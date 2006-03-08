@@ -1,0 +1,166 @@
+/*******************************************************************************
+ * Copyright (c) 2006 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.jdt.internal.ui.actions;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
+
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+/**
+ * Action to extract a supertype from a class.
+ * <p>
+ * Action is applicable to selections containing elements of type
+ * <code>IType</code> (top-level types only), <code>IField</code> and
+ * <code>IMethod</code>.
+ * 
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ * 
+ * @since 3.2
+ */
+public final class ExtractSuperTypeAction extends SelectionDispatchAction {
+
+	private static IMember[] getSelectedMembers(final IStructuredSelection selection) {
+		if (selection.isEmpty())
+			return null;
+		for (final Iterator iterator= selection.iterator(); iterator.hasNext();) {
+			if (!(iterator.next() instanceof IMember))
+				return null;
+		}
+		final Set set= new HashSet();
+		set.addAll(Arrays.asList(selection.toArray()));
+		return (IMember[]) set.toArray(new IMember[set.size()]);
+	}
+
+	/** The compilation unit editor */
+	private CompilationUnitEditor fEditor;
+
+	/**
+	 * Creates a new extract super type action.
+	 * 
+	 * @param editor
+	 *            the compilation unit editor
+	 */
+	public ExtractSuperTypeAction(final CompilationUnitEditor editor) {
+		this(editor.getEditorSite());
+		fEditor= editor;
+		setEnabled(SelectionConverter.canOperateOn(fEditor));
+	}
+
+	/**
+	 * Creates a new extract super type action.
+	 * 
+	 * @param site
+	 *            the workbench site
+	 */
+	public ExtractSuperTypeAction(final IWorkbenchSite site) {
+		super(site);
+		setText(RefactoringMessages.ExtractSuperTypeAction_label);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.PULL_UP_ACTION);
+	}
+
+	private IMember getSelectedMember() throws JavaModelException {
+		final IJavaElement element= SelectionConverter.resolveEnclosingElement(fEditor, (ITextSelection) fEditor.getSelectionProvider().getSelection());
+		if (element == null || !(element instanceof IMember))
+			return null;
+		return (IMember) element;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void run(final IStructuredSelection selection) {
+		try {
+			final IMember[] members= getSelectedMembers(selection);
+			if (RefactoringAvailabilityTester.isExtractSupertypeAvailable(members))
+				RefactoringExecutionStarter.startExtractSupertypeRefactoring(members, getShell());
+		} catch (final JavaModelException exception) {
+			ExceptionHandler.handle(exception, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void run(final ITextSelection selection) {
+		try {
+			if (!ActionUtil.isProcessable(getShell(), fEditor))
+				return;
+			final IMember member= getSelectedMember();
+			final IMember[] array= new IMember[] { member};
+			if (member != null && RefactoringAvailabilityTester.isExtractSupertypeAvailable(array)) {
+				RefactoringExecutionStarter.startExtractSupertypeRefactoring(array, getShell());
+			} else {
+				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.ExtractSuperTypeAction_unavailable);
+			}
+		} catch (JavaModelException exception) {
+			ExceptionHandler.handle(exception, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void selectionChanged(final IStructuredSelection selection) {
+		try {
+			setEnabled(RefactoringAvailabilityTester.isExtractSupertypeAvailable(selection));
+		} catch (JavaModelException exception) {
+			if (JavaModelUtil.isExceptionToBeLogged(exception))
+				JavaPlugin.log(exception);
+			setEnabled(false);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void selectionChanged(final ITextSelection selection) {
+		setEnabled(true);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void selectionChanged(final JavaTextSelection selection) {
+		try {
+			setEnabled(RefactoringAvailabilityTester.isExtractSupertypeAvailable(selection));
+		} catch (JavaModelException event) {
+			setEnabled(false);
+		}
+	}
+}

@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Tree;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -81,6 +82,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceReference;
@@ -96,6 +98,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
@@ -128,7 +131,10 @@ public class PullUpWizard extends RefactoringWizard {
 	}
 
 	private static class PullUpInputPage1 extends UserInputWizardPage {
-	
+
+		private static final String SETTING_REPLACE= "Replace"; //$NON-NLS-1$
+		private static final String SETTING_INSTANCEOF= "InstanceOf"; //$NON-NLS-1$
+
 		private class PullUpCellModifier implements ICellModifier {
 			/*
 			 * @see org.eclipse.jface.viewers.ICellModifier#getValue(java.lang.Object, java.lang.String)
@@ -343,6 +349,8 @@ public class PullUpWizard extends RefactoringWizard {
 		private IType[] fSuperclasses;
 		private Button fEditButton;
 		private Button fCreateStubsButton;
+		private Button fReplaceButton;
+		private Button fInstanceofButton;
 		private Label fStatusLine;
 
 		public PullUpInputPage1() {
@@ -358,6 +366,14 @@ public class PullUpWizard extends RefactoringWizard {
 
 			createSuperTypeCombo(composite);
 			createSpacer(composite);
+			createSuperTypeCheckbox(composite);
+			createInstanceOfCheckbox(composite, gl.marginWidth);
+			fReplaceButton.addSelectionListener(new SelectionAdapter() {
+				
+				public void widgetSelected(SelectionEvent e) {
+					fInstanceofButton.setEnabled(fReplaceButton.getSelection());
+				}
+			});
 			createStubCheckbox(composite);
 			createSpacer(composite);
 			createMemberTableLabel(composite);
@@ -366,6 +382,7 @@ public class PullUpWizard extends RefactoringWizard {
 				
 			setControl(composite);
 			Dialog.applyDialogFont(composite);
+			initializeCheckboxes();
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.PULL_UP_WIZARD_PAGE);			
 		}
 	
@@ -376,7 +393,35 @@ public class PullUpWizard extends RefactoringWizard {
 			updateStatusLine();
 			fStatusLine.setLayoutData(gd);
 		}
-	
+
+		private void createSuperTypeCheckbox(Composite parent) {
+			fReplaceButton= new Button(parent, SWT.CHECK);
+			fReplaceButton.setText(RefactoringMessages.PullUpInputPage1_label_use_destination); 
+			GridData gd= new GridData();
+			gd.horizontalSpan= 2;
+			fReplaceButton.setLayoutData(gd);
+			fReplaceButton.setEnabled(true);
+			fReplaceButton.setSelection(getPullUpRefactoring().getPullUpProcessor().isReplace());
+		}
+
+		private void createInstanceOfCheckbox(Composite result, int margin) {
+			final PullUpRefactoringProcessor processor= getPullUpRefactoring().getPullUpProcessor();
+			String title= RefactoringMessages.PullUpInputPage1_label_use_in_instanceof;
+			fInstanceofButton= new Button(result, SWT.CHECK);
+			fInstanceofButton.setSelection(false);
+			GridData gd= new GridData();
+			gd.horizontalIndent= (margin + fInstanceofButton.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
+			gd.horizontalSpan= 2;
+			fInstanceofButton.setLayoutData(gd);
+			fInstanceofButton.setText(title);
+			processor.setInstanceOf(fInstanceofButton.getSelection());
+			fInstanceofButton.addSelectionListener(new SelectionAdapter(){
+				public void widgetSelected(SelectionEvent e) {
+					processor.setInstanceOf(fInstanceofButton.getSelection());
+				}
+			});		
+		}
+		
 		private void createStubCheckbox(Composite parent) {
 			fCreateStubsButton= new Button(parent, SWT.CHECK);
 			fCreateStubsButton.setText(RefactoringMessages.PullUpInputPage1_Create_stubs); 
@@ -674,6 +719,7 @@ public class PullUpWizard extends RefactoringWizard {
 			if (fEditButton != null)
 				fEditButton.setEnabled(enableEditButton((IStructuredSelection)tableSelection));
 			fCreateStubsButton.setEnabled(getMethodsToDeclareAbstract().length != 0);
+			fInstanceofButton.setEnabled(fReplaceButton.getSelection());
 		}
 
 		private boolean enableEditButton(IStructuredSelection ss) {
@@ -746,6 +792,7 @@ public class PullUpWizard extends RefactoringWizard {
 		 */
 		public IWizardPage getNextPage() {
 			initializeRefactoring();
+			storeDialogSettings();
 			if (canSkipSecondInputPage())
 				return computeSuccessorPage();
 
@@ -772,6 +819,7 @@ public class PullUpWizard extends RefactoringWizard {
 		 */
 		protected boolean performFinish() {
 			initializeRefactoring();
+			storeDialogSettings();
 			return super.performFinish();
 		}
 	
@@ -781,9 +829,37 @@ public class PullUpWizard extends RefactoringWizard {
 			processor.setMethodsToDeclareAbstract(getMethodsToDeclareAbstract());
 			processor.setTargetClass(getSelectedClass());
 			processor.setCreateMethodStubs(fCreateStubsButton.getSelection());
+			processor.setReplace(fReplaceButton.getSelection());
+			processor.setInstanceOf(fInstanceofButton.getSelection());
 			processor.setMethodsToDelete(getMethodsToPullUp());
 		}
-	
+
+		public void dispose() {
+			fInstanceofButton= null;
+			fReplaceButton= null;
+			fTableViewer= null;
+			super.dispose();
+		}
+
+		private void initializeCheckboxes() {
+			initializeCheckBox(fReplaceButton, SETTING_REPLACE, true);
+			initializeCheckBox(fInstanceofButton, SETTING_INSTANCEOF, false);
+		}
+
+		private void initializeCheckBox(Button checkbox, String property, boolean def) {
+			String s= JavaPlugin.getDefault().getDialogSettings().get(property);
+			if (s != null)
+				checkbox.setSelection(new Boolean(s).booleanValue());
+			else
+				checkbox.setSelection(def);
+		}
+
+		private void storeDialogSettings() {
+			final IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
+			settings.put(SETTING_REPLACE, fReplaceButton.getSelection());
+			settings.put(SETTING_INSTANCEOF, fInstanceofButton.getSelection());
+		}
+
 		private IType getSelectedClass() {
 			return fSuperclasses[fSuperclassCombo.getSelectionIndex()];
 		}
@@ -1309,10 +1385,18 @@ public class PullUpWizard extends RefactoringWizard {
 		}
 	
 	  private void setSourceViewerContents(String contents) {
-		  IDocument document= (contents == null) ? new Document(): new Document(contents);
-		  getJavaTextTools().setupJavaDocumentPartitioner(document);
-		  fSourceViewer.setDocument(document);
-	  }
+			if (contents != null) {
+				IJavaProject project= getPullUpMethodsRefactoring().getPullUpProcessor().getTargetClass().getJavaProject();
+				String[] lines= Strings.convertIntoLines(contents);
+				if (lines.length > 0) {
+					int indent= Strings.computeIndentUnits(lines[lines.length - 1], project);
+					contents= Strings.changeIndent(contents, indent, project, "", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
+			IDocument document= (contents == null) ? new Document() : new Document(contents);
+			getJavaTextTools().setupJavaDocumentPartitioner(document);
+			fSourceViewer.setDocument(document);
+		}
 	
 	  private void showInSourceViewer(ISourceReference selected) throws JavaModelException{
 		if (selected == null)

@@ -1279,7 +1279,7 @@ public class IntroduceIndirectionRefactoring extends CommentRefactoring implemen
 				rewrites= new HashMap();
 				rewrites.put(whoToAdjust.getCompilationUnit(), rewrite);
 				status.merge(rewriteVisibility(adjustments, rewrites, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
-				rewrite.attachChange((CompilationUnitChange) fTextChangeManager.get(whoToAdjust.getCompilationUnit()), new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				rewrite.attachChange((CompilationUnitChange) fTextChangeManager.get(whoToAdjust.getCompilationUnit()), true, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 			}
 		} finally {
 			monitor.done();

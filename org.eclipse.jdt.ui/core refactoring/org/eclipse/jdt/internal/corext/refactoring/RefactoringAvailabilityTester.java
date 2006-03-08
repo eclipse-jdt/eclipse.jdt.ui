@@ -77,6 +77,26 @@ public final class RefactoringAvailabilityTester {
 		return (IType) element;
 	}
 
+	public static IMember[] getExtractSupertypeMembers(final IType type) throws JavaModelException {
+		final List list= new ArrayList(3);
+		IMember[] members= type.getFields();
+		for (int index= 0; index < members.length; index++) {
+			if (isExtractSupertypeAvailable(members[index]))
+				list.add(members[index]);
+		}
+		members= type.getMethods();
+		for (int index= 0; index < members.length; index++) {
+			if (isExtractSupertypeAvailable(members[index]))
+				list.add(members[index]);
+		}
+		members= type.getTypes();
+		for (int index= 0; index < members.length; index++) {
+			if (isExtractSupertypeAvailable(members[index]))
+				list.add(members[index]);
+		}
+		return (IMember[]) list.toArray(new IMember[list.size()]);
+	}
+
 	public static IJavaElement[] getJavaElements(final Object[] elements) {
 		List result= new ArrayList();
 		for (int index= 0; index < elements.length; index++) {
@@ -205,6 +225,10 @@ public final class RefactoringAvailabilityTester {
 		return ReorgPolicyFactory.createCopyPolicy(resources, elements).canEnable();
 	}
 
+	public static boolean isDelegateCreationAvailable(final IField field) throws JavaModelException {
+		return (Flags.isStatic(field.getFlags()) && Flags.isFinal(field.getFlags()) /* && hasInitializer(field) */);
+	}
+
 	public static boolean isDeleteAvailable(final IJavaElement element) throws JavaModelException {
 		if (!element.exists())
 			return false;
@@ -319,6 +343,65 @@ public final class RefactoringAvailabilityTester {
 		return (selection.resolveInMethodBody() || selection.resolveInClassInitializer()) && RefactoringAvailabilityTester.isExtractMethodAvailable(selection.resolveSelectedNodes());
 	}
 
+	public static boolean isExtractSupertypeAvailable(IMember member) throws JavaModelException {
+		final int type= member.getElementType();
+		if (type != IJavaElement.METHOD && type != IJavaElement.FIELD && type != IJavaElement.TYPE)
+			return false;
+		if (JdtFlags.isEnum(member) && type != IJavaElement.TYPE)
+			return false;
+		if (!Checks.isAvailable(member))
+			return false;
+		if (member instanceof IType) {
+			if (!JdtFlags.isStatic(member) && !JdtFlags.isEnum(member) && !JdtFlags.isAnnotation(member))
+				return false;
+		}
+		if (member instanceof IMethod) {
+			final IMethod method= (IMethod) member;
+			if (method.isConstructor())
+				return false;
+			if (JdtFlags.isNative(method))
+				return false;
+			final IType declaring= method.getDeclaringType();
+			if (declaring != null && declaring.isAnnotation())
+				return false;
+		}
+		return true;
+	}
+
+	public static boolean isExtractSupertypeAvailable(final IMember[] members) throws JavaModelException {
+		if (members != null && members.length != 0) {
+			final IType type= getTopLevelType(members);
+			if (type != null && getPullUpMembers(type).length != 0)
+				return true;
+			for (int index= 0; index < members.length; index++) {
+				if (!isExtractSupertypeAvailable(members[index]))
+					return false;
+			}
+			return isCommonDeclaringType(members);
+		}
+		return false;
+	}
+
+	public static boolean isExtractSupertypeAvailable(final IStructuredSelection selection) throws JavaModelException {
+		if (!selection.isEmpty()) {
+			for (final Iterator iterator= selection.iterator(); iterator.hasNext();) {
+				if (!(iterator.next() instanceof IMember))
+					return false;
+			}
+			final Set members= new HashSet();
+			members.addAll(Arrays.asList(selection.toArray()));
+			return isExtractSupertypeAvailable((IMember[]) members.toArray(new IMember[members.size()]));
+		}
+		return false;
+	}
+
+	public static boolean isExtractSupertypeAvailable(final JavaTextSelection selection) throws JavaModelException {
+		IJavaElement element= selection.resolveEnclosingElement();
+		if (!(element instanceof IMember))
+			return false;
+		return isExtractSupertypeAvailable(new IMember[] { (IMember) element});
+	}
+	
 	public static boolean isExtractTempAvailable(final JavaTextSelection selection) {
 		final ASTNode[] nodes= selection.resolveSelectedNodes();
 		return (selection.resolveInMethodBody() || selection.resolveInClassInitializer()) && (Checks.isExtractableExpression(nodes, selection.resolveCoveringNode()) || (nodes != null && nodes.length == 1 && nodes[0] instanceof ExpressionStatement));
@@ -370,17 +453,6 @@ public final class RefactoringAvailabilityTester {
 		return isGeneralizeTypeAvailable(elements[0]);
 	}
 
-	public static boolean isInferTypeArgumentsAvailable(final IJavaElement[] elements) throws JavaModelException {
-		if (elements.length == 0)
-			return false;
-		
-		for (int i= 0; i < elements.length; i++) {
-			if (! (isInferTypeArgumentsAvailable(elements[i])))
-				return false;
-		}
-		return true;
-	}
-	
 	public static boolean isInferTypeArgumentsAvailable(final IJavaElement element) throws JavaModelException {
 		if (! Checks.isAvailable(element)) {
 			return false;
@@ -403,6 +475,17 @@ public final class RefactoringAvailabilityTester {
 		} else {
 			return false;
 		}
+	}
+
+	public static boolean isInferTypeArgumentsAvailable(final IJavaElement[] elements) throws JavaModelException {
+		if (elements.length == 0)
+			return false;
+		
+		for (int i= 0; i < elements.length; i++) {
+			if (! (isInferTypeArgumentsAvailable(elements[i])))
+				return false;
+		}
+		return true;
 	}
 
 	public static boolean isInferTypeArgumentsAvailable(final IStructuredSelection selection) throws JavaModelException {
@@ -991,10 +1074,6 @@ public final class RefactoringAvailabilityTester {
 		if (ReorgUtils.isInsideCompilationUnit(element))
 			return ReorgUtils.getCompilationUnit(element).isWorkingCopy();
 		return false;
-	}
-	
-	public static boolean isDelegateCreationAvailable(final IField field) throws JavaModelException {
-		return (Flags.isStatic(field.getFlags()) && Flags.isFinal(field.getFlags()) /* && hasInitializer(field) */);
 	}
 
 	private RefactoringAvailabilityTester() {

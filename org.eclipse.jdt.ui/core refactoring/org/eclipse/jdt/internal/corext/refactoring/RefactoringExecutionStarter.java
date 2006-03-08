@@ -70,6 +70,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefa
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.JavaMoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;
@@ -92,6 +94,7 @@ import org.eclipse.jdt.internal.ui.refactoring.ChangeSignatureWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeTypeWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ConvertAnonymousToNestedWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ExtractInterfaceWizard;
+import org.eclipse.jdt.internal.ui.refactoring.ExtractSupertypeWizard;
 import org.eclipse.jdt.internal.ui.refactoring.InferTypeArgumentsWizard;
 import org.eclipse.jdt.internal.ui.refactoring.InlineConstantWizard;
 import org.eclipse.jdt.internal.ui.refactoring.InlineTempWizard;
@@ -321,6 +324,18 @@ public final class RefactoringExecutionStarter {
 		final JavaMoveRefactoring refactoring= new JavaMoveRefactoring(new MoveStaticMembersProcessor(elements, JavaPreferencesSettings.getCodeGenerationSettings(project)));
 		if (ActionUtil.isProcessable(shell, ((MoveStaticMembersProcessor) refactoring.getAdapter(MoveStaticMembersProcessor.class)).getMembersToMove()[0].getCompilationUnit()))
 			new RefactoringStarter().activate(refactoring, new MoveMembersWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
+	}
+
+	public static void startExtractSupertypeRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
+		if (!RefactoringAvailabilityTester.isExtractSupertypeAvailable(members))
+			return;
+		IJavaProject project= null;
+		if (members != null && members.length > 0)
+			project= members[0].getJavaProject();
+		final ExtractSupertypeRefactoring refactoring= new ExtractSupertypeRefactoring(new ExtractSupertypeProcessor(members, JavaPreferencesSettings.getCodeGenerationSettings(project)));
+		if (!ActionUtil.isProcessable(shell, refactoring.getExtractSupertypeProcessor().getDeclaringType()))
+			return;
+		new RefactoringStarter().activate(refactoring, new ExtractSupertypeWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
 	}
 
 	public static void startPullUpRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {

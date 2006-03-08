@@ -144,19 +144,22 @@ public class CompilationUnitRewrite {
 	
 
 	public CompilationUnitChange createChange() throws CoreException {
-		return createChange(null);
+		return createChange(true, null);
 	}
 	
 	/**
+	 * Creates a compilation unit change based on the events recorded by this compilation unit rewrite.
+	 * @param generateGroups <code>true</code> to generate text edit groups, <code>false</code> otherwise
+	 * @param monitor the progress monitor or <code>null</code>
 	 * @return a {@link CompilationUnitChange}, or <code>null</code> for an empty change
 	 * @throws CoreException when text buffer acquisition or import rewrite text edit creation fails
 	 * @throws IllegalArgumentException when the AST rewrite encounters problems
 	 */
-	public CompilationUnitChange createChange(IProgressMonitor monitor) throws CoreException {
+	public CompilationUnitChange createChange(boolean generateGroups, IProgressMonitor monitor) throws CoreException {
 		CompilationUnitChange cuChange= new CompilationUnitChange(fCu.getElementName(), fCu);
 		MultiTextEdit multiEdit= new MultiTextEdit();
 		cuChange.setEdit(multiEdit);
-		return attachChange(cuChange, monitor);
+		return attachChange(cuChange, generateGroups, monitor);
 	}
 	
 	/**
@@ -166,11 +169,12 @@ public class CompilationUnitRewrite {
 	 * this compilation unit.
 	 *  
 	 * @param cuChange existing CompilationUnitChange with a MultiTextEdit root or no root at all.
+	 * @param generateGroups <code>true</code> to generate text edit groups, <code>false</code> otherwise
 	 * @param monitor the progress monitor or <code>null</code>
 	 * @return a change combining the changes of this rewrite and the given rewrite.
 	 * @throws CoreException
 	 */
-	public CompilationUnitChange attachChange(CompilationUnitChange cuChange, IProgressMonitor monitor) throws CoreException {
+	public CompilationUnitChange attachChange(CompilationUnitChange cuChange, boolean generateGroups, IProgressMonitor monitor) throws CoreException {
 		try {
 			boolean needsAstRewrite= fRewrite != null; // TODO: do we need something like ASTRewrite#hasChanges() here?
 			boolean needsImportRemoval= fImportRemover != null && fImportRemover.hasRemovedNodes();
@@ -189,7 +193,9 @@ public class CompilationUnitRewrite {
 				if (!isEmptyEdit(rewriteEdit)) {
 					multiEdit.addChild(rewriteEdit);
 					for (Iterator iter= fTextEditGroups.iterator(); iter.hasNext();) {
-						cuChange.addTextEditGroup((TextEditGroup) iter.next());
+						TextEditGroup group= (TextEditGroup) iter.next();
+						if (generateGroups)
+							cuChange.addTextEditGroup(group);
 					}
 				}
 			}

@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,6 +39,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.osgi.util.NLS;
@@ -49,6 +51,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeParameter;
@@ -57,6 +60,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -92,6 +96,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
@@ -101,7 +106,13 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
+import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsSolver;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ISourceConstraintVariable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraintVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -121,7 +132,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
  * 
  * @since 3.2
  */
-public final class PullUpRefactoringProcessor extends HierarchyProcessor {
+public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	/**
 	 * AST node visitor which performs the actual mapping.
@@ -338,15 +349,20 @@ public final class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	private IMethod[] fMethodsToDelete;
 
+	/** Should occurrences of the type be replaced by the supertype? */
+	private boolean fReplace= false;
+
 	private IType fTargetType;
 
 	/**
 	 * Creates a new pull up refactoring processor.
 	 * 
 	 * @param members
-	 *            the members to pull up, or <code>null</code> if invoked by scripting
+	 *            the members to pull up, or <code>null</code> if invoked by
+	 *            scripting
 	 * @param settings
-	 *            the code generation settings, or <code>null</code> if invoked by scripting
+	 *            the code generation settings, or <code>null</code> if
+	 *            invoked by scripting
 	 */
 	public PullUpRefactoringProcessor(final IMember[] members, final CodeGenerationSettings settings) {
 		super(members);
@@ -939,7 +955,8 @@ public final class PullUpRefactoringProcessor extends HierarchyProcessor {
 					final IJavaProject javaProject= declaring.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PULL_UP, project, fMembersToMove.length == 1 ? NLS.bind(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fTargetType, JavaElementLabels.ALL_FULLY_QUALIFIED)}) : NLS.bind(RefactoringCoreMessages.PullUpRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fTargetType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PULL_UP, project, fMembersToMove.length == 1 ? NLS.bind(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fTargetType, JavaElementLabels.ALL_FULLY_QUALIFIED)}) : NLS.bind(RefactoringCoreMessages.PullUpRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fTargetType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE
+							| RefactoringDescriptor.MULTI_CHANGE);
 					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fTargetType));
 					if (fDeclaringType != null)
 						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(fDeclaringType));
@@ -966,7 +983,7 @@ public final class PullUpRefactoringProcessor extends HierarchyProcessor {
 		Assert.isNotNull(monitor);
 		Assert.isNotNull(status);
 		try {
-			monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, 6);
+			monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, 8);
 			final ICompilationUnit source= getDeclaringType().getCompilationUnit();
 			final IType targetClass= getTargetClass();
 			final ICompilationUnit target= targetClass.getCompilationUnit();
@@ -1081,6 +1098,39 @@ public final class PullUpRefactoringProcessor extends HierarchyProcessor {
 			if (adjustor != null && !adjustments.isEmpty())
 				adjustor.rewriteVisibility(new SubProgressMonitor(monitor, 1));
 			final TextChangeManager manager= new TextChangeManager();
+			if (fReplace) {
+				for (final Iterator iterator= rewrites.keySet().iterator(); iterator.hasNext();) {
+					unit= (ICompilationUnit) iterator.next();
+					rewrite= (CompilationUnitRewrite) rewrites.get(unit);
+					if (rewrite != null)
+						manager.manage(unit, rewrite.createChange(false, null));
+				}
+				TextEdit edit= null;
+				TextChange change= null;
+				Map workingcopies= new HashMap();
+				IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
+				try {
+					subMonitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, rewrites.keySet().size());
+					for (final Iterator iterator= rewrites.keySet().iterator(); iterator.hasNext();) {
+						unit= (ICompilationUnit) iterator.next();
+						change= manager.get(unit);
+						if (change != null) {
+							edit= change.getEdit();
+							if (edit != null) {
+								final ICompilationUnit copy= createWorkingCopy(unit, edit, status, new SubProgressMonitor(monitor, 1));
+								if (copy != null)
+									workingcopies.put(unit, copy);
+							}
+						}
+					}
+					rewriteTypeOccurrences(manager, sourceRewriter, (ICompilationUnit) workingcopies.get(sourceRewriter.getCu()), new HashSet(), status, new SubProgressMonitor(monitor, 1));
+				} finally {
+					subMonitor.done();
+					for (final Iterator iterator= workingcopies.values().iterator(); iterator.hasNext();) {
+						((ICompilationUnit) iterator.next()).discardWorkingCopy();
+					}
+				}
+			}
 			for (final Iterator iterator= rewrites.keySet().iterator(); iterator.hasNext();) {
 				unit= (ICompilationUnit) iterator.next();
 				rewrite= (CompilationUnitRewrite) rewrites.get(unit);
@@ -1172,6 +1222,27 @@ public final class PullUpRefactoringProcessor extends HierarchyProcessor {
 			((List) result.get(cu)).add(type);
 		}
 		return result;
+	}
+
+	private ICompilationUnit createWorkingCopy(ICompilationUnit unit, TextEdit edit, RefactoringStatus status, IProgressMonitor monitor) {
+		try {
+			monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, 1);
+			ICompilationUnit copy= WorkingCopyUtil.getNewWorkingCopy((IPackageFragment) unit.getParent(), unit.getElementName(), fOwner, new SubProgressMonitor(monitor, 1));
+			IDocument document= new Document(unit.getBuffer().getContents());
+			edit.apply(document, TextEdit.UPDATE_REGIONS);
+			copy.getBuffer().setContents(document.get());
+			JavaModelUtil.reconcile(copy);
+			return copy;
+		} catch (JavaModelException exception) {
+			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
+		} catch (MalformedTreeException exception) {
+			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
+		} catch (BadLocationException exception) {
+			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
+		} finally {
+			monitor.done();
+		}
+		return null;
 	}
 
 	private IMethod[] getAbstractMethods() throws JavaModelException {
@@ -1565,6 +1636,16 @@ public final class PullUpRefactoringProcessor extends HierarchyProcessor {
 		}
 	}
 
+	/**
+	 * Should occurrences of the type be replaced by the interface?
+	 * 
+	 * @return <code>true</code> if the should be replaced, <code>false</code>
+	 *         otherwise
+	 */
+	public boolean isReplace() {
+		return fReplace;
+	}
+
 	private boolean isRequiredPullableMember(List queue, IMember member) throws JavaModelException {
 		if (member.getDeclaringType() == null) // not a member
 			return false;
@@ -1582,8 +1663,95 @@ public final class PullUpRefactoringProcessor extends HierarchyProcessor {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void rewriteTypeOccurrences(TextChangeManager manager, ASTRequestor requestor, CompilationUnitRewrite rewrite, ICompilationUnit unit, CompilationUnit node, Set replacements) throws CoreException {
-		// TODO: implement
+	protected void rewriteTypeOccurrences(final TextChangeManager manager, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final ICompilationUnit unit, final CompilationUnit node, Set replacements) throws CoreException {
+		CompilationUnitRewrite currentRewrite= null;
+		final boolean isSubUnit= rewrite.getCu().equals(unit.getPrimary());
+		if (isSubUnit)
+			currentRewrite= rewrite;
+		else
+			currentRewrite= new CompilationUnitRewrite(unit, node);
+		final Collection collection= (Collection) fTypeOccurrences.get(unit);
+		if (collection != null && !collection.isEmpty()) {
+			TType estimate= null;
+			ISourceConstraintVariable variable= null;
+			ITypeConstraintVariable constraint= null;
+			for (final Iterator iterator= collection.iterator(); iterator.hasNext();) {
+				variable= (ISourceConstraintVariable) iterator.next();
+				if (variable instanceof ITypeConstraintVariable) {
+					constraint= (ITypeConstraintVariable) variable;
+					estimate= (TType) constraint.getData(SuperTypeConstraintsSolver.DATA_TYPE_ESTIMATE);
+					if (estimate != null) {
+						final CompilationUnitRange range= constraint.getRange();
+						if (isSubUnit)
+							rewriteTypeOccurrence(range, estimate, requestor, currentRewrite, node, replacements, currentRewrite.createGroupDescription(RefactoringCoreMessages.SuperTypeRefactoringProcessor_update_type_occurrence));
+						else {
+							final ASTNode result= NodeFinder.perform(node, range.getSourceRange());
+							if (result != null)
+								rewriteTypeOccurrence(estimate, currentRewrite, result, currentRewrite.createGroupDescription(RefactoringCoreMessages.SuperTypeRefactoringProcessor_update_type_occurrence));
+						}
+					}
+				}
+			}
+		}
+		if (!isSubUnit) {
+			final TextChange change= currentRewrite.createChange();
+			if (change != null)
+				manager.manage(unit, change);
+		}
+	}
+
+	private void rewriteTypeOccurrences(final TextChangeManager manager, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit copy, final Set replacements, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
+		try {
+			monitor.beginTask("", 20); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.PullUpRefactoring_checking);
+			try {
+				final IType declaring= getDeclaringType();
+				final IJavaProject project= declaring.getJavaProject();
+				final ASTParser parser= ASTParser.newParser(AST.JLS3);
+				parser.setWorkingCopyOwner(fOwner);
+				parser.setResolveBindings(true);
+				parser.setProject(project);
+				parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
+				parser.createASTs(new ICompilationUnit[] { copy}, new String[0], new ASTRequestor() {
+
+					public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
+						try {
+							final IType subType= (IType) JavaModelUtil.findInCompilationUnit(unit, declaring);
+							final AbstractTypeDeclaration subDeclaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(subType, node);
+							if (subDeclaration != null) {
+								final ITypeBinding subBinding= subDeclaration.resolveBinding();
+								if (subBinding != null) {
+									String name= null;
+									ITypeBinding superBinding= null;
+									final ITypeBinding[] superBindings= Bindings.getAllSuperTypes(subBinding);
+									for (int index= 0; index < superBindings.length; index++) {
+										name= superBindings[index].getName();
+										if (name.startsWith(fTargetType.getElementName()))
+											superBinding= superBindings[index];
+									}
+									if (superBinding != null) {
+										solveSuperTypeConstraints(unit, node, subType, subBinding, superBinding, new SubProgressMonitor(monitor, 14), status);
+										if (!status.hasFatalError())
+											rewriteTypeOccurrences(manager, this, sourceRewrite, unit, node, replacements, status, new SubProgressMonitor(monitor, 3));
+									}
+								}
+							}
+						} catch (JavaModelException exception) {
+							JavaPlugin.log(exception);
+							status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
+						}
+					}
+
+					public final void acceptBinding(final String key, final IBinding binding) {
+						// Do nothing
+					}
+				}, new SubProgressMonitor(monitor, 1));
+			} finally {
+
+			}
+		} finally {
+			monitor.done();
+		}
 	}
 
 	public void setCreateMethodStubs(boolean create) {
@@ -1604,6 +1772,18 @@ public final class PullUpRefactoringProcessor extends HierarchyProcessor {
 	public void setMethodsToDelete(IMethod[] methodsToDelete) {
 		Assert.isNotNull(methodsToDelete);
 		fMethodsToDelete= getOriginals(methodsToDelete);
+	}
+
+	/**
+	 * Determines whether occurrences of the type should be replaced by the
+	 * interface.
+	 * 
+	 * @param replace
+	 *            <code>true</code> to replace occurrences where possible,
+	 *            <code>false</code> otherwise
+	 */
+	public void setReplace(final boolean replace) {
+		fReplace= replace;
 	}
 
 	public void setTargetClass(IType targetType) {
