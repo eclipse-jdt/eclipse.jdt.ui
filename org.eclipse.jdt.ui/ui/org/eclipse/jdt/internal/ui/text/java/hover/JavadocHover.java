@@ -137,13 +137,16 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		if (nResults == 0)
 			return null;
 
+		boolean hasContents= false;
 		if (nResults > 1) {
 
 			for (int i= 0; i < result.length; i++) {
 				HTMLPrinter.startBulletList(buffer);
 				IJavaElement curr= result[i];
-				if (curr instanceof IMember || curr.getElementType() == IJavaElement.LOCAL_VARIABLE)
+				if (curr instanceof IMember || curr.getElementType() == IJavaElement.LOCAL_VARIABLE) {
 					HTMLPrinter.addBullet(buffer, getInfoText(curr));
+					hasContents= true;
+				}
 				HTMLPrinter.endBulletList(buffer);
 			}
 
@@ -162,9 +165,15 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 				if (reader != null) {
 					HTMLPrinter.addParagraph(buffer, reader);
 				}
-			} else if (curr.getElementType() == IJavaElement.LOCAL_VARIABLE || curr.getElementType() == IJavaElement.TYPE_PARAMETER)
+				hasContents= true;
+			} else if (curr.getElementType() == IJavaElement.LOCAL_VARIABLE || curr.getElementType() == IJavaElement.TYPE_PARAMETER) {
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(curr));
+				hasContents= true;
+			}
 		}
+		
+		if (!hasContents)
+			return null;
 
 		if (buffer.length() > 0) {
 			HTMLPrinter.insertPageProlog(buffer, 0, getStyleSheetURL());
