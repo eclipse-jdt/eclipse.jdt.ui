@@ -45,7 +45,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * Action to pull up method and fields into a superclass.
  * <p>
  * Action is applicable to selections containing elements of
- * type <code>IField</code> and <code>IMethod</code>.
+ * type <code>IType</code> (top-level types only), 
+ * <code>IField</code> and <code>IMethod</code>.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
