@@ -100,7 +100,7 @@ public class CompilationUnitRewrite {
 	}
 	
 	/**
-	 * Requests that the compiler should perfom statements recovery.
+	 * Requests that the compiler should perform statements recovery.
 	 * To be effective, this method must be called before any
 	 * of {@link #getRoot()},{@link #getASTRewrite()},
 	 * {@link #getImportRemover()}. This method has no effect if the target object
