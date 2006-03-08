@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
@@ -44,6 +49,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -61,6 +67,7 @@ public class AccessorClassModifier {
 	private ASTRewrite fASTRewrite;
 	private ListRewrite fListRewrite;
 	private ICompilationUnit fCU;
+	private List fFields;
 
 	private AccessorClassModifier(ICompilationUnit cu) throws CoreException {
 
@@ -73,6 +80,31 @@ public class AccessorClassModifier {
 		AbstractTypeDeclaration parent= null;
 		if (fRoot.types().size() > 0) {
 			parent= (AbstractTypeDeclaration)fRoot.types().get(0);
+			fFields= new ArrayList();
+			parent.accept(new GenericVisitor() {
+				/**
+				 * {@inheritDoc}
+				 */
+				public boolean visit(FieldDeclaration node) {
+					int modifiers= node.getModifiers();
+					if (!Modifier.isPublic(modifiers))
+						return false;
+					
+					if (!Modifier.isStatic(modifiers))
+						return false;
+					
+					List fragments= node.fragments();
+					if (fragments.size() != 1)
+						return false;
+					
+					VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragments.get(0);
+					if (fragment.getInitializer() != null)
+						return false;
+					
+					fFields.add(node);
+					return false;
+				}
+			});
 			fListRewrite= fASTRewrite.getListRewrite(parent, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		} else {
 			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.INTERNAL_ERROR, NLSMessages.AccessorClassModifier_missingType, null); 
@@ -201,12 +233,36 @@ public class AccessorClassModifier {
 		if (fListRewrite == null)
 			return;
 		
-		FieldDeclaration fieldDeclaration= getNewFinalStringFieldDeclaration(sub.getKey());
+		String key= sub.getKey();
+		FieldDeclaration fieldDeclaration= getNewFinalStringFieldDeclaration(key);
 		
-		String name= Messages.format(NLSMessages.AccessorClassModifier_add_entry, sub.getKey()); 
+		String name= Messages.format(NLSMessages.AccessorClassModifier_add_entry, key); 
 		TextEditGroup editGroup= new TextEditGroup(name);
-		fListRewrite.insertLast(fieldDeclaration, editGroup);
 		change.addTextEditGroup(editGroup);
+
+		Iterator iter= fFields.iterator();
+		if (iter.hasNext()) {
+			Collator collator= Collator.getInstance();
+			FieldDeclaration existingFieldDecl= (FieldDeclaration)iter.next();
+			VariableDeclarationFragment fragment= (VariableDeclarationFragment)existingFieldDecl.fragments().get(0);
+			String identifier= fragment.getName().getIdentifier();
+			if (collator.compare(key, identifier) == -1) {
+				fListRewrite.insertBefore(fieldDeclaration, existingFieldDecl, editGroup);
+			} else {
+				while (iter.hasNext()) {
+					FieldDeclaration next= (FieldDeclaration)iter.next();
+					fragment= (VariableDeclarationFragment)next.fragments().get(0);
+					identifier= fragment.getName().getIdentifier();
+					if (collator.compare(key, identifier) == -1) {
+						break;
+					}
+					existingFieldDecl= next;
+				}
+				fListRewrite.insertAfter(fieldDeclaration, existingFieldDecl, editGroup);
+			}
+		} else {
+			fListRewrite.insertLast(fieldDeclaration, editGroup);
+		}
 	}
 
 	private FieldDeclaration getNewFinalStringFieldDeclaration(String name) {
