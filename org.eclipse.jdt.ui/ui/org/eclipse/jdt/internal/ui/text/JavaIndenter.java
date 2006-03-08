@@ -763,7 +763,7 @@ public final class JavaIndenter {
 		boolean matchParen= false;
 		boolean matchCase= false;
 
-		// account for unindenation characters already typed in, but after position
+		// account for un-indentation characters already typed in, but after position
 		// if they are on a line by themselves, the indentation gets adjusted
 		// accordingly
 		//
@@ -957,6 +957,10 @@ public final class JavaIndenter {
 						return skipToStatementStart(danglingElse, false);
 					}
 					if (fToken == Symbols.TokenCATCH) {
+						return skipToStatementStart(danglingElse, false);
+					}
+					fPosition= scope;
+					if (looksLikeAnonymousTypeDecl()) {
 						return skipToStatementStart(danglingElse, false);
 					}
 				}
@@ -1597,6 +1601,32 @@ public final class JavaIndenter {
 
 			return fToken == Symbols.TokenIDENT; // return type name
 
+		}
+		return false;
+	}
+
+	/**
+	 * Returns <code>true</code> if the current tokens look like an anonymous type declaration
+	 * header (i.e. a type name (potentially qualified) and a new keyword). The heuristic calls
+	 * <code>nextToken</code> and expects an identifier (type name) and a type declaration (an
+	 * identifier with optional brackets) which also covers the visibility modifier of constructors;
+	 * it does not recognize package visible constructors.
+	 * 
+	 * @return <code>true</code> if the current position looks like a anonymous type declaration
+	 *         header.
+	 */
+	private boolean looksLikeAnonymousTypeDecl() {
+		
+		nextToken();
+		if (fToken == Symbols.TokenIDENT) { // type name
+			nextToken();
+			while (fToken == Symbols.TokenOTHER) { // dot of qualification
+				nextToken();
+				if (fToken != Symbols.TokenIDENT) // qualificating name
+					return false;
+				nextToken();
+			}
+			return fToken == Symbols.TokenNEW;
 		}
 		return false;
 	}
