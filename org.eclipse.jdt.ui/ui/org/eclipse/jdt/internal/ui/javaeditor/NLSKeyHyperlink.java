@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
+import org.eclipse.jdt.internal.corext.refactoring.nls.PropertyFileDocumentModel;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
@@ -119,10 +120,11 @@ public class NLSKeyHyperlink implements IHyperlink {
 			if (document != null) {
 				FindReplaceDocumentAdapter finder= new FindReplaceDocumentAdapter(document);
 				PropertyKeyHyperlinkDetector detector= new PropertyKeyHyperlinkDetector((ITextEditor)editor);
+				String key= PropertyFileDocumentModel.unwindEscapeChars(fKeyName);
 				int offset= document.getLength() - 1;
 				try {
 					while (!found && offset >= 0) {
-						region= finder.find(offset, fKeyName, false, true, false, false);
+						region= finder.find(offset, key, false, true, false, false);
 						if (region == null)
 							offset= -1;
 						else {
@@ -131,14 +133,14 @@ public class NLSKeyHyperlink implements IHyperlink {
 							if (hyperlinks != null) {
 								for (int i= 0; i < hyperlinks.length; i++) {
 									IRegion hyperlinkRegion= hyperlinks[i].getHyperlinkRegion();
-									found= fKeyName.equals(document.get(hyperlinkRegion.getOffset(), hyperlinkRegion.getLength()));
+									found= key.equals(document.get(hyperlinkRegion.getOffset(), hyperlinkRegion.getLength()));
 								}
 							} else if (document instanceof IDocumentExtension3) {
 								// Fall back: test using properties file partitioning
 								ITypedRegion partition= null;
 								partition= ((IDocumentExtension3)document).getPartition(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, region.getOffset(), false);
 								found= IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType())
-										&& fKeyName.equals(document.get(partition.getOffset(), partition.getLength()).trim());
+										&& key.equals(document.get(partition.getOffset(), partition.getLength()).trim());
 							}
 							// Prevent endless loop (panic code, shouldn't be needed)
 							if (offset == region.getOffset())

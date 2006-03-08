@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.text.StringCharacterIterator;
 import java.util.Properties;
 
 import org.eclipse.jface.text.Assert;
@@ -96,14 +97,15 @@ public class PropertyKeyHyperlinkDetector implements IHyperlinkDetector {
 			String realKey= key.trim();
 			int delta= key.indexOf(realKey);
 
+			String unicodeKey= getUnicodeString(key);
 			// Check whether the key is valid
 			Properties properties= new Properties();
 			properties.load(new ByteArrayInputStream(document.get().getBytes()));
-			if (properties.getProperty(realKey) == null) {
+			if (properties.getProperty(unicodeKey) == null) {
 				return null;
 			}
 
-			return new PropertyKeyHyperlink[] {new PropertyKeyHyperlink(new Region(partition.getOffset() + delta, realKey.length()), realKey, fTextEditor)};
+			return new PropertyKeyHyperlink[] {new PropertyKeyHyperlink(new Region(partition.getOffset() + delta, realKey.length()), unicodeKey, fTextEditor)};
 
 		} catch (BadLocationException ex) {
 			return null;
@@ -112,6 +114,29 @@ public class PropertyKeyHyperlinkDetector implements IHyperlinkDetector {
 		} catch (IOException ex) {
 			return null;
 		}
+	}
+
+	private String getUnicodeString(String key) {
+		StringCharacterIterator iter= new StringCharacterIterator(key);
+		StringBuffer result= new StringBuffer();
+		while (iter.getIndex() < iter.getEndIndex()) {
+			char c= iter.current();
+			if (c == '\\') {
+				iter.next();
+				c= iter.current();
+				if (c == 'u') {
+					StringBuffer unicode= new StringBuffer();
+					unicode.append(iter.next());
+					unicode.append(iter.next());
+					unicode.append(iter.next());
+					unicode.append(iter.next());
+					c= (char)Integer.parseInt(unicode.toString(), 16);
+				}
+			}
+			result.append(c);
+			iter.next();
+		}
+		return result.toString();
 	}
 
 	private boolean checkEnabled(IRegion region) {
