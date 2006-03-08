@@ -80,11 +80,8 @@ public final class JavaModelContentProvider extends StandardJavaElementContentPr
 			return true;
 		else if (element instanceof RefactoringDescriptorProxy)
 			return false;
-		else if (element instanceof IFolder) {
-			final IFolder folder= (IFolder) element;
-			if (folder.getName().equals(NAME_SETTINGS_FOLDER))
-				return true;
-		}
+		else if (element instanceof IFolder)
+			return true;
 		return super.hasChildren(element);
 	}
 }
