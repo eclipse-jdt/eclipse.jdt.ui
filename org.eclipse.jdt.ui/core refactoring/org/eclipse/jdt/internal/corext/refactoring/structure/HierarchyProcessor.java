@@ -30,6 +30,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextUtilities;
 
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
@@ -424,7 +425,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		return JavaElementLabels.getTextLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED);
 	}
 
-	protected static void deleteDeclarationNodes(final CompilationUnitRewrite sourceRewriter, final boolean sameCu, final CompilationUnitRewrite unitRewriter, final List members) throws JavaModelException {
+	protected static void deleteDeclarationNodes(final CompilationUnitRewrite sourceRewriter, final boolean sameCu, final CompilationUnitRewrite unitRewriter, final List members, GroupCategorySet set) throws JavaModelException {
 		final List declarationNodes= getDeclarationNodes(unitRewriter.getRoot(), members);
 		for (final Iterator iterator= declarationNodes.iterator(); iterator.hasNext();) {
 			final ASTNode node= (ASTNode) iterator.next();
@@ -434,17 +435,17 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 				if (node.getParent() instanceof FieldDeclaration) {
 					final FieldDeclaration declaration= (FieldDeclaration) node.getParent();
 					if (areAllFragmentsDeleted(declaration, declarationNodes)) {
-						rewriter.remove(declaration, unitRewriter.createGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_remove_member));
+						rewriter.remove(declaration, unitRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_remove_member, set));
 						if (!sameCu)
 							remover.registerRemovedNode(declaration);
 					} else {
-						rewriter.remove(node, unitRewriter.createGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_remove_member));
+						rewriter.remove(node, unitRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_remove_member, set));
 						if (!sameCu)
 							remover.registerRemovedNode(node);
 					}
 				}
 			} else {
-				rewriter.remove(node, unitRewriter.createGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_remove_member));
+				rewriter.remove(node, unitRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_remove_member, set));
 				if (!sameCu)
 					remover.registerRemovedNode(node);
 			}

@@ -367,7 +367,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 				if (estimate != null && variable instanceof ITypeConstraintVariable) {
 					final ASTNode result= NodeFinder.perform(node, ((ITypeConstraintVariable) variable).getRange().getSourceRange());
 					if (result != null)
-						rewriteTypeOccurrence(estimate, currentRewrite, result, currentRewrite.createGroupDescription(RefactoringCoreMessages.SuperTypeRefactoringProcessor_update_type_occurrence));
+						rewriteTypeOccurrence(estimate, currentRewrite, result, currentRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.SuperTypeRefactoringProcessor_update_type_occurrence, SET_SUPER_TYPE));
 				}
 			}
 			if (!sourceUnit.equals(unit)) {

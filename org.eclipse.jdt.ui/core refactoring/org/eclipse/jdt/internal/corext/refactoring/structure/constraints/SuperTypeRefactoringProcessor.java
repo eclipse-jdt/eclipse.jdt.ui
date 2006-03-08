@@ -26,6 +26,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.GroupCategory;
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 
@@ -91,6 +93,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * @since 3.1
  */
 public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor implements IInitializableRefactoringComponent, ICommentProvider {
+
+	/** The super type group category set */
+	protected static final GroupCategorySet SET_SUPER_TYPE= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.superType", //$NON-NLS-1$
+			RefactoringCoreMessages.SuperTypeRefactoringProcessor_category_name, RefactoringCoreMessages.SuperTypeRefactoringProcessor_category_description));
 
 	protected static final String ATTRIBUTE_INSTANCEOF= "instanceof"; //$NON-NLS-1$
 

@@ -942,4 +942,18 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenameJavaProjectProcessor_folder_already_exists;
 	public static String MoveInstanceMethodProcessor_present_type_parameter_warning;
+	public static String SuperTypeRefactoringProcessor_category_name;
+	public static String SuperTypeRefactoringProcessor_category_description;
+	public static String ExtractInterfaceProcessor_category_name;
+	public static String ExtractInterfaceProcessor_category_description;
+	public static String ExtractInterfaceProcessor_remove_field_label;
+	public static String ExtractInterfaceProcessor_remove_method_label;
+	public static String PullUpRefactoring_category_name;
+	public static String PullUpRefactoring_category_description;
+	public static String PushDownRefactoring_category_name;
+	public static String PushDownRefactoring_category_description;
+	public static String PushDownRefactoring_make_abstract;
+	public static String ExtractInterfaceProcessor_add_super_interface;
+	public static String ExtractInterfaceProcessor_rewrite_comment;
+	public static String ExtractInterfaceProcessor_add_comment;
 }

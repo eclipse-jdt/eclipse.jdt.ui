@@ -39,6 +39,8 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
+import org.eclipse.ltk.core.refactoring.GroupCategory;
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -130,6 +132,10 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
  * Refactoring processor to extract interfaces.
  */
 public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcessor {
+
+	/** The extract interface group category set */
+	private static final GroupCategorySet SET_EXTRACT_INTERFACE= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.extractInterface", //$NON-NLS-1$
+			RefactoringCoreMessages.ExtractInterfaceProcessor_category_name, RefactoringCoreMessages.ExtractInterfaceProcessor_category_description));
 
 	/** The identifier of this processor */
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.extractInterfaceProcessor"; //$NON-NLS-1$
@@ -371,11 +377,11 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				createTypeSignature(sourceRewrite, declaration, status, new SubProgressMonitor(monitor, 2));
 				final IField[] fields= getExtractedFields(fSubType.getCompilationUnit());
 				if (fields.length > 0)
-					ASTNodeDeleteUtil.markAsDeleted(fields, sourceRewrite, null);
+					ASTNodeDeleteUtil.markAsDeleted(fields, sourceRewrite, sourceRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.ExtractInterfaceProcessor_remove_field_label, SET_EXTRACT_INTERFACE));
 				if (fSubType.isInterface()) {
 					final IMethod[] methods= getExtractedMethods(fSubType.getCompilationUnit());
 					if (methods.length > 0)
-						ASTNodeDeleteUtil.markAsDeleted(methods, sourceRewrite, null);
+						ASTNodeDeleteUtil.markAsDeleted(methods, sourceRewrite, sourceRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.ExtractInterfaceProcessor_remove_method_label, SET_EXTRACT_INTERFACE));
 				}
 				ICompilationUnit superUnit= null;
 				try {
@@ -494,14 +500,14 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/**
 	 * Creates the method comment for the specified declaration.
 	 * 
-	 * @param rewrite the ast rewrite
+	 * @param sourceRewrite the compilation unit rewrite
 	 * @param declaration the method declaration
 	 * @param replacements the set of variable binding keys of formal parameters which must be replaced
 	 * @param javadoc <code>true</code> if javadoc comments are processed, <code>false</code> otherwise
 	 * @throws CoreException if an error occurs
 	 */
-	protected final void createMethodComment(final ASTRewrite rewrite, final MethodDeclaration declaration, final Set replacements, final boolean javadoc) throws CoreException {
-		Assert.isNotNull(rewrite);
+	protected final void createMethodComment(final CompilationUnitRewrite sourceRewrite, final MethodDeclaration declaration, final Set replacements, final boolean javadoc) throws CoreException {
+		Assert.isNotNull(sourceRewrite);
 		Assert.isNotNull(declaration);
 		Assert.isNotNull(replacements);
 		final IMethodBinding binding= declaration.resolveBinding();
@@ -528,10 +534,11 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			}
 			final String comment= CodeGeneration.getMethodComment(fSubType.getCompilationUnit(), fSubType.getElementName(), declaration, false, binding.getName(), string, names, StubUtility.getLineDelimiterUsed(fSubType.getJavaProject()));
 			if (comment != null) {
+				final ASTRewrite rewrite= sourceRewrite.getASTRewrite();
 				if (declaration.getJavadoc() != null) {
-					rewrite.replace(declaration.getJavadoc(), rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC), null);
+					rewrite.replace(declaration.getJavadoc(), rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC), sourceRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.ExtractInterfaceProcessor_rewrite_comment, SET_EXTRACT_INTERFACE));
 				} else if (javadoc) {
-					rewrite.set(declaration, MethodDeclaration.JAVADOC_PROPERTY, rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC), null);
+					rewrite.set(declaration, MethodDeclaration.JAVADOC_PROPERTY, rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC), sourceRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.ExtractInterfaceProcessor_add_comment, SET_EXTRACT_INTERFACE));
 				}
 			}
 		}
@@ -554,7 +561,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			for (int index= 0; index < fMembers.length; index++) {
 				member= fMembers[index];
 				if (member instanceof IMethod)
-					createMethodComment(sourceRewrite.getASTRewrite(), ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) member, sourceRewrite.getRoot()), replacements, javadoc);
+					createMethodComment(sourceRewrite, ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) member, sourceRewrite.getRoot()), replacements, javadoc);
 			}
 		}
 	}
@@ -757,9 +764,9 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		}
 		final ASTRewrite rewriter= rewrite.getASTRewrite();
 		if (declaration instanceof TypeDeclaration)
-			rewriter.getListRewrite(declaration, TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY).insertLast(type, null);
+			rewriter.getListRewrite(declaration, TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY).insertLast(type, rewrite.createCategorizedGroupDescription(RefactoringCoreMessages.ExtractInterfaceProcessor_add_super_interface, SET_EXTRACT_INTERFACE));
 		else if (declaration instanceof EnumDeclaration)
-			rewriter.getListRewrite(declaration, EnumDeclaration.SUPER_INTERFACE_TYPES_PROPERTY).insertLast(type, null);
+			rewriter.getListRewrite(declaration, EnumDeclaration.SUPER_INTERFACE_TYPES_PROPERTY).insertLast(type, rewrite.createCategorizedGroupDescription(RefactoringCoreMessages.ExtractInterfaceProcessor_add_super_interface, SET_EXTRACT_INTERFACE));
 	}
 
 	/**
@@ -1042,11 +1049,11 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					if (estimate != null) {
 						final CompilationUnitRange range= constraint.getRange();
 						if (isSubUnit)
-							rewriteTypeOccurrence(range, estimate, requestor, currentRewrite, node, replacements, currentRewrite.createGroupDescription(RefactoringCoreMessages.SuperTypeRefactoringProcessor_update_type_occurrence));
+							rewriteTypeOccurrence(range, estimate, requestor, currentRewrite, node, replacements, currentRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.SuperTypeRefactoringProcessor_update_type_occurrence, SET_SUPER_TYPE));
 						else {
 							final ASTNode result= NodeFinder.perform(node, range.getSourceRange());
 							if (result != null)
-								rewriteTypeOccurrence(estimate, currentRewrite, result, currentRewrite.createGroupDescription(RefactoringCoreMessages.SuperTypeRefactoringProcessor_update_type_occurrence));
+								rewriteTypeOccurrence(estimate, currentRewrite, result, currentRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.SuperTypeRefactoringProcessor_update_type_occurrence, SET_SUPER_TYPE));
 						}
 					}
 				}
