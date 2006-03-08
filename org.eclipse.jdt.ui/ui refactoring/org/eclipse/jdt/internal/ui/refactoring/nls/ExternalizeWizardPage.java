@@ -920,7 +920,14 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			fIsEclipseNLS.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					super.widgetDefaultSelected(e);
-					fNLSRefactoring.setIsEclipseNLS(fIsEclipseNLS.getSelection());
+					boolean isEclipseNLS= fIsEclipseNLS.getSelection();
+					fNLSRefactoring.setIsEclipseNLS(isEclipseNLS);
+					if (isEclipseNLS) {
+						fNLSRefactoring.setPrefix(fNLSRefactoring.getPrefix().replace('.', '_'));
+					} else {
+						fNLSRefactoring.setPrefix(fNLSRefactoring.getPrefix().replace('_', '.'));
+					}
+					fPrefixField.setText(fNLSRefactoring.getPrefix());
 					validateKeys(true);
 				}
 			});
