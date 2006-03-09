@@ -606,6 +606,10 @@ public final class RefactoringMessages extends NLS {
 
 	public static String PullUpWizard_defaultPageTitle;
 
+	public static String PullUpWizard_deselect_all_label;
+
+	public static String PullUpWizard_select_all_label;
+
 	public static String PushDownAction_not_possible;
 
 	public static String PushDownAction_Push_Down;
