@@ -43,6 +43,10 @@ public class InlineTempTests extends RefactoringTest {
 		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 	
+	public static Test setUpTest(Test test) {
+		return new RefactoringTestSetup(test);
+	}
+	
 	private String getSimpleTestFileName(boolean canInline, boolean input){
 		String fileName = "A_" + getName();
 		if (canInline)
