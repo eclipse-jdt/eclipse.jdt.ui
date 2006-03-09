@@ -65,6 +65,8 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 abstract class TargetProvider {
 
+	public static final boolean BUG_CORE_130317= true; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=130317
+	
 	protected SourceProvider fSourceProvider;
 
 	public void setSourceProvider(SourceProvider sourceProvider) {
@@ -104,7 +106,7 @@ abstract class TargetProvider {
 		ITypeBinding type= method.getDeclaringClass();
 		if (type.isLocal()) {
 			if (! type.isFromSource()) {
-				return new ErrorTargetProvider(RefactoringStatus.createFatalErrorStatus("Cannot inline local method in binary type."));
+				return new ErrorTargetProvider(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.TargetProvider_cannot_local_method_in_binary));
 			} else {
 				IType declaringClassOfLocal= (IType) type.getDeclaringClass().getJavaElement();
 				return new LocalTypeTargetProvider(declaringClassOfLocal.getCompilationUnit(), declaration);
@@ -307,9 +309,10 @@ abstract class TargetProvider {
 		private boolean matches(IBinding binding) {
 			if (!(binding instanceof IMethodBinding))
 				return false;
-			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=130317
-			// return fBinding.isEqualTo(((IMethodBinding)binding).getMethodDeclaration());
-			return fBinding.getKey().equals(((IMethodBinding)binding).getMethodDeclaration().getKey());
+			if (BUG_CORE_130317)
+				return fBinding.getKey().equals(((IMethodBinding)binding).getMethodDeclaration().getKey());
+			else
+				return fBinding.isEqualTo(((IMethodBinding)binding).getMethodDeclaration());
 		}
 	}
 	

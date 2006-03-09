@@ -956,4 +956,5 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractInterfaceProcessor_add_super_interface;
 	public static String ExtractInterfaceProcessor_rewrite_comment;
 	public static String ExtractInterfaceProcessor_add_comment;
+	public static String TargetProvider_cannot_local_method_in_binary;
 }
