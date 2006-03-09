@@ -2203,30 +2203,12 @@
                label="%Refactoring.menu.label"
                path="edit"
                id="org.eclipse.jdt.ui.refactoring.menu">
-            <separator name="undoRedoGroup"/>
             <separator name="reorgGroup"/>
             <separator name="typeGroup"/>
             <separator name="codingGroup"/>
             <separator name="codingGroup2"/>
             <separator name="scriptGroup"/>
          </menu>
-<!-- undo/redo group  -->
-		 <!--
-         <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
-               label="%Refactoring.redoAction.label"
-               class="org.eclipse.ltk.ui.refactoring.RedoRefactoringAction"
-               menubarPath="org.eclipse.jdt.ui.refactoring.menu/undoRedoGroup"
-               id="RedoAction">
-         </action>
-         <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
-               label="%Refactoring.undoAction.label"
-               class="org.eclipse.ltk.ui.refactoring.UndoRefactoringAction"
-               menubarPath="org.eclipse.jdt.ui.refactoring.menu/undoRedoGroup"
-               id="UndoAction">
-         </action>
-         -->
 <!-- reorg group  -->
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level"
@@ -3422,18 +3404,6 @@
             id="org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu">
       </command>
       <command
-            name="%ActionDefinition.refactorUndo.name"
-            description="%ActionDefinition.refactorUndo.description"
-            categoryId="org.eclipse.jdt.ui.category.refactoring"
-            id="org.eclipse.jdt.ui.edit.text.java.refactor.undo">
-      </command>
-      <command
-            name="%ActionDefinition.refactorRedo.name"
-            description="%ActionDefinition.refactorRedo.description"
-            categoryId="org.eclipse.jdt.ui.category.refactoring"
-            id="org.eclipse.jdt.ui.edit.text.java.refactor.redo">
-      </command>
-      <command
             name="%ActionDefinition.renameElement.name"
             description="%ActionDefinition.renameElement.description"
             categoryId="org.eclipse.jdt.ui.category.refactoring"
@@ -4005,11 +3975,6 @@
             sequence="COMMAND+ALT+T"
             commandId="org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
-      <key
-            sequence="M2+M3+Z"
-            commandId="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             platform="carbon"
             sequence="M2+M3+Z"
@@ -4017,25 +3982,9 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             platform="carbon"
-            sequence="COMMAND+ALT+Z"
-            commandId="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
-      <key
-            sequence="M2+M3+Y"
-            commandId="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            platform="carbon"
             sequence="M2+M3+Y"
             commandId=""
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            platform="carbon"
-            sequence="COMMAND+ALT+Y"
-            commandId="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
       <key
             sequence="M2+M3+R"
             commandId="org.eclipse.jdt.ui.edit.text.java.rename.element"
