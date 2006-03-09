@@ -35,6 +35,7 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 
@@ -117,6 +118,7 @@ import org.eclipse.jdt.internal.ui.deprecation.FixDeprecationRefactoringWizard;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
+import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 
 /**
   */
@@ -370,23 +372,31 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 			private static final int SIZING_WIZARD_WIDTH= 490;
 
-			public final void apply(final IDocument document) {
-				RefactoringHistory history= null;
-				InputStream stream= null;
-				try {
-					stream= new BufferedInputStream(file.getContents(true));
-					history= RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.DEPRECATION_RESOLVING);
-				} catch (CoreException exception) {
-					JavaPlugin.log(exception);
-				} finally {
-					if (stream != null) {
-						try {
-							stream.close();
-						} catch (IOException exception) {
-							JavaPlugin.log(exception);
+			private RefactoringHistory fCachedHistory= null;
+
+			private RefactoringHistory getRefactoringHistory() {
+				if (fCachedHistory == null) {
+					InputStream stream= null;
+					try {
+						stream= new BufferedInputStream(file.getContents(true));
+						fCachedHistory= RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.DEPRECATION_RESOLVING);
+					} catch (CoreException exception) {
+						JavaPlugin.log(exception);
+					} finally {
+						if (stream != null) {
+							try {
+								stream.close();
+							} catch (IOException exception) {
+								JavaPlugin.log(exception);
+							}
 						}
 					}
 				}
+				return fCachedHistory;
+			}
+
+			public final void apply(final IDocument document) {
+				final RefactoringHistory history= getRefactoringHistory();
 				if (history == null || history.isEmpty())
 					return;
 				final FixDeprecationRefactoringWizard wizard= new FixDeprecationRefactoringWizard(history.getDescriptors().length > 1, context.getCompilationUnit(), node.getStartPosition(), node.getLength());
@@ -405,7 +415,17 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 
 			public final String getAdditionalProposalInfo() {
-				return CorrectionMessages.QuickAssistProcessor_fix_deprecation_info;
+				final RefactoringHistory history= getRefactoringHistory();
+				if (history == null || history.isEmpty())
+					return ""; //$NON-NLS-1$
+				final StringBuffer buffer= new StringBuffer(512);
+				HTMLPrinter.startBulletList(buffer);
+				final RefactoringDescriptorProxy[] proxies= history.getDescriptors();
+				for (int index= 0; index < proxies.length; index++) {
+					HTMLPrinter.addBullet(buffer, proxies[index].getDescription());
+				}
+				HTMLPrinter.endBulletList(buffer);
+				return Messages.format(CorrectionMessages.QuickAssistProcessor_fix_deprecation_info, buffer.toString());
 			}
 		};
 		resultingCollections.add(proposal);
