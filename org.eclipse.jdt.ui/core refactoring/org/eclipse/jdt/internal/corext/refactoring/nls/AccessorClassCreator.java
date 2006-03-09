@@ -43,7 +43,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
-class AccessorClassCreator {
+public class AccessorClassCreator {
 
 	private final ICompilationUnit fCu;
 	private final String fAccessorClassName;
