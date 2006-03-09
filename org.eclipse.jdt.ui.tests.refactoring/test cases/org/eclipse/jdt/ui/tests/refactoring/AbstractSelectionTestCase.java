@@ -125,8 +125,8 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 				} else {
 					JavaCore.run(op, new NullProgressMonitor());
 				}
-				assertTrue("Precondition check failed", !op.getConditionStatus().hasFatalError());
-				assertTrue("Validation check failed", !op.getValidationStatus().hasFatalError());
+				assertTrue("Precondition check failed: " + op.getConditionStatus().toString(), !op.getConditionStatus().hasFatalError());
+				assertTrue("Validation check failed: " + op.getConditionStatus().toString(), !op.getValidationStatus().hasFatalError());
 				assertNotNull("No Undo", op.getUndoChange());
 				compareSource(unit.getSource(), out);
 				Change undo= op.getUndoChange();
