@@ -25,6 +25,8 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 public class RefactoringASTParser {
 
 	private ASTParser fParser;
@@ -85,6 +87,26 @@ public class RefactoringASTParser {
 		CompilationUnit result= (CompilationUnit) fParser.createAST(null);
 		result.setProperty(SOURCE_PROPERTY, unit);
 		return result;
+	}
+	
+	/**
+	 * @param newCfSource the source
+	 * @param originalCf the class file to get the name and project from
+	 * @param resolveBindings whether bindings are to be resolved
+	 * @param statementsRecovery whether statements recovery should be enabled
+	 * @param pm an {@link IProgressMonitor}, or <code>null</code>
+	 * @return the parsed CompilationUnit
+	 */
+	public CompilationUnit parse(String newCfSource, IClassFile originalCf, boolean resolveBindings, boolean statementsRecovery, IProgressMonitor pm) {
+		fParser.setResolveBindings(resolveBindings);
+		fParser.setStatementsRecovery(statementsRecovery);
+		fParser.setSource(newCfSource.toCharArray());
+		String cfName= originalCf.getElementName();
+		fParser.setUnitName(cfName.substring(0, cfName.length() - 6) + JavaModelUtil.DEFAULT_CU_SUFFIX);
+		fParser.setProject(originalCf.getJavaProject());
+		fParser.setCompilerOptions(getCompilerOptions(originalCf));
+		CompilationUnit newCUNode= (CompilationUnit) fParser.createAST(pm);
+		return newCUNode;
 	}
 	
 	public static ICompilationUnit getCompilationUnit(ASTNode node) {

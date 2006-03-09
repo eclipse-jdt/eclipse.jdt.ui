@@ -83,6 +83,7 @@ public class SourceProvider {
 	private boolean fMustEvalReturnedExpression;
 	private boolean fReturnValueNeedsLocalVariable;
 	private List fReturnExpressions;
+	private IDocument fSource;
 	
 	private class ReturnAnalyzer extends ASTVisitor {
 		public boolean visit(ReturnStatement node) {
@@ -113,12 +114,20 @@ public class SourceProvider {
 		fReturnExpressions= new ArrayList();
 	}
 	
+	/**
+	 * TODO: unit's source does not match contents of source document and declaration node.
+	 */
+	public SourceProvider(IJavaElement unit, IDocument source, MethodDeclaration declaration) {
+		this(unit, declaration);
+		fSource= source;
+	}
+
 	public RefactoringStatus checkActivation() throws JavaModelException {
 		return fAnalyzer.checkActivation();
 	}
 	
 	public void initialize() throws JavaModelException {
-		fDocument= new Document(((IOpenable) fUnit).getBuffer().getContents());
+		fDocument= fSource == null ? new Document(((IOpenable) fUnit).getBuffer().getContents()) : fSource;
 		fAnalyzer.initialize();
 		if (hasReturnValue()) {
 			ASTNode last= getLastStatement();
