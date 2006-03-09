@@ -406,6 +406,78 @@ public class NLSSourceModifierTest extends TestCase {
                 "}\n",  
             	doc.get());
     }
+	
+	public void testFromTranslatedToNotTranslatedEclipse() throws Exception {
+        
+        String klazz =
+            "package test;\n" +
+            "public class Test {\n" +
+            "	private String str=Accessor.k_0;\n" +
+            "}\n"; 
+        
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test;\n");
+        buf.append("import org.eclipse.osgi.util.NLS;\n");
+        buf.append("public class Accessor extends NLS {\n");
+        buf.append("    private static final String BUNDLE_NAME = \"test.test\"; //$NON-NLS-1$\n");
+        buf.append("\n");
+        buf.append("    private Accessor() {\n");
+        buf.append("    }\n");
+        buf.append("    static {\n");
+        buf.append("        // initialize resource bundle\n");
+        buf.append("        NLS.initializeMessages(BUNDLE_NAME, Accessor.class);\n");
+        buf.append("    }\n");
+        buf.append("    public static String k_0;\n");
+        buf.append("}\n");
+        String accessorKlazz= buf.toString();
+        
+        IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+        ICompilationUnit accessorCu= pack.createCompilationUnit("Accessor.java", accessorKlazz, false, null);
+        ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
+        
+        IPackageFragment nlspack= fSourceFolder.createPackageFragment("org.eclipse.osgi.util", false, null);
+        nlspack.createCompilationUnit("NLS.java", "public class NLS {}", false, null);
+        
+        CompilationUnit astRoot= createAST(cu);
+        NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
+        nlsSubstitutions[0].setValue("whatever");
+        nlsSubstitutions[0].setPrefix("k_");
+        nlsSubstitutions[0].setState(NLSSubstitution.IGNORED);
+        
+        String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
+        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor", true);
+        
+        Document doc = new Document(klazz);
+        change.getEdit().apply(doc);
+        
+        assertEquals(
+                "package test;\n" +
+                "public class Test {\n" +
+                "	private String str=\"whatever\"; //$NON-NLS-1$\n" +
+                "}\n",  
+            	doc.get());
+
+        TextChange accessorChange= (TextChange)AccessorClassModifier.create(accessorCu, nlsSubstitutions);
+        Document accessorDoc= new Document(accessorKlazz);
+        accessorChange.getEdit().apply(accessorDoc);
+        
+        buf= new StringBuffer();
+        buf.append("package test;\n");
+        buf.append("import org.eclipse.osgi.util.NLS;\n");
+        buf.append("public class Accessor extends NLS {\n");
+        buf.append("    private static final String BUNDLE_NAME = \"test.test\"; //$NON-NLS-1$\n");
+        buf.append("\n");
+        buf.append("    private Accessor() {\n");
+        buf.append("    }\n");
+        buf.append("    static {\n");
+        buf.append("        // initialize resource bundle\n");
+        buf.append("        NLS.initializeMessages(BUNDLE_NAME, Accessor.class);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        String expected= buf.toString();
+        
+        assertEquals(expected, accessorDoc.get());
+    }
     
     public void testFromTranslatedToSkipped() throws Exception {
         
