@@ -157,7 +157,8 @@ public class TestRunSession {
 	}
 	
 	public void stopTestRun() {
-		fIsStopped= true;
+		if (isRunning() || ! isKeptAlive())
+			fIsStopped= true;
 		fTestRunnerClient.stopTest();
 	}
 
