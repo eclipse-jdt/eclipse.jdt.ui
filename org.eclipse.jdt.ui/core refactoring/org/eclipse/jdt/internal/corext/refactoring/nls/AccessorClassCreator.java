@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
+import java.util.HashSet;
+
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -162,16 +164,14 @@ public class AccessorClassCreator {
 	
 	private String createStaticFields(String lineDelim) {
 		StringBuffer buf= new StringBuffer();
-		int count= 0;
-		
+		HashSet added= new HashSet();
 		for (int i= 0; i < fNLSSubstitutions.length; i++) {
 			NLSSubstitution substitution= fNLSSubstitutions[i];
 			int newState= substitution.getState();
 			if (substitution.hasStateChanged()
 					&& newState == NLSSubstitution.EXTERNALIZED && substitution.getInitialState() == NLSSubstitution.INTERNALIZED) {
-				if (count > 0)
-					buf.append(lineDelim);
-				appendStaticField(buf,substitution);
+				if (added.add(substitution.getKey()))
+					appendStaticField(buf,substitution);
 			}
 		}
 		

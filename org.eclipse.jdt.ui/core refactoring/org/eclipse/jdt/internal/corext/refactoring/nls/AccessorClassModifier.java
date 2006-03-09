@@ -14,9 +14,9 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -31,7 +31,6 @@ import org.eclipse.core.filebuffers.ITextFileBufferManager;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.Region;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -51,7 +50,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -135,7 +133,11 @@ public class AccessorClassModifier {
 		return fASTRewrite.rewriteAST(document, fCU.getJavaProject().getOptions(true));
 	}
 
-	public static Change create(ICompilationUnit cu, NLSSubstitution[] subs) throws CoreException {
+	public static Change create(ICompilationUnit cu, NLSSubstitution[] substitutions) throws CoreException {
+		
+
+		Map newKeyToSubstMap= NLSPropertyFileModifier.getNewKeyToSubstitutionMap(substitutions);
+		Map oldKeyToSubstMap= NLSPropertyFileModifier.getOldKeyToSubstitutionMap(substitutions);
 
 		AccessorClassModifier sourceModification= new AccessorClassModifier(cu);
 
@@ -144,34 +146,26 @@ public class AccessorClassModifier {
 		TextChange change= new CompilationUnitChange(message, cu);
 		MultiTextEdit multiTextEdit= new MultiTextEdit();
 		change.setEdit(multiTextEdit);
-
-		for (int i= 0; i < subs.length; i++) {
-			NLSSubstitution substitution= subs[i];
-			int newState= substitution.getState();
-			if (substitution.hasStateChanged()) {
-				if (newState == NLSSubstitution.EXTERNALIZED) {
-					if (substitution.getInitialState() == NLSSubstitution.INTERNALIZED)
-						sourceModification.addKey(substitution, change);
-				} else if (newState == NLSSubstitution.INTERNALIZED) {
-					if (substitution.getInitialState() == NLSSubstitution.EXTERNALIZED)
-						sourceModification.removeKey(substitution, change);
-				} else if (newState == NLSSubstitution.IGNORED) {
-					if (substitution.getInitialState() == NLSSubstitution.EXTERNALIZED)
-						sourceModification.removeKey(substitution, change);
-				}
-			} else {
-				if (newState == NLSSubstitution.EXTERNALIZED) {
-					if (substitution.isKeyRename()) {
-						sourceModification.renameKey(substitution, change);
-					}
-					if (substitution.isAccessorRename()) {
-						// FIXME: need to verify
-						sourceModification.replaceAccessor(substitution, change);
-					}
-				}
+		
+		for (int i= 0; i < substitutions.length; i++) {
+			NLSSubstitution substitution= substitutions[i];
+			if (NLSPropertyFileModifier.doInsert(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
+				sourceModification.addKey(substitution, change);
 			}
 		}
-
+		for (int i= 0; i < substitutions.length; i++) {
+			NLSSubstitution substitution= substitutions[i];
+			if (NLSPropertyFileModifier.doRemove(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
+				sourceModification.removeKey(substitution, change);
+			}
+		}
+		for (int i= 0; i < substitutions.length; i++) {
+			NLSSubstitution substitution= substitutions[i];
+			if (NLSPropertyFileModifier.doReplace(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
+				sourceModification.renameKey(substitution, change);
+			}
+		}
+		
 		change.addEdit(sourceModification.getTextEdit());
 		
 		return change;
@@ -246,7 +240,7 @@ public class AccessorClassModifier {
 			FieldDeclaration existingFieldDecl= (FieldDeclaration)iter.next();
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment)existingFieldDecl.fragments().get(0);
 			String identifier= fragment.getName().getIdentifier();
-			if (collator.compare(key, identifier) == -1) {
+			if (collator.compare(key, identifier) != 1) {
 				fListRewrite.insertBefore(fieldDeclaration, existingFieldDecl, editGroup);
 			} else {
 				while (iter.hasNext()) {
@@ -277,19 +271,4 @@ public class AccessorClassModifier {
 		return fieldDeclaration;
 	}
 
-	/**
-	 * @param substitution
-	 * @param change
-	 */
-	private void replaceAccessor(NLSSubstitution substitution, TextChange change) {
-		AccessorClassReference accessorClassRef= substitution.getAccessorClassReference();
-		if (accessorClassRef != null) {
-			Region region= accessorClassRef.getRegion();
-			int len= accessorClassRef.getName().length();
-			String[] args= {accessorClassRef.getName(), substitution.getUpdatedAccessor()};
-			TextChangeCompatibility.addTextEdit(change, Messages.format(NLSMessages.NLSSourceModifier_replace_accessor, args), 
-					new ReplaceEdit(region.getOffset(), len, substitution.getUpdatedAccessor())); // 
-		}
-		
-	}
 }

@@ -86,7 +86,7 @@ public class NLSPropertyFileModifier {
 	/**
 	 * Maps the new keys to a substitutions. If a substitution is not in the map then it is a duplicate.
 	 */
-	private static HashMap getNewKeyToSubstitutionMap(NLSSubstitution[] substitutions) {
+	static HashMap getNewKeyToSubstitutionMap(NLSSubstitution[] substitutions) {
 		HashMap keyToSubstMap= new HashMap(substitutions.length);
 		// find all duplicates
 		for (int i= 0; i < substitutions.length; i++) {
@@ -104,7 +104,7 @@ public class NLSPropertyFileModifier {
 	/**
 	 * Maps the old keys to a substitutions. If a substitution is not in the map then it is a duplicate.
 	 */
-	private static HashMap getOldKeyToSubstitutionMap(NLSSubstitution[] substitutions) {
+	static HashMap getOldKeyToSubstitutionMap(NLSSubstitution[] substitutions) {
 		HashMap keyToSubstMap= new HashMap(substitutions.length);
 		// find all duplicates
 		for (int i= 0; i < substitutions.length; i++) {
@@ -122,7 +122,7 @@ public class NLSPropertyFileModifier {
 		return keyToSubstMap;
 	}
 
-	private static boolean doReplace(NLSSubstitution substitution, Map newKeyToSubstMap, Map oldKeyToSubstMap) {
+	static boolean doReplace(NLSSubstitution substitution, Map newKeyToSubstMap, Map oldKeyToSubstMap) {
 		if (substitution.getState() != NLSSubstitution.EXTERNALIZED || substitution.hasStateChanged() || substitution.getInitialValue() == null) {
 			return false; // was not in property file before
 		}
@@ -151,7 +151,7 @@ public class NLSPropertyFileModifier {
 		}
 	}
 	
-	private static boolean doInsert(NLSSubstitution substitution, Map newKeyToSubstMap, Map oldKeyToSubstMap) {
+	static boolean doInsert(NLSSubstitution substitution, Map newKeyToSubstMap, Map oldKeyToSubstMap) {
 		if (substitution.getState() != NLSSubstitution.EXTERNALIZED) {
 			return false; // does not go into the property file
 		}
@@ -180,7 +180,7 @@ public class NLSPropertyFileModifier {
 		}
 	}
 	
-	private static boolean doRemove(NLSSubstitution substitution, Map newKeyToSubstMap, Map oldKeyToSubstMap) {
+	static boolean doRemove(NLSSubstitution substitution, Map newKeyToSubstMap, Map oldKeyToSubstMap) {
 		if (substitution.getInitialState() != NLSSubstitution.EXTERNALIZED || substitution.getInitialKey() == null) {
 			return false; // was not in property file before
 		}
