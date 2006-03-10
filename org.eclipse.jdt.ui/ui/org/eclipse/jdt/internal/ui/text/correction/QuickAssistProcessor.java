@@ -78,6 +78,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -531,6 +532,19 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		int insertIndex= list.indexOf(statement);
 
 		Expression placeholder= (Expression) rewrite.createMoveTarget(fragment.getInitializer());
+		ITypeBinding binding= fragment.getInitializer().resolveTypeBinding();
+		if (binding.isArray()) {
+			ArrayCreation creation= ast.newArrayCreation();
+			creation.setInitializer((ArrayInitializer) placeholder);
+			final ITypeBinding componentType= binding.getComponentType();
+			Type type= null;
+			if (componentType.isPrimitive())
+				type= ast.newPrimitiveType(PrimitiveType.toCode(componentType.getName()));
+			else
+				type= ast.newSimpleType(ast.newSimpleName(componentType.getName()));
+			creation.setType(ast.newArrayType(type, binding.getDimensions()));
+			placeholder= creation;
+		}
 		Assignment assignment= ast.newAssignment();
 		assignment.setRightHandSide(placeholder);
 		assignment.setLeftHandSide(ast.newSimpleName(fragment.getName().getIdentifier()));

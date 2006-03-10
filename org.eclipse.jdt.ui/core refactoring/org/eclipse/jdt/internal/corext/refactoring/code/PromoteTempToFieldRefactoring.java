@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -707,7 +708,18 @@ public class PromoteTempToFieldRefactoring extends CommentRefactoring implements
         return assignmentStatement;
     }
 	private String getTempInitializerCode() throws JavaModelException {
-		return fCu.getBuffer().getText(getTempInitializer().getStartPosition(), getTempInitializer().getLength());
+		final StringBuffer buffer= new StringBuffer(128);
+		final Expression initializer= getTempInitializer();
+		if (initializer instanceof ArrayInitializer) {
+			final ArrayInitializer extended= (ArrayInitializer) initializer;
+			final ITypeBinding binding= extended.resolveTypeBinding();
+			if (binding != null) {
+				buffer.append("new "); //$NON-NLS-1$
+				buffer.append(binding.getName());
+			}
+		}
+		buffer.append(fCu.getBuffer().getText(initializer.getStartPosition(), initializer.getLength()));
+		return buffer.toString();
 	}
 
     private void addLocalDeclarationRemoval(ASTRewrite rewrite) {
