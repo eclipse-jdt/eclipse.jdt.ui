@@ -202,7 +202,7 @@ class DeleteChangeCreator {
 			//XXX using this code is a workaround for jcore bug 31998
 			//jcore cannot handle linked stuff
 			//normally, we should always create DeletePackageFragmentRootChange
-			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.DeleteRefactoring_delete_package_fragment_root); 
+			CompositeChange composite= new DynamicValidationStateChange(RefactoringCoreMessages.DeleteRefactoring_delete_package_fragment_root); 
 	
 			composite.add(new DeleteFromClasspathChange(root));
 			Assert.isTrue(! Checks.isClasspathDelete(root));//checked in preconditions

@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.composite.MultiStateCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -324,7 +325,7 @@ public class CleanUpRefactoring extends Refactoring {
 		pm.beginTask("", cuCount * 3 * fCleanUps.size()); //$NON-NLS-1$
 
 		try {
-			CompositeChange change= new CompositeChange(getName());
+			CompositeChange change= new DynamicValidationStateChange(getName());
 			for (Iterator projectIter= fProjects.keySet().iterator(); projectIter.hasNext();) {
 				IJavaProject project= (IJavaProject)projectIter.next();
 				

@@ -103,6 +103,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CopyCompilationUnitCh
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyPackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyPackageFragmentRootChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyResourceChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageFragmentRootChange;
@@ -1212,7 +1213,7 @@ public class ReorgPolicyFactory {
 			ICompilationUnit[] cus= getCus();
 			pm.beginTask("", cus.length + file.length + folders.length); //$NON-NLS-1$
 			NewNameProposer nameProposer= new NewNameProposer();
-			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.ReorgPolicy_copy); 
+			CompositeChange composite= new DynamicValidationStateChange(RefactoringCoreMessages.ReorgPolicy_copy); 
 			composite.markAsSynthetic();
 			for (int i= 0; i < cus.length; i++) {
 				composite.add(createChange(cus[i], nameProposer, copyQueries));
@@ -1315,7 +1316,7 @@ public class ReorgPolicyFactory {
 			NewNameProposer nameProposer= new NewNameProposer();
 			IPackageFragmentRoot[] roots= getPackageFragmentRoots();
 			pm.beginTask("", roots.length); //$NON-NLS-1$
-			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.ReorgPolicy_copy_source_folder); 
+			CompositeChange composite= new DynamicValidationStateChange(RefactoringCoreMessages.ReorgPolicy_copy_source_folder); 
 			composite.markAsSynthetic();
 			IJavaProject destination= getDestinationJavaProject();
 			Assert.isNotNull(destination);
@@ -1370,7 +1371,7 @@ public class ReorgPolicyFactory {
 			NewNameProposer nameProposer= new NewNameProposer();
 			IPackageFragment[] fragments= getPackages();
 			pm.beginTask("", fragments.length); //$NON-NLS-1$
-			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.ReorgPolicy_copy_package); 
+			CompositeChange composite= new DynamicValidationStateChange(RefactoringCoreMessages.ReorgPolicy_copy_package); 
 			composite.markAsSynthetic();
 			IPackageFragmentRoot root= getDestinationAsPackageFragmentRoot();
 			for (int i= 0; i < fragments.length; i++) {
@@ -1533,7 +1534,7 @@ public class ReorgPolicyFactory {
 		public Change createChange(IProgressMonitor pm) throws JavaModelException {
 			IPackageFragmentRoot[] roots= getPackageFragmentRoots();
 			pm.beginTask("", roots.length); //$NON-NLS-1$
-			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.ReorgPolicy_move_source_folder); 
+			CompositeChange composite= new DynamicValidationStateChange(RefactoringCoreMessages.ReorgPolicy_move_source_folder); 
 			composite.markAsSynthetic();
 			IJavaProject destination= getDestinationJavaProject();
 			Assert.isNotNull(destination);
@@ -1651,7 +1652,7 @@ public class ReorgPolicyFactory {
 		public Change createChange(IProgressMonitor pm) throws JavaModelException {
 			IPackageFragment[] fragments= getPackages();
 			pm.beginTask("", fragments.length); //$NON-NLS-1$
-			CompositeChange result= new CompositeChange(RefactoringCoreMessages.ReorgPolicy_move_package); 
+			CompositeChange result= new DynamicValidationStateChange(RefactoringCoreMessages.ReorgPolicy_move_package); 
 			result.markAsSynthetic();
 			IPackageFragmentRoot root= getDestinationAsPackageFragmentRoot();
 			for (int i= 0; i < fragments.length; i++) {
@@ -1807,7 +1808,7 @@ public class ReorgPolicyFactory {
 		private Change createReferenceUpdatingMoveChange(IProgressMonitor pm) throws JavaModelException {
 			pm.beginTask("", 2 + (fUpdateQualifiedNames ? 1 : 0)); //$NON-NLS-1$
 			try{
-				CompositeChange composite= new CompositeChange(RefactoringCoreMessages.ReorgPolicy_move); 
+				CompositeChange composite= new DynamicValidationStateChange(RefactoringCoreMessages.ReorgPolicy_move); 
 				composite.markAsSynthetic();
 				//XX workaround for bug 13558
 				//<workaround>
@@ -1852,7 +1853,7 @@ public class ReorgPolicyFactory {
 		}
 
 		private Change createSimpleMoveChange(IProgressMonitor pm) {
-			CompositeChange result= new CompositeChange(RefactoringCoreMessages.ReorgPolicy_move); 
+			CompositeChange result= new DynamicValidationStateChange(RefactoringCoreMessages.ReorgPolicy_move); 
 			result.markAsSynthetic();
 			IFile[] files= getFiles();
 			IFolder[] folders= getFolders();
@@ -2064,7 +2065,7 @@ public class ReorgPolicyFactory {
 				if (sourceCu.equals(destinationCu)) {
 					return targetCuChange;
 				} else {
-					CompositeChange result= new CompositeChange(RefactoringCoreMessages.ReorgPolicy_move_members); 
+					CompositeChange result= new DynamicValidationStateChange(RefactoringCoreMessages.ReorgPolicy_move_members); 
 					result.markAsSynthetic();
 					result.add(targetCuChange);
 					if (Arrays.asList(getJavaElements()).containsAll(Arrays.asList(sourceCu.getTypes())))

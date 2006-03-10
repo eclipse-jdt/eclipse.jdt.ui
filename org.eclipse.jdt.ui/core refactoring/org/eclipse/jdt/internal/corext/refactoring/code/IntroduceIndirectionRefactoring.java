@@ -96,6 +96,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder2;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -739,7 +740,7 @@ public class IntroduceIndirectionRefactoring extends CommentRefactoring implemen
 	// ******************** CHANGE CREATION ***********************
 
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-		final CompositeChange result= new CompositeChange(RefactoringCoreMessages.IntroduceIndirectionRefactoring_introduce_indirection) {
+		final CompositeChange result= new DynamicValidationStateChange(RefactoringCoreMessages.IntroduceIndirectionRefactoring_introduce_indirection) {
 		
 			public final ChangeDescriptor getDescriptor() {
 				final Map arguments= new HashMap();
