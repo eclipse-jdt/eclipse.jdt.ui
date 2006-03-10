@@ -95,8 +95,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  *  - forbid cases like foo(foo(10)) when inlining foo().
  *  - case ref.foo(); and we want to inline foo. Inline a method in a different context;
  *  - optimize code when the method to be inlined returns an argument and that one is
- *    assigned to a paramter again. No need for a separate local (important to be able
- *    to revers extract method correctly).
+ *    assigned to a parameter again. No need for a separate local (important to be able
+ *    to reverse extract method correctly).
  */
 public class InlineMethodRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent, IDeprecationResolving {
 
@@ -361,7 +361,7 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 			TextEdit root= change.getEdit();
 			if (root != null) {
 				// TODO instead of finding the right insert position the call inliner should
-				// resuse the AST & rewriter of the source provide and we should rewrite the
+				// reuse the AST & rewriter of the source provide and we should rewrite the
 				// whole AST at the end. However, since recursive calls aren't allowed there
 				// shouldn't be a text edit overlap.
 				// root.addChild(delete);
