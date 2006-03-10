@@ -72,6 +72,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
@@ -109,6 +110,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
+import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -162,10 +164,11 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 	/**
 	 * Creates a new convert anonymous to nested refactoring
 	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
+	 * @param settings the code generation settings
 	 * @param selectionStart
 	 * @param selectionLength
 	 */
-    public ConvertAnonymousToNestedRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) {
+    public ConvertAnonymousToNestedRefactoring(ICompilationUnit unit, CodeGenerationSettings settings, int selectionStart, int selectionLength) {
         Assert.isTrue(selectionStart >= 0);
         Assert.isTrue(selectionLength >= 0);
         Assert.isTrue(unit == null || unit.exists());
@@ -173,7 +176,7 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
         fSelectionLength= selectionLength;
         fCu= unit;
         if (unit != null)
-        	fSettings= JavaPreferencesSettings.getCodeGenerationSettings(unit.getJavaProject());
+        	fSettings= settings;
     }
 
     public int[] getAvailableVisibilities() {
@@ -603,6 +606,17 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 		}
 		createFieldsForAccessedLocals(rewrite, declaration);
 		createNewConstructorIfNeeded(rewrite, declaration);
+		if (fSettings.createComments) {
+			String[] parameterNames= new String[parameters.length];
+			for (int index= 0; index < parameterNames.length; index++) {
+				parameterNames[index]= parameters[index].getName();
+			}
+			String string= CodeGeneration.getTypeComment(rewrite.getCu(), fClassName, parameterNames, StubUtility.getLineDelimiterUsed(rewrite.getCu()));
+			if (string != null) {
+				Javadoc javadoc= (Javadoc) rewrite.getASTRewrite().createStringPlaceholder(string, ASTNode.JAVADOC);
+				declaration.setJavadoc(javadoc);
+			}
+		}
 		return declaration;
 	}
 
@@ -694,6 +708,17 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 			field.setType(rewrite.getImportRewrite().addImport(bindings[index].getType(), ast));
 			field.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.PRIVATE | Modifier.FINAL));
 			declaration.bodyDeclarations().add(findIndexOfLastField(declaration.bodyDeclarations()) + 1, field);
+			if (fSettings.createComments) {
+				try {
+					String string= CodeGeneration.getFieldComment(rewrite.getCu(), bindings[index].getType().getName(), name, StubUtility.getLineDelimiterUsed(rewrite.getCu()));
+					if (string != null) {
+						Javadoc javadoc= (Javadoc) rewrite.getASTRewrite().createStringPlaceholder(string, ASTNode.JAVADOC);
+						field.setJavadoc(javadoc);
+					}
+				} catch (CoreException exception) {
+					JavaPlugin.log(exception);
+				}
+			}
 		}
 	}
 
@@ -743,10 +768,11 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 		newConstructor.setJavadoc(null);
 		newConstructor.modifiers().addAll(ASTNodeFactory.newModifiers(ast, fVisibility));
 		newConstructor.setName(ast.newSimpleName(fClassName));
-		addParametersToNewConstructor(newConstructor, rewrite);
+		List paramNames= new ArrayList();
+		addParametersToNewConstructor(newConstructor, rewrite, paramNames);
 		int paramCount= newConstructor.parameters().size();
 
-		addParametersForLocalsUsedInInnerClass(rewrite, bindings, newConstructor);
+		addParametersForLocalsUsedInInnerClass(rewrite, bindings, newConstructor, paramNames);
 
 		Block body= ast.newBlock();
 		if (paramCount > 0) {
@@ -792,6 +818,17 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 
 		addExceptionsToNewConstructor(newConstructor);
 		declaration.bodyDeclarations().add(1 + bindings.length + findIndexOfLastField(fAnonymousInnerClassNode.bodyDeclarations()), newConstructor);
+		if (fSettings.createComments) {
+			try {
+				String string= CodeGeneration.getMethodComment(rewrite.getCu(), fClassName, fClassName, (String[]) paramNames.toArray(new String[paramNames.size()]), new String[0], null, new String[0], null, StubUtility.getLineDelimiterUsed(rewrite.getCu()));
+				if (string != null) {
+					Javadoc javadoc= (Javadoc) rewrite.getASTRewrite().createStringPlaceholder(string, ASTNode.JAVADOC);
+					newConstructor.setJavadoc(javadoc);
+				}
+			} catch (CoreException exception) {
+				JavaPlugin.log(exception);
+			}
+		}
 	}
 
     private void addFieldInitialization(CompilationUnitRewrite rewrite, Block constructorBody) {
@@ -852,12 +889,14 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
         return !localsUsed.isEmpty();
     }
 
-    private void addParametersForLocalsUsedInInnerClass(CompilationUnitRewrite rewrite, IVariableBinding[] usedLocals, MethodDeclaration newConstructor) {
+    private void addParametersForLocalsUsedInInnerClass(CompilationUnitRewrite rewrite, IVariableBinding[] usedLocals, MethodDeclaration newConstructor, List params) {
     	List excluded= new ArrayList();
         for (int index= 0; index < usedLocals.length; index++) {
         	SingleVariableDeclaration declaration= createNewParamDeclarationNode(usedLocals[index].getName(), usedLocals[index].getType(), rewrite, (String[]) excluded.toArray(new String[excluded.size()]));
             newConstructor.parameters().add(declaration);
-            excluded.add(declaration.getName().getIdentifier());
+            final String identifier= declaration.getName().getIdentifier();
+			excluded.add(identifier);
+			params.add(identifier);
         }
     }
 
@@ -901,7 +940,7 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
         }
     }
 
-    private void addParametersToNewConstructor(MethodDeclaration newConstructor, CompilationUnitRewrite rewrite) throws JavaModelException {
+    private void addParametersToNewConstructor(MethodDeclaration newConstructor, CompilationUnitRewrite rewrite, List params) throws JavaModelException {
         IMethodBinding constructorBinding= getSuperConstructorBinding();
         if (constructorBinding == null)
             return;
@@ -914,7 +953,9 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
         for (int index= 0; index < parameterNames.length; index++) {
         	SingleVariableDeclaration declaration= createNewParamDeclarationNode(parameterNames[index], paramTypes[index], rewrite, (String[]) excluded.toArray(new String[excluded.size()]));
             newConstructor.parameters().add(declaration);
-            excluded.add(declaration.getName().getIdentifier());
+            final String identifier= declaration.getName().getIdentifier();
+			excluded.add(identifier);
+			params.add(identifier);
         }
     }
 

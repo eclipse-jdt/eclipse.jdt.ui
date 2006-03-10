@@ -20,6 +20,8 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
@@ -27,10 +29,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class ConvertAnonymousToNestedTests extends RefactoringTest {
 
@@ -92,7 +96,9 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean makeFinal, String className, int visibility) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-		ConvertAnonymousToNestedRefactoring ref= new ConvertAnonymousToNestedRefactoring(cu, selection.getOffset(), selection.getLength());
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
+		settings.createComments= false;
+		ConvertAnonymousToNestedRefactoring ref= new ConvertAnonymousToNestedRefactoring(cu, settings, selection.getOffset(), selection.getLength());
 
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());	
 		if (preconditionResult.isOK())
@@ -123,7 +129,9 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean makeFinal, boolean makeStatic, String className, int visibility) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-		ConvertAnonymousToNestedRefactoring ref= new ConvertAnonymousToNestedRefactoring(cu, selection.getOffset(), selection.getLength());
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
+		settings.createComments= false;
+		ConvertAnonymousToNestedRefactoring ref= new ConvertAnonymousToNestedRefactoring(cu, settings, selection.getOffset(), selection.getLength());
 
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());	
 		if (preconditionResult.isOK())
@@ -155,7 +163,9 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean makeFinal, String className, int visibility, int expectedSeverity) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-		ConvertAnonymousToNestedRefactoring ref= new ConvertAnonymousToNestedRefactoring(cu, selection.getOffset(), selection.getLength());
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
+		settings.createComments= false;
+		ConvertAnonymousToNestedRefactoring ref= new ConvertAnonymousToNestedRefactoring(cu, settings, selection.getOffset(), selection.getLength());
 
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());	
 		if (preconditionResult.isOK())
@@ -180,7 +190,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	private void failActivationHelper(int startLine, int startColumn, int endLine, int endColumn, boolean makeFinal, String className, int visibility, int expectedSeverity) throws Exception{
 	    ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 	    ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-	    ConvertAnonymousToNestedRefactoring ref= new ConvertAnonymousToNestedRefactoring(cu, selection.getOffset(), selection.getLength());
+	    ConvertAnonymousToNestedRefactoring ref= new ConvertAnonymousToNestedRefactoring(cu, JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()), selection.getOffset(), selection.getLength());
 
 	    RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());	
 	    assertEquals("activation was supposed to fail", expectedSeverity, preconditionResult.getSeverity());

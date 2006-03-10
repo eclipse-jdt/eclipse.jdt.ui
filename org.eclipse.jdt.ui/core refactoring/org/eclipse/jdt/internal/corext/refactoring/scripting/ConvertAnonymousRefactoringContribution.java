@@ -12,11 +12,11 @@ package org.eclipse.jdt.internal.corext.refactoring.scripting;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringContribution;
-import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
-
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringContribution;
+import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 
 /**
  * Refactoring contribution for the convert anonymous refactoring.
@@ -29,6 +29,6 @@ public final class ConvertAnonymousRefactoringContribution extends JavaRefactori
 	 * {@inheritDoc}
 	 */
 	public Refactoring createRefactoring(final RefactoringDescriptor descriptor) throws CoreException {
-		return new ConvertAnonymousToNestedRefactoring(null, 0, 0);
+		return new ConvertAnonymousToNestedRefactoring(null, null, 0, 0);
 	}
 }
