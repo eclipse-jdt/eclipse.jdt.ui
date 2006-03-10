@@ -829,6 +829,186 @@ public class NLSSourceModifierTest extends TestCase {
         assertEquals(expected, accessorDoc.get());
     }
 
+    public void  testInsertionOrder1() throws Exception {        
+         String klazz =
+             "public class Test {\n" +
+             "	private String str1=Accessor.key_b;\n" +
+             "	private String str2=Accessor.key_y;\n" +
+             "	private String str3=\"h\";\n" +
+             "	private String str4=\"a\";\n" +
+             "	private String str5=\"z\";\n" +
+             "}\n";
+         
+         StringBuffer buf= new StringBuffer();
+         buf.append("package test;\n");
+         buf.append("import org.eclipse.osgi.util.NLS;\n");
+         buf.append("public class Accessor extends NLS {\n");
+         buf.append("    private static final String BUNDLE_NAME = \"test.test\"; //$NON-NLS-1$\n");
+         buf.append("    private Accessor() {\n");
+         buf.append("    }\n");
+         buf.append("    public static String key_b;\n");
+         buf.append("    public static String key_y;\n");
+         buf.append("    static {\n");
+         buf.append("        // initialize resource bundle\n");
+         buf.append("        NLS.initializeMessages(BUNDLE_NAME, Accessor.class);\n");
+         buf.append("    }\n");
+         buf.append("}\n");
+         String accessorKlazz= buf.toString();
+         
+         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+         ICompilationUnit accessorCu= pack.createCompilationUnit("Accessor.java", accessorKlazz, false, null);
+         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
+         
+         IPackageFragment nlspack= fSourceFolder.createPackageFragment("org.eclipse.osgi.util", false, null);
+         nlspack.createCompilationUnit("NLS.java", "public class NLS {}", false, null);
+         
+         CompilationUnit astRoot= createAST(cu);
+         NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
+         nlsSubstitutions[4].setInitialValue("b");
+         nlsSubstitutions[3].setInitialValue("y");
+         nlsSubstitutions[2].setState(NLSSubstitution.EXTERNALIZED);
+         nlsSubstitutions[2].setPrefix("key_");
+         nlsSubstitutions[2].setKey("z");
+         nlsSubstitutions[1].setState(NLSSubstitution.EXTERNALIZED);
+         nlsSubstitutions[1].setPrefix("key_");
+         nlsSubstitutions[1].setKey("a");
+         nlsSubstitutions[0].setState(NLSSubstitution.EXTERNALIZED);
+         nlsSubstitutions[0].setPrefix("key_");
+         nlsSubstitutions[0].setKey("h");
+         
+         String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
+         TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor", true);
+         
+         Document doc = new Document(klazz);
+         change.getEdit().apply(doc);
+         
+         assertEquals(
+                 "public class Test {\n" +
+                 "	private String str1=Accessor.key_b;\n" +
+                 "	private String str2=Accessor.key_y;\n" +
+                 "	private String str3=Accessor.key_h;\n" +
+                 "	private String str4=Accessor.key_a;\n" +
+                 "	private String str5=Accessor.key_z;\n" +
+                 "}\n",  
+             	doc.get());
+         
+         TextChange accessorChange= (TextChange)AccessorClassModifier.create(accessorCu, nlsSubstitutions);
+         Document accessorDoc= new Document(accessorKlazz);
+         accessorChange.getEdit().apply(accessorDoc);
+         
+         buf= new StringBuffer();
+         buf.append("package test;\n");
+         buf.append("import org.eclipse.osgi.util.NLS;\n");
+         buf.append("public class Accessor extends NLS {\n");
+         buf.append("    private static final String BUNDLE_NAME = \"test.test\"; //$NON-NLS-1$\n");
+         buf.append("    private Accessor() {\n");
+         buf.append("    }\n");
+         buf.append("    public static String key_a;\n");
+         buf.append("    public static String key_b;\n");
+         buf.append("    public static String key_h;\n");
+         buf.append("    public static String key_y;\n");
+         buf.append("    public static String key_z;\n");
+         buf.append("    static {\n");
+         buf.append("        // initialize resource bundle\n");
+         buf.append("        NLS.initializeMessages(BUNDLE_NAME, Accessor.class);\n");
+         buf.append("    }\n");
+         buf.append("}\n");
+         String expected= buf.toString();
+         
+         assertEquals(expected, accessorDoc.get());
+     }
+    
+    public void  testInsertionOrder2() throws Exception {        
+        String klazz =
+            "public class Test {\n" +
+            "	private String str1=Accessor.key_b;\n" +
+            "	private String str2=Accessor.key_y;\n" +
+            "	private String str3=\"h\";\n" +
+            "	private String str4=\"a\";\n" +
+            "	private String str5=\"z\";\n" +
+            "}\n";
+        
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test;\n");
+        buf.append("import org.eclipse.osgi.util.NLS;\n");
+        buf.append("public class Accessor extends NLS {\n");
+        buf.append("    private static final String BUNDLE_NAME = \"test.test\"; //$NON-NLS-1$\n");
+        buf.append("    private Accessor() {\n");
+        buf.append("    }\n");
+        buf.append("    public static String key_b;\n");
+        buf.append("    public static String key_y;\n");
+        buf.append("    static {\n");
+        buf.append("        // initialize resource bundle\n");
+        buf.append("        NLS.initializeMessages(BUNDLE_NAME, Accessor.class);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        String accessorKlazz= buf.toString();
+        
+        IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+        ICompilationUnit accessorCu= pack.createCompilationUnit("Accessor.java", accessorKlazz, false, null);
+        ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
+        
+        IPackageFragment nlspack= fSourceFolder.createPackageFragment("org.eclipse.osgi.util", false, null);
+        nlspack.createCompilationUnit("NLS.java", "public class NLS {}", false, null);
+        
+        CompilationUnit astRoot= createAST(cu);
+        NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
+        nlsSubstitutions[4].setInitialValue("b");
+        nlsSubstitutions[4].setKey("key_i");
+        nlsSubstitutions[3].setInitialValue("y");
+        nlsSubstitutions[3].setKey("key_g");
+        nlsSubstitutions[2].setState(NLSSubstitution.EXTERNALIZED);
+        nlsSubstitutions[2].setPrefix("key_");
+        nlsSubstitutions[2].setKey("z");
+        nlsSubstitutions[1].setState(NLSSubstitution.EXTERNALIZED);
+        nlsSubstitutions[1].setPrefix("key_");
+        nlsSubstitutions[1].setKey("a");
+        nlsSubstitutions[0].setState(NLSSubstitution.EXTERNALIZED);
+        nlsSubstitutions[0].setPrefix("key_");
+        nlsSubstitutions[0].setKey("h");
+        
+        String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
+        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor", true);
+        
+        Document doc = new Document(klazz);
+        change.getEdit().apply(doc);
+        
+        assertEquals(
+                "public class Test {\n" +
+                "	private String str1=Accessor.key_i;\n" +
+                "	private String str2=Accessor.key_g;\n" +
+                "	private String str3=Accessor.key_h;\n" +
+                "	private String str4=Accessor.key_a;\n" +
+                "	private String str5=Accessor.key_z;\n" +
+                "}\n",  
+            	doc.get());
+        
+        TextChange accessorChange= (TextChange)AccessorClassModifier.create(accessorCu, nlsSubstitutions);
+        Document accessorDoc= new Document(accessorKlazz);
+        accessorChange.getEdit().apply(accessorDoc);
+        
+        buf= new StringBuffer();
+        buf.append("package test;\n");
+        buf.append("import org.eclipse.osgi.util.NLS;\n");
+        buf.append("public class Accessor extends NLS {\n");
+        buf.append("    private static final String BUNDLE_NAME = \"test.test\"; //$NON-NLS-1$\n");
+        buf.append("    private Accessor() {\n");
+        buf.append("    }\n");
+        buf.append("    public static String key_a;\n");
+        buf.append("    public static String key_g;\n");
+        buf.append("    public static String key_h;\n");
+        buf.append("    public static String key_i;\n");
+        buf.append("    public static String key_z;\n");
+        buf.append("    static {\n");
+        buf.append("        // initialize resource bundle\n");
+        buf.append("        NLS.initializeMessages(BUNDLE_NAME, Accessor.class);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        String expected= buf.toString();
+        
+        assertEquals(expected, accessorDoc.get());
+    }
+
 	private CompilationUnit createAST(ICompilationUnit cu) {
 		return ASTCreator.createAST(cu, null);
 	}

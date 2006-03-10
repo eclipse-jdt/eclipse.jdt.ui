@@ -149,12 +149,6 @@ public class AccessorClassModifier {
 		
 		for (int i= 0; i < substitutions.length; i++) {
 			NLSSubstitution substitution= substitutions[i];
-			if (NLSPropertyFileModifier.doInsert(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
-				sourceModification.addKey(substitution, change);
-			}
-		}
-		for (int i= 0; i < substitutions.length; i++) {
-			NLSSubstitution substitution= substitutions[i];
 			if (NLSPropertyFileModifier.doRemove(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
 				sourceModification.removeKey(substitution, change);
 			}
@@ -163,6 +157,12 @@ public class AccessorClassModifier {
 			NLSSubstitution substitution= substitutions[i];
 			if (NLSPropertyFileModifier.doReplace(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
 				sourceModification.renameKey(substitution, change);
+			}
+		}
+		for (int i= 0; i < substitutions.length; i++) {
+			NLSSubstitution substitution= substitutions[i];
+			if (NLSPropertyFileModifier.doInsert(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
+				sourceModification.addKey(substitution, change);
 			}
 		}
 		
@@ -180,6 +180,7 @@ public class AccessorClassModifier {
 		TextEditGroup editGroup= new TextEditGroup(name);
 		fListRewrite.remove(node, editGroup);
 		change.addTextEditGroup(editGroup);
+		fFields.remove(node);
 	}
 	
 	private void renameKey(NLSSubstitution sub, TextChange change) throws CoreException {
@@ -187,11 +188,12 @@ public class AccessorClassModifier {
 		if (node == null)
 			return;
 		
-		FieldDeclaration fieldDeclaration= getNewFinalStringFieldDeclaration(sub.getKey());
-		
 		String name= Messages.format(NLSMessages.AccessorClassModifier_replace_entry, sub.getKey()); 
 		TextEditGroup editGroup= new TextEditGroup(name);
-		fListRewrite.replace(node, fieldDeclaration, editGroup);
+		fListRewrite.remove(node, editGroup);
+		fFields.remove(node);
+		
+		addKey(sub, change, editGroup);
 		
 		change.addTextEditGroup(editGroup);
 	}
@@ -222,27 +224,33 @@ public class AccessorClassModifier {
 		return result[0];
 	}
 	
-	private void addKey(NLSSubstitution sub, TextChange change) throws CoreException {
+	private void addKey(NLSSubstitution sub, TextChange change) throws CoreException {		
+		String name= Messages.format(NLSMessages.AccessorClassModifier_add_entry, sub.getKey()); 
+		TextEditGroup editGroup= new TextEditGroup(name);
+		change.addTextEditGroup(editGroup);
+		addKey(sub, change, editGroup);
+	}
+		
+	private void addKey(NLSSubstitution sub, TextChange change, TextEditGroup editGroup) throws CoreException {	
 		
 		if (fListRewrite == null)
 			return;
 		
 		String key= sub.getKey();
 		FieldDeclaration fieldDeclaration= getNewFinalStringFieldDeclaration(key);
-		
-		String name= Messages.format(NLSMessages.AccessorClassModifier_add_entry, key); 
-		TextEditGroup editGroup= new TextEditGroup(name);
-		change.addTextEditGroup(editGroup);
 
 		Iterator iter= fFields.iterator();
+		int insertionPosition= 0;
 		if (iter.hasNext()) {
 			Collator collator= Collator.getInstance();
 			FieldDeclaration existingFieldDecl= (FieldDeclaration)iter.next();
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment)existingFieldDecl.fragments().get(0);
 			String identifier= fragment.getName().getIdentifier();
 			if (collator.compare(key, identifier) != 1) {
+				insertionPosition= 0;
 				fListRewrite.insertBefore(fieldDeclaration, existingFieldDecl, editGroup);
 			} else {
+				insertionPosition++;
 				while (iter.hasNext()) {
 					FieldDeclaration next= (FieldDeclaration)iter.next();
 					fragment= (VariableDeclarationFragment)next.fragments().get(0);
@@ -250,13 +258,16 @@ public class AccessorClassModifier {
 					if (collator.compare(key, identifier) == -1) {
 						break;
 					}
+					insertionPosition++;
 					existingFieldDecl= next;
 				}
 				fListRewrite.insertAfter(fieldDeclaration, existingFieldDecl, editGroup);
 			}
 		} else {
+			insertionPosition= 0;
 			fListRewrite.insertLast(fieldDeclaration, editGroup);
 		}
+		fFields.add(insertionPosition, fieldDeclaration);
 	}
 
 	private FieldDeclaration getNewFinalStringFieldDeclaration(String name) {
