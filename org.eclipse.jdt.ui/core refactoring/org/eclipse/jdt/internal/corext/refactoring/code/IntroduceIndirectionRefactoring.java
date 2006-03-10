@@ -109,6 +109,8 @@ import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 /**
  * 
  * This refactoring creates a wrapper around a certain method and redirects callers of the original
@@ -745,7 +747,15 @@ public class IntroduceIndirectionRefactoring extends CommentRefactoring implemen
 				IJavaProject javaProject= fTargetMethod.getJavaProject();
 				if (javaProject != null && fTargetMethod.isBinary())
 					project= javaProject.getElementName();
-				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INTRODUCE_INDIRECTION, project, Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fTargetMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(fTargetMethod.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, (JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE));
+				int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+				final IType declaring= fTargetMethod.getDeclaringType();
+				try {
+					if (declaring.isLocal() || declaring.isAnonymous())
+						flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+				} catch (JavaModelException exception) {
+					JavaPlugin.log(exception);
+				}
+				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INTRODUCE_INDIRECTION, project, Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fTargetMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, flags);
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fTargetMethod));
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fIntermediaryMethodName);
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(fIntermediaryClass));

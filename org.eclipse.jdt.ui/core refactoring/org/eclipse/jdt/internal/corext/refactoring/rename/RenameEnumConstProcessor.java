@@ -120,6 +120,8 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 					try {
 						if (!Flags.isPrivate(declaring.getFlags()))
 							flags|= RefactoringDescriptor.MULTI_CHANGE;
+						if (declaring.isAnonymous() || declaring.isLocal())
+							flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}

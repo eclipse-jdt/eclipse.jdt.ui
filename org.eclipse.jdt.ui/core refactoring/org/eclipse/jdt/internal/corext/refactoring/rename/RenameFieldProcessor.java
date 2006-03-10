@@ -588,7 +588,14 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_FIELD, project, Messages.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED) + "." + fField.getElementName(), getNewElementName()}), getComment(), arguments, flags); //$NON-NLS-1$
+					final IType declaring= fField.getDeclaringType();
+					try {
+						if (declaring.isAnonymous() || declaring.isLocal())
+							flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+					} catch (JavaModelException exception) {
+						JavaPlugin.log(exception);
+					}
+					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_FIELD, project, Messages.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED) + "." + fField.getElementName(), getNewElementName()}), getComment(), arguments, flags); //$NON-NLS-1$
 					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fField));
 					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
 					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());

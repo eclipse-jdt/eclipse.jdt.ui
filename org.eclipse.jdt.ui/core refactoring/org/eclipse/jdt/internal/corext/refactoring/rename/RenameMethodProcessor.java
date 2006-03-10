@@ -705,6 +705,13 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
+					final IType declaring= fMethod.getDeclaringType();
+					try {
+						if (declaring.isAnonymous() || declaring.isLocal())
+							flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+					} catch (JavaModelException exception) {
+						JavaPlugin.log(exception);
+					}
 					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_METHOD, project, Messages.format(RefactoringCoreMessages.RenameMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), getComment(), arguments, flags);
 					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fMethod));
 					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());

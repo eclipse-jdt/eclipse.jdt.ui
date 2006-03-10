@@ -1015,6 +1015,8 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 					try {
 						if (!Flags.isPrivate(fType.getFlags()))
 							flags|= RefactoringDescriptor.MULTI_CHANGE;
+						if (fType.isAnonymous() || fType.isLocal())
+							flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
@@ -1398,7 +1400,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 
 		/*
 		 * There is room for performance improvement here: One could move
-		 * shadowing analyses out of the field and method processors and perform
+		 * shadowing analyzes out of the field and method processors and perform
 		 * it here, thus saving on working copy creation. Drawback is increased
 		 * heap consumption.
 		 */
@@ -1618,7 +1620,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	 * Updates textual matches for fields.
 	 * 
 	 * Strategy for matching text matches: Match and replace all fully qualified
-	 * field names, but non-qualified field names ony iff there are no fields
+	 * field names, but non-qualified field names only iff there are no fields
 	 * which have the same original, but a different new name. Don't add java
 	 * references; duplicate edits may be created but do not matter.
 	 * 

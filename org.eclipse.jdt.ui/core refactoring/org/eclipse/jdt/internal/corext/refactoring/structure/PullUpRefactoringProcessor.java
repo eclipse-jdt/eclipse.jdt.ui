@@ -961,7 +961,13 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 					final IJavaProject javaProject= declaring.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					final int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+					int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+					try {
+						if (declaring.isLocal() || declaring.isAnonymous())
+							flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+					} catch (JavaModelException exception) {
+						JavaPlugin.log(exception);
+					}
 					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PULL_UP, project, fMembersToMove.length == 1 ? NLS.bind(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fTargetType, JavaElementLabels.ALL_FULLY_QUALIFIED)}) : NLS.bind(RefactoringCoreMessages.PullUpRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fTargetType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
 					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fTargetType));
 					if (fDeclaringType != null)

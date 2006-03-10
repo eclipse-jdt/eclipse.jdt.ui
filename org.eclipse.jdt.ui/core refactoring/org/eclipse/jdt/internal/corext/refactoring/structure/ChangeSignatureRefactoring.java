@@ -1155,6 +1155,9 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 					try {
 						if (!Flags.isPrivate(fMethod.getFlags()))
 							flags|= RefactoringDescriptor.MULTI_CHANGE;
+						final IType declaring= fMethod.getDeclaringType();
+						if (declaring.isAnonymous() || declaring.isLocal())
+							flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}

@@ -108,6 +108,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
@@ -390,8 +391,15 @@ public class SelfEncapsulateFieldRefactoring extends CommentRefactoring implemen
 				IJavaProject javaProject= fField.getJavaProject();
 				if (javaProject != null)
 					project= javaProject.getElementName();
-				final int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
-				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_SELF_ENCAPSULATE, project, NLS.bind(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_descriptor_description, new String[] {JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fField.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+				int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+				final IType declaring= fField.getDeclaringType();
+				try {
+					if (declaring.isAnonymous() || declaring.isLocal())
+						flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+				} catch (JavaModelException exception) {
+					JavaPlugin.log(exception);
+				}
+				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_SELF_ENCAPSULATE, project, NLS.bind(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_descriptor_description, new String[] {JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fField));
 				arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
 				arguments.put(ATTRIBUTE_INSERTION, new Integer(fInsertionIndex).toString());

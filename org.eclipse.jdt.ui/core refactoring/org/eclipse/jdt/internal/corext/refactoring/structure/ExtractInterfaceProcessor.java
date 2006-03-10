@@ -332,7 +332,13 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					final IJavaProject javaProject= fSubType.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					final int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+					int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+					try {
+						if (fSubType.isLocal() || fSubType.isAnonymous())
+							flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+					} catch (JavaModelException exception) {
+						JavaPlugin.log(exception);
+					}
 					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_INTERFACE, project, Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_descriptor_description, new String[] { fSuperName, JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
 					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSubType));
 					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fSuperName);
