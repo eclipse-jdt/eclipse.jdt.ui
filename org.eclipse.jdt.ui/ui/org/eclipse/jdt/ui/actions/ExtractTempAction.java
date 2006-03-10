@@ -78,8 +78,6 @@ public class ExtractTempAction extends SelectionDispatchAction {
 			return;
 		try{
 			final ExtractTempRefactoring refactoring= new ExtractTempRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
-			if (refactoring == null)
-				return;
 			new RefactoringStarter().activate(refactoring, new ExtractTempWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.NewTextRefactoringAction_exception); 

@@ -77,8 +77,6 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 			return;
 		try{
 			final IntroduceParameterRefactoring refactoring= new IntroduceParameterRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
-			if (refactoring == null)
-				return;
 			new RefactoringStarter().activate(refactoring, new IntroduceParameterWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, true);
 		} catch (CoreException e){
 			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.NewTextRefactoringAction_exception); 
