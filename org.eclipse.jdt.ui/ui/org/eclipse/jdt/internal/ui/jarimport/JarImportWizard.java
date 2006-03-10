@@ -116,7 +116,7 @@ public final class JarImportWizard extends StubRefactoringHistoryWizard implemen
 										InputStream stream= null;
 										try {
 											stream= zip.getInputStream(entry);
-											final RefactoringHistory existing= RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.JAR_IMPORTABLE);
+											final RefactoringHistory existing= RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE);
 											if (existing != null)
 												fHistoryDelta= incoming.removeAll(existing).getDescriptors();
 										} finally {

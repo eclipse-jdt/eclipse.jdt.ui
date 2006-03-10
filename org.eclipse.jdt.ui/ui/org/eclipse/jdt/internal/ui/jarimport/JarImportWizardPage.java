@@ -375,7 +375,7 @@ public final class JarImportWizardPage extends WizardPage {
 				InputStream stream= null;
 				try {
 					stream= zip.getInputStream(entry);
-					data.setRefactoringHistory(RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.JAR_IMPORTABLE));
+					data.setRefactoringHistory(RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE));
 				} catch (IOException exception) {
 					setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
 					setPageComplete(false);

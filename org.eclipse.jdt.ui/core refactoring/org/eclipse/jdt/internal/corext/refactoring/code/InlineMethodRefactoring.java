@@ -380,7 +380,7 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 				if (javaProject != null)
 					project= javaProject.getElementName();
 				final IMethodBinding binding= fSourceProvider.getDeclaration().resolveBinding();
-				int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;
+				int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 				if (!Modifier.isPrivate(binding.getModifiers()))
 					flags|= RefactoringDescriptor.MULTI_CHANGE;
 				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_METHOD, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringClass(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
@@ -611,7 +611,7 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 		IJavaProject javaProject= fMethod.getJavaProject();
 		if (javaProject != null)
 			project= javaProject.getElementName();
-		int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.DEPRECATION_RESOLVING;
+		int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.DEPRECATION_RESOLVING | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 		try {
 			if (!Flags.isPrivate(fMethod.getFlags()))
 				flags|= RefactoringDescriptor.MULTI_CHANGE;

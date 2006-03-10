@@ -390,7 +390,8 @@ public class SelfEncapsulateFieldRefactoring extends CommentRefactoring implemen
 				IJavaProject javaProject= fField.getJavaProject();
 				if (javaProject != null)
 					project= javaProject.getElementName();
-				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_SELF_ENCAPSULATE, project, NLS.bind(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_descriptor_description, new String[] {JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fField.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, (JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE));
+				final int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_SELF_ENCAPSULATE, project, NLS.bind(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_descriptor_description, new String[] {JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fField.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fField));
 				arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
 				arguments.put(ATTRIBUTE_INSERTION, new Integer(fInsertionIndex).toString());

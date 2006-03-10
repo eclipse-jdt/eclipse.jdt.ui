@@ -100,7 +100,9 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * Constant describing the deprecation resolving flag.
 	 * <p>
 	 * Clients should set this flag to indicate that the refactoring can used to
-	 * resolve deprecation problems of members declared in source.
+	 * resolve deprecation problems of members. Refactorings which can run on
+	 * binary targets, but require a source attachment to work correctly, should
+	 * set the <code>JAR_SOURCE_ATTACHMENT</code> flag as well.
 	 * </p>
 	 */
 	public static final int DEPRECATION_RESOLVING= 1 << 17;
@@ -133,23 +135,34 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	private static final String IDENTIFIER_UNIT= "unit"; //$NON-NLS-1$
 
 	/**
-	 * Constant describing the jar deprecation resolving flag.
-	 * <p>
-	 * Clients should set this flag to indicate that the refactoring can used to
-	 * resolve deprecation problems both of binary members contained in JAR
-	 * files and members declared in source.
-	 * </p>
-	 */
-	public static final int JAR_DEPRECATION_RESOLVING= 1 << 18;
-
-	/**
-	 * Constant describing the importable flag.
+	 * Constant describing the jar importable flag.
 	 * <p>
 	 * Clients should set this flag to indicate that the refactoring can be
-	 * imported from a JAR file.
+	 * imported from a JAR file. If this flag is set,
+	 * <code>JAR_REFACTORABLE</code> should be set as well.
 	 * </p>
 	 */
 	public static final int JAR_IMPORTABLE= 1 << 16;
+
+	/**
+	 * Constant describing the jar refactorable flag.
+	 * <p>
+	 * Clients should set this flag to indicate that the refactoring can be
+	 * performed on a JAR file. Refactorings which can run on binary targets,
+	 * but require a source attachment to work correctly, should set the
+	 * <code>JAR_SOURCE_ATTACHMENT</code> flag as well.
+	 * </p>
+	 */
+	public static final int JAR_REFACTORABLE= 1 << 19;
+
+	/**
+	 * Constant describing the jar source attachment flag.
+	 * <p>
+	 * Clients should set this flag to indicate that the refactoring can be
+	 * performed on a JAR file if and only if it contains a source attachment.
+	 * </p>
+	 */
+	public static final int JAR_SOURCE_ATTACHMENT= 1 << 18;
 
 	/** The dot separator */
 	private static final char SEPARATOR_DOT= '.';
@@ -408,20 +421,8 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 
 	/**
 	 * Creates refactoring arguments for this refactoring descriptor.
-	 * <p>
-	 * This method is used by the refactoring framework to create refactoring
-	 * arguments for the refactoring instance represented by this refactoring
-	 * descriptor. The result of this method is used as argument to initialize a
-	 * refactoring.
-	 * </p>
-	 * <p>
-	 * Note: this method must not be used outside the refactoring framework.
-	 * </p>
 	 * 
-	 * @return the refactoring arguments, or <code>null</code> if this
-	 *         refactoring descriptor represents the unknown refactoring, or if
-	 *         no refactoring contribution is available for this refactoring
-	 *         descriptor
+	 * @return the refactoring arguments
 	 */
 	public RefactoringArguments createArguments() {
 		final JavaRefactoringArguments arguments= new JavaRefactoringArguments(getProject());

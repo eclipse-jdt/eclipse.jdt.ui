@@ -698,7 +698,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 					IJavaProject javaProject= fMethod.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
+					int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
 					try {
 						if (!Flags.isPrivate(fMethod.getFlags()))
 							flags|= RefactoringDescriptor.MULTI_CHANGE;

@@ -288,7 +288,7 @@ public final class JarPackagerUtil {
 			final IRefactoringHistoryService service= RefactoringCore.getHistoryService();
 			try {
 				service.connect();
-				return service.getRefactoringHistory(projects, start, end, JavaRefactoringDescriptor.JAR_IMPORTABLE | filter, monitor);
+				return service.getRefactoringHistory(projects, start, end, JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | filter, monitor);
 			} finally {
 				service.disconnect();
 			}
