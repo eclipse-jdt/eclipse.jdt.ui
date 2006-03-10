@@ -131,7 +131,7 @@ public class MultiMoveTest extends RefactoringTest {
 			processor.setDestination(packP2);
 			processor.setUpdateReferences(true);
 		    performDummySearch();
-			RefactoringStatus status= performRefactoring(processor, false);
+			RefactoringStatus status= performRefactoring(processor, true);
 
 			//-- checks
 			assertEquals("status should be ok here", null, status);
@@ -195,7 +195,7 @@ public class MultiMoveTest extends RefactoringTest {
 			processor.setDestination(packP2);
 			processor.setUpdateReferences(true);
 		    performDummySearch();
-			RefactoringStatus status= performRefactoring(processor, false);
+			RefactoringStatus status= performRefactoring(processor, true);
 
 			//-- checks
 			assertEquals("status should be ok here", null, status);
@@ -256,7 +256,7 @@ public class MultiMoveTest extends RefactoringTest {
 			processor.setDestination(packP2);
 			processor.setUpdateReferences(true);
 		    performDummySearch();
-			RefactoringStatus status= performRefactoring(processor, false);
+			RefactoringStatus status= performRefactoring(processor, true);
 
 			//-- checks
 			assertEquals("status should be ok here", null, status);
@@ -317,7 +317,7 @@ public class MultiMoveTest extends RefactoringTest {
 			processor.setDestination(packP2);
 			processor.setUpdateReferences(true);
 		    performDummySearch();
-			RefactoringStatus status= performRefactoring(processor, false);
+			RefactoringStatus status= performRefactoring(processor, true);
 
 			//-- checks
 			assertEquals("status should be ok here", null, status);

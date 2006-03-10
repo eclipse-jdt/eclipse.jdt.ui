@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -167,8 +168,13 @@ public final class JavaMoveProcessor extends MoveProcessor implements IInitializ
 		try {
 			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges) { 
 				public Change perform(IProgressMonitor pm2) throws CoreException {
-					super.perform(pm2);
-					return null;
+					Change change= super.perform(pm2);
+					Change[] changes= getChildren();
+					for (int index= 0; index < changes.length; index++) {
+						if (!(changes[index] instanceof TextEditBasedChange))
+							return null;
+					}
+					return change;
 				}
 			};
 			Change change= fMovePolicy.createChange(pm);
