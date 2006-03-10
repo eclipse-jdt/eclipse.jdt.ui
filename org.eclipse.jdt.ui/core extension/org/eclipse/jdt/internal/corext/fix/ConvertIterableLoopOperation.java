@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -106,6 +107,9 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 	/** The binding of the iterable object */
 	private IBinding fIterable= null;
 
+	/** Is the iterator method invoked on <code>this</code>? */
+	private boolean fThis= false;
+
 	/** The binding of the iterator variable */
 	private IVariableBinding fIterator= null;
 
@@ -165,9 +169,11 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 	 * Returns the expression for the enhanced for statement.
 	 * 
 	 * @param rewrite the AST rewrite to use
-	 * @return the expression node
+	 * @return the expression node, or <code>null</code>
 	 */
 	private Expression getExpression(final ASTRewrite rewrite) {
+		if (fThis)
+			return rewrite.getAST().newThisExpression();
 		if (fExpression instanceof MethodInvocation)
 			return (MethodInvocation) rewrite.createMoveTarget(fExpression);
 		return (Expression) ASTNode.copySubtree(rewrite.getAST(), fExpression);
@@ -318,7 +324,17 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 														} else if (qualifier instanceof FieldAccess) {
 															final FieldAccess access= (FieldAccess) qualifier;
 															fIterable= access.resolveFieldBinding();
-														}
+														} else if (qualifier instanceof ThisExpression)
+															fIterable= resolved;
+													}
+												}
+											} else {
+												final ITypeBinding declaring= binding.getDeclaringClass();
+												if (declaring != null) {
+													final ITypeBinding superBinding= getSuperType(declaring, "java.lang.Iterable"); //$NON-NLS-1$
+													if (superBinding != null) {
+														fIterable= superBinding;
+														fThis= true;
 													}
 												}
 											}
@@ -474,7 +490,7 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 				});
 			}
 		}
-		return fExpression != null && fIterable != null && fIterator != null && !fAssigned;
+		return (fExpression != null || fThis) && fIterable != null && fIterator != null && !fAssigned;
 	}
 
 	/* (non-Javadoc)
