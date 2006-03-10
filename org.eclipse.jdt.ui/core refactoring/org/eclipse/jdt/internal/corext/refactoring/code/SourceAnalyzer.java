@@ -424,7 +424,7 @@ class SourceAnalyzer  {
 
 	public void initialize() {
 		Block body= fDeclaration.getBody();
-		// first collect the static imports. This is neccessary to not mark
+		// first collect the static imports. This is necessary to not mark
 		// static imported fields and methods as implicit visible.
 		fTypesToImport= new ArrayList();
 		fStaticsToImport= new ArrayList();
