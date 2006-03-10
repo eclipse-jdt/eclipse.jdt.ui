@@ -735,6 +735,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	
 	void addOccurrences(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException/*thrown in subtype*/{
 		pm.beginTask("", fOccurrences.length);				 //$NON-NLS-1$
+		boolean created= false;
 		for (int i= 0; i < fOccurrences.length; i++){
 			ICompilationUnit cu= fOccurrences[i].getCompilationUnit();
 			if (cu == null)	
@@ -772,9 +773,13 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 						creator.setNewElementName(getNewElementName());
 						creator.prepareDelegate();
 						creator.createEdit();
-						Change change= creator.createChange();
-						if (change != null)
-							fDelegateChanges.add(change);
+						if (!created) {
+							Change change= creator.createChange();
+							if (change != null) {
+								fDelegateChanges.add(change);
+								created= true;
+							}
+						}
 					}
 					// Need to handle all delegates first as this
 					// creates a completely new change object.
