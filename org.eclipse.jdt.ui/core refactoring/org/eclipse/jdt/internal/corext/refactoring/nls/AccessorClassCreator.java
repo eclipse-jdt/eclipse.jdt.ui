@@ -168,8 +168,7 @@ public class AccessorClassCreator {
 		for (int i= 0; i < fNLSSubstitutions.length; i++) {
 			NLSSubstitution substitution= fNLSSubstitutions[i];
 			int newState= substitution.getState();
-			if (substitution.hasStateChanged()
-					&& newState == NLSSubstitution.EXTERNALIZED && substitution.getInitialState() == NLSSubstitution.INTERNALIZED) {
+			if (substitution.hasStateChanged() && newState == NLSSubstitution.EXTERNALIZED) {
 				if (added.add(substitution.getKey()))
 					appendStaticField(buf,substitution);
 			}

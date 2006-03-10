@@ -285,6 +285,57 @@ public class NLSSourceModifierTest extends TestCase {
             	doc.get());
     }
     
+  public void testFromNotTranslatedToTranslatedEclipse() throws Exception {
+        
+        String klazz =
+            "public class Test {\n" +
+            "	private String str=\"whatever\"; //$NON-NLS-1$\n" +
+            "}\n"; 
+        
+        IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+        ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
+        
+        CompilationUnit astRoot= createAST(cu);
+        NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
+        nlsSubstitutions[0].setState(NLSSubstitution.EXTERNALIZED);
+        nlsSubstitutions[0].setPrefix("key_");
+        nlsSubstitutions[0].generateKey(nlsSubstitutions);
+        
+        
+        String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
+        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor", true);
+        
+        Document doc = new Document(klazz);
+        change.getEdit().apply(doc);
+        
+        assertEquals(
+                "public class Test {\n" +
+                "	private String str=Accessor.key_0; \n" +
+            	"}\n", 
+            	doc.get());
+        
+        CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, null);
+        
+        String accessor= accessorChange.getPreview();
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test;\n");
+        buf.append("\n");
+        buf.append("import org.eclipse.osgi.util.NLS;\n");
+        buf.append("\n");
+        buf.append("public class Accessor extends NLS {\n");
+        buf.append("    private static final String BUNDLE_NAME = \"test.test\"; //$NON-NLS-1$\n");
+        buf.append("    private Accessor() {\n");
+        buf.append("    }\n");
+        buf.append("    static {\n");
+        buf.append("        // initialize resource bundle\n");
+        buf.append("        NLS.initializeMessages(BUNDLE_NAME, Accessor.class);\n");
+        buf.append("    }\n");
+        buf.append("    public static String key_0;\n");
+        buf.append("}\n");
+        String expected= buf.toString();
+        StringAsserts.assertEqualStringIgnoreDelim(accessor, expected);
+    }
+    
     public void testFromNotTranslatedToSkipped() throws Exception {
         
         String klazz =

@@ -360,11 +360,6 @@ public class NLSRefactoring extends Refactoring {
 
 	public boolean willCreateAccessorClass() throws JavaModelException {
 
-		NLSSubstitution[] subs= fSubstitutions;
-		if (NLSSubstitution.countItems(subs, NLSSubstitution.EXTERNALIZED) == 0) {
-			return false;
-		}
-
 		ICompilationUnit compilationUnit= getAccessorCu();
 		if (compilationUnit.exists()) {
 			return false;
