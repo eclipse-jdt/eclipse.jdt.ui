@@ -403,7 +403,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			if (script == null)
 				return false;
 			final Change change= new CreateDeprecationScriptChange(file.getFullPath(), script, CorrectionMessages.QuickAssistProcessor_create_fix_name);
-			final ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.QuickAssistProcessor_create_fix_name, change, 1, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
+			final ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.QuickAssistProcessor_create_fix_name, change, 100, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
 
 				public final String getAdditionalProposalInfo() {
 					return CorrectionMessages.QuickAssistProcessor_create_fix_info;
@@ -416,7 +416,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				return false;
 			if (resultingCollections == null)
 				return true;
-			final ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.QuickAssistProcessor_fix_deprecation_name, null, 2, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
+			final ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.QuickAssistProcessor_fix_deprecation_name, null, 100, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
 
 				private static final int SIZING_WIZARD_HEIGHT= 470;
 
