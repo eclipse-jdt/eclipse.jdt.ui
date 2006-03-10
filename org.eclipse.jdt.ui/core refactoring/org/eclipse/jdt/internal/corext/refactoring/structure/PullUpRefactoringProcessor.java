@@ -143,7 +143,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	/**
 	 * AST node visitor which performs the actual mapping.
 	 */
-	public static class PullUpAstNodeMapper extends TypeVariableMapper {
+	private static class PullUpAstNodeMapper extends TypeVariableMapper {
 
 		/** Are we in an anonymous class declaration? */
 		protected boolean fAnonymousClassDeclaration= false;
