@@ -33,14 +33,14 @@ import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.refactoring.binary.StubRefactoringHistoryWizard;
+import org.eclipse.jdt.internal.ui.refactoring.binary.BinaryRefactoringHistoryWizard;
 
 /**
  * Refactoring wizard to fix deprecations using a refactoring script.
  * 
  * @since 3.2
  */
-public final class FixDeprecationRefactoringWizard extends StubRefactoringHistoryWizard {
+public final class FixDeprecationRefactoringWizard extends BinaryRefactoringHistoryWizard {
 
 	/** Proxy which encapsulates a refactoring history */
 	private final class RefactoringHistoryProxy extends RefactoringHistory {
@@ -141,6 +141,13 @@ public final class FixDeprecationRefactoringWizard extends StubRefactoringHistor
 	 */
 	public boolean canFinish() {
 		return super.canFinish() && fRefactoringHistory != null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected boolean canUseSourceAttachment() {
+		return true;
 	}
 
 	/**

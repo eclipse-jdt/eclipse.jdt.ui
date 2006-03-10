@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
@@ -55,6 +56,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -62,6 +64,7 @@ import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringContribution;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.binary.SourceCreationOperation;
 import org.eclipse.jdt.internal.corext.refactoring.binary.StubCreationOperation;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -76,7 +79,7 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
  * 
  * @since 3.2
  */
-public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWizard {
+public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryWizard {
 
 	/** The meta-inf fragment */
 	private static final String META_INF_FRAGMENT= JarFile.MANIFEST_NAME.substring(0, JarFile.MANIFEST_NAME.indexOf('/'));
@@ -265,7 +268,7 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 	 * @param description
 	 *            the wizard description
 	 */
-	protected StubRefactoringHistoryWizard(final boolean overview, final String caption, final String title, final String description) {
+	protected BinaryRefactoringHistoryWizard(final boolean overview, final String caption, final String title, final String description) {
 		super(overview, caption, title, description);
 	}
 
@@ -279,7 +282,7 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 	 * @param description
 	 *            the wizard description
 	 */
-	protected StubRefactoringHistoryWizard(final String caption, final String title, final String description) {
+	protected BinaryRefactoringHistoryWizard(final String caption, final String title, final String description) {
 		super(caption, title, description);
 	}
 
@@ -336,10 +339,108 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
 			monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 100);
-			status.merge(createTypeStubs(refactoring, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
+			status.merge(createNecessarySourceCode(refactoring, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
 			if (!status.hasFatalError()) {
 				if (fCurrentRefactoring != null && fCurrentArguments != null)
 					status.merge(fCurrentRefactoring.initialize(fCurrentArguments));
+			}
+		} finally {
+			monitor.done();
+		}
+		return status;
+	}
+
+	/**
+	 * Can this wizard use the source attachment of the package fragment root if
+	 * necessary?
+	 * 
+	 * @return <code>true</code> to use the source attachment,
+	 *         <code>false</code> otherwise
+	 */
+	protected boolean canUseSourceAttachment() {
+		final IPackageFragmentRoot root= getPackageFragmentRoot();
+		if (root != null) {
+			try {
+				return root.getSourceAttachmentPath() != null;
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Creates the necessary source code for the refactoring.
+	 * 
+	 * @param refactoring
+	 *            the refactoring to create the source code for
+	 * @param monitor
+	 *            the progress monitor to use
+	 */
+	private RefactoringStatus createNecessarySourceCode(final Refactoring refactoring, final IProgressMonitor monitor) {
+		final RefactoringStatus status= new RefactoringStatus();
+		try {
+			monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 240);
+			final IPackageFragmentRoot root= getPackageFragmentRoot();
+			if (root != null && fSourceFolder != null && fJavaProject != null) {
+				try {
+					final SubProgressMonitor subMonitor= new SubProgressMonitor(monitor, 40, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
+					final IJavaElement[] elements= root.getChildren();
+					final List list= new ArrayList(elements.length);
+					try {
+						subMonitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, elements.length);
+						for (int index= 0; index < elements.length; index++) {
+							final IJavaElement element= elements[index];
+							if (!fProcessedFragments.contains(element) && !element.getElementName().equals(META_INF_FRAGMENT))
+								list.add(element);
+							subMonitor.worked(1);
+						}
+					} finally {
+						subMonitor.done();
+					}
+					if (!list.isEmpty()) {
+						fProcessedFragments.addAll(list);
+						final URI uri= fSourceFolder.getRawLocationURI();
+						if (uri != null) {
+							final IPackageFragmentRoot sourceFolder= fJavaProject.getPackageFragmentRoot(fSourceFolder);
+							IWorkspaceRunnable runnable= null;
+							if (canUseSourceAttachment()) {
+								runnable= new SourceCreationOperation(uri, list) {
+
+									private IPackageFragment fFragment= null;
+
+									protected final void createCompilationUnit(final IFileStore store, final String name, final String content, final IProgressMonitor pm) throws CoreException {
+										fFragment.createCompilationUnit(name, content, true, pm);
+									}
+
+									protected final void createPackageFragment(final IFileStore store, final String name, final IProgressMonitor pm) throws CoreException {
+										fFragment= sourceFolder.createPackageFragment(name, true, pm);
+									}
+								};
+							} else {
+								runnable= new StubCreationOperation(uri, list, true) {
+
+									private IPackageFragment fFragment= null;
+
+									protected final void createCompilationUnit(final IFileStore store, final String name, final String content, final IProgressMonitor pm) throws CoreException {
+										fFragment.createCompilationUnit(name, content, true, pm);
+									}
+
+									protected final void createPackageFragment(final IFileStore store, final String name, final IProgressMonitor pm) throws CoreException {
+										fFragment= sourceFolder.createPackageFragment(name, true, pm);
+									}
+								};
+							}
+							try {
+								runnable.run(new SubProgressMonitor(monitor, 150, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+							} finally {
+								fSourceFolder.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 50, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+							}
+						}
+					}
+				} catch (CoreException exception) {
+					status.addFatalError(exception.getLocalizedMessage());
+				}
 			}
 		} finally {
 			monitor.done();
@@ -393,68 +494,6 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 			return refactoring;
 		}
 		return null;
-	}
-
-	/**
-	 * Creates the necessary type stubs for the refactoring.
-	 * 
-	 * @param refactoring
-	 *            the refactoring to create the type stubs for
-	 * @param monitor
-	 *            the progress monitor to use
-	 */
-	private RefactoringStatus createTypeStubs(final Refactoring refactoring, final IProgressMonitor monitor) {
-		final RefactoringStatus status= new RefactoringStatus();
-		try {
-			monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 240);
-			final IPackageFragmentRoot root= getPackageFragmentRoot();
-			if (root != null && fSourceFolder != null && fJavaProject != null) {
-				try {
-					final SubProgressMonitor subMonitor= new SubProgressMonitor(monitor, 40, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
-					final IJavaElement[] elements= root.getChildren();
-					final List list= new ArrayList(elements.length);
-					try {
-						subMonitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, elements.length);
-						for (int index= 0; index < elements.length; index++) {
-							if (!fProcessedFragments.contains(elements[index]) && !elements[index].getElementName().equals(META_INF_FRAGMENT))
-								list.add(elements[index]);
-							subMonitor.worked(1);
-						}
-					} finally {
-						subMonitor.done();
-					}
-					if (!list.isEmpty()) {
-						fProcessedFragments.addAll(list);
-						final URI uri= fSourceFolder.getRawLocationURI();
-						if (uri != null) {
-							final IPackageFragmentRoot sourceFolder= fJavaProject.getPackageFragmentRoot(fSourceFolder);
-							final StubCreationOperation operation= new StubCreationOperation(uri, list, true) {
-
-								private IPackageFragment fFragment= null;
-
-								protected final void createCompilationUnit(final IFileStore store, final String name, final String content, final IProgressMonitor pm) throws CoreException {
-									fFragment.createCompilationUnit(name, content, true, pm);
-								}
-
-								protected final void createPackageFragment(final IFileStore store, final String name, final IProgressMonitor pm) throws CoreException {
-									fFragment= sourceFolder.createPackageFragment(name, true, pm);
-								}
-							};
-							try {
-								operation.run(new SubProgressMonitor(monitor, 150, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-							} finally {
-								fSourceFolder.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 50, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-							}
-						}
-					}
-				} catch (CoreException exception) {
-					status.addFatalError(exception.getLocalizedMessage());
-				}
-			}
-		} finally {
-			monitor.done();
-		}
-		return status;
 	}
 
 	/**

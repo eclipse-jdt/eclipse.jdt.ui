@@ -838,9 +838,9 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 					} else
 						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_METHOD));
 				} else
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_METHOD));
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_METHOD));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
 			final String name= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_NAME);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				setNewElementName(name);

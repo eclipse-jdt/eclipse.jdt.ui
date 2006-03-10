@@ -71,7 +71,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.filters.EmptyPackageFilter;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
-import org.eclipse.jdt.internal.ui.refactoring.binary.StubRefactoringHistoryWizard;
+import org.eclipse.jdt.internal.ui.refactoring.binary.BinaryRefactoringHistoryWizard;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
@@ -431,7 +431,7 @@ public final class JarImportWizardPage extends WizardPage {
 		final IPackageFragmentRoot root= fJarImportData.getPackageFragmentRoot();
 		if (root != null) {
 			try {
-				final URI uri= StubRefactoringHistoryWizard.getLocationURI(root.getRawClasspathEntry());
+				final URI uri= BinaryRefactoringHistoryWizard.getLocationURI(root.getRawClasspathEntry());
 				if (uri != null) {
 					final File file= new File(uri);
 					if (file.exists()) {
@@ -458,5 +458,14 @@ public final class JarImportWizardPage extends WizardPage {
 	 */
 	public void performFinish() {
 		fLocationControl.saveHistory();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setVisible(final boolean visible) {
+		super.setVisible(visible);
+		if (visible)
+			handleInputChanged();
 	}
 }

@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
-import org.eclipse.jdt.internal.ui.refactoring.binary.StubRefactoringHistoryWizard;
+import org.eclipse.jdt.internal.ui.refactoring.binary.BinaryRefactoringHistoryWizard;
 
 /**
  * Import wizard to import a refactoring-aware Java Archive (JAR) file.
@@ -84,7 +84,7 @@ import org.eclipse.jdt.internal.ui.refactoring.binary.StubRefactoringHistoryWiza
  * 
  * @since 3.2
  */
-public final class JarImportWizard extends StubRefactoringHistoryWizard implements IImportWizard {
+public final class JarImportWizard extends BinaryRefactoringHistoryWizard implements IImportWizard {
 
 	/** Proxy which requests the refactoring history from the import data */
 	private final class RefactoringHistoryProxy extends RefactoringHistory {
@@ -280,6 +280,13 @@ public final class JarImportWizard extends StubRefactoringHistoryWizard implemen
 	 */
 	public boolean canFinish() {
 		return super.canFinish() && fImportData.getPackageFragmentRoot() != null && fImportData.getRefactoringFileLocation() != null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected boolean canUseSourceAttachment() {
+		return false;
 	}
 
 	/**

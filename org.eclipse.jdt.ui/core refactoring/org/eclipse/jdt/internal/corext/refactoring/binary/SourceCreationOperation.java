@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Common Public License v1.0
+ * Copyright (c) 2006 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/cpl-v10.html
- * 
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -42,12 +42,12 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * Operation, which run, creates structurally equivalent stub types for a list
- * of binary package fragments.
+ * Operation, which run, creates source code for a list of binary package
+ * fragments with attached source.
  * 
  * @since 3.2
  */
-public class StubCreationOperation implements IWorkspaceRunnable {
+public class SourceCreationOperation implements IWorkspaceRunnable {
 
 	/** The URI where to output the stubs */
 	private final URI fOutputURI;
@@ -55,38 +55,19 @@ public class StubCreationOperation implements IWorkspaceRunnable {
 	/** The list of packages to create stubs for */
 	private final List fPackages;
 
-	/** Should stubs for private member be generated as well? */
-	private final boolean fStubInvisible;
-
 	/**
-	 * Creates a new stub creation operation.
+	 * Creates a new source creation operation.
 	 * 
 	 * @param uri
-	 *            the URI where to output the stubs
+	 *            the URI where to output the source
 	 * @param packages
-	 *            the list of packages to create stubs for
+	 *            the list of packages to create source for
 	 */
-	public StubCreationOperation(final URI uri, final List packages) {
-		this(uri, packages, false);
-	}
-
-	/**
-	 * Creates a new stub creation operation.
-	 * 
-	 * @param uri
-	 *            the URI where to output the stubs
-	 * @param packages
-	 *            the list of packages to create stubs for
-	 * @param stub
-	 *            <code>true</code> to generate stubs for private and package
-	 *            visible members as well, <code>false</code> otherwise
-	 */
-	public StubCreationOperation(final URI uri, final List packages, final boolean stub) {
+	public SourceCreationOperation(final URI uri, final List packages) {
 		Assert.isNotNull(uri);
 		Assert.isNotNull(packages);
 		fOutputURI= uri;
 		fPackages= packages;
-		fStubInvisible= stub;
 	}
 
 	/**
@@ -153,7 +134,7 @@ public class StubCreationOperation implements IWorkspaceRunnable {
 	 */
 	private void run(final IClassFile file, final IFileStore parent, final IProgressMonitor monitor) throws CoreException {
 		try {
-			monitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, 2);
+			monitor.beginTask(RefactoringCoreMessages.SourceCreationOperation_creating_source_folder, 2);
 			SubProgressMonitor subProgressMonitor= new SubProgressMonitor(monitor, 1);
 			final IType type= file.getType();
 			final String name= type.getElementName();
@@ -161,7 +142,10 @@ public class StubCreationOperation implements IWorkspaceRunnable {
 				return;
 			if (!Checks.isTopLevel(type))
 				return;
-			String source= new StubCreator(fStubInvisible).createStub(type, subProgressMonitor);
+			String source= "";
+
+			// TODO: implement
+
 			createCompilationUnit(parent, name + ".java", source, monitor); //$NON-NLS-1$
 		} finally {
 			monitor.done();
@@ -174,7 +158,7 @@ public class StubCreationOperation implements IWorkspaceRunnable {
 	public void run(IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
-		monitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, 100 * fPackages.size());
+		monitor.beginTask(RefactoringCoreMessages.SourceCreationOperation_creating_source_folder, 100 * fPackages.size());
 		try {
 			final StringBuffer buffer= new StringBuffer(128);
 			for (final Iterator iterator= fPackages.iterator(); iterator.hasNext();) {
@@ -182,7 +166,7 @@ public class StubCreationOperation implements IWorkspaceRunnable {
 				final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 100);
 				final IClassFile[] files= fragment.getClassFiles();
 				final int size= files.length;
-				subMonitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, size * 50);
+				subMonitor.beginTask(RefactoringCoreMessages.SourceCreationOperation_creating_source_folder, size * 50);
 				final String name= fragment.getElementName();
 				IFileStore store= EFS.getStore(fOutputURI);
 				String pack= ""; //$NON-NLS-1$
@@ -203,7 +187,7 @@ public class StubCreationOperation implements IWorkspaceRunnable {
 				}
 				final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 30);
 				try {
-					subsubMonitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, size * 100);
+					subsubMonitor.beginTask(RefactoringCoreMessages.SourceCreationOperation_creating_source_folder, size * 100);
 					for (int index= 0; index < size; index++) {
 						if (subMonitor.isCanceled())
 							throw new OperationCanceledException();
