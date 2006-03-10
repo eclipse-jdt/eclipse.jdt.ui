@@ -37,6 +37,26 @@ public interface IDelegateUpdating {
 	public boolean getDelegateUpdating();
 
 	/**
+	 * Returns the title of the preference to update delegates in the user
+	 * interface.
+	 * 
+	 * @param plural
+	 *            <code>true</code> if several delegates are created,
+	 *            <code>false</code> otherwise
+	 * @return the non-null string denoting the title
+	 */
+	public String getDelegateUpdatingTitle(boolean plural);
+
+	/**
+	 * If <code>canEnableDelegateUpdating</code> returns
+	 * <code>true</code>, then this method is used to ask the refactoring
+	 * object whether delegates will be deprecated.
+	 * This call can be ignored if <code>canEnableDelegateUpdating</code>
+	 * returns <code>false</code>.
+	 */
+	public boolean getDeprecateDelegates();
+	
+	/**
 	 * If <code>canEnableDelegateUpdating</code> returns
 	 * <code>true</code>, then this method may be called to set whether
 	 * to create delegates.
@@ -44,15 +64,6 @@ public interface IDelegateUpdating {
 	 * returns <code>false</code>.
 	 */
 	public void setDelegateUpdating(boolean updating);
-
-	/**
-	 * If <code>canEnableDelegateUpdating</code> returns
-	 * <code>true</code>, then this method is used to ask the refactoring
-	 * object whether delegates will be decprecated.
-	 * This call can be ignored if <code>canEnableDelegateUpdating</code>
-	 * returns <code>false</code>.
-	 */
-	public boolean getDeprecateDelegates();
 	
 	/**
 	 * If <code>canEnableDelegateUpdating</code> returns

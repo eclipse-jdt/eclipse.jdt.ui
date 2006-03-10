@@ -909,4 +909,14 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDelegateUpdatingTitle(boolean plural) {
+		if (plural)
+			return RefactoringCoreMessages.DelegateFieldCreator_keep_original_renamed_plural;
+		else
+			return RefactoringCoreMessages.DelegateFieldCreator_keep_original_renamed_singular;
+	}
 }

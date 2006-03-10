@@ -2501,4 +2501,11 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
 	}
+
+	public String getDelegateUpdatingTitle(boolean plural) {
+		if (plural)
+			return RefactoringCoreMessages.DelegateCreator_keep_original_changed_plural;
+		else
+			return RefactoringCoreMessages.DelegateCreator_keep_original_changed_singular;
+	}
 }

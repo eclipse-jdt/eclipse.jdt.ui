@@ -124,10 +124,6 @@ public final class RefactoringMessages extends NLS {
 
 	public static String DelegateCreator_deprecate_delegates;
 
-	public static String DelegateCreator_leave_one_delegate;
-
-	public static String DelegateCreator_leave_several_delegates;
-
 	public static String DeleteWizard_1;
 
 	public static String DeleteWizard_10;

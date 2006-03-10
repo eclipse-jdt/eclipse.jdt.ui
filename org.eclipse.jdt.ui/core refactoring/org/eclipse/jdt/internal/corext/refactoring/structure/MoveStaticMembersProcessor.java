@@ -1091,4 +1091,11 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	public void setComment(String comment) {
 		fComment= comment;
 	}
+
+	public String getDelegateUpdatingTitle(boolean plural) {
+		if (plural)
+			return RefactoringCoreMessages.DelegateMethodCreator_keep_original_moved_plural;
+		else
+			return RefactoringCoreMessages.DelegateMethodCreator_keep_original_moved_singular;
+	}
 }

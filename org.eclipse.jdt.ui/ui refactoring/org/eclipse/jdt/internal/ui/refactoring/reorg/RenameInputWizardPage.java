@@ -223,7 +223,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		final IDelegateUpdating refactoring= (IDelegateUpdating) getRefactoring().getAdapter(IDelegateUpdating.class);
 		if (refactoring == null || !refactoring.canEnableDelegateUpdating())
 			return;
-		fLeaveDelegateCheckBox= createCheckbox(result, DelegateUIHelper.getLeaveDelegateCheckBoxTitle(false), DelegateUIHelper.loadLeaveDelegateSetting(refactoring), layouter);
+		fLeaveDelegateCheckBox= createCheckbox(result, refactoring.getDelegateUpdatingTitle(false), DelegateUIHelper.loadLeaveDelegateSetting(refactoring), layouter);
 		refactoring.setDelegateUpdating(fLeaveDelegateCheckBox.getSelection());
 		fLeaveDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -263,11 +263,11 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	protected void updateLeaveDelegateCheckbox(int delegateCount) {
 		if (fLeaveDelegateCheckBox == null)
 			return;
+		final IDelegateUpdating refactoring= (IDelegateUpdating) getRefactoring().getAdapter(IDelegateUpdating.class);
 		fLeaveDelegateCheckBox.setEnabled(delegateCount > 0);
-		fLeaveDelegateCheckBox.setText(DelegateUIHelper.getLeaveDelegateCheckBoxTitle(delegateCount > 1));
+		fLeaveDelegateCheckBox.setText(refactoring.getDelegateUpdatingTitle(delegateCount > 1));
 		if (delegateCount == 0) {
 			fLeaveDelegateCheckBox.setSelection(false);
-			final IDelegateUpdating refactoring= (IDelegateUpdating) getRefactoring().getAdapter(IDelegateUpdating.class);
 			refactoring.setDelegateUpdating(false);
 		}
 	}

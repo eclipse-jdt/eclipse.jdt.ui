@@ -562,4 +562,14 @@ public class IntroduceParameterRefactoring extends CommentRefactoring implements
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDelegateUpdatingTitle(boolean plural) {
+		if (plural)
+			return RefactoringCoreMessages.DelegateCreator_keep_original_changed_plural;
+		else
+			return RefactoringCoreMessages.DelegateCreator_keep_original_changed_singular;
+	}
 }

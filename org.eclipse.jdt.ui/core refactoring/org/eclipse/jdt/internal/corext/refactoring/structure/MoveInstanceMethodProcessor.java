@@ -2841,4 +2841,14 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	public void setComment(final String comment) {
 		fComment= comment;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDelegateUpdatingTitle(boolean plural) {
+		if (plural)
+			return RefactoringCoreMessages.DelegateMethodCreator_keep_original_moved_plural;
+		else
+			return RefactoringCoreMessages.DelegateMethodCreator_keep_original_moved_singular;
+	}
 }

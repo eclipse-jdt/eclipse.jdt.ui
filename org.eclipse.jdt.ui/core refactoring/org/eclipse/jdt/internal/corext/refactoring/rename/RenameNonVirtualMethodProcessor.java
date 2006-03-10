@@ -231,4 +231,11 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 		return RefactoringSearchEngine.search(pattern, createRefactoringScope(),
 			new MethodOccurenceCollector(getMethod().getElementName()), new SubProgressMonitor(pm, 1), status);	
 	}
+
+	public String getDelegateUpdatingTitle(boolean plural) {
+		if (plural)
+			return RefactoringCoreMessages.DelegateMethodCreator_keep_original_renamed_plural;
+		else
+			return RefactoringCoreMessages.DelegateMethodCreator_keep_original_renamed_singular;
+	}
 }

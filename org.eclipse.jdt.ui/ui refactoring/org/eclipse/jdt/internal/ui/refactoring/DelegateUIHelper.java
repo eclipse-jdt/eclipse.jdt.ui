@@ -23,7 +23,6 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * 
  * This is a helper class to keep a consistent design between refactorings
  * capable of creating delegates.
  * 
@@ -51,7 +50,7 @@ public class DelegateUIHelper {
 		final IDelegateUpdating updating= (IDelegateUpdating) refactoring.getAdapter(IDelegateUpdating.class);
 		if (updating == null || !updating.canEnableDelegateUpdating())
 			return null;
-		final Button button= createCheckbox(parent, getLeaveDelegateCheckBoxTitle(plural), loadLeaveDelegateSetting(updating));
+		final Button button= createCheckbox(parent, updating.getDelegateUpdatingTitle(plural), loadLeaveDelegateSetting(updating));
 		updating.setDelegateUpdating(button.getSelection());
 		button.addSelectionListener(new SelectionAdapter() {
 
@@ -76,10 +75,6 @@ public class DelegateUIHelper {
 
 	public static boolean loadDeprecateDelegateSetting(IDelegateUpdating refactoring) {
 		return getBooleanSetting(DELEGATE_DEPRECATION, refactoring.getDeprecateDelegates());
-	}
-
-	public static String getLeaveDelegateCheckBoxTitle(boolean plural) {
-		return plural ? RefactoringMessages.DelegateCreator_leave_several_delegates : RefactoringMessages.DelegateCreator_leave_one_delegate;
 	}
 
 	public static String getDeprecateDelegateCheckBoxTitle() {
