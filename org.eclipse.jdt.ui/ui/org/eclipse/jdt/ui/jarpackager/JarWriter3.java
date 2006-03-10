@@ -56,7 +56,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 
-import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateCreator;
+import org.eclipse.jdt.internal.corext.refactoring.deprecation.IDeprecationConstants;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -276,7 +276,7 @@ public class JarWriter3 {
 		Assert.isNotNull(monitor);
 		for (int index= 0; index < projects.length; index++) {
 			final IProject project= (IProject) projects[index];
-			final IFolder folder= project.getFolder(DelegateCreator.SCRIPT_FOLDER);
+			final IFolder folder= project.getFolder(IDeprecationConstants.SCRIPT_FOLDER);
 			if (folder.exists()) {
 				final IResource[] resources= folder.members();
 				for (int offset= 0; offset < resources.length; offset++) {

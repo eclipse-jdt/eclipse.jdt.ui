@@ -320,4 +320,6 @@ final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_fix_deprecation_name;
 	public static String QuickAssistProcessor_fix_deprecation_info;
 	public static String SuppressWarningsSubProcessor_fix_suppress_token_label;
+	public static String QuickAssistProcessor_create_fix_name;
+	public static String QuickAssistProcessor_create_fix_info;
 }

@@ -12,8 +12,10 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -33,13 +35,18 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
+import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -89,6 +96,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -101,9 +109,12 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFix;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateCreator;
+import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateFieldCreator;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
+import org.eclipse.jdt.internal.corext.refactoring.deprecation.CreateDeprecationScriptChange;
+import org.eclipse.jdt.internal.corext.refactoring.deprecation.IDeprecationConstants;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -135,9 +146,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		super();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#hasAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext)
-	 */
 	public boolean hasAssists(IInvocationContext context) throws CoreException {
 		ASTNode coveringNode= context.getCoveringNode();
 		if (coveringNode != null) {
@@ -165,9 +173,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#getAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[])
-	 */
 	public IJavaCompletionProposal[] getAssists(IInvocationContext context, IProblemLocation[] locations) throws CoreException {
 		ASTNode coveringNode= context.getCoveringNode();
 		if (coveringNode != null) {
@@ -349,6 +354,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		final IBinding binding= name.resolveBinding();
 		if (binding == null || !binding.isDeprecated())
 			return false;
+		final CompilationUnit root= (CompilationUnit) ASTNodes.getParent(node, ASTNode.COMPILATION_UNIT);
+		if (root == null)
+			return false;
 		String fileName= null;
 		if (binding instanceof IVariableBinding)
 			fileName= DelegateFieldCreator.getRefactoringScriptName((IVariableBinding) binding);
@@ -361,75 +369,118 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (unit == null || !unit.exists())
 			return false;
 		final IProject project= unit.getJavaProject().getProject();
-		final IFile file= project.getFolder(DelegateCreator.SCRIPT_FOLDER).getFile(fileName);
-		if (!file.exists())
-			return false;
-		if (resultingCollections == null)
+		final IFile file= project.getFolder(IDeprecationConstants.SCRIPT_FOLDER).getFile(fileName);
+		final ASTNode declaring= root.findDeclaringNode(binding);
+		if (declaring != null) {
+			if (resultingCollections == null)
+				return true;
+			RefactoringSessionDescriptor descriptor= null;
+			if (binding instanceof IVariableBinding) {
+				final IJavaElement element= binding.getJavaElement();
+				if (element != null) {
+					final InlineConstantRefactoring refactoring= new InlineConstantRefactoring((IField) element);
+					descriptor= refactoring.createDeprecationResolution();
+				}
+			} else if (binding instanceof IMethodBinding) {
+				final IJavaElement element= binding.getJavaElement();
+				if (element != null) {
+					final InlineMethodRefactoring refactoring= new InlineMethodRefactoring((IMethod) element);
+					descriptor= refactoring.createDeprecationResolution();
+				}
+			}
+			if (descriptor == null)
+				return false;
+			String script= null;
+			try {
+				final ByteArrayOutputStream stream= new ByteArrayOutputStream(1024);
+				RefactoringCore.getHistoryService().writeRefactoringSession(descriptor, stream, false);
+				script= stream.toString(IDeprecationConstants.SCRIPT_ENCODING);
+			} catch (CoreException exception) {
+				JavaPlugin.log(exception);
+			} catch (UnsupportedEncodingException exception) {
+				Assert.isTrue(false);
+			}
+			if (script == null)
+				return false;
+			final Change change= new CreateDeprecationScriptChange(file.getFullPath(), script, CorrectionMessages.QuickAssistProcessor_create_fix_name);
+			final ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.QuickAssistProcessor_create_fix_name, change, 1, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
+
+				public final String getAdditionalProposalInfo() {
+					return CorrectionMessages.QuickAssistProcessor_create_fix_info;
+				}
+			};
+			resultingCollections.add(proposal);
 			return true;
-		final ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.QuickAssistProcessor_fix_deprecation_name, null, 2, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
+		} else {
+			if (!file.exists())
+				return false;
+			if (resultingCollections == null)
+				return true;
+			final ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.QuickAssistProcessor_fix_deprecation_name, null, 2, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
 
-			private static final int SIZING_WIZARD_HEIGHT= 470;
+				private static final int SIZING_WIZARD_HEIGHT= 470;
 
-			private static final int SIZING_WIZARD_WIDTH= 490;
+				private static final int SIZING_WIZARD_WIDTH= 490;
 
-			private RefactoringHistory fCachedHistory= null;
+				private RefactoringHistory fCachedHistory= null;
 
-			private RefactoringHistory getRefactoringHistory() {
-				if (fCachedHistory == null) {
-					InputStream stream= null;
-					try {
-						stream= new BufferedInputStream(file.getContents(true));
-						fCachedHistory= RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.DEPRECATION_RESOLVING);
-					} catch (CoreException exception) {
-						JavaPlugin.log(exception);
-					} finally {
-						if (stream != null) {
-							try {
-								stream.close();
-							} catch (IOException exception) {
-								JavaPlugin.log(exception);
+				private RefactoringHistory getRefactoringHistory() {
+					if (fCachedHistory == null) {
+						InputStream stream= null;
+						try {
+							stream= new BufferedInputStream(file.getContents(true));
+							fCachedHistory= RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.DEPRECATION_RESOLVING);
+						} catch (CoreException exception) {
+							JavaPlugin.log(exception);
+						} finally {
+							if (stream != null) {
+								try {
+									stream.close();
+								} catch (IOException exception) {
+									JavaPlugin.log(exception);
+								}
 							}
 						}
 					}
+					return fCachedHistory;
 				}
-				return fCachedHistory;
-			}
 
-			public final void apply(final IDocument document) {
-				final RefactoringHistory history= getRefactoringHistory();
-				if (history == null || history.isEmpty())
-					return;
-				final FixDeprecationRefactoringWizard wizard= new FixDeprecationRefactoringWizard(history.getDescriptors().length > 1, context.getCompilationUnit(), node.getStartPosition(), node.getLength());
-				final WizardDialog dialog= new WizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard);
-				wizard.setRefactoringHistory(history);
-				dialog.create();
-				dialog.getShell().setSize(Math.max(SIZING_WIZARD_WIDTH, dialog.getShell().getSize().x), SIZING_WIZARD_HEIGHT);
-				PlatformUI.getWorkbench().getHelpSystem().setHelp(dialog.getShell(), IJavaHelpContextIds.FIX_DEPRECATION_WIZARD_PAGE);
-				dialog.getShell().getDisplay().asyncExec(new Runnable() {
+				public final void apply(final IDocument document) {
+					final RefactoringHistory history= getRefactoringHistory();
+					if (history == null || history.isEmpty())
+						return;
+					final FixDeprecationRefactoringWizard wizard= new FixDeprecationRefactoringWizard(history.getDescriptors().length > 1, context.getCompilationUnit(), node.getStartPosition(), node.getLength());
+					final WizardDialog dialog= new WizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard);
+					wizard.setRefactoringHistory(history);
+					dialog.create();
+					dialog.getShell().setSize(Math.max(SIZING_WIZARD_WIDTH, dialog.getShell().getSize().x), SIZING_WIZARD_HEIGHT);
+					PlatformUI.getWorkbench().getHelpSystem().setHelp(dialog.getShell(), IJavaHelpContextIds.FIX_DEPRECATION_WIZARD_PAGE);
+					dialog.getShell().getDisplay().asyncExec(new Runnable() {
 
-					public final void run() {
-						dialog.showPage(wizard.getNextPage(wizard.getStartingPage()));
+						public final void run() {
+							dialog.showPage(wizard.getNextPage(wizard.getStartingPage()));
+						}
+					});
+					dialog.open();
+				}
+
+				public final String getAdditionalProposalInfo() {
+					final RefactoringHistory history= getRefactoringHistory();
+					if (history == null || history.isEmpty())
+						return ""; //$NON-NLS-1$
+					final StringBuffer buffer= new StringBuffer(512);
+					HTMLPrinter.startBulletList(buffer);
+					final RefactoringDescriptorProxy[] proxies= history.getDescriptors();
+					for (int index= 0; index < proxies.length; index++) {
+						HTMLPrinter.addBullet(buffer, proxies[index].getDescription());
 					}
-				});
-				dialog.open();
-			}
-
-			public final String getAdditionalProposalInfo() {
-				final RefactoringHistory history= getRefactoringHistory();
-				if (history == null || history.isEmpty())
-					return ""; //$NON-NLS-1$
-				final StringBuffer buffer= new StringBuffer(512);
-				HTMLPrinter.startBulletList(buffer);
-				final RefactoringDescriptorProxy[] proxies= history.getDescriptors();
-				for (int index= 0; index < proxies.length; index++) {
-					HTMLPrinter.addBullet(buffer, proxies[index].getDescription());
+					HTMLPrinter.endBulletList(buffer);
+					return Messages.format(CorrectionMessages.QuickAssistProcessor_fix_deprecation_info, buffer.toString());
 				}
-				HTMLPrinter.endBulletList(buffer);
-				return Messages.format(CorrectionMessages.QuickAssistProcessor_fix_deprecation_info, buffer.toString());
-			}
-		};
-		resultingCollections.add(proposal);
-		return true;
+			};
+			resultingCollections.add(proposal);
+			return true;
+		}
 	}
 
 	private static boolean getSplitVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {

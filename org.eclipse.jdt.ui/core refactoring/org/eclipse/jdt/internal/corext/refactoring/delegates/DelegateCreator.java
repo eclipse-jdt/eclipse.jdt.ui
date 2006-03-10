@@ -57,6 +57,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.deprecation.CreateDeprecationScriptChange;
+import org.eclipse.jdt.internal.corext.refactoring.deprecation.IDeprecationConstants;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -119,9 +121,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 public abstract class DelegateCreator {
 
 	public static final GroupCategorySet CATEGORY_DELEGATE= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.refactoring.delegates.delegate", RefactoringCoreMessages.DelegateCreator_change_category_title, RefactoringCoreMessages.DelegateCreator_change_category_description)); //$NON-NLS-1$
-
-	protected static final String SCRIPT_ENCODING= "utf-8"; //$NON-NLS-1$
-	public static final String SCRIPT_FOLDER= ".deprecations"; //$NON-NLS-1$
 
 	/*
 	 * We are dealing with two CURewrites here: 
@@ -359,7 +358,7 @@ public abstract class DelegateCreator {
 				try {
 					final ByteArrayOutputStream stream= new ByteArrayOutputStream(1024);
 					RefactoringCore.getHistoryService().writeRefactoringSession(descriptor, stream, false);
-					fDeprecationScript= stream.toString(SCRIPT_ENCODING);
+					fDeprecationScript= stream.toString(IDeprecationConstants.SCRIPT_ENCODING);
 				} catch (CoreException exception) {
 					JavaPlugin.log(exception);
 				} catch (UnsupportedEncodingException exception) {
@@ -475,7 +474,7 @@ public abstract class DelegateCreator {
 	// ******************* INTERNAL HELPERS ***************************
 
 	private static IPath getRefactoringScriptPath(IProject project, String name) {
-		return project.getFullPath().append(SCRIPT_FOLDER).append(name);
+		return project.getFullPath().append(IDeprecationConstants.SCRIPT_FOLDER).append(name);
 	}
 
 	private TagElement getDelegateJavadocTag(BodyDeclaration declaration) throws JavaModelException {

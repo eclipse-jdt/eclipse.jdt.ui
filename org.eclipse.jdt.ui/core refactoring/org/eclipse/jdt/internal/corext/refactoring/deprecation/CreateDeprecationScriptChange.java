@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.corext.refactoring.delegates;
+package org.eclipse.jdt.internal.corext.refactoring.deprecation;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -144,9 +144,9 @@ public final class CreateDeprecationScriptChange extends JDTChange {
 			monitor.beginTask(RefactoringCoreMessages.CreateDeprecationScriptChange_performing_change, 2);
 			final IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
 			try {
-				stream= new ByteArrayInputStream(fScript.getBytes(DelegateCreator.SCRIPT_ENCODING));
+				stream= new ByteArrayInputStream(fScript.getBytes(IDeprecationConstants.SCRIPT_ENCODING));
 				createFile(file, stream, monitor);
-				file.setCharset(DelegateCreator.SCRIPT_ENCODING, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				file.setCharset(IDeprecationConstants.SCRIPT_ENCODING, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 				return new DeleteFileChange(file);
 			} catch (UnsupportedEncodingException exception) {
 				throw new JavaModelException(exception, IJavaModelStatusConstants.IO_EXCEPTION);
