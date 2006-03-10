@@ -1135,7 +1135,9 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 							}
 						}
 					}
-					rewriteTypeOccurrences(manager, sourceRewriter, (ICompilationUnit) workingcopies.get(sourceRewriter.getCu()), new HashSet(), status, new SubProgressMonitor(monitor, 1));
+					final ICompilationUnit current= (ICompilationUnit) workingcopies.get(sourceRewriter.getCu());
+					if (current != null)
+						rewriteTypeOccurrences(manager, sourceRewriter, current, new HashSet(), status, new SubProgressMonitor(monitor, 1));
 				} finally {
 					subMonitor.done();
 					for (final Iterator iterator= workingcopies.values().iterator(); iterator.hasNext();) {
