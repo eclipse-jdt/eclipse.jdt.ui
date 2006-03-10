@@ -70,30 +70,21 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	protected static final int GRANT_PARENT= 1 << 1;
 	protected static final int PROJECT= 1 << 2;
 	
-	TreeViewer fViewer;
+	private TreeViewer fViewer;
 	private Object fInput;
 	private boolean fIsFlatLayout;
-	private PackageFragmentProvider fPackageFragmentProvider= new PackageFragmentProvider();
+	private PackageFragmentProvider fPackageFragmentProvider;
 	
 	private int fPendingChanges;
-	//PackageExplorerPart fPart;
 	
 	/**
 	 * Creates a new content provider for Java elements.
 	 */
 	public PackageExplorerContentProvider(boolean provideMembers) {
-		super(provideMembers);	
-		//fPart= part;
+		super(provideMembers);
+		fPackageFragmentProvider= new PackageFragmentProvider();
 	}
-	
-	/**
-	 * Creates a new content provider for Java elements.
-	 */
-	public PackageExplorerContentProvider(PackageExplorerPart part, boolean provideMembers) {
-		super(provideMembers);	
-		//fPart= part;
-	}
-	
+		
 	/* package */ PackageFragmentProvider getPackageFragmentProvider() {
 		return fPackageFragmentProvider;
 	}
@@ -700,13 +691,11 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	
 	private synchronized void addPendingChange() {
 		fPendingChanges++;
-		// System.out.print(fPendingChanges);
 	}
 
 	synchronized void removePendingChange() {
 		fPendingChanges--;
 		if (fPendingChanges < 0)
 			fPendingChanges= 0;
-		// System.out.print(fPendingChanges);
 	}
 }

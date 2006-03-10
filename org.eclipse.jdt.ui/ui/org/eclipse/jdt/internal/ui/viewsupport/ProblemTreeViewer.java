@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Widget;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.IMember;
 
@@ -148,15 +149,44 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		return contentProvider instanceof IWorkingCopyProvider && !((IWorkingCopyProvider)contentProvider).providesWorkingCopies();
 	}
 	
+		
+	/**
+	 * Decides if {@link #isExpandable(Object)} should also test filters. The default behaviour is to
+	 * do this only for IMembers. Implementors can replace this behaviour.
+	 * @param parent the given element
+	 * @return returns if if {@link #isExpandable(Object)} should also test filters for the given element.
+	 */
+	protected boolean evaluateExpandableWithFilters(Object parent) {
+		return parent instanceof IMember;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.AbstractTreeViewer#isExpandable(java.lang.Object)
 	 */
-	public boolean isExpandable(Object element) {
-		// workaround for 65762
-		if (hasFilters() && element instanceof IMember) {
-			return getFilteredChildren(element).length > 0;
+	public boolean isExpandable(Object parent) {
+		if (hasFilters() && evaluateExpandableWithFilters(parent)) {
+			// workaround for 65762
+			Object[] children= getRawChildren(parent);
+			if (children.length > 0) {
+				ViewerFilter[] filters= getFilters();
+				for (int i = 0; i < children.length; i++) {
+					if (!isFiltered(children[i], parent, filters)) {
+						return true;
+					}
+				}
+			}
+			return false;
 		}
-		return super.isExpandable(element);
+		return super.isExpandable(parent);
+	}
+	
+	protected boolean isFiltered(Object object, Object parent, ViewerFilter[] filters) {
+		for (int i = 0; i < filters.length; i++) {
+			ViewerFilter filter = filters[i];
+			if (!filter.select(this, parent, object))
+				return true;
+		}
+		return false;
 	}
 	
 	protected Object[] addAditionalProblemParents(Object[] elements) {

@@ -44,8 +44,8 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 	private WorkingSetModel fWorkingSetModel;
 	private IPropertyChangeListener fListener;
 	
-	public WorkingSetAwareContentProvider(PackageExplorerPart part, boolean provideMembers, WorkingSetModel model) {
-		super(part, provideMembers);
+	public WorkingSetAwareContentProvider(boolean provideMembers, WorkingSetModel model) {
+		super(provideMembers);
 		fWorkingSetModel= model;
 		fListener= new IPropertyChangeListener() {
 					public void propertyChange(PropertyChangeEvent event) {

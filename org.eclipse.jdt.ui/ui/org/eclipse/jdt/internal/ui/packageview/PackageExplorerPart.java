@@ -70,7 +70,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.OpenEvent;
@@ -116,6 +115,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -237,24 +237,28 @@ public class PackageExplorerPart extends ViewPart
 
 	private class PackageExplorerProblemTreeViewer extends ProblemTreeViewer {
 		// fix for 64372  Projects showing up in Package Explorer twice [package explorer] 
-		List fPendingGetChildren;
+		private List fPendingRefreshes;
 		
 		public PackageExplorerProblemTreeViewer(Composite parent, int style) {
 			super(parent, style);
-			fPendingGetChildren= Collections.synchronizedList(new ArrayList());
+			fPendingRefreshes= Collections.synchronizedList(new ArrayList());
 		}
 		public void add(Object parentElement, Object[] childElements) {
-			if (fPendingGetChildren.contains(parentElement)) 
+			if (fPendingRefreshes.contains(parentElement)) {
 				return;
+			}
 			super.add(parentElement, childElements);
 		}
-				
-		protected Object[] getRawChildren(Object parent) {
+						
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.viewers.AbstractTreeViewer#internalRefresh(java.lang.Object, boolean)
+		 */
+	    protected void internalRefresh(Object element, boolean updateLabels) {
 			try {
-				fPendingGetChildren.add(parent);
-				return super.getRawChildren(parent);				
+				fPendingRefreshes.add(element);
+				super.internalRefresh(element, updateLabels);
 			} finally {
-				fPendingGetChildren.remove(parent);
+				fPendingRefreshes.remove(element);
 			}
 		}
 		
@@ -262,32 +266,42 @@ public class PackageExplorerPart extends ViewPart
 		 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object)
 		 */
 		protected Object[] getFilteredChildren(Object parent) {
+			Object[] children = getRawChildren(parent);
+			if (!hasFilters()) {
+				return children;
+			}
 			List list = new ArrayList();
 			ViewerFilter[] filters = getFilters();
-			Object[] children = ((ITreeContentProvider)getContentProvider()).getChildren(parent);
+
 			for (int i = 0; i < children.length; i++) {
 				Object object = children[i];
-				if (!isEssential(object)) {
-					object = filter(object, parent, filters);
-					if (object != null) {
-						list.add(object);
-					}
-				} else
+				if (!isFiltered(object, parent, filters)) {
 					list.add(object);
+				}
 			}
 			return list.toArray();
 		}
 		
-		// Sends the object through the given filters
-		private Object filter(Object object, Object parent, ViewerFilter[] filters) {
-			for (int i = 0; i < filters.length; i++) {
-				ViewerFilter filter = filters[i];
-				if (!filter.select(this, parent, object))
-					return null;
+		protected boolean evaluateExpandableWithFilters(Object parent) {
+			if (parent instanceof IJavaProject
+					|| parent instanceof ICompilationUnit || parent instanceof IClassFile
+					|| parent instanceof ClassPathContainer) {
+				return false;
 			}
-			return object;
+			if (parent instanceof IPackageFragmentRoot && ((IPackageFragmentRoot) parent).isArchive()) {
+				return false;
+			}
+			return true;
 		}
 
+		protected boolean isFiltered(Object object, Object parent, ViewerFilter[] filters) {
+			boolean res= super.isFiltered(object, parent, filters);
+			if (res && isEssential(object)) {
+				return false;
+			}
+			return res;
+		}
+		
 		/*
 		 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object[])
 		 * @since 3.0
@@ -743,9 +757,9 @@ public class PackageExplorerPart extends ViewPart
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		boolean showCUChildren= store.getBoolean(PreferenceConstants.SHOW_CU_CHILDREN);
 		if (showProjects()) 
-			return new PackageExplorerContentProvider(this, showCUChildren);
+			return new PackageExplorerContentProvider(showCUChildren);
 		else
-			return new WorkingSetAwareContentProvider(this, showCUChildren, fWorkingSetModel);
+			return new WorkingSetAwareContentProvider(showCUChildren, fWorkingSetModel);
 	}
 	
 	private PackageExplorerLabelProvider createLabelProvider() {
