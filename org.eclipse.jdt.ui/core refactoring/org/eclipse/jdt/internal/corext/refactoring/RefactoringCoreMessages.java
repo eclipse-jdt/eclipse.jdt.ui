@@ -1837,4 +1837,6 @@ public final class RefactoringCoreMessages extends NLS {
 	private RefactoringCoreMessages() {
 		// Do not instantiate
 	}
+
+	public static String PullUpRefactoring_non_final_pull_up_to_interface;
 }

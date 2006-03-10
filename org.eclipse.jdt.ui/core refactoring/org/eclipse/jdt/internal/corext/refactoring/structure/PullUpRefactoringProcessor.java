@@ -690,9 +690,16 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, fMembersToMove.length);
 		for (int index= 0; index < fMembersToMove.length; index++) {
 			IMember member= fMembersToMove[index];
-			if (member.getElementType() == IJavaElement.FIELD && !JdtFlags.isStatic(member) && JdtFlags.isFinal(member)) {
-				RefactoringStatusContext context= JavaStatusContext.create(member);
-				result.addWarning(RefactoringCoreMessages.PullUpRefactoring_final_fields, context);
+			if (member.getElementType() == IJavaElement.FIELD) {
+				if (!JdtFlags.isStatic(member)) {
+					if (JdtFlags.isFinal(member)) {
+						RefactoringStatusContext context= JavaStatusContext.create(member);
+						result.addWarning(RefactoringCoreMessages.PullUpRefactoring_final_fields, context);
+					} else if (getTargetClass().isInterface()) {
+						RefactoringStatusContext context= JavaStatusContext.create(member);
+						result.addWarning(RefactoringCoreMessages.PullUpRefactoring_non_final_pull_up_to_interface, context);
+					}
+				}
 			}
 			monitor.worked(1);
 			if (monitor.isCanceled())
@@ -1052,7 +1059,10 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 							if (member instanceof IField) {
 								final VariableDeclarationFragment oldField= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) member, root);
 								if (oldField != null) {
-									FieldDeclaration newField= createNewFieldDeclarationNode(rewriter, root, (IField) member, oldField, mapping, new SubProgressMonitor(subsub, 1), status, getModifiersWithUpdatedVisibility(member, member.getFlags(), adjustments, new SubProgressMonitor(subsub, 1), true, status));
+									int flags= getModifiersWithUpdatedVisibility(member, member.getFlags(), adjustments, new SubProgressMonitor(subsub, 1), true, status);
+									if (targetClass.isInterface())
+										flags|= Flags.AccFinal;
+									FieldDeclaration newField= createNewFieldDeclarationNode(rewriter, root, (IField) member, oldField, mapping, new SubProgressMonitor(subsub, 1), status, flags);
 									rewriter.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, ASTNodes.getInsertionIndex(newField, declaration.bodyDeclarations()), rewrite.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PULL_UP));
 									ImportRewriteUtil.addImports(rewrite, oldField.getParent(), new HashMap(), new HashMap(), false);
 								}
