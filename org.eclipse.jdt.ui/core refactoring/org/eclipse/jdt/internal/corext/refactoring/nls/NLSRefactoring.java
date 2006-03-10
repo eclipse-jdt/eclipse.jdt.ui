@@ -204,7 +204,7 @@ public class NLSRefactoring extends Refactoring {
 				createAccessorClass= false;
 			}
 			if (createAccessorClass) {
-				result.add(AccessorClassCreator.create(fCu, fAccessorClassName, getAccessorCUPath(), fAccessorClassPackage, getPropertyFilePath(), fIsEclipseNLS, fSubstitutions, new SubProgressMonitor(pm, 1)));
+				result.add(AccessorClassCreator.create(fCu, fAccessorClassName, getAccessorCUPath(), fAccessorClassPackage, getPropertyFilePath(), fIsEclipseNLS, fSubstitutions, getSubstitutionPattern(), new SubProgressMonitor(pm, 1)));
 			}
 			pm.worked(1);
 

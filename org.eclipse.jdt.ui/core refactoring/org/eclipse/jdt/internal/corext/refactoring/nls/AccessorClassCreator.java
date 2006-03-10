@@ -62,8 +62,9 @@ public class AccessorClassCreator {
 	private final IPackageFragment fAccessorPackage;
 	private final boolean fIsEclipseNLS;
 	private final NLSSubstitution[] fNLSSubstitutions;
+	private final String fSubstitutionPattern;
 
-	private AccessorClassCreator(ICompilationUnit cu, String accessorClassname, IPath accessorPath, IPackageFragment accessorPackage, IPath resourceBundlePath, boolean isEclipseNLS, NLSSubstitution[] nlsSubstitutions) {
+	private AccessorClassCreator(ICompilationUnit cu, String accessorClassname, IPath accessorPath, IPackageFragment accessorPackage, IPath resourceBundlePath, boolean isEclipseNLS, NLSSubstitution[] nlsSubstitutions, String substitutionPattern) {
 		fCu= cu;
 		fAccessorClassName= accessorClassname;
 		fAccessorPath= accessorPath;
@@ -71,10 +72,11 @@ public class AccessorClassCreator {
 		fResourceBundlePath= resourceBundlePath;
 		fIsEclipseNLS= isEclipseNLS;
 		fNLSSubstitutions= nlsSubstitutions;
+		fSubstitutionPattern= substitutionPattern;
 	}
 
-	public static Change create(ICompilationUnit cu, String accessorClassname, IPath accessorPath, IPackageFragment accessorPackage, IPath resourceBundlePath, boolean isEclipseNLS, NLSSubstitution[] nlsSubstitutions, IProgressMonitor pm) throws CoreException {
-		AccessorClassCreator accessorClass= new AccessorClassCreator(cu, accessorClassname, accessorPath, accessorPackage, resourceBundlePath, isEclipseNLS, nlsSubstitutions);
+	public static Change create(ICompilationUnit cu, String accessorClassname, IPath accessorPath, IPackageFragment accessorPackage, IPath resourceBundlePath, boolean isEclipseNLS, NLSSubstitution[] nlsSubstitutions, String substitutionPattern, IProgressMonitor pm) throws CoreException {
+		AccessorClassCreator accessorClass= new AccessorClassCreator(cu, accessorClassname, accessorPath, accessorPackage, resourceBundlePath, isEclipseNLS, nlsSubstitutions, substitutionPattern);
 
 		return new CreateTextFileChange(accessorPath, accessorClass.createAccessorCUSource(pm), null, "java"); //$NON-NLS-1$
 	}
@@ -248,15 +250,29 @@ public class AccessorClassCreator {
 	}
 	
 	private String createGetStringMethod(String lineDelim) throws CoreException {
-		String bodyStatement= new StringBuffer().append("try {").append(lineDelim) //$NON-NLS-1$
+		StringBuffer result= new StringBuffer();
+		
+		result.append("public static String "); //$NON-NLS-1$
+		int i= fSubstitutionPattern.indexOf(NLSRefactoring.KEY);
+		if (i != -1) {
+			result.append(fSubstitutionPattern.substring(0, i));
+			result.append("String key"); //$NON-NLS-1$
+			result.append(fSubstitutionPattern.substring(i + NLSRefactoring.KEY.length()));
+		} else {
+			//fallback
+			result.append("getString(String key)"); //$NON-NLS-1$
+		}
+		result.append('{').append(lineDelim);
+		
+		result.append("try {").append(lineDelim) //$NON-NLS-1$
 				.append("return ") //$NON-NLS-1$
 				.append(getResourceBundleConstantName()).append(".getString(key);").append(lineDelim) //$NON-NLS-1$
 				.append("} catch (MissingResourceException e) {").append(lineDelim) //$NON-NLS-1$
 				.append("return '!' + key + '!';").append(lineDelim) //$NON-NLS-1$
-				.append("}").toString(); //$NON-NLS-1$
-
-		return "public static String getString(String key) {" //$NON-NLS-1$
-				+ lineDelim + bodyStatement + lineDelim + '}';
+				.append("}"); //$NON-NLS-1$
+		
+		result.append(lineDelim).append('}');
+		return result.toString();
 	}
 	
 	private String createStaticInitializer(String lineDelim) throws CoreException {

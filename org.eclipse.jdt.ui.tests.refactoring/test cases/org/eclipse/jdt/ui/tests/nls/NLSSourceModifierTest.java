@@ -126,7 +126,7 @@ public class NLSSourceModifierTest extends TestCase {
             	"}\n", 
             	doc.get());
     }
-    
+   
    public void testFromSkippedToTranslatedEclipseNew() throws Exception {
         
         String klazz =
@@ -155,7 +155,7 @@ public class NLSSourceModifierTest extends TestCase {
             	"}\n", 
             	doc.get());
         
-      CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, null);
+      CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, defaultSubst, null);
       String accessor= accessorChange.getPreview();
       StringBuffer buf= new StringBuffer();
       buf.append("package test;\n");
@@ -231,7 +231,7 @@ public class NLSSourceModifierTest extends TestCase {
                 "}\n",  
             	doc.get());
         
-        CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, null);
+        CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, NLSRefactoring.DEFAULT_SUBST_PATTERN, null);
         String accessor= accessorChange.getPreview();
         StringBuffer buf= new StringBuffer();
         buf.append("package test;\n");
@@ -314,7 +314,7 @@ public class NLSSourceModifierTest extends TestCase {
             	"}\n", 
             	doc.get());
         
-        CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, null);
+        CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, NLSRefactoring.DEFAULT_SUBST_PATTERN, null);
         
         String accessor= accessorChange.getPreview();
         StringBuffer buf= new StringBuffer();
@@ -391,7 +391,7 @@ public class NLSSourceModifierTest extends TestCase {
                 "}\n",  
             	doc.get());
         
-        CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, null);
+        CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, NLSRefactoring.DEFAULT_SUBST_PATTERN, null);
         String accessor= accessorChange.getPreview();
         StringBuffer buf= new StringBuffer();
         buf.append("package test;\n");
@@ -787,7 +787,7 @@ public class NLSSourceModifierTest extends TestCase {
                 "}\n",  
             	doc.get());
         
-        CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, null);
+        CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, NLSRefactoring.DEFAULT_SUBST_PATTERN, null);
         String accessor= accessorChange.getPreview();
         StringBuffer buf= new StringBuffer();
         buf.append("package test;\n");
@@ -1058,6 +1058,62 @@ public class NLSSourceModifierTest extends TestCase {
         String expected= buf.toString();
         
         assertEquals(expected, accessorDoc.get());
+    }
+    
+    public void testBug131323() throws Exception {
+        
+        String klazz =
+            "public class Test {\n" +
+            "	private String str=\"whatever\";\n" +
+            "}\n"; 
+        
+        IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+        ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
+        
+        CompilationUnit astRoot= createAST(cu);
+        NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
+        nlsSubstitutions[0].setState(NLSSubstitution.EXTERNALIZED);
+        nlsSubstitutions[0].setPrefix("key.");
+        nlsSubstitutions[0].generateKey(nlsSubstitutions);
+        
+        String subpattern= "getFoo(${key})";
+        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, subpattern, pack, "Accessor", false);
+        
+        Document doc = new Document(klazz);
+        change.getEdit().apply(doc);
+        
+        assertEquals(
+                "public class Test {\n" +
+                "	private String str=Accessor.getFoo(\"key.0\"); //$NON-NLS-1$\n" +
+            	"}\n", 
+            	doc.get());
+        
+        CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), false, nlsSubstitutions, subpattern, null);
+        String accessor= accessorChange.getPreview();
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test;\n");
+        buf.append("\n");
+        buf.append("import java.util.MissingResourceException;\n");
+        buf.append("import java.util.ResourceBundle;\n");
+        buf.append("\n");
+        buf.append("public class Accessor {\n");
+        buf.append("    private static final String BUNDLE_NAME = \"test.test\"; //$NON-NLS-1$\n");
+        buf.append("\n");
+        buf.append("    private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle\n");
+        buf.append("            .getBundle(BUNDLE_NAME);\n");
+        buf.append("\n");
+        buf.append("    private Accessor() {\n");
+        buf.append("    }\n");
+        buf.append("    public static String getFoo(String key) {\n");
+        buf.append("        try {\n");
+        buf.append("            return RESOURCE_BUNDLE.getString(key);\n");
+        buf.append("        } catch (MissingResourceException e) {\n");
+        buf.append("            return '!' + key + '!';\n");
+        buf.append("        }\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        String expected= buf.toString();
+        StringAsserts.assertEqualStringIgnoreDelim(accessor, expected);
     }
 
 	private CompilationUnit createAST(ICompilationUnit cu) {
