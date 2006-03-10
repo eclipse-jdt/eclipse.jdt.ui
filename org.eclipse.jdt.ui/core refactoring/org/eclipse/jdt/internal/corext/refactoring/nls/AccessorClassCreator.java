@@ -234,7 +234,7 @@ public class AccessorClassCreator {
 		for (Iterator iter= subs.iterator(); iter.hasNext();) {
 			NLSSubstitution substitution= (NLSSubstitution)iter.next();
 			int newState= substitution.getState();
-			if (substitution.hasStateChanged() && newState == NLSSubstitution.EXTERNALIZED) {
+			if ((substitution.hasStateChanged() || substitution.isAccessorRename())&& newState == NLSSubstitution.EXTERNALIZED) {
 				if (added.add(substitution.getKey()))
 					appendStaticField(buf,substitution);
 			}
