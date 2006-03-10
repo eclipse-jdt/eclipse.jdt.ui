@@ -200,6 +200,9 @@ public class NLSRefactoring extends Refactoring {
 			final DynamicValidationStateChange result= new DynamicValidationStateChange(NLSMessages.NLSRefactoring_change_name);
 
 			boolean createAccessorClass= willCreateAccessorClass();
+			if (NLSSubstitution.countItems(fSubstitutions, NLSSubstitution.EXTERNALIZED) == 0) {
+				createAccessorClass= false;
+			}
 			if (createAccessorClass) {
 				result.add(AccessorClassCreator.create(fCu, fAccessorClassName, getAccessorCUPath(), fAccessorClassPackage, getPropertyFilePath(), fIsEclipseNLS, fSubstitutions, new SubProgressMonitor(pm, 1)));
 			}
@@ -281,7 +284,7 @@ public class NLSRefactoring extends Refactoring {
 
 	//should stop checking if fatal error
 	private RefactoringStatus checkIfAnythingToDo() throws JavaModelException {
-		if (willCreateAccessorClass())
+		if (NLSSubstitution.countItems(fSubstitutions, NLSSubstitution.EXTERNALIZED) != 0 && willCreateAccessorClass())
 			return null;
 
 		if (willModifyPropertyFile())
