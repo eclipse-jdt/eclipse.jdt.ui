@@ -383,8 +383,11 @@ public final class PullUpWizard extends RefactoringWizard {
 
 		private CheckboxTableViewer fTableViewer;
 
-		public PullUpInputPage1() {
+		private final PullUpInputPage2 fSuccessorPage;
+		
+		public PullUpInputPage1(PullUpInputPage2 page) {
 			super(PAGE_NAME);
+			fSuccessorPage= page;
 			setMessage(RefactoringMessages.PullUpInputPage1_page_message);
 		}
 
@@ -417,6 +420,7 @@ public final class PullUpWizard extends RefactoringWizard {
 				setErrorMessage(null);
 				setPageComplete(true);
 			}
+			fSuccessorPage.fireSettingsChanged();
 		}
 
 		private MemberActionInfo[] convertPullableMemberToMemberActionInfoArray() {
@@ -1190,6 +1194,8 @@ public final class PullUpWizard extends RefactoringWizard {
 
 		private ContainerCheckedTreeViewer fTreeViewer;
 
+		private boolean fChangedSettings= true;
+
 		private Label fTypeHierarchyLabel;
 
 		public PullUpInputPage2() {
@@ -1474,11 +1480,16 @@ public final class PullUpWizard extends RefactoringWizard {
 		}
 
 		public void setVisible(final boolean visible) {
-			if (visible) {
+			if (visible && fChangedSettings) {
+				fChangedSettings= false;
 				initializeTreeViewer();
 				setHierarchyLabelText();
 			}
 			super.setVisible(visible);
+		}
+
+		public void fireSettingsChanged() {
+			fChangedSettings= true;
 		}
 
 		private void showInSourceViewer(final ISourceReference selected) throws JavaModelException {
@@ -1514,7 +1525,8 @@ public final class PullUpWizard extends RefactoringWizard {
 	}
 
 	protected void addUserInputPages() {
-		addPage(new PullUpInputPage1());
-		addPage(new PullUpInputPage2());
+		PullUpInputPage2 page= new PullUpInputPage2();
+		addPage(new PullUpInputPage1(page));
+		addPage(page);
 	}
 }
