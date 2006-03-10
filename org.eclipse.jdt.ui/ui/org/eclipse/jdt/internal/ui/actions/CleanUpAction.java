@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -88,9 +89,9 @@ public class CleanUpAction extends SelectionDispatchAction {
 	 */
 	public void run(IStructuredSelection selection) {
 		ICompilationUnit[] cus= getCompilationUnits(selection);
-		if (cus.length == 0)
-			return;
-		if (cus.length == 1) {
+		if (cus.length == 0) {
+			MessageDialog.openInformation(getShell(), ActionMessages.CleanUpAction_EmptySelection_title, ActionMessages.CleanUpAction_EmptySelection_description);
+		} else if (cus.length == 1) {
 			run(cus[0]);
 		} else {
 			runOnMultiple(cus);

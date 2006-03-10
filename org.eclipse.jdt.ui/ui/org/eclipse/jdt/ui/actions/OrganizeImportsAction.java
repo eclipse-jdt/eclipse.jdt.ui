@@ -319,9 +319,9 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	 */
 	public void run(IStructuredSelection selection) {
 		ICompilationUnit[] cus= getCompilationUnits(selection);
-		if (cus.length == 0)
-			return;
-		if (cus.length == 1) {
+		if (cus.length == 0) {
+			MessageDialog.openInformation(getShell(), ActionMessages.OrganizeImportsAction_EmptySelection_title, ActionMessages.OrganizeImportsAction_EmptySelection_description);
+		} else if (cus.length == 1) {
 			run(cus[0]);
 		} else {
 			runOnMultiple(cus);

@@ -82,6 +82,9 @@ public final class ActionMessages extends NLS {
 	public static String CleanUpAction_MultiStateErrorTitle;
 	public static String CleanUpAction_UnexpectedErrorMessage;
 	public static String CleanUpAction_CUNotOnBuildpathMessage;
+	public static String CleanUpAction_EmptySelection_description;
+	public static String CleanUpAction_EmptySelection_title;
+	
 	public static String AddGetterSetterAction_no_primary_type_title;
 	public static String AddGetterSetterAction_no_primary_type_message;
 	public static String AddGetterSetterAction_label;
@@ -231,6 +234,9 @@ public final class ActionMessages extends NLS {
 	public static String OrganizeImportsAction_summary_removed;
 	public static String OrganizeImportsAction_multi_status_title;
 	public static String OrganizeImportsAction_multi_status_description;
+	public static String OrganizeImportsAction_EmptySelection_description;
+	public static String OrganizeImportsAction_EmptySelection_title;
+
 	public static String FormatAllAction_label;
 	public static String FormatAllAction_tooltip;
 	public static String FormatAllAction_description;
@@ -243,6 +249,9 @@ public final class ActionMessages extends NLS {
 	public static String FormatAllAction_failedvalidateedit_message;
 	public static String FormatAllAction_noundo_title;
 	public static String FormatAllAction_noundo_message;
+	public static String FormatAllAction_EmptySelection_description;
+	public static String FormatAllAction_EmptySelection_title;
+
 	public static String SortMembersAction_label;
 	public static String SortMembersAction_tooltip;
 	public static String SortMembersAction_description;

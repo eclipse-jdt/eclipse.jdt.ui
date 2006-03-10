@@ -251,8 +251,10 @@ public class FormatAllAction extends SelectionDispatchAction {
 	 */
 	public void run(IStructuredSelection selection) {
 		ICompilationUnit[] cus= getCompilationUnits(selection);
-		if (cus.length == 0)
+		if (cus.length == 0) {
+			MessageDialog.openInformation(getShell(), ActionMessages.FormatAllAction_EmptySelection_title, ActionMessages.FormatAllAction_EmptySelection_description);
 			return;
+		}
 		if (cus.length > 1) {
 			int returnCode= OptionalMessageDialog.open("FormatAll",  //$NON-NLS-1$
 					getShell(), 
