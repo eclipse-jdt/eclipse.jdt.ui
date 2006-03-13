@@ -90,7 +90,7 @@ public class TestRunListenerTest extends TestCase {
 			protected boolean condition() {
 				return fLaunchHasTerminated;
 			}
-		}.waitForCondition(Display.getCurrent(), 10*1000, 1000);
+		}.waitForCondition(Display.getCurrent(), 20*1000, 1000);
 		
 		if (! fLaunchHasTerminated)
 			fail("Launch has not terminated");
