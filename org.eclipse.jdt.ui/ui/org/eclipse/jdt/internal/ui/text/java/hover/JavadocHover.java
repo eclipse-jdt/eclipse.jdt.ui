@@ -109,7 +109,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 				 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 				 */
 				public IInformationControl doCreateInformationControl(Shell parent) {
-					return new BrowserInformationControl(parent, SWT.NO_TRIM, SWT.NONE, getTooltipAffordanceString(), true);
+					if (BrowserInformationControl.isAvailable(parent))
+						return new BrowserInformationControl(parent, SWT.NO_TRIM, SWT.NONE, getTooltipAffordanceString(), true);
+					else
+						return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true), getTooltipAffordanceString());
 				}
 				
 				/*
