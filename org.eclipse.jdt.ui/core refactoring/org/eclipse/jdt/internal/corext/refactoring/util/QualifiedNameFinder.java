@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import org.eclipse.text.edits.ReplaceEdit;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -71,6 +72,11 @@ public class QualifiedNameFinder {
 			if (! FileBuffers.getTextFileBufferManager().isTextFileLocation(file.getFullPath(), false))
 				return false;
 			
+			IPath path= file.getProjectRelativePath();
+			String segment= path.segment(0);
+			if (segment != null && (segment.startsWith(".refactorings") || segment.startsWith(".deprecations"))) //$NON-NLS-1$ //$NON-NLS-2$
+				return false;
+
 			return true;
 		}
 		
