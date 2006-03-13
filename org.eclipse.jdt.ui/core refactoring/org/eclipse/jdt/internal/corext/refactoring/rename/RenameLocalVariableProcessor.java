@@ -315,12 +315,11 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		fChange.setEdit(rootEdit);
 		fChange.setKeepPreviewEdits(true);
 
-		String changeName= Messages.format(RefactoringCoreMessages.RenameTempRefactoring_changeName, new String[]{fCurrentName, fNewName}); 
 		for (int i= 0; i < allRenameEdits.length; i++) {
 			if (fIsComposite) {
 				// Add a copy of the text edit (text edit may only have one
 				// parent) to keep problem reporting code clean
-				TextChangeCompatibility.addTextEdit(fChangeManager.get(fCu), changeName, allRenameEdits[i].copy(), fCategorySet);
+				TextChangeCompatibility.addTextEdit(fChangeManager.get(fCu), RefactoringCoreMessages.RenameTempRefactoring_changeName, allRenameEdits[i].copy(), fCategorySet);
 				
 				// Add a separate copy for problem reporting
 				allUnparentedRenameEdits[i]= allRenameEdits[i].copy();
@@ -328,7 +327,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 					unparentedDeclarationEdit= allUnparentedRenameEdits[i];
 			}
 			rootEdit.addChild(allRenameEdits[i]);
-			fChange.addTextEditGroup(new TextEditGroup(changeName, allRenameEdits[i]));
+			fChange.addTextEditGroup(new TextEditGroup(RefactoringCoreMessages.RenameTempRefactoring_changeName, allRenameEdits[i]));
 		}
 
 		// store information for analysis
