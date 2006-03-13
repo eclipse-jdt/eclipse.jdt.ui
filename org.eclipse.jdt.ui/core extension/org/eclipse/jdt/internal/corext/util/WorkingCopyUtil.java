@@ -26,27 +26,6 @@ public class WorkingCopyUtil {
 	private WorkingCopyUtil(){
 	}
 	
-	/**
-	 * @deprecated Inline this method.
-	 */
-	public static IJavaElement getWorkingCopyIfExists(IJavaElement element) {
-		return element;
-	}
-	
-	/**
-	 * @deprecated Inline this method.
-	 */
-	public static ICompilationUnit getWorkingCopyIfExists(ICompilationUnit element) {
-		return element;
-	}
-	
-	/**
-	 * @deprecated Inline this method.
-	 */
-	public static IMember getWorkingCopyIfExists(IMember member) {
-		return member;
-	}
-	
 	public static IJavaElement getOriginal(IMember member){
 		return JavaModelUtil.toOriginal(member);
 	}
