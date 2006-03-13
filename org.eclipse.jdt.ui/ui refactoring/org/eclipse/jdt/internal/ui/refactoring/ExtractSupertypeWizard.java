@@ -31,13 +31,15 @@ public final class ExtractSupertypeWizard extends RefactoringWizard {
 	public ExtractSupertypeWizard(final Refactoring refactoring) {
 		super(refactoring, WIZARD_BASED_USER_INTERFACE);
 		setDefaultPageTitle(RefactoringMessages.ExtractSupertypeWizard_defaultPageTitle);
-		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_PULL_UP);
+		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_EXTRACT_SUPERTYPE);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	protected void addUserInputPages() {
-		// TODO: implement
+		final PullUpMethodPage page= new PullUpMethodPage();
+		addPage(new PullUpMemberPage(page));
+		addPage(page);
 	}
 }

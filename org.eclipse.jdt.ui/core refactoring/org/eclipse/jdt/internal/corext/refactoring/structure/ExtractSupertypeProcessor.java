@@ -10,6 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+
 import org.eclipse.jdt.core.IMember;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -21,17 +29,31 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
  */
 public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor {
 
+	private static final String ID_EXTRACT_SUPERTYPE= "org.eclipse.jdt.ui.extract.supertype"; //$NON-NLS-1$
+
 	/**
 	 * Creates a new extract supertype refactoring processor.
 	 * 
 	 * @param members
-	 *            the members to extract, or <code>null</code> if invoked by
-	 *            scripting
+	 *            the members to extract, or <code>null</code> if invoked by scripting
 	 * @param settings
-	 *            the code generation settings, or <code>null</code> if
-	 *            invoked by scripting
+	 *            the code generation settings, or <code>null</code> if invoked by scripting
 	 */
 	public ExtractSupertypeProcessor(final IMember[] members, final CodeGenerationSettings settings) {
 		super(members, settings);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Change createChange(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+		return super.createChange(monitor);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public RefactoringStatus initialize(final RefactoringArguments arguments) {
+		return super.initialize(arguments);
 	}
 }
