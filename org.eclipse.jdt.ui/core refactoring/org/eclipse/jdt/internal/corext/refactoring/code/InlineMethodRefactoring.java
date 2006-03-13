@@ -190,12 +190,11 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 	
 	/**
 	 * Creates a new inline method refactoring
-	 * @param unit the compilation unit, class file, or <code>null</code> if invoked by scripting
-	 * @param node the compilation unit node, or <code>null</code> if invoked by scripting
+	 * @param unit the compilation unit or class file
+	 * @param node the compilation unit node
 	 * @param selectionStart
 	 * @param selectionLength
 	 */
-	//TODO: scripting will throw NPEs!
 	public static InlineMethodRefactoring create(IJavaElement unit, CompilationUnit node, int selectionStart, int selectionLength) {
 		ASTNode target= getTargetNode(unit, node, selectionStart, selectionLength);
 		if (target == null)
@@ -244,7 +243,14 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 		Assert.isTrue(getInitialMode() == Mode.INLINE_SINGLE);
 		fCurrentMode= mode;
 		if (mode == Mode.INLINE_SINGLE) {
-			fTargetProvider= TargetProvider.create((ICompilationUnit) fInitialUnit, (MethodInvocation)fInitialNode);
+			if (fInitialNode instanceof MethodInvocation)
+				fTargetProvider= TargetProvider.create((ICompilationUnit) fInitialUnit, (MethodInvocation)fInitialNode);
+			else if (fInitialNode instanceof SuperMethodInvocation)
+				fTargetProvider= TargetProvider.create((ICompilationUnit) fInitialUnit, (SuperMethodInvocation)fInitialNode);
+			else if (fInitialNode instanceof ConstructorInvocation)
+				fTargetProvider= TargetProvider.create((ICompilationUnit) fInitialUnit, (ConstructorInvocation)fInitialNode);
+			else
+				throw new IllegalStateException(String.valueOf(fInitialNode));
 		} else {
 			fTargetProvider= TargetProvider.create(fSourceProvider.getDeclaration());
 		}
