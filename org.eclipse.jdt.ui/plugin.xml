@@ -5061,6 +5061,15 @@
 	</extension>
 	
 	<extension
+			point="org.eclipse.ui.navigator.viewer">
+		<viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+			<includes>
+				<contentExtension pattern="org.eclipse.jdt.java.ui.javaContent" />
+			</includes>
+		</viewerContentBinding>
+	</extension>
+	
+	<extension
 			point="org.eclipse.ui.navigator.navigatorContent">
 		<navigatorContent
 				activeByDefault="true"
