@@ -798,16 +798,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			fCreator= new AbstractReusableInformationControlCreator() {
 				
 				/*
-				 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#createInformationControl(org.eclipse.swt.widgets.Shell)
-				 */
-				public IInformationControl createInformationControl(Shell parent) {
-					if (BrowserInformationControl.isAvailable(parent))
-						return super.createInformationControl(parent);
-					else
-						return null;
-				}
-				
-				/*
 				 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 				 */
 				public IInformationControl doCreateInformationControl(Shell parent) {
