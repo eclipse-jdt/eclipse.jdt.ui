@@ -924,8 +924,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveInnerToTopRefactoring_creating_preview;
 
-	public static String MoveInnerToTopRefactoring_deleted;
-
 	public static String MoveInnerToTopRefactoring_descriptor_description;
 
 	public static String MoveInnerToTopRefactoring_move_to_Top;

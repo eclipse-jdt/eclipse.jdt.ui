@@ -312,14 +312,6 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		return result;
 	}
 
-	private static IMethod[] getOriginals(IMethod[] methods) {
-		IMethod[] result= new IMethod[methods.length];
-		for (int i= 0; i < methods.length; i++) {
-			result[i]= (IMethod) JavaModelUtil.toOriginal(methods[i]);
-		}
-		return result;
-	}
-
 	private static void mergeSetsForCommonKeys(Map result, Map map) {
 		for (Iterator iter= result.keySet().iterator(); iter.hasNext();) {
 			IMember key= (IMember) iter.next();
@@ -1785,12 +1777,12 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	public void setMethodsToDeclareAbstract(IMethod[] methods) {
 		Assert.isNotNull(methods);
-		fMethodsToDeclareAbstract= getOriginals(methods);
+		fMethodsToDeclareAbstract= methods;
 	}
 
 	public void setMethodsToDelete(IMethod[] methodsToDelete) {
 		Assert.isNotNull(methodsToDelete);
-		fMethodsToDelete= getOriginals(methodsToDelete);
+		fMethodsToDelete= methodsToDelete;
 	}
 
 	/**

@@ -91,7 +91,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTy
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
@@ -568,7 +567,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	public IType getDeclaringType() {
 		if (fDeclaringType != null)
 			return fDeclaringType;
-		fDeclaringType= (IType) JavaModelUtil.toOriginal(fMembersToMove[0].getDeclaringType());
+		fDeclaringType= fMembersToMove[0].getDeclaringType();
 		return fDeclaringType;
 	}
 

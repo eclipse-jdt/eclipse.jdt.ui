@@ -735,15 +735,7 @@ public class MoveInnerToTopRefactoring extends CommentRefactoring implements IIn
 		}
 	}
 
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
-		IType orig= (IType) JavaModelUtil.toOriginal(fType);
-		if (orig == null || !orig.exists()) {
-
-			String message= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_deleted, new String[] { fType.getCompilationUnit().getElementName()}); 
-			return RefactoringStatus.createFatalErrorStatus(message);
-		}
-		fType= orig;
-
+	public RefactoringStatus checkInitialConditions(IProgressMonitor monitor) throws CoreException {
 		return Checks.checkIfCuBroken(fType);
 	}
 
