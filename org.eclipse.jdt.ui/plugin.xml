@@ -2203,6 +2203,7 @@
                label="%Refactoring.menu.label"
                path="edit"
                id="org.eclipse.jdt.ui.refactoring.menu">
+            <separator name="undoRedoGroup"/>
             <separator name="reorgGroup"/>
             <separator name="typeGroup"/>
             <separator name="codingGroup"/>
