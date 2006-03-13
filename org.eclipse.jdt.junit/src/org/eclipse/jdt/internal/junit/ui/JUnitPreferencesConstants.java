@@ -30,6 +30,12 @@ public class JUnitPreferencesConstants {
 	public final static String SHOW_ON_ERROR_ONLY= JUnitPlugin.PLUGIN_ID + ".show_on_error"; //$NON-NLS-1$
 	
 	/**
+	 * Boolean preference controlling whether the JUnit view should be shown on
+	 * errors only.
+	 */	
+	public static String ENABLE_ASSERTIONS= JUnitPlugin.PLUGIN_ID + ".enable_assertions"; //$NON-NLS-1$
+	
+	/**
 	 * List of active stack filters. A String containing a comma separated list
 	 * of fully qualified type names/patterns.
 	 */			

@@ -47,6 +47,7 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
@@ -314,6 +315,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 			wc.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, container);
 			if (testName.length() > 0)
 				wc.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, testName);	
+			AssertionVMArg.setArgDefault(wc);
 			config= wc.doSave();		
 		} catch (CoreException ce) {
 			JUnitPlugin.log(ce);

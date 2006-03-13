@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
@@ -77,6 +78,8 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
+
+import org.eclipse.jdt.internal.junit.launcher.AssertionVMArg;
 import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 
@@ -90,7 +93,11 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	private static final Image IMG_CUNIT= JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_CLASS);
 	private static final Image IMG_PKG= JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_PACKAGE);
 	
+	// enable assertions widget
+	private Button fEnableAssertionsCheckBox;
+
 	// Step filter widgets
+	private Label fFilterViewerLabel;
 	private CheckboxTableViewer fFilterViewer;
 	private Table fFilterTable;
 
@@ -306,7 +313,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		
 	public JUnitPreferencePage() {
 		super();
-		setDescription(JUnitMessages.JUnitPreferencePage_filter_label/*JUnitMessages.JUnitPreferencePage_description*/); 
+		setDescription(JUnitMessages.JUnitPreferencePage_description); 
 		setPreferenceStore(JUnitPlugin.getDefault().getPreferenceStore());
 	}
 
@@ -324,15 +331,41 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		data.horizontalAlignment= GridData.FILL;
 		composite.setLayoutData(data);
 
+		createEnableAssertionsCheckbox(composite);
 		createStackFilterPreferences(composite);
 		Dialog.applyDialogFont(composite);
 		return composite;
+	}
+
+	private void createEnableAssertionsCheckbox(Composite container) {
+		fEnableAssertionsCheckBox= new Button(container, SWT.CHECK | SWT.WRAP);
+		fEnableAssertionsCheckBox.setText(JUnitMessages.JUnitPreferencePage_enableassertionscheckbox_label); 
+		fEnableAssertionsCheckBox.setToolTipText(JUnitMessages.JUnitPreferencePage_enableassertionscheckbox_tooltip); 
+		GridData gd= getButtonGridData(fEnableAssertionsCheckBox);
+		fEnableAssertionsCheckBox.setLayoutData(gd);
+		SWTUtil.setButtonDimensionHint(fEnableAssertionsCheckBox);
+		setAssertionCheckBoxSelection(AssertionVMArg.getEnableAssertionsPreference());
+	}
+	
+	/**
+	 * Programatic access to enable assertions checkbox
+	 * @return boolean indicating check box selected or not
+	 */
+	public boolean getAssertionCheckBoxSelection() {
+		return fEnableAssertionsCheckBox.getSelection();
+	}
+
+	public void setAssertionCheckBoxSelection(boolean selected) {
+		fEnableAssertionsCheckBox.setSelection(selected);
 	}
 
 	/*
 	 * Create a group to contain the step filter related widgets
 	 */
 	private void createStackFilterPreferences(Composite composite) {
+		fFilterViewerLabel= new Label(composite, SWT.SINGLE | SWT.LEFT);
+		fFilterViewerLabel.setText(JUnitMessages.JUnitPreferencePage_filter_label);
+		
 		Composite container= new Composite(composite, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
@@ -690,6 +723,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	}
 	
 	public boolean performOk() {
+		AssertionVMArg.setEnableAssertionsPreference(getAssertionCheckBoxSelection());
 		fStackFilterContentProvider.saveFilters();
 		return true;
 	}
@@ -700,6 +734,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	}
 
 	private void setDefaultValues() {
+		fEnableAssertionsCheckBox.setSelection(false);
 		fStackFilterContentProvider.setDefaults();
 	}
 

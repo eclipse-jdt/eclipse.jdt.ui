@@ -110,7 +110,10 @@ public final class JUnitMessages extends NLS {
 	public static String JUnitPreferencePage_removefilterbutton_label;
 	public static String JUnitPreferencePage_removefilterbutton_tooltip;
 	public static String JUnitPreferencePage_showcheck_label;
-	
+
+	public static String JUnitPreferencePage_enableassertionscheckbox_label;
+	public static String JUnitPreferencePage_enableassertionscheckbox_tooltip;
+
 	public static String LaunchConfigChange_configDeleted;
 	public static String LaunchConfigRenameChange_name;
 	public static String LaunchConfigSetAttributeChange_name;

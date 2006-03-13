@@ -26,6 +26,7 @@ public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
 		Preferences prefs= JUnitPlugin.getDefault().getPluginPreferences();
 		prefs.setDefault(JUnitPreferencesConstants.DO_FILTER_STACK, true);
 		prefs.setDefault(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, false);
+		prefs.setDefault(JUnitPreferencesConstants.ENABLE_ASSERTIONS, false);
 
 		List defaults= JUnitPreferencesConstants.createDefaultStackFiltersList();
 		String[] filters= (String[]) defaults.toArray(new String[defaults.size()]);
