@@ -18,6 +18,7 @@ import java.util.Map;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -539,7 +540,8 @@ public final class JavaModelUtil {
 	 * Returns if a CU can be edited.
 	 */
 	public static boolean isEditable(ICompilationUnit cu)  {
-		IResource resource= toOriginal(cu).getResource();
+		Assert.isNotNull(cu);
+		IResource resource= cu.getPrimary().getResource();
 		return (resource.exists() && !resource.getResourceAttributes().isReadOnly());
 	}
 
