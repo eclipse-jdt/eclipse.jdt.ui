@@ -3977,16 +3977,6 @@
             commandId="org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
-            platform="carbon"
-            sequence="M2+M3+Z"
-            commandId=""
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            platform="carbon"
-            sequence="M2+M3+Y"
-            commandId=""
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
             sequence="M2+M3+R"
             commandId="org.eclipse.jdt.ui.edit.text.java.rename.element"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
