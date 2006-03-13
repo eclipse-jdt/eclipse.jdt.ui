@@ -530,9 +530,9 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 	private void createButtonComposite(Composite superComposite) {
 		Composite buttonComposite= new Composite(superComposite, SWT.NONE);
 		buttonComposite.setLayoutData(new GridData());
-		GridLayout bcl= new GridLayout();
-		bcl.numColumns= 2;
-		buttonComposite.setLayout(bcl);
+		GridLayout layout= new GridLayout(2, false);
+		layout.marginWidth= 0;
+		buttonComposite.setLayout(layout);
 
 		Button returnToDefaults= new Button(buttonComposite, SWT.PUSH);
 		returnToDefaults.setText(RefactoringMessages.RenameTypeWizardSimilarElementsPage_restore_defaults);

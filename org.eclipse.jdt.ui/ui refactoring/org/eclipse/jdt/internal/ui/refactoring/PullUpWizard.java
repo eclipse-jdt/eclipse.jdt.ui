@@ -42,7 +42,6 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
@@ -1198,6 +1197,8 @@ public final class PullUpWizard extends RefactoringWizard {
 
 		private Label fTypeHierarchyLabel;
 
+		private Label fSelectionLabel;
+		
 		public PullUpInputPage2() {
 			super(PAGE_NAME);
 			setMessage(RefactoringMessages.PullUpInputPage_select_methods);
@@ -1225,11 +1226,15 @@ public final class PullUpWizard extends RefactoringWizard {
 
 		private void createButtonComposite(final Composite superComposite) {
 			final Composite buttonComposite= new Composite(superComposite, SWT.NONE);
-			buttonComposite.setLayoutData(new GridData());
-			final GridLayout bcl= new GridLayout();
-			bcl.numColumns= 2;
-			bcl.marginWidth= 1;
-			buttonComposite.setLayout(bcl);
+			buttonComposite.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, true, false));
+			final GridLayout layout= new GridLayout(2, false);
+			layout.marginWidth= 0;
+			buttonComposite.setLayout(layout);
+
+			fSelectionLabel= new Label(buttonComposite, SWT.LEFT | SWT.WRAP | SWT.HORIZONTAL);
+			GridData data= new GridData(GridData.BEGINNING, GridData.BEGINNING, true, false);
+			data.widthHint= convertWidthInCharsToPixels(32);
+			fSelectionLabel.setLayoutData(data);
 
 			final Button button= new Button(buttonComposite, SWT.PUSH);
 			button.setText(RefactoringMessages.PullUpInputPage2_Select);
@@ -1513,8 +1518,7 @@ public final class PullUpWizard extends RefactoringWizard {
 		}
 
 		private void updateTypeHierarchyLabel() {
-			final String message= Messages.format(RefactoringMessages.PullUpInputPage_hierarchyLabal, new Integer(getCheckedMethods().length).toString());
-			setMessage(message, IMessageProvider.INFORMATION);
+			fSelectionLabel.setText(Messages.format(RefactoringMessages.PullUpInputPage_hierarchyLabal, String.valueOf(getCheckedMethods().length)));
 		}
 	}
 
