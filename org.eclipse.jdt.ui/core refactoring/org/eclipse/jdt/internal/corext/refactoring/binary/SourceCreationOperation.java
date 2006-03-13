@@ -10,36 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.binary;
 
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URI;
-import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Operation, which run, creates source code for a list of binary package
@@ -47,13 +29,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 3.2
  */
-public class SourceCreationOperation implements IWorkspaceRunnable {
-
-	/** The URI where to output the stubs */
-	private final URI fOutputURI;
-
-	/** The list of packages to create stubs for */
-	private final List fPackages;
+public class SourceCreationOperation extends AbstractCodeCreationOperation {
 
 	/**
 	 * Creates a new source creation operation.
@@ -64,60 +40,16 @@ public class SourceCreationOperation implements IWorkspaceRunnable {
 	 *            the list of packages to create source for
 	 */
 	public SourceCreationOperation(final URI uri, final List packages) {
-		Assert.isNotNull(uri);
-		Assert.isNotNull(packages);
-		fOutputURI= uri;
-		fPackages= packages;
+		super(uri, packages);
 	}
 
 	/**
-	 * Creates a new compilation unit with the given contents.
+	 * Returns the operation label.
 	 * 
-	 * @param store
-	 *            the file store
-	 * @param name
-	 *            the name of the compilation unit
-	 * @param content
-	 *            the content of the compilation unit
-	 * @param monitor
-	 *            the progress monitor to use
-	 * @throws CoreException
-	 *             if an error occurs while creating the compilation unit
+	 * @return the operation label
 	 */
-	protected void createCompilationUnit(final IFileStore store, final String name, final String content, final IProgressMonitor monitor) throws CoreException {
-		OutputStream stream= null;
-		try {
-			stream= new BufferedOutputStream(store.getChild(name).openOutputStream(EFS.NONE, new SubProgressMonitor(monitor, 1)));
-			try {
-				stream.write(content.getBytes());
-			} catch (IOException exception) {
-				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, exception.getLocalizedMessage(), exception));
-			}
-		} finally {
-			if (stream != null) {
-				try {
-					stream.close();
-				} catch (IOException exception) {
-					// Do nothing
-				}
-			}
-		}
-	}
-
-	/**
-	 * Creates a package fragment with the given name.
-	 * 
-	 * @param store
-	 *            the file store
-	 * @param name
-	 *            the name of the package
-	 * @param monitor
-	 *            the progress monitor to use
-	 * @throws CoreException
-	 *             if an error occurs while creating the package fragment
-	 */
-	protected void createPackageFragment(final IFileStore store, final String name, final IProgressMonitor monitor) throws CoreException {
-		store.mkdir(EFS.NONE, monitor);
+	protected String getOperationLabel() {
+		return RefactoringCoreMessages.SourceCreationOperation_creating_source_folder;
 	}
 
 	/**
@@ -132,71 +64,14 @@ public class SourceCreationOperation implements IWorkspaceRunnable {
 	 * @throws CoreException
 	 *             if an error occurs
 	 */
-	private void run(final IClassFile file, final IFileStore parent, final IProgressMonitor monitor) throws CoreException {
+	protected void run(final IClassFile file, final IFileStore parent, final IProgressMonitor monitor) throws CoreException {
 		try {
-			monitor.beginTask(RefactoringCoreMessages.SourceCreationOperation_creating_source_folder, 2);
-			SubProgressMonitor subProgressMonitor= new SubProgressMonitor(monitor, 1);
+			monitor.beginTask(getOperationLabel(), 2);
 			final IType type= file.getType();
-			final String name= type.getElementName();
-			if (name.length() == 0)
+			if (type.isAnonymous() || type.isLocal() || type.isMember())
 				return;
-			if (!Checks.isTopLevel(type))
-				return;
-			String source= "";
-
-			// TODO: implement
-
-			createCompilationUnit(parent, name + ".java", source, monitor); //$NON-NLS-1$
-		} finally {
-			monitor.done();
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void run(IProgressMonitor monitor) throws CoreException {
-		if (monitor == null)
-			monitor= new NullProgressMonitor();
-		monitor.beginTask(RefactoringCoreMessages.SourceCreationOperation_creating_source_folder, 100 * fPackages.size());
-		try {
-			final StringBuffer buffer= new StringBuffer(128);
-			for (final Iterator iterator= fPackages.iterator(); iterator.hasNext();) {
-				final IPackageFragment fragment= (IPackageFragment) iterator.next();
-				final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 100);
-				final IClassFile[] files= fragment.getClassFiles();
-				final int size= files.length;
-				subMonitor.beginTask(RefactoringCoreMessages.SourceCreationOperation_creating_source_folder, size * 50);
-				final String name= fragment.getElementName();
-				IFileStore store= EFS.getStore(fOutputURI);
-				String pack= ""; //$NON-NLS-1$
-				if (!"".equals(name)) { //$NON-NLS-1$
-					pack= name;
-					buffer.setLength(0);
-					buffer.append(name);
-					final int length= buffer.length();
-					for (int index= 0; index < length; index++) {
-						if (buffer.charAt(index) == '.')
-							buffer.setCharAt(index, '/');
-					}
-					store= store.getChild(new Path(buffer.toString()));
-					if (!store.fetchInfo(EFS.NONE, new SubProgressMonitor(subMonitor, 10)).exists())
-						createPackageFragment(store, pack, new SubProgressMonitor(subMonitor, 10));
-					else
-						subMonitor.worked(10);
-				}
-				final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 30);
-				try {
-					subsubMonitor.beginTask(RefactoringCoreMessages.SourceCreationOperation_creating_source_folder, size * 100);
-					for (int index= 0; index < size; index++) {
-						if (subMonitor.isCanceled())
-							throw new OperationCanceledException();
-						run(files[index], store, new SubProgressMonitor(subsubMonitor, 100));
-					}
-				} finally {
-					subsubMonitor.done();
-				}
-			}
+			final String source= file.getSource();
+			createCompilationUnit(parent, type.getElementName() + ".java", source != null ? source : "", monitor); //$NON-NLS-1$ //$NON-NLS-2$
 		} finally {
 			monitor.done();
 		}

@@ -78,6 +78,9 @@ public final class FixDeprecationRefactoringWizard extends BinaryRefactoringHist
 	/** The compilation unit */
 	private final ICompilationUnit fCompilationUnit;
 
+	/** The refactoring history proxy */
+	private final RefactoringHistoryProxy fHistoryProxy;
+
 	/** The selection length */
 	private final int fLength;
 
@@ -114,7 +117,8 @@ public final class FixDeprecationRefactoringWizard extends BinaryRefactoringHist
 		fCompilationUnit= unit;
 		fOffset= offset;
 		fLength= length;
-		setInput(new RefactoringHistoryProxy());
+		fHistoryProxy= new RefactoringHistoryProxy();
+		setInput(fHistoryProxy);
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR);
 		final IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
 		final IDialogSettings section= settings.getSection(DIALOG_SETTINGS_KEY);
@@ -141,13 +145,6 @@ public final class FixDeprecationRefactoringWizard extends BinaryRefactoringHist
 	 */
 	public boolean canFinish() {
 		return super.canFinish() && fRefactoringHistory != null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected boolean canUseSourceAttachment() {
-		return true;
 	}
 
 	/**
@@ -188,12 +185,10 @@ public final class FixDeprecationRefactoringWizard extends BinaryRefactoringHist
 	}
 
 	/**
-	 * Returns the refactoring history to apply.
-	 * 
-	 * @return the refactoring history to apply, or <code>null</code>
+	 * {@inheritDoc}
 	 */
 	public RefactoringHistory getRefactoringHistory() {
-		return fRefactoringHistory;
+		return fHistoryProxy;
 	}
 
 	/**
@@ -212,9 +207,12 @@ public final class FixDeprecationRefactoringWizard extends BinaryRefactoringHist
 
 	/**
 	 * Sets the package fragment root.
+	 * <p>
+	 * This method must be called before the wizard is created.
+	 * </p>
 	 * 
 	 * @param root
-	 *            the package fragment root
+	 *            the package fragment root, or <code>null</code>
 	 */
 	public void setPackageFragmentRoot(final IPackageFragmentRoot root) {
 		fPackageFragmentRoot= root;
@@ -222,6 +220,9 @@ public final class FixDeprecationRefactoringWizard extends BinaryRefactoringHist
 
 	/**
 	 * Sets the refactoring history to apply.
+	 * <p>
+	 * This method must be called before the wizard is created.
+	 * </p>
 	 * 
 	 * @param history
 	 *            the refactoring history to apply, or <code>null</code>

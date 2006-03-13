@@ -214,6 +214,9 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 		return result;
 	}
 
+	/** The refactoring history proxy */
+	private final RefactoringHistoryProxy fHistoryProxy;
+
 	/** The jar import data */
 	private final JarImportData fImportData= new JarImportData();
 
@@ -233,7 +236,8 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 		super(JarImportMessages.JarImportWizard_window_title, JarImportMessages.RefactoringImportPreviewPage_title, JarImportMessages.RefactoringImportPreviewPage_description);
 		fImportData.setRefactoringAware(true);
 		fImportData.setIncludeDirectoryEntries(true);
-		setInput(new RefactoringHistoryProxy());
+		fHistoryProxy= new RefactoringHistoryProxy();
+		setInput(fHistoryProxy);
 		final IDialogSettings section= JavaPlugin.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS_KEY);
 		if (section == null)
 			fNewSettings= true;
@@ -280,13 +284,6 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 	 */
 	public boolean canFinish() {
 		return super.canFinish() && fImportData.getPackageFragmentRoot() != null && fImportData.getRefactoringFileLocation() != null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected boolean canUseSourceAttachment() {
-		return false;
 	}
 
 	/**
@@ -341,7 +338,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 	 * {@inheritDoc}
 	 */
 	protected RefactoringHistory getRefactoringHistory() {
-		return fImportData.getRefactoringHistory();
+		return fHistoryProxy;
 	}
 
 	/**

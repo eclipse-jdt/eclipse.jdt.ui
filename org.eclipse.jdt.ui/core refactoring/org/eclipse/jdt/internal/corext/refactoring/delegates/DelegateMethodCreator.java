@@ -16,8 +16,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -27,7 +25,6 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
@@ -43,6 +40,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.deprecation.DeprecationRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDeprecationResolving;
 
 /**
@@ -177,47 +175,9 @@ public class DelegateMethodCreator extends DelegateCreator {
 		final MethodDeclaration declaration= (MethodDeclaration) getDeclaration();
 		final IMethodBinding binding= declaration.resolveBinding();
 		if (binding != null)
-			return getRefactoringScriptName(binding);
+			return DeprecationRefactorings.getRefactoringScriptName(binding);
 		return null;
 	}
-
-	/**
-	 * Returns the refactoring script name associated with the method binding.
-	 * 
-	 * @param binding
-	 *            the method binding
-	 * @return the refactoring script name, or <code>null</code>
-	 */
-	public static String getRefactoringScriptName(final IMethodBinding binding) {
-		Assert.isNotNull(binding);
-		final IJavaElement element= binding.getDeclaringClass().getJavaElement();
-		if (element instanceof IType) {
-			final IType type= (IType) element;
-			final StringBuffer buffer= new StringBuffer();
-			buffer.append(type.getFullyQualifiedName());
-			buffer.append('.');
-			buffer.append(binding.getName());
-			buffer.append('(');
-			final ITypeBinding[] parameters= binding.getParameterTypes();
-			for (int index= 0; index < parameters.length; index++) {
-				if (index != 0)
-					buffer.append(',');
-				final IJavaElement javaElem= parameters[index].getJavaElement();
-				if (javaElem instanceof IType)
-					buffer.append(((IType) javaElem).getFullyQualifiedName());
-				else if (javaElem instanceof ITypeParameter)
-					buffer.append(((ITypeParameter) javaElem).getElementName());
-				else
-					buffer.append(parameters[index].getQualifiedName());
-			}
-			buffer.append(')');
-			buffer.append(".xml"); //$NON-NLS-1$
-			return buffer.toString();
-		}
-		return null;
-	}
-
-	// ******************* INTERNAL HELPERS ***************************
 
 	private void createArguments(final MethodDeclaration declaration, final List arguments, boolean methodInvocation) throws JavaModelException {
 		Assert.isNotNull(declaration);

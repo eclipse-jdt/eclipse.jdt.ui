@@ -41,6 +41,7 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
@@ -150,7 +151,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 												if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
 													final URI location= getLocationURI(entry);
 													if (uri.equals(location))
-														status.addFatalError(MessageFormat.format(JarImportMessages.JarImportWizard_error_shared_jar, new String[] { current.getJavaProject().getElementName()}));
+														status.addFatalError(MessageFormat.format(JarImportMessages.JarImportWizard_error_shared_jar, new String[] { current.getJavaProject().getElementName() }));
 												}
 											}
 											subsubMonitor.worked(1);
@@ -295,31 +296,35 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 			fJavaProject= null;
 			fSourceFolder= null;
 			fProcessedFragments.clear();
-			monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 500);
+			monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 520);
 			status.merge(super.aboutToPerformHistory(new SubProgressMonitor(monitor, 10, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
 			if (!status.hasFatalError()) {
 				final IPackageFragmentRoot root= getPackageFragmentRoot();
 				if (root != null) {
 					status.merge(checkPackageFragmentRoots(root, new SubProgressMonitor(monitor, 90, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
 					if (!status.hasFatalError()) {
-						final IJavaProject project= root.getJavaProject();
-						if (project != null) {
-							final IFolder folder= project.getProject().getFolder(SOURCE_FOLDER + String.valueOf(System.currentTimeMillis()));
-							try {
-								fAutoBuild= CoreUtility.enableAutoBuild(false);
-								if (getRefactoringHistory() != null)
-									configureClasspath(project, root, folder, new SubProgressMonitor(monitor, 300, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-							} catch (CoreException exception) {
-								status.merge(RefactoringStatus.createFatalErrorStatus(exception.getLocalizedMessage()));
+						status.merge(checkSourceAttachmentRefactorings(new SubProgressMonitor(monitor, 20, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
+						if (!status.hasFatalError()) {
+							final IJavaProject project= root.getJavaProject();
+							if (project != null) {
+								final IFolder folder= project.getProject().getFolder(SOURCE_FOLDER + String.valueOf(System.currentTimeMillis()));
 								try {
-									project.setRawClasspath(project.readRawClasspath(), false, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-								} catch (CoreException throwable) {
-									JavaPlugin.log(throwable);
-								}
-							} finally {
-								if (!status.hasFatalError()) {
-									fJavaProject= project;
-									fSourceFolder= folder;
+									fAutoBuild= CoreUtility.enableAutoBuild(false);
+									final RefactoringHistory history= getRefactoringHistory();
+									if (history != null && !history.isEmpty())
+										configureClasspath(project, root, folder, new SubProgressMonitor(monitor, 300, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+								} catch (CoreException exception) {
+									status.merge(RefactoringStatus.createFatalErrorStatus(exception.getLocalizedMessage()));
+									try {
+										project.setRawClasspath(project.readRawClasspath(), false, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+									} catch (CoreException throwable) {
+										JavaPlugin.log(throwable);
+									}
+								} finally {
+									if (!status.hasFatalError()) {
+										fJavaProject= project;
+										fSourceFolder= folder;
+									}
 								}
 							}
 						}
@@ -367,6 +372,36 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Checks whether there are any refactorings to be executed which need a
+	 * source attachment, but none exists.
+	 * 
+	 * @param monitor
+	 *            the progress monitor
+	 * @return a status describing the outcome of the check
+	 */
+	protected RefactoringStatus checkSourceAttachmentRefactorings(final IProgressMonitor monitor) {
+		final RefactoringStatus status= new RefactoringStatus();
+		try {
+			if (!canUseSourceAttachment()) {
+				final RefactoringDescriptorProxy[] proxies= getRefactoringHistory().getDescriptors();
+				monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, proxies.length * 100);
+				for (int index= 0; index < proxies.length; index++) {
+					final RefactoringDescriptor descriptor= proxies[index].requestDescriptor(new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+					if (descriptor != null) {
+						final int flags= descriptor.getFlags();
+						if ((flags & JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT) != 0)
+							status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(JarImportMessages.BinaryRefactoringHistoryWizard_error_missing_source_attachment, descriptor.getDescription())));
+					}
+				}
+			} else
+				monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 1);
+		} finally {
+			monitor.done();
+		}
+		return status;
 	}
 
 	/**
@@ -527,9 +562,10 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 				final IClasspathEntry[] entries= fJavaProject.readRawClasspath();
 				final boolean changed= deconfigureClasspath(entries, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 				final RefactoringHistory history= getRefactoringHistory();
-				if (history != null)
+				final boolean valid= history != null && !history.isEmpty();
+				if (valid)
 					RefactoringCore.getUndoManager().flush();
-				if (history != null || changed)
+				if (valid || changed)
 					fJavaProject.setRawClasspath(entries, changed, new SubProgressMonitor(monitor, 60, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 				fJavaProject= null;
 			}
@@ -556,7 +592,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	/**
 	 * Returns the refactoring history to perform.
 	 * 
-	 * @return the refactoring history to perform, or <code>null</code>
+	 * @return the refactoring history to perform, or the empty history
 	 */
 	protected abstract RefactoringHistory getRefactoringHistory();
 

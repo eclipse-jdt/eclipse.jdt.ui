@@ -14,6 +14,8 @@ import org.eclipse.osgi.util.NLS;
 
 public final class JarImportMessages extends NLS {
 
+	public static String BinaryRefactoringHistoryWizard_error_missing_source_attachment;
+
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.jarimport.JarImportMessages";//$NON-NLS-1$
 
 	public static String JarImportWizard_cleanup_import;

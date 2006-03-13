@@ -14,7 +14,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -31,6 +30,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.deprecation.DeprecationRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDeprecationResolving;
 
@@ -106,28 +106,7 @@ public class DelegateFieldCreator extends DelegateCreator {
 	protected String getRefactoringScriptName() {
 		final IVariableBinding binding= fOldFieldFragment.resolveBinding();
 		if (binding != null)
-			return getRefactoringScriptName(binding);
-		return null;
-	}
-
-	/**
-	 * Returns the refactoring script name associated with the variable binding.
-	 * 
-	 * @param binding
-	 *            the variable binding
-	 * @return the refactoring script name, or <code>null</code>
-	 */
-	public static String getRefactoringScriptName(final IVariableBinding binding) {
-		final IJavaElement element= binding.getDeclaringClass().getJavaElement();
-		if (element instanceof IType) {
-			final IType type= (IType) element;
-			final StringBuffer buffer= new StringBuffer();
-			buffer.append(type.getFullyQualifiedName());
-			buffer.append('.');
-			buffer.append(binding.getName());
-			buffer.append(".xml"); //$NON-NLS-1$
-			return buffer.toString();
-		}
+			return DeprecationRefactorings.getRefactoringScriptName(binding);
 		return null;
 	}
 

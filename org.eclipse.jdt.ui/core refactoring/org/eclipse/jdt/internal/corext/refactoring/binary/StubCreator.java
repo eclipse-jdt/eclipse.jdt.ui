@@ -35,14 +35,15 @@ public class StubCreator {
 
 	/** The internal string buffer */
 	protected StringBuffer fBuffer;
+
 	/** Should stubs for private member be generated as well? */
-	private final boolean fStubInvisible;
+	protected final boolean fStubInvisible;
 
 	public StubCreator(final boolean stubInvisible) {
 		fStubInvisible= stubInvisible;
 	}
 
-	private void appendEnumConstants(final IType type) throws JavaModelException {
+	protected void appendEnumConstants(final IType type) throws JavaModelException {
 		final IField[] fields= type.getFields();
 		final List list= new ArrayList(fields.length);
 		for (int index= 0; index < fields.length; index++) {
@@ -58,7 +59,7 @@ public class StubCreator {
 		fBuffer.append(";"); //$NON-NLS-1$
 	}
 
-	private void appendExpression(final String signature) {
+	protected void appendExpression(final String signature) {
 		switch (signature.charAt(0)) {
 			case Signature.C_BOOLEAN:
 				fBuffer.append("false"); //$NON-NLS-1$
@@ -80,8 +81,8 @@ public class StubCreator {
 				break;
 		}
 	}
-	
-	private void appendFieldDeclaration(final IField field) throws JavaModelException {
+
+	protected void appendFieldDeclaration(final IField field) throws JavaModelException {
 		appendFlags(field);
 		fBuffer.append(" "); //$NON-NLS-1$
 		final String signature= field.getTypeSignature();
@@ -95,7 +96,7 @@ public class StubCreator {
 		fBuffer.append(";"); //$NON-NLS-1$
 	}
 
-	private void appendFlags(final IMember member) throws JavaModelException {
+	protected void appendFlags(final IMember member) throws JavaModelException {
 		int flags= member.getFlags();
 		final int kind= member.getElementType();
 		if (kind == IJavaElement.TYPE) {
@@ -114,7 +115,7 @@ public class StubCreator {
 			fBuffer.append(Flags.toString(flags));
 	}
 
-	private void appendMembers(final IType type, final IProgressMonitor monitor) throws JavaModelException {
+	protected void appendMembers(final IType type, final IProgressMonitor monitor) throws JavaModelException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, 1);
 			final IJavaElement[] children= type.getChildren();
@@ -156,7 +157,51 @@ public class StubCreator {
 		}
 	}
 
-	private void appendMethodDeclaration(final IMethod method) throws JavaModelException {
+	protected void appendMethodBody(final IMethod method) throws JavaModelException {
+		if (method.isConstructor()) {
+			final IType declaringType= method.getDeclaringType();
+			String superSignature= declaringType.getSuperclassTypeSignature();
+			if (superSignature != null) {
+				superSignature= Signature.getTypeErasure(superSignature);
+				final IType superclass= declaringType.getJavaProject().findType(Signature.getSignatureQualifier(superSignature), Signature.getSignatureSimpleName(superSignature));
+				if (superclass != null) {
+					final IMethod[] superMethods= superclass.getMethods();
+					IMethod superConstructor= null;
+					final int length= superMethods.length;
+					for (int index= 0; index < length; index++) {
+						final IMethod superMethod= superMethods[index];
+						if (superMethod.isConstructor() && !Flags.isPrivate(superMethod.getFlags())) {
+							superConstructor= superMethod;
+							if (superConstructor.getExceptionTypes().length == 0)
+								break;
+						}
+					}
+					if (superConstructor != null) {
+						final String[] superParameters= superConstructor.getParameterTypes();
+						final int paramLength= superParameters.length;
+						if (paramLength != 0) {
+							fBuffer.append("super("); //$NON-NLS-1$
+							for (int index= 0; index < paramLength; index++) {
+								if (index > 0)
+									fBuffer.append(","); //$NON-NLS-1$
+								appendExpression(superParameters[index]);
+							}
+							fBuffer.append(");"); //$NON-NLS-1$
+						}
+					}
+				}
+			}
+		} else {
+			String returnType= method.getReturnType();
+			if (!Signature.SIG_VOID.equals(returnType)) {
+				fBuffer.append("return "); //$NON-NLS-1$
+				appendExpression(returnType);
+				fBuffer.append(";"); //$NON-NLS-1$
+			}
+		}
+	}
+
+	protected void appendMethodDeclaration(final IMethod method) throws JavaModelException {
 		appendFlags(method);
 		fBuffer.append(" "); //$NON-NLS-1$
 		final String returnType= method.getReturnType();
@@ -212,51 +257,7 @@ public class StubCreator {
 		fBuffer.append(index);
 	}
 
-	protected void appendMethodBody(final IMethod method) throws JavaModelException {
-		if (method.isConstructor()) {
-			final IType declaringType= method.getDeclaringType();
-			String superSignature= declaringType.getSuperclassTypeSignature();
-			if (superSignature != null) {
-				superSignature= Signature.getTypeErasure(superSignature);
-				final IType superclass= declaringType.getJavaProject().findType(Signature.getSignatureQualifier(superSignature), Signature.getSignatureSimpleName(superSignature));
-				if (superclass != null) {
-					final IMethod[] superMethods= superclass.getMethods();
-					IMethod superConstructor= null;
-					final int length= superMethods.length;
-					for (int index= 0; index < length; index++) {
-						final IMethod superMethod= superMethods[index];
-						if (superMethod.isConstructor() && !Flags.isPrivate(superMethod.getFlags())) {
-							superConstructor= superMethod;
-							if (superConstructor.getExceptionTypes().length == 0)
-								break;
-						}
-					}
-					if (superConstructor != null) {
-						final String[] superParameters= superConstructor.getParameterTypes();
-						final int paramLength= superParameters.length;
-						if (paramLength != 0) {
-							fBuffer.append("super("); //$NON-NLS-1$
-							for (int index= 0; index < paramLength; index++) {
-								if (index > 0)
-									fBuffer.append(","); //$NON-NLS-1$
-								appendExpression(superParameters[index]);
-							}
-							fBuffer.append(");"); //$NON-NLS-1$
-						}
-					}
-				}
-			}
-		} else {
-			String returnType= method.getReturnType();
-			if (!Signature.SIG_VOID.equals(returnType)) {
-				fBuffer.append("return "); //$NON-NLS-1$
-				appendExpression(returnType);
-				fBuffer.append(";"); //$NON-NLS-1$
-			}
-		}
-	}
-
-	private void appendSuperInterfaceTypes(final IType type) throws JavaModelException {
+	protected void appendSuperInterfaceTypes(final IType type) throws JavaModelException {
 		final String[] signatures= type.getSuperInterfaceTypeSignatures();
 		if (signatures.length > 0) {
 			if (type.isInterface())
@@ -271,7 +272,7 @@ public class StubCreator {
 		}
 	}
 
-	private void appendTopLevelType(final IType type, IProgressMonitor subProgressMonitor) throws JavaModelException {
+	protected void appendTopLevelType(final IType type, IProgressMonitor subProgressMonitor) throws JavaModelException {
 		String packageName= type.getPackageFragment().getElementName();
 		if (packageName.length() > 0) {
 			fBuffer.append("package "); //$NON-NLS-1$
@@ -281,7 +282,7 @@ public class StubCreator {
 		appendTypeDeclaration(type, subProgressMonitor);
 	}
 
-	private void appendTypeDeclaration(final IType type, final IProgressMonitor monitor) throws JavaModelException {
+	protected void appendTypeDeclaration(final IType type, final IProgressMonitor monitor) throws JavaModelException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, 1);
 			if (type.isInterface()) {
@@ -329,7 +330,7 @@ public class StubCreator {
 		}
 	}
 
-	private void appendTypeParameters(final ITypeParameter[] parameters) throws JavaModelException {
+	protected void appendTypeParameters(final ITypeParameter[] parameters) throws JavaModelException {
 		final int length= parameters.length;
 		if (length > 0)
 			fBuffer.append("<"); //$NON-NLS-1$
@@ -354,7 +355,8 @@ public class StubCreator {
 
 	/**
 	 * @param topLevelType
-	 * @param monitor progress monitor, can be <code>null</code>
+	 * @param monitor
+	 *            progress monitor, can be <code>null</code>
 	 * @return source stub
 	 * @throws JavaModelException
 	 */
@@ -362,7 +364,7 @@ public class StubCreator {
 		Assert.isTrue(Checks.isTopLevel(topLevelType));
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
-		
+
 		fBuffer= new StringBuffer(2046);
 		appendTopLevelType(topLevelType, monitor);
 		String result= fBuffer.toString();

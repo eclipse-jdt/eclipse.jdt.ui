@@ -13,12 +13,16 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -47,6 +51,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -112,9 +118,8 @@ import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateFieldCreator;
-import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.deprecation.CreateDeprecationScriptChange;
+import org.eclipse.jdt.internal.corext.refactoring.deprecation.DeprecationRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.deprecation.IDeprecationConstants;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -130,6 +135,8 @@ import org.eclipse.jdt.internal.ui.deprecation.FixDeprecationRefactoringWizard;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
+import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
+import org.eclipse.jdt.internal.ui.refactoring.binary.BinaryRefactoringHistoryWizard;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 
 /**
@@ -360,9 +367,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		String fileName= null;
 		if (binding instanceof IVariableBinding)
-			fileName= DelegateFieldCreator.getRefactoringScriptName((IVariableBinding) binding);
+			fileName= DeprecationRefactorings.getRefactoringScriptName((IVariableBinding) binding);
 		else if (binding instanceof IMethodBinding) {
-			fileName= DelegateMethodCreator.getRefactoringScriptName((IMethodBinding) binding);
+			fileName= DeprecationRefactorings.getRefactoringScriptName((IMethodBinding) binding);
 		}
 		if (fileName == null)
 			return false;
@@ -413,7 +420,21 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			resultingCollections.add(proposal);
 			return true;
 		} else {
-			if (!file.exists())
+			final IPackageFragmentRoot[] roots= { null };
+			final IJavaElement element= binding.getJavaElement();
+			if (element != null) {
+				roots[0]= (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+				if (roots[0] != null && !roots[0].isArchive())
+					roots[0]= null;
+			}
+			final RefactoringHistory[] histories= { null };
+			if (file.exists()) {
+				histories[0]= getRefactoringHistory(file);
+			} else if (roots[0] != null) {
+				histories[0]= getRefactoringHistory(roots[0], fileName);
+			} else
+				return false;
+			if (histories[0] == null)
 				return false;
 			if (resultingCollections == null)
 				return true;
@@ -423,36 +444,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 				private static final int SIZING_WIZARD_WIDTH= 490;
 
-				private RefactoringHistory fCachedHistory= null;
-
-				private RefactoringHistory getRefactoringHistory() {
-					if (fCachedHistory == null) {
-						InputStream stream= null;
-						try {
-							stream= new BufferedInputStream(file.getContents(true));
-							fCachedHistory= RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.DEPRECATION_RESOLVING);
-						} catch (CoreException exception) {
-							JavaPlugin.log(exception);
-						} finally {
-							if (stream != null) {
-								try {
-									stream.close();
-								} catch (IOException exception) {
-									JavaPlugin.log(exception);
-								}
-							}
-						}
-					}
-					return fCachedHistory;
-				}
-
 				public final void apply(final IDocument document) {
-					final RefactoringHistory history= getRefactoringHistory();
-					if (history == null || history.isEmpty())
+					if (histories[0].isEmpty())
 						return;
-					final FixDeprecationRefactoringWizard wizard= new FixDeprecationRefactoringWizard(history.getDescriptors().length > 1, context.getCompilationUnit(), node.getStartPosition(), node.getLength());
+					final FixDeprecationRefactoringWizard wizard= new FixDeprecationRefactoringWizard(histories[0].getDescriptors().length > 1, context.getCompilationUnit(), node.getStartPosition(), node.getLength());
 					final WizardDialog dialog= new WizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard);
-					wizard.setRefactoringHistory(history);
+					wizard.setRefactoringHistory(histories[0]);
+					wizard.setPackageFragmentRoot(roots[0]);
 					dialog.create();
 					dialog.getShell().setSize(Math.max(SIZING_WIZARD_WIDTH, dialog.getShell().getSize().x), SIZING_WIZARD_HEIGHT);
 					PlatformUI.getWorkbench().getHelpSystem().setHelp(dialog.getShell(), IJavaHelpContextIds.FIX_DEPRECATION_WIZARD_PAGE);
@@ -466,12 +464,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				}
 
 				public final String getAdditionalProposalInfo() {
-					final RefactoringHistory history= getRefactoringHistory();
-					if (history == null || history.isEmpty())
+					if (histories[0].isEmpty())
 						return ""; //$NON-NLS-1$
 					final StringBuffer buffer= new StringBuffer(512);
 					HTMLPrinter.startBulletList(buffer);
-					final RefactoringDescriptorProxy[] proxies= history.getDescriptors();
+					final RefactoringDescriptorProxy[] proxies= histories[0].getDescriptors();
 					for (int index= 0; index < proxies.length; index++) {
 						HTMLPrinter.addBullet(buffer, proxies[index].getDescription());
 					}
@@ -482,6 +479,63 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			resultingCollections.add(proposal);
 			return true;
 		}
+	}
+
+	private static RefactoringHistory getRefactoringHistory(IFile file) {
+		InputStream stream= null;
+		try {
+			stream= new BufferedInputStream(file.getContents(true));
+			return RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.DEPRECATION_RESOLVING);
+		} catch (CoreException exception) {
+			JavaPlugin.log(exception);
+		} finally {
+			if (stream != null) {
+				try {
+					stream.close();
+				} catch (IOException exception) {
+					// Do nothing
+				}
+			}
+		}
+		return null;
+	}
+
+	private static RefactoringHistory getRefactoringHistory(IPackageFragmentRoot root, String name) {
+		try {
+			final URI uri= BinaryRefactoringHistoryWizard.getLocationURI(root.getRawClasspathEntry());
+			if (uri != null) {
+				final File file= new File(uri);
+				if (file.exists()) {
+					ZipFile zip= null;
+					try {
+						zip= new ZipFile(file, ZipFile.OPEN_READ);
+						ZipEntry entry= zip.getEntry(JarPackagerUtil.getDeprecationEntry(name));
+						if (entry != null) {
+							InputStream stream= null;
+							try {
+								stream= zip.getInputStream(entry);
+								return RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.DEPRECATION_RESOLVING);
+							} catch (CoreException exception) {
+								JavaPlugin.log(exception);
+							} finally {
+								if (stream != null) {
+									try {
+										stream.close();
+									} catch (IOException exception) {
+										// Do nothing
+									}
+								}
+							}
+						}
+					} catch (IOException exception) {
+						// Just leave it
+					}
+				}
+			}
+		} catch (JavaModelException exception) {
+			JavaPlugin.log(exception);
+		}
+		return null;
 	}
 
 	private static boolean getSplitVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
