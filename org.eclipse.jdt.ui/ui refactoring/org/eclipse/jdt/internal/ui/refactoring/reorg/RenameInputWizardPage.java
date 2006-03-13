@@ -67,14 +67,15 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		Composite superComposite= new Composite(parent, SWT.NONE);
 		setControl(superComposite);
 		initializeDialogUnits(superComposite);
-		
 		superComposite.setLayout(new GridLayout());
 		Composite composite= new Composite(superComposite, SWT.NONE);
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
 		
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
-		layout.verticalSpacing= 8;
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+
 		composite.setLayout(layout);
 		RowLayouter layouter= new RowLayouter(2);
 		
@@ -87,15 +88,22 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		gd.widthHint= convertWidthInCharsToPixels(25);
 		text.setLayoutData(gd);
 
-				
 		layouter.perform(label, text, 1);
+
+		Label separator= new Label(composite, SWT.NONE);
+		GridData gridData= new GridData(SWT.FILL, SWT.FILL, false, false);
+		gridData.heightHint= 2;
+		separator.setLayoutData(gridData);
+		
+		
+		int indent= convertWidthInCharsToPixels(2);
 		
 		addOptionalUpdateReferencesCheckbox(composite, layouter);
 		addAdditionalOptions(composite, layouter);
 		addOptionalUpdateTextualMatches(composite, layouter);
-		addOptionalUpdateQualifiedNameComponent(composite, layouter, layout.marginWidth);
+		addOptionalUpdateQualifiedNameComponent(composite, layouter, indent);
 		addOptionalLeaveDelegateCheckbox(composite, layouter);
-		addOptionalDeprecateDelegateCheckbox(composite, layouter, layout.marginWidth);
+		addOptionalDeprecateDelegateCheckbox(composite, layouter, indent);
 		updateForcePreview();
 		
 		Dialog.applyDialogFont(superComposite);
