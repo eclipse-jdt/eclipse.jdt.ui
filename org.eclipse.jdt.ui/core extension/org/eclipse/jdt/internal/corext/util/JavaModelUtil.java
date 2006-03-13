@@ -71,7 +71,6 @@ import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.JavaRuntime;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
@@ -549,9 +548,6 @@ public final class JavaModelUtil {
 	 * an original the input is returned. The returned member might not exist
 	 */
 	public static IMember toOriginal(IMember member) {
-		if (PRIMARY_ONLY) {
-			testCompilationUnitOwner("toOriginal", member.getCompilationUnit()); //$NON-NLS-1$
-		}
 		if (member instanceof IMethod)
 			return toOriginalMethod((IMethod)member);
 		
@@ -589,17 +585,12 @@ public final class JavaModelUtil {
 			return null;
 		}	
 	}
-	
-	private static boolean PRIMARY_ONLY= false;
 
 	/**
 	 * Returns the original cu if the given cu is a working copy. If the cu is already
 	 * an original the input cu is returned. The returned cu might not exist
 	 */
 	public static ICompilationUnit toOriginal(ICompilationUnit cu) {
-		if (PRIMARY_ONLY) {
-			testCompilationUnitOwner("toOriginal", cu); //$NON-NLS-1$
-		}
 		// To stay compatible with old version returned null
 		// if cu is null
 		if (cu == null)
@@ -614,25 +605,14 @@ public final class JavaModelUtil {
 	public static IJavaElement toOriginal(IJavaElement element) {
 		return element.getPrimaryElement();
 	}	
-		
-	private static void testCompilationUnitOwner(String methodName, ICompilationUnit cu) {
-		if (cu == null) {
-			return;
-		}
-		if (!isPrimary(cu))  {
-			JavaPlugin.logErrorMessage(methodName + ": operating with non-primary cu"); //$NON-NLS-1$
-		}
-	}
-	
-	
+
 	/**
 	 * Returns true if a cu is a primary cu (original or shared working copy)
 	 */
 	public static boolean isPrimary(ICompilationUnit cu) {
 		return cu.getOwner() == null;
 	}
-	
-	
+
 	/*
 	 * http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 	 * 

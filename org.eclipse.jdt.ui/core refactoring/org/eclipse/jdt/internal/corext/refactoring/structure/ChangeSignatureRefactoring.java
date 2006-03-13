@@ -134,7 +134,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -689,7 +688,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 			RefactoringStatus result= Checks.checkIfCuBroken(fMethod);
 			if (result.hasFatalError())
 				return result;
-			IMethod orig= (IMethod) WorkingCopyUtil.getOriginal(fMethod);
+			IMethod orig= (IMethod) JavaModelUtil.toOriginal(fMethod);
 			if (orig == null || !orig.exists()) {
 				String message= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_method_deleted, getCu().getElementName());
 				return RefactoringStatus.createFatalErrorStatus(message);

@@ -128,7 +128,6 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -737,7 +736,7 @@ public class MoveInnerToTopRefactoring extends CommentRefactoring implements IIn
 	}
 
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
-		IType orig= (IType) WorkingCopyUtil.getOriginal(fType);
+		IType orig= (IType) JavaModelUtil.toOriginal(fType);
 		if (orig == null || !orig.exists()) {
 
 			String message= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_deleted, new String[] { fType.getCompilationUnit().getElementName()}); 
@@ -855,7 +854,7 @@ public class MoveInnerToTopRefactoring extends CommentRefactoring implements IIn
 	private Change createCompilationUnitForMovedType(IProgressMonitor pm) throws CoreException {
 		ICompilationUnit newCuWC= null;
 		try {
-			newCuWC= WorkingCopyUtil.getNewWorkingCopy(fType.getPackageFragment(), (getCompilationUnitName()));
+			newCuWC= fType.getPackageFragment().getCompilationUnit(getCompilationUnitName()).getWorkingCopy(null);
 			String source= createSourceForNewCu(newCuWC, pm);
 			return new CreateTextFileChange(ResourceUtil.getFile(fType.getCompilationUnit()).getFullPath().removeLastSegments(1).append((getCompilationUnitName())), source, null, "java"); //$NON-NLS-1$
 		} finally {

@@ -45,7 +45,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
@@ -96,7 +95,7 @@ public class AccessorClassCreator {
 	private String getUnformattedSource(IProgressMonitor pm) throws CoreException {
 		ICompilationUnit newCu= null;
 		try {
-			newCu= WorkingCopyUtil.getNewWorkingCopy(fAccessorPackage, fAccessorPath.lastSegment());
+			newCu= fAccessorPackage.getCompilationUnit(fAccessorPath.lastSegment()).getWorkingCopy(null);
 
 			String typeComment= null, fileComment= null;
 			final IJavaProject project= newCu.getJavaProject();

@@ -121,7 +121,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -316,7 +315,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	private static IMethod[] getOriginals(IMethod[] methods) {
 		IMethod[] result= new IMethod[methods.length];
 		for (int i= 0; i < methods.length; i++) {
-			result[i]= (IMethod) WorkingCopyUtil.getOriginal(methods[i]);
+			result[i]= (IMethod) JavaModelUtil.toOriginal(methods[i]);
 		}
 		return result;
 	}
@@ -815,22 +814,19 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	/**
 	 * {@inheritDoc}
 	 */
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		try {
-			pm.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, 1);
-			RefactoringStatus result= new RefactoringStatus();
-
-			fMembersToMove= WorkingCopyUtil.getOriginals(fMembersToMove);
-
-			result.merge(checkDeclaringType(new SubProgressMonitor(pm, 1)));
-			if (result.hasFatalError())
-				return result;
-			result.merge(checkIfMembersExist());
-			if (result.hasFatalError())
-				return result;
-			return result;
+			monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, 1);
+			RefactoringStatus status= new RefactoringStatus();
+			status.merge(checkDeclaringType(new SubProgressMonitor(monitor, 1)));
+			if (status.hasFatalError())
+				return status;
+			status.merge(checkIfMembersExist());
+			if (status.hasFatalError())
+				return status;
+			return status;
 		} finally {
-			pm.done();
+			monitor.done();
 		}
 	}
 
@@ -1251,7 +1247,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	private ICompilationUnit createWorkingCopy(ICompilationUnit unit, TextEdit edit, RefactoringStatus status, IProgressMonitor monitor) {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, 1);
-			ICompilationUnit copy= WorkingCopyUtil.getNewWorkingCopy((IPackageFragment) unit.getParent(), unit.getElementName(), fOwner, new SubProgressMonitor(monitor, 1));
+			ICompilationUnit copy= ((IPackageFragment) unit.getParent()).getCompilationUnit(unit.getElementName()).getWorkingCopy(fOwner, null, new SubProgressMonitor(monitor, 1));
 			IDocument document= new Document(unit.getBuffer().getContents());
 			edit.apply(document, TextEdit.UPDATE_REGIONS);
 			copy.getBuffer().setContents(document.get());
@@ -1417,9 +1413,9 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	private IMember[] getMembersToDelete(IProgressMonitor pm) throws JavaModelException {
 		try {
-			IMember[] typesToDelete= WorkingCopyUtil.getOriginals(getMembersOfType(fMembersToMove, IJavaElement.TYPE));
+			IMember[] typesToDelete= getMembersOfType(fMembersToMove, IJavaElement.TYPE);
 			IMember[] matchingElements= getMatchingElements(pm, false);
-			IMember[] matchingFields= WorkingCopyUtil.getOriginals(getMembersOfType(matchingElements, IJavaElement.FIELD));
+			IMember[] matchingFields= getMembersOfType(matchingElements, IJavaElement.FIELD);
 			return JavaElementUtil.merge(JavaElementUtil.merge(matchingFields, typesToDelete), fMethodsToDelete);
 		} finally {
 			pm.done();
@@ -1785,7 +1781,6 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	public void setMembersToMove(IMember[] elements) {
 		Assert.isNotNull(elements);
 		fMembersToMove= (IMember[]) SourceReferenceUtil.sortByOffset(elements);
-		fMembersToMove= WorkingCopyUtil.getOriginals(fMembersToMove);
 	}
 
 	public void setMethodsToDeclareAbstract(IMethod[] methods) {

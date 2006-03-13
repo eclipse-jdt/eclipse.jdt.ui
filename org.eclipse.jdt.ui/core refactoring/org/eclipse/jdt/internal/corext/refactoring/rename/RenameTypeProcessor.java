@@ -114,7 +114,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -434,7 +433,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	//------------- Conditions -----------------
 	
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
-		IType orig= (IType)WorkingCopyUtil.getOriginal(fType);
+		IType orig= (IType)JavaModelUtil.toOriginal(fType);
 		if (orig == null || ! orig.exists()){
 			String message= Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_does_not_exist, 
 						new String[]{JavaModelUtil.getFullyQualifiedName(fType), fType.getCompilationUnit().getElementName()});

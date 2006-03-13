@@ -59,7 +59,6 @@ import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -112,7 +111,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		ICompilationUnit copy= null;
 		try {
 			final String name= "Type" + System.currentTimeMillis(); //$NON-NLS-1$
-			copy= WorkingCopyUtil.getNewWorkingCopy(fCompilationUnit);
+			copy= JavaModelUtil.toOriginal(fCompilationUnit).getWorkingCopy(null);
 			final StringBuffer contents= new StringBuffer();
 			int start= 0;
 			int end= 0;

@@ -87,7 +87,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -391,7 +390,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	// -------------- Preconditions -----------------------
 	
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException{
-		IField orig= (IField)WorkingCopyUtil.getOriginal(fField);
+		IField orig= (IField)JavaModelUtil.toOriginal(fField);
 		if (orig == null || ! orig.exists()){
 			String message= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_deleted, 
 								fField.getCompilationUnit().getElementName());

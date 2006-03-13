@@ -120,7 +120,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -392,7 +391,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				}
 				ICompilationUnit superUnit= null;
 				try {
-					superUnit= WorkingCopyUtil.getNewWorkingCopy(fSubType.getPackageFragment(), JavaModelUtil.getRenamedCUName(fSubType.getCompilationUnit(), fSuperName), fOwner, new SubProgressMonitor(monitor, 1));
+					superUnit= fSubType.getPackageFragment().getCompilationUnit(JavaModelUtil.getRenamedCUName(fSubType.getCompilationUnit(), fSuperName)).getWorkingCopy(fOwner, null, new SubProgressMonitor(monitor, 1));
 					fSuperSource= createTypeSource(superUnit, sourceRewrite, declaration, status, new SubProgressMonitor(monitor, 3));
 					if (fSuperSource != null) {
 						superUnit.getBuffer().setContents(fSuperSource);
@@ -1096,7 +1095,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
 			ICompilationUnit subUnit= null;
 			try {
-				subUnit= WorkingCopyUtil.getNewWorkingCopy(fSubType.getCompilationUnit(), fOwner, new SubProgressMonitor(monitor, 2));
+				subUnit= fSubType.getCompilationUnit().getPrimary().getWorkingCopy(fOwner, null, new SubProgressMonitor(monitor, 2));
 				final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fSubType.getCompilationUnit());
 				final ASTRewrite rewrite= sourceRewrite.getASTRewrite();
 				try {

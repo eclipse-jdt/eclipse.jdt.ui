@@ -95,7 +95,6 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -459,19 +458,16 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 	public RefactoringStatus checkInitialConditions(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_checking, 1);
-			RefactoringStatus result= new RefactoringStatus();
-			fMembersToMove= WorkingCopyUtil.getOriginals(fMembersToMove);
-
-			result.merge(checkPossibleSubclasses(new SubProgressMonitor(monitor, 1)));
-			if (result.hasFatalError())
-				return result;
-			result.merge(checkDeclaringType(new SubProgressMonitor(monitor, 1)));
-			if (result.hasFatalError())
-				return result;
-			result.merge(checkIfMembersExist());
-			if (result.hasFatalError())
-				return result;
-
+			RefactoringStatus status= new RefactoringStatus();
+			status.merge(checkPossibleSubclasses(new SubProgressMonitor(monitor, 1)));
+			if (status.hasFatalError())
+				return status;
+			status.merge(checkDeclaringType(new SubProgressMonitor(monitor, 1)));
+			if (status.hasFatalError())
+				return status;
+			status.merge(checkIfMembersExist());
+			if (status.hasFatalError())
+				return status;
 			fMemberInfos= createInfosForAllPushableFieldsAndMethods(getDeclaringType());
 			List list= Arrays.asList(fMembersToMove);
 			for (int offset= 0; offset < fMemberInfos.length; offset++) {
@@ -479,7 +475,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 				if (list.contains(info.getMember()))
 					info.setAction(MemberActionInfo.PUSH_DOWN_ACTION);
 			}
-			return result;
+			return status;
 		} finally {
 			monitor.done();
 		}

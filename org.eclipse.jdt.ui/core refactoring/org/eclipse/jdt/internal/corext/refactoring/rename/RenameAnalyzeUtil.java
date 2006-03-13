@@ -66,9 +66,9 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 class RenameAnalyzeUtil {
 	
@@ -170,7 +170,7 @@ class RenameAnalyzeUtil {
 	}
 
 	static ICompilationUnit findWorkingCopyForCu(ICompilationUnit[] newWorkingCopies, ICompilationUnit cu){
-		ICompilationUnit originalDeclaringCu= WorkingCopyUtil.getOriginal(cu);
+		ICompilationUnit originalDeclaringCu= JavaModelUtil.toOriginal(cu);
 		for (int i= 0; i < newWorkingCopies.length; i++) {
 			if (newWorkingCopies[i].getPrimary().equals(originalDeclaringCu))
 				return newWorkingCopies[i];

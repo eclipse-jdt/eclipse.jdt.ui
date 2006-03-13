@@ -93,7 +93,6 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -556,7 +555,7 @@ public abstract class HierarchyRefactoring extends CommentRefactoring implements
 	public IType getDeclaringType() {
 		if (fDeclaringType != null)
 			return fDeclaringType;
-		fDeclaringType= (IType) WorkingCopyUtil.getOriginal(fMembersToMove[0].getDeclaringType());
+		fDeclaringType= (IType) JavaModelUtil.toOriginal(fMembersToMove[0].getDeclaringType());
 		return fDeclaringType;
 	}
 

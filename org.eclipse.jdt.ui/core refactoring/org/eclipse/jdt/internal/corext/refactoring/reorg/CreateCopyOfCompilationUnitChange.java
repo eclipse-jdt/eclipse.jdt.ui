@@ -12,8 +12,6 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import org.eclipse.text.edits.ReplaceEdit;
 
-import org.eclipse.core.resources.mapping.ResourceMapping;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -22,6 +20,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -49,7 +48,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 
@@ -118,7 +116,7 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 	}
 
 	private static String getCopiedFileSource(IProgressMonitor pm, ICompilationUnit cu, String newTypeName) throws CoreException {
-		ICompilationUnit wc= WorkingCopyUtil.getNewWorkingCopy(cu);
+		ICompilationUnit wc= JavaModelUtil.toOriginal(cu).getWorkingCopy(null);
 		try {
 			TextChangeManager manager= createChangeManager(pm, wc, newTypeName);
 			String result= manager.get(wc).getPreviewContent(new NullProgressMonitor());

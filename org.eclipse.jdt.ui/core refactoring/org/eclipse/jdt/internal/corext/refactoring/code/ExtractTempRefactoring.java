@@ -117,8 +117,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -420,7 +420,7 @@ public class ExtractTempRefactoring extends CommentRefactoring implements IIniti
 
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		ITextFileBuffer buffer= null;
-		final ICompilationUnit original= WorkingCopyUtil.getOriginal(fCu);
+		final ICompilationUnit original= JavaModelUtil.toOriginal(fCu);
 		try {
 			buffer= RefactoringFileBuffers.acquire(original);
 			pm.beginTask(RefactoringCoreMessages.ExtractTempRefactoring_checking_preconditions, 3); 

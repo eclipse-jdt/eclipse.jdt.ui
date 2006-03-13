@@ -110,8 +110,8 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAwareSourceRangeComputer;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -474,7 +474,7 @@ public class ExtractMethodRefactoring extends CommentRefactoring implements IIni
 		MultiTextEdit root= new MultiTextEdit();
 		result.setEdit(root);
 		// This is cheap since the compilation unit is already open in a editor.
-		IPath path= ((IFile)WorkingCopyUtil.getOriginal(fCUnit).getResource()).getFullPath();
+		IPath path= ((IFile)JavaModelUtil.toOriginal(fCUnit).getResource()).getFullPath();
 		ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
 		try {
 			bufferManager.connect(path, new SubProgressMonitor(pm, 1));
