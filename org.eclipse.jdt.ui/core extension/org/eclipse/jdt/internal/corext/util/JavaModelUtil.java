@@ -599,14 +599,6 @@ public final class JavaModelUtil {
 	}
 	
 	/**
-	 * Returns the original element if the given element is a working copy. If the cu is already
-	 * an original the input element is returned. The returned element might not exist
-	 */
-	public static IJavaElement toOriginal(IJavaElement element) {
-		return element.getPrimaryElement();
-	}	
-
-	/**
 	 * Returns true if a cu is a primary cu (original or shared working copy)
 	 */
 	public static boolean isPrimary(ICompilationUnit cu) {

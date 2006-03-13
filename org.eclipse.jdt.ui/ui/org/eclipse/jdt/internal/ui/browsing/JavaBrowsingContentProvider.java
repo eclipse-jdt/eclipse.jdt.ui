@@ -48,9 +48,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 
 class JavaBrowsingContentProvider extends StandardJavaElementContentProvider implements IElementChangedListener {
 
@@ -269,7 +267,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 
 			if (fBrowsingPart.isAncestorOf(element, fInput)) {
 				if (element instanceof IWorkingCopy && ((IWorkingCopy)element).isWorkingCopy()) {
-					postAdjustInputAndSetSelection(JavaModelUtil.toOriginal((IJavaElement) fInput));
+					postAdjustInputAndSetSelection(((IJavaElement) fInput).getPrimaryElement());
 				} else
 					postAdjustInputAndSetSelection(null);
 			}
