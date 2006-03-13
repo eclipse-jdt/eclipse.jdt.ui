@@ -51,6 +51,7 @@ import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension3;
 import org.eclipse.jface.text.TextPresentation;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.HTML2TextReader;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.IInformationControlExtension4;
@@ -78,12 +79,17 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	 * Tells whether the SWT Browser widget and hence this information
 	 * control is available.
 	 *
-	 * @param parent the parent component used for checking
+	 * @param parent the parent component used for checking or <code>null</code> if none
 	 * @return <code>true</code> if this control is available
 	 */
 	public static boolean isAvailable(Composite parent) {
 		if (!fgAvailabilityChecked) {
 			try {
+				if (parent == null)
+					parent= JavaPlugin.getActiveWorkbenchShell();
+				if (parent == null)
+					return false; // don't store this value - try again later
+				
 				Browser browser= new Browser(parent, SWT.NONE);
 				browser.dispose();
 				fgIsAvailable= true;
