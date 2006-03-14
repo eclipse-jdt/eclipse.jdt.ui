@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.infoviews;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 import java.net.URL;
 
 import org.eclipse.core.runtime.FileLocator;
@@ -62,6 +63,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -472,6 +474,14 @@ public class JavadocView extends AbstractInfoView {
 				Reader reader;
 				try {
 					reader= JavadocContentAccess.getHTMLContentReader(member, true, true);
+					
+					// Provide hint why there's no Javadoc
+					if (reader == null && member.isBinary()) {
+						IPackageFragmentRoot root= (IPackageFragmentRoot)member.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+						if (root != null && root.getSourceAttachmentPath() == null && root.getAttachedJavadoc(null) == null)
+							reader= new StringReader(InfoViewMessages.JavadocView_noAttachedInformation);
+					}
+					
 				} catch (JavaModelException ex) {
 					return null;
 				}
