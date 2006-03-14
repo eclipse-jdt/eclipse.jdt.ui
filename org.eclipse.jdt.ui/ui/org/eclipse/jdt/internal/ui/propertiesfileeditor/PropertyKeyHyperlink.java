@@ -21,8 +21,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
@@ -436,38 +438,44 @@ public class PropertyKeyHyperlink implements IHyperlink {
 			fEditor.getEditorSite().getWorkbenchWindow().getWorkbench().getProgressService().busyCursorWhile(
 				new IRunnableWithProgress() {
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						ResultCollector collector= new ResultCollector(result, useDoubleQuotedKey);
-						TextSearchEngine engine= TextSearchEngine.create();
-						Pattern searchPattern= PatternConstructor.createPattern(searchString, true, false);
-						engine.search(createScope(scope), collector, searchPattern, monitor);
+						if (monitor == null)
+							monitor= new NullProgressMonitor();
+						
+						monitor.beginTask("", 5); //$NON-NLS-1$
+						try {
+							ResultCollector collector= new ResultCollector(result, useDoubleQuotedKey);
+							TextSearchEngine engine= TextSearchEngine.create();
+							Pattern searchPattern= PatternConstructor.createPattern(searchString, true, false);
+							engine.search(createScope(scope), collector, searchPattern, new SubProgressMonitor(monitor, 4));
+							
+							if (result.size() == 0 && useDoubleQuotedKey) {
+								//Try without, maybe an eclipse style NLS string
+								IJavaElement element= JavaCore.create(scope);
+								if (element == null)
+									return;
+								
+								int includeMask = IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.REFERENCED_PROJECTS;
+								IJavaSearchScope javaSearchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element }, includeMask);
+	
+								SearchPattern pattern= SearchPattern.createPattern(fPropertiesKey, IJavaSearchConstants.FIELD, IJavaSearchConstants.REFERENCES, SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CASE_SENSITIVE);
+								try {
+									new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), javaSearchScope, new SearchRequestor() {
+										public void acceptSearchMatch(SearchMatch match) throws CoreException {
+											result.add(new KeyReference((IStorage)match.getResource(), match.getOffset(), match.getLength()));
+										}
+									}, new SubProgressMonitor(monitor, 1));
+								} catch (CoreException e) {
+									throw new InvocationTargetException(e);
+								}
+							} else {
+								monitor.worked(1);
+							}
+						} finally {
+							monitor.done();
+						}
 					}
 				}
 			);
-			
-			if (result.size() == 0 && useDoubleQuotedKey) {
-				//Try without, maybe an eclipse style NLS string
-				fEditor.getEditorSite().getWorkbenchWindow().getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
-					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						IJavaElement element= JavaCore.create(scope);
-						if (element == null)
-							return;
-						
-						int includeMask = IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.REFERENCED_PROJECTS;
-						IJavaSearchScope javaSearchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element }, includeMask);
-
-						SearchPattern pattern= SearchPattern.createPattern(fPropertiesKey, IJavaSearchConstants.FIELD, IJavaSearchConstants.REFERENCES, SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CASE_SENSITIVE);
-						try {
-							new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), javaSearchScope, new SearchRequestor() {
-								public void acceptSearchMatch(SearchMatch match) throws CoreException {
-									result.add(new KeyReference((IStorage)match.getResource(), match.getOffset(), match.getLength()));
-								}
-							}, monitor);
-						} catch (CoreException e) {
-							throw new InvocationTargetException(e);
-						}
-					}
-				});
-			}
 		} catch (InvocationTargetException ex) {
 			String message= PropertiesFileEditorMessages.OpenAction_error_messageErrorSearchingKey;
 			showError(new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, ex.getTargetException())));
