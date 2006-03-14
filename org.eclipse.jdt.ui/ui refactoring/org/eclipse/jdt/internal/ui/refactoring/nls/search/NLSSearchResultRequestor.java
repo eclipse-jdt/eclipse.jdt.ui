@@ -195,12 +195,16 @@ class NLSSearchResultRequestor extends SearchRequestor {
 			
 			try {
 				String src= null;
+				int keyStart= -1;
+				int keyEnd= -1;
 				int tok= scanner.getNextToken();
 				// skip type and method names:
 				while (tok != ITerminalSymbols.TokenNameEOF && 
 						(tok == ITerminalSymbols.TokenNameIdentifier || tok == ITerminalSymbols.TokenNameDOT)) {
 					if (tok == ITerminalSymbols.TokenNameIdentifier) {
 						src= new String(scanner.getCurrentTokenSource());
+						keyStart= scanner.getCurrentTokenStartPosition();
+						keyEnd= scanner.getCurrentTokenEndPosition();
 					} else {
 						src= null;
 					}
@@ -213,12 +217,14 @@ class NLSSearchResultRequestor extends SearchRequestor {
 					if (tok == ITerminalSymbols.TokenNameEOF || tok != ITerminalSymbols.TokenNameStringLiteral)
 						return null;
 					// found it:
-					int keyStart= scanner.getCurrentTokenStartPosition() + 1;
-					int keyEnd= scanner.getCurrentTokenEndPosition();
+					keyStart= scanner.getCurrentTokenStartPosition() + 1;
+					keyEnd= scanner.getCurrentTokenEndPosition();
 					keyPositionResult.setOffset(typeNameStart + keyStart);
 					keyPositionResult.setLength(keyEnd - keyStart);
 					return source.substring(keyStart, keyEnd);
 				} else {
+					keyPositionResult.setOffset(typeNameStart + keyStart);
+					keyPositionResult.setLength(keyEnd - keyStart + 1);
 					return src;
 				}
 			} catch (InvalidInputException e) {
