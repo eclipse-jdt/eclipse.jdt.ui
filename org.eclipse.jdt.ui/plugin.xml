@@ -207,14 +207,14 @@
 		id="javaTypeProposalCategory"
 		name="%JavaTypesCategory">
 		<proposalCategory
-			icon="$nl$/icons/full/obj16/types_assist.png"/>
+			icon="$nl$/icons/full/elcl16/jtypeassist_co.gif"/>
 	</extension>
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="javaNoTypeProposalCategory"
 		name="%JavaProposalCategory">
 		<proposalCategory
-			icon="$nl$/icons/full/obj16/java_assist.png"/>
+			icon="$nl$/icons/full/elcl16/javaassist_co.gif"/>
 	</extension>
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
@@ -227,21 +227,21 @@
 		id="templateProposalCategory"
 		name="%TemplateProposalCategory">
 		<proposalCategory
-			icon="$nl$/icons/full/obj16/templates_assist.png"/>
+			icon="$nl$/icons/full/elcl16/templateprop_co.gif"/>
 	</extension>
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="spellingProposalCategory"
 		name="%SpellingProposalCategory">
 		<proposalCategory
-			icon="$nl$/icons/full/obj16/spelling_assist.png"/>
+			icon="$nl$/icons/full/elcl16/spellassist_co.gif"/>
 	</extension>
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="textProposalCategory"
 		name="%TextProposalCategory">
 		<proposalCategory
-			icon="$nl$/icons/full/obj16/hippie_assist.png"/>
+			icon="$nl$/icons/full/elcl16/wordassist_co.gif"/>
 	</extension>
 	 
 	<!-- java completions -->   
