@@ -116,7 +116,7 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 	}
 
 	private static String getCopiedFileSource(IProgressMonitor pm, ICompilationUnit cu, String newTypeName) throws CoreException {
-		ICompilationUnit wc= JavaModelUtil.toOriginal(cu).getWorkingCopy(null);
+		ICompilationUnit wc= cu.getPrimary().getWorkingCopy(null);
 		try {
 			TextChangeManager manager= createChangeManager(pm, wc, newTypeName);
 			String result= manager.get(wc).getPreviewContent(new NullProgressMonitor());

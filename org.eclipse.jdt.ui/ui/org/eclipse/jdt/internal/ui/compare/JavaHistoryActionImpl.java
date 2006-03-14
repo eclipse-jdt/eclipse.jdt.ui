@@ -68,7 +68,6 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -104,7 +103,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 			return null;
 			
 		// get to original CU
-		cu= JavaModelUtil.toOriginal(cu);
+		cu= cu.getPrimary();
 			
 		// find underlying file
 		IFile file= (IFile) cu.getResource();

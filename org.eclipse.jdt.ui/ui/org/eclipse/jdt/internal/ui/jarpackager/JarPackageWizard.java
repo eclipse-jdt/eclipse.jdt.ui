@@ -117,7 +117,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		} else {
 			IOpenable openable= je.getOpenable();
 			if (openable instanceof ICompilationUnit)
-				selectedElements.add(JavaModelUtil.toOriginal((ICompilationUnit) openable));
+				selectedElements.add(((ICompilationUnit) openable).getPrimary());
 			else if (openable instanceof IClassFile && !JavaModelUtil.getPackageFragmentRoot(je).isArchive())
 				selectedElements.add(openable);
 		}

@@ -33,7 +33,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
@@ -232,7 +231,7 @@ public abstract class JDTChange extends Change {
 			return (IResource)element;
 		}
 		if (element instanceof ICompilationUnit) {
-			return JavaModelUtil.toOriginal((ICompilationUnit)element).getResource();
+			return ((ICompilationUnit)element).getPrimary().getResource();
 		}
 		if (element instanceof IJavaElement) {
 			return ((IJavaElement)element).getResource();

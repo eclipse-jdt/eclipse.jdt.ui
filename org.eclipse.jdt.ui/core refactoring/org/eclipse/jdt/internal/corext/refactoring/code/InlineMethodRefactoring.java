@@ -493,7 +493,7 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 	}
 	
 	private IFile getFile(ICompilationUnit unit) {
-		unit= JavaModelUtil.toOriginal(unit);
+		unit= unit.getPrimary();
 		IResource resource= unit.getResource();
 		if (resource != null && resource.getType() == IResource.FILE)
 			return (IFile)resource;

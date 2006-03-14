@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.search.JavaSearchPageScoreComputer;
@@ -112,11 +111,11 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 				// top level types behave like the CU
 				IJavaElement parent= element.getParent();
 				if (parent instanceof ICompilationUnit) {
-					return JavaModelUtil.toOriginal((ICompilationUnit) parent).getResource();
+					return ((ICompilationUnit) parent).getPrimary().getResource();
 				}
 				return null;
 			case IJavaElement.COMPILATION_UNIT:
-				return JavaModelUtil.toOriginal((ICompilationUnit) element).getResource();
+				return ((ICompilationUnit) element).getPrimary().getResource();
 			case IJavaElement.CLASS_FILE:
 			case IJavaElement.PACKAGE_FRAGMENT:
 				// test if in a archive

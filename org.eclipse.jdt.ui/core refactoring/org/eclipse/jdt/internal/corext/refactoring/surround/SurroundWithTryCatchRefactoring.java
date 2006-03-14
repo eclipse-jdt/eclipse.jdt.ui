@@ -75,7 +75,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAwareSourceRangeComputer;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -364,6 +363,6 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	}
 	
 	private IFile getFile() {
-		return (IFile) JavaModelUtil.toOriginal(fCUnit).getResource();
+		return (IFile) fCUnit.getPrimary().getResource();
 	}
 }

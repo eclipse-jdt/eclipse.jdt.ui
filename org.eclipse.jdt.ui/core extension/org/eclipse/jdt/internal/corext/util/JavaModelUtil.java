@@ -548,11 +548,16 @@ public final class JavaModelUtil {
 	/**
 	 * Returns the original if the given member. If the member is already
 	 * an original the input is returned. The returned member might not exist
+	 * 
+	 * @deprecated Replace by IMember#getPrimaryElement() if <code>member</code> is not part
+	 * of a shared working copy owner. Also have a look at http://bugs.eclipse.org/bugs/show_bug.cgi?id=18568
 	 */
 	public static IMember toOriginal(IMember member) {
 		if (member instanceof IMethod)
 			return toOriginalMethod((IMethod)member);
-		
+
+		// TODO: remove toOriginalMethod(IMethod)
+
 		return (IMember) member.getPrimaryElement();
 		/*ICompilationUnit cu= member.getCompilationUnit();
 		if (cu != null && cu.isWorkingCopy())
@@ -561,6 +566,7 @@ public final class JavaModelUtil {
 	}
 	
 	/*
+	 * TODO remove if toOriginal(IMember) can be removed
 	 * XXX workaround for bug 18568
 	 * http://bugs.eclipse.org/bugs/show_bug.cgi?id=18568
 	 * to be removed once the bug is fixed
@@ -588,18 +594,6 @@ public final class JavaModelUtil {
 		}	
 	}
 
-	/**
-	 * Returns the original cu if the given cu is a working copy. If the cu is already
-	 * an original the input cu is returned. The returned cu might not exist
-	 */
-	public static ICompilationUnit toOriginal(ICompilationUnit cu) {
-		// To stay compatible with old version returned null
-		// if cu is null
-		if (cu == null)
-			return cu;
-		return cu.getPrimary();
-	}
-	
 	/**
 	 * Returns true if a cu is a primary cu (original or shared working copy)
 	 */

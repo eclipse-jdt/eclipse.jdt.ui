@@ -111,7 +111,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		ICompilationUnit copy= null;
 		try {
 			final String name= "Type" + System.currentTimeMillis(); //$NON-NLS-1$
-			copy= JavaModelUtil.toOriginal(fCompilationUnit).getWorkingCopy(null);
+			copy= fCompilationUnit.getPrimary().getWorkingCopy(null);
 			final StringBuffer contents= new StringBuffer();
 			int start= 0;
 			int end= 0;

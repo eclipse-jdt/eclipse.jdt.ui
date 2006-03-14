@@ -352,10 +352,9 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 	}
 	
 	public static ResourceMapping create(ICompilationUnit unit) {
-		unit= JavaModelUtil.toOriginal(unit);
 		if (unit == null)
 			return null;
-		return new CompilationUnitResourceMapping(unit);
+		return new CompilationUnitResourceMapping(unit.getPrimary());
 	}
 	
 	public static ResourceMapping create(IClassFile classFile) {

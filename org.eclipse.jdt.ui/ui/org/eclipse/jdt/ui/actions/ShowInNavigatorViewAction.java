@@ -12,10 +12,11 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IViewPart;
@@ -28,7 +29,6 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -146,7 +146,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 		
 		element= (IJavaElement) element.getOpenable();
 		if (element instanceof ICompilationUnit) {
-			element= JavaModelUtil.toOriginal((ICompilationUnit) element);
+			element= ((ICompilationUnit) element).getPrimary();
 		}
 		return element.getResource();
 	}

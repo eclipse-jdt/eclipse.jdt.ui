@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.workingsets;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IStorage;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -27,12 +27,13 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
+
 /**
  * Working set filter for Java viewers.
  */
 public class WorkingSetFilter extends ViewerFilter {
+
 	private IWorkingSet fWorkingSet= null;
 	private IAdaptable[] fCachedWorkingSet= null;
 
@@ -153,8 +154,8 @@ public class WorkingSetFilter extends ViewerFilter {
 						}
 						searchedElement= searchedElement.getParent();
 						if (searchedElement != null && searchedElement.getElementType() == IJavaElement.COMPILATION_UNIT) {
-							ICompilationUnit cu= (ICompilationUnit)searchedElement;
-							cu= JavaModelUtil.toOriginal(cu);
+							ICompilationUnit unit= (ICompilationUnit)searchedElement;
+							unit= unit.getPrimary();
 						}
 					}
 				}

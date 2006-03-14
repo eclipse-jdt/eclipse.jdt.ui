@@ -469,7 +469,7 @@ public class RewriteMethodInvocationsRefactoring extends CommentRefactoring impl
 	}
 	
 	private IFile getFile(ICompilationUnit unit) {
-		unit= JavaModelUtil.toOriginal(unit);
+		unit= unit.getPrimary();
 		IResource resource= unit.getResource();
 		if (resource != null && resource.getType() == IResource.FILE)
 			return (IFile)resource;

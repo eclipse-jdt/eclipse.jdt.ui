@@ -752,7 +752,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					Object input= getInput();
 					if (input instanceof ICompilationUnit) {
 						ICompilationUnit cu= (ICompilationUnit) input;
-						cu= JavaModelUtil.toOriginal(cu);
+						cu= cu.getPrimary();
 						return cu.getResource();
 					} else if (input instanceof IClassFile) {
 						return ((IClassFile) input).getResource();

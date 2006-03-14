@@ -119,7 +119,7 @@ public class ReorgUtils {
 		
 	public static IResource getResource(IJavaElement element){
 		if (element instanceof ICompilationUnit)
-			return JavaModelUtil.toOriginal((ICompilationUnit)element).getResource();
+			return ((ICompilationUnit)element).getPrimary().getResource();
 		else
 			return element.getResource();
 	}

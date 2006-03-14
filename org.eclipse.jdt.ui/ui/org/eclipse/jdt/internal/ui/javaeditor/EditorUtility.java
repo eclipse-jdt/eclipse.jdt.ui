@@ -360,7 +360,7 @@ public class EditorUtility {
 	private static IEditorInput getEditorInput(IJavaElement element) throws JavaModelException {
 		while (element != null) {
 			if (element instanceof ICompilationUnit) {
-				ICompilationUnit unit= JavaModelUtil.toOriginal((ICompilationUnit) element);
+				ICompilationUnit unit= ((ICompilationUnit) element).getPrimary();
 					IResource resource= unit.getResource();
 					if (resource instanceof IFile)
 						return new FileEditorInput((IFile) resource);

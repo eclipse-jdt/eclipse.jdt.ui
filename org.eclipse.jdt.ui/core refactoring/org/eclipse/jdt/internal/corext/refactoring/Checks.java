@@ -688,7 +688,7 @@ public class Checks {
 	}
 	
 	public static RefactoringStatus validateEdit(ICompilationUnit unit, Object context) {
-		IResource resource= JavaModelUtil.toOriginal(unit).getResource();
+		IResource resource= unit.getPrimary().getResource();
 		RefactoringStatus result= new RefactoringStatus();
 		if (resource == null)
 			return result;

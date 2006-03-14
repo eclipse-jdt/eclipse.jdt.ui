@@ -13,19 +13,18 @@ package org.eclipse.jdt.internal.ui.util;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.ErrorDialog;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -196,7 +195,7 @@ public class ElementValidator {
 				IJavaElement je= (IJavaElement)element;
 				ICompilationUnit cu= (ICompilationUnit)je.getAncestor(IJavaElement.COMPILATION_UNIT);
 				if (cu != null) {
-					je= JavaModelUtil.toOriginal(cu);
+					je= cu.getPrimary();
 				}
 				resource= je.getResource();
 			} else {
