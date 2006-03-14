@@ -632,10 +632,9 @@ public final class RefactoringSearchEngine2 {
 	 * <p>
 	 * This method must be called before start searching. The default is to use no working copy owner.
 	 * 
-	 * @param owner the working copy owner to use
+	 * @param owner the working copy owner to use, or <code>null</code> to use none
 	 */
 	public final void setOwner(final WorkingCopyOwner owner) {
-		Assert.isNotNull(owner);
 		fOwner= owner;
 	}
 

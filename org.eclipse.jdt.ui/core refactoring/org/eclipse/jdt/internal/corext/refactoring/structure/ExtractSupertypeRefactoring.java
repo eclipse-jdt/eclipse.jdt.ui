@@ -10,25 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
-import org.eclipse.osgi.util.NLS;
-
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-
 /**
  * Refactoring to extract a supertype from a class.
  * 
  * @since 3.2
  */
-public final class ExtractSupertypeRefactoring extends ProcessorBasedRefactoring implements IInitializableRefactoringComponent {
-
-	/** The refactoring processor to use */
-	private final ExtractSupertypeProcessor fProcessor;
+public final class ExtractSupertypeRefactoring extends PullUpRefactoring {
 
 	/**
 	 * Creates a new extract supertype refactoring.
@@ -38,7 +25,6 @@ public final class ExtractSupertypeRefactoring extends ProcessorBasedRefactoring
 	 */
 	public ExtractSupertypeRefactoring(final ExtractSupertypeProcessor processor) {
 		super(processor);
-		fProcessor= processor;
 	}
 
 	/**
@@ -48,24 +34,5 @@ public final class ExtractSupertypeRefactoring extends ProcessorBasedRefactoring
 	 */
 	public ExtractSupertypeProcessor getExtractSupertypeProcessor() {
 		return (ExtractSupertypeProcessor) getProcessor();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public RefactoringProcessor getProcessor() {
-		return fProcessor;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public final RefactoringStatus initialize(final RefactoringArguments arguments) {
-		Assert.isNotNull(arguments);
-		final RefactoringProcessor processor= getProcessor();
-		if (processor instanceof IInitializableRefactoringComponent) {
-			return ((IInitializableRefactoringComponent) processor).initialize(arguments);
-		}
-		return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.ProcessorBasedRefactoring_error_unsupported_initialization, getProcessor().getIdentifier()));
 	}
 }

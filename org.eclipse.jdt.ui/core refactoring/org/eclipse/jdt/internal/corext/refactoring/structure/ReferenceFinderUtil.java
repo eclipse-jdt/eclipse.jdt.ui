@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
@@ -44,72 +45,93 @@ public class ReferenceFinderUtil {
 	//----- referenced types -
 	
 	public static IType[] getTypesReferencedIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
-		SearchMatch[] results= getTypeReferencesIn(elements, pm);
+		SearchMatch[] results= getTypeReferencesIn(elements, null, pm);
 		Set referencedTypes= extractElements(results, IJavaElement.TYPE);
 		return (IType[]) referencedTypes.toArray(new IType[referencedTypes.size()]);	
 	}
 	
-	private static SearchMatch[] getTypeReferencesIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
+	public static IType[] getTypesReferencedIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
+		SearchMatch[] results= getTypeReferencesIn(elements, owner, pm);
+		Set referencedTypes= extractElements(results, IJavaElement.TYPE);
+		return (IType[]) referencedTypes.toArray(new IType[referencedTypes.size()]);	
+	}
+	
+	private static SearchMatch[] getTypeReferencesIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		List referencedTypes= new ArrayList();
 		pm.beginTask("", elements.length); //$NON-NLS-1$
 		for (int i = 0; i < elements.length; i++) {
-			referencedTypes.addAll(getTypeReferencesIn(elements[i], new SubProgressMonitor(pm, 1)));
+			referencedTypes.addAll(getTypeReferencesIn(elements[i], owner, new SubProgressMonitor(pm, 1)));
 		}
 		pm.done();
 		return (SearchMatch[]) referencedTypes.toArray(new SearchMatch[referencedTypes.size()]);
 	}
 	
-	private static List getTypeReferencesIn(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
+	private static List getTypeReferencesIn(IJavaElement element, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		CollectingSearchRequestor requestor= new CollectingSearchRequestor();
-		new SearchEngine().searchDeclarationsOfReferencedTypes(element, requestor, pm);
+		SearchEngine engine= owner != null ? new SearchEngine(owner) : new SearchEngine();
+		engine.searchDeclarationsOfReferencedTypes(element, requestor, pm);
 		return requestor.getResults();
 	}
 	
 	//----- referenced fields ----
 	
 	public static IField[] getFieldsReferencedIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
-		SearchMatch[] results= getFieldReferencesIn(elements, pm);
+		SearchMatch[] results= getFieldReferencesIn(elements, null, pm);
+		Set referencedFields= extractElements(results, IJavaElement.FIELD);
+		return (IField[]) referencedFields.toArray(new IField[referencedFields.size()]);
+	}
+	
+	public static IField[] getFieldsReferencedIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
+		SearchMatch[] results= getFieldReferencesIn(elements, owner, pm);
 		Set referencedFields= extractElements(results, IJavaElement.FIELD);
 		return (IField[]) referencedFields.toArray(new IField[referencedFields.size()]);
 	}
 
-	private static SearchMatch[] getFieldReferencesIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
+	private static SearchMatch[] getFieldReferencesIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		List referencedFields= new ArrayList();
 		pm.beginTask("", elements.length); //$NON-NLS-1$
 		for (int i = 0; i < elements.length; i++) {
-			referencedFields.addAll(getFieldReferencesIn(elements[i], new SubProgressMonitor(pm, 1)));
+			referencedFields.addAll(getFieldReferencesIn(elements[i], owner, new SubProgressMonitor(pm, 1)));
 		}
 		pm.done();
 		return (SearchMatch[]) referencedFields.toArray(new SearchMatch[referencedFields.size()]);
 	}
 	
-	private static List getFieldReferencesIn(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
+	private static List getFieldReferencesIn(IJavaElement element, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		CollectingSearchRequestor requestor= new CollectingSearchRequestor();
-		new SearchEngine().searchDeclarationsOfAccessedFields(element, requestor, pm);
+		SearchEngine engine= owner != null ? new SearchEngine(owner) : new SearchEngine();
+		engine.searchDeclarationsOfAccessedFields(element, requestor, pm);
 		return requestor.getResults();
 	}
 	
 	//----- referenced methods ----
 	
 	public static IMethod[] getMethodsReferencedIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
-		SearchMatch[] results= getMethodReferencesIn(elements, pm);
+		SearchMatch[] results= getMethodReferencesIn(elements, null, pm);
 		Set referencedMethods= extractElements(results, IJavaElement.METHOD);
 		return (IMethod[]) referencedMethods.toArray(new IMethod[referencedMethods.size()]);
 	}
 	
-	private static SearchMatch[] getMethodReferencesIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
+	public static IMethod[] getMethodsReferencedIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
+		SearchMatch[] results= getMethodReferencesIn(elements, owner, pm);
+		Set referencedMethods= extractElements(results, IJavaElement.METHOD);
+		return (IMethod[]) referencedMethods.toArray(new IMethod[referencedMethods.size()]);
+	}
+	
+	private static SearchMatch[] getMethodReferencesIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		List referencedMethods= new ArrayList();
 		pm.beginTask("", elements.length); //$NON-NLS-1$
 		for (int i = 0; i < elements.length; i++) {
-			referencedMethods.addAll(getMethodReferencesIn(elements[i], new SubProgressMonitor(pm, 1)));
+			referencedMethods.addAll(getMethodReferencesIn(elements[i], owner, new SubProgressMonitor(pm, 1)));
 		}
 		pm.done();
 		return (SearchMatch[]) referencedMethods.toArray(new SearchMatch[referencedMethods.size()]);
 	}
 	
-	private static List getMethodReferencesIn(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
+	private static List getMethodReferencesIn(IJavaElement element, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		CollectingSearchRequestor requestor= new CollectingSearchRequestor();
-		new SearchEngine().searchDeclarationsOfSentMessages(element, requestor, pm);
+		SearchEngine engine= owner != null ? new SearchEngine(owner) : new SearchEngine();
+		engine.searchDeclarationsOfSentMessages(element, requestor, pm);
 		return requestor.getResults();
 	}
 	

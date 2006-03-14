@@ -252,6 +252,8 @@ public final class RefactoringMessages extends NLS {
 
 	public static String ExtractSuperTypeAction_unavailable;
 
+	public static String ExtractSupertypeMemberPage_page_title;
+
 	public static String ExtractSupertypeWizard_defaultPageTitle;
 
 	public static String ExtractTempAction_extract_temp;

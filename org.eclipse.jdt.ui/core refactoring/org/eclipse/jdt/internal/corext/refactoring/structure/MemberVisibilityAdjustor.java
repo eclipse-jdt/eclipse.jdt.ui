@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -481,6 +482,9 @@ public final class MemberVisibilityAdjustor {
 	/** The visibility message severity */
 	private int fVisibilitySeverity= RefactoringStatus.WARNING;
 
+	/** The working copy owner, or <code>null</code> to use none */
+	private WorkingCopyOwner fOwner= null;
+
 	/**
 	 * Creates a new java element visibility adjustor.
 	 * 
@@ -513,36 +517,41 @@ public final class MemberVisibilityAdjustor {
 	 * Check whether anyone accesses the members of the moved type from the
 	 * outside. Those may need to have their visibility adjusted.
 	 */
-	private void adjustMemberVisibility(final IMember memberToMove, final IProgressMonitor pm) throws JavaModelException {
+	private void adjustMemberVisibility(final IMember member, final IProgressMonitor monitor) throws JavaModelException {
 
-		if (memberToMove instanceof IType) {
+		if (member instanceof IType) {
 			// recursively check accessibility of member type's members
-			final IJavaElement[] typeMembers= ((IType) memberToMove).getChildren();
+			final IJavaElement[] typeMembers= ((IType) member).getChildren();
 			for (int i= 0; i < typeMembers.length; i++) {
 				if (! (typeMembers[i] instanceof IInitializer))
-					adjustMemberVisibility((IMember) typeMembers[i], pm);
+					adjustMemberVisibility((IMember) typeMembers[i], monitor);
 			}
 		}
 
-		if ((memberToMove.equals(fReferenced)) || (Modifier.isPublic(memberToMove.getFlags())))
+		if ((member.equals(fReferenced)) || (Modifier.isPublic(member.getFlags())))
 			return;
 
-		final SearchResultGroup[] references= findReferences(memberToMove, pm);
+		final SearchResultGroup[] references= findReferences(member, monitor);
 		for (int i= 0; i < references.length; i++) {
 			final SearchMatch[] searchResults= references[i].getSearchResults();
 			for (int k= 0; k < searchResults.length; k++) {
 				final IJavaElement referenceToMember= (IJavaElement) searchResults[k].getElement();
-				if (fAdjustments.get(memberToMove) == null && referenceToMember instanceof IMember && !isInsideMovedMember(referenceToMember)) {
+				if (fAdjustments.get(member) == null && referenceToMember instanceof IMember && !isInsideMovedMember(referenceToMember)) {
 					// check whether the member is still visible from the
 					// destination. As we are moving a type, the destination is
 					// a package or another type.
-					adjustIncomingVisibility(fReferencing, memberToMove, new SubProgressMonitor(pm, 1));
+					adjustIncomingVisibility(fReferencing, member, new SubProgressMonitor(monitor, 1));
 				}
 			}
 		}
 	}
 
-	private boolean isInsideMovedMember(IJavaElement element) {
+	/**
+	 * Is the specified member inside the moved member?
+	 * @param element the element
+	 * @return <code>true</code> if it is inside, <code>false</code> otherwise
+	 */
+	private boolean isInsideMovedMember(final IJavaElement element) {
 		IJavaElement current= element;
 		while ((current= current.getParent()) != null)
 			if (current.equals(fReferenced))
@@ -550,9 +559,16 @@ public final class MemberVisibilityAdjustor {
 		return false;
 	}
 
-	private static SearchResultGroup[] findReferences(IMember member, IProgressMonitor monitor) throws JavaModelException {
-		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES,
-				SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
+	/**
+	 * Finds references to the specified member.
+	 * @param member the member
+	 * @param monitor the progress monitor to use
+	 * @return the search result groups
+	 * @throws JavaModelException if an error occurs during search
+	 */
+	private SearchResultGroup[] findReferences(final IMember member, final IProgressMonitor monitor) throws JavaModelException {
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
+		engine.setOwner(fOwner);
 		engine.setFiltering(true, true);
 		engine.setScope(RefactoringScopeFactory.create(member));
 		engine.searchPattern(new SubProgressMonitor(monitor, 1));
@@ -651,7 +667,7 @@ public final class MemberVisibilityAdjustor {
 		}
 	}
 
-	private void adjustOutgoingVisibilityChain(IMember member, IProgressMonitor monitor) throws JavaModelException {
+	private void adjustOutgoingVisibilityChain(final IMember member, final IProgressMonitor monitor) throws JavaModelException {
 
 		if (!Modifier.isPublic(member.getFlags())) {
 			final ModifierKeyword threshold= computeOutgoingVisibilityThreshold(fReferencing, member, monitor);
@@ -716,6 +732,7 @@ public final class MemberVisibilityAdjustor {
 			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(fReferenced, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
 			engine.setScope(fScope);
 			engine.setStatus(fStatus);
+			engine.setOwner(fOwner);
 			if (fIncoming) { 
 				// check calls to the referenced (moved) element, adjust element
 				// visibility if necessary.
@@ -991,8 +1008,12 @@ public final class MemberVisibilityAdjustor {
 	 */
 	private CompilationUnitRewrite getCompilationUnitRewrite(final ICompilationUnit unit) {
 		CompilationUnitRewrite rewrite= (CompilationUnitRewrite) fRewrites.get(unit);
-		if (rewrite == null)
-			rewrite= new CompilationUnitRewrite(unit);
+		if (rewrite == null) {
+			if (fOwner == null)
+				rewrite= new CompilationUnitRewrite(unit);
+			else
+				rewrite= new CompilationUnitRewrite(fOwner, unit);
+		}
 		return rewrite;
 	}
 
@@ -1011,8 +1032,12 @@ public final class MemberVisibilityAdjustor {
 			monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_checking);
 			try {
 				hierarchy= (ITypeHierarchy) fTypeHierarchies.get(type);
-				if (hierarchy == null)
-					hierarchy= type.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				if (hierarchy == null) {
+					if (fOwner == null)
+						hierarchy= type.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+					else
+						hierarchy= type.newSupertypeHierarchy(fOwner, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				}
 			} finally {
 				monitor.done();
 			}
@@ -1166,6 +1191,17 @@ public final class MemberVisibilityAdjustor {
 	public final void setScope(final IJavaSearchScope scope) {
 		Assert.isNotNull(scope);
 		fScope= scope;
+	}
+
+	/**
+	 * Sets the working copy owner used by this adjustor.
+	 * <p>
+	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is to use none.
+	 * 
+	 * @param owner the working copy owner, or <code>null</code> to use none
+	 */
+	public final void setOwner(final WorkingCopyOwner owner) {
+		fOwner= owner;
 	}
 
 	/**

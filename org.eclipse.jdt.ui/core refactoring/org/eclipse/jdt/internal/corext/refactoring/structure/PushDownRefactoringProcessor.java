@@ -437,7 +437,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			result.merge(checkElementsAccessedByModifiedMembers(new SubProgressMonitor(monitor, 1)));
 			result.merge(checkReferencesToPushedDownMembers(new SubProgressMonitor(monitor, 1)));
 			if (!JdtFlags.isAbstract(getDeclaringType()) && getAbstractDeclarationInfos().length != 0)
-				result.merge(checkCallsToClassConstructors(getDeclaringType(), new SubProgressMonitor(monitor, 1)));
+				result.merge(checkConstructorCalls(getDeclaringType(), new SubProgressMonitor(monitor, 1)));
 			else
 				monitor.worked(1);
 

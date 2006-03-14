@@ -1317,10 +1317,10 @@ public class ChangeTypeRefactoring extends CommentRefactoring {
 				
 				SearchResultGroup[] groups= RefactoringSearchEngine.search(
 					pattern,
+					null,
 					scope,
 					csr,
 					new SubProgressMonitor(pm, 80),
-					null,
 					new RefactoringStatus()); //TODO: deal with errors from non-CU matches
 				
 				fAffectedUnits= getCus(groups);
@@ -1336,7 +1336,7 @@ public class ChangeTypeRefactoring extends CommentRefactoring {
 			IJavaSearchScope scope= RefactoringScopeFactory.create(iField);
 			CollectingSearchRequestor csr= new CollectingSearchRequestor();
 			SearchResultGroup[] groups=
-				RefactoringSearchEngine.search(pattern, scope, csr, new SubProgressMonitor(pm, 100), null,
+				RefactoringSearchEngine.search(pattern, null, scope, csr, new SubProgressMonitor(pm, 100),
 						new RefactoringStatus()); //TODO: deal with errors from non-CU matches
 			fAffectedUnits= getCus(groups);
 		} else {

@@ -480,6 +480,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractMethodRefactoring_substitute_with_call;
 
+	public static String ExtractSupertypeProcessor_computing_possible_types;
+
 	public static String ExtractTempRefactoring_another_variable;
 
 	public static String ExtractTempRefactoring_array_initializer;
@@ -1170,6 +1172,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String PullUpRefactoring_no_java_lang_Object;
 
+	public static String PullUpRefactoring_non_final_pull_up_to_interface;
+
 	public static String PullUPRefactoring_not_java_lang_object;
 
 	public static String PullUpRefactoring_not_this_type;
@@ -1835,6 +1839,4 @@ public final class RefactoringCoreMessages extends NLS {
 	private RefactoringCoreMessages() {
 		// Do not instantiate
 	}
-
-	public static String PullUpRefactoring_non_final_pull_up_to_interface;
 }

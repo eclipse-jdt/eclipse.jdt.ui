@@ -845,7 +845,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			requestor= new CollectingSearchRequestor();
 		
 		SearchPattern newPattern= SearchPattern.createPattern(field, IJavaSearchConstants.REFERENCES);			
-		return RefactoringSearchEngine.search(newPattern, createRefactoringScope(), requestor, new SubProgressMonitor(pm, 1), owner, status);
+		return RefactoringSearchEngine.search(newPattern, owner, createRefactoringScope(), requestor, new SubProgressMonitor(pm, 1), status);
 	}
 	
 	private IField getFieldInWorkingCopy(ICompilationUnit newWorkingCopyOfDeclaringCu, String elementName) throws CoreException{

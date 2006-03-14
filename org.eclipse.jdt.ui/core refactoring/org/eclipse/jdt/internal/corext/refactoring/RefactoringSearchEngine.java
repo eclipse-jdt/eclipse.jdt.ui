@@ -114,18 +114,24 @@ public class RefactoringSearchEngine {
 	}
 	
 	//TODO: throw CoreException
+	public static SearchResultGroup[] search(SearchPattern pattern, WorkingCopyOwner owner, IJavaSearchScope scope, IProgressMonitor monitor, RefactoringStatus status)
+			throws JavaModelException {
+		return internalSearch(owner != null ? new SearchEngine(owner) : new SearchEngine(), pattern, scope, new CollectingSearchRequestor(), monitor, status);
+	}
+	
+	//TODO: throw CoreException
 	public static SearchResultGroup[] search(SearchPattern pattern, IJavaSearchScope scope, CollectingSearchRequestor requestor,
 			IProgressMonitor monitor, RefactoringStatus status) throws JavaModelException {
 		return internalSearch(new SearchEngine(), pattern, scope, requestor, monitor, status);
 	}
 	
 	//TODO: throw CoreException
-	public static SearchResultGroup[] search(SearchPattern pattern, IJavaSearchScope scope, CollectingSearchRequestor requestor,
-			IProgressMonitor monitor, WorkingCopyOwner owner, RefactoringStatus status) throws JavaModelException {
-		return internalSearch(new SearchEngine(owner), pattern, scope, requestor, monitor, status);
+	public static SearchResultGroup[] search(SearchPattern pattern, WorkingCopyOwner owner, IJavaSearchScope scope,
+			CollectingSearchRequestor requestor, IProgressMonitor monitor, RefactoringStatus status) throws JavaModelException {
+		return internalSearch(owner != null ? new SearchEngine(owner) : new SearchEngine(), pattern, scope, requestor, monitor, status);
 	}
 	
-	/** @deprecated use {@link #search(SearchPattern, IJavaSearchScope, CollectingSearchRequestor, IProgressMonitor, WorkingCopyOwner, RefactoringStatus)} */
+	/** @deprecated use {@link #search(SearchPattern, WorkingCopyOwner, IJavaSearchScope, CollectingSearchRequestor, IProgressMonitor, RefactoringStatus)} */
 	//TODO: throw CoreException
 	public static SearchResultGroup[] search(SearchPattern pattern, IJavaSearchScope scope,
 			IProgressMonitor monitor, ICompilationUnit[] workingCopies, RefactoringStatus status) throws JavaModelException {

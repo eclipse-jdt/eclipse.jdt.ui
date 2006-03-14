@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 /**
  * Refactoring to pull up members in a type hierarchy.
  */
-public final class PullUpRefactoring extends ProcessorBasedRefactoring implements IInitializableRefactoringComponent {
+public class PullUpRefactoring extends ProcessorBasedRefactoring implements IInitializableRefactoringComponent {
 
 	/** The refactoring processor to use */
 	private final PullUpRefactoringProcessor fProcessor;

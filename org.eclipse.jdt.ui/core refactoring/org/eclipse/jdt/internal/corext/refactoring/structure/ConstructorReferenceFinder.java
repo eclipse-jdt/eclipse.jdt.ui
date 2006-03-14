@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -72,23 +73,27 @@ class ConstructorReferenceFinder {
 	}
 
 	public static SearchResultGroup[] getConstructorReferences(IType type, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException{
-		return new ConstructorReferenceFinder(type).getConstructorReferences(pm, IJavaSearchConstants.REFERENCES, status);
+		return new ConstructorReferenceFinder(type).getConstructorReferences(pm, null, IJavaSearchConstants.REFERENCES, status);
+	}
+
+	public static SearchResultGroup[] getConstructorReferences(IType type, WorkingCopyOwner owner, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException{
+		return new ConstructorReferenceFinder(type).getConstructorReferences(pm, owner, IJavaSearchConstants.REFERENCES, status);
 	}
 
 	public static SearchResultGroup[] getConstructorOccurrences(IMethod constructor, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException{
 		Assert.isTrue(constructor.isConstructor());
-		return new ConstructorReferenceFinder(constructor).getConstructorReferences(pm, IJavaSearchConstants.ALL_OCCURRENCES, status);
+		return new ConstructorReferenceFinder(constructor).getConstructorReferences(pm, null, IJavaSearchConstants.ALL_OCCURRENCES, status);
 	}
 
-	private SearchResultGroup[] getConstructorReferences(IProgressMonitor pm, int limitTo, RefactoringStatus status) throws JavaModelException{
+	private SearchResultGroup[] getConstructorReferences(IProgressMonitor pm, WorkingCopyOwner owner, int limitTo, RefactoringStatus status) throws JavaModelException{
 		IJavaSearchScope scope= createSearchScope();
 		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(fConstructors, limitTo);
 		if (pattern == null){
 			if (fConstructors.length != 0)
 				return new SearchResultGroup[0];
-			return getImplicitConstructorReferences(pm, status);	
+			return getImplicitConstructorReferences(pm, owner, status);	
 		}	
-		return removeUnrealReferences(RefactoringSearchEngine.search(pattern, scope, pm, status));
+		return removeUnrealReferences(RefactoringSearchEngine.search(pattern, owner, scope, pm, status));
 	}
 	
 	//XXX this method is a workaround for jdt core bug 27236
@@ -162,21 +167,21 @@ class ConstructorReferenceFinder {
 		return candidate;
 	}
 
-	private SearchResultGroup[] getImplicitConstructorReferences(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
+	private SearchResultGroup[] getImplicitConstructorReferences(IProgressMonitor pm, WorkingCopyOwner owner, RefactoringStatus status) throws JavaModelException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		List searchMatches= new ArrayList();
-		searchMatches.addAll(getImplicitConstructorReferencesFromHierarchy(new SubProgressMonitor(pm, 1)));
-		searchMatches.addAll(getImplicitConstructorReferencesInClassCreations(new SubProgressMonitor(pm, 1), status));
+		searchMatches.addAll(getImplicitConstructorReferencesFromHierarchy(owner, new SubProgressMonitor(pm, 1)));
+		searchMatches.addAll(getImplicitConstructorReferencesInClassCreations(owner, new SubProgressMonitor(pm, 1), status));
 		pm.done();
 		return RefactoringSearchEngine.groupByCu((SearchMatch[]) searchMatches.toArray(new SearchMatch[searchMatches.size()]), status);
 	}
 		
 	//List of SearchResults
-	private List getImplicitConstructorReferencesInClassCreations(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
+	private List getImplicitConstructorReferencesInClassCreations(WorkingCopyOwner owner, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		//XXX workaround for jdt core bug 23112
 		SearchPattern pattern= SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fType);
-		SearchResultGroup[] refs= RefactoringSearchEngine.search(pattern, scope, pm, status);
+		SearchResultGroup[] refs= RefactoringSearchEngine.search(pattern, owner, scope, pm, status);
 		List result= new ArrayList();
 		for (int i= 0; i < refs.length; i++) {
 			SearchResultGroup group= refs[i];
@@ -212,8 +217,8 @@ class ConstructorReferenceFinder {
 	}
 
 	//List of SearchResults
-	private List getImplicitConstructorReferencesFromHierarchy(IProgressMonitor pm) throws JavaModelException{
-		IType[] subTypes= getNonBinarySubtypes(fType, pm);
+	private List getImplicitConstructorReferencesFromHierarchy(WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException{
+		IType[] subTypes= getNonBinarySubtypes(owner, fType, pm);
 		List result= new ArrayList(subTypes.length);
 		for (int i= 0; i < subTypes.length; i++) {
 			result.addAll(getAllSuperConstructorInvocations(subTypes[i]));
@@ -221,8 +226,12 @@ class ConstructorReferenceFinder {
 		return result;
 	}
 
-	private static IType[] getNonBinarySubtypes(IType type, IProgressMonitor pm) throws JavaModelException{
-		ITypeHierarchy hierarchy= type.newTypeHierarchy(pm);
+	private static IType[] getNonBinarySubtypes(WorkingCopyOwner owner, IType type, IProgressMonitor monitor) throws JavaModelException{
+		ITypeHierarchy hierarchy= null;
+		if (owner == null)
+			hierarchy= type.newTypeHierarchy(monitor);
+		else
+			hierarchy= type.newSupertypeHierarchy(owner, monitor);
 		IType[] subTypes= hierarchy.getAllSubtypes(type);
 		List result= new ArrayList(subTypes.length);
 		for (int i= 0; i < subTypes.length; i++) {

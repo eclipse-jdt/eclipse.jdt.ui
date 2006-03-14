@@ -77,7 +77,6 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -130,10 +129,10 @@ public class PullUpMethodPage extends UserInputWizardPage {
 
 		private final Set fTypesToShow;
 
-		PullUpFilter(final ITypeHierarchy hierarchy, final IMember[] members) {
+		public PullUpFilter(final ITypeHierarchy hierarchy, final IMember[] members) {
 			// IType -> IMember[]
-			final Map typeToMemberArray= PullUpMethodPage.createTypeToMemberArrayMapping(members);
-			fTypesToShow= computeTypesToShow(hierarchy, typeToMemberArray);
+			final Map map= PullUpMethodPage.createTypeToMemberArrayMapping(members);
+			fTypesToShow= computeTypesToShow(hierarchy, map);
 		}
 
 		public boolean select(final Viewer viewer, final Object parentElement, final Object element) {
@@ -151,7 +150,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 
 		private Map fTypeToMemberArray; // IType -> IMember[]
 
-		PullUpHierarchyContentProvider(final IType declaringType, final IMember[] members) {
+		public PullUpHierarchyContentProvider(final IType declaringType, final IMember[] members) {
 			fDeclaringType= declaringType;
 			fTypeToMemberArray= PullUpMethodPage.createTypeToMemberArrayMapping(members);
 		}
@@ -208,15 +207,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 			if (!(element instanceof IType))
 				return false;
 			final IType type= (IType) element;
-			return hasSubtypes(type) || hasMembers(type);
-		}
-
-		private boolean hasMembers(final IType type) {
-			return fTypeToMemberArray.containsKey(type);
-		}
-
-		private boolean hasSubtypes(final IType type) {
-			return fHierarchy.getAllSubtypes(type).length > 0;
+			return (fHierarchy.getAllSubtypes(type).length > 0) || fTypeToMemberArray.containsKey(type);
 		}
 
 		public void inputChanged(final Viewer viewer, final Object oldInput, final Object newInput) {
@@ -225,7 +216,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 		}
 	}
 
-	public static final String PAGE_NAME= "PullUpMethodsInputPage2"; //$NON-NLS-1$
+	private static final String PAGE_NAME= "PullUpMethodPage"; //$NON-NLS-1$
 
 	// IType -> IMember[]
 	private static Map createTypeToMemberArrayMapping(final IMember[] members) {
@@ -254,10 +245,6 @@ public class PullUpMethodPage extends UserInputWizardPage {
 		return typeToMemberSet;
 	}
 
-	private static JavaTextTools getJavaTextTools() {
-		return JavaPlugin.getDefault().getJavaTextTools();
-	}
-
 	private boolean fChangedSettings= true;
 
 	private Label fSelectionLabel;
@@ -274,8 +261,8 @@ public class PullUpMethodPage extends UserInputWizardPage {
 	}
 
 	private void checkAllParents(final IType parent) {
-		final ITypeHierarchy th= getTreeViewerInput();
-		final IType root= getTreeViewerInputRoot();
+		final ITypeHierarchy th= getTreeInput();
+		final IType root= getTreeInput().getType();
 		IType type= parent;
 		while (!root.equals(type)) {
 			fTreeViewer.setChecked(type, true);
@@ -286,7 +273,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 
 	public void checkPulledUp() {
 		uncheckAll();
-		final PullUpRefactoringProcessor processor= getPullUpMethodsRefactoring().getPullUpProcessor();
+		final PullUpRefactoringProcessor processor= getPullUpRefactoring().getPullUpProcessor();
 		fTreeViewer.setCheckedElements(processor.getMembersToMove());
 		final IType parent= processor.getDeclaringType();
 		fTreeViewer.setChecked(parent, true);
@@ -313,7 +300,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 
 			public void widgetSelected(final SelectionEvent e) {
 				checkPulledUp();
-				updateTypeHierarchyLabel();
+				updateSelectionLabel();
 			}
 		});
 	}
@@ -347,7 +334,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 	private void createSourceViewer(final Composite c) {
 		final IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		fSourceViewer= new JavaSourceViewer(c, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION, store);
-		fSourceViewer.configure(new JavaSourceViewerConfiguration(getJavaTextTools().getColorManager(), store, null, null));
+		fSourceViewer.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
 		fSourceViewer.setEditable(false);
 		fSourceViewer.getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
 		fSourceViewer.getControl().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
@@ -410,7 +397,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 		fTreeViewer.addCheckStateListener(new ICheckStateListener() {
 
 			public void checkStateChanged(final CheckStateChangedEvent event) {
-				updateTypeHierarchyLabel();
+				updateSelectionLabel();
 			}
 		});
 	}
@@ -453,24 +440,20 @@ public class PullUpMethodPage extends UserInputWizardPage {
 		return super.getNextPage();
 	}
 
-	private PullUpRefactoring getPullUpMethodsRefactoring() {
+	private PullUpRefactoring getPullUpRefactoring() {
 		return (PullUpRefactoring) getRefactoring();
 	}
 
 	private String getSupertypeSignature() {
-		return JavaElementUtil.createSignature(getPullUpMethodsRefactoring().getPullUpProcessor().getTargetClass());
+		return JavaElementUtil.createSignature(getPullUpRefactoring().getPullUpProcessor().getDestinationType());
 	}
 
-	private ITypeHierarchy getTreeViewerInput() {
+	private ITypeHierarchy getTreeInput() {
 		return (ITypeHierarchy) fTreeViewer.getInput();
 	}
 
-	private IType getTreeViewerInputRoot() {
-		return getTreeViewerInput().getType();
-	}
-
 	private void initializeRefactoring() {
-		getPullUpMethodsRefactoring().getPullUpProcessor().setMethodsToDelete(getCheckedMethods());
+		getPullUpRefactoring().getPullUpProcessor().setDeletedMethods(getCheckedMethods());
 	}
 
 	private void initializeTreeViewer() {
@@ -494,16 +477,16 @@ public class PullUpMethodPage extends UserInputWizardPage {
 
 	private void initializeTreeViewer(final IProgressMonitor pm) {
 		try {
-			final PullUpRefactoringProcessor processor= getPullUpMethodsRefactoring().getPullUpProcessor();
+			final PullUpRefactoringProcessor processor= getPullUpRefactoring().getPullUpProcessor();
 			final IMember[] matchingMethods= processor.getMatchingElements(new SubProgressMonitor(pm, 1), false);
-			final ITypeHierarchy hierarchy= processor.getTypeHierarchyOfTargetClass(new SubProgressMonitor(pm, 1));
+			final ITypeHierarchy hierarchy= processor.getDestinationTypeHierarchy(new SubProgressMonitor(pm, 1));
 			removeAllTreeViewFilters();
 			fTreeViewer.addFilter(new PullUpFilter(hierarchy, matchingMethods));
 			fTreeViewer.setContentProvider(new PullUpHierarchyContentProvider(processor.getDeclaringType(), matchingMethods));
 			fTreeViewer.setInput(hierarchy);
 			precheckElements(fTreeViewer);
 			fTreeViewer.expandAll();
-			updateTypeHierarchyLabel();
+			updateSelectionLabel();
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.PullUpInputPage_pull_up1, RefactoringMessages.PullUpInputPage_exception);
 			fTreeViewer.setInput(null);
@@ -516,7 +499,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 	}
 
 	private void precheckElements(final ContainerCheckedTreeViewer treeViewer) {
-		final IMember[] members= getPullUpMethodsRefactoring().getPullUpProcessor().getMembersToMove();
+		final IMember[] members= getPullUpRefactoring().getPullUpProcessor().getMembersToMove();
 		for (int i= 0; i < members.length; i++) {
 			treeViewer.setChecked(members[i], true);
 		}
@@ -536,7 +519,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 
 	private void setSourceViewerContents(String contents) {
 		if (contents != null) {
-			final IJavaProject project= getPullUpMethodsRefactoring().getPullUpProcessor().getTargetClass().getJavaProject();
+			final IJavaProject project= getPullUpRefactoring().getPullUpProcessor().getDestinationType().getJavaProject();
 			final String[] lines= Strings.convertIntoLines(contents);
 			if (lines.length > 0) {
 				final int indent= Strings.computeIndentUnits(lines[lines.length - 1], project);
@@ -544,7 +527,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 			}
 		}
 		final IDocument document= (contents == null) ? new Document() : new Document(contents);
-		getJavaTextTools().setupJavaDocumentPartitioner(document);
+		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(document);
 		fSourceViewer.setDocument(document);
 	}
 
@@ -573,11 +556,11 @@ public class PullUpMethodPage extends UserInputWizardPage {
 	}
 
 	private void uncheckAll() {
-		final IType root= getTreeViewerInputRoot();
+		final IType root= getTreeInput().getType();
 		fTreeViewer.setChecked(root, false);
 	}
 
-	private void updateTypeHierarchyLabel() {
+	private void updateSelectionLabel() {
 		fSelectionLabel.setText(Messages.format(RefactoringMessages.PullUpInputPage_hierarchyLabal, String.valueOf(getCheckedMethods().length)));
 	}
 }
