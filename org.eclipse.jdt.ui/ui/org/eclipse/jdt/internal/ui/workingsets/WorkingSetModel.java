@@ -35,6 +35,8 @@ import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.IWorkingSetUpdater;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.internal.corext.Assert;
+
 public class WorkingSetModel {
 
 	public static final String CHANGE_WORKING_SET_MODEL_CONTENT= "workingSetModelChanged"; //$NON-NLS-1$
@@ -217,16 +219,24 @@ public class WorkingSetModel {
 		IWorkingSet others= fLocalWorkingSetManager.createWorkingSet(WorkingSetMessages.WorkingSetModel_others_name, new IAdaptable[0]); 
 		others.setId(OthersWorkingSetUpdater.ID);
 		fLocalWorkingSetManager.addWorkingSet(others);
+		Assert.isNotNull(fOthersWorkingSetUpdater);
+		
 		fActiveWorkingSets.add(others);
 
-		fOthersWorkingSetUpdater.init(this);
 		fElementMapper.rebuild(getActiveWorkingSets());
+		fOthersWorkingSetUpdater.updateElements();
 	}
 
 	public WorkingSetModel(IMemento memento) {
-		restoreState(memento);
-		fOthersWorkingSetUpdater.init(this);
+		fLocalWorkingSetManager= PlatformUI.getWorkbench().createLocalWorkingSetManager();
+		addListenersToWorkingSetManagers();
+		fActiveWorkingSets= new ArrayList(2);
+		
+		restoreState(memento); // restore localWorkingSetManager and active working sets
+		Assert.isNotNull(fOthersWorkingSetUpdater);
+		
 		fElementMapper.rebuild(getActiveWorkingSets());
+		fOthersWorkingSetUpdater.updateElements();
 	}
 
 	private void addListenersToWorkingSetManagers() {
@@ -356,17 +366,10 @@ public class WorkingSetModel {
 
 	private void restoreState(IMemento memento) {
 		String configured= memento.getString(TAG_CONFIGURED);
-		if (configured != null)
-			fConfigured= Boolean.valueOf(configured).booleanValue();
-		fLocalWorkingSetManager= PlatformUI.getWorkbench().createLocalWorkingSetManager();
-		addListenersToWorkingSetManagers();
-		fLocalWorkingSetManager.restoreState(memento.getChild(TAG_LOCAL_WORKING_SET_MANAGER));
-		IWorkingSet history= getHistoryWorkingSet();
-		if (history != null) {
-			fLocalWorkingSetManager.removeWorkingSet(history);
-		}
+		fConfigured= configured != null && Boolean.valueOf(configured).booleanValue();
+		
+
 		IMemento[] actives= memento.getChildren(TAG_ACTIVE_WORKING_SET);
-		fActiveWorkingSets= new ArrayList(actives.length);
 		for (int i= 0; i < actives.length; i++) {
 			String name= actives[i].getString(TAG_WORKING_SET_NAME);
 			if (name != null) {
@@ -386,6 +389,7 @@ public class WorkingSetModel {
 			IWorkingSetUpdater updater= (IWorkingSetUpdater)event.getNewValue();
 			if (updater instanceof OthersWorkingSetUpdater) {
 				fOthersWorkingSetUpdater= (OthersWorkingSetUpdater)updater;
+				fOthersWorkingSetUpdater.init(this);
 			}
 			return;
 		}
@@ -428,12 +432,7 @@ public class WorkingSetModel {
 		return false;
 	}
 
-	private IWorkingSet getHistoryWorkingSet() {
-		IWorkingSet[] workingSets= fLocalWorkingSetManager.getWorkingSets();
-		for (int i= 0; i < workingSets.length; i++) {
-			if (HistoryWorkingSetUpdater.ID.equals(workingSets[i].getId()))
-				return workingSets[i];
-		}
-		return null;
+	public boolean isActiveWorkingSet(IWorkingSet changedWorkingSet) {
+		return fActiveWorkingSets.contains(changedWorkingSet);
 	}
 }

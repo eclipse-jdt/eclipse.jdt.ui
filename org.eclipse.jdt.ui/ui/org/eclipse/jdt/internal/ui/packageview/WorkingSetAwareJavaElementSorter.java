@@ -14,32 +14,14 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.IWorkingSet;
 
-import org.eclipse.jdt.internal.ui.workingsets.HistoryWorkingSetUpdater;
-
 import org.eclipse.jdt.ui.JavaElementSorter;
 
-public class WorkingSetAwareJavaElementSorter extends JavaElementSorter implements IParentAwareSorter {
-	
-	private Object fParent;
-	
-	public void setParent(Object parent) {
-		fParent= parent;
-	}
-	
-	public void sort(Viewer viewer, Object[] elements) {
-		if (fParent instanceof IWorkingSet) {
-			IWorkingSet workingSet= (IWorkingSet)fParent;
-			if (HistoryWorkingSetUpdater.ID.equals(workingSet.getId()))
-				return;
-		}
-		super.sort(viewer, elements);
-	}
+public class WorkingSetAwareJavaElementSorter extends JavaElementSorter {
 	
 	public int compare(Viewer viewer, Object e1, Object e2) {
-		IWorkingSet ws1= e1 instanceof IWorkingSet ? (IWorkingSet)e1 : null;
-		IWorkingSet ws2= e2 instanceof IWorkingSet ? (IWorkingSet)e2 : null;
-		if (ws1 == null || ws2 == null)
-			return super.compare(viewer, e1, e2);
-		return 0;
+		if (e1 instanceof IWorkingSet || e2 instanceof IWorkingSet)
+			return 0;
+
+		return super.compare(viewer, e1, e2);
 	}
 }

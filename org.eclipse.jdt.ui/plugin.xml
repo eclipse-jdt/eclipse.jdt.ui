@@ -2999,15 +2999,9 @@
       </workingSet>
    </extension>
 <!-- =========================================================================== -->
-<!-- History & Others Working Set                                                -->
+<!-- Others Working Set                                                          -->
 <!-- =========================================================================== -->
    <extension point="org.eclipse.ui.workingSets">
-      <workingSet
-            name="%HistoryWorkingSetWizardPage.name"
-            icon="$nl$/icons/full/obj16/history_working_set_obj.gif"
-            updaterClass="org.eclipse.jdt.internal.ui.workingsets.HistoryWorkingSetUpdater"
-            id="org.eclipse.jdt.internal.ui.HistoryWorkingSet">
-      </workingSet>
       <workingSet
             name="%OthersWorkingSetWizardPage.name"
             icon="$nl$/icons/full/obj16/jworkingSet_obj.gif"

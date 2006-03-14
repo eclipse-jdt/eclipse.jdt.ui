@@ -391,22 +391,6 @@ public class PackageExplorerPart extends ViewPart
 			return elements;
 		}
 		
-		//---- sorter per parent support ------
-		
-		protected Object[] getSortedChildren(Object parent) {
-			IParentAwareSorter sorter= getSorter() instanceof IParentAwareSorter 
-				? (IParentAwareSorter)getSorter()
-				: null;
-			if (sorter != null)
-				sorter.setParent(parent);
-			try {
-				return super.getSortedChildren(parent);
-			} finally {
-				if (sorter != null)
-					sorter.setParent(null);
-			}
-		}
-		
 	    //---- special handling to preserve the selection correctly
 	    private boolean fInPreserveSelection;
 		protected void preservingSelection(Runnable updateCode) {

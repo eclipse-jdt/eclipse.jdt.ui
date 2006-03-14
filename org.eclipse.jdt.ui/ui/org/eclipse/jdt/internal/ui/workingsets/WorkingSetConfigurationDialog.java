@@ -101,8 +101,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			IWorkingSet ws= (IWorkingSet)element;
 			String id= ws.getId();
-			return HistoryWorkingSetUpdater.ID.equals(id) ||
-				OthersWorkingSetUpdater.ID.equals(id) ||
+			return OthersWorkingSetUpdater.ID.equals(id) ||
 				JavaWorkingSetUpdater.ID.equals(id) || isCompatible(ws) || isActive(ws);
 		}
 		private boolean isCompatible(IWorkingSet set) {

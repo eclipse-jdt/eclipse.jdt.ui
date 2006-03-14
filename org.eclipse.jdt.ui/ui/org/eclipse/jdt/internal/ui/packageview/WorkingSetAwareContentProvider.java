@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.ui.workingsets.HistoryWorkingSetUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
@@ -127,8 +126,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 	
 	private boolean isKnownWorkingSet(IWorkingSet set) {
 		String id= set.getId();
-		return HistoryWorkingSetUpdater.ID.equals(id) ||
-			OthersWorkingSetUpdater.ID.equals(id) ||
+		return OthersWorkingSetUpdater.ID.equals(id) ||
 			JavaWorkingSetUpdater.ID.equals(id);
 	}
 	
@@ -196,13 +194,6 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 		if(parents.length == 0)
 			return super.getParent(child);
 		Object first= parents[0];
-		if (first instanceof IWorkingSet && HistoryWorkingSetUpdater.ID.equals(((IWorkingSet)first).getId())) {
-			if (parents.length > 1) {
-				return parents[1];
-			} else {
-				return super.getParent(child);
-			}
-		}
 		return first;
 	}
 	

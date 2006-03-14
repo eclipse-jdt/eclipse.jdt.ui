@@ -33,6 +33,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -51,16 +53,18 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 	
 	private class ResourceChangeListener implements IResourceChangeListener {
 		public void resourceChanged(IResourceChangeEvent event) {
+			if (fWorkingSet == null)
+				return;		// not yet initialized
 			IResourceDelta delta= event.getDelta();
 			IResourceDelta[] affectedChildren= delta.getAffectedChildren(IResourceDelta.ADDED | IResourceDelta.REMOVED, IResource.PROJECT);
 			if (affectedChildren.length > 0) {
-				updateElements(fWorkingSetModel.getActiveWorkingSets());
+				updateElements();
 			} else {
 				affectedChildren= delta.getAffectedChildren(IResourceDelta.CHANGED, IResource.PROJECT);
 				for (int i= 0; i < affectedChildren.length; i++) {
 					IResourceDelta projectDelta= affectedChildren[i];
 					if ((projectDelta.getFlags() & IResourceDelta.DESCRIPTION) != 0) {
-						updateElements(fWorkingSetModel.getActiveWorkingSets());
+						updateElements();
 						// one is enough
 						return;
 					}
@@ -73,27 +77,20 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 	private class WorkingSetListener implements IPropertyChangeListener {
 		public void propertyChange(PropertyChangeEvent event) {
 			if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(event.getProperty())) {
-				IWorkingSet changedWorkingSet= (IWorkingSet)event.getNewValue();
-				if (changedWorkingSet != fWorkingSet) {
-					IWorkingSet[] activeWorkingSets= fWorkingSetModel.getActiveWorkingSets();
-					if (contains(activeWorkingSets, changedWorkingSet)
-						&& !HistoryWorkingSetUpdater.ID.equals(changedWorkingSet.getId()))
-						updateElements(activeWorkingSets);
+				IWorkingSet changedWorkingSet= (IWorkingSet) event.getNewValue();
+				if (changedWorkingSet != fWorkingSet && fWorkingSetModel.isActiveWorkingSet(changedWorkingSet)) {
+					updateElements();
 				}
 			}
-		}
-		private boolean contains(IWorkingSet[] workingSets, IWorkingSet workingSet) {
-			for (int i= 0; i < workingSets.length; i++) {
-				if (workingSets[i] == workingSet)
-					return true;
-			}
-			return false;
 		}
 	}
 	private IPropertyChangeListener fWorkingSetListener;
 	
 	private class JavaElementChangeListener implements IElementChangedListener {
 		public void elementChanged(ElementChangedEvent event) {
+			if (fWorkingSet == null)
+				return; // not yet initialized
+			
 			processJavaDelta(new ArrayList(Arrays.asList(fWorkingSet.getElements())), event.getDelta());
 		}
 		private void processJavaDelta(List elements, IJavaElementDelta delta) {
@@ -130,7 +127,7 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 	 * {@inheritDoc}
 	 */
 	public void add(IWorkingSet workingSet) {
-		Assert.isTrue(fWorkingSet == null);
+		Assert.isTrue(fWorkingSet == null && fWorkingSetModel != null);
 		fWorkingSet= workingSet;
 	}
 	
@@ -158,7 +155,6 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 		PlatformUI.getWorkbench().getWorkingSetManager().addPropertyChangeListener(fWorkingSetListener);
 		fJavaElementChangeListener= new JavaElementChangeListener();
 		JavaCore.addElementChangedListener(fJavaElementChangeListener, ElementChangedEvent.POST_CHANGE);
-		updateElements(fWorkingSetModel.getActiveWorkingSets());
 	}
 	
 	public void dispose() {
@@ -176,10 +172,10 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 	}
 	
 	public void updateElements() {
-		updateElements(fWorkingSetModel.getActiveWorkingSets());
-	}
-	
-	private void updateElements(IWorkingSet[] activeWorkingSets) {
+		Assert.isTrue(fWorkingSet != null && fWorkingSetModel != null); // init and addWorkingSet have happend
+		
+		IWorkingSet[] activeWorkingSets= fWorkingSetModel.getActiveWorkingSets();
+
 		List result= new ArrayList();
 		Set projects= new HashSet();
 		for (int i= 0; i < activeWorkingSets.length; i++) {
@@ -206,6 +202,7 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 					result.add(rProjects[i]);
 			}
 		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
 		}
 		fWorkingSet.setElements((IAdaptable[])result.toArray(new IAdaptable[result.size()]));
 	}
