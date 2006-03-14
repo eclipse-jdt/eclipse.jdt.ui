@@ -89,7 +89,7 @@ public class TestEnableAssertions extends TestCase {
 	
 	protected ILaunchConfigurationWorkingCopy getNewConfigWorkingCopy() throws CoreException {
 		ILaunchManager lm= DebugPlugin.getDefault().getLaunchManager();
-		ILaunchConfigurationType configType= lm.getLaunchConfigurationType("org.eclipse.pde.ui.JunitLaunchConfig"); //$NON-NLS-1$
+		ILaunchConfigurationType configType= lm.getLaunchConfigurationType("org.eclipse.jdt.junit.launchconfig"); //$NON-NLS-1$
 		String computedName= DebugPlugin.getDefault().getLaunchManager().generateUniqueLaunchConfigurationNameFrom(configName);
 		return configType.newInstance(null, computedName);
 	}
