@@ -89,20 +89,22 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		private String pattern;
 		private boolean isCaseSensitive;
 		private IJavaElement javaElement;
+		private boolean includeJRE;
 		private int scope;
 		private IWorkingSet[] workingSets;
 		
-		public SearchPatternData(int searchFor, int limitTo, boolean isCaseSensitive, String pattern, IJavaElement element) {
-			this(searchFor, limitTo, pattern, isCaseSensitive, element, ISearchPageContainer.WORKSPACE_SCOPE, null);
+		public SearchPatternData(int searchFor, int limitTo, boolean isCaseSensitive, String pattern, IJavaElement element, boolean includeJRE) {
+			this(searchFor, limitTo, pattern, isCaseSensitive, element, ISearchPageContainer.WORKSPACE_SCOPE, null, includeJRE);
 		}
 		
-		public SearchPatternData(int searchFor, int limitTo, String pattern, boolean isCaseSensitive, IJavaElement element, int scope, IWorkingSet[] workingSets) {
+		public SearchPatternData(int searchFor, int limitTo, String pattern, boolean isCaseSensitive, IJavaElement element, int scope, IWorkingSet[] workingSets, boolean includeJRE) {
 			this.searchFor= searchFor;
 			this.limitTo= limitTo;
 			this.pattern= pattern;
 			this.isCaseSensitive= isCaseSensitive;
 			this.scope= scope;
 			this.workingSets= workingSets;
+			this.includeJRE= includeJRE;
 			
 			setJavaElement(element);
 		}
@@ -139,6 +141,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			return workingSets;
 		}
 		
+		public boolean includesJRE() {
+			return includeJRE;
+		}
+		
 		public void store(IDialogSettings settings) {
 			settings.put("searchFor", searchFor); //$NON-NLS-1$
 			settings.put("scope", scope); //$NON-NLS-1$
@@ -155,7 +161,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			} else {
 				settings.put("workingSets", new String[0]); //$NON-NLS-1$
 			}
-
+			settings.put("includeJRE", includeJRE); //$NON-NLS-1$
 		}
 		
 		public static SearchPatternData create(IDialogSettings settings) {
@@ -189,8 +195,14 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				int scope= settings.getInt("scope"); //$NON-NLS-1$
 				int limitTo= settings.getInt("limitTo"); //$NON-NLS-1$
 				boolean isCaseSensitive= settings.getBoolean("isCaseSensitive"); //$NON-NLS-1$
-
-				return 	new SearchPatternData(searchFor, limitTo, pattern, isCaseSensitive, elem, scope, workingSets);
+				
+				boolean includeJRE;
+				if (settings.get("includeJRE") != null) { //$NON-NLS-1$
+					includeJRE= settings.getBoolean("includeJRE"); //$NON-NLS-1$
+				} else {
+					includeJRE= forceIncludeJRE(limitTo);
+				}
+				return 	new SearchPatternData(searchFor, limitTo, pattern, isCaseSensitive, elem, scope, workingSets, includeJRE);
 			} catch (NumberFormatException e) {
 				return null;
 			}
@@ -201,8 +213,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	public static final String PARTICIPANT_EXTENSION_POINT= "org.eclipse.jdt.ui.queryParticipants"; //$NON-NLS-1$
 
 	public static final String EXTENSION_POINT_ID= "org.eclipse.jdt.ui.JavaSearchPage"; //$NON-NLS-1$
-
-	public static final String PREF_SEARCH_JRE= "org.eclipse.jdt.ui.searchJRE"; //$NON-NLS-1$
 	
 	private static final int HISTORY_SIZE= 12;
 	
@@ -241,9 +251,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		SearchMessages.SearchPage_limitTo_readReferences, 
 		SearchMessages.SearchPage_limitTo_writeReferences};
 
-	private Button fSearchJRE; 
-	private static final int INDEX_REFERENCES= 2;
-	private static final int INDEX_ALL= 3;
+	private Button fIncludeJRECheckbox; 
 
 	/**
 	 * 
@@ -266,7 +274,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		IJavaSearchScope scope= null;
 		String scopeDescription= ""; //$NON-NLS-1$
 		
-		boolean includeJRE= getSearchJRE();
+		boolean includeJRE= data.includesJRE();
 		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 		
 		switch (getContainer().getSelectedScope()) {
@@ -406,7 +414,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				fCaseSensitive.getSelection(),
 				fJavaElement,
 				getContainer().getSelectedScope(),
-				getContainer().getSelectedWorkingSets());
+				getContainer().getSelectedWorkingSets(),
+				fIncludeJRECheckbox.getSelection()
+		);
 			
 		fPreviousSearchPatterns.add(0, match); // insert on top
 		return match;
@@ -463,14 +473,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		Control limitTo= createLimitTo(result);
 		limitTo.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1));
 
-		fSearchJRE= new Button(result, SWT.CHECK);
-		fSearchJRE.setText(SearchMessages.SearchPage_searchJRE_label); 
-		fSearchJRE.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				setSearchJRE(fSearchJRE.getSelection());
-			}
-		});
-		fSearchJRE.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
+		fIncludeJRECheckbox= new Button(result, SWT.CHECK);
+		fIncludeJRECheckbox.setText(SearchMessages.SearchPage_searchJRE_label); 
+		fIncludeJRECheckbox.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
 		
 		//createParticipants(result);
 		
@@ -497,13 +502,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(result, IJavaHelpContextIds.JAVA_SEARCH_PAGE);	
 	}
 	
-	public static boolean getSearchJRE() {
-		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_SEARCH_JRE);
-	}
-
-	public static void setSearchJRE(boolean value) {
-		JavaPlugin.getDefault().getPreferenceStore().setValue(PREF_SEARCH_JRE, value);
-	}
 	
 	/*private Control createParticipants(Composite result) {
 		if (!SearchParticipantsExtensionPoint.hasAnyParticipants())
@@ -721,22 +719,26 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		setLimitTo(initData.getSearchFor(), initData.getLimitTo());
 
 		fPattern.setText(initData.getPattern());
-		updateUseJRE();
+		
+		boolean forceIncludeJRE= forceIncludeJRE(getLimitTo());
+		fIncludeJRECheckbox.setEnabled(!forceIncludeJRE);
+		fIncludeJRECheckbox.setSelection(forceIncludeJRE || initData.includesJRE());
 	}
 
 	private void updateUseJRE() {
-		boolean shouldEnable= mayExcludeJRE();
-		if (shouldEnable) {
-			fSearchJRE.setSelection(getSearchJRE());
-			fSearchJRE.setEnabled(true);
+		boolean forceIncludeJRE= forceIncludeJRE(getLimitTo());
+		fIncludeJRECheckbox.setEnabled(!forceIncludeJRE);
+		boolean isSelected= true;
+		if (!forceIncludeJRE) {
+			isSelected= fIncludeJRECheckbox.getSelection();
 		} else {
-			fSearchJRE.setEnabled(false);
-			fSearchJRE.setSelection(true);
+			isSelected= true;
 		}
+		fIncludeJRECheckbox.setSelection(isSelected);
 	}
 
-	private boolean mayExcludeJRE() {
-		return getLimitTo() == INDEX_REFERENCES || getLimitTo() == INDEX_ALL;
+	private static boolean forceIncludeJRE(int limitTo) {
+		return limitTo == DECLARATIONS || limitTo == IMPLEMENTORS;
 	}
 
 	private SearchPatternData tryStructuredSelection(IStructuredSelection selection) {
@@ -749,7 +751,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			res= determineInitValuesFrom((IJavaElement) o);
 		} else if (o instanceof LogicalPackage) {
 			LogicalPackage lp= (LogicalPackage)o;
-			return new SearchPatternData(PACKAGE, REFERENCES, fIsCaseSensitive, lp.getElementName(), null);
+			return new SearchPatternData(PACKAGE, REFERENCES, fIsCaseSensitive, lp.getElementName(), null, false);
 		} else if (o instanceof IAdaptable) {
 			IJavaElement element= (IJavaElement) ((IAdaptable) o).getAdapter(IJavaElement.class);
 			if (element != null) {
@@ -759,7 +761,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		if (res == null && o instanceof IAdaptable) {
 			IWorkbenchAdapter adapter= (IWorkbenchAdapter)((IAdaptable)o).getAdapter(IWorkbenchAdapter.class);
 			if (adapter != null) {
-				return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, adapter.getLabel(o), null);
+				return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, adapter.getLabel(o), null, false);
 			}
 		}
 		return res;
@@ -780,40 +782,43 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 	private SearchPatternData determineInitValuesFrom(IJavaElement element) {
 		try {
+			JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
+			boolean isInsideJRE= factory.isInsideJRE(element);
+			
 			switch (element.getElementType()) {
 				case IJavaElement.PACKAGE_FRAGMENT:
 				case IJavaElement.PACKAGE_DECLARATION:
-					return new SearchPatternData(PACKAGE, REFERENCES, true, element.getElementName(), element);
+					return new SearchPatternData(PACKAGE, REFERENCES, true, element.getElementName(), element, isInsideJRE);
 				case IJavaElement.IMPORT_DECLARATION: {
 					IImportDeclaration declaration= (IImportDeclaration) element;
 					if (declaration.isOnDemand()) {
 						String name= Signature.getQualifier(declaration.getElementName());
-						return new SearchPatternData(PACKAGE, DECLARATIONS, true, name, element);
+						return new SearchPatternData(PACKAGE, DECLARATIONS, true, name, element, true);
 					}
-					return new SearchPatternData(TYPE, DECLARATIONS, true, element.getElementName(), element);
+					return new SearchPatternData(TYPE, DECLARATIONS, true, element.getElementName(), element, true);
 				}
 				case IJavaElement.TYPE:
-					return new SearchPatternData(TYPE, REFERENCES, true, PatternStrings.getTypeSignature((IType) element), element);
+					return new SearchPatternData(TYPE, REFERENCES, true, PatternStrings.getTypeSignature((IType) element), element, isInsideJRE);
 				case IJavaElement.COMPILATION_UNIT: {
 					IType mainType= ((ICompilationUnit) element).findPrimaryType();
 					if (mainType != null) {
-						return new SearchPatternData(TYPE, REFERENCES, true, PatternStrings.getTypeSignature(mainType), mainType);
+						return new SearchPatternData(TYPE, REFERENCES, true, PatternStrings.getTypeSignature(mainType), mainType, isInsideJRE);
 					}
 					break;
 				}
 				case IJavaElement.CLASS_FILE: {
 					IType mainType= ((IClassFile) element).getType();
 					if (mainType.exists()) {
-						return new SearchPatternData(TYPE, REFERENCES, true, PatternStrings.getTypeSignature(mainType), mainType);
+						return new SearchPatternData(TYPE, REFERENCES, true, PatternStrings.getTypeSignature(mainType), mainType, isInsideJRE);
 					}
 					break;
 				}
 				case IJavaElement.FIELD:
-					return new SearchPatternData(FIELD, REFERENCES, true, PatternStrings.getFieldSignature((IField) element), element);
+					return new SearchPatternData(FIELD, REFERENCES, true, PatternStrings.getFieldSignature((IField) element), element, isInsideJRE);
 				case IJavaElement.METHOD:
 					IMethod method= (IMethod) element;
 					int searchFor= method.isConstructor() ? CONSTRUCTOR : METHOD;
-					return new SearchPatternData(searchFor, REFERENCES, true, PatternStrings.getMethodSignature(method), element);
+					return new SearchPatternData(searchFor, REFERENCES, true, PatternStrings.getMethodSignature(method), element, isInsideJRE);
 			}
 			
 		} catch (JavaModelException e) {
@@ -833,7 +838,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				i++;
 			}
 			if (i > 0) {
-				return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, selectedText.substring(0, i), null);
+				return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, selectedText.substring(0, i), null, true);
 			}
 		}
 		return null;
@@ -843,7 +848,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		if (!fPreviousSearchPatterns.isEmpty()) {
 			return (SearchPatternData) fPreviousSearchPatterns.get(0);
 		}
-		return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, "", null); //$NON-NLS-1$
+		return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, "", null, false); //$NON-NLS-1$
 	}	
 
 	/*
