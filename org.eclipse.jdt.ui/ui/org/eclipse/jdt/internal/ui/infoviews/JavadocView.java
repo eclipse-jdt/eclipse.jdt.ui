@@ -407,7 +407,10 @@ public class JavadocView extends AbstractInfoView {
 			default:
 				javadocHtml= getJavadocHtml(new IJavaElement[] { je });
 		}
-
+		
+		if (javadocHtml == null)
+			return ""; //$NON-NLS-1$
+		
 		return javadocHtml;
 	}
 
@@ -491,7 +494,8 @@ public class JavadocView extends AbstractInfoView {
 			}
 		}
 
-		if (buffer.length() > 0) {
+		boolean flushContent= true;
+		if (buffer.length() > 0 || flushContent) {
 			HTMLPrinter.insertPageProlog(buffer, 0, fStyleSheetURL);
 			HTMLPrinter.addPageEpilog(buffer);
 			return buffer.toString();

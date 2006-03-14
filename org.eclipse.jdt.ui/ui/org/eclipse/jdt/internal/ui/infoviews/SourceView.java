@@ -385,18 +385,18 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 		try {
 			source= sourceRef.getSource();
 		} catch (JavaModelException ex) {
-			return null;
+			return ""; //$NON-NLS-1$
 		}
 
 		if (source == null)
-			return null;
+			return ""; //$NON-NLS-1$
 
 		source= removeLeadingComments(source);
 		String delim= StubUtility.getLineDelimiterUsed((IJavaElement) input);
 
 		String[] sourceLines= Strings.convertIntoLines(source);
 		if (sourceLines == null || sourceLines.length == 0)
-			return null;
+			return ""; //$NON-NLS-1$
 
 		String firstLine= sourceLines[0];
 		boolean firstCharNotWhitespace= firstLine != null && firstLine.length() > 0 && !Character.isWhitespace(firstLine.charAt(0));
@@ -423,7 +423,12 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	 * @see AbstractInfoView#setInput(Object)
 	 */
 	protected void setInput(Object input) {
-		fViewer.setInput(input);
+		if (input instanceof IDocument)
+			fViewer.setInput(input);
+		else if (input == null)
+			fViewer.setInput(new Document("")); //$NON-NLS-1$
+		else
+			fViewer.setInput(new Document(input.toString()));
 	}
 
 	/**
