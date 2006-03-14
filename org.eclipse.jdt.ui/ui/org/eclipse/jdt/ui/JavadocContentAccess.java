@@ -55,13 +55,12 @@ public class JavadocContentAccess {
 	 * @throws JavaModelException is thrown when the elements javadoc can not be accessed
 	 */
 	public static Reader getContentReader(IMember member, boolean allowInherited) throws JavaModelException {
-		IBuffer buf= member.isBinary() ? member.getClassFile().getBuffer() : member.getCompilationUnit().getBuffer();
-		ISourceRange javadocRange= member.getJavadocRange();
+		IBuffer buf= member.getOpenable().getBuffer();
 		if (buf == null) {
-			// no source attachment found
-			return null;
+			return null; // no source attachment found
 		}
-
+		
+		ISourceRange javadocRange= member.getJavadocRange();
 		if (javadocRange != null) {
 			JavaDocCommentReader reader= new JavaDocCommentReader(buf, javadocRange.getOffset(), javadocRange.getOffset() + javadocRange.getLength() - 1);
 			if (!containsOnlyInheritDoc(reader, javadocRange.getLength())) {
@@ -117,14 +116,16 @@ public class JavadocContentAccess {
 		Reader contentReader= getContentReader(member, allowInherited);
 		if (contentReader != null)
 			return new JavaDoc2HTMLTextReader(contentReader);
-		else if (useAttachedJavadoc) {
+		
+		if (useAttachedJavadoc && member.getOpenable().getBuffer() == null) { // only if no source available
 			String s= member.getAttachedJavadoc(null);
 			if (s != null)
 				return new StringReader(s);
 		}
-
 		return null;
 	}
+	
+	
 
 	/**
 	 * Gets a reader for an IMember's Javadoc comment content from the source attachment.
