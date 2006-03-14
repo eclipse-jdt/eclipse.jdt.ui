@@ -2356,13 +2356,13 @@
          </action>
 <!-- script group  -->         
         <action
-               class="org.eclipse.ltk.internal.ui.refactoring.actions.ApplyRefactoringScriptAction"
+               class="org.eclipse.jdt.internal.ui.refactoring.actions.ApplyRefactoringScriptAction"
                definitionId="org.eclipse.ltk.ui.refactor.apply.refactoring.script"
                id="org.eclipse.ltk.ui.actions.ApplyRefactoringStript"
                label="%Refactoring.applyScript.label"
                menubarPath="org.eclipse.jdt.ui.refactoring.menu/scriptGroup"/>
         <action
-              class="org.eclipse.ltk.internal.ui.refactoring.actions.CreateRefactoringScriptAction"
+              class="org.eclipse.jdt.internal.ui.refactoring.actions.CreateRefactoringScriptAction"
               definitionId="org.eclipse.ltk.ui.refactor.create.refactoring.script"
               id="org.eclipse.ltk.ui.actions.CreateRefactoringScript"
               label="%Refactoring.createScript.label"
