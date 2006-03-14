@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
@@ -87,8 +88,10 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeRefacto
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.ui.refactoring.RenameSupport;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeSignatureWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeTypeWizard;
@@ -404,5 +407,23 @@ public final class RefactoringExecutionStarter {
 
 	private RefactoringExecutionStarter() {
 		// Not for instantiation
+	}
+
+	public static void startCleanupRefactoring(final ICompilationUnit[] cus) throws JavaModelException {
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		for (int i= 0; i < cus.length; i++) {
+			refactoring.addCompilationUnit(cus[i]);
+		}
+		CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, false, true);
+		RefactoringStarter starter= new RefactoringStarter();
+			starter.activate(refactoring, refactoringWizard, JavaPlugin.getActiveWorkbenchShell(), "Clean ups", true); //$NON-NLS-1$
+	}
+
+	public static void startCleanupRefactoring(ICompilationUnit cu) throws JavaModelException {
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu);
+		CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, false, true);
+		RefactoringStarter starter= new RefactoringStarter();
+		starter.activate(refactoring, refactoringWizard, JavaPlugin.getActiveWorkbenchShell(), "Clean ups", true); //$NON-NLS-1$
 	}
 }

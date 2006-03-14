@@ -27,8 +27,6 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -36,7 +34,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -46,9 +44,7 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
-import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 
 public class CleanUpAction extends SelectionDispatchAction {
@@ -157,46 +153,14 @@ public class CleanUpAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), cu))
 			return;
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu);
-		CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, false, true);
-		
-		RefactoringStarter starter= new RefactoringStarter();
 		try {
-			starter.activate(refactoring, refactoringWizard, JavaPlugin.getActiveWorkbenchShell(), "Clean ups", true); //$NON-NLS-1$
+			RefactoringExecutionStarter.startCleanupRefactoring(cu);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 			showUnexpectedError(e);
 		}
 		return;
 	}
-	
-//Bug 120528 [clean up] inside editor behaves unexpected
-//	private void runLight(ICompilationUnit cu) {
-//		if (!ElementValidator.check(cu, getShell(), ActionMessages.CleanUpAction_ErrorDialogTitle, fEditor != null)) 
-//			return;
-//		if (!ActionUtil.isProcessable(getShell(), cu))
-//			return;
-//		
-//		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-//		refactoring.addCompilationUnit(cu);
-//		
-//		ICleanUp[] cleanUps= CleanUpRefactoringWizard.createAllCleanUps();
-//		for (int i= 0; i < cleanUps.length; i++) {
-//			refactoring.addCleanUp(cleanUps[i]);
-//		}
-//		
-//		int stopSeverity= RefactoringCore.getConditionCheckingFailedSeverity();
-//		Shell shell= JavaPlugin.getActiveWorkbenchShell();
-//		BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
-//		RefactoringExecutionHelper executer= new RefactoringExecutionHelper(refactoring, stopSeverity, true, shell, context);
-//		try {
-//			executer.perform();
-//		} catch (InterruptedException e) {
-//		} catch (InvocationTargetException e) {
-//			JavaPlugin.log(e);
-//		}
-//	}
 
 	/**
 	 * Perform on multiple compilation units. No editors are opened.
@@ -216,16 +180,8 @@ public class CleanUpAction extends SelectionDispatchAction {
 			return;
 		}
 			
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		for (int i= 0; i < cus.length; i++) {
-			refactoring.addCompilationUnit(cus[i]);
-		}
-		
-		CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, false, true);
-		
-		RefactoringStarter starter= new RefactoringStarter();
 		try {
-			starter.activate(refactoring, refactoringWizard, JavaPlugin.getActiveWorkbenchShell(), "Clean ups", true); //$NON-NLS-1$
+			RefactoringExecutionStarter.startCleanupRefactoring(cus);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 			showUnexpectedError(e);
