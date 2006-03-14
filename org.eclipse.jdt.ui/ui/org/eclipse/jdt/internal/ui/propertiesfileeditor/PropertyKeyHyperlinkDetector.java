@@ -97,7 +97,7 @@ public class PropertyKeyHyperlinkDetector implements IHyperlinkDetector {
 			String realKey= key.trim();
 			int delta= key.indexOf(realKey);
 
-			String unicodeKey= getUnicodeString(key);
+			String unicodeKey= getUnicodeString(realKey);
 			// Check whether the key is valid
 			Properties properties= new Properties();
 			properties.load(new ByteArrayInputStream(document.get().getBytes()));
