@@ -173,10 +173,18 @@ public class NLSHintHelper {
 			Assert.isLegal(false);
 		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(container, ASTProvider.WAIT_YES, null);
 	
-		return getResourceBundleName(accessorClassBinding, astRoot);
+		return getResourceBundleName(astRoot);
 	}
 	
-	public static String getResourceBundleName(ITypeBinding accessorClassBinding, CompilationUnit astRoot) throws JavaModelException {
+	public static String getResourceBundleName(ICompilationUnit unit) throws JavaModelException {
+		return getResourceBundleName(JavaPlugin.getDefault().getASTProvider().getAST(unit, ASTProvider.WAIT_YES, null));
+	}
+	
+	public static String getResourceBundleName(IClassFile classFile) throws JavaModelException {
+		return getResourceBundleName(JavaPlugin.getDefault().getASTProvider().getAST(classFile, ASTProvider.WAIT_YES, null));
+	}
+	
+	public static String getResourceBundleName(CompilationUnit astRoot) throws JavaModelException {
 
 		if (astRoot == null)
 			return null;
@@ -322,6 +330,22 @@ public class NLSHintHelper {
 			}
 		}
 		return null;
+	}
+	
+	public static IStorage getResourceBundle(ICompilationUnit compilationUnit) throws JavaModelException {
+		IJavaProject project= compilationUnit.getJavaProject();
+		if (project == null)
+			return null;
+		
+		String name= getResourceBundleName(compilationUnit);
+		if (name == null)
+			return null;
+		
+		int i= name.lastIndexOf('.');
+		String packName= name.substring(0, i);
+		String resourceName= name.substring(i + 1) + NLSRefactoring.PROPERTY_FILE_EXT;
+		
+		return getResourceBundle(project, packName, resourceName);
 	}
 	
 	public static IStorage getResourceBundle(IJavaProject javaProject, String packageName, String resourceName) throws JavaModelException {

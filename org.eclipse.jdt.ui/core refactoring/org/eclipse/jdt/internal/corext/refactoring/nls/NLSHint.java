@@ -165,7 +165,7 @@ public class NLSHint {
 								else
 									fCache_AST= null;
 							}
-							bundleName = NLSHintHelper.getResourceBundleName(type, fCache_AST);
+							bundleName = NLSHintHelper.getResourceBundleName(fCache_AST);
 						} catch (JavaModelException e) {
 							return true; // ignore this accessor and continue
 						}

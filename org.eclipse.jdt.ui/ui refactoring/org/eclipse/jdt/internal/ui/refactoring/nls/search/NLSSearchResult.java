@@ -14,6 +14,8 @@ package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -46,19 +48,15 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 	 */
 	
 	private NLSSearchQuery fQuery;
-	private FileEntry fDuplicatesGroup;
-	private FileEntry fUnusedGroup;
+	private final List fFileEntryGroups;
 
 	public NLSSearchResult(NLSSearchQuery query) {
 		fQuery= query;
+		fFileEntryGroups= new ArrayList();
 	}
 	
-	public void setDuplicatesGroup(FileEntry duplicatesGroup) {
-		fDuplicatesGroup= duplicatesGroup;
-	}
-	
-	public void setUnusedGroup(FileEntry unusedGroup) {
-		fUnusedGroup= unusedGroup;
+	public void addFileEntryGroup(FileEntry group) {
+		fFileEntryGroups.add(group);
 	}
 	
 	/*
@@ -83,20 +81,21 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#findContainedMatches(org.eclipse.core.resources.IFile)
 	 */
 	public Match[] computeContainedMatches(AbstractTextSearchResult result, IFile file) {
-		if (fQuery.getPropertiesFile().equals(file)) {
-			ArrayList matches= new ArrayList();
-			if (fDuplicatesGroup != null)
-				matches.addAll(Arrays.asList(getMatches(fDuplicatesGroup)));
-			if (fUnusedGroup != null)
-				matches.addAll(Arrays.asList(getMatches(fUnusedGroup)));
-			return (Match[]) matches.toArray(new Match[matches.size()]);
-		} else {
-			//TODO: copied from JavaSearchResult:
-			IJavaElement javaElement= JavaCore.create(file);
-			Set matches= new HashSet();
-			collectMatches(matches, javaElement);
-			return (Match[]) matches.toArray(new Match[matches.size()]);
+		ArrayList matches= new ArrayList();
+		for (Iterator iter= fFileEntryGroups.iterator(); iter.hasNext();) {
+			FileEntry element= (FileEntry)iter.next();
+			if (element.getPropertiesFile().equals(file)) {
+				matches.addAll(Arrays.asList(getMatches(element)));
+			}
 		}
+		if (matches.size() > 0)
+			return (Match[]) matches.toArray(new Match[matches.size()]);
+		
+		//TODO: copied from JavaSearchResult:
+		IJavaElement javaElement= JavaCore.create(file);
+		Set matchesSet= new HashSet();
+		collectMatches(matchesSet, javaElement);
+		return (Match[]) matchesSet.toArray(new Match[matchesSet.size()]);
 	}
 	
 	private void collectMatches(Set matches, IJavaElement element) {

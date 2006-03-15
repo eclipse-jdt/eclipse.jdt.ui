@@ -39,46 +39,55 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 public class NLSSearchQuery implements ISearchQuery {
 	private NLSSearchResult fResult;
-	private IJavaElement fWrapperClass;
-	private IFile fPropertiesFile;
+	private IJavaElement[] fWrapperClass;
+	private IFile[] fPropertiesFile;
 	private IJavaSearchScope fScope;
 	private String fScopeDescription;
 	
 	public NLSSearchQuery(IJavaElement wrapperClass, IFile propertiesFile, IJavaSearchScope scope, String scopeDescription) {
+		this(new IJavaElement[] {wrapperClass}, new IFile[] {propertiesFile}, scope, scopeDescription);
+	}
+	
+	public NLSSearchQuery(IJavaElement[] wrapperClass, IFile[] propertiesFile, IJavaSearchScope scope, String scopeDescription) {
 		fWrapperClass= wrapperClass;
 		fPropertiesFile= propertiesFile;
 		fScope= scope;
 		fScopeDescription= scopeDescription;
 	}
 	
-	IFile getPropertiesFile() {
-		return fPropertiesFile;
-	}
-	
 	/*
 	 * @see org.eclipse.search.ui.ISearchQuery#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public IStatus run(IProgressMonitor monitor) {
-		monitor.beginTask("", 5); //$NON-NLS-1$
-		if (! fWrapperClass.exists())
-			return JavaUIStatus.createError(0, Messages.format(NLSSearchMessages.NLSSearchQuery_wrapperNotExists, fWrapperClass.getElementName()), null); 
-		if (! fPropertiesFile.exists())
-			return JavaUIStatus.createError(0, Messages.format(NLSSearchMessages.NLSSearchQuery_propertiesNotExists, fPropertiesFile.getName()), null); 
+		monitor.beginTask("", 5 * fWrapperClass.length); //$NON-NLS-1$
 		
-		final AbstractTextSearchResult textResult= (AbstractTextSearchResult) getSearchResult();
-		textResult.removeAll();
-		
-		SearchPattern pattern= SearchPattern.createPattern(fWrapperClass, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
-		SearchParticipant[] participants= new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()};
-		NLSSearchResultRequestor requestor= new NLSSearchResultRequestor(fPropertiesFile, fResult);
 		try {
-			SearchEngine engine= new SearchEngine();
-			engine.search(pattern, participants, fScope, requestor, new SubProgressMonitor(monitor, 4));
-			requestor.reportUnusedPropertyNames(new SubProgressMonitor(monitor, 1));
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
+			final AbstractTextSearchResult textResult= (AbstractTextSearchResult) getSearchResult();
+			textResult.removeAll();
+			
+			for (int i= 0; i < fWrapperClass.length; i++) {
+				IJavaElement wrapperClass= fWrapperClass[i];
+				IFile propertieFile= fPropertiesFile[i];
+				if (! wrapperClass.exists())
+					return JavaUIStatus.createError(0, Messages.format(NLSSearchMessages.NLSSearchQuery_wrapperNotExists, wrapperClass.getElementName()), null); 
+				if (! wrapperClass.exists())
+					return JavaUIStatus.createError(0, Messages.format(NLSSearchMessages.NLSSearchQuery_propertiesNotExists, propertieFile.getName()), null); 
+				
+				SearchPattern pattern= SearchPattern.createPattern(wrapperClass, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+				SearchParticipant[] participants= new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()};
+				
+				NLSSearchResultRequestor requestor= new NLSSearchResultRequestor(propertieFile, fResult);
+				try {
+					SearchEngine engine= new SearchEngine();
+					engine.search(pattern, participants, fScope, requestor, new SubProgressMonitor(monitor, 4));
+					requestor.reportUnusedPropertyNames(new SubProgressMonitor(monitor, 1));
+				} catch (CoreException e) {
+					JavaPlugin.log(e);
+				}
+			}
+		} finally {
+			monitor.done();
 		}
-		monitor.done();
 		return 	Status.OK_STATUS;
 	}
 
@@ -90,12 +99,19 @@ public class NLSSearchQuery implements ISearchQuery {
 	}
 
 	public String getResultLabel(int nMatches) {
-		if (nMatches == 1) {
-			String[] args= new String[] {fWrapperClass.getElementName(), fScopeDescription};	
-			return Messages.format(NLSSearchMessages.SearchOperation_singularLabelPostfix, args); 
+		if (fWrapperClass.length == 1) {
+			if (nMatches == 1) {
+				String[] args= new String[] {fWrapperClass[0].getElementName(), fScopeDescription};	
+				return Messages.format(NLSSearchMessages.SearchOperation_singularLabelPostfix, args); 
+			}
+			String[] args= new String[] {fWrapperClass[0].getElementName(), String.valueOf(nMatches), fScopeDescription};
+			return Messages.format(NLSSearchMessages.SearchOperation_pluralLabelPatternPostfix, args); 
+		} else {
+			if (nMatches == 1) {
+				return Messages.format(NLSSearchMessages.NLSSearchQuery_oneProblemInScope_description, fScopeDescription);
+			}
+			return Messages.format(NLSSearchMessages.NLSSearchQuery_xProblemsInScope_description, new Object[] {String.valueOf(nMatches), fScopeDescription});
 		}
-		String[] args= new String[] {fWrapperClass.getElementName(), String.valueOf(nMatches), fScopeDescription};
-		return Messages.format(NLSSearchMessages.SearchOperation_pluralLabelPatternPostfix, args); 
 	}
 	
 	/*

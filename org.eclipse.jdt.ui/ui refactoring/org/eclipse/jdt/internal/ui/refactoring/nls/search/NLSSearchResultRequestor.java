@@ -23,6 +23,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
+import org.eclipse.jface.text.Position;
+
+import org.eclipse.search.ui.text.Match;
+
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
@@ -32,10 +36,6 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchRequestor;
-
-import org.eclipse.jface.text.Position;
-
-import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.PropertyFileDocumentModel;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -120,7 +120,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		pm.beginTask("", fProperties.size()); //$NON-NLS-1$
 		boolean hasUnused= false;		
 		pm.setTaskName(NLSSearchMessages.NLSSearchResultRequestor_searching); 
-		String message= Messages.format(NLSSearchMessages.NLSSearchResultCollector_unusedKeys, fPropertiesFile.getName()); 
+		String message= Messages.format(NLSSearchMessages.NLSSearchResultCollector_unusedKeys, getPropertiesName(fPropertiesFile)); 
 		FileEntry groupElement= new FileEntry(fPropertiesFile, message);
 		
 		for (Enumeration enumeration= fProperties.propertyNames(); enumeration.hasMoreElements();) {
@@ -132,8 +132,13 @@ class NLSSearchResultRequestor extends SearchRequestor {
 			pm.worked(1);
 		}
 		if (hasUnused)
-			fResult.setUnusedGroup(groupElement);
+			fResult.addFileEntryGroup(groupElement);
 		pm.done();
+	}
+
+	private String getPropertiesName(IFile propertiesFile) {
+		String path= propertiesFile.getFullPath().removeLastSegments(1).toOSString();
+		return propertiesFile.getName() + " - " + path; //$NON-NLS-1$
 	}
 
 	private void addMatch(FileEntry groupElement, String propertyName) {
@@ -333,14 +338,14 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		if (duplicateKeys.size() == 0)
 			return;
 		
-		String message= Messages.format(NLSSearchMessages.NLSSearchResultCollector_duplicateKeys, fPropertiesFile.getName()); 
+		String message= Messages.format(NLSSearchMessages.NLSSearchResultCollector_duplicateKeys, getPropertiesName(fPropertiesFile)); 
 		FileEntry groupElement= new FileEntry(fPropertiesFile, message);
 		Iterator iter= duplicateKeys.iterator();
 		while (iter.hasNext()) {
 			String propertyName= (String) iter.next();
 			addMatch(groupElement, propertyName);
 		}
-		fResult.setDuplicatesGroup(groupElement);
+		fResult.addFileEntryGroup(groupElement);
 	}
 
 }

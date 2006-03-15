@@ -23,36 +23,48 @@ final class NLSSearchMessages extends NLS {
 		// Do not instantiate
 	}
 
-	public static String Search_Error_javaElementAccess_title;
-	public static String Search_Error_javaElementAccess_message;
-	public static String Search_Error_createJavaElement_title;
-	public static String Search_Error_createJavaElement_message;
-	public static String SearchElementSelectionDialog_title;
-	public static String SearchElementSelectionDialog_message;
-	public static String SearchOperation_singularLabelPostfix;
-	public static String SearchOperation_pluralLabelPatternPostfix;
-	public static String NLSSearchResultCollector_unusedKeys;
-	public static String NLSSearchResultRequestor_searching;
-	public static String NLSSearchResultCollector_duplicateKeys;
+	public static String EnclosingProjectScope;
+	
+	public static String EnclosingProjectsScope;
+
 	public static String NLSSearchPage_Error_createTypeDialog_message;
 	public static String NLSSearchPage_Error_createTypeDialog_title;
-	public static String NLSSearchPage_propertyFileGroup_text;
-	public static String NLSSearchPage_propertyFileBrowseButton_text;
-	public static String NLSSearchPage_propertiesFileSelectionDialog_title;
 	public static String NLSSearchPage_propertiesFileSelectionDialog_message;
-	public static String NLSSearchPage_wrapperClassGroup_text;
+	public static String NLSSearchPage_propertiesFileSelectionDialog_title;
+	public static String NLSSearchPage_propertyFileBrowseButton_text;
+	public static String NLSSearchPage_propertyFileGroup_text;
 	public static String NLSSearchPage_wrapperClassBrowseButton_text;
-	public static String NLSSearchPage_wrapperClassDialog_title;
 	public static String NLSSearchPage_wrapperClassDialog_message;
-	public static String WorkspaceScope;
-	public static String WorkingSetScope;
-	public static String SelectionScope;
-	public static String EnclosingProjectsScope;
-	public static String EnclosingProjectScope;
+	public static String NLSSearchPage_wrapperClassDialog_title;
+	public static String NLSSearchPage_wrapperClassGroup_text;
+	
 	public static String NLSSearchQuery_label;
-	public static String NLSSearchQuery_wrapperNotExists;
+	public static String NLSSearchQuery_oneProblemInScope_description;
 	public static String NLSSearchQuery_propertiesNotExists;
-
+	public static String NLSSearchQuery_wrapperNotExists;
+	public static String NLSSearchQuery_xProblemsInScope_description;
+	
+	public static String NLSSearchResultCollector_duplicateKeys;
+	public static String NLSSearchResultCollector_unusedKeys;
+	public static String NLSSearchResultRequestor_searching;
+	
+	public static String Search_Error_createJavaElement_message;
+	public static String Search_Error_createJavaElement_title;
+	public static String Search_Error_javaElementAccess_message;
+	public static String Search_Error_javaElementAccess_title;
+	
+	public static String SearchElementSelectionDialog_message;
+	public static String SearchElementSelectionDialog_title;
+	
+	public static String SearchOperation_pluralLabelPatternPostfix;
+	public static String SearchOperation_singularLabelPostfix;
+	
+	public static String SelectionScope;
+	
+	public static String WorkingSetScope;
+	
+	public static String WorkspaceScope;
+	
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, NLSSearchMessages.class);
 	}

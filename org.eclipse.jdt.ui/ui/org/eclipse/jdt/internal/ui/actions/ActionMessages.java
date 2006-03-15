@@ -20,6 +20,12 @@ public final class ActionMessages extends NLS {
 		// Do not instantiate
 	}
 
+	public static String FindNLSProblemsAction_Description;
+	public static String FindNLSProblemsAction_ErrorDialogTitle;
+	public static String FindNLSProblemsAction_Name;
+	public static String FindNLSProblemsAction_NoPropertieFilesFoundErrorDescription;
+	public static String FindNLSProblemsAction_ToolTip;
+	
 	public static String OpenWithMenu_label;
 	public static String RefactorMenu_label;
 	public static String SourceMenu_label;

@@ -2393,6 +2393,13 @@
          </menu>
 <!-- Code Group -->
          <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.findNLSProblems"
+               label="%FindNLSProblems.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.source.menu/codeGroup"
+               id="org.eclipse.jdt.ui.actions.FindNLSProblems">
+         </action>
+         <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.find.strings.to.externalize"
                label="%FindStringsToExternalizeAction.label"
                retarget="true"
@@ -3199,6 +3206,12 @@
             description="%ActionDefinition.cleanUp.description"
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.edit.text.java.clean.up">
+      </command>
+      <command
+            name="%ActionDefinition.findNLSProblems.name"
+            description="%ActionDefinition.findNLSProblems.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.edit.text.java.findnlsproblems">
       </command>
       <command
             name="%ActionDefinition.externalizeStrings.name"

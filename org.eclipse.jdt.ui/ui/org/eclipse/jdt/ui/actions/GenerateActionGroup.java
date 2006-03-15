@@ -41,6 +41,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.AddTaskAction;
 import org.eclipse.jdt.internal.ui.actions.CleanUpAction;
+import org.eclipse.jdt.internal.ui.actions.FindBrokenNLSKeysAction;
 import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
 import org.eclipse.jdt.internal.ui.javaeditor.AddImportOnSelectionAction;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -107,6 +108,7 @@ public class GenerateActionGroup extends ActionGroup {
 	private FindStringsToExternalizeAction fFindStringsToExternalize;
 	private SurroundWithTryCatchAction fSurroundWithTryCatch;
 	private CleanUpAction fCleanUp;	
+	private FindBrokenNLSKeysAction fFindNLSProblems;
 	
 	private OrganizeImportsAction fOrganizeImports;
 	private SortMembersAction fSortMembers;
@@ -261,6 +263,9 @@ public class GenerateActionGroup extends ActionGroup {
 		fFindStringsToExternalize= new FindStringsToExternalizeAction(site);
 		fFindStringsToExternalize.setActionDefinitionId(IJavaEditorActionDefinitionIds.FIND_STRINGS_TO_EXTERNALIZE);
 		
+		fFindNLSProblems= new FindBrokenNLSKeysAction(site);
+		fFindNLSProblems.setActionDefinitionId(FindBrokenNLSKeysAction.FIND_BROKEN_NLS_KEYS_ACTION_ID);
+		
 		fOrganizeImports= new OrganizeImportsAction(site);
 		fOrganizeImports.setActionDefinitionId(IJavaEditorActionDefinitionIds.ORGANIZE_IMPORTS);
 		
@@ -283,6 +288,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddJavaDocStub.update(selection);
 		fExternalizeStrings.update(selection);
 		fFindStringsToExternalize.update(selection);
+		fFindNLSProblems.update(selection);
 		fCleanUp.update(selection);
 		fAddTaskAction.update(selection);
 		fOrganizeImports.update(selection);
@@ -305,6 +311,7 @@ public class GenerateActionGroup extends ActionGroup {
 		registerSelectionListener(provider, fAddBookmark);
 		registerSelectionListener(provider, fExternalizeStrings);
 		registerSelectionListener(provider, fFindStringsToExternalize);
+		registerSelectionListener(provider, fFindNLSProblems);
 		registerSelectionListener(provider, fOrganizeImports);
 		registerSelectionListener(provider, fFormatAll);
 		registerSelectionListener(provider, fSortMembers);
@@ -419,6 +426,7 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(source, fExternalizeStrings);
 		added+= addAction(source, fCleanUp);
 		added+= addAction(source, fFindStringsToExternalize);
+		added+= addAction(source, fFindNLSProblems);
 		return added;
 	}
 
@@ -453,6 +461,7 @@ public class GenerateActionGroup extends ActionGroup {
 		actionBar.setGlobalActionHandler(JdtActionConstants.EXTERNALIZE_STRINGS, fExternalizeStrings);
 		actionBar.setGlobalActionHandler(JdtActionConstants.CLEAN_UP, fCleanUp);
 		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_STRINGS_TO_EXTERNALIZE, fFindStringsToExternalize);
+		actionBar.setGlobalActionHandler(FindBrokenNLSKeysAction.ACTION_HANDLER_ID, fFindNLSProblems);
 		actionBar.setGlobalActionHandler(JdtActionConstants.ORGANIZE_IMPORTS, fOrganizeImports);
 		actionBar.setGlobalActionHandler(JdtActionConstants.SORT_MEMBERS, fSortMembers);
 		if (!isEditorOwner()) {
