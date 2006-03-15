@@ -12,8 +12,8 @@ public class E1 {
 		public void run() {}
 	}
 
-	/* (non-Javadoc)
-	 * @see p.E1.E1Inner1#foo()
+	/**
+	 * @param inner1
 	 */
 	public static void bar(E1Inner1 inner1) {
 		inner1.foo();

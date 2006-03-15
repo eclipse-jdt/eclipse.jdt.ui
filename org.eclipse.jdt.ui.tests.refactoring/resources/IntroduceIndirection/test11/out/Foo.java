@@ -4,8 +4,10 @@ public class Foo {
 	
 	// Test name clash with existing arguments
 	
-	/* (non-Javadoc)
-	 * @see p.Foo#foo(java.lang.String, java.lang.String)
+	/**
+	 * @param foo
+	 * @param target
+	 * @param target1
 	 */
 	public static void bar(Foo foo, String target, String target1) {
 		foo.foo(target, target1);

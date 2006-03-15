@@ -2,8 +2,10 @@ package p;
 
 public class MultiGenerics<E> {
 
-	/* (non-Javadoc)
-	 * @see p.MultiGenerics#addElement(java.lang.Object)
+	/**
+	 * @param <E>
+	 * @param multiGenerics
+	 * @param e
 	 */
 	public static <E> void bar(MultiGenerics<E> multiGenerics, E e) {
 		multiGenerics.addElement(e);

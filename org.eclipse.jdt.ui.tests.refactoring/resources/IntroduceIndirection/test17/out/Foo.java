@@ -8,8 +8,10 @@ public class Foo {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see p.Foo#foo(java.util.Collection)
+	/**
+	 * @param <A>
+	 * @param xs
+	 * @return
 	 */
 	public static <A extends Comparable<A>> A bar(Collection<A> xs) {
 		return Foo.foo(xs);

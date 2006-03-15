@@ -2,8 +2,11 @@ package p;
 
 public class Foo<E, F, G extends Comparable<E>> {
 
-	/* (non-Javadoc)
-	 * @see p.Foo#foo()
+	/**
+	 * @param <E>
+	 * @param <F>
+	 * @param <G>
+	 * @param foo
 	 */
 	public static <E, F, G extends Comparable<E>> void bar(Foo<E, F, G> foo) {
 		foo.foo();

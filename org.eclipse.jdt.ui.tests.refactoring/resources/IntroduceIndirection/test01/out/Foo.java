@@ -4,8 +4,8 @@ public class Foo {
 	
 	// Very simple test
 	
-	/* (non-Javadoc)
-	 * @see p.Foo#foo()
+	/**
+	 * @param foo
 	 */
 	public static void bar(Foo foo) {
 		foo.foo();

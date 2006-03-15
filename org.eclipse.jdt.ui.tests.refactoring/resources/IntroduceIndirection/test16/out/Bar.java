@@ -2,8 +2,8 @@ package p;
 
 public class Bar {
 	
-	/* (non-Javadoc)
-	 * @see p.Foo#foo()
+	/**
+	 * @param foo
 	 */
 	public static void bar(Foo foo) {
 		foo.foo();

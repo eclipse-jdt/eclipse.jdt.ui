@@ -4,8 +4,9 @@ public class Foo {
 	
 	// Test error, method already exists
 	
-	/* (non-Javadoc)
-	 * @see p.Bar#foo(java.lang.String)
+	/**
+	 * @param bar
+	 * @param foo
 	 */
 	public static void foo(Bar bar, String foo) {
 		bar.foo(foo);

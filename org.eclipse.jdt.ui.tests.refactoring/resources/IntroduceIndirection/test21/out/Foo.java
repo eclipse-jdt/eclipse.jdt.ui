@@ -2,8 +2,10 @@ package p;
 
 public class Foo {
 	
-	/* (non-Javadoc)
-	 * @see p.Foo#setE(java.lang.Object)
+	/**
+	 * @param <E>
+	 * @param foo
+	 * @param e
 	 */
 	public static <E> void bar(Foo foo, E e) {
 		foo.setE(e);

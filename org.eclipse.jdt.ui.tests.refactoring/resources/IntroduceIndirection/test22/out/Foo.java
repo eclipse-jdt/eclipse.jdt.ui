@@ -14,8 +14,15 @@ public class Foo<E> {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see p.Foo.Bar.FooBar#foo(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)
+	/**
+	 * @param <E>
+	 * @param <F>
+	 * @param <G>
+	 * @param <H>
+	 * @param e
+	 * @param f
+	 * @param g
+	 * @param h
 	 */
 	public static <E, F, G, H> void bar(E e, F f, G g, H h) {
 		FooBar.foo(e, f, g, h);

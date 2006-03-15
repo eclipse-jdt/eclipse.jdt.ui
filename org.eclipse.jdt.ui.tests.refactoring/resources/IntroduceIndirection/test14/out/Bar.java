@@ -4,8 +4,8 @@ import p0.Foo;
 
 class Bar {
 
-	/* (non-Javadoc)
-	 * @see p0.Foo#hello()
+	/**
+	 * @param foo
 	 */
 	public static void bar(Foo foo) {
 		foo.hello();

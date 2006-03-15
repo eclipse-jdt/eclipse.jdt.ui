@@ -4,8 +4,9 @@ import java.io.IOException;
 
 public class Foo extends Bar {
 	
-	/* (non-Javadoc)
-	 * @see p.Bar#foo()
+	/**
+	 * @param bar
+	 * @throws IOException
 	 */
 	public static void bar(Bar bar) throws IOException {
 		bar.foo();

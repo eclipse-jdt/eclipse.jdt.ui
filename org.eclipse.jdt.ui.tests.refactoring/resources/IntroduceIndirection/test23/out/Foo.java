@@ -4,8 +4,8 @@ import p.Foo.Bar.FooBar;
 
 public class Foo {
 	
-	/* (non-Javadoc)
-	 * @see p.Foo.Bar.FooBar#foo()
+	/**
+	 * 
 	 */
 	public static void bar() {
 		FooBar.foo();

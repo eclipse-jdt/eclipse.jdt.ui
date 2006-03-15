@@ -8,8 +8,8 @@ public class Foo {
 		
 	}
 	
-	/* (non-Javadoc)
-	 * @see p.Foo#foo()
+	/**
+	 * 
 	 */
 	public static void bar() {
 		Foo.foo();

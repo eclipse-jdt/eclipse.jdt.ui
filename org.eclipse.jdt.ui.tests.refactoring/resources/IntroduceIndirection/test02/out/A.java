@@ -4,8 +4,8 @@ public class A extends B {
 	
 	// Test warning because of super keyword
 
-	/* (non-Javadoc)
-	 * @see p.B#foo()
+	/**
+	 * @param b
 	 */
 	public static void bar(B b) {
 		b.foo();

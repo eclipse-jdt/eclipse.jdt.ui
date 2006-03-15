@@ -4,8 +4,8 @@ public class Foo extends Bar {
 	
 	// Test correct "thisification".
 
-	/* (non-Javadoc)
-	 * @see p.Bar#getDisplay()
+	/**
+	 * @param bar
 	 */
 	public static void bar(Bar bar) {
 		bar.getDisplay();

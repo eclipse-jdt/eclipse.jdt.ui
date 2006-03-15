@@ -8,8 +8,8 @@ public class Foo {
 		
 		static class MoreInner {
 
-			/* (non-Javadoc)
-			 * @see p.Foo#foo()
+			/**
+			 * @param foo
 			 */
 			public static void bar(Foo foo) {
 				foo.foo();

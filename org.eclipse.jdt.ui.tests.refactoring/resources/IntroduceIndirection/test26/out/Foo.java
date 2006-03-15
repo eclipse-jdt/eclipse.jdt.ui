@@ -8,8 +8,9 @@ public class Foo {
 
 	}
 	
-	/* (non-Javadoc)
-	 * @see p.Foo#foo()
+	/**
+	 * @throws IOException
+	 * @throws ArrayIndexOutOfBoundsException
 	 */
 	public static void bar() throws IOException, ArrayIndexOutOfBoundsException {
 		Foo.foo();

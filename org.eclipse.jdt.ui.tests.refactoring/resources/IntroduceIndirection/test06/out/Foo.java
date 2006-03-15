@@ -11,8 +11,8 @@ public class Foo {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see p.Bar#getDisplay()
+	/**
+	 * @param bar
 	 */
 	public static void bar(Bar bar) {
 		bar.getDisplay();
