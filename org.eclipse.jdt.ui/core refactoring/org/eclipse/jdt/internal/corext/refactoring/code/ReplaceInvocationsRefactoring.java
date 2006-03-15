@@ -56,15 +56,14 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
@@ -89,139 +88,260 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
-public class RewriteMethodInvocationsRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
+public class ReplaceInvocationsRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
-	public static final String ID_REWRITE_METHOD_INVOCATIONS= "org.eclipse.jdt.ui.rewrite.method.invocations"; //$NON-NLS-1$
+	public static final String ID_REPLACE_INVOCATIONS= "org.eclipse.jdt.ui.replace.invocations"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_MODE= "mode"; //$NON-NLS-1$
 
 	public static class Mode {
 		private Mode() {
 		}
-		public static final Mode REWRITE_ALL= new Mode();
-		public static final Mode REWRITE_SINGLE= new Mode();
+		public static final Mode REPLACE_ALL= new Mode();
+		public static final Mode REPLACE_SINGLE= new Mode();
 	}
 
 	/**
 	 * ICompilationUnit or IClassFile
 	 */
-	private IJavaElement fInitialUnit;
-	private ASTNode fInitialNode;
-	private TextChangeManager fChangeManager;
-	private SourceProvider fSourceProvider;
-	private TargetProvider fTargetProvider;
+	private final IJavaElement fSelectionUnit;
+	/**
+	 * only set if initial mode is REPLACE_SINGLE
+	 */
+	private final int fSelectionStart;
+	/**
+	 * only set if initial mode is REPLACE_SINGLE
+	 */
+	private final int fSelectionLength;
 	
-	private Mode fCurrentMode;
-	private Mode fInitialMode;
-	private int fSelectionStart;
-	private int fSelectionLength;
+	private ASTNode fSelectionNode;
+	/**
+	 * only set after checkInitialConditions
+	 */
+	private IMethod fMethod;
+	
 	private String fBody;
 	private String[] fParameterNames;
-
-	private RewriteMethodInvocationsRefactoring(IJavaElement unit, ASTNode node, int offset, int length) {
-		Assert.isNotNull(unit);
-		Assert.isTrue(JavaModelUtil.isTypeContainerUnit(unit));
-//		Assert.isTrue(JavaElementUtil.isSourceAvailable((ISourceReference) unit));
-		Assert.isNotNull(node);
-		fInitialUnit= unit;
-		fInitialNode= node;
+	
+	private SourceProvider fSourceProvider; // resolved once in checkInitialConditions
+	private TargetProvider fTargetProvider; // flexible
+	
+	private TextChangeManager fChangeManager;
+	private IMethodBinding fMethodBinding;
+	
+	public ReplaceInvocationsRefactoring(IJavaElement unit, int offset, int length) {
+		if (! JavaModelUtil.isTypeContainerUnit(unit))
+			throw new IllegalArgumentException(unit.toString());
+		
+		fSelectionUnit= unit;
 		fSelectionStart= offset;
 		fSelectionLength= length;
 	}
 
-	private RewriteMethodInvocationsRefactoring(ICompilationUnit unit, MethodInvocation node, int offset, int length) {
-		this(unit, (ASTNode)node, offset, length);
-		fTargetProvider= TargetProvider.create(unit, node);
-		fInitialMode= fCurrentMode= Mode.REWRITE_SINGLE;
-	}
-
-	private RewriteMethodInvocationsRefactoring(ICompilationUnit unit, SuperMethodInvocation node, int offset, int length) {
-		this(unit, (ASTNode)node, offset, length);
-		fTargetProvider= TargetProvider.create(unit, node);
-		fInitialMode= fCurrentMode= Mode.REWRITE_SINGLE;
-	}
-
-	private RewriteMethodInvocationsRefactoring(ICompilationUnit unit, ConstructorInvocation node, int offset, int length) {
-		this(unit, (ASTNode)node, offset, length);
-		fTargetProvider= TargetProvider.create(unit, node);
-		fInitialMode= fCurrentMode= Mode.REWRITE_SINGLE;
-	}
-
-	private RewriteMethodInvocationsRefactoring(IJavaElement unit, MethodDeclaration node, int offset, int length) {
-		this(unit, (ASTNode)node, offset, length);
-		fTargetProvider= TargetProvider.create(node);
-		fInitialMode= fCurrentMode= Mode.REWRITE_ALL;
-	}
-	
-	/**
-	 * Creates a new inline method refactoring
-	 * @param unit the compilation unit, class file, or <code>null</code> if invoked by scripting
-	 * @param node the compilation unit node, or <code>null</code> if invoked by scripting
-	 * @param selectionStart
-	 * @param selectionLength
-	 */
-	//TODO: scripting will throw NPEs!
-	public static RewriteMethodInvocationsRefactoring create(IJavaElement unit, CompilationUnit node, int selectionStart, int selectionLength) {
-		ASTNode target= getTargetNode(unit, node, selectionStart, selectionLength);
-		if (target == null)
-			return null;
-		if (target.getNodeType() == ASTNode.METHOD_DECLARATION) {
-			
-			return new RewriteMethodInvocationsRefactoring(unit, (MethodDeclaration)target, selectionStart, selectionLength);
-		} else {
-			ICompilationUnit cu= (ICompilationUnit) unit;
-			if (target.getNodeType() == ASTNode.METHOD_INVOCATION) {
-				return new RewriteMethodInvocationsRefactoring(cu, (MethodInvocation)target, selectionStart, selectionLength);
-			} else if (target.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION) {
-				return new RewriteMethodInvocationsRefactoring(cu, (SuperMethodInvocation)target, selectionStart, selectionLength);
-			} else if (target.getNodeType() == ASTNode.CONSTRUCTOR_INVOCATION) {
-				return new RewriteMethodInvocationsRefactoring(cu, (ConstructorInvocation)target, selectionStart, selectionLength);
-			}
-		}
-		return null;
+	public ReplaceInvocationsRefactoring(IMethod method) {
+		fMethod= method;
+		fSelectionUnit= JavaModelUtil.getTypeContainerUnit(method);
+		fSelectionStart= -1;
+		fSelectionLength= -1;
 	}
 	
 	public String getName() {
 		return RefactoringCoreMessages.InlineMethodRefactoring_name; 
 	}
 	
-	public boolean canEnableDeleteSource() {
-		return ! (fSourceProvider.getTypeContainerUnit() instanceof IClassFile);
+	/**
+	 * Only to be called after {@link #checkInitialConditions(IProgressMonitor)}
+	 */
+	public boolean canReplaceSingle() {
+		return fSelectionNode instanceof MethodInvocation;
 	}
 	
-	public Mode getInitialMode() {
-		return fInitialMode;
-	}
-	
+	/**
+	 * Only to be called after {@link #checkInitialConditions(IProgressMonitor)}
+	 */
 	public RefactoringStatus setCurrentMode(Mode mode) throws JavaModelException {
-		if (fCurrentMode == mode)
+		if (fTargetProvider.isSingle() == (mode == Mode.REPLACE_SINGLE))
 			return new RefactoringStatus();
-		Assert.isTrue(getInitialMode() == Mode.REWRITE_SINGLE);
-		fCurrentMode= mode;
-		if (mode == Mode.REWRITE_SINGLE) {
-			fTargetProvider= TargetProvider.create((ICompilationUnit) fInitialUnit, (MethodInvocation)fInitialNode);
+		Assert.isTrue(canReplaceSingle());
+		if (mode == Mode.REPLACE_SINGLE) {
+			fTargetProvider= TargetProvider.create((ICompilationUnit) fSelectionUnit, (MethodInvocation) fSelectionNode);
 		} else {
 			fTargetProvider= TargetProvider.create(fSourceProvider.getDeclaration());
 		}
 		return fTargetProvider.checkActivation();
 	}
 	
+	public void setBody(String body, String[] parameterNames) {
+		//TODO: validate parameter name count and body
+		fBody= body;
+		fParameterNames= parameterNames;
+	}
+	
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
+		// TargetProvider must get an untampered AST with original invocation node
+		// SourceProvider must get a tweaked AST with method body / parameter names replaced
+		
 		RefactoringStatus result= new RefactoringStatus();
-		if (fSourceProvider == null) {
-			fSourceProvider= resolveSourceProvider(result);
-			if (result.hasFatalError())
-				return result;
+		
+		if (fMethod == null) {
+			if (! (fSelectionUnit instanceof ICompilationUnit))
+				return RefactoringStatus.createFatalErrorStatus("Cannot replace invocation in a binary method.");
+			
+			ICompilationUnit cu= (ICompilationUnit) fSelectionUnit;
+			CompilationUnit root= new RefactoringASTParser(AST.JLS3).parse(cu, true);
+			fSelectionNode= getTargetNode(cu, root, fSelectionStart, fSelectionLength);
+			if (fSelectionNode == null)
+				return RefactoringStatus.createFatalErrorStatus("Select a method declaration or method invocation to apply this refactoring.");
+			
+			if (fSelectionNode.getNodeType() == ASTNode.METHOD_DECLARATION) {
+				MethodDeclaration methodDeclaration= (MethodDeclaration) fSelectionNode;
+				fTargetProvider= TargetProvider.create(methodDeclaration);
+				fMethodBinding= methodDeclaration.resolveBinding();
+			} else {
+				MethodInvocation methodInvocation= (MethodInvocation) fSelectionNode;
+				fTargetProvider= TargetProvider.create(cu, methodInvocation);
+				fMethodBinding= methodInvocation.resolveMethodBinding();
+			}
+			if (fMethodBinding == null)
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineMethodRefactoring_error_noMethodDeclaration);
+			fMethod= (IMethod) fMethodBinding.getJavaElement();
+			
+		} else {
+			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			parser.setProject(fMethod.getJavaProject());
+			IBinding[] bindings= parser.createBindings(new IJavaElement[] { fMethod }, null);
+			fMethodBinding= (IMethodBinding) bindings[0];
+			if (fMethodBinding == null)
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineMethodRefactoring_error_noMethodDeclaration);
+			
+			fTargetProvider= TargetProvider.create(fMethodBinding);
 		}
-		fTargetProvider.setSourceProvider(fSourceProvider);
-		result.merge(fSourceProvider.checkActivation());
+		
 		result.merge(fTargetProvider.checkActivation());
 		return result;
+	}
+	
+	private SourceProvider resolveSourceProvider(IMethodBinding methodBinding, RefactoringStatus status) throws JavaModelException {
+		final IMethod method= (IMethod) methodBinding.getJavaElement();
+		
+		IJavaElement unit;
+		IDocument source;
+		CompilationUnit methodDeclarationAstRoot;
+		
+		ICompilationUnit methodCu= (method).getCompilationUnit();
+		if (methodCu != null) {
+			unit= methodCu;
+			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			parser.setSource(methodCu);
+			parser.setFocalPosition(method.getNameRange().getOffset());
+			CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
+			MethodDeclaration methodDecl= (MethodDeclaration) NodeFinder.perform(compilationUnit, method.getNameRange()).getParent();
+			AST ast= compilationUnit.getAST();
+			ASTRewrite rewrite= ASTRewrite.create(ast);
+			Block newBody= ast.newBlock();
+			newBody.statements().add(rewrite.createStringPlaceholder(fBody, ASTNode.EMPTY_STATEMENT));
+			rewrite.replace(methodDecl.getBody(), newBody, null);
+			List parameters= methodDecl.parameters();
+			for (int i= 0; i < parameters.size(); i++) {
+				SingleVariableDeclaration parameter= (SingleVariableDeclaration) parameters.get(i);
+				rewrite.set(parameter.getName(), SimpleName.IDENTIFIER_PROPERTY, fParameterNames[i], null);
+			}
+			TextEdit textEdit= rewrite.rewriteAST();
+			Document document= new Document(methodCu.getBuffer().getContents());
+			try {
+				textEdit.apply(document);
+			} catch (MalformedTreeException e) {
+				JavaPlugin.log(e);
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
+			}
+			source= document;
+			
+			methodDeclarationAstRoot= new RefactoringASTParser(AST.JLS3).parse(source.get(), methodCu, true, true, null);
+			
+		} else {
+			IClassFile classFile= method.getClassFile();
+			//TODO: use source if available?
+			StubCreator stubCreator= new StubCreator(true) {
+				protected void appendMethodBody(IMethod currentMethod) throws JavaModelException {
+					if (currentMethod.equals(method)) {
+						fBuffer.append(fBody);
+					} else {
+						super.appendMethodBody(currentMethod);
+					}
+				}
+				/*
+				 * @see org.eclipse.jdt.internal.corext.refactoring.binary.StubCreator#appendMethodParameterName(org.eclipse.jdt.core.IMethod, int)
+				 */
+				protected void appendMethodParameterName(IMethod currentMethod, int index) {
+					if (currentMethod.equals(method)) {
+						fBuffer.append(fParameterNames[index]);
+					} else {
+						super.appendMethodParameterName(currentMethod, index);
+					}
+				}
+			};
+			
+			String stub= stubCreator.createStub(classFile.getType(), null);
+			source= new Document(stub);
+			methodDeclarationAstRoot= new RefactoringASTParser(AST.JLS3).parse(stub, classFile, true, true, null);
+			unit= classFile;
+		}
+		ASTNode node= methodDeclarationAstRoot.findDeclaringNode(methodBinding.getKey());
+		if (node instanceof MethodDeclaration) {
+			return new SourceProvider(unit, source, (MethodDeclaration) node);
+		} else {
+			status.addFatalError("Cannot find method declaration");
+			return null;
+		}
+	}
+	
+	/**
+	 * @return an invocation or declaration node
+	 */
+	private static ASTNode getTargetNode(ICompilationUnit unit, CompilationUnit root, int offset, int length) {
+		ASTNode node= null;
+		try {
+			node= checkNode(NodeFinder.perform(root, offset, length, unit), unit);
+		} catch(JavaModelException e) {
+			// Do nothing
+		}
+		if (node != null)
+			return node;
+		return checkNode(NodeFinder.perform(root, offset, length), unit);
+	}
+
+	private static ASTNode checkNode(ASTNode node, ICompilationUnit unit) {
+		if (node == null)
+			return null;
+		if (node.getNodeType() == ASTNode.SIMPLE_NAME) {
+			node= node.getParent();
+		} else if (node.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
+			node= ((ExpressionStatement)node).getExpression();
+		}
+		switch(node.getNodeType()) {
+			case ASTNode.METHOD_DECLARATION:
+			case ASTNode.METHOD_INVOCATION:
+// not yet...
+//			case ASTNode.SUPER_METHOD_INVOCATION:
+//			case ASTNode.CONSTRUCTOR_INVOCATION:
+				return node;
+		}
+		return null;
 	}
 	
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 20); //$NON-NLS-1$
 		fChangeManager= new TextChangeManager();
 		RefactoringStatus result= new RefactoringStatus();
+		
+		fSourceProvider= resolveSourceProvider(fMethodBinding, result);
+		if (result.hasFatalError())
+			return result;
+		
+		result.merge(fSourceProvider.checkActivation());
+		if (result.hasFatalError())
+			return result;
+		
 		fSourceProvider.initialize();
 		fTargetProvider.initialize();
 		pm.setTaskName(RefactoringCoreMessages.InlineMethodRefactoring_searching);
@@ -306,155 +426,23 @@ public class RewriteMethodInvocationsRefactoring extends CommentRefactoring impl
 		return new DynamicValidationStateChange(RefactoringCoreMessages.InlineMethodRefactoring_edit_inlineCall, fChangeManager.getAllChanges()) {
 		
 			public final ChangeDescriptor getDescriptor() {
+				//TODO: update for fSelectionStart == -1
 				final Map arguments= new HashMap();
 				String project= null;
-				IJavaProject javaProject= fInitialUnit.getJavaProject();
+				IJavaProject javaProject= fSelectionUnit.getJavaProject();
 				if (javaProject != null)
 					project= javaProject.getElementName();
 				final IMethodBinding binding= fSourceProvider.getDeclaration().resolveBinding();
 				int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;
 				if (!Modifier.isPrivate(binding.getModifiers()))
 					flags|= RefactoringDescriptor.MULTI_CHANGE;
-				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_REWRITE_METHOD_INVOCATIONS, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringClass(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fInitialUnit));
+				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_REPLACE_INVOCATIONS, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringClass(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSelectionUnit));
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
-				arguments.put(ATTRIBUTE_MODE, new Integer(fCurrentMode == Mode.REWRITE_ALL ? 1 : 0).toString());
+				arguments.put(ATTRIBUTE_MODE, new Integer(fTargetProvider.isSingle() ? 0 : 1).toString());
 				return new RefactoringChangeDescriptor(descriptor);
 			}
 		}; 
-	}
-	
-	private SourceProvider resolveSourceProvider(RefactoringStatus status) throws JavaModelException {
-		IMethodBinding methodBinding;
-		switch(fInitialNode.getNodeType()) {
-			case ASTNode.METHOD_INVOCATION:
-				methodBinding= (IMethodBinding)((MethodInvocation)fInitialNode).getName().resolveBinding();
-				break;
-			case ASTNode.SUPER_METHOD_INVOCATION:
-				methodBinding= (IMethodBinding)((SuperMethodInvocation)fInitialNode).getName().resolveBinding();
-				break;
-			case ASTNode.CONSTRUCTOR_INVOCATION:
-				methodBinding= ((ConstructorInvocation)fInitialNode).resolveConstructorBinding();
-				break;
-			case ASTNode.METHOD_DECLARATION:
-				methodBinding= ((MethodDeclaration)fInitialNode).resolveBinding();
-				break;
-			default:
-				status.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_error_noMethodDeclaration); 
-				return null;
-		}
-		
-		final IMethod method= (IMethod)methodBinding.getJavaElement();
-		if (method != null) {
-			IJavaElement unit;
-			IDocument source;
-			CompilationUnit methodDeclarationAstRoot;
-			ICompilationUnit methodCu= method.getCompilationUnit();
-			if (methodCu != null) {
-				unit= methodCu;
-//				source= methodCu.getBuffer().getContents();
-				
-				ASTParser parser= ASTParser.newParser(AST.JLS3);
-				parser.setSource(methodCu);
-				parser.setFocalPosition(method.getNameRange().getOffset());
-				CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
-				MethodDeclaration methodDecl= (MethodDeclaration) NodeFinder.perform(compilationUnit, method.getNameRange()).getParent();
-				AST ast= compilationUnit.getAST();
-				ASTRewrite rewrite= ASTRewrite.create(ast);
-				Block newBody= ast.newBlock();
-				newBody.statements().add(rewrite.createStringPlaceholder(fBody, ASTNode.EMPTY_STATEMENT));
-				rewrite.replace(methodDecl.getBody(), newBody, null);
-				List parameters= methodDecl.parameters();
-				for (int i= 0; i < parameters.size(); i++) {
-					SingleVariableDeclaration parameter= (SingleVariableDeclaration) parameters.get(i);
-					rewrite.set(parameter.getName(), SimpleName.IDENTIFIER_PROPERTY, fParameterNames[i], null);
-				}
-				TextEdit textEdit= rewrite.rewriteAST();
-				Document document= new Document(methodCu.getBuffer().getContents());
-				try {
-					textEdit.apply(document);
-				} catch (MalformedTreeException e) {
-					JavaPlugin.log(e);
-				} catch (BadLocationException e) {
-					JavaPlugin.log(e);
-				}
-				source= document;
-				
-				methodDeclarationAstRoot= new RefactoringASTParser(AST.JLS3).parse(source.get(), methodCu, true, true, null);
-				
-			} else {
-				IClassFile classFile= method.getClassFile();
-				//TODO: use source if available?
-				StubCreator stubCreator= new StubCreator(true) {
-					protected void appendMethodBody(IMethod currentMethod) throws JavaModelException {
-						if (currentMethod.equals(method)) {
-							fBuffer.append(fBody);
-						} else {
-							super.appendMethodBody(currentMethod);
-						}
-					}
-					/*
-					 * @see org.eclipse.jdt.internal.corext.refactoring.binary.StubCreator#appendMethodParameterName(org.eclipse.jdt.core.IMethod, int)
-					 */
-					protected void appendMethodParameterName(IMethod currentMethod, int index) {
-						if (currentMethod.equals(method)) {
-							fBuffer.append(fParameterNames[index]);
-						} else {
-							super.appendMethodParameterName(currentMethod, index);
-						}
-					}
-				};
-				
-				String stub= stubCreator.createStub(classFile.getType(), null);
-				source= new Document(stub);
-				methodDeclarationAstRoot= new RefactoringASTParser(AST.JLS3).parse(stub, classFile, true, true, null);
-				unit= classFile;
-			}
-			ASTNode node= methodDeclarationAstRoot.findDeclaringNode(methodBinding.getKey());
-			if (node instanceof MethodDeclaration) {
-				return new SourceProvider(unit, source, (MethodDeclaration) node);
-			}
-		}
-		status.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_error_noMethodDeclaration); 
-		return null;
-	}
-	
-	private static ASTNode getTargetNode(IJavaElement unit, CompilationUnit root, int offset, int length) {
-		ASTNode node= null;
-		try {
-			node= checkNode(findNode(unit, root, offset, length), unit);
-		} catch(JavaModelException e) {
-			// Do nothing
-		}
-		if (node != null)
-			return node;
-		return checkNode(NodeFinder.perform(root, offset, length), unit);
-	}
-
-	private static ASTNode findNode(IJavaElement unit, CompilationUnit root, int offset, int length) throws JavaModelException {
-		if (unit instanceof ICompilationUnit)
-			return NodeFinder.perform(root, offset, length, (ICompilationUnit) unit);
-		else
-			return NodeFinder.perform(root, offset, length, (IClassFile) unit);
-	}
-	
-	private static ASTNode checkNode(ASTNode node, IJavaElement unit) {
-		if (node == null)
-			return null;
-		if (node.getNodeType() == ASTNode.SIMPLE_NAME) {
-			node= node.getParent();
-		} else if (node.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
-			node= ((ExpressionStatement)node).getExpression();
-		}
-		switch(node.getNodeType()) {
-			case ASTNode.METHOD_DECLARATION:
-					return node;
-			case ASTNode.METHOD_INVOCATION:
-			case ASTNode.SUPER_METHOD_INVOCATION:
-			case ASTNode.CONSTRUCTOR_INVOCATION:
-				return unit instanceof ICompilationUnit ? node : null; // don't start on invocations in binary
-		}
-		return null;
 	}
 	
 	private IFile[] getFilesToBeModified(ICompilationUnit[] units) {
@@ -571,7 +559,7 @@ public class RewriteMethodInvocationsRefactoring extends CommentRefactoring impl
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_MODE));
 				}
 				try {
-					setCurrentMode(mode == 1 ? Mode.REWRITE_ALL : Mode.REWRITE_SINGLE);
+					setCurrentMode(mode == 1 ? Mode.REPLACE_ALL : Mode.REPLACE_SINGLE);
 				} catch (JavaModelException exception) {
 					return RefactoringStatus.createFatalErrorStatus(exception.getLocalizedMessage());
 				}
@@ -581,9 +569,8 @@ public class RewriteMethodInvocationsRefactoring extends CommentRefactoring impl
 		return new RefactoringStatus();
 	}
 
-	public void setBody(String body, String[] parameterNames) {
-		//TODO: validate parameter name count and body
-		fBody= body;
-		fParameterNames= parameterNames;
+	public IMethod getMethod() {
+		return fMethod;
 	}
+
 }

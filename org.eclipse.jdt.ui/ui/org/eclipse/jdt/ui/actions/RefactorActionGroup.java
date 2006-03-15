@@ -130,6 +130,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fInferTypeArgumentsAction;
 	
 	private SelectionDispatchAction fInlineAction;
+	private SelectionDispatchAction fReplaceInvocationsAction;
 	private SelectionDispatchAction fIntroduceIndirectionAction;
 	private SelectionDispatchAction fExtractMethodAction;
 	private SelectionDispatchAction fExtractTempAction;
@@ -297,6 +298,12 @@ public class RefactorActionGroup extends ActionGroup {
 		editor.setAction("ExtractConstant", fExtractConstantAction); //$NON-NLS-1$
 		fEditorActions.add(fExtractConstantAction);
 		
+		fReplaceInvocationsAction= new ReplaceInvocationsAction(editor);
+		fReplaceInvocationsAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.REPLACE_INVOCATIONS);
+		initAction(fReplaceInvocationsAction, provider, selection);
+		editor.setAction("ReplaceInvocations", fReplaceInvocationsAction); //$NON-NLS-1$
+		fEditorActions.add(fReplaceInvocationsAction);
+		
 		fIntroduceIndirectionAction= new IntroduceIndirectionAction(editor);
 		fIntroduceIndirectionAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INTRODUCE_INDIRECTION);
 		initAction(fIntroduceIndirectionAction, provider, selection);
@@ -391,6 +398,10 @@ public class RefactorActionGroup extends ActionGroup {
 		fInlineAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INLINE);
 		initAction(fInlineAction, provider, selection);
 		
+		fReplaceInvocationsAction= new ReplaceInvocationsAction(fSite);
+		fReplaceInvocationsAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.REPLACE_INVOCATIONS);
+		initAction(fReplaceInvocationsAction, provider, selection);
+		
 		fIntroduceIndirectionAction= new IntroduceIndirectionAction(fSite);
 		fIntroduceIndirectionAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INTRODUCE_INDIRECTION);
 		initAction(fIntroduceIndirectionAction, provider, selection);
@@ -433,6 +444,7 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.INTRODUCE_PARAMETER, fIntroduceParameterAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.INTRODUCE_FACTORY, fIntroduceFactoryAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_METHOD, fExtractMethodAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.REPLACE_INVOCATIONS, fReplaceInvocationsAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.INTRODUCE_INDIRECTION, fIntroduceIndirectionAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE, fInlineAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_INTERFACE, fExtractInterfaceAction);
@@ -483,6 +495,7 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fExtractMethodAction, provider);
 		disposeAction(fIntroduceIndirectionAction, provider);
 		disposeAction(fInlineAction, provider);
+		disposeAction(fReplaceInvocationsAction, provider);
 		disposeAction(fExtractInterfaceAction, provider);
 		disposeAction(fChangeTypeAction, provider);
 		disposeAction(fConvertNestedToTopAction, provider);
@@ -548,6 +561,7 @@ public class RefactorActionGroup extends ActionGroup {
 		added+= addAction(refactorSubmenu, fExtractTempAction);
 		added+= addAction(refactorSubmenu, fExtractConstantAction);
 		refactorSubmenu.add(new Separator(GROUP_CODING2));
+		added+= addAction(refactorSubmenu, fReplaceInvocationsAction);
 		added+= addAction(refactorSubmenu, fIntroduceIndirectionAction);
 		added+= addAction(refactorSubmenu, fIntroduceParameterAction);
 		added+= addAction(refactorSubmenu, fIntroduceFactoryAction);

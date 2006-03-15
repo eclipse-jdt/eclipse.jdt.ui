@@ -63,12 +63,16 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
+/**
+ * A TargetProvider provides all targets that have to be adapted, i.e. all method invocations that should be inlined. 
+ */
 abstract class TargetProvider {
 
 	public static final boolean BUG_CORE_130317= true; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=130317
 	
 	protected SourceProvider fSourceProvider;
 
+	//TODO: not used...
 	public void setSourceProvider(SourceProvider sourceProvider) {
 		Assert.isNotNull(sourceProvider);
 		fSourceProvider= sourceProvider;
@@ -86,6 +90,10 @@ abstract class TargetProvider {
 	public abstract RefactoringStatus checkActivation() throws JavaModelException;
 	
 	public abstract int getStatusSeverity();
+	
+	public boolean isSingle() {
+		return false;
+	}
 	
 	public static TargetProvider create(ICompilationUnit cu, MethodInvocation invocation) {
 		return new SingleCallTargetProvider(cu, invocation);
@@ -105,17 +113,21 @@ abstract class TargetProvider {
 			return new ErrorTargetProvider(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.TargetProvider_method_declaration_not_unique));
 		ITypeBinding type= method.getDeclaringClass();
 		if (type.isLocal()) {
-			if (! type.isFromSource()) {
+			if (((IType) type.getJavaElement()).isBinary()) {
 				return new ErrorTargetProvider(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.TargetProvider_cannot_local_method_in_binary));
 			} else {
 				IType declaringClassOfLocal= (IType) type.getDeclaringClass().getJavaElement();
 				return new LocalTypeTargetProvider(declaringClassOfLocal.getCompilationUnit(), declaration);
 			}
 		} else {
-			return new MemberTypeTargetProvider(declaration);
+			return new MemberTypeTargetProvider(declaration.resolveBinding());
 		}
 	}
 
+	public static TargetProvider create(IMethodBinding methodBinding) {
+		return new MemberTypeTargetProvider(methodBinding);
+	}
+	
 	static void fastDone(IProgressMonitor pm) {
 		if (pm == null)
 			return;
@@ -188,6 +200,9 @@ abstract class TargetProvider {
 		public int getStatusSeverity() {
 			return RefactoringStatus.FATAL;
 		}
+		public boolean isSingle() {
+			return true;
+		}
 	}
 
 	private static class BodyData {
@@ -213,8 +228,8 @@ abstract class TargetProvider {
 	}
 
 	private static class InvocationFinder extends ASTVisitor {
-		Map result= new HashMap(2);
-		Stack fBodies= new Stack();
+		Map/*<BodyDeclaration, BodyData>*/ result= new HashMap(2);
+		Stack/*<BodyData>*/ fBodies= new Stack();
 		BodyData fCurrent;
 		private IMethodBinding fBinding;
 		public InvocationFinder(IMethodBinding binding) {
@@ -346,7 +361,7 @@ abstract class TargetProvider {
 	
 		public ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
 			BodyData data= (BodyData)fBodies.get(declaration);
-			Assert.isTrue(data != null);
+			Assert.isNotNull(data);
 			fastDone(pm);
 			return data.getInvocations();
 		}
@@ -361,18 +376,18 @@ abstract class TargetProvider {
 	}
 	
 	private static class MemberTypeTargetProvider extends TargetProvider {
-		private MethodDeclaration fMethod;
+		private final IMethodBinding fMethodBinding;
 		private Map fCurrentBodies;
-		public MemberTypeTargetProvider(MethodDeclaration method) {
-			Assert.isNotNull(method);
-			fMethod= method;
+		public MemberTypeTargetProvider(IMethodBinding methodBinding) {
+			Assert.isNotNull(methodBinding);
+			fMethodBinding= methodBinding;
 		}
 		public void initialize() {
 			// do nothing.
 		}
 
 		public ICompilationUnit[] getAffectedCompilationUnits(final RefactoringStatus status, IProgressMonitor pm) throws JavaModelException {
-			IMethod method= (IMethod)fMethod.resolveBinding().getJavaElement();
+			IMethod method= (IMethod)fMethodBinding.getJavaElement();
 			Assert.isTrue(method != null);
 			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
 			engine.setGranularity(RefactoringSearchEngine2.GRANULARITY_COMPILATION_UNIT);
@@ -406,7 +421,7 @@ abstract class TargetProvider {
 
 		public BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm) {
 			ASTNode root= new RefactoringASTParser(AST.JLS3).parse(unit, true);
-			InvocationFinder finder= new InvocationFinder(fMethod.resolveBinding());
+			InvocationFinder finder= new InvocationFinder(fMethodBinding);
 			root.accept(finder);
 			fCurrentBodies= finder.result;
 			Set result= fCurrentBodies.keySet();
@@ -416,7 +431,7 @@ abstract class TargetProvider {
 	
 		public ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
 			BodyData data= (BodyData)fCurrentBodies.get(declaration);
-			Assert.isTrue(data != null);
+			Assert.isNotNull(data);
 			fastDone(pm);
 			return data.getInvocations();
 		}

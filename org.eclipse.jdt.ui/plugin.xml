@@ -2325,6 +2325,13 @@
                menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup2"
                id="org.eclipse.jdt.ui.actions.IntroduceIndirection">
          </action>
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.replace.invocations"
+               label="%Refactoring.replaceInvocationsAction.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup2"
+               id="org.eclipse.jdt.ui.actions.ReplaceInvocations">
+         </action>
 <!-- coding group  -->         
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.extract.constant"
@@ -3477,12 +3484,6 @@
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.eclipse.jdt.ui.edit.text.java.infer.type.arguments">
       </command>
-            <command
-            name="%ActionDefinition.introduceIndirection.name"
-            description="%ActionDefinition.introduceIndirection.description"
-            categoryId="org.eclipse.jdt.ui.category.refactoring"
-            id="org.eclipse.jdt.ui.edit.text.java.introduce.indirection">
-      </command>
       <command
             name="%ActionDefinition.inline.name"
             description="%ActionDefinition.inline.description"
@@ -3506,6 +3507,18 @@
             description="%ActionDefinition.extractConstant.description"
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.eclipse.jdt.ui.edit.text.java.extract.constant">
+      </command>
+      <command
+            name="%ActionDefinition.replaceInvocations.name"
+            description="%ActionDefinition.replaceInvocations.description"
+            categoryId="org.eclipse.jdt.ui.category.refactoring"
+            id="org.eclipse.jdt.ui.edit.text.java.replace.invocations">
+      </command>
+      <command
+            name="%ActionDefinition.introduceIndirection.name"
+            description="%ActionDefinition.introduceIndirection.description"
+            categoryId="org.eclipse.jdt.ui.category.refactoring"
+            id="org.eclipse.jdt.ui.edit.text.java.introduce.indirection">
       </command>
       <command
             name="%ActionDefinition.introduceParameter.name"

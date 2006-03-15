@@ -354,6 +354,14 @@ public class JdtActionConstants {
 	public static final String EXTRACT_METHOD= "org.eclipse.jdt.ui.actions.ExtractMethod"; //$NON-NLS-1$
 	
 	/**
+	 * Refactor menu: name of standard Replace Invocations global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ReplaceInvocations"</code>).
+	 * 
+	 * @since 3.2
+	 */
+	public static final String REPLACE_INVOCATIONS="org.eclipse.jdt.ui.actions.ReplaceInvocations"; //$NON-NLS-1$
+	
+	/**
 	 * Refactor menu: name of standard Introduce Indirection global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.IntroduceIndirection"</code>).
 	 * 

@@ -372,6 +372,14 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String INLINE= "org.eclipse.jdt.ui.edit.text.java.inline"; //$NON-NLS-1$
 	
 	/**
+	 * Action definition ID of the refactor -> replace invocations action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.replace.invocations"</code>).
+	 *
+	 * @since 3.2
+	 */
+	public static final String REPLACE_INVOCATIONS= "org.eclipse.jdt.ui.edit.text.java.replace.invocations"; //$NON-NLS-1$
+	
+	/**
 	 * Action definition ID of the refactor -> introduce indirection action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.create.indirection"</code>).
 	 *

@@ -792,6 +792,12 @@ public final class RefactoringMessages extends NLS {
 
 	public static String RenameTypeWizardSimilarElementsPage_select_element_to_view_source;
 
+	public static String ReplaceInvocationsAction_dialog_title;
+
+	public static String ReplaceInvocationsAction_label;
+
+	public static String ReplaceInvocationsAction_unavailable;
+
 	public static String SelfEncapsulateField_field_access;
 
 	public static String SelfEncapsulateField_keep_references;

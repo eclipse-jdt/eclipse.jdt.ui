@@ -74,6 +74,10 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+/**
+ * A SourceProvider encapsulates a piece of code (source) and the logic
+ * to inline it into given CallContexts.
+ */
 public class SourceProvider {
 
 	private IJavaElement fUnit;

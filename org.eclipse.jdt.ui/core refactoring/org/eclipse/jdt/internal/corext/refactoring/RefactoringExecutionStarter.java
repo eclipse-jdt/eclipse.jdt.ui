@@ -59,6 +59,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceIndirectionRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameResourceProcessor;
@@ -114,6 +115,7 @@ import org.eclipse.jdt.internal.ui.refactoring.UseSupertypeWizard;
 import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.code.InlineMethodWizard;
+import org.eclipse.jdt.internal.ui.refactoring.code.ReplaceInvocationsWizard;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CreateTargetQueries;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.DeleteUserInterfaceManager;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceManager;
@@ -383,6 +385,16 @@ public final class RefactoringExecutionStarter {
 	public static void startRenameResourceRefactoring(final IResource resource, final Shell shell) throws CoreException {
 		final JavaRenameRefactoring refactoring= new JavaRenameRefactoring(new RenameResourceProcessor(resource));
 		RenameUserInterfaceManager.getDefault().getStarter(refactoring).activate(refactoring, shell, true);
+	}
+	
+	public static void startReplaceInvocationsRefactoring(final IJavaElement unit, final int offset, final int length, final Shell shell) throws JavaModelException {
+		final ReplaceInvocationsRefactoring refactoring= new ReplaceInvocationsRefactoring(unit, offset, length);
+		new RefactoringStarter().activate(refactoring, new ReplaceInvocationsWizard(refactoring), shell, RefactoringMessages.ReplaceInvocationsAction_dialog_title, true);
+	}
+	
+	public static void startReplaceInvocationsRefactoring(final IMethod method, final Shell shell) throws JavaModelException {
+		final ReplaceInvocationsRefactoring refactoring= new ReplaceInvocationsRefactoring(method);
+		new RefactoringStarter().activate(refactoring, new ReplaceInvocationsWizard(refactoring), shell, RefactoringMessages.ReplaceInvocationsAction_dialog_title, true);
 	}
 
 	public static void startSelfEncapsulateRefactoring(final IField field, final Shell shell) {

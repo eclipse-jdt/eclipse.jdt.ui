@@ -536,8 +536,9 @@ public final class RefactoringAvailabilityTester {
 			return false;
 		if (! method.isBinary())
 			return true;
-		else
-			return ! method.isConstructor() && SourceRange.isAvailable(method.getNameRange());
+		if (method.isConstructor())
+			return false;
+		return SourceRange.isAvailable(method.getNameRange());
 	}
 
 	public static boolean isInlineMethodAvailable(final IStructuredSelection selection) throws JavaModelException {
@@ -1023,6 +1024,31 @@ public final class RefactoringAvailabilityTester {
 		return isRenameAvailable(method) && MethodChecks.isVirtual(method);
 	}
 
+	public static boolean isReplaceInvocationsAvailable(IMethod method) throws JavaModelException {
+		if (method == null)
+			return false;
+		if (! method.exists())
+			return false;
+		if (method.isConstructor())
+			return false;
+		return true;
+	}
+
+	public static boolean isReplaceInvocationsAvailable(final IStructuredSelection selection) throws JavaModelException {
+		if (selection.isEmpty() || selection.size() != 1)
+			return false;
+		final Object first= selection.getFirstElement();
+		return (first instanceof IMethod) && isReplaceInvocationsAvailable(((IMethod) first));
+	}
+
+	public static boolean isReplaceInvocationsAvailable(final JavaTextSelection selection) throws JavaModelException {
+		final IJavaElement[] elements= selection.resolveElementAtOffset();
+		if (elements.length != 1)
+			return false;
+		IJavaElement element= elements[0];
+		return (element instanceof IMethod) && isReplaceInvocationsAvailable(((IMethod) element));
+	}
+	
 	public static boolean isSelfEncapsulateAvailable(IField field) throws JavaModelException {
 		return Checks.isAvailable(field) && !JdtFlags.isEnum(field) && !field.getDeclaringType().isAnnotation();
 	}
