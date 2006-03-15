@@ -123,27 +123,74 @@ public class CleanUpRefactoring extends Refactoring {
 		}
 	}
 	
+	private class IndexCounter {
+		
+		private int fIndex;
+		private final int fSize;
+		
+		public IndexCounter(int index, int size) {
+			fIndex= index;
+			fSize= size;
+		}
+		
+		public void inc() {
+			fIndex++;
+		}
+		
+		public int value() {
+			return fIndex;
+		}
+		
+		public int size() {
+			return fSize;
+		}
+	}
+	
+	private final class CleanUpRefactoringProgressMonitor extends SubProgressMonitor {
+		private int worked= 0;
+
+		private CleanUpRefactoringProgressMonitor(IProgressMonitor monitor, int ticks) {
+			super(monitor, ticks);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void worked(int work) {
+			worked+=work;
+		}
+
+		public void flush() {
+			super.worked(worked);
+			reset();
+		}
+
+		public void reset() {
+			worked= 0;
+		}
+		
+		public void done() {
+		}
+	}
 	
 	private final class SolutionGenerator extends ASTRequestor {
 
-		private final IProgressMonitor fMonitor;
+		private final CleanUpRefactoringProgressMonitor fMonitor;
 		private final List fResult;
 		private final Hashtable fSolutions;
-		private final Integer fSize;
 		private final Iterator fToParseIter;
 		private ParseListElement fCurElement;
-		private int fIndex;
+		private IndexCounter fIndex;
 
-		private SolutionGenerator(List/*<ParseListElement>*/ toSolve, int startIndex, int totalSize, Hashtable solutions, IProgressMonitor monitor) {
+		private SolutionGenerator(List/*<ParseListElement>*/ toSolve, IndexCounter startIndex, Hashtable solutions, CleanUpRefactoringProgressMonitor monitor) {
 			fMonitor= monitor;
 			fResult= new ArrayList();
 			fSolutions= solutions;
-			fSize= new Integer(totalSize);
-			fIndex= startIndex + 1;
+			fIndex= startIndex;
 			
 			fToParseIter= toSolve.iterator();
 			fCurElement= (ParseListElement)fToParseIter.next();
-			fMonitor.subTask(getSubTaskMessage(fCurElement.getCompilationUnit(), fIndex, fSize));
+			fMonitor.subTask(getSubTaskMessage(fCurElement.getCompilationUnit(), fIndex.value(), fIndex.size()));
 		}
 
 		public List getResult() {
@@ -154,17 +201,20 @@ public class CleanUpRefactoring extends Refactoring {
 			ParseListElement tuple= calculateSolution(fSolutions, ast, fCurElement.getCleanUps());
 			if (tuple != null) {
 				fResult.add(tuple);
+				fMonitor.reset();
+			} else {
+				fIndex.inc();
+				fMonitor.flush();
 			}
 			if (fToParseIter.hasNext()) {
-				fIndex++;
 				fCurElement= (ParseListElement)fToParseIter.next();
-				fMonitor.subTask(getSubTaskMessage(fCurElement.getCompilationUnit(), fIndex, fSize));
+				fMonitor.subTask(getSubTaskMessage(fCurElement.getCompilationUnit(), fIndex.value(), fIndex.size()));
 			}
 		}
 		
-		private String getSubTaskMessage(ICompilationUnit cu, int index, Integer size) {
+		private String getSubTaskMessage(ICompilationUnit cu, int index, int size) {
 			String typeName= JavaCore.removeJavaLikeExtension(cu.getElementName());
-			return Messages.format(FixMessages.CleanUpRefactoring_ProcessingCompilationUnit_message, new Object[] {typeName, new Integer(index), size});
+			return Messages.format(FixMessages.CleanUpRefactoring_ProcessingCompilationUnit_message, new Object[] {typeName, new Integer(index), new Integer(size)});
 		}
 		
 		private ParseListElement calculateSolution(Hashtable solutions, CompilationUnit ast, ICleanUp[] cleanUps) {
@@ -322,7 +372,7 @@ public class CleanUpRefactoring extends Refactoring {
 			cuCount+= ((List)fProjects.get(project)).size();
 		}
 		
-		pm.beginTask("", cuCount * 3 * fCleanUps.size()); //$NON-NLS-1$
+		pm.beginTask("", cuCount * 2 * fCleanUps.size() + 4 * fCleanUps.size()); //$NON-NLS-1$
 
 		try {
 			CompositeChange change= new DynamicValidationStateChange(getName());
@@ -366,7 +416,7 @@ public class CleanUpRefactoring extends Refactoring {
 	}
 
 	private void cleanUpProject(IJavaProject project, ICompilationUnit[] compilationUnits, ICleanUp[] cleanUps, CompositeChange result, IProgressMonitor monitor) throws CoreException {
-		initCleanUps(project, compilationUnits, new SubProgressMonitor(monitor, compilationUnits.length * cleanUps.length));
+		initCleanUps(project, compilationUnits, new SubProgressMonitor(monitor, 4 * cleanUps.length));
 		
 		List toGo= new ArrayList();
 		for (int i= 0; i < compilationUnits.length; i++) {
@@ -375,6 +425,7 @@ public class CleanUpRefactoring extends Refactoring {
 		Hashtable resultingFixes= new Hashtable();
 		Map cleanUpOptions= getCleanUpOptions();
 		
+		IndexCounter index= new IndexCounter(1, compilationUnits.length);
 		int start= 0;
 		int end= 0;
 		while (end < toGo.size()) {
@@ -382,7 +433,7 @@ public class CleanUpRefactoring extends Refactoring {
 			List toParse= toGo.subList(start, end);
 			
 			ASTParser parser= createParser(cleanUpOptions, project);
-			List redoList= parse(resultingFixes, start, toParse, new SubProgressMonitor(monitor, toParse.size() * 2 * cleanUps.length), parser, toGo.size());
+			List redoList= parse(toParse, parser, resultingFixes, index, new CleanUpRefactoringProgressMonitor(monitor, toParse.size() * 2 * cleanUps.length));
 			toGo.addAll(redoList);
 			
 			start= end;
@@ -428,7 +479,7 @@ public class CleanUpRefactoring extends Refactoring {
 		return cleanUpOptions;
 	}
 
-	private List/*<ParseListElement>*/ parse(final Hashtable solutions, final int start, List/*<ParseListElement*/ toParse, final IProgressMonitor monitor, ASTParser parser, final int size) throws CoreException {
+	private List/*<ParseListElement>*/ parse(List/*<ParseListElement*/ toParse, ASTParser parser, final Hashtable solutions, final IndexCounter index, final CleanUpRefactoringProgressMonitor monitor) throws CoreException {
 
 		final ICompilationUnit[] compilationUnits= new ICompilationUnit[toParse.size()];
 		final List workingCopys= new ArrayList();
@@ -450,7 +501,7 @@ public class CleanUpRefactoring extends Refactoring {
 				i++;
 			}
 
-			SolutionGenerator solutionGenerator= new SolutionGenerator(toParse, start, size, solutions, monitor);
+			SolutionGenerator solutionGenerator= new SolutionGenerator(toParse, index, solutions, monitor);
 			try {
 				parser.createASTs(compilationUnits, new String[0], solutionGenerator, monitor);
 			} catch (FixCalculationException e) {
