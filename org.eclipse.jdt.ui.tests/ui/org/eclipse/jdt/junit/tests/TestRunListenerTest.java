@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener2;
 
@@ -65,33 +66,55 @@ public class TestRunListenerTest extends TestCase {
 		TestRunListener.startListening();
 		
 		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
-		lm.addLaunchListener(new ILaunchesListener2() {
+		lm.removeLaunches(lm.getLaunches());
+		ILaunchesListener2 launchesListener= new ILaunchesListener2() {
 			public void launchesTerminated(ILaunch[] launches) {
 				fLaunchHasTerminated= true;
+				for (int i= 0; i < launches.length; i++)
+					logLaunch("terminated", launches[i]);
 			}
 			public void launchesRemoved(ILaunch[] launches) {
+				for (int i= 0; i < launches.length; i++)
+					logLaunch("removed   ", launches[i]);
 			}
 			public void launchesAdded(ILaunch[] launches) {
+				for (int i= 0; i < launches.length; i++)
+					logLaunch("added     ", launches[i]);
 			}
 			public void launchesChanged(ILaunch[] launches) {
+				for (int i= 0; i < launches.length; i++)
+					logLaunch("changed   ", launches[i]);
 			}
-		});
-		LaunchConfigurationManager manager= DebugUIPlugin.getDefault().getLaunchConfigurationManager();
-		List launchShortcuts= manager.getLaunchShortcuts();
-		LaunchShortcutExtension ext= null;
-		for (Iterator iter= launchShortcuts.iterator(); iter.hasNext();) {
-			ext= (LaunchShortcutExtension) iter.next();
-			if (ext.getLabel().equals("JUnit Test"))
-				break;
+			private void logLaunch(String action, ILaunch launch) {
+				StringBuffer buf= new StringBuffer();
+				buf.append("launch ").append(action).append(": ");
+				ILaunchConfiguration launchConfiguration= launch.getLaunchConfiguration();
+				if (launchConfiguration != null) {
+					buf.append(launchConfiguration.getName()).append(": ");
+				}
+				buf.append(launch);
+				System.out.println(buf);				
+			}
+		};
+		lm.addLaunchListener(launchesListener);
+		try {
+			LaunchConfigurationManager manager= DebugUIPlugin.getDefault().getLaunchConfigurationManager();
+			List launchShortcuts= manager.getLaunchShortcuts();
+			LaunchShortcutExtension ext= null;
+			for (Iterator iter= launchShortcuts.iterator(); iter.hasNext();) {
+				ext= (LaunchShortcutExtension) iter.next();
+				if (ext.getLabel().equals("JUnit Test"))
+					break;
+			}
+			ext.launch(new StructuredSelection(aTestCase), ILaunchManager.RUN_MODE);
+			new DisplayHelper() {
+				protected boolean condition() {
+					return fLaunchHasTerminated;
+				}
+			}.waitForCondition(Display.getCurrent(), 30 * 1000, 1000);
+		} finally {
+			lm.removeLaunchListener(launchesListener);
 		}
-		ext.launch(new StructuredSelection(aTestCase), ILaunchManager.RUN_MODE);
-		
-		new DisplayHelper(){
-			protected boolean condition() {
-				return fLaunchHasTerminated;
-			}
-		}.waitForCondition(Display.getCurrent(), 20*1000, 1000);
-		
 		if (! fLaunchHasTerminated)
 			fail("Launch has not terminated");
 		
