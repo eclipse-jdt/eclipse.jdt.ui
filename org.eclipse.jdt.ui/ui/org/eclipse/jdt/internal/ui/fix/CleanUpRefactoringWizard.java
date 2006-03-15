@@ -406,6 +406,9 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			}
 			
 			public void enableDefaults() {
+				if (isDisabled())
+					return;
+				
 				boolean hasDefaultSelection= false;
 				for (int i= 0; i < fButtons.length; i++) {
 					if ((fButtons[i].getCleanUp().getDefaultFlag() & fButtons[i].getFlag()) != 0) {
@@ -431,6 +434,10 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				for (int i= 0; i < fButtons.length; i++) {
 					fButtons[i].disable();
 				}
+			}
+			
+			public boolean isDisabled() {
+				return !fControlButton.isEnabled();
 			}
 			
 			public void createButton(Composite parent) {
@@ -1040,10 +1047,12 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 						}
 					}
 					for (int i= 0; i < checkBoxGroups.length; i++) {
-						checkBoxGroups[i].select();
+						if (!checkBoxGroups[i].isDisabled())
+							checkBoxGroups[i].select();
 					}
 					for (int i= 0; i < radioGroups.length; i++) {
-						radioGroups[i].select();
+						if (!radioGroups[i].isDisabled())
+							radioGroups[i].select();
 					}
 					preview.resumeUpdate();
 					preview.update();
