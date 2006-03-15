@@ -329,7 +329,10 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		if (clipboardData != null) {
 			Clipboard clipboard= new Clipboard(getDisplay());
 			try {
-				// see bug 61876, I currently make assumptions about what the styled text widget sets
+				/*
+				 * We currently make assumptions about what the styled text widget sets,
+				 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=61876
+				 */
 				Object textData= clipboard.getContents(TextTransfer.getInstance());
 				Object rtfData= clipboard.getContents(RTFTransfer.getInstance());
 
@@ -366,7 +369,6 @@ public final class ClipboardOperationAction extends TextEditorAction {
 	private void setClipboardContents(Clipboard clipboard, Object[] datas, Transfer[] transfers) {
 		try {
 			clipboard.setContents(datas, transfers);
-			return; // success
 		} catch (SWTError e) {
 			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD) {
 				throw e;
