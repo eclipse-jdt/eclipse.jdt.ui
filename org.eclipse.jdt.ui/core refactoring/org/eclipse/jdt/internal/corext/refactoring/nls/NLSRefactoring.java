@@ -215,8 +215,11 @@ public class NLSRefactoring extends Refactoring {
 
 			if (willModifyPropertyFile()) {
 				result.add(NLSPropertyFileModifier.create(fSubstitutions, getPropertyFilePath()));
-				if (isEclipseNLS() && !createAccessorClass)
-					result.add(AccessorClassModifier.create(getAccessorCu(), fSubstitutions));
+				if (isEclipseNLS() && !createAccessorClass) {
+					Change change= AccessorClassModifier.create(getAccessorCu(), fSubstitutions);
+					if (change != null)
+						result.add(change);
+				}
 			}
 			pm.worked(1);
 

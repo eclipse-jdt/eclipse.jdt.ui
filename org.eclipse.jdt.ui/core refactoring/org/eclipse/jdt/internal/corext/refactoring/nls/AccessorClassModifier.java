@@ -135,7 +135,6 @@ public class AccessorClassModifier {
 
 	public static Change create(ICompilationUnit cu, NLSSubstitution[] substitutions) throws CoreException {
 		
-
 		Map newKeyToSubstMap= NLSPropertyFileModifier.getNewKeyToSubstitutionMap(substitutions);
 		Map oldKeyToSubstMap= NLSPropertyFileModifier.getOldKeyToSubstitutionMap(substitutions);
 
@@ -155,7 +154,7 @@ public class AccessorClassModifier {
 		}
 		for (int i= 0; i < substitutions.length; i++) {
 			NLSSubstitution substitution= substitutions[i];
-			if (NLSPropertyFileModifier.doReplace(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
+			if (substitution.isKeyRename() && NLSPropertyFileModifier.doReplace(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
 				sourceModification.renameKey(substitution, change);
 			}
 		}
@@ -165,6 +164,9 @@ public class AccessorClassModifier {
 				sourceModification.addKey(substitution, change);
 			}
 		}
+		
+		if (change.getChangeGroups().length == 0)
+			return null;
 		
 		change.addEdit(sourceModification.getTextEdit());
 		
