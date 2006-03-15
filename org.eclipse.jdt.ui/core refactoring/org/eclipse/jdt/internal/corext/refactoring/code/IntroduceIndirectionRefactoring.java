@@ -848,12 +848,13 @@ public class IntroduceIndirectionRefactoring extends CommentRefactoring implemen
 		intermediary.setBody(body);
 
 		// method comment
-		String comment= CodeGeneration.getMethodComment(imRewrite.getCu(), fIntermediaryClass.getFullyQualifiedName('.'), intermediary, fTargetMethodBinding, StubUtility
-				.getLineDelimiterUsed(imRewrite.getCu()));
-
-		if (comment != null) {
-			Javadoc javadoc= (Javadoc) imRewrite.getASTRewrite().createStringPlaceholder(comment, ASTNode.JAVADOC);
-			intermediary.setJavadoc(javadoc);
+		ICompilationUnit targetCU= imRewrite.getCu();
+		if (StubUtility.doAddComments(targetCU.getJavaProject())) {
+			String comment= CodeGeneration.getMethodComment(targetCU, fIntermediaryClass.getFullyQualifiedName('.'), intermediary, null, StubUtility.getLineDelimiterUsed(targetCU));
+			if (comment != null) {
+				Javadoc javadoc= (Javadoc) imRewrite.getASTRewrite().createStringPlaceholder(comment, ASTNode.JAVADOC);
+				intermediary.setJavadoc(javadoc);
+			}
 		}
 
 		// Add the completed method to the intermediary type:
