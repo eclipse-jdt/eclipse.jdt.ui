@@ -213,7 +213,8 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 				if (canEnable(folder.members()))
 					return true;
 			} else if (objects[i] instanceof IProject) {
-				if (canEnable(((IProject)objects[i]).members()))
+				IProject project= (IProject)objects[i];
+				if (project.exists() && project.isOpen() && canEnable(project.members()))
 					return true;
 			} else if (objects[i] instanceof IJavaProject) {
 				IJavaProject project= (IJavaProject)objects[i];
