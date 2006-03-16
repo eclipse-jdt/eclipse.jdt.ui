@@ -206,7 +206,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 		for (int i= 0; i < objects.length; i++) {
 			if (objects[i] instanceof IFile) {
 				IFile file= (IFile)objects[i];
-				if (file.getFileExtension().equalsIgnoreCase("properties")) //$NON-NLS-1$
+				if ("properties".equalsIgnoreCase(file.getFileExtension())) //$NON-NLS-1$
 					return true;
 			} else if (objects[i] instanceof IFolder) {
 				IFolder folder= (IFolder)objects[i];
