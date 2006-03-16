@@ -83,6 +83,17 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		return JavaModelProvider.JAVA_MODEL_PROVIDER_ID;
 	}
 	
+	public boolean contains(ResourceMapping mapping) {
+		if (mapping instanceof JavaElementResourceMapping) {
+			JavaElementResourceMapping javaMapping = (JavaElementResourceMapping) mapping;
+			IJavaElement element = getJavaElement();
+			IJavaElement other = javaMapping.getJavaElement();
+			if (other != null && element != null)
+				return element.getPath().isPrefixOf(other.getPath());
+		}
+		return false;
+	}
+	
 	//---- the factory code ---------------------------------------------------------------
 	
 	private static final class JavaModelResourceMapping extends JavaElementResourceMapping {
