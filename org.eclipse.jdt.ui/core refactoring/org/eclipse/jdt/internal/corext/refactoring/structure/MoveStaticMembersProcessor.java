@@ -730,7 +730,8 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			Map adjustments= new HashMap();
 			IMember member= null;
 			SubProgressMonitor sub= new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
-			sub.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, fMembersToMove.length); 
+			sub.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, fMembersToMove.length);
+			Set rewritten= new HashSet();
 			for (int index= 0; index < fMembersToMove.length; index++) {
 				member= fMembersToMove[index];
 				final MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fDestinationType, member);
@@ -757,6 +758,10 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				// error message if not (for example, when moving into a private type)
 				status.merge(checkMovedMemberAvailability(member, new SubProgressMonitor(sub, 1)));
 				// Put rewrite info into code and into status
+				for (final Iterator iterator= rewritten.iterator(); iterator.hasNext();) {
+					adjustments.remove(iterator.next());
+				}
+				rewritten.addAll(adjustments.keySet());
 				adjustor.rewriteVisibility(new NullProgressMonitor());
 			}
 
