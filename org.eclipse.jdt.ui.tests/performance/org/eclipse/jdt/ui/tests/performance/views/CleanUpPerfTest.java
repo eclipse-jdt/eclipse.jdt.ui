@@ -38,10 +38,14 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
+import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 
 import org.eclipse.test.performance.Dimension;
 
@@ -131,53 +135,245 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 				return null;
 			}
 		});
-		tagAsSummary("Code clean up - no fix", Dimension.ELAPSED_PROCESS);
-		
-		joinBackgroudActivities();
-		startMeasuring();
 		
 		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
 		cleanUpRefactoring.createChange(null);
-
-		finishMeasurements();
+		
+		joinBackgroudActivities();
+		for (int i= 0; i < 10; i++) {
+			startMeasuring();
+			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+			cleanUpRefactoring.createChange(null);
+			finishMeasurements();
+		}
 	}
 	
-	public void testAllCleanUp() throws Exception {
+	public void testAllCleanUps() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 		
 		cleanUpRefactoring.addCleanUp(new CodeStyleCleanUp(
-				CodeStyleCleanUp.CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT | 
-				CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC | 
 				CodeStyleCleanUp.QUALIFY_FIELD_ACCESS |
-				CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS));
+				CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC |
+				CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS |
+				CodeStyleCleanUp.CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT |
+				CodeStyleCleanUp.QUALIFY_METHOD_ACCESS |
+				CodeStyleCleanUp.QUALIFY_STATIC_METHOD_ACCESS));
 		
 		cleanUpRefactoring.addCleanUp(new ControlStatementsCleanUp(
-				ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS));
+				ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS |
+				ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP |
+				ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS));
+		
+		cleanUpRefactoring.addCleanUp(new ExpressionsCleanUp(
+				ExpressionsCleanUp.ADD_PARANOIC_PARENTHESIS));
 		
 		cleanUpRefactoring.addCleanUp(new Java50CleanUp(
 				Java50CleanUp.ADD_DEPRECATED_ANNOTATION | 
 				Java50CleanUp.ADD_OVERRIDE_ANNOATION));
 		
+		cleanUpRefactoring.addCleanUp(new PotentialProgrammingProblemsCleanUp(
+				PotentialProgrammingProblemsCleanUp.ADD_DEFAULT_SERIAL_VERSION_ID));
+		
 		cleanUpRefactoring.addCleanUp(new StringCleanUp(
 				StringCleanUp.ADD_MISSING_NLS_TAG |
 				StringCleanUp.REMOVE_UNNECESSARY_NLS_TAG));
+		
+		cleanUpRefactoring.addCleanUp(new UnnecessaryCodeCleanUp(
+				UnnecessaryCodeCleanUp.REMOVE_UNUSED_CAST));
 		
 		cleanUpRefactoring.addCleanUp(new UnusedCodeCleanUp(
 				UnusedCodeCleanUp.REMOVE_UNUSED_IMPORTS |
 				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_CONSTRUCTORS |
 				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_METHODS |
-				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_TYPES));
+				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_TYPES |
+				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS |
+				UnusedCodeCleanUp.REMOVE_UNUSED_LOCAL_VARIABLES));
 		
-		tagAsSummary("Code clean up - all fixes", Dimension.ELAPSED_PROCESS);
+		cleanUpRefactoring.addCleanUp(new VariableDeclarationCleanUp(
+				VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_FIELDS |
+				VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_PARAMETERS |
+				VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_LOCAL_VARIABLES));
 		
-		joinBackgroudActivities();
-		startMeasuring();
+		tagAsSummary("Code Clean Up - 25 clean-ups", Dimension.ELAPSED_PROCESS);
 		
 		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
 		cleanUpRefactoring.createChange(null);
-
-		finishMeasurements();
+		
+		joinBackgroudActivities();
+		for (int i= 0; i < 10; i++) {
+			startMeasuring();
+			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+			cleanUpRefactoring.createChange(null);
+			finishMeasurements();
+		}
+	}
+	
+	public void testCodeStyleCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+		
+		cleanUpRefactoring.addCleanUp(new CodeStyleCleanUp(
+				CodeStyleCleanUp.QUALIFY_FIELD_ACCESS |
+				CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC |
+				CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS |
+				CodeStyleCleanUp.CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT |
+				CodeStyleCleanUp.QUALIFY_METHOD_ACCESS |
+				CodeStyleCleanUp.QUALIFY_STATIC_METHOD_ACCESS));
+		
+		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+		cleanUpRefactoring.createChange(null);
+		
+		joinBackgroudActivities();
+		for (int i= 0; i < 10; i++) {
+			startMeasuring();
+			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+			cleanUpRefactoring.createChange(null);
+			finishMeasurements();
+		}
+	}
+	
+	public void testControlStatementsCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+		
+		cleanUpRefactoring.addCleanUp(new ControlStatementsCleanUp(
+				ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS |
+				ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP |
+				ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS));
+		
+		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+		cleanUpRefactoring.createChange(null);
+		
+		joinBackgroudActivities();
+		for (int i= 0; i < 10; i++) {
+			startMeasuring();
+			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+			cleanUpRefactoring.createChange(null);
+			finishMeasurements();
+		}
 	}
 
+	public void testExpressionsCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+		
+		cleanUpRefactoring.addCleanUp(new ExpressionsCleanUp(
+				ExpressionsCleanUp.ADD_PARANOIC_PARENTHESIS));
+		
+		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+		cleanUpRefactoring.createChange(null);
+		
+		joinBackgroudActivities();
+		for (int i= 0; i < 10; i++) {
+			startMeasuring();
+			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+			cleanUpRefactoring.createChange(null);
+			finishMeasurements();
+		}
+	}
+	
+	public void testJava50CleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+		
+		cleanUpRefactoring.addCleanUp(new Java50CleanUp(
+				Java50CleanUp.ADD_DEPRECATED_ANNOTATION | 
+				Java50CleanUp.ADD_OVERRIDE_ANNOATION));
+		
+		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+		cleanUpRefactoring.createChange(null);
+		
+		joinBackgroudActivities();
+		for (int i= 0; i < 10; i++) {
+			startMeasuring();
+			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+			cleanUpRefactoring.createChange(null);
+			finishMeasurements();
+		}
+	}
+	
+	public void testStringCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+		
+		cleanUpRefactoring.addCleanUp(new StringCleanUp(
+				StringCleanUp.ADD_MISSING_NLS_TAG |
+				StringCleanUp.REMOVE_UNNECESSARY_NLS_TAG));
+		
+		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+		cleanUpRefactoring.createChange(null);
+		
+		joinBackgroudActivities();
+		for (int i= 0; i < 10; i++) {
+			startMeasuring();
+			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+			cleanUpRefactoring.createChange(null);
+			finishMeasurements();
+		}
+	}
+	
+	public void testUnnecessaryCodeCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+		
+		cleanUpRefactoring.addCleanUp(new UnnecessaryCodeCleanUp(
+				UnnecessaryCodeCleanUp.REMOVE_UNUSED_CAST));
+		
+		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+		cleanUpRefactoring.createChange(null);
+		
+		joinBackgroudActivities();
+		for (int i= 0; i < 10; i++) {
+			startMeasuring();
+			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+			cleanUpRefactoring.createChange(null);
+			finishMeasurements();
+		}
+	}
+	
+	public void testUnusedCodeCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		cleanUpRefactoring.addCleanUp(new UnusedCodeCleanUp(
+				UnusedCodeCleanUp.REMOVE_UNUSED_IMPORTS |
+				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_CONSTRUCTORS |
+				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_METHODS |
+				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_TYPES |
+				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS |
+				UnusedCodeCleanUp.REMOVE_UNUSED_LOCAL_VARIABLES));
+	
+		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+		cleanUpRefactoring.createChange(null);
+		
+		joinBackgroudActivities();
+		for (int i= 0; i < 10; i++) {
+			startMeasuring();
+			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+			cleanUpRefactoring.createChange(null);
+			finishMeasurements();
+		}
+	}
+	
+	public void testVariableDeclarationCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+		
+		cleanUpRefactoring.addCleanUp(new VariableDeclarationCleanUp(
+				VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_FIELDS |
+				VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_PARAMETERS |
+				VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_LOCAL_VARIABLES));
+		
+		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+		cleanUpRefactoring.createChange(null);
+		
+		joinBackgroudActivities();
+		for (int i= 0; i < 10; i++) {
+			startMeasuring();
+			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+			cleanUpRefactoring.createChange(null);
+			finishMeasurements();
+		}
+	}
 }
