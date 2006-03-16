@@ -283,7 +283,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	private void askForAddingExclusionPatternsDialog(List newEntries) {
 		HashSet modified= new HashSet();
-		fixNestingConflicts(newEntries, fClassPathList.getElements(), modified);
+		List existing= fClassPathList.getElements();
+		fixNestingConflicts((CPListElement[])newEntries.toArray(new CPListElement[newEntries.size()]), (CPListElement[])existing.toArray(new CPListElement[existing.size()]), modified);
 		if (!modified.isEmpty()) {
 			String title= NewWizardMessages.LibrariesWorkbookPage_exclusion_added_title; 
 			String message= NewWizardMessages.LibrariesWorkbookPage_exclusion_added_message; 

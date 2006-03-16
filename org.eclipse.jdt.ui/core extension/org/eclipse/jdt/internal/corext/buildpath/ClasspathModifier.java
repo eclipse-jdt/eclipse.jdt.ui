@@ -231,7 +231,7 @@ public class ClasspathModifier {
 				}
 				
 				Set modifiedSourceEntries= new HashSet();
-				BuildPathBasePage.fixNestingConflicts(newEntries, existingEntries, modifiedSourceEntries);
+				BuildPathBasePage.fixNestingConflicts((CPListElement[])newEntries.toArray(new CPListElement[newEntries.size()]), (CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]), modifiedSourceEntries);
 
 				setNewEntry(existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
 

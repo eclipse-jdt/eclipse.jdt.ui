@@ -22,10 +22,16 @@ public class AddSourceFolderWizard extends BuildPathWizard {
 	private AddSourceFolderWizardPage fAddFolderPage;
 	private SetFilterWizardPage fFilterPage;
 	private final boolean fLinkedMode;
+	private boolean fAllowConflict;
 
 	public AddSourceFolderWizard(CPListElement[] existingEntries, CPListElement newEntry, IPath outputLocation, boolean linkedMode) {
+		this(existingEntries, newEntry, outputLocation, linkedMode, false);
+	}
+	
+	public AddSourceFolderWizard(CPListElement[] existingEntries, CPListElement newEntry, IPath outputLocation, boolean linkedMode, boolean allowConflict) {
 		super(existingEntries, newEntry, outputLocation, getTitel(newEntry, linkedMode), JavaPluginImages.DESC_WIZBAN_NEWSRCFOLDR);
 		fLinkedMode= linkedMode;
+		fAllowConflict= allowConflict;
 	}
 
 	private static String getTitel(CPListElement newEntry, boolean linkedMode) {
@@ -46,7 +52,7 @@ public class AddSourceFolderWizard extends BuildPathWizard {
 	public void addPages() {
 		super.addPages();
 	
-		fAddFolderPage= new AddSourceFolderWizardPage(getEntryToEdit(), getExistingEntries(), getOutputLocation(), fLinkedMode);
+		fAddFolderPage= new AddSourceFolderWizardPage(getEntryToEdit(), getExistingEntries(), getOutputLocation(), fLinkedMode, fAllowConflict);
 		addPage(fAddFolderPage);
 		
 		fFilterPage= new SetFilterWizardPage(getEntryToEdit(), getExistingEntries(), getOutputLocation());

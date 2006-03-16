@@ -204,11 +204,14 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 
 	private List fModifiedElements;
 	private List fRemovedElements;
+
+	private final boolean fAllowConflict;
 	
-	public AddSourceFolderWizardPage(CPListElement newElement, List/*<CPListElement>*/ existingEntries, IPath outputLocation, boolean linkedMode) {
+	public AddSourceFolderWizardPage(CPListElement newElement, List/*<CPListElement>*/ existingEntries, IPath outputLocation, boolean linkedMode, boolean allowConflict) {
 		super(PAGE_NAME);
 		
 		fLinkedMode= linkedMode;
+		fAllowConflict= allowConflict;
 				
 		fOrginalExlusionFilters= new Hashtable();
 		fOrginalInclusionFilters= new Hashtable();
@@ -295,8 +298,10 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			fLinkFields.doFillIntoGrid(composite, layout.numColumns);
 		
 		fRootDialogField.doFillIntoGrid(composite, layout.numColumns);
-		fExcludeInOthersFields.doFillIntoGrid(composite, layout.numColumns);
-		fReplaceExistingField.doFillIntoGrid(composite, layout.numColumns);
+		if (!fAllowConflict) {
+			fExcludeInOthersFields.doFillIntoGrid(composite, layout.numColumns);
+			fReplaceExistingField.doFillIntoGrid(composite, layout.numColumns);
+		}
 		
 		LayoutUtil.setHorizontalSpan(fRootDialogField.getLabelControl(null), layout.numColumns);
 		LayoutUtil.setHorizontalGrabbing(fRootDialogField.getTextControl(null));
@@ -393,7 +398,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 				}
 			}
 		}
-		
+				
 		boolean isProjectAsSourceFolder= false;
 		
 		fModifiedElements.clear();
@@ -424,6 +429,9 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 				CPListElement.insert(fNewElement, fExistingEntries);
 			}
 		}
+		
+		if (fAllowConflict)
+			return new StatusInfo();
 		
 		IJavaModelStatus status= JavaConventions.validateClasspath(javaProject, CPListElement.convertToClasspathEntries(fExistingEntries), fOutputLocation);
 		if (!status.isOK()) {

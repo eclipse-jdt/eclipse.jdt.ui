@@ -45,17 +45,16 @@ public abstract class BuildPathBasePage {
 		setSelection(res, false);
 	}
 	
-	public static void fixNestingConflicts(List newEntries, List existing, Set modifiedSourceEntries) {
-		for (int i= 0; i < newEntries.size(); i++) {
-			CPListElement curr= (CPListElement) newEntries.get(i);
-			addExclusionPatterns(curr, existing, modifiedSourceEntries);
+	public static void fixNestingConflicts(CPListElement[] newEntries, CPListElement[] existing, Set modifiedSourceEntries) {
+		for (int i= 0; i < newEntries.length; i++) {
+			addExclusionPatterns(newEntries[i], existing, modifiedSourceEntries);
 		}
 	}
 	
-	private static void addExclusionPatterns(CPListElement newEntry, List existing, Set modifiedEntries) {
+	private static void addExclusionPatterns(CPListElement newEntry, CPListElement[] existing, Set modifiedEntries) {
 		IPath entryPath= newEntry.getPath();
-		for (int i= 0; i < existing.size(); i++) {
-			CPListElement curr= (CPListElement) existing.get(i);
+		for (int i= 0; i < existing.length; i++) {
+			CPListElement curr= existing[i];
 			if (curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 				IPath currPath= curr.getPath();
 				if (!currPath.equals(entryPath)) {

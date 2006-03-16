@@ -281,16 +281,23 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 	}	
 
 	protected void newFolderButtonPressed() {
-		NewFolderDialog dialog= new NewFolderDialog(getShell(), fSelectedContainer);
-		if (dialog.open() == Window.OK) {
+		Object createdFolder= createFolder(fSelectedContainer);
+		if (createdFolder != null) {
 			CheckboxTreeViewer treeViewer= fViewer;
 			treeViewer.refresh(fSelectedContainer);
-			Object createdFolder= dialog.getResult()[0];
 			treeViewer.reveal(createdFolder);
 			treeViewer.setChecked(createdFolder, true);
 			treeViewer.setSelection(new StructuredSelection(createdFolder));
 			updateOKStatus();
 		}
+	}
+	
+	protected Object createFolder(IContainer container) {
+		NewFolderDialog dialog= new NewFolderDialog(getShell(), container);
+		if (dialog.open() == Window.OK) {
+			return dialog.getResult()[0];
+		}
+		return null;
 	}
 	
 	/* (non-Javadoc)
