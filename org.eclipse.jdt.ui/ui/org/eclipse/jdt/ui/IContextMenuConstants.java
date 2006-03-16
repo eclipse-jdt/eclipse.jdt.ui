@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
-import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.navigator.ICommonMenuConstants;
 
 /**
  * Constants for menu groups used in context menus for Java views and editors.
@@ -55,7 +55,7 @@ public interface IContextMenuConstants {
 	
 
 	/**
-	 * Pop-up menu: name of group for goto actions (value <code>"group.open"</code>).
+	 * Pop-up menu: name of group for goto actions (value <code>"group.goto"</code>).
 	 * <p>
 	 * Examples for open actions are:
 	 * <ul>
@@ -64,7 +64,7 @@ public interface IContextMenuConstants {
 	 * </ul>
 	 * </p>
 	 */
-	public static final String GROUP_GOTO=		"group.goto"; //$NON-NLS-1$
+	public static final String GROUP_GOTO=		ICommonMenuConstants.GROUP_GOTO;
 	/**
 	 * Pop-up menu: name of group for open actions (value <code>"group.open"</code>).
 	 * <p>
@@ -75,7 +75,7 @@ public interface IContextMenuConstants {
 	 * </ul>
 	 * </p>
 	 */
-	public static final String GROUP_OPEN=		"group.open"; //$NON-NLS-1$
+	public static final String GROUP_OPEN=		ICommonMenuConstants.GROUP_OPEN;
 	
 	/**
 	 * Pop-up menu: name of group for show actions (value <code>"group.show"</code>).
@@ -87,7 +87,7 @@ public interface IContextMenuConstants {
 	 * </ul>
 	 * </p>
 	 */
-	public static final String GROUP_SHOW=		"group.show"; //$NON-NLS-1$
+	public static final String GROUP_SHOW=		ICommonMenuConstants.GROUP_SHOW;
 	
 	/**
 	 * Pop-up menu: name of group for new actions (value <code>"group.new"</code>).
@@ -99,23 +99,23 @@ public interface IContextMenuConstants {
 	 * </ul>
 	 * </p>
 	 */
-	public static final String GROUP_NEW=		"group.new"; //$NON-NLS-1$
+	public static final String GROUP_NEW=		ICommonMenuConstants.GROUP_NEW;
 
 	/**
 	 * Pop-up menu: name of group for build actions (value <code>"group.build"</code>).
 	 */
-	public static final String GROUP_BUILD=		"group.build"; //$NON-NLS-1$
+	public static final String GROUP_BUILD=		ICommonMenuConstants.GROUP_BUILD;
 	
 	/**
 	 * Pop-up menu: name of group for reorganize actions (value <code>"group.reorganize"</code>).
 	 */	
-	public static final String GROUP_REORGANIZE=	IWorkbenchActionConstants.GROUP_REORGANIZE;	
+	public static final String GROUP_REORGANIZE=	ICommonMenuConstants.GROUP_REORGANIZE;	
 	
 	/**
 	 * Pop-up menu: name of group for code generation actions (
 	 * value <code>"group.generate"</code>).
 	 */	
-	public static final String GROUP_GENERATE=	"group.generate"; //$NON-NLS-1$
+	public static final String GROUP_GENERATE=	ICommonMenuConstants.GROUP_GENERATE;
 
 	/**
 	 * Pop-up menu: name of group for source actions. This is an alias for
@@ -124,25 +124,25 @@ public interface IContextMenuConstants {
 	 * 
 	 * @since 2.0
 	 */	
-	public static final String GROUP_SOURCE=	GROUP_GENERATE;
+	public static final String GROUP_SOURCE=		ICommonMenuConstants.GROUP_SOURCE;
 
 	/**
 	 * Pop-up menu: name of group for search actions (value <code>"group.search"</code>).
 	 */	
-	public static final String GROUP_SEARCH=		"group.search"; //$NON-NLS-1$
+	public static final String GROUP_SEARCH=		ICommonMenuConstants.GROUP_SEARCH;
 	
 	/**
 	 * Pop-up menu: name of group for additional actions (value <code>"additions"</code>).
 	 */	
-	public static final String GROUP_ADDITIONS=	"additions"; //$NON-NLS-1$
+	public static final String GROUP_ADDITIONS=	ICommonMenuConstants.GROUP_ADDITIONS;
 
 	/**
 	 * Pop-up menu: name of group for viewer setup actions (value <code>"group.viewerSetup"</code>).
 	 */	
-	public static final String GROUP_VIEWER_SETUP=	"group.viewerSetup"; //$NON-NLS-1$
+	public static final String GROUP_VIEWER_SETUP=	ICommonMenuConstants.GROUP_VIEWER_SETUP;
 
 	/**
 	 * Pop-up menu: name of group for properties actions (value <code>"group.properties"</code>).
 	 */	
-	public static final String GROUP_PROPERTIES=	"group.properties"; //$NON-NLS-1$
+	public static final String GROUP_PROPERTIES=	ICommonMenuConstants.GROUP_PROPERTIES;
 }
