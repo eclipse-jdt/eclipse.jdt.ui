@@ -245,7 +245,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		private class TabFolderLayout extends Layout {
 
 			protected Point computeSize (Composite composite, int wHint, int hHint, boolean flushCache) {
-				return new Point(680, 340);
+				return new Point(730, 340);
 			}
 			
 			protected void layout (Composite composite, boolean flushCache) {
