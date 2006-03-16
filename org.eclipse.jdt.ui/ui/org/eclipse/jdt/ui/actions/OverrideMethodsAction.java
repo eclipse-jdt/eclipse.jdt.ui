@@ -155,11 +155,6 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 				notifyResult(false);
 				return;
 			}
-			if (type == null) {
-				MessageDialog.openError(getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_error_type_removed_in_editor);
-				notifyResult(false);
-				return;
-			}
 			run(getShell(), type);
 		} catch (CoreException exception) {
 			ExceptionHandler.handle(exception, getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_error_actionfailed); 
