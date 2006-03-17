@@ -19,6 +19,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor;
 
 /**
  * Refactoring to extract an interface from a type.
@@ -26,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 public final class ExtractInterfaceRefactoring extends ProcessorBasedRefactoring implements IInitializableRefactoringComponent {
 
 	/** The processor to use */
-	private final ExtractInterfaceProcessor fProcessor;
+	private final SuperTypeRefactoringProcessor fProcessor;
 
 	/**
 	 * Creates a new extract interface refactoring.
@@ -34,7 +35,7 @@ public final class ExtractInterfaceRefactoring extends ProcessorBasedRefactoring
 	 * @param processor
 	 *            the processor to use
 	 */
-	public ExtractInterfaceRefactoring(final ExtractInterfaceProcessor processor) {
+	public ExtractInterfaceRefactoring(final SuperTypeRefactoringProcessor processor) {
 		super(processor);
 
 		fProcessor= processor;

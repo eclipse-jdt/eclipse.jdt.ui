@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -142,7 +143,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		}
 
 		private void addInstanceofCheckbox(Composite result, int margin) {
-			final ExtractInterfaceProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
+			final SuperTypeRefactoringProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
 			String title= RefactoringMessages.ExtractInterfaceWizard_use_supertype;
 			fInstanceofCheckbox= new Button(result, SWT.CHECK);
 			fInstanceofCheckbox.setSelection(false);

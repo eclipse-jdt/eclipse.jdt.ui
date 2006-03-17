@@ -76,6 +76,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -476,7 +477,8 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	 * @param members
 	 *            the members, or <code>null</code> if invoked by scripting
 	 */
-	protected HierarchyProcessor(final IMember[] members) {
+	protected HierarchyProcessor(final IMember[] members, final CodeGenerationSettings settings) {
+		super(settings);
 		if (members != null)
 			fMembersToMove= (IMember[]) SourceReferenceUtil.sortByOffset(members);
 	}

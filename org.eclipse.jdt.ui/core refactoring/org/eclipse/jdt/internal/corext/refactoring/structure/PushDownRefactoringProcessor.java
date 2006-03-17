@@ -309,7 +309,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 	 *            the members to pull up, or <code>null</code> if invoked by scripting
 	 */
 	public PushDownRefactoringProcessor(IMember[] members) {
-		super(members);
+		super(members, null);
 		if (members != null) {
 			final IType type= RefactoringAvailabilityTester.getTopLevelType(members);
 			try {

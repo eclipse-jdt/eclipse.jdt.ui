@@ -339,8 +339,6 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	/** Should occurrences of the type be replaced by the supertype? */
 	private boolean fReplace= false;
 
-	private CodeGenerationSettings fSettings;
-
 	/**
 	 * Creates a new pull up refactoring processor.
 	 * 
@@ -352,7 +350,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	 *            invoked by scripting
 	 */
 	public PullUpRefactoringProcessor(final IMember[] members, final CodeGenerationSettings settings) {
-		super(members);
+		super(members, settings);
 		if (members != null) {
 			final IType type= RefactoringAvailabilityTester.getTopLevelType(members);
 			try {
@@ -364,7 +362,6 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				JavaPlugin.log(exception);
 			}
 		}
-		fSettings= settings;
 		fDeletedMethods= new IMethod[0];
 		fAbstractMethods= new IMethod[0];
 		fCreateMethodStubs= true;
@@ -387,7 +384,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 					final IMethod requiredMethod= requiredMethods[index];
 					if (isStatic && !JdtFlags.isStatic(requiredMethod))
 						continue;
-					if (isRequiredPullableMember(queue, requiredMethod) && !isVirtualAccessibleFromTargetType(requiredMethod, new SubProgressMonitor(sub, 1)))
+					if (isRequiredPullableMember(queue, requiredMethod) && !(MethodChecks.isVirtual(requiredMethod) && isAvailableInDestination(requiredMethod, new SubProgressMonitor(sub, 1))))
 						queue.add(requiredMethod);
 				}
 			} finally {
@@ -659,12 +656,19 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	 */
 	public RefactoringStatus checkFinalConditions(final IProgressMonitor monitor, final CheckConditionsContext context) throws CoreException, OperationCanceledException {
 		try {
-			monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, 7);
+			monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, 12);
 			clearCaches();
 
 			final RefactoringStatus result= new RefactoringStatus();
+			result.merge(createWorkingCopyLayer(new SubProgressMonitor(monitor, 4)));
+			if (result.hasFatalError())
+				return result;
+			if (monitor.isCanceled())
+				throw new OperationCanceledException();
 			result.merge(checkGenericDeclaringType(new SubProgressMonitor(monitor, 1)));
 			result.merge(checkFinalFields(new SubProgressMonitor(monitor, 1)));
+			if (monitor.isCanceled())
+				throw new OperationCanceledException();
 			result.merge(checkAccesses(new SubProgressMonitor(monitor, 1)));
 			result.merge(checkMembersInTypeAndAllSubtypes(new SubProgressMonitor(monitor, 2)));
 			result.merge(checkIfSkippingOverElements(new SubProgressMonitor(monitor, 1)));
@@ -905,7 +909,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			final IDocument document= new Document(method.getCompilationUnit().getBuffer().getContents());
 			final ASTRewrite rewrite= ASTRewrite.create(body.getAST());
 			final ITrackedNodePosition position= rewrite.track(body);
-			body.accept(new PullUpAstNodeMapper(sourceRewrite, targetRewrite, rewrite, getDeclaringSuperType(monitor), mapping));
+			body.accept(new PullUpAstNodeMapper(sourceRewrite, targetRewrite, rewrite, getDeclaringSuperTypeHierarchy(monitor).getSuperclass(getDeclaringType()), mapping));
 			rewrite.rewriteAST(document, method.getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
 			String content= document.get(position.getStartPosition(), position.getLength());
 			final String[] lines= Strings.convertIntoLines(content);
@@ -1260,6 +1264,22 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		return null;
 	}
 
+	/**
+	 * Creates a working copy layer if necessary.
+	 * 
+	 * @param monitor
+	 *            the progress monitor to use
+	 * @return a status describing the outcome of the operation
+	 */
+	protected RefactoringStatus createWorkingCopyLayer(IProgressMonitor monitor) {
+		try {
+			monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, 1);
+			return new RefactoringStatus();
+		} finally {
+			monitor.done();
+		}
+	}
+
 	private IMethod[] getAbstractMethods() throws JavaModelException {
 		final IMethod[] toDeclareAbstract= fAbstractMethods;
 		final IMethod[] abstractPulledUp= getAbstractMethodsToPullUp();
@@ -1331,11 +1351,6 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		return fCreateMethodStubs;
 	}
 
-	private IType getDeclaringSuperType(final IProgressMonitor monitor) throws JavaModelException {
-		final IType declaringType= getDeclaringType();
-		return declaringType.newSupertypeHierarchy(fOwner, monitor).getSuperclass(declaringType);
-	}
-
 	public ITypeHierarchy getDeclaringSuperTypeHierarchy(final IProgressMonitor monitor) throws JavaModelException {
 		try {
 			if (fCachedDeclaringSuperTypeHierarchy != null)
@@ -1376,11 +1391,11 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		return IDENTIFIER;
 	}
 
-	public IMember[] getMatchingElements(final IProgressMonitor monitor, final boolean includeMethodsToDeclareAbstract) throws JavaModelException {
+	public IMember[] getMatchingElements(final IProgressMonitor monitor, final boolean includeAbstract) throws JavaModelException {
 		try {
 			final Set result= new HashSet();
 			final IType destination= getDestinationType();
-			final Map matching= getMatchingMembers(getDestinationTypeHierarchy(monitor), getDestinationType(), includeMethodsToDeclareAbstract);
+			final Map matching= getMatchingMembers(getDestinationTypeHierarchy(monitor), getDestinationType(), includeAbstract);
 			for (final Iterator iterator= matching.keySet().iterator(); iterator.hasNext();) {
 				final IMember key= (IMember) iterator.next();
 				Assert.isTrue(!key.getDeclaringType().equals(destination));
@@ -1392,7 +1407,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		}
 	}
 
-	private Map getMatchingMembers(final ITypeHierarchy hierarchy, final IType type, final boolean includeMethodsToDeclareAbstract) throws JavaModelException {
+	private Map getMatchingMembers(final ITypeHierarchy hierarchy, final IType type, final boolean includeAbstract) throws JavaModelException {
 		final Map result= new HashMap(); // IMember -> Set of IMembers (of
 		// the same
 		// type as key)
@@ -1403,7 +1418,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			mergeMaps(result, map);
 			upgradeMap(result, map);
 		}
-		if (includeMethodsToDeclareAbstract)
+		if (includeAbstract)
 			return result;
 
 		for (int i= 0; i < fAbstractMethods.length; i++) {
@@ -1413,24 +1428,24 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		return result;
 	}
 
-	private Map getMatchingMembersMapping(final IType analyzedType) throws JavaModelException {
+	private Map getMatchingMembersMapping(final IType initial) throws JavaModelException {
 		final Map result= new HashMap();
 		final IMember[] members= getCreatedDestinationMembers();
 		for (int i= 0; i < members.length; i++) {
 			final IMember member= members[i];
 			if (member instanceof IMethod) {
 				final IMethod method= (IMethod) member;
-				final IMethod found= MemberCheckUtil.findMethod(method, analyzedType.getMethods());
+				final IMethod found= MemberCheckUtil.findMethod(method, initial.getMethods());
 				if (found != null)
 					addMatchingMember(result, method, found);
 			} else if (member instanceof IField) {
 				final IField field= (IField) member;
-				final IField found= analyzedType.getField(field.getElementName());
+				final IField found= initial.getField(field.getElementName());
 				if (found.exists())
 					addMatchingMember(result, field, found);
 			} else if (member instanceof IType) {
 				final IType type= (IType) member;
-				final IType found= analyzedType.getType(type.getElementName());
+				final IType found= initial.getType(type.getElementName());
 				if (found.exists())
 					addMatchingMember(result, type, found);
 			} else
@@ -1680,14 +1695,6 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		if (member.getDeclaringType() == null) // not a member
 			return false;
 		return member.getDeclaringType().equals(getDeclaringType()) && !queue.contains(member) && RefactoringAvailabilityTester.isPullUpAvailable(member);
-	}
-
-	private boolean isVirtualAccessibleFromTargetType(final IMethod method, final IProgressMonitor monitor) throws JavaModelException {
-		try {
-			return MethodChecks.isVirtual(method) && isAvailableInDestination(method, monitor);
-		} finally {
-			monitor.done();
-		}
 	}
 
 	/**
