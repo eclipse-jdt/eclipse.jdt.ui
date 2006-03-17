@@ -245,10 +245,13 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 				IFolder folder= (IFolder)objects[i];
 				collectNLSFiles(folder.members(), result);
 			} else if (objects[i] instanceof IProject) {
-				collectNLSFiles(((IProject)objects[i]).members(), result);
+				IProject project= ((IProject)objects[i]);
+				if (project.exists() && project.isOpen())
+					collectNLSFiles(project.members(), result);
 			} else if (objects[i] instanceof IJavaProject) {
 				IJavaProject project= (IJavaProject)objects[i];
-				collectNLSFiles(project.getAllPackageFragmentRoots(), result);
+				if (project.exists() && project.isOpen())
+					collectNLSFiles(project.getAllPackageFragmentRoots(), result);
 			} else if (objects[i] instanceof IJavaElement) {
 				IJavaElement element= (IJavaElement)objects[i];
 				IResource resource= element.getCorrespondingResource();
@@ -275,7 +278,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 	}
 	
 	private SearchPatternData tryIfPropertyFileSelected(IFile file) throws JavaModelException {
-		if (!file.getFileExtension().equalsIgnoreCase("properties")) //$NON-NLS-1$
+		if (!"properties".equalsIgnoreCase(file.getFileExtension())) //$NON-NLS-1$
 			return null;
 		
 		IPath propertyFullPath= file.getFullPath();

@@ -629,7 +629,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 	private SearchPatternData tryIfPropertyFileSelected(ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
 			Object o= ((IStructuredSelection) selection).getFirstElement();
-			if (o instanceof IFile && ((IFile) o).getFileExtension().equalsIgnoreCase("properties")) { //$NON-NLS-1$
+			if (o instanceof IFile && "properties".equalsIgnoreCase(((IFile) o).getFileExtension())) { //$NON-NLS-1$
 				IPath propertyFullPath= ((IFile)o).getFullPath();
 				String typePathStr= null;
 				IType type= null;
