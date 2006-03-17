@@ -34,17 +34,21 @@ import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
  * @since 3.2
  */
 public class CommonLayoutActionGroup extends MultiActionGroup {
+
+	private IExtensionStateModel fStateModel;
+	private StructuredViewer fStructuredViewer;
 	
-	private static class CommonLayoutAction extends Action implements IAction {
+	private boolean fHasContributedToViewMenu = false;
+	private IAction fHierarchicalLayout = null;
+	private IAction fFlatLayoutAction = null; 
+	private IAction[] actions;
+	
+	private class CommonLayoutAction extends Action implements IAction {
 
 		private final boolean fIsFlatLayout;
-		private IExtensionStateModel fStateModel;
-		private StructuredViewer fStructuredViewer;
 
-		public CommonLayoutAction(StructuredViewer structuredViewer, IExtensionStateModel stateModel, boolean flat) {
+		public CommonLayoutAction(boolean flat) {
 			super("", AS_RADIO_BUTTON); //$NON-NLS-1$
-			fStateModel = stateModel;
-			fStructuredViewer = structuredViewer;
 			fIsFlatLayout= flat; 
 			if (fIsFlatLayout)
 				PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LAYOUT_FLAT_ACTION);
@@ -60,21 +64,20 @@ public class CommonLayoutActionGroup extends MultiActionGroup {
 				fStateModel.setBooleanProperty(Values.IS_LAYOUT_FLAT, fIsFlatLayout);
 	  			 	
 				fStructuredViewer.getControl().setRedraw(false);
-				fStructuredViewer.refresh();
-				fStructuredViewer.getControl().setRedraw(true);
+				try {
+					fStructuredViewer.refresh();
+				} finally {
+					fStructuredViewer.getControl().setRedraw(true);
+				}
 			}
 		}
 	}
 	
-	
-	private boolean fHasContributedToViewMenu = false;
-	private IAction fHierarchicalLayout = null;
-	private IAction fFlatLayoutAction = null; 
 
 	public CommonLayoutActionGroup(StructuredViewer structuredViewer, IExtensionStateModel stateModel) {
-		super();
-		IAction[] actions = createActions(structuredViewer, stateModel);
-		setActions(actions, stateModel.getBooleanProperty(Values.IS_LAYOUT_FLAT) ? 0 : 1);
+		super();  
+		fStateModel = stateModel;
+		fStructuredViewer = structuredViewer;
 	}
 
 	/* (non-Javadoc)
@@ -109,25 +112,27 @@ public class CommonLayoutActionGroup extends MultiActionGroup {
 	}
 	
 	
-	private IAction[] createActions(StructuredViewer structuredViewer, IExtensionStateModel stateModel) {
+	private IAction[] createActions() {
 		
-		fFlatLayoutAction= new CommonLayoutAction(structuredViewer, stateModel, true);
+		fFlatLayoutAction= new CommonLayoutAction(true);
 		fFlatLayoutAction.setText(PackagesMessages.LayoutActionGroup_flatLayoutAction_label); 
 		JavaPluginImages.setLocalImageDescriptors(fFlatLayoutAction, "flatLayout.gif"); //$NON-NLS-1$
 		
-		fHierarchicalLayout= new CommonLayoutAction(structuredViewer, stateModel, false);
+		fHierarchicalLayout= new CommonLayoutAction(false);
 		fHierarchicalLayout.setText(PackagesMessages.LayoutActionGroup_hierarchicalLayoutAction_label);	  
 		JavaPluginImages.setLocalImageDescriptors(fHierarchicalLayout, "hierarchicalLayout.gif"); //$NON-NLS-1$
-		
-		fHierarchicalLayout.setChecked(!stateModel.getBooleanProperty(Values.IS_LAYOUT_FLAT));
-		fFlatLayoutAction.setChecked(stateModel.getBooleanProperty(Values.IS_LAYOUT_FLAT));
-		
+		  
 		return new IAction[]{fFlatLayoutAction, fHierarchicalLayout};
 	}
 	
-	public void setFlatLayout(boolean flatLayout) {
+	public void setFlatLayout(boolean flatLayout) { 
+		if(actions == null) {
+			actions = createActions(); 
+			setActions(actions, flatLayout ? 0 /* indicates check the flat action */ : 1);
+		}
 		fHierarchicalLayout.setChecked(!flatLayout);
-		fFlatLayoutAction.setChecked(flatLayout);
+		fFlatLayoutAction.setChecked(flatLayout); 
+		
 	}
 	 
 }

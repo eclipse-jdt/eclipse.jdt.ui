@@ -5072,16 +5072,6 @@
 	
 	<extension
 			point="org.eclipse.ui.navigator.viewer">
-		<viewerContentBinding
-				viewerId="org.eclipse.ui.navigator.resourceContent">
-			<includes>
-				<contentExtension pattern="org.eclipse.jdt.java.ui.javaContent" />
-			</includes>
-		</viewerContentBinding>
-	</extension>
-	
-	<extension
-			point="org.eclipse.ui.navigator.viewer">
 		<viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
 			<includes>
 				<contentExtension pattern="org.eclipse.jdt.java.ui.javaContent" />
@@ -5153,10 +5143,9 @@
 				</or>
 			</possibleChildren>
 			<actionProvider
-					class="org.eclipse.jdt.internal.ui.navigator.PackageExplorerActionProvider">
+					class="org.eclipse.jdt.internal.ui.navigator.PackageExplorerActionProvider"
+					overrides="org.eclipse.ui.navigator.resources.actions.RefactorActions">
 				<enablement>
-					<adapt
-							type="org.eclipse.jdt.core.IJavaElement" />
 				</enablement>
 			</actionProvider>
 			<override
