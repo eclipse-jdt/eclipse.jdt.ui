@@ -248,7 +248,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 					collectNLSFiles(project.members(), result);
 			} else if (objects[i] instanceof IJavaProject) {
 				IJavaProject project= (IJavaProject)objects[i];
-				if (project.exists() && project.isOpen())
+				if (project.exists())
 					collectNLSFiles(project.getAllPackageFragmentRoots(), result);
 			} else if (objects[i] instanceof IJavaElement) {
 				IJavaElement element= (IJavaElement)objects[i];
