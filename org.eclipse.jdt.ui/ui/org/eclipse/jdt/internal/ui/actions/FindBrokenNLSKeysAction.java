@@ -31,15 +31,12 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
-import org.eclipse.search.ui.NewSearchUI;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
@@ -49,7 +46,7 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchQuery;
+import org.eclipse.jdt.internal.ui.refactoring.nls.search.SearchBrokenNLSKeysUtil;
 
 public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 	
@@ -148,8 +145,9 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 				properties.add(current.getPropertyFile());
 			}
 		}
-		NLSSearchQuery query= new NLSSearchQuery((IType[])wrappers.toArray(new IType[wrappers.size()]), (IFile[])properties.toArray(new IFile[properties.size()]), SearchEngine.createWorkspaceScope(), scope);
-		NewSearchUI.runQueryInBackground(query);
+		IType[] accessorClasses= (IType[])wrappers.toArray(new IType[wrappers.size()]);
+		IFile[] propertieFiles= (IFile[])properties.toArray(new IFile[properties.size()]);
+		SearchBrokenNLSKeysUtil.search(scope, accessorClasses, propertieFiles);
 	}
 
 	/* (non-Javadoc)
