@@ -82,6 +82,27 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
  * notified through the <code>IPackageExplorerActionListener</code> interface. 
  */
 public final class HintTextGroup implements IClasspathInformationProvider, IPackageExplorerActionListener {
+	
+	/**
+	 * Order of actions in the group. First is first.
+	 * Only actions in ACTION_ORDER are part of the group.
+	 */
+	private final static int[] ACTION_ORDER= {
+		IClasspathInformationProvider.CREATE_FOLDER,
+		IClasspathInformationProvider.CREATE_LINK,
+		IClasspathInformationProvider.EDIT_FILTERS,
+		IClasspathInformationProvider.EXCLUDE,
+		IClasspathInformationProvider.INCLUDE,
+		IClasspathInformationProvider.UNEXCLUDE,
+		IClasspathInformationProvider.UNINCLUDE,
+		IClasspathInformationProvider.EDIT_OUTPUT,
+		IClasspathInformationProvider.CREATE_OUTPUT,
+		IClasspathInformationProvider.ADD_SEL_SF_TO_BP,
+		IClasspathInformationProvider.REMOVE_FROM_BP,
+		IClasspathInformationProvider.ADD_SEL_LIB_TO_BP,
+		IClasspathInformationProvider.ADD_LIB_TO_BP,
+		IClasspathInformationProvider.ADD_JAR_TO_BP
+	};
     
     private StringDialogField fOutputLocationField;
     private Composite fTopComposite;
@@ -606,14 +627,15 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
             return;
         }
         
-        for (int i= 0; i < actions.length; i++) {
-            int id= Integer.parseInt(actions[i].getId());
-            if (id == IClasspathInformationProvider.RESET_ALL)
-                continue;
-            if (id == IClasspathInformationProvider.CREATE_LINK)
-                continue;
-            createLabel(childComposite, descriptionText[i], actions[i], fRunnableContext);
-        }
+        for (int j= 0; j < ACTION_ORDER.length; j++) {
+			for (int i= 0; i < actions.length; i++) {
+	            int id= Integer.parseInt(actions[i].getId());
+	            if (id == ACTION_ORDER[j]) {
+	            	createLabel(childComposite, descriptionText[i], actions[i], fRunnableContext);
+	            	break;
+	            }
+			}
+		}
         
         fTopComposite.layout(true);
     }
