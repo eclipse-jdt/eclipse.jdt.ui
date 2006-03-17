@@ -41,7 +41,7 @@ public interface IInternalRefactoringProcessorIds {
 	 * <p>
 	 * Use the method {@link ResourceMapping#accept(ResourceMappingContext context, IResourceVisitor visitor, IProgressMonitor monitor)} 
 	 * to enumerate the resources which form the Java element. <code>ResourceMappingContext.LOCAL_CONTEXT</code> 
-	 * should be use as the <code>ResourceMappingContext</code> passed to the accept methdod.
+	 * should be use as the <code>ResourceMappingContext</code> passed to the accept method.
 	 * </p>
 	 * @see org.eclipse.core.resources.mapping.ResourceMapping
 	 * @since 3.1
