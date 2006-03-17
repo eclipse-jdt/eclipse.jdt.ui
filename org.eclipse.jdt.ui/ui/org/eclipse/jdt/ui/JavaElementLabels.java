@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
  */
 public class JavaElementLabels {
 	
+	
 	/**
 	 * Method names contain parameter types.
 	 * e.g. <code>foo(int)</code>
@@ -463,15 +464,6 @@ public class JavaElementLabels {
 			BindingKey resolvedKey= getFlag(flags, USE_RESOLVED) && method.isResolved() ? new BindingKey(method.getKey()) : null;
 			String resolvedSig= (resolvedKey != null) ? resolvedKey.toSignature() : null;
 			
-			// category
-			if (getFlag(flags, M_CATEGORY) && method.exists()) {
-				String[] categories= method.getCategories();
-				if (categories.length > 0) {
-					buf.append(categories[0]);
-					buf.append(CONCAT_STRING);
-				}
-			}
-			
 			// type parameters
 			if (getFlag(flags, M_PRE_TYPE_PARAMETERS)) {
 				if (resolvedKey != null) {
@@ -620,12 +612,20 @@ public class JavaElementLabels {
 				String returnTypeSig= resolvedSig != null ? Signature.getReturnType(resolvedSig) : method.getReturnType();
 				getTypeSignatureLabel(returnTypeSig, flags, buf);
 			}			
+
+			// category
+			if (getFlag(flags, M_CATEGORY) && method.exists()) {
+				String[] categories= method.getCategories();
+				if (categories.length > 0) {
+					buf.append(CONCAT_STRING);
+					buf.append(Messages.format(JavaUIMessages.JavaElementLabels_category , categories[0]));				}
+			}
 			
 			// post qualification
 			if (getFlag(flags, M_POST_QUALIFIED)) {
 				buf.append(CONCAT_STRING);
 				getTypeLabel(method.getDeclaringType(), T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS), buf);
-			}			
+			}
 			
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e); // NotExistsException will not reach this point
@@ -654,15 +654,6 @@ public class JavaElementLabels {
 	public static void getFieldLabel(IField field, long flags, StringBuffer buf) {
 		try {
 			
-			// category
-			if (getFlag(flags, F_CATEGORY) && field.exists()) {
-				String[] categories= field.getCategories();
-				if (categories.length > 0) {
-					buf.append(categories[0]);
-					buf.append(CONCAT_STRING);
-				}
-			}
-			
 			if (getFlag(flags, F_PRE_TYPE_SIGNATURE) && field.exists() && !Flags.isEnum(field.getFlags())) {
 				if (getFlag(flags, USE_RESOLVED) && field.isResolved()) {
 					getTypeSignatureLabel(new BindingKey(field.getKey()).toSignature(), flags, buf);
@@ -687,13 +678,22 @@ public class JavaElementLabels {
 					getTypeSignatureLabel(field.getTypeSignature(), flags, buf);
 				}
 			}
-			
+
+			// category
+			if (getFlag(flags, F_CATEGORY) && field.exists()) {
+				String[] categories= field.getCategories();
+				if (categories.length > 0) {
+					buf.append(CONCAT_STRING);
+					buf.append(Messages.format(JavaUIMessages.JavaElementLabels_category , categories[0]));
+				}
+			}
+
 			// post qualification
 			if (getFlag(flags, F_POST_QUALIFIED)) {
 				buf.append(CONCAT_STRING);
 				getTypeLabel(field.getDeclaringType(), T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS), buf);
 			}
-			
+
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e); // NotExistsException will not reach this point
 		}			
@@ -830,19 +830,6 @@ public class JavaElementLabels {
 	 */		
 	public static void getTypeLabel(IType type, long flags, StringBuffer buf) {
 		
-		// category
-		if (getFlag(flags, T_CATEGORY) && type.exists()) {
-			try {
-				String[] categories= type.getCategories();
-				if (categories.length > 0) {
-					buf.append(categories[0]);
-					buf.append(CONCAT_STRING);
-				}
-			} catch (JavaModelException e) {
-				// ignore
-			}
-		}
-		
 		if (getFlag(flags, T_FULLY_QUALIFIED)) {
 			IPackageFragment pack= type.getPackageFragment();
 			if (!pack.isDefaultPackage()) {
@@ -902,6 +889,19 @@ public class JavaElementLabels {
 				}
 			}
 		}
+		
+		// category
+		if (getFlag(flags, T_CATEGORY) && type.exists()) {
+			try {
+				String[] categories= type.getCategories();
+				if (categories.length > 0) {
+					buf.append(CONCAT_STRING);
+					buf.append(Messages.format(JavaUIMessages.JavaElementLabels_category , categories[0]));				}
+			} catch (JavaModelException e) {
+				// ignore
+			}
+		}
+
 		// post qualification
 		if (getFlag(flags, T_POST_QUALIFIED)) {
 			buf.append(CONCAT_STRING);

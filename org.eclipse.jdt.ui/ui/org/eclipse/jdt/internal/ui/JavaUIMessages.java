@@ -97,6 +97,7 @@ public final class JavaUIMessages extends NLS {
 	public static String JavaElementLabels_anonym;
 	public static String JavaElementLabels_import_container;
 	public static String JavaElementLabels_initializer;
+	public static String JavaElementLabels_category;
 	public static String JavaElementLabels_concat_string;
 	public static String JavaElementLabels_comma_string;
 	public static String JavaElementLabels_declseparator_string;
