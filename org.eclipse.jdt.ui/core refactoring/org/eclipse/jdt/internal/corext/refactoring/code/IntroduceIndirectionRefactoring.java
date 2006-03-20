@@ -426,27 +426,10 @@ public class IntroduceIndirectionRefactoring extends CommentRefactoring implemen
 					fTargetMethodBinding= declaration.resolveBinding().getMethodDeclaration();
 				} else {
 					// binary method - no CURewrite available (and none needed as we cannot update the method anyway)
-					if (fTargetMethod.getClassFile().getSource() != null) {
-						// binary type with attached source
-						// see below - can integrate with "else" branch if JDT/Core bug is fixed 
-						ASTParser parser= ASTParser.newParser(AST.JLS3);
-						parser.setResolveBindings(true);
-						parser.setSource(fTargetMethod.getClassFile());
-						CompilationUnit targetUnit= (CompilationUnit) parser.createAST(null);
-						MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fTargetMethod, targetUnit);
-						fTargetMethodBinding= declaration.resolveBinding().getMethodDeclaration();
-					} else {
-						// binary type without source
-						ASTParser parser= ASTParser.newParser(AST.JLS3);
-						parser.setProject(fTargetMethod.getJavaProject());
-						IBinding[] bindings= parser.createBindings(new IJavaElement[] { fTargetMethod }, null);
-
-						// Bug in JDT/Core - wrong element returned for generic binary methods, see bug #122650 
-						if (bindings != null && bindings[0] != null && bindings[0] instanceof IMethodBinding) 
-							fTargetMethodBinding= ((IMethodBinding) bindings[0]).getMethodDeclaration();
-						else
-							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_no_generic_methods_inside_binary);
-					}
+					ASTParser parser= ASTParser.newParser(AST.JLS3);
+					parser.setProject(fTargetMethod.getJavaProject());
+					IBinding[] bindings= parser.createBindings(new IJavaElement[] { fTargetMethod }, null);
+					fTargetMethodBinding= ((IMethodBinding) bindings[0]).getMethodDeclaration();
 				}
 			}
 

@@ -806,8 +806,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String IntroduceIndirectionRefactoring_looking_for_references;
 
-	public static String IntroduceIndirectionRefactoring_no_generic_methods_inside_binary;
-
 	public static String IntroduceIndirectionRefactoring_not_available_for_constructors;
 
 	public static String IntroduceIndirectionRefactoring_not_available_for_local_or_anonymous_types;
