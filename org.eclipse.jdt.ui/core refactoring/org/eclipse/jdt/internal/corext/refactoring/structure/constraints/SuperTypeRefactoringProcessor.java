@@ -244,40 +244,44 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		Assert.isNotNull(buffer);
 		Assert.isNotNull(status);
 		Assert.isNotNull(monitor);
-		monitor.beginTask("", 1); //$NON-NLS-1$
-		monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
-		final String delimiter= StubUtility.getLineDelimiterUsed(subType.getJavaProject());
-		if (JdtFlags.isPublic(subType)) {
-			buffer.append(JdtFlags.VISIBILITY_STRING_PUBLIC);
-			buffer.append(" "); //$NON-NLS-1$
-		}
-		if (isInterface)
-			buffer.append("interface "); //$NON-NLS-1$
-		else
-			buffer.append("class "); //$NON-NLS-1$
-		buffer.append(superName);
-		buffer.append(" {"); //$NON-NLS-1$
-		buffer.append(delimiter);
-		buffer.append(delimiter);
-		buffer.append('}');
-		final IDocument document= new Document(buffer.toString());
-		final ASTParser parser= ASTParser.newParser(AST.JLS3);
-		parser.setSource(document.get().toCharArray());
-		final CompilationUnit unit= (CompilationUnit) parser.createAST(new SubProgressMonitor(monitor, 1));
-		final ASTRewrite targetRewrite= ASTRewrite.create(unit.getAST());
-		final AbstractTypeDeclaration targetDeclaration= (AbstractTypeDeclaration) unit.types().get(0);
-		createTypeParameters(targetRewrite, subType, sourceDeclaration, targetDeclaration);
-		createMemberDeclarations(sourceRewrite, targetRewrite, targetDeclaration);
-		final TextEdit edit= targetRewrite.rewriteAST(document, subType.getJavaProject().getOptions(true));
 		try {
-			edit.apply(document, TextEdit.UPDATE_REGIONS);
-		} catch (MalformedTreeException exception) {
-			JavaPlugin.log(exception);
-		} catch (BadLocationException exception) {
-			JavaPlugin.log(exception);
+			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
+			final String delimiter= StubUtility.getLineDelimiterUsed(subType.getJavaProject());
+			if (JdtFlags.isPublic(subType)) {
+				buffer.append(JdtFlags.VISIBILITY_STRING_PUBLIC);
+				buffer.append(" "); //$NON-NLS-1$
+			}
+			if (isInterface)
+				buffer.append("interface "); //$NON-NLS-1$
+			else
+				buffer.append("class "); //$NON-NLS-1$
+			buffer.append(superName);
+			buffer.append(" {"); //$NON-NLS-1$
+			buffer.append(delimiter);
+			buffer.append(delimiter);
+			buffer.append('}');
+			final IDocument document= new Document(buffer.toString());
+			final ASTParser parser= ASTParser.newParser(AST.JLS3);
+			parser.setSource(document.get().toCharArray());
+			final CompilationUnit unit= (CompilationUnit) parser.createAST(new SubProgressMonitor(monitor, 1));
+			final ASTRewrite targetRewrite= ASTRewrite.create(unit.getAST());
+			final AbstractTypeDeclaration targetDeclaration= (AbstractTypeDeclaration) unit.types().get(0);
+			createTypeParameters(targetRewrite, subType, sourceDeclaration, targetDeclaration);
+			createMemberDeclarations(sourceRewrite, targetRewrite, targetDeclaration);
+			final TextEdit edit= targetRewrite.rewriteAST(document, subType.getJavaProject().getOptions(true));
+			try {
+				edit.apply(document, TextEdit.UPDATE_REGIONS);
+			} catch (MalformedTreeException exception) {
+				JavaPlugin.log(exception);
+			} catch (BadLocationException exception) {
+				JavaPlugin.log(exception);
+			}
+			buffer.setLength(0);
+			buffer.append(document.get());
+		} finally {
+			monitor.done();
 		}
-		buffer.setLength(0);
-		buffer.append(document.get());
 	}
 
 	/**
@@ -358,6 +362,8 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 *            the working copy of the new supertype
 	 * @param subType
 	 *            the subtype
+	 * @param superName
+	 *            the name of the supertype
 	 * @param sourceRewrite
 	 *            the source compilation unit rewrite
 	 * @param declaration
@@ -390,13 +396,13 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				final String[] names= new String[parameters.length];
 				for (int index= 0; index < parameters.length; index++)
 					names[index]= parameters[index].getElementName();
-				typeComment= CodeGeneration.getTypeComment(copy, subType.getTypeQualifiedName('.'), names, delimiter);
+				typeComment= CodeGeneration.getTypeComment(copy, superName, names, delimiter);
 				fileComment= CodeGeneration.getFileComment(copy, delimiter);
 			}
 			final StringBuffer buffer= new StringBuffer(64);
 			createTypeDeclaration(sourceRewrite, subType, superName, declaration, buffer, true, status, new SubProgressMonitor(monitor, 1));
 			final String imports= createTypeImports(copy, monitor);
-			source= createTypeTemplate(copy, subType, imports, fileComment, typeComment, buffer.toString());
+			source= createTypeTemplate(copy, imports, fileComment, typeComment, buffer.toString());
 			if (source == null) {
 				if (!subType.getPackageFragment().isDefaultPackage()) {
 					if (imports.length() > 0)
@@ -430,8 +436,6 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * 
 	 * @param unit
 	 *            the working copy for the new supertype
-	 * @param subType
-	 *            the subtype
 	 * @param imports
 	 *            the generated imports declaration
 	 * @param fileComment
@@ -444,13 +448,13 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * @throws CoreException
 	 *             if the template could not be evaluated
 	 */
-	protected final String createTypeTemplate(final ICompilationUnit unit, final IType subType, final String imports, String fileComment, final String comment, final String content) throws CoreException {
+	protected final String createTypeTemplate(final ICompilationUnit unit, final String imports, String fileComment, final String comment, final String content) throws CoreException {
 		Assert.isNotNull(unit);
 		Assert.isNotNull(imports);
 		Assert.isNotNull(content);
 		final IPackageFragment fragment= (IPackageFragment) unit.getParent();
 		final StringBuffer buffer= new StringBuffer();
-		final String delimiter= StubUtility.getLineDelimiterUsed(subType.getJavaProject());
+		final String delimiter= StubUtility.getLineDelimiterUsed(unit.getJavaProject());
 		if (!fragment.isDefaultPackage()) {
 			buffer.append("package " + fragment.getElementName() + ";"); //$NON-NLS-1$ //$NON-NLS-2$
 			buffer.append(delimiter);
