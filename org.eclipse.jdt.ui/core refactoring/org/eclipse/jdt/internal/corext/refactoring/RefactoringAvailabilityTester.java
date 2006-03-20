@@ -371,7 +371,7 @@ public final class RefactoringAvailabilityTester {
 	public static boolean isExtractSupertypeAvailable(final IMember[] members) throws JavaModelException {
 		if (members != null && members.length != 0) {
 			final IType type= getTopLevelType(members);
-			if (type != null && getPullUpMembers(type).length != 0)
+			if (type != null && getExtractSupertypeMembers(type).length != 0)
 				return true;
 			for (int index= 0; index < members.length; index++) {
 				if (!isExtractSupertypeAvailable(members[index]))
