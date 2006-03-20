@@ -54,7 +54,6 @@ public class ResetAllOperation extends ClasspathModifierOperation {
      * @param monitor a progress monitor, can be <code>null</code>
      */
     public void run(IProgressMonitor monitor) throws InvocationTargetException {
-        List result= null;
         fException= null;
         try {
             fInformationProvider.getJavaProject().setRawClasspath(fEntries, fOutputLocation, monitor);
@@ -63,10 +62,9 @@ public class ResetAllOperation extends ClasspathModifierOperation {
             fOutputLocation= null;
         } catch (CoreException e) {
             fException= e;
-            result= null;
         }
         
-        super.handleResult(result, monitor);
+        super.handleResult(null, monitor);
     }
 
     /**

@@ -21,6 +21,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 /**
  * Action which is used when operations on the classpath 
  * are executed.
@@ -54,14 +56,17 @@ public class ClasspathModifierAction extends Action {
     public void run() {
         try {
             fOperation.run(null);
+            setEnabled(fOperation.isValid());
         } catch (InvocationTargetException e) {
             // nothing to do
         } catch (InterruptedException e) {
             // nothing to do
-        }
+        } catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
         // Remark: there is nothing to do because the operation that is executed 
         // ensures that the object receiving the result should do the exception handling
-        // because it needs to implement interface IClasspathInformationProvider
+        // because it needs to implement interface IClasspathInformationProvider 
     }
     
     /**

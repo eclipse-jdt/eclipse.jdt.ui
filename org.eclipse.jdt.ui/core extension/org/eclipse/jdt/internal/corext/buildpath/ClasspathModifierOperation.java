@@ -21,6 +21,8 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
+
 
 /**
  * Abstract class which represents classpath modifier operation, this is, 
@@ -134,4 +136,13 @@ public abstract class ClasspathModifierOperation extends ClasspathModifier imple
     public int getTypeId() {
     	return fType;
     }
+
+	public boolean isValid() throws JavaModelException {
+        List selectedElements= getSelectedElements();
+        int[] types= new int[selectedElements.size()];
+        for(int i= 0; i < types.length; i++) {
+            types[i]= DialogPackageExplorerActionGroup.getType(selectedElements.get(i), fInformationProvider.getJavaProject());
+        }
+		return isValid(selectedElements, types);
+	}
 }
