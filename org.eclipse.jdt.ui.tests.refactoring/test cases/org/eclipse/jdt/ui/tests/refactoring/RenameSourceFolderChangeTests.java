@@ -13,10 +13,14 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -33,6 +37,10 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 	
 	public static Test suite() {
 		return new RefactoringTestSetup(new TestSuite(clazz));
+	}
+	
+	public static Test setUpTest(Test test) {
+		return new RefactoringTestSetup(test);
 	}
 	
 	public void test0() throws Exception {
@@ -90,6 +98,33 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 		}finally{		
 			JavaProjectHelper.removeSourceContainer(RefactoringTestSetup.getProject(), newName1);
 			JavaProjectHelper.removeSourceContainer(RefactoringTestSetup.getProject(), oldName2);
+		}	
+	}
+	
+	public void testBug129991() throws Exception {
+		IJavaProject project= JavaProjectHelper.createJavaProject("RenameSourceFolder", "bin");
+		
+		try {
+			IPath projectPath= project.getPath();
+			
+			IPath[] exclusion= new IPath[] { new Path("src/") };
+			JavaProjectHelper.addToClasspath(project, JavaCore.newSourceEntry(projectPath, exclusion));
+			IPackageFragmentRoot src= JavaProjectHelper.addSourceContainer(project, "src");
+			
+			RenameSourceFolderChange change= new RenameSourceFolderChange(src, "src2", null);
+			change.initializeValidationData(new NullProgressMonitor());
+			performChange(change);
+			
+			assertTrue("src should not exist", ! src.exists());
+			assertEquals("expected 2 pfr's", 2, project.getPackageFragmentRoots().length);
+			
+			IClasspathEntry[] rawClasspath= project.getRawClasspath();
+			assertEquals(projectPath, rawClasspath[0].getPath());
+			
+			assertEquals("src2/", rawClasspath[0].getExclusionPatterns()[0].toString());
+			assertEquals(projectPath.append("src2/"), rawClasspath[1].getPath());
+		} finally {
+			project.getProject().delete(true, null);
 		}	
 	}
 	
