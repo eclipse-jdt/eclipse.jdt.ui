@@ -229,7 +229,9 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	public boolean close() {
 		boolean result;
 		try {
-			OpenTypeHistory.getInstance().save();
+			if (getReturnCode() == OK) {
+				OpenTypeHistory.getInstance().save();
+			}
 		} finally {
 			result= super.close();
 		}
