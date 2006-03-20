@@ -33,6 +33,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
 import org.eclipse.ui.texteditor.spelling.SpellingContext;
 import org.eclipse.ui.texteditor.spelling.SpellingProblem;
+import org.eclipse.ui.texteditor.spelling.SpellingService;
 
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -142,6 +143,9 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 	public void reconcile(IRegion region) {
 		if (fRequestor != null) {
 			try {
+				if (!isSpellingEnabled())
+					return;
+				
 				SpellingContext context= new SpellingContext();
 				context.setContentType(getContentType());
 				EditorsUI.getSpellingService().check(fDocument, context, fCollector, fProgressMonitor);
@@ -149,6 +153,10 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 				// swallow exception
 			}
 		}
+	}
+	
+	private boolean isSpellingEnabled() {
+		return EditorsUI.getPreferenceStore().getBoolean(SpellingService.PREFERENCE_SPELLING_ENABLED);
 	}
 
 	/**
