@@ -614,7 +614,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	protected RefactoringStatus checkDeclaringSuperTypes(final IProgressMonitor monitor) throws JavaModelException {
 		final RefactoringStatus result= new RefactoringStatus();
-		if (getPossibleTargetTypes(result, monitor).length == 0 && !result.hasFatalError()) {
+		if (getCandidateTypes(result, monitor).length == 0 && !result.hasFatalError()) {
 			final String msg= Messages.format(RefactoringCoreMessages.PullUpRefactoring_not_this_type, new String[] { createTypeLabel(getDeclaringType())});
 			return RefactoringStatus.createFatalErrorStatus(msg);
 		}
@@ -1329,6 +1329,30 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
 
+	public IType[] getCandidateTypes(final RefactoringStatus status, final IProgressMonitor monitor) throws JavaModelException {
+		final IType declaring= getDeclaringType();
+		final IType[] superTypes= declaring.newSupertypeHierarchy(fOwner, monitor).getAllSupertypes(declaring);
+		final List list= new ArrayList(superTypes.length);
+		int binary= 0;
+		for (int index= 0; index < superTypes.length; index++) {
+			final IType type= superTypes[index];
+			if (type != null && type.exists() && !type.isReadOnly() && !type.isBinary() && !"java.lang.Object".equals(type.getFullyQualifiedName())) { //$NON-NLS-1$
+				list.add(type);
+			} else {
+				if (type != null && type.isBinary()) {
+					binary++;
+				}
+			}
+		}
+		if (superTypes.length == 1 && superTypes[0].getFullyQualifiedName().equals("java.lang.Object")) //$NON-NLS-1$
+			status.addFatalError(RefactoringCoreMessages.PullUPRefactoring_not_java_lang_object);
+		else if (superTypes.length == binary)
+			status.addFatalError(RefactoringCoreMessages.PullUPRefactoring_no_all_binary);
+
+		Collections.reverse(list);
+		return (IType[]) list.toArray(new IType[list.size()]);
+	}
+
 	private CompilationUnitRewrite getCompilationUnitRewrite(final Map rewrites, final ICompilationUnit unit) {
 		Assert.isNotNull(rewrites);
 		Assert.isNotNull(unit);
@@ -1483,30 +1507,6 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		matchingSet.removeAll(Arrays.asList(getMembersToDelete(new SubProgressMonitor(monitor, 1))));
 		monitor.done();
 		return matchingSet;
-	}
-
-	public IType[] getPossibleTargetTypes(final RefactoringStatus status, final IProgressMonitor monitor) throws JavaModelException {
-		final IType declaring= getDeclaringType();
-		final IType[] superTypes= declaring.newSupertypeHierarchy(fOwner, monitor).getAllSupertypes(declaring);
-		final List list= new ArrayList(superTypes.length);
-		int binary= 0;
-		for (int index= 0; index < superTypes.length; index++) {
-			final IType type= superTypes[index];
-			if (type != null && type.exists() && !type.isReadOnly() && !type.isBinary() && !"java.lang.Object".equals(type.getFullyQualifiedName())) { //$NON-NLS-1$
-				list.add(type);
-			} else {
-				if (type != null && type.isBinary()) {
-					binary++;
-				}
-			}
-		}
-		if (superTypes.length == 1 && superTypes[0].getFullyQualifiedName().equals("java.lang.Object")) //$NON-NLS-1$
-			status.addFatalError(RefactoringCoreMessages.PullUPRefactoring_not_java_lang_object);
-		else if (superTypes.length == binary)
-			status.addFatalError(RefactoringCoreMessages.PullUPRefactoring_no_all_binary);
-
-		Collections.reverse(list);
-		return (IType[]) list.toArray(new IType[list.size()]);
 	}
 
 	/**

@@ -252,7 +252,15 @@ public final class RefactoringMessages extends NLS {
 
 	public static String ExtractSuperTypeAction_unavailable;
 
+	public static String ExtractSupertypeMemberPage_create_stubs_label;
+
+	public static String ExtractSupertypeMemberPage_extract_supertype;
+
 	public static String ExtractSupertypeMemberPage_page_title;
+
+	public static String ExtractSupertypeMemberPage_use_instanceof_label;
+
+	public static String ExtractSupertypeMemberPage_use_supertype_label;
 
 	public static String ExtractSupertypeWizard_defaultPageTitle;
 

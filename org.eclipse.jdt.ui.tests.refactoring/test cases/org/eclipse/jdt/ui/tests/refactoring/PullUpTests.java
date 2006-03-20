@@ -105,7 +105,7 @@ public class PullUpTests extends RefactoringTest {
 	}
 
 	private IType[] getPossibleTargetClasses(PullUpRefactoring ref) throws JavaModelException{
-		return ref.getPullUpProcessor().getPossibleTargetTypes(new RefactoringStatus(), new NullProgressMonitor());
+		return ref.getPullUpProcessor().getCandidateTypes(new RefactoringStatus(), new NullProgressMonitor());
 	}
 	
 	private void setSuperclassAsTargetClass(PullUpRefactoring ref) throws JavaModelException {

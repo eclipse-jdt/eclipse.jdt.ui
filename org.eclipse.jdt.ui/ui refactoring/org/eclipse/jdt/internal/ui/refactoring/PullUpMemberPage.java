@@ -338,7 +338,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	private Combo fSuperTypesCombo;
 
-	private IType[] fSuperTypes;
+	protected IType[] fCandidateTypes;
 
 	private CheckboxTableViewer fTableViewer;
 
@@ -454,14 +454,14 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	public void createControl(final Composite parent) {
 		final Composite composite= new Composite(parent, SWT.NONE);
-		final GridLayout gl= new GridLayout();
-		gl.numColumns= 2;
-		composite.setLayout(gl);
+		final GridLayout layout= new GridLayout();
+		layout.numColumns= 2;
+		composite.setLayout(layout);
 
-		createSuperTypeCombo(composite);
+		createSuperTypeControl(composite);
 		createSpacer(composite);
 		createSuperTypeCheckbox(composite);
-		createInstanceOfCheckbox(composite, gl.marginWidth);
+		createInstanceOfCheckbox(composite, layout.marginWidth);
 		fReplaceButton.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(final SelectionEvent e) {
@@ -482,14 +482,13 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	private void createInstanceOfCheckbox(final Composite result, final int margin) {
 		final PullUpRefactoringProcessor processor= getPullUpRefactoring().getPullUpProcessor();
-		final String title= RefactoringMessages.PullUpInputPage1_label_use_in_instanceof;
 		fInstanceofButton= new Button(result, SWT.CHECK);
 		fInstanceofButton.setSelection(false);
 		final GridData gd= new GridData();
 		gd.horizontalIndent= (margin + fInstanceofButton.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
 		gd.horizontalSpan= 2;
 		fInstanceofButton.setLayoutData(gd);
-		fInstanceofButton.setText(title);
+		fInstanceofButton.setText(getInstanceofButtonLabel());
 		processor.setInstanceOf(fInstanceofButton.getSelection());
 		fInstanceofButton.addSelectionListener(new SelectionAdapter() {
 
@@ -497,6 +496,10 @@ public class PullUpMemberPage extends UserInputWizardPage {
 				processor.setInstanceOf(fInstanceofButton.getSelection());
 			}
 		});
+	}
+
+	protected String getInstanceofButtonLabel() {
+		return RefactoringMessages.PullUpInputPage1_label_use_in_instanceof;
 	}
 
 	private void createMemberTable(final Composite parent) {
@@ -604,7 +607,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	private void createStubCheckbox(final Composite parent) {
 		fCreateStubsButton= new Button(parent, SWT.CHECK);
-		fCreateStubsButton.setText(RefactoringMessages.PullUpInputPage1_Create_stubs);
+		fCreateStubsButton.setText(getCreateStubsButtonLabel());
 		final GridData data= new GridData();
 		data.horizontalSpan= 2;
 		fCreateStubsButton.setLayoutData(data);
@@ -612,9 +615,13 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		fCreateStubsButton.setSelection(getPullUpRefactoring().getPullUpProcessor().getCreateMethodStubs());
 	}
 
+	protected String getCreateStubsButtonLabel() {
+		return RefactoringMessages.PullUpInputPage1_Create_stubs;
+	}
+
 	private void createSuperTypeCheckbox(final Composite parent) {
 		fReplaceButton= new Button(parent, SWT.CHECK);
-		fReplaceButton.setText(RefactoringMessages.PullUpInputPage1_label_use_destination);
+		fReplaceButton.setText(getReplaceButtonLabel());
 		final GridData data= new GridData();
 		data.horizontalSpan= 2;
 		fReplaceButton.setLayoutData(data);
@@ -622,23 +629,27 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		fReplaceButton.setSelection(getPullUpRefactoring().getPullUpProcessor().isReplace());
 	}
 
-	private void createSuperTypeCombo(final Composite parent) {
+	protected String getReplaceButtonLabel() {
+		return RefactoringMessages.PullUpInputPage1_label_use_destination;
+	}
+
+	protected void createSuperTypeControl(final Composite parent) {
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, new IRunnableWithProgress() {
 
 				public void run(final IProgressMonitor monitor) throws InvocationTargetException {
 					try {
 						createSuperTypeCombo(monitor, parent);
-					} catch (JavaModelException e) {
-						throw new InvocationTargetException(e);
+					} catch (JavaModelException exception) {
+						throw new InvocationTargetException(exception);
 					} finally {
 						monitor.done();
 					}
 				}
 			});
-		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), RefactoringMessages.PullUpInputPage_pull_Up, RefactoringMessages.PullUpInputPage_exception);
-		} catch (InterruptedException e) {
+		} catch (InvocationTargetException exception) {
+			ExceptionHandler.handle(exception, getShell(), RefactoringMessages.PullUpInputPage_pull_Up, RefactoringMessages.PullUpInputPage_exception);
+		} catch (InterruptedException exception) {
 			Assert.isTrue(false);
 		}
 	}
@@ -649,13 +660,13 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		label.setLayoutData(new GridData());
 
 		fSuperTypesCombo= new Combo(parent, SWT.READ_ONLY);
-		fSuperTypes= getPullUpRefactoring().getPullUpProcessor().getPossibleTargetTypes(new RefactoringStatus(), pm);
-		Assert.isTrue(fSuperTypes.length > 0);
-		for (int i= 0; i < fSuperTypes.length; i++) {
-			final String comboLabel= JavaModelUtil.getFullyQualifiedName(fSuperTypes[i]);
+		fCandidateTypes= getPullUpRefactoring().getPullUpProcessor().getCandidateTypes(new RefactoringStatus(), pm);
+		Assert.isTrue(fCandidateTypes.length > 0);
+		for (int i= 0; i < fCandidateTypes.length; i++) {
+			final String comboLabel= JavaModelUtil.getFullyQualifiedName(fCandidateTypes[i]);
 			fSuperTypesCombo.add(comboLabel);
 		}
-		fSuperTypesCombo.select(fSuperTypes.length - 1);
+		fSuperTypesCombo.select(fCandidateTypes.length - 1);
 		fSuperTypesCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
 
@@ -781,7 +792,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	}
 
 	private IType getDestinationType() {
-		return fSuperTypes[fSuperTypesCombo.getSelectionIndex()];
+		return fCandidateTypes[fSuperTypesCombo.getSelectionIndex()];
 	}
 
 	private MemberActionInfo[] getSelectedMembers() {

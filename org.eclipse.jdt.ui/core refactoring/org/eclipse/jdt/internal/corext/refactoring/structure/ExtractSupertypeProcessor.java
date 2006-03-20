@@ -415,14 +415,9 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	}
 
 	/**
-	 * Returns the possible candidates where a supertype can be extracted.
-	 * <p>
-	 * This includes the declaring type.
-	 * </p>
-	 * 
-	 * @return the array of candidates, or the empty array
+	 * {@inheritDoc}
 	 */
-	public IType[] getPossibleCandidates(final IProgressMonitor monitor) {
+	public IType[] getCandidateTypes(final RefactoringStatus status, final IProgressMonitor monitor) {
 		Assert.isNotNull(monitor);
 		if (fPossibleCandidates == null || fPossibleCandidates.length == 0) {
 			final IType declaring= getDeclaringType();
@@ -453,7 +448,8 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	}
 
 	/**
-	 * Returns the types to extract.
+	 * Returns the types to extract. The declaring type may or may not be
+	 * contained in the result.
 	 * 
 	 * @return the types to extract
 	 */
