@@ -81,10 +81,24 @@ public class QualifiedNameFinder {
 		}
 		
 		public boolean acceptPatternMatch(TextSearchMatchAccess matchAccess) throws CoreException {
-			IFile file= matchAccess.getFile();
 			int start= matchAccess.getMatchOffset();
 			int length= matchAccess.getMatchLength();
 			
+			// skip embedded FQNs (bug 130764):
+			if (start > 0) {
+				char before= matchAccess.getFileContentChar(start - 1);
+				if (before == '.' || Character.isJavaIdentifierPart(before))
+					return true;
+			}
+			int fileContentLength= matchAccess.getFileContentLength();
+			int end= start + length;
+			if (end < fileContentLength) {
+				char after= matchAccess.getFileContentChar(end);
+				if (Character.isJavaIdentifierPart(after))
+					return true;
+			}
+			
+			IFile file= matchAccess.getFile();
 			TextChange change= fResult.getChange(file);
 			TextChangeCompatibility.addTextEdit(
 				change, 

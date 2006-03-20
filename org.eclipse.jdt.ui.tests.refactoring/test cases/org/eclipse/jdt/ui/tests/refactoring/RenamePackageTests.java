@@ -11,8 +11,10 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -29,6 +31,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourceAttributes;
@@ -72,6 +75,7 @@ public class RenamePackageTests extends RefactoringTest {
 	
 	private boolean fUpdateReferences;
 	private boolean fUpdateTextualMatches;
+	private String fQualifiedNamesFilePatterns;
 	private boolean fRenameSubpackages;
 	
 	public RenamePackageTests(String name) {
@@ -90,6 +94,7 @@ public class RenamePackageTests extends RefactoringTest {
 		super.setUp();
 		fUpdateReferences= true;
 		fUpdateTextualMatches= false;
+		fQualifiedNamesFilePatterns= null;
 		fRenameSubpackages= false;
 		// fIsPreDeltaTest= true;
 	}
@@ -216,8 +221,10 @@ public class RenamePackageTests extends RefactoringTest {
 				moveHandles= ParticipantTesting.createHandles(movedObjects.toArray());
 			}
 			RenameRefactoring ref= createRefactoring(thisPackage, newPackageName);
-			((RenamePackageProcessor)ref.getProcessor()).setUpdateReferences(fUpdateReferences);
-			((RenamePackageProcessor) ref.getProcessor()).setUpdateTextualMatches(fUpdateTextualMatches);
+			RenamePackageProcessor processor= (RenamePackageProcessor) ref.getProcessor();
+			processor.setUpdateReferences(fUpdateReferences);
+			processor.setUpdateTextualMatches(fUpdateTextualMatches);
+			setFilePatterns(processor);
 			RefactoringStatus result= performRefactoring(ref);
 			assertEquals("preconditions were supposed to pass", null, result);
 			
@@ -308,6 +315,7 @@ public class RenamePackageTests extends RefactoringTest {
 			RenamePackageProcessor processor= (RenamePackageProcessor) ref.getProcessor();
 			processor.setUpdateReferences(fUpdateReferences);
 			processor.setUpdateTextualMatches(fUpdateTextualMatches);
+			setFilePatterns(processor);
 			processor.setRenameSubpackages(fRenameSubpackages);
 			RefactoringStatus result= performRefactoring(ref);
 			assertEquals("preconditions were supposed to pass", null, result);
@@ -368,8 +376,10 @@ public class RenamePackageTests extends RefactoringTest {
 		}
 		
 		RenameRefactoring ref= createRefactoring(thisPackage, newPackageName);
-		((RenamePackageProcessor) ref.getProcessor()).setUpdateReferences(fUpdateReferences);
-		((RenamePackageProcessor) ref.getProcessor()).setUpdateTextualMatches(fUpdateTextualMatches);
+		RenamePackageProcessor processor= (RenamePackageProcessor) ref.getProcessor();
+		processor.setUpdateReferences(fUpdateReferences);
+		processor.setUpdateTextualMatches(fUpdateTextualMatches);
+		setFilePatterns(processor);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("preconditions were supposed to pass", null, result);
 		
@@ -446,6 +456,12 @@ public class RenamePackageTests extends RefactoringTest {
 		}
 		for (int r= 0; r < roots.length; r++)
 			JavaProjectHelper.removeSourceContainer(getRoot().getJavaProject(), rootNames[r]);
+	}
+	
+	private void setFilePatterns(RenamePackageProcessor processor) {
+		processor.setUpdateQualifiedNames(fQualifiedNamesFilePatterns != null);
+		if (fQualifiedNamesFilePatterns != null)
+			processor.setFilePatterns(fQualifiedNamesFilePatterns);
 	}
 
 	// ---------- tests -------------	
@@ -561,6 +577,7 @@ public class RenamePackageTests extends RefactoringTest {
 		RenamePackageProcessor processor= (RenamePackageProcessor) ref.getProcessor();
 		processor.setUpdateReferences(fUpdateReferences);
 		processor.setUpdateTextualMatches(fUpdateTextualMatches);
+		setFilePatterns(processor);
 		processor.setRenameSubpackages(fRenameSubpackages);
 
 		performDummySearch();
@@ -684,7 +701,27 @@ public class RenamePackageTests extends RefactoringTest {
 	
 	public void test4() throws Exception{
 		fIsPreDeltaTest= true;
+		
+		fQualifiedNamesFilePatterns= "*.txt";
+		String textFileName= "Textfile.txt";
+		
+		String textfileContent= getFileContents(getTestPath() + getName() + TEST_INPUT_INFIX + textFileName);
+		IFile textfile= getRoot().getJavaProject().getProject().getFile(textFileName);
+		textfile.create(new ByteArrayInputStream(textfileContent.getBytes()), true, null);
+		
 		helper2(new String[]{"r.p1", "r"}, new String[][]{{"A"}, {"A"}}, "q");
+		
+		InputStreamReader reader= new InputStreamReader(textfile.getContents(true));
+		StringBuffer newContent= new StringBuffer();
+		try {
+			int ch;
+			while((ch= reader.read()) != -1)
+				newContent.append((char)ch);
+		} finally {
+			reader.close();
+		}
+		String definedContent= getFileContents(getTestPath() + getName() + TEST_OUTPUT_INFIX + textFileName);
+		assertEqualLines("invalid updating", definedContent, newContent.toString());
 	}
 	
 	public void test5() throws Exception{

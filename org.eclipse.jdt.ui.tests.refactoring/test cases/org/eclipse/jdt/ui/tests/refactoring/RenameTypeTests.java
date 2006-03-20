@@ -1160,39 +1160,43 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void testQualifiedName1() throws Exception {
-		getRoot().createPackageFragment("p", true, null);
+		helperQualifiedName("A", "B", "build.xml", "*.xml");
+	}
+
+	public void testQualifiedName2() throws Exception {
+		helperQualifiedName("Transient", "TransientEquipment", "mapping.hbm.xml", "*.xml");
+	}
+	
+	private void helperQualifiedName(String oldName, String newName, String textFileName, String filePatterns) throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), oldName);
+		IType classA= getType(cu, oldName);
 		
-		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
-		IType classA= getType(cu, "A");
-		
-		String content= getFileContents(getTestPath() + "testQualifiedName1/in/build.xml");
+		String content= getFileContents(getTestPath() + getName() + TEST_INPUT_INFIX + textFileName);
 		IProject project= classA.getJavaProject().getProject();
-		IFile file= project.getFile("build.xml");
+		IFile file= project.getFile(textFileName);
 		file.create(new ByteArrayInputStream(content.getBytes()), true, null);
 				
-		RenameRefactoring ref= createRefactoring(classA, "B");
+		RenameRefactoring ref= createRefactoring(classA, newName);
 		
 		IQualifiedNameUpdating qr= (IQualifiedNameUpdating)ref.getAdapter(IQualifiedNameUpdating.class);
 		qr.setUpdateQualifiedNames(true);
-		qr.setFilePatterns("*.xml");
+		qr.setFilePatterns(filePatterns);
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		
-		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
-		assertEqualLines("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
+		ICompilationUnit newcu= getPackageP().getCompilationUnit(newName + ".java");
+		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName(newName)), newcu.getSource());
 		InputStreamReader reader= new InputStreamReader(file.getContents(true));
 		StringBuffer newContent= new StringBuffer();
-		int ch;
 		try {
+			int ch;
 			while((ch= reader.read()) != -1)
 				newContent.append((char)ch);
 		} finally {
-			if (reader != null)
-				reader.close();
+			reader.close();
 		}
-		String definedContent= getFileContents(getTestPath() + "testQualifiedName1/out/build.xml");
-		assertEqualLines("invalid updating build.xml", newContent.toString(), definedContent);
-		
+		String definedContent= getFileContents(getTestPath() + getName() + TEST_OUTPUT_INFIX + textFileName);
+		assertEqualLines("invalid updating", definedContent, newContent.toString());
 	}
 	
 	public void testGenerics1() throws Exception {
@@ -1295,13 +1299,12 @@ public class RenameTypeTests extends RefactoringTest {
 		
 		InputStreamReader reader= new InputStreamReader(file.getContents(true));
 		StringBuffer newContent= new StringBuffer();
-		int ch;
 		try {
+			int ch;
 			while((ch= reader.read()) != -1)
 				newContent.append((char)ch);
 		} finally {
-			if (reader != null)
-				reader.close();
+			reader.close();
 		}
 		String definedContent= getFileContents(getTestPath() + "testSimilarElements05/out/test.html");
 		assertEqualLines("invalid updating test.html", newContent.toString(), definedContent);
