@@ -75,10 +75,8 @@ public class ViewActionGroup extends ActionGroup {
 	 */
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
-		if(fMenuManager == null) {
-			fMenuManager= actionBars.getMenuManager();
-			fillViewMenu(fMenuManager);
-		}
+		fMenuManager= actionBars.getMenuManager();
+		fillViewMenu(fMenuManager);
 
 		if (fActiveActionGroup == null)
 			fActiveActionGroup= fFilterActionGroup;
@@ -86,7 +84,6 @@ public class ViewActionGroup extends ActionGroup {
 	}
 	
 	private void fillViewMenu(IMenuManager menu) { 
-		
 		IMenuManager showMenu= new MenuManager(WorkingSetMessages.ViewActionGroup_show_label); 
 		fillShowMenu(showMenu);
 		menu.add(showMenu);
