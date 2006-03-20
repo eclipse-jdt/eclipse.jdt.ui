@@ -275,7 +275,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		
 		private void addDeclareAsPublicCheckbox(Composite result) {
 			final ExtractInterfaceProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
-			String[] keys= {"&public"}; //$NON-NLS-1$
+			String[] keys= {RefactoringMessages.ExtractInterfaceWizard_public_label};
 			String title= Messages.format(RefactoringMessages.ExtractInterfaceWizard_12, keys); 
 			boolean defaultValue= processor.getPublic();
 			fDeclarePublicCheckbox= createCheckbox(result,  title, defaultValue);
@@ -289,7 +289,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 
 		private void addDeclareAsAbstractCheckbox(Composite result) {
 			final ExtractInterfaceProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
-			String[] keys= {"&abstract"}; //$NON-NLS-1$
+			String[] keys= {RefactoringMessages.ExtractInterfaceWizard_abstract_label};
 			String title= Messages.format(RefactoringMessages.ExtractInterfaceWizard_12, keys); 
 			boolean defaultValue= processor.getAbstract();
 			fDeclareAbstractCheckbox= createCheckbox(result,  title, defaultValue);

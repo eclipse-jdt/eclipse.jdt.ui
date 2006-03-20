@@ -200,9 +200,13 @@ public final class RefactoringMessages extends NLS {
 
 	public static String ExtractInterfaceWizard_12;
 
+	public static String ExtractInterfaceWizard_abstract_label;
+
 	public static String ExtractInterfaceWizard_Extract_Interface;
 
 	public static String ExtractInterfaceWizard_generate_comments;
+
+	public static String ExtractInterfaceWizard_public_label;
 
 	public static String ExtractInterfaceWizard_use_supertype;
 
@@ -255,6 +259,8 @@ public final class RefactoringMessages extends NLS {
 	public static String ExtractSupertypeMemberPage_create_stubs_label;
 
 	public static String ExtractSupertypeMemberPage_extract_supertype;
+
+	public static String ExtractSupertypeMemberPage_name_label;
 
 	public static String ExtractSupertypeMemberPage_page_title;
 
