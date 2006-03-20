@@ -44,6 +44,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -63,7 +64,12 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 
 
 	/** JavaElementLabels flags used for the title */
-	private static final long TITLE_LABEL_FLAGS= JavaElementLabels.DEFAULT_QUALIFIED;
+	private final long TITLE_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
+		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS
+		| JavaElementLabels.F_PRE_TYPE_SIGNATURE | JavaElementLabels.M_PRE_TYPE_PARAMETERS | JavaElementLabels.T_TYPE_PARAMETERS
+		| JavaElementLabels.USE_RESOLVED;
+	private final long LOCAL_VARIABLE_TITLE_FLAGS= TITLE_FLAGS & ~JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.F_POST_QUALIFIED;
+	
 	/** JavaElementLabels flags used for the tool tip text */
 	private static final long TOOLTIP_LABEL_FLAGS= JavaElementLabels.DEFAULT_QUALIFIED | JavaElementLabels.ROOT_POST_QUALIFIED | JavaElementLabels.APPEND_ROOT_PATH |
 			JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.M_EXCEPTIONS |
@@ -491,7 +497,14 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 
 		fGotoInputAction.setEnabled(true);
 
-		setContentDescription(JavaElementLabels.getElementLabel(fCurrentViewInput, TITLE_LABEL_FLAGS));
-		setTitleToolTip(JavaElementLabels.getElementLabel(fCurrentViewInput, TOOLTIP_LABEL_FLAGS));
+		long flags;
+		
+		if (getInput() instanceof ILocalVariable)
+			flags= LOCAL_VARIABLE_TITLE_FLAGS;
+		else
+			flags= TITLE_FLAGS;
+		
+		setContentDescription(JavaElementLabels.getElementLabel(getInput(), flags));
+		setTitleToolTip(JavaElementLabels.getElementLabel(getInput(), TOOLTIP_LABEL_FLAGS));
 	}
 }
