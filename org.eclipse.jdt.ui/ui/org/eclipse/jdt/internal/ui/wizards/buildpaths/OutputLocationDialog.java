@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
@@ -165,9 +166,10 @@ public class OutputLocationDialog extends StatusDialog {
 	
 	protected void doStatusLineUpdate() {
 		checkIfPathValid();
+		warnIfPathDangerous();
 		updateStatus(fContainerFieldStatus);
-	}		
-	
+	}
+
 	protected void checkIfPathValid() {
 		fOutputLocation= null;
 		fContainerFieldStatus.setOK();
@@ -204,9 +206,33 @@ public class OutputLocationDialog extends StatusDialog {
             if (!checkIfFolderValid(path)) {
                 fContainerFieldStatus.setError(Messages.format(NewWizardMessages.OutputLocationDialog_error_invalidFolder, path)); 
                return;
-            }            
+            }
 		}
 		fOutputLocation= path;
+	}
+	
+	private void warnIfPathDangerous() {
+		if (!fContainerFieldStatus.isOK())
+			return;
+		
+		if (fUseDefault.isSelected())
+			return;
+		
+		String pathStr= fContainerDialogField.getText();
+		if (pathStr.length() == 0)
+			return;
+		
+		Path outputPath= (new Path(pathStr));
+		pathStr= outputPath.lastSegment();
+		if (pathStr.equals(".settings") && outputPath.segmentCount() == 1) { //$NON-NLS-1$
+			fContainerFieldStatus.setWarning(NewWizardMessages.OutputLocation_SettingsAsLocation);
+			return;
+		}
+		
+		if (pathStr.charAt(0) == '.' && pathStr.length() > 1) {
+			fContainerFieldStatus.setWarning(Messages.format(NewWizardMessages.OutputLocation_DotAsLocation, pathStr));
+			return;
+		}
 	}
     
     /**

@@ -601,8 +601,21 @@ public class BuildPathsBlock {
 				fOutputFolderStatus.setError(NewWizardMessages.BuildPathsBlock_error_InvalidBuildPath); 
 				return;
 			}
-		}	
+		}
+		
 		fOutputFolderStatus.setOK();
+		
+		String pathStr= fBuildPathDialogField.getText();
+		Path outputPath= (new Path(pathStr));
+		pathStr= outputPath.lastSegment();
+		if (pathStr.equals(".settings") && outputPath.segmentCount() == 2) { //$NON-NLS-1$
+			fOutputFolderStatus.setWarning(NewWizardMessages.OutputLocation_SettingsAsLocation);
+		}
+		
+		if (pathStr.charAt(0) == '.' && pathStr.length() > 1) {
+			fOutputFolderStatus.setWarning(Messages.format(NewWizardMessages.OutputLocation_DotAsLocation, pathStr));
+		}
+		
 		updateBuildPathStatus();
 	}
 		
