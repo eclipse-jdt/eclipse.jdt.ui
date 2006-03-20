@@ -23,15 +23,19 @@ public class AddSourceFolderWizard extends BuildPathWizard {
 	private SetFilterWizardPage fFilterPage;
 	private final boolean fLinkedMode;
 	private boolean fAllowConflict;
-
-	public AddSourceFolderWizard(CPListElement[] existingEntries, CPListElement newEntry, IPath outputLocation, boolean linkedMode) {
-		this(existingEntries, newEntry, outputLocation, linkedMode, false);
-	}
+	private final boolean fAllowRemoveProjectFolder;
+	private final boolean fAllowAddExclusionPatterns;
+	private final boolean fCanCommitConflict;
 	
-	public AddSourceFolderWizard(CPListElement[] existingEntries, CPListElement newEntry, IPath outputLocation, boolean linkedMode, boolean allowConflict) {
+	public AddSourceFolderWizard(CPListElement[] existingEntries, CPListElement newEntry, IPath outputLocation, 
+			boolean linkedMode, boolean canCommitConflict, 
+			boolean allowConflict, boolean allowRemoveProjectFolder, boolean allowAddExclusionPatterns) {
 		super(existingEntries, newEntry, outputLocation, getTitel(newEntry, linkedMode), JavaPluginImages.DESC_WIZBAN_NEWSRCFOLDR);
 		fLinkedMode= linkedMode;
+		fCanCommitConflict= canCommitConflict;
 		fAllowConflict= allowConflict;
+		fAllowRemoveProjectFolder= allowRemoveProjectFolder;
+		fAllowAddExclusionPatterns= allowAddExclusionPatterns;
 	}
 
 	private static String getTitel(CPListElement newEntry, boolean linkedMode) {
@@ -52,7 +56,9 @@ public class AddSourceFolderWizard extends BuildPathWizard {
 	public void addPages() {
 		super.addPages();
 	
-		fAddFolderPage= new AddSourceFolderWizardPage(getEntryToEdit(), getExistingEntries(), getOutputLocation(), fLinkedMode, fAllowConflict);
+		fAddFolderPage= new AddSourceFolderWizardPage(getEntryToEdit(), getExistingEntries(), getOutputLocation(), 
+				fLinkedMode, fCanCommitConflict,
+				fAllowConflict, fAllowRemoveProjectFolder, fAllowAddExclusionPatterns);
 		addPage(fAddFolderPage);
 		
 		fFilterPage= new SetFilterWizardPage(getEntryToEdit(), getExistingEntries(), getOutputLocation());
@@ -97,5 +103,9 @@ public class AddSourceFolderWizard extends BuildPathWizard {
 			selectAndReveal(fAddFolderPage.getCorrespondingResource());
 		}
 		return res;
+	}
+	
+	public void cancel() {
+		fAddFolderPage.restore();
 	}
 }

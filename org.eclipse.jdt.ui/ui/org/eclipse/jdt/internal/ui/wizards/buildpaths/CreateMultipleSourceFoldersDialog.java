@@ -143,15 +143,20 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 			protected Object createFolder(final IContainer container) {
 				final Object[] result= new Object[1];
 				final CPListElement newElement= new CPListElement(fJavaProject, IClasspathEntry.CPE_SOURCE);
+				final AddSourceFolderWizard wizard= newSourceFolderWizard(newElement, fExistingElements, fOutputLocation);
 				AbstractOpenWizardAction action= new AbstractOpenWizardAction() {
 					protected INewWizard createWizard() throws CoreException {
-						return newSourceFolderWizard(newElement, fExistingElements, fOutputLocation);
+						return wizard;
 					}
 				};
 				action.addPropertyChangeListener(new IPropertyChangeListener() {
 					public void propertyChange(PropertyChangeEvent event) {
-						if (event.getProperty().equals(IAction.RESULT) && event.getNewValue().equals(Boolean.TRUE)) {
-							result[0]= addFakeFolder(container, newElement);
+						if (event.getProperty().equals(IAction.RESULT)) {
+							if (event.getNewValue().equals(Boolean.TRUE)) {
+								result[0]= addFakeFolder(container, newElement);
+							} else {
+								wizard.cancel();
+							}
 						}
 					}
 				});
@@ -247,7 +252,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 	}
 	
 	private AddSourceFolderWizard newSourceFolderWizard(CPListElement element, CPListElement[] existing, String outputLocation) {
-		AddSourceFolderWizard wizard= new AddSourceFolderWizard(existing, element, new Path(outputLocation).makeAbsolute(), false, true);
+		AddSourceFolderWizard wizard= new AddSourceFolderWizard(existing, element, new Path(outputLocation).makeAbsolute(), false, true, false, false, false);
 		wizard.setDoFlushChange(false);
 		return wizard;
 	}

@@ -79,8 +79,12 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		 * {@inheritDoc}
 		 */
 		public void propertyChange(PropertyChangeEvent event) {
-			if (event.getProperty().equals(IAction.RESULT) && event.getNewValue().equals(Boolean.TRUE)) {
-				finishWizard();
+			if (event.getProperty().equals(IAction.RESULT)) {
+				if (event.getNewValue().equals(Boolean.TRUE)) {
+					finishWizard();
+				} else {
+					fWizard.cancel();
+				}
 			}
 		}
 		
@@ -95,16 +99,16 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 	}
 	
-	private static AddSourceFolderWizard newSourceFolderWizard(CPListElement element, List/*<CPListElement>*/ existingElements, String outputLocation) {
+	private static AddSourceFolderWizard newSourceFolderWizard(CPListElement element, List/*<CPListElement>*/ existingElements, String outputLocation, boolean newFolder) {
 		CPListElement[] existing= (CPListElement[])existingElements.toArray(new CPListElement[existingElements.size()]);
-		AddSourceFolderWizard wizard= new AddSourceFolderWizard(existing, element, new Path(outputLocation).makeAbsolute(), false);
+		AddSourceFolderWizard wizard= new AddSourceFolderWizard(existing, element, new Path(outputLocation).makeAbsolute(), false, newFolder, newFolder, newFolder?CPListElement.isProjectSourceFolder(existing, element.getJavaProject()):false, newFolder);
 		wizard.setDoFlushChange(false);
 		return wizard;
 	}
 	
-	private static AddSourceFolderWizard newLinkedSourceFolderWizard(CPListElement element, List/*<CPListElement>*/ existingElements, String outputLocation) {
+	private static AddSourceFolderWizard newLinkedSourceFolderWizard(CPListElement element, List/*<CPListElement>*/ existingElements, String outputLocation, boolean newFolder) {
 		CPListElement[] existing= (CPListElement[])existingElements.toArray(new CPListElement[existingElements.size()]);
-		AddSourceFolderWizard wizard= new AddSourceFolderWizard(existing, element, new Path(outputLocation).makeAbsolute(), true);
+		AddSourceFolderWizard wizard= new AddSourceFolderWizard(existing, element, new Path(outputLocation).makeAbsolute(), true, newFolder, newFolder, newFolder?CPListElement.isProjectSourceFolder(existing, element.getJavaProject()):false, newFolder);
 		wizard.setDoFlushChange(false);
 		return wizard;
 	}
@@ -311,13 +315,13 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 					}
 				} else {
 					CPListElement newElement= new CPListElement(fCurrJProject, IClasspathEntry.CPE_SOURCE);
-					AddSourceFolderWizard wizard= newSourceFolderWizard(newElement, fFoldersList.getElements(), fOutputLocationField.getText());
+					AddSourceFolderWizard wizard= newSourceFolderWizard(newElement, fFoldersList.getElements(), fOutputLocationField.getText(), true);
 					OpenBuildPathWizardAction action= new OpenBuildPathWizardAction(wizard);
 					action.run();
 				}
 			} else if (index == IDX_ADD_LINK) {
 				CPListElement newElement= new CPListElement(fCurrJProject, IClasspathEntry.CPE_SOURCE);
-				AddSourceFolderWizard wizard= newLinkedSourceFolderWizard(newElement, fFoldersList.getElements(), fOutputLocationField.getText());
+				AddSourceFolderWizard wizard= newLinkedSourceFolderWizard(newElement, fFoldersList.getElements(), fOutputLocationField.getText(), true);
 				OpenBuildPathWizardAction action= new OpenBuildPathWizardAction(wizard);
 				action.run();
 			} else if (index == IDX_EDIT) {
@@ -370,11 +374,11 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 	private void editElementEntry(CPListElement elem) {
 		if (elem.getLinkTarget() != null) {
-			AddSourceFolderWizard wizard= newLinkedSourceFolderWizard(elem, fFoldersList.getElements(), fOutputLocationField.getText());
+			AddSourceFolderWizard wizard= newLinkedSourceFolderWizard(elem, fFoldersList.getElements(), fOutputLocationField.getText(), false);
 			OpenBuildPathWizardAction action= new OpenBuildPathWizardAction(wizard);
 			action.run();
 		} else {
-			AddSourceFolderWizard wizard= newSourceFolderWizard(elem, fFoldersList.getElements(), fOutputLocationField.getText());
+			AddSourceFolderWizard wizard= newSourceFolderWizard(elem, fFoldersList.getElements(), fOutputLocationField.getText(), false);
 			OpenBuildPathWizardAction action= new OpenBuildPathWizardAction(wizard);
 			action.run();
 		}

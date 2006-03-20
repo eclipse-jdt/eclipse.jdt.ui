@@ -153,80 +153,66 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		//Needs to be public for the operation, will be protected later.
 		public abstract boolean selectionChanged(IStructuredSelection selection);
     }
+    
+    private abstract static class CreateSourceFolderAction extends OpenBuildPathWizardAction {
+
+		private AddSourceFolderWizard fAddSourceFolderWizard;
+		private IJavaProject fSelectedProject;
+		private final boolean fIsLinked;
 		
-    public static class AddSourceFolderAction extends OpenBuildPathWizardAction {
+		public CreateSourceFolderAction(boolean isLinked) {
+			fIsLinked= isLinked;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		protected INewWizard createWizard() throws CoreException {
+			CPListElement newEntrie= new CPListElement(fSelectedProject, IClasspathEntry.CPE_SOURCE);
+			CPListElement[] existing= CPListElement.createFromExisting(fSelectedProject);
+			boolean isProjectSrcFolder= CPListElement.isProjectSourceFolder(existing, fSelectedProject);
+			fAddSourceFolderWizard= new AddSourceFolderWizard(existing, newEntrie, getOutputLocation(fSelectedProject), fIsLinked, false, false, isProjectSrcFolder, isProjectSrcFolder);
+			return fAddSourceFolderWizard;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean selectionChanged(IStructuredSelection selection) {
+			if (selection.size() == 1 && selection.getFirstElement() instanceof IJavaProject) {
+				fSelectedProject= (IJavaProject)selection.getFirstElement();
+				return true;
+			}
+			return false;
+		}
+
+		public List getCPListElements() {
+			return fAddSourceFolderWizard.getExistingEntries();
+		}
     	
-    	private AddSourceFolderWizard fAddSourceFolderWizard;
-    	private IJavaProject fSelectedProject;
+    }
+		
+    public static class AddSourceFolderAction extends CreateSourceFolderAction {
 
 		public AddSourceFolderAction() {
+			super(false);
 			setText(ActionMessages.OpenNewSourceFolderWizardAction_text2); 
     		setDescription(ActionMessages.OpenNewSourceFolderWizardAction_description); 
     		setToolTipText(ActionMessages.OpenNewSourceFolderWizardAction_tooltip); 
     		setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPACKROOT);
     		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_SOURCEFOLDER_WIZARD_ACTION);
     	}
-		
-		/**
-		 * {@inheritDoc}
-		 */
-		protected INewWizard createWizard() throws CoreException {
-			CPListElement newEntrie= new CPListElement(fSelectedProject, IClasspathEntry.CPE_SOURCE);
-			fAddSourceFolderWizard= new AddSourceFolderWizard(CPListElement.createFromExisting(fSelectedProject), newEntrie, getOutputLocation(fSelectedProject), false);
-			return fAddSourceFolderWizard;
-		}
-		
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean selectionChanged(IStructuredSelection selection) {
-			if (selection.size() == 1 && selection.getFirstElement() instanceof IJavaProject) {
-				fSelectedProject= (IJavaProject)selection.getFirstElement();
-				return true;
-			}
-			return false;
-		}
-		
-		public List getCPListElements() {
-			return fAddSourceFolderWizard.getExistingEntries();
-		}
     }
     
-    public static class AddLinkedSourceFolderAction extends OpenBuildPathWizardAction {
+    public static class AddLinkedSourceFolderAction extends CreateSourceFolderAction {
     	
-    	private AddSourceFolderWizard fAddSourceFolderWizard;
-    	private IJavaProject fSelectedProject;
-
-		public AddLinkedSourceFolderAction() {
+    	public AddLinkedSourceFolderAction() {
+    		super(true);
 			setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_label); 
     		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_tooltip);
     		setImageDescriptor(JavaPluginImages.DESC_ELCL_ADD_LINKED_SOURCE_TO_BUILDPATH);
     		setDescription(NewWizardMessages.PackageExplorerActionGroup_FormText_createLinkedFolder);
     	}
-		
-		/**
-		 * {@inheritDoc}
-		 */
-		protected INewWizard createWizard() throws CoreException {
-			CPListElement newEntrie= new CPListElement(fSelectedProject, IClasspathEntry.CPE_SOURCE);
-			fAddSourceFolderWizard= new AddSourceFolderWizard(CPListElement.createFromExisting(fSelectedProject), newEntrie, getOutputLocation(fSelectedProject), true);
-			return fAddSourceFolderWizard;
-		}
-		
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean selectionChanged(IStructuredSelection selection) {
-			if (selection.size() == 1 && selection.getFirstElement() instanceof IJavaProject) {
-				fSelectedProject= (IJavaProject)selection.getFirstElement();
-				return true;
-			}
-			return false;
-		}
-		
-		public List getCPListElements() {
-			return fAddSourceFolderWizard.getExistingEntries();
-		}
     }
     
     public static class EditFilterAction extends OpenBuildPathWizardAction {

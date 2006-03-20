@@ -188,13 +188,12 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	private static final String PAGE_NAME= "NewSourceFolderWizardPage"; //$NON-NLS-1$
 
 	private final StringButtonDialogField fRootDialogField;
-	private final SelectionButtonDialogField fExcludeInOthersFields;
-	private final SelectionButtonDialogField fReplaceExistingField;
+	private final SelectionButtonDialogField fAddExclusionPatterns, fRemoveProjectFolder, fIgnoreConflicts;
 	private final LinkFields fLinkFields;
 	
 	private final CPListElement fNewElement;
 	private final List/*<CPListElement>*/ fExistingEntries;
-	private final Hashtable/*<CPListElement, IPath[]>*/ fOrginalExlusionFilters, fOrginalInclusionFilters;
+	private final Hashtable/*<CPListElement, IPath[]>*/ fOrginalExlusionFilters, fOrginalInclusionFilters, fOrginalExlusionFiltersCopy, fOrginalInclusionFiltersCopy;
 	private final IPath fOrginalPath;
 	private final boolean fLinkedMode;
 	
@@ -206,23 +205,44 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	private List fRemovedElements;
 
 	private final boolean fAllowConflict;
+	private final boolean fAllowRemoveProjectFolder;
+	private final boolean fAllowAddExclusionPatterns;
+	private final boolean fCanCommitConflictingBuildpath;
 	
-	public AddSourceFolderWizardPage(CPListElement newElement, List/*<CPListElement>*/ existingEntries, IPath outputLocation, boolean linkedMode, boolean allowConflict) {
+	public AddSourceFolderWizardPage(CPListElement newElement, List/*<CPListElement>*/ existingEntries, IPath outputLocation, 
+			boolean linkedMode, boolean canCommitConflictingBuildpath,
+			boolean allowIgnoreConflicts, boolean allowRemoveProjectFolder, boolean allowAddExclusionPatterns) {
+		
 		super(PAGE_NAME);
 		
 		fLinkedMode= linkedMode;
-		fAllowConflict= allowConflict;
+		fCanCommitConflictingBuildpath= canCommitConflictingBuildpath;
+		fAllowConflict= allowIgnoreConflicts;
+		fAllowRemoveProjectFolder= allowRemoveProjectFolder;
+		fAllowAddExclusionPatterns= allowAddExclusionPatterns;
 				
 		fOrginalExlusionFilters= new Hashtable();
 		fOrginalInclusionFilters= new Hashtable();
+		fOrginalExlusionFiltersCopy= new Hashtable();
+		fOrginalInclusionFiltersCopy= new Hashtable();
 		for (Iterator iter= existingEntries.iterator(); iter.hasNext();) {
 			CPListElement element= (CPListElement)iter.next();
 			IPath[] exlusions= (IPath[])element.getAttribute(CPListElement.EXCLUSION);
 			if (exlusions != null) {
+				IPath[] save= new IPath[exlusions.length];
+				for (int i= 0; i < save.length; i++) {
+					save[i]= exlusions[i];
+				}
+				fOrginalExlusionFiltersCopy.put(element, save);
 				fOrginalExlusionFilters.put(element, exlusions);
 			}
 			IPath[] inclusions= (IPath[])element.getAttribute(CPListElement.INCLUSION);
 			if (inclusions != null) {
+				IPath[] save= new IPath[inclusions.length];
+				for (int i= 0; i < save.length; i++) {
+					save[i]= inclusions[i];
+				}
+				fOrginalInclusionFiltersCopy.put(element, save);
 				fOrginalInclusionFilters.put(element, inclusions);
 			}
 		}
@@ -257,23 +277,33 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		}
 		fRootDialogField.setEnabled(fNewElement.getJavaProject() != null);
 		
-		fExcludeInOthersFields= new SelectionButtonDialogField(SWT.CHECK);
-		fExcludeInOthersFields.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_exclude_label); 
-		fExcludeInOthersFields.setEnabled(fOrginalPath == null);
-		if (!fExcludeInOthersFields.isEnabled()) 
-			fExcludeInOthersFields.setSelection(true);
+		int buttonStyle= SWT.CHECK;
+		if ((fAllowConflict && fAllowAddExclusionPatterns) ||
+			(fAllowConflict && fAllowRemoveProjectFolder) ||
+			(fAllowAddExclusionPatterns && fAllowRemoveProjectFolder)) {
+			buttonStyle= SWT.RADIO;
+		}
 		
-		fReplaceExistingField= new SelectionButtonDialogField(SWT.CHECK);
-		fReplaceExistingField.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_ReplaceExistingSourceFolder_label); 
-		fReplaceExistingField.setEnabled(fOrginalPath == null);
+		fAddExclusionPatterns= new SelectionButtonDialogField(buttonStyle);
+		fAddExclusionPatterns.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_exclude_label); 
+		fAddExclusionPatterns.setSelection(!fCanCommitConflictingBuildpath && !fAllowRemoveProjectFolder);
+		
+		fRemoveProjectFolder= new SelectionButtonDialogField(buttonStyle);
+		fRemoveProjectFolder.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_ReplaceExistingSourceFolder_label); 
+		fRemoveProjectFolder.setSelection(!fCanCommitConflictingBuildpath && fAllowRemoveProjectFolder);
+		
+		fIgnoreConflicts= new SelectionButtonDialogField(buttonStyle);
+		fIgnoreConflicts.setLabelText(NewWizardMessages.AddSourceFolderWizardPage_ignoreNestingConflicts);
+		fIgnoreConflicts.setSelection(fCanCommitConflictingBuildpath);
 		
 		fLinkFields= new LinkFields();
 		if (fNewElement.getLinkTarget() != null) {
 			fLinkFields.setLinkTarget(fNewElement.getLinkTarget());
 		}
 		
-		fReplaceExistingField.setDialogFieldListener(adapter);
-		fExcludeInOthersFields.setDialogFieldListener(adapter);
+		fRemoveProjectFolder.setDialogFieldListener(adapter);
+		fAddExclusionPatterns.setDialogFieldListener(adapter);
+		fIgnoreConflicts.setDialogFieldListener(adapter);
 		fRootDialogField.setDialogFieldListener(adapter);
 		fLinkFields.setDialogFieldListener(adapter);
 		
@@ -298,10 +328,15 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			fLinkFields.doFillIntoGrid(composite, layout.numColumns);
 		
 		fRootDialogField.doFillIntoGrid(composite, layout.numColumns);
-		if (!fAllowConflict) {
-			fExcludeInOthersFields.doFillIntoGrid(composite, layout.numColumns);
-			fReplaceExistingField.doFillIntoGrid(composite, layout.numColumns);
-		}
+		
+		if (fAllowRemoveProjectFolder)
+			fRemoveProjectFolder.doFillIntoGrid(composite, layout.numColumns);
+		
+		if (fAllowAddExclusionPatterns)
+			fAddExclusionPatterns.doFillIntoGrid(composite, layout.numColumns);
+		
+		if (fAllowConflict)
+			fIgnoreConflicts.doFillIntoGrid(composite, layout.numColumns);
 		
 		LayoutUtil.setHorizontalSpan(fRootDialogField.getLabelControl(null), layout.numColumns);
 		LayoutUtil.setHorizontalGrabbing(fRootDialogField.getTextControl(null));
@@ -399,7 +434,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			}
 		}
 				
-		boolean isProjectAsSourceFolder= false;
+		boolean isProjectASourceFolder= projectEntryIndex != -1;
 		
 		fModifiedElements.clear();
 		updateFilters(fNewElement.getPath(), path);
@@ -409,19 +444,21 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			fNewElement.setLinkTarget(fLinkFields.getLinkTarget());
 		}
 		fRemovedElements.clear();
-		Set modified= new HashSet();				
-		if (fExcludeInOthersFields.isEnabled() && fExcludeInOthersFields.isSelected()) {
-			addExclusionPatterns(fNewElement, fExistingEntries, modified);
-			fModifiedElements.addAll(modified);
-			CPListElement.insert(fNewElement, fExistingEntries);
+		Set modified= new HashSet();
+		boolean isProjectSourceFolderReplaced= false;
+		if (fAddExclusionPatterns.isSelected()) {
+			if (fOrginalPath == null) {
+				addExclusionPatterns(fNewElement, fExistingEntries, modified);
+				fModifiedElements.addAll(modified);
+				CPListElement.insert(fNewElement, fExistingEntries);
+			}
 		} else {
-			
-			if (projectEntryIndex != -1) {
-				isProjectAsSourceFolder= true;
-				if (fReplaceExistingField.isSelected()) {
+			if (isProjectASourceFolder) {
+				if (fRemoveProjectFolder.isSelected()) {
 					fOldProjectSourceFolder= (CPListElement)fExistingEntries.get(projectEntryIndex);
 					fRemovedElements.add(fOldProjectSourceFolder);
 					fExistingEntries.set(projectEntryIndex, fNewElement);
+					isProjectSourceFolderReplaced= true;
 				} else {
 					CPListElement.insert(fNewElement, fExistingEntries);
 				}
@@ -430,16 +467,18 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			}
 		}
 		
-		if (fAllowConflict)
+		if (!fAllowConflict && fCanCommitConflictingBuildpath)
 			return new StatusInfo();
 		
+		fNewOutputLocation= null;
 		IJavaModelStatus status= JavaConventions.validateClasspath(javaProject, CPListElement.convertToClasspathEntries(fExistingEntries), fOutputLocation);
 		if (!status.isOK()) {
 			if (fOutputLocation.equals(projPath)) {
+				//Try to change the output folder
 				fNewOutputLocation= projPath.append(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME));
 				IStatus status2= JavaConventions.validateClasspath(javaProject, CPListElement.convertToClasspathEntries(fExistingEntries), fNewOutputLocation);
 				if (status2.isOK()) {
-					if (isProjectAsSourceFolder) {
+					if (isProjectSourceFolderReplaced) {
 						result.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceSFandOL, fNewOutputLocation.makeRelative().toString())); 
 					} else {
 						result.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceOL, fNewOutputLocation.makeRelative().toString())); 
@@ -447,16 +486,46 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 					return result;
 				}
 			}
+			//Don't know what the problem is, report to user
 			fNewOutputLocation= null;
-			result.setError(status.getMessage());
+			if (fCanCommitConflictingBuildpath) {
+				result.setInfo(NewWizardMessages.AddSourceFolderWizardPage_conflictWarning + status.getMessage());
+			} else {
+				result.setError(status.getMessage());
+			}
 			return result;
 		}
 		if (!modified.isEmpty()) {
-			result.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_AddedExclusions, String.valueOf(modified.size()))); 
+			//Added exclusion patterns to solve problem
+			if (modified.size() == 1) {
+				CPListElement elem= (CPListElement)modified.toArray()[0];
+				IPath changed= elem.getPath().makeRelative();
+				IPath excl= fNewElement.getPath().makeRelative();
+				result.setInfo(Messages.format(NewWizardMessages.AddSourceFolderWizardPage_addSinglePattern, new Object[] {excl, changed}));
+			} else {
+				result.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_AddedExclusions, String.valueOf(modified.size())));
+			}
+			return result;
+		}
+		if (isProjectSourceFolderReplaced) {
+			result.setInfo(NewWizardMessages.AddSourceFolderWizardPage_replaceSourceFolderInfo);
 			return result;
 		}
 		
 		return result;
+	}
+	
+	public void restore() {
+		for (Iterator iter= fExistingEntries.iterator(); iter.hasNext();) {
+			CPListElement element= (CPListElement)iter.next();
+			if (fOrginalExlusionFilters.containsKey(element)) {
+				element.setAttribute(CPListElement.EXCLUSION, fOrginalExlusionFiltersCopy.get(element));
+			}
+			if (fOrginalInclusionFilters.containsKey(element)) {
+				element.setAttribute(CPListElement.INCLUSION, fOrginalInclusionFiltersCopy.get(element));
+			}
+		}
+		fNewElement.setPath(fOrginalPath);
 	}
 
 	private void restoreCPElements() {
@@ -487,17 +556,26 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		IPath projPath= fNewElement.getJavaProject().getProject().getFullPath();
 		if (projPath.isPrefixOf(oldPath)) {
 			oldPath= oldPath.removeFirstSegments(projPath.segmentCount()).addTrailingSeparator();
+		}
+		if (projPath.isPrefixOf(newPath)) {
 			newPath= newPath.removeFirstSegments(projPath.segmentCount()).addTrailingSeparator();
 		}
 		
 		for (Iterator iter= fExistingEntries.iterator(); iter.hasNext();) {
 			CPListElement element= (CPListElement)iter.next();
+			IPath elementPath= element.getPath();
+			if (projPath.isPrefixOf(elementPath)) {
+				elementPath= elementPath.removeFirstSegments(projPath.segmentCount());
+				if (elementPath.segmentCount() > 0)
+					elementPath= elementPath.addTrailingSeparator();
+			}
+			
 			IPath[] exlusions= (IPath[])element.getAttribute(CPListElement.EXCLUSION);
 			if (exlusions != null) {
 				for (int i= 0; i < exlusions.length; i++) {
-					if (exlusions[i].equals(oldPath)) {
+					if (elementPath.append(exlusions[i]).equals(oldPath)) {
 						fModifiedElements.add(element);
-						exlusions[i]= newPath;
+						exlusions[i]= newPath.removeFirstSegments(elementPath.segmentCount());
 					}
 				}
 				element.setAttribute(CPListElement.EXCLUSION, exlusions);
@@ -506,9 +584,9 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			IPath[] inclusion= (IPath[])element.getAttribute(CPListElement.INCLUSION);
 			if (inclusion != null) {
 				for (int i= 0; i < inclusion.length; i++) {
-					if (inclusion[i].equals(oldPath)) {
+					if (elementPath.append(inclusion[i]).equals(oldPath)) {
 						fModifiedElements.add(element);
-						inclusion[i]= newPath;
+						inclusion[i]= newPath.removeFirstSegments(elementPath.segmentCount());
 					}
 				}
 				element.setAttribute(CPListElement.INCLUSION, inclusion);

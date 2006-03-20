@@ -663,6 +663,19 @@ public class CPListElement {
 		}
 		return result;
 	}
+	
+	public static boolean isProjectSourceFolder(CPListElement[] existing, IJavaProject project) {
+		IPath projPath= project.getProject().getFullPath();	
+		for (int i= 0; i < existing.length; i++) {
+			IClasspathEntry curr= existing[i].getClasspathEntry();
+			if (curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+				if (projPath.equals(curr.getPath())) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 	public IPath getOrginalPath() {
 		return fOrginalPath;

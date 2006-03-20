@@ -112,5 +112,7 @@ public abstract class BuildPathWizard extends NewElementWizard {
 		result.add(fEntryToEdit);
 		return result;
 	}
+	
+	public abstract void cancel();
 
 }
