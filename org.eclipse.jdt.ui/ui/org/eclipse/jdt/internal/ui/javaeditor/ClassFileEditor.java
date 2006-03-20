@@ -219,15 +219,23 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			}
 
 			private void createSourceAttachmentControls(Composite composite, IPackageFragmentRoot root) throws JavaModelException {
-				IClasspathEntry entry= root.getRawClasspathEntry();
+				IClasspathEntry entry;
+				try {
+					entry= root.getRawClasspathEntry();
+				} catch (JavaModelException ex) {
+					if (ex.isDoesNotExist())
+						entry= null;
+					else
+						throw ex;
+				}
 				IPath containerPath= null;
-				IJavaProject jproject= root.getJavaProject();
 
 				if (entry == null || root.getKind() != IPackageFragmentRoot.K_BINARY) {
 					createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_noSource, fFile.getElementName()));
 					return;
 				}
 
+				IJavaProject jproject= root.getJavaProject();
 				if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 					containerPath= entry.getPath();
 					IClasspathEntry entry2= JavaModelUtil.getClasspathEntryToEdit(jproject, containerPath, root.getPath());
