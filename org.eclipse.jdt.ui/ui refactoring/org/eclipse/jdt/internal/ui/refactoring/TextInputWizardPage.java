@@ -148,13 +148,13 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 	 * is computed by calling <code>validatePage</code>.
 	 */
 	protected void textModified(String text) {	
-		if (! isEmptyInputValid() && text.equals("")){ //$NON-NLS-1$
+		if (! isEmptyInputValid() && "".equals(text)){ //$NON-NLS-1$
 			setPageComplete(false);
 			setErrorMessage(null);
 			restoreMessage();
 			return;
 		}
-		if ((! isInitialInputValid()) && text.equals(fInitialValue)){
+		if ((! isInitialInputValid()) && fInitialValue.equals(text)){
 			setPageComplete(false);
 			setErrorMessage(null);
 			restoreMessage();
