@@ -257,25 +257,23 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		
 		OpenTypeHistory history= OpenTypeHistory.getInstance();
 		List result= new ArrayList(selected.length);
-		if (result != null) {
-			for (int i= 0; i < selected.length; i++) {
-				try {
-					TypeInfo typeInfo= selected[i];
-					history.accessed(typeInfo);
-					IType type= typeInfo.resolveType(fScope);
-					if (type == null) {
-						String title= JavaUIMessages.TypeSelectionDialog_errorTitle; 
-						String message= Messages.format(JavaUIMessages.TypeSelectionDialog_dialogMessage, typeInfo.getPath()); 
-						MessageDialog.openError(getShell(), title, message);
-						setResult(null);
-					} else {
-						result.add(type);
-					}
-				} catch (JavaModelException e) {
-					String title= JavaUIMessages.MultiTypeSelectionDialog_errorTitle; 
-					String message= JavaUIMessages.MultiTypeSelectionDialog_errorMessage; 
-					ErrorDialog.openError(getShell(), title, message, e.getStatus());
+		for (int i= 0; i < selected.length; i++) {
+			try {
+				TypeInfo typeInfo= selected[i];
+				history.accessed(typeInfo);
+				IType type= typeInfo.resolveType(fScope);
+				if (type == null) {
+					String title= JavaUIMessages.TypeSelectionDialog_errorTitle; 
+					String message= Messages.format(JavaUIMessages.TypeSelectionDialog_dialogMessage, typeInfo.getPath()); 
+					MessageDialog.openError(getShell(), title, message);
+					setResult(null);
+				} else {
+					result.add(type);
 				}
+			} catch (JavaModelException e) {
+				String title= JavaUIMessages.MultiTypeSelectionDialog_errorTitle; 
+				String message= JavaUIMessages.MultiTypeSelectionDialog_errorMessage; 
+				ErrorDialog.openError(getShell(), title, message, e.getStatus());
 			}
 		}
 		setResult(result);
