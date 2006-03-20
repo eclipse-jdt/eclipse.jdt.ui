@@ -267,6 +267,23 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     	throw new ArrayIndexOutOfBoundsException();
     }
     
+    public ClasspathModifierAction[] getActions() {
+    	List result= new ArrayList();
+    	for (int i= 0; i < fActions.length; i++) {
+			ClasspathModifierAction action= fActions[i];
+			if (action instanceof ClasspathModifierDropDownAction) {
+				ClasspathModifierDropDownAction dropDownAction= (ClasspathModifierDropDownAction)action;
+				ClasspathModifierAction[] actions= dropDownAction.getActions();
+				for (int j= 0; j < actions.length; j++) {
+					result.add(actions[j]);
+				}
+			} else {
+				result.add(action);
+			}
+		}
+    	return (ClasspathModifierAction[])result.toArray(new ClasspathModifierAction[result.size()]);
+    }
+    
     /**
      * Method that is called whenever setting of 
      * output folders is allowed or forbidden (for example 

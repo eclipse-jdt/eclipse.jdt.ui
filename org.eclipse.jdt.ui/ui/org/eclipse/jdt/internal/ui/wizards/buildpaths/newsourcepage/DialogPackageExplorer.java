@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
+import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -320,6 +321,19 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
                 Object element= ((IStructuredSelection)event.getSelection()).getFirstElement();
                 if (fPackageViewer.isExpandable(element)) {
                     fPackageViewer.setExpandedState(element, !fPackageViewer.getExpandedState(element));
+                } else {
+                	if (element instanceof CPListElementAttribute) {
+						CPListElementAttribute attribute= (CPListElementAttribute)element;
+                		if (attribute.getKey().equals(CPListElement.OUTPUT)) {
+                			ClasspathModifierAction[] actions= fActionGroup.getActions();
+                			for (int i= 0; i < actions.length; i++) {
+								if (actions[i].getOperation().getTypeId() == IClasspathInformationProvider.EDIT_OUTPUT) {
+									actions[i].run();
+									return;
+								}
+							}
+                		}
+                	}
                 }
             }
         });
