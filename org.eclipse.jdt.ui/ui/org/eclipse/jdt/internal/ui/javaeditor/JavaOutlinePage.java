@@ -1040,29 +1040,23 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	}
 
 	private void registerToolbarActions(IActionBars actionBars) {
-
 		IToolBarManager toolBarManager= actionBars.getToolBarManager();
-		if (toolBarManager != null) {
-			toolBarManager.add(new LexicalSortingAction());
+		toolBarManager.add(new LexicalSortingAction());
 
-			fMemberFilterActionGroup= new MemberFilterActionGroup(fOutlineViewer, "org.eclipse.jdt.ui.JavaOutlinePage"); //$NON-NLS-1$
-			fMemberFilterActionGroup.contributeToToolBar(toolBarManager);
+		fMemberFilterActionGroup= new MemberFilterActionGroup(fOutlineViewer, "org.eclipse.jdt.ui.JavaOutlinePage"); //$NON-NLS-1$
+		fMemberFilterActionGroup.contributeToToolBar(toolBarManager);
 
-			fCustomFiltersActionGroup.fillActionBars(actionBars);
+		fCustomFiltersActionGroup.fillActionBars(actionBars);
 
-			IMenuManager menu= actionBars.getMenuManager();
-			menu.add(new Separator("EndFilterGroup")); //$NON-NLS-1$
+		IMenuManager viewMenuManager= actionBars.getMenuManager();
+		viewMenuManager.add(new Separator("EndFilterGroup")); //$NON-NLS-1$
 
-			fToggleLinkingAction= new ToggleLinkingAction(this);
-			menu.add(new ClassOnlyAction());
-			menu.add(fToggleLinkingAction);
-		}
-		
-		IMenuManager menuManager= actionBars.getMenuManager();
-		if (menuManager != null) {
-			fCategoryFilterActionGroup= new CategoryFilterActionGroup(fOutlineViewer, "org.eclipse.jdt.ui.JavaOutlinePage", fInput); //$NON-NLS-1$
-			fCategoryFilterActionGroup.contributeToViewMenu(menuManager);
-		}
+		fToggleLinkingAction= new ToggleLinkingAction(this);
+		viewMenuManager.add(new ClassOnlyAction());
+		viewMenuManager.add(fToggleLinkingAction);
+
+		fCategoryFilterActionGroup= new CategoryFilterActionGroup(fOutlineViewer, "org.eclipse.jdt.ui.JavaOutlinePage", fInput); //$NON-NLS-1$
+		fCategoryFilterActionGroup.contributeToViewMenu(viewMenuManager);
 	}
 
 	/*
