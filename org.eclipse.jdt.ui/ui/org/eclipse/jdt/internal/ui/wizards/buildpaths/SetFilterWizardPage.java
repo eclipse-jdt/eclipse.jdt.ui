@@ -174,7 +174,9 @@ public class SetFilterWizardPage extends NewElementWizardPage {
 		
 		ArrayList elements= new ArrayList(pattern.length);
 		for (int i= 0; i < pattern.length; i++) {
-			elements.add(pattern[i].toString());
+			String patternName= pattern[i].toString();
+			if (patternName.length() > 0)
+				elements.add(patternName);
 		}
 		patternList.setElements(elements);
 		patternList.selectFirstElement();

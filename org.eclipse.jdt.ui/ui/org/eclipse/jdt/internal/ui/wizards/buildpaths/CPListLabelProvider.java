@@ -145,14 +145,23 @@ public class CPListLabelProvider extends LabelProvider {
 			String arg= null;
 			IPath[] patterns= (IPath[]) attrib.getValue();
 			if (patterns != null && patterns.length > 0) {
+				int patternsCount= 0;
 				StringBuffer buf= new StringBuffer();
 				for (int i= 0; i < patterns.length; i++) {
-					if (i > 0) {
-						buf.append(NewWizardMessages.CPListLabelProvider_exclusion_filter_separator); 
+					String pattern= patterns[i].toString();
+					if (pattern.length() > 0) {
+						if (patternsCount > 0) {
+							buf.append(NewWizardMessages.CPListLabelProvider_exclusion_filter_separator); 
+						}
+						buf.append(pattern);
+						patternsCount++;
 					}
-					buf.append(patterns[i].toString());
 				}
-				arg= buf.toString();
+				if (patternsCount > 0) {
+					arg= buf.toString();
+				} else {
+					arg= notAvailable;
+				}
 			} else {
 				arg= notAvailable;
 			}
@@ -161,14 +170,23 @@ public class CPListLabelProvider extends LabelProvider {
 			String arg= null;
 			IPath[] patterns= (IPath[]) attrib.getValue();
 			if (patterns != null && patterns.length > 0) {
+				int patternsCount= 0;
 				StringBuffer buf= new StringBuffer();
 				for (int i= 0; i < patterns.length; i++) {
-					if (i > 0) {
-						buf.append(NewWizardMessages.CPListLabelProvider_inclusion_filter_separator); 
-					}
-					buf.append(patterns[i].toString());
+					String pattern= patterns[i].toString();
+					if (pattern.length() > 0) {
+						if (patternsCount > 0) {
+							buf.append(NewWizardMessages.CPListLabelProvider_inclusion_filter_separator);
+						}
+						buf.append(pattern);
+						patternsCount++;
+					}					
 				}
-				arg= buf.toString();
+				if (patternsCount > 0) {
+					arg= buf.toString();
+				} else {
+					arg= notAvailable;
+				}
 			} else {
 				arg= NewWizardMessages.CPListLabelProvider_all; 
 			}

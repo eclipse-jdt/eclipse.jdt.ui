@@ -783,7 +783,21 @@ public class BuildPathsBlock {
 						if (entry.getLinkTarget() == null) {
 							if (!folder.exists()) {
 								//Source folder was edited, move to new location
-								orginalFolder.move(path, true, true, new SubProgressMonitor(monitor, 2));
+								IPath parentPath= entry.getPath().removeLastSegments(1);
+								if (projPath.isPrefixOf(parentPath)) {
+									parentPath= parentPath.removeFirstSegments(projPath.segmentCount());
+								}
+								if (parentPath.segmentCount() > 0) {
+									IFolder parentFolder= project.getFolder(parentPath);
+									if (!parentFolder.exists()) {
+										CoreUtility.createFolder(parentFolder, true, true, new SubProgressMonitor(monitor, 1));
+									} else {
+										monitor.worked(1);
+									}
+								} else {
+									monitor.worked(1);
+								}
+								orginalFolder.move(entry.getPath(), true, true, new SubProgressMonitor(monitor, 1));
 							}
 						} else {
 							if (!folder.exists() || !entry.getLinkTarget().equals(entry.getOrginalLinkTarget())) {
