@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup.DialogExplorerActionContext;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
@@ -66,8 +67,10 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     private HintTextGroup fHintTextGroup;
     private DialogPackageExplorer fPackageExplorer;
     private SelectionButtonDialogField fUseFolderOutputs;
-
+	private final StringDialogField fOutputLocationField;
+	
 	private IJavaProject fJavaProject;
+
 
     /**
      * Constructor of the <code>NewSourceContainerWorkbookPage</code> which consists of 
@@ -81,6 +84,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
      */
     public NewSourceContainerWorkbookPage(ListDialogField classPathList, StringDialogField outputLocationField, IRunnableContext context) {
         fClassPathList= classPathList;
+		fOutputLocationField= outputLocationField;
     
         fUseFolderOutputs= new SelectionButtonDialogField(SWT.CHECK);
         fUseFolderOutputs.setSelection(false);
@@ -196,6 +200,13 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
                 }
             }
         });
+        
+        Composite outputLocation= new Composite(body, SWT.NONE);
+        outputLocation.setLayout(new GridLayout(2, false));
+        outputLocation.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        
+		LayoutUtil.doDefaultLayout(outputLocation, new DialogField[] {fOutputLocationField }, true, SWT.DEFAULT, SWT.DEFAULT);
+		LayoutUtil.setHorizontalGrabbing(fOutputLocationField.getTextControl(null));
         
         // Create toolbar with actions on the left
         ToolBarManager tbm= actionGroup.createLeftToolBarManager(pane);

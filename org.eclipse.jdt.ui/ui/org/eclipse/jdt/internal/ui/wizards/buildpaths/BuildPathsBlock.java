@@ -84,7 +84,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
-import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -95,7 +94,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
 public class BuildPathsBlock {
@@ -197,8 +195,6 @@ public class BuildPathsBlock {
 	public Control createControl(Composite parent) {
 		fSWTWidget= parent;
 		
-		PixelConverter converter= new PixelConverter(parent);
-		
 		Composite composite= new Composite(parent, SWT.NONE);	
 		composite.setFont(parent.getFont());
 		
@@ -257,18 +253,7 @@ public class BuildPathsBlock {
 			fSourceContainerPage.init(fCurrJProject);
 			fLibrariesPage.init(fCurrJProject);
 			fProjectsPage.init(fCurrJProject);
-		}		
-						
-		Composite editorcomp= new Composite(composite, SWT.NONE);	
-	
-		DialogField[] editors= new DialogField[] { fBuildPathDialogField };
-		LayoutUtil.doDefaultLayout(editorcomp, editors, true, 0, 0);
-		
-		int maxFieldWidth= converter.convertWidthInCharsToPixels(40);
-		LayoutUtil.setWidthHint(fBuildPathDialogField.getTextControl(null), maxFieldWidth);
-		LayoutUtil.setHorizontalGrabbing(fBuildPathDialogField.getTextControl(null));
-	
-		editorcomp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		}
 		
 		folder.setSelection(fPageIndex);
 		fCurrPage= (BuildPathBasePage) folder.getItem(fPageIndex).getData();
