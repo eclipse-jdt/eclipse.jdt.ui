@@ -83,7 +83,7 @@ public class CreateFileChange extends JDTChange {
 
 	public String getName() {
 		if (fChangeName == null)
-			return NLSChangesMessages.createFile_Create_file + fPath.toString(); 
+			return Messages.format(NLSChangesMessages.createFile_Create_file, fPath.toOSString());
 		else
 			return fChangeName;
 	}
