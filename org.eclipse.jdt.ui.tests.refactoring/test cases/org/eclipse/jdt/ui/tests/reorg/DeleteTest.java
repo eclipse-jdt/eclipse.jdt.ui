@@ -761,7 +761,7 @@ public class DeleteTest extends RefactoringTest{
 	public void testDeleteInternalJAR() throws Exception{
 		ParticipantTesting.reset();
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
-		assertTrue("lib does not exist",  lib != null && lib.exists());
+		assertTrue("lib does not exist",  lib.exists());
 		IPackageFragmentRoot internalJAR= JavaProjectHelper.addLibraryWithImport(RefactoringTestSetup.getProject(), Path.fromOSString(lib.getPath()), null, null);
 
 		Object[] elements= {internalJAR};
@@ -1013,21 +1013,55 @@ public class DeleteTest extends RefactoringTest{
 		// (default)	<- delete
 		// a0
 		// a0.a1
-		// expected: everything deleted; notification about deletion of: 
-		// PackageFragments: a0, a0.a1, <default>
-		// Folders: a0 (NOT the folder of the default package)
+		// expected: nothing deleted; no notification about deletion
 		IPackageFragment[] frags= createPackagePath(2);
 		IPackageFragment p= getRoot().getPackageFragment("p");
 		if (p.exists()) p.delete(true, null);
 		final IPackageFragment defaultPackage= getRoot().getPackageFragment("");
-		executeDeletePackage(new Object[] { defaultPackage }, frags, new Object[] { defaultPackage, frags[0].getResource() } , true);
-		assertPackagesAreDeleted(frags);
+		executeDeletePackage(new Object[] { defaultPackage }, new IPackageFragment[] { defaultPackage }, new Object[0], true);
+		for (int i= 0; i < frags.length; i++) {
+			assertTrue(frags[i].exists());
+		}
 	}
 	
 	public void testDeletePackageSub3() throws Exception {
 		// (default)	<- delete
 		// (default).A
 		// a0
+		// a0.a1
+		// expected: A deleted; notification about deletion of: 
+		// PackageFragments: <default>
+		// Folders: - 
+		// Files: A.java (NOT other files in root, like .classpath).
+		IPackageFragment[] frags= createPackagePath(2);
+		final IPackageFragment defaultPackage= getRoot().getPackageFragment("");
+		IPackageFragment p= getRoot().getPackageFragment("p");
+		if (p.exists()) p.delete(true, null);
+		ICompilationUnit a= defaultPackage.createCompilationUnit("A.java", "public class A {}", false, null);
+		executeDeletePackage(new Object[] { defaultPackage }, new IPackageFragment[0], new Object[] { defaultPackage, a.getResource() } , true);
+		for (int i= 0; i < frags.length; i++) {
+			assertTrue(frags[i].exists());
+		}
+	}
+	
+	public void testDeletePackageSub4() throws Exception {
+		// (default)
+		// a0 <- delete
+		// a0.a1
+		// expected: everything deleted; notification about deletion of: 
+		// PackageFragments: a0, a0.a1
+		// Folders: a0 (NOT the folder of the default package)
+		IPackageFragment[] frags= createPackagePath(2);
+		IPackageFragment p= getRoot().getPackageFragment("p");
+		if (p.exists()) p.delete(true, null);
+		executeDeletePackage(new Object[] { frags[0] }, frags, new Object[] { frags[0].getResource() } , true);
+		assertPackagesAreDeleted(frags);
+	}
+	
+	public void testDeletePackageSub5() throws Exception {
+		// (default)	<- delete
+		// (default).A
+		// a0 <- delete
 		// a0.a1
 		// expected: everything deleted; notification about deletion of: 
 		// PackageFragments: a0, a0.a1, <default>
@@ -1038,7 +1072,7 @@ public class DeleteTest extends RefactoringTest{
 		IPackageFragment p= getRoot().getPackageFragment("p");
 		if (p.exists()) p.delete(true, null);
 		ICompilationUnit a= defaultPackage.createCompilationUnit("A.java", "public class A {}", false, null);
-		executeDeletePackage(new Object[] { defaultPackage }, frags, new Object[] { defaultPackage, a.getResource(), frags[0].getResource() } , true);
+		executeDeletePackage(new Object[] { defaultPackage, frags[0] }, frags, new Object[] { defaultPackage, a.getResource(), frags[0].getResource() } , true);
 		assertPackagesAreDeleted(frags);
 	}
 

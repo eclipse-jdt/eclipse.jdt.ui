@@ -171,8 +171,13 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IComme
 	public boolean hasSubPackagesToDelete() {
 		try {
 			for (int i= 0; i < fJavaElements.length; i++) {
-				if (fJavaElements[i] instanceof IPackageFragment && ((IPackageFragment) fJavaElements[i]).hasSubpackages())
-					return true;
+				if (fJavaElements[i] instanceof IPackageFragment) {
+					IPackageFragment packageFragment= (IPackageFragment) fJavaElements[i];
+					if (packageFragment.isDefaultPackage())
+						continue; // see bug 132576 (can remove this if(..) continue; statement when bug is fixed)
+					if (packageFragment.hasSubpackages())
+						return true;
+				}
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
@@ -403,7 +408,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IComme
 			if (canRemoveCompletely(currentPackageFragment, initialPackagesToDelete)) {
 				
 				final IPackageFragment parent= JavaElementUtil.getParentSubpackage(currentPackageFragment);
-				if (parent != null && !parent.isDefaultPackage() && !initialPackagesToDelete.contains(parent)) {
+				if (parent != null && !initialPackagesToDelete.contains(parent)) {
 
 					final List/* <IPackageFragment> */emptyParents= new ArrayList();
 					addDeletableParentPackages(parent, initialPackagesToDelete, deletedChildren, emptyParents);
@@ -481,7 +486,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IComme
 		deletableParentPackages.add(frag);
 
 		final IPackageFragment parent= JavaElementUtil.getParentSubpackage(frag);
-		if (parent != null && !parent.isDefaultPackage() && !initialPackagesToDelete.contains(parent))
+		if (parent != null && !initialPackagesToDelete.contains(parent))
 			addDeletableParentPackages(parent, initialPackagesToDelete, resourcesToDelete, deletableParentPackages);
 	}
 

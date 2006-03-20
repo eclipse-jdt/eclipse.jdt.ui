@@ -186,43 +186,37 @@ public class JavaElementUtil {
 	 * @throws JavaModelException 
 	 */
 	public static IPackageFragment[] getPackageAndSubpackages(IPackageFragment pack) throws JavaModelException {
+		if (pack.isDefaultPackage())
+			return new IPackageFragment[] { pack };
+		
 		IPackageFragmentRoot root= (IPackageFragmentRoot) pack.getParent();
 		IJavaElement[] allPackages= root.getChildren();
 		ArrayList subpackages= new ArrayList();
-		if (pack.isDefaultPackage()) {
-			subpackages.addAll(Arrays.asList(allPackages));
-		} else {
-			subpackages.add(pack);
-			String prefix= pack.getElementName() + '.';
-			for (int i= 0; i < allPackages.length; i++) {
-				IPackageFragment currentPackage= (IPackageFragment) allPackages[i];
-				if (currentPackage.getElementName().startsWith(prefix))
-					subpackages.add(currentPackage);
-			}
+		subpackages.add(pack);
+		String prefix= pack.getElementName() + '.';
+		for (int i= 0; i < allPackages.length; i++) {
+			IPackageFragment currentPackage= (IPackageFragment) allPackages[i];
+			if (currentPackage.getElementName().startsWith(prefix))
+				subpackages.add(currentPackage);
 		}
 		return (IPackageFragment[]) subpackages.toArray(new IPackageFragment[subpackages.size()]);
 	}
 	
 	/**
-	 * Returns the parent package fragment for this package fragment.
-	 * 
 	 * @param pack the package fragment; may not be null
-	 * @return the parent package fragment, or null if the given package fragment is the default package.
+	 * @return the parent package fragment, or null if the given package fragment is the default package or a top level package
 	 */
 	public static IPackageFragment getParentSubpackage(IPackageFragment pack) {
-
 		if (pack.isDefaultPackage())
 			return null;
 		
 		final int index= pack.getElementName().lastIndexOf('.');
-		final IPackageFragmentRoot root= (IPackageFragmentRoot) pack.getParent();
-		
 		if (index == -1)
-			return root.getPackageFragment("");  //$NON-NLS-1$
+			return null;
 
+		final IPackageFragmentRoot root= (IPackageFragmentRoot) pack.getParent();
 		final String newPackageName= pack.getElementName().substring(0, index);
 		final IPackageFragment parent= root.getPackageFragment(newPackageName);
-		
 		if (parent.exists())
 			return parent;
 		else

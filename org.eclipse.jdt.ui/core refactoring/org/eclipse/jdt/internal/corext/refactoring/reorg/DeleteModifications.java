@@ -177,8 +177,8 @@ public class DeleteModifications extends RefactoringModifications {
 			// if the parent folder of this folder will not be deleted as well:
 			boolean parentIsMarked= false;
 			final IPackageFragment parent= JavaElementUtil.getParentSubpackage(pack);
-			if (parent != null && parent.isDefaultPackage()) {
-				// Parent is the default package which will never be
+			if (parent == null) {
+				// "Parent" is the default package which will never be
 				// deleted physically
 				parentIsMarked= false;
 			} else {
