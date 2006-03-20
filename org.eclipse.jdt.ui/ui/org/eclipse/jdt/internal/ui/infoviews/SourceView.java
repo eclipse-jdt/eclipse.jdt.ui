@@ -60,6 +60,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.OpenAction;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -175,7 +176,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	 */
 	protected void internalCreatePartControl(Composite parent) {
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
-		fViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, store);
+		fViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.LEFT_TO_RIGHT, store);
 		fViewerConfiguration= new SimpleJavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null, false);
 		fViewer.configure(fViewerConfiguration);
 		fViewer.setEditable(false);
@@ -415,7 +416,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 		source= Strings.concatenate(sourceLines, delim);
 
 		IDocument doc= new Document(source);
-		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(doc);
+		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(doc, IJavaPartitions.JAVA_PARTITIONING);
 		return doc;
 	}
 
@@ -427,8 +428,11 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 			fViewer.setInput(input);
 		else if (input == null)
 			fViewer.setInput(new Document("")); //$NON-NLS-1$
-		else
-			fViewer.setInput(new Document(input.toString()));
+		else {
+			IDocument document= new Document(input.toString());
+			JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);			
+			fViewer.setInput(document);
+		}
 	}
 
 	/**

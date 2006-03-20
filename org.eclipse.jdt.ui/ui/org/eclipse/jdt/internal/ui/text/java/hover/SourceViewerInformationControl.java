@@ -38,6 +38,8 @@ import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
@@ -253,7 +255,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		}
 
 		IDocument doc= new Document(content);
-		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(doc);
+		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(doc, IJavaPartitions.JAVA_PARTITIONING);
 		fViewer.setInput(doc);
 	}
 
