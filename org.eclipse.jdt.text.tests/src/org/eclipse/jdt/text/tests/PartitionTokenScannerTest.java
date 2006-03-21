@@ -133,6 +133,19 @@ public class PartitionTokenScannerTest extends TestCase {
 		// assertTrue(testeeTime <= referenceTime);
 	}
 	
+	public void test_bug57903() {
+		final Document document= new Document("<%/**f%>");
+		fReference.setRange(document, 2, 4);
+		fTestee.setRange(document, 2, 4);
+		
+		IToken refToken= null;
+		while (refToken == null || !refToken.isEOF()) {
+			refToken=fReference.nextToken();
+			IToken testeeToken=fTestee.nextToken();
+			assertTokenEquals(refToken, testeeToken);
+		}
+	}
+	
 	private long getTime(IPartitionTokenScanner scanner, IDocument document, int count) {
 		final long start= System.currentTimeMillis();
 

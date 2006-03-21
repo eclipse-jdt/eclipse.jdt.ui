@@ -56,7 +56,7 @@ public final class BufferedDocumentScanner implements ICharacterScanner {
 	}
 
 	/**
-	 * Fills the buffer with the contens of the document starting at the given offset.
+	 * Fills the buffer with the contents of the document starting at the given offset.
 	 *
 	 * @param offset the document offset at which the buffer starts
 	 */
@@ -104,7 +104,8 @@ public final class BufferedDocumentScanner implements ICharacterScanner {
 	public final int read() {
 
 		if (fOffset == fBufferLength) {
-			if (fBufferOffset + fBufferLength == fDocument.getLength())
+			int end= fBufferOffset + fBufferLength;
+			if (end == fDocument.getLength() || end == fRangeOffset + fRangeLength)
 				return EOF;
 			else {
 				updateBuffer(fBufferOffset + fBufferLength);
