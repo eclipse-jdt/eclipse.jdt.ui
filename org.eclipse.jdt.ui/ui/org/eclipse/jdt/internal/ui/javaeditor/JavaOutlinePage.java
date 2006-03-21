@@ -1371,6 +1371,9 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 						setSelection(new StructuredSelection(element));
 						return true;
 					}
+				} else if (sel instanceof IStructuredSelection) {
+					setSelection(sel);
+					return true;
 				}
 				return false;
 			}
