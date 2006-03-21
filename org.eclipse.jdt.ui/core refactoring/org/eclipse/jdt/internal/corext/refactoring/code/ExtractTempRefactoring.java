@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
@@ -62,6 +61,7 @@ import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -82,14 +82,15 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
-import org.eclipse.jdt.core.dom.SwitchStatement;
-import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -585,10 +586,8 @@ public class ExtractTempRefactoring extends CommentRefactoring implements IIniti
 	}
 
 	private TextEdit createAndInsertTempDeclaration(String delimiter) throws CoreException {
-		ASTNode insertBefore= getNodeToInsertTempDeclarationBefore();
-		int insertOffset= insertBefore.getStartPosition();
-		String text= createTempDeclarationSource(getInitializerSource(), true, delimiter) + CodeFormatterUtil.createIndentString(CodeRefactoringUtil.getIndentationLevel(insertBefore, fCu), fCu.getJavaProject());
-		return new InsertEdit(insertOffset, text);
+		String declarationText= createTempDeclarationSource(getInitializerSource(), false, delimiter);
+		return getTempDeclarationInsertion(declarationText);
 	}
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
@@ -693,16 +692,28 @@ public class ExtractTempRefactoring extends CommentRefactoring implements IIniti
 		return removeTrailingSemicolons(fCu.getBuffer().getText(fragment.getStartPosition(), fragment.getLength()));
 	}
 
-	private Statement getInnermostStatementInBlock(ASTNode node) {
-		Block block= (Block) ASTNodes.getParent(node, Block.class);
-		if (block == null)
-			return null;
-		for (Iterator iter= block.statements().iterator(); iter.hasNext();) {
-			Statement statement= (Statement) iter.next();
-			if (ASTNodes.isParent(node, statement))
-				return statement;
+	private TextEdit insertAt(ASTNode target, ASTRewrite rewrite, Statement declaration) throws JavaModelException {
+		ASTNode parent= target.getParent();
+		while (! (parent instanceof Block)) {
+			StructuralPropertyDescriptor locationInParent= target.getLocationInParent();
+			if (locationInParent == IfStatement.THEN_STATEMENT_PROPERTY
+					|| locationInParent == IfStatement.ELSE_STATEMENT_PROPERTY
+					|| locationInParent == ForStatement.BODY_PROPERTY
+					|| locationInParent == DoStatement.BODY_PROPERTY
+					|| locationInParent == WhileStatement.BODY_PROPERTY) {
+				Block replacement= rewrite.getAST().newBlock();
+				ListRewrite replacementRewrite= rewrite.getListRewrite(replacement, Block.STATEMENTS_PROPERTY);
+				replacementRewrite.insertFirst(declaration, null);
+				replacementRewrite.insertLast(rewrite.createMoveTarget(target), null);
+				rewrite.replace(target, replacement, null);
+				return rewrite.rewriteAST();
+			}
+			target= parent;
+			parent= parent.getParent();
 		}
-		return null;
+		ListRewrite listRewrite= rewrite.getListRewrite(parent, Block.STATEMENTS_PROPERTY);
+		listRewrite.insertBefore(declaration, target, null);
+		return rewrite.rewriteAST();
 	}
 
 	private IASTFragment[] getMatchingFragments() throws JavaModelException {
@@ -725,42 +736,22 @@ public class ExtractTempRefactoring extends CommentRefactoring implements IIniti
 		return RefactoringCoreMessages.ExtractTempRefactoring_name; 
 	}
 
-	private ASTNode getNodeToInsertTempDeclarationBefore() throws JavaModelException {
+	private TextEdit getTempDeclarationInsertion(String declarationText) throws JavaModelException {
+		ASTRewrite rewrite= ASTRewrite.create(fCompilationUnitNode.getAST());
+		Statement declaration= (Statement) rewrite.createStringPlaceholder(declarationText, ASTNode.EXPRESSION_STATEMENT);
+		
 		if ((!fReplaceAllOccurrences) || (retainOnlyReplacableMatches(getMatchingFragments()).length <= 1))
-			return getInnermostStatementInBlock(getSelectedExpression().getAssociatedNode());
+			return insertAt(getSelectedExpression().getAssociatedNode(), rewrite, declaration);
 
 		ASTNode[] firstReplaceNodeParents= getParents(getFirstReplacedExpression().getAssociatedNode());
 		ASTNode[] commonPath= findDeepestCommonSuperNodePathForReplacedNodes();
 		Assert.isTrue(commonPath.length <= firstReplaceNodeParents.length);
 
 		ASTNode deepestCommonParent= firstReplaceNodeParents[commonPath.length - 1];
-		if (deepestCommonParent instanceof TryStatement || deepestCommonParent instanceof IfStatement) {
-			if (deepestCommonParent.getParent() instanceof Block)
-				return deepestCommonParent;
-			if (deepestCommonParent.getParent() instanceof SwitchStatement) {
-				SwitchStatement statement= (SwitchStatement) deepestCommonParent.getParent();
-				final List statements= statement.statements();
-				for (int index= 0; index < statements.size(); index++) {
-					if (statements.get(index) == deepestCommonParent) {
-						for (int offset= index; offset >= 0; offset--) {
-							if (statements.get(offset) instanceof SwitchCase) {
-								for (int stat= offset + 1; stat < statements.size(); stat++) {
-									if (!(statements.get(stat) instanceof VariableDeclarationStatement))
-										return (ASTNode) statements.get(stat);
-								}
-							}
-						}
-					}
-				}
-			}
-			if (commonPath.length < firstReplaceNodeParents.length)
-				return getInnermostStatementInBlock(firstReplaceNodeParents[commonPath.length]);
-		}
-
 		if (deepestCommonParent instanceof Block)
-			return firstReplaceNodeParents[commonPath.length];
-
-		return getInnermostStatementInBlock(getFirstReplacedExpression().getAssociatedNode());
+			return insertAt(firstReplaceNodeParents[commonPath.length], rewrite, declaration);
+		else
+			return insertAt(deepestCommonParent, rewrite, declaration);
 	}
 
 	private IExpressionFragment getSelectedExpression() throws JavaModelException {

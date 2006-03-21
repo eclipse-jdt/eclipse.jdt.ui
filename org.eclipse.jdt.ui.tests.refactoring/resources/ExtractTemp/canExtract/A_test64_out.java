@@ -5,11 +5,13 @@ class A  {
 	void f() {
 		String x;
 		boolean test= false, test2= false, test3= false;
-		String temp= "ExtractMe";
 		if (test) {
-		} else if (test2)
-			x = temp;
-		else if (test3)
-			x = temp;
+		} else {
+			String temp= "ExtractMe";
+			if (test2)
+				x = temp;
+			else if (test3)
+				x = temp;
+		}
 	}
 }
