@@ -1059,7 +1059,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		viewMenuManager.add(new ClassOnlyAction());
 		viewMenuManager.add(fToggleLinkingAction);
 
-		fCategoryFilterActionGroup= new CategoryFilterActionGroup(fOutlineViewer, "org.eclipse.jdt.ui.JavaOutlinePage", fInput); //$NON-NLS-1$
+		fCategoryFilterActionGroup= new CategoryFilterActionGroup(fOutlineViewer, "org.eclipse.jdt.ui.JavaOutlinePage", new IJavaElement[] {fInput}); //$NON-NLS-1$
 		fCategoryFilterActionGroup.contributeToViewMenu(viewMenuManager);
 	}
 
@@ -1220,6 +1220,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			fOutlineViewer.setInput(fInput);
 			updateSelectionProvider(getSite());
 		}
+		if (fCategoryFilterActionGroup != null) 
+			fCategoryFilterActionGroup.setInput(new IJavaElement[] {fInput});
 	}
 
 	public void select(ISourceReference reference) {

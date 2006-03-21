@@ -96,13 +96,12 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	private SortByDefiningTypeAction fSortByDefiningTypeAction;
 	private ShowOnlyMainTypeAction fShowOnlyMainTypeAction;
 	private Map fTypeHierarchies= new HashMap();
+	
 	/**
 	 * Category filter action group.
 	 * @since 3.2
 	 */
 	private CategoryFilterActionGroup fCategoryFilterActionGroup;
-	
-
 
 	private class OutlineLabelProvider extends AppearanceAwareLabelProvider {
 
@@ -327,38 +326,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 				fCategoryFilterActionGroup= null;
 			}
 			fTypeHierarchies.clear();
-		}
-
-		/**
-		 * Returns the primary type of a compilation unit (has the same
-		 * name as the compilation unit).
-		 *
-		 * @param compilationUnit the compilation unit
-		 * @return returns the primary type of the compilation unit, or
-		 * <code>null</code> if is does not have one
-		 */
-		private IType getMainType(ICompilationUnit compilationUnit) {
-
-			if (compilationUnit == null)
-				return null;
-
-			return compilationUnit.findPrimaryType();
-		}
-
-		/**
-		 * Returns the primary type of a class file.
-		 *
-		 * @param classFile the class file
-		 * @return returns the primary type of the class file, or <code>null</code>
-		 * if is does not have one
-		 */
-		private IType getMainType(IClassFile classFile) {
-			try {
-				IType type= classFile.getType();
-				return type != null && type.exists() ? type : null;
-			} catch (JavaModelException e) {
-				return null;
-			}
 		}
 	}
 
@@ -630,6 +597,9 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			fInput= je.getAncestor(IJavaElement.CLASS_FILE);
 
 		inputChanged(fInput, information);
+		
+		if (fCategoryFilterActionGroup != null)
+			fCategoryFilterActionGroup.setInput(getInputForCategories());
 	}
 
 	private KeyAdapter getKeyAdapter() {
@@ -667,6 +637,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		fInnerLabelProvider.setTextFlags(flags);
 		fOutlineContentProvider.toggleShowInheritedMembers();
 		updateStatusFieldText();
+		fCategoryFilterActionGroup.setInput(getInputForCategories());
 	}
 
 	/*
@@ -680,9 +651,36 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		viewMenu.add(fLexicalSortingAction);
 
 		viewMenu.add(fSortByDefiningTypeAction);
-		fCategoryFilterActionGroup= new CategoryFilterActionGroup(getTreeViewer(), getId(), fInput);
-		fCategoryFilterActionGroup.contributeToViewMenu(viewMenu);
-		
+		fCategoryFilterActionGroup= new CategoryFilterActionGroup(getTreeViewer(), getId(), getInputForCategories());
+		fCategoryFilterActionGroup.contributeToViewMenu(viewMenu);	
+	}
+
+	private IJavaElement[] getInputForCategories() {
+		if (fOutlineContentProvider.isShowingInheritedMembers()) {
+			IJavaElement p= fInput;
+			if (p instanceof ICompilationUnit) {
+				p= getMainType((ICompilationUnit)p);
+			} else if (p instanceof IClassFile) {
+				p= getMainType((IClassFile)p);
+			}
+			while (p != null && !(p instanceof IType)) {
+				p= p.getParent();
+			}
+			if (!(p instanceof IType))
+				return new IJavaElement[] {fInput};
+			
+			ITypeHierarchy hierarchy= getSuperTypeHierarchy((IType)p);
+			if (hierarchy == null)
+				return new IJavaElement[] {fInput};
+			
+			IType[] supertypes= hierarchy.getAllSupertypes((IType)p);
+			IJavaElement[] result= new IJavaElement[supertypes.length + 1];
+			result[0]= fInput;
+			System.arraycopy(supertypes, 0, result, 1, supertypes.length);
+			return result;
+		} else {
+			return new IJavaElement[] {fInput};
+		}
 	}
 	
 	private ITypeHierarchy getSuperTypeHierarchy(IType type) {
@@ -710,5 +708,37 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			return null;
 
 		return editor.getEditorSite().getActionBars().getStatusLineManager().getProgressMonitor();
+	}
+	
+	/**
+	 * Returns the primary type of a compilation unit (has the same
+	 * name as the compilation unit).
+	 *
+	 * @param compilationUnit the compilation unit
+	 * @return returns the primary type of the compilation unit, or
+	 * <code>null</code> if is does not have one
+	 */
+	private IType getMainType(ICompilationUnit compilationUnit) {
+
+		if (compilationUnit == null)
+			return null;
+
+		return compilationUnit.findPrimaryType();
+	}
+
+	/**
+	 * Returns the primary type of a class file.
+	 *
+	 * @param classFile the class file
+	 * @return returns the primary type of the class file, or <code>null</code>
+	 * if is does not have one
+	 */
+	private IType getMainType(IClassFile classFile) {
+		try {
+			IType type= classFile.getType();
+			return type != null && type.exists() ? type : null;
+		} catch (JavaModelException e) {
+			return null;
+		}
 	}
 }

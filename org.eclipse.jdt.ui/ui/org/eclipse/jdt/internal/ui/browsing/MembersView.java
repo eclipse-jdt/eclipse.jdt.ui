@@ -129,8 +129,26 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	 */
 	protected void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
-		fCategoryFilterActionGroup= new CategoryFilterActionGroup(getViewer(), getViewSite().getId(), (IJavaElement)getInput());
+		fCategoryFilterActionGroup= new CategoryFilterActionGroup(getViewer(), getViewSite().getId(), getCategoryFilterActionGroupInput());
 		fCategoryFilterActionGroup.contributeToViewMenu(actionBars.getMenuManager());
+	}
+
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#setInput(java.lang.Object)
+	 * @since 3.2
+	 */
+	protected void setInput(Object input) {
+		super.setInput(input);
+		if (fCategoryFilterActionGroup != null)
+			fCategoryFilterActionGroup.setInput(getCategoryFilterActionGroupInput());
+	}
+	
+	private IJavaElement[] getCategoryFilterActionGroupInput() {
+		Object input= getInput();
+		if (input instanceof IJavaElement)
+			return new IJavaElement[] { (IJavaElement)input };
+		return new IJavaElement[0];
 	}
 
 	/**

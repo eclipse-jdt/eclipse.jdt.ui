@@ -178,9 +178,9 @@ public class CategoryFilterActionGroup extends ActionGroup {
 	
 	private class CategoryFilterMenuAction extends Action {
 		
-		private final IJavaElement fInput;
+		private IJavaElement[] fInput;
 		
-		public CategoryFilterMenuAction(IJavaElement input) {
+		public CategoryFilterMenuAction(IJavaElement[] input) {
 			fInput= input;
 			setDescription(ActionMessages.CategoryFilterActionGroup_ShowCategoriesActionDescription); 
 			setToolTipText(ActionMessages.CategoryFilterActionGroup_ShowCategoriesToolTip); 
@@ -195,6 +195,9 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			showCategorySelectionDialog(fInput);
 		}
 
+		public void setInput(IJavaElement[] input) {
+			fInput= input;
+		}
 	}
 		
 	private class CategoryFilterAction extends Action {
@@ -232,12 +235,12 @@ public class CategoryFilterActionGroup extends ActionGroup {
 	private final String fViewerId;
 	private final CategoryFilter fFilter;
 	private final HashSet fFilteredCategories;
-	private final IJavaElement fInputElement;
+	private IJavaElement[] fInputElement;
 	private final CategoryFilterMenuAction fMenuAction;
 	private IMenuManager fMenuManager;
 	private IMenuListener fMenuListener;
 
-	public CategoryFilterActionGroup(final StructuredViewer viewer, final String viewerId, IJavaElement input) {
+	public CategoryFilterActionGroup(final StructuredViewer viewer, final String viewerId, IJavaElement[] input) {
 		Assert.isLegal(viewer != null);
 		Assert.isLegal(viewerId != null);
 		Assert.isLegal(input != null);
@@ -254,6 +257,15 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		fMenuAction= new CategoryFilterMenuAction(input);
 		
 		fViewer.addFilter(fFilter);
+	}
+	
+	public void setInput(IJavaElement[] input) {
+		Assert.isLegal(input != null);
+		
+		fInputElement= input;
+		if (fMenuManager != null) {
+			updateMenu(fMenuManager);
+		}
 	}
 	
 	private void loadFilteredCategories() {
@@ -320,7 +332,9 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			}
 		}
 		HashSet/*<String>*/ categories= new HashSet();
-		collectCategories(fInputElement, categories);
+		for (int i= 0; i < fInputElement.length; i++) {
+			collectCategories(fInputElement[i], categories);
+		}
 		List sortedCategories= new ArrayList(categories);
 		Collections.sort(sortedCategories, new Comparator() {
 			public int compare(Object o1, Object o2) {
@@ -333,6 +347,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			manager.appendToGroup(CATEGORY_MENU_GROUP_NAME, new CategoryFilterAction(category));
 			count++;
 		}
+		fMenuAction.setInput(fInputElement);
 	}
 
 	private void collectCategories(IJavaElement element, HashSet result) {
@@ -382,10 +397,11 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		return "CategoryFilterActionGroup." + fViewerId; //$NON-NLS-1$
 	}
 	
-	private void showCategorySelectionDialog(IJavaElement input) {
+	private void showCategorySelectionDialog(IJavaElement[] input) {
 		HashSet/*<String>*/ categories= new HashSet();
-		collectCategories(input, categories);
-		
+		for (int i= 0; i < input.length; i++) {
+			collectCategories(input[i], categories);
+		}
 		CategoryFilterSelectionDialog dialog= new CategoryFilterSelectionDialog(fViewer.getControl().getShell(), new ArrayList(categories), new ArrayList(fFilteredCategories));
 		if (dialog.open() == Window.OK) {
 			Object[] selected= dialog.getResult();
