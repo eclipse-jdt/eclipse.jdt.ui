@@ -21,11 +21,14 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class RefactoringASTParser {
 
@@ -109,6 +112,16 @@ public class RefactoringASTParser {
 		return newCUNode;
 	}
 	
+	public static CompilationUnit parseWithASTProvider(ICompilationUnit unit, IProgressMonitor pm) {
+		CompilationUnit cuNode= ASTProvider.getASTProvider().getAST(unit, ASTProvider.WAIT_ACTIVE_ONLY, pm);
+		if (cuNode != null) {
+			cuNode.setProperty(SOURCE_PROPERTY, unit);
+			return cuNode;
+		} else {
+			return new RefactoringASTParser(AST.JLS3).parse(unit, null, true, true, pm);
+		}
+	}
+
 	public static ICompilationUnit getCompilationUnit(ASTNode node) {
 		Object source= node.getRoot().getProperty(SOURCE_PROPERTY);
 		if (source instanceof ICompilationUnit)

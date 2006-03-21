@@ -45,7 +45,6 @@ import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Initializer;
@@ -239,7 +238,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 
 	private void initAST() throws JavaModelException {
 		if (!fIsComposite)
-			fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, null, true, true, null);
+			fCompilationUnitNode= RefactoringASTParser.parseWithASTProvider(fCu, null);
 		ISourceRange sourceRange= fLocalVariable.getNameRange();
 		ASTNode name= NodeFinder.perform(fCompilationUnitNode, sourceRange);
 		if (name == null)

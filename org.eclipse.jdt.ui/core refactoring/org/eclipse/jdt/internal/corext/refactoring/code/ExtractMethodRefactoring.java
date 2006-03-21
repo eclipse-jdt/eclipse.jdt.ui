@@ -256,7 +256,7 @@ public class ExtractMethodRefactoring extends CommentRefactoring implements IIni
 			return result;
 		result.merge(ResourceChangeChecker.checkFilesToBeChanged(changedFiles, new SubProgressMonitor(pm, 1)));
 		
-		fRoot= new RefactoringASTParser(AST.JLS3).parse(fCUnit, null, true, true, new SubProgressMonitor(pm, 99));
+		fRoot= RefactoringASTParser.parseWithASTProvider(fCUnit, new SubProgressMonitor(pm, 99));
 		fAST= fRoot.getAST();
 		fRoot.accept(createVisitor());
 		
