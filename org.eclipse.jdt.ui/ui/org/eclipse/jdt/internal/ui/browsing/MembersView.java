@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.part.IShowInTargetList;
@@ -51,6 +52,11 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 public class MembersView extends JavaBrowsingPart implements IPropertyChangeListener {
 
 	private MemberFilterActionGroup fMemberFilterActionGroup;
+	/**
+	 * Category filter action group.
+	 * @since 3.2
+	 */
+	private CategoryFilterActionGroup fCategoryFilterActionGroup;
 
 
 	public MembersView() {
@@ -115,6 +121,16 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 		tbm.add(new LexicalSortingAction(getViewer(), JavaUI.ID_MEMBERS_VIEW));
 		fMemberFilterActionGroup.contributeToToolBar(tbm);
 		super.fillToolBar(tbm);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#fillActionBars(org.eclipse.ui.IActionBars)
+	 * @since 3.2
+	 */
+	protected void fillActionBars(IActionBars actionBars) {
+		super.fillActionBars(actionBars);
+		fCategoryFilterActionGroup= new CategoryFilterActionGroup(getViewer(), getViewSite().getId(), (IJavaElement)getInput());
+		fCategoryFilterActionGroup.contributeToViewMenu(actionBars.getMenuManager());
 	}
 
 	/**
@@ -308,6 +324,10 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 		if (fMemberFilterActionGroup != null) {
 			fMemberFilterActionGroup.dispose();
 			fMemberFilterActionGroup= null;
+		}
+		if (fCategoryFilterActionGroup != null) {
+			fCategoryFilterActionGroup.dispose();
+			fCategoryFilterActionGroup= null;
 		}
 		super.dispose();
 		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);

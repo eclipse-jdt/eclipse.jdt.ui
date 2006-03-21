@@ -70,6 +70,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.actions.CategoryFilterActionGroup;
 import org.eclipse.jdt.internal.ui.typehierarchy.AbstractHierarchyViewerSorter;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.MemberFilter;
@@ -95,6 +96,12 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	private SortByDefiningTypeAction fSortByDefiningTypeAction;
 	private ShowOnlyMainTypeAction fShowOnlyMainTypeAction;
 	private Map fTypeHierarchies= new HashMap();
+	/**
+	 * Category filter action group.
+	 * @since 3.2
+	 */
+	private CategoryFilterActionGroup fCategoryFilterActionGroup;
+	
 
 
 	private class OutlineLabelProvider extends AppearanceAwareLabelProvider {
@@ -315,6 +322,10 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		 */
 		public void dispose() {
 			super.dispose();
+			if (fCategoryFilterActionGroup != null) {
+				fCategoryFilterActionGroup.dispose();
+				fCategoryFilterActionGroup= null;
+			}
 			fTypeHierarchies.clear();
 		}
 
@@ -651,9 +662,8 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	}
 
 	protected void toggleShowInheritedMembers() {
-		long flags= AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE;
-		if (!fOutlineContentProvider.isShowingInheritedMembers())
-			flags |= JavaElementLabels.ALL_POST_QUALIFIED;
+		long flags= fInnerLabelProvider.getTextFlags();
+		flags ^= JavaElementLabels.ALL_POST_QUALIFIED;
 		fInnerLabelProvider.setTextFlags(flags);
 		fOutlineContentProvider.toggleShowInheritedMembers();
 		updateStatusFieldText();
@@ -670,6 +680,9 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		viewMenu.add(fLexicalSortingAction);
 
 		viewMenu.add(fSortByDefiningTypeAction);
+		fCategoryFilterActionGroup= new CategoryFilterActionGroup(getTreeViewer(), getId(), fInput);
+		fCategoryFilterActionGroup.contributeToViewMenu(viewMenu);
+		
 	}
 	
 	private ITypeHierarchy getSuperTypeHierarchy(IType type) {
