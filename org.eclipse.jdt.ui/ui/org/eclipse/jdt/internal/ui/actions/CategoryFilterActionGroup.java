@@ -42,6 +42,8 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.jface.text.Assert;
+
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 
@@ -236,6 +238,10 @@ public class CategoryFilterActionGroup extends ActionGroup {
 	private IMenuListener fMenuListener;
 
 	public CategoryFilterActionGroup(final StructuredViewer viewer, final String viewerId, IJavaElement input) {
+		Assert.isLegal(viewer != null);
+		Assert.isLegal(viewerId != null);
+		Assert.isLegal(input != null);
+		
 		fViewer= viewer;
 		fViewerId= viewerId;
 		fInputElement= input;
@@ -380,7 +386,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		HashSet/*<String>*/ categories= new HashSet();
 		collectCategories(input, categories);
 		
-		CategoryFilterSelectionDialog dialog= new CategoryFilterSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), new ArrayList(categories), new ArrayList(fFilteredCategories));
+		CategoryFilterSelectionDialog dialog= new CategoryFilterSelectionDialog(fViewer.getControl().getShell(), new ArrayList(categories), new ArrayList(fFilteredCategories));
 		if (dialog.open() == Window.OK) {
 			Object[] selected= dialog.getResult();
 			for (Iterator iter= categories.iterator(); iter.hasNext();) {
