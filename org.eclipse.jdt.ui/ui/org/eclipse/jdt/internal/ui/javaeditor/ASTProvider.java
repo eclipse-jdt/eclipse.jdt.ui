@@ -33,6 +33,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -571,6 +573,9 @@ public final class ASTProvider {
 	 * @return AST
 	 */
 	private CompilationUnit createAST(IJavaElement je, final IProgressMonitor progressMonitor) {
+		if (!hasSource(je))
+			return null;
+		
 		final ASTParser parser = ASTParser.newParser(SHARED_AST_LEVEL);
 		parser.setResolveBindings(true);
 		parser.setStatementsRecovery(SHARED_AST_STATEMENT_RECOVERY);
@@ -591,8 +596,6 @@ public final class ASTProvider {
 					root[0]= (CompilationUnit)parser.createAST(progressMonitor);
 				} catch (OperationCanceledException ex) {
 					root[0]= null;
-				} catch (IllegalStateException ex) {
-					root[0]= null;
 				}
 			}
 			public void handleException(Throwable ex) {
@@ -606,6 +609,26 @@ public final class ASTProvider {
 			ASTNodes.setFlagsToAST(root[0], ASTNode.PROTECT);
 		
 		return root[0];
+	}
+	
+	/**
+	 * Checks whether the given Java element has accessible source.
+	 * 
+	 * @param je the Java element to test
+	 * @return <code>true</code> if the element has source
+	 * @since 3.2
+	 */
+	private boolean hasSource(IJavaElement je) {
+		if (je == null || !je.exists())
+			return false;
+		
+		try {
+			return je instanceof ISourceReference && ((ISourceReference)je).getSource() != null;
+		} catch (JavaModelException ex) {
+			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, "Error in JDT Core during AST creation", ex);  //$NON-NLS-1$
+			JavaPlugin.getDefault().getLog().log(status);
+		}
+		return false;
 	}
 	
 	/**
