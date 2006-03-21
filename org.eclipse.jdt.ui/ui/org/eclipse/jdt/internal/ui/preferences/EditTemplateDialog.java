@@ -46,6 +46,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
@@ -601,5 +602,17 @@ public class EditTemplateDialog extends StatusDialog {
 		}
 	}
 	
+	/*
+	 * @see org.eclipse.jface.dialogs.Dialog#getDialogBoundsSettings()
+	 * @since 3.2
+	 */
+	protected IDialogSettings getDialogBoundsSettings() {
+		String sectionName= getClass().getName() + "_dialogBounds"; //$NON-NLS-1$
+		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
+		IDialogSettings section= settings.getSection(sectionName);
+		if (section == null)
+			section= settings.addNewSection(sectionName);
+		return section;
+	}
 
 }
