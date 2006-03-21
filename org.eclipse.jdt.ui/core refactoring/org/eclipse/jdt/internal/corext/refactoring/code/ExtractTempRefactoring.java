@@ -121,6 +121,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * Extract Local Variable (from selected expression inside method or initializer).
@@ -503,7 +504,7 @@ public class ExtractTempRefactoring extends CommentRefactoring implements IIniti
 			if (result.hasFatalError())
 				return result;
 
-			CompilationUnit rootNode= new RefactoringASTParser(AST.JLS3).parse(fCu, null, true, true, new SubProgressMonitor(pm, 3));
+			CompilationUnit rootNode= ASTProvider.getASTProvider().getAST(fCu, ASTProvider.WAIT_YES, new SubProgressMonitor(pm, 3));
 			
 			result.merge(checkActivationBasics(rootNode, new SubProgressMonitor(pm, 3)));
 			if ((!result.hasFatalError()) && isLiteralNodeSelected())
