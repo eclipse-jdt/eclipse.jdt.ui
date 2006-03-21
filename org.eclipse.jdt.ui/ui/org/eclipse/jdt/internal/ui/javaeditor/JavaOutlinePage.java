@@ -909,6 +909,10 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	 * @since 3.0
 	 */
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;
+	/**
+	 * Category filter action group.
+	 * @since 3.2
+	 */
 	private CategoryFilterActionGroup fCategoryFilterActionGroup;
 
 	public JavaOutlinePage(String contextMenuID, JavaEditor editor) {
