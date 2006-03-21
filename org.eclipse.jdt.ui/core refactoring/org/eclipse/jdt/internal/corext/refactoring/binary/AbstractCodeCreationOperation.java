@@ -165,7 +165,8 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 							buffer.setCharAt(index, '/');
 					}
 					store= store.getChild(new Path(buffer.toString()));
-					createPackageFragment(store, pack, new SubProgressMonitor(subMonitor, 10));
+					if (!pack.startsWith(".")) //$NON-NLS-1$
+						createPackageFragment(store, pack, new SubProgressMonitor(subMonitor, 10));
 				}
 				final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 30);
 				try {
