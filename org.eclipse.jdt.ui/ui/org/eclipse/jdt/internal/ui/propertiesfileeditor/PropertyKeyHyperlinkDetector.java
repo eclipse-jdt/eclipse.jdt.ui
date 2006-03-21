@@ -105,7 +105,7 @@ public class PropertyKeyHyperlinkDetector implements IHyperlinkDetector {
 				return null;
 			}
 
-			return new PropertyKeyHyperlink[] {new PropertyKeyHyperlink(new Region(partition.getOffset() + delta, realKey.length()), unicodeKey, fTextEditor)};
+			return new PropertyKeyHyperlink[] {new PropertyKeyHyperlink(new Region(partition.getOffset() + delta, realKey.length()), realKey, fTextEditor)};
 
 		} catch (BadLocationException ex) {
 			return null;
