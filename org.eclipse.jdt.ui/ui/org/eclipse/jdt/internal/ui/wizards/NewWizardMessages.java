@@ -24,6 +24,9 @@ public final class NewWizardMessages extends NLS {
 	public static String AbstractOpenWizardAction_noproject_message;
 	public static String AbstractOpenWizardAction_createerror_title;
 	public static String AbstractOpenWizardAction_createerror_message;
+	
+	public static String AddLibraryToBuildpathAction_ErrorTitle;
+	
 	public static String AddSourceFolderWizardPage_addSinglePattern;
 	public static String AddSourceFolderWizardPage_conflictWarning;
 	public static String AddSourceFolderWizardPage_ignoreNestingConflicts;

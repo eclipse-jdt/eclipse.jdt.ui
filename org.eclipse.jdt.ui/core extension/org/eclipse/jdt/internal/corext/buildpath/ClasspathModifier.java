@@ -95,7 +95,7 @@ public class ClasspathModifier {
 
 	private IClasspathModifierListener fListener;
 
-	protected ClasspathModifier() {
+	public ClasspathModifier() {
 		this(null);
 	}
 
@@ -1651,7 +1651,7 @@ public class ClasspathModifier {
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @throws JavaModelException in case that validation for the new entries fails
 	 */
-	private void updateClasspath(List newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	public void updateClasspath(List newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -1855,7 +1855,7 @@ public class ClasspathModifier {
 	 * @param monitor a progress monitor, can be <code>null</code>
 	 * @throws CoreException in case that validation on one of the new entries fails
 	 */
-	private void setNewEntry(List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws CoreException {
+	public void setNewEntry(List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_SetNewEntry, existingEntries.size()); 
 			for (int i= 0; i < newEntries.size(); i++) {
