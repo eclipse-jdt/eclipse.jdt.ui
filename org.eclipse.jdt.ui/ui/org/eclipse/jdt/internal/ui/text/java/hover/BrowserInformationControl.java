@@ -191,6 +191,8 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 			layout= new GridLayout(1, false);
 			layout.marginHeight= 0;
 			layout.marginWidth= 0;
+			layout.verticalSpacing= 1;
+			layout.horizontalSpacing= 1;
 			composite.setLayout(layout);
 			
 			GridData  gd= new GridData(GridData.FILL_BOTH);
@@ -383,11 +385,12 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		bounds.width= bounds.width + 15; 
 		bounds.height= bounds.height + 25; 
 		
-		if (fStatusFieldText != null) {
+		if (fStatusFieldText != null && fSeparator != null) {
 			fTextLayout.setText(fStatusFieldText);
 			Rectangle statusBounds= fTextLayout.getBounds();
-			bounds.width= Math.max(statusBounds.width, bounds.width);
-			bounds.height= Math.max(statusBounds.height, bounds.height);
+			Rectangle separatorBounds= fSeparator.getBounds();
+			bounds.width= Math.max(bounds.width, statusBounds.width);
+			bounds.height= bounds.height + statusBounds.height + separatorBounds.height;
 		}
 		
 		// Apply size constraints
