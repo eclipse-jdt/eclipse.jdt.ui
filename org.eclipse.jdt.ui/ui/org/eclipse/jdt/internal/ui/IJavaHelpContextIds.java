@@ -159,6 +159,10 @@ public interface IJavaHelpContextIds {
 	public static final String OPEN_INPUT_ACTION= 														PREFIX + "open_input_action"; //$NON-NLS-1$
 	public static final String OPEN_SUPER_IMPLEMENTATION_ACTION= 					PREFIX + "open_super_implementation_action"; //$NON-NLS-1$
 	public static final String PULL_UP_ACTION= 													PREFIX + "pull_up_action"; //$NON-NLS-1$
+	/**
+	 * @since 3.2
+	 */
+	public static final String EXTRACT_SUPERTYPE_ACTION= 													PREFIX + "extract_supertype_action"; //$NON-NLS-1$
 	public static final String PUSH_DOWN_ACTION= 													PREFIX + "push_down_action"; //$NON-NLS-1$
 	public static final String REFRESH_ACTION= 													PREFIX + "refresh_action"; //$NON-NLS-1$
 	public static final String RENAME_ACTION= 													PREFIX + "rename_action"; //$NON-NLS-1$
@@ -357,6 +361,10 @@ public interface IJavaHelpContextIds {
 	public static final String MOVE_MEMBERS_WIZARD_PAGE= 						PREFIX + "move_members_wizard_page_context"; //$NON-NLS-1$
 	public static final String MOVE_INNER_TO_TOP_WIZARD_PAGE= 				PREFIX + "move_inner_to_top_wizard_page_context"; //$NON-NLS-1$
 	public static final String PULL_UP_WIZARD_PAGE= 									PREFIX + "pull_up_wizard_page_context"; //$NON-NLS-1$
+	/**
+	 * @since 3.2
+	 */
+	public static final String EXTRACT_SUPERTYPE_WIZARD_PAGE= 									PREFIX + "extract_supertype_wizard_page_context"; //$NON-NLS-1$
 	public static final String PUSH_DOWN_WIZARD_PAGE= 									PREFIX + "push_down_wizard_page_context"; //$NON-NLS-1$
 	public static final String RENAME_PACKAGE_WIZARD_PAGE= 						PREFIX + "rename_package_wizard_page_context"; //$NON-NLS-1$
 	public static final String RENAME_TYPE_PARAMETER_WIZARD_PAGE= 						PREFIX + "rename_type_parameter_wizard_page_context"; //$NON-NLS-1$
