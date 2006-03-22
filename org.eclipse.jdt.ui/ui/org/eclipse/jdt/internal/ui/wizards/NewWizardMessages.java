@@ -132,6 +132,8 @@ public final class NewWizardMessages extends NLS {
 	public static String OutputLocation_DotAsLocation;
 	public static String OutputLocation_SettingsAsLocation;
 	
+	public static String RemoveFromBuildpathAction_ErrorTitle;
+	
 	public static String SuperInterfaceSelectionDialog_addButton_label;
 	public static String SuperInterfaceSelectionDialog_interfaceadded_info;
 	public static String SuperInterfaceSelectionDialog_interfacealreadyadded_info;
