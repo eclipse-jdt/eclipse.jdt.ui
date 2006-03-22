@@ -63,39 +63,39 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
 
 	public void test1(){
 		String string= "/**@author Foo Bar*/"; //$NON-NLS-1$
-		String expected= "<dl><dt>@author</dt><dd>Foo Bar</dd></dl>"; //$NON-NLS-1$
+		String expected= "<dl><dt>Author:</dt><dd>Foo Bar</dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 
 	public void test2(){
 		//test for bug 14658
 		String string= "/**@author Foo Bar<a href=\"mailto:foobar@eclipse.org\">foobar@eclipse.org</a>*/"; //$NON-NLS-1$
-		String expected= "<dl><dt>@author</dt><dd>Foo Bar<a href=\"mailto:foobar@eclipse.org\">foobar@eclipse.org</a></dd></dl>"; //$NON-NLS-1$
+		String expected= "<dl><dt>Author:</dt><dd>Foo Bar<a href=\"mailto:foobar@eclipse.org\">foobar@eclipse.org</a></dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 	
 	public void test3(){
 		//test for bug 14658
 		String string= "/**@author Foo Bar<a href=\"mailto:foobar@eclipse.org\">foobar@eclipse.org</a>\n *@deprecated*/"; //$NON-NLS-1$
-		String expected= "<dl><dt>@author</dt><dd>Foo Bar<a href=\"mailto:foobar@eclipse.org\">foobar@eclipse.org</a></dd><dt>@deprecated</dt><dd></dd></dl>"; //$NON-NLS-1$
+		String expected= "<dl><dt>Author:</dt><dd>Foo Bar<a href=\"mailto:foobar@eclipse.org\">foobar@eclipse.org</a></dd><dt>@deprecated</dt><dd></dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 
 	public void test4(){
 		String string= "/**@author Foo Bar\n * @deprecated*/"; //$NON-NLS-1$
-		String expected= "<dl><dt>@author</dt><dd>Foo Bar</dd><dt>@deprecated</dt><dd></dd></dl>"; //$NON-NLS-1$
+		String expected= "<dl><dt>Author:</dt><dd>Foo Bar</dd><dt>@deprecated</dt><dd></dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 	
 	public void test5(){
 		String string= "/**@author Foo Bar\n * @author Baz Fred*/"; //$NON-NLS-1$
-		String expected= "<dl><dt>@author</dt><dd>Foo Bar</dd><dt>@author</dt><dd>Baz Fred</dd></dl>"; //$NON-NLS-1$
+		String expected= "<dl><dt>Author:</dt><dd>Foo Bar</dd><dd>Baz Fred</dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 
 	public void test6(){
 		String string= "/**@author Foo Bar\n * @since 2.0*/"; //$NON-NLS-1$
-		String expected= "<dl><dt>@author</dt><dd>Foo Bar</dd><dt>@since</dt><dd>2.0</dd></dl>"; //$NON-NLS-1$
+		String expected= "<dl><dt>Author:</dt><dd>Foo Bar</dd><dt>Since:</dt><dd>2.0</dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 
@@ -106,7 +106,7 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
 			return;
 		}
 		String string= "/**@author Foo Bar<a href=\"mailto:foobar@see.org\">foobar@see.org</a>*/"; //$NON-NLS-1$
-		String expected= "<dl><dt>@author</dt><dd>Foo Bar<a href=\"mailto:foobar@see.org\">foobar@see.org</a></dd></dl>"; //$NON-NLS-1$
+		String expected= "<dl><dt>Author:</dt><dd>Foo Bar<a href=\"mailto:foobar@see.org\">foobar@see.org</a></dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 
@@ -116,7 +116,7 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
 			return;
 		}
 		String string= "/**@author Foo Bar<a href=\"mailto:foobar@see.org\">foobar@eclipse.org</a>*/"; //$NON-NLS-1$
-		String expected= "<dl><dt>@author</dt><dd>Foo Bar<a href=\"mailto:foobar@see.org\">foobar@eclipse.org</a></dd></dl>"; //$NON-NLS-1$
+		String expected= "<dl><dt>Author:</dt><dd>Foo Bar<a href=\"mailto:foobar@see.org\">foobar@eclipse.org</a></dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 
