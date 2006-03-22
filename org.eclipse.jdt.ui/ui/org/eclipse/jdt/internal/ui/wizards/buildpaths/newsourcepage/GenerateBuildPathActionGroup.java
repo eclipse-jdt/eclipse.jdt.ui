@@ -180,9 +180,9 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     	
     }
 		
-    public static class AddSourceFolderAction extends CreateSourceFolderAction {
+    public static class CreateLocalSourceFolderAction extends CreateSourceFolderAction {
 
-		public AddSourceFolderAction() {
+		public CreateLocalSourceFolderAction() {
 			super(false);
 			setText(ActionMessages.OpenNewSourceFolderWizardAction_text2); 
     		setDescription(ActionMessages.OpenNewSourceFolderWizardAction_description); 
@@ -192,9 +192,9 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     	}
     }
     
-    public static class AddLinkedSourceFolderAction extends CreateSourceFolderAction {
+    public static class CreateLinkedSourceFolderAction extends CreateSourceFolderAction {
     	
-    	public AddLinkedSourceFolderAction() {
+    	public CreateLinkedSourceFolderAction() {
     		super(true);
 			setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_label); 
     		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_tooltip);
@@ -326,10 +326,10 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
         fSite= site;
         fActions= new ArrayList();
         
-		final AddLinkedSourceFolderAction addLinkedSourceFolderAction= new AddLinkedSourceFolderAction();
+		final CreateLinkedSourceFolderAction addLinkedSourceFolderAction= new CreateLinkedSourceFolderAction();
 		fActions.add(addLinkedSourceFolderAction);
         
-        final AddSourceFolderAction addSourceFolderAction= new AddSourceFolderAction();
+        final CreateLocalSourceFolderAction addSourceFolderAction= new CreateLocalSourceFolderAction();
         fActions.add(addSourceFolderAction);
         
 		final AddFolderToBuildpathAction addFolder= new AddFolderToBuildpathAction(site);

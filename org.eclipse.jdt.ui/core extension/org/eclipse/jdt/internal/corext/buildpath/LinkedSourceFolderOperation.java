@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.GenerateBuildPathActionGroup.AddLinkedSourceFolderAction;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.GenerateBuildPathActionGroup.CreateLinkedSourceFolderAction;
 
 /**
  * Operation create a link to a source folder.
@@ -66,7 +66,7 @@ public class LinkedSourceFolderOperation extends ClasspathModifierOperation {
      * @param monitor a progress monitor, can be <code>null</code>
      */
     public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-    	AddLinkedSourceFolderAction action= new AddLinkedSourceFolderAction();
+    	CreateLinkedSourceFolderAction action= new CreateLinkedSourceFolderAction();
 		action.selectionChanged(new StructuredSelection(fCPInformationProvider.getJavaProject()));
 		action.run();
 		IPackageFragmentRoot createdElement= (IPackageFragmentRoot)action.getCreatedElement();

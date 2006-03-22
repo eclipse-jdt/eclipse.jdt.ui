@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.GenerateBuildPathActionGroup.AddSourceFolderAction;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.GenerateBuildPathActionGroup.CreateLocalSourceFolderAction;
 
 public class CreateFolderOperation extends ClasspathModifierOperation {
 	
@@ -54,7 +54,7 @@ public class CreateFolderOperation extends ClasspathModifierOperation {
 	 * {@inheritDoc}
 	 */
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-		AddSourceFolderAction action= new AddSourceFolderAction();
+		CreateLocalSourceFolderAction action= new CreateLocalSourceFolderAction();
 		action.selectionChanged(new StructuredSelection(fCPInformationProvider.getJavaProject()));
 		action.run();
 		IPackageFragmentRoot createdElement= (IPackageFragmentRoot)action.getCreatedElement();
