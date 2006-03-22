@@ -39,6 +39,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -302,11 +303,11 @@ public final class MoveInnerToTopRefactoring extends CommentRefactoring implemen
 		}
 	}
 
-	private static void addTypeParameters(final CompilationUnit declaring, final IType type, final Map map) throws JavaModelException {
-		Assert.isNotNull(declaring);
+	private static void addTypeParameters(final CompilationUnit unit, final IType type, final Map map) throws JavaModelException {
+		Assert.isNotNull(unit);
 		Assert.isNotNull(type);
 		Assert.isNotNull(map);
-		final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(type, declaring);
+		final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(type, unit);
 		if (declaration instanceof TypeDeclaration) {
 			ITypeBinding binding= null;
 			TypeParameter parameter= null;
@@ -316,8 +317,9 @@ public final class MoveInnerToTopRefactoring extends CommentRefactoring implemen
 				if (binding != null && !map.containsKey(binding.getKey()))
 					map.put(binding.getKey(), binding);
 			}
-			if (type.getDeclaringType() != null)
-				addTypeParameters(declaring, type.getDeclaringType(), map);
+			final IType declaring= type.getDeclaringType();
+			if (declaring != null && !Flags.isStatic(type.getFlags()))
+				addTypeParameters(unit, declaring, map);
 		}
 	}
 
