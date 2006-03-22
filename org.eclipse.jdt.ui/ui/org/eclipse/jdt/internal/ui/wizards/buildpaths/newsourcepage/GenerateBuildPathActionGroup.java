@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -295,7 +296,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 	}
 
     private IWorkbenchSite fSite;
-    private Action[] fActions;
+    private List/*<Action>*/ fActions;
 
 	private String fGroupName= IContextMenuConstants.GROUP_REORGANIZE;
         
@@ -323,61 +324,55 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     
     private GenerateBuildPathActionGroup(IWorkbenchSite site) {
         fSite= site;
+        fActions= new ArrayList();
+        
+		final AddLinkedSourceFolderAction addLinkedSourceFolderAction= new AddLinkedSourceFolderAction();
+		fActions.add(addLinkedSourceFolderAction);
         
         final AddSourceFolderAction addSourceFolderAction= new AddSourceFolderAction();
-		final UpdateJarFileAction updateAction= new UpdateJarFileAction();
-		final ISelectionProvider provider= fSite.getSelectionProvider();
-		provider.addSelectionChangedListener(addSourceFolderAction);
-		provider.addSelectionChangedListener(updateAction);
-
-		final EditFilterAction editFilterAction= new EditFilterAction();
-		provider.addSelectionChangedListener(editFilterAction);
-		
-		final AddLinkedSourceFolderAction addLinkedSourceFolderAction= new AddLinkedSourceFolderAction();
-		provider.addSelectionChangedListener(addLinkedSourceFolderAction);
-		
-		final AddLibraryToBuildpathAction addLibrary= new AddLibraryToBuildpathAction(site);
-		provider.addSelectionChangedListener(addLibrary);
-		
-		final EditOutputFolderAction editOutput= new EditOutputFolderAction(site);
-		provider.addSelectionChangedListener(editOutput);
-		
-		final AddArchiveToBuildpathAction addArchive= new AddArchiveToBuildpathAction(site);
-		provider.addSelectionChangedListener(addArchive);
-		
-		final RemoveFromBuildpathAction remove= new RemoveFromBuildpathAction(site);
-		provider.addSelectionChangedListener(remove);
-		
-		final ExcludeFromBuildpathAction exclude= new ExcludeFromBuildpathAction(site);
-		provider.addSelectionChangedListener(exclude);
-		
-		final IncludeToBuildpathAction include= new IncludeToBuildpathAction(site);
-		provider.addSelectionChangedListener(include);
-		
+        fActions.add(addSourceFolderAction);
+        
 		final AddFolderToBuildpathAction addFolder= new AddFolderToBuildpathAction(site);
-		provider.addSelectionChangedListener(addFolder);
+		fActions.add(addFolder);
 		
 		final AddSelectedLibraryToBuildpathAction addSelectedLibrary= new AddSelectedLibraryToBuildpathAction(site);
-		provider.addSelectionChangedListener(addSelectedLibrary);
+		fActions.add(addSelectedLibrary);
+	
+		final RemoveFromBuildpathAction remove= new RemoveFromBuildpathAction(site);
+		fActions.add(remove);
+		
+		final AddArchiveToBuildpathAction addArchive= new AddArchiveToBuildpathAction(site);
+		fActions.add(addArchive);
+		
+		final AddLibraryToBuildpathAction addLibrary= new AddLibraryToBuildpathAction(site);
+		fActions.add(addLibrary);	
+		
+		final UpdateJarFileAction updateAction= new UpdateJarFileAction();
+		fActions.add(updateAction);
+		
+		final ExcludeFromBuildpathAction exclude= new ExcludeFromBuildpathAction(site);
+		fActions.add(exclude);	
+		
+		final IncludeToBuildpathAction include= new IncludeToBuildpathAction(site);
+		fActions.add(include);		
+
+		final EditFilterAction editFilterAction= new EditFilterAction();
+		fActions.add(editFilterAction);
+			
+		final EditOutputFolderAction editOutput= new EditOutputFolderAction(site);
+		fActions.add(editOutput);
 		
 		final ConfigureBuildPathAction configure= new ConfigureBuildPathAction(site);
-		provider.addSelectionChangedListener(configure);
+		fActions.add(configure);
 		
-		fActions= new Action[] {
-				addLinkedSourceFolderAction,
-				addSourceFolderAction,
-				addFolder,
-				addSelectedLibrary,
-				remove,
-				addArchive,
-				addLibrary,
-				updateAction,
-				exclude,
-				include,
-				editFilterAction,
-				editOutput,
-				configure
-		};
+		final ISelectionProvider provider= fSite.getSelectionProvider();
+		for (Iterator iter= fActions.iterator(); iter.hasNext();) {
+			Action action= (Action)iter.next();
+			if (action instanceof ISelectionChangedListener) {
+				provider.addSelectionChangedListener((ISelectionChangedListener)action);
+			}
+		}
+		
     }
             
     /* (non-Javadoc)
@@ -409,22 +404,22 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
         
 	private void fillViewSubMenu(IMenuManager source) {
         int added= 0;
-        
-        Action[] actions= fActions;
-        for (int i= 0; i < actions.length; i++) {
+        int i=0;
+        for (Iterator iter= fActions.iterator(); iter.hasNext();) {
+			Action action= (Action)iter.next();
             if (i == 2)
                 source.add(new Separator(GROUP_BUILDPATH));
             else if (i == 8)
                 source.add(new Separator(GROUP_FILTER));
             else if (i == 10)
                 source.add(new Separator(GROUP_CUSTOMIZE));
-            added+= addAction(source, actions[i]);
-        }
+            added+= addAction(source, action);
+            i++;
+		}
 
         if (added == 0) {
         	source.add(fNoActionAvailable);
         }
-        
     }
         
     private void setGlobalActionHandlers(IActionBars actionBar) {
@@ -458,8 +453,8 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 	public void dispose() {
 		if (fActions != null) {
 			final ISelectionProvider provider= fSite.getSelectionProvider();
-			for (int index= 0; index < fActions.length; index++) {
-				final IAction action= fActions[index];
+			for (Iterator iter= fActions.iterator(); iter.hasNext();) {
+				Action action= (Action)iter.next();
 				if (action instanceof ISelectionChangedListener)
 					provider.removeSelectionChangedListener((ISelectionChangedListener) action);
 			}
