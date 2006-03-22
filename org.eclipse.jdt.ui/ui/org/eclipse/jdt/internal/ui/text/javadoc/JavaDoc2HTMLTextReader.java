@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 	private String fReturn;
 	private List fExceptions;
 	private List fSees;
+	private List fSince;
 	private List fRest; // list of Pair objects
 
 	public JavaDoc2HTMLTextReader(Reader reader) {
@@ -196,6 +197,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_returns_section, fReturn);
 		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_throws_section, fExceptions, false);
 		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_see_section, fSees, false);
+		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_since_section, fSince, false);
 		printRest(buffer);
 		buffer.append("</dl>"); //$NON-NLS-1$
 
@@ -216,6 +218,8 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 			fExceptions.add(tagContent);
 		else if ("@see".equals(tag)) //$NON-NLS-1$
 			fSees.add(subsituteQualification(tagContent));
+		else if ("@since".equals(tag)) //$NON-NLS-1$
+			fSince.add(subsituteQualification(tagContent));
 		else if (tagContent != null)
 			fRest.add(new Pair(tag, tagContent));
 	}
@@ -228,6 +232,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 		fParameters= new ArrayList();
 		fExceptions= new ArrayList();
 		fSees= new ArrayList();
+		fSince= new ArrayList();
 		fRest= new ArrayList();
 
 		StringBuffer buffer= new StringBuffer();
