@@ -142,14 +142,12 @@ public class AddLibraryToBuildpathAction extends Action implements ISelectionCha
 						if (pm.isCanceled())
 							throw new InterruptedException();
 
-						ClasspathModifier modifier= new ClasspathModifier();
-
 						List existingEntries= ClasspathModifier.getExistingEntries(project);
-						modifier.setNewEntry(existingEntries, addedEntries, project, new SubProgressMonitor(pm, 1));
+						ClasspathModifier.setNewEntry(existingEntries, addedEntries, project, new SubProgressMonitor(pm, 1));
 						if (pm.isCanceled())
 							throw new InterruptedException();
 
-						modifier.updateClasspath(existingEntries, project, new SubProgressMonitor(pm, 1));
+						ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(pm, 1));
 						if (pm.isCanceled())
 							throw new InterruptedException();
 

@@ -32,6 +32,9 @@ public final class NewWizardMessages extends NLS {
 	public static String AddSourceFolderWizardPage_ignoreNestingConflicts;
 	public static String AddSourceFolderWizardPage_replaceSourceFolderInfo;
 	
+	public static String EditOutputFolderAction_ErrorDescription;
+	public static String EditOutputFolderAction_ProgressMonitorDescription;
+	
 	public static String NewElementWizard_op_error_title;
 	public static String NewElementWizard_op_error_message;
 	public static String NewElementWizard_typecomment_deprecated_title;

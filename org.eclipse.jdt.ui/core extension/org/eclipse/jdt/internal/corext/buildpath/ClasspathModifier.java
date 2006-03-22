@@ -1113,7 +1113,7 @@ public class ClasspathModifier {
 	 * is a source folder 
 	 * 
 	 * @param project the project to test
-	 * @return <code>true</code> if is theproject is a source folder
+	 * @return <code>true</code> if <code>project</code> is a source folder
 	 * <code>false</code> otherwise.
 	 */
 	public static boolean isSourceFolder(IJavaProject project) throws JavaModelException {
@@ -1250,7 +1250,7 @@ public class ClasspathModifier {
 	 * @return returns the Java project
 	 * @throws CoreException
 	 */
-	private IJavaProject removeFromClasspath(IJavaProject project, List existingEntries, IProgressMonitor monitor) throws CoreException {
+	public static IJavaProject removeFromClasspath(IJavaProject project, List existingEntries, IProgressMonitor monitor) throws CoreException {
 		CPListElement elem= getListElement(project.getPath(), existingEntries);
 		if (elem != null) {
 			existingEntries.remove(elem);
@@ -1391,7 +1391,7 @@ public class ClasspathModifier {
 	 * @return a <code>IResource</code> corresponding to the excluded element
 	 * @throws JavaModelException 
 	 */
-	private IResource exclude(String name, IPath fullPath, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	private static IResource exclude(String name, IPath fullPath, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		IResource result;
@@ -1433,7 +1433,7 @@ public class ClasspathModifier {
 	 * @param project the Java project
 	 * @param monitor progress monitor, can be <code>null</code>
 	 */
-	private void exclude(IPath path, List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	public static void exclude(IPath path, List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -1594,7 +1594,7 @@ public class ClasspathModifier {
 	 * @return an attribute representing the modified output folder
 	 * @throws JavaModelException 
 	 */
-	private CPListElementAttribute resetOutputFolder(CPListElement entry, IJavaProject project) throws JavaModelException {
+	public static CPListElementAttribute resetOutputFolder(CPListElement entry, IJavaProject project) throws JavaModelException {
 		entry.setAttribute(CPListElement.OUTPUT, null);
 		CPListElementAttribute outputFolder= new CPListElementAttribute(entry, CPListElement.OUTPUT, entry.getAttribute(CPListElement.OUTPUT), true);
 		return outputFolder;
@@ -1612,7 +1612,7 @@ public class ClasspathModifier {
 	 * the second <code>CPListElement</code> parameter itself if there is no match.
 	 * @throws JavaModelException
 	 */
-	private CPListElement getClasspathEntry(List elements, CPListElement cpElement) throws JavaModelException {
+	public static CPListElement getClasspathEntry(List elements, CPListElement cpElement) throws JavaModelException {
 		for (int i= 0; i < elements.size(); i++) {
 			if (((CPListElement) elements.get(i)).getPath().equals(cpElement.getPath()))
 				return (CPListElement) elements.get(i);
@@ -1629,7 +1629,7 @@ public class ClasspathModifier {
 	 * @return the mathed <code>CPListElement</code> or <code>null</code> if 
 	 * no match could be found
 	 */
-	private CPListElement getListElement(IPath path, List elements) {
+	private static CPListElement getListElement(IPath path, List elements) {
 		for (int i= 0; i < elements.size(); i++) {
 			CPListElement element= (CPListElement) elements.get(i);
 			if (element.getEntryKind() == IClasspathEntry.CPE_SOURCE && element.getPath().equals(path)) {
@@ -1651,7 +1651,7 @@ public class ClasspathModifier {
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @throws JavaModelException in case that validation for the new entries fails
 	 */
-	public void updateClasspath(List newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	private void updateClasspath(List newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -1664,6 +1664,23 @@ public class ClasspathModifier {
 
 			project.setRawClasspath(entries, outputLocation, new SubProgressMonitor(monitor, 2));
 			fireEvent(newEntries);
+		} finally {
+			monitor.done();
+		}
+	}
+	
+	public static void commitClassPath(List newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+		if (monitor == null)
+			monitor= new NullProgressMonitor();
+		try {
+			IClasspathEntry[] entries= convert(newEntries);
+			IPath outputLocation= project.getOutputLocation();
+
+			IJavaModelStatus status= JavaConventions.validateClasspath(project, entries, outputLocation);
+			if (!status.isOK())
+				throw new JavaModelException(status);
+
+			project.setRawClasspath(entries, outputLocation, new SubProgressMonitor(monitor, 2));
 		} finally {
 			monitor.done();
 		}
@@ -1713,7 +1730,7 @@ public class ClasspathModifier {
 	 * @return the resource matching to the path. Can be
 	 * either an <code>IFile</code> or an <code>IFolder</code>.
 	 */
-	private IResource getResource(IPath path, IJavaProject project) {
+	private static IResource getResource(IPath path, IJavaProject project) {
 		return project.getProject().getWorkspace().getRoot().findMember(path);
 	}
 
@@ -1776,7 +1793,7 @@ public class ClasspathModifier {
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @return array which does not contain <code>path</code>
 	 */
-	private IPath[] remove(IPath path, IPath[] paths, IProgressMonitor monitor) {
+	private static IPath[] remove(IPath path, IPath[] paths, IProgressMonitor monitor) {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -1855,7 +1872,7 @@ public class ClasspathModifier {
 	 * @param monitor a progress monitor, can be <code>null</code>
 	 * @throws CoreException in case that validation on one of the new entries fails
 	 */
-	public void setNewEntry(List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws CoreException {
+	public static void setNewEntry(List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_SetNewEntry, existingEntries.size()); 
 			for (int i= 0; i < newEntries.size(); i++) {
@@ -1876,7 +1893,7 @@ public class ClasspathModifier {
 	 * @return an array containing build path entries 
 	 * corresponding to the list
 	 */
-	private IClasspathEntry[] convert(List list) {
+	private static IClasspathEntry[] convert(List list) {
 		IClasspathEntry[] entries= new IClasspathEntry[list.size()];
 		for (int i= 0; i < list.size(); i++) {
 			CPListElement element= (CPListElement) list.get(i);
@@ -1896,7 +1913,7 @@ public class ClasspathModifier {
 	 * @param project the Java project
 	 * @throws CoreException in case that validation fails
 	 */
-	private void validateAndAddEntry(CPListElement entry, List existingEntries, IJavaProject project) throws CoreException {
+	private static void validateAndAddEntry(CPListElement entry, List existingEntries, IJavaProject project) throws CoreException {
 		IPath path= entry.getPath();
 		IPath projPath= project.getProject().getFullPath();
 		IWorkspaceRoot workspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
@@ -1972,7 +1989,7 @@ public class ClasspathModifier {
 		}
 	}
 
-	private void insertAtEndOfCategory(CPListElement entry, List existingEntries) {
+	private static void insertAtEndOfCategory(CPListElement entry, List existingEntries) {
 		int length= existingEntries.size();
 		CPListElement[] elements= (CPListElement[])existingEntries.toArray(new CPListElement[length]);
 		int i= 0;
@@ -2002,7 +2019,7 @@ public class ClasspathModifier {
 		}
 	}
 
-	private boolean isExternalArchiveOrLibrary(CPListElement entry, IJavaProject project) {
+	private static boolean isExternalArchiveOrLibrary(CPListElement entry, IJavaProject project) {
 		if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY || entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 			if (entry.getResource() instanceof IFolder) {
 				return false;
