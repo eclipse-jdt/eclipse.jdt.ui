@@ -1477,7 +1477,7 @@ public class ClasspathModifier {
 	 * @return the resulting <code>IResource<code>
 	 * @throws JavaModelException
 	 */
-	private IResource exclude(IJavaElement javaElement, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	public static IResource exclude(IJavaElement javaElement, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {

@@ -361,6 +361,9 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		final RemoveFromBuildpathAction remove= new RemoveFromBuildpathAction(site);
 		provider.addSelectionChangedListener(remove);
 		
+		final ExcludeFromBuildathAction exclude= new ExcludeFromBuildathAction(site);
+		provider.addSelectionChangedListener(exclude);
+		
 		final BuildActionSelectionContext context= new BuildActionSelectionContext();
 		fActions= new Action[] {
 				addLinkedSourceFolderAction,
@@ -371,7 +374,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 				addArchive,
 				addLibrary,
 				updateAction,
-				createBuildPathAction(fSite, IClasspathInformationProvider.EXCLUDE, context),
+				exclude,
 				createBuildPathAction(fSite, IClasspathInformationProvider.UNEXCLUDE, context),
 				editFilterAction,
 				editOutput,

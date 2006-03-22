@@ -36,6 +36,8 @@ public final class NewWizardMessages extends NLS {
 	public static String EditOutputFolderAction_ErrorDescription;
 	public static String EditOutputFolderAction_ProgressMonitorDescription;
 	
+	public static String ExcludeFromBuildathAction_ErrorTitle;
+	
 	public static String NewElementWizard_op_error_title;
 	public static String NewElementWizard_op_error_message;
 	public static String NewElementWizard_typecomment_deprecated_title;
