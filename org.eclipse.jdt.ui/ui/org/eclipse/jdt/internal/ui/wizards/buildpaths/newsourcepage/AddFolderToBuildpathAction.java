@@ -171,7 +171,7 @@ public class AddFolderToBuildpathAction extends Action implements ISelectionChan
 		}
 		
 		try {
-			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 2 * elements.size() + 3); 
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, elements.size() + 4); 
 			IWorkspaceRoot workspaceRoot= JavaPlugin.getWorkspace().getRoot();
 			
 			if (removeOldClassFiles) {
@@ -182,12 +182,16 @@ public class AddFolderToBuildpathAction extends Action implements ISelectionChan
 			}
 
 			if (!project.getOutputLocation().equals(outputLocation)) {
-				project.setOutputLocation(outputLocation, null);
+				project.setOutputLocation(outputLocation, new SubProgressMonitor(monitor, 1));
+			} else {
+				monitor.worked(1);
 			}
 
 			List existingEntries= ClasspathModifier.getExistingEntries(project);
 			if (removeProjectFromClasspath) {
-				ClasspathModifier.removeFromClasspath(project, existingEntries, null);
+				ClasspathModifier.removeFromClasspath(project, existingEntries, new SubProgressMonitor(monitor, 1));
+			} else {
+				monitor.worked(1);
 			}
 
 			List newEntries= new ArrayList();
@@ -195,9 +199,9 @@ public class AddFolderToBuildpathAction extends Action implements ISelectionChan
 				Object element= elements.get(i);
 				CPListElement entry;
 				if (element instanceof IResource)
-					entry= ClasspathModifier.addToClasspath((IResource) element, existingEntries, newEntries, project, monitor);
+					entry= ClasspathModifier.addToClasspath((IResource) element, existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
 				else
-					entry= ClasspathModifier.addToClasspath((IJavaElement) element, existingEntries, newEntries, project, monitor);
+					entry= ClasspathModifier.addToClasspath((IJavaElement) element, existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
 				newEntries.add(entry);
 			}
 
