@@ -355,6 +355,9 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		final EditOutputFolderAction editOutput= new EditOutputFolderAction(site);
 		provider.addSelectionChangedListener(editOutput);
 		
+		final AddArchiveToBuildpathAction addArchive= new AddArchiveToBuildpathAction(site);
+		provider.addSelectionChangedListener(addArchive);
+		
 		final BuildActionSelectionContext context= new BuildActionSelectionContext();
 		fActions= new Action[] {
 				addLinkedSourceFolderAction,
@@ -362,7 +365,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 				createBuildPathAction(fSite, IClasspathInformationProvider.ADD_SEL_SF_TO_BP, context),
 				createBuildPathAction(fSite, IClasspathInformationProvider.ADD_SEL_LIB_TO_BP, context),
 				createBuildPathAction(fSite, IClasspathInformationProvider.REMOVE_FROM_BP, context),
-				createBuildPathAction(fSite, IClasspathInformationProvider.ADD_JAR_TO_BP, context),
+				addArchive,
 				addLibrary,
 				updateAction,
 				createBuildPathAction(fSite, IClasspathInformationProvider.EXCLUDE, context),
