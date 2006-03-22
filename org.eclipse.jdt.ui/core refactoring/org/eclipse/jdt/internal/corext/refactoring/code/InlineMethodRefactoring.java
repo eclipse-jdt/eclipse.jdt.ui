@@ -388,8 +388,6 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 				int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 				final IMethodBinding binding= fSourceProvider.getDeclaration().resolveBinding();
 				final ITypeBinding declaring= binding.getDeclaringClass();
-				if (declaring != null && declaring.isNested() && !declaring.isMember())
-					flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 				if (!Modifier.isPrivate(binding.getModifiers()))
 					flags|= RefactoringDescriptor.MULTI_CHANGE;
 				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_METHOD, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
