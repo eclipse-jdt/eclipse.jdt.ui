@@ -41,6 +41,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 	private List fParameters;
 	private String fReturn;
 	private List fExceptions;
+	private List fAuthors;
 	private List fSees;
 	private List fSince;
 	private List fRest; // list of Pair objects
@@ -196,6 +197,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_parameters_section, fParameters, true);
 		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_returns_section, fReturn);
 		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_throws_section, fExceptions, false);
+		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_author_section, fAuthors, false);
 		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_see_section, fSees, false);
 		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_since_section, fSince, false);
 		printRest(buffer);
@@ -216,6 +218,8 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 			fExceptions.add(tagContent);
 		else if ("@throws".equals(tag)) //$NON-NLS-1$
 			fExceptions.add(tagContent);
+		else if ("@author".equals(tag)) //$NON-NLS-1$
+			fAuthors.add(subsituteQualification(tagContent));
 		else if ("@see".equals(tag)) //$NON-NLS-1$
 			fSees.add(subsituteQualification(tagContent));
 		else if ("@since".equals(tag)) //$NON-NLS-1$
@@ -231,6 +235,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 
 		fParameters= new ArrayList();
 		fExceptions= new ArrayList();
+		fAuthors= new ArrayList();
 		fSees= new ArrayList();
 		fSince= new ArrayList();
 		fRest= new ArrayList();
