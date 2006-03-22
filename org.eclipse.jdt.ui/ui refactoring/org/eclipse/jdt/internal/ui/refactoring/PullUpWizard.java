@@ -21,6 +21,9 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  */
 public final class PullUpWizard extends RefactoringWizard {
 
+	/** The page name */
+	private static final String PAGE_NAME= "PullUpMemberPage"; //$NON-NLS-1$
+
 	/**
 	 * Creates a new pull up wizard.
 	 * 
@@ -38,7 +41,7 @@ public final class PullUpWizard extends RefactoringWizard {
 	 */
 	protected void addUserInputPages() {
 		final PullUpMethodPage page= new PullUpMethodPage();
-		addPage(new PullUpMemberPage(page));
+		addPage(new PullUpMemberPage(PullUpWizard.PAGE_NAME, page));
 		addPage(page);
 	}
 }

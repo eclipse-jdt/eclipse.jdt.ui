@@ -22,6 +22,9 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  */
 public final class ExtractSupertypeWizard extends RefactoringWizard {
 
+	/** The page name */
+	private static final String PAGE_NAME= "ExtractSupertypeMemberPage"; //$NON-NLS-1$
+
 	/**
 	 * Creates a new extract supertype wizard.
 	 * 
@@ -39,7 +42,7 @@ public final class ExtractSupertypeWizard extends RefactoringWizard {
 	 */
 	protected void addUserInputPages() {
 		final PullUpMethodPage page= new PullUpMethodPage();
-		addPage(new ExtractSupertypeMemberPage(page));
+		addPage(new ExtractSupertypeMemberPage(PAGE_NAME, page));
 		addPage(page);
 	}
 }

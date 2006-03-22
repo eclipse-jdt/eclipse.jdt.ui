@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTy
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -80,6 +81,8 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		private static final String SETTING_REPLACE= "Replace"; //$NON-NLS-1$
 		private static final String SETTING_COMMENTS= "Comments"; //$NON-NLS-1$
 		private static final String SETTING_INSTANCEOF= "InstanceOf"; //$NON-NLS-1$
+		private Button fSelectAllButton;
+		private Button fDeselectAllButton;
 
 		public ExtractInterfaceInputPage() {
 			super(DESCRIPTION, true);
@@ -177,7 +180,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			fTableViewer.setLabelProvider(createLabelProvider());
 			fTableViewer.setContentProvider(new ArrayContentProvider());
 			try {
-				fTableViewer.setInput(getExtractInterfaceRefactoring().getExtractInterfaceProcessor().getExtractableMembers());
+				fTableViewer.setInput(getExtractableMembers());
 			} catch (JavaModelException e) {
 				ExceptionHandler.handle(e, RefactoringMessages.ExtractInterfaceInputPage_Extract_Interface, RefactoringMessages.ExtractInterfaceInputPage_Internal_Error); 
 				fTableViewer.setInput(new IMember[0]);
@@ -186,18 +189,33 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 				public void checkStateChanged(CheckStateChangedEvent event) {
 					ExtractInterfaceInputPage.this.updateUIElementEnablement();
 				}
-			}); 
+			});
+			fTableViewer.setSorter(new JavaElementSorter());
 			fTableViewer.getControl().setEnabled(anyMembersToExtract());
 
 			createButtonComposite(composite);
 		}
 
+		private IMember[] getExtractableMembers() throws JavaModelException {
+			return getExtractInterfaceRefactoring().getExtractInterfaceProcessor().getExtractableMembers();
+		}
+
 		protected void updateUIElementEnablement() {
-			final boolean enabled= containsMethods(getCheckedMembers());
+			final IMember[] checked= getCheckedMembers();
+			IMember[] extractable;
+			try {
+				extractable= getExtractableMembers();
+			} catch (JavaModelException exception) {
+				extractable= new IMember[0];
+				JavaPlugin.log(exception);
+			}
+			final boolean enabled= containsMethods(checked);
 			fDeclarePublicCheckbox.setEnabled(enabled);
 			fDeclareAbstractCheckbox.setEnabled(enabled);
 			fGenerateCommentsCheckbox.setEnabled(enabled);
 			fInstanceofCheckbox.setEnabled(fReplaceAllCheckbox.getSelection());
+			fSelectAllButton.setEnabled(checked.length < extractable.length);
+			fDeselectAllButton.setEnabled(checked.length > 0);
 		}
 
 		private static boolean containsMethods(IMember[] members) {
@@ -227,24 +245,24 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			gd= new GridData(GridData.FILL_VERTICAL);
 			buttonComposite.setLayoutData(gd);
 		
-			Button selectAll= new Button(buttonComposite, SWT.PUSH);
-			selectAll.setText(RefactoringMessages.ExtractInterfaceInputPage_Select_All); 
-			selectAll.setEnabled(anyMembersToExtract());
-			selectAll.setLayoutData(new GridData());
-			SWTUtil.setButtonDimensionHint(selectAll);
-			selectAll.addSelectionListener(new SelectionAdapter(){
+			fSelectAllButton= new Button(buttonComposite, SWT.PUSH);
+			fSelectAllButton.setText(RefactoringMessages.ExtractInterfaceInputPage_Select_All); 
+			fSelectAllButton.setEnabled(anyMembersToExtract());
+			fSelectAllButton.setLayoutData(new GridData());
+			SWTUtil.setButtonDimensionHint(fSelectAllButton);
+			fSelectAllButton.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
 					fTableViewer.setAllChecked(true);
 					ExtractInterfaceInputPage.this.updateUIElementEnablement();
 				}
 			});
 		
-			Button deSelectAll= new Button(buttonComposite, SWT.PUSH);
-			deSelectAll.setText(RefactoringMessages.ExtractInterfaceInputPage_Deselect_All); 
-			deSelectAll.setEnabled(anyMembersToExtract());
-			deSelectAll.setLayoutData(new GridData());
-			SWTUtil.setButtonDimensionHint(deSelectAll);
-			deSelectAll.addSelectionListener(new SelectionAdapter(){
+			fDeselectAllButton= new Button(buttonComposite, SWT.PUSH);
+			fDeselectAllButton.setText(RefactoringMessages.ExtractInterfaceInputPage_Deselect_All); 
+			fDeselectAllButton.setEnabled(anyMembersToExtract());
+			fDeselectAllButton.setLayoutData(new GridData());
+			SWTUtil.setButtonDimensionHint(fDeselectAllButton);
+			fDeselectAllButton.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
 					fTableViewer.setAllChecked(false);
 					ExtractInterfaceInputPage.this.updateUIElementEnablement();
@@ -254,7 +272,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 
 		private boolean anyMembersToExtract() {
 			try {
-				return getExtractInterfaceRefactoring().getExtractInterfaceProcessor().getExtractableMembers().length > 0;
+				return getExtractableMembers().length > 0;
 			} catch (JavaModelException e) {
 				return false;
 			}

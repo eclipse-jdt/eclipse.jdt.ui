@@ -256,13 +256,25 @@ public final class RefactoringMessages extends NLS {
 
 	public static String ExtractSuperTypeAction_unavailable;
 
+	public static String ExtractSupertypeMemberPage_add_button_label;
+
+	public static String ExtractSupertypeMemberPage_choose_type_caption;
+
+	public static String ExtractSupertypeMemberPage_choose_type_message;
+
 	public static String ExtractSupertypeMemberPage_create_stubs_label;
 
 	public static String ExtractSupertypeMemberPage_extract_supertype;
 
 	public static String ExtractSupertypeMemberPage_name_label;
 
+	public static String ExtractSupertypeMemberPage_no_members_selected;
+
 	public static String ExtractSupertypeMemberPage_page_title;
+
+	public static String ExtractSupertypeMemberPage_remove_button_label;
+
+	public static String ExtractSupertypeMemberPage_types_list_caption;
 
 	public static String ExtractSupertypeMemberPage_use_instanceof_label;
 
