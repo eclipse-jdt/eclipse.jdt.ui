@@ -38,7 +38,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
-import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -1572,7 +1571,7 @@ public final class MoveInnerToTopRefactoring extends CommentRefactoring implemen
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
 				if (element == null || element.getElementType() != IJavaElement.TYPE)
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_MOVE_INNER));
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_MOVE_INNER));
 				else {
 					fType= (IType) element;
 					fCodeGenerationSettings= JavaPreferencesSettings.getCodeGenerationSettings(fType.getJavaProject());
@@ -1583,7 +1582,7 @@ public final class MoveInnerToTopRefactoring extends CommentRefactoring implemen
 					}
 				}
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
 			final String fieldName= extended.getAttribute(ATTRIBUTE_FIELD_NAME);
 			if (fieldName != null && !"".equals(fieldName)) //$NON-NLS-1$
 				fEnclosingInstanceFieldName= fieldName;
@@ -1594,22 +1593,22 @@ public final class MoveInnerToTopRefactoring extends CommentRefactoring implemen
 			if (createField != null) {
 				fCreateInstanceField= Boolean.valueOf(createField).booleanValue();
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FIELD));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FIELD));
 			final String markFinal= extended.getAttribute(ATTRIBUTE_FINAL);
 			if (markFinal != null) {
 				fMarkInstanceFieldAsFinal= Boolean.valueOf(markFinal).booleanValue();
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FINAL));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FINAL));
 			final String possible= extended.getAttribute(ATTRIBUTE_POSSIBLE);
 			if (possible != null) {
 				fIsInstanceFieldCreationPossible= Boolean.valueOf(possible).booleanValue();
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_POSSIBLE));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_POSSIBLE));
 			final String mandatory= extended.getAttribute(ATTRIBUTE_MANDATORY);
 			if (mandatory != null)
 				fIsInstanceFieldCreationMandatory= Boolean.valueOf(mandatory).booleanValue();
 			else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_MANDATORY));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_MANDATORY));
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();

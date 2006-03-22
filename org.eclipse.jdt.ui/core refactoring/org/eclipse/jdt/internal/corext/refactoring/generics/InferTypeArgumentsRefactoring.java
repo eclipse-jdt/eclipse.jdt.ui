@@ -38,7 +38,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
-import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -536,7 +535,7 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 				public final ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
 					final IJavaProject project= getSingleProject();
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INFER_TYPE_ARGUMENTS, project != null ? project.getElementName() : null, project != null ? NLS.bind(RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description_project, project.getElementName()) : RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description, getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INFER_TYPE_ARGUMENTS, project != null ? project.getElementName() : null, project != null ? Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description_project, project.getElementName()) : RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description, getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 					for (int index= 0; index < fElements.length; index++)
 						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1), descriptor.elementToHandle(fElements[index]));
 					arguments.put(ATTRIBUTE_CLONE, Boolean.valueOf(fAssumeCloneReturnsSameType).toString());
@@ -571,12 +570,12 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 			if (clone != null) {
 				fAssumeCloneReturnsSameType= Boolean.valueOf(clone).booleanValue();
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_CLONE));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_CLONE));
 			final String leave= generic.getAttribute(ATTRIBUTE_LEAVE);
 			if (leave != null) {
 				fLeaveUnconstrainedRaw= Boolean.valueOf(leave).booleanValue();
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_LEAVE));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_LEAVE));
 			int count= 1;
 			final List elements= new ArrayList();
 			String handle= null;
@@ -585,7 +584,7 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 			while ((handle= generic.getAttribute(attribute)) != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(generic.getProject(), handle);
 				if (element == null)
-					status.merge(RefactoringStatus.createWarningStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INFER_TYPE_ARGUMENTS)));
+					status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INFER_TYPE_ARGUMENTS)));
 				else
 					elements.add(element);
 				count++;
@@ -593,7 +592,7 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 			}
 			fElements= (IJavaElement[]) elements.toArray(new IJavaElement[elements.size()]);
 			if (elements.isEmpty())
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INFER_TYPE_ARGUMENTS));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INFER_TYPE_ARGUMENTS));
 			if (!status.isOK())
 				return status;
 		} else

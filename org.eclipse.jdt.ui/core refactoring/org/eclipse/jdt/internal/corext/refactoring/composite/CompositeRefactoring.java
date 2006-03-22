@@ -35,7 +35,6 @@ import org.eclipse.ltk.core.refactoring.MultiStateTextFileChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
-import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -48,6 +47,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.code.CommentRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -248,7 +248,7 @@ public class CompositeRefactoring extends CommentRefactoring implements IInitial
 						if (!status.hasFatalError())
 							return refactoring.checkInitialConditions(new SubProgressMonitor(monitor, 1));
 					}
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.CompositeRefactoring_error_setup, refactoring.getName()));
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.CompositeRefactoring_error_setup, refactoring.getName()));
 				}
 			}
 

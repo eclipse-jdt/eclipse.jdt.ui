@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import org.eclipse.osgi.util.NLS;
 
-public class FixMessages extends NLS {
+public final class FixMessages extends NLS {
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.corext.fix.FixMessages"; //$NON-NLS-1$
 
 	private FixMessages() {

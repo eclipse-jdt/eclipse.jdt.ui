@@ -39,7 +39,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
-import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -2397,7 +2396,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
 				if (element == null || element.getElementType() != IJavaElement.METHOD)
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_CHANGE_METHOD_SIGNATURE));
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_CHANGE_METHOD_SIGNATURE));
 				else {
 					fMethod= (IMethod) element;
 					fMethodName= fMethod.getElementName();
@@ -2405,11 +2404,11 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 						fVisibility= JdtFlags.getVisibilityCode(fMethod);
 						fReturnTypeInfo= new ReturnTypeInfo(Signature.toString(Signature.getReturnType(fMethod.getSignature())));
 					} catch (JavaModelException exception) {
-						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_VISIBILITY));
+						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_VISIBILITY));
 					}
 				}
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
 			final String name= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_NAME);
 			if (name != null) {
 				fMethodName= name;
@@ -2417,7 +2416,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 				if (status.hasError())
 					return status;
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_NAME));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_NAME));
 			final String type= extended.getAttribute(ATTRIBUTE_RETURN);
 			if (type != null && !"".equals(type)) //$NON-NLS-1$
 				fReturnTypeInfo= new ReturnTypeInfo(type);
@@ -2427,7 +2426,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 				try {
 					flag= Integer.parseInt(visibility);
 				} catch (NumberFormatException exception) {
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_VISIBILITY));
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_VISIBILITY));
 				}
 				fVisibility= flag;
 			}
@@ -2438,7 +2437,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 			while ((value= extended.getAttribute(attribute)) != null) {
 				StringTokenizer tokenizer= new StringTokenizer(value);
 				if (tokenizer.countTokens() < 6)
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
 				String oldTypeName= tokenizer.nextToken();
 				String oldName= tokenizer.nextToken();
 				String oldIndex= tokenizer.nextToken();
@@ -2454,7 +2453,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 						info.markAsDeleted();
 					fParameterInfos.add(info);
 				} catch (NumberFormatException exception) {
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
 				}
 				final String result= extended.getAttribute(ATTRIBUTE_DEFAULT + count);
 				if (result != null && !"".equals(result)) //$NON-NLS-1$
@@ -2471,16 +2470,16 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 				if (kind != null) {
 					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
 					if (element == null)
-						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_CHANGE_METHOD_SIGNATURE));
+						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_CHANGE_METHOD_SIGNATURE));
 					else {
 						try {
 							info= new ExceptionInfo((IType) element, Integer.valueOf(kind).intValue(), null);
 						} catch (NumberFormatException exception) {
-							return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_KIND));
+							return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_KIND));
 						}
 					}
 				} else
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_KIND));
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_KIND));
 				if (info != null)
 					fExceptionInfos.add(info);
 				count++;
@@ -2490,12 +2489,12 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 			if (deprecate != null) {
 				fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
 			final String delegate= extended.getAttribute(ATTRIBUTE_DELEGATE);
 			if (delegate != null) {
 				fDelegateUpdating= Boolean.valueOf(delegate).booleanValue();
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATE));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATE));
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();

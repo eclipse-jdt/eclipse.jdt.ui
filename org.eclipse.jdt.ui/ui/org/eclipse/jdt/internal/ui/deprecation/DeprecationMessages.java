@@ -15,7 +15,7 @@ import org.eclipse.osgi.util.NLS;
 /**
  * Description
  */
-public class DeprecationMessages extends NLS {
+public final class DeprecationMessages extends NLS {
 
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.deprecation.DeprecationMessages"; //$NON-NLS-1$
 

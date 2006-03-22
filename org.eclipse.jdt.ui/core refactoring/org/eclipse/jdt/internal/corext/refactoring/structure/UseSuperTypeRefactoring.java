@@ -14,11 +14,11 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
-import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 /**
  * Refactoring to replace type occurrences by a super type where possible.
@@ -66,6 +66,6 @@ public final class UseSuperTypeRefactoring extends ProcessorBasedRefactoring imp
 		if (processor instanceof IInitializableRefactoringComponent) {
 			return ((IInitializableRefactoringComponent) processor).initialize(arguments);
 		}
-		return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.ProcessorBasedRefactoring_error_unsupported_initialization, UseSuperTypeProcessor.ID_USE_SUPERTYPE));
+		return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ProcessorBasedRefactoring_error_unsupported_initialization, UseSuperTypeProcessor.ID_USE_SUPERTYPE));
 	}
 }

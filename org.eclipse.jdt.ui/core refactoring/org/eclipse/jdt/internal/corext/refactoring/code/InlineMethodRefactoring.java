@@ -41,7 +41,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
-import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
@@ -590,14 +589,14 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 			if (delete != null) {
 				fDeleteSource= Boolean.valueOf(delete).booleanValue();
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELETE));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELETE));
 			final String value= generic.getAttribute(ATTRIBUTE_MODE);
 			if (value != null && !"".equals(value)) {//$NON-NLS-1$
 				int mode= 0;
 				try {
 					mode= Integer.parseInt(value);
 				} catch (NumberFormatException exception) {
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_MODE));
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_MODE));
 				}
 				try {
 					setCurrentMode(mode == 1 ? Mode.INLINE_ALL : Mode.INLINE_SINGLE);

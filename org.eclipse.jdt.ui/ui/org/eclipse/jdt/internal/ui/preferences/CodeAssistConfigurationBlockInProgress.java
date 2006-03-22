@@ -58,8 +58,6 @@ import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 
-import org.eclipse.osgi.util.NLS;
-
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -565,12 +563,12 @@ final class CodeAssistConfigurationBlockInProgress extends OptionsConfigurationB
 					int max= 5000;
 					if (number < min || number > max) {
 						String msgFormat= PreferencesMessages.CodeAssistConfigurationBlockInProgress_parameterNameFromAttachedJavadoc_timeout_invalidRange;
-						String msg= NLS.bind(msgFormat, new Integer(min), new Integer(max));
+						String msg= Messages.format(msgFormat, new Object[] {new Integer(min), new Integer(max)});
 						status.setError(msg);
 					}
 				} catch (NumberFormatException ex) {
 					String msgFormat= PreferencesMessages.CodeAssistConfigurationBlockInProgress_parameterNameFromAttachedJavadoc_timeout_invalidInput;
-					String msg= NLS.bind(msgFormat, newValue);
+					String msg= Messages.format(msgFormat, newValue);
 					status.setError(msg); 
 				}
 			}
