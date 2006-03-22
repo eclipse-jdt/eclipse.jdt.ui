@@ -52,12 +52,12 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
-public class ExcludeFromBuildathAction extends Action implements ISelectionChangedListener {
+public class ExcludeFromBuildpathAction extends Action implements ISelectionChangedListener {
 
 	private final IWorkbenchSite fSite;
 	private final List fSelectedElements; //IPackageFragment || ICompilationUnit iff isEnabled()
 	
-	public ExcludeFromBuildathAction(IWorkbenchSite site) {
+	public ExcludeFromBuildpathAction(IWorkbenchSite site) {
 		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_label, JavaPluginImages.DESC_ELCL_EXCLUDE_FROM_BUILDPATH);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_tooltip);
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_EXCLUDE_FROM_BUILDPATH);

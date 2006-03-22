@@ -361,7 +361,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		final RemoveFromBuildpathAction remove= new RemoveFromBuildpathAction(site);
 		provider.addSelectionChangedListener(remove);
 		
-		final ExcludeFromBuildathAction exclude= new ExcludeFromBuildathAction(site);
+		final ExcludeFromBuildpathAction exclude= new ExcludeFromBuildpathAction(site);
 		provider.addSelectionChangedListener(exclude);
 		
 		final BuildActionSelectionContext context= new BuildActionSelectionContext();
