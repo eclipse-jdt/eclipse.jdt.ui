@@ -138,6 +138,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ChangeTypeRefactoring_checking_preconditions;
 
+	public static String ChangeTypeRefactoring_descriptor_description;
+
 	public static String ChangeTypeRefactoring_enumsNotSupported;
 
 	public static String ChangeTypeRefactoring_failedToSelectType;

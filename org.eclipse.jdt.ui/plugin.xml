@@ -4847,6 +4847,9 @@
       <contribution
             class="org.eclipse.jdt.internal.corext.refactoring.scripting.InferTypeArgumentsRefactoringContribution"
             id="org.eclipse.jdt.ui.infer.typearguments"/>
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.ChangeTypeRefactoringContribution"
+            id="org.eclipse.jdt.ui.change.type"/>
    </extension>
 
 <!-- End Refactoring -->

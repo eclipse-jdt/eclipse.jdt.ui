@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEditGroup;
@@ -30,10 +31,15 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
@@ -69,6 +75,9 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
+import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -94,14 +103,22 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeConstrain
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
  * @author tip
  */
-public class ChangeTypeRefactoring extends CommentRefactoring {
+public class ChangeTypeRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
+
+	public static final String ID_CHANGE_TYPE= "org.eclipse.jdt.ui.change.type"; //$NON-NLS-1$
+
+	private static final String ATTRIBUTE_TYPE= "type"; //$NON-NLS-1$
 
 	// ------------------------------------------------------------------------------------------------- //
 	// Fields
@@ -110,12 +127,12 @@ public class ChangeTypeRefactoring extends CommentRefactoring {
 	/**
 	 * Offset of the selected text area.
 	 */
-	private final int fSelectionStart;
+	private int fSelectionStart;
 
 	/**
 	 * Length of the selected text area.
 	 */
-	private final int fSelectionLength;
+	private int fSelectionLength;
 	
 	/**
 	 * Offset of the effective selection
@@ -241,7 +258,7 @@ public class ChangeTypeRefactoring extends CommentRefactoring {
 		fCu= cu;
 
 		if (selectedType != null)
-			setSelectedTypeName(selectedType);
+			fSelectedTypeName= selectedType;
 		
 		fConstraintCache= new HashMap();
 		fValidTypes= new HashSet();
@@ -461,7 +478,21 @@ public class ChangeTypeRefactoring extends CommentRefactoring {
 			  new HashMap/*<ICompilationUnit,HashSet<ConstraintVariable>>*/();
 			groupChangesByCompilationUnit(relevantVarsByUnit);
 			
-			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.ChangeTypeRefactoring_allChanges);  
+			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.ChangeTypeRefactoring_allChanges) {
+				
+				public final ChangeDescriptor getDescriptor() {
+					final Map arguments= new HashMap();
+					String project= null;
+					IJavaProject javaProject= fCu.getJavaProject();
+					if (javaProject != null)
+						project= javaProject.getElementName();
+					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_CHANGE_TYPE, project, Messages.format(RefactoringCoreMessages.ChangeTypeRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(fSelectionBinding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fSelectedType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, (RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT));
+					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
+					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+					arguments.put(ATTRIBUTE_TYPE, fSelectedType.getQualifiedName());
+					return new RefactoringChangeDescriptor(descriptor);
+				}
+			};
 			for (Iterator/*<ICompilationUnit>*/ it= relevantVarsByUnit.keySet().iterator(); it.hasNext(); ){
 				ICompilationUnit icu= (ICompilationUnit)it.next();
 				Set/*<ConstraintVariable>*/ cVars = (Set)relevantVarsByUnit.get(icu);
@@ -1215,7 +1246,7 @@ public class ChangeTypeRefactoring extends CommentRefactoring {
 		return fSelectionTypeBinding;
 	}
 	
-	public void setOriginalType(ITypeBinding originalType){
+	private void setOriginalType(ITypeBinding originalType){
 		fSelectionTypeBinding= originalType;
 		fSelectedType= findSuperTypeByName(originalType, fSelectedTypeName);
 	}
@@ -1354,13 +1385,6 @@ public class ChangeTypeRefactoring extends CommentRefactoring {
 		return fAffectedUnits;
 	}
 
-	/**
-	 * Store the name of selected new type.
-	 */
-	public void setSelectedTypeName(String typeName) {
-		fSelectedTypeName= typeName;
-	}
-
 	public void setSelectedType(ITypeBinding type){
 		fSelectedType= type;
 	}
@@ -1401,20 +1425,7 @@ public class ChangeTypeRefactoring extends CommentRefactoring {
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
     
-    public IJavaProject getProject(){
-    	return fCu.getJavaProject();
-    }
-    
-    /** This does not include the type itself. It will include type
-	 *  Object for any type other than Object.
-	 */
-	public Set/*<ITypeBinding>*/ getStrictSuperTypes(ITypeBinding type){
-		Set/*<ITypeBinding>*/ result= getAllSuperTypes(type);
-		result.remove(type);
-		return result;
-	}
-		
-	/**
+    /**
 	 * This always includes the type itself. It will include type
 	 * Object for any type other than Object
 	 */
@@ -1434,7 +1445,7 @@ public class ChangeTypeRefactoring extends CommentRefactoring {
 		return result;		
 	}
 	
-    public ITypeBinding findSuperTypeByName(ITypeBinding type, String superTypeName){
+    private ITypeBinding findSuperTypeByName(ITypeBinding type, String superTypeName){
     	Set/*<ITypeBinding>*/ superTypes= getAllSuperTypes(type);
     	for (Iterator/*<ITypeBinding>*/ it= superTypes.iterator(); it.hasNext(); ){
     		ITypeBinding sup= (ITypeBinding)it.next();
@@ -1462,5 +1473,45 @@ public class ChangeTypeRefactoring extends CommentRefactoring {
 		}
 		return false;
 	}
-    
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public RefactoringStatus initialize(RefactoringArguments arguments) {
+		if (arguments instanceof JavaRefactoringArguments) {
+			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+			final String selection= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION);
+			if (selection != null) {
+				int offset= -1;
+				int length= -1;
+				final StringTokenizer tokenizer= new StringTokenizer(selection);
+				if (tokenizer.hasMoreTokens())
+					offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+				if (tokenizer.hasMoreTokens())
+					length= Integer.valueOf(tokenizer.nextToken()).intValue();
+				if (offset >= 0 && length >= 0) {
+					fSelectionStart= offset;
+					fSelectionLength= length;
+				} else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.ATTRIBUTE_SELECTION}));
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_SELECTION));
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
+			if (handle != null) {
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
+				if (element == null || element.getElementType() != IJavaElement.COMPILATION_UNIT)
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_CHANGE_TYPE));
+				else
+					fCu= (ICompilationUnit) element;
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
+			final String type= extended.getAttribute(ATTRIBUTE_TYPE);
+			if (type != null && !"".equals(type)) //$NON-NLS-1$
+				fSelectedTypeName= type;
+			else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TYPE));
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+		return new RefactoringStatus();
+	}
 }
