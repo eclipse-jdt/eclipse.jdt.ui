@@ -24,15 +24,16 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
 /**
  * Helper class for match pairs of characters.
  */
-public class JavaPairMatcher implements ICharacterPairMatcher, ISourceVersionDependent {
+public final class JavaPairMatcher implements ICharacterPairMatcher, ISourceVersionDependent {
 
-	protected char[] fPairs;
-	protected IDocument fDocument;
-	protected int fOffset;
+	private char[] fPairs;
+	private IDocument fDocument;
+	private int fOffset;
 
-	protected int fStartPos;
-	protected int fEndPos;
-	protected int fAnchor;
+	private int fStartPos;
+	private int fEndPos;
+	private int fAnchor;
+	
 	/**
 	 * Stores the source version state.
 	 * @since 3.1
@@ -83,7 +84,7 @@ public class JavaPairMatcher implements ICharacterPairMatcher, ISourceVersionDep
 	public void clear() {
 	}
 
-	protected boolean matchPairsAt() {
+	private boolean matchPairsAt() {
 
 		int i;
 		int pairIndex1= fPairs.length;
@@ -134,7 +135,7 @@ public class JavaPairMatcher implements ICharacterPairMatcher, ISourceVersionDep
 		return false;
 	}
 
-	protected int searchForClosingPeer(int offset, char openingPeer, char closingPeer, IDocument document) throws BadLocationException {
+	private int searchForClosingPeer(int offset, char openingPeer, char closingPeer, IDocument document) throws BadLocationException {
 		boolean useGenericsHeuristic= openingPeer == '<';
 		if (useGenericsHeuristic && !fHighlightAngularBrackets)
 			return -1;
@@ -146,7 +147,7 @@ public class JavaPairMatcher implements ICharacterPairMatcher, ISourceVersionDep
 	}
 
 
-	protected int searchForOpeningPeer(int offset, char openingPeer, char closingPeer, IDocument document) throws BadLocationException {
+	private int searchForOpeningPeer(int offset, char openingPeer, char closingPeer, IDocument document) throws BadLocationException {
 		boolean useGenericsHeuristic= openingPeer == '<';
 		if (useGenericsHeuristic && !fHighlightAngularBrackets)
 			return -1;
