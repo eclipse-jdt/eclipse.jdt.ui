@@ -194,11 +194,11 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 	private String printSimpleTag() {
 		StringBuffer buffer= new StringBuffer();
 		buffer.append("<dl>"); //$NON-NLS-1$
+		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_see_section, fSees, false);
 		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_parameters_section, fParameters, true);
 		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_returns_section, fReturn);
 		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_throws_section, fExceptions, false);
 		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_author_section, fAuthors, false);
-		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_see_section, fSees, false);
 		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_since_section, fSince, false);
 		printRest(buffer);
 		buffer.append("</dl>"); //$NON-NLS-1$
