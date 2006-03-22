@@ -24,7 +24,6 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -49,19 +48,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.buildpath.AddExternalArchivesOperation;
-import org.eclipse.jdt.internal.corext.buildpath.AddLibraryOperation;
-import org.eclipse.jdt.internal.corext.buildpath.AddSelectedLibraryOperation;
-import org.eclipse.jdt.internal.corext.buildpath.AddSelectedSourceFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation;
-import org.eclipse.jdt.internal.corext.buildpath.EditFiltersOperation;
-import org.eclipse.jdt.internal.corext.buildpath.EditOutputFolderOperation;
-import org.eclipse.jdt.internal.corext.buildpath.ExcludeOperation;
-import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
-import org.eclipse.jdt.internal.corext.buildpath.LinkedSourceFolderOperation;
-import org.eclipse.jdt.internal.corext.buildpath.RemoveFromClasspathOperation;
-import org.eclipse.jdt.internal.corext.buildpath.UnexcludeOperation;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -376,7 +363,6 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		final ConfigureBuildPathAction configure= new ConfigureBuildPathAction(site);
 		provider.addSelectionChangedListener(configure);
 		
-		final BuildActionSelectionContext context= new BuildActionSelectionContext();
 		fActions= new Action[] {
 				addLinkedSourceFolderAction,
 				addSourceFolderAction,
@@ -392,109 +378,6 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 				editOutput,
 				configure
 		};
-    }
-
-	/**
-     * Creates a <code>BuildPathAction</code>.
-     * 
-     * @param site the site providing context information for this action
-     * @param type the type of the operation, must be a constant of <code>
-     * IClasspathInformationProvider</code>
-     * @return a BuildPathAction for the operation of the corresponding type
-     * 
-     * @see IClasspathInformationProvider
-     */
-    private BuildPathAction createBuildPathAction(IWorkbenchSite site, int type, BuildActionSelectionContext context) {
-        ImageDescriptor imageDescriptor= null, disabledImageDescriptor= null; 
-        String text= null, tooltip= null;
-        ClasspathModifierOperation operation= null;
-		
-        BuildPathAction action= new BuildPathAction(site, context);
-        switch(type) {
-            case IClasspathInformationProvider.CREATE_LINK: {
-                imageDescriptor= JavaPluginImages.DESC_ELCL_ADD_LINKED_SOURCE_TO_BUILDPATH;
-                disabledImageDescriptor= JavaPluginImages.DESC_DLCL_ADD_LINKED_SOURCE_TO_BUILDPATH;
-                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_label; 
-                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_tooltip; 
-                operation= new LinkedSourceFolderOperation(null, action);
-                break;
-            }
-            case IClasspathInformationProvider.ADD_SEL_SF_TO_BP: {
-                imageDescriptor= JavaPluginImages.DESC_OBJS_PACKFRAG_ROOT;
-                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_label; 
-                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_tooltip; 
-                operation= new AddSelectedSourceFolderOperation(null, action);
-                break;
-            }
-            case IClasspathInformationProvider.ADD_SEL_LIB_TO_BP: {
-                imageDescriptor= JavaPluginImages.DESC_OBJS_EXTJAR;
-                // TODO add disabled icon
-                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_label; 
-                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_tooltip; 
-                operation= new AddSelectedLibraryOperation(null, action);
-                break;
-            }
-            case IClasspathInformationProvider.REMOVE_FROM_BP: {
-                imageDescriptor= JavaPluginImages.DESC_ELCL_REMOVE_FROM_BP;
-                disabledImageDescriptor= JavaPluginImages.DESC_DLCL_REMOVE_FROM_BP;
-                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_label; 
-                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip; 
-                operation= new RemoveFromClasspathOperation(null, action);
-                break;
-            }
-            case IClasspathInformationProvider.EXCLUDE: {
-                imageDescriptor= JavaPluginImages.DESC_ELCL_EXCLUDE_FROM_BUILDPATH;
-                disabledImageDescriptor= JavaPluginImages.DESC_DLCL_EXCLUDE_FROM_BUILDPATH;
-                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_label; 
-                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_tooltip; 
-                operation= new ExcludeOperation(null, action);
-                break;
-            }
-            case IClasspathInformationProvider.UNEXCLUDE: {
-                imageDescriptor= JavaPluginImages.DESC_ELCL_INCLUDE_ON_BUILDPATH;
-                disabledImageDescriptor= JavaPluginImages.DESC_DLCL_INCLUDE_ON_BUILDPATH;
-                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_label; 
-                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_tooltip; 
-                operation= new UnexcludeOperation(null, action);
-                break;
-            }
-            case IClasspathInformationProvider.EDIT_FILTERS: {
-                imageDescriptor= JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH_FILTERS;
-                disabledImageDescriptor= JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH_FILTERS;
-                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_label; 
-                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_tooltip; 
-                operation= new EditFiltersOperation(null, action);
-                break;
-            }
-            case IClasspathInformationProvider.EDIT_OUTPUT: {
-                imageDescriptor= JavaPluginImages.DESC_ELCL_CONFIGURE_OUTPUT_FOLDER;
-                disabledImageDescriptor= JavaPluginImages.DESC_DLCL_CONFIGURE_OUTPUT_FOLDER;
-                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_label; 
-                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip; 
-                operation= new EditOutputFolderOperation(null, action);
-                ((EditOutputFolderOperation)operation).showOutputFolders(true);
-                break;
-            }
-            case IClasspathInformationProvider.ADD_JAR_TO_BP: {
-                imageDescriptor= JavaPluginImages.DESC_OBJS_EXTJAR;
-                // TODO add disabled icon
-                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddJarCP_label; 
-                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddJarCP_tooltip; 
-                operation= new AddExternalArchivesOperation(null, action);
-                break;
-            }
-            case IClasspathInformationProvider.ADD_LIB_TO_BP: {
-                imageDescriptor= JavaPluginImages.DESC_OBJS_LIBRARY;
-                // TODO add disabled icon
-                text= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_label; 
-                tooltip= NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_tooltip; 
-                operation= new AddLibraryOperation(null, action);
-                break;
-            }
-            default: break;
-        }
-        action.initialize(operation, imageDescriptor, disabledImageDescriptor, text, tooltip);
-        return action;
     }
             
     /* (non-Javadoc)
