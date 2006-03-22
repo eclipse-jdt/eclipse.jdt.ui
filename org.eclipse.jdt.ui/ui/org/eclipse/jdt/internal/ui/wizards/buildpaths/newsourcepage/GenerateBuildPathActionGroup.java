@@ -373,6 +373,9 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		final AddSelectedLibraryToBuildpathAction addSelectedLibrary= new AddSelectedLibraryToBuildpathAction(site);
 		provider.addSelectionChangedListener(addSelectedLibrary);
 		
+		final ConfigureBuildPathAction configure= new ConfigureBuildPathAction(site);
+		provider.addSelectionChangedListener(configure);
+		
 		final BuildActionSelectionContext context= new BuildActionSelectionContext();
 		fActions= new Action[] {
 				addLinkedSourceFolderAction,
@@ -387,18 +390,9 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 				include,
 				editFilterAction,
 				editOutput,
-				createConfigureAction(fSite)
+				configure
 		};
     }
-    
-	private Action createConfigureAction(IWorkbenchSite site) {
-		ConfigureBuildPathAction action= new ConfigureBuildPathAction(site);
-		action.setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH);
-		action.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH);
-		action.setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_label); 
-		action.setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_tooltip); 
-		return action;
-	}
 
 	/**
      * Creates a <code>BuildPathAction</code>.
@@ -526,7 +520,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
         	}
         });
         subMenu.setRemoveAllWhenShown(true);
-        subMenu.add(createConfigureAction(fSite));
+        subMenu.add(new ConfigureBuildPathAction(fSite));
         menu.appendToGroup(fGroupName, subMenu);
     }
         
@@ -534,11 +528,6 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
         int added= 0;
         
         Action[] actions= fActions;
-		for (int i= 0; i < actions.length; i++) {
-			if (actions[i] instanceof IUpdate)
-				((IUpdate) actions[i]).update();
-        }
-        
         for (int i= 0; i < actions.length; i++) {
             if (i == 2)
                 source.add(new Separator(GROUP_BUILDPATH));

@@ -19,11 +19,13 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.dialogs.PreferencesUtil;
-import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -31,18 +33,23 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 /**
  * 
  */
-public class ConfigureBuildPathAction extends Action implements IUpdate {
+public class ConfigureBuildPathAction extends Action implements ISelectionChangedListener {
 
 	private final IWorkbenchSite fSite;
 	private IProject fProject;
 
 	public ConfigureBuildPathAction(IWorkbenchSite site) {
+		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_label, JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH);
+		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_tooltip);
+		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH);		
 		fSite= site;
 	}
 	
@@ -55,20 +62,29 @@ public class ConfigureBuildPathAction extends Action implements IUpdate {
 			PreferencesUtil.createPropertyDialogOn(getShell(), fProject, BuildPathsPropertyPage.PROP_ID, null, null).open();
 		}
 	}
-
-	public void update() {
-		ISelection selection= fSite.getSelectionProvider().getSelection();
-		
-		fProject= null;
-		if (selection instanceof IStructuredSelection && !selection.isEmpty() ) {
-			IStructuredSelection structSel= (IStructuredSelection) selection;
-			if (structSel.size() == 1) {
-				Object firstElement= structSel.getFirstElement();
-				fProject= getProjectFromSelectedElement(firstElement);
-			}
-		}			
-		setEnabled(fProject != null);	
+	
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void selectionChanged(final SelectionChangedEvent event) {
+		final ISelection selection = event.getSelection();
+		if (selection instanceof IStructuredSelection) {
+			setEnabled(canHandle((IStructuredSelection) selection));
+		} else {
+			setEnabled(canHandle(StructuredSelection.EMPTY));
+		}
 	}
+
+	private boolean canHandle(IStructuredSelection elements) {
+		if (elements.size() != 1)
+			return false;
+	
+		Object firstElement= elements.getFirstElement();
+		fProject= getProjectFromSelectedElement(firstElement);
+		return fProject != null;
+	}
+
 
 	private IProject getProjectFromSelectedElement(Object firstElement) {
 		if (firstElement instanceof IJavaElement) {
