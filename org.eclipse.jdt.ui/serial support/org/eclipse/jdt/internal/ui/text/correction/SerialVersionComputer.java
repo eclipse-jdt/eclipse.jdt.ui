@@ -18,8 +18,8 @@ import java.io.ObjectStreamClass;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
-import com.ibm.icu.text.DateFormat;
-import com.ibm.icu.text.MessageFormat;
+import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.Date;
 
 /**
