@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.text.Collator;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -75,6 +74,8 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.search.IMatchPresentation;
@@ -687,11 +688,11 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			if (filteredOut > 0 || getMatchFiltersCount() > 0) {
 				if (isQueryRunning()) {
 					String message= SearchMessages.JavaSearchResultPage_filtered_message; 
-					return MessageFormat.format(message, new Object[] { label });
+					return Messages.format(message, new Object[] { label });
 				
 				} else {
 					String message= SearchMessages.JavaSearchResultPage_filteredWithCount_message; 
-					return MessageFormat.format(message, new Object[] { label, String.valueOf(filteredOut) });
+					return Messages.format(message, new Object[] { label, String.valueOf(filteredOut) });
 				}
 			}
 		}

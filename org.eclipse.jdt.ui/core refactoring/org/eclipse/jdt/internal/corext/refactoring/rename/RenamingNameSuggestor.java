@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
-import java.text.BreakIterator;
+import com.ibm.icu.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.List;
 

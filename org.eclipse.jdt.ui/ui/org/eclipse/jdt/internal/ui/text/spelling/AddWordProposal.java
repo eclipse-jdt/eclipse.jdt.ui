@@ -11,22 +11,22 @@
 
 package org.eclipse.jdt.internal.ui.text.spelling;
 
-import java.text.MessageFormat;
-
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
-import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 
 /**
  * Proposal to add the unknown word to the dictionaries.
@@ -70,7 +70,7 @@ public class AddWordProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
-		return MessageFormat.format(JavaUIMessages.Spelling_add_info, new String[] { WordCorrectionProposal.getHtmlRepresentation(fWord)});
+		return Messages.format(JavaUIMessages.Spelling_add_info, new String[] { WordCorrectionProposal.getHtmlRepresentation(fWord)});
 	}
 
 	/*
@@ -84,7 +84,7 @@ public class AddWordProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return MessageFormat.format(JavaUIMessages.Spelling_add_label, new String[] { fWord });
+		return Messages.format(JavaUIMessages.Spelling_add_label, new String[] { fWord });
 	}
 
 	/*

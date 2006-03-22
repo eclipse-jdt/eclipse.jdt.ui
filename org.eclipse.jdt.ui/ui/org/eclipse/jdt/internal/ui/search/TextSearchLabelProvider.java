@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import java.text.MessageFormat;
-
 import org.eclipse.jface.viewers.LabelProvider;
+
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public abstract class TextSearchLabelProvider extends LabelProvider {
 
@@ -31,7 +32,7 @@ public abstract class TextSearchLabelProvider extends LabelProvider {
 		if (matchCount < 2)
 			return text;
 		else {
-			return MessageFormat.format(fMatchCountFormat, new Object[] { text, new Integer(matchCount) });
+			return Messages.format(fMatchCountFormat, new Object[] { text, new Integer(matchCount) });
 		}
 	}
 

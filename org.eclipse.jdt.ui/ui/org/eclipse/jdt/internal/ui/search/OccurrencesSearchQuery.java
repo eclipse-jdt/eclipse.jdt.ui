@@ -11,7 +11,6 @@
 
 package org.eclipse.jdt.internal.ui.search;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -25,6 +24,8 @@ import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.core.IJavaElement;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
@@ -83,7 +84,7 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 		if (nMatches == 0) {
 			return fSingularLabel;
 		} else {
-			return MessageFormat.format(fPluralLabel, new Object[] { new Integer(nMatches) });
+			return Messages.format(fPluralLabel, new Object[] { new Integer(nMatches) });
 		}
 	}
 		

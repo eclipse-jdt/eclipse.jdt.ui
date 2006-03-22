@@ -12,7 +12,6 @@ package org.eclipse.jdt.ui.actions;
 
 import java.io.File;
 import java.net.URL;
-import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -20,10 +19,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
-
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
@@ -32,10 +31,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -169,11 +170,11 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 				IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
 				if (root != null && root.getKind() == IPackageFragmentRoot.K_BINARY) {
 					String message= ActionMessages.OpenExternalJavadocAction_libraries_no_location;	 
-					showMessage(shell, MessageFormat.format(message, new String[] { labelName, root.getElementName() }), false);
+					showMessage(shell, Messages.format(message, new String[] { labelName, root.getElementName() }), false);
 				} else {
 					IJavaElement annotatedElement= element.getJavaProject();
 					String message= ActionMessages.OpenExternalJavadocAction_source_no_location;	 
-					showMessage(shell, MessageFormat.format(message, new String[] { labelName, annotatedElement.getElementName() }), false);
+					showMessage(shell, Messages.format(message, new String[] { labelName, annotatedElement.getElementName() }), false);
 				}
 				return;
 			}
@@ -181,7 +182,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 				URL noRefURL= JavaUI.getJavadocLocation(element, false);
 				if (!(new File(noRefURL.getFile())).isFile()) {
 					String message= ActionMessages.OpenExternalJavadocAction_no_entry; 
-					showMessage(shell, MessageFormat.format(message, new String[] { labelName, noRefURL.toExternalForm() }), false);
+					showMessage(shell, Messages.format(message, new String[] { labelName, noRefURL.toExternalForm() }), false);
 					return;
 				}
 			}

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -43,6 +42,7 @@ import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 
@@ -400,19 +400,11 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	}
 	
 	private String createEmptyMessage() {
-		final MessageFormat format= new MessageFormat(JavaTextMessages.ContentAssistProcessor_empty_message);
-		Object[] args= {getCategoryLabel(fRepetition)};
-		String message= format.format(args);
-		return message;
+		return Messages.format(JavaTextMessages.ContentAssistProcessor_empty_message, new String[]{getCategoryLabel(fRepetition)});
 	}
 	
 	private String createIterationMessage() {
-		final MessageFormat format= new MessageFormat(JavaTextMessages.ContentAssistProcessor_toggle_affordance_update_message);
-		String current= getCategoryLabel(fRepetition);
-		String next= getCategoryLabel(fRepetition + 1);
-		Object[] args= { current, fIterationGesture, next };
-		String message= format.format(args);
-		return message;
+		return Messages.format(JavaTextMessages.ContentAssistProcessor_toggle_affordance_update_message, new String[]{ getCategoryLabel(fRepetition), fIterationGesture, getCategoryLabel(fRepetition + 1) });
 	}
 	
 	private String getCategoryLabel(int repetition) {
@@ -430,7 +422,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		final IBindingService bindingSvc= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
 		TriggerSequence[] triggers= bindingSvc.getActiveBindingsFor(getContentAssistCommand());
 		return triggers.length > 0 ? 
-				  MessageFormat.format(JavaTextMessages.ContentAssistProcessor_toggle_affordance_press_gesture, new Object[] { triggers[0].format() })
+				  Messages.format(JavaTextMessages.ContentAssistProcessor_toggle_affordance_press_gesture, new Object[] { triggers[0].format() })
 				: JavaTextMessages.ContentAssistProcessor_toggle_affordance_click_gesture;
 	}
 

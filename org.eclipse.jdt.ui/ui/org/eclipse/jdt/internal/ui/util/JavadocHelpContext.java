@@ -14,7 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
-import java.text.BreakIterator;
+import com.ibm.icu.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.List;
 

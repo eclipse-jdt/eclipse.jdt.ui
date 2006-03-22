@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import java.text.Collator;
+import com.ibm.icu.text.Collator;
 import java.util.Comparator;
 import org.eclipse.ui.IWorkingSet;
 

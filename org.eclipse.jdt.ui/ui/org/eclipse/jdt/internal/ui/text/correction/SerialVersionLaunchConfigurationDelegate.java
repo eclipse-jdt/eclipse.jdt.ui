@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -313,7 +312,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 		Assert.isNotNull(configuration);
 		Assert.isNotNull(monitor);
 		try {
-			monitor.beginTask(MessageFormat.format("{0}...", new String[] { configuration.getName()}), 100); //$NON-NLS-1$
+			monitor.beginTask(Messages.format("{0}...", new String[] { configuration.getName()}), 100); //$NON-NLS-1$
 			if (monitor.isCanceled())
 				return;
 

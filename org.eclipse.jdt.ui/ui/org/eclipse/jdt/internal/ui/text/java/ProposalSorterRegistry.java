@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,6 +28,8 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -95,7 +96,7 @@ public final class ProposalSorterRegistry {
 				 * about it.
 				 */
 				Object[] args= { element.toString() };
-				String message= MessageFormat.format(JavaTextMessages.CompletionProposalComputerRegistry_invalid_message, args);
+				String message= Messages.format(JavaTextMessages.CompletionProposalComputerRegistry_invalid_message, args);
 				IStatus status= new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, message, x);
 				informUser(status);
 			}

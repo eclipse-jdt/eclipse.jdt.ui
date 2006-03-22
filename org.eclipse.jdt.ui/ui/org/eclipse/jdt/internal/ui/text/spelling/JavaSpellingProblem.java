@@ -11,11 +11,11 @@
 
 package org.eclipse.jdt.internal.ui.text.spelling;
 
-import java.text.MessageFormat;
-
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.ui.texteditor.spelling.SpellingProblem;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent;
@@ -60,9 +60,9 @@ public class JavaSpellingProblem extends SpellingProblem {
 	 */
 	public String getMessage() {
 		if (isSentenceStart() && isDictionaryMatch())
-			return MessageFormat.format(JavaUIMessages.Spelling_error_case_label, new String[] { fSpellEvent.getWord() });
+			return Messages.format(JavaUIMessages.Spelling_error_case_label, new String[] { fSpellEvent.getWord() });
 
-		return MessageFormat.format(JavaUIMessages.Spelling_error_label, new String[] { fSpellEvent.getWord() });
+		return Messages.format(JavaUIMessages.Spelling_error_label, new String[] { fSpellEvent.getWord() });
 	}
 
 	/*

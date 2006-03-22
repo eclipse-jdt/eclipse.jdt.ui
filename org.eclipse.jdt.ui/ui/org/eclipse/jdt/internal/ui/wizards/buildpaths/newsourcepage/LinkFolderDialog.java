@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -469,7 +468,7 @@ public class LinkFolderDialog extends StatusDialog {
                                 .getStatus());
             } else {
                 // CoreExceptions are handled above, but unexpected runtime exceptions and errors may still occur.
-                JavaPlugin.log(new Exception(MessageFormat.format(
+                JavaPlugin.log(new Exception(Messages.format(
                         "Exception in {0}.createNewFolder(): {1}", //$NON-NLS-1$
                         new Object[] { getClass().getName(),
                                 exception.getTargetException() })));

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -62,6 +61,8 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -271,7 +272,7 @@ final class CodeAssistConfigurationBlockInProgress extends OptionsConfigurationB
 		int width= pixelConverter.convertWidthInCharsToPixels(40);
 		
 		Label label= new Label(composite, SWT.NONE | SWT.WRAP);
-		label.setText(MessageFormat.format(PreferencesMessages.CodeAssistConfigurationBlockInProgress_computer_description, new Object[] { key }));
+		label.setText(Messages.format(PreferencesMessages.CodeAssistConfigurationBlockInProgress_computer_description, new Object[] { key }));
 		GridData gd= new GridData(GridData.FILL, GridData.FILL, false, false, 2, 1);
 		gd.widthHint= width;
 		label.setLayoutData(gd);

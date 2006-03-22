@@ -11,14 +11,14 @@
 
 package org.eclipse.jdt.internal.ui.text.spelling;
 
-import java.text.MessageFormat;
-
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -145,7 +145,7 @@ public class WordCorrectionProposal implements IJavaCompletionProposal, IHtmlTag
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return MessageFormat.format(JavaUIMessages.Spelling_correct_label, new String[] { fWord });
+		return Messages.format(JavaUIMessages.Spelling_correct_label, new String[] { fWord });
 	}
 
 	/*

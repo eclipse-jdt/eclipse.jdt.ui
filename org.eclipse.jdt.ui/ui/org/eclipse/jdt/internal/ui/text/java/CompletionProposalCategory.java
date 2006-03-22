@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 import java.net.URL;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +25,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
@@ -106,7 +107,7 @@ public final class CompletionProposalCategory {
 	private void checkNotNull(Object obj, String attribute) throws InvalidRegistryObjectException {
 		if (obj == null) {
 			Object[] args= { getId(), fElement.getNamespace(), attribute };
-			String message= MessageFormat.format(JavaTextMessages.CompletionProposalComputerDescriptor_illegal_attribute_message, args);
+			String message= Messages.format(JavaTextMessages.CompletionProposalComputerDescriptor_illegal_attribute_message, args);
 			IStatus status= new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, message, null);
 			JavaPlugin.log(status);
 			throw new InvalidRegistryObjectException();

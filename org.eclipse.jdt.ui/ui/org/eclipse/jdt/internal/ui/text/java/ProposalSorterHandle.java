@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,6 +22,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.text.Assert;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.AbstractProposalSorter;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
@@ -106,7 +107,7 @@ public final class ProposalSorterHandle {
 	private void checkNotNull(Object obj, String attribute) throws InvalidRegistryObjectException {
 		if (obj == null) {
 			Object[] args= { getId(), fElement.getNamespace(), attribute };
-			String message= MessageFormat.format(JavaTextMessages.CompletionProposalComputerDescriptor_illegal_attribute_message, args);
+			String message= Messages.format(JavaTextMessages.CompletionProposalComputerDescriptor_illegal_attribute_message, args);
 			IStatus status= new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, message, null);
 			JavaPlugin.log(status);
 			throw new InvalidRegistryObjectException();
@@ -255,20 +256,20 @@ public final class ProposalSorterHandle {
 	private Status createAPIViolationStatus(String operation) {
 		String disable= createBlameMessage();
 		Object[] args= {operation};
-		String reason= MessageFormat.format(JavaTextMessages.CompletionProposalComputerDescriptor_reason_API, args);
+		String reason= Messages.format(JavaTextMessages.CompletionProposalComputerDescriptor_reason_API, args);
 		return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, disable + " " + reason, null); //$NON-NLS-1$
 	}
 
 	private Status createPerformanceStatus(String operation) {
 		String disable= createBlameMessage();
 		Object[] args= {operation};
-		String reason= MessageFormat.format(JavaTextMessages.CompletionProposalComputerDescriptor_reason_performance, args);
+		String reason= Messages.format(JavaTextMessages.CompletionProposalComputerDescriptor_reason_performance, args);
 		return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, disable + " " + reason, null); //$NON-NLS-1$
 	}
 
 	private String createBlameMessage() {
 		Object[] args= { getName(), getId() };
-		String disable= MessageFormat.format(JavaTextMessages.ProposalSorterHandle_blame, args);
+		String disable= Messages.format(JavaTextMessages.ProposalSorterHandle_blame, args);
 		return disable;
 	}
 	

@@ -132,3 +132,4 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.core.manipulation;bundle-version="[1.0.0,2.0.0)"
 Eclipse-LazyStart: true
 Plugin-Class: org.eclipse.jdt.internal.ui.JavaPlugin
+Import-Package: com.ibm.icu.text

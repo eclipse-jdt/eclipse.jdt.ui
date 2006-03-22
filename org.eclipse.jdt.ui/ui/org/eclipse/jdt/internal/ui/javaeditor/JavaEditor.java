@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-import java.text.BreakIterator;
+import com.ibm.icu.text.BreakIterator;
 import java.text.CharacterIterator;
 import java.util.ArrayList;
 import java.util.HashMap;

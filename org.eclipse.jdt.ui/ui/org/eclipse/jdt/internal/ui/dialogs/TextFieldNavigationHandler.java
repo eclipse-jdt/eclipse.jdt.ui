@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dialogs;
 
-import java.text.BreakIterator;
+import com.ibm.icu.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

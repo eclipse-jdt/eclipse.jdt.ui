@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.refactoring.binary;
 
 import java.net.URI;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -151,7 +150,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 												if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
 													final URI location= getLocationURI(entry);
 													if (uri.equals(location))
-														status.addFatalError(MessageFormat.format(JarImportMessages.JarImportWizard_error_shared_jar, new String[] { current.getJavaProject().getElementName() }));
+														status.addFatalError(Messages.format(JarImportMessages.JarImportWizard_error_shared_jar, new String[] { current.getJavaProject().getElementName() }));
 												}
 											}
 											subsubMonitor.worked(1);

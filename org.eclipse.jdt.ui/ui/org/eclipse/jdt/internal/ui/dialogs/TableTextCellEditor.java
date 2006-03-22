@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dialogs;
 
-import java.text.MessageFormat;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
@@ -36,6 +34,8 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 /**
  * <code>TableTextCellEditor</code> is a copy of TextCellEditor, with the
@@ -326,7 +326,7 @@ public class TableTextCellEditor extends CellEditor {
         boolean newValidState = isCorrect(value);
         if (!newValidState) {
             // try to insert the current value into the error message.
-            setErrorMessage(MessageFormat.format(getErrorMessage(),
+            setErrorMessage(Messages.format(getErrorMessage(),
                     new Object[] { value }));
         }
         valueChanged(oldValidState, newValidState);

@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
-import java.text.MessageFormat;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -29,6 +28,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /*
@@ -104,7 +105,7 @@ public class ActionUtil {
 			if (! isOnBuildPath(elements[i])) {
 				MessageDialog.openInformation(shell, 
 						ActionMessages.ActionUtil_notOnBuildPath_title,  
-						MessageFormat.format(ActionMessages.ActionUtil_notOnBuildPath_resource_message, new Object[] {elements[i].getPath()}));
+						Messages.format(ActionMessages.ActionUtil_notOnBuildPath_resource_message, new Object[] {elements[i].getPath()}));
 				return false;
 			}
 		}

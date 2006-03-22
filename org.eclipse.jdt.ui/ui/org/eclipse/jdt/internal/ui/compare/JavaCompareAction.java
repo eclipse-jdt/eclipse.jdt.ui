@@ -10,28 +10,37 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ResourceBundle;
-import java.text.MessageFormat;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IActionDelegate;
 
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.compare.*;
+import org.eclipse.compare.IEncodedStreamContentAccessor;
+import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class JavaCompareAction implements IActionDelegate {
 	
@@ -120,7 +129,7 @@ public class JavaCompareAction implements IActionDelegate {
 			else
 				element= fRight;
 				 
-			String message= MessageFormat.format(errorFormat, new String[] { fJavaElementLabelProvider.getText(element) } );
+			String message= Messages.format(errorFormat, new String[] { fJavaElementLabelProvider.getText(element) } );
 			
 			MessageDialog.openError(shell, errorTitle, message);
 			return;

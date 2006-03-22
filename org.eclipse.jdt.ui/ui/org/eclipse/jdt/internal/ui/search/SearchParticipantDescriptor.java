@@ -11,14 +11,16 @@
 
 package org.eclipse.jdt.internal.ui.search;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.search.IQueryParticipant;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  */
@@ -43,18 +45,18 @@ public class SearchParticipantDescriptor {
 	protected IStatus checkSyntax() {
 		if (fConfigurationElement.getAttribute(ID) == null) {
 			String format= SearchMessages.SearchParticipant_error_noID; 
-			String message= MessageFormat.format(format,  new String[] { fConfigurationElement.getDeclaringExtension().getUniqueIdentifier() });
+			String message= Messages.format(format,  new String[] { fConfigurationElement.getDeclaringExtension().getUniqueIdentifier() });
 			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, message, null);
 		}
 		if (fConfigurationElement.getAttribute(NATURE) == null) {
 			String format= SearchMessages.SearchParticipant_error_noNature; 
-			String message= MessageFormat.format(format,  new String[] { fConfigurationElement.getAttribute(ID)});
+			String message= Messages.format(format,  new String[] { fConfigurationElement.getAttribute(ID)});
 			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, message, null);
 		}
 
 		if (fConfigurationElement.getAttribute(CLASS) == null) {
 			String format= SearchMessages.SearchParticipant_error_noClass; 
-			String message= MessageFormat.format(format,  new String[] { fConfigurationElement.getAttribute(ID)});
+			String message= Messages.format(format,  new String[] { fConfigurationElement.getAttribute(ID)});
 			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, message, null);
 		}
 		return Status.OK_STATUS;

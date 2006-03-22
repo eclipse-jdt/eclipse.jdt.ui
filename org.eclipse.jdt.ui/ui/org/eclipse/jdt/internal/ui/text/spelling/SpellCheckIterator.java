@@ -11,7 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.text.spelling;
 
-import java.text.BreakIterator;
+import com.ibm.icu.text.BreakIterator;
 import java.util.LinkedList;
 import java.util.Locale;
 

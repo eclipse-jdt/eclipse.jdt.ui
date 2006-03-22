@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dialogs;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -32,6 +31,8 @@ import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.ui.dialogs.AbstractElementListSelectionDialog;
 import org.eclipse.ui.dialogs.FilteredList;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
@@ -282,7 +283,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 			return ""; //$NON-NLS-1$
 			
 		String[] args= new String[] { Integer.toString(fCurrentPage + 1), Integer.toString(fNumberOfPages) };	
-		return MessageFormat.format(fPageInfoMessage, args);
+		return Messages.format(fPageInfoMessage, args);
 	}
 		
 	private void initializeResult(int length) {
@@ -302,7 +303,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	}
 
 	/**
-	 * Set the <code>Compatator</code> used to sort
+	 * Set the <code>Comparator</code> used to sort
 	 * the elements in the List.
 	 * 
 	 * @param comparator the comparator to use, not null.

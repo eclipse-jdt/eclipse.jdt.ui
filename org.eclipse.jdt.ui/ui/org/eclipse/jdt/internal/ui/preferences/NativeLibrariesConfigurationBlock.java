@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -40,6 +38,8 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
@@ -115,7 +115,7 @@ public class NativeLibrariesConfigurationBlock {
 
 		Label desc= new Label(inner, SWT.WRAP);
 		desc.setFont(inner.getFont());
-		desc.setText(MessageFormat.format(NewWizardMessages.NativeLibrariesDialog_description, new String[] { fEntry.getPath().lastSegment() }));
+		desc.setText(Messages.format(NewWizardMessages.NativeLibrariesDialog_description, new String[] { fEntry.getPath().lastSegment() }));
 		GridData gridData= new GridData(GridData.FILL, GridData.CENTER, false, false, 3, 1);
 		gridData.widthHint= converter.convertWidthInCharsToPixels(80);
 		desc.setLayoutData(gridData);

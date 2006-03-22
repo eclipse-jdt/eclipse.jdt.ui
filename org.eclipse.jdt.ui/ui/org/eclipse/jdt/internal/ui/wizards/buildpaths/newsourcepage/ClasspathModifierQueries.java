@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
-import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
@@ -82,7 +81,7 @@ public class ClasspathModifierQueries {
 		 * @param folder the linked folder to remove
 		 */
 		private RemoveLinkedFolderDialog(final Shell shell, final IFolder folder) {
-			super(shell, NewWizardMessages.ClasspathModifierQueries_confirm_remove_linked_folder_label, null, MessageFormat.format(NewWizardMessages.ClasspathModifierQueries_confirm_remove_linked_folder_message, new Object[] { folder.getFullPath()}), MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0); // yes is the default
+			super(shell, NewWizardMessages.ClasspathModifierQueries_confirm_remove_linked_folder_label, null, Messages.format(NewWizardMessages.ClasspathModifierQueries_confirm_remove_linked_folder_message, new Object[] { folder.getFullPath()}), MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0); // yes is the default
 			Assert.isTrue(folder.isLinked());
 		}
 

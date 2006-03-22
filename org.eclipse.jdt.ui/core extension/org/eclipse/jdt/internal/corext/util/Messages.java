@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
-import java.text.MessageFormat;
+import com.ibm.icu.text.MessageFormat;
 
 /**
  * Helper class to format message strings.
