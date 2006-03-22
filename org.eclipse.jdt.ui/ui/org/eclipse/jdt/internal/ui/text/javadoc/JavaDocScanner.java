@@ -197,8 +197,10 @@ public final class JavaDocScanner extends JavaCommentScanner {
 							scanner.unread();
 						int c= scanner.read();
 						i--;
-						if (c == '*' || Character.isWhitespace((char)c))
+						if (c == '*' || Character.isWhitespace((char)c)) {
+							scanner.unread();
 							return token;
+						}
 					} finally {
 						for (; i >= 0; i--)
 							scanner.read();
