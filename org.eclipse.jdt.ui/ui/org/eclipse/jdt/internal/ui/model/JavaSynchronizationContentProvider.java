@@ -346,7 +346,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 					final IJavaElement element= JavaCore.create((IFile) members[index]);
 					if (element != null)
 						set.add(element);
-				} else if (type == IResource.FOLDER && contained && visible) {
+				} else if (type == IResource.FOLDER && contained && visible && tree.getDiff(members[index]) != null) {
 					final IJavaElement element= JavaCore.create(members[index]);
 					if (element != null)
 						set.add(element);
