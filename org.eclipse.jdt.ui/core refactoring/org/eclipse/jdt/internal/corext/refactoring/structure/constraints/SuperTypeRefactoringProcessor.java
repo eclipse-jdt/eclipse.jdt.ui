@@ -119,6 +119,8 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	protected static final String ATTRIBUTE_INSTANCEOF= "instanceof"; //$NON-NLS-1$
 
+	protected static final String ATTRIBUTE_REPLACE= "replace"; //$NON-NLS-1$
+
 	/** The super type group category set */
 	protected static final GroupCategorySet SET_SUPER_TYPE= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.superType", //$NON-NLS-1$
 			RefactoringCoreMessages.SuperTypeRefactoringProcessor_category_name, RefactoringCoreMessages.SuperTypeRefactoringProcessor_category_description));
@@ -154,6 +156,9 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	/** The working copy owner */
 	protected final WorkingCopyOwner fOwner= new WorkingCopyOwner() {
 	};
+
+	/** Should occurrences of the type be replaced by the supertype? */
+	protected boolean fReplace= false;
 
 	/** The code generation settings, or <code>null</code> */
 	protected CodeGenerationSettings fSettings;
@@ -665,6 +670,16 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	}
 
 	/**
+	 * Should occurrences of the subtype be replaced by the supertype?
+	 * 
+	 * @return <code>true</code> if the subtype should be replaced,
+	 *         <code>false</code> otherwise
+	 */
+	public final boolean isReplace() {
+		return fReplace;
+	}
+
+	/**
 	 * Performs the first pass of processing the affected compilation units.
 	 * 
 	 * @param creator
@@ -971,6 +986,18 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 */
 	public final void setInstanceOf(final boolean rewrite) {
 		fInstanceOf= rewrite;
+	}
+
+	/**
+	 * Determines whether occurrences of the subtype should be replaced by the
+	 * supertype.
+	 * 
+	 * @param replace
+	 *            <code>true</code> to replace occurrences where possible,
+	 *            <code>false</code> otherwise
+	 */
+	public final void setReplace(final boolean replace) {
+		fReplace= replace;
 	}
 
 	/**

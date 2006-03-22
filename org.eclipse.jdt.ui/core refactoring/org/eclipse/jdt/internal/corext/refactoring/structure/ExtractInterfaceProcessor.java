@@ -134,8 +134,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	private static final String ATTRIBUTE_PUBLIC= "public"; //$NON-NLS-1$
 
-	private static final String ATTRIBUTE_REPLACE= "replace"; //$NON-NLS-1$
-
 	public static final String ID_EXTRACT_INTERFACE= "org.eclipse.jdt.ui.extract.interface"; //$NON-NLS-1$
 
 	/** The identifier of this processor */
@@ -181,9 +179,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/** Should extracted methods be declared as public? */
 	private boolean fPublic= true;
-
-	/** Should occurrences of the type be replaced by the supertype? */
-	private boolean fReplace= false;
 
 	/** The subtype where to extract the supertype */
 	private IType fSubType;
@@ -900,16 +895,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		return fComments;
 	}
 
-	/**
-	 * Should occurrences of the type be replaced by the interface?
-	 * 
-	 * @return <code>true</code> if the should be replaced, <code>false</code>
-	 *         otherwise
-	 */
-	public final boolean isReplace() {
-		return fReplace;
-	}
-
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#loadParticipants(org.eclipse.ltk.core.refactoring.RefactoringStatus,org.eclipse.ltk.core.refactoring.participants.SharableParticipants)
 	 */
@@ -1137,18 +1122,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 */
 	public final void setPublic(final boolean declare) {
 		fPublic= declare;
-	}
-
-	/**
-	 * Determines whether occurrences of the type should be replaced by the
-	 * interface.
-	 * 
-	 * @param replace
-	 *            <code>true</code> to replace occurrences where possible,
-	 *            <code>false</code> otherwise
-	 */
-	public final void setReplace(final boolean replace) {
-		fReplace= replace;
 	}
 
 	/**

@@ -136,7 +136,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
-public class MoveInnerToTopRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
+public final class MoveInnerToTopRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	private static final String ID_MOVE_INNER= "org.eclipse.jdt.ui.move.inner"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_FIELD= "field"; //$NON-NLS-1$

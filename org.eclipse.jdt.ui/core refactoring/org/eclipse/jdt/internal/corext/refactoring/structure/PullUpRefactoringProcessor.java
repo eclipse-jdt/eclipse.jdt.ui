@@ -141,19 +141,19 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	private static class PullUpAstNodeMapper extends TypeVariableMapper {
 
 		/** Are we in an anonymous class declaration? */
-		protected boolean fAnonymousClassDeclaration= false;
+		private boolean fAnonymousClassDeclaration= false;
 
 		/** The source compilation unit rewrite to use */
-		protected final CompilationUnitRewrite fSourceRewriter;
+		private final CompilationUnitRewrite fSourceRewriter;
 
 		/** The super reference type */
-		protected final IType fSuperReferenceType;
+		private final IType fSuperReferenceType;
 
 		/** The target compilation unit rewrite to use */
-		protected final CompilationUnitRewrite fTargetRewriter;
+		private final CompilationUnitRewrite fTargetRewriter;
 
 		/** Are we in a type declaration statement? */
-		protected boolean fTypeDeclarationStatement= false;
+		private boolean fTypeDeclarationStatement= false;
 
 		/**
 		 * Creates a new pull up ast node mapper.
@@ -243,18 +243,17 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		}
 	}
 
-	private static final String ATTRIBUTE_ABSTRACT= "abstract"; //$NON-NLS-1$
+	protected static final String ATTRIBUTE_ABSTRACT= "abstract"; //$NON-NLS-1$
 
-	private static final String ATTRIBUTE_DELETE= "delete"; //$NON-NLS-1$
+	protected static final String ATTRIBUTE_DELETE= "delete"; //$NON-NLS-1$
 
-	private static final String ATTRIBUTE_PULL= "pull"; //$NON-NLS-1$
+	protected static final String ATTRIBUTE_PULL= "pull"; //$NON-NLS-1$
 
-	private static final String ATTRIBUTE_STUBS= "stubs"; //$NON-NLS-1$
+	protected static final String ATTRIBUTE_STUBS= "stubs"; //$NON-NLS-1$
 
 	private static final String ID_PULL_UP= "org.eclipse.jdt.ui.pull.up"; //$NON-NLS-1$
 
-	/** The identifier of this processor */
-	public static final String IDENTIFIER= "org.eclipse.jdt.ui.pullUpProcessor"; //$NON-NLS-1$
+	private static final String IDENTIFIER= "org.eclipse.jdt.ui.pullUpProcessor"; //$NON-NLS-1$
 
 	/** The pull up group category set */
 	private static final GroupCategorySet SET_PULL_UP= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.pullUp", //$NON-NLS-1$
@@ -322,7 +321,8 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		}
 	}
 
-	private IMethod[] fAbstractMethods;
+	/** The methods to be declared abstract */
+	protected IMethod[] fAbstractMethods;
 
 	private ITypeHierarchy fCachedDeclaringSuperTypeHierarchy;
 
@@ -330,14 +330,14 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	private Set fCachedSkippedSuperTypes;
 
-	private boolean fCreateMethodStubs;
+	/** Should method stubs be generated in subtypes? */
+	protected boolean fCreateMethodStubs;
 
-	private IMethod[] fDeletedMethods;
+	/** The methods to be deleted in subtypes */
+	protected IMethod[] fDeletedMethods;
 
-	private IType fDestinationType;
-
-	/** Should occurrences of the type be replaced by the supertype? */
-	private boolean fReplace= false;
+	/** The destination type */
+	protected IType fDestinationType;
 
 	/**
 	 * Creates a new pull up refactoring processor.
@@ -970,6 +970,8 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 					}
 					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PULL_UP, project, fMembersToMove.length == 1 ? NLS.bind(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}) : NLS.bind(RefactoringCoreMessages.PullUpRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
 					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fDestinationType));
+					arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplace).toString());
+					arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
 					if (fDeclaringType != null)
 						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(fDeclaringType));
 					arguments.put(ATTRIBUTE_PULL, new Integer(fMembersToMove.length).toString());
@@ -1568,11 +1570,21 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				else
 					fDeclaringType= (IType) element;
 			}
-			final String instance= extended.getAttribute(ATTRIBUTE_STUBS);
-			if (instance != null) {
-				fCreateMethodStubs= Boolean.valueOf(instance).booleanValue();
+			final String stubs= extended.getAttribute(ATTRIBUTE_STUBS);
+			if (stubs != null) {
+				fCreateMethodStubs= Boolean.valueOf(stubs).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_STUBS));
+			final String instance= extended.getAttribute(ATTRIBUTE_INSTANCEOF);
+			if (instance != null) {
+				fInstanceOf= Boolean.valueOf(instance).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INSTANCEOF));
+			final String replace= extended.getAttribute(ATTRIBUTE_REPLACE);
+			if (replace != null) {
+				fReplace= Boolean.valueOf(replace).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
 			int pullCount= 0;
 			int abstractCount= 0;
 			int deleteCount= 0;
@@ -1681,16 +1693,6 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		}
 	}
 
-	/**
-	 * Should occurrences of the type be replaced by the interface?
-	 * 
-	 * @return <code>true</code> if the should be replaced, <code>false</code>
-	 *         otherwise
-	 */
-	public boolean isReplace() {
-		return fReplace;
-	}
-
 	private boolean isRequiredPullableMember(final List queue, final IMember member) throws JavaModelException {
 		if (member.getDeclaringType() == null) // not a member
 			return false;
@@ -1739,7 +1741,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		}
 	}
 
-	private void rewriteTypeOccurrences(final TextChangeManager manager, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit copy, final Set replacements, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
+	protected void rewriteTypeOccurrences(final TextChangeManager manager, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit copy, final Set replacements, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask("", 20); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.PullUpRefactoring_checking);
@@ -1817,17 +1819,5 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	public void setMembersToMove(final IMember[] members) {
 		Assert.isNotNull(members);
 		fMembersToMove= (IMember[]) SourceReferenceUtil.sortByOffset(members);
-	}
-
-	/**
-	 * Determines whether occurrences of the type should be replaced by the
-	 * interface.
-	 * 
-	 * @param replace
-	 *            <code>true</code> to replace occurrences where possible,
-	 *            <code>false</code> otherwise
-	 */
-	public void setReplace(final boolean replace) {
-		fReplace= replace;
 	}
 }
