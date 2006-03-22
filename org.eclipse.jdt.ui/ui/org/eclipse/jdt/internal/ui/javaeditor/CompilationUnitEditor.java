@@ -1749,9 +1749,14 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @since 3.0
 	 */
 	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
-
+		
+		// see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=58245
+		JavaPlugin javaPlugin= JavaPlugin.getDefault();
+		if (javaPlugin == null)
+			return;
+		
 		// Always notify AST provider
-		JavaPlugin.getDefault().getASTProvider().reconciled(ast, getInputJavaElement());
+		javaPlugin.getASTProvider().reconciled(ast, getInputJavaElement());
 
 		// Notify listeners
 		Object[] listeners = fReconcilingListeners.getListeners();
