@@ -11,18 +11,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -52,7 +45,6 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -114,7 +106,6 @@ import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFix;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
@@ -135,8 +126,6 @@ import org.eclipse.jdt.internal.ui.deprecation.FixDeprecationRefactoringWizard;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
-import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
-import org.eclipse.jdt.internal.ui.refactoring.binary.BinaryRefactoringHistoryWizard;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 
 /**
@@ -429,9 +418,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 			final RefactoringHistory[] histories= { null };
 			if (file.exists()) {
-				histories[0]= getRefactoringHistory(file);
+				histories[0]= DeprecationRefactorings.getRefactoringHistory(file);
 			} else if (roots[0] != null) {
-				histories[0]= getRefactoringHistory(roots[0], fileName);
+				histories[0]= DeprecationRefactorings.getRefactoringHistory(roots[0], fileName);
 			} else
 				return false;
 			if (histories[0] == null)
@@ -479,63 +468,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			resultingCollections.add(proposal);
 			return true;
 		}
-	}
-
-	private static RefactoringHistory getRefactoringHistory(IFile file) {
-		InputStream stream= null;
-		try {
-			stream= new BufferedInputStream(file.getContents(true));
-			return RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.DEPRECATION_RESOLVING);
-		} catch (CoreException exception) {
-			JavaPlugin.log(exception);
-		} finally {
-			if (stream != null) {
-				try {
-					stream.close();
-				} catch (IOException exception) {
-					// Do nothing
-				}
-			}
-		}
-		return null;
-	}
-
-	private static RefactoringHistory getRefactoringHistory(IPackageFragmentRoot root, String name) {
-		try {
-			final URI uri= BinaryRefactoringHistoryWizard.getLocationURI(root.getRawClasspathEntry());
-			if (uri != null) {
-				final File file= new File(uri);
-				if (file.exists()) {
-					ZipFile zip= null;
-					try {
-						zip= new ZipFile(file, ZipFile.OPEN_READ);
-						ZipEntry entry= zip.getEntry(JarPackagerUtil.getDeprecationEntry(name));
-						if (entry != null) {
-							InputStream stream= null;
-							try {
-								stream= zip.getInputStream(entry);
-								return RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.DEPRECATION_RESOLVING);
-							} catch (CoreException exception) {
-								JavaPlugin.log(exception);
-							} finally {
-								if (stream != null) {
-									try {
-										stream.close();
-									} catch (IOException exception) {
-										// Do nothing
-									}
-								}
-							}
-						}
-					} catch (IOException exception) {
-						// Just leave it
-					}
-				}
-			}
-		} catch (JavaModelException exception) {
-			JavaPlugin.log(exception);
-		}
-		return null;
 	}
 
 	private static boolean getSplitVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
