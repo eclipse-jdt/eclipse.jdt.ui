@@ -490,6 +490,10 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractSupertypeProcessor_computing_possible_types;
 
+	public static String ExtractSupertypeProcessor_descriptor_description;
+
+	public static String ExtractSupertypeProcessor_extract_supertype;
+
 	public static String ExtractSupertypeProcessor_unexpected_exception_on_layer;
 
 	public static String ExtractTempRefactoring_another_variable;
