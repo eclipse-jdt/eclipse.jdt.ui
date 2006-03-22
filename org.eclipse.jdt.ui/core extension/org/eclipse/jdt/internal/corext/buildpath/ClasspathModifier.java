@@ -1188,7 +1188,7 @@ public class ClasspathModifier {
 	 * @throws CoreException 
 	 * @throws OperationCanceledException 
 	 */
-	private CPListElement addToClasspath(IResource resource, List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+	public static CPListElement addToClasspath(IResource resource, List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -1228,7 +1228,7 @@ public class ClasspathModifier {
 	 * @throws CoreException 
 	 * @throws OperationCanceledException 
 	 */
-	private CPListElement addToClasspath(IJavaElement javaElement, List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+	public static CPListElement addToClasspath(IJavaElement javaElement, List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -2066,7 +2066,7 @@ public class ClasspathModifier {
 		};
 	}
 
-	private OutputFolderValidator getValidator(final List newElements, final IJavaProject project) throws JavaModelException {
+	public static OutputFolderValidator getValidator(final List newElements, final IJavaProject project) throws JavaModelException {
 		return new OutputFolderValidator(newElements, project) {
 
 			public boolean validate(IPath outputLocation) {
