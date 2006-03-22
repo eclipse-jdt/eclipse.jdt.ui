@@ -1539,7 +1539,7 @@ public class ClasspathModifier {
 	 * 
 	 * @see #exclude(List, IJavaProject, IProgressMonitor)
 	 */
-	private void unExclude(IResource resource, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	public static void unExclude(IResource resource, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -1698,7 +1698,7 @@ public class ClasspathModifier {
 	 * @param project the Java project
 	 * @return a list of elements corresponding to the passed entries.
 	 */
-	private List getCorrespondingElements(List entries, IJavaProject project) {
+	public static List getCorrespondingElements(List entries, IJavaProject project) {
 		List result= new ArrayList();
 		for (int i= 0; i < entries.size(); i++) {
 			Object element= entries.get(i);
