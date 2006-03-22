@@ -370,12 +370,15 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		final AddFolderToBuildpathAction addFolder= new AddFolderToBuildpathAction(site);
 		provider.addSelectionChangedListener(addFolder);
 		
+		final AddSelectedLibraryToBuildpathAction addSelectedLibrary= new AddSelectedLibraryToBuildpathAction(site);
+		provider.addSelectionChangedListener(addSelectedLibrary);
+		
 		final BuildActionSelectionContext context= new BuildActionSelectionContext();
 		fActions= new Action[] {
 				addLinkedSourceFolderAction,
 				addSourceFolderAction,
 				addFolder,
-				createBuildPathAction(fSite, IClasspathInformationProvider.ADD_SEL_LIB_TO_BP, context),
+				addSelectedLibrary,
 				remove,
 				addArchive,
 				addLibrary,
