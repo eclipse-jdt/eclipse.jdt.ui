@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import java.text.BreakIterator;
+import com.ibm.icu.text.BreakIterator;
 
 import junit.framework.TestCase;
 
