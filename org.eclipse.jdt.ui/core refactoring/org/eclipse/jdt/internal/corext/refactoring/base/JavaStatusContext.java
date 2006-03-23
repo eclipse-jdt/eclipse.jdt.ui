@@ -112,7 +112,7 @@ public abstract class JavaStatusContext extends RefactoringStatusContext {
 				fSourceRange= new SourceRange(0,0);
 		}
 		public boolean isBinary() {
-			return false;
+			return true;
 		}
 		public ICompilationUnit getCompilationUnit() {
 			return null;
