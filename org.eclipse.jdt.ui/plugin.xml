@@ -444,12 +444,18 @@
             icon="$nl$/icons/full/eview16/jperspective.gif"
             class="org.eclipse.jdt.internal.ui.JavaPerspectiveFactory"
             id="org.eclipse.jdt.ui.JavaPerspective">
+         <description>
+            %java.perspective.description
+         </description>
       </perspective>
       <perspective
             name="%typeHierarchyName"
             icon="$nl$/icons/full/eview16/hierch_persp.gif"
             class="org.eclipse.jdt.internal.ui.JavaHierarchyPerspectiveFactory"
             id="org.eclipse.jdt.ui.JavaHierarchyPerspective">
+         <description>
+            %typeHierarchy.perspective.description
+         </description>
       </perspective>
    </extension>
    
@@ -1963,6 +1969,9 @@
             icon="$nl$/icons/full/eview16/browse_persp.gif"
             class="org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPerspectiveFactory"
             id="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+         <description>
+            %browsing.perspective.description
+         </description>
       </perspective>
    </extension>
    <extension
