@@ -174,7 +174,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		try {
 			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
 
-				public final void run(final IProgressMonitor monitor) {
+				public final void run(final IProgressMonitor monitor) throws InterruptedException {
 					Assert.isNotNull(monitor);
 					String id= computeId(declarationNode, monitor);
 					fragment.setInitializer(fragment.getAST().newNumberLiteral(id));
@@ -194,7 +194,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		//Do nothing
 	}
 
-	private String computeId(final ASTNode declarationNode, final IProgressMonitor monitor) {
+	private String computeId(final ASTNode declarationNode, final IProgressMonitor monitor) throws InterruptedException {
 		Assert.isNotNull(monitor);
 		long serialVersionID= SERIAL_VALUE;
 		try {
@@ -203,15 +203,24 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 			final IPath path= fCompilationUnit.getResource().getFullPath();
 			try {
 				FileBuffers.getTextFileBufferManager().connect(path, new SubProgressMonitor(monitor, 10));
+				if (monitor.isCanceled())
+					throw new InterruptedException();
+				
 				final ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(path);
 				if (buffer.isDirty() && buffer.isStateValidated() && buffer.isCommitable() && displayYesNoMessage(CorrectionMessages.SerialVersionHashProposal_save_caption, CorrectionMessages.SerialVersionHashProposal_save_message))
 					buffer.commit(new SubProgressMonitor(monitor, 20), true);
 				else
 					monitor.worked(20);
+				
+				if (monitor.isCanceled())
+					throw new InterruptedException();
 			} finally {
 				FileBuffers.getTextFileBufferManager().disconnect(path, new SubProgressMonitor(monitor, 10));
 			}
 			project.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor, 60));
+			if (monitor.isCanceled())
+				throw new InterruptedException();
+			
 			long[] ids= calculateSerialVersionIds(new String[] {getQualifiedName(declarationNode)}, project, new SubProgressMonitor(monitor, 100));
 			if (ids.length == 1)
 				serialVersionID= ids[0];
