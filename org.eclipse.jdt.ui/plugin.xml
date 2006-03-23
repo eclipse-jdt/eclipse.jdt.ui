@@ -2400,7 +2400,7 @@
          </menu>
 <!-- Code Group -->
          <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.findNLSProblems"
+               definitionId="org.eclipse.jdt.ui.edit.text.java.find.broken.nls.keys"
                label="%FindNLSProblems.label"
                retarget="true"
                menubarPath="org.eclipse.jdt.ui.source.menu/codeGroup"
@@ -3218,7 +3218,7 @@
             name="%ActionDefinition.findNLSProblems.name"
             description="%ActionDefinition.findNLSProblems.description"
             categoryId="org.eclipse.jdt.ui.category.source"
-            id="org.eclipse.jdt.ui.edit.text.java.findnlsproblems">
+            id="org.eclipse.jdt.ui.edit.text.java.find.broken.nls.keys">
       </command>
       <command
             name="%ActionDefinition.externalizeStrings.name"

@@ -25,7 +25,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
 
@@ -34,6 +36,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -45,6 +48,7 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.refactoring.nls.search.SearchBrokenNLSKeysUtil;
 
@@ -71,7 +75,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 	}
 
 	//TODO: Add to API: IJavaEditorActionDefinitionIds
-	public static final String FIND_BROKEN_NLS_KEYS_ACTION_ID= "org.eclipse.jdt.ui.edit.text.java.findNLSProblems"; //$NON-NLS-1$
+	public static final String FIND_BROKEN_NLS_KEYS_ACTION_ID= "org.eclipse.jdt.ui.edit.text.java.find.broken.nls.keys"; //$NON-NLS-1$
 
 	//TODO: Add to API: JdtActionConstants
 	public static final String ACTION_HANDLER_ID= "org.eclipse.jdt.ui.actions.FindNLSProblems"; //$NON-NLS-1$
@@ -92,23 +96,18 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 	public FindBrokenNLSKeysAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
-		setEnabled(false);
+		setEnabled(getCompilationUnit(editor) != null);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void run(ITextSelection selection) {
-		try {
-			ICompilationUnit compilationUnit= getCompilationUnit(fEditor);
-			if (compilationUnit == null)
-				return;
-			
-			SearchPatternData[] data= tryIfPropertyCuSelected(compilationUnit);
-			run(data, compilationUnit.getElementName());
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		}		
+		ISelectionProvider selectionProvider= fEditor.getSelectionProvider();
+		if (selectionProvider == null)
+			return;
+		
+		run(new StructuredSelection(selectionProvider.getSelection()));
 	}
 
 	/* (non-Javadoc)
@@ -154,28 +153,19 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void selectionChanged(ITextSelection selection) {
-		try {
-			setEnabled(tryIfPropertyCuSelected(getCompilationUnit(fEditor)) != null);
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+		ISelectionProvider selectionProvider= fEditor.getSelectionProvider();
+		if (selectionProvider == null) {
 			setEnabled(false);
+		} else {
+			selectionChanged(new StructuredSelection(selectionProvider.getSelection()));
 		}
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	public void selectionChanged(IStructuredSelection selection) {
-		try {
-			if (selection.size() == 1 && selection.getFirstElement() instanceof ICompilationUnit) {
-				setEnabled(true);
-			} else {
-				setEnabled(canEnable(selection.toArray()));
-			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-			setEnabled(false);
-		}
+	public void selectionChanged(IStructuredSelection selection) { 
+		setEnabled(canEnable(selection));
 	}
 	
 	private SearchPatternData[] getNLSFiles(IStructuredSelection selection) {
@@ -200,34 +190,42 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 		return (SearchPatternData[])values.toArray(new SearchPatternData[values.size()]);
 	}
 	
-	private boolean canEnable(Object[] objects) throws CoreException {
-		for (int i= 0; i < objects.length; i++) {
-			if (objects[i] instanceof IFile) {
-				IFile file= (IFile)objects[i];
-				if ("properties".equalsIgnoreCase(file.getFileExtension())) //$NON-NLS-1$
+	private boolean canEnable(IStructuredSelection selection) {
+		Object[] selected= selection.toArray();
+		for (int i= 0; i < selected.length; i++) {
+			try {
+				if (selected[i] instanceof IJavaElement) {
+					IJavaElement elem= (IJavaElement) selected[i];
+					if (elem.exists()) {
+						switch (elem.getElementType()) {
+							case IJavaElement.TYPE:
+								return elem.getParent().getElementType() == IJavaElement.COMPILATION_UNIT; // for browsing perspective
+							case IJavaElement.COMPILATION_UNIT:
+								return true;
+							case IJavaElement.IMPORT_CONTAINER:
+								return true;
+							case IJavaElement.PACKAGE_FRAGMENT:
+							case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+								IPackageFragmentRoot root= (IPackageFragmentRoot) elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+								return (root.getKind() == IPackageFragmentRoot.K_SOURCE);
+							case IJavaElement.JAVA_PROJECT:
+								return true;
+						}
+					}
+				} else if (selected[i] instanceof LogicalPackage) {
 					return true;
-			} else if (objects[i] instanceof IFolder) {
-				IFolder folder= (IFolder)objects[i];
-				if (canEnable(folder.members()))
-					return true;
-			} else if (objects[i] instanceof IProject) {
-				IProject project= (IProject)objects[i];
-				if (project.exists() && project.isOpen() && canEnable(project.members()))
-					return true;
-			} else if (objects[i] instanceof IJavaProject) {
-				IJavaProject project= (IJavaProject)objects[i];
-				if (canEnable(project.getAllPackageFragmentRoots()))
-					return true;
-			} else if (objects[i] instanceof IJavaElement) {
-				IJavaElement element= (IJavaElement)objects[i];
-				IResource resource= element.getCorrespondingResource();
-				if (resource != null) {
-					if (canEnable(new Object[] {resource}))
+				} else if (selected[i] instanceof IFile) {
+					IFile file= (IFile)selected[i];
+					if ("properties".equalsIgnoreCase(file.getFileExtension())) //$NON-NLS-1$
 						return true;
+				}
+			} catch (JavaModelException e) {
+				if (!e.isDoesNotExist()) {
+					JavaPlugin.log(e);
 				}
 			}
 		}
-		return false;
+		return true;
 	}
 
 	private void collectNLSFiles(Object[] objects, Hashtable result) throws CoreException {
