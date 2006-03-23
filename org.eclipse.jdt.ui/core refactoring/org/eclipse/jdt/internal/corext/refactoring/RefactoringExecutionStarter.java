@@ -221,7 +221,7 @@ public final class RefactoringExecutionStarter {
 		final JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
 		processor.setSuggestGetterSetterDeletion(false);
 		processor.setQueries(new ReorgQueries(shell));
-		new RefactoringExecutionHelper(new DeleteRefactoring(processor), RefactoringCore.getConditionCheckingFailedSeverity(), false, shell, new ProgressMonitorDialog(shell)).perform();
+		new RefactoringExecutionHelper(new DeleteRefactoring(processor), RefactoringCore.getConditionCheckingFailedSeverity(), false, shell, new ProgressMonitorDialog(shell)).perform(false);
 	}
 
 	public static void startDeleteRefactoring(final Object[] elements, final Shell shell) throws CoreException {

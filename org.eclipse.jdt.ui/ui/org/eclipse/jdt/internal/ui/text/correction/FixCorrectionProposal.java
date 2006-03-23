@@ -18,6 +18,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
@@ -41,7 +43,6 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
-import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 /**
  * A correction proposal which uses an {@link IFix} to
@@ -124,10 +125,10 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 			
 			int stopSeverity= RefactoringCore.getConditionCheckingFailedSeverity();
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
-			BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
+			ProgressMonitorDialog context= new ProgressMonitorDialog(shell);
 			RefactoringExecutionHelper executer= new RefactoringExecutionHelper(refactoring, stopSeverity, false, shell, context);
 			try {
-				executer.perform();
+				executer.perform(true);
 			} catch (InterruptedException e) {
 			} catch (InvocationTargetException e) {
 				JavaPlugin.log(e);

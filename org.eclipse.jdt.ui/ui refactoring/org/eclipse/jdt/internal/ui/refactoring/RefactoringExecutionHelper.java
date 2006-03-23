@@ -98,7 +98,7 @@ public class RefactoringExecutionHelper {
 		fNeedsSavedEditors= needsSavedEditors;
 	}
 	
-	public void perform() throws InterruptedException, InvocationTargetException {
+	public void perform(boolean cancelable) throws InterruptedException, InvocationTargetException {
 		Assert.isTrue(Display.getCurrent() != null);
 		final IJobManager manager=  Platform.getJobManager();
 		final IWorkspaceRoot rule= ResourcesPlugin.getWorkspace().getRoot();
@@ -128,7 +128,7 @@ public class RefactoringExecutionHelper {
 			Operation op= new Operation();
 			fRefactoring.setValidationContext(fParent);
 			try{
-				fExecContext.run(false, false, new OperationRunner(op, rule));
+				fExecContext.run(false, cancelable, new OperationRunner(op, rule));
 				RefactoringStatus validationStatus= op.fPerformChangeOperation.getValidationStatus();
 				if (validationStatus != null && validationStatus.hasFatalError()) {
 					MessageDialog.openError(fParent, fRefactoring.getName(), 
@@ -152,6 +152,8 @@ public class RefactoringExecutionHelper {
 				} else {
 					throw e;
 				}
+			}catch (OperationCanceledException e) {
+				throw new InterruptedException(e.getMessage());
 			} finally {
 				saveHelper.triggerBuild();
 			}

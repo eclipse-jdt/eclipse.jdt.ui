@@ -199,6 +199,8 @@ public class CleanUpRefactoring extends Refactoring {
 
 		public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
 			ParseListElement tuple= calculateSolution(fSolutions, ast, fCurElement.getCleanUps());
+			if (fMonitor.isCanceled())
+				throw new OperationCanceledException();
 			if (tuple != null) {
 				fResult.add(tuple);
 				fMonitor.reset();

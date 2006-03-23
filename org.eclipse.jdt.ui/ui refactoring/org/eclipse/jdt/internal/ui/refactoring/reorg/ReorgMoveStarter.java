@@ -78,7 +78,7 @@ public class ReorgMoveStarter {
 				IRunnableContext context= new ProgressMonitorDialog(parent);
 				fMoveProcessor.setCreateTargetQueries(new CreateTargetQueries(parent));
 				fMoveProcessor.setReorgQueries(new ReorgQueries(parent));
-				new RefactoringExecutionHelper(ref, RefactoringCore.getConditionCheckingFailedSeverity(), true, parent, context).perform();
+				new RefactoringExecutionHelper(ref, RefactoringCore.getConditionCheckingFailedSeverity(), true, parent, context).perform(false);
 			} else  {
 				RefactoringWizard wizard= new ReorgMoveWizard(ref);
 				/*

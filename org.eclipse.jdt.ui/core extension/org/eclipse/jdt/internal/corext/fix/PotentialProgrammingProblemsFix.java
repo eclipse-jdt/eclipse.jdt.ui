@@ -87,6 +87,8 @@ public class PotentialProgrammingProblemsFix extends AbstractFix {
 			fIdsTable= new Hashtable();
 			if (fQualifiedNames.length > 0) {
 				long[] ids= SerialVersionHashOperation.calculateSerialVersionIds(fQualifiedNames, fProject, monitor);
+				if (monitor.isCanceled())
+					throw new OperationCanceledException();
 				
 				if (ids.length != fQualifiedNames.length) {
 					for (int i= 0; i < fQualifiedNames.length; i++) {

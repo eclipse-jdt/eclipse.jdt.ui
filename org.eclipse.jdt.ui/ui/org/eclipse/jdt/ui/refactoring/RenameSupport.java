@@ -149,7 +149,7 @@ public class RenameSupport {
 			getJavaRenameProcessor().needsSavedEditors(),
 			parent,
 			context);
-		helper.perform();
+		helper.perform(false);
 	}
 	
 	/** Flag indication that no additional update is to be performed. */
