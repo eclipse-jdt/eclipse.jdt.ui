@@ -165,11 +165,34 @@ public class StatusInfo implements IStatus {
 	}
 
 	/**
-	 * Returns always <code>null</code>.
+	 * Returns always an empty array.
 	 * @see IStatus#getChildren()
 	 */
 	public IStatus[] getChildren() {
 		return new IStatus[0];
 	}	
-
+	
+	/**
+	 * Returns a string representation of the status, suitable 
+	 * for debugging purposes only.
+	 */
+	public String toString() {
+		StringBuffer buf = new StringBuffer();
+		buf.append("StatusInfo "); //$NON-NLS-1$
+		if (fSeverity == OK) {
+			buf.append("OK"); //$NON-NLS-1$
+		} else if (fSeverity == ERROR) {
+			buf.append("ERROR"); //$NON-NLS-1$
+		} else if (fSeverity == WARNING) {
+			buf.append("WARNING"); //$NON-NLS-1$
+		} else if (fSeverity == INFO) {
+			buf.append("INFO"); //$NON-NLS-1$
+		} else {
+			buf.append("severity="); //$NON-NLS-1$
+			buf.append(fSeverity);
+		}
+		buf.append(": "); //$NON-NLS-1$
+		buf.append(fStatusMessage);
+		return buf.toString();
+	}
 }
