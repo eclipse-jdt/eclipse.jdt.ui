@@ -360,7 +360,7 @@ public class PackageExplorerPart extends ViewPart
 				Object element= iter.next();
 				if (element instanceof IJavaProject) {
 					IProject project= ((IJavaProject)element).getProject();
-					if (!project.isOpen()) {
+					if (!project.isOpen() && project.exists()) {
 						ns.add(project);
 						changed= true;
 					}
