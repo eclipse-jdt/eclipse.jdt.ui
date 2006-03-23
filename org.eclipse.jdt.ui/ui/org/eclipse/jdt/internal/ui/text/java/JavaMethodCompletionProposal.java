@@ -52,12 +52,10 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	}
 
 	protected boolean needsLinkedMode() {
-		return hasArgumentList() && hasParameters() && !isEmptyConstructorProposal();
+		return hasArgumentList() && hasParameters();
 	}
 	
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
-		if (isEmptyConstructorProposal())
-			return ""; //$NON-NLS-1$
 		if (hasArgumentList())
 			return String.valueOf(fProposal.getName());
 		return super.getPrefixCompletionText(document, completionOffset);
@@ -136,10 +134,6 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		if (!hasArgumentList())
 			return super.computeReplacementString();
 		
-		if (isEmptyConstructorProposal()) {
-			return ""; //$NON-NLS-1$
-		}
-		
 		// we're inserting a method plus the argument list - respect formatter preferences
 		StringBuffer buffer= new StringBuffer();
 		buffer.append(fProposal.getName());
@@ -168,14 +162,6 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 
 		return buffer.toString();
 
-	}
-
-	/**
-	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=120542
-	 */
-	private boolean isEmptyConstructorProposal() {
-		char[] completion= fProposal.getCompletion();
-		return completion.length == 1 && completion[0] == ')';
 	}
 	
 	protected ProposalInfo computeProposalInfo() {
