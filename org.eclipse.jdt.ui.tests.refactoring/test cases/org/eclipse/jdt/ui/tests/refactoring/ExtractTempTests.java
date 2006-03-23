@@ -617,6 +617,11 @@ public class ExtractTempTests extends RefactoringTest {
 		helper1(10, 32, 10, 47, true, false, "temp", "nextElement");
 	}
 	
+	public void test98() throws Exception {
+		//test for bug 132931
+		helper1(8, 32, 8, 44, true, true, "temp", "toString");
+	}
+	
 	public void testZeroLengthSelection0() throws Exception {
 //		printTestDisabledMessage("test for bug 30146");
 		helper1(4, 18, 4, 18, true, false, "temp", "j");

@@ -61,6 +61,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -698,6 +699,7 @@ public class ExtractTempRefactoring extends CommentRefactoring implements IIniti
 			if (locationInParent == IfStatement.THEN_STATEMENT_PROPERTY
 					|| locationInParent == IfStatement.ELSE_STATEMENT_PROPERTY
 					|| locationInParent == ForStatement.BODY_PROPERTY
+					|| locationInParent == EnhancedForStatement.BODY_PROPERTY
 					|| locationInParent == DoStatement.BODY_PROPERTY
 					|| locationInParent == WhileStatement.BODY_PROPERTY) {
 				Block replacement= rewrite.getAST().newBlock();
