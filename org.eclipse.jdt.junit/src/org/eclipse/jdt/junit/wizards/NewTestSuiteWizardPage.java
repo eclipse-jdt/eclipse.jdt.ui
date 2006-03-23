@@ -41,6 +41,7 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -48,6 +49,8 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
@@ -74,6 +77,8 @@ import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
  */
 public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	
+	private static final String ALL_TESTS= "AllTests"; //$NON-NLS-1$
+
 	public static final String NON_COMMENT_END_MARKER = "$JUnit-END$"; //$NON-NLS-1$
 
 	public static final String NON_COMMENT_START_MARKER = "$JUnit-BEGIN$"; //$NON-NLS-1$
@@ -144,7 +149,6 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		createPackageControls(composite, nColumns);	
 		//createSeparator(composite, nColumns);
 		createTypeNameControls(composite, nColumns);
-		setTypeName("AllTests", true); //$NON-NLS-1$
 		createClassesInSuiteControl(composite, nColumns);
 		createMethodStubSelectionControls(composite, nColumns);
 		setControl(composite);
@@ -174,12 +178,27 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	public void init(IStructuredSelection selection) {
 		IJavaElement jelem= getInitialJavaElement(selection);
 		initContainerPage(jelem);
-		initTypePage(jelem);
+		initSuitePage(jelem);
 		doStatusUpdate();
 
 		fMethodStubsButtons.setSelection(0, false); //main
 		fMethodStubsButtons.setSelection(1, false); //add textrunner
 		fMethodStubsButtons.setEnabled(1, false); //add text
+	}
+
+	private void initSuitePage(IJavaElement jelem) {
+		//parts of NewTypeWizardPage#initTypePage(..), see bug 132748
+		
+		if (jelem != null) {
+			IPackageFragment pack= (IPackageFragment) jelem.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+			IJavaProject project= jelem.getJavaProject();
+			
+			setPackageFragment(pack, true);
+			setAddComments(StubUtility.doAddComments(project), true); // from project or workspace
+		}
+		
+		setTypeName(ALL_TESTS, true);
+		fTypeNameStatus= typeNameChanged(); //set status on initialization for this dialog - user must know that suite method will be overridden
 	}
 	
 	/* (non-Javadoc)
@@ -447,6 +466,8 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	 * @see org.eclipse.jdt.ui.wizards.NewTypeWizardPage#typeNameChanged()
 	 */
 	protected IStatus typeNameChanged() {
+		super.typeNameChanged();
+		
 		JUnitStatus status= new JUnitStatus();
 		String typeName= getTypeName();
 		// must not be empty

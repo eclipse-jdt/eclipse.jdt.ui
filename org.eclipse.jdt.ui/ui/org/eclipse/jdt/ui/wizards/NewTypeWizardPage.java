@@ -305,6 +305,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	private IPackageFragment fCurrPackage;
 	
 	private IType fCurrEnclosingType;
+	/**
+	 * a handle to the type to be created (does usually not exist, can be null)
+	 */
 	private IType fCurrType;
 	private StringDialogField fTypeNameDialogField;
 	
@@ -2165,7 +2168,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		if (fTypeKind == CLASS_TYPE && superclass.length() > 0 && !"java.lang.Object".equals(superclass)) { //$NON-NLS-1$
 			buf.append(" extends "); //$NON-NLS-1$
 			
-			ITypeBinding binding= TypeContextChecker.resolveSuperClass(superclass, fCurrType, getSuperClassStubTypeContext());
+			ITypeBinding binding= null;
+			if (fCurrType != null) {
+				binding= TypeContextChecker.resolveSuperClass(superclass, fCurrType, getSuperClassStubTypeContext());
+			}
 			if (binding != null) {
 				buf.append(imports.addImport(binding));
 			} else {
@@ -2184,7 +2190,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				buf.append(" extends "); //$NON-NLS-1$
 			}
 			String[] intfs= (String[]) interfaces.toArray(new String[interfaces.size()]);
-			ITypeBinding[] bindings= TypeContextChecker.resolveSuperInterfaces(intfs, fCurrType, getSuperInterfacesStubTypeContext());
+			ITypeBinding[] bindings;
+			if (fCurrType != null) {
+				bindings= TypeContextChecker.resolveSuperInterfaces(intfs, fCurrType, getSuperInterfacesStubTypeContext());
+			} else {
+				bindings= new ITypeBinding[intfs.length];
+			}
 			for (int i= 0; i <= last; i++) {
 				ITypeBinding binding= bindings[i];
 				if (binding != null) {
