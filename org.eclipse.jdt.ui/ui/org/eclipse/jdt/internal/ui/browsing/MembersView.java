@@ -133,7 +133,6 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 		fCategoryFilterActionGroup.contributeToViewMenu(actionBars.getMenuManager());
 	}
 
-
 	/*
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#setInput(java.lang.Object)
 	 * @since 3.2
@@ -335,7 +334,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#dispose()
 	 */
 	public void dispose() {
