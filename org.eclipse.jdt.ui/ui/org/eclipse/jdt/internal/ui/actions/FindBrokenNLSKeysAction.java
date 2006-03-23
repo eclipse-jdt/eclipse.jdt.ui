@@ -225,7 +225,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 				}
 			}
 		}
-		return true;
+		return false;
 	}
 
 	private void collectNLSFiles(Object[] objects, Hashtable result) throws CoreException {
