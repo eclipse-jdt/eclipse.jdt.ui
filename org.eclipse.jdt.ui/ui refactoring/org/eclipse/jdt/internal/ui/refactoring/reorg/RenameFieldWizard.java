@@ -75,7 +75,10 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 			Composite parentComposite= (Composite)getControl();
 				
 			Composite composite= new Composite(parentComposite, SWT.NONE);
-			composite.setLayout(new GridLayout());
+			final GridLayout layout= new GridLayout();
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			composite.setLayout(layout);
 			composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 			Label separator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
