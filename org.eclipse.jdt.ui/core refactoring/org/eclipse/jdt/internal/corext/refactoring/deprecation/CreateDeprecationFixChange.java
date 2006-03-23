@@ -39,11 +39,11 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.changes.DeleteFileChange;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 /**
- * Change to create a new deprecation script.
+ * Change to create a new deprecation fix.
  * 
  * @since 3.2
  */
-public final class CreateDeprecationScriptChange extends JDTChange {
+public final class CreateDeprecationFixChange extends JDTChange {
 
 	/** The label of the element to be deprecated */
 	private final String fLabel;
@@ -55,14 +55,14 @@ public final class CreateDeprecationScriptChange extends JDTChange {
 	private final String fScript;
 
 	/**
-	 * Creates a new deprecation script change.
+	 * Creates a new deprecation fix change.
 	 * 
 	 * @param path
 	 *            the path of the script file
 	 * @param script
 	 *            the deprecation script
 	 */
-	public CreateDeprecationScriptChange(final IPath path, final String script, final String label) {
+	public CreateDeprecationFixChange(final IPath path, final String script, final String label) {
 		Assert.isNotNull(path);
 		Assert.isLegal(script != null && !"".equals(script)); //$NON-NLS-1$
 		Assert.isNotNull(label);
@@ -154,9 +154,9 @@ public final class CreateDeprecationScriptChange extends JDTChange {
 			monitor.beginTask(RefactoringCoreMessages.CreateDeprecationScriptChange_performing_change, 2);
 			final IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
 			try {
-				stream= new ByteArrayInputStream(fScript.getBytes(IDeprecationConstants.SCRIPT_ENCODING));
+				stream= new ByteArrayInputStream(fScript.getBytes(DeprecationRefactorings.SCRIPT_ENCODING));
 				createFile(file, stream, monitor);
-				file.setCharset(IDeprecationConstants.SCRIPT_ENCODING, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				file.setCharset(DeprecationRefactorings.SCRIPT_ENCODING, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 				return new DeleteFileChange(file);
 			} catch (UnsupportedEncodingException exception) {
 				throw new JavaModelException(exception, IJavaModelStatusConstants.IO_EXCEPTION);

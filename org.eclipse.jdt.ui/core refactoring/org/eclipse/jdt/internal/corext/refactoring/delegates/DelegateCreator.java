@@ -10,17 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.delegates;
 
-import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-
-import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -30,8 +25,6 @@ import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
 
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -57,8 +50,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.deprecation.CreateDeprecationScriptChange;
-import org.eclipse.jdt.internal.corext.refactoring.deprecation.IDeprecationConstants;
+import org.eclipse.jdt.internal.corext.refactoring.deprecation.CreateDeprecationFixChange;
+import org.eclipse.jdt.internal.corext.refactoring.deprecation.DeprecationRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -255,7 +248,7 @@ public abstract class DelegateCreator {
 	 * 
 	 * This method is only called if isDeclareDeprecated() == true.
 	 */
-	protected abstract RefactoringSessionDescriptor createRefactoringScript();
+	protected abstract String createRefactoringScript();
 
 	/**
 	 * 
@@ -353,18 +346,7 @@ public abstract class DelegateCreator {
 		}
 
 		if (fDeclareDeprecated) {
-			final RefactoringSessionDescriptor descriptor= createRefactoringScript();
-			if (descriptor != null) {
-				try {
-					final ByteArrayOutputStream stream= new ByteArrayOutputStream(1024);
-					RefactoringCore.getHistoryService().writeRefactoringSession(descriptor, stream, false);
-					fDeprecationScript= stream.toString(IDeprecationConstants.SCRIPT_ENCODING);
-				} catch (CoreException exception) {
-					JavaPlugin.log(exception);
-				} catch (UnsupportedEncodingException exception) {
-					Assert.isTrue(false);
-				}
-			}
+			fDeprecationScript= createRefactoringScript();
 			createJavadoc();
 		}
 	}
@@ -445,9 +427,9 @@ public abstract class DelegateCreator {
 		if (fDeprecationScript != null) {
 			final String name= getRefactoringScriptName();
 			if (name != null) {
-				final IPath path= getRefactoringScriptPath(fDelegateRewrite.getCu().getJavaProject().getProject(), name);
+				final IPath path= DeprecationRefactorings.getRefactoringScriptFile(fDelegateRewrite.getCu().getJavaProject(), name).getFullPath();
 				if (path != null)
-					return new CreateDeprecationScriptChange(path, fDeprecationScript, BindingLabelProvider.getBindingLabel(getDeclarationBinding(), JavaElementLabels.ALL_DEFAULT));
+					return new CreateDeprecationFixChange(path, fDeprecationScript, BindingLabelProvider.getBindingLabel(getDeclarationBinding(), JavaElementLabels.ALL_DEFAULT));
 			}
 		}
 		return null;
@@ -472,10 +454,6 @@ public abstract class DelegateCreator {
 	}
 
 	// ******************* INTERNAL HELPERS ***************************
-
-	private static IPath getRefactoringScriptPath(IProject project, String name) {
-		return project.getFullPath().append(IDeprecationConstants.SCRIPT_FOLDER).append(name);
-	}
 
 	private TagElement getDelegateJavadocTag(BodyDeclaration declaration) throws JavaModelException {
 		Assert.isNotNull(declaration);

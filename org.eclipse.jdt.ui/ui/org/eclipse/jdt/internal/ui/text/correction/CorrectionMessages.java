@@ -15,7 +15,7 @@ import org.eclipse.osgi.util.NLS;
 /**
  * Helper class to get NLSed messages.
  */
-final class CorrectionMessages extends NLS {
+public final class CorrectionMessages extends NLS {
 
 	private static final String BUNDLE_NAME= CorrectionMessages.class.getName();
 

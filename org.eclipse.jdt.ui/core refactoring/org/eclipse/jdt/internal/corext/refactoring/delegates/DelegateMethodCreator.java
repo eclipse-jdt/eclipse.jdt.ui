@@ -12,10 +12,6 @@ package org.eclipse.jdt.internal.corext.refactoring.delegates;
 
 import java.util.List;
 
-import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -39,9 +35,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.deprecation.DeprecationRefactorings;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IDeprecationResolving;
 
 /**
  * Delegate creator for static and non-static methods.
@@ -145,18 +139,11 @@ public class DelegateMethodCreator extends DelegateCreator {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected RefactoringSessionDescriptor createRefactoringScript() {
+	protected String createRefactoringScript() {
 		final MethodDeclaration declaration= (MethodDeclaration) getDeclaration();
 		final IMethodBinding binding= declaration.resolveBinding();
-		if (binding != null) {
-			final IJavaElement element= binding.getJavaElement();
-			if (element instanceof IMethod) {
-				final IMethod method= (IMethod) element;
-				final IDeprecationResolving resolving= new InlineMethodRefactoring(method);
-				if (resolving.canEnableDeprecationResolving())
-					return resolving.createDeprecationResolution();
-			}
-		}
+		if (binding != null)
+			return DeprecationRefactorings.createInlineDeprecationScript(binding);
 		return null;
 	}
 
@@ -175,7 +162,7 @@ public class DelegateMethodCreator extends DelegateCreator {
 		final MethodDeclaration declaration= (MethodDeclaration) getDeclaration();
 		final IMethodBinding binding= declaration.resolveBinding();
 		if (binding != null)
-			return DeprecationRefactorings.getRefactoringScriptName(binding);
+			return DeprecationRefactorings.getMethodScriptName(binding);
 		return null;
 	}
 

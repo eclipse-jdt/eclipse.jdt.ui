@@ -10,10 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.delegates;
 
-import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
-
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -29,10 +25,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.deprecation.DeprecationRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IDeprecationResolving;
 
 /**
  * Delegate creator for static fields. Note that this implementation assumes a
@@ -89,24 +83,17 @@ public class DelegateFieldCreator extends DelegateCreator {
 		return fOldFieldFragment.resolveBinding();
 	}
 
-	protected RefactoringSessionDescriptor createRefactoringScript() {
+	protected String createRefactoringScript() {
 		final IVariableBinding binding= fOldFieldFragment.resolveBinding();
-		if (binding != null) {
-			final IJavaElement element= binding.getJavaElement();
-			if (element instanceof IField) {
-				final IField field= (IField) element;
-				final IDeprecationResolving resolving= new InlineConstantRefactoring(field);
-				if (resolving.canEnableDeprecationResolving())
-					return resolving.createDeprecationResolution();
-			}
-		}
+		if (binding != null && binding.isField())
+			return DeprecationRefactorings.createInlineDeprecationScript(binding);
 		return null;
 	}
 
 	protected String getRefactoringScriptName() {
 		final IVariableBinding binding= fOldFieldFragment.resolveBinding();
 		if (binding != null)
-			return DeprecationRefactorings.getRefactoringScriptName(binding);
+			return DeprecationRefactorings.getFieldScriptName(binding);
 		return null;
 	}
 
