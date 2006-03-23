@@ -779,7 +779,15 @@ public class ASTNodes {
 			return ((SimpleName) name).getIdentifier();
 		}
 	}
-	
+
+	public static boolean isDeclaration(Name name) {
+		if (name.isQualifiedName()) {
+			return ((QualifiedName) name).getName().isDeclaration();
+		} else {
+			return ((SimpleName) name).isDeclaration();
+		}
+	}
+
 	public static Modifier findModifierNode(int flag, List modifiers) {
 		for (int i= 0; i < modifiers.size(); i++) {
 			Object curr= modifiers.get(i);
