@@ -178,10 +178,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 	
 	private class CategoryFilterMenuAction extends Action {
 		
-		private IJavaElement[] fInput;
-		
-		public CategoryFilterMenuAction(IJavaElement[] input) {
-			fInput= input;
+		public CategoryFilterMenuAction() {
 			setDescription(ActionMessages.CategoryFilterActionGroup_ShowCategoriesActionDescription); 
 			setToolTipText(ActionMessages.CategoryFilterActionGroup_ShowCategoriesToolTip); 
 			setText(ActionMessages.CategoryFilterActionGroup_ShowCategoriesLabel);
@@ -192,12 +189,9 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		 * {@inheritDoc}
 		 */
 		public void run() {
-			showCategorySelectionDialog(fInput);
+			showCategorySelectionDialog(fInputElement);
 		}
 
-		public void setInput(IJavaElement[] input) {
-			fInput= input;
-		}
 	}
 		
 	private class CategoryFilterAction extends Action {
@@ -254,18 +248,14 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		fFilteredCategories= new HashSet();
 		loadFilteredCategories();
 
-		fMenuAction= new CategoryFilterMenuAction(input);
+		fMenuAction= new CategoryFilterMenuAction();
 		
 		fViewer.addFilter(fFilter);
 	}
 	
 	public void setInput(IJavaElement[] input) {
 		Assert.isLegal(input != null);
-		
 		fInputElement= input;
-		if (fMenuManager != null) {
-			updateMenu(fMenuManager);
-		}
 	}
 	
 	private void loadFilteredCategories() {
@@ -303,6 +293,8 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		menuManager.appendToGroup(CATEGORY_MENU_GROUP_NAME, fMenuAction);
 		fMenuListener= new IMenuListener() {
 					public void menuAboutToShow(IMenuManager manager) {
+						if (!manager.isVisible())
+							return;
 						updateMenu(manager);
 					}			
 				};
@@ -347,7 +339,6 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			manager.appendToGroup(CATEGORY_MENU_GROUP_NAME, new CategoryFilterAction(category));
 			count++;
 		}
-		fMenuAction.setInput(fInputElement);
 	}
 
 	private void collectCategories(IJavaElement element, HashSet result) {

@@ -544,7 +544,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		fLexicalSortingAction= new LexicalSortingAction(treeViewer);
 		fSortByDefiningTypeAction= new SortByDefiningTypeAction(treeViewer);
 		fShowOnlyMainTypeAction= new ShowOnlyMainTypeAction(treeViewer);
-		fCategoryFilterActionGroup= new CategoryFilterActionGroup(treeViewer, getId(), new IJavaElement[0]);
+		fCategoryFilterActionGroup= new CategoryFilterActionGroup(treeViewer, getId(), getInputForCategories());
 
 		fOutlineContentProvider= new OutlineContentProvider(false);
 		treeViewer.setContentProvider(fOutlineContentProvider);
@@ -657,6 +657,9 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	}
 
 	private IJavaElement[] getInputForCategories() {
+		if (fInput == null)
+			return new IJavaElement[0];
+		
 		if (fOutlineContentProvider.isShowingInheritedMembers()) {
 			IJavaElement p= fInput;
 			if (p instanceof ICompilationUnit) {
