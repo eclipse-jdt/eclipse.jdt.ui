@@ -40,6 +40,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringTickProvider;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextEditBasedChangeGroup;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -228,6 +229,9 @@ public class CleanUpRefactoring extends Refactoring {
 					IFix fix= cleanUp.createFix(ast);
 					if (fix != null) {
 						TextChange current= fix.createChange();
+						if (current instanceof TextFileChange && fLeaveFilesDirty)
+							((TextFileChange)current).setSaveMode(TextFileChange.LEAVE_DIRTY);
+						
 						if (solution != null) {
 							if (intersects(current.getEdit(),solution.getEdit())) {
 								if (result == null) {
@@ -267,6 +271,8 @@ public class CleanUpRefactoring extends Refactoring {
 	private Hashtable/*<IJavaProject, List<ICompilationUnit>*/ fProjects;
 
 	private Change fChange;
+
+	private boolean fLeaveFilesDirty;
 	
 	public CleanUpRefactoring() {
 		fCleanUps= new ArrayList();
@@ -317,6 +323,10 @@ public class CleanUpRefactoring extends Refactoring {
 	
 	public IJavaProject[] getProjects() {
 		return (IJavaProject[])fProjects.keySet().toArray(new IJavaProject[fProjects.keySet().size()]);
+	}
+	
+	public void setLeaveFilesDirty(boolean leaveFilesDirty) {
+		fLeaveFilesDirty= leaveFilesDirty;
 	}
 
 	/* (non-Javadoc)

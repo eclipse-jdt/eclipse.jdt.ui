@@ -27,6 +27,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
@@ -72,7 +73,9 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 	protected TextChange createTextChange() throws CoreException {
 		IFix fix= fFix;
 		TextChange createChange= fix.createChange();
-
+		if (createChange instanceof TextFileChange)
+			((TextFileChange)createChange).setSaveMode(TextFileChange.LEAVE_DIRTY);
+		
 		if (fix instanceof LinkedFix) {
 			LinkedFix linkedFix= (LinkedFix)fix;
 			
@@ -122,6 +125,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 			CleanUpRefactoring refactoring= new CleanUpRefactoring();
 			refactoring.addCompilationUnit(getCompilationUnit());
 			refactoring.addCleanUp(fCleanUp);
+			refactoring.setLeaveFilesDirty(true);
 			
 			int stopSeverity= RefactoringCore.getConditionCheckingFailedSeverity();
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
