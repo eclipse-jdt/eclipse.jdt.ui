@@ -41,6 +41,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.AddTaskAction;
 import org.eclipse.jdt.internal.ui.actions.CleanUpAction;
+import org.eclipse.jdt.internal.ui.actions.ConfigureDeprecationFixAction;
 import org.eclipse.jdt.internal.ui.actions.FindBrokenNLSKeysAction;
 import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
 import org.eclipse.jdt.internal.ui.javaeditor.AddImportOnSelectionAction;
@@ -82,6 +83,14 @@ public class GenerateActionGroup extends ActionGroup {
 	public static final String GROUP_GENERATE= "generateGroup";  //$NON-NLS-1$
 	
 	/**
+	 * Pop-up menu: id of the deprecate group of the source sub menu (value
+	 * <code>deprecateGroup</code>).
+	 * 
+	 * @since 3.2
+	 */
+	private static final String GROUP_DEPRECATE= "deprecateGroup";  //$NON-NLS-1$
+	
+	/**
 	 * Pop-up menu: id of the code group of the source sub menu (value
 	 * <code>codeGroup</code>).
 	 * 
@@ -96,6 +105,7 @@ public class GenerateActionGroup extends ActionGroup {
 	
 	private AddImportOnSelectionAction fAddImport;
 	private OverrideMethodsAction fOverrideMethods;
+	private ConfigureDeprecationFixAction fDeprecationAction;
 	private GenerateHashCodeEqualsAction fHashCodeEquals;
 	private AddGetterSetterAction fAddGetterSetter;
 	private AddDelegateMethodsAction fAddDelegateMethods;
@@ -178,6 +188,10 @@ public class GenerateActionGroup extends ActionGroup {
 		fHashCodeEquals.setActionDefinitionId(IJavaEditorActionDefinitionIds.GENERATE_HASHCODE_EQUALS);
 		editor.setAction("GenerateHashCodeEquals", fHashCodeEquals); //$NON-NLS-1$
 
+		fDeprecationAction= new ConfigureDeprecationFixAction(editor);
+		fDeprecationAction.setActionDefinitionId(ConfigureDeprecationFixAction.CONFIGURE_DEPRECATION_FIXES);
+		editor.setAction("ConfigureDeprecationFix", fDeprecationAction); //$NON-NLS-1$
+
 		fAddJavaDocStub= new AddJavaDocStubAction(editor);
 		fAddJavaDocStub.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_JAVADOC_COMMENT);
 		editor.setAction("AddJavadocComment", fAddJavaDocStub); //$NON-NLS-1$
@@ -250,6 +264,9 @@ public class GenerateActionGroup extends ActionGroup {
 		fHashCodeEquals= new GenerateHashCodeEqualsAction(site);
 		fHashCodeEquals.setActionDefinitionId(IJavaEditorActionDefinitionIds.GENERATE_HASHCODE_EQUALS);
 
+		fDeprecationAction= new ConfigureDeprecationFixAction(site);
+		fDeprecationAction.setActionDefinitionId(ConfigureDeprecationFixAction.CONFIGURE_DEPRECATION_FIXES);
+
 		fAddJavaDocStub= new AddJavaDocStubAction(site);
 		fAddJavaDocStub.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_JAVADOC_COMMENT);
 		
@@ -289,6 +306,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddUnimplementedConstructors.update(selection);	
 		fGenerateConstructorUsingFields.update(selection);
 		fHashCodeEquals.update(selection);
+		fDeprecationAction.update(selection);
 		fAddJavaDocStub.update(selection);
 		fExternalizeStrings.update(selection);
 		fFindStringsToExternalize.update(selection);
@@ -311,6 +329,7 @@ public class GenerateActionGroup extends ActionGroup {
 		registerSelectionListener(provider, fAddUnimplementedConstructors);
 		registerSelectionListener(provider, fGenerateConstructorUsingFields);
 		registerSelectionListener(provider, fHashCodeEquals);
+		registerSelectionListener(provider, fDeprecationAction);
 		registerSelectionListener(provider, fAddJavaDocStub);
 		registerSelectionListener(provider, fAddBookmark);
 		registerSelectionListener(provider, fExternalizeStrings);
@@ -403,6 +422,8 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(source, fGenerateConstructorUsingFields);
 		added+= addAction(source, fHashCodeEquals);
 		added+= addAction(source, fAddJavaDocStub);
+		source.add(new Separator(GROUP_DEPRECATE));	
+		added+= addAction(source, fDeprecationAction);
 		source.add(new Separator(GROUP_CODE));		
 		added+= addAction(source, fSurroundWithTryCatch);
 		added+= addAction(source, fExternalizeStrings);
@@ -426,7 +447,9 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(source, fGenerateConstructorUsingFields);
 		added+= addAction(source, fHashCodeEquals);
 		added+= addAction(source, fAddJavaDocStub);
-		source.add(new Separator(GROUP_CODE));		
+		source.add(new Separator(GROUP_DEPRECATE));	
+		added+= addAction(source, fDeprecationAction);
+		source.add(new Separator(GROUP_CODE));	
 		added+= addAction(source, fSurroundWithTryCatch);
 		added+= addAction(source, fExternalizeStrings);
 		added+= addAction(source, fFindStringsToExternalize);
@@ -462,6 +485,7 @@ public class GenerateActionGroup extends ActionGroup {
 		actionBar.setGlobalActionHandler(JdtActionConstants.ADD_CONSTRUCTOR_FROM_SUPERCLASS, fAddUnimplementedConstructors);		
 		actionBar.setGlobalActionHandler(JdtActionConstants.GENERATE_CONSTRUCTOR_USING_FIELDS, fGenerateConstructorUsingFields);
 		actionBar.setGlobalActionHandler(JdtActionConstants.GENERATE_HASHCODE_EQUALS, fHashCodeEquals);
+		actionBar.setGlobalActionHandler(ConfigureDeprecationFixAction.CONFIGURE_DEPRECATION_FIX, fDeprecationAction);
 		actionBar.setGlobalActionHandler(JdtActionConstants.ADD_JAVA_DOC_COMMENT, fAddJavaDocStub);
 		actionBar.setGlobalActionHandler(JdtActionConstants.EXTERNALIZE_STRINGS, fExternalizeStrings);
 		actionBar.setGlobalActionHandler(JdtActionConstants.CLEAN_UP, fCleanUp);

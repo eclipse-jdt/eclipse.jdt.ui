@@ -2464,6 +2464,13 @@
                id="org.eclipse.jdt.ui.actions.GenerateHashCodeEquals">
          </action>
          <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.configure.deprecation.fix"
+               label="%ConfigureDeprecationFixAction.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
+               id="org.eclipse.jdt.ui.actions.ConfigureDeprecationFix">
+         </action>
+         <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.create.delegate.methods"
                label="%GenerateDelegateMethodsAction.label"
                retarget="true"
@@ -3171,6 +3178,12 @@
             description="%ActionDefinition.generateHashCode.description"
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.edit.text.java.generate.hashcode.equals">
+      </command>
+      <command
+            name="%ActionDefinition.configureDeprecationFix.name"
+            description="%ActionDefinition.configureDeprecationFix.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.edit.text.java.configure.deprecation.fix">
       </command>
       <command
             name="%ActionDefinition.delegateMethods.name"

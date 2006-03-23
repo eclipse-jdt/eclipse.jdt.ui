@@ -20,12 +20,24 @@ public final class ActionMessages extends NLS {
 		// Do not instantiate
 	}
 
+	public static String ConfigureDeprecationFixAction_error_not_deprecated;
+	public static String ConfigureDeprecationFixDialog_dialog_description;
+	public static String ConfigureDeprecationFixDialog_dialog_title;
+	public static String ConfigureDeprecationFixDialog_inline_fix_label;
+	public static String ConfigureDeprecationFixDialog_no_fix_label;
 	public static String FindNLSProblemsAction_Description;
 	public static String FindNLSProblemsAction_ErrorDialogTitle;
 	public static String FindNLSProblemsAction_Name;
 	public static String FindNLSProblemsAction_NoPropertieFilesFoundErrorDescription;
 	public static String FindNLSProblemsAction_ToolTip;
-	
+	public static String ConfigureDeprecationFixAction_description;
+	public static String ConfigureDeprecationFixAction_dialog_title;
+	public static String ConfigureDeprecationFixAction_error_main_method;
+	public static String ConfigureDeprecationFixAction_error_read_only;
+	public static String ConfigureDeprecationFixAction_general_error;
+	public static String ConfigureDeprecationFixAction_not_applicable;
+	public static String ConfigureDeprecationFixAction_text;
+	public static String ConfigureDeprecationFixAction_tool_tip;
 	public static String OpenWithMenu_label;
 	public static String RefactorMenu_label;
 	public static String SourceMenu_label;
@@ -76,7 +88,6 @@ public final class ActionMessages extends NLS {
 	public static String OverrideMethodsAction_error_actionfailed;
 	public static String OverrideMethodsAction_error_title;
 	public static String OverrideMethodsAction_error_nothing_found;
-	public static String OverrideMethodsAction_error_type_removed_in_editor;
 	public static String OverrideMethodsAction_not_applicable;
 	public static String OverrideMethodsAction_interface_not_applicable;
 	public static String OverrideMethodsAction_annotation_not_applicable;

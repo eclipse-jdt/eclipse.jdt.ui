@@ -30,6 +30,8 @@ public interface IJavaHelpContextIds {
 	public static final String ADD_UNIMPLEMENTED_METHODS_ACTION= 					PREFIX + "add_unimplemented_methods_action_context"; //$NON-NLS-1$
 	/* @since 3.2 */
 	public static final String GENERATE_HASHCODE_EQUALS_ACTION=						PREFIX + "add_hashcode_equals_action_context"; //$NON-NLS-1$
+	/* @since 3.2 */
+	public static final String CONFIGURE_DEPRECATION_FIX_ACTION=						PREFIX + "configure_deprecation_fix_action_context"; //$NON-NLS-1$
 	public static final String ADD_UNIMPLEMENTED_CONSTRUCTORS_ACTION= 			PREFIX + "add_unimplemented_constructors_action_context"; //$NON-NLS-1$	
 	public static final String CREATE_NEW_CONSTRUCTOR_ACTION= 					PREFIX + "create_new_constructor_action_context"; //$NON-NLS-1$	
 	public static final String SHOW_IN_PACKAGEVIEW_ACTION= 								PREFIX + "show_in_packageview_action_context"; //$NON-NLS-1$
