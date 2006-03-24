@@ -163,6 +163,9 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	public ExtractSupertypeMemberPage(final String name, final PullUpMethodPage page) {
 		super(name, page);
 		setDescription(RefactoringMessages.ExtractSupertypeMemberPage_page_title);
+		METHOD_LABELS[PULL_UP_ACTION]= RefactoringMessages.ExtractSupertypeMemberPage_extract;
+		METHOD_LABELS[DECLARE_ABSTRACT_ACTION]= RefactoringMessages.ExtractSupertypeMemberPage_declare_abstract;
+		TYPE_LABELS[PULL_UP_ACTION]= RefactoringMessages.ExtractSupertypeMemberPage_extract;
 	}
 
 	/**
@@ -174,6 +177,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 			if (areAllMembersMarkedAsWithNoAction())
 				status.addFatalError(getNoMembersMessage());
 		}
+		setMessage(null);
 		if (display)
 			setPageComplete(status);
 		else
@@ -396,6 +400,13 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	protected String getDeclareAbstractActionLabel() {
+		return RefactoringMessages.ExtractSupertypeMemberPage_declare_abstract;
+	}
+
+	/**
 	 * Returns the declaring type.
 	 * 
 	 * @return the declaring type
@@ -446,6 +457,13 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	 */
 	protected ExtractSupertypeProcessor getProcessor() {
 		return getExtractSuperTypeRefactoring().getExtractSupertypeProcessor();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected String getPullUpActionLabel() {
+		return RefactoringMessages.ExtractSupertypeMemberPage_extract;
 	}
 
 	/**
