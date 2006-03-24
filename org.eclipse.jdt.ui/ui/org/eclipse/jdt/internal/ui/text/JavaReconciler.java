@@ -12,8 +12,6 @@
 package org.eclipse.jdt.internal.ui.text;
 
 
-import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -382,10 +380,5 @@ public class JavaReconciler extends MonoReconciler {
 	 */
 	private synchronized void setEditorActive(boolean state) {
 		fIsEditorActive= state;
-		if (!state) {
-			IProgressMonitor pm= getProgressMonitor();
-			if (pm != null)
-				pm.setCanceled(true);
-		}
 	}
 }
