@@ -11,8 +11,12 @@
 package org.eclipse.jdt.internal.ui;
 
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdapterFactory;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
@@ -29,6 +33,14 @@ public class ResourceAdapterFactory implements IAdapterFactory {
 	
 	public Object getAdapter(Object element, Class key) {
 		if (IJavaElement.class.equals(key)) {
+			
+			// Performance optimization, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=133141
+			if (element instanceof IFile) {
+				IJavaElement je= JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(new FileEditorInput((IFile)element));
+				if (je != null)
+					return je;
+			}
+			
 			return JavaCore.create((IResource)element);
 		}
 		return null;
