@@ -547,31 +547,39 @@ public class JavadocConfigurationBlock {
 			if (jdocLocation.length() == 0) {
 				return status;
 			}
-			if (jdocLocation.length() > 0) {
-				URL url= new URL(jdocLocation);
-				if ("file".equals(url.getProtocol())) { //$NON-NLS-1$
-					if (url.getFile() == null) {
-						status.setError(PreferencesMessages.JavadocConfigurationBlock_error_notafolder); 
-						return status;
-					} else {
-						File dir= new File(url.getFile());
-						if (dir.exists()) {
-							if (dir.isFile()) {
-								status.setError(PreferencesMessages.JavadocConfigurationBlock_error_notafolder); 
-								return status;
-							}
-							File packagesFile= new File(dir, "package-list"); //$NON-NLS-1$
-							if (!packagesFile.exists()) {
-								status.setWarning(PreferencesMessages.JavadocConfigurationBlock_warning_packagelistnotfound); 
-								// only a warning, go on
-							}
-						} else {
-							status.setWarning(PreferencesMessages.JavadocConfigurationBlock_error_notafolder); 
+			if (jdocLocation.startsWith("file:/")) { //$NON-NLS-1$
+				StringBuffer buf= new StringBuffer(jdocLocation);
+				for (int i= 6; i < 9; i++) {
+					if (buf.charAt(i) != '/')
+						buf.insert(i, '/');
+				}
+				jdocLocation= buf.toString();
+			} else {
+				jdocLocation= "file:/" + jdocLocation; //$NON-NLS-1$
+			}
+			URL url= new URL(jdocLocation);
+			if ("file".equals(url.getProtocol())) { //$NON-NLS-1$
+				if (url.getFile() == null) {
+					status.setError(PreferencesMessages.JavadocConfigurationBlock_error_notafolder); 
+					return status;
+				} else {
+					File dir= new File(url.getFile());
+					if (dir.exists()) {
+						if (dir.isFile()) {
+							status.setError(PreferencesMessages.JavadocConfigurationBlock_error_notafolder); 
+							return status;
 						}
+						File packagesFile= new File(dir, "package-list"); //$NON-NLS-1$
+						if (!packagesFile.exists()) {
+							status.setWarning(PreferencesMessages.JavadocConfigurationBlock_warning_packagelistnotfound); 
+							// only a warning, go on
+						}
+					} else {
+						status.setWarning(PreferencesMessages.JavadocConfigurationBlock_error_notafolder); 
 					}
 				}
-				fURLResult= url;
-			} 
+			}
+			fURLResult= url;
 		} catch (MalformedURLException e) {
 			status.setError(PreferencesMessages.JavadocConfigurationBlock_MalformedURL_error);  
 			return status;			
