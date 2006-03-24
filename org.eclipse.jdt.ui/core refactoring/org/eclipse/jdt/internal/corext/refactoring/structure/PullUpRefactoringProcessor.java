@@ -321,7 +321,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	}
 
 	/** The methods to be declared abstract */
-	protected IMethod[] fAbstractMethods;
+	protected IMethod[] fAbstractMethods= new IMethod[0];
 
 	private ITypeHierarchy fCachedDeclaringSuperTypeHierarchy;
 
@@ -330,10 +330,10 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	private Set fCachedSkippedSuperTypes;
 
 	/** Should method stubs be generated in subtypes? */
-	protected boolean fCreateMethodStubs;
+	protected boolean fCreateMethodStubs= true;
 
 	/** The methods to be deleted in subtypes */
-	protected IMethod[] fDeletedMethods;
+	protected IMethod[] fDeletedMethods= new IMethod[0];
 
 	/** The destination type */
 	protected IType fDestinationType;
@@ -361,9 +361,6 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				JavaPlugin.log(exception);
 			}
 		}
-		fDeletedMethods= new IMethod[0];
-		fAbstractMethods= new IMethod[0];
-		fCreateMethodStubs= true;
 	}
 
 	private void addAllRequiredPullableMembers(final List queue, final IMember member, final IProgressMonitor monitor) throws JavaModelException {
@@ -1000,11 +997,9 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			final ICompilationUnit source= getDeclaringType().getCompilationUnit();
 			final IType destination= getDestinationType();
 			final ICompilationUnit target= destination.getCompilationUnit();
-			final CompilationUnitRewrite sourceRewriter= new CompilationUnitRewrite(fOwner, source);
-			final CompilationUnitRewrite targetRewriter= new CompilationUnitRewrite(fOwner, target);
-			final Map rewrites= new HashMap(2);
-			rewrites.put(source, sourceRewriter);
-			rewrites.put(target, targetRewriter);
+			final Map rewrites= new HashMap(3);
+			final CompilationUnitRewrite sourceRewriter= getCompilationUnitRewrite(rewrites, source);
+			final CompilationUnitRewrite targetRewriter= getCompilationUnitRewrite(rewrites, target);
 			final Map deleteMap= createMembersToDeleteMap(new SubProgressMonitor(monitor, 1));
 			final Map effectedMap= createEffectedTypesMap(new SubProgressMonitor(monitor, 1));
 			final ICompilationUnit[] units= getAffectedCompilationUnits(new SubProgressMonitor(monitor, 1));
@@ -1354,7 +1349,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		return (IType[]) list.toArray(new IType[list.size()]);
 	}
 
-	private CompilationUnitRewrite getCompilationUnitRewrite(final Map rewrites, final ICompilationUnit unit) {
+	protected CompilationUnitRewrite getCompilationUnitRewrite(final Map rewrites, final ICompilationUnit unit) {
 		Assert.isNotNull(rewrites);
 		Assert.isNotNull(unit);
 		CompilationUnitRewrite rewrite= (CompilationUnitRewrite) rewrites.get(unit);
