@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -336,7 +335,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		public void elementChanged(ElementChangedEvent e) {
 			IJavaElementDelta delta= findElement(fInput, e.getDelta());
 			if (delta != null && (delta.getFlags() & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_CHILDREN)) != 0)
-				update();
+	            update(createContext(false));
 		}
 
 		private IJavaElementDelta findElement(IJavaElement target, IJavaElementDelta delta) {
@@ -735,21 +734,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 * @see org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider#initialize()
 	 */
 	public final void initialize() {
-		FoldingStructureComputationContext ctx= createInitialContext();
-		if (ctx == null)
-			return;
-		
-		computeFoldingStructure(ctx);
-		Map additions= ctx.fMap;
-		/*
-		 *  Minimize the events being sent out - as this happens in the
-		 *  UI thread merge everything into one call.
-		 */
-		List removals= new LinkedList();
-		Iterator existing= ctx.getModel().getAnnotationIterator();
-		while (existing.hasNext())
-			removals.add(existing.next());
-		ctx.getModel().replaceAnnotations((Annotation[]) removals.toArray(new Annotation[removals.size()]), additions);
+		update(createInitialContext());
 	}
 
 	private FoldingStructureComputationContext createInitialContext() {
@@ -789,9 +774,8 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		fCollapseHeaderComments= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_HEADERS);
 	}
 
-	private void update() {
-		FoldingStructureComputationContext ctx= createContext(false);
-		if (ctx == null)
+	private void update(FoldingStructureComputationContext ctx) {
+	    if (ctx == null)
 			return;
 
 		Map additions= new HashMap();
@@ -822,9 +806,14 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 					JavaProjectionAnnotation existingAnnotation= tuple.annotation;
 					Position existingPosition= tuple.position;
 					if (newAnnotation.isComment() == existingAnnotation.isComment()) {
-						if (existingPosition != null && (!newPosition.equals(existingPosition))) {
+						if (existingPosition != null && (!newPosition.equals(existingPosition) || ctx.allowCollapsing() && existingAnnotation.isCollapsed() != newAnnotation.isCollapsed())) {
 							existingPosition.setOffset(newPosition.getOffset());
 							existingPosition.setLength(newPosition.getLength());
+							if (ctx.allowCollapsing() && existingAnnotation.isCollapsed() != newAnnotation.isCollapsed())
+								if (newAnnotation.isCollapsed())
+									existingAnnotation.markCollapsed();
+								else
+									existingAnnotation.markExpanded();
 							updates.add(existingAnnotation);
 						}
 						matched= true;
@@ -855,7 +844,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		Annotation[] changes= new Annotation[updates.size()];
 		updates.toArray(changes);
 		ctx.getModel().modifyAnnotations(removals, additions, changes);
-	}
+    }
 	
 	private void computeFoldingStructure(FoldingStructureComputationContext ctx) {
 		IParent parent= (IParent) fInput;
