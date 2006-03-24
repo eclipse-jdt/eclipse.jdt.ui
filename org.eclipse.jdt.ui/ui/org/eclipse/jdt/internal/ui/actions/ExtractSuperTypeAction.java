@@ -46,14 +46,30 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * Action is applicable to selections containing elements of type
  * <code>IType</code> (top-level types only), <code>IField</code> and
  * <code>IMethod</code>.
- * 
+ * </p>
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  * 
  * @since 3.2
  */
-public final class ExtractSuperTypeAction extends SelectionDispatchAction {
+public class ExtractSuperTypeAction extends SelectionDispatchAction {
+
+	/**
+	 * Action definition ID of the refactor -> extract supertype action (value
+	 * <code>"org.eclipse.jdt.ui.edit.text.java.extract.supertype"</code>).
+	 * 
+	 * @since 3.2
+	 */
+	public static final String EXTRACT_SUPERTYPE= "org.eclipse.jdt.ui.edit.text.java.extract.supertype"; //$NON-NLS-1$
+
+	/**
+	 * Refactor menu: name of standard Extract Supertype global action (value
+	 * <code>"org.eclipse.jdt.ui.actions.ExtractSupertype"</code>).
+	 * 
+	 * @since 3.2
+	 */
+	public static final String EXTRACT_SUPERTYPES= "org.eclipse.jdt.ui.actions.ExtractSupertype"; //$NON-NLS-1$
 
 	private static IMember[] getSelectedMembers(final IStructuredSelection selection) {
 		if (selection.isEmpty())
@@ -71,7 +87,8 @@ public final class ExtractSuperTypeAction extends SelectionDispatchAction {
 	private CompilationUnitEditor fEditor;
 
 	/**
-	 * Creates a new extract super type action.
+	 * Note: This constructor is for internal use only. Clients should not call
+	 * this constructor.
 	 * 
 	 * @param editor
 	 *            the compilation unit editor
@@ -83,7 +100,9 @@ public final class ExtractSuperTypeAction extends SelectionDispatchAction {
 	}
 
 	/**
-	 * Creates a new extract super type action.
+	 * Creates a new extract super type action. The action requires that the
+	 * selection provided by the site's selection provider is of type
+	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site
 	 *            the workbench site
@@ -91,7 +110,7 @@ public final class ExtractSuperTypeAction extends SelectionDispatchAction {
 	public ExtractSuperTypeAction(final IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.ExtractSuperTypeAction_label);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.PULL_UP_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.EXTRACT_SUPERTYPE_ACTION);
 	}
 
 	private IMember getSelectedMember() throws JavaModelException {
