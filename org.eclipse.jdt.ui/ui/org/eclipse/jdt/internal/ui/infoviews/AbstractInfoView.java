@@ -328,10 +328,12 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	 * Tells whether the new input should be ignored
 	 * if the current input is the same.
 	 *
+	 * @param je the new input
+	 * @param selection the current selection from the part that provides the input
 	 * @return <code>true</code> if the new input should be ignored
 	 */
-	protected boolean isIgnoringEqualInput() {
-		return true;
+	protected boolean isIgnoringNewInput(IJavaElement je, IWorkbenchPart part, ISelection selection) {
+		return fCurrentViewInput != null && fCurrentViewInput.equals(je) && je != null;
 	}
 
 	/**
@@ -455,7 +457,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 
 				final IJavaElement je= findSelectedJavaElement(part, selection);
 
-				if (isIgnoringEqualInput() && fCurrentViewInput != null && fCurrentViewInput.equals(je))
+				if (isIgnoringNewInput(je, part, selection))
 					return;
 
 				// The actual computation

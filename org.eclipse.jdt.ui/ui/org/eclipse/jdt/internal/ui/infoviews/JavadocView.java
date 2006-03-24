@@ -45,9 +45,11 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.BadPartitioningException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextPresentation;
@@ -58,6 +60,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -515,10 +518,34 @@ public class JavadocView extends AbstractInfoView {
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#isIgnoringEqualInput()
-	 * @since 3.0
+	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#isIgnoringNewInput(org.eclipse.jdt.core.IJavaElement, org.eclipse.jface.viewers.ISelection)
+	 * @since 3.2
 	 */
-	protected boolean isIgnoringEqualInput() {
+	protected boolean isIgnoringNewInput(IJavaElement je, IWorkbenchPart part, ISelection selection) {
+		if (super.isIgnoringNewInput(je, part, selection)
+				&& part instanceof ITextEditor
+				&& selection instanceof ITextSelection) {
+			
+			ITextEditor editor= (ITextEditor)part;
+			IDocumentProvider docProvider= editor.getDocumentProvider();
+			if (docProvider == null)
+				return false;
+			
+			IDocument document= docProvider.getDocument(editor.getEditorInput());
+			if (!(document instanceof IDocumentExtension3))
+				return false;
+			
+			try {
+				int offset= ((ITextSelection)selection).getOffset();
+				String partition= ((IDocumentExtension3)document).getContentType(IJavaPartitions.JAVA_PARTITIONING, offset, false);
+				return  partition != IJavaPartitions.JAVA_DOC;
+			} catch (BadPartitioningException ex) {
+				return false;
+			} catch (BadLocationException ex) {
+				return false;
+			}
+
+		}
 		return false;
 	}
 
