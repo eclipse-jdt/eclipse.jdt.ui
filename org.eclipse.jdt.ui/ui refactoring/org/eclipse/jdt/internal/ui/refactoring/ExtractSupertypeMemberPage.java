@@ -443,13 +443,6 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected int getMemberTableHeight() {
-		return 24;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public IWizardPage getNextPage() {
 		if (!fWorkingCopiesCreated) {
 			try {
@@ -498,6 +491,13 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	 */
 	protected String getReplaceButtonLabel() {
 		return RefactoringMessages.ExtractSupertypeMemberPage_use_instanceof_label;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected int getTableRowCount() {
+		return 6;
 	}
 
 	/**

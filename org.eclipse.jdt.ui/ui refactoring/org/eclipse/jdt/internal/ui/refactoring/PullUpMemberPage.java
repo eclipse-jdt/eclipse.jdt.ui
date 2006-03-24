@@ -275,8 +275,6 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	protected static final int PULL_UP_ACTION= 0;
 
-	private static final int ROW_COUNT= 10;
-
 	private static final String SETTING_INSTANCEOF= "InstanceOf"; //$NON-NLS-1$
 
 	private static final String SETTING_REPLACE= "Replace"; //$NON-NLS-1$
@@ -525,8 +523,8 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		table.setLinesVisible(true);
 
 		final GridData gd= new GridData(GridData.FILL_BOTH);
-		gd.heightHint= SWTUtil.getTableHeightHint(table, ROW_COUNT);
-		gd.widthHint= convertWidthInCharsToPixels(getMemberTableHeight());
+		gd.heightHint= SWTUtil.getTableHeightHint(table, getTableRowCount());
+		gd.widthHint= convertWidthInCharsToPixels(30);
 		layouter.setLayoutData(gd);
 
 		final TableLayout tableLayout= new TableLayout();
@@ -788,10 +786,6 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		return (IMember[]) result.toArray(new IMember[result.size()]);
 	}
 
-	protected int getMemberTableHeight() {
-		return 30;
-	}
-
 	private IMethod[] getMethodsForAction(final int action) {
 		final MemberActionInfo[] infos= getTableInput();
 		final List list= new ArrayList(infos.length);
@@ -837,6 +831,10 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	private MemberActionInfo[] getTableInput() {
 		return (MemberActionInfo[]) fTableViewer.getInput();
+	}
+
+	protected int getTableRowCount() {
+		return 10;
 	}
 
 	private void initializeCheckBox(final Button checkbox, final String property, final boolean def) {
