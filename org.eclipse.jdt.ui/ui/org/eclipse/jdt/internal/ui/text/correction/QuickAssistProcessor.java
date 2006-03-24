@@ -108,6 +108,7 @@ import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
   */
 public class QuickAssistProcessor implements IQuickAssistProcessor {
 
+	public static final String SPLIT_JOIN_VARIABLE_DECLARATION_ID= "org.eclipse.jdt.ui.correction.splitJoinVariableDeclaration.assist"; //$NON-NLS-1$
 	public static final String CONVERT_FOR_LOOP_ID= "org.eclipse.jdt.ui.correction.convertForLoop.assist"; //$NON-NLS-1$
 	public static final String ASSIGN_TO_LOCAL_ID= "org.eclipse.jdt.ui.correction.assignToLocal.assist"; //$NON-NLS-1$
 	public static final String ASSIGN_TO_FIELD_ID= "org.eclipse.jdt.ui.correction.assignToField.assist"; //$NON-NLS-1$
@@ -294,6 +295,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		String label= CorrectionMessages.QuickAssistProcessor_joindeclaration_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		proposal.setCommandId(SPLIT_JOIN_VARIABLE_DECLARATION_ID);
 		
 		Expression placeholder= (Expression) rewrite.createMoveTarget(assignment.getRightHandSide());
 		rewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, placeholder, null);
@@ -406,7 +408,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		String label= CorrectionMessages.QuickAssistProcessor_splitdeclaration_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
-
+		proposal.setCommandId(SPLIT_JOIN_VARIABLE_DECLARATION_ID);
+		
 		Statement newStatement;
 		int insertIndex= list.indexOf(statement);
 

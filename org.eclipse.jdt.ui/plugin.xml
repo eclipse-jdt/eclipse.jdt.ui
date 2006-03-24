@@ -3351,7 +3351,12 @@
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.correction.addSuppressWarnings">
       </command>
-
+      <command
+            name="%ActionDefinition.corrections.splitJoinVariableDeclaration.name"
+            description="%ActionDefinition.corrections.splitJoinVariableDeclaration.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.splitJoinVariableDeclaration.assist">
+      </command>
 <!-- perspectives -->
       <command
             name="%PerspectiveCommand.javaBrowsing.name"
