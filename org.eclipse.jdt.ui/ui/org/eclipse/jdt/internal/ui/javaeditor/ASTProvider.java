@@ -447,7 +447,7 @@ public final class ASTProvider {
 	 *
 	 * @param je				the Java element
 	 * @param waitFlag			{@link #WAIT_YES}, {@link #WAIT_NO} or {@link #WAIT_ACTIVE_ONLY}
-	 * @param progressMonitor	the progress monitor
+	 * @param progressMonitor	the progress monitor or <code>null</code>
 	 * @return					the AST or <code>null</code> if the AST is not available
 	 */
 	public CompilationUnit getAST(IJavaElement je, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor) {
@@ -541,7 +541,7 @@ public final class ASTProvider {
 	 * @param wait				<code>true</code> if the client wants to wait for the result,
 	 * 								<code>null</code> will be returned if the AST is not ready and
 	 * 								the client does not want to wait
-	 * @param progressMonitor	the progress monitor
+	 * @param progressMonitor	the progress monitor or <code>null</code>
 	 * @return					the AST or <code>null</code> if the AST is not available
 	 * @deprecated As of 3.1, use {@link #getAST(IJavaElement, WAIT_FLAG, IProgressMonitor)}
 	 */
