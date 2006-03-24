@@ -329,6 +329,8 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	private Set fCachedSkippedSuperTypes;
 
+	protected Map fCompilationUnitRewrites;
+
 	/** Should method stubs be generated in subtypes? */
 	protected boolean fCreateMethodStubs= true;
 
@@ -997,9 +999,9 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			final ICompilationUnit source= getDeclaringType().getCompilationUnit();
 			final IType destination= getDestinationType();
 			final ICompilationUnit target= destination.getCompilationUnit();
-			final Map rewrites= new HashMap(3);
-			final CompilationUnitRewrite sourceRewriter= getCompilationUnitRewrite(rewrites, source);
-			final CompilationUnitRewrite targetRewriter= getCompilationUnitRewrite(rewrites, target);
+			fCompilationUnitRewrites= new HashMap(3);
+			final CompilationUnitRewrite sourceRewriter= getCompilationUnitRewrite(fCompilationUnitRewrites, source);
+			final CompilationUnitRewrite targetRewriter= getCompilationUnitRewrite(fCompilationUnitRewrites, target);
 			final Map deleteMap= createMembersToDeleteMap(new SubProgressMonitor(monitor, 1));
 			final Map effectedMap= createEffectedTypesMap(new SubProgressMonitor(monitor, 1));
 			final ICompilationUnit[] units= getAffectedCompilationUnits(new SubProgressMonitor(monitor, 1));
@@ -1016,7 +1018,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 						sub.worked(10);
 						continue;
 					}
-					rewrite= getCompilationUnitRewrite(rewrites, unit);
+					rewrite= getCompilationUnitRewrite(fCompilationUnitRewrites, unit);
 					if (deleteMap.containsKey(unit) && !destination.isInterface())
 						deleteDeclarationNodes(sourceRewriter, sourceRewriter.getCu().equals(targetRewriter.getCu()), rewrite, (List) deleteMap.get(unit), SET_PULL_UP);
 					final CompilationUnit root= sourceRewriter.getRoot();
@@ -1041,7 +1043,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 							adjustor.setFailureSeverity(RefactoringStatus.WARNING);
 
 							adjustor.setOwner(fOwner);
-							adjustor.setRewrites(rewrites);
+							adjustor.setRewrites(fCompilationUnitRewrites);
 							adjustor.setStatus(status);
 							adjustor.setAdjustments(adjustments);
 							adjustor.adjustVisibility(new SubProgressMonitor(subsub, 1));
@@ -1087,7 +1089,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 							method= fAbstractMethods[offset];
 							adjustor= new MemberVisibilityAdjustor(destination, method);
 							adjustor.setRewrite(sourceRewriter.getASTRewrite(), root);
-							adjustor.setRewrites(rewrites);
+							adjustor.setRewrites(fCompilationUnitRewrites);
 
 							// TW: set to error if bug 78387 is fixed
 							adjustor.setFailureSeverity(RefactoringStatus.WARNING);
@@ -1112,9 +1114,9 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				adjustor.rewriteVisibility(new SubProgressMonitor(monitor, 1));
 			final TextChangeManager manager= new TextChangeManager();
 			if (fReplace) {
-				for (final Iterator iterator= rewrites.keySet().iterator(); iterator.hasNext();) {
+				for (final Iterator iterator= fCompilationUnitRewrites.keySet().iterator(); iterator.hasNext();) {
 					unit= (ICompilationUnit) iterator.next();
-					rewrite= (CompilationUnitRewrite) rewrites.get(unit);
+					rewrite= (CompilationUnitRewrite) fCompilationUnitRewrites.get(unit);
 					if (rewrite != null)
 						manager.manage(unit, rewrite.createChange(false, null));
 				}
@@ -1123,8 +1125,8 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				final Map workingcopies= new HashMap();
 				final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
 				try {
-					subMonitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, rewrites.keySet().size());
-					for (final Iterator iterator= rewrites.keySet().iterator(); iterator.hasNext();) {
+					subMonitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, fCompilationUnitRewrites.keySet().size());
+					for (final Iterator iterator= fCompilationUnitRewrites.keySet().iterator(); iterator.hasNext();) {
 						unit= (ICompilationUnit) iterator.next();
 						change= manager.get(unit);
 						if (change != null) {
@@ -1146,14 +1148,15 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 					}
 				}
 			}
-			for (final Iterator iterator= rewrites.keySet().iterator(); iterator.hasNext();) {
+			for (final Iterator iterator= fCompilationUnitRewrites.keySet().iterator(); iterator.hasNext();) {
 				unit= (ICompilationUnit) iterator.next();
-				rewrite= (CompilationUnitRewrite) rewrites.get(unit);
+				rewrite= (CompilationUnitRewrite) fCompilationUnitRewrites.get(unit);
 				if (rewrite != null)
 					manager.manage(unit, rewrite.createChange());
 			}
 			return manager;
 		} finally {
+			fCompilationUnitRewrites.clear();
 			monitor.done();
 		}
 	}
@@ -1698,13 +1701,12 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	 */
 	protected void rewriteTypeOccurrences(final TextChangeManager manager, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements) throws CoreException {
 		CompilationUnitRewrite currentRewrite= null;
-
-		// TODO: Is this check valid?
-		final boolean isSubUnit= rewrite.getCu().equals(unit.getPrimary());
-		if (isSubUnit)
-			currentRewrite= rewrite;
+		final CompilationUnitRewrite existingRewrite= (CompilationUnitRewrite) fCompilationUnitRewrites.get(unit.getPrimary());
+		final boolean isTouched= existingRewrite != null;
+		if (isTouched)
+			currentRewrite= existingRewrite;
 		else
-			currentRewrite= new CompilationUnitRewrite(fOwner, unit, node);
+			currentRewrite= new CompilationUnitRewrite(unit, node);
 		final Collection collection= (Collection) fTypeOccurrences.get(unit);
 		if (collection != null && !collection.isEmpty()) {
 			TType estimate= null;
@@ -1717,7 +1719,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 					estimate= (TType) constraint.getData(SuperTypeConstraintsSolver.DATA_TYPE_ESTIMATE);
 					if (estimate != null) {
 						final CompilationUnitRange range= constraint.getRange();
-						if (isSubUnit)
+						if (isTouched)
 							rewriteTypeOccurrence(range, estimate, requestor, currentRewrite, node, replacements, currentRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.SuperTypeRefactoringProcessor_update_type_occurrence, SET_SUPER_TYPE));
 						else {
 							final ASTNode result= NodeFinder.perform(node, range.getSourceRange());
@@ -1728,7 +1730,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				}
 			}
 		}
-		if (!isSubUnit) {
+		if (!isTouched) {
 			final TextChange change= currentRewrite.createChange();
 			if (change != null)
 				manager.manage(unit, change);
