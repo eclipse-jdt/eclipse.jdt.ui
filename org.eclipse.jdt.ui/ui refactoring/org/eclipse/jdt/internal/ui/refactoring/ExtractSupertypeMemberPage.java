@@ -43,6 +43,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionDialog;
@@ -60,6 +61,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -151,6 +153,9 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 
 	/** The types to extract */
 	private final Set fTypesToExtract= new HashSet(2);
+
+	/** Have the working copies already been created? */
+	private boolean fWorkingCopiesCreated= false;
 
 	/**
 	 * Creates a new extract supertype member page.
@@ -290,7 +295,6 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
 		initializeCheckboxes();
-		fNameField.setFocus();
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.EXTRACT_SUPERTYPE_WIZARD_PAGE);
 	}
 
@@ -446,6 +450,29 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	public IWizardPage getNextPage() {
+		if (!fWorkingCopiesCreated) {
+			try {
+				getWizard().getContainer().run(true, false, new IRunnableWithProgress() {
+
+					public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						getProcessor().createWorkingCopyLayer(monitor);
+					}
+				});
+			} catch (InvocationTargetException exception) {
+				JavaPlugin.log(exception);
+			} catch (InterruptedException exception) {
+				// Does not happen
+			} finally {
+				fWorkingCopiesCreated= true;
+			}
+		}
+		return super.getNextPage();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	protected String getNoMembersMessage() {
 		return RefactoringMessages.ExtractSupertypeMemberPage_no_members_selected;
 	}
@@ -500,5 +527,14 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	 */
 	protected boolean isAddTypeEnabled() {
 		return fCandidateTypes.length > 0 && fTypesToExtract.size() < fCandidateTypes.length;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setVisible(final boolean visible) {
+		super.setVisible(visible);
+		if (visible)
+			fNameField.setFocus();
 	}
 }
