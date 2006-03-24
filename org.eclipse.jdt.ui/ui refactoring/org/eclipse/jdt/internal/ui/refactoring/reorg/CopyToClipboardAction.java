@@ -39,8 +39,6 @@ import org.eclipse.ui.part.ResourceTransfer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -339,31 +337,9 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			if (element == null || ! element.exists())
 				return false;
 				
-			if (element instanceof IJavaModel)
-				return false;
-				
 			if (JavaElementUtil.isDefaultPackage(element))		
 				return false;
 			
-			if (element instanceof IMember && ! ReorgUtils.hasSourceAvailable((IMember)element))
-				return false;
-			
-			if (element instanceof IMember){
-				/* feature in jdt core - initializers from class files are not binary but have no cus
-				 * see bug 37199
-				 * we just say 'no' to them
-				 */
-				IMember member= (IMember)element;
-				if (! member.isBinary() && ReorgUtils.getCompilationUnit(member) == null)
-					return false;
-			}
-			
-			if (ReorgUtils.isDeletedFromEditor(element))
-				return false;
-			
-			if (! (element instanceof IMember) && element.isReadOnly()) 
-				return false;
-
 			return true;
 		}
 
