@@ -918,12 +918,8 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(project));
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor#rewriteTypeOccurrences(org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager,
-	 *      org.eclipse.jdt.core.dom.ASTRequestor,
-	 *      org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite,
-	 *      org.eclipse.jdt.core.ICompilationUnit,
-	 *      org.eclipse.jdt.core.dom.CompilationUnit, java.util.Set)
+	/**
+	 * {@inheritDoc}
 	 */
 	protected final void rewriteTypeOccurrences(final TextChangeManager manager, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements) throws CoreException {
 		CompilationUnitRewrite currentRewrite= null;
