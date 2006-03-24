@@ -7,5 +7,6 @@ class B extends A{
 	B(){
 		super();
 	}
+	@Override
 	public void m(){}
 }
