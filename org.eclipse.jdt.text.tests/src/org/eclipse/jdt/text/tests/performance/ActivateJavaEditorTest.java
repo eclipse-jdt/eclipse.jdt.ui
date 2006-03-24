@@ -34,5 +34,6 @@ public class ActivateJavaEditorTest extends ActivateEditorTest {
 	public void testActivateEditor() {
 		setShortName(SHORT_NAME);
 		super.testActivateEditor();
+		explainDegradation("Java editor activation was not working correctly in 3.1 (see bug 119326 and bug 120572). The fixes result this expected performance degradation.");
 	}
 }

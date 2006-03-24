@@ -391,6 +391,17 @@ public class TextPerformanceTestCase extends TestCase {
 		performance.setComment(performanceMeter, Performance.EXPLAINS_DEGRADATION_COMMENT, explanation);
 	}
 
+	/*
+	 * @see PerformanceTestCase#setComment(int, String)
+	 * @since 3.2
+	 */
+	protected final void explainDegradation(String explanation) {
+		if (fPerformanceMeters != null) {
+			for (Iterator iter= fPerformanceMeters.iterator(); iter.hasNext();)
+				explainDegradation(explanation, (PerformanceMeter) iter.next());
+		}
+	}
+
 	/**
 	 * Create a performance meter with the given scenario id. The
 	 * performance meter will be disposed on {@link #tearDown()}.
