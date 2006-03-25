@@ -1717,7 +1717,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
 		fProjectionSupport.setHoverControlCreator(new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell shell) {
-				return new SourceViewerInformationControl(shell, getOrientation(), SWT.NONE);
+				return new SourceViewerInformationControl(shell, SWT.TOOL | SWT.NO_TRIM | getOrientation(), SWT.NONE);
 			}
 		});
 		fProjectionSupport.install();
