@@ -282,7 +282,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	 * @param style the additional styles for the browser widget
 	 */
 	public BrowserInformationControl(Shell parent,int style) {
-		this(parent, SWT.NO_TRIM, style);
+		this(parent, SWT.TOOL | SWT.NO_TRIM, style);
 	}
 
 	/**

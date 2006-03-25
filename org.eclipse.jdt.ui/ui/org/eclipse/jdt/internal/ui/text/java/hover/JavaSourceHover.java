@@ -119,7 +119,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
 				IEditorPart editor= getEditor(); 
-				int shellStyle= SWT.NONE;
+				int shellStyle= SWT.TOOL | SWT.NO_TRIM;
 				if (editor instanceof IWorkbenchPartOrientation)
 					shellStyle |= ((IWorkbenchPartOrientation)editor).getOrientation();
 				return new SourceViewerInformationControl(parent, shellStyle, SWT.NONE, getTooltipAffordanceString());
