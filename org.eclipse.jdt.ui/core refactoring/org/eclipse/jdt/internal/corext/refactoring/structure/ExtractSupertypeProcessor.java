@@ -818,8 +818,6 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 */
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-
 			// TODO: implement
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);

@@ -54,7 +54,7 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * </p>
 	 * <p>
 	 * The element arguments are simply distinguished by appending a number to
-	 * the argument name, eg. element1. The indices of this argument are non
+	 * the argument name, e.g. element1. The indices of this argument are non
 	 * zero-based.
 	 * </p>
 	 */
@@ -93,8 +93,6 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	/** The version attribute */
 	private static final String ATTRIBUTE_VERSION= "version"; //$NON-NLS-1$
 
-	/** The default package */
-	private static final String DEFAULT_PACKAGE= "(default)"; //$NON-NLS-1$
 
 	/**
 	 * Constant describing the deprecation resolving flag.
@@ -107,15 +105,6 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 */
 	public static final int DEPRECATION_RESOLVING= 1 << 17;
 
-	/** The field identifier */
-	private static final String IDENTIFIER_FIELD= "field"; //$NON-NLS-1$
-
-	/** The initializer identifier */
-	private static final String IDENTIFIER_INITIALIZER= "initializer"; //$NON-NLS-1$
-
-	/** The method identifier */
-	private static final String IDENTIFIER_METHOD= "method"; //$NON-NLS-1$
-
 	/** The package identifier */
 	private static final String IDENTIFIER_PACKAGE= "package"; //$NON-NLS-1$
 
@@ -127,9 +116,6 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 
 	/** The root identifier */
 	private static final String IDENTIFIER_ROOT= "root"; //$NON-NLS-1$
-
-	/** The type identifier */
-	private static final String IDENTIFIER_TYPE= "type"; //$NON-NLS-1$
 
 	/** The unit identifier */
 	private static final String IDENTIFIER_UNIT= "unit"; //$NON-NLS-1$
@@ -163,18 +149,6 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * </p>
 	 */
 	public static final int JAR_SOURCE_ATTACHMENT= 1 << 18;
-
-	/** The dot separator */
-	private static final char SEPARATOR_DOT= '.';
-
-	/** The member separator */
-	private static final char SEPARATOR_MEMBER= '#';
-
-	/** The package separator */
-	private static final char SEPARATOR_PACKAGE= '$';
-
-	/** The path separator */
-	private static final char SEPARATOR_PATH= IPath.SEPARATOR;
 
 	/** The version value 1.0 */
 	private static final String VALUE_VERSION_1_0= "1.0"; //$NON-NLS-1$
