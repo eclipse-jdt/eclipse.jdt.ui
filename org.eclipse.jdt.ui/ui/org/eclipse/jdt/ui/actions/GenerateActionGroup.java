@@ -81,17 +81,7 @@ public class GenerateActionGroup extends ActionGroup {
 	 * @since 3.0
 	 */
 	public static final String GROUP_GENERATE= "generateGroup";  //$NON-NLS-1$
-	
-	/**
-	 * Pop-up menu: id of the deprecate group of the source sub menu (value
-	 * <code>deprecateGroup</code>).
-	 * 
-	 * TODO: make API
-	 * 
-	 * @since 3.2
-	 */
-	private static final String GROUP_DEPRECATE= "deprecateGroup";  //$NON-NLS-1$
-	
+
 	/**
 	 * Pop-up menu: id of the code group of the source sub menu (value
 	 * <code>codeGroup</code>).
@@ -424,12 +414,11 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(source, fGenerateConstructorUsingFields);
 		added+= addAction(source, fHashCodeEquals);
 		added+= addAction(source, fAddJavaDocStub);
-		source.add(new Separator(GROUP_DEPRECATE));	
-		added+= addAction(source, fDeprecationAction);
-		source.add(new Separator(GROUP_CODE));		
+		source.add(new Separator(GROUP_CODE));
 		added+= addAction(source, fSurroundWithTryCatch);
 		added+= addAction(source, fExternalizeStrings);
 		added+= addAction(source, fFindNLSProblems);
+		added+= addAction(source, fDeprecationAction);
 		added+= addAction(source, fCleanUp);
 		return added;
 	}
@@ -449,13 +438,12 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(source, fGenerateConstructorUsingFields);
 		added+= addAction(source, fHashCodeEquals);
 		added+= addAction(source, fAddJavaDocStub);
-		source.add(new Separator(GROUP_DEPRECATE));	
-		added+= addAction(source, fDeprecationAction);
-		source.add(new Separator(GROUP_CODE));	
+		source.add(new Separator(GROUP_CODE));
 		added+= addAction(source, fSurroundWithTryCatch);
 		added+= addAction(source, fExternalizeStrings);
 		added+= addAction(source, fFindStringsToExternalize);
 		added+= addAction(source, fFindNLSProblems);
+		added+= addAction(source, fDeprecationAction);
 		added+= addAction(source, fCleanUp);
 		return added;
 	}
