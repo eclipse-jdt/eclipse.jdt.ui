@@ -312,8 +312,10 @@ public final class JarImportWizardPage extends WizardPage {
 		file.setFilterNames(new String[] { "*.jar", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		file.setFilterExtensions(new String[] { "*.jar", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		final String path= file.open();
-		if (path != null)
+		if (path != null) {
 			fLocationControl.setText(path);
+			handleInputChanged();
+		}
 	}
 
 	/**
