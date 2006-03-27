@@ -36,7 +36,7 @@ import org.eclipse.jdt.ui.JavaUI;
  * Represents a filter which is provided by the
  * "org.eclipse.jdt.ui.internal_refactoringElementFilter" extension point.
  * 
- * since 3.2
+ * @since 3.2
  */
 public class RefactoringElementFilterDescriptor implements IPluginContribution {
 
