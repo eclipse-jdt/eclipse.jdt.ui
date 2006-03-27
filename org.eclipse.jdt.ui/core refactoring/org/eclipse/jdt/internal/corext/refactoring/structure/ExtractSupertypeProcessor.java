@@ -635,9 +635,8 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				type= ast.newSimpleType(ast.newSimpleName(extractedType.getElementName()));
 			}
 			subRewrite.getImportRemover().registerAddedImport(extractedType.getFullyQualifiedName('.'));
-			final IType declaringSuperType= extractedType;
-			if (type != null && declaringSuperType != null) {
-				final ITypeParameter[] parameters= declaringSuperType.getTypeParameters();
+			if (type != null) {
+				final ITypeParameter[] parameters= extractedType.getTypeParameters();
 				if (parameters.length > 0) {
 					final ParameterizedType parameterized= ast.newParameterizedType(type);
 					for (int index= 0; index < parameters.length; index++)
