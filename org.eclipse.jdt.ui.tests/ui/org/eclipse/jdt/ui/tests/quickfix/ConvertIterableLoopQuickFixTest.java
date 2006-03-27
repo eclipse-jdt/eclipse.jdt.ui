@@ -11,7 +11,6 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.Test;
@@ -30,7 +29,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
-import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor;
 
@@ -69,13 +67,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		int offset= buf.toString().indexOf("for");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
-
-		for (Iterator it= proposals.iterator(); it.hasNext();) {
-			CUCorrectionProposal proposal= (CUCorrectionProposal) it.next();
-			if (QuickAssistProcessor.CONVERT_FOR_LOOP_ID.equals(proposal.getCommandId())) {
-				fConvertLoopProposal= (FixCorrectionProposal)proposal;
-			}
-		}
+		fConvertLoopProposal= (FixCorrectionProposal) findProposalByCommandId(QuickAssistProcessor.CONVERT_FOR_LOOP_ID, proposals);
 		return proposals;
 	}
 

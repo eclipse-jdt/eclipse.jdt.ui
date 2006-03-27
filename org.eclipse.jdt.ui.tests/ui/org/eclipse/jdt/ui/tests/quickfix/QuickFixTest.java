@@ -46,6 +46,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.NewCUCompletionUsingWizardProposal;
@@ -378,6 +379,19 @@ public class QuickFixTest extends TestCase {
 			assertTrue(buf.toString(), false);
 		}
 	}
+	
+	protected ICommandAccess findProposalByCommandId(String commandId, List proposals) {
+		for (int i= 0; i < proposals.size(); i++) {
+			Object curr= proposals.get(i);
+			if (curr instanceof ICommandAccess) {
+				if (commandId.equals(((ICommandAccess) curr).getCommandId())) {
+					return (ICommandAccess) curr;
+				}
+			}
+		}
+		return null;
+	}
+	
 	
 	private static void appendSource(CUCorrectionProposal proposal, StringBuffer buf) {
 		
