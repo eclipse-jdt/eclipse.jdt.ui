@@ -13,9 +13,11 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
@@ -23,6 +25,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -40,6 +43,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
@@ -91,7 +95,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTy
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsSolver;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
-import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextEditBasedChangeManager;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
@@ -102,8 +106,12 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * Partial implementation of a hierarchy refactoring processor used in pull up
- * and push down refactorings.
+ * Partial implementation of a hierarchy refactoring processor used in pull up,
+ * push down and extract supertype refactorings.
+ * <p>
+ * This processor provides common functionality to move members in a type
+ * hierarchy, and to perform a "Use Supertype" refactoring afterwards.
+ * </p>
  * 
  * @since 3.2
  */
@@ -216,25 +224,17 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 			newMethod.typeParameters().add(index, ASTNode.copySubtree(ast, (TypeParameter) oldMethod.typeParameters().get(index)));
 	}
 
-	protected static String createFieldLabel(final IField field) {
-		return JavaElementLabels.getTextLabel(field, JavaElementLabels.ALL_FULLY_QUALIFIED);
-	}
-
 	protected static String createLabel(final IMember member) {
 		if (member instanceof IType)
-			return createTypeLabel((IType) member);
+			return JavaElementLabels.getTextLabel(member, JavaElementLabels.ALL_FULLY_QUALIFIED);
 		else if (member instanceof IMethod)
-			return createMethodLabel((IMethod) member);
+			return JavaElementLabels.getTextLabel(member, JavaElementLabels.ALL_FULLY_QUALIFIED);
 		else if (member instanceof IField)
-			return createFieldLabel((IField) member);
+			return JavaElementLabels.getTextLabel(member, JavaElementLabels.ALL_FULLY_QUALIFIED);
 		else if (member instanceof IInitializer)
 			return RefactoringCoreMessages.HierarchyRefactoring_initializer;
 		Assert.isTrue(false);
 		return null;
-	}
-
-	protected static String createMethodLabel(final IMethod method) {
-		return JavaElementLabels.getTextLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED);
 	}
 
 	protected static FieldDeclaration createNewFieldDeclarationNode(final ASTRewrite rewrite, final CompilationUnit unit, final IField field, final VariableDeclarationFragment oldFieldFragment, final TypeVariableMaplet[] mapping, final IProgressMonitor monitor, final RefactoringStatus status, final int modifiers) throws JavaModelException {
@@ -396,10 +396,6 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		return result;
 	}
 
-	protected static String createTypeLabel(final IType type) {
-		return JavaElementLabels.getTextLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED);
-	}
-
 	protected static void deleteDeclarationNodes(final CompilationUnitRewrite sourceRewriter, final boolean sameCu, final CompilationUnitRewrite unitRewriter, final List members, final GroupCategorySet set) throws JavaModelException {
 		final List declarationNodes= getDeclarationNodes(unitRewriter.getRoot(), members);
 		for (final Iterator iterator= declarationNodes.iterator(); iterator.hasNext();) {
@@ -461,26 +457,62 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(declaringCu));
 	}
 
+	/** The cached declaring type */
+	protected IType fCachedDeclaringType;
+
+	/** The cached member references */
 	protected final Map fCachedMembersReferences= new HashMap(2);
 
+	/** The cached type references */
 	protected IType[] fCachedReferencedTypes;
 
-	protected TextChangeManager fChangeManager;
+	/** The text edit based change manager */
+	protected TextEditBasedChangeManager fChangeManager;
 
-	protected IType fDeclaringType;
+	/** The declaring working copy, or <code>null</code> if no layer exists */
+	protected ICompilationUnit fDeclaringWorkingCopy;
 
+	/** The members to move (may be in working copies) */
 	protected IMember[] fMembersToMove;
+
+	/** The working copies (working copy owner is <code>fOwner</code>) */
+	protected Set fWorkingCopies= new HashSet(8);
+
+	/** Have the working copies already been created? */
+	protected boolean fWorkingCopiesCreated= false;
 
 	/**
 	 * Creates a new hierarchy processor.
 	 * 
 	 * @param members
 	 *            the members, or <code>null</code> if invoked by scripting
+	 * @param layer
+	 *            <code>true</code> to create a working copy layer on the
+	 *            input, <code>false</code> otherwise
 	 */
-	protected HierarchyProcessor(final IMember[] members, final CodeGenerationSettings settings) {
+	protected HierarchyProcessor(final IMember[] members, final CodeGenerationSettings settings, boolean layer) {
 		super(settings);
-		if (members != null)
+		if (members != null) {
 			fMembersToMove= (IMember[]) SourceReferenceUtil.sortByOffset(members);
+			if (layer && fMembersToMove.length > 0) {
+				final ICompilationUnit unit= fMembersToMove[0].getCompilationUnit();
+				if (unit != null) {
+					try {
+						fDeclaringWorkingCopy= unit.getWorkingCopy(fOwner, null, new NullProgressMonitor());
+						if (fDeclaringWorkingCopy != null) {
+							for (int index= 0; index < fMembersToMove.length; index++) {
+								final IJavaElement[] elements= fDeclaringWorkingCopy.findElements(fMembersToMove[index]);
+								if (elements != null && elements.length > 0 && elements[0] instanceof IMember) {
+									fMembersToMove[index]= (IMember) elements[0];
+								}
+							}
+						}
+					} catch (JavaModelException exception) {
+						JavaPlugin.log(exception);
+					}
+				}
+			}
+		}
 	}
 
 	protected boolean canBeAccessedFrom(final IMember member, final IType target, final ITypeHierarchy hierarchy) throws JavaModelException {
@@ -491,7 +523,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	protected RefactoringStatus checkConstructorCalls(final IType type, final IProgressMonitor monitor) throws JavaModelException {
 		final RefactoringStatus result= new RefactoringStatus();
 		final SearchResultGroup[] groups= ConstructorReferenceFinder.getConstructorReferences(type, fOwner, monitor, result);
-		final String message= Messages.format(RefactoringCoreMessages.HierarchyRefactoring_gets_instantiated, new Object[] { createTypeLabel(type)});
+		final String message= Messages.format(RefactoringCoreMessages.HierarchyRefactoring_gets_instantiated, new Object[] { JavaElementLabels.getTextLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED) });
 
 		ICompilationUnit unit= null;
 		for (int index= 0; index < groups.length; index++) {
@@ -569,10 +601,10 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	}
 
 	public IType getDeclaringType() {
-		if (fDeclaringType != null)
-			return fDeclaringType;
-		fDeclaringType= fMembersToMove[0].getDeclaringType();
-		return fDeclaringType;
+		if (fCachedDeclaringType != null)
+			return fCachedDeclaringType;
+		fCachedDeclaringType= fMembersToMove[0].getDeclaringType();
+		return fCachedDeclaringType;
 	}
 
 	public IMember[] getMembersToMove() {

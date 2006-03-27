@@ -88,7 +88,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextEditBasedChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -106,10 +106,6 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
  * @since 3.2
  */
 public final class PushDownRefactoringProcessor extends HierarchyProcessor {
-
-	/** The push down group category set */
-	private static final GroupCategorySet SET_PUSH_DOWN= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.pushDown", //$NON-NLS-1$
-			RefactoringCoreMessages.PushDownRefactoring_category_name, RefactoringCoreMessages.PushDownRefactoring_category_description));
 
 	public static class MemberActionInfo implements IMemberActionInfo {
 
@@ -159,9 +155,9 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 
 		public int[] getAvailableActions() {
 			if (isFieldInfo())
-				return new int[] { PUSH_DOWN_ACTION, NO_ACTION};
+				return new int[] { PUSH_DOWN_ACTION, NO_ACTION };
 
-			return new int[] { PUSH_DOWN_ACTION, PUSH_ABSTRACT_ACTION, NO_ACTION};
+			return new int[] { PUSH_DOWN_ACTION, PUSH_ABSTRACT_ACTION, NO_ACTION };
 		}
 
 		public IMember getMember() {
@@ -247,6 +243,10 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 	/** The identifier of this processor */
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.pushDownProcessor"; //$NON-NLS-1$
 
+	/** The push down group category set */
+	private static final GroupCategorySet SET_PUSH_DOWN= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.pushDown", //$NON-NLS-1$
+			RefactoringCoreMessages.PushDownRefactoring_category_name, RefactoringCoreMessages.PushDownRefactoring_category_description));
+
 	private static MemberActionInfo[] createInfosForAllPushableFieldsAndMethods(IType type) throws JavaModelException {
 		List result= new ArrayList();
 		IMember[] pushableMembers= RefactoringAvailabilityTester.getPushDownMembers(type);
@@ -281,7 +281,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		Assert.isNotNull(member);
 		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
 		engine.setFiltering(true, true);
-		engine.setScope(SearchEngine.createJavaSearchScope(new IJavaElement[] { member.getDeclaringType()}));
+		engine.setScope(SearchEngine.createJavaSearchScope(new IJavaElement[] { member.getDeclaringType() }));
 		engine.setStatus(status);
 		engine.searchPattern(new SubProgressMonitor(pm, 1));
 		SearchResultGroup[] groups= (SearchResultGroup[]) engine.getResults();
@@ -305,16 +305,17 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 	 * Creates a new push down refactoring processor.
 	 * 
 	 * @param members
-	 *            the members to pull up, or <code>null</code> if invoked by scripting
+	 *            the members to pull up, or <code>null</code> if invoked by
+	 *            scripting
 	 */
 	public PushDownRefactoringProcessor(IMember[] members) {
-		super(members, null);
+		super(members, null, false);
 		if (members != null) {
 			final IType type= RefactoringAvailabilityTester.getTopLevelType(members);
 			try {
 				if (type != null && RefactoringAvailabilityTester.getPushDownMembers(type).length != 0) {
 					fMembersToMove= new IMember[0];
-					fDeclaringType= type;
+					fCachedDeclaringType= type;
 				}
 			} catch (JavaModelException exception) {
 				JavaPlugin.log(exception);
@@ -326,7 +327,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_calculating_required, 2);
 		IProgressMonitor sub= new SubProgressMonitor(monitor, 1);
 		sub.beginTask(RefactoringCoreMessages.PushDownRefactoring_calculating_required, 2);
-		IMethod[] requiredMethods= ReferenceFinderUtil.getMethodsReferencedIn(new IJavaElement[] { member}, new SubProgressMonitor(sub, 1));
+		IMethod[] requiredMethods= ReferenceFinderUtil.getMethodsReferencedIn(new IJavaElement[] { member }, new SubProgressMonitor(sub, 1));
 		sub= new SubProgressMonitor(sub, 1);
 		sub.beginTask(RefactoringCoreMessages.PushDownRefactoring_calculating_required, requiredMethods.length);
 		for (int index= 0; index < requiredMethods.length; index++) {
@@ -335,7 +336,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 				queue.add(method);
 		}
 		sub.done();
-		IField[] requiredFields= ReferenceFinderUtil.getFieldsReferencedIn(new IJavaElement[] { member}, new SubProgressMonitor(monitor, 1));
+		IField[] requiredFields= ReferenceFinderUtil.getFieldsReferencedIn(new IJavaElement[] { member }, new SubProgressMonitor(monitor, 1));
 		for (int index= 0; index < requiredFields.length; index++) {
 			IField field= requiredFields[index];
 			if (field.getDeclaringType().equals(getDeclaringType()) && !queue.contains(field) && RefactoringAvailabilityTester.isPushDownAvailable(field))
@@ -365,7 +366,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 				IField field= accessedFields[j];
 				boolean isAccessible= pushedDownList.contains(field) || canBeAccessedFrom(field, targetClass, targetSupertypes) || Flags.isEnum(field.getFlags());
 				if (!isAccessible) {
-					String message= Messages.format(RefactoringCoreMessages.PushDownRefactoring_field_not_accessible, new String[] { createFieldLabel(field), createTypeLabel(targetClass)});
+					String message= Messages.format(RefactoringCoreMessages.PushDownRefactoring_field_not_accessible, new String[] { JavaElementLabels.getTextLabel(field, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(targetClass, JavaElementLabels.ALL_FULLY_QUALIFIED) });
 					result.addError(message, JavaStatusContext.create(field));
 				}
 			}
@@ -386,7 +387,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 				IMethod method= accessedMethods[offset];
 				boolean isAccessible= pushedDownList.contains(method) || canBeAccessedFrom(method, targetClass, targetSupertypes);
 				if (!isAccessible) {
-					String message= Messages.format(RefactoringCoreMessages.PushDownRefactoring_method_not_accessible, new String[] { createMethodLabel(method), createTypeLabel(targetClass)});
+					String message= Messages.format(RefactoringCoreMessages.PushDownRefactoring_method_not_accessible, new String[] { JavaElementLabels.getTextLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(targetClass, JavaElementLabels.ALL_FULLY_QUALIFIED) });
 					result.addError(message, JavaStatusContext.create(method));
 				}
 			}
@@ -404,7 +405,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			for (int offset= 0; offset < accessedTypes.length; offset++) {
 				IType type= accessedTypes[offset];
 				if (!canBeAccessedFrom(type, targetClass, targetSupertypes)) {
-					String message= Messages.format(RefactoringCoreMessages.PushDownRefactoring_type_not_accessible, new String[] { createTypeLabel(type), createTypeLabel(targetClass)});
+					String message= Messages.format(RefactoringCoreMessages.PushDownRefactoring_type_not_accessible, new String[] { JavaElementLabels.getTextLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(targetClass, JavaElementLabels.ALL_FULLY_QUALIFIED) });
 					result.addError(message, JavaStatusContext.create(type));
 				}
 			}
@@ -510,7 +511,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 	private RefactoringStatus checkPossibleSubclasses(IProgressMonitor pm) throws JavaModelException {
 		IType[] modifiableSubclasses= getAbstractDestinations(pm);
 		if (modifiableSubclasses.length == 0) {
-			String msg= Messages.format(RefactoringCoreMessages.PushDownRefactoring_no_subclasses, new String[] { createTypeLabel(getDeclaringType())});
+			String msg= Messages.format(RefactoringCoreMessages.PushDownRefactoring_no_subclasses, new String[] { JavaElementLabels.getTextLabel(getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED) });
 			return RefactoringStatus.createFatalErrorStatus(msg);
 		}
 		return new RefactoringStatus();
@@ -538,7 +539,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 				if (!(element instanceof IMember))
 					continue;
 				IMember referencingMember= (IMember) element;
-				Object[] keys= { label, createLabel(referencingMember)};
+				Object[] keys= { label, createLabel(referencingMember) };
 				String msg= Messages.format(RefactoringCoreMessages.PushDownRefactoring_referenced, keys);
 				result.addError(msg, JavaStatusContext.create(referencingMember));
 			}
@@ -652,20 +653,20 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PUSH_DOWN, project, fMembersToMove.length == 1 ? Messages.format(RefactoringCoreMessages.PushDownRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}) : Messages.format(RefactoringCoreMessages.PushDownRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
-					if (fDeclaringType != null)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fDeclaringType));
+					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PUSH_DOWN, project, fMembersToMove.length == 1 ? Messages.format(RefactoringCoreMessages.PushDownRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED) }) : Messages.format(RefactoringCoreMessages.PushDownRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, flags);
+					if (fCachedDeclaringType != null)
+						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCachedDeclaringType));
 					for (int index= 0; index < fMembersToMove.length; index++) {
 						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1), descriptor.elementToHandle(fMembersToMove[index]));
 						for (int offset= 0; offset < fMemberInfos.length; offset++) {
 							if (fMemberInfos[offset].getMember().equals(fMembersToMove[index])) {
 								switch (fMemberInfos[offset].getAction()) {
-									case MemberActionInfo.PUSH_ABSTRACT_ACTION:
-										arguments.put(ATTRIBUTE_ABSTRACT + (index + 1), Boolean.valueOf(true).toString());
-										break;
-									case MemberActionInfo.PUSH_DOWN_ACTION:
-										arguments.put(ATTRIBUTE_PUSH + (index + 1), Boolean.valueOf(true).toString());
-										break;
+								case MemberActionInfo.PUSH_ABSTRACT_ACTION:
+									arguments.put(ATTRIBUTE_ABSTRACT + (index + 1), Boolean.valueOf(true).toString());
+									break;
+								case MemberActionInfo.PUSH_DOWN_ACTION:
+									arguments.put(ATTRIBUTE_PUSH + (index + 1), Boolean.valueOf(true).toString());
+									break;
 								}
 							}
 						}
@@ -679,7 +680,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		}
 	}
 
-	private TextChangeManager createChangeManager(final IProgressMonitor monitor, final RefactoringStatus status) throws CoreException {
+	private TextEditBasedChangeManager createChangeManager(final IProgressMonitor monitor, final RefactoringStatus status) throws CoreException {
 		Assert.isNotNull(monitor);
 		Assert.isNotNull(status);
 		try {
@@ -729,7 +730,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 				final MemberVisibilityAdjustor adjustor= (MemberVisibilityAdjustor) adjustors.get(0);
 				adjustor.rewriteVisibility(new SubProgressMonitor(monitor, 1));
 			}
-			final TextChangeManager manager= new TextChangeManager();
+			final TextEditBasedChangeManager manager= new TextEditBasedChangeManager();
 			for (final Iterator iterator= rewrites.keySet().iterator(); iterator.hasNext();) {
 				unit= (ICompilationUnit) iterator.next();
 				rewrite= (CompilationUnitRewrite) rewrites.get(unit);
@@ -949,7 +950,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 				if (element == null || element.getElementType() != IJavaElement.TYPE)
 					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_PUSH_DOWN));
 				else
-					fDeclaringType= (IType) element;
+					fCachedDeclaringType= (IType) element;
 			}
 			int count= 1;
 			final List elements= new ArrayList();
@@ -990,7 +991,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void rewriteTypeOccurrences(TextChangeManager manager, ASTRequestor requestor, CompilationUnitRewrite rewrite, ICompilationUnit unit, CompilationUnit node, Set replacements) throws CoreException {
+	protected void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements) throws CoreException {
 		// Not needed
 	}
 }

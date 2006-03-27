@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditCopier;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -45,6 +46,8 @@ import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
@@ -61,7 +64,10 @@ import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -72,17 +78,19 @@ import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
-import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
+import org.eclipse.jdt.internal.corext.refactoring.composite.MultiStateCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextEditBasedChangeManager;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -92,7 +100,6 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 /**
  * Refactoring processor for the extract supertype refactoring.
@@ -111,6 +118,16 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	private static final GroupCategorySet SET_EXTRACT_SUPERTYPE= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.extractSupertype", //$NON-NLS-1$
 			RefactoringCoreMessages.ExtractSupertypeProcessor_category_name, RefactoringCoreMessages.ExtractSupertypeProcessor_category_description));
 
+	/**
+	 * The changes of the working copy layer (element type:
+	 * &lt;ICompilationUnit, TextEditBasedChange&gt;)
+	 * <p>
+	 * The compilation units are all primary working copies or normal
+	 * compilation units.
+	 * </p>
+	 */
+	private final Map fLayerChanges= new HashMap();
+
 	/** The possible extract supertype candidates, or the empty array */
 	private IType[] fPossibleCandidates= {};
 
@@ -123,12 +140,6 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	/** The types where to extract the supertype */
 	private IType[] fTypesToExtract= {};
 
-	/** The working copies (working copy owner is <code>fOwner</code>) */
-	private Set fWorkingCopies= new HashSet(8);
-
-	/** Have the working copies already been created? */
-	private boolean fWorkingCopiesCreated= false;
-
 	/**
 	 * Creates a new extract supertype refactoring processor.
 	 * 
@@ -140,11 +151,11 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 *            invoked by scripting
 	 */
 	public ExtractSupertypeProcessor(final IMember[] members, final CodeGenerationSettings settings) {
-		super(members, settings);
+		super(members, settings, true);
 		if (members != null) {
 			final IType declaring= getDeclaringType();
 			if (declaring != null)
-				fTypesToExtract= new IType[] { declaring};
+				fTypesToExtract= new IType[] { declaring };
 		}
 	}
 
@@ -193,30 +204,11 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	}
 
 	/**
-	 * Clears the working copies.
-	 */
-	protected final void clearWorkingCopies() {
-		try {
-			for (final Iterator iterator= fWorkingCopies.iterator(); iterator.hasNext();) {
-				final ICompilationUnit unit= (ICompilationUnit) iterator.next();
-				try {
-					unit.discardWorkingCopy();
-				} catch (JavaModelException exception) {
-					JavaPlugin.log(exception);
-				}
-			}
-		} finally {
-			fWorkingCopies.clear();
-			fWorkingCopiesCreated= false;
-		}
-	}
-
-	/**
 	 * Computes the destination type based on the new name.
 	 * 
 	 * @return the destination type
 	 */
-	public IType computeDestinationType(final String name) {
+	public IType computeExtractedType(final String name) {
 		if (name != null && !name.equals("")) {//$NON-NLS-1$
 			final IType declaring= getDeclaringType();
 			try {
@@ -227,8 +219,11 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 					if (units[index].getElementName().equals(newName))
 						result= units[index];
 				}
-				if (result != null)
-					return result.getType(name);
+				if (result != null) {
+					final IType type= result.getType(name);
+					setDestinationType(type);
+					return type;
+				}
 			} catch (JavaModelException exception) {
 				JavaPlugin.log(exception);
 			}
@@ -257,12 +252,12 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_SUPERTYPE, project, Messages.format(RefactoringCoreMessages.ExtractSupertypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_DEFAULT), JavaElementLabels.getElementLabel(fDeclaringType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_SUPERTYPE, project, Messages.format(RefactoringCoreMessages.ExtractSupertypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_DEFAULT), JavaElementLabels.getElementLabel(fCachedDeclaringType, JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, flags);
 					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fDestinationType));
 					arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplace).toString());
 					arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
-					if (fDeclaringType != null)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(fDeclaringType));
+					if (fCachedDeclaringType != null)
+						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(fCachedDeclaringType));
 					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fTypeName);
 					arguments.put(ATTRIBUTE_PULL, new Integer(fMembersToMove.length).toString());
 					for (int offset= 0; offset < fMembersToMove.length; offset++)
@@ -283,7 +278,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			final IType declaring= getDeclaringType();
 			final IFile file= ResourceUtil.getFile(declaring.getCompilationUnit());
 			if (fSuperSource != null && fSuperSource.length() > 0)
-				change.add(new CreateTextFileChange(file.getFullPath().removeLastSegments(1).append(JavaModelUtil.getRenamedCUName(declaring.getCompilationUnit(), fTypeName)), fSuperSource, file.getCharset(false), "java")); //$NON-NLS-1$
+				change.add(new CreateCompilationUnitChange(declaring.getPackageFragment().getCompilationUnit(JavaModelUtil.getRenamedCUName(declaring.getCompilationUnit(), fTypeName)), fSuperSource, file.getCharset(false)));
 			return change;
 		} finally {
 			monitor.done();
@@ -308,7 +303,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 		Assert.isNotNull(monitor);
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
-			monitor.beginTask(RefactoringCoreMessages.ExtractSupertypeProcessor_checking, 20);
+			monitor.beginTask(RefactoringCoreMessages.ExtractSupertypeProcessor_preparing, 20);
 			fSuperSource= null;
 			ICompilationUnit extractedWorkingCopy= null;
 			try {
@@ -358,25 +353,77 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			final Document document= new Document(unit.getBuffer().getContents());
 			final CompilationUnitChange change= rewrite.createChange();
 			if (change != null) {
+				fLayerChanges.put(unit.getPrimary(), change);
 				final TextEdit edit= change.getEdit();
-				if (edit != null)
-					edit.apply(document, TextEdit.UPDATE_REGIONS);
+				if (edit != null) {
+					final TextEditCopier copier= new TextEditCopier(edit);
+					final TextEdit copy= copier.perform();
+					copy.apply(document, TextEdit.NONE);
+				}
 			}
-			final ICompilationUnit copy= unit.getWorkingCopy(fOwner, null, new NullProgressMonitor());
-			if (copy != null) {
+			ICompilationUnit copy= unit.findWorkingCopy(fOwner);
+			if (copy == null) {
+				copy= unit.getWorkingCopy(fOwner, null, new NullProgressMonitor());
 				fWorkingCopies.add(copy);
-				copy.getBuffer().setContents(document.get());
-				JavaModelUtil.reconcile(copy);
 			}
+			copy.getBuffer().setContents(document.get());
+			JavaModelUtil.reconcile(copy);
 		} catch (CoreException exception) {
 			JavaPlugin.log(exception);
-			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringMessages.RefactoringStarter_unexpected_exception));
+			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception_on_layer));
 		} catch (MalformedTreeException exception) {
 			JavaPlugin.log(exception);
-			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringMessages.RefactoringStarter_unexpected_exception));
+			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception_on_layer));
 		} catch (BadLocationException exception) {
 			JavaPlugin.log(exception);
-			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringMessages.RefactoringStarter_unexpected_exception));
+			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception_on_layer));
+		}
+	}
+
+	/**
+	 * Creates the necessary constructors for the extracted supertype.
+	 * 
+	 * @param targetRewrite
+	 *            the target compilation unit rewrite
+	 * @param superType
+	 *            the super type, or <code>null</code> if no super type (ie.
+	 *            <code>java.lang.Object</code>) is available
+	 * @param targetDeclaration
+	 *            the type declaration of the target type
+	 * @param status
+	 *            the refactoring status
+	 */
+	protected final void createNecessaryConstructors(final CompilationUnitRewrite targetRewrite, final IType superType, final AbstractTypeDeclaration targetDeclaration, final RefactoringStatus status) {
+		Assert.isNotNull(targetRewrite);
+		Assert.isNotNull(targetDeclaration);
+		if (superType != null) {
+			final ITypeBinding binding= targetDeclaration.resolveBinding();
+			if (binding != null && binding.isClass()) {
+				final IMethodBinding[] bindings= StubUtility2.getVisibleConstructors(binding, true, true);
+				int deprecationCount= 0;
+				for (int i= 0; i < bindings.length; i++) {
+					if (bindings[i].isDeprecated())
+						deprecationCount++;
+				}
+				final ListRewrite rewrite= targetRewrite.getASTRewrite().getListRewrite(targetDeclaration, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+				if (rewrite != null) {
+					boolean createDeprecated= deprecationCount == bindings.length;
+					for (int i= 0; i < bindings.length; i++) {
+						IMethodBinding curr= bindings[i];
+						if (!curr.isDeprecated() || createDeprecated) {
+							MethodDeclaration stub;
+							try {
+								stub= StubUtility2.createConstructorStub(targetRewrite.getCu(), targetRewrite.getASTRewrite(), targetRewrite.getImportRewrite(), curr, binding.getName(), Modifier.PUBLIC, false, false, fSettings);
+								if (stub != null)
+									rewrite.insertLast(stub, null);
+							} catch (CoreException exception) {
+								JavaPlugin.log(exception);
+								status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception_on_layer));
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -406,7 +453,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 		String source= null;
 		try {
 			monitor.beginTask("", 2); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.ExtractSupertypeProcessor_checking);
+			monitor.setTaskName(RefactoringCoreMessages.ExtractSupertypeProcessor_preparing);
 			final IType declaring= getDeclaringType();
 			final String delimiter= StubUtility.getLineDelimiterUsed(extractedWorkingCopy.getJavaProject());
 			String typeComment= null;
@@ -420,9 +467,9 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				fileComment= CodeGeneration.getFileComment(extractedWorkingCopy, delimiter);
 			}
 			final StringBuffer buffer= new StringBuffer(64);
-			createTypeDeclaration(extractedWorkingCopy, superType, declaringDeclaration, buffer, status, new SubProgressMonitor(monitor, 1));
+			createTypeDeclaration(extractedWorkingCopy, superType, declaringDeclaration, typeComment, buffer, status, new SubProgressMonitor(monitor, 1));
 			final String imports= createTypeImports(extractedWorkingCopy, monitor);
-			source= createTypeTemplate(extractedWorkingCopy, imports, fileComment, typeComment, buffer.toString());
+			source= createTypeTemplate(extractedWorkingCopy, imports, fileComment, "", buffer.toString()); //$NON-NLS-1$
 			if (source == null) {
 				if (!declaring.getPackageFragment().isDefaultPackage()) {
 					if (imports.length() > 0)
@@ -438,10 +485,10 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 					edit.apply(document, TextEdit.UPDATE_REGIONS);
 				} catch (MalformedTreeException exception) {
 					JavaPlugin.log(exception);
-					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
+					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception_on_layer));
 				} catch (BadLocationException exception) {
 					JavaPlugin.log(exception);
-					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
+					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception_on_layer));
 				}
 				source= document.get();
 			}
@@ -462,6 +509,8 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 *            <code>java.lang.Object</code>) is available
 	 * @param declaringDeclaration
 	 *            the declaration of the declaring type
+	 * @param comment
+	 *            the comment of the new type declaration
 	 * @param buffer
 	 *            the string buffer containing the declaration
 	 * @param status
@@ -471,7 +520,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 * @throws CoreException
 	 *             if an error occurs
 	 */
-	protected final void createTypeDeclaration(final ICompilationUnit extractedWorkingCopy, final IType superType, final AbstractTypeDeclaration declaringDeclaration, final StringBuffer buffer, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
+	protected final void createTypeDeclaration(final ICompilationUnit extractedWorkingCopy, final IType superType, final AbstractTypeDeclaration declaringDeclaration, final String comment, final StringBuffer buffer, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(extractedWorkingCopy);
 		Assert.isNotNull(declaringDeclaration);
 		Assert.isNotNull(buffer);
@@ -479,15 +528,19 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 		Assert.isNotNull(monitor);
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.ExtractSupertypeProcessor_checking);
+			monitor.setTaskName(RefactoringCoreMessages.ExtractSupertypeProcessor_preparing);
 			final IJavaProject project= extractedWorkingCopy.getJavaProject();
 			final String delimiter= StubUtility.getLineDelimiterUsed(project);
+			if (comment != null && !"".equals(comment)) { //$NON-NLS-1$
+				buffer.append(comment);
+				buffer.append(delimiter);
+			}
 			buffer.append(JdtFlags.VISIBILITY_STRING_PUBLIC);
-			buffer.append(" "); //$NON-NLS-1$
+			buffer.append(' ');
 			buffer.append("class "); //$NON-NLS-1$
 			buffer.append(fTypeName);
 			if (superType != null) {
-				buffer.append(" "); //$NON-NLS-1$
+				buffer.append(' ');
 				if (superType.isInterface())
 					buffer.append("implements "); //$NON-NLS-1$
 				else
@@ -505,15 +558,16 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			final AbstractTypeDeclaration targetDeclaration= (AbstractTypeDeclaration) targetRewrite.getRoot().types().get(0);
 			createTypeParameters(targetRewrite, superType, declaringDeclaration, targetDeclaration);
 			createTypeSignature(targetRewrite, superType, declaringDeclaration, targetDeclaration);
+			createNecessaryConstructors(targetRewrite, superType, targetDeclaration, status);
 			final TextEdit edit= targetRewrite.createChange().getEdit();
 			try {
 				edit.apply(document, TextEdit.UPDATE_REGIONS);
 			} catch (MalformedTreeException exception) {
 				JavaPlugin.log(exception);
-				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringMessages.RefactoringStarter_unexpected_exception));
+				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception_on_layer));
 			} catch (BadLocationException exception) {
 				JavaPlugin.log(exception);
-				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringMessages.RefactoringStarter_unexpected_exception));
+				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception_on_layer));
 			}
 			buffer.setLength(0);
 			buffer.append(document.get());
@@ -571,7 +625,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 		Assert.isNotNull(extractedType);
 		Assert.isNotNull(monitor);
 		try {
-			monitor.beginTask(RefactoringCoreMessages.ExtractSupertypeProcessor_checking, 10);
+			monitor.beginTask(RefactoringCoreMessages.ExtractSupertypeProcessor_preparing, 10);
 			final AST ast= subRewrite.getAST();
 			Type type= null;
 			if (extractedBinding != null) {
@@ -581,7 +635,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				type= ast.newSimpleType(ast.newSimpleName(extractedType.getElementName()));
 			}
 			subRewrite.getImportRemover().registerAddedImport(extractedType.getFullyQualifiedName('.'));
-			final IType declaringSuperType= getDeclaringSuperTypeHierarchy(new SubProgressMonitor(monitor, 10, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)).getSuperclass(getDeclaringType());
+			final IType declaringSuperType= extractedType;
 			if (type != null && declaringSuperType != null) {
 				final ITypeParameter[] parameters= declaringSuperType.getTypeParameters();
 				if (parameters.length > 0) {
@@ -653,19 +707,21 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 		if (!fWorkingCopiesCreated) {
 			final RefactoringStatus status= new RefactoringStatus();
 			try {
-				monitor.beginTask(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating, 70);
+				monitor.beginTask(RefactoringCoreMessages.ExtractSupertypeProcessor_preparing, 70);
 				status.merge(super.createWorkingCopyLayer(new SubProgressMonitor(monitor, 10)));
 				final IType declaring= getDeclaringType();
 				status.merge(createExtractedSuperType(getDeclaringSuperTypeHierarchy(new SubProgressMonitor(monitor, 10)).getSuperclass(declaring), new SubProgressMonitor(monitor, 10)));
 				if (status.hasFatalError())
 					return status;
-				final List typesToExtract= new ArrayList(Arrays.asList(fTypesToExtract));
-				if (!typesToExtract.contains(declaring))
-					typesToExtract.add(declaring);
-				final Map unitToTypes= new HashMap(typesToExtract.size());
-				final Set units= new HashSet(typesToExtract.size());
-				for (int index= 0; index < typesToExtract.size(); index++) {
-					final IType type= (IType) typesToExtract.get(index);
+				final IType extractedType= computeExtractedType(fTypeName);
+				setDestinationType(extractedType);
+				final List subTypes= new ArrayList(Arrays.asList(fTypesToExtract));
+				if (!subTypes.contains(declaring))
+					subTypes.add(declaring);
+				final Map unitToTypes= new HashMap(subTypes.size());
+				final Set units= new HashSet(subTypes.size());
+				for (int index= 0; index < subTypes.size(); index++) {
+					final IType type= (IType) subTypes.get(index);
 					final ICompilationUnit unit= type.getCompilationUnit();
 					units.add(unit);
 					Collection collection= (Collection) unitToTypes.get(unit);
@@ -689,8 +745,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 					}
 					collection.add(current);
 				}
-				final ITypeBinding[] extractBindings= { null};
-				final IType extractedType= computeDestinationType(fTypeName);
+				final ITypeBinding[] extractBindings= { null };
 				final ASTParser extractParser= ASTParser.newParser(AST.JLS3);
 				extractParser.setWorkingCopyOwner(fOwner);
 				extractParser.setResolveBindings(true);
@@ -707,7 +762,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				try {
 					final Set keySet= projectToUnits.keySet();
 					subMonitor.beginTask("", keySet.size()); //$NON-NLS-1$
-					subMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
+					subMonitor.setTaskName(RefactoringCoreMessages.ExtractSupertypeProcessor_preparing);
 					for (final Iterator iterator= keySet.iterator(); iterator.hasNext();) {
 						project= (IJavaProject) iterator.next();
 						collection= (Collection) projectToUnits.get(project);
@@ -718,7 +773,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 						final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 1);
 						try {
 							subsubMonitor.beginTask("", collection.size()); //$NON-NLS-1$
-							subsubMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
+							subsubMonitor.setTaskName(RefactoringCoreMessages.ExtractSupertypeProcessor_preparing);
 							parser.createASTs((ICompilationUnit[]) collection.toArray(new ICompilationUnit[collection.size()]), new String[0], new ASTRequestor() {
 
 								public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
@@ -764,6 +819,27 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	}
 
 	/**
+	 * Destroys the working copy layer.
+	 */
+	public void destroyWorkingCopyLayer() {
+		try {
+			fLayerChanges.clear();
+			for (final Iterator iterator= fWorkingCopies.iterator(); iterator.hasNext();) {
+				final ICompilationUnit unit= (ICompilationUnit) iterator.next();
+				try {
+					unit.discardWorkingCopy();
+				} catch (JavaModelException exception) {
+					JavaPlugin.log(exception);
+				}
+			}
+		} finally {
+			fSuperSource= null;
+			fWorkingCopies.clear();
+			fWorkingCopiesCreated= false;
+		}
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public IType[] getCandidateTypes(final RefactoringStatus status, final IProgressMonitor monitor) {
@@ -792,6 +868,15 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			}
 		}
 		return fPossibleCandidates;
+	}
+
+	/**
+	 * Returns the extracted type.
+	 * 
+	 * @return the extracted type, or <code>null</code>
+	 */
+	public IType getExtractedType() {
+		return getDestinationType();
 	}
 
 	/**
@@ -827,7 +912,46 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void rewriteTypeOccurrences(final TextChangeManager manager, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit copy, final Set replacements, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
+	protected void registerChanges(final TextEditBasedChangeManager manager) throws CoreException {
+		try {
+			final ICompilationUnit extractedUnit= getExtractedType().getCompilationUnit().getPrimary();
+			ICompilationUnit unit= null;
+			CompilationUnitRewrite rewrite= null;
+			for (final Iterator iterator= fCompilationUnitRewrites.keySet().iterator(); iterator.hasNext();) {
+				unit= (ICompilationUnit) iterator.next();
+				if (!unit.getPrimary().equals(extractedUnit)) {
+					rewrite= (CompilationUnitRewrite) fCompilationUnitRewrites.get(unit);
+					if (rewrite != null) {
+						final CompilationUnitChange layerChange= (CompilationUnitChange) fLayerChanges.get(unit.getPrimary());
+						final CompilationUnitChange rewriteChange= rewrite.createChange();
+						if (rewriteChange != null && layerChange != null) {
+							final MultiStateCompilationUnitChange change= new MultiStateCompilationUnitChange(rewriteChange.getName(), unit);
+							change.addChange(layerChange);
+							change.addChange(rewriteChange);
+							fLayerChanges.remove(unit.getPrimary());
+							manager.manage(unit, change);
+						} else if (layerChange != null) {
+							manager.manage(unit, layerChange);
+							fLayerChanges.remove(unit.getPrimary());
+						} else if (rewriteChange != null) {
+							manager.manage(unit, rewriteChange);
+						}
+					}
+				}
+			}
+			for (Iterator iterator= fLayerChanges.entrySet().iterator(); iterator.hasNext();) {
+				final Map.Entry entry= (Map.Entry) iterator.next();
+				manager.manage((ICompilationUnit) entry.getKey(), (TextEditBasedChange) entry.getValue());
+			}
+		} finally {
+			fLayerChanges.clear();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit copy, final Set replacements, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask("", 20); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.ExtractSupertypeProcessor_checking);
@@ -840,7 +964,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				parser.setResolveBindings(true);
 				parser.setProject(project);
 				parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-				parser.createASTs(new ICompilationUnit[] { copy}, new String[0], new ASTRequestor() {
+				parser.createASTs(new ICompilationUnit[] { copy }, new String[0], new ASTRequestor() {
 
 					public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
 						try {
@@ -862,20 +986,23 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 										if (!status.hasFatalError())
 											rewriteTypeOccurrences(manager, this, sourceRewrite, unit, node, replacements, status, new SubProgressMonitor(monitor, 3));
 										if (manager.containsChangesIn(destinationUnit)) {
-											final TextEdit edit= manager.get(destinationUnit).getEdit();
-											if (edit != null) {
-												final IDocument document= new Document(destinationUnit.getBuffer().getContents());
-												try {
-													edit.apply(document, TextEdit.UPDATE_REGIONS);
-												} catch (MalformedTreeException exception) {
-													JavaPlugin.log(exception);
-													status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
-												} catch (BadLocationException exception) {
-													JavaPlugin.log(exception);
-													status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
+											final TextEditBasedChange change= manager.get(destinationUnit);
+											if (change instanceof TextChange) {
+												final TextEdit edit= ((TextChange) change).getEdit();
+												if (edit != null) {
+													final IDocument document= new Document(destinationUnit.getBuffer().getContents());
+													try {
+														edit.apply(document, TextEdit.UPDATE_REGIONS);
+													} catch (MalformedTreeException exception) {
+														JavaPlugin.log(exception);
+														status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception));
+													} catch (BadLocationException exception) {
+														JavaPlugin.log(exception);
+														status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception));
+													}
+													fSuperSource= document.get();
+													manager.remove(destinationUnit);
 												}
-												fSuperSource= document.get();
-												manager.remove(destinationUnit);
 											}
 										}
 									}
@@ -883,7 +1010,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 							}
 						} catch (JavaModelException exception) {
 							JavaPlugin.log(exception);
-							status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
+							status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception));
 						}
 					}
 

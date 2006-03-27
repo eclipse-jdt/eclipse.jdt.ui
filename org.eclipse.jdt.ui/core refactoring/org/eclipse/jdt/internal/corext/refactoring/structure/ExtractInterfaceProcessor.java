@@ -45,6 +45,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
@@ -97,8 +98,8 @@ import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
-import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ASTNodeDeleteUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsModel;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsSolver;
@@ -110,7 +111,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstra
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextEditBasedChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -155,20 +156,20 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	protected static boolean isExtractableMember(final IMember member) throws JavaModelException {
 		Assert.isNotNull(member);
 		switch (member.getElementType()) {
-			case IJavaElement.METHOD:
-				return JdtFlags.isPublic(member) && !JdtFlags.isStatic(member) && !((IMethod) member).isConstructor();
-			case IJavaElement.FIELD:
-				return JdtFlags.isPublic(member) && JdtFlags.isStatic(member) && JdtFlags.isFinal(member) && !JdtFlags.isEnum(member);
-			default:
-				return false;
+		case IJavaElement.METHOD:
+			return JdtFlags.isPublic(member) && !JdtFlags.isStatic(member) && !((IMethod) member).isConstructor();
+		case IJavaElement.FIELD:
+			return JdtFlags.isPublic(member) && JdtFlags.isStatic(member) && JdtFlags.isFinal(member) && !JdtFlags.isEnum(member);
+		default:
+			return false;
 		}
 	}
 
 	/** Should extracted methods be declared as abstract? */
 	private boolean fAbstract= true;
 
-	/** The text change manager */
-	private TextChangeManager fChangeManager= null;
+	/** The text edit based change manager */
+	private TextEditBasedChangeManager fChangeManager= null;
 
 	/** Should comments be generated? */
 	private boolean fComments= true;
@@ -212,7 +213,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		Assert.isNotNull(monitor);
 		Assert.isNotNull(context);
 		final RefactoringStatus status= new RefactoringStatus();
-		fChangeManager= new TextChangeManager();
+		fChangeManager= new TextEditBasedChangeManager();
 		try {
 			monitor.beginTask("", 4); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_checking);
@@ -273,9 +274,9 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		final IType type= Checks.findTypeInPackage(fragment, fSuperName);
 		if (type != null && type.exists()) {
 			if (fragment.isDefaultPackage())
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_existing_default_type, new String[] { fSuperName}));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_existing_default_type, new String[] { fSuperName }));
 			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_existing_type, new String[] { fSuperName, fragment.getElementName()}));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_existing_type, new String[] { fSuperName, fragment.getElementName() }));
 		}
 		return new RefactoringStatus();
 	}
@@ -299,7 +300,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				return result;
 			final IPackageFragment fragment= fSubType.getPackageFragment();
 			if (fragment.getCompilationUnit(unitName).exists()) {
-				result.addFatalError(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_existing_compilation_unit, new String[] { unitName, fragment.getElementName()}));
+				result.addFatalError(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_existing_compilation_unit, new String[] { unitName, fragment.getElementName() }));
 				return result;
 			}
 			result.merge(checkSuperType());
@@ -332,7 +333,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_INTERFACE, project, Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_descriptor_description, new String[] { fSuperName, JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_INTERFACE, project, Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_descriptor_description, new String[] { fSuperName, JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, flags);
 					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSubType));
 					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fSuperName);
 					for (int index= 0; index < fMembers.length; index++)
@@ -347,7 +348,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			};
 			final IFile file= ResourceUtil.getFile(fSubType.getCompilationUnit());
 			if (fSuperSource != null && fSuperSource.length() > 0)
-				change.add(new CreateTextFileChange(file.getFullPath().removeLastSegments(1).append(JavaModelUtil.getRenamedCUName(fSubType.getCompilationUnit(), fSuperName)), fSuperSource, file.getCharset(false), "java")); //$NON-NLS-1$
+				change.add(new CreateCompilationUnitChange(fSubType.getPackageFragment().getCompilationUnit(JavaModelUtil.getRenamedCUName(fSubType.getCompilationUnit(), fSuperName)), fSuperSource, file.getCharset(false)));
 			return change;
 		} finally {
 			monitor.done();
@@ -367,14 +368,14 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 * @throws CoreException
 	 *             if the changes could not be generated
 	 */
-	protected final TextChangeManager createChangeManager(final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException, CoreException {
+	protected final TextEditBasedChangeManager createChangeManager(final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException, CoreException {
 		Assert.isNotNull(status);
 		Assert.isNotNull(monitor);
 		try {
 			monitor.beginTask("", 20); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
 			fSuperSource= null;
-			final TextChangeManager manager= new TextChangeManager();
+			final TextEditBasedChangeManager manager= new TextEditBasedChangeManager();
 			final CompilationUnitRewrite sourceRewrite= new CompilationUnitRewrite(fSubType.getCompilationUnit());
 			final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fSubType, sourceRewrite.getRoot());
 			if (declaration != null) {
@@ -697,7 +698,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getElements()
 	 */
 	public final Object[] getElements() {
-		return new Object[] { fSubType};
+		return new Object[] { fSubType };
 	}
 
 	/**
@@ -774,7 +775,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
 	public final String getProcessorName() {
-		return Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_name, new String[] { fSubType.getElementName()});
+		return Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_name, new String[] { fSubType.getElementName() });
 	}
 
 	/**
@@ -921,7 +922,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/**
 	 * {@inheritDoc}
 	 */
-	protected final void rewriteTypeOccurrences(final TextChangeManager manager, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements) throws CoreException {
+	protected final void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements) throws CoreException {
 		CompilationUnitRewrite currentRewrite= null;
 		final boolean isSubUnit= rewrite.getCu().equals(unit.getPrimary());
 		if (isSubUnit)
@@ -978,7 +979,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 * @throws CoreException
 	 *             if an error occurs
 	 */
-	protected final void rewriteTypeOccurrences(final TextChangeManager manager, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit superUnit, final Set replacements, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
+	protected final void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit superUnit, final Set replacements, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(manager);
 		Assert.isNotNull(sourceRewrite);
 		Assert.isNotNull(superUnit);
@@ -1013,7 +1014,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				parser.setResolveBindings(true);
 				parser.setProject(project);
 				parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-				parser.createASTs(new ICompilationUnit[] { subUnit}, new String[0], new ASTRequestor() {
+				parser.createASTs(new ICompilationUnit[] { subUnit }, new String[0], new ASTRequestor() {
 
 					public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
 						try {
@@ -1035,20 +1036,23 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 										if (!status.hasFatalError()) {
 											rewriteTypeOccurrences(manager, this, sourceRewrite, unit, node, replacements, status, new SubProgressMonitor(monitor, 3));
 											if (manager.containsChangesIn(superUnit)) {
-												final TextEdit edit= manager.get(superUnit).getEdit();
-												if (edit != null) {
-													final IDocument document= new Document(superUnit.getBuffer().getContents());
-													try {
-														edit.apply(document, TextEdit.UPDATE_REGIONS);
-													} catch (MalformedTreeException exception) {
-														JavaPlugin.log(exception);
-														status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
-													} catch (BadLocationException exception) {
-														JavaPlugin.log(exception);
-														status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
+												final TextEditBasedChange change= manager.get(superUnit);
+												if (change instanceof TextChange) {
+													final TextEdit edit= ((TextChange) change).getEdit();
+													if (edit != null) {
+														final IDocument document= new Document(superUnit.getBuffer().getContents());
+														try {
+															edit.apply(document, TextEdit.UPDATE_REGIONS);
+														} catch (MalformedTreeException exception) {
+															JavaPlugin.log(exception);
+															status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
+														} catch (BadLocationException exception) {
+															JavaPlugin.log(exception);
+															status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
+														}
+														fSuperSource= document.get();
+														manager.remove(superUnit);
 													}
-													fSuperSource= document.get();
-													manager.remove(superUnit);
 												}
 											}
 										}

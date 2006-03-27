@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
 /**
  * Refactoring to extract a supertype from a class.
  * 
@@ -34,5 +36,12 @@ public final class ExtractSupertypeRefactoring extends PullUpRefactoring {
 	 */
 	public ExtractSupertypeProcessor getExtractSupertypeProcessor() {
 		return (ExtractSupertypeProcessor) getProcessor();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getName() {
+		return RefactoringCoreMessages.ExtractSupertypeProcessor_extract_supertype;
 	}
 }

@@ -114,9 +114,9 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.code.CommentRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
@@ -720,12 +720,12 @@ public final class MoveInnerToTopRefactoring extends CommentRefactoring implemen
 			if (JdtFlags.isStatic(fType))
 				result.merge(checkEnclosingInstanceName(fEnclosingInstanceFieldName));
 
-			if (fType.getPackageFragment().getCompilationUnit((getCompilationUnitName())).exists()) {
-				String message= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_compilation_Unit_exists, new String[] { (getCompilationUnitName()), fType.getPackageFragment().getElementName()});
+			if (fType.getPackageFragment().getCompilationUnit((JavaModelUtil.getRenamedCUName(fType.getCompilationUnit(), fType.getElementName()))).exists()) {
+				String message= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_compilation_Unit_exists, new String[] { (JavaModelUtil.getRenamedCUName(fType.getCompilationUnit(), fType.getElementName())), fType.getPackageFragment().getElementName()});
 				result.addFatalError(message);
 			}
 			result.merge(checkEnclosingInstanceName(fEnclosingInstanceFieldName));
-			result.merge(Checks.checkCompilationUnitName((getCompilationUnitName())));
+			result.merge(Checks.checkCompilationUnitName((JavaModelUtil.getRenamedCUName(fType.getCompilationUnit(), fType.getElementName()))));
 			result.merge(checkConstructorParameterNames());
 			result.merge(checkTypeNameInPackage());
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), result);
@@ -847,17 +847,13 @@ public final class MoveInnerToTopRefactoring extends CommentRefactoring implemen
 	private Change createCompilationUnitForMovedType(IProgressMonitor pm) throws CoreException {
 		ICompilationUnit newCuWC= null;
 		try {
-			newCuWC= fType.getPackageFragment().getCompilationUnit(getCompilationUnitName()).getWorkingCopy(null);
+			newCuWC= fType.getPackageFragment().getCompilationUnit(JavaModelUtil.getRenamedCUName(fType.getCompilationUnit(), fType.getElementName())).getWorkingCopy(null);
 			String source= createSourceForNewCu(newCuWC, pm);
-			return new CreateTextFileChange(ResourceUtil.getFile(fType.getCompilationUnit()).getFullPath().removeLastSegments(1).append((getCompilationUnitName())), source, null, "java"); //$NON-NLS-1$
+			return new CreateCompilationUnitChange(fType.getPackageFragment().getCompilationUnit(JavaModelUtil.getRenamedCUName(fType.getCompilationUnit(), fType.getElementName())), source, null);
 		} finally {
 			if (newCuWC != null)
 				newCuWC.discardWorkingCopy();
 		}
-	}
-
-	private String getCompilationUnitName() {
-		return JavaModelUtil.getRenamedCUName(fType.getCompilationUnit(), fType.getElementName());
 	}
 
 	private void createCompilationUnitRewrite(final ITypeBinding[] parameters, final CompilationUnitRewrite targetRewrite, final Map typeReferences, final Map constructorReferences, boolean visibilityWasAdjusted, final ICompilationUnit sourceUnit, final ICompilationUnit targetUnit, final boolean remove, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {

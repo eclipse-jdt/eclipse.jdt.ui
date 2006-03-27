@@ -53,6 +53,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+import org.eclipse.jdt.internal.ui.actions.ExtractSuperTypeAction;
 import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -125,6 +126,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fPullUpAction;
 	private SelectionDispatchAction fPushDownAction;
 	private SelectionDispatchAction fExtractInterfaceAction;
+	private SelectionDispatchAction fExtractSupertypeAction;
 	private SelectionDispatchAction fChangeTypeAction;
 	private SelectionDispatchAction fUseSupertypeAction;
 	private SelectionDispatchAction fInferTypeArgumentsAction;
@@ -249,6 +251,12 @@ public class RefactorActionGroup extends ActionGroup {
 		fPushDownAction.update(selection);
 		editor.setAction("PushDown", fPushDownAction); //$NON-NLS-1$
 		fEditorActions.add(fPushDownAction);
+
+		fExtractSupertypeAction= new ExtractSuperTypeAction(editor);
+		fExtractSupertypeAction.setActionDefinitionId(ExtractSuperTypeAction.EXTRACT_SUPERTYPE);
+		fExtractSupertypeAction.update(selection);
+		editor.setAction("ExtractSupertype", fExtractSupertypeAction); //$NON-NLS-1$
+		fEditorActions.add(fExtractSupertypeAction);
 		
 		fExtractInterfaceAction= new ExtractInterfaceAction(editor);
 		fExtractInterfaceAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_INTERFACE);
@@ -374,6 +382,10 @@ public class RefactorActionGroup extends ActionGroup {
 		fSelfEncapsulateField.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELF_ENCAPSULATE_FIELD);
 		initAction(fSelfEncapsulateField, provider, selection);
 
+		fExtractSupertypeAction= new ExtractSuperTypeAction(fSite);
+		fExtractSupertypeAction.setActionDefinitionId(ExtractSuperTypeAction.EXTRACT_SUPERTYPE);
+		initAction(fExtractSupertypeAction, provider, selection);
+
 		fExtractInterfaceAction= new ExtractInterfaceAction(fSite);
 		fExtractInterfaceAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_INTERFACE);
 		initAction(fExtractInterfaceAction, provider, selection);
@@ -448,6 +460,7 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.INTRODUCE_INDIRECTION, fIntroduceIndirectionAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE, fInlineAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_INTERFACE, fExtractInterfaceAction);
+		actionBars.setGlobalActionHandler(ExtractSuperTypeAction.EXTRACT_SUPERTYPES, fExtractSupertypeAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.CHANGE_TYPE, fChangeTypeAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_NESTED_TO_TOP, fConvertNestedToTopAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.USE_SUPERTYPE, fUseSupertypeAction);
@@ -497,6 +510,7 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fInlineAction, provider);
 		disposeAction(fReplaceInvocationsAction, provider);
 		disposeAction(fExtractInterfaceAction, provider);
+		disposeAction(fExtractSupertypeAction, provider);
 		disposeAction(fChangeTypeAction, provider);
 		disposeAction(fConvertNestedToTopAction, provider);
 		disposeAction(fUseSupertypeAction, provider);
@@ -551,6 +565,7 @@ public class RefactorActionGroup extends ActionGroup {
 		refactorSubmenu.add(new Separator(GROUP_TYPE));
 		added+= addAction(refactorSubmenu, fPullUpAction);
 		added+= addAction(refactorSubmenu, fPushDownAction);
+		added+= addAction(refactorSubmenu, fExtractSupertypeAction);
 		added+= addAction(refactorSubmenu, fExtractInterfaceAction);
 		added+= addAction(refactorSubmenu, fChangeTypeAction);
 		added+= addAction(refactorSubmenu, fUseSupertypeAction);
