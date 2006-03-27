@@ -139,7 +139,11 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 		try {
 			Change change= getChange();
 			if (change != null) {
-				buf.append(change.getName());
+				String name= change.getName();
+				if (name.length() == 0) {
+					return null;
+				}
+				buf.append(name);
 			} else {
 				return null;
 			}
