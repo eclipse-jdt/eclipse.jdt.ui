@@ -92,7 +92,7 @@ public class Java50Fix extends LinkedFix {
 			ListRewrite listRewrite= cuRewrite.getASTRewrite().getListRewrite(fBodyDeclaration, fBodyDeclaration.getModifiersProperty());
 			Annotation newAnnotation= ast.newMarkerAnnotation();
 			newAnnotation.setTypeName(ast.newSimpleName(fAnnotation));
-			TextEditGroup group= createTextEditGroup(Messages.format(FixMessages.Java50Fix_AddMissingAnnotation_description, new String[] {fAnnotation}));
+			TextEditGroup group= createTextEditGroup(Messages.format(FixMessages.Java50Fix_AddMissingAnnotation_description, fAnnotation));
 			textEditGroups.add(group);
 			listRewrite.insertFirst(newAnnotation, group);
 		}
