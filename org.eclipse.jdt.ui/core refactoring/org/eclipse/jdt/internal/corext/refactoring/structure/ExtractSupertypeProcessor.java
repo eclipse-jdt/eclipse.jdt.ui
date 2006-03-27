@@ -852,10 +852,13 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 					if (superType != null) {
 						fPossibleCandidates= superType.newTypeHierarchy(fOwner, new SubProgressMonitor(monitor, 9, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)).getSubtypes(superType);
 						final LinkedList list= new LinkedList(Arrays.asList(fPossibleCandidates));
+						final Set names= new HashSet();
 						for (final Iterator iterator= list.iterator(); iterator.hasNext();) {
 							final IType type= (IType) iterator.next();
-							if (type.isReadOnly() || type.isBinary() || type.isAnonymous() || !type.isClass())
+							if (type.isReadOnly() || type.isBinary() || type.isAnonymous() || !type.isClass() || names.contains(type.getFullyQualifiedName()))
 								iterator.remove();
+							else
+								names.add(type.getFullyQualifiedName());
 						}
 						fPossibleCandidates= (IType[]) list.toArray(new IType[list.size()]);
 					}

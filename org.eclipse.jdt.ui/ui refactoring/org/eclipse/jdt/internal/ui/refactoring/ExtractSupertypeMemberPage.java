@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -208,12 +209,19 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		addButton.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(final SelectionEvent event) {
-				final Set set= new HashSet(Arrays.asList(fCandidateTypes));
-				set.removeAll(fTypesToExtract);
-				if (!set.isEmpty()) {
+				final LinkedList list= new LinkedList(Arrays.asList(fCandidateTypes));
+				for (final Iterator outer= list.iterator(); outer.hasNext();) {
+					final IType first= (IType) outer.next();
+					for (final Iterator inner= fTypesToExtract.iterator(); inner.hasNext();) {
+						final IType second= (IType) inner.next();
+						if (second.getFullyQualifiedName().equals(first.getFullyQualifiedName()))
+							outer.remove();
+					}
+				}
+				if (!list.isEmpty()) {
 					final SupertypeSelectionDialog dialog= new SupertypeSelectionDialog(getShell());
 					dialog.create();
-					dialog.setInput(set.toArray());
+					dialog.setInput(list.toArray());
 					final int result= dialog.open();
 					if (result == Window.OK) {
 						final Object[] objects= dialog.getResult();
