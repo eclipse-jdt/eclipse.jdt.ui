@@ -354,48 +354,54 @@ public final class JarImportWizardPage extends WizardPage {
 				}
 				ZipFile zip= null;
 				try {
-					zip= new ZipFile(file, ZipFile.OPEN_READ);
-				} catch (IOException exception) {
-					setErrorMessage(JarImportMessages.JarImportWizardPage_invalid_location);
-					setPageComplete(false);
-					return;
-				}
-				final JarImportData data= fJarImportData.getImportData();
-				data.setRefactoringFileLocation(URIUtil.toURI(path));
-				ZipEntry entry= zip.getEntry(JarPackagerUtil.getRefactoringsEntry());
-				if (entry == null) {
-					setMessage(JarImportMessages.JarImportWizardPage_no_refactorings, INFORMATION);
-					setPageComplete(true);
-					return;
-				}
-				handleTimeStampChanged();
-				if (data.getExistingTimeStamp() > entry.getTime()) {
-					setMessage(JarImportMessages.JarImportWizardPage_version_warning, WARNING);
-					setPageComplete(true);
-					return;
-				}
-				InputStream stream= null;
-				try {
-					stream= zip.getInputStream(entry);
-					data.setRefactoringHistory(RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE));
-				} catch (IOException exception) {
-					setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
-					setPageComplete(false);
-					return;
-				} catch (CoreException exception) {
-					JavaPlugin.log(exception);
-					setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
-					setPageComplete(false);
-					return;
-				} finally {
-					if (stream != null) {
-						try {
-							stream.close();
-						} catch (IOException exception) {
-							// Do nothing
+					try {
+						zip= new ZipFile(file, ZipFile.OPEN_READ);
+					} catch (IOException exception) {
+						setErrorMessage(JarImportMessages.JarImportWizardPage_invalid_location);
+						setPageComplete(false);
+						return;
+					}
+					final JarImportData data= fJarImportData.getImportData();
+					data.setRefactoringFileLocation(URIUtil.toURI(path));
+					ZipEntry entry= zip.getEntry(JarPackagerUtil.getRefactoringsEntry());
+					if (entry == null) {
+						setMessage(JarImportMessages.JarImportWizardPage_no_refactorings, INFORMATION);
+						setPageComplete(true);
+						return;
+					}
+					handleTimeStampChanged();
+					if (data.getExistingTimeStamp() > entry.getTime()) {
+						setMessage(JarImportMessages.JarImportWizardPage_version_warning, WARNING);
+						setPageComplete(true);
+						return;
+					}
+					InputStream stream= null;
+					try {
+						stream= zip.getInputStream(entry);
+						data.setRefactoringHistory(RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE));
+					} catch (IOException exception) {
+						setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
+						setPageComplete(false);
+						return;
+					} catch (CoreException exception) {
+						JavaPlugin.log(exception);
+						setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
+						setPageComplete(false);
+						return;
+					} finally {
+						if (stream != null) {
+							try {
+								stream.close();
+							} catch (IOException exception) {
+								// Do nothing
+							}
 						}
 					}
-				}
+				} finally {
+					if (zip != null) {
+						try { zip.close(); } catch (IOException e) {}
+					}
+				}				
 			}
 		}
 	}
@@ -446,6 +452,10 @@ public final class JarImportWizardPage extends WizardPage {
 							}
 						} catch (IOException exception) {
 							// Just leave it
+						} finally {
+							if (zip != null) {
+								try { zip.close(); } catch (IOException e) {}
+							}
 						}
 					}
 				}
