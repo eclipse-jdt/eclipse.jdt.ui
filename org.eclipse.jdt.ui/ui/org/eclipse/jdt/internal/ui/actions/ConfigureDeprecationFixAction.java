@@ -42,6 +42,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -69,6 +71,8 @@ public class ConfigureDeprecationFixAction extends SelectionDispatchAction {
 	 * Source menu: name of standard configure deprecation fix global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.ConfigureDeprecationFix"</code>).
 	 * 
+	 * TODO: make API in {@link JdtActionConstants}
+	 * 
 	 * @since 3.2
 	 */
 	public static final String CONFIGURE_DEPRECATION_FIX= "org.eclipse.jdt.ui.actions.ConfigureDeprecationFix"; //$NON-NLS-1$
@@ -77,6 +81,8 @@ public class ConfigureDeprecationFixAction extends SelectionDispatchAction {
 	 * Action definition ID of the source ->configure deprecation fix action
 	 * (value
 	 * <code>"org.eclipse.jdt.ui.edit.text.java.configure.deprecation.fix"</code>).
+	 * 
+	 * TODO: make API in {@link IJavaEditorActionDefinitionIds}
 	 * 
 	 * @since 3.2
 	 */
