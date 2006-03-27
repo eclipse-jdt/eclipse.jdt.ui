@@ -43,7 +43,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionDialog;
@@ -154,9 +153,6 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	/** The types to extract */
 	private final Set fTypesToExtract= new HashSet(2);
 
-	/** Have the working copies already been created? */
-	private boolean fWorkingCopiesCreated= false;
-
 	/**
 	 * Creates a new extract supertype member page.
 	 * 
@@ -165,7 +161,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	 * @param page
 	 *            the method page
 	 */
-	public ExtractSupertypeMemberPage(final String name, final PullUpMethodPage page) {
+	public ExtractSupertypeMemberPage(final String name, final ExtractSupertypeMethodPage page) {
 		super(name, page);
 		setDescription(RefactoringMessages.ExtractSupertypeMemberPage_page_title);
 		METHOD_LABELS[PULL_UP_ACTION]= RefactoringMessages.ExtractSupertypeMemberPage_extract;
@@ -380,7 +376,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		layout.marginHeight= 0;
 		composite.setLayout(layout);
 		data= new GridData(GridData.FILL_BOTH);
-		data.heightHint= convertHeightInCharsToPixels(12);
+		data.heightHint= convertHeightInCharsToPixels(3);
 		data.horizontalSpan= 2;
 		composite.setLayoutData(data);
 
@@ -423,7 +419,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	 * {@inheritDoc}
 	 */
 	public IType getDestinationType() {
-		return getProcessor().computeDestinationType(fNameField.getText());
+		return getProcessor().computeExtractedType(fNameField.getText());
 	}
 
 	/**
@@ -438,29 +434,6 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	 */
 	protected String getInstanceofButtonLabel() {
 		return RefactoringMessages.ExtractSupertypeMemberPage_use_supertype_label;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public IWizardPage getNextPage() {
-		if (!fWorkingCopiesCreated) {
-			try {
-				getWizard().getContainer().run(true, false, new IRunnableWithProgress() {
-
-					public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						getProcessor().createWorkingCopyLayer(monitor);
-					}
-				});
-			} catch (InvocationTargetException exception) {
-				JavaPlugin.log(exception);
-			} catch (InterruptedException exception) {
-				// Does not happen
-			} finally {
-				fWorkingCopiesCreated= true;
-			}
-		}
-		return super.getNextPage();
 	}
 
 	/**
@@ -534,7 +507,20 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	 */
 	public void setVisible(final boolean visible) {
 		super.setVisible(visible);
-		if (visible)
+		if (visible) {
 			fNameField.setFocus();
+			try {
+				getWizard().getContainer().run(true, false, new IRunnableWithProgress() {
+
+					public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						getProcessor().destroyWorkingCopyLayer();
+					}
+				});
+			} catch (InvocationTargetException exception) {
+				JavaPlugin.log(exception);
+			} catch (InterruptedException exception) {
+				// Does not happen
+			}
+		}
 	}
 }
