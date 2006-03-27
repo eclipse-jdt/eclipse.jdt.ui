@@ -228,7 +228,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 			for (int i= 0; i < toImplement.length; i++) {
 				IMethodBinding curr= toImplement[i];
 				if (!curr.isDeprecated() || createDeprecated) {
-					MethodDeclaration stub= StubUtility2.createConstructorStub(cu, astRewrite, importRewrite, curr, currTypeBinding.getName(), fVisibility, fOmitSuper, settings);
+					MethodDeclaration stub= StubUtility2.createConstructorStub(cu, astRewrite, importRewrite, curr, currTypeBinding.getName(), fVisibility, fOmitSuper, true, settings);
 					if (stub != null) {
 						fCreatedMethods.add(curr.getKey());
 						if (insertion != null)

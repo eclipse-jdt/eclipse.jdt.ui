@@ -79,7 +79,7 @@ public final class StubUtility2 {
 		}
 	}
 
-	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, IMethodBinding binding, String type, int modifiers, boolean omitSuper, CodeGenerationSettings settings) throws CoreException {
+	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, IMethodBinding binding, String type, int modifiers, boolean omitSuper, boolean todo, CodeGenerationSettings settings) throws CoreException {
 		AST ast= rewrite.getAST();
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
@@ -126,10 +126,15 @@ public final class StubUtility2 {
 			bodyStatement= ASTNodes.asFormattedString(invocation, 0, delimiter);
 		}
 
-		String placeHolder= CodeGeneration.getMethodBodyContent(unit, type, binding.getName(), true, bodyStatement, delimiter);
-		if (placeHolder != null) {
-			ASTNode todoNode= rewrite.createStringPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
-			body.statements().add(todoNode);
+		if (todo) {
+			String placeHolder= CodeGeneration.getMethodBodyContent(unit, type, binding.getName(), true, bodyStatement, delimiter);
+			if (placeHolder != null) {
+				ASTNode todoNode= rewrite.createStringPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
+				body.statements().add(todoNode);
+			}
+		} else {
+			ASTNode statementNode= rewrite.createStringPlaceholder(bodyStatement, ASTNode.RETURN_STATEMENT);
+			body.statements().add(statementNode);
 		}
 
 		if (settings != null && settings.createComments) {
@@ -232,7 +237,6 @@ public final class StubUtility2 {
 			assignment.setOperator(Assignment.Operator.ASSIGN);
 			body.statements().add(ast.newExpressionStatement(assignment));
 		}
-		
 
 		if (settings != null && settings.createComments) {
 			String string= CodeGeneration.getMethodComment(unit, typeBinding.getName(), decl, superConstructor, delimiter);
@@ -337,7 +341,7 @@ public final class StubUtility2 {
 		if (declaringType == null) { // can be null for
 			return decl;
 		}
-		
+
 		String qualifiedName= declaringType.getQualifiedName();
 		IPackageBinding packageBinding= declaringType.getPackage();
 		if (packageBinding != null) {
@@ -347,8 +351,9 @@ public final class StubUtility2 {
 
 		if (settings.createComments) {
 			/*
-			 * TODO: have API for delegate method comments
-			 * This is an inlined version of {@link CodeGeneration#getMethodComment(ICompilationUnit, String, MethodDeclaration, IMethodBinding, String)}
+			 * TODO: have API for delegate method comments This is an inlined
+			 * version of
+			 * {@link CodeGeneration#getMethodComment(ICompilationUnit, String, MethodDeclaration, IMethodBinding, String)}
 			 */
 			methodBinding= methodBinding.getMethodDeclaration();
 			String declaringClassQualifiedName= methodBinding.getDeclaringClass().getQualifiedName();
@@ -677,7 +682,7 @@ public final class StubUtility2 {
 		if (typeBinding.isTypeVariable()) {
 			ITypeBinding[] typeBounds= typeBinding.getTypeBounds();
 			if (typeBounds == null || typeBounds.length == 0)
-				typeBounds= new ITypeBinding[] { ast.resolveWellKnownType("java.lang.Object")}; //$NON-NLS-1$
+				typeBounds= new ITypeBinding[] { ast.resolveWellKnownType("java.lang.Object") }; //$NON-NLS-1$
 			for (int index= 0; index < typeBounds.length; index++) {
 				IMethodBinding[] candidates= getDelegateCandidates(typeBounds[index], binding);
 				for (int candidate= 0; candidate < candidates.length; candidate++) {
@@ -688,7 +693,7 @@ public final class StubUtility2 {
 							match= true;
 					}
 					if (!match) {
-						tuples.add(new IBinding[] { fieldBinding, methodBinding});
+						tuples.add(new IBinding[] { fieldBinding, methodBinding });
 						methods.add(methodBinding);
 					}
 				}
@@ -709,7 +714,7 @@ public final class StubUtility2 {
 						match= true;
 				}
 				if (!match) {
-					tuples.add(new IBinding[] { fieldBinding, methodBinding});
+					tuples.add(new IBinding[] { fieldBinding, methodBinding });
 					methods.add(methodBinding);
 				}
 			}
