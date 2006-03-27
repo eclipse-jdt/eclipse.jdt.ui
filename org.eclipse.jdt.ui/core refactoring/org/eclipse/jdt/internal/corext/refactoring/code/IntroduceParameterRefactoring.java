@@ -495,27 +495,30 @@ public class IntroduceParameterRefactoring extends CommentRefactoring implements
 		} finally {
 			fChangeSignatureRefactoring.setValidationContext(null);
 		}
-		return new CompositeChange(RefactoringCoreMessages.IntroduceParameterRefactoring_name, new Change[] {result}) {
-		
+		return new CompositeChange(RefactoringCoreMessages.IntroduceParameterRefactoring_name, new Change[] { result}) {
+
 			public final ChangeDescriptor getDescriptor() {
-				final ChangeDescriptor descriptor= getChildren()[0].getDescriptor();
-				if (descriptor instanceof RefactoringChangeDescriptor) {
-					final RefactoringDescriptor refactoringDescriptor= ((RefactoringChangeDescriptor) descriptor).getRefactoringDescriptor();
-					if (refactoringDescriptor instanceof JavaRefactoringDescriptor) {
-						final JavaRefactoringDescriptor extended= (JavaRefactoringDescriptor) refactoringDescriptor;
-						final Map arguments= new HashMap();
-						arguments.put(ATTRIBUTE_ARGUMENT, fParameter.getNewName());
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
-						arguments.putAll(extended.getArguments());
-						String signature= fChangeSignatureRefactoring.getMethodName();
-						try {
-							signature= fChangeSignatureRefactoring.getOldMethodSignature();
-						} catch (JavaModelException exception) {
-							JavaPlugin.log(exception);
+				final Change[] children= getChildren();
+				if (children != null && children.length > 0 && children[0] != null) {
+					final ChangeDescriptor descriptor= children[0].getDescriptor();
+					if (descriptor instanceof RefactoringChangeDescriptor) {
+						final RefactoringDescriptor refactoringDescriptor= ((RefactoringChangeDescriptor) descriptor).getRefactoringDescriptor();
+						if (refactoringDescriptor instanceof JavaRefactoringDescriptor) {
+							final JavaRefactoringDescriptor extended= (JavaRefactoringDescriptor) refactoringDescriptor;
+							final Map arguments= new HashMap();
+							arguments.put(ATTRIBUTE_ARGUMENT, fParameter.getNewName());
+							arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+							arguments.putAll(extended.getArguments());
+							String signature= fChangeSignatureRefactoring.getMethodName();
+							try {
+								signature= fChangeSignatureRefactoring.getOldMethodSignature();
+							} catch (JavaModelException exception) {
+								JavaPlugin.log(exception);
+							}
+							final JavaRefactoringDescriptor newRefDesc= new JavaRefactoringDescriptor(ID_INTRODUCE_PARAMETER, extended.getProject(), Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description, new String[] { fParameter.getNewName(), signature, ASTNodes.asString(fSelectedExpression)}), getComment(), arguments, extended.getFlags());
+							return new RefactoringChangeDescriptor(newRefDesc);
+
 						}
-						final JavaRefactoringDescriptor newRefDesc= new JavaRefactoringDescriptor(ID_INTRODUCE_PARAMETER, extended.getProject(), Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description, new String[] { fParameter.getNewName(), signature, ASTNodes.asString(fSelectedExpression)}), getComment(), arguments, extended.getFlags());
-						return new RefactoringChangeDescriptor(newRefDesc);
-						
 					}
 				}
 				return null;
