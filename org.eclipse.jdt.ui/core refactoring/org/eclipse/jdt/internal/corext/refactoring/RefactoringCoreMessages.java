@@ -224,6 +224,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String CommentAnalyzer_starts_inside_comment;
 
+	public static String CompilationUnitChange_label;
+
 	public static String CompositeRefactoring_checking_preconditions;
 
 	public static String CompositeRefactoring_creating_change;
@@ -495,6 +497,10 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractSupertypeProcessor_descriptor_description;
 
 	public static String ExtractSupertypeProcessor_extract_supertype;
+
+	public static String ExtractSupertypeProcessor_preparing;
+
+	public static String ExtractSupertypeProcessor_unexpected_exception;
 
 	public static String ExtractSupertypeProcessor_unexpected_exception_on_layer;
 
@@ -1103,6 +1109,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String MoveStaticMembersProcessor_descriptor_description_multi;
 
 	public static String MoveStaticMembersProcessor_descriptor_description_single;
+
+	public static String MultiStateCompilationUnitChange_name_pattern;
 
 	public static String OverwriteHelper_0;
 
