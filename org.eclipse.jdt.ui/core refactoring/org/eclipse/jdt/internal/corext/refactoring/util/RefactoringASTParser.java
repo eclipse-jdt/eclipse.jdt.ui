@@ -21,7 +21,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -112,13 +111,23 @@ public class RefactoringASTParser {
 		return newCUNode;
 	}
 	
-	public static CompilationUnit parseWithASTProvider(ICompilationUnit unit, IProgressMonitor pm) {
+	/**
+	 * Tries to get the shared AST from the ASTProvider.
+	 * If the shared AST is not available, parses the compilation unit with a
+	 * RefactoringASTParser that uses settings similar to the ASTProvider.
+	 * 
+	 * @param unit the compilation unit
+	 * @param resolveBindings TODO
+	 * @param pm an {@link IProgressMonitor}, or <code>null</code>
+	 * @return the parsed CompilationUnit
+	 */
+	public static CompilationUnit parseWithASTProvider(ICompilationUnit unit, boolean resolveBindings, IProgressMonitor pm) {
 		CompilationUnit cuNode= ASTProvider.getASTProvider().getAST(unit, ASTProvider.WAIT_ACTIVE_ONLY, pm);
 		if (cuNode != null) {
 			cuNode.setProperty(SOURCE_PROPERTY, unit);
 			return cuNode;
 		} else {
-			return new RefactoringASTParser(AST.JLS3).parse(unit, null, true, true, pm);
+			return new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(unit, null, resolveBindings, ASTProvider.SHARED_AST_STATEMENT_RECOVERY, pm);
 		}
 	}
 

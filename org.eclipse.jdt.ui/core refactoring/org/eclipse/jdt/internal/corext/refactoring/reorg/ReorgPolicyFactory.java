@@ -117,6 +117,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.Changes;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResult;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -2051,11 +2052,20 @@ public class ReorgPolicyFactory {
 		}
 
 		public Change createChange(IProgressMonitor pm) throws JavaModelException {
+			pm.beginTask("", 3); //$NON-NLS-1$
 			try {
 				final ICompilationUnit sourceCu= getSourceCu();
-				CompilationUnitRewrite sourceRewriter= new CompilationUnitRewrite(sourceCu);
+				CompilationUnit sourceCuNode= RefactoringASTParser.parseWithASTProvider(sourceCu, false, new SubProgressMonitor(pm, 1));
+				CompilationUnitRewrite sourceRewriter= new CompilationUnitRewrite(sourceCu, sourceCuNode);
 				ICompilationUnit destinationCu= getDestinationCu();
-				CompilationUnitRewrite targetRewriter= sourceCu.equals(destinationCu) ? sourceRewriter : new CompilationUnitRewrite(destinationCu);
+				CompilationUnitRewrite targetRewriter;
+				if (sourceCu.equals(destinationCu)) {
+					targetRewriter= sourceRewriter;
+					pm.worked(1);
+				} else {
+					CompilationUnit destinationCuNode= RefactoringASTParser.parseWithASTProvider(destinationCu, false, new SubProgressMonitor(pm, 1));
+					targetRewriter= new CompilationUnitRewrite(destinationCu, destinationCuNode);
+				}
 				IJavaElement[] javaElements= getJavaElements();
 				for (int i= 0; i < javaElements.length; i++) {
 					copyToDestination(javaElements[i], targetRewriter.getASTRewrite(), sourceRewriter.getRoot(), targetRewriter.getRoot());
@@ -2078,6 +2088,8 @@ public class ReorgPolicyFactory {
 				throw e;
 			} catch (CoreException e) {
 				throw new JavaModelException(e);
+			} finally {
+				pm.done();
 			}
 		}
 		

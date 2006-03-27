@@ -503,7 +503,7 @@ public class ExtractTempRefactoring extends CommentRefactoring implements IIniti
 			if (result.hasFatalError())
 				return result;
 
-			CompilationUnit rootNode= RefactoringASTParser.parseWithASTProvider(fCu, new SubProgressMonitor(pm, 3));
+			CompilationUnit rootNode= RefactoringASTParser.parseWithASTProvider(fCu, true, new SubProgressMonitor(pm, 3));
 			
 			result.merge(checkActivationBasics(rootNode, new SubProgressMonitor(pm, 3)));
 			if ((!result.hasFatalError()) && isLiteralNodeSelected())

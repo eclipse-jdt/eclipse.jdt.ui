@@ -237,7 +237,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 
 	private void initAST() throws JavaModelException {
 		if (!fIsComposite)
-			fCompilationUnitNode= RefactoringASTParser.parseWithASTProvider(fCu, null);
+			fCompilationUnitNode= RefactoringASTParser.parseWithASTProvider(fCu, true, null);
 		ISourceRange sourceRange= fLocalVariable.getNameRange();
 		ASTNode name= NodeFinder.perform(fCompilationUnitNode, sourceRange);
 		if (name == null)

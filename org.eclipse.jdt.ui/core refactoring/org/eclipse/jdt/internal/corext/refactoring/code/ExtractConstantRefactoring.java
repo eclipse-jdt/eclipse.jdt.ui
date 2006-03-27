@@ -354,10 +354,10 @@ public class ExtractConstantRefactoring extends CommentRefactoring implements II
 				return result;
 			pm.worked(1);
 	
-			fCuRewrite= new CompilationUnitRewrite(fCu);
-			fCuRewrite.setStatementsRecovery(true);
+			CompilationUnit cuNode= RefactoringASTParser.parseWithASTProvider(fCu, true, new SubProgressMonitor(pm, 3));
+			fCuRewrite= new CompilationUnitRewrite(fCu, cuNode);
 	
-			result.merge(checkSelection(new SubProgressMonitor(pm, 6)));
+			result.merge(checkSelection(new SubProgressMonitor(pm, 3)));
 			if (result.hasFatalError())
 				return result;
 			

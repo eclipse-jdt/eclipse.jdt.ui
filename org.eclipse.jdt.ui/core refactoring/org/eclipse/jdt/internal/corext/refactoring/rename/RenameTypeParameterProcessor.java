@@ -30,6 +30,7 @@ import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -62,6 +63,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -307,9 +309,10 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
 			monitor.beginTask(RefactoringCoreMessages.RenameTypeParameterRefactoring_searching, 2);
-			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(fTypeParameter.getDeclaringMember().getCompilationUnit());
+			final ICompilationUnit cu= fTypeParameter.getDeclaringMember().getCompilationUnit();
+			final CompilationUnit root= RefactoringASTParser.parseWithASTProvider(cu, true, null);
+			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(cu, root);
 			final IMember member= fTypeParameter.getDeclaringMember();
-			final CompilationUnit root= rewrite.getRoot();
 			ASTNode declaration= null;
 			if (member instanceof IMethod) {
 				declaration= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) member, root);

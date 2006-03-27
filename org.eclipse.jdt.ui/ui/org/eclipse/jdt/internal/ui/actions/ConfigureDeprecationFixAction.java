@@ -225,7 +225,7 @@ public class ConfigureDeprecationFixAction extends SelectionDispatchAction {
 	}
 
 	private void run(final Shell shell, final IMember member) throws CoreException {
-		CompilationUnit unit= RefactoringASTParser.parseWithASTProvider(member.getCompilationUnit(), null);
+		CompilationUnit unit= RefactoringASTParser.parseWithASTProvider(member.getCompilationUnit(), true, null);
 		if (unit != null) {
 			IBinding binding= null;
 			BodyDeclaration declaration= ASTNodeSearchUtil.getBodyDeclarationNode(member, unit);
