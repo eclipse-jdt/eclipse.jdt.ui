@@ -11,10 +11,14 @@
 package org.eclipse.jdt.internal.corext.refactoring.composite;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.MultiStateTextFileChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 /**
  * Multi state compilation unit change for composite refactorings.
@@ -60,5 +64,29 @@ public final class MultiStateCompilationUnitChange extends MultiStateTextFileCha
 	 */
 	public final ICompilationUnit getCompilationUnit() {
 		return fUnit;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getName() {
+		return Messages.format(RefactoringCoreMessages.MultiStateCompilationUnitChange_name_pattern, new String[] { fUnit.getElementName(), getPath(fUnit.getResource()) });
+	}
+
+	/**
+	 * Returns the path of the resource to display.
+	 * 
+	 * @param resource
+	 *            the resource
+	 * @return the path
+	 */
+	private String getPath(IResource resource) {
+		final StringBuffer buffer= new StringBuffer(resource.getProject().getName());
+		final String path= resource.getParent().getProjectRelativePath().toString();
+		if (path.length() > 0) {
+			buffer.append('/');
+			buffer.append(path);
+		}
+		return buffer.toString();
 	}
 }
