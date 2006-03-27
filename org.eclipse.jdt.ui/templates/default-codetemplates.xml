@@ -49,7 +49,8 @@
  * ${see_to_overridden}
  */</template>
 
-<template name="delegatecomment" id="org.eclipse.jdt.ui.text.codetemplates.delegatecomment" description="%CodeTemplates.delegatecomment" context="delegatecomment_context" enabled="true">/* %CodeTemplates.delegatecomment.nonjd
+<template name="delegatecomment" id="org.eclipse.jdt.ui.text.codetemplates.delegatecomment" description="%CodeTemplates.delegatecomment" context="delegatecomment_context" enabled="true">/**
+ * ${tags}
  * ${see_to_target}
  */</template>
 
