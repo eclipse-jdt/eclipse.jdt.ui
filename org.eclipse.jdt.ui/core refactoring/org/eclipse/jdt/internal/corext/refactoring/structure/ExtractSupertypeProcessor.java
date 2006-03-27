@@ -155,7 +155,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 		if (members != null) {
 			final IType declaring= getDeclaringType();
 			if (declaring != null)
-				fTypesToExtract= new IType[] { declaring };
+				fTypesToExtract= new IType[] { declaring};
 		}
 	}
 
@@ -252,7 +252,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_SUPERTYPE, project, Messages.format(RefactoringCoreMessages.ExtractSupertypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_DEFAULT), JavaElementLabels.getElementLabel(fCachedDeclaringType, JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, flags);
+					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_SUPERTYPE, project, Messages.format(RefactoringCoreMessages.ExtractSupertypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_DEFAULT), JavaElementLabels.getElementLabel(fCachedDeclaringType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
 					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fDestinationType));
 					arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplace).toString());
 					arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
@@ -744,7 +744,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 					}
 					collection.add(current);
 				}
-				final ITypeBinding[] extractBindings= { null };
+				final ITypeBinding[] extractBindings= { null};
 				final ASTParser extractParser= ASTParser.newParser(AST.JLS3);
 				extractParser.setWorkingCopyOwner(fOwner);
 				extractParser.setResolveBindings(true);
@@ -945,6 +945,11 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				final Map.Entry entry= (Map.Entry) iterator.next();
 				manager.manage((ICompilationUnit) entry.getKey(), (TextEditBasedChange) entry.getValue());
 			}
+			ICompilationUnit[] units= manager.getAllCompilationUnits();
+			for (int index= 0; index < units.length; index++) {
+				if (units[index].getPath().equals(extractedUnit.getPath()))
+					manager.remove(units[index]);
+			}
 		} finally {
 			fLayerChanges.clear();
 		}
@@ -966,7 +971,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				parser.setResolveBindings(true);
 				parser.setProject(project);
 				parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-				parser.createASTs(new ICompilationUnit[] { copy }, new String[0], new ASTRequestor() {
+				parser.createASTs(new ICompilationUnit[] { copy}, new String[0], new ASTRequestor() {
 
 					public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
 						try {

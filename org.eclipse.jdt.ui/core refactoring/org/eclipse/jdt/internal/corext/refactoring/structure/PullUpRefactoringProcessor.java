@@ -105,6 +105,7 @@ import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
@@ -1146,8 +1147,11 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				for (final Iterator iterator= fCompilationUnitRewrites.keySet().iterator(); iterator.hasNext();) {
 					unit= (ICompilationUnit) iterator.next();
 					rewrite= (CompilationUnitRewrite) fCompilationUnitRewrites.get(unit);
-					if (rewrite != null)
-						manager.manage(unit, rewrite.createChange(false, null));
+					if (rewrite != null) {
+						final CompilationUnitChange change= rewrite.createChange(false, null);
+						if (change != null)
+							manager.manage(unit, change);
+					}
 				}
 				TextEdit edit= null;
 				TextEditBasedChange change= null;
@@ -1726,8 +1730,11 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		for (final Iterator iterator= fCompilationUnitRewrites.keySet().iterator(); iterator.hasNext();) {
 			unit= (ICompilationUnit) iterator.next();
 			rewrite= (CompilationUnitRewrite) fCompilationUnitRewrites.get(unit);
-			if (rewrite != null)
-				manager.manage(unit, rewrite.createChange());
+			if (rewrite != null) {
+				final CompilationUnitChange change= rewrite.createChange();
+				if (change != null)
+					manager.manage(unit, change);
+			}
 		}
 	}
 
