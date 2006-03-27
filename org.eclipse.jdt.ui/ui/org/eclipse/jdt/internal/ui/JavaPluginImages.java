@@ -381,6 +381,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_CODE= createUnManaged(T_WIZBAN, "coderefact_wiz.png"); 	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_CU= createUnManaged(T_WIZBAN, "compunitrefact_wiz.png");	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_PULL_UP= createUnManaged(T_WIZBAN, "pullup_wiz.png");	//$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_FIX_DEPRECATION= createUnManaged(T_WIZBAN, "fixdepr_wiz.png");	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_JAR_PACKAGER= createUnManaged(T_WIZBAN, "jar_pack_wiz.png"); 		//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_EXTRACT_SUPERTYPE= createUnManaged(T_WIZBAN, "extractsupertype_wiz.png");	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_REPLACE_JAR= createUnManaged(T_WIZBAN, "replacejar_wiz.png"); 		//$NON-NLS-1$

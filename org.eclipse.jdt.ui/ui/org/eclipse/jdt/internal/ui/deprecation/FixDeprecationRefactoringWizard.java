@@ -119,7 +119,7 @@ public final class FixDeprecationRefactoringWizard extends BinaryRefactoringHist
 		fLength= length;
 		fHistoryProxy= new RefactoringHistoryProxy();
 		setInput(fHistoryProxy);
-		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR);
+		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_FIX_DEPRECATION);
 		final IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
 		final IDialogSettings section= settings.getSection(DIALOG_SETTINGS_KEY);
 		if (section == null)
