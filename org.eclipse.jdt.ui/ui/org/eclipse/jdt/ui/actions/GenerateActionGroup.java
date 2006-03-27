@@ -86,6 +86,8 @@ public class GenerateActionGroup extends ActionGroup {
 	 * Pop-up menu: id of the deprecate group of the source sub menu (value
 	 * <code>deprecateGroup</code>).
 	 * 
+	 * TODO: make API
+	 * 
 	 * @since 3.2
 	 */
 	private static final String GROUP_DEPRECATE= "deprecateGroup";  //$NON-NLS-1$
