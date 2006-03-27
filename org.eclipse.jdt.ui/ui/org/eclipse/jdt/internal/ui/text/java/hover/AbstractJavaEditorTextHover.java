@@ -10,6 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
+import java.io.IOException;
+import java.net.URL;
+
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Platform;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
@@ -41,6 +47,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
+import org.osgi.framework.Bundle;
+
 /**
  * Abstract class for providing hover information for Java elements.
  *
@@ -49,6 +57,11 @@ import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHover, ITextHoverExtension {
 
 
+	/**
+	 * The URL of the style sheet (css).
+	 * @since 3.2
+	 */
+	private URL fStyleSheetURL;
 	private IEditorPart fEditor;
 	private IBindingService fBindingService;
 	{
@@ -153,4 +166,25 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 		return Messages.format(JavaHoverMessages.JavaTextHover_makeStickyHint, keySequence == null ? "" : keySequence); //$NON-NLS-1$
 	}
 
+	/**
+	 * Returns the style sheet URL.
+	 *
+	 * @since 3.2
+	 */
+	protected URL getStyleSheetURL() {
+		if (fStyleSheetURL == null) {
+
+			Bundle bundle= Platform.getBundle(JavaPlugin.getPluginId());
+			fStyleSheetURL= bundle.getEntry("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
+			if (fStyleSheetURL != null) {
+				try {
+					fStyleSheetURL= FileLocator.toFileURL(fStyleSheetURL);
+				} catch (IOException ex) {
+					JavaPlugin.log(ex);
+				}
+			}
+		}
+		return fStyleSheetURL;
+	}
+	
 }

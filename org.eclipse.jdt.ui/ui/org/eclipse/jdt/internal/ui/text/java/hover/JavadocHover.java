@@ -10,13 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.net.URL;
-
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
@@ -35,12 +30,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavadocContentAccess;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.IInformationControlExtension4;
-
-import org.osgi.framework.Bundle;
 
 /**
  * Provides Javadoc as hover info for Java elements.
@@ -55,11 +47,6 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		| JavaElementLabels.USE_RESOLVED;
 	private final long LOCAL_VARIABLE_FLAGS= LABEL_FLAGS & ~JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.F_POST_QUALIFIED;
 
-
-	/**
-	 * The URL of the style sheet (css).
-	 * @since 3.1 */
-	private URL fStyleSheetURL;
 	
 	/**
 	 * The hover control creator.
@@ -215,24 +202,4 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		return buf.toString();
 	}
 
-	/**
-	 * Returns the style sheet URL.
-	 *
-	 * @since 3.1
-	 */
-	protected URL getStyleSheetURL() {
-		if (fStyleSheetURL == null) {
-
-			Bundle bundle= Platform.getBundle(JavaPlugin.getPluginId());
-			fStyleSheetURL= bundle.getEntry("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
-			if (fStyleSheetURL != null) {
-				try {
-					fStyleSheetURL= FileLocator.toFileURL(fStyleSheetURL);
-				} catch (IOException ex) {
-					JavaPlugin.log(ex);
-				}
-			}
-		}
-		return fStyleSheetURL;
-	}
 }

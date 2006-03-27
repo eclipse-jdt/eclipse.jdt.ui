@@ -61,8 +61,8 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	 */
 	private String formatMessage(String message) {
 		StringBuffer buffer= new StringBuffer();
-		HTMLPrinter.addPageProlog(buffer);
-		HTMLPrinter.addParagraph(buffer, HTMLPrinter.convertToHTMLContent(message));
+		HTMLPrinter.insertPageProlog(buffer, 0, getStyleSheetURL());
+		buffer.append(HTMLPrinter.convertToHTMLContent(message));
 		HTMLPrinter.addPageEpilog(buffer);
 		return buffer.toString();
 	}
