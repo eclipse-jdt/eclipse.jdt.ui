@@ -418,7 +418,6 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(source, fSurroundWithTryCatch);
 		added+= addAction(source, fExternalizeStrings);
 		added+= addAction(source, fFindNLSProblems);
-		added+= addAction(source, fDeprecationAction);
 		added+= addAction(source, fCleanUp);
 		return added;
 	}
