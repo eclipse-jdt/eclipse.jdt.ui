@@ -129,33 +129,39 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
     }
 
     /**
-     * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
-     */
-    public boolean hasChildren(Object element) {
-        if (element == TreeRoot.EMPTY_ROOT || element == TreeTermination.SEARCH_CANCELED) {
-            return false;
-        }
+	 * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
+	 */
+	public boolean hasChildren(Object element) {
+		if (element == TreeRoot.EMPTY_ROOT || element == TreeTermination.SEARCH_CANCELED) {
+			return false;
+		}
 
-        // Only methods can have subelements, so there's no need to fool the user into believing that there is more
-        if (element instanceof MethodWrapper) {
-            MethodWrapper methodWrapper= (MethodWrapper) element;
-            if (methodWrapper.getMember().getElementType() != IJavaElement.METHOD) {
-                return false;
-            }
-            if (shouldStopTraversion(methodWrapper)) {
-                return false;
-            }
-            return true;
-        } else if (element instanceof TreeRoot) {
-        	return true;
-        }
+		// Only methods can have subelements, so there's no need to fool the
+		// user into believing that there is more
+		if (element instanceof MethodWrapper) {
+			MethodWrapper methodWrapper= (MethodWrapper) element;
+			if (methodWrapper.getMember().getElementType() != IJavaElement.METHOD) {
+				return false;
+			}
+			if (shouldStopTraversion(methodWrapper)) {
+				return false;
+			}
+			return true;
+		} else if (element instanceof TreeRoot) {
+			return true;
+		} else if (element instanceof DeferredMethodWrapper) {
+			// Err on the safe side by returning true even though
+			// we don't know for sure that there are children.
+			return true;
+		}
 
-        return false; // the "Update ..." placeholder has no children
-    }
+		return false; // the "Update ..." placeholder has no children
+	}
 
     /**
-     * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-     */
+	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer,
+	 *      java.lang.Object, java.lang.Object)
+	 */
     public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
     	if (oldInput instanceof TreeRoot) {
     		Object root = ((TreeRoot) oldInput).getRoot();

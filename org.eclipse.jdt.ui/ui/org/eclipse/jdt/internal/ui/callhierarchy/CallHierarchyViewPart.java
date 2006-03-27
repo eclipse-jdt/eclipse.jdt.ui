@@ -887,27 +887,29 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     }
 
     /**
-     * Method updateView.
-     */
-    private void updateView() {
-        if ((fShownMethod != null)) {
-            showPage(PAGE_VIEWER);
-            
-            CallHierarchy.getDefault().setSearchScope(getSearchScope());
+	 * Method updateView.
+	 */
+	private void updateView() {
+		if ( (fShownMethod != null)) {
+			showPage(PAGE_VIEWER);
 
-            String elementName= JavaElementLabels.getElementLabel(fShownMethod, JavaElementLabels.ALL_DEFAULT);
-            String scopeDescription = fSearchScopeActions.getFullDescription();
-            String[] args = new String[] { elementName, scopeDescription};
+			CallHierarchy.getDefault().setSearchScope(getSearchScope());
+
+			String elementName= JavaElementLabels.getElementLabel(fShownMethod, JavaElementLabels.ALL_DEFAULT);
+			String scopeDescription= fSearchScopeActions.getFullDescription();
+			String[] args= new String[] { elementName, scopeDescription };
+			// set input to null so that setSorter does not cause a refresh on the old contents:
+			fCallHierarchyViewer.setInput(null);
 			if (fCurrentCallMode == CALL_MODE_CALLERS) {
-                setContentDescription(Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMethod, args)); 
-                fCallHierarchyViewer.setSorter(new ViewerSorter()); //bug 111423: sort caller hierarchy alphabetically
-                fCallHierarchyViewer.setMethodWrapper(getCallerRoot());
-            } else {
-                setContentDescription(Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMethod, args)); 
-                fCallHierarchyViewer.setSorter(null);
-                fCallHierarchyViewer.setMethodWrapper(getCalleeRoot());
-            }
-        }
+				setContentDescription(Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMethod, args)); 
+				fCallHierarchyViewer.setSorter(new ViewerSorter()); // bug 111423: sort caller hierarchy alphabetically
+    			fCallHierarchyViewer.setMethodWrapper(getCallerRoot());
+			} else {
+				setContentDescription(Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMethod, args));
+				fCallHierarchyViewer.setSorter(null);
+				fCallHierarchyViewer.setMethodWrapper(getCalleeRoot());
+			}
+		}
     }
 
     static CallHierarchyViewPart findAndShowCallersView(IWorkbenchPartSite site) {
