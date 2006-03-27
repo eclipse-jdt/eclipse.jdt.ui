@@ -407,6 +407,9 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
         int i=0;
         for (Iterator iter= fActions.iterator(); iter.hasNext();) {
 			Action action= (Action)iter.next();
+			if (action instanceof IUpdate)
+				((IUpdate) action).update();
+			
             if (i == 2)
                 source.add(new Separator(GROUP_BUILDPATH));
             else if (i == 8)
