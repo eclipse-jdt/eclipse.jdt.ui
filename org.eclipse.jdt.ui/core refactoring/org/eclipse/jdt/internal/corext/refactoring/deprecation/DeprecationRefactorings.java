@@ -185,13 +185,43 @@ public final class DeprecationRefactorings {
 	}
 
 	/**
+	 * Returns a refactoring history suitable to fix deprecated references to
+	 * the specified member.
+	 * 
+	 * @param binding
+	 *            the binding associated with the member
+	 * @return a refactoring history, or <code>null</code>
+	 */
+	public static RefactoringHistory getRefactoringHistory(final IBinding binding) {
+		RefactoringHistory history= null;
+		final String name= getRefactoringScriptName(binding);
+		if (name != null) {
+			final IPackageFragmentRoot root= getPackageFragmentRoot(binding);
+			if (root != null)
+				history= getRefactoringHistory(root, name);
+			if (history == null) {
+				IFile file= null;
+				final IJavaElement element= binding.getJavaElement();
+				if (element != null) {
+					final IJavaProject project= element.getJavaProject();
+					if (project != null)
+						file= project.getProject().getFolder(DeprecationRefactorings.SCRIPT_FOLDER).getFile(name);
+				}
+				if (file != null && file.exists())
+					history= getRefactoringHistory(file);
+			}
+		}
+		return history;
+	}
+
+	/**
 	 * Retrieves a refactoring history from the specified file.
 	 * 
 	 * @param file
 	 *            the file
 	 * @return the refactoring history, or <code>null</code>
 	 */
-	private static RefactoringHistory getRefactoringHistory(final IFile file) {
+	public static RefactoringHistory getRefactoringHistory(final IFile file) {
 		Assert.isNotNull(file);
 		InputStream stream= null;
 		try {
@@ -209,31 +239,6 @@ public final class DeprecationRefactorings {
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Returns a refactoring history suitable to fix deprecated references to
-	 * the specified member.
-	 * 
-	 * @param project
-	 *            the project which declares the member
-	 * @param binding
-	 *            the binding associated with the member
-	 * @return a refactoring history, or <code>null</code>
-	 */
-	public static RefactoringHistory getRefactoringHistory(final IJavaProject project, final IBinding binding) {
-		RefactoringHistory history= null;
-		IPackageFragmentRoot root= getPackageFragmentRoot(binding);
-		final String name= getRefactoringScriptName(binding);
-		if (name != null) {
-			final IFile file= project.getProject().getFolder(DeprecationRefactorings.SCRIPT_FOLDER).getFile(name);
-			if (file.exists()) {
-				history= getRefactoringHistory(file);
-			} else if (root != null) {
-				history= getRefactoringHistory(root, name);
-			}
-		}
-		return history;
 	}
 
 	/**

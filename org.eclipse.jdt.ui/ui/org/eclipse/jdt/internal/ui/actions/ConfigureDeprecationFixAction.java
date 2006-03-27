@@ -101,7 +101,7 @@ public class ConfigureDeprecationFixAction extends SelectionDispatchAction {
 	public ConfigureDeprecationFixAction(final CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
-		setEnabled(checkEnabledEditor());
+		setEnabled((fEditor != null && SelectionConverter.canOperateOn(fEditor)));
 	}
 
 	/**
@@ -137,14 +137,6 @@ public class ConfigureDeprecationFixAction extends SelectionDispatchAction {
 		return false;
 	}
 
-	private boolean checkEnabledEditor() {
-		return fEditor != null && SelectionConverter.canOperateOn(fEditor);
-	}
-
-	private String getDialogTitle() {
-		return ActionMessages.ConfigureDeprecationFixAction_dialog_title;
-	}
-
 	private IMember getSelectedMember(final IStructuredSelection selection) throws JavaModelException {
 		final Object[] elements= selection.toArray();
 		if (elements.length == 1) {
@@ -168,17 +160,17 @@ public class ConfigureDeprecationFixAction extends SelectionDispatchAction {
 		try {
 			final IMember member= getSelectedMember(selection);
 			if (member == null) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.ConfigureDeprecationFixAction_not_applicable);
+				MessageDialog.openInformation(getShell(), ActionMessages.ConfigureDeprecationFixAction_dialog_title, ActionMessages.ConfigureDeprecationFixAction_not_applicable);
 				notifyResult(false);
 				return;
 			}
-			if (!ElementValidator.check(member, getShell(), getDialogTitle(), false) || !ActionUtil.isProcessable(getShell(), member)) {
+			if (!ElementValidator.check(member, getShell(), ActionMessages.ConfigureDeprecationFixAction_dialog_title, false) || !ActionUtil.isProcessable(getShell(), member)) {
 				notifyResult(false);
 				return;
 			}
 			run(getShell(), member);
 		} catch (CoreException exception) {
-			ExceptionHandler.handle(exception, getShell(), getDialogTitle(), ActionMessages.ConfigureDeprecationFixAction_general_error);
+			ExceptionHandler.handle(exception, getShell(), ActionMessages.ConfigureDeprecationFixAction_dialog_title, ActionMessages.ConfigureDeprecationFixAction_general_error);
 		}
 	}
 
@@ -194,33 +186,33 @@ public class ConfigureDeprecationFixAction extends SelectionDispatchAction {
 			else if (element instanceof IField)
 				member= (IMember) element;
 			if (member != null) {
-				if (!ElementValidator.check(member, getShell(), getDialogTitle(), false) || !ActionUtil.isProcessable(getShell(), member)) {
+				if (!ElementValidator.check(member, getShell(), ActionMessages.ConfigureDeprecationFixAction_dialog_title, false) || !ActionUtil.isProcessable(getShell(), member)) {
 					notifyResult(false);
 					return;
 				}
 				if (member.isReadOnly()) {
-					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.ConfigureDeprecationFixAction_error_read_only);
+					MessageDialog.openInformation(getShell(), ActionMessages.ConfigureDeprecationFixAction_dialog_title, ActionMessages.ConfigureDeprecationFixAction_error_read_only);
 					notifyResult(false);
 					return;
 				}
 				if (!Flags.isDeprecated(member.getFlags())) {
-					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.ConfigureDeprecationFixAction_error_not_deprecated);
+					MessageDialog.openInformation(getShell(), ActionMessages.ConfigureDeprecationFixAction_dialog_title, ActionMessages.ConfigureDeprecationFixAction_error_not_deprecated);
 					notifyResult(false);
 					return;
 				}
 				if (member instanceof IMethod && ((IMethod) member).isMainMethod()) {
-					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.ConfigureDeprecationFixAction_error_main_method);
+					MessageDialog.openInformation(getShell(), ActionMessages.ConfigureDeprecationFixAction_dialog_title, ActionMessages.ConfigureDeprecationFixAction_error_main_method);
 					notifyResult(false);
 					return;
 				}
 				run(getShell(), member);
 			} else {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.ConfigureDeprecationFixAction_not_applicable);
+				MessageDialog.openInformation(getShell(), ActionMessages.ConfigureDeprecationFixAction_dialog_title, ActionMessages.ConfigureDeprecationFixAction_not_applicable);
 			}
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), getDialogTitle(), null);
+			ExceptionHandler.handle(e, getShell(), ActionMessages.ConfigureDeprecationFixAction_dialog_title, null);
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.ConfigureDeprecationFixAction_general_error);
+			ExceptionHandler.handle(e, getShell(), ActionMessages.ConfigureDeprecationFixAction_dialog_title, ActionMessages.ConfigureDeprecationFixAction_general_error);
 		}
 	}
 

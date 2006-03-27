@@ -28,7 +28,6 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -338,14 +337,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		final ICompilationUnit cu= context.getCompilationUnit();
 		if (cu == null || !cu.exists())
 			return false;
-		final IJavaProject project= cu.getJavaProject();
 		if (ASTNodes.isDeclaration(name)) {
 			if (resultingCollections == null)
 				return true;
 			String script= DeprecationRefactorings.createInlineDeprecationScript(binding);
 			if (script == null)
 				return false;
-			final Change change= new CreateDeprecationFixChange(DeprecationRefactorings.getRefactoringScriptFile(project, fileName).getFullPath(), script, CorrectionMessages.QuickAssistProcessor_create_fix_name);
+			final Change change= new CreateDeprecationFixChange(DeprecationRefactorings.getRefactoringScriptFile(cu.getJavaProject(), fileName).getFullPath(), script, CorrectionMessages.QuickAssistProcessor_create_fix_name);
 			final ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.QuickAssistProcessor_create_fix_name, change, 100, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
 
 				public final String getAdditionalProposalInfo() {
@@ -355,7 +353,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			resultingCollections.add(proposal);
 			return true;
 		} else {
-			final RefactoringHistory history= DeprecationRefactorings.getRefactoringHistory(project, binding);
+			final RefactoringHistory history= DeprecationRefactorings.getRefactoringHistory(binding);
 			if (history == null)
 				return false;
 			if (resultingCollections == null)

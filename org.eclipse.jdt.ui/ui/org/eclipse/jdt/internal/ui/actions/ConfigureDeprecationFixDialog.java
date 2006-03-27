@@ -61,8 +61,10 @@ import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
  */
 public final class ConfigureDeprecationFixDialog extends TrayDialog {
 
+	/** The inline fix constant */
 	private static final int INLINE_FIX= 1;
 
+	/** The no fix constant */
 	private static final int NO_FIX= 0;
 
 	/** The binding */
@@ -166,13 +168,19 @@ public final class ConfigureDeprecationFixDialog extends TrayDialog {
 	 * Initializes the current fix.
 	 */
 	private void initializeFix() {
-		final RefactoringHistory history= DeprecationRefactorings.getRefactoringHistory(fProject, fBinding);
-		if (history != null) {
-			final RefactoringDescriptorProxy[] proxies= history.getDescriptors();
-			if (proxies.length == 1) {
-				final RefactoringDescriptor descriptor= proxies[0].requestDescriptor(null);
-				if (descriptor != null && descriptor.getID().equals(InlineMethodRefactoring.ID_INLINE_METHOD))
-					fCurrentFix= INLINE_FIX;
+		final String name= DeprecationRefactorings.getRefactoringScriptName(fBinding);
+		if (name != null) {
+			final IFile file= DeprecationRefactorings.getRefactoringScriptFile(fProject, name);
+			if (file != null && file.exists()) {
+				final RefactoringHistory history= DeprecationRefactorings.getRefactoringHistory(file);
+				if (history != null) {
+					final RefactoringDescriptorProxy[] proxies= history.getDescriptors();
+					if (proxies.length == 1) {
+						final RefactoringDescriptor descriptor= proxies[0].requestDescriptor(null);
+						if (descriptor != null && descriptor.getID().equals(InlineMethodRefactoring.ID_INLINE_METHOD))
+							fCurrentFix= INLINE_FIX;
+					}
+				}
 			}
 		} else
 			fCurrentFix= NO_FIX;
