@@ -201,10 +201,6 @@ public class GenerateActionGroup extends ActionGroup {
 		fExternalizeStrings= new ExternalizeStringsAction(editor);
 		fExternalizeStrings.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTERNALIZE_STRINGS);
 		editor.setAction("ExternalizeStrings", fExternalizeStrings); //$NON-NLS-1$	
-		
-		fFindNLSProblems= new FindBrokenNLSKeysAction(editor);
-		fFindNLSProblems.setActionDefinitionId(FindBrokenNLSKeysAction.FIND_BROKEN_NLS_KEYS_ACTION_ID);
-		editor.setAction("FindBrokenNLSKeys", fFindNLSProblems);
 				
 		fQuickAccessAction= new RefactorQuickAccessAction(editor);
 		fKeyBindingService= editor.getEditorSite().getKeyBindingService();
@@ -417,7 +413,6 @@ public class GenerateActionGroup extends ActionGroup {
 		source.add(new Separator(GROUP_CODE));
 		added+= addAction(source, fSurroundWithTryCatch);
 		added+= addAction(source, fExternalizeStrings);
-		added+= addAction(source, fFindNLSProblems);
 		added+= addAction(source, fCleanUp);
 		return added;
 	}
