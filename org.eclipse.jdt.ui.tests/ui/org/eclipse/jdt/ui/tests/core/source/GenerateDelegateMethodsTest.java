@@ -32,8 +32,10 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
@@ -56,6 +58,20 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 	public static Test suite() {
 		return allTests();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.tests.core.source.SourceTestCase#setUp()
+	 */
+	protected void setUp() throws CoreException {
+		super.setUp();
+		
+		StringBuffer comment= new StringBuffer();
+		comment.append("/* (non-Javadoc)\n");
+		comment.append(" * ${see_to_target}\n");
+		comment.append(" */");
+		StubUtility.setCodeTemplate(CodeTemplateContextType.DELEGATECOMMENT_ID, comment.toString(), null);
+
 	}
 
 	public void runOperation(IType type, IField[] fields, IMethod[] methods, IJavaElement insertBefore, boolean createComments) throws CoreException {
