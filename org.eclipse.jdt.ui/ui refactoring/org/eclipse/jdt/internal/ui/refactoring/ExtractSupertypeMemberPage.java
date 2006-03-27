@@ -176,8 +176,8 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	protected void checkPageCompletionStatus(final boolean display) {
 		final RefactoringStatus status= getProcessor().checkExtractedCompilationUnit();
 		if (!status.hasFatalError()) {
-			if (areAllMembersMarkedAsWithNoAction())
-				status.addFatalError(getNoMembersMessage());
+//			if (areAllMembersMarkedAsWithNoAction())
+//				status.addFatalError(getNoMembersMessage());
 		}
 		setMessage(null);
 		if (display)
