@@ -19,25 +19,32 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
+import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.ISearchResult;
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
+import org.eclipse.search.ui.text.Match;
+
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.search.ui.ISearchQuery;
-import org.eclipse.search.ui.ISearchResult;
-import org.eclipse.search.ui.text.AbstractTextSearchResult;
-
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 
 public class NLSSearchQuery implements ISearchQuery {
+	
+	private static final StringMatcher fgGetClassNameMatcher= new StringMatcher("*.class.getName()*", false, false);  //$NON-NLS-1$
+
 	private NLSSearchResult fResult;
 	private IJavaElement[] fWrapperClass;
 	private IFile[] fPropertiesFile;
@@ -80,6 +87,21 @@ public class NLSSearchQuery implements ISearchQuery {
 				try {
 					SearchEngine engine= new SearchEngine();
 					engine.search(pattern, participants, fScope, requestor, new SubProgressMonitor(monitor, 4));
+					
+					IField[] fields= ((IType)wrapperClass).getFields();
+					for (int j= 0; j < fields.length; j++) {
+						IField field= fields[j];
+						
+						String source= field.getSource();
+						if (!fgGetClassNameMatcher.match(source)) {
+							if (source.indexOf("NLS.initializeMessages") == -1) { //$NON-NLS-1$
+								if (!requestor.hasPropertyKey(field.getElementName())) {
+									fResult.addMatch(new Match(field, field.getSourceRange().getOffset(), field.getSourceRange().getLength()));
+								}
+							}
+						}
+					}
+
 					requestor.reportUnusedPropertyNames(new SubProgressMonitor(monitor, 1));
 				} catch (CoreException e) {
 					JavaPlugin.log(e);

@@ -79,7 +79,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		
 		if (! (match.getElement() instanceof IJavaElement))
 			return;
-		IJavaElement javaElement= (IJavaElement) match.getElement();
+		IJavaElement javaElement= (IJavaElement) match.getElement();	
 		
 		// ignore matches in import declarations:
 		if (javaElement.getElementType() == IJavaElement.IMPORT_DECLARATION)
@@ -176,6 +176,10 @@ class NLSSearchResultRequestor extends SearchRequestor {
 			return true;
 		}
 		return false;
+	}
+	
+	public boolean hasPropertyKey(String key) {
+		return fProperties.containsKey(key);
 	}
 	
 	/**
