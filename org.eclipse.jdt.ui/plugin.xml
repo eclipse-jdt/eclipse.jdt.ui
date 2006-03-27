@@ -1939,26 +1939,6 @@
       </consoleLineTracker>
    </extension>
    
-
-<!-- NLS Search Page                                                             -->
-<!-- =========================================================================== -->
-<!-- NLS tool 																	 -->
-<!-- =========================================================================== -->
-   <extension
-         point="org.eclipse.search.searchPages">
-      <page
-            id="org.eclipse.jdt.ui.refactoring.NLSSearchPage"
-            class="org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchPage"
-            canSearchEnclosingProjects="true"
-            enabled="false"
-            extensions="java:89, properties:90"
-            sizeHint="460,160"
-            icon="$nl$/icons/full/obj16/nls_search_obj.gif"
-            showScopeSection="true"
-            label="%NLSsearchPageLabel"
-            tabPosition="2000000000">
-      </page>
-   </extension>
 <!-- =========================================================================== -->
 <!-- Java Browsing 																 -->
 <!-- =========================================================================== -->
