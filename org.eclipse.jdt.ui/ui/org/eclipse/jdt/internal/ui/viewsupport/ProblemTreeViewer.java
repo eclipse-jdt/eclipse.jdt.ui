@@ -107,16 +107,13 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
 	 */
 	protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {
-		Object[] changed= null;
 		if (event instanceof ProblemsLabelChangedEvent) {
 			ProblemsLabelChangedEvent e= (ProblemsLabelChangedEvent) event;
 			if (!e.isMarkerChange() && canIgnoreChangesFromAnnotionModel()) {
 				return;
 			}
-			changed= addAditionalProblemParents(event.getElements());
-		} else {
-			changed= event.getElements();
 		}
+		Object[] changed= addAditionalProblemParents(event.getElements());
 		
 		if (changed != null && !fResourceToItemsMapper.isEmpty()) {
 			ArrayList others= new ArrayList();
