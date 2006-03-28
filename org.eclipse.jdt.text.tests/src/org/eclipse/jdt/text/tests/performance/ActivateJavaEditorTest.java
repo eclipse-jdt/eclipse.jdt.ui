@@ -11,6 +11,10 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import org.eclipse.test.performance.PerformanceMeter;
+
+import org.eclipse.ui.texteditor.AbstractTextEditor;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -34,6 +38,14 @@ public class ActivateJavaEditorTest extends ActivateEditorTest {
 	public void testActivateEditor() {
 		setShortName(SHORT_NAME);
 		super.testActivateEditor();
-		explainDegradation("Java editor activation was not working correctly in 3.1 (see bug 119326 and bug 120572). The fixes result this expected performance degradation.");
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.text.tests.performance.ActivateEditorTest#measureActivateEditor(org.eclipse.ui.texteditor.AbstractTextEditor[], int, org.eclipse.test.performance.PerformanceMeter)
+	 * @since 3.2
+	 */
+	protected void measureActivateEditor(AbstractTextEditor[] editors, int runs, PerformanceMeter performanceMeter) {
+		explainDegradation("Java editor activation was not working correctly in 3.1 (see bug 119326 and bug 120572). The fixes result this expected performance degradation.", performanceMeter);
+		super.measureActivateEditor(editors, runs, performanceMeter);
 	}
 }
