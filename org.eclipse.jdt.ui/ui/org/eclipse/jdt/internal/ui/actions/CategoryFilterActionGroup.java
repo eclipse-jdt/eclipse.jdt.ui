@@ -166,14 +166,14 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			}
 		}
 
-		public void selectionChanged(ListDialogField field) {
+		public void doubleClicked(ListDialogField field) {
 			List selectedElements= field.getSelectedElements();
 			if (selectedElements.size() == 1) {
 				Object selected= selectedElements.get(0);
 				fCategoryList.setChecked(selected, !fCategoryList.isChecked(selected));
 			}
 		}
-		public void doubleClicked(ListDialogField field) {}
+		public void selectionChanged(ListDialogField field) {}
 	}
 	
 	private class CategoryFilterMenuAction extends Action {
