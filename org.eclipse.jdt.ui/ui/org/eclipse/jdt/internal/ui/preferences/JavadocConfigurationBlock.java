@@ -547,16 +547,6 @@ public class JavadocConfigurationBlock {
 			if (jdocLocation.length() == 0) {
 				return status;
 			}
-			if (jdocLocation.startsWith("file:/")) { //$NON-NLS-1$
-				StringBuffer buf= new StringBuffer(jdocLocation);
-				for (int i= 6; i < 9; i++) {
-					if (buf.charAt(i) != '/')
-						buf.insert(i, '/');
-				}
-				jdocLocation= buf.toString();
-			} else {
-				jdocLocation= "file:/" + jdocLocation; //$NON-NLS-1$
-			}
 			URL url= new URL(jdocLocation);
 			if ("file".equals(url.getProtocol())) { //$NON-NLS-1$
 				if (url.getFile() == null) {
