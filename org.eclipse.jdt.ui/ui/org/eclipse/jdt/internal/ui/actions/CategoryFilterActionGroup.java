@@ -198,9 +198,11 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		
 		private final String fCategory;
 
-		public CategoryFilterAction(String category) {
+		public CategoryFilterAction(String category, int count) {
 			fCategory= category;
-			setText(fCategory);
+			StringBuffer buf = new StringBuffer();
+			buf.append('&').append(count).append(' ').append(fCategory);
+			setText(buf.toString());
 			setChecked(!fFilteredCategories.contains(fCategory));
 			setId(FILTER_CATEGORY_ACTION_ID);
 		}
@@ -338,7 +340,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		int count= 0;
 		for (Iterator iter= sortedCategories.iterator(); iter.hasNext() && count < MAX_NUMBER_OF_CATEGORIES_IN_MENU;) {
 			String category= (String)iter.next();
-			manager.appendToGroup(CATEGORY_MENU_GROUP_NAME, new CategoryFilterAction(category));
+			manager.appendToGroup(CATEGORY_MENU_GROUP_NAME, new CategoryFilterAction(category, count + 1));
 			count++;
 		}
 	}
