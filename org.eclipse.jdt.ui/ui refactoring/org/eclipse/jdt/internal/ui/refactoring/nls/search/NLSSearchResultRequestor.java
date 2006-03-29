@@ -27,6 +27,7 @@ import org.eclipse.jface.text.Position;
 
 import org.eclipse.search.ui.text.Match;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
@@ -192,55 +193,54 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	 * @return a string denoting the key, null if no key can be found
 	 */
 	private String findKey(Position keyPositionResult, int typeNameStart, IJavaElement enclosingElement) throws CoreException {
-		if (enclosingElement instanceof ISourceReference) {
-			int sourceRangeOffset= ((ISourceReference) enclosingElement).getSourceRange().getOffset();
-			String source= ((ISourceReference) enclosingElement).getSource();
-			if (source == null)
-				return null; //e.g. a class file without source
-			source= source.substring(typeNameStart - sourceRangeOffset);
-			
-			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
-			scanner.setSource(source.toCharArray());
-			
-			try {
-				String src= null;
-				int keyStart= -1;
-				int keyEnd= -1;
-				int tok= scanner.getNextToken();
-				// skip type and method names:
-				while (tok != ITerminalSymbols.TokenNameEOF && 
-						(tok == ITerminalSymbols.TokenNameIdentifier || tok == ITerminalSymbols.TokenNameDOT)) {
-					if (tok == ITerminalSymbols.TokenNameIdentifier) {
-						src= new String(scanner.getCurrentTokenSource());
-						keyStart= scanner.getCurrentTokenStartPosition();
-						keyEnd= scanner.getCurrentTokenEndPosition();
-					} else {
-						src= null;
-					}
-					tok= scanner.getNextToken();
-				}
-				if (tok == ITerminalSymbols.TokenNameLPAREN) {
-					// Old school
-					tok= scanner.getNextToken();
-					// next must be key string:
-					if (tok == ITerminalSymbols.TokenNameEOF || tok != ITerminalSymbols.TokenNameStringLiteral)
-						return null;
-					// found it:
-					keyStart= scanner.getCurrentTokenStartPosition() + 1;
+		ICompilationUnit unit= (ICompilationUnit)enclosingElement.getAncestor(IJavaElement.COMPILATION_UNIT);
+		if (unit == null)
+			return null;
+
+		String source= unit.getSource();
+		if (source == null)
+			return null;
+		
+		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+		scanner.setSource(source.toCharArray());
+		scanner.resetTo(typeNameStart, source.length());
+
+		try {
+			String src= null;
+			int keyStart= -1;
+			int keyEnd= -1;
+			int tok= scanner.getNextToken();
+			// skip type and method names:
+			while (tok == ITerminalSymbols.TokenNameIdentifier || tok == ITerminalSymbols.TokenNameDOT) {
+				if (tok == ITerminalSymbols.TokenNameIdentifier) {
+					src= new String(scanner.getCurrentTokenSource());
+					keyStart= scanner.getCurrentTokenStartPosition();
 					keyEnd= scanner.getCurrentTokenEndPosition();
-					keyPositionResult.setOffset(typeNameStart + keyStart);
-					keyPositionResult.setLength(keyEnd - keyStart);
-					return source.substring(keyStart, keyEnd);
 				} else {
-					keyPositionResult.setOffset(typeNameStart + keyStart);
-					keyPositionResult.setLength(keyEnd - keyStart + 1);
-					return src;
+					src= null;
 				}
-			} catch (InvalidInputException e) {
-				return null;
+				tok= scanner.getNextToken();
 			}
+			if (tok == ITerminalSymbols.TokenNameLPAREN) {
+				// Old school
+				tok= scanner.getNextToken();
+				// next must be key string:
+				if (tok != ITerminalSymbols.TokenNameStringLiteral)
+					return null;
+				// found it:
+				keyStart= scanner.getCurrentTokenStartPosition() + 1;
+				keyEnd= scanner.getCurrentTokenEndPosition();
+				keyPositionResult.setOffset(keyStart);
+				keyPositionResult.setLength(keyEnd - keyStart);
+				return source.substring(keyStart, keyEnd);
+			} else {
+				keyPositionResult.setOffset(keyStart);
+				keyPositionResult.setLength(keyEnd - keyStart + 1);
+				return src;
+			}
+		} catch (InvalidInputException e) {
+			return null;
 		}
-		return null;
 	}
 	
 	/**
