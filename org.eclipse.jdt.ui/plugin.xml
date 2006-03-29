@@ -2985,6 +2985,23 @@
                id="org.eclipse.jdt.internal.ui.javaeditor.JavaSelectRulerAction">
          </action>
       </editorContribution>
+      <editorContribution
+            targetID="org.eclipse.jdt.ui.PropertiesFileEditor"
+            id="org.eclipse.ui.texteditor.ruler.actions">
+         <action
+               label="%BookmarkRulerAction.label"
+               helpContextId="org.eclipse.ui.bookmark_action_context"
+               class="org.eclipse.ui.texteditor.BookmarkRulerAction"
+               actionID="RulerDoubleClick"
+               id="org.eclipse.jdt.internal.ui.javaeditor.BookmarkRulerAction">
+         </action>
+         <action
+               label="%JavaSelectRulerAction.label"
+               class="org.eclipse.jdt.internal.ui.javaeditor.JavaSelectRulerAction"
+               actionID="RulerClick"
+               id="org.eclipse.jdt.internal.ui.javaeditor.JavaSelectRulerAction">
+         </action>
+      </editorContribution>
    </extension>
    <extension
          point="org.eclipse.ui.popupMenus">
