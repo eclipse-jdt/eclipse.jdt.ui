@@ -186,7 +186,10 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					setStatusLineErrorMessage(msg);
 					return;
 				case QUICK_ASSIST:
-					// XXX: We can get rid of this once the SourceViewer has a way to update the status line
+					/*
+					 * XXX: We can get rid of this once the SourceViewer has a way to update the status line
+					 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=133787
+					 */
 					msg= fQuickAssistAssistant.showPossibleQuickAssists();
 					setStatusLineErrorMessage(msg);
 					return;
