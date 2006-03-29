@@ -309,7 +309,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		private Map fElementToNewName;
 
 		public SimilarLabelProvider() {
-			super(JavaElementLabelProvider.SHOW_DEFAULT);
+			super(JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_SMALL_ICONS);
 		}
 
 		public void initialize(Map elementToNewName) {

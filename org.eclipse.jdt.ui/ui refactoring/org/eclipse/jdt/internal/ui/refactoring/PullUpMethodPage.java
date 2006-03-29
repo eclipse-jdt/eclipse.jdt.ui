@@ -385,7 +385,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 		final Tree tree= new Tree(composite, SWT.CHECK | SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
 		fTreeViewer= new ContainerCheckedTreeViewer(tree);
-		fTreeViewer.setLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
+		fTreeViewer.setLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_SMALL_ICONS));
 		fTreeViewer.setUseHashlookup(true);
 		fTreeViewer.setSorter(new JavaElementSorter());
 		fTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
