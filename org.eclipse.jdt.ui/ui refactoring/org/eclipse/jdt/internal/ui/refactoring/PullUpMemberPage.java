@@ -299,7 +299,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		}
 	}
 
-	protected IType[] fCandidateTypes;
+	protected IType[] fCandidateTypes= {};
 
 	private Button fCreateStubsButton;
 
@@ -644,13 +644,14 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 		fSuperTypesCombo= new Combo(parent, SWT.READ_ONLY);
 		fCandidateTypes= getPullUpRefactoring().getPullUpProcessor().getCandidateTypes(new RefactoringStatus(), pm);
-		Assert.isTrue(fCandidateTypes.length > 0);
-		for (int i= 0; i < fCandidateTypes.length; i++) {
-			final String comboLabel= JavaModelUtil.getFullyQualifiedName(fCandidateTypes[i]);
-			fSuperTypesCombo.add(comboLabel);
+		if (fCandidateTypes.length > 0) {
+			for (int i= 0; i < fCandidateTypes.length; i++) {
+				final String comboLabel= JavaModelUtil.getFullyQualifiedName(fCandidateTypes[i]);
+				fSuperTypesCombo.add(comboLabel);
+			}
+			fSuperTypesCombo.select(fCandidateTypes.length - 1);
+			fSuperTypesCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		}
-		fSuperTypesCombo.select(fCandidateTypes.length - 1);
-		fSuperTypesCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
 
 	protected void createSuperTypeControl(final Composite parent) {
@@ -743,7 +744,10 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	}
 
 	public IType getDestinationType() {
-		return fCandidateTypes[fSuperTypesCombo.getSelectionIndex()];
+		final int index= fSuperTypesCombo.getSelectionIndex();
+		if (index > 0)
+			return fCandidateTypes[index];
+		return null;
 	}
 
 	private int getInitialSelectionIndexForEditDialog(final Map stringMapping, final String[] keys) {

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import com.ibm.icu.text.Collator;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -18,12 +20,14 @@ import java.util.LinkedList;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -41,8 +45,11 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
@@ -77,7 +84,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 
 	/** Dialog to select supertypes */
-	private class SupertypeSelectionDialog extends SelectionDialog {
+	private static class SupertypeSelectionDialog extends SelectionDialog {
 
 		/** The table viewer */
 		private TableViewer fViewer;
@@ -109,10 +116,10 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 			setMessage(RefactoringMessages.ExtractSupertypeMemberPage_choose_type_message);
 			final Composite control= (Composite) super.createDialogArea(composite);
 			createMessageArea(control);
-			fViewer= new TableViewer(control, SWT.VIRTUAL | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+			fViewer= new TableViewer(control, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 			fViewer.setLabelProvider(createLabelProvider());
 			fViewer.setContentProvider(new ArrayContentProvider());
-			fViewer.setSorter(new JavaElementSorter());
+			fViewer.setSorter(new SupertypeSelectionViewerSorter());
 			fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
 				public void selectionChanged(final SelectionChangedEvent event) {
@@ -145,6 +152,58 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		}
 	}
 
+	/** The label provider */
+	private static class SupertypeSelectionLabelProvider extends AppearanceAwareLabelProvider implements ITableLabelProvider {
+
+		/**
+		 * Creates a new supertype selection label provider.
+		 * 
+		 * @param textFlags
+		 *            the text flags
+		 * @param imageFlags
+		 *            the image flags
+		 */
+		public SupertypeSelectionLabelProvider(final long textFlags, final int imageFlags) {
+			super(textFlags, imageFlags);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Image getColumnImage(final Object element, final int index) {
+			return getImage(element);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public String getColumnText(final Object element, final int index) {
+			return getText(element);
+		}
+	}
+
+	/** The viewer sorter */
+	private static class SupertypeSelectionViewerSorter extends ViewerSorter {
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public int compare(final Viewer viewer, final Object first, final Object second) {
+			final IType predecessor= (IType) first;
+			final IType successor= (IType) second;
+			return Collator.getInstance().compare(predecessor.getElementName(), successor.getElementName());
+		}
+	}
+
+	/**
+	 * Creates a label provider for a type list.
+	 * 
+	 * @return a label provider
+	 */
+	private static ILabelProvider createLabelProvider() {
+		return new SupertypeSelectionLabelProvider(JavaElementLabels.T_TYPE_PARAMETERS | JavaElementLabels.T_POST_QUALIFIED, JavaElementImageProvider.OVERLAY_ICONS);
+	}
+
 	/** The supertype name field */
 	private Text fNameField;
 
@@ -175,16 +234,42 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	 */
 	protected void checkPageCompletionStatus(final boolean display) {
 		final RefactoringStatus status= getProcessor().checkExtractedCompilationUnit();
-		if (!status.hasFatalError()) {
-//			if (areAllMembersMarkedAsWithNoAction())
-//				status.addFatalError(getNoMembersMessage());
-		}
 		setMessage(null);
 		if (display)
 			setPageComplete(status);
 		else
 			setPageComplete(!status.hasFatalError());
 		fSuccessorPage.fireSettingsChanged();
+	}
+
+	/**
+	 * Computes the candidate types.
+	 * 
+	 * @throws InterruptedException
+	 *             if the computation has been interrupted
+	 */
+	protected void computeCandidateTypes() throws InterruptedException {
+		if (fCandidateTypes != null && fCandidateTypes.length > 0)
+			return;
+		try {
+			getWizard().getContainer().run(true, true, new IRunnableWithProgress() {
+
+				public void run(final IProgressMonitor monitor) throws InvocationTargetException {
+					try {
+						fCandidateTypes= getProcessor().getCandidateTypes(new RefactoringStatus(), monitor);
+					} finally {
+						monitor.done();
+					}
+				}
+			});
+		} catch (InvocationTargetException exception) {
+			ExceptionHandler.handle(exception, getShell(), RefactoringMessages.ExtractSupertypeMemberPage_extract_supertype, RefactoringMessages.PullUpInputPage_exception);
+		} catch (InterruptedException exception) {
+			fCandidateTypes= new IType[0];
+			throw new InterruptedException();
+		} catch (OperationCanceledException exception) {
+			fCandidateTypes= new IType[0];
+		}
 	}
 
 	/**
@@ -203,12 +288,16 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 
 		final Button addButton= new Button(buttons, SWT.PUSH);
 		addButton.setText(RefactoringMessages.ExtractSupertypeMemberPage_add_button_label);
-		addButton.setEnabled(isAddTypeEnabled());
 		addButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(addButton);
 		addButton.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(final SelectionEvent event) {
+				try {
+					computeCandidateTypes();
+				} catch (InterruptedException exception) {
+					return;
+				}
 				final LinkedList list= new LinkedList(Arrays.asList(fCandidateTypes));
 				for (final Iterator outer= list.iterator(); outer.hasNext();) {
 					final IType first= (IType) outer.next();
@@ -218,18 +307,17 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 							outer.remove();
 					}
 				}
-				if (!list.isEmpty()) {
-					final SupertypeSelectionDialog dialog= new SupertypeSelectionDialog(getShell());
-					dialog.create();
-					dialog.setInput(list.toArray());
-					final int result= dialog.open();
-					if (result == Window.OK) {
-						final Object[] objects= dialog.getResult();
+				final SupertypeSelectionDialog dialog= new SupertypeSelectionDialog(getShell());
+				dialog.create();
+				dialog.setInput(list.toArray());
+				final int result= dialog.open();
+				if (result == Window.OK) {
+					final Object[] objects= dialog.getResult();
+					if (objects != null && objects.length > 0) {
 						for (int index= 0; index < objects.length; index++) {
 							fTypesToExtract.add(objects[index]);
 						}
 						fTableViewer.setInput(fTypesToExtract.toArray());
-						addButton.setEnabled(isAddTypeEnabled());
 						handleTypesChanged();
 					}
 				}
@@ -253,7 +341,6 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 							fTypesToExtract.remove(element);
 					}
 					fTableViewer.setInput(fTypesToExtract.toArray());
-					addButton.setEnabled(isAddTypeEnabled());
 					handleTypesChanged();
 				}
 			}
@@ -303,36 +390,13 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	}
 
 	/**
-	 * Creates a label provider for a type list.
-	 * 
-	 * @return a label provider
-	 */
-	protected ILabelProvider createLabelProvider() {
-		return new AppearanceAwareLabelProvider(JavaElementLabels.T_TYPE_PARAMETERS | JavaElementLabels.T_POST_QUALIFIED, JavaElementImageProvider.OVERLAY_ICONS);
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	protected void createSuperTypeControl(final Composite parent) {
 		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, new IRunnableWithProgress() {
-
-				public void run(final IProgressMonitor monitor) throws InvocationTargetException {
-					try {
-						fCandidateTypes= getProcessor().getCandidateTypes(new RefactoringStatus(), monitor);
-					} finally {
-						monitor.done();
-					}
-				}
-			});
 			createSuperTypeList(parent);
-		} catch (InvocationTargetException exception) {
-			ExceptionHandler.handle(exception, getShell(), RefactoringMessages.ExtractSupertypeMemberPage_extract_supertype, RefactoringMessages.PullUpInputPage_exception);
 		} catch (JavaModelException exception) {
 			ExceptionHandler.handle(exception, getShell(), RefactoringMessages.ExtractSupertypeMemberPage_extract_supertype, RefactoringMessages.PullUpInputPage_exception);
-		} catch (InterruptedException exception) {
-			Assert.isTrue(false);
 		}
 	}
 
@@ -369,7 +433,6 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 
 		final Label label= new Label(parent, SWT.NONE);
 		label.setText(RefactoringMessages.ExtractSupertypeMemberPage_types_list_caption);
-		label.setEnabled(fCandidateTypes.length > 0);
 		GridData data= new GridData();
 		data.horizontalSpan= 2;
 		label.setLayoutData(data);
@@ -393,7 +456,6 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		fTableViewer.setSorter(new JavaElementSorter());
 		fTypesToExtract.add(getDeclaringType());
 		fTableViewer.setInput(fTypesToExtract.toArray());
-		fTableViewer.getControl().setEnabled(fCandidateTypes.length > 0);
 
 		createButtonComposite(composite);
 	}
@@ -496,16 +558,6 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	 */
 	protected void handleTypesChanged() {
 		getProcessor().setTypesToExtract((IType[]) fTypesToExtract.toArray(new IType[fTypesToExtract.size()]));
-	}
-
-	/**
-	 * Is the add type button enabled?
-	 * 
-	 * @return <code>true</code> if it is enabled, <code>false</code>
-	 *         otherwise
-	 */
-	protected boolean isAddTypeEnabled() {
-		return fCandidateTypes.length > 0 && fTypesToExtract.size() < fCandidateTypes.length;
 	}
 
 	/**
