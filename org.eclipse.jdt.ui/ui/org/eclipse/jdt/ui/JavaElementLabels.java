@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -331,6 +332,12 @@ public class JavaElementLabels {
 	 */
 	public final static String DECL_STRING= JavaUIMessages.JavaElementLabels_declseparator_string; 
 	/**
+	 * User-readable string for concatenating categories (e.g. " ").
+	 * XXX: to be made API post 3.2
+	 * @since 3.2
+	 */
+	private final static String CATEGORY_SEPARATOR_STRING= JavaUIMessages.JavaElementLabels_category_separator_string; 
+	/**
 	 * User-readable string for ellipsis ("...").
 	 */
 	public final static String ELLIPSIS_STRING= "..."; //$NON-NLS-1$
@@ -614,12 +621,8 @@ public class JavaElementLabels {
 			}			
 
 			// category
-			if (getFlag(flags, M_CATEGORY) && method.exists()) {
-				String[] categories= method.getCategories();
-				if (categories.length > 0) {
-					buf.append(CONCAT_STRING);
-					buf.append(Messages.format(JavaUIMessages.JavaElementLabels_category , categories[0]));				}
-			}
+			if (getFlag(flags, M_CATEGORY) && method.exists()) 
+				getCategoryLabel(method, buf);
 			
 			// post qualification
 			if (getFlag(flags, M_POST_QUALIFIED)) {
@@ -632,6 +635,20 @@ public class JavaElementLabels {
 		}
 	}
 
+	private static void getCategoryLabel(IMember member, StringBuffer buf) throws JavaModelException {
+		String[] categories= member.getCategories();
+		if (categories.length > 0) {
+			StringBuffer categoriesBuf= new StringBuffer(30);
+			for (int i= 0; i < categories.length; i++) {
+				if (i > 0)
+					categoriesBuf.append(CATEGORY_SEPARATOR_STRING);
+				categoriesBuf.append(categories[i]);
+			}
+			buf.append(CONCAT_STRING);
+			buf.append(Messages.format(JavaUIMessages.JavaElementLabels_category , categoriesBuf.toString()));
+		}
+	}
+	
 	private static void getTypeParametersLabel(ITypeParameter[] typeParameters, long flags, StringBuffer buf) {
 		if (typeParameters.length > 0) {
 			buf.append('<');
@@ -680,13 +697,8 @@ public class JavaElementLabels {
 			}
 
 			// category
-			if (getFlag(flags, F_CATEGORY) && field.exists()) {
-				String[] categories= field.getCategories();
-				if (categories.length > 0) {
-					buf.append(CONCAT_STRING);
-					buf.append(Messages.format(JavaUIMessages.JavaElementLabels_category , categories[0]));
-				}
-			}
+			if (getFlag(flags, F_CATEGORY) && field.exists())
+				getCategoryLabel(field, buf);
 
 			// post qualification
 			if (getFlag(flags, F_POST_QUALIFIED)) {
@@ -893,10 +905,7 @@ public class JavaElementLabels {
 		// category
 		if (getFlag(flags, T_CATEGORY) && type.exists()) {
 			try {
-				String[] categories= type.getCategories();
-				if (categories.length > 0) {
-					buf.append(CONCAT_STRING);
-					buf.append(Messages.format(JavaUIMessages.JavaElementLabels_category , categories[0]));				}
+				getCategoryLabel(type, buf);
 			} catch (JavaModelException e) {
 				// ignore
 			}

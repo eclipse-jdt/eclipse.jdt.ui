@@ -101,6 +101,7 @@ public final class JavaUIMessages extends NLS {
 	public static String JavaElementLabels_concat_string;
 	public static String JavaElementLabels_comma_string;
 	public static String JavaElementLabels_declseparator_string;
+	public static String JavaElementLabels_category_separator_string;
 	
 	public static String StatusBarUpdater_num_elements_selected;
 	
