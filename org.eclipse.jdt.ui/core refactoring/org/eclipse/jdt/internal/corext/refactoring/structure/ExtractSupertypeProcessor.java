@@ -112,7 +112,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	private static final String ATTRIBUTE_TYPES= "types"; //$NON-NLS-1$
 
 	/** The id of the refactoring */
-	private static final String ID_EXTRACT_SUPERTYPE= "org.eclipse.jdt.ui.extract.supertype"; //$NON-NLS-1$
+	private static final String ID_EXTRACT_SUPERTYPE= "org.eclipse.jdt.ui.extract.superclass"; //$NON-NLS-1$
 
 	/** The extract supertype group category set */
 	private static final GroupCategorySet SET_EXTRACT_SUPERTYPE= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.extractSupertype", //$NON-NLS-1$

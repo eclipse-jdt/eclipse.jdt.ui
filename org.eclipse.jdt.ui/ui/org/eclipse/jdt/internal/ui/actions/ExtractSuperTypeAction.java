@@ -57,19 +57,19 @@ public class ExtractSuperTypeAction extends SelectionDispatchAction {
 
 	/**
 	 * Action definition ID of the refactor -> extract supertype action (value
-	 * <code>"org.eclipse.jdt.ui.edit.text.java.extract.supertype"</code>).
+	 * <code>"org.eclipse.jdt.ui.edit.text.java.extract.superclass"</code>).
 	 * 
 	 * @since 3.2
 	 */
-	public static final String EXTRACT_SUPERTYPE= "org.eclipse.jdt.ui.edit.text.java.extract.supertype"; //$NON-NLS-1$
+	public static final String EXTRACT_SUPERTYPE= "org.eclipse.jdt.ui.edit.text.java.extract.superclass"; //$NON-NLS-1$
 
 	/**
 	 * Refactor menu: name of standard Extract Supertype global action (value
-	 * <code>"org.eclipse.jdt.ui.actions.ExtractSupertype"</code>).
+	 * <code>"org.eclipse.jdt.ui.actions.ExtractSuperclass"</code>).
 	 * 
 	 * @since 3.2
 	 */
-	public static final String EXTRACT_SUPERTYPES= "org.eclipse.jdt.ui.actions.ExtractSupertype"; //$NON-NLS-1$
+	public static final String EXTRACT_SUPERTYPES= "org.eclipse.jdt.ui.actions.ExtractSuperclass"; //$NON-NLS-1$
 
 	private static IMember[] getSelectedMembers(final IStructuredSelection selection) {
 		if (selection.isEmpty())

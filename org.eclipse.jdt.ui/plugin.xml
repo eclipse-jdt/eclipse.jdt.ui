@@ -2265,8 +2265,8 @@
                id="org.eclipse.jdt.ui.actions.ExtractInterface">
          </action>
          <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.extract.supertype"
-               id="org.eclipse.jdt.ui.actions.ExtractSupertype"
+               definitionId="org.eclipse.jdt.ui.edit.text.java.extract.superclass"
+               id="org.eclipse.jdt.ui.actions.ExtractSuperclass"
                label="%Refactoring.extractSupertypeAction.label"
                menubarPath="org.eclipse.jdt.ui.refactoring.menu/typeGroup"
                retarget="true"/>
@@ -3483,7 +3483,7 @@
             name="%ActionDefinition.extractSupertype.name"
             description="%ActionDefinition.extractSupertype.description"
             categoryId="org.eclipse.jdt.ui.category.refactoring"
-            id="org.eclipse.jdt.ui.edit.text.java.extract.supertype">
+            id="org.eclipse.jdt.ui.edit.text.java.extract.superclass">
       </command>
       <command
             name="%ActionDefinition.changeType.name"
@@ -4871,7 +4871,7 @@
             id="org.eclipse.jdt.ui.change.type"/>
       <contribution
             class="org.eclipse.jdt.internal.corext.refactoring.scripting.ExtractSupertypeRefactoringContribution"
-            id="org.eclipse.jdt.ui.extract.supertype"/>
+            id="org.eclipse.jdt.ui.extract.superclass"/>
    </extension>
 
 <!-- End Refactoring -->
