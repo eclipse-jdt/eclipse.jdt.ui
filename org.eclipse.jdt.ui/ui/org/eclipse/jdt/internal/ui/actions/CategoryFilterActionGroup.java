@@ -11,9 +11,9 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import com.ibm.icu.text.Collator;
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -332,11 +332,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			collectCategories(fInputElement[i], categories);
 		}
 		List sortedCategories= new ArrayList(categories);
-		Collections.sort(sortedCategories, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				return -Collator.getInstance().compare(o1, o2);
-			}
-		});
+		Collections.sort(sortedCategories, Collator.getInstance());
 		int count= 0;
 		for (Iterator iter= sortedCategories.iterator(); iter.hasNext() && count < MAX_NUMBER_OF_CATEGORIES_IN_MENU;) {
 			String category= (String)iter.next();
