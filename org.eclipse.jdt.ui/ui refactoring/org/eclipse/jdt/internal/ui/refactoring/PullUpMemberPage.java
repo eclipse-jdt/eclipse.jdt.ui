@@ -597,6 +597,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		final Label label= new Label(parent, SWT.NONE);
 		final GridData data= new GridData();
 		data.horizontalSpan= 2;
+		data.heightHint= convertHeightInCharsToPixels(1) / 2;
 		label.setLayoutData(data);
 	}
 

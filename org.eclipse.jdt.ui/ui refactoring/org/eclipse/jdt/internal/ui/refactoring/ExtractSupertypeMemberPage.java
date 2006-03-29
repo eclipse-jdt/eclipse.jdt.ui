@@ -204,7 +204,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		final Button addButton= new Button(buttons, SWT.PUSH);
 		addButton.setText(RefactoringMessages.ExtractSupertypeMemberPage_add_button_label);
 		addButton.setEnabled(isAddTypeEnabled());
-		addButton.setLayoutData(new GridData());
+		addButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(addButton);
 		addButton.addSelectionListener(new SelectionAdapter() {
 
@@ -239,7 +239,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		final Button removeButton= new Button(buttons, SWT.PUSH);
 		removeButton.setText(RefactoringMessages.ExtractSupertypeMemberPage_remove_button_label);
 		removeButton.setEnabled(fCandidateTypes.length > 0 && !fTableViewer.getSelection().isEmpty());
-		removeButton.setLayoutData(new GridData());
+		removeButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(removeButton);
 		removeButton.addSelectionListener(new SelectionAdapter() {
 
@@ -321,15 +321,15 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 				public void run(final IProgressMonitor monitor) throws InvocationTargetException {
 					try {
 						fCandidateTypes= getProcessor().getCandidateTypes(new RefactoringStatus(), monitor);
-						createSuperTypeList(parent);
-					} catch (JavaModelException exception) {
-						throw new InvocationTargetException(exception);
 					} finally {
 						monitor.done();
 					}
 				}
 			});
+			createSuperTypeList(parent);
 		} catch (InvocationTargetException exception) {
+			ExceptionHandler.handle(exception, getShell(), RefactoringMessages.ExtractSupertypeMemberPage_extract_supertype, RefactoringMessages.PullUpInputPage_exception);
+		} catch (JavaModelException exception) {
 			ExceptionHandler.handle(exception, getShell(), RefactoringMessages.ExtractSupertypeMemberPage_extract_supertype, RefactoringMessages.PullUpInputPage_exception);
 		} catch (InterruptedException exception) {
 			Assert.isTrue(false);
@@ -365,31 +365,29 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	 *            the parent control
 	 */
 	protected void createSuperTypeList(final Composite parent) throws JavaModelException {
-		final Label separator= new Label(parent, SWT.NONE);
-		GridData data= new GridData();
-		data.horizontalSpan= 2;
-		separator.setLayoutData(data);
+		createSpacer(parent);
 
 		final Label label= new Label(parent, SWT.NONE);
 		label.setText(RefactoringMessages.ExtractSupertypeMemberPage_types_list_caption);
 		label.setEnabled(fCandidateTypes.length > 0);
-		data= new GridData();
+		GridData data= new GridData();
 		data.horizontalSpan= 2;
 		label.setLayoutData(data);
 
-		Composite composite= new Composite(parent, SWT.NONE);
+		final Composite composite= new Composite(parent, SWT.NONE);
 		final GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
 		composite.setLayout(layout);
 		data= new GridData(GridData.FILL_BOTH);
-		data.heightHint= convertHeightInCharsToPixels(3);
 		data.horizontalSpan= 2;
 		composite.setLayoutData(data);
 
 		fTableViewer= new TableViewer(composite, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-		fTableViewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
+		data= new GridData(GridData.FILL_BOTH);
+		data.heightHint= SWTUtil.getTableHeightHint(fTableViewer.getTable(), 3);
+		fTableViewer.getTable().setLayoutData(data);
 		fTableViewer.setLabelProvider(createLabelProvider());
 		fTableViewer.setContentProvider(new ArrayContentProvider());
 		fTableViewer.setSorter(new JavaElementSorter());
