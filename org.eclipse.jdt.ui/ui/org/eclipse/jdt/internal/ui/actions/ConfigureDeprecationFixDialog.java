@@ -117,7 +117,10 @@ public final class ConfigureDeprecationFixDialog extends TrayDialog {
 		final Composite container= (Composite) super.createDialogArea(parent);
 
 		final Composite composite= new Composite(container, SWT.NONE);
-		composite.setLayout(new GridLayout());
+		final GridLayout layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		composite.setLayout(layout);
 
 		final Label label= new Label(composite, SWT.HORIZONTAL | SWT.LEFT | SWT.WRAP);
 		label.setText(ActionMessages.ConfigureDeprecationFixDialog_dialog_description);

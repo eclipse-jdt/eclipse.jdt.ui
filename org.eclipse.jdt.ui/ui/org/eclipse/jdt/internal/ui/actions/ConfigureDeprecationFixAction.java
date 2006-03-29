@@ -128,13 +128,23 @@ public class ConfigureDeprecationFixAction extends SelectionDispatchAction {
 			final Object element= selection.getFirstElement();
 			if (element instanceof IMethod) {
 				final IMethod method= (IMethod) element;
-				return !method.isReadOnly() && !method.isMainMethod() && Flags.isDeprecated(method.getFlags());
+				return canEnable(method);
 			} else if (element instanceof IField) {
 				final IField field= (IField) element;
-				return !field.isReadOnly() && Flags.isDeprecated(field.getFlags());
+				return canEnable(field);
 			}
 		}
 		return false;
+	}
+
+	private boolean canEnable(final IField field) throws JavaModelException {
+		final int flags= field.getFlags();
+		return !field.isReadOnly() && Flags.isDeprecated(flags) && Flags.isFinal(flags);
+	}
+
+	private boolean canEnable(final IMethod method) throws JavaModelException {
+		final int flags= method.getFlags();
+		return !method.isReadOnly() && !method.isMainMethod() && Flags.isDeprecated(flags) && !Flags.isAbstract(flags);
 	}
 
 	private IMember getSelectedMember(final IStructuredSelection selection) throws JavaModelException {
@@ -142,11 +152,11 @@ public class ConfigureDeprecationFixAction extends SelectionDispatchAction {
 		if (elements.length == 1) {
 			if (elements[0] instanceof IMethod) {
 				final IMethod method= (IMethod) elements[0];
-				if (!method.isReadOnly() && !method.isMainMethod() && Flags.isDeprecated(method.getFlags()))
+				if (canEnable(method))
 					return method;
 			} else if (elements[0] instanceof IField) {
 				final IField field= (IField) elements[0];
-				if (!field.isReadOnly() && Flags.isDeprecated(field.getFlags()))
+				if (canEnable(field))
 					return field;
 			}
 		}
