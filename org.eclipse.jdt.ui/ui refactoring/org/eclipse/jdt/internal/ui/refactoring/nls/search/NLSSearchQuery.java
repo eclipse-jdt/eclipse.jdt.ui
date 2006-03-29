@@ -24,26 +24,27 @@ import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.Match;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
-import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 
 public class NLSSearchQuery implements ISearchQuery {
-	
-	private static final StringMatcher fgGetClassNameMatcher= new StringMatcher("*.class.getName()*", false, false);  //$NON-NLS-1$
 
 	private NLSSearchResult fResult;
 	private IJavaElement[] fWrapperClass;
@@ -87,22 +88,17 @@ public class NLSSearchQuery implements ISearchQuery {
 				try {
 					SearchEngine engine= new SearchEngine();
 					engine.search(pattern, participants, fScope, requestor, new SubProgressMonitor(monitor, 4));
+					requestor.reportUnusedPropertyNames(new SubProgressMonitor(monitor, 1));
 					
 					IField[] fields= ((IType)wrapperClass).getFields();
 					for (int j= 0; j < fields.length; j++) {
 						IField field= fields[j];
-						
-						String source= field.getSource();
-						if (!fgGetClassNameMatcher.match(source)) {
-							if (source.indexOf("NLS.initializeMessages") == -1) { //$NON-NLS-1$
-								if (!requestor.hasPropertyKey(field.getElementName())) {
-									fResult.addMatch(new Match(field, field.getSourceRange().getOffset(), field.getSourceRange().getLength()));
-								}
-							}
+						if (isUndefinedKey(field, requestor)) {
+							ISourceRange sourceRange= field.getSourceRange();
+							if (sourceRange != null)
+								fResult.addMatch(new Match(field, sourceRange.getOffset(), sourceRange.getLength()));	
 						}
 					}
-
-					requestor.reportUnusedPropertyNames(new SubProgressMonitor(monitor, 1));
 				} catch (CoreException e) {
 					JavaPlugin.log(e);
 				}
@@ -111,6 +107,27 @@ public class NLSSearchQuery implements ISearchQuery {
 			monitor.done();
 		}
 		return 	Status.OK_STATUS;
+	}
+
+	private boolean isUndefinedKey(IField field, NLSSearchResultRequestor requestor) throws JavaModelException {
+		int flags= field.getFlags();
+		if (!Flags.isPublic(flags))
+			return false;
+		
+		if (!Flags.isStatic(flags))
+			return false;
+		
+		String fieldName= field.getElementName();
+		if (NLSRefactoring.BUNDLE_NAME.equals(fieldName))
+			return false;
+		
+		if ("RESOURCE_BUNDLE".equals(fieldName)) //$NON-NLS-1$
+			return false;
+		
+		if (requestor.hasPropertyKey(fieldName))
+			return false;
+		
+		return true;		
 	}
 
 	/*
