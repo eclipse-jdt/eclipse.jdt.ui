@@ -840,7 +840,7 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 					IJavaProject javaProject= fSelectionCu.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;
+					int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 					try {
 						if (!Flags.isPrivate(fField.getFlags()))
 							flags|= RefactoringDescriptor.MULTI_CHANGE;
