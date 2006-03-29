@@ -645,24 +645,24 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			 *  testFooStringBuffer1()
 			 *  testFooStringBuffer2()
 			 */
-			String result= name.toString();
-			if (names.contains(result)) {
+			String testName= name.toString();
+			if (names.contains(testName)) {
 				int suffix= 1;
-				while (names.contains(result + Integer.toString(suffix)))
+				while (names.contains(testName + Integer.toString(suffix)))
 					suffix++;
 				name.append(Integer.toString(suffix));
 			}
-			result= name.toString();
-			names.add(result);
+			testName= name.toString();
+			names.add(testName);
 			appendMethodComment(buffer, method);
 			buffer.append("public ");//$NON-NLS-1$ 
 			if (fPage2.getCreateFinalMethodStubsButtonSelection())
 				buffer.append("final "); //$NON-NLS-1$
 			buffer.append("void ");//$NON-NLS-1$ 
-			buffer.append(result);
+			buffer.append(testName);
 			buffer.append("()");//$NON-NLS-1$ 
 			try {
-				appendTestMethodBody(buffer, result, method);
+				appendTestMethodBody(buffer, testName, method, type.getCompilationUnit());
 			} catch (CoreException exception) {
 				throw new JavaModelException(exception);
 			}
@@ -694,11 +694,11 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		return getPackageFragment().findRecommendedLineSeparator();
 	}
 
-	private void appendTestMethodBody(StringBuffer buffer, String name, IMethod method) throws CoreException {
+	private void appendTestMethodBody(StringBuffer buffer, String name, IMethod method, ICompilationUnit targetCu) throws CoreException {
 		final String delimiter= getLineDelimiter();
 		buffer.append("{").append(delimiter); //$NON-NLS-1$
 		if (fPage2.isCreateTasks()) {
-			final String content= CodeGeneration.getMethodBodyContent(method.getCompilationUnit(), CLASS_UNDER_TEST, name, false, "", delimiter); //$NON-NLS-1$
+			final String content= CodeGeneration.getMethodBodyContent(targetCu, CLASS_UNDER_TEST, name, false, "", delimiter); //$NON-NLS-1$
 			if (content != null && content.length() > 0)
 				buffer.append(content);
 		}

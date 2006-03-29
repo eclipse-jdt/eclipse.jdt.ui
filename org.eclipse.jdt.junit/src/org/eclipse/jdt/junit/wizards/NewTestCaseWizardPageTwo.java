@@ -149,7 +149,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		} else if (widget == fCreateTasksButton) {
 			fCreateTasks= fCreateTasksButton.getSelection();
 		}
-		
+		saveWidgetValues();
 	}
 	
 	private void createMethodsTreeControls(Composite container) {
@@ -275,16 +275,14 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 			} catch(JavaModelException e) {
 				JUnitPlugin.log(e);
 			}
-			fMethodsTree.setContentProvider(new MethodsTreeContentProvider(types.toArray()));
 			if (types == null)
 				types= new ArrayList();
+			fMethodsTree.setContentProvider(new MethodsTreeContentProvider(types.toArray()));
 			fMethodsTree.setInput(types.toArray());
 			fMethodsTree.setSelection(new StructuredSelection(fClassToTest), true);
 			doCheckedStateChanged();
 			
 			fMethodsTree.getControl().setFocus();
-		} else {
-			saveWidgetValues();
 		}
 	}
 
@@ -456,20 +454,18 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 	private void restoreWidgetValues() {
 		IDialogSettings settings= getDialogSettings();
 		if (settings != null) {
-			fCreateTasksButton.setSelection(settings.getBoolean(STORE_USE_TASKMARKER));
-			fCreateFinalMethodStubsButton.setSelection(settings.getBoolean(STORE_CREATE_FINAL_METHOD_STUBS));
+			fCreateTasks= settings.getBoolean(STORE_USE_TASKMARKER);
+			fCreateTasksButton.setSelection(fCreateTasks);
+			fCreateFinalStubs= settings.getBoolean(STORE_CREATE_FINAL_METHOD_STUBS);
+			fCreateFinalMethodStubsButton.setSelection(fCreateFinalStubs);
 		}		
 	}	
 
-	/**
-	 * 	Since Finish was pressed, write widget values to the dialog store so that they
-	 *	will persist into the next invocation of this wizard page
-	 */
 	private void saveWidgetValues() {
 		IDialogSettings settings= getDialogSettings();
 		if (settings != null) {
-			settings.put(STORE_USE_TASKMARKER, fCreateTasksButton.getSelection());
-			settings.put(STORE_CREATE_FINAL_METHOD_STUBS, fCreateFinalMethodStubsButton.getSelection());
+			settings.put(STORE_USE_TASKMARKER, fCreateTasks);
+			settings.put(STORE_CREATE_FINAL_METHOD_STUBS, fCreateFinalStubs);
 		}
 	}
 
