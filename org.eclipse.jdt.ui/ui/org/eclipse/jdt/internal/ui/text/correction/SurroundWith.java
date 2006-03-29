@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -40,6 +41,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.VariableDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InOutFlowAnalyzer;
@@ -339,13 +341,22 @@ public abstract class SurroundWith {
 					ModifierRewrite.create(rewrite, variableDeclaration).setModifiers(Modifier.FINAL, Modifier.NONE, null);
 				}
 				accessedInside.remove(0);
-			} else {
+			} else if (variableDeclaration.getParent() instanceof VariableDeclarationStatement) {
 				VariableDeclarationStatement statement= (VariableDeclarationStatement)variableDeclaration.getParent();
 				final ListRewrite blockRewrite= getListRewrite(statement, rewrite);
 				
 				splitVariableDeclarationStatement(statement, createSplitUnselectedOperator(accessedInside, rewrite, blockRewrite), rewrite);
 				
 				for (Iterator iter= statement.fragments().iterator(); iter.hasNext();) {
+					VariableDeclarationFragment fragment= (VariableDeclarationFragment)iter.next();
+					accessedInside.remove(fragment);
+				}
+			} else if (variableDeclaration.getParent() instanceof VariableDeclarationExpression) {
+				VariableDeclarationExpression expression= (VariableDeclarationExpression)variableDeclaration.getParent();
+				
+				VariableDeclarationRewrite.rewriteModifiers(expression, Modifier.FINAL, 0, rewrite, null);
+				
+				for (Iterator iter= expression.fragments().iterator(); iter.hasNext();) {
 					VariableDeclarationFragment fragment= (VariableDeclarationFragment)iter.next();
 					accessedInside.remove(fragment);
 				}

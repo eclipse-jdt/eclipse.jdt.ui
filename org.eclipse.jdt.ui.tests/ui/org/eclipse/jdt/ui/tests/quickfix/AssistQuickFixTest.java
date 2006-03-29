@@ -4843,6 +4843,45 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);	
 	}
 	
+	public void testSurroundWithRunnableBug133560() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int i = 0; i < 10; i++) {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		StringBuffer selection= new StringBuffer();
+		selection.append("            System.out.println(i);\n");
+		
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 11);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (final int i = 0; i < 10; i++) {\n");
+		buf.append("            Runnable runnable = new Runnable() {\n");
+		buf.append("                public void run() {\n");
+		buf.append("                    System.out.println(i);\n");
+		buf.append("                }\n");
+		buf.append("            };\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});	
+	}
+	
 	public void testMakeFinal01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
