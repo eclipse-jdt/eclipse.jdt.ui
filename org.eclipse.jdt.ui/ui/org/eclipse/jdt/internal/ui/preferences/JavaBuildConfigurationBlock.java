@@ -63,6 +63,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_PB_CIRCULAR_BUILDPATH= getJDTCoreKey(JavaCore.CORE_CIRCULAR_CLASSPATH);
 	private static final Key PREF_PB_INCOMPATIBLE_JDK_LEVEL= getJDTCoreKey(JavaCore.CORE_INCOMPATIBLE_JDK_LEVEL);
 	private static final Key PREF_PB_DUPLICATE_RESOURCE= getJDTCoreKey(JavaCore.CORE_JAVA_BUILD_DUPLICATE_RESOURCE);
+	private static final Key PREF_RECREATE_MODIFIED_CLASS_FILES= getJDTCoreKey(JavaCore.CORE_JAVA_BUILD_RECREATE_MODIFIED_CLASS_FILES_IN_OUTPUT_FOLDER);
 
 	
 	// values
@@ -125,6 +126,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		String[] abortIgnoreValues= new String[] { ABORT, IGNORE };
 		String[] cleanIgnoreValues= new String[] { CLEAN, IGNORE };
 		String[] enableDisableValues= new String[] { ENABLED, DISABLED };
+		String[] enableIgnoreValues= new String[] { ENABLED, IGNORE };
 		
 		String[] errorWarning= new String[] { ERROR, WARNING };
 		
@@ -217,7 +219,10 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_build_clean_outputfolder_label; 
 		addCheckBox(othersComposite, label, PREF_BUILD_CLEAN_OUTPUT_FOLDER, cleanIgnoreValues, 0);
-
+		
+		label= PreferencesMessages.JavaBuildConfigurationBlock_build_recreate_modified; 
+		addCheckBox(othersComposite, label, PREF_RECREATE_MODIFIED_CLASS_FILES, enableIgnoreValues, 0);
+		
 		label= PreferencesMessages.JavaBuildConfigurationBlock_resource_filter_label; 
 		text= addTextField(othersComposite, label, PREF_RESOURCE_FILTER, 0, 0);
 		gd= (GridData) text.getLayoutData();
