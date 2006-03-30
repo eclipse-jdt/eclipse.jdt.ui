@@ -2993,13 +2993,13 @@
                helpContextId="org.eclipse.ui.bookmark_action_context"
                class="org.eclipse.ui.texteditor.BookmarkRulerAction"
                actionID="RulerDoubleClick"
-               id="org.eclipse.jdt.internal.ui.javaeditor.BookmarkRulerAction">
+               id="org.eclipse.jdt.internal.ui.propertiesfileeditor.BookmarkRulerAction">
          </action>
          <action
                label="%JavaSelectRulerAction.label"
-               class="org.eclipse.jdt.internal.ui.javaeditor.JavaSelectRulerAction"
+               class="org.eclipse.ui.texteditor.SelectRulerAction"
                actionID="RulerClick"
-               id="org.eclipse.jdt.internal.ui.javaeditor.JavaSelectRulerAction">
+               id="org.eclipse.jdt.internal.ui.propertiesfileeditor.SelectRulerAction">
          </action>
       </editorContribution>
    </extension>
