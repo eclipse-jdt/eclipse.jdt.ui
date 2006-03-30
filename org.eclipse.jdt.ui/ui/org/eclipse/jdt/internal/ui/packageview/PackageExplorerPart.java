@@ -385,7 +385,7 @@ public class PackageExplorerPart extends ViewPart
 		 * {@inheritDoc}
 		 */
 		protected Object[] addAditionalProblemParents(Object[] elements) {
-			if (showWorkingSets()) {
+			if (showWorkingSets() && elements != null) {
 				return fWorkingSetModel.addWorkingSets(elements);
 			}
 			return elements;
