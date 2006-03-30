@@ -21,10 +21,13 @@ public final class ActionMessages extends NLS {
 	}
 
 	public static String ConfigureDeprecationFixAction_error_not_deprecated;
-	public static String ConfigureDeprecationFixDialog_dialog_description;
+	public static String ConfigureDeprecationFixDialog_Description;
 	public static String ConfigureDeprecationFixDialog_dialog_title;
-	public static String ConfigureDeprecationFixDialog_inline_fix_label;
-	public static String ConfigureDeprecationFixDialog_no_fix_label;
+	public static String ConfigureDeprecationFixDialog_InliningRadioButtonLabel;
+	public static String ConfigureDeprecationFixDialog_NoFixCheckBoxLabel;
+	public static String ConfigureDeprecationFixDialog_ReplaceReferencesCheckBoxLabel;
+	public static String ConfigureDeprecationFixDialog_ReplaceReferencesRadioButtonLabel;
+	public static String ConfigureDeprecationFixDialog_ThisFeatureIsNotSupportedInfo;
 	public static String FindNLSProblemsAction_Description;
 	public static String FindNLSProblemsAction_ErrorDialogTitle;
 	public static String FindNLSProblemsAction_Name;
@@ -39,6 +42,7 @@ public final class ActionMessages extends NLS {
 	public static String ConfigureDeprecationFixAction_text;
 	public static String ConfigureDeprecationFixAction_tool_tip;
 	public static String OpenWithMenu_label;
+	public static String QuickAssistProcessor_create_fix_name;
 	public static String RefactorMenu_label;
 	public static String SourceMenu_label;
 	public static String BuildPath_label;

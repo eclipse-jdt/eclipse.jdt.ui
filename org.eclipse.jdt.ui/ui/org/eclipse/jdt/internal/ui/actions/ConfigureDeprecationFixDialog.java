@@ -30,8 +30,12 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TrayDialog;
+import org.eclipse.jface.dialogs.StatusDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.window.Window;
+
+import org.eclipse.jface.text.Document;
 
 import org.eclipse.ui.PlatformUI;
 
@@ -43,23 +47,35 @@ import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.deprecation.CreateDeprecationFixChange;
 import org.eclipse.jdt.internal.corext.refactoring.deprecation.DeprecationRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.DeleteFileChange;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 /**
  * Dialog to configure a deprecation fix.
  * 
  * @since 3.2
  */
-public final class ConfigureDeprecationFixDialog extends TrayDialog {
+public final class ConfigureDeprecationFixDialog extends StatusDialog {
+
+	/** The replace invocation fix constant */
+	private static final int REPLACE_FIX= 2;
 
 	/** The inline fix constant */
 	private static final int INLINE_FIX= 1;
@@ -71,7 +87,7 @@ public final class ConfigureDeprecationFixDialog extends TrayDialog {
 	private final IBinding fBinding;
 
 	/** The current fix */
-	private int fCurrentFix= -1;
+	private int fCurrentFix= NO_FIX;
 
 	/** The future fix */
 	private int fFutureFix= -1;
@@ -82,8 +98,13 @@ public final class ConfigureDeprecationFixDialog extends TrayDialog {
 	/** The no fix button */
 	private Button fNoFixButton;
 
+	/** The replace invocation fix button */
+	private Button fReplaceInvocationButton;
+
 	/** The java project */
 	private final IJavaProject fProject;
+
+	private Control fBodyEditorControl;
 
 	/**
 	 * Creates a new configure deprecation fix dialog.
@@ -122,35 +143,172 @@ public final class ConfigureDeprecationFixDialog extends TrayDialog {
 		layout.marginWidth= 0;
 		composite.setLayout(layout);
 
-		final Label label= new Label(composite, SWT.HORIZONTAL | SWT.LEFT | SWT.WRAP);
-		label.setText(ActionMessages.ConfigureDeprecationFixDialog_dialog_description);
+		PixelConverter pixelConverter= new PixelConverter(composite);
+		Label description= new Label(composite, SWT.HORIZONTAL | SWT.LEFT | SWT.WRAP);
+		description.setText(ActionMessages.ConfigureDeprecationFixDialog_Description);
+		GridData data= new GridData();
+		data.widthHint= pixelConverter.convertWidthInCharsToPixels(90);
+		description.setLayoutData(data);
 
-		fNoFixButton= new Button(composite, SWT.RADIO);
-		fNoFixButton.setText(ActionMessages.ConfigureDeprecationFixDialog_no_fix_label);
-		fNoFixButton.addSelectionListener(new SelectionAdapter() {
+		String memberName= fBinding.getName();
 
-			public void widgetSelected(final SelectionEvent event) {
-				fFutureFix= NO_FIX;
+
+		if (canInlineMember()) {
+			fNoFixButton= new Button(composite, SWT.CHECK);
+			fNoFixButton.setText(Messages.format(ActionMessages.ConfigureDeprecationFixDialog_NoFixCheckBoxLabel, memberName));
+			data= new GridData();
+			data.verticalIndent= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING * 2);
+			fNoFixButton.setLayoutData(data);
+
+			fInlineFixButton= new Button(composite, SWT.RADIO);
+			fInlineFixButton.setText(Messages.format(ActionMessages.ConfigureDeprecationFixDialog_InliningRadioButtonLabel, memberName));
+			data= new GridData();
+			data.horizontalIndent= convertVerticalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING * 2);
+			fInlineFixButton.setLayoutData(data);
+
+			fReplaceInvocationButton= new Button(composite, SWT.RADIO);
+			fReplaceInvocationButton.setText(Messages.format(ActionMessages.ConfigureDeprecationFixDialog_ReplaceReferencesRadioButtonLabel, memberName));
+			data= new GridData();
+			data.horizontalIndent= convertVerticalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING * 2);
+			fReplaceInvocationButton.setLayoutData(data);
+
+			fBodyEditorControl= createBody(composite);
+			data= new GridData(GridData.FILL_BOTH);
+			data.widthHint= pixelConverter.convertWidthInCharsToPixels(60);
+			data.minimumHeight= pixelConverter.convertHeightInCharsToPixels(5);
+			data.horizontalIndent= convertVerticalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING * 4);
+			fBodyEditorControl.setLayoutData(data);
+
+
+			fNoFixButton.addSelectionListener(new SelectionAdapter() {
+
+				public void widgetSelected(final SelectionEvent event) {
+					if (fNoFixButton.getSelection()) {
+						if (fInlineFixButton.getSelection()) {
+							fFutureFix= INLINE_FIX;
+							fBodyEditorControl.setEnabled(false);
+						} else {
+							fFutureFix= REPLACE_FIX;
+							fBodyEditorControl.setEnabled(true);
+						}
+						fInlineFixButton.setEnabled(true);
+						fReplaceInvocationButton.setEnabled(true);
+					} else {
+						fFutureFix= NO_FIX;
+						fInlineFixButton.setEnabled(false);
+						fReplaceInvocationButton.setEnabled(false);
+						fBodyEditorControl.setEnabled(false);
+					}
+					updateStatus();
+				}
+			});
+
+			fReplaceInvocationButton.addSelectionListener(new SelectionAdapter() {
+
+				public void widgetSelected(SelectionEvent e) {
+					fFutureFix= REPLACE_FIX;
+					fBodyEditorControl.setEnabled(true);
+					updateStatus();
+				}
+			});
+
+			fInlineFixButton.addSelectionListener(new SelectionAdapter() {
+
+				public void widgetSelected(final SelectionEvent event) {
+					fFutureFix= INLINE_FIX;
+					fBodyEditorControl.setEnabled(false);
+					updateStatus();
+				}
+			});
+
+			initializeFix();
+			initializeControls();
+		} else {
+			fReplaceInvocationButton= new Button(composite, SWT.CHECK);
+			fReplaceInvocationButton.setText(Messages.format(ActionMessages.ConfigureDeprecationFixDialog_ReplaceReferencesCheckBoxLabel, memberName));
+			data= new GridData();
+			data.verticalIndent= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING * 2);
+			fReplaceInvocationButton.setLayoutData(data);
+
+			fBodyEditorControl= createBody(composite);
+			data= new GridData(GridData.FILL_BOTH);
+			data.widthHint= pixelConverter.convertWidthInCharsToPixels(50);
+			data.minimumHeight= pixelConverter.convertHeightInCharsToPixels(5);
+			data.horizontalIndent= convertVerticalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING * 2);
+			fBodyEditorControl.setLayoutData(data);
+
+			fReplaceInvocationButton.addSelectionListener(new SelectionAdapter() {
+
+				public void widgetSelected(SelectionEvent e) {
+					if (fReplaceInvocationButton.getSelection()) {
+						fFutureFix= REPLACE_FIX;
+						fBodyEditorControl.setEnabled(true);
+					} else {
+						fFutureFix= NO_FIX;
+						fBodyEditorControl.setEnabled(false);
+					}
+					updateStatus();
+				}
+			});
+
+			initializeFix();
+			switch (fCurrentFix) {
+				case NO_FIX:
+					fReplaceInvocationButton.setSelection(false);
+					fBodyEditorControl.setEnabled(false);
+					break;
+				case REPLACE_FIX:
+					fReplaceInvocationButton.setSelection(true);
+					fBodyEditorControl.setEnabled(true);
+					break;
 			}
-		});
+		}
 
-		final GridData data= new GridData();
-		data.verticalIndent= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING * 2);
-		fNoFixButton.setLayoutData(data);
-
-		fInlineFixButton= new Button(composite, SWT.RADIO);
-		fInlineFixButton.setText(ActionMessages.ConfigureDeprecationFixDialog_inline_fix_label);
-		fInlineFixButton.addSelectionListener(new SelectionAdapter() {
-
-			public void widgetSelected(final SelectionEvent event) {
-				fFutureFix= INLINE_FIX;
-			}
-		});
-
-		initializeFix();
-		initializeControls();
+		applyDialogFont(composite);
 
 		return composite;
+	}
+
+	private Control createBody(Composite parent) {
+		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
+		JavaSourceViewer bodyEditor= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.WRAP | SWT.BORDER, store);
+		bodyEditor.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
+		bodyEditor.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
+		Document bodyDocument= new Document(""); //$NON-NLS-1$
+		bodyEditor.setDocument(bodyDocument);
+		bodyEditor.setEditable(true);
+
+		return bodyEditor.getControl();
+	}
+
+	private void updateStatus() {
+		StatusInfo status= new StatusInfo();
+		if (fFutureFix == REPLACE_FIX) {
+			status.setInfo(ActionMessages.ConfigureDeprecationFixDialog_ThisFeatureIsNotSupportedInfo);
+			updateStatus(status);
+			status.setError(""); //$NON-NLS-1$
+			updateButtonsEnableState(status);
+		} else {
+			updateStatus(status);			
+		}
+	}
+
+	private boolean canInlineMember() {
+		int modifiers= fBinding.getModifiers();
+		if (Modifier.isAbstract(modifiers))
+			return false;
+
+		if (fBinding instanceof IVariableBinding) {
+			IVariableBinding varBining= (IVariableBinding)fBinding;
+			if (varBining.isField()) {
+				if (!Modifier.isFinal(modifiers))
+					return false;
+			} else if (varBining.isEnumConstant()) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -159,12 +317,33 @@ public final class ConfigureDeprecationFixDialog extends TrayDialog {
 	private void initializeControls() {
 		switch (fCurrentFix) {
 			case NO_FIX:
-				fNoFixButton.setSelection(true);
+				fNoFixButton.setSelection(false);
+				fInlineFixButton.setSelection(true);
+				fReplaceInvocationButton.setSelection(false);
+	
+				fInlineFixButton.setEnabled(false);
+				fReplaceInvocationButton.setEnabled(false);
+				fBodyEditorControl.setEnabled(false);
 				break;
 			case INLINE_FIX:
+				fNoFixButton.setSelection(true);
 				fInlineFixButton.setSelection(true);
+				fReplaceInvocationButton.setSelection(false);
+	
+				fInlineFixButton.setEnabled(true);
+				fReplaceInvocationButton.setEnabled(true);
+				fBodyEditorControl.setEnabled(false);
 				break;
-		}
+			case REPLACE_FIX:
+				fNoFixButton.setSelection(true);
+				fInlineFixButton.setSelection(false);
+				fReplaceInvocationButton.setSelection(true);
+	
+				fInlineFixButton.setEnabled(true);
+				fReplaceInvocationButton.setEnabled(true);
+				fBodyEditorControl.setEnabled(true);
+				break;
+			}
 	}
 
 	/**
@@ -185,8 +364,7 @@ public final class ConfigureDeprecationFixDialog extends TrayDialog {
 					}
 				}
 			}
-		} else
-			fCurrentFix= NO_FIX;
+		}
 		fFutureFix= fCurrentFix;
 	}
 
