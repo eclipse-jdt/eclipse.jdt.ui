@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFileState;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
@@ -954,8 +955,15 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		
 		try {
 			final IStorage storage= sei.getStorage();
-			if (storage.getName() == null || storage.getFullPath() == null)
+			final IPath storagePath= storage.getFullPath();
+			if (storage.getName() == null || storagePath == null)
 				return null;
+			
+			final IPath documentPath;
+			if (storage instanceof IFileState)
+				documentPath= storagePath.append(Long.toString(((IFileState)storage).getModificationTime()));
+			else
+				documentPath= storagePath;
 			
 			WorkingCopyOwner woc= new WorkingCopyOwner() {
 				/*
@@ -963,12 +971,12 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				 * @since 3.2
 				 */
 				public IBuffer createBuffer(ICompilationUnit workingCopy) {
-					return new DocumentAdapter(workingCopy, storage.getFullPath());
+					return new DocumentAdapter(workingCopy, documentPath);
 				}
 			};
 
 			IClasspathEntry[] cpEntries= null;
-			IJavaProject jp= findJavaProject(storage.getFullPath());
+			IJavaProject jp= findJavaProject(storagePath);
 			if (jp != null)
 				cpEntries= jp.getResolvedClasspath(true);
 			
