@@ -366,6 +366,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 
 			Combo comboControl= fJRECombo.getComboControl(fGroup);
 			comboControl.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, true, false)); // make sure column 2 is grabing (but no fill)
+			comboControl.setVisibleItemCount(20);
 			
 			DialogField.createEmptySpace(fGroup);
 			
