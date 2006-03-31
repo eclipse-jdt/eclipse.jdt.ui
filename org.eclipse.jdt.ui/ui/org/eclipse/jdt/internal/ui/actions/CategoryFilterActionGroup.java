@@ -79,10 +79,14 @@ public class CategoryFilterActionGroup extends ActionGroup {
 				IMember member= (IMember)element;
 				try {
 					String[] categories= member.getCategories();
+					if (categories.length == 0)
+						return true;
+					
 					for (int i= 0; i < categories.length; i++) {
-						if (fFilteredCategories.contains(categories[i]))
-							return false;
+						if (!fFilteredCategories.contains(categories[i]))
+							return true;
 					}
+					return false;
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
 				}
