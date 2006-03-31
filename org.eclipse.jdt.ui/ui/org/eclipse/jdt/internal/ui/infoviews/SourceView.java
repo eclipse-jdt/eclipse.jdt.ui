@@ -285,7 +285,15 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	protected void setBackground(Color color) {
 		fViewer.getTextWidget().setBackground(color);
 	}
-
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getBackgroundColorKey()
+	 * @since 3.2
+	 */
+	protected String getBackgroundColorKey() {
+		return "org.eclipse.jdt.ui.DeclarationsView.backgroundColor";		 //$NON-NLS-1$
+	}
+	
 	/**
 	 * Converts the given selection to a structured selection
 	 * containing Java elements.

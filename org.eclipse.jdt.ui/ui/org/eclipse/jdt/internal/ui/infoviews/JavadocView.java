@@ -28,6 +28,7 @@ import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -122,6 +123,9 @@ public class JavadocView extends AbstractInfoView {
 	/** The Browser widget */
 	private boolean fIsUsingBrowserWidget;
 
+	private RGB fBackgroundColorRGB;
+
+	
 	/**
 	 * The Javadoc view's select all action.
 	 */
@@ -259,11 +263,6 @@ public class JavadocView extends AbstractInfoView {
 			fBrowser= new Browser(parent, SWT.NONE);
 			fIsUsingBrowserWidget= true;
 			
-			// Apply background color from style sheet
-			StringBuffer buffer= new StringBuffer(""); //$NON-NLS-1$
-			HTMLPrinter.insertPageProlog(buffer, 0, fStyleSheetURL);
-			setInput(buffer.toString());
-			
 		} catch (SWTError er) {
 
 			/* The Browser widget throws an SWTError if it fails to
@@ -365,6 +364,24 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	protected void setBackground(Color color) {
 		getControl().setBackground(color);
+
+		// Apply style sheet
+		fBackgroundColorRGB= color.getRGB();
+		if (getInput() == null) {
+			StringBuffer buffer= new StringBuffer(""); //$NON-NLS-1$
+			HTMLPrinter.insertPageProlog(buffer, 0, fBackgroundColorRGB, fStyleSheetURL);
+			setInput(buffer.toString());
+		} else {
+			setInput(computeInput(getInput()));
+		}
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getBackgroundColorKey()
+	 * @since 3.2
+	 */
+	protected String getBackgroundColorKey() {
+		return "org.eclipse.jdt.ui.JavadocView.backgroundColor";		 //$NON-NLS-1$
 	}
 
 	/*
@@ -447,7 +464,7 @@ public class JavadocView extends AbstractInfoView {
 			TextPresentation.applyTextPresentation(fPresentation, fText);
 		}
 	}
-
+	
 	/**
 	 * Returns the Javadoc in HTML format.
 	 *
@@ -499,7 +516,7 @@ public class JavadocView extends AbstractInfoView {
 
 		boolean flushContent= true;
 		if (buffer.length() > 0 || flushContent) {
-			HTMLPrinter.insertPageProlog(buffer, 0, fStyleSheetURL);
+			HTMLPrinter.insertPageProlog(buffer, 0, fBackgroundColorRGB, fStyleSheetURL);
 			HTMLPrinter.addPageEpilog(buffer);
 			return buffer.toString();
 		}

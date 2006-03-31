@@ -1030,6 +1030,24 @@
             %propertiesFileEditorFontDefintion.description
          </description>
       </fontDefinition>
+      <colorDefinition
+            label="%JavadocViewBackgroundColor.label"
+            categoryId="org.eclipse.jdt.ui.presentation"
+            value="COLOR_INFO_BACKGROUND"
+            id="org.eclipse.jdt.ui.JavadocView.backgroundColor">
+         <description>
+            %JavadocViewBackgroundColor.description
+         </description>
+      </colorDefinition>
+      <colorDefinition
+            label="%DeclarationViewBackgroundColor.label"
+            categoryId="org.eclipse.jdt.ui.presentation"
+            value="COLOR_INFO_BACKGROUND"
+            id="org.eclipse.jdt.ui.DeclarationView.backgroundColor">
+         <description>
+            %DeclarationViewBackgroundColor.description
+         </description>
+      </colorDefinition>
    </extension>
    
    

@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -26,6 +27,10 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.resource.ColorRegistry;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -60,7 +65,7 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
  *
  * @since 3.0
  */
-abstract class AbstractInfoView extends ViewPart implements ISelectionListener, IMenuListener {
+abstract class AbstractInfoView extends ViewPart implements ISelectionListener, IMenuListener, IPropertyChangeListener {
 
 
 	/** JavaElementLabels flags used for the title */
@@ -117,7 +122,14 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	private GotoInputAction fGotoInputAction;
 	/** Counts the number of background computation requests. */
 	private volatile int fComputeCount;
-
+	
+	/**
+	 * Background color.
+	 * @since 3.2
+	 */
+	private Color fBackgroundColor;
+	private RGB fBackgroundColorRGB;
+	
 
 	/**
 	 * Set the input of this view.
@@ -176,7 +188,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	 */
 	public final void createPartControl(Composite parent) {
 		internalCreatePartControl(parent);
-		setInfoColor();
+		inititalizeColors();
 		getSite().getWorkbenchWindow().getPartService().addPartListener(fPartListener);
 		createContextMenu();
 		createActions();
@@ -285,10 +297,11 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 		tbm.add(fGotoInputAction);
 	}
 
-	/**
-	 * Sets the foreground and background color to the corresponding SWT info color.
+	/*
+	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#inititalizeColors()
+	 * @since 3.2
 	 */
-	private void setInfoColor() {
+	private void inititalizeColors() {
 		if (getSite().getShell().isDisposed())
 			return;
 
@@ -297,7 +310,34 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 			return;
 
 		setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-		setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+		
+		ColorRegistry registry= JFaceResources.getColorRegistry();
+		registry.addListener(this);
+		
+		fBackgroundColorRGB= registry.getRGB(getBackgroundColorKey());
+		Color bgColor;
+		if (fBackgroundColorRGB == null) {
+			bgColor= display.getSystemColor(SWT.COLOR_INFO_BACKGROUND);
+			fBackgroundColorRGB= bgColor.getRGB();
+		} else {
+			bgColor= new Color(display, fBackgroundColorRGB);
+			fBackgroundColor= bgColor;
+		}
+		
+		setBackground(bgColor);
+	}
+	
+	/**
+	 * The preference key for the background color.
+	 * 
+	 * @return the background color key
+	 * @since 3.2
+	 */
+	abstract protected String getBackgroundColorKey();
+	
+	public void propertyChange(PropertyChangeEvent event) {
+		if (getBackgroundColorKey().equals(event.getProperty()))
+			inititalizeColors();
 	}
 
 	/**
@@ -423,14 +463,21 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 		if (provider != null)
 			provider.removeSelectionChangedListener(fCopyToClipboardAction);
 
+		JFaceResources.getColorRegistry().removeListener(this);
+		fBackgroundColorRGB= null;
+		if (fBackgroundColor != null) {
+			fBackgroundColor.dispose();
+			fBackgroundColor= null;
+		}
+		
 		internalDispose();
+
 	}
 
 	/*
 	 * @see IWorkbenchPart#dispose()
 	 */
-	protected void internalDispose() {
-	}
+	abstract protected void internalDispose();
 
 	/**
 	 * Determines all necessary details and delegates the computation into
