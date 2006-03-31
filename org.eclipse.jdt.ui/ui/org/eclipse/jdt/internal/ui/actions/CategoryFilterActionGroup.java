@@ -16,7 +16,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -217,10 +219,15 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			} else {
 				fFilteredCategories.add(fCategory);
 			}
+			fLRUList.put(fCategory, fCategory);
 			storeFilteredCategories();
 			fireSelectionChange();
 		}
 
+	}
+	
+	private interface IResultCollector {
+		public boolean accept(String category);
 	}
 	
 	private static int COUNTER= 0;//WORKAROUND for Bug 132669 https://bugs.eclipse.org/bugs/show_bug.cgi?id=132669
@@ -237,12 +244,19 @@ public class CategoryFilterActionGroup extends ActionGroup {
 	private final CategoryFilterMenuAction fMenuAction;
 	private IMenuManager fMenuManager;
 	private IMenuListener fMenuListener;
+	private final LinkedHashMap fLRUList;
 
 	public CategoryFilterActionGroup(final StructuredViewer viewer, final String viewerId, IJavaElement[] input) {
 		Assert.isLegal(viewer != null);
 		Assert.isLegal(viewerId != null);
 		Assert.isLegal(input != null);
 		
+		fLRUList= new LinkedHashMap(MAX_NUMBER_OF_CATEGORIES_IN_MENU * 2, 0.75f, true) {
+			private static final long serialVersionUID= 1L;
+			protected boolean removeEldestEntry(Map.Entry eldest) {
+				return size() > MAX_NUMBER_OF_CATEGORIES_IN_MENU;
+			}
+		};
 		fViewer= viewer;
 		fViewerId= viewerId;
 		fInputElement= input;
@@ -266,10 +280,17 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		fFilteredCategories.clear();
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		String string= store.getString(getPreferenceKey());
-		if (string != null) {
+		if (string != null && string.length() > 0) {
 			String[] categories= string.split(";"); //$NON-NLS-1$
 			for (int i= 0; i < categories.length; i++) {
 				fFilteredCategories.add(categories[i]);
+			}
+		}
+		string= store.getString(getPreferenceKey()+".LRU"); //$NON-NLS-1$
+		if (string != null && string.length() > 0) {
+			String[] categories= string.split(";"); //$NON-NLS-1$
+			for (int i= categories.length - 1; i >= 0; i--) {
+				fLRUList.put(categories[i], categories[i]);
 			}
 		}
 	}
@@ -289,6 +310,16 @@ public class CategoryFilterActionGroup extends ActionGroup {
 				buf.append(element);
 			}
 			store.setValue(getPreferenceKey(), buf.toString());
+			buf= new StringBuffer();
+			iter= fLRUList.values().iterator();
+			element= (String)iter.next();
+			buf.append(element);
+			while (iter.hasNext()) {
+				element= (String)iter.next();
+				buf.append(';');
+				buf.append(element);
+			}
+			store.setValue(getPreferenceKey()+".LRU", buf.toString()); //$NON-NLS-1$
 		}
 	}
 	
@@ -327,51 +358,86 @@ public class CategoryFilterActionGroup extends ActionGroup {
 					manager.remove(item);
 			}
 		}
-		HashSet/*<String>*/ categories= new HashSet();
-		for (int i= 0; i < fInputElement.length; i++) {
-			collectCategories(fInputElement[i], categories);
-		}
-		List sortedCategories= new ArrayList(categories);
+		List sortedCategories= getMenuCategories();
 		Collections.sort(sortedCategories, Collator.getInstance());
 		int count= 0;
-		for (Iterator iter= sortedCategories.iterator(); iter.hasNext() && count < MAX_NUMBER_OF_CATEGORIES_IN_MENU;) {
+		for (Iterator iter= sortedCategories.iterator(); iter.hasNext();) {
 			String category= (String)iter.next();
 			manager.appendToGroup(CATEGORY_MENU_GROUP_NAME, new CategoryFilterAction(category, count + 1));
 			count++;
 		}
 	}
 
-	private void collectCategories(IJavaElement element, HashSet result) {
+	private List getMenuCategories() {
+		final HashSet/*<String>*/ categories= new HashSet();
+		final HashSet/*<String>*/ foundLRUCategories= new HashSet();
+		for (int i= 0; i < fInputElement.length; i++) {
+			collectCategories(fInputElement[i], new IResultCollector() {
+				public boolean accept(String category) {
+					categories.add(category);
+					if (fLRUList.containsKey(category)) {
+						foundLRUCategories.add(category);
+					}
+					return foundLRUCategories.size() >= MAX_NUMBER_OF_CATEGORIES_IN_MENU;
+				}
+			});
+		}
+		List result= new ArrayList();
+		int count= 0;
+		for (Iterator iter= foundLRUCategories.iterator(); iter.hasNext();) {
+			String element= (String)iter.next();
+			result.add(element);
+			count++;
+		}
+		if (count < MAX_NUMBER_OF_CATEGORIES_IN_MENU) {
+			List sortedCategories= new ArrayList(categories);
+			Collections.sort(sortedCategories, Collator.getInstance());
+			for (Iterator iter= sortedCategories.iterator(); iter.hasNext() && count < MAX_NUMBER_OF_CATEGORIES_IN_MENU;) {
+				String element= (String)iter.next();
+				result.add(element);
+				count++;
+			}
+		}
+		return result;
+	}
+
+	private boolean collectCategories(IJavaElement element, IResultCollector collector) {//HashSet result, int max, LinkedHashMap lruList) {
 		try {
 			if (element instanceof IMember) {
 				IMember member= (IMember)element;
 				String[] categories= member.getCategories();
 				for (int i= 0; i < categories.length; i++) {
-					result.add(categories[i]);
+					if (collector.accept(categories[i])) {
+						return true;
+					}
 				}
-				processChildren(member.getChildren(), result);
+				return processChildren(member.getChildren(), collector);
 			} else if (element instanceof ICompilationUnit) {
-				processChildren(((ICompilationUnit)element).getChildren(), result);
+				return processChildren(((ICompilationUnit)element).getChildren(), collector);
 			} else if (element instanceof IClassFile) {
-				processChildren(((IClassFile)element).getChildren(), result);
+				return processChildren(((IClassFile)element).getChildren(), collector);
 			} else if (element instanceof IJavaModel) {
-				processChildren(((IJavaModel)element).getChildren(), result);
+				return processChildren(((IJavaModel)element).getChildren(), collector);
 			} else if (element instanceof IJavaProject) {
-				processChildren(((IJavaProject)element).getChildren(), result);
+				return processChildren(((IJavaProject)element).getChildren(), collector);
 			} else if (element instanceof IPackageFragment) {
-				processChildren(((IPackageFragment)element).getChildren(), result);
+				return processChildren(((IPackageFragment)element).getChildren(), collector);
 			} else if (element instanceof IPackageFragmentRoot)	 {
-				processChildren(((IPackageFragmentRoot)element).getChildren(), result);
+				return processChildren(((IPackageFragmentRoot)element).getChildren(), collector);
 			}
+			return false;
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
+			return true;
 		}
 	}
 
-	private void processChildren(IJavaElement[] children, HashSet result) {
+	private boolean processChildren(IJavaElement[] children, IResultCollector collector) {
 		for (int i= 0; i < children.length; i++) {
-			collectCategories(children[i], result);
+			if (collectCategories(children[i], collector))
+				return true;
 		}
+		return false;
 	}
 
 	private void fireSelectionChange() {
@@ -389,9 +455,14 @@ public class CategoryFilterActionGroup extends ActionGroup {
 	}
 	
 	private void showCategorySelectionDialog(IJavaElement[] input) {
-		HashSet/*<String>*/ categories= new HashSet();
+		final HashSet/*<String>*/ categories= new HashSet();
 		for (int i= 0; i < input.length; i++) {
-			collectCategories(input[i], categories);
+			collectCategories(input[i], new IResultCollector() {
+				public boolean accept(String category) {
+					categories.add(category);
+					return false;
+				}
+			});
 		}
 		CategoryFilterSelectionDialog dialog= new CategoryFilterSelectionDialog(fViewer.getControl().getShell(), new ArrayList(categories), new ArrayList(fFilteredCategories));
 		if (dialog.open() == Window.OK) {
@@ -399,9 +470,11 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			for (Iterator iter= categories.iterator(); iter.hasNext();) {
 				String category= (String)iter.next();
 				if (contains(selected, category)) {
-					fFilteredCategories.remove(category);
+					if (fFilteredCategories.remove(category))
+						fLRUList.put(category, category);
 				} else {
-					fFilteredCategories.add(category);
+					if (fFilteredCategories.add(category))
+						fLRUList.put(category, category);
 				}
 			}
 			storeFilteredCategories();
