@@ -97,7 +97,7 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 		try {
 			return (fragment.getCompilationUnits().length == 0) && (fragment.getClassFiles().length == 0);
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			// ignore
 		}
 		return false;
 	}
