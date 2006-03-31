@@ -80,7 +80,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 				try {
 					String[] categories= member.getCategories();
 					if (categories.length == 0)
-						return true;
+						return !fFilterUncategorizedMembers;
 					
 					for (int i= 0; i < categories.length; i++) {
 						if (!fFilteredCategories.contains(categories[i]))
@@ -224,14 +224,32 @@ public class CategoryFilterActionGroup extends ActionGroup {
 				fFilteredCategories.add(fCategory);
 			}
 			fLRUList.put(fCategory, fCategory);
-			storeFilteredCategories();
+			storeSettings();
 			fireSelectionChange();
 		}
 
 	}
 	
+	private class FilterUncategorizedMembersAction extends Action {
+
+		public FilterUncategorizedMembersAction() {
+			setText(ActionMessages.CategoryFilterActionGroup_ShowUncategorizedMembers);
+			setChecked(!fFilterUncategorizedMembers);
+			setId(FILTER_CATEGORY_ACTION_ID);
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public void run() {
+			fFilterUncategorizedMembers= !fFilterUncategorizedMembers;
+			storeSettings();
+			fireSelectionChange();
+		}
+	}
+	
 	private interface IResultCollector {
-		public boolean accept(String category);
+		public boolean accept(String[] category);
 	}
 	
 	private static int COUNTER= 0;//WORKAROUND for Bug 132669 https://bugs.eclipse.org/bugs/show_bug.cgi?id=132669
@@ -249,6 +267,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 	private IMenuManager fMenuManager;
 	private IMenuListener fMenuListener;
 	private final LinkedHashMap fLRUList;
+	private boolean fFilterUncategorizedMembers;
 
 	public CategoryFilterActionGroup(final StructuredViewer viewer, final String viewerId, IJavaElement[] input) {
 		Assert.isLegal(viewer != null);
@@ -268,7 +287,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		fFilter= new CategoryFilter();
 		
 		fFilteredCategories= new HashSet();
-		loadFilteredCategories();
+		loadSettings();
 
 		fMenuAction= new CategoryFilterMenuAction();
 		
@@ -280,7 +299,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		fInputElement= input;
 	}
 	
-	private void loadFilteredCategories() {
+	private void loadSettings() {
 		fFilteredCategories.clear();
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		String string= store.getString(getPreferenceKey());
@@ -297,9 +316,10 @@ public class CategoryFilterActionGroup extends ActionGroup {
 				fLRUList.put(categories[i], categories[i]);
 			}
 		}
+		fFilterUncategorizedMembers= store.getBoolean(getPreferenceKey()+".FilterUncategorized"); //$NON-NLS-1$
 	}
 
-	private void storeFilteredCategories() {
+	private void storeSettings() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		if (fFilteredCategories.size() == 0) {
 			store.setValue(getPreferenceKey(), ""); //$NON-NLS-1$
@@ -324,6 +344,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 				buf.append(element);
 			}
 			store.setValue(getPreferenceKey()+".LRU", buf.toString()); //$NON-NLS-1$
+			store.setValue(getPreferenceKey()+".FilterUncategorized", fFilterUncategorizedMembers); //$NON-NLS-1$
 		}
 	}
 	
@@ -362,31 +383,43 @@ public class CategoryFilterActionGroup extends ActionGroup {
 					manager.remove(item);
 			}
 		}
-		List sortedCategories= getMenuCategories();
-		Collections.sort(sortedCategories, Collator.getInstance());
+		List menuEntries= new ArrayList();
+		boolean hasUncategorizedMembers= getMenuCategories(menuEntries);
+		Collections.sort(menuEntries, Collator.getInstance());
+		
+		if (menuEntries.size() > 0 && hasUncategorizedMembers)
+			manager.appendToGroup(CATEGORY_MENU_GROUP_NAME, new FilterUncategorizedMembersAction());
+		
 		int count= 0;
-		for (Iterator iter= sortedCategories.iterator(); iter.hasNext();) {
+		for (Iterator iter= menuEntries.iterator(); iter.hasNext();) {
 			String category= (String)iter.next();
 			manager.appendToGroup(CATEGORY_MENU_GROUP_NAME, new CategoryFilterAction(category, count + 1));
 			count++;
 		}
 	}
 
-	private List getMenuCategories() {
+	private boolean getMenuCategories(List result) {
 		final HashSet/*<String>*/ categories= new HashSet();
 		final HashSet/*<String>*/ foundLRUCategories= new HashSet();
-		for (int i= 0; i < fInputElement.length; i++) {
+		final boolean hasUncategorizedMember[]= new boolean[] {false};
+		for (int i= 0; i < fInputElement.length && !(hasUncategorizedMember[0] && foundLRUCategories.size() >= MAX_NUMBER_OF_CATEGORIES_IN_MENU); i++) {
 			collectCategories(fInputElement[i], new IResultCollector() {
-				public boolean accept(String category) {
-					categories.add(category);
-					if (fLRUList.containsKey(category)) {
-						foundLRUCategories.add(category);
+				public boolean accept(String[] cats) {
+					if (cats.length > 0) {
+						for (int j= 0; j < cats.length; j++) {
+							String category= cats[j];
+							categories.add(category);
+							if (fLRUList.containsKey(category)) {
+								foundLRUCategories.add(category);
+							}	
+						}
+					} else {
+						hasUncategorizedMember[0]= true;
 					}
-					return foundLRUCategories.size() >= MAX_NUMBER_OF_CATEGORIES_IN_MENU;
+					return hasUncategorizedMember[0] && foundLRUCategories.size() >= MAX_NUMBER_OF_CATEGORIES_IN_MENU;
 				}
 			});
 		}
-		List result= new ArrayList();
 		int count= 0;
 		for (Iterator iter= foundLRUCategories.iterator(); iter.hasNext();) {
 			String element= (String)iter.next();
@@ -402,19 +435,14 @@ public class CategoryFilterActionGroup extends ActionGroup {
 				count++;
 			}
 		}
-		return result;
+		return hasUncategorizedMember[0];
 	}
 
 	private boolean collectCategories(IJavaElement element, IResultCollector collector) {//HashSet result, int max, LinkedHashMap lruList) {
 		try {
 			if (element instanceof IMember) {
 				IMember member= (IMember)element;
-				String[] categories= member.getCategories();
-				for (int i= 0; i < categories.length; i++) {
-					if (collector.accept(categories[i])) {
-						return true;
-					}
-				}
+				collector.accept(member.getCategories());
 				return processChildren(member.getChildren(), collector);
 			} else if (element instanceof ICompilationUnit) {
 				return processChildren(((ICompilationUnit)element).getChildren(), collector);
@@ -462,8 +490,10 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		final HashSet/*<String>*/ categories= new HashSet();
 		for (int i= 0; i < input.length; i++) {
 			collectCategories(input[i], new IResultCollector() {
-				public boolean accept(String category) {
-					categories.add(category);
+				public boolean accept(String[] cats) {
+					for (int j= 0; j < cats.length; j++) {
+						categories.add(cats[j]);
+					}
 					return false;
 				}
 			});
@@ -481,7 +511,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 						fLRUList.put(category, category);
 				}
 			}
-			storeFilteredCategories();
+			storeSettings();
 			fireSelectionChange();
 		}
 	}

@@ -364,6 +364,7 @@ public final class ActionMessages extends NLS {
 	public static String CategoryFilterActionGroup_ShowCategoriesActionDescription;
 	public static String CategoryFilterActionGroup_ShowCategoriesToolTip;
 	public static String CategoryFilterActionGroup_ShowCategoriesLabel;
+	public static String CategoryFilterActionGroup_ShowUncategorizedMembers;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, ActionMessages.class);
