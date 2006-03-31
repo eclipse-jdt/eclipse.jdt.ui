@@ -305,9 +305,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 		}
 		
 		if (fReturnKind == UNDEFINED) {
-			status.addFatalError(RefactoringCoreMessages.FlowAnalyzer_execution_flow, JavaStatusContext.create(fCUnit, getSelection())); 
-			fReturnKind= ERROR;
-			return status;
+			status.addError(RefactoringCoreMessages.FlowAnalyzer_execution_flow, JavaStatusContext.create(fCUnit, getSelection())); 
+			fReturnKind= NO;
 		}
 		computeInput();
 		computeExceptions();
