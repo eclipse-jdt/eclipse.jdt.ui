@@ -341,9 +341,8 @@ public class NLSHintHelper {
 		if (name == null)
 			return null;
 		
-		int i= name.lastIndexOf('.');
-		String packName= name.substring(0, i);
-		String resourceName= name.substring(i + 1) + NLSRefactoring.PROPERTY_FILE_EXT;
+		String packName= Signature.getQualifier(name); 
+		String resourceName= Signature.getSimpleName(name) + NLSRefactoring.PROPERTY_FILE_EXT;
 		
 		return getResourceBundle(project, packName, resourceName);
 	}
