@@ -276,7 +276,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			public void createButton(Composite parent) {
 				fButton= new Button(parent, fStyle);
 				fButton.setText(fLabel);
-				fButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+				fButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 				fButton.setSelection(fCleanUp.isFlag(fFlag));
 				fButton.addSelectionListener(new SelectionAdapter() {
 					public void widgetSelected(SelectionEvent e) {
@@ -424,7 +424,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				
 				fControlButton= new Button(parent, SWT.CHECK);
 				fControlButton.setText(fLabel);
-				fControlButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+				fControlButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 				
 				Composite sub= new Composite(parent, SWT.NONE);
 				sub.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
