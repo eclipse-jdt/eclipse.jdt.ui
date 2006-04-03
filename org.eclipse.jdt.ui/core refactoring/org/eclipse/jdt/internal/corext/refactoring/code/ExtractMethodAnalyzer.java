@@ -311,8 +311,10 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 		computeInput();
 		computeExceptions();
 		computeOutput(status);
-		if (!status.hasFatalError())
-			adjustArgumentsAndMethodLocals();
+		if (status.hasFatalError())
+			return status;
+		
+		adjustArgumentsAndMethodLocals();
 		compressArrays();
 		return status;
 	}
@@ -444,6 +446,9 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 	private void adjustArgumentsAndMethodLocals() {
 		for (int i= 0; i < fArguments.length; i++) {
 			IVariableBinding argument= fArguments[i];
+			// Both arguments and locals consider FlowInfo.WRITE_POTENTIAL. But at the end a variable
+			// can either be a local of an argument. Fix this based on the compute return type which
+			// didn't exist when we computed the locals and arguments (see computeInput())
 			if (fInputFlowInfo.hasAccessMode(fInputFlowContext, argument, FlowInfo.WRITE_POTENTIAL)) {
 				if (argument != fReturnValue)
 					fArguments[i]= null;
