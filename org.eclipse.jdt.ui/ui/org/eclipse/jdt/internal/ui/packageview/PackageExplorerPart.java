@@ -972,11 +972,17 @@ public class PackageExplorerPart extends ViewPart
 			return s;
 			
 		Object[] elements= ((IStructuredSelection)s).toArray();
-				
-		for (int i= 0; i < elements.length; i++) 
-			elements[i]= convertElement(elements[i]);
 		
-		return new StructuredSelection(elements);
+		boolean changed= false;
+		for (int i= 0; i < elements.length; i++) {
+			Object convertedElement= convertElement(elements[i]);
+			changed= changed && convertedElement != elements[i];
+			elements[i]= convertedElement;
+		}
+		if (changed)
+			return new StructuredSelection(elements);
+		else
+			return s;
 	}
 
 	private Object convertElement(Object original) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,9 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.TreeSelection;
 
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IViewReference;
@@ -90,19 +93,54 @@ public class RenameUserInterfaceStarter extends UserInterfaceStarter {
 			if (fDisplay == null)
 				return;
 			for (int i= 0; i < fParts.size(); i++) {
-				final IStructuredSelection selection= (IStructuredSelection)fSelections.get(i);
+				IStructuredSelection currentSelection= (IStructuredSelection)fSelections.get(i);
+				boolean changed= false;
 				final ISetSelectionTarget target= (ISetSelectionTarget)fParts.get(i);
-				List l= selection.toList();
-				int index= l.indexOf(fElement);
-				if (index != -1) { 
-					l.set(index, newElement);
+				final IStructuredSelection[] newSelection= new IStructuredSelection[1];
+				newSelection[0]= currentSelection;
+				if (currentSelection instanceof TreeSelection) {
+					TreeSelection treeSelection= (TreeSelection)currentSelection;
+					TreePath[] paths= treeSelection.getPaths();
+					for (int p= 0; p < paths.length; p++) {
+						TreePath path= paths[p];
+						if (path.getSegmentCount() > 0 && path.getLastSegment().equals(fElement)) {
+							paths[p]= createTreePath(path, newElement);
+							changed= true;
+						}
+					}
+					if (changed) {
+						newSelection[0]= new TreeSelection(paths, treeSelection.getElementComparer());
+					}
+				} else {
+					Object[] elements= currentSelection.toArray();
+					for (int e= 0; e < elements.length; e++) {
+						if (elements[e].equals(fElement)) {
+							elements[e]= newElement;
+							changed= true;
+						}
+					}
+					if (changed) {
+						newSelection[0]= new StructuredSelection(elements);
+					}
+				}
+				if (changed) {
 					fDisplay.asyncExec(new Runnable() {
 						public void run() {
-							target.selectReveal(selection);
+							target.selectReveal(newSelection[0]);
 						}
 					});
 				}
 			}
+		}
+		// Method assumes that segment count of path > 0.
+		private TreePath createTreePath(TreePath old, Object newElement) {
+			int count= old.getSegmentCount();
+			Object[] newObjects= new Object[count];
+			for (int i= 0; i < count - 1; i++) {
+				newObjects[i]= old.getSegment(i);
+			}
+			newObjects[count - 1]= newElement;
+			return new TreePath(newObjects);
 		}
 	}
 	
