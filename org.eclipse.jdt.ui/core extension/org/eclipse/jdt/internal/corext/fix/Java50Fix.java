@@ -54,7 +54,6 @@ import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRe
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsTCModel;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsUpdate;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -114,7 +113,6 @@ public class Java50Fix extends LinkedFix {
 			InferTypeArgumentsConstraintCreator creator= new InferTypeArgumentsConstraintCreator(model, true);
 			
 			CompilationUnit root= cuRewrite.getRoot();
-			root.setProperty(RefactoringASTParser.SOURCE_PROPERTY, cuRewrite.getCu());
 			root.accept(creator);
 			
 			InferTypeArgumentsConstraintsSolver solver= new InferTypeArgumentsConstraintsSolver(model);

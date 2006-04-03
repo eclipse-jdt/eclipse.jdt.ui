@@ -696,7 +696,6 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 *            the compilation unit node of the subtype
 	 */
 	protected final void performFirstPass(final SuperTypeConstraintsCreator creator, final Map units, final Map groups, final ICompilationUnit unit, final CompilationUnit node) {
-		node.setProperty(RefactoringASTParser.SOURCE_PROPERTY, unit);
 		node.accept(creator);
 		final SearchResultGroup group= (SearchResultGroup) groups.get(unit);
 		if (group != null) {
@@ -721,7 +720,6 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 *            the compilation unit node of the subtype
 	 */
 	protected final void performSecondPass(final SuperTypeConstraintsCreator creator, final ICompilationUnit unit, final CompilationUnit node) {
-		node.setProperty(RefactoringASTParser.SOURCE_PROPERTY, unit);
 		node.accept(creator);
 	}
 

@@ -37,8 +37,6 @@ public class RefactoringASTParser {
 		fParser= ASTParser.newParser(level);
 	}
 	
-	public static final String SOURCE_PROPERTY= "org.eclipse.jdt.ui.refactoring.ast_source"; //$NON-NLS-1$
-
 	public CompilationUnit parse(ICompilationUnit unit, boolean resolveBindings) {
 		return parse(unit, resolveBindings, null);
 	}
@@ -59,7 +57,6 @@ public class RefactoringASTParser {
 			fParser.setWorkingCopyOwner(owner);
 		fParser.setCompilerOptions(getCompilerOptions(unit));
 		CompilationUnit result= (CompilationUnit) fParser.createAST(pm);
-		result.setProperty(SOURCE_PROPERTY, unit);
 		return result;
 	}
 
@@ -87,7 +84,6 @@ public class RefactoringASTParser {
 		fParser.setSource(unit);
 		fParser.setCompilerOptions(getCompilerOptions(unit));
 		CompilationUnit result= (CompilationUnit) fParser.createAST(null);
-		result.setProperty(SOURCE_PROPERTY, unit);
 		return result;
 	}
 	
@@ -124,7 +120,6 @@ public class RefactoringASTParser {
 	public static CompilationUnit parseWithASTProvider(ICompilationUnit unit, boolean resolveBindings, IProgressMonitor pm) {
 		CompilationUnit cuNode= ASTProvider.getASTProvider().getAST(unit, ASTProvider.WAIT_ACTIVE_ONLY, pm);
 		if (cuNode != null) {
-			cuNode.setProperty(SOURCE_PROPERTY, unit);
 			return cuNode;
 		} else {
 			return new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(unit, null, resolveBindings, ASTProvider.SHARED_AST_STATEMENT_RECOVERY, pm);
@@ -132,9 +127,12 @@ public class RefactoringASTParser {
 	}
 
 	public static ICompilationUnit getCompilationUnit(ASTNode node) {
-		Object source= node.getRoot().getProperty(SOURCE_PROPERTY);
-		if (source instanceof ICompilationUnit)
-			return (ICompilationUnit)source;
+		ASTNode root= node.getRoot();
+		if (root instanceof CompilationUnit) {
+			IJavaElement cu= ((CompilationUnit) root).getJavaElement();
+			if (cu instanceof ICompilationUnit)
+				return (ICompilationUnit) cu;
+		}
 		return null;
 	}
 	

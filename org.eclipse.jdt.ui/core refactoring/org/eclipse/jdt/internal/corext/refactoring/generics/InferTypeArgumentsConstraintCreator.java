@@ -75,7 +75,6 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ReturnTypeVa
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TTypes;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor {
@@ -98,7 +97,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 	
 	public boolean visit(CompilationUnit node) {
 		fTCModel.newCu(); //TODO: make sure that accumulators are reset after last CU!
-		fCU= RefactoringASTParser.getCompilationUnit(node);
+		fCU= (ICompilationUnit) node.getJavaElement();
 		return super.visit(node);
 	}
 	

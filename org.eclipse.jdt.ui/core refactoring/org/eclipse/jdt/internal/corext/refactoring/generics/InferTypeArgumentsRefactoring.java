@@ -182,7 +182,6 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 					parser.createASTs(batchCus, new String[0], new ASTRequestor() {
 						public void acceptAST(final ICompilationUnit source, final CompilationUnit ast) {
 							batchMonitor.subTask(source.getElementName());
-							ast.setProperty(RefactoringASTParser.SOURCE_PROPERTY, source);
 	
 							SafeRunner.run(new ISafeRunnable() {
 								public void run() throws Exception {
