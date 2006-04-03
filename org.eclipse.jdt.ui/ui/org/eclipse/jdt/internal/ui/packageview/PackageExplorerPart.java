@@ -976,7 +976,7 @@ public class PackageExplorerPart extends ViewPart
 		boolean changed= false;
 		for (int i= 0; i < elements.length; i++) {
 			Object convertedElement= convertElement(elements[i]);
-			changed= changed && convertedElement != elements[i];
+			changed= changed || convertedElement != elements[i];
 			elements[i]= convertedElement;
 		}
 		if (changed)
