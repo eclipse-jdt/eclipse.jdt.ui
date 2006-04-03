@@ -177,7 +177,12 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 			}
-
+		} else if (selectedElements.length == 1 && selectedElements[0] instanceof IType) {
+			try {
+				return tryIfPropertyCuSelected(((IType)selectedElements[0]).getCompilationUnit());
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
 		}
 		
 		Hashtable result= new Hashtable();
@@ -199,11 +204,14 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 					if (elem.exists()) {
 						switch (elem.getElementType()) {
 							case IJavaElement.TYPE:
-								return elem.getParent().getElementType() == IJavaElement.COMPILATION_UNIT; // for browsing perspective
+								if (elem.getParent().getElementType() == IJavaElement.COMPILATION_UNIT) {
+									return tryIfPropertyCuSelected((ICompilationUnit)elem.getParent()) != null;
+								}
+								return false;
 							case IJavaElement.COMPILATION_UNIT:
-								return true;
+								return tryIfPropertyCuSelected((ICompilationUnit)elem) != null;
 							case IJavaElement.IMPORT_CONTAINER:
-								return true;
+								return false;
 							case IJavaElement.PACKAGE_FRAGMENT:
 							case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 								IPackageFragmentRoot root= (IPackageFragmentRoot) elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
