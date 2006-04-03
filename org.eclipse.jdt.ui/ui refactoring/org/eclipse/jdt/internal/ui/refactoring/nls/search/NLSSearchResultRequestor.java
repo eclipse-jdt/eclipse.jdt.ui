@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.PropertyFileDocumentModel;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -113,7 +114,12 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		if (key != null && isKeyDefined(key))
 			return;
 
-		fResult.addMatch(new Match(javaElement, mutableKeyPosition.getOffset(), mutableKeyPosition.getLength()));
+		ICompilationUnit[] allCompilationUnits= JavaModelUtil.getAllCompilationUnits(new IJavaElement[] {javaElement});
+		Object element= javaElement;
+		if (allCompilationUnits != null && allCompilationUnits.length == 1) 
+			element= allCompilationUnits[0];
+
+		fResult.addMatch(new Match(element, mutableKeyPosition.getOffset(), mutableKeyPosition.getLength()));
 	}
 
 	public void reportUnusedPropertyNames(IProgressMonitor pm) {

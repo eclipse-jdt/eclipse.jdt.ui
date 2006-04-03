@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.swt.graphics.Image;
@@ -38,7 +40,7 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider {
 			FileEntry fileEntry= (FileEntry) element;
 			return fileEntry.getMessage();
 		} else {
-			return fLabelProvider.getText(element);
+			return Messages.format(NLSSearchMessages.NLSSearchResultLabelProvider2_undefinedKeys, fLabelProvider.getText(element));
 		}
 	}
 	

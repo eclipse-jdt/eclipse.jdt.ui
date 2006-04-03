@@ -31,6 +31,7 @@ final class NLSSearchMessages extends NLS {
 	
 	public static String NLSSearchResultCollector_duplicateKeys;
 	public static String NLSSearchResultCollector_unusedKeys;
+	public static String NLSSearchResultLabelProvider2_undefinedKeys;
 	public static String NLSSearchResultRequestor_searching;
 	
 	public static String SearchOperation_pluralLabelPatternPostfix;
