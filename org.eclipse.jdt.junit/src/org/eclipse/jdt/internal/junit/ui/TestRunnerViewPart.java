@@ -1253,7 +1253,7 @@ action enablement
 			}
 		});
 		top.setTopLeft(empty); // makes ViewForm draw the horizontal separator line ...
-		fTestViewer= new TestViewer(top, this);
+		fTestViewer= new TestViewer(top, fClipboard, this);
 		top.setContent(fTestViewer.getTreeViewer().getTree());
 		
 		ViewForm bottom= new ViewForm(fSashForm, SWT.NONE);

@@ -72,7 +72,7 @@ public class CopyFailureListAction extends Action {
 				while (start < failureTrace.length()) {
 					int idx= failureTrace.indexOf('\n', start);
 					if (idx != -1) {
-						String line= failureTrace.substring(start, idx - 1);
+						String line= failureTrace.substring(start, idx);
 						buf.append(line).append(lineDelim);
 						start= idx + 1;
 					} else {

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseEvent;
@@ -102,6 +103,7 @@ public class TestViewer {
 
 	
 	private final TestRunnerViewPart fTestRunnerPart;
+	private final Clipboard fClipboard;
 	
 	private final TreeViewer fTreeViewer;
 	private final Image fHierarchyIcon;
@@ -119,9 +121,11 @@ public class TestViewer {
 	private TestCaseElement fAutoScrollTarget;
 	private LinkedList/*<TestSuiteElement>*/ fAutoClose;
 	private HashSet/*<TestSuite>*/ fAutoExpand;
+
 	
-	public TestViewer(Composite parent, TestRunnerViewPart runner) {
+	public TestViewer(Composite parent, Clipboard clipboard, TestRunnerViewPart runner) {
 		fTestRunnerPart= runner;
+		fClipboard= clipboard;
 		
 		fHierarchyIcon= TestRunnerViewPart.createImage("obj16/testhier.gif"); //$NON-NLS-1$
 		parent.addDisposeListener(new DisposeListener() {
@@ -211,6 +215,8 @@ public class TestViewer {
 			manager.add(new ExpandAllAction());
 
 		}
+		if (fTestRunSession != null && fTestRunSession.getFailureCount() > 0)
+			manager.add(new CopyFailureListAction(fTestRunnerPart, fClipboard));
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS + "-end")); //$NON-NLS-1$
 	}
