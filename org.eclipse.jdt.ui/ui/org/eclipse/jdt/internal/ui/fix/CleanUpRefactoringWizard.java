@@ -21,8 +21,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -245,7 +243,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		private class TabFolderLayout extends Layout {
 
 			protected Point computeSize (Composite composite, int wHint, int hHint, boolean flushCache) {
-				return new Point(730, 340);
+				return new Point(600, 340);
 			}
 			
 			protected void layout (Composite composite, boolean flushCache) {
@@ -682,34 +680,32 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			fCleanUps= new ICleanUp[9];
 			
-			ScrolledComposite codeStyleTab= createTab(parent, MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description);
-			Composite codeStyle= fillCodeStyleTab(codeStyleTab, project, section);
-			codeStyleTab.setContent(codeStyle);
-			codeStyleTab.setMinSize(codeStyle.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+			Composite codeStyleTab= createTab(parent, MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description);
+			fillCodeStyleTab(codeStyleTab, project, section);
 			
-			ScrolledComposite accessesTab= createTab(parent, MultiFixMessages.CleanUpRefactoringWizard_memberAccesses_sectionDescription);
-			Composite accesses= fillMemberAccessesTab(accessesTab, project, section);
-			accessesTab.setContent(accesses);
-			accessesTab.setMinSize(accesses.computeSize(SWT.DEFAULT, SWT.DEFAULT));		
+			Composite accessesTab= createTab(parent, MultiFixMessages.CleanUpRefactoringWizard_memberAccesses_sectionDescription);
+			fillMemberAccessesTab(accessesTab, project, section);	
 			
-			ScrolledComposite unnecessaryCodeTab= createTab(parent, MultiFixMessages.CleanUpRefactoringWizard_UnnecessaryCode_tabLabel);
-			Composite unnecessaryCode= fillUnnecessaryCodeTab(unnecessaryCodeTab, project, section);
-			unnecessaryCodeTab.setContent(unnecessaryCode);
-			unnecessaryCodeTab.setMinSize(unnecessaryCode.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+			Composite unnecessaryCodeTab= createTab(parent, MultiFixMessages.CleanUpRefactoringWizard_UnnecessaryCode_tabLabel);
+			fillUnnecessaryCodeTab(unnecessaryCodeTab, project, section);
 			
-			ScrolledComposite missingCodeTab= createTab(parent, MultiFixMessages.CleanUpRefactoringWizard_MissingCode_tabLabel);
-			Composite missingCode= fillMissingCodeTab(missingCodeTab, project, section);
-			missingCodeTab.setContent(missingCode);
-			missingCodeTab.setMinSize(missingCode.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+			Composite missingCodeTab= createTab(parent, MultiFixMessages.CleanUpRefactoringWizard_MissingCode_tabLabel);
+			fillMissingCodeTab(missingCodeTab, project, section);
 		}
 		
 		private Composite fillCodeStyleTab(Composite parent, final IJavaProject project, IDialogSettings settings) {
-			Composite composite = new SashForm(parent, SWT.HORIZONTAL);
-			composite.setLayout(new GridLayout(2, false));
+			Composite composite= new Composite(parent, SWT.NONE);
+			GridLayout gridLayout= new GridLayout(2, false);
+			gridLayout.marginWidth= 0;
+			gridLayout.marginHeight= 0;
+			composite.setLayout(gridLayout);
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 			Composite left= new Composite(composite, SWT.NONE);
-			left.setLayout(new GridLayout(1, false));
+			gridLayout= new GridLayout(1, false);
+			gridLayout.marginWidth= 0;
+			gridLayout.marginHeight= 0;
+			left.setLayout(gridLayout);
 			left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 			
 			Composite groups= new Composite(left, SWT.NONE);
@@ -776,12 +772,18 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		}
 		
 		private Composite fillMemberAccessesTab(Composite parent, IJavaProject project, IDialogSettings settings) {
-			Composite composite = new SashForm(parent, SWT.HORIZONTAL);
-			composite.setLayout(new GridLayout(2, false));
+			Composite composite= new Composite(parent, SWT.NONE);
+			GridLayout gridLayout= new GridLayout(2, false);
+			gridLayout.marginWidth= 0;
+			gridLayout.marginHeight= 0;
+			composite.setLayout(gridLayout);
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 			Composite left= new Composite(composite, SWT.NONE);
-			left.setLayout(new GridLayout(1, false));
+			gridLayout= new GridLayout(1, false);
+			gridLayout.marginWidth= 0;
+			gridLayout.marginHeight= 0;
+			left.setLayout(gridLayout);
 			left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 			
 			Composite groups= new Composite(left, SWT.NONE);
@@ -828,13 +830,19 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			return composite;
 		}
 
-		private Composite fillUnnecessaryCodeTab(ScrolledComposite parent, final IJavaProject project, IDialogSettings section) {
-			Composite composite= new SashForm(parent, SWT.HORIZONTAL);
-			composite.setLayout(new GridLayout(1, false));
+		private Composite fillUnnecessaryCodeTab(Composite parent, final IJavaProject project, IDialogSettings section) {
+			Composite composite= new Composite(parent, SWT.NONE);
+			GridLayout gridLayout= new GridLayout(2, false);
+			gridLayout.marginWidth= 0;
+			gridLayout.marginHeight= 0;
+			composite.setLayout(gridLayout);
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 			Composite left= new Composite(composite, SWT.NONE);
-			left.setLayout(new GridLayout(1, false));
+			gridLayout= new GridLayout(1, false);
+			gridLayout.marginWidth= 0;
+			gridLayout.marginHeight= 0;
+			left.setLayout(gridLayout);
 			left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 			
 			Composite groups= new Composite(left, SWT.NONE);
@@ -883,13 +891,19 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			return composite;
 		}
 
-		private Composite fillMissingCodeTab(ScrolledComposite parent, final IJavaProject project, IDialogSettings section) {
-			Composite composite= new SashForm(parent, SWT.HORIZONTAL);
-			composite.setLayout(new GridLayout(2, false));
+		private Composite fillMissingCodeTab(Composite parent, final IJavaProject project, IDialogSettings section) {
+			Composite composite= new Composite(parent, SWT.NONE);
+			GridLayout gridLayout= new GridLayout(2, false);
+			gridLayout.marginWidth= 0;
+			gridLayout.marginHeight= 0;
+			composite.setLayout(gridLayout);
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 			Composite left= new Composite(composite, SWT.NONE);
-			left.setLayout(new GridLayout(1, false));
+			gridLayout= new GridLayout(1, false);
+			gridLayout.marginWidth= 0;
+			gridLayout.marginHeight= 0;
+			left.setLayout(gridLayout);
 			left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 			
 			Composite groups= new Composite(left, SWT.NONE);
@@ -946,7 +960,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 			Label label= new Label(composite, SWT.NONE);
-			composite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+			label.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 			label.setText(MultiFixMessages.CleanUpRefactoringWizard_previewLabel_text);
 			
 			IJavaProject javaProject= ((CleanUpRefactoring)getRefactoring()).getProjects()[0];
@@ -1098,17 +1112,15 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			});
 		}
 
-		private ScrolledComposite createTab(TabFolder parent, String label) {
+		private Composite createTab(TabFolder parent, String label) {
 			TabItem csTab= new TabItem(parent, SWT.NONE);
 			csTab.setText(label);
 			
-			ScrolledComposite scrolled= new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
-			scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			scrolled.setLayout(new GridLayout(1, false));
-			scrolled.setExpandHorizontal(true);
-			scrolled.setExpandVertical(true);			
-			csTab.setControl(scrolled);
-			return scrolled;
+			Composite result= new Composite(parent, SWT.NONE);
+			result.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			result.setLayout(new GridLayout(1, false));
+			csTab.setControl(result);
+			return result;
 		}
 
 		private Composite createGroup(Composite parent, String description) {
