@@ -18,6 +18,9 @@ import junit.framework.TestCase;
 
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -63,6 +66,8 @@ public class TestRunListenerTest extends TestCase {
 		IPackageFragment pack= root.createPackageFragment("pack", true, null);
 		ICompilationUnit aTestCase= pack.createCompilationUnit("ATestCase.java", source, true, null);
 		
+		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+		
 		TestRunListener.startListening();
 		
 		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
@@ -87,6 +92,7 @@ public class TestRunListenerTest extends TestCase {
 			}
 			private void logLaunch(String action, ILaunch launch) {
 				StringBuffer buf= new StringBuffer();
+				buf.append(System.currentTimeMillis()).append(" ");
 				buf.append("launch ").append(action).append(": ");
 				ILaunchConfiguration launchConfiguration= launch.getLaunchConfiguration();
 				if (launchConfiguration != null) {
