@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.NavigateActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
@@ -28,6 +30,7 @@ class NewSearchViewActionGroup extends CompositeActionGroup {
 		Assert.isNotNull(part);
 		setGroups(new ActionGroup[]{
 			fNavigateActionGroup= new NavigateActionGroup(part),
+			new GenerateActionGroup(part), 
 			new RefactorActionGroup(part),
 			new JavaSearchActionGroup(part) 
 			});
