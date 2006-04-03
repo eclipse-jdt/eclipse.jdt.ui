@@ -293,5 +293,10 @@ public class IntroduceIndirectionTests extends RefactoringTest {
 		// multiple generic instantiations
 		helperPass(new String[] { "p.MultiGenerics" }, "bar", "p.MultiGenerics", 7, 16, 7, 26);
 	}
+	
+	public void test31() throws Exception {
+		// test for bug 127665
+		helperPass(new String[] { "p.Test" }, "foo", "p.Test0", 13, 20, 13, 23);
+	}
 
 }

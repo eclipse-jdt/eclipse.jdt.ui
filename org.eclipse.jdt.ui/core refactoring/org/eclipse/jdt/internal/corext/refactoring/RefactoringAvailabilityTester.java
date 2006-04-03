@@ -649,9 +649,19 @@ public final class RefactoringAvailabilityTester {
 
 	public static boolean isIntroduceIndirectionAvailable(final JavaTextSelection selection) throws JavaModelException {
 		final IJavaElement[] elements= selection.resolveElementAtOffset();
-		if (elements.length != 1)
+		if (elements.length == 1)
+			return (elements[0] instanceof IMethod) && isIntroduceIndirectionAvailable(((IMethod) elements[0]));
+		ASTNode[] selectedNodes= selection.resolveSelectedNodes();
+		if (selectedNodes.length != 1)
 			return false;
-		return (elements[0] instanceof IMethod) && isIntroduceIndirectionAvailable(((IMethod) elements[0]));
+		switch (selectedNodes[0].getNodeType()) {
+			case ASTNode.METHOD_DECLARATION:
+			case ASTNode.METHOD_INVOCATION:
+			case ASTNode.SUPER_METHOD_INVOCATION:
+				return true;
+			default:
+				return false;
+		}
 	}
 
 	public static boolean isIntroduceParameterAvailable(final ASTNode[] selectedNodes, ASTNode coveringNode) {

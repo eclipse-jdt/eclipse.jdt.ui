@@ -990,6 +990,8 @@ public class IntroduceIndirectionRefactoring extends CommentRefactoring implemen
 	 * Attempts to qualify a "this" expression for a method invocation with an appropriate qualifier. 
 	 * The invoked method is analyzed according to the following specs:
 	 * 
+	 * 'this' must be qualified iff method is declared in an enclosing type or a supertype of an enclosing type
+	 * 
 	 * 1) The method is declared somewhere outside of the cu of the invocation
 	 *      1a) inside a supertype of the current type
 	 *      1b) inside a supertype of an enclosing type
@@ -1009,8 +1011,11 @@ public class IntroduceIndirectionRefactoring extends CommentRefactoring implemen
 
 		ITypeBinding currentTypeBinding= null;
 		if (methodDeclaration != null) {
-			// Case 1) : Declaring class is inside this cu => use its name
-			currentTypeBinding= methodBinding.getDeclaringClass();
+			// Case 1) : Declaring class is inside this cu => use its name if it's declared in an enclosing type
+			if (ASTNodes.isParent(originalInvocation, methodDeclaration.getParent()))
+				currentTypeBinding= methodBinding.getDeclaringClass();
+			else
+				currentTypeBinding= ASTNodes.getEnclosingType(originalInvocation);
 		} else {
 			// Case 2) : Declaring class is outside of this cu => find subclass in this cu
 			ASTNode currentTypeDeclaration= getEnclosingTypeDeclaration(originalInvocation);
