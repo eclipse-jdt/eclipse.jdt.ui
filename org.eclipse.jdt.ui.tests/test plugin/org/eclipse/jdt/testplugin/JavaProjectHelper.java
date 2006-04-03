@@ -434,7 +434,7 @@ public class JavaProjectHelper {
 		addToClasspath(jproject, cpe);
 		return jproject.getPackageFragmentRoot(path.toString());
 	}
-
+	
 
 	/**
 	 * Copies the library into the project and adds it as library entry.
@@ -482,7 +482,9 @@ public class JavaProjectHelper {
 			}
 			container= folder;
 		}
-		return addLibrary(jproject, container.getFullPath(), sourceAttachPath, sourceAttachRoot);
+		IClasspathEntry cpe= JavaCore.newLibraryEntry(container.getFullPath(), sourceAttachPath, sourceAttachRoot);
+		addToClasspath(jproject, cpe);
+		return jproject.getPackageFragmentRoot(container);
 	}
 
 	/**
