@@ -146,8 +146,14 @@ public class TypeInfoViewer {
 	    public int compare(Object left, Object right) {
 	     	TypeInfo leftInfo= (TypeInfo)left;
 	     	TypeInfo rightInfo= (TypeInfo)right;
-	     	int leftCategory= getCategory(leftInfo);
-	     	int rightCategory= getCategory(rightInfo);
+	     	int leftCategory= getCamelCaseCategory(leftInfo);
+	     	int rightCategory= getCamelCaseCategory(rightInfo);
+	     	if (leftCategory < rightCategory)
+	     		return -1;
+	     	if (leftCategory > rightCategory)
+	     		return +1;
+	     	leftCategory= getElementTypeCategory(leftInfo);
+	     	rightCategory= getElementTypeCategory(rightInfo);
 	     	if (leftCategory < rightCategory)
 	     		return -1;
 	     	if (leftCategory > rightCategory)
@@ -189,12 +195,19 @@ public class TypeInfoViewer {
 			return fLabelProvider.getContainerName(leftType).compareTo(
 				fLabelProvider.getContainerName(rightType));
 		}
-		private int getCategory(TypeInfo type) {
+		private int getCamelCaseCategory(TypeInfo type) {
 			if (fFilter == null)
 				return 0;
 			if (!fFilter.isCamcelCasePattern())
 				return 0;
 			return fFilter.matchesRawNamePattern(type) ? 0 : 1;
+		}
+		private int getElementTypeCategory(TypeInfo type) {
+			if (type.getElementType() == TypeInfo.IFILE_TYPE_INFO)
+				return 0;
+			if (type.getElementType() == TypeInfo.JAR_FILE_ENTRY_TYPE_INFO)
+				return 1;
+			return 2;
 		}
 	}
 	
