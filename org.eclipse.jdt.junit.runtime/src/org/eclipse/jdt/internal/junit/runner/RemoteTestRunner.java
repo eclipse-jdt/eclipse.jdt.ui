@@ -191,11 +191,14 @@ public class RemoteTestRunner implements TestListener {
      * </pre>
      */
 	public static void main(String[] args) {
-		RemoteTestRunner testRunServer= new RemoteTestRunner();
-		testRunServer.init(args);
-		testRunServer.run();
-		// fix for 14434
-		System.exit(0);
+		try {
+			RemoteTestRunner testRunServer= new RemoteTestRunner();
+			testRunServer.init(args);
+			testRunServer.run();
+		} finally {
+			// fix for 14434
+			System.exit(0);
+		}
 	}
 	
 	/**
@@ -725,13 +728,22 @@ public class RemoteTestRunner implements TestListener {
 	/**
 	 * Returns the stack trace for the given throwable.
 	 */
-	private String getTrace(Throwable t) { 
+	private String getTrace(Throwable t) {
 		StringWriter stringWriter= new StringWriter();
 		PrintWriter writer= new PrintWriter(stringWriter);
-		t.printStackTrace(writer);
+		try {
+			t.printStackTrace(writer);
+		} catch (RuntimeException e) {
+			writer.println(JUnitMessages.getString("RemoteTestRunner.error.couldnotprintstacktrace")); //$NON-NLS-1$
+			try {
+				e.printStackTrace(writer);
+			} catch (RuntimeException ignored) {
+				// ignore any further problems, see bug 133925
+			} 
+		}
 		StringBuffer buffer= stringWriter.getBuffer();
 		return buffer.toString();
-	}	
+	}
 
 	/**
 	 * Stop the current test run.
