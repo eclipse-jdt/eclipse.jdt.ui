@@ -60,38 +60,43 @@ public class PackageFragmentProvider implements IPropertyChangeListener {
 	 */
 	public Object[] getChildren(Object parentElement) {
 		try {
-			IJavaElement iJavaElement= (IJavaElement) parentElement;
-			int type= iJavaElement.getElementType();
-
-			switch (type) {
-				case IJavaElement.JAVA_PROJECT: {
-					IJavaProject project= (IJavaProject) iJavaElement;
-					
-					IPackageFragmentRoot root= project.findPackageFragmentRoot(project.getPath());
-					if (root != null) {
-						List children= getTopLevelChildren(root);
-						return filter(children).toArray();
-					} 
-					break;
-				}
-				case IJavaElement.PACKAGE_FRAGMENT_ROOT: {
-					IPackageFragmentRoot root= (IPackageFragmentRoot) parentElement;
-					if (root.exists()) {
-						return filter(getTopLevelChildren(root)).toArray();
+			if (parentElement instanceof IFolder) {
+				IResource[] resources= ((IFolder) parentElement).members();
+				return filter(getFolders(resources)).toArray();
+			} else if (parentElement instanceof IJavaElement) {
+				IJavaElement iJavaElement= (IJavaElement) parentElement;
+				int type= iJavaElement.getElementType();
+	
+				switch (type) {
+					case IJavaElement.JAVA_PROJECT: {
+						IJavaProject project= (IJavaProject) iJavaElement;
+						
+						IPackageFragmentRoot root= project.findPackageFragmentRoot(project.getPath());
+						if (root != null) {
+							List children= getTopLevelChildren(root);
+							return filter(children).toArray();
+						} 
+						break;
 					}
-					break;
-				}
-				case IJavaElement.PACKAGE_FRAGMENT: {
-					IPackageFragment packageFragment = (IPackageFragment) parentElement;
-					if (!packageFragment.isDefaultPackage()) {
-						IPackageFragmentRoot root= (IPackageFragmentRoot) packageFragment.getParent();
-						List children = getPackageChildren(root, packageFragment);
-						return filter(children).toArray();
+					case IJavaElement.PACKAGE_FRAGMENT_ROOT: {
+						IPackageFragmentRoot root= (IPackageFragmentRoot) parentElement;
+						if (root.exists()) {
+							return filter(getTopLevelChildren(root)).toArray();
+						}
+						break;
 					}
-					break;
+					case IJavaElement.PACKAGE_FRAGMENT: {
+						IPackageFragment packageFragment = (IPackageFragment) parentElement;
+						if (!packageFragment.isDefaultPackage()) {
+							IPackageFragmentRoot root= (IPackageFragmentRoot) packageFragment.getParent();
+							List children = getPackageChildren(root, packageFragment);
+							return filter(children).toArray();
+						}
+						break;
+					}
+					default :
+						// do nothing
 				}
-				default :
-					// do nothing
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
@@ -183,6 +188,22 @@ public class PackageFragmentProvider implements IPropertyChangeListener {
 		}	
 		return topLevelElements;
 	}
+
+	private List getFolders(IResource[] resources) throws JavaModelException {
+		List list= new ArrayList(resources.length);
+		for (int i= 0; i < resources.length; i++) {
+			IResource resource= resources[i];
+			if (resource instanceof IFolder) {
+				IFolder folder= (IFolder) resource;
+				IJavaElement element= JavaCore.create(folder);
+				if (element instanceof IPackageFragment) {
+					list.add(element);	
+				} 
+			}	
+		}
+		return list;
+	}
+
 
 	/*
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(Object)
