@@ -419,7 +419,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		}
 		
 		// target must not be smaller than source
-		if (!VERSION_1_3.equals(source) && JavaModelUtil.isVersionLessThan(source, target)) {
+		if (!VERSION_1_3.equals(source) && JavaModelUtil.isVersionLessThan(target, source)) {
 			status.setError(PreferencesMessages.ComplianceConfigurationBlock_classfile_greater_source); 
 			return status;
 		}
