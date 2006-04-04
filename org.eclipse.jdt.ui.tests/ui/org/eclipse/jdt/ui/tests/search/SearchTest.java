@@ -22,7 +22,7 @@ public class SearchTest {
 		suite.addTest(TreeContentProviderTestWrapper.allTests());
 		suite.addTest(ParticipantTest.allTests());
 		suite.addTest(FileAdapterTest.allTests());
-        suite.addTest(NLSSearchTest.suite());
+//        suite.addTest(NLSSearchTest.suite());
 		return suite;
 	}
 }
