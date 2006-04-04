@@ -301,7 +301,7 @@ final class CompletionProposalComputerDescriptor {
 			monitor.done();
 		}
 		
-		fRegistry.remove(this, status);
+		fRegistry.informUser(this, status);
 
 		return Collections.EMPTY_LIST;
 	}
@@ -346,7 +346,7 @@ final class CompletionProposalComputerDescriptor {
 			monitor.done();
 		}
 		
-		fRegistry.remove(this, status);
+		fRegistry.informUser(this, status);
 		
 		return Collections.EMPTY_LIST;
 	}
@@ -378,7 +378,7 @@ final class CompletionProposalComputerDescriptor {
 			status= createExceptionStatus(x);
 		}
 		
-		fRegistry.remove(this, status);
+		fRegistry.informUser(this, status);
 	}
 
 	/**
@@ -407,7 +407,7 @@ final class CompletionProposalComputerDescriptor {
 			status= createExceptionStatus(x);
 		}
 		
-		fRegistry.remove(this, status);
+		fRegistry.informUser(this, status);
 	}
 	
 	
@@ -417,7 +417,7 @@ final class CompletionProposalComputerDescriptor {
 			stats.endRun();
 			if (stats.isFailure()) {
 				status= createPerformanceStatus(operation);
-				fRegistry.remove(this, status);
+				fRegistry.informUser(this, status);
 			}
 		}
 	}
@@ -435,42 +435,42 @@ final class CompletionProposalComputerDescriptor {
 
 	private Status createExceptionStatus(InvalidRegistryObjectException x) {
 		// extension has become invalid - log & disable
-		String disable= createDisableMessage();
+		String blame= createBlameMessage();
 		String reason= JavaTextMessages.CompletionProposalComputerDescriptor_reason_invalid;
-		return new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, disable + " " + reason, x); //$NON-NLS-1$
+		return new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, blame + " " + reason, x); //$NON-NLS-1$
 	}
 
 	private Status createExceptionStatus(CoreException x) {
 		// unable to instantiate the extension - log & disable
-		String disable= createDisableMessage();
+		String blame= createBlameMessage();
 		String reason= JavaTextMessages.CompletionProposalComputerDescriptor_reason_instantiation;
-		return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, disable + " " + reason, x); //$NON-NLS-1$
+		return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, blame + " " + reason, x); //$NON-NLS-1$
 	}
 	
 	private Status createExceptionStatus(RuntimeException x) {
 		// misbehaving extension - log & disable
-		String disable= createDisableMessage();
-		String reason= JavaTextMessages.CompletionProposalComputerDescriptor_reason_runime_ex;
-		return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, disable + " " + reason, x); //$NON-NLS-1$
+		String blame= createBlameMessage();
+		String reason= JavaTextMessages.CompletionProposalComputerDescriptor_reason_runtime_ex;
+		return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, blame + " " + reason, x); //$NON-NLS-1$
 	}
 
 	private Status createAPIViolationStatus(String operation) {
-		String disable= createDisableMessage();
+		String blame= createBlameMessage();
 		Object[] args= {operation};
 		String reason= Messages.format(JavaTextMessages.CompletionProposalComputerDescriptor_reason_API, args);
-		return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, disable + " " + reason, null); //$NON-NLS-1$
+		return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, blame + " " + reason, null); //$NON-NLS-1$
 	}
 
 	private Status createPerformanceStatus(String operation) {
-		String disable= createDisableMessage();
+		String blame= createBlameMessage();
 		Object[] args= {operation};
 		String reason= Messages.format(JavaTextMessages.CompletionProposalComputerDescriptor_reason_performance, args);
-		return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, disable + " " + reason, null); //$NON-NLS-1$
+		return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, blame + " " + reason, null); //$NON-NLS-1$
 	}
 
-	private String createDisableMessage() {
-		Object[] args= { getName(), getId() };
-		String disable= Messages.format( JavaTextMessages.CompletionProposalComputerDescriptor_disabling_message, args);
+	private String createBlameMessage() {
+		Object[] args= { getName(), fElement.getDeclaringExtension().getContributor().getName() };
+		String disable= Messages.format( JavaTextMessages.CompletionProposalComputerDescriptor_blame_message, args);
 		return disable;
 	}
 	

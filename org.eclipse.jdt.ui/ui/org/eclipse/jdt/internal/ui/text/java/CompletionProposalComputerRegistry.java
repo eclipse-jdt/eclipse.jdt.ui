@@ -28,8 +28,18 @@ import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Link;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -306,22 +316,31 @@ public final class CompletionProposalComputerRegistry {
 	}
 
 	/**
-	 * Remove the descriptor from the set of managed descriptors.
-	 * Nothing happens if <code>descriptor</code> is not managed by
-	 * the receiver.
+	 * Log the status and inform the user about a misbehaving extension.
 	 * 
-	 * @param descriptor the descriptor to be removed
+	 * @param descriptor the descriptor of the misbehaving extension
 	 * @param status a status object that will be logged
 	 */
-	void remove(CompletionProposalComputerDescriptor descriptor, IStatus status) {
-		Set partitions= descriptor.getPartitions();
-		for (Iterator it= partitions.iterator(); it.hasNext();) {
-			String partition= (String) it.next();
-			List descriptors= (List) fDescriptorsByPartition.get(partition);
-			if (descriptors != null)
-				descriptors.remove(descriptor);
-		}
-		informUser(status);
+	void informUser(CompletionProposalComputerDescriptor descriptor, IStatus status) {
+		JavaPlugin.log(status);
+        String title= JavaTextMessages.CompletionProposalComputerRegistry_error_dialog_title;
+        final String avoidHint= "To avoid this message, disable the '" + descriptor.getCategory().getName() + "' category on the <a>content assist</a> preference page.";
+        String message= status.getMessage();
+        
+        // inlined from MessageDialog.openError
+        MessageDialog dialog = new MessageDialog(JavaPlugin.getActiveWorkbenchShell(), title, null /* default image */, message, MessageDialog.ERROR, new String[] { IDialogConstants.OK_LABEL }, 0) {
+        	protected Control createCustomArea(Composite parent) {
+        		Link link= new Link(parent, SWT.NONE);
+        		link.setText(avoidHint);
+        		link.addSelectionListener(new SelectionAdapter() {
+        			public void widgetSelected(SelectionEvent e) {
+        				PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.CodeAssistPreferencePageInProgress", null, null).open(); //$NON-NLS-1$
+        			}
+        		});
+        		return link;
+        	}
+        };
+        dialog.open();
 	}
 
 	private void informUser(IStatus status) {
