@@ -9,3 +9,4 @@ Bundle-Localization: plugin
 Export-Package: org.eclipse.jdt.internal.junit.runner;x-friends:="org.eclipse.jdt.junit"
 Require-Bundle: org.junit
 Eclipse-LazyStart: true
+Bundle-RequiredExecutionEnvironment: J2SE-1.4

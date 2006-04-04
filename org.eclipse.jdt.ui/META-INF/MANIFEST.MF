@@ -133,3 +133,4 @@ Require-Bundle: org.eclipse.ui,
 Eclipse-LazyStart: true
 Plugin-Class: org.eclipse.jdt.internal.ui.JavaPlugin
 Import-Package: com.ibm.icu.text
+Bundle-RequiredExecutionEnvironment: J2SE-1.4
