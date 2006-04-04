@@ -509,7 +509,11 @@ public final class MemberVisibilityAdjustor {
 	 */
 	private void adjustIncomingVisibility(final IJavaElement element, IMember referencedMovedElement, final IProgressMonitor monitor) throws JavaModelException {
 		final ModifierKeyword threshold= getVisibilityThreshold(element, referencedMovedElement, monitor);
-		if (hasLowerVisibility(referencedMovedElement.getFlags(), threshold == null ? Modifier.NONE : threshold.toFlagValue()) && needsVisibilityAdjustment(referencedMovedElement, threshold))
+		int flags= referencedMovedElement.getFlags();
+		IType declaring= referencedMovedElement.getDeclaringType();
+		if (declaring.isInterface())
+			return;
+		if (hasLowerVisibility(flags, threshold == null ? Modifier.NONE : threshold.toFlagValue()) && needsVisibilityAdjustment(referencedMovedElement, threshold))
 			fAdjustments.put(referencedMovedElement, new IncomingMemberVisibilityAdjustment(referencedMovedElement, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, Messages.format(getMessage(referencedMovedElement), new String[] { getLabel(referencedMovedElement), getLabel(threshold)}), JavaStatusContext.create(referencedMovedElement), null, RefactoringStatusEntry.NO_CODE, null)));
 	}
 
