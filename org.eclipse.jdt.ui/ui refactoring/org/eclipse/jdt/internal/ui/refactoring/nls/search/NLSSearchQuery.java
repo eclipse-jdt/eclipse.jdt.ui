@@ -25,6 +25,7 @@ import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
@@ -40,8 +41,11 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 
 
 public class NLSSearchQuery implements ISearchQuery {
@@ -51,10 +55,6 @@ public class NLSSearchQuery implements ISearchQuery {
 	private IFile[] fPropertiesFile;
 	private IJavaSearchScope fScope;
 	private String fScopeDescription;
-	
-	public NLSSearchQuery(IJavaElement wrapperClass, IFile propertiesFile, IJavaSearchScope scope, String scopeDescription) {
-		this(new IJavaElement[] {wrapperClass}, new IFile[] {propertiesFile}, scope, scopeDescription);
-	}
 	
 	public NLSSearchQuery(IJavaElement[] wrapperClass, IFile[] propertiesFile, IJavaSearchScope scope, String scopeDescription) {
 		fWrapperClass= wrapperClass;
@@ -72,6 +72,7 @@ public class NLSSearchQuery implements ISearchQuery {
 		try {
 			final AbstractTextSearchResult textResult= (AbstractTextSearchResult) getSearchResult();
 			textResult.removeAll();
+			AppearanceAwareLabelProvider labelProvider= new AppearanceAwareLabelProvider(JavaElementLabels.ALL_POST_QUALIFIED, 0);
 			
 			for (int i= 0; i < fWrapperClass.length; i++) {
 				IJavaElement wrapperClass= fWrapperClass[i];
@@ -90,15 +91,30 @@ public class NLSSearchQuery implements ISearchQuery {
 					engine.search(pattern, participants, fScope, requestor, new SubProgressMonitor(monitor, 4));
 					requestor.reportUnusedPropertyNames(new SubProgressMonitor(monitor, 1));
 					
+					ICompilationUnit compilationUnit= ((IType)wrapperClass).getCompilationUnit();
+					CompilationUnitEntry groupElement= new CompilationUnitEntry(Messages.format(NLSSearchMessages.NLSSearchResultCollector_unusedKeys, labelProvider.getText(compilationUnit)), compilationUnit);
+					
+					boolean hasUnusedPropertie= false;
 					IField[] fields= ((IType)wrapperClass).getFields();
 					for (int j= 0; j < fields.length; j++) {
 						IField field= fields[j];
-						if (isUndefinedKey(field, requestor)) {
+						if (isNLSField(field)) {
 							ISourceRange sourceRange= field.getSourceRange();
-							if (sourceRange != null)
-								fResult.addMatch(new Match(field, sourceRange.getOffset(), sourceRange.getLength()));	
+							if (sourceRange != null) {
+								String fieldName= field.getElementName();
+								if (!requestor.hasPropertyKey(fieldName)) { 
+									fResult.addMatch(new Match(compilationUnit, sourceRange.getOffset(), sourceRange.getLength()));	
+								}
+								if (!requestor.isUsedPropertyKey(fieldName)) {
+									hasUnusedPropertie= true;
+									fResult.addMatch(new Match(groupElement, sourceRange.getOffset(), sourceRange.getLength()));	
+								}
+							}
 						}
 					}
+					if (hasUnusedPropertie)
+						fResult.addCompilationUnitGroup(groupElement);
+					
 				} catch (CoreException e) {
 					JavaPlugin.log(e);
 				}
@@ -109,7 +125,7 @@ public class NLSSearchQuery implements ISearchQuery {
 		return 	Status.OK_STATUS;
 	}
 
-	private boolean isUndefinedKey(IField field, NLSSearchResultRequestor requestor) throws JavaModelException {
+	private boolean isNLSField(IField field) throws JavaModelException {
 		int flags= field.getFlags();
 		if (!Flags.isPublic(flags))
 			return false;
@@ -123,10 +139,7 @@ public class NLSSearchQuery implements ISearchQuery {
 		
 		if ("RESOURCE_BUNDLE".equals(fieldName)) //$NON-NLS-1$
 			return false;
-		
-		if (requestor.hasPropertyKey(fieldName))
-			return false;
-		
+				
 		return true;		
 	}
 

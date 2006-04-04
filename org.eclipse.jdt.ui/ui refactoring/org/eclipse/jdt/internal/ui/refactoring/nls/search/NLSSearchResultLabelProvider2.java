@@ -39,6 +39,8 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider {
 		if (element instanceof FileEntry) {
 			FileEntry fileEntry= (FileEntry) element;
 			return fileEntry.getMessage();
+		} else if (element instanceof CompilationUnitEntry) {
+			return ((CompilationUnitEntry)element).getMessage();
 		} else {
 			return Messages.format(NLSSearchMessages.NLSSearchResultLabelProvider2_undefinedKeys, fLabelProvider.getText(element));
 		}
@@ -50,6 +52,8 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider {
 	public Image getImage(Object element) {
 		if (element instanceof FileEntry)
 			element= ((FileEntry) element).getPropertiesFile();
+		if (element instanceof CompilationUnitEntry)
+			element= ((CompilationUnitEntry)element).getCompilationUnit();
 		
 		return fLabelProvider.getImage(element);
 	}

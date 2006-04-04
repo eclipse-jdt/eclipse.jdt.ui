@@ -8,38 +8,34 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 
-public class FileEntry implements IAdaptable {
+import org.eclipse.jdt.core.ICompilationUnit;
 
-	private IFile fPropertiesFile;
-	private String fMessage;
-
-	public FileEntry(IFile propertiesFile, String message) {
-		fPropertiesFile= propertiesFile;
-		fMessage= message;
-	}
+public class CompilationUnitEntry implements IAdaptable {
 	
-	public IFile getPropertiesFile() {
-		return fPropertiesFile;
+	private final String fMessage;
+	private final ICompilationUnit fCompilationUnit;
+
+	public CompilationUnitEntry(String message, ICompilationUnit compilationUnit) {
+		fMessage= message;
+		fCompilationUnit= compilationUnit;
 	}
 
 	public String getMessage() {
 		return fMessage;
 	}
-	
-	public String toString() {
-		return fMessage;
+
+	public ICompilationUnit getCompilationUnit() {
+		return fCompilationUnit;
 	}
 	
 	public Object getAdapter(Class adapter) {
-		if (IResource.class.equals(adapter))
-			return fPropertiesFile;
+		if (ICompilationUnit.class.equals(adapter))
+			return getCompilationUnit();
 		return null;
 	}
+
 }

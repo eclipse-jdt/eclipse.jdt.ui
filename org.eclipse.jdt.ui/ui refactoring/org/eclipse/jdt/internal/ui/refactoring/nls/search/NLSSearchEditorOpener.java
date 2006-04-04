@@ -25,6 +25,8 @@ public class NLSSearchEditorOpener extends JavaSearchEditorOpener {
 		} else if (element instanceof FileEntry) {
 			FileEntry fileEntry= (FileEntry) element;
 			return fileEntry.getPropertiesFile();
+		} else if (element instanceof CompilationUnitEntry) {
+			return ((CompilationUnitEntry)element).getCompilationUnit();
 		}
 		// this should not happen
 		return null;

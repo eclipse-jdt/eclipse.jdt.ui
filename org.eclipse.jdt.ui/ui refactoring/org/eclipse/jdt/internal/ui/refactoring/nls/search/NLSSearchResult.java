@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 
@@ -49,14 +50,20 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 	
 	private NLSSearchQuery fQuery;
 	private final List fFileEntryGroups;
+	private final List fCompilationUnitGroups;
 
 	public NLSSearchResult(NLSSearchQuery query) {
 		fQuery= query;
 		fFileEntryGroups= new ArrayList();
+		fCompilationUnitGroups= new ArrayList();
 	}
 	
 	public void addFileEntryGroup(FileEntry group) {
 		fFileEntryGroups.add(group);
+	}
+	
+	public void addCompilationUnitGroup(CompilationUnitEntry group) {
+		fCompilationUnitGroups.add(group);
 	}
 	
 	/*
@@ -81,7 +88,7 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#findContainedMatches(org.eclipse.core.resources.IFile)
 	 */
 	public Match[] computeContainedMatches(AbstractTextSearchResult result, IFile file) {
-		ArrayList matches= new ArrayList();
+		Set matches= new HashSet();
 		for (Iterator iter= fFileEntryGroups.iterator(); iter.hasNext();) {
 			FileEntry element= (FileEntry)iter.next();
 			if (element.getPropertiesFile().equals(file)) {
@@ -91,11 +98,22 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 		if (matches.size() > 0)
 			return (Match[]) matches.toArray(new Match[matches.size()]);
 		
+		try {
+			for (Iterator iter= fCompilationUnitGroups.iterator(); iter.hasNext();) {
+				CompilationUnitEntry element= (CompilationUnitEntry)iter.next();
+				if (file.equals(element.getCompilationUnit().getCorrespondingResource())) {
+					matches.addAll(Arrays.asList(getMatches(element)));
+				}
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			return null;
+		}
+		
 		//TODO: copied from JavaSearchResult:
 		IJavaElement javaElement= JavaCore.create(file);
-		Set matchesSet= new HashSet();
-		collectMatches(matchesSet, javaElement);
-		return (Match[]) matchesSet.toArray(new Match[matchesSet.size()]);
+		collectMatches(matches, javaElement);
+		return (Match[]) matches.toArray(new Match[matches.size()]);
 	}
 	
 	private void collectMatches(Set matches, IJavaElement element) {
@@ -126,7 +144,12 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 		if (element instanceof FileEntry) {
 			return ((FileEntry) element).getPropertiesFile();
 		} else {
-			IJavaElement javaElement= (IJavaElement) element;
+			IJavaElement javaElement= null;
+			if (element instanceof CompilationUnitEntry) {
+				javaElement= ((CompilationUnitEntry)element).getCompilationUnit();
+			} else {
+				javaElement= (IJavaElement) element;
+			}
 			IResource resource= null;
 			try {
 				resource= javaElement.getCorrespondingResource();
@@ -150,8 +173,13 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 			if (editorInput instanceof IFileEditorInput) {
 				return ((IFileEditorInput) editorInput).getFile().equals(file);
 			}
-		} else if (match.getElement() instanceof IJavaElement) {
-			IJavaElement je= (IJavaElement) match.getElement();
+		} else if (match.getElement() instanceof IJavaElement || match.getElement() instanceof CompilationUnitEntry) {
+			IJavaElement je= null;
+			if (match.getElement() instanceof IJavaElement) {
+				je= (IJavaElement) match.getElement();
+			} else {
+				je= ((CompilationUnitEntry)match.getElement()).getCompilationUnit();
+			}
 			if (editorInput instanceof IFileEditorInput) {
 				try {
 					ICompilationUnit cu= (ICompilationUnit) je.getAncestor(IJavaElement.COMPILATION_UNIT);

@@ -178,8 +178,8 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		if (key == null)
 			return true; // Parse error - don't check key
 
+		fUsedPropertyNames.add(key);
 		if (fProperties.getProperty(key) != null) {
-			fUsedPropertyNames.add(key);
 			return true;
 		}
 		return false;
@@ -187,6 +187,10 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	
 	public boolean hasPropertyKey(String key) {
 		return fProperties.containsKey(key);
+	}
+	
+	public boolean isUsedPropertyKey(String key) {
+		return fUsedPropertyNames.contains(key);
 	}
 	
 	/**
