@@ -26,6 +26,8 @@ import org.eclipse.ui.texteditor.spelling.ISpellingEngine;
 import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
 import org.eclipse.ui.texteditor.spelling.SpellingContext;
 
+import org.eclipse.jdt.core.JavaCore;
+
 /**
  * Default spelling engine.
  *
@@ -37,7 +39,7 @@ public class DefaultSpellingEngine implements ISpellingEngine {
 	private static final IContentType TEXT_CONTENT_TYPE= Platform.getContentTypeManager().getContentType(IContentTypeManager.CT_TEXT);
 
 	/** Java source content type */
-	private static final IContentType JAVA_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.jdt.core.javaSource"); //$NON-NLS-1$
+	private static final IContentType JAVA_CONTENT_TYPE= Platform.getContentTypeManager().getContentType(JavaCore.JAVA_SOURCE_CONTENT_TYPE);
 
 	/** Java properties content type */
 	private static final IContentType PROPERTIES_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.jdt.core.javaProperties"); //$NON-NLS-1$
