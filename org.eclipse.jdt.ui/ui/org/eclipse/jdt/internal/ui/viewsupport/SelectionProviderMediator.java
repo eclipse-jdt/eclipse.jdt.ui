@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.typehierarchy;
+package org.eclipse.jdt.internal.ui.viewsupport;
 
 import org.eclipse.core.runtime.ListenerList;
 
@@ -73,7 +73,7 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 	 * @param viewers All viewers that can provide a selection
 	 * @param viewerInFocus the viewer currently in focus or <code>null</code> 
 	 */
-	public SelectionProviderMediator(StructuredViewer[] viewers, TypeHierarchyViewer viewerInFocus) {
+	public SelectionProviderMediator(StructuredViewer[] viewers, StructuredViewer viewerInFocus) {
 		Assert.isNotNull(viewers);
 		fViewers= viewers;
 		InternalListener listener= new InternalListener();
