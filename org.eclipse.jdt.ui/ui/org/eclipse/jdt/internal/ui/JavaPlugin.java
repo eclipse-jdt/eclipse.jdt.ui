@@ -553,7 +553,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		IWorkbenchWindow window= getWorkbench().getActiveWorkbenchWindow();
 		if (window == null)
 			return null;
-		return getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		return window.getActivePage();
 	}
 	
 	/**
