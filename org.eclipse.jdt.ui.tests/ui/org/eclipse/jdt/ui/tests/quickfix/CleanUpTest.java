@@ -4330,6 +4330,48 @@ public class CleanUpTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 	
+	public void testRemoveParenthesisBug134739() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean a) {\n");
+		buf.append("        if (((a)))\n");
+		buf.append("            return;\n");
+		buf.append("    }\n");
+		buf.append("    public void bar(boolean a, boolean b) {\n");
+		buf.append("        if (((a)) || ((b)))\n");
+		buf.append("            return;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+
+		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS);
+		ICleanUp cleanUp2= new ExpressionsCleanUp(ExpressionsCleanUp.REMOVE_UNNECESSARY_PARENTHESIS);
+		refactoring.addCleanUp(cleanUp1);
+		refactoring.addCleanUp(cleanUp2);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean a) {\n");
+		buf.append("        if (a)\n");
+		buf.append("            return;\n");
+		buf.append("    }\n");
+		buf.append("    public void bar(boolean a, boolean b) {\n");
+		buf.append("        if (a || b)\n");
+		buf.append("            return;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
 	public void testRemoveQualifier01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

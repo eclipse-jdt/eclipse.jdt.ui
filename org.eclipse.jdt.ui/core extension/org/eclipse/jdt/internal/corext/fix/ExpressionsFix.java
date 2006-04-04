@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -249,9 +250,9 @@ public class ExpressionsFix extends AbstractFix {
 	
 	private static class RemoveParenthesisOperation extends AbstractFixRewriteOperation {
 
-		private final ParenthesizedExpression[] fExpressions;
+		private final HashSet/*<ParenthesizedExpression>*/ fExpressions;
 
-		public RemoveParenthesisOperation(ParenthesizedExpression[] expressions) {
+		public RemoveParenthesisOperation(HashSet expressions) {
 			fExpressions= expressions;
 		}
 
@@ -263,10 +264,25 @@ public class ExpressionsFix extends AbstractFix {
 			textEditGroups.add(group);
 			
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			
-			for (int i= 0; i < fExpressions.length; i++) {
-				ParenthesizedExpression parenthesizedExpression= fExpressions[i];
-				rewrite.replace(parenthesizedExpression, rewrite.createMoveTarget(parenthesizedExpression.getExpression()), group);
+						
+			while (fExpressions.size() > 0) {
+				ParenthesizedExpression parenthesizedExpression= (ParenthesizedExpression)fExpressions.iterator().next();
+				fExpressions.remove(parenthesizedExpression);
+				ParenthesizedExpression down= parenthesizedExpression;
+				while (fExpressions.contains(down.getExpression())) {
+					down= (ParenthesizedExpression)down.getExpression();
+					fExpressions.remove(down);
+				}
+				
+				ASTNode move= rewrite.createMoveTarget(down.getExpression());
+				
+				ParenthesizedExpression top= parenthesizedExpression;
+				while (fExpressions.contains(top.getParent())) {
+					top= (ParenthesizedExpression)top.getParent();
+					fExpressions.remove(top);
+				}
+				
+				rewrite.replace(top, move, group);
 			}
 		}
 	}
@@ -303,7 +319,8 @@ public class ExpressionsFix extends AbstractFix {
 		if (changedNodes.isEmpty())
 			return null;
 		
-		RemoveParenthesisOperation op= new RemoveParenthesisOperation((ParenthesizedExpression[])changedNodes.toArray(new ParenthesizedExpression[changedNodes.size()]));
+		HashSet expressions= new HashSet(changedNodes);
+		RemoveParenthesisOperation op= new RemoveParenthesisOperation(expressions);
 		return new ExpressionsFix(FixMessages.ExpressionsFix_removeUnnecessaryParenthesis_description, compilationUnit, new IFixRewriteOperation[] {op});
 	}
 	
@@ -327,7 +344,8 @@ public class ExpressionsFix extends AbstractFix {
 			if (changedNodes.isEmpty())
 				return null;
 			
-			IFixRewriteOperation op= new RemoveParenthesisOperation((ParenthesizedExpression[])changedNodes.toArray(new ParenthesizedExpression[changedNodes.size()]));
+			HashSet expressions= new HashSet(changedNodes);
+			IFixRewriteOperation op= new RemoveParenthesisOperation(expressions);
 			return new ExpressionsFix(FixMessages.ExpressionsFix_removeUnnecessaryParenthesis_description, compilationUnit, new IFixRewriteOperation[] {op});
 		}
 		return null;
