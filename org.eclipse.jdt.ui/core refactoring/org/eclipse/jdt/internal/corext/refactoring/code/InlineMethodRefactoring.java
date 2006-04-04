@@ -626,12 +626,13 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 			JavaPlugin.log(exception);
 		}
 		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_METHOD, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_deprecation_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED) }), RefactoringCoreMessages.InlineMethodRefactoring_deprecation_comment, arguments, flags);
+		final String handle= descriptor.elementToHandle(fMethod.getCompilationUnit());
 		// Must be set to actual compilation unit
-		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fMethod.getCompilationUnit()));
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, handle);
 		// Must be set to actual selection
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, "-1 -1"); //$NON-NLS-1$
 		arguments.put(ATTRIBUTE_DELETE, Boolean.FALSE.toString());
 		arguments.put(ATTRIBUTE_MODE, String.valueOf(0));
-		return new RefactoringSessionDescriptor(new RefactoringDescriptor[] { descriptor }, RefactoringSessionDescriptor.VERSION_1_0, RefactoringCoreMessages.InlineMethodRefactoring_deprecation_comment);
+		return new RefactoringSessionDescriptor(new RefactoringDescriptor[] { descriptor }, RefactoringSessionDescriptor.VERSION_1_0, handle);
 	}
 }

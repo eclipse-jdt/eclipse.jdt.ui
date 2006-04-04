@@ -982,12 +982,13 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 			JavaPlugin.log(exception);
 		}
 		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_CONSTANT, project, Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_deprecation_description, new String[] { JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED) }), RefactoringCoreMessages.InlineConstantRefactoring_deprecation_comment, arguments, flags);
+		final String handle= descriptor.elementToHandle(fField.getCompilationUnit());
 		// Must be set to actual compilation unit
-		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fField.getCompilationUnit()));
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, handle);
 		// Must be set to actual selection
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, "-1 -1"); //$NON-NLS-1$
 		arguments.put(ATTRIBUTE_REMOVE, Boolean.FALSE.toString());
 		arguments.put(ATTRIBUTE_REPLACE, Boolean.FALSE.toString());
-		return new RefactoringSessionDescriptor(new RefactoringDescriptor[] { descriptor }, RefactoringSessionDescriptor.VERSION_1_0, RefactoringCoreMessages.InlineConstantRefactoring_deprecation_comment);
+		return new RefactoringSessionDescriptor(new RefactoringDescriptor[] { descriptor }, RefactoringSessionDescriptor.VERSION_1_0, handle);
 	}
 }
