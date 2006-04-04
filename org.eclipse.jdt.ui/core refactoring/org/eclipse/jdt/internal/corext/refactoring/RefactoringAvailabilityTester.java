@@ -77,26 +77,6 @@ public final class RefactoringAvailabilityTester {
 		return (IType) element;
 	}
 
-	public static IMember[] getExtractSupertypeMembers(final IType type) throws JavaModelException {
-		final List list= new ArrayList(3);
-		IMember[] members= type.getFields();
-		for (int index= 0; index < members.length; index++) {
-			if (isExtractSupertypeAvailable(members[index]))
-				list.add(members[index]);
-		}
-		members= type.getMethods();
-		for (int index= 0; index < members.length; index++) {
-			if (isExtractSupertypeAvailable(members[index]))
-				list.add(members[index]);
-		}
-		members= type.getTypes();
-		for (int index= 0; index < members.length; index++) {
-			if (isExtractSupertypeAvailable(members[index]))
-				list.add(members[index]);
-		}
-		return (IMember[]) list.toArray(new IMember[list.size()]);
-	}
-
 	public static IJavaElement[] getJavaElements(final Object[] elements) {
 		List result= new ArrayList();
 		for (int index= 0; index < elements.length; index++) {
@@ -371,7 +351,7 @@ public final class RefactoringAvailabilityTester {
 	public static boolean isExtractSupertypeAvailable(final IMember[] members) throws JavaModelException {
 		if (members != null && members.length != 0) {
 			final IType type= getTopLevelType(members);
-			if (type != null && getExtractSupertypeMembers(type).length != 0)
+			if (type != null)
 				return true;
 			for (int index= 0; index < members.length; index++) {
 				if (!isExtractSupertypeAvailable(members[index]))

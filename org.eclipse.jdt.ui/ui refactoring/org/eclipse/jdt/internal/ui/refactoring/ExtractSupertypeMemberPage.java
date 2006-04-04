@@ -385,6 +385,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
+		initializeEnablement();
 		initializeCheckboxes();
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.EXTRACT_SUPERTYPE_WIZARD_PAGE);
 	}

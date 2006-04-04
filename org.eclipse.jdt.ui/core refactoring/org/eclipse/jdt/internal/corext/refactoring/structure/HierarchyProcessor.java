@@ -85,6 +85,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
@@ -603,7 +604,9 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	public IType getDeclaringType() {
 		if (fCachedDeclaringType != null)
 			return fCachedDeclaringType;
-		fCachedDeclaringType= fMembersToMove[0].getDeclaringType();
+		fCachedDeclaringType= RefactoringAvailabilityTester.getTopLevelType(fMembersToMove);
+		if (fCachedDeclaringType == null)
+			fCachedDeclaringType= fMembersToMove[0].getDeclaringType();
 		return fCachedDeclaringType;
 	}
 

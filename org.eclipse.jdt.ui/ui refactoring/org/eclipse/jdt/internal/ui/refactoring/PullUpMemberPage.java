@@ -299,6 +299,8 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		}
 	}
 
+	private Button fAddButton;
+
 	protected IType[] fCandidateTypes= {};
 
 	private Button fCreateStubsButton;
@@ -308,6 +310,8 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	private Button fEditButton;
 
 	private Button fInstanceofButton;
+
+	private Label fLabel;
 
 	private Button fReplaceButton;
 
@@ -455,11 +459,11 @@ public class PullUpMemberPage extends UserInputWizardPage {
 			}
 		});
 
-		final Button addButton= new Button(composite, SWT.PUSH);
-		addButton.setText(RefactoringMessages.PullUpInputPage1_Add_Required);
-		addButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		SWTUtil.setButtonDimensionHint(addButton);
-		addButton.addSelectionListener(new SelectionAdapter() {
+		fAddButton= new Button(composite, SWT.PUSH);
+		fAddButton.setText(RefactoringMessages.PullUpInputPage1_Add_Required);
+		fAddButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		SWTUtil.setButtonDimensionHint(fAddButton);
+		fAddButton.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(final SelectionEvent event) {
 				checkAdditionalRequired();
@@ -485,8 +489,18 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
+		initializeEnablement();
 		initializeCheckboxes();
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.PULL_UP_WIZARD_PAGE);
+	}
+
+	protected void initializeEnablement() {
+		MemberActionInfo[] infos= asMemberActionInfos();
+		final boolean enabled= infos.length > 0;
+		fTableViewer.getTable().setEnabled(enabled);
+		fStatusLine.setEnabled(enabled);
+		fAddButton.setEnabled(enabled);
+		fLabel.setEnabled(enabled);
 	}
 
 	protected void createInstanceOfCheckbox(final Composite result, final int margin) {
@@ -586,11 +600,11 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	}
 
 	protected void createMemberTableLabel(final Composite parent) {
-		final Label label= new Label(parent, SWT.NONE);
-		label.setText(RefactoringMessages.PullUpInputPage1_Specify_actions);
+		fLabel= new Label(parent, SWT.NONE);
+		fLabel.setText(RefactoringMessages.PullUpInputPage1_Specify_actions);
 		final GridData data= new GridData();
 		data.horizontalSpan= 2;
-		label.setLayoutData(data);
+		fLabel.setLayoutData(data);
 	}
 
 	protected void createSpacer(final Composite parent) {
