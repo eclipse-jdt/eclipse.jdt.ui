@@ -220,11 +220,12 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	}
 
 	/**
-	 * Returns the changed projects from the event.
+	 * Returns all the existing projects that contain additions,
+	 * removals or deletions.
 	 * 
 	 * @param event
 	 *            the event
-	 * @return the changed projects
+	 * @return the projects that contain changes
 	 */
 	private IJavaProject[] getChangedProjects(final IDiffChangeEvent event) {
 		final Set result= new HashSet();
@@ -244,6 +245,19 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 				final IJavaProject project= asJavaProject(resource.getProject());
 				if (project != null)
 					result.add(project);
+			}
+		}
+		final IPath[] removals = event.getRemovals();
+		for (int i = 0; i < removals.length; i++) {
+			IPath path = removals[i];
+			if (path.segmentCount() > 0) {
+				IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(path.segment(0));
+				// Only consider projects that still exist
+				if (project.exists()) {
+					final IJavaProject javaProject= asJavaProject(project.getProject());
+					if (javaProject != null)
+						result.add(javaProject);
+				}
 			}
 		}
 		return (IJavaProject[]) result.toArray(new IJavaProject[result.size()]);
@@ -497,19 +511,23 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	}
 
 	/**
-	 * Returns the removed projects from the event.
+	 * Returns the projects that used to have changes in the diff tree 
+	 * but have been deleted from the workspace.
 	 * 
 	 * @param event
 	 *            the event
-	 * @return the removed projects
+	 * @return the deleted projects
 	 */
-	private Set getRemovedProjects(final IDiffChangeEvent event) {
+	private Set getDeletedProjects(final IDiffChangeEvent event) {
 		final Set result= new HashSet();
-		final IPath[] removals= event.getRemovals();
-		for (int index= 0; index < removals.length; index++) {
-			final IPath path= removals[index];
-			if (path.segmentCount() > 0)
-				result.add(ResourcesPlugin.getWorkspace().getRoot().getProject(path.segment(0)));
+		final IPath[] deletions= event.getRemovals();
+		for (int index= 0; index < deletions.length; index++) {
+			final IPath path= deletions[index];
+			if (path.segmentCount() > 0) {
+				IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(path.segment(0));
+				if (!project.isAccessible())
+					result.add(project);
+			}
 		}
 		return result;
 	}
@@ -545,21 +563,25 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 */
 	private void handleChange(final IDiffChangeEvent event) {
 		final Set existing= getVisibleProjects();
-		// First, get the set of projects that contain changes or additions
+		// Get all existing and open projects that contain changes
+		// and determine what needs to be done to the project
+		// (i.e. add, remove or refresh)
 		final IJavaProject[] changed= getChangedProjects(event);
 		final List refreshes= new ArrayList(changed.length);
 		final List additions= new ArrayList(changed.length);
 		final List removals= new ArrayList(changed.length);
 		for (int index= 0; index < changed.length; index++) {
 			final IJavaProject project= changed[index];
-			if (event.getTree().getChildren(project.getResource().getFullPath()).length > 0)
+			if (hasDiffs(event, project)) {
 				if (existing.contains(project))
 					refreshes.add(project);
 				else if (hasVisibleChanges(event.getTree(), project))
 					additions.add(project);
+			} else
+				removals.add(project);
 		}
-		// Remove any java projects that correspond to removed projects
-		final Set removed= getRemovedProjects(event);
+		// Remove any java projects that correspond to deleted or closed projects
+		final Set removed= getDeletedProjects(event);
 		for (final Iterator iterator= existing.iterator(); iterator.hasNext();) {
 			final IJavaProject element= (IJavaProject) iterator.next();
 			if (removed.contains(element.getResource()))
@@ -583,6 +605,20 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 				tree.setRedraw(true);
 			}
 		}
+	}
+
+	/**
+	 * Has the diff tree any diffs for the project?
+	 * 
+	 * @param event
+	 *            the diff change event
+	 * @param project
+	 *            the project
+	 * @return <code>true</code> if it has diffs, <code>false</code>
+	 *         otherwise
+	 */
+	private boolean hasDiffs(final IDiffChangeEvent event, final IJavaProject project) {
+		return event.getTree().getChildren(project.getResource().getFullPath()).length > 0;
 	}
 
 	/**
