@@ -147,14 +147,14 @@ public final class ProposalSorterHandle {
 		return fSorter;
 	}
 
-	private boolean isPluginLoaded() {
+	private boolean isPluginLoaded() throws InvalidRegistryObjectException {
 		Bundle bundle= getBundle();
 		return bundle != null && bundle.getState() == Bundle.ACTIVE;
 	}
 
-	private Bundle getBundle() {
-		String namespace= fElement.getDeclaringExtension().getNamespace();
-		Bundle bundle= Platform.getBundle(namespace);
+	private Bundle getBundle() throws InvalidRegistryObjectException {
+		String symbolicName= fElement.getContributor().getName();
+		Bundle bundle= Platform.getBundle(symbolicName);
 		return bundle;
 	}
 
@@ -249,7 +249,7 @@ public final class ProposalSorterHandle {
 	private Status createExceptionStatus(RuntimeException x) {
 		// misbehaving extension - log & disable
 		String disable= createBlameMessage();
-		String reason= JavaTextMessages.CompletionProposalComputerDescriptor_reason_runime_ex;
+		String reason= JavaTextMessages.CompletionProposalComputerDescriptor_reason_runtime_ex;
 		return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, disable + " " + reason, x); //$NON-NLS-1$
 	}
 
