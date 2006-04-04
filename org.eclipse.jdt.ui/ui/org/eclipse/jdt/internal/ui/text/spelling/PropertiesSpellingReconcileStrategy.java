@@ -17,9 +17,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.content.IContentType;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -33,15 +32,14 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
 
-import org.eclipse.ui.editors.text.EditorsUI;
-
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.IDocumentProviderExtension4;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
 import org.eclipse.ui.texteditor.spelling.SpellingContext;
 import org.eclipse.ui.texteditor.spelling.SpellingProblem;
+
+import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.core.compiler.IProblem;
 
@@ -143,6 +141,20 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 
 	/** The progress monitor. */
 	private IProgressMonitor fProgressMonitor;
+	
+	/**
+	 * The spelling context containing the Java properties
+	 * content type.
+	 * <p>
+	 * Since his reconcile strategy is for the Properties File
+	 * editor which normally edits Java properties files we always
+	 * use the Java properties file content type for performance
+	 * reasons.
+	 * </p>
+	 * @since 3.2
+	 */
+	private SpellingContext fSpellingContext;
+
 
 	/**
 	 * Creates a new comment reconcile strategy.
@@ -151,6 +163,8 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 	 */
 	public PropertiesSpellingReconcileStrategy(ITextEditor editor) {
 		fEditor= editor;
+		fSpellingContext= new SpellingContext();
+		fSpellingContext.setContentType(Platform.getContentTypeManager().getContentType("org.eclipse.jdt.core.javaProperties")); //$NON-NLS-1$
 	}
 
 	/*
@@ -175,28 +189,9 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 		if (model == null)
 			return;
 
-		try {
-			SpellingContext context= new SpellingContext();
-			context.setContentType(getContentType());
-			PropertiesSpellingReconcileStrategy.SpellingProblemCollector collector= new SpellingProblemCollector(model);
-			EditorsUI.getSpellingService().check(fDocument, context, collector, fProgressMonitor);
-		} catch (CoreException x) {
-			// swallow exception
-		}
-	}
+		PropertiesSpellingReconcileStrategy.SpellingProblemCollector collector= new SpellingProblemCollector(model);
+		EditorsUI.getSpellingService().check(fDocument, fSpellingContext, collector, fProgressMonitor);
 
-	/**
-	 * Returns the content type of the underlying editor input.
-	 *
-	 * @return the content type of the underlying editor input or
-	 *         <code>null</code> if none could be determined
-	 * @throws CoreException if reading or accessing the underlying store fails
-	 */
-	private IContentType getContentType() throws CoreException {
-		IDocumentProvider documentProvider= fEditor.getDocumentProvider();
-		if (documentProvider instanceof IDocumentProviderExtension4)
-			return ((IDocumentProviderExtension4) documentProvider).getContentType(fEditor.getEditorInput());
-		return null;
 	}
 
 	/*

@@ -11,9 +11,8 @@
 
 package org.eclipse.jdt.internal.ui.text.spelling;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.content.IContentType;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -24,18 +23,17 @@ import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
-import org.eclipse.ui.editors.text.EditorsUI;
-
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.IDocumentProviderExtension4;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
 import org.eclipse.ui.texteditor.spelling.SpellingContext;
 import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 import org.eclipse.ui.texteditor.spelling.SpellingService;
 
+import org.eclipse.ui.editors.text.EditorsUI;
+
 import org.eclipse.jdt.core.IProblemRequestor;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 /**
@@ -111,8 +109,22 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 	private IProblemRequestor fRequestor;
 
 	/** The spelling problem collector. */
-	private ISpellingProblemCollector fCollector= new SpellingProblemCollector();
+	private ISpellingProblemCollector fCollector;
+	
+	/**
+	 * The spelling context containing the Java source
+	 * content type.
+	 * <p>
+	 * Since his reconcile strategy is for the Compilation Unit
+	 * editor which normally edits Java source files we always
+	 * use the Java properties file content type for performance
+	 * reasons.
+	 * </p>
+	 * @since 3.2
+	 */
+	private SpellingContext fSpellingContext;
 
+	
 	/**
 	 * Creates a new comment reconcile strategy.
 	 *
@@ -120,6 +132,9 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 	 */
 	public JavaSpellingReconcileStrategy(ITextEditor editor) {
 		fEditor= editor;
+		fCollector= new SpellingProblemCollector();
+		fSpellingContext= new SpellingContext();
+		fSpellingContext.setContentType(Platform.getContentTypeManager().getContentType(JavaCore.JAVA_SOURCE_CONTENT_TYPE));
 		updateProblemRequester();
 	}
 
@@ -141,36 +156,12 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.IRegion)
 	 */
 	public void reconcile(IRegion region) {
-		if (fRequestor != null) {
-			try {
-				if (!isSpellingEnabled())
-					return;
-				
-				SpellingContext context= new SpellingContext();
-				context.setContentType(getContentType());
-				EditorsUI.getSpellingService().check(fDocument, context, fCollector, fProgressMonitor);
-			} catch (CoreException x) {
-				// swallow exception
-			}
-		}
+		if (fRequestor != null && isSpellingEnabled())
+			EditorsUI.getSpellingService().check(fDocument, fSpellingContext, fCollector, fProgressMonitor);
 	}
 	
 	private boolean isSpellingEnabled() {
 		return EditorsUI.getPreferenceStore().getBoolean(SpellingService.PREFERENCE_SPELLING_ENABLED);
-	}
-
-	/**
-	 * Returns the content type of the underlying editor input.
-	 *
-	 * @return the content type of the underlying editor input or
-	 *         <code>null</code> if none could be determined
-	 * @throws CoreException if reading or accessing the underlying store fails
-	 */
-	private IContentType getContentType() throws CoreException {
-		IDocumentProvider documentProvider= fEditor.getDocumentProvider();
-		if (documentProvider instanceof IDocumentProviderExtension4)
-			return ((IDocumentProviderExtension4) documentProvider).getContentType(fEditor.getEditorInput());
-		return null;
 	}
 
 	/*
