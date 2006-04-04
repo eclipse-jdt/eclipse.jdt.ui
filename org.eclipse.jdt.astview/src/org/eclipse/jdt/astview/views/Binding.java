@@ -128,7 +128,7 @@ public class Binding extends ASTAttribute {
 					if (typeBinding.isGenericType()) kinds.append(" isGenericType"); //$NON-NLS-1$
 					if (typeBinding.isParameterizedType()) kinds.append(" isParameterizedType"); //$NON-NLS-1$
 					if (!isType(typeKind, GENERIC | PARAMETRIZED)) {
-						kinds.append(" (non-generic, non-parametrized)");
+						kinds.append(" (non-generic, non-parameterized)");
 					}
 					
 					res.add(new BindingProperty(this, kinds, isRefType)); //$NON-NLS-1$
