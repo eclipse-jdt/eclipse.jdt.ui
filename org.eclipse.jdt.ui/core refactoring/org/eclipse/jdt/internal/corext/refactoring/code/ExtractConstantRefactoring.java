@@ -597,7 +597,7 @@ public class ExtractConstantRefactoring extends CommentRefactoring implements II
 				IJavaProject javaProject= fCu.getJavaProject();
 				if (javaProject != null)
 					project= javaProject.getElementName();
-				int flags= RefactoringDescriptor.NONE;
+				int flags= JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 				if (JdtFlags.getVisibilityCode(fAccessModifier) != Modifier.PRIVATE)
 					flags |= RefactoringDescriptor.STRUCTURAL_CHANGE;
 				String description= ""; //$NON-NLS-1$
