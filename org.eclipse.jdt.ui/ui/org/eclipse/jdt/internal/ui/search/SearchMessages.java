@@ -20,6 +20,7 @@ public final class SearchMessages extends NLS {
 		// Do not instantiate
 	}
 
+	public static String JavaSearchResultPage_preferences_label;
 	public static String SearchLabelProvider_exact_singular;
 	public static String SearchLabelProvider_exact_noCount;
 	public static String SearchLabelProvider_exact_and_potential_plural;
