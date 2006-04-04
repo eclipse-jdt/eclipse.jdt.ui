@@ -62,8 +62,10 @@ public class AddWordProposal implements IJavaCompletionProposal {
 		final ISpellCheckEngine engine= SpellCheckEngine.getInstance();
 		final ISpellChecker checker= engine.createSpellChecker(engine.getLocale(), PreferenceConstants.getPreferenceStore());
 
-		if (checker != null)
+		if (checker != null) {
 			checker.addWord(fWord);
+			JavaSpellingProblem.removeAllInActiveEditor(fWord);
+		}
 	}
 
 	/*

@@ -62,8 +62,10 @@ public class WordIgnoreProposal implements IJavaCompletionProposal {
 		final ISpellCheckEngine engine= SpellCheckEngine.getInstance();
 		final ISpellChecker checker= engine.createSpellChecker(engine.getLocale(), PreferenceConstants.getPreferenceStore());
 
-		if (checker != null)
+		if (checker != null) {
 			checker.ignoreWord(fWord);
+			JavaSpellingProblem.removeAllInActiveEditor(fWord);
+		}
 	}
 
 	/*
