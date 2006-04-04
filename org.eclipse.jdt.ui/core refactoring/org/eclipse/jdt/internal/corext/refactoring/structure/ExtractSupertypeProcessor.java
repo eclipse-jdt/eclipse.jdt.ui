@@ -539,7 +539,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			buffer.append(' ');
 			buffer.append("class "); //$NON-NLS-1$
 			buffer.append(fTypeName);
-			if (superType != null) {
+			if (superType != null && !"java.lang.Object".equals(superType.getFullyQualifiedName())) { //$NON-NLS-1$
 				buffer.append(' ');
 				if (superType.isInterface())
 					buffer.append("implements "); //$NON-NLS-1$
