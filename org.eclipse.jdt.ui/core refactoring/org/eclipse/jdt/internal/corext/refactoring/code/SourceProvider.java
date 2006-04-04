@@ -45,15 +45,18 @@ import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -61,7 +64,9 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
@@ -70,6 +75,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.refactoring.code.SourceAnalyzer.NameData;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -88,6 +94,12 @@ public class SourceProvider {
 	private boolean fReturnValueNeedsLocalVariable;
 	private List fReturnExpressions;
 	private IDocument fSource;
+	
+	private static final int EXPRESSION_MODE= 1;
+	private static final int STATEMENT_MODE= 2;
+	private static final int RETURN_STATEMENT_MODE= 3;
+	private int fMarkerMode;
+	
 	
 	private class ReturnAnalyzer extends ASTVisitor {
 		public boolean visit(ReturnStatement node) {
@@ -513,6 +525,7 @@ public class SourceProvider {
 	}
 
 	private List getReturnStatementRanges() {
+		fMarkerMode= RETURN_STATEMENT_MODE;
 		List result= new ArrayList(1);
 		List statements= fDeclaration.getBody().statements();
 		int size= statements.size();
@@ -523,6 +536,7 @@ public class SourceProvider {
 	}
 
 	private List getStatementRanges() {
+		fMarkerMode= STATEMENT_MODE;
 		List result= new ArrayList(1);
 		List statements= fDeclaration.getBody().statements();
 		int size= statements.size();
@@ -533,6 +547,7 @@ public class SourceProvider {
 	}
 
 	private List getExpressionRanges() {
+		fMarkerMode= EXPRESSION_MODE;
 		List result= new ArrayList(2);
 		List statements= fDeclaration.getBody().statements();
 		ReturnStatement rs= null;
@@ -593,8 +608,30 @@ public class SourceProvider {
 			String content= fDocument.get(marker.getOffset(), marker.getLength());
 			String lines[]= Strings.convertIntoLines(content);
 			Strings.trimIndentation(lines, fUnit.getJavaProject(), false);
+			if (fMarkerMode == STATEMENT_MODE && lines.length == 2 && isSingleControlStatementWithoutBlock()) {
+				lines[1]= CodeFormatterUtil.createIndentString(1, fUnit.getJavaProject()) + lines[1];
+			}
 			result[i]= Strings.concatenate(lines, TextUtilities.getDefaultLineDelimiter(fDocument));
 		}
 		return result;
+	}
+
+	private boolean isSingleControlStatementWithoutBlock() {
+		List statements= fDeclaration.getBody().statements();
+		int size= statements.size();
+		if (size != 1)
+			return false;
+		Statement statement= (Statement) statements.get(size - 1);
+		int nodeType= statement.getNodeType();
+		if (nodeType == ASTNode.IF_STATEMENT) {
+			IfStatement ifStatement= (IfStatement) statement;
+			return !(ifStatement.getThenStatement() instanceof Block) 
+				&& !(ifStatement.getElseStatement() instanceof Block);
+		} else if (nodeType == ASTNode.FOR_STATEMENT) {
+			return !(((ForStatement)statement).getBody() instanceof Block);
+		} else if (nodeType == ASTNode.WHILE_STATEMENT) {
+			return !(((WhileStatement)statement).getBody() instanceof Block);
+		}
+		return false;
 	}
 }
