@@ -22,8 +22,10 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
@@ -40,6 +42,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -485,13 +488,14 @@ public class CallInliner {
 
 	private void computeRealArguments() throws BadLocationException {
 		List arguments= Invocations.getArguments(fInvocation);
+		Set canNotInline= crossCheckArguments(arguments);
 		boolean needsVarargBoxing= needsVarargBoxing(arguments);
 		int varargIndex= fSourceProvider.getVarargIndex();
 		String[] realArguments= new String[needsVarargBoxing ? varargIndex + 1 : arguments.size()];
 		for (int i= 0; i < (needsVarargBoxing ? varargIndex : arguments.size()); i++) {
 			Expression expression= (Expression)arguments.get(i);
 			ParameterData parameter= fSourceProvider.getParameterData(i);
-			if (canInline(expression, parameter)) {
+			if (canInline(expression, parameter) && !canNotInline.contains(expression)) {
 				realArguments[i] = getContent(expression);
 				// fixes bugs #35905, #38471
 				if(expression instanceof CastExpression || expression instanceof ArrayCreation) {
@@ -732,6 +736,51 @@ public class CallInliner {
 		return decl;
 	}
 
+    /**
+     * Checks whether arguments are passed to the method which do some assignments
+     * inside the expression. If so these arguments can't be inlined into the
+     * calling method since the assignments might be reorder. An example is:
+     * <code>
+     *   add((field=args).length,field.hashCode());
+     * </code>
+     * Field might not be initialized when the arguments are reorder in the called
+     * method.
+     */
+	private Set crossCheckArguments(List arguments) {
+		final Set assigned= new HashSet();
+		final Set result= new HashSet();
+		for (Iterator iter= arguments.iterator(); iter.hasNext();) {
+			final Expression expression= (Expression) iter.next();
+			expression.accept(new ASTVisitor() {
+				public boolean visit(Assignment node) {
+					Expression lhs= node.getLeftHandSide();
+					if (lhs instanceof Name) {
+						IBinding binding= ((Name)lhs).resolveBinding();
+						if (binding instanceof IVariableBinding) {
+							assigned.add(binding);
+							result.add(expression);
+						}
+					}
+					return true;
+				}
+			});
+		}
+		for (Iterator iter= arguments.iterator(); iter.hasNext();) {
+			final Expression expression= (Expression) iter.next();
+			if (!result.contains(expression)) {
+				expression.accept(new HierarchicalASTVisitor() {
+					public boolean visit(Name node) {
+						IBinding binding= node.resolveBinding();
+						if (binding != null && assigned.contains(binding))
+							result.add(expression);
+						return false;
+					}
+				});
+			}
+		}
+		return result;
+	}
+	
 	private boolean canInline(Expression actualParameter, ParameterData formalParameter) {
 		InlineEvaluator evaluator= new InlineEvaluator(formalParameter);
 		actualParameter.accept(evaluator);
