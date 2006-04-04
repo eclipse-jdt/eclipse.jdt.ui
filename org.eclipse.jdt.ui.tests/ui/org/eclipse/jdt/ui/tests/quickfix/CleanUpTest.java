@@ -4483,7 +4483,7 @@ public class CleanUpTest extends QuickFixTest {
 	}
 	
 	public void testAddFinal01() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
@@ -4493,7 +4493,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("        v= 0;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
@@ -4517,7 +4517,7 @@ public class CleanUpTest extends QuickFixTest {
 	}
 	
 	public void testAddFinal02() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
@@ -4526,7 +4526,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    Object obj3;\n");
 		buf.append("    public Object obj4;\n");
 		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
@@ -4548,7 +4548,7 @@ public class CleanUpTest extends QuickFixTest {
 	}
 	
 	public void testAddFinal03() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
@@ -4563,7 +4563,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
@@ -4591,7 +4591,7 @@ public class CleanUpTest extends QuickFixTest {
 	}	
 	
 	public void testAddFinal04() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
@@ -4606,7 +4606,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
@@ -4634,7 +4634,7 @@ public class CleanUpTest extends QuickFixTest {
 	}
 	
 	public void testAddFinal05() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
@@ -4644,7 +4644,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("            ;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
@@ -4668,7 +4668,7 @@ public class CleanUpTest extends QuickFixTest {
 	}
 	
 	public void testAddFinalBug129807() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("public abstract class E {\n");
@@ -4705,6 +4705,62 @@ public class CleanUpTest extends QuickFixTest {
 		
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
+	
+	public void testAddFinalBug134676_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E<T> { \n");
+		buf.append("    private String s;\n");
+		buf.append("    void setS(String s) {\n");
+		buf.append("        this.s = s;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new VariableDeclarationCleanUp(VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_FIELDS);
+		refactoring.addCleanUp(cleanUp);
+		
+		assertRefactoringHasNoChange(refactoring);
+	}
+	
+	public void testAddFinalBug134676_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E<T> { \n");
+		buf.append("    private String s;\n");
+		buf.append("    private T t;\n");
+		buf.append("    private T t2;\n");
+		buf.append("    void setT(T t) {\n");
+		buf.append("        this.t = t;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new VariableDeclarationCleanUp(VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_FIELDS);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E<T> { \n");
+		buf.append("    private final String s;\n");
+		buf.append("    private T t;\n");
+		buf.append("    private final T t2;\n");
+		buf.append("    void setT(T t) {\n");
+		buf.append("        this.t = t;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {buf.toString()});
+	}
+	
 	
 	public void testRemoveBlockReturnThrows01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);

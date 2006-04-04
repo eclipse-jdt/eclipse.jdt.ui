@@ -61,10 +61,14 @@ public class VariableDeclarationFix extends AbstractFix {
 				return super.visit(node);
 
 			IBinding binding= node.resolveBinding();
+			if (!(binding instanceof IVariableBinding))
+				return super.visit(node);
+			
+			binding= ((IVariableBinding)binding).getVariableDeclaration();
 			if (fResult.contains(binding))
 				return super.visit(node);
 			
-			if (ASTResolving.isWriteAccess(node)) {	
+			if (ASTResolving.isWriteAccess(node)) { 
 				fResult.add(binding);
 			}
 			
