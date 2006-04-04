@@ -88,7 +88,7 @@ public class FindReferencesAction extends FindAction {
 		boolean isInsideJRE= factory.isInsideJRE(element);
 		
 		IJavaSearchScope scope= factory.createWorkspaceScope(isInsideJRE);
-		String description= isInsideJRE ? SearchMessages.WorkspaceScope : SearchMessages.WorkspaceScopeNoJRE;
+		String description= factory.getWorkspaceScopeDescription(isInsideJRE);
 		return new ElementQuerySpecification(element, getLimitTo(), scope, description);
 	}
 

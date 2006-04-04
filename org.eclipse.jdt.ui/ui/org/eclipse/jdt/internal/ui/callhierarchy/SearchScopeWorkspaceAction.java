@@ -13,13 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.search.SearchMessages;
+import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 
 
 class SearchScopeWorkspaceAction extends SearchScopeAction {
@@ -44,6 +44,7 @@ class SearchScopeWorkspaceAction extends SearchScopeAction {
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getFullDescription()
 	 */
 	public String getFullDescription() {
-		return SearchMessages.WorkspaceScope; 
+		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
+		return factory.getWorkspaceScopeDescription(true);
 	}
 }

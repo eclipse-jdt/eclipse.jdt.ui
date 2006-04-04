@@ -13,16 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-
-import org.eclipse.jdt.internal.corext.util.Messages;
-
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
-import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 
 class SearchScopeWorkingSetAction extends SearchScopeAction {
@@ -58,6 +55,6 @@ class SearchScopeWorkingSetAction extends SearchScopeAction {
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getFullDescription()
 	 */
 	public String getFullDescription() {
-		return Messages.format(SearchMessages.WorkingSetScope, SearchUtil.toString(fWorkingSets)); 
+		return JavaSearchScopeFactory.getInstance().getWorkingSetScopeDescription(fWorkingSets, true);
 	}
 }

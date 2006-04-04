@@ -13,18 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.internal.corext.util.Messages;
-
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.search.SearchMessages;
+import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 
 
 class SearchScopeProjectAction extends SearchScopeAction {
@@ -39,18 +34,12 @@ class SearchScopeProjectAction extends SearchScopeAction {
 	
 	public IJavaSearchScope getSearchScope() {
 		IMethod method = this.fGroup.getView().getMethod();
-		IJavaProject project = null;
-		
-		if (method != null) {
-			project = method.getJavaProject();
-		}
-		
-		if (project != null) {
-			return SearchEngine.createJavaSearchScope(new IJavaElement[] { project },
-					false);
-		} else {
+		if (method == null) {
 			return null;
 		}
+		
+		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
+		return factory.createJavaProjectSearchScope(method.getJavaProject(), true);
 	}
 	
 	/* (non-Javadoc)
@@ -65,6 +54,10 @@ class SearchScopeProjectAction extends SearchScopeAction {
 	 */
 	public String getFullDescription() {
 		IMethod method = this.fGroup.getView().getMethod();
-		return Messages.format(SearchMessages.ProjectScope, method.getJavaProject().getElementName()); 
+		if (method != null) {
+			JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
+			return factory.getProjectScopeDescription(method.getJavaProject(), true);
+		}
+		return ""; //$NON-NLS-1$
 	}
 }

@@ -21,6 +21,9 @@ public final class SearchMessages extends NLS {
 	}
 
 	public static String JavaSearchResultPage_preferences_label;
+	public static String JavaSearchScopeFactory_undefined_projects;
+	public static String JavaSearchScopeFactory_undefined_selection;
+	public static String JavaSearchScopeFactory_undefined_workingsets;
 	public static String SearchLabelProvider_exact_singular;
 	public static String SearchLabelProvider_exact_noCount;
 	public static String SearchLabelProvider_exact_and_potential_plural;
@@ -143,12 +146,23 @@ public final class SearchMessages extends NLS {
 	public static String JavaElementAction_operationUnavailable_interface;
 	public static String WorkspaceScope;
 	public static String WorkspaceScopeNoJRE;
-	public static String WorkingSetScope;
-	public static String WorkingSetScopeNoJRE;
+	public static String SingleWorkingSetScope;
+	public static String SingleWorkingSetScopeNoJRE;
+	public static String DoubleWorkingSetScope;
+	public static String DoubleWorkingSetScopeNoJRE;
+	public static String WorkingSetsScope;
+	public static String WorkingSetsScopeNoJRE;
+	
 	public static String SelectionScope;
 	public static String SelectionScopeNoJRE;
+	public static String SingleSelectionScope;
+	public static String SingleSelectionScopeNoJRE;
+	public static String DoubleSelectionScope;
+	public static String DoubleSelectionScopeNoJRE;
 	public static String EnclosingProjectsScope;
 	public static String EnclosingProjectsScopeNoJRE;
+	public static String EnclosingProjectsScope2;
+	public static String EnclosingProjectsScope2NoJRE;
 	public static String EnclosingProjectScope;
 	public static String EnclosingProjectScopeNoJRE;
 	public static String ProjectScope;

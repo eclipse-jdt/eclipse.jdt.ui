@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -59,7 +60,6 @@ public class JavaSearchScopeFactory {
 
 	private static JavaSearchScopeFactory fgInstance;
 	private final IJavaSearchScope EMPTY_SCOPE= SearchEngine.createJavaSearchScope(new IJavaElement[] {});
-	private final Set EMPTY_SET= new HashSet(0);
 	
 	private JavaSearchScopeFactory() {
 	}
@@ -114,6 +114,7 @@ public class JavaSearchScopeFactory {
 		addJavaElements(javaElements, resources);
 		return createJavaSearchScope(javaElements, includeJRE);
 	}
+		
 	
 	public IJavaSearchScope createJavaSearchScope(ISelection selection, boolean includeJRE) {
 		return createJavaSearchScope(getJavaElements(selection), includeJRE);
@@ -146,6 +147,28 @@ public class JavaSearchScopeFactory {
 		return EMPTY_SCOPE;
 	}
 	
+	public String getWorkspaceScopeDescription(boolean includeJRE) {
+		return includeJRE ? SearchMessages.WorkspaceScope : SearchMessages.WorkspaceScopeNoJRE; 
+	}
+	
+	public String getProjectScopeDescription(String[] projectNames, boolean includeJRE) {
+		if (projectNames.length == 0) {
+			return SearchMessages.JavaSearchScopeFactory_undefined_projects;
+		}
+		String scopeDescription;
+		if (projectNames.length == 1) {
+			String label= includeJRE ? SearchMessages.EnclosingProjectScope : SearchMessages.EnclosingProjectScopeNoJRE;
+			scopeDescription= Messages.format(label, projectNames[0]);
+		} else if (projectNames.length == 2) {
+			String label= includeJRE ? SearchMessages.EnclosingProjectsScope2 : SearchMessages.EnclosingProjectsScope2NoJRE;
+			scopeDescription= Messages.format(label, new String[] { projectNames[0], projectNames[1]});
+		} else {
+			String label= includeJRE ? SearchMessages.EnclosingProjectsScope : SearchMessages.EnclosingProjectsScopeNoJRE;
+			scopeDescription= Messages.format(label, new String[] { projectNames[0], projectNames[1]});
+		}
+		return scopeDescription;
+	}
+	
 	public String getProjectScopeDescription(IJavaProject project, boolean includeJRE) {
 		if (includeJRE) {
 			return Messages.format(SearchMessages.ProjectScope, project.getElementName());
@@ -165,6 +188,45 @@ public class JavaSearchScopeFactory {
 		return Messages.format(SearchMessages.ProjectScope, "");  //$NON-NLS-1$
 	}
 	
+	public String getHierarchyScopeDescription(IType type) {
+		return Messages.format(SearchMessages.HierarchyScope, new String[] { type.getElementName() }); 
+	}
+
+
+	public String getSelectionScopeDescription(IJavaElement[] javaElements, boolean includeJRE) {
+		if (javaElements.length == 0) {
+			return SearchMessages.JavaSearchScopeFactory_undefined_selection;
+		}
+		String scopeDescription;
+		if (javaElements.length == 1) {
+			String label= includeJRE ? SearchMessages.SingleSelectionScope : SearchMessages.SingleSelectionScopeNoJRE;
+			scopeDescription= Messages.format(label, javaElements[0].getElementName());
+		} else if (javaElements.length == 1) {
+			String label= includeJRE ? SearchMessages.DoubleSelectionScope : SearchMessages.DoubleSelectionScopeNoJRE;
+			scopeDescription= Messages.format(label, new String[] { javaElements[0].getElementName(), javaElements[1].getElementName()});
+		}  else {
+			String label= includeJRE ? SearchMessages.SelectionScope : SearchMessages.SelectionScopeNoJRE;
+			scopeDescription= Messages.format(label, new String[] { javaElements[0].getElementName(), javaElements[1].getElementName()});
+		}
+		return scopeDescription;
+	}
+	
+	public String getWorkingSetScopeDescription(IWorkingSet[] workingSets, boolean includeJRE) {
+		if (workingSets.length == 0) {
+			return SearchMessages.JavaSearchScopeFactory_undefined_workingsets;
+		}
+		if (workingSets.length == 1) {
+			String label= includeJRE ? SearchMessages.SingleWorkingSetScope : SearchMessages.SingleWorkingSetScopeNoJRE;
+			return Messages.format(label, workingSets[0].getLabel());
+		}
+		Arrays.sort(workingSets, new WorkingSetComparator());
+		if (workingSets.length == 2) {
+			String label= includeJRE ? SearchMessages.DoubleWorkingSetScope : SearchMessages.DoubleWorkingSetScopeNoJRE;
+			return Messages.format(label, new String[] { workingSets[0].getLabel(), workingSets[1].getLabel()});
+		}
+		String label= includeJRE ? SearchMessages.WorkingSetsScope : SearchMessages.WorkingSetsScopeNoJRE;
+		return Messages.format(label, new String[] { workingSets[0].getLabel(), workingSets[1].getLabel()});
+	}
 	
 	public IProject[] getProjects(IJavaSearchScope scope) {
 		IPath[] paths= scope.enclosingProjectsAndJars();
@@ -177,17 +239,17 @@ public class JavaSearchScopeFactory {
 		return (IProject[]) temp.toArray(new IProject[temp.size()]);
 	}
 
-	private Set getJavaElements(ISelection selection) {
+	public IJavaElement[] getJavaElements(ISelection selection) {
 		if (selection instanceof IStructuredSelection && !selection.isEmpty()) {
 			return getJavaElements(((IStructuredSelection)selection).toArray());
 		} else {
-			return EMPTY_SET;
+			return new IJavaElement[0];
 		}
 	}
 
-	private Set getJavaElements(Object[] elements) {
+	private IJavaElement[] getJavaElements(Object[] elements) {
 		if (elements.length == 0)
-			return EMPTY_SET;
+			return new IJavaElement[0];
 		
 		Set result= new HashSet(elements.length);
 		for (int i= 0; i < elements.length; i++) {
@@ -208,7 +270,13 @@ public class JavaSearchScopeFactory {
 			}
 			
 		}
-		return result;
+		return (IJavaElement[]) result.toArray(new IJavaElement[result.size()]);
+	}
+	
+	public IJavaSearchScope createJavaSearchScope(IJavaElement[] javaElements, boolean includeJRE) {
+		if (javaElements.length == 0)
+			return EMPTY_SCOPE;
+		return SearchEngine.createJavaSearchScope(javaElements, getSearchFlags(includeJRE));
 	}
 
 	private IJavaSearchScope createJavaSearchScope(Collection javaElements, boolean includeJRE) {

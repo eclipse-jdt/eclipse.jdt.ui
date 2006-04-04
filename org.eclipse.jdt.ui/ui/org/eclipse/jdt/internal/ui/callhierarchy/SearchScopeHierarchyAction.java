@@ -13,18 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.search.SearchMessages;
+import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 
 
 class SearchScopeHierarchyAction extends SearchScopeAction {
@@ -65,8 +63,7 @@ class SearchScopeHierarchyAction extends SearchScopeAction {
 	 */
 	public String getFullDescription() {
 		IMethod method = this.fGroup.getView().getMethod();
-		
-		return Messages.format(SearchMessages.HierarchyScope, method.getDeclaringType().getElementName()); 
+		return JavaSearchScopeFactory.getInstance().getHierarchyScopeDescription(method.getDeclaringType());
 	}
 
 }

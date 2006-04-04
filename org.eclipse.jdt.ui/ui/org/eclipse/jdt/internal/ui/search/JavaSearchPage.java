@@ -65,8 +65,6 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.jdt.internal.corext.util.Messages;
-
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.ui.search.PatternQuerySpecification;
 import org.eclipse.jdt.ui.search.QuerySpecification;
@@ -80,8 +78,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSearchConstants {
-	
-	
 	
 	private static class SearchPatternData {
 		private int searchFor;
@@ -279,30 +275,18 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		
 		switch (getContainer().getSelectedScope()) {
 			case ISearchPageContainer.WORKSPACE_SCOPE:
-				scopeDescription= includeJRE ? SearchMessages.WorkspaceScope : SearchMessages.WorkspaceScopeNoJRE; 
+				scopeDescription= factory.getWorkspaceScopeDescription(includeJRE);
 				scope= factory.createWorkspaceScope(includeJRE);
 				break;
 			case ISearchPageContainer.SELECTION_SCOPE:
-				scopeDescription= includeJRE ? SearchMessages.SelectionScope : SearchMessages.SelectionScopeNoJRE;
-				scope= factory.createJavaSearchScope(getContainer().getSelection(), includeJRE);
+				IJavaElement[] javaElements= factory.getJavaElements(getContainer().getSelection());
+				scope= factory.createJavaSearchScope(javaElements, includeJRE);
+				scopeDescription= factory.getSelectionScopeDescription(javaElements, includeJRE);
 				break;
 			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE: {
 				String[] projectNames= getContainer().getSelectedProjectNames();
 				scope= factory.createJavaProjectSearchScope(projectNames, includeJRE);
-				String label;
-				String projectName;
-				if (projectNames.length >= 1) {
-					projectName= projectNames[0];
-					if (projectNames.length == 1) {
-						label= includeJRE ? SearchMessages.EnclosingProjectScope : SearchMessages.EnclosingProjectScopeNoJRE;
-					} else {
-						label= includeJRE ? SearchMessages.EnclosingProjectsScope : SearchMessages.EnclosingProjectsScopeNoJRE;
-					}
-				} else {
-					projectName= ""; //$NON-NLS-1$
-					label= SearchMessages.EnclosingProjectScope;
-				}
-				scopeDescription= Messages.format(label, projectName);
+				scopeDescription= factory.getProjectScopeDescription(projectNames, includeJRE);
 				break;
 			}
 			case ISearchPageContainer.WORKING_SET_SCOPE: {
@@ -310,8 +294,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				// should not happen - just to be sure
 				if (workingSets == null || workingSets.length < 1)
 					return false;
-				String label= includeJRE ? SearchMessages.WorkingSetScope : SearchMessages.WorkingSetScopeNoJRE;
-				scopeDescription= Messages.format(label, SearchUtil.toString(workingSets)); 
+				scopeDescription= factory.getWorkingSetScopeDescription(workingSets, includeJRE); 
 				scope= factory.createJavaSearchScope(workingSets, includeJRE);
 				SearchUtil.updateLRUWorkingSets(workingSets);
 			}
@@ -331,8 +314,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		NewSearchUI.runQueryInBackground(textSearchJob);
 		return true;
 	}
-
-	
 	
 	private int getLimitTo() {
 		for (int i= 0; i < fLimitTo.length; i++) {

@@ -24,14 +24,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.corext.util.Messages;
-
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.ui.search.QuerySpecification;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 /**
@@ -81,8 +80,9 @@ public class FindReferencesInHierarchyAction extends FindReferencesAction {
 		if (type == null) {
 			return super.createQuery(element);
 		}
+		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 		IJavaSearchScope scope= SearchEngine.createHierarchyScope(type);
-		String description= Messages.format(SearchMessages.HierarchyScope, new String[] { type.getElementName() }); 
+		String description= factory.getHierarchyScopeDescription(type);
 		return new ElementQuerySpecification(element, getLimitTo(), scope, description);
 	}
 

@@ -18,8 +18,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
-import org.eclipse.jdt.internal.corext.util.Messages;
-
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.ui.search.QuerySpecification;
 
@@ -106,7 +104,7 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 		}
 		SearchUtil.updateLRUWorkingSets(workingSets);
 		IJavaSearchScope scope= factory.createJavaSearchScope(workingSets, true);
-		String description= Messages.format(SearchMessages.WorkingSetScope, new String[] {SearchUtil.toString(workingSets)});
+		String description= factory.getWorkingSetScopeDescription(workingSets, true);
 		return new ElementQuerySpecification(element, getLimitTo(), scope, description);
 	}
 }

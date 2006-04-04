@@ -35,7 +35,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -48,6 +47,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
+import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -303,8 +303,9 @@ public abstract class FindAction extends SelectionDispatchAction {
 	}
 	
 	QuerySpecification createQuery(IJavaElement element) throws JavaModelException {
-		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
-		String description= SearchMessages.WorkspaceScope;
+		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
+		IJavaSearchScope scope= factory.createWorkspaceScope(true);
+		String description= factory.getWorkspaceScopeDescription(true);
 		return new ElementQuerySpecification(element, getLimitTo(), scope, description);
 	}
 
