@@ -162,7 +162,7 @@ public class DelegateMethodCreator extends DelegateCreator {
 		final MethodDeclaration declaration= (MethodDeclaration) getDeclaration();
 		final IMethodBinding binding= declaration.resolveBinding();
 		if (binding != null)
-			return DeprecationRefactorings.getMethodScriptName(binding);
+			return DeprecationRefactorings.getRefactoringScriptName(binding);
 		return null;
 	}
 

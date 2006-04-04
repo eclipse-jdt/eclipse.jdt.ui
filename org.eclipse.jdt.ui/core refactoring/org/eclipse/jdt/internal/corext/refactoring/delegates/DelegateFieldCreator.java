@@ -93,7 +93,7 @@ public class DelegateFieldCreator extends DelegateCreator {
 	protected String getRefactoringScriptName() {
 		final IVariableBinding binding= fOldFieldFragment.resolveBinding();
 		if (binding != null)
-			return DeprecationRefactorings.getFieldScriptName(binding);
+			return DeprecationRefactorings.getRefactoringScriptName(binding);
 		return null;
 	}
 

@@ -112,7 +112,7 @@ public final class DeprecationRefactorings {
 	 *            the variable binding
 	 * @return the refactoring script name, or <code>null</code>
 	 */
-	public static String getFieldScriptName(final IVariableBinding binding) {
+	private static String getFieldScriptName(final IVariableBinding binding) {
 		Assert.isNotNull(binding);
 		final IJavaElement element= binding.getDeclaringClass().getJavaElement();
 		if (element instanceof IType) {
@@ -135,7 +135,7 @@ public final class DeprecationRefactorings {
 	 *            the method binding
 	 * @return the refactoring script name, or <code>null</code>
 	 */
-	public static String getMethodScriptName(final IMethodBinding binding) {
+	private static String getMethodScriptName(final IMethodBinding binding) {
 		Assert.isNotNull(binding);
 		final IJavaElement element= binding.getDeclaringClass().getJavaElement();
 		if (element instanceof IType) {
