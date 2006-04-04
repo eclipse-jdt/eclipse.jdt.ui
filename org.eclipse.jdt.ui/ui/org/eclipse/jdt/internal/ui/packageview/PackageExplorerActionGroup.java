@@ -373,4 +373,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 	public CustomFiltersActionGroup getCustomFilterActionGroup() {
 	    return fCustomFiltersActionGroup;
 	}
+	
+	public FrameList getFrameList() {
+		return fFrameList;
+	}
 }

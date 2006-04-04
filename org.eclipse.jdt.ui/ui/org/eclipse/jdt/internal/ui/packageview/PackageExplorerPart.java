@@ -105,8 +105,11 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 
+import org.eclipse.ui.views.framelist.Frame;
 import org.eclipse.ui.views.framelist.FrameAction;
+import org.eclipse.ui.views.framelist.FrameList;
 import org.eclipse.ui.views.framelist.IFrameSource;
+import org.eclipse.ui.views.framelist.TreeFrame;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -821,7 +824,7 @@ public class PackageExplorerPart extends ViewPart
 			if (element instanceof IJavaModel) {
 				result= PackagesMessages.PackageExplorerPart_workspace; 
 			} else if (element instanceof IJavaElement){
-				result= JavaElementLabels.getTextLabel(element, AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS);
+				result= JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_FULLY_QUALIFIED);
 			} else if (element instanceof IWorkingSet) {
 				result= ((IWorkingSet)element).getLabel();
 			} else if (element instanceof WorkingSetModel) {
@@ -837,14 +840,38 @@ public class PackageExplorerPart extends ViewPart
 				result= path.makeRelative().toString();
 			}
 		}
-		
-		if (fWorkingSetLabel == null)
-			return result;
 
-		String wsstr= Messages.format(PackagesMessages.PackageExplorer_toolTip, new String[] { fWorkingSetLabel }); 
-		if (result.length() == 0)
-			return wsstr;
-		return Messages.format(PackagesMessages.PackageExplorer_toolTip2, new String[] { result, fWorkingSetLabel }); 
+		if (fRootMode == ViewActionGroup.SHOW_PROJECTS) {
+			if (fWorkingSetLabel == null)
+				return result;
+			if (result.length() == 0)
+				return Messages.format(PackagesMessages.PackageExplorer_toolTip, new String[] { fWorkingSetLabel });
+			return Messages.format(PackagesMessages.PackageExplorer_toolTip2, new String[] { result, fWorkingSetLabel });
+		} else { // Working set mode
+			if (!(element instanceof IWorkingSet) && !(element instanceof WorkingSetModel)) {
+				FrameList frameList= fActionSet.getFrameList();
+				int index= frameList.getCurrentIndex();
+				IWorkingSet ws= null;
+				while(index >= 0) {
+					Frame frame= frameList.getFrame(index);
+					if (frame instanceof TreeFrame) {
+						Object input= ((TreeFrame)frame).getInput();
+						if (input instanceof IWorkingSet) {
+							ws= (IWorkingSet) input;
+							break;
+						}
+					}
+					index--;
+				}
+				if (ws != null) {
+					return Messages.format(PackagesMessages.PackageExplorer_toolTip3, new String[] {ws.getLabel() , result}); 
+				} else {
+					return result;
+				}
+			} else {
+				return result;
+			}
+		}
 	}
 	
 	public String getTitleToolTip() {
@@ -1691,6 +1718,7 @@ public class PackageExplorerPart extends ViewPart
 			action.run();
 			fWorkingSetModel.configured();
 		}
+		setTitleToolTip(getTitleToolTip());
 	}
 
 	private void createWorkingSetModel() {

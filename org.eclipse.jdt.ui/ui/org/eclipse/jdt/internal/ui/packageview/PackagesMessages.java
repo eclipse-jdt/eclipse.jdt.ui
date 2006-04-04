@@ -72,6 +72,7 @@ public final class PackagesMessages extends NLS {
 	public static String PackageExplorer_title;
 	public static String PackageExplorer_toolTip;
 	public static String PackageExplorer_toolTip2;
+	public static String PackageExplorer_toolTip3;
 	public static String PackageExplorer_openWith;
 	public static String PackageExplorer_element_not_present;
 	public static String PackageExplorer_filteredDialog_title;
