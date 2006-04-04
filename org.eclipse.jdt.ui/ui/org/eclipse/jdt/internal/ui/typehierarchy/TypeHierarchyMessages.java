@@ -23,6 +23,7 @@ public final class TypeHierarchyMessages extends NLS {
 	public static String EnableMemberFilterAction_label;
 	public static String EnableMemberFilterAction_tooltip;
 	public static String EnableMemberFilterAction_description;
+	public static String HistoryDropDownAction_clearhistory_label;
 	public static String ToggleOrientationAction_horizontal_label;
 	public static String ToggleOrientationAction_horizontal_tooltip;
 	public static String ToggleOrientationAction_horizontal_description;

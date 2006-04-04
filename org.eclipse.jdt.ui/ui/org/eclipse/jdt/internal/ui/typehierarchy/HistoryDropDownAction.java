@@ -27,7 +27,21 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class HistoryDropDownAction extends Action implements IMenuCreator {
+	
+	public static class ClearHistoryAction extends Action {
 
+		private TypeHierarchyViewPart fView;
+		
+		public ClearHistoryAction(TypeHierarchyViewPart view) {
+			super(TypeHierarchyMessages.HistoryDropDownAction_clearhistory_label);
+			fView= view;
+		}
+			
+		public void run() {
+			fView.setHistoryEntries(new IJavaElement[0]);
+			fView.setInputElement(null);
+		}
+	}
 
 	public static final int RESULTS_IN_DROP_DOWN= 10;
 
@@ -61,13 +75,10 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 		}
 		fMenu= new Menu(parent);
 		IJavaElement[] elements= fHierarchyView.getHistoryEntries();
-		boolean checked= addEntries(fMenu, elements);
-		if (elements.length > RESULTS_IN_DROP_DOWN) {
-			new MenuItem(fMenu, SWT.SEPARATOR);
-			Action others= new HistoryListAction(fHierarchyView);
-			others.setChecked(checked);
-			addActionToMenu(fMenu, others);
-		}
+		addEntries(fMenu, elements);
+		new MenuItem(fMenu, SWT.SEPARATOR);
+		addActionToMenu(fMenu, new HistoryListAction(fHierarchyView));
+		addActionToMenu(fMenu, new ClearHistoryAction(fHierarchyView));
 		return fMenu;
 	}
 	
@@ -80,7 +91,9 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 			action.setChecked(elements[i].equals(fHierarchyView.getInputElement()));
 			checked= checked || action.isChecked();
 			addActionToMenu(menu, action);
-		}	
+		}
+		
+		
 		return checked;
 	}
 	
