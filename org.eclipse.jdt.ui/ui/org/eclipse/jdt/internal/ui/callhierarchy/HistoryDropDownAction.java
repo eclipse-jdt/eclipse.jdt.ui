@@ -27,7 +27,24 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
+
 class HistoryDropDownAction extends Action implements IMenuCreator {
+	
+	private static class ClearHistoryAction extends Action {
+
+		private CallHierarchyViewPart fView;
+		
+		public ClearHistoryAction(CallHierarchyViewPart view) {
+			super(CallHierarchyMessages.HistoryDropDownAction_clearhistory_label);
+			fView= view;
+		}
+			
+		public void run() {
+			fView.setHistoryEntries(new IMethod[0]);
+			fView.setMethod(null);
+		}
+	}
+	
     public static final int RESULTS_IN_DROP_DOWN = 10;
     private CallHierarchyViewPart fView;
     private Menu fMenu;
@@ -53,14 +70,10 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
         }
         fMenu= new Menu(parent);
         IMethod[] elements= fView.getHistoryEntries();
-        boolean checked= addEntries(fMenu, elements);
-        if (elements.length > RESULTS_IN_DROP_DOWN) {
-            new MenuItem(fMenu, SWT.SEPARATOR);
-            Action others= new HistoryListAction(fView);
-            others.setChecked(checked);
-            addActionToMenu(fMenu, others);
-        }
-
+        addEntries(fMenu, elements);
+		new MenuItem(fMenu, SWT.SEPARATOR);
+		addActionToMenu(fMenu, new HistoryListAction(fView));
+		addActionToMenu(fMenu, new ClearHistoryAction(fView));
         return fMenu;
     }
 
