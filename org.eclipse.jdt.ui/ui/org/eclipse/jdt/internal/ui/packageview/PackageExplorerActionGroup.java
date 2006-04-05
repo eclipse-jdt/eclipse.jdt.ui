@@ -278,7 +278,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 				// don't zoom into compilation units and class files
 				if (element instanceof ICompilationUnit || element instanceof IClassFile)
 					return;
-				if (element instanceof IOpenable || element instanceof IContainer) {
+				if (element instanceof IOpenable || element instanceof IContainer || element instanceof IWorkingSet) {
 					fZoomInAction.run();
 				}
 			} else {
