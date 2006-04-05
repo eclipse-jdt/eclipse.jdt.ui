@@ -847,8 +847,8 @@ public class PackageExplorerPart extends ViewPart
 			if (result.length() == 0)
 				return Messages.format(PackagesMessages.PackageExplorer_toolTip, new String[] { fWorkingSetLabel });
 			return Messages.format(PackagesMessages.PackageExplorer_toolTip2, new String[] { result, fWorkingSetLabel });
-		} else { // Working set mode
-			if (!(element instanceof IWorkingSet) && !(element instanceof WorkingSetModel)) {
+		} else { // Working set mode.
+			if (!(element instanceof IWorkingSet) && !(element instanceof WorkingSetModel) && fActionSet != null) {
 				FrameList frameList= fActionSet.getFrameList();
 				int index= frameList.getCurrentIndex();
 				IWorkingSet ws= null;
