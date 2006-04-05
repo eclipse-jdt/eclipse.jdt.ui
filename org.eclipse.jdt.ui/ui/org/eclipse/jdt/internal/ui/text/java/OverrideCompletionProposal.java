@@ -100,6 +100,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 		buffer.replace(index + 1, length, " "); //$NON-NLS-1$
 		final ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setResolveBindings(true);
+		parser.setStatementsRecovery(true);
 		parser.setSource(buffer.get().toCharArray());
 		parser.setUnitName(fCompilationUnit.getResource().getFullPath().toString());
 		parser.setProject(fCompilationUnit.getJavaProject());
@@ -131,9 +132,8 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 				List candidates= new ArrayList(bindings.length);
 				IMethodBinding method= null;
 				for (index= 0; index < bindings.length; index++) {
-					method= bindings[index];
-					if (method.getName().equals(fMethodName) && method.getParameterTypes().length == fParamTypes.length)
-						candidates.add(method);
+					if (bindings[index].getName().equals(fMethodName) && bindings[index].getParameterTypes().length == fParamTypes.length)
+						candidates.add(bindings[index]);
 				}
 				if (candidates.size() > 1) {
 					method= Bindings.findMethodInHierarchy(binding, fMethodName, fParamTypes);
@@ -141,9 +141,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 						ITypeBinding objectType= rewrite.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 						method= Bindings.findMethodInType(objectType, fMethodName, fParamTypes);
 					}
-					if (method == null)
-						method= (IMethodBinding) candidates.get(0);
-				} else if (!candidates.isEmpty())
+				} else if (candidates.size() == 1)
 					method= (IMethodBinding) candidates.get(0);
 				if (method != null) {
 					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject);
