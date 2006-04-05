@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
@@ -59,10 +60,12 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringActions;
 
 /**
- * Helper class to detect whether a certain refactoring can be enabled on a selection.
+ * Helper class to detect whether a certain refactoring can be enabled on a
+ * selection.
  * <p>
- * This class has been introduced to decouple actions from the refactoring code, in order not
- * to eagerly load refactoring classes during action initialization.
+ * This class has been introduced to decouple actions from the refactoring code,
+ * in order not to eagerly load refactoring classes during action
+ * initialization.
  * </p>
  * 
  * @since 3.1
@@ -128,6 +131,15 @@ public final class RefactoringAvailabilityTester {
 				result.add(elements[index]);
 		}
 		return (IResource[]) result.toArray(new IResource[result.size()]);
+	}
+
+	public static IType getSingleSelectedType(IStructuredSelection selection) throws JavaModelException {
+		Object first= selection.getFirstElement();
+		if (first instanceof IType)
+			return (IType) first;
+		if (first instanceof ICompilationUnit)
+			return JavaElementUtil.getMainType((ICompilationUnit) first);
+		return null;
 	}
 
 	public static IType getTopLevelType(final IMember[] members) {
@@ -206,7 +218,10 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isDelegateCreationAvailable(final IField field) throws JavaModelException {
-		return (Flags.isStatic(field.getFlags()) && Flags.isFinal(field.getFlags()) /* && hasInitializer(field) */);
+		return (Flags.isStatic(field.getFlags()) && Flags.isFinal(field.getFlags()) /*
+																					 * &&
+																					 * hasInitializer(field)
+																					 */);
 	}
 
 	public static boolean isDeleteAvailable(final IJavaElement element) throws JavaModelException {
@@ -218,7 +233,9 @@ public final class RefactoringAvailabilityTester {
 			return false;
 		if (element instanceof IPackageFragmentRoot) {
 			IPackageFragmentRoot root= (IPackageFragmentRoot) element;
-			if (root.isExternal() || Checks.isClasspathDelete(root)) // TODO rename isClasspathDelete
+			if (root.isExternal() || Checks.isClasspathDelete(root)) // TODO
+				// rename
+				// isClasspathDelete
 				return false;
 		}
 		if (element.getResource() == null && !RefactoringAvailabilityTester.isWorkingCopyElement(element))
@@ -286,10 +303,10 @@ public final class RefactoringAvailabilityTester {
 			if (first instanceof IType) {
 				return isExtractInterfaceAvailable((IType) first);
 			} else if (first instanceof ICompilationUnit) {
-				ICompilationUnit unit= (ICompilationUnit)first;
+				ICompilationUnit unit= (ICompilationUnit) first;
 				if (!unit.exists() || unit.isReadOnly())
 					return false;
-				
+
 				return true;
 			}
 		}
@@ -364,6 +381,11 @@ public final class RefactoringAvailabilityTester {
 
 	public static boolean isExtractSupertypeAvailable(final IStructuredSelection selection) throws JavaModelException {
 		if (!selection.isEmpty()) {
+			if (selection.size() == 1) {
+				final IType type= getSingleSelectedType(selection);
+				if (type != null)
+					return isExtractSupertypeAvailable(new IType[] { type});
+			}
 			for (final Iterator iterator= selection.iterator(); iterator.hasNext();) {
 				if (!(iterator.next() instanceof IMember))
 					return false;
@@ -381,7 +403,7 @@ public final class RefactoringAvailabilityTester {
 			return false;
 		return isExtractSupertypeAvailable(new IMember[] { (IMember) element});
 	}
-	
+
 	public static boolean isExtractTempAvailable(final JavaTextSelection selection) {
 		final ASTNode[] nodes= selection.resolveSelectedNodes();
 		return (selection.resolveInMethodBody() || selection.resolveInClassInitializer()) && (Checks.isExtractableExpression(nodes, selection.resolveCoveringNode()) || (nodes != null && nodes.length == 1 && nodes[0] instanceof ExpressionStatement));
@@ -434,7 +456,7 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isInferTypeArgumentsAvailable(final IJavaElement element) throws JavaModelException {
-		if (! Checks.isAvailable(element)) {
+		if (!Checks.isAvailable(element)) {
 			return false;
 		} else if (element instanceof IJavaProject) {
 			IJavaProject project= (IJavaProject) element;
@@ -460,9 +482,9 @@ public final class RefactoringAvailabilityTester {
 	public static boolean isInferTypeArgumentsAvailable(final IJavaElement[] elements) throws JavaModelException {
 		if (elements.length == 0)
 			return false;
-		
+
 		for (int i= 0; i < elements.length; i++) {
-			if (! (isInferTypeArgumentsAvailable(elements[i])))
+			if (!(isInferTypeArgumentsAvailable(elements[i])))
 				return false;
 		}
 		return true;
@@ -471,19 +493,19 @@ public final class RefactoringAvailabilityTester {
 	public static boolean isInferTypeArgumentsAvailable(final IStructuredSelection selection) throws JavaModelException {
 		if (selection.isEmpty())
 			return false;
-		
+
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
-			if (! (element instanceof IJavaElement))
+			if (!(element instanceof IJavaElement))
 				return false;
 			if (element instanceof ICompilationUnit) {
-				ICompilationUnit unit= (ICompilationUnit)element;
+				ICompilationUnit unit= (ICompilationUnit) element;
 				if (!unit.exists() || unit.isReadOnly())
 					return false;
-				
+
 				return true;
 			}
-			if (! isInferTypeArgumentsAvailable((IJavaElement) element))
+			if (!isInferTypeArgumentsAvailable((IJavaElement) element))
 				return false;
 		}
 		return true;
@@ -510,11 +532,11 @@ public final class RefactoringAvailabilityTester {
 	public static boolean isInlineMethodAvailable(IMethod method) throws JavaModelException {
 		if (method == null)
 			return false;
-		if (! method.exists())
+		if (!method.exists())
 			return false;
-		if (! method.isStructureKnown())
+		if (!method.isStructureKnown())
 			return false;
-		if (! method.isBinary())
+		if (!method.isBinary())
 			return true;
 		if (method.isConstructor())
 			return false;
@@ -533,25 +555,24 @@ public final class RefactoringAvailabilityTester {
 		if (elements.length != 1)
 			return false;
 		IJavaElement element= elements[0];
-		if (! (element instanceof IMethod))
+		if (!(element instanceof IMethod))
 			return false;
 		IMethod method= (IMethod) element;
-		if (! isInlineMethodAvailable((method)))
+		if (!isInlineMethodAvailable((method)))
 			return false;
-		
+
 		// in binary class, only activate for method declarations
 		IJavaElement enclosingElement= selection.resolveEnclosingElement();
 		if (enclosingElement == null || enclosingElement.getAncestor(IJavaElement.CLASS_FILE) == null)
 			return true;
-		if (! (enclosingElement instanceof IMethod))
+		if (!(enclosingElement instanceof IMethod))
 			return false;
 		IMethod enclosingMethod= (IMethod) enclosingElement;
 		if (enclosingMethod.isConstructor())
 			return false;
 		int nameOffset= enclosingMethod.getNameRange().getOffset();
 		int nameLength= enclosingMethod.getNameRange().getLength();
-		return (nameOffset <= selection.getOffset())
-				&& (selection.getOffset() + selection.getLength() <= nameOffset + nameLength);
+		return (nameOffset <= selection.getOffset()) && (selection.getOffset() + selection.getLength() <= nameOffset + nameLength);
 	}
 
 	public static boolean isInlineTempAvailable(final ILocalVariable variable) throws JavaModelException {
@@ -574,14 +595,14 @@ public final class RefactoringAvailabilityTester {
 			return isIntroduceFactoryAvailable((IMethod) selection.getFirstElement());
 		return false;
 	}
-	
+
 	public static boolean isIntroduceFactoryAvailable(final JavaTextSelection selection) throws JavaModelException {
 		final IJavaElement[] elements= selection.resolveElementAtOffset();
 		if (elements.length == 1 && elements[0] instanceof IMethod)
 			return isIntroduceFactoryAvailable((IMethod) elements[0]);
-		
+
 		// there's no IMethod for the default constructor
-		if (! Checks.isAvailable(selection.resolveEnclosingElement()))
+		if (!Checks.isAvailable(selection.resolveEnclosingElement()))
 			return false;
 		ASTNode node= selection.resolveCoveringNode();
 		if (node == null) {
@@ -594,30 +615,30 @@ public final class RefactoringAvailabilityTester {
 				return false;
 			}
 		}
-		
+
 		if (node.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION)
 			return true;
-		
+
 		node= ASTNodes.getNormalizedNode(node);
 		if (node.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY)
 			return true;
-		
+
 		return false;
 	}
-	
+
 	public static boolean isIntroduceIndirectionAvailable(IMethod method) throws JavaModelException {
 		if (method == null)
 			return false;
-		if (! method.exists())
+		if (!method.exists())
 			return false;
-		if (! method.isStructureKnown())
+		if (!method.isStructureKnown())
 			return false;
 		if (method.isConstructor())
 			return false;
 		if (method.getDeclaringType().isAnnotation())
 			return false;
-		
-		return true;	
+
+		return true;
 	}
 
 	public static boolean isIntroduceIndirectionAvailable(final IStructuredSelection selection) throws JavaModelException {
@@ -678,7 +699,7 @@ public final class RefactoringAvailabilityTester {
 		if (selection.size() == 1) {
 			Object first= selection.getFirstElement();
 			if (first instanceof IType) {
-				return isMoveInnerAvailable((IType)first);
+				return isMoveInnerAvailable((IType) first);
 			}
 		}
 		return false;
@@ -817,6 +838,11 @@ public final class RefactoringAvailabilityTester {
 
 	public static boolean isPullUpAvailable(final IStructuredSelection selection) throws JavaModelException {
 		if (!selection.isEmpty()) {
+			if (selection.size() == 1) {
+				final IType type= getSingleSelectedType(selection);
+				if (type != null)
+					return isPullUpAvailable(new IType[] { type});
+			}
 			for (final Iterator iterator= selection.iterator(); iterator.hasNext();) {
 				if (!(iterator.next() instanceof IMember))
 					return false;
@@ -876,6 +902,11 @@ public final class RefactoringAvailabilityTester {
 
 	public static boolean isPushDownAvailable(final IStructuredSelection selection) throws JavaModelException {
 		if (!selection.isEmpty()) {
+			if (selection.size() == 1) {
+				final IType type= getSingleSelectedType(selection);
+				if (type != null)
+					return isPushDownAvailable(new IType[] { type});
+			}
 			for (final Iterator iterator= selection.iterator(); iterator.hasNext();) {
 				if (!(iterator.next() instanceof IMember))
 					return false;
@@ -1017,7 +1048,7 @@ public final class RefactoringAvailabilityTester {
 	public static boolean isReplaceInvocationsAvailable(IMethod method) throws JavaModelException {
 		if (method == null)
 			return false;
-		if (! method.exists())
+		if (!method.exists())
 			return false;
 		if (method.isConstructor())
 			return false;
@@ -1038,7 +1069,7 @@ public final class RefactoringAvailabilityTester {
 		IJavaElement element= elements[0];
 		return (element instanceof IMethod) && isReplaceInvocationsAvailable(((IMethod) element));
 	}
-	
+
 	public static boolean isSelfEncapsulateAvailable(IField field) throws JavaModelException {
 		return Checks.isAvailable(field) && !JdtFlags.isEnum(field) && !field.getDeclaringType().isAnnotation();
 	}
@@ -1064,12 +1095,12 @@ public final class RefactoringAvailabilityTester {
 		if (selection.size() == 1) {
 			final Object first= selection.getFirstElement();
 			if (first instanceof IType) {
-				return isUseSuperTypeAvailable((IType)first);
+				return isUseSuperTypeAvailable((IType) first);
 			} else if (first instanceof ICompilationUnit) {
-				ICompilationUnit unit= (ICompilationUnit)first;
+				ICompilationUnit unit= (ICompilationUnit) first;
 				if (!unit.exists() || unit.isReadOnly())
 					return false;
-				
+
 				return true;
 			}
 		}

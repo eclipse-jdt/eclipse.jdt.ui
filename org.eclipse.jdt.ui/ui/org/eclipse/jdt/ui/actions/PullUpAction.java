@@ -15,7 +15,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -26,6 +25,7 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
@@ -44,9 +44,9 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * Action to pull up method and fields into a superclass.
  * <p>
- * Action is applicable to selections containing elements of
- * type <code>IType</code> (top-level types only), 
- * <code>IField</code> and <code>IMethod</code>.
+ * Action is applicable to selections containing elements of type
+ * <code>IType</code> (top-level types only), <code>IField</code> and
+ * <code>IMethod</code>.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -56,14 +56,49 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class PullUpAction extends SelectionDispatchAction {
 
+	private static IMember[] getSelectedMembers(IStructuredSelection selection) {
+		if (selection.isEmpty())
+			return null;
+		if (selection.size() == 1) {
+			try {
+				final IType type= RefactoringAvailabilityTester.getSingleSelectedType(selection);
+				if (type != null)
+					return new IType[] { type};
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+		}
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			if (!(iter.next() instanceof IMember))
+				return null;
+		}
+		Set memberSet= new HashSet();
+		memberSet.addAll(Arrays.asList(selection.toArray()));
+		return (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
+	}
+
 	private CompilationUnitEditor fEditor;
-	
+
 	/**
-	 * Creates a new <code>PullUpAction</code>. The action requires that the selection 
-	 * provided by the site's selection provider is of type <code>
+	 * Note: This constructor is for internal use only. Clients should not call
+	 * this constructor.
+	 * 
+	 * @param editor
+	 *            the compilation unit editor
+	 */
+	public PullUpAction(CompilationUnitEditor editor) {
+		this(editor.getEditorSite());
+		fEditor= editor;
+		setEnabled(SelectionConverter.canOperateOn(fEditor));
+	}
+
+	/**
+	 * Creates a new <code>PullUpAction</code>. The action requires that the
+	 * selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
-	 * @param site the site providing context information for this action
+	 * @param site
+	 *            the site providing context information for this action
 	 */
 	public PullUpAction(IWorkbenchSite site) {
 		super(site);
@@ -71,20 +106,47 @@ public class PullUpAction extends SelectionDispatchAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.PULL_UP_ACTION);
 	}
 
-	/**
-	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * @param editor the compilation unit editor
-	 */
-	public PullUpAction(CompilationUnitEditor editor) {
-		this(editor.getEditorSite());
-		fEditor= editor;
-		setEnabled(SelectionConverter.canOperateOn(fEditor));
+	private IMember getSelectedMember() throws JavaModelException {
+		IJavaElement element= SelectionConverter.resolveEnclosingElement(fEditor, (ITextSelection) fEditor.getSelectionProvider().getSelection());
+		if (element == null || !(element instanceof IMember))
+			return null;
+		return (IMember) element;
 	}
-	
-	//---- structured selection -----------------------------------------------
 
-	/*
-	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
+	/**
+	 * {@inheritDoc}
+	 */
+	public void run(IStructuredSelection selection) {
+		try {
+			IMember[] members= getSelectedMembers(selection);
+			if (RefactoringAvailabilityTester.isPullUpAvailable(members))
+				RefactoringExecutionStarter.startPullUpRefactoring(members, getShell());
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void run(ITextSelection selection) {
+		try {
+			if (!ActionUtil.isProcessable(getShell(), fEditor))
+				return;
+			IMember member= getSelectedMember();
+			IMember[] array= new IMember[] { member};
+			if (member != null && RefactoringAvailabilityTester.isPullUpAvailable(array)) {
+				RefactoringExecutionStarter.startPullUpRefactoring(array, getShell());
+			} else {
+				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.PullUpAction_unavailable);
+			}
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
@@ -97,30 +159,16 @@ public class PullUpAction extends SelectionDispatchAction {
 		}
 	}
 
-	/*
-	 * @see SelectionDispatchAction#run(IStructuredSelection)
-	 */
-	public void run(IStructuredSelection selection) {
-		try {
-			IMember[] members= getSelectedMembers(selection);
-			if (RefactoringAvailabilityTester.isPullUpAvailable(members))
-				RefactoringExecutionStarter.startPullUpRefactoring(members, getShell());
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
-		}
-	}
-
-	//---- text selection -----------------------------------------------------
-	
-	/*
-	 * @see SelectionDispatchAction#selectionChanged(ITextSelection)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
-	
+
 	/**
-	 * Note: This method is for internal use only. Clients should not call this method.
+	 * Note: This method is for internal use only. Clients should not call this
+	 * method.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
@@ -128,47 +176,5 @@ public class PullUpAction extends SelectionDispatchAction {
 		} catch (JavaModelException e) {
 			setEnabled(false);
 		}
-	}
-
-	/*
-	 * @see SelectionDispatchAction#run(ITextSelection)
-	 */
-	public void run(ITextSelection selection) {
-		try {
-			if (!ActionUtil.isProcessable(getShell(), fEditor))
-				return;
-			IMember member= getSelectedMember();
-			IMember[] array= new IMember[]{member};
-			if (member != null && RefactoringAvailabilityTester.isPullUpAvailable(array)){
-				RefactoringExecutionStarter.startPullUpRefactoring(array, getShell());	
-			} else {
-				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.PullUpAction_unavailable); 
-			}
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
-		}
-	}
-	
-	//---- private helper methods ------------------------------------------------
-		
-	private static IMember[] getSelectedMembers(IStructuredSelection selection) {
-		if (selection.isEmpty())
-			return null;
-		
-		for  (Iterator iter= selection.iterator(); iter.hasNext(); ) {
-			if (! (iter.next() instanceof IMember))
-				return null;
-		}
-		Set memberSet= new HashSet();
-		memberSet.addAll(Arrays.asList(selection.toArray()));
-		return (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
-	}
-		
-	private IMember getSelectedMember() throws JavaModelException {
-		IJavaElement element= SelectionConverter.resolveEnclosingElement(
-			fEditor, (ITextSelection)fEditor.getSelectionProvider().getSelection());
-		if (element == null || ! (element instanceof IMember))
-			return null;
-		return (IMember)element;
 	}
 }

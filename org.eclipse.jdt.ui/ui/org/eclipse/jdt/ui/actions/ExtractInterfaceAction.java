@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-
 import java.io.CharConversionException;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -21,13 +20,11 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
-import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -98,23 +95,12 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 	public void run(IStructuredSelection selection) {
 		try {
 			if (RefactoringAvailabilityTester.isExtractInterfaceAvailable(selection))
-				RefactoringExecutionStarter.startExtractInterfaceRefactoring(getSingleSelectedType(selection), getShell());
+				RefactoringExecutionStarter.startExtractInterfaceRefactoring(RefactoringAvailabilityTester.getSingleSelectedType(selection), getShell());
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}
 	}
 
-	private static IType getSingleSelectedType(IStructuredSelection selection) throws JavaModelException {
-		Object first= selection.getFirstElement();
-		if (first instanceof IType)
-			return (IType) first;
-		if (first instanceof ICompilationUnit)
-			return JavaElementUtil.getMainType((ICompilationUnit) first);
-		return null;
-	}
-
-	//---- text selection ---------------------------------------------------
-	
     /*
      * @see SelectionDispatchAction#selectionChanged(ITextSelection)
      */

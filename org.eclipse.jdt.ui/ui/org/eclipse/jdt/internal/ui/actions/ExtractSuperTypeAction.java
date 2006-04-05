@@ -25,6 +25,7 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
@@ -74,6 +75,15 @@ public class ExtractSuperTypeAction extends SelectionDispatchAction {
 	private static IMember[] getSelectedMembers(final IStructuredSelection selection) {
 		if (selection.isEmpty())
 			return null;
+		if (selection.size() == 1) {
+			try {
+				final IType type= RefactoringAvailabilityTester.getSingleSelectedType(selection);
+				if (type != null)
+					return new IType[] {type};
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+		}
 		for (final Iterator iterator= selection.iterator(); iterator.hasNext();) {
 			if (!(iterator.next() instanceof IMember))
 				return null;
