@@ -1479,6 +1479,70 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertEqualString(preview, buf.toString());	
 	}	
 	
+	public void testSplitDeclaration4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package e;\n");
+		buf.append("public class Test {\n");
+		buf.append("    public void test() {\n");
+		buf.append("        String[] test = new String[0];\n");
+		buf.append("    }\n");
+		buf.append("}");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		String str= "=";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package e;\n");
+		buf.append("public class Test {\n");
+		buf.append("    public void test() {\n");
+		buf.append("        String[] test;\n");
+		buf.append("        test = new String[0];\n");
+		buf.append("    }\n");
+		buf.append("}");
+		assertEqualString(preview, buf.toString());	
+	}
+	
+	public void testSplitDeclaration5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package e;\n");
+		buf.append("public class Test {\n");
+		buf.append("    public void test() {\n");
+		buf.append("        String[] test = { null };\n");
+		buf.append("    }\n");
+		buf.append("}");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		String str= "=";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package e;\n");
+		buf.append("public class Test {\n");
+		buf.append("    public void test() {\n");
+		buf.append("        String[] test;\n");
+		buf.append("        test = new String[]{ null };\n");
+		buf.append("    }\n");
+		buf.append("}");
+		assertEqualString(preview, buf.toString());	
+	}	
+	
 	public void testJoinDeclaration1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
