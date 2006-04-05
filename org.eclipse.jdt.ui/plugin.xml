@@ -3906,12 +3906,12 @@
             commandId="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
-            sequence="M1+/"
+            sequence="M1+7"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
-            sequence="M1+7"
+            sequence="M1+/"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
