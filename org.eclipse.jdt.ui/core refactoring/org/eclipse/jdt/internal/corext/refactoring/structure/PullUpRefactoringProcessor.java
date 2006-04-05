@@ -879,21 +879,23 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			final IMethod method= (IMethod) members[i];
 			final String returnType= Signature.toString(Signature.getReturnType(method.getSignature()).toString());
 			Assert.isTrue(mapping.containsKey(method));
-			for (final Iterator iter= ((Set) mapping.get(method)).iterator(); iter.hasNext();) {
-				final IMethod matchingMethod= (IMethod) iter.next();
-				if (method.equals(matchingMethod))
-					continue;
-				if (!notDeletedMembersInSubtypes.contains(matchingMethod))
-					continue;
-				if (returnType.equals(Signature.toString(Signature.getReturnType(matchingMethod.getSignature()).toString())))
-					continue;
-				final String[] keys= { JavaElementLabels.getTextLabel(matchingMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(matchingMethod.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED) };
-				final String message= Messages.format(RefactoringCoreMessages.PullUpRefactoring_different_method_return_type, keys);
-				final RefactoringStatusContext context= JavaStatusContext.create(matchingMethod.getCompilationUnit(), matchingMethod.getNameRange());
-				status.addError(message, context);
-			}
+			final Set set= (Set) mapping.get(method);
+			if (set != null) {
+				for (final Iterator iter= set.iterator(); iter.hasNext();) {
+					final IMethod matchingMethod= (IMethod) iter.next();
+					if (method.equals(matchingMethod))
+						continue;
+					if (!notDeletedMembersInSubtypes.contains(matchingMethod))
+						continue;
+					if (returnType.equals(Signature.toString(Signature.getReturnType(matchingMethod.getSignature()).toString())))
+						continue;
+					final String[] keys= { JavaElementLabels.getTextLabel(matchingMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(matchingMethod.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)};
+					final String message= Messages.format(RefactoringCoreMessages.PullUpRefactoring_different_method_return_type, keys);
+					final RefactoringStatusContext context= JavaStatusContext.create(matchingMethod.getCompilationUnit(), matchingMethod.getNameRange());
+					status.addError(message, context);
+				}
+			}			
 		}
-
 	}
 
 	protected void clearCaches() {
