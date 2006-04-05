@@ -276,10 +276,7 @@ public class CodeStyleFix extends AbstractFix {
 					TextEditGroup group= createTextEditGroup(FixMessages.CodeStyleFix_removeThis_groupDescription);
 					textEditGroups.add(group);
 					
-					MethodInvocation invocation= node.getAST().newMethodInvocation();
-					invocation.setName((SimpleName)rewrite.createCopyTarget(node.getName()));
-					
-					rewrite.replace(node, invocation, group);
+					rewrite.remove(node.getExpression(), group);
 				}
 			});
 			return super.visit(node);
