@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
@@ -144,7 +145,7 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 			if (overlay == null)
 				return;
 			
-			decoration.addOverlay(overlay, IDecoration.TOP_LEFT);
+			decoration.addOverlay(overlay, IDecoration.TOP_RIGHT);
 		} catch (JavaModelException e) {
 			return;
 		}
@@ -167,6 +168,10 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 			return JavaPluginImages.DESC_OVR_INTERFACE;
 		} else if (type.isEnum()) {
 			return JavaPluginImages.DESC_OVR_ENUM;
+		} else if (type.isClass()) {
+			if (Flags.isAbstract(type.getFlags())) {
+				return JavaPluginImages.DESC_OVR_ABSTRACT_CLASS;
+			}
 		}
 		return null;
 	}
