@@ -74,6 +74,9 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	 * @see org.eclipse.jdt.core.search.SearchRequestor#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)
 	 */
 	public void acceptSearchMatch(SearchMatch match) throws CoreException {
+		if (match.getAccuracy() == SearchMatch.A_INACCURATE)
+			return;
+		
 		int offset= match.getOffset();
 		int length= match.getLength();
 		if (offset == -1 || length == -1)
