@@ -1084,12 +1084,12 @@ public class JavaElementLabels {
 					buf.append(path.toString());
 				}
 				buf.append(CONCAT_STRING);
+				if (root.isExternal())
+					buf.append(root.getPath().toOSString());
+				else
+					buf.append(root.getPath().makeRelative().toString());
+				return true;
 			}
-			if (root.isExternal())
-				buf.append(root.getPath().toOSString());
-			else
-				buf.append(root.getPath().makeRelative().toString());
-			return true;
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e); // problems with class path
 		}
