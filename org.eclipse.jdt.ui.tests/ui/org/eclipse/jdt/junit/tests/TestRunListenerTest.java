@@ -40,6 +40,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
 
@@ -74,13 +76,18 @@ public class TestRunListenerTest extends TestCase {
 		lm.removeLaunches(lm.getLaunches());
 		ILaunchesListener2 launchesListener= new ILaunchesListener2() {
 			public void launchesTerminated(ILaunch[] launches) {
-				fLaunchHasTerminated= true;
-				for (int i= 0; i < launches.length; i++)
+				for (int i= 0; i < launches.length; i++) {
+					if (isJUnitLaunch(launches[i]))
+						fLaunchHasTerminated= true;
 					logLaunch("terminated", launches[i]);
+				}
 			}
 			public void launchesRemoved(ILaunch[] launches) {
-				for (int i= 0; i < launches.length; i++)
+				for (int i= 0; i < launches.length; i++) {
+					if (isJUnitLaunch(launches[i]))
+						fLaunchHasTerminated= true;
 					logLaunch("removed   ", launches[i]);
+				}
 			}
 			public void launchesAdded(ILaunch[] launches) {
 				for (int i= 0; i < launches.length; i++)
@@ -99,6 +106,9 @@ public class TestRunListenerTest extends TestCase {
 					buf.append(launchConfiguration.getName()).append(": ");
 				}
 				buf.append(launch);
+				if (isJUnitLaunch(launch)) {
+					buf.append(" [JUnit]");
+				}
 				System.out.println(buf);				
 			}
 		};
@@ -140,6 +150,21 @@ public class TestRunListenerTest extends TestCase {
 			expected.append(expectedSequence[i]).append('\n');
 		}
 		assertEquals(expected.toString(), actual.toString());
+	}
+	
+	private boolean isJUnitLaunch(ILaunch launch) {
+		ILaunchConfiguration config= launch.getLaunchConfiguration();
+		if (config == null)
+			return false;
+		
+		// test whether the launch defines the JUnit attributes
+		String portStr= launch.getAttribute(JUnitBaseLaunchConfiguration.PORT_ATTR);
+		String typeStr= launch.getAttribute(JUnitBaseLaunchConfiguration.TESTTYPE_ATTR);
+		if (portStr == null || typeStr == null)
+			return false;
+		
+		return true;
+
 	}
 	
 	public void testOK() throws Exception {
