@@ -26,6 +26,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.ILineRange;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.LineRange;
@@ -268,9 +269,11 @@ public class JavaMoveLinesAction extends TextEditorAction {
 	 */
 	private ITextSelection getSkippedLine(IDocument document, ITextSelection selection) {
 		int skippedLineN= (fUpwards ? selection.getStartLine() - 1 : selection.getEndLine() + 1);
-		if (skippedLineN < 0 || skippedLineN >= document.getNumberOfLines())
+		if (skippedLineN > document.getNumberOfLines() || (!fCopy && (skippedLineN < 0 ||  skippedLineN == document.getNumberOfLines())))
 			return null;
 		try {
+			if (fCopy && skippedLineN == -1)
+				skippedLineN= 0;
 			IRegion line= document.getLineInformation(skippedLineN);
 			return new TextSelection(document, line.getOffset(), line.getLength());
 		} catch (BadLocationException e) {
@@ -337,7 +340,7 @@ public class JavaMoveLinesAction extends TextEditorAction {
 			// get the content to be moved around: the moving (selected) area and the skipped line
 			String moving= movingArea.getText();
 			String skipped= skippedLine.getText();
-			if (moving == null || skipped == null)
+			if (moving == null || skipped == null || document.getLength() == 0)
 				return;
 
 			String delim;
@@ -345,21 +348,26 @@ public class JavaMoveLinesAction extends TextEditorAction {
 			int offset;
 			if (fUpwards) {
 				delim= document.getLineDelimiter(skippedLine.getEndLine());
-				Assert.isNotNull(delim);
 				if (fCopy) {
+					delim= TextUtilities.getDefaultLineDelimiter(document);
 					insertion= moving + delim;
 					offset= movingArea.getOffset();
 				} else {
+					Assert.isNotNull(delim);
 					insertion= moving + delim + skipped;
 					offset= skippedLine.getOffset();
 				}
 			} else {
 				delim= document.getLineDelimiter(movingArea.getEndLine());
-				Assert.isNotNull(delim);
 				if (fCopy) {
-					insertion= moving + delim;
+					if (delim == null) {
+						delim= TextUtilities.getDefaultLineDelimiter(document);
+						insertion= delim + moving;
+					} else
+						insertion= moving + delim;
 					offset= skippedLine.getOffset();
 				} else {
+					Assert.isNotNull(delim);
 					insertion= skipped + delim + moving;
 					offset= movingArea.getOffset();
 				}
@@ -373,10 +381,6 @@ public class JavaMoveLinesAction extends TextEditorAction {
 				fSharedState.endCompoundEdit();
 			fSharedState.beginCompoundEdit();
 			fSharedState.fIsChanging= true;
-			// set the caret offset to 0 in order to clear the selection
-			// this is a performance optimization, since document modifications are much cheaper
-			// if the selection has length 0, because no selection events get sent out then.
-			widget.setCaretOffset(0);
 			
 			document.replace(offset, lenght, insertion);
 			
