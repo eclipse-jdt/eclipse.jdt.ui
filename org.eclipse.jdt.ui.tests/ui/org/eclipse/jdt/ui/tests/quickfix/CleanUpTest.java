@@ -4449,6 +4449,64 @@ public class CleanUpTest extends QuickFixTest {
 		assertRefactoringHasNoChange(refactoring);
 	}
 	
+	public void testRemoveParenthesisBug134985_1() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public boolean foo(String s1, String s2, boolean a, boolean b) {\n");
+		buf.append("        return (a == b) == (s1 == s2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+	
+		ICleanUp cleanUp= new ExpressionsCleanUp(ExpressionsCleanUp.REMOVE_UNNECESSARY_PARENTHESIS);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public boolean foo(String s1, String s2, boolean a, boolean b) {\n");
+		buf.append("        return a == b == (s1 == s2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {buf.toString()});
+	}
+	
+	public void testRemoveParenthesisBug134985_2() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public String foo() {\n");
+		buf.append("        return (\"\" + 3) + (3 + 3);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+	
+		ICleanUp cleanUp= new ExpressionsCleanUp(ExpressionsCleanUp.REMOVE_UNNECESSARY_PARENTHESIS);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public String foo() {\n");
+		buf.append("        return \"\" + 3 + (3 + 3);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {buf.toString()});
+	}
+	
 	public void testRemoveQualifier01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

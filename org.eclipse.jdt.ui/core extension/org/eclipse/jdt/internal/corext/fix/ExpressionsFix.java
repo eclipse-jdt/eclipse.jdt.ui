@@ -123,32 +123,56 @@ public class ExpressionsFix extends AbstractFix {
 				if ((expressionPrecedence == parentPrecedence) && (parentExpression instanceof InfixExpression)) {
 					//we have expr infix (expr infix expr) removing the parenthesis is equal to (expr infix expr) infix expr
 					InfixExpression parentInfix= (InfixExpression) parentExpression;
-					Operator parentOperator= parentInfix.getOperator();
-					// check for PLUS with String
-					if (parentOperator == InfixExpression.Operator.PLUS) {
-						if (isStringExpression(parentInfix.getLeftOperand())
-							|| isStringExpression(parentInfix.getRightOperand())) {
-							return;
-						}
-						for (Iterator J= parentInfix.extendedOperands().iterator(); J.hasNext();) {
-							Expression operand= (Expression) J.next();
-							if (isStringExpression(operand)) {
+ 					Operator parentOperator= parentInfix.getOperator();
+					if (parentInfix.getLeftOperand() == parenthesizedExpression) {
+						fNodes.add(node);
+					} else if (isAssoziative(parentOperator)) {
+						if (parentOperator == InfixExpression.Operator.PLUS) {
+							if (isStringExpression(parentInfix.getLeftOperand())
+								|| isStringExpression(parentInfix.getRightOperand())) {
 								return;
 							}
+							for (Iterator J= parentInfix.extendedOperands().iterator(); J.hasNext();) {
+								Expression operand= (Expression) J.next();
+								if (isStringExpression(operand)) {
+									return;
+								}
+							}
 						}
+						fNodes.add(node);
 					}
-					// check for /, %, -
-					if ((parentOperator == InfixExpression.Operator.DIVIDE)
-						|| (parentOperator == InfixExpression.Operator.REMAINDER)
-						|| parentOperator == InfixExpression.Operator.MINUS) {
-						if (parentInfix.getLeftOperand() != parenthesizedExpression)
-							return;
-					}
+					return;
 				}
 			}
 			fNodes.add(node);
 		}
-		
+
+		//is e1 op (e2 op e3) == (e1 op e2) op e3 == e1 op e2 op e3 for 'operator'? 
+		private boolean isAssoziative(Operator operator) {
+			if (operator == InfixExpression.Operator.PLUS)
+				return true;
+			
+			if (operator == InfixExpression.Operator.CONDITIONAL_AND)
+				return true;
+			
+			if (operator == InfixExpression.Operator.CONDITIONAL_OR)
+				return true;
+			
+			if (operator == InfixExpression.Operator.AND)
+				return true;
+			
+			if (operator == InfixExpression.Operator.OR)
+				return true;
+			
+			if (operator == InfixExpression.Operator.XOR)
+				return true;
+			
+			if (operator == InfixExpression.Operator.TIMES)
+				return true;
+			
+			return false;
+		}
+
 		private static int getExpressionPrecedence(Expression expression) {
 			if (expression instanceof PostfixExpression || expression instanceof MethodInvocation) {
 				return 0;
