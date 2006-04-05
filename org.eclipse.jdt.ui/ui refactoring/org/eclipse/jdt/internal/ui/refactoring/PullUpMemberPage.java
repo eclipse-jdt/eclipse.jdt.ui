@@ -759,7 +759,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	public IType getDestinationType() {
 		final int index= fSuperTypesCombo.getSelectionIndex();
-		if (index > 0)
+		if (index >= 0)
 			return fCandidateTypes[index];
 		return null;
 	}
