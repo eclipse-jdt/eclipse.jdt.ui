@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.surround;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -21,7 +22,9 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
@@ -64,6 +67,19 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 		ExceptionAnalyzer analyzer= new ExceptionAnalyzer(selection);
 		enclosingNode.accept(analyzer);
 		List exceptions= analyzer.getCurrentExceptions();
+		if (enclosingNode.getNodeType() == ASTNode.METHOD_DECLARATION) {
+			List thrownExceptions= ((MethodDeclaration)enclosingNode).thrownExceptions();
+			for (Iterator thrown= thrownExceptions.iterator(); thrown.hasNext();) {
+				ITypeBinding thrownException= ((Name)thrown.next()).resolveTypeBinding();
+				if (thrownException != null) {
+					for (Iterator excep= exceptions.iterator(); excep.hasNext();) {
+						ITypeBinding exception= (ITypeBinding) excep.next();
+						if (exception.isAssignmentCompatible(thrownException))
+							excep.remove();
+					}
+				}
+			}
+		}
 		Collections.sort(exceptions, new ExceptionComparator());
 		return (ITypeBinding[]) exceptions.toArray(new ITypeBinding[exceptions.size()]);
 	}

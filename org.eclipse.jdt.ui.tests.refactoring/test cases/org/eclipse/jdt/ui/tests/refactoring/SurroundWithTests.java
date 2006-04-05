@@ -202,4 +202,12 @@ public class SurroundWithTests extends AbstractSelectionTestCase {
 	public void testGeneric2() throws Exception {
 		tryCatchTest();
 	}
+	
+	public void testMethodThrowsException() throws Exception {
+		tryCatchTest();
+	}
+	
+	public void testMethodThrowsException1() throws Exception {
+		tryCatchTest();
+	}
 }

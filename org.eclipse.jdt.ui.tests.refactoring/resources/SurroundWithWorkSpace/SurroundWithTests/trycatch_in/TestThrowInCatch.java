@@ -1,9 +1,9 @@
 package trycatch_in;
 
 public class TestThrowInCatch {
-	void f() throws Exception{
+	void f() throws NumberFormatException {
 		/*[*/try{
-		} catch (Exception e){
+		} catch (Exception e) {
 			throw new Exception();
 		}/*]*/
 	}
