@@ -26,7 +26,6 @@ public class AllReorgPerformanceTests {
 		
 		suite.addTest(RenameMethodPerfTests1.suite());
 		suite.addTest(RenameMethodPerfTests2.suite());
-		suite.addTest(RenameMethodWithHidingPerfTests.suite());
 		suite.addTest(RenameMethodWithOverloadPerfTests.suite());
 		
 		suite.addTest(MoveCompilationUnitPerfTests1.suite());
