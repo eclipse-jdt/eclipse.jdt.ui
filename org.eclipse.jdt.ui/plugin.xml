@@ -231,13 +231,6 @@
 	</extension>
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
-		id="spellingProposalCategory"
-		name="%SpellingProposalCategory">
-		<proposalCategory
-			icon="$nl$/icons/full/elcl16/spellassist_co.gif"/>
-	</extension>
-	<extension
-		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="textProposalCategory"
 		name="%TextProposalCategory">
 		<proposalCategory
@@ -293,19 +286,6 @@
 			categoryId="org.eclipse.jdt.ui.templateProposalCategory">
 			<partition type="__dftl_partition_content_type"/>
 			<partition type="__java_singleline_comment"/> <!-- to get NLS templates -->
-			<partition type="__java_javadoc"/>
-		</javaCompletionProposalComputer>
-	</extension>
-	<!-- spelling proposals -->
-	<extension
-		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
-		id="SpellingProposalComputer">
-		<javaCompletionProposalComputer
-			class="org.eclipse.jdt.internal.ui.text.spelling.WordCompletionProposalComputer"
-			categoryId="org.eclipse.jdt.ui.spellingProposalCategory">
-			<partition type="__java_singleline_comment"/>
-			<partition type="__java_multiline_comment"/>
-			<partition type="__java_string"/>
 			<partition type="__java_javadoc"/>
 		</javaCompletionProposalComputer>
 	</extension>
@@ -1416,11 +1396,11 @@
             <keywordReference id="org.eclipse.jdt.ui.contentassist"/>
       </page>
       <page
-            name="%workInProgress.name"
+            name="%contentAssistAdvancedName"
             category="org.eclipse.jdt.ui.preferences.CodeAssistPreferencePage"
-            class="org.eclipse.jdt.internal.ui.preferences.CodeAssistPreferencePageInProgress"
-            id="org.eclipse.jdt.ui.preferences.CodeAssistPreferencePageInProgress">
-            <keywordReference id="org.eclipse.jdt.ui.codeassist"/>
+            class="org.eclipse.jdt.internal.ui.preferences.CodeAssistAdvancedPreferencePage"
+            id="org.eclipse.jdt.ui.preferences.CodeAssistPreferenceAdvanced">
+            <keywordReference id="org.eclipse.jdt.ui.contentassist"/>
       </page>
       <page
             name="%editorHoversPageName"

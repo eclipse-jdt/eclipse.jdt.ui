@@ -20,13 +20,13 @@ import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
-public final class CodeAssistPreferencePageInProgress extends PropertyAndPreferencePage  {
+public final class CodeAssistAdvancedPreferencePage extends PropertyAndPreferencePage  {
 
-	private CodeAssistConfigurationBlockInProgress fConfigurationBlock;
+	private CodeAssistAdvancedConfigurationBlock fConfigurationBlock;
 
 	public void createControl(Composite parent) {
 		IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer) getContainer();
-		fConfigurationBlock= new CodeAssistConfigurationBlockInProgress(getNewStatusChangedListener(), container);
+		fConfigurationBlock= new CodeAssistAdvancedConfigurationBlock(getNewStatusChangedListener(), container);
 		
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE);
@@ -41,7 +41,7 @@ public final class CodeAssistPreferencePageInProgress extends PropertyAndPrefere
 	}
 
 	protected String getPreferencePageID() {
-		return "org.eclipse.jdt.ui.preferences.CodeAssistPreferencePageInProgress"; //$NON-NLS-1$
+		return "org.eclipse.jdt.ui.preferences.CodeAssistPreferenceAdvanced"; //$NON-NLS-1$
 	}
 
 	protected String getPropertyPageID() {

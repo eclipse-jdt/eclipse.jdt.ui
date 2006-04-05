@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IStatus;
@@ -76,7 +77,7 @@ public final class CompletionProposalCategory {
 			Bundle bundle= getBundle();
 			if (bundle != null) {
 				Path path= new Path(icon);
-				URL url= Platform.find(bundle, path);
+				URL url= FileLocator.find(bundle, path, null);
 				img= ImageDescriptor.createFromURL(url);
 			}
 		}
@@ -93,7 +94,7 @@ public final class CompletionProposalCategory {
 	}
 
 	private Bundle getBundle() {
-		String namespace= fElement.getDeclaringExtension().getNamespace();
+		String namespace= fElement.getDeclaringExtension().getContributor().getName();
 		Bundle bundle= Platform.getBundle(namespace);
 		return bundle;
 	}
@@ -106,7 +107,7 @@ public final class CompletionProposalCategory {
 	 */
 	private void checkNotNull(Object obj, String attribute) throws InvalidRegistryObjectException {
 		if (obj == null) {
-			Object[] args= { getId(), fElement.getNamespace(), attribute };
+			Object[] args= { getId(), fElement.getContributor().getName(), attribute };
 			String message= Messages.format(JavaTextMessages.CompletionProposalComputerDescriptor_illegal_attribute_message, args);
 			IStatus status= new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, message, null);
 			JavaPlugin.log(status);
@@ -142,7 +143,7 @@ public final class CompletionProposalCategory {
 	}
 	
 	/**
-	 * Sets the enablement state of the category.
+	 * Sets the separate command state of the category.
 	 * 
 	 * @param enabled the new enabled state.
 	 */

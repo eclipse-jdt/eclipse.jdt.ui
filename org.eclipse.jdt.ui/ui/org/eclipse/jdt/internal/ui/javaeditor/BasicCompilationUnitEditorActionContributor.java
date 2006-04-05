@@ -17,8 +17,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
@@ -42,6 +44,27 @@ import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 
 public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditorActionContributor {
 
+	/**
+	 * A menu listener that can remove itself from the menu it listens to.
+	 * @since 3.2
+	 */
+    private final class MenuListener implements IMenuListener {
+        private final IMenuManager fMenu;
+
+		public MenuListener(IMenuManager menu) {
+			fMenu= menu;
+        }
+
+		public void menuAboutToShow(IMenuManager manager) {
+	    	for (int i= 0; i < fSpecificAssistActions.length; i++) {
+	            fSpecificAssistActions[i].update();
+	        }
+	    }
+		
+		public void dispose() {
+			fMenu.removeMenuListener(this);
+		}
+    }
 
 	protected RetargetAction fRetargetContentAssist;
 	protected RetargetTextEditorAction fContentAssist;
@@ -49,16 +72,18 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 	protected RetargetTextEditorAction fQuickAssistAction;
 	protected RetargetTextEditorAction fChangeEncodingAction;
 	
-	/*
-	 * @since 3.2
-	 */
+	/* @since 3.2 */
 	protected SpecificContentAssistAction[] fSpecificAssistActions;
+	/* @since 3.2 */
+	private MenuListener fContentAssistMenuListener;
 
 
 	public BasicCompilationUnitEditorActionContributor() {
 
 		fRetargetContentAssist= new RetargetAction(JdtActionConstants.CONTENT_ASSIST,  JavaEditorMessages.ContentAssistProposal_label);
 		fRetargetContentAssist.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+		fRetargetContentAssist.setImageDescriptor(JavaPluginImages.DESC_ELCL_CODE_ASSIST);
+		fRetargetContentAssist.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CODE_ASSIST);
 		markAsPartListener(fRetargetContentAssist);
 
 		fContentAssist= new RetargetTextEditorAction(JavaEditorMessages.getBundleForConstructedKeys(), "ContentAssistProposal."); //$NON-NLS-1$
@@ -81,6 +106,8 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 	public void contributeToMenu(IMenuManager menu) {
 
 		super.contributeToMenu(menu);
+		if (fContentAssistMenuListener != null)
+			fContentAssistMenuListener.dispose();
 
 		IMenuManager editMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
 		if (editMenu != null) {
@@ -100,9 +127,14 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 				}
 			}
 			fSpecificAssistActions= (SpecificContentAssistAction[]) specificAssistActions.toArray(new SpecificContentAssistAction[specificAssistActions.size()]);
+			if (fSpecificAssistActions.length > 0) {
+				fContentAssistMenuListener= new MenuListener(caMenu);
+				caMenu.addMenuListener(fContentAssistMenuListener);
+			}
+			caMenu.add(new Separator("context_info")); //$NON-NLS-1$
+			caMenu.add(fContextInformation);
 			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fQuickAssistAction);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fContextInformation);
 		}
 	}
 
@@ -154,6 +186,10 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 		if (fRetargetContentAssist != null) {
 			fRetargetContentAssist.dispose();
 			fRetargetContentAssist= null;
+		}
+		if (fContentAssistMenuListener != null) {
+			fContentAssistMenuListener.dispose();
+			fContentAssistMenuListener= null;
 		}
 		super.dispose();
 	}

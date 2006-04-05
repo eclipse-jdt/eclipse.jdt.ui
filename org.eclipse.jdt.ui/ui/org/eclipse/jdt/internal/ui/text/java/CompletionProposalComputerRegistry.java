@@ -324,7 +324,7 @@ public final class CompletionProposalComputerRegistry {
 	void informUser(CompletionProposalComputerDescriptor descriptor, IStatus status) {
 		JavaPlugin.log(status);
         String title= JavaTextMessages.CompletionProposalComputerRegistry_error_dialog_title;
-        final String avoidHint= "To avoid this message, disable the '" + descriptor.getCategory().getName() + "' category on the <a>content assist</a> preference page.";
+        final String avoidHint= Messages.format(JavaTextMessages.CompletionProposalComputerRegistry_messageAvoidanceHint, descriptor.getCategory().getName());
         String message= status.getMessage();
         
         // inlined from MessageDialog.openError
@@ -334,7 +334,7 @@ public final class CompletionProposalComputerRegistry {
         		link.setText(avoidHint);
         		link.addSelectionListener(new SelectionAdapter() {
         			public void widgetSelected(SelectionEvent e) {
-        				PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.CodeAssistPreferencePageInProgress", null, null).open(); //$NON-NLS-1$
+        				PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.CodeAssistPreferenceAdvanced", null, null).open(); //$NON-NLS-1$
         			}
         		});
         		return link;
