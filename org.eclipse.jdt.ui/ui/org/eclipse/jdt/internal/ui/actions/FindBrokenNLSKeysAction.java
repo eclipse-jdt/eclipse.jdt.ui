@@ -205,11 +205,11 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 						switch (elem.getElementType()) {
 							case IJavaElement.TYPE:
 								if (elem.getParent().getElementType() == IJavaElement.COMPILATION_UNIT) {
-									return tryIfPropertyCuSelected((ICompilationUnit)elem.getParent()) != null;
+									return true;
 								}
 								return false;
 							case IJavaElement.COMPILATION_UNIT:
-								return tryIfPropertyCuSelected((ICompilationUnit)elem) != null;
+								return true;
 							case IJavaElement.IMPORT_CONTAINER:
 								return false;
 							case IJavaElement.PACKAGE_FRAGMENT:
