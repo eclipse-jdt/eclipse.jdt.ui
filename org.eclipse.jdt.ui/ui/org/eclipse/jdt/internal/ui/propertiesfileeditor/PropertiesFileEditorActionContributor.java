@@ -12,18 +12,16 @@ package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.action.Separator;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
 import org.eclipse.ui.editors.text.TextEditorActionContributor;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
 
@@ -40,7 +38,7 @@ public class PropertiesFileEditorActionContributor extends TextEditorActionContr
 
 	public PropertiesFileEditorActionContributor() {
 		fCorrectionAssist= new RetargetTextEditorAction(PropertiesFileEditorMessages.getBundleForConstructedKeys(), "CorrectionAssistProposal."); //$NON-NLS-1$
-		fCorrectionAssist.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);
+		fCorrectionAssist.setActionDefinitionId(ITextEditorActionDefinitionIds.QUICK_ASSIST);
 	}
 
 	/*
@@ -52,11 +50,8 @@ public class PropertiesFileEditorActionContributor extends TextEditorActionContr
 
 		IMenuManager editMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
 		if (editMenu != null) {
-			editMenu.add(new Separator(IContextMenuConstants.GROUP_OPEN));
-			editMenu.add(new Separator(IContextMenuConstants.GROUP_GENERATE));
-			editMenu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));
-
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fCorrectionAssist);
+			String GROUP_ASSIST= "group.assist"; //$NON-NLS-1$ // TODO replace by ITextEditorActionConstants constant
+			editMenu.appendToGroup(GROUP_ASSIST, fCorrectionAssist);
 		}
 
 	}

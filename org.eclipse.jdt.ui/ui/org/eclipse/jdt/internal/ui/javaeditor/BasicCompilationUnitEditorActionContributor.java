@@ -34,7 +34,6 @@ import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
 import org.eclipse.ui.ide.IDEActionFactory;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -113,7 +112,8 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 		if (editMenu != null) {
 			editMenu.add(fChangeEncodingAction);
 			IMenuManager caMenu= new MenuManager(JavaEditorMessages.BasicEditorActionContributor_specific_content_assist_menu, "specific_content_assist"); //$NON-NLS-1$
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, caMenu);
+			String GROUP_ASSIST= "group.assist"; //$NON-NLS-1$ // TODO replace by ITextEditorActionConstants constant
+			editMenu.insertAfter(GROUP_ASSIST, caMenu);
 			
 			caMenu.add(fRetargetContentAssist);
 			Collection descriptors= CompletionProposalComputerRegistry.getDefault().getProposalCategories();
@@ -134,7 +134,7 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 			caMenu.add(new Separator("context_info")); //$NON-NLS-1$
 			caMenu.add(fContextInformation);
 			
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fQuickAssistAction);
+			editMenu.appendToGroup(GROUP_ASSIST, fQuickAssistAction);
 		}
 	}
 
