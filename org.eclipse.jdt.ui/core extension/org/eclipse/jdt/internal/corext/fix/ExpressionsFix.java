@@ -121,6 +121,7 @@ public class ExpressionsFix extends AbstractFix {
 				}
 				// check for case when precedences for expression and parent are same
 				if ((expressionPrecedence == parentPrecedence) && (parentExpression instanceof InfixExpression)) {
+					//we have expr infix (expr infix expr) removing the parenthesis is equal to (expr infix expr) infix expr
 					InfixExpression parentInfix= (InfixExpression) parentExpression;
 					Operator parentOperator= parentInfix.getOperator();
 					// check for PLUS with String
@@ -149,7 +150,7 @@ public class ExpressionsFix extends AbstractFix {
 		}
 		
 		private static int getExpressionPrecedence(Expression expression) {
-			if (expression instanceof PostfixExpression) {
+			if (expression instanceof PostfixExpression || expression instanceof MethodInvocation) {
 				return 0;
 			}
 			if (expression instanceof PrefixExpression) {
@@ -171,9 +172,6 @@ public class ExpressionsFix extends AbstractFix {
 			}
 			if (expression instanceof Assignment) {
 				return 14;
-			}
-			if (expression instanceof MethodInvocation) {
-				return 15;
 			}
 			return -1;
 		}
