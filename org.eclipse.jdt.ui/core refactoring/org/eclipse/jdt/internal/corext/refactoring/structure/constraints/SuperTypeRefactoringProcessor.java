@@ -26,6 +26,7 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -250,7 +251,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		Assert.isNotNull(status);
 		Assert.isNotNull(monitor);
 		try {
-			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.beginTask("", 100); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
 			final String delimiter= StubUtility.getLineDelimiterUsed(subType.getJavaProject());
 			if (JdtFlags.isPublic(subType)) {
@@ -269,7 +270,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			final IDocument document= new Document(buffer.toString());
 			final ASTParser parser= ASTParser.newParser(AST.JLS3);
 			parser.setSource(document.get().toCharArray());
-			final CompilationUnit unit= (CompilationUnit) parser.createAST(new SubProgressMonitor(monitor, 1));
+			final CompilationUnit unit= (CompilationUnit) parser.createAST(new SubProgressMonitor(monitor, 100));
 			final ASTRewrite targetRewrite= ASTRewrite.create(unit.getAST());
 			final AbstractTypeDeclaration targetDeclaration= (AbstractTypeDeclaration) unit.types().get(0);
 			createTypeParameters(targetRewrite, subType, sourceDeclaration, targetDeclaration);
@@ -302,35 +303,42 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 */
 	protected final String createTypeImports(final ICompilationUnit unit, final IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(unit);
-		final ImportRewrite rewrite= StubUtility.createImportRewrite(unit, true);
-		ITypeBinding type= null;
-		for (final Iterator iterator= fTypeBindings.iterator(); iterator.hasNext();) {
-			type= (ITypeBinding) iterator.next();
-			if (type.isTypeVariable()) {
-				final ITypeBinding[] bounds= type.getTypeBounds();
-				for (int index= 0; index < bounds.length; index++)
-					rewrite.addImport(bounds[index]);
-			}
-			rewrite.addImport(type);
-		}
-		IBinding binding= null;
-		for (final Iterator iterator= fStaticBindings.iterator(); iterator.hasNext();) {
-			binding= (IBinding) iterator.next();
-			rewrite.addStaticImport(binding);
-		}
-		final IDocument document= new Document();
+		Assert.isNotNull(monitor);
 		try {
-			rewrite.rewriteImports(new SubProgressMonitor(monitor, 1)).apply(document);
-		} catch (MalformedTreeException exception) {
-			JavaPlugin.log(exception);
-		} catch (BadLocationException exception) {
-			JavaPlugin.log(exception);
-		} catch (CoreException exception) {
-			JavaPlugin.log(exception);
+			monitor.beginTask("", 100); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
+			final ImportRewrite rewrite= StubUtility.createImportRewrite(unit, true);
+			ITypeBinding type= null;
+			for (final Iterator iterator= fTypeBindings.iterator(); iterator.hasNext();) {
+				type= (ITypeBinding) iterator.next();
+				if (type.isTypeVariable()) {
+					final ITypeBinding[] bounds= type.getTypeBounds();
+					for (int index= 0; index < bounds.length; index++)
+						rewrite.addImport(bounds[index]);
+				}
+				rewrite.addImport(type);
+			}
+			IBinding binding= null;
+			for (final Iterator iterator= fStaticBindings.iterator(); iterator.hasNext();) {
+				binding= (IBinding) iterator.next();
+				rewrite.addStaticImport(binding);
+			}
+			final IDocument document= new Document();
+			try {
+				rewrite.rewriteImports(new SubProgressMonitor(monitor, 100)).apply(document);
+			} catch (MalformedTreeException exception) {
+				JavaPlugin.log(exception);
+			} catch (BadLocationException exception) {
+				JavaPlugin.log(exception);
+			} catch (CoreException exception) {
+				JavaPlugin.log(exception);
+			}
+			fTypeBindings.clear();
+			fStaticBindings.clear();
+			return document.get();
+		} finally {
+			monitor.done();
 		}
-		fTypeBindings.clear();
-		fStaticBindings.clear();
-		return document.get();
 	}
 
 	/**
@@ -391,7 +399,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		Assert.isNotNull(monitor);
 		String source= null;
 		try {
-			monitor.beginTask("", 2); //$NON-NLS-1$
+			monitor.beginTask("", 100); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
 			final String delimiter= StubUtility.getLineDelimiterUsed(subType.getJavaProject());
 			String typeComment= null;
@@ -405,8 +413,8 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				fileComment= CodeGeneration.getFileComment(copy, delimiter);
 			}
 			final StringBuffer buffer= new StringBuffer(64);
-			createTypeDeclaration(sourceRewrite, subType, superName, declaration, buffer, true, status, new SubProgressMonitor(monitor, 1));
-			final String imports= createTypeImports(copy, monitor);
+			createTypeDeclaration(sourceRewrite, subType, superName, declaration, buffer, true, status, new SubProgressMonitor(monitor, 40));
+			final String imports= createTypeImports(copy, new SubProgressMonitor(monitor, 60));
 			source= createTypeTemplate(copy, imports, fileComment, typeComment, buffer.toString());
 			if (source == null) {
 				if (!subType.getPackageFragment().isDefaultPackage()) {
@@ -589,7 +597,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 */
 	protected final Map getReferencingCompilationUnits(final IType type, final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
 		try {
-			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.beginTask("", 100); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
 			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2();
 			engine.setOwner(fOwner);
@@ -597,7 +605,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			engine.setStatus(status);
 			engine.setScope(RefactoringScopeFactory.create(type));
 			engine.setPattern(SearchPattern.createPattern(type, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
-			engine.searchPattern(new SubProgressMonitor(monitor, 1));
+			engine.searchPattern(new SubProgressMonitor(monitor, 100));
 			return engine.getAffectedProjects();
 		} finally {
 			monitor.done();
@@ -694,18 +702,29 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 *            the compilation unit of the subtype
 	 * @param node
 	 *            the compilation unit node of the subtype
+	 * @param monitor
+	 *            the progress monitor to use
 	 */
-	protected final void performFirstPass(final SuperTypeConstraintsCreator creator, final Map units, final Map groups, final ICompilationUnit unit, final CompilationUnit node) {
-		node.accept(creator);
-		final SearchResultGroup group= (SearchResultGroup) groups.get(unit);
-		if (group != null) {
-			final ASTNode[] nodes= ASTNodeSearchUtil.getAstNodes(group.getSearchResults(), node);
-			try {
-				getMethodReferencingCompilationUnits(units, nodes);
-				getFieldReferencingCompilationUnits(units, nodes);
-			} catch (JavaModelException exception) {
-				JavaPlugin.log(exception);
+	protected final void performFirstPass(final SuperTypeConstraintsCreator creator, final Map units, final Map groups, final ICompilationUnit unit, final CompilationUnit node, final IProgressMonitor monitor) {
+		try {
+			monitor.beginTask("", 100); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
+			node.accept(creator);
+			monitor.worked(20);
+			final SearchResultGroup group= (SearchResultGroup) groups.get(unit);
+			if (group != null) {
+				final ASTNode[] nodes= ASTNodeSearchUtil.getAstNodes(group.getSearchResults(), node);
+				try {
+					getMethodReferencingCompilationUnits(units, nodes);
+					monitor.worked(40);
+					getFieldReferencingCompilationUnits(units, nodes);
+					monitor.worked(40);
+				} catch (JavaModelException exception) {
+					JavaPlugin.log(exception);
+				}
 			}
+		} finally {
+			monitor.done();
 		}
 	}
 
@@ -718,9 +737,18 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 *            the compilation unit of the subtype
 	 * @param node
 	 *            the compilation unit node of the subtype
+	 * @param monitor
+	 *            the progress monitor to use
 	 */
-	protected final void performSecondPass(final SuperTypeConstraintsCreator creator, final ICompilationUnit unit, final CompilationUnit node) {
-		node.accept(creator);
+	protected final void performSecondPass(final SuperTypeConstraintsCreator creator, final ICompilationUnit unit, final CompilationUnit node, final IProgressMonitor monitor) {
+		try {
+			monitor.beginTask("", 20); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
+			node.accept(creator);
+			monitor.worked(20);
+		} finally {
+			monitor.done();
+		}
 	}
 
 	/**
@@ -871,10 +899,12 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * @param replacements
 	 *            the set of variable binding keys of formal parameters which
 	 *            must be replaced
+	 * @param monitor
+	 *            the progress monitor to use
 	 * @throws CoreException
 	 *             if the change could not be generated
 	 */
-	protected abstract void rewriteTypeOccurrences(TextEditBasedChangeManager manager, ASTRequestor requestor, CompilationUnitRewrite rewrite, ICompilationUnit unit, CompilationUnit node, final Set replacements) throws CoreException;
+	protected abstract void rewriteTypeOccurrences(TextEditBasedChangeManager manager, ASTRequestor requestor, CompilationUnitRewrite rewrite, ICompilationUnit unit, CompilationUnit node, Set replacements, IProgressMonitor monitor) throws CoreException;
 
 	/**
 	 * Creates the necessary text edits to replace the subtype occurrences by a
@@ -900,71 +930,80 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 *            the progress monitor to use
 	 */
 	protected final void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final ASTRequestor sourceRequestor, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit subUnit, final CompilationUnit subNode, final Set replacements, final RefactoringStatus status, final IProgressMonitor monitor) {
-		if (fTypeOccurrences != null) {
-			final Set units= new HashSet(fTypeOccurrences.keySet());
-			if (subUnit != null)
-				units.remove(subUnit);
-			final Map projects= new HashMap();
-			Collection collection= null;
-			IJavaProject project= null;
-			ICompilationUnit current= null;
-			for (final Iterator iterator= units.iterator(); iterator.hasNext();) {
-				current= (ICompilationUnit) iterator.next();
-				project= current.getJavaProject();
-				collection= (Collection) projects.get(project);
-				if (collection == null) {
-					collection= new ArrayList();
-					projects.put(project, collection);
-				}
-				collection.add(current);
-			}
-			final ASTParser parser= ASTParser.newParser(AST.JLS3);
-			final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
-			try {
-				final Set keySet= projects.keySet();
-				subMonitor.beginTask("", keySet.size()); //$NON-NLS-1$
-				subMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
-				for (final Iterator iterator= keySet.iterator(); iterator.hasNext();) {
-					project= (IJavaProject) iterator.next();
+		try {
+			monitor.beginTask("", 300); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
+			if (fTypeOccurrences != null) {
+				final Set units= new HashSet(fTypeOccurrences.keySet());
+				if (subUnit != null)
+					units.remove(subUnit);
+				final Map projects= new HashMap();
+				Collection collection= null;
+				IJavaProject project= null;
+				ICompilationUnit current= null;
+				for (final Iterator iterator= units.iterator(); iterator.hasNext();) {
+					current= (ICompilationUnit) iterator.next();
+					project= current.getJavaProject();
 					collection= (Collection) projects.get(project);
-					parser.setWorkingCopyOwner(fOwner);
-					parser.setResolveBindings(true);
-					parser.setProject(project);
-					parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-					final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 1);
-					try {
-						subsubMonitor.beginTask("", collection.size()); //$NON-NLS-1$
-						subsubMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
-						parser.createASTs((ICompilationUnit[]) collection.toArray(new ICompilationUnit[collection.size()]), new String[0], new ASTRequestor() {
-
-							public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
-								try {
-									if (sourceRewrite != null)
-										rewriteTypeOccurrences(manager, this, sourceRewrite, unit, node, replacements);
-								} catch (CoreException exception) {
-									status.merge(RefactoringStatus.createFatalErrorStatus(exception.getLocalizedMessage()));
-								} finally {
-									subsubMonitor.worked(1);
-								}
-							}
-
-							public final void acceptBinding(final String key, final IBinding binding) {
-								// Do nothing
-							}
-						}, subsubMonitor);
-					} finally {
-						subsubMonitor.done();
+					if (collection == null) {
+						collection= new ArrayList();
+						projects.put(project, collection);
 					}
+					collection.add(current);
 				}
-			} finally {
-				subMonitor.done();
+				final ASTParser parser= ASTParser.newParser(AST.JLS3);
+				final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 320);
+				try {
+					final Set keySet= projects.keySet();
+					subMonitor.beginTask("", keySet.size() * 100); //$NON-NLS-1$
+					subMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
+					for (final Iterator iterator= keySet.iterator(); iterator.hasNext();) {
+						project= (IJavaProject) iterator.next();
+						collection= (Collection) projects.get(project);
+						parser.setWorkingCopyOwner(fOwner);
+						parser.setResolveBindings(true);
+						parser.setProject(project);
+						parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
+						final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 100);
+						try {
+							subsubMonitor.beginTask("", collection.size() * 100 + 200); //$NON-NLS-1$
+							subsubMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
+							parser.createASTs((ICompilationUnit[]) collection.toArray(new ICompilationUnit[collection.size()]), new String[0], new ASTRequestor() {
+
+								public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
+									final IProgressMonitor subsubsubMonitor= new SubProgressMonitor(subsubMonitor, 100);
+									try {
+										subsubsubMonitor.beginTask("", 100); //$NON-NLS-1$
+										subsubsubMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
+										if (sourceRewrite != null)
+											rewriteTypeOccurrences(manager, this, sourceRewrite, unit, node, replacements, new SubProgressMonitor(subsubsubMonitor, 100));
+									} catch (CoreException exception) {
+										status.merge(RefactoringStatus.createFatalErrorStatus(exception.getLocalizedMessage()));
+									} finally {
+										subsubsubMonitor.done();
+									}
+								}
+
+								public final void acceptBinding(final String key, final IBinding binding) {
+									// Do nothing
+								}
+							}, new SubProgressMonitor(subsubMonitor, 200));
+						} finally {
+							subsubMonitor.done();
+						}
+					}
+					try {
+						if (subUnit != null && subNode != null && sourceRewrite != null && sourceRequestor != null)
+							rewriteTypeOccurrences(manager, sourceRequestor, sourceRewrite, subUnit, subNode, replacements, new SubProgressMonitor(subMonitor, 20));
+					} catch (CoreException exception) {
+						status.merge(RefactoringStatus.createFatalErrorStatus(exception.getLocalizedMessage()));
+					}
+				} finally {
+					subMonitor.done();
+				}
 			}
-			try {
-				if (subUnit != null && subNode != null && sourceRewrite != null && sourceRequestor != null)
-					rewriteTypeOccurrences(manager, sourceRequestor, sourceRewrite, subUnit, subNode, replacements);
-			} catch (CoreException exception) {
-				status.merge(RefactoringStatus.createFatalErrorStatus(exception.getLocalizedMessage()));
-			}
+		} finally {
+			monitor.done();
 		}
 	}
 
@@ -1029,9 +1068,9 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		final SuperTypeConstraintsModel model= new SuperTypeConstraintsModel(environment, environment.create(subBinding), environment.create(superBinding));
 		final SuperTypeConstraintsCreator creator= new SuperTypeConstraintsCreator(model, fInstanceOf);
 		try {
-			monitor.beginTask("", 3); //$NON-NLS-1$
+			monitor.beginTask("", 300); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
-			final Map firstPass= getReferencingCompilationUnits(subType, new SubProgressMonitor(monitor, 1), status);
+			final Map firstPass= getReferencingCompilationUnits(subType, new SubProgressMonitor(monitor, 100), status);
 			final Map secondPass= new HashMap();
 			IJavaProject project= null;
 			Collection collection= null;
@@ -1067,10 +1106,10 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				if (subUnit != null)
 					processed.add(subUnit);
 				model.beginCreation();
-				IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
+				IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 120);
 				try {
 					final Set keySet= firstPass.keySet();
-					subMonitor.beginTask("", keySet.size()); //$NON-NLS-1$
+					subMonitor.beginTask("", keySet.size() * 100); //$NON-NLS-1$
 					subMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
 					for (final Iterator outer= keySet.iterator(); outer.hasNext();) {
 						project= (IJavaProject) outer.next();
@@ -1092,42 +1131,42 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 							final List batches= new ArrayList(units);
 							final int size= batches.size();
 							final int iterations= ((size - 1) / SIZE_BATCH) + 1;
-							final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 1);
-							subsubMonitor.beginTask("", iterations); //$NON-NLS-1$
-							subsubMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
-							final Map options= RefactoringASTParser.getCompilerOptions(project);
-							for (int index= 0; index < iterations; index++) {
-								final List iteration= batches.subList(index * SIZE_BATCH, Math.min(size, (index + 1) * SIZE_BATCH));
-								parser.setWorkingCopyOwner(fOwner);
-								parser.setResolveBindings(true);
-								parser.setProject(project);
-								parser.setCompilerOptions(options);
-								final IProgressMonitor subsubsubMonitor= new SubProgressMonitor(subsubMonitor, 1);
-								try {
-									final int count= iteration.size();
-									subsubsubMonitor.beginTask("", count); //$NON-NLS-1$
-									subsubsubMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
-									parser.createASTs((ICompilationUnit[]) iteration.toArray(new ICompilationUnit[count]), new String[0], new ASTRequestor() {
+							final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 100);
+							try {
+								subsubMonitor.beginTask("", iterations * 100); //$NON-NLS-1$
+								subsubMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
+								final Map options= RefactoringASTParser.getCompilerOptions(project);
+								for (int index= 0; index < iterations; index++) {
+									final List iteration= batches.subList(index * SIZE_BATCH, Math.min(size, (index + 1) * SIZE_BATCH));
+									parser.setWorkingCopyOwner(fOwner);
+									parser.setResolveBindings(true);
+									parser.setProject(project);
+									parser.setCompilerOptions(options);
+									final IProgressMonitor subsubsubMonitor= new SubProgressMonitor(subsubMonitor, 100);
+									try {
+										final int count= iteration.size();
+										subsubsubMonitor.beginTask("", count * 100); //$NON-NLS-1$
+										subsubsubMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
+										parser.createASTs((ICompilationUnit[]) iteration.toArray(new ICompilationUnit[count]), new String[0], new ASTRequestor() {
 
-										public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
-											try {
-												subsubsubMonitor.subTask(unit.getElementName());
+											public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
 												if (!processed.contains(unit)) {
-													performFirstPass(creator, secondPass, groups, unit, node);
+													performFirstPass(creator, secondPass, groups, unit, node, new SubProgressMonitor(subsubsubMonitor, 100));
 													processed.add(unit);
-												}
-											} finally {
-												subsubsubMonitor.worked(1);
+												} else
+													subsubsubMonitor.worked(100);
 											}
-										}
 
-										public final void acceptBinding(final String key, final IBinding binding) {
-											// Do nothing
-										}
-									}, subsubsubMonitor);
-								} finally {
-									subsubsubMonitor.done();
+											public final void acceptBinding(final String key, final IBinding binding) {
+												// Do nothing
+											}
+										}, new NullProgressMonitor());
+									} finally {
+										subsubsubMonitor.done();
+									}
 								}
+							} finally {
+								subsubMonitor.done();
 							}
 						}
 					}
@@ -1136,11 +1175,11 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					subMonitor.done();
 				}
 				if (subUnit != null && subNode != null)
-					performFirstPass(creator, secondPass, groups, subUnit, subNode);
-				subMonitor= new SubProgressMonitor(monitor, 1);
+					performFirstPass(creator, secondPass, groups, subUnit, subNode, new SubProgressMonitor(subMonitor, 20));
+				subMonitor= new SubProgressMonitor(monitor, 100);
 				try {
 					final Set keySet= secondPass.keySet();
-					subMonitor.beginTask("", keySet.size()); //$NON-NLS-1$
+					subMonitor.beginTask("", keySet.size() * 100); //$NON-NLS-1$
 					subMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
 					for (final Iterator iterator= keySet.iterator(); iterator.hasNext();) {
 						project= (IJavaProject) iterator.next();
@@ -1152,26 +1191,23 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 							parser.setResolveBindings(true);
 							parser.setProject(project);
 							parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-							final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 1);
+							final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 100);
 							try {
-								subsubMonitor.beginTask("", collection.size()); //$NON-NLS-1$
+								subsubMonitor.beginTask("", collection.size() * 100); //$NON-NLS-1$
 								subsubMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
 								parser.createASTs((ICompilationUnit[]) collection.toArray(new ICompilationUnit[collection.size()]), new String[0], new ASTRequestor() {
 
 									public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
-										try {
-											subsubMonitor.subTask(unit.getElementName());
-											if (!processed.contains(unit))
-												performSecondPass(creator, unit, node);
-										} finally {
-											subsubMonitor.worked(1);
-										}
+										if (!processed.contains(unit))
+											performSecondPass(creator, unit, node, new SubProgressMonitor(subsubMonitor, 100));
+										else
+											subsubMonitor.worked(100);
 									}
 
 									public final void acceptBinding(final String key, final IBinding binding) {
 										// Do nothing
 									}
-								}, subsubMonitor);
+								}, new NullProgressMonitor());
 							} finally {
 								subsubMonitor.done();
 							}

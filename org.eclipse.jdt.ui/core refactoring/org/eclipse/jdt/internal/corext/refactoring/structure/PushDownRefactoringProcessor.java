@@ -991,7 +991,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements) throws CoreException {
+	protected void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements, final IProgressMonitor monitor) throws CoreException {
 		// Not needed
 	}
 }
