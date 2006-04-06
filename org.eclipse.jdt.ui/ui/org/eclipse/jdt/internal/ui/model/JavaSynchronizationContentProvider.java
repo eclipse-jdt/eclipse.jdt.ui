@@ -76,7 +76,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public final class JavaSynchronizationContentProvider extends AbstractSynchronizationContentProvider implements IPipelinedTreeContentProvider {
 
 	/** The refactorings folder */
-	private static final String NAME_REFACTORING_FOLDER= ".refactorings"; //$NON-NLS-1$
+//	private static final String NAME_REFACTORING_FOLDER= ".refactorings"; //$NON-NLS-1$
 
 	/**
 	 * Returns the diffs associated with the element.
@@ -339,16 +339,16 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 						// Add any phantom resources that are visible
 						list.add(members[index]);
 					}
-					if (members[index] instanceof IFolder) {
-						final IFolder folder= (IFolder) members[index];
-						if (folder.getName().equals(NAME_REFACTORING_FOLDER)) {
-							final RefactoringHistory history= getRefactorings(context, (IProject) resource, null);
-							if (!history.isEmpty()) {
-								list.remove(folder);
-								list.addFirst(history);
-							}
-						}
-					}
+//					if (members[index] instanceof IFolder) {
+//						final IFolder folder= (IFolder) members[index];
+//						if (folder.getName().equals(NAME_REFACTORING_FOLDER)) {
+//							final RefactoringHistory history= getRefactorings(context, (IProject) resource, null);
+//							if (!history.isEmpty()) {
+//								list.remove(folder);
+//								list.addFirst(history);
+//							}
+//						}
+//					}
 				}
 		}
 		return list.toArray(new Object[list.size()]);
