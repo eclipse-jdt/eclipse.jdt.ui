@@ -28,6 +28,14 @@ public final class ActionMessages extends NLS {
 	public static String ConfigureDeprecationFixDialog_ReplaceReferencesCheckBoxLabel;
 	public static String ConfigureDeprecationFixDialog_ReplaceReferencesRadioButtonLabel;
 	public static String ConfigureDeprecationFixDialog_ThisFeatureIsNotSupportedInfo;
+	
+	public static String CopyQualifiedNameAction_ActionName;
+	public static String CopyQualifiedNameAction_ErrorDescription;
+	public static String CopyQualifiedNameAction_ErrorTitle;
+	public static String CopyQualifiedNameAction_InfoDialogTitel;
+	public static String CopyQualifiedNameAction_NoElementToQualify;
+	public static String CopyQualifiedNameAction_ToolTipText;
+	
 	public static String FindNLSProblemsAction_Description;
 	public static String FindNLSProblemsAction_ErrorDialogTitle;
 	public static String FindNLSProblemsAction_Name;

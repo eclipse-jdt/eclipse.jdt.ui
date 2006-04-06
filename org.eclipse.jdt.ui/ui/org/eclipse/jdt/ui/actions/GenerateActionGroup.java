@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.AddTaskAction;
 import org.eclipse.jdt.internal.ui.actions.CleanUpAction;
 import org.eclipse.jdt.internal.ui.actions.ConfigureDeprecationFixAction;
+import org.eclipse.jdt.internal.ui.actions.CopyQualifiedNameAction;
 import org.eclipse.jdt.internal.ui.actions.FindBrokenNLSKeysAction;
 import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
 import org.eclipse.jdt.internal.ui.javaeditor.AddImportOnSelectionAction;
@@ -115,6 +116,7 @@ public class GenerateActionGroup extends ActionGroup {
 	private OrganizeImportsAction fOrganizeImports;
 	private SortMembersAction fSortMembers;
 	private FormatAllAction fFormatAll;
+	private CopyQualifiedNameAction fCopyQualifiedNameAction;
 	
 	private static final String QUICK_MENU_ID= "org.eclipse.jdt.ui.edit.text.java.source.quickMenu"; //$NON-NLS-1$
 	
@@ -155,6 +157,10 @@ public class GenerateActionGroup extends ActionGroup {
 		fSortMembers= new SortMembersAction(editor);
 		fSortMembers.setActionDefinitionId(IJavaEditorActionDefinitionIds.SORT_MEMBERS);
 		editor.setAction("SortMembers", fSortMembers); //$NON-NLS-1$
+		
+		fCopyQualifiedNameAction= new CopyQualifiedNameAction(editor);
+		fCopyQualifiedNameAction.setActionDefinitionId(CopyQualifiedNameAction.JAVA_EDITOR_ACTION_DEFINITIONS_ID);
+		editor.setAction("CopyQualifiedName", fCopyQualifiedNameAction); //$NON-NLS-1$
 
 		fOverrideMethods= new OverrideMethodsAction(editor);
 		fOverrideMethods.setActionDefinitionId(IJavaEditorActionDefinitionIds.OVERRIDE_METHODS);
@@ -280,6 +286,9 @@ public class GenerateActionGroup extends ActionGroup {
 		
 		fSortMembers= new SortMembersAction(site);
 		fSortMembers.setActionDefinitionId(IJavaEditorActionDefinitionIds.SORT_MEMBERS);
+		
+		fCopyQualifiedNameAction= new CopyQualifiedNameAction(site);
+		fCopyQualifiedNameAction.setActionDefinitionId(CopyQualifiedNameAction.JAVA_EDITOR_ACTION_DEFINITIONS_ID);
 
 		fFormatAll= new FormatAllAction(site);
 		fFormatAll.setActionDefinitionId(IJavaEditorActionDefinitionIds.FORMAT);
@@ -303,6 +312,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddTaskAction.update(selection);
 		fOrganizeImports.update(selection);
 		fSortMembers.update(selection);
+		fCopyQualifiedNameAction.update(selection);
 		fFormatAll.update(selection);
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection ss= (IStructuredSelection)selection;
@@ -326,6 +336,7 @@ public class GenerateActionGroup extends ActionGroup {
 		registerSelectionListener(provider, fOrganizeImports);
 		registerSelectionListener(provider, fFormatAll);
 		registerSelectionListener(provider, fSortMembers);
+		registerSelectionListener(provider, fCopyQualifiedNameAction);
 		registerSelectionListener(provider, fAddTaskAction);
 		registerSelectionListener(provider, fCleanUp);
 		
@@ -477,6 +488,7 @@ public class GenerateActionGroup extends ActionGroup {
 		actionBar.setGlobalActionHandler(FindBrokenNLSKeysAction.ACTION_HANDLER_ID, fFindNLSProblems);
 		actionBar.setGlobalActionHandler(JdtActionConstants.ORGANIZE_IMPORTS, fOrganizeImports);
 		actionBar.setGlobalActionHandler(JdtActionConstants.SORT_MEMBERS, fSortMembers);
+		actionBar.setGlobalActionHandler(CopyQualifiedNameAction.ACTION_HANDLER_ID, fCopyQualifiedNameAction);
 		if (!isEditorOwner()) {
 			// editor provides its own implementation of these actions.
 			actionBar.setGlobalActionHandler(IDEActionFactory.BOOKMARK.getId(), fAddBookmark);

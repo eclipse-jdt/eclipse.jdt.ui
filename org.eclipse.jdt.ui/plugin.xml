@@ -2151,6 +2151,14 @@
             description="%CodingActionSet.description"
             visible="false"
             id="org.eclipse.jdt.ui.CodingActionSet">
+
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.copy.qualified.name"
+               label="%CopyQualifiedName.label"
+               retarget="true"
+               menubarPath="edit/copy"
+               id="org.eclipse.jdt.ui.actions.CopyQualifiedName">
+         </action>
 <!-- =========================================================================== -->
 <!-- Navigate Menu                                                               -->
 <!-- =========================================================================== -->
@@ -3236,6 +3244,12 @@
             description="%ActionDefinition.cleanUp.description"
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.edit.text.java.clean.up">
+      </command>
+      <command
+            name="%ActionDefinition.copyQualifiedName.name"
+            description="%ActionDefinition.copyQualifiedName.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.edit.text.java.copy.qualified.name">
       </command>
       <command
             name="%ActionDefinition.findNLSProblems.name"
