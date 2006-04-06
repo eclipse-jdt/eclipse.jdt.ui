@@ -17,6 +17,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
@@ -50,8 +51,7 @@ public class PropertiesFileEditorActionContributor extends TextEditorActionContr
 
 		IMenuManager editMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
 		if (editMenu != null) {
-			String GROUP_ASSIST= "group.assist"; //$NON-NLS-1$ // TODO replace by ITextEditorActionConstants constant
-			editMenu.appendToGroup(GROUP_ASSIST, fCorrectionAssist);
+			editMenu.appendToGroup(ITextEditorActionConstants.GROUP_ASSIST, fCorrectionAssist);
 		}
 
 	}

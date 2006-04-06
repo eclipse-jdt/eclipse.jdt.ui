@@ -152,7 +152,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			structureSelection.add(fStructureSelectPreviousAction);
 			structureSelection.add(fStructureSelectHistoryAction);
 
-			editMenu.appendToGroup("group.information", fRetargetShowJavaDoc); //$NON-NLS-1$ // TODO replace by ITextEditorActionConstants constant
+			editMenu.appendToGroup(ITextEditorActionConstants.GROUP_INFORMATION, fRetargetShowJavaDoc);
 		}
 
 		IMenuManager navigateMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_NAVIGATE);
