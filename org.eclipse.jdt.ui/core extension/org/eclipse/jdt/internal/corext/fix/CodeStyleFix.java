@@ -121,14 +121,14 @@ public class CodeStyleFix extends AbstractFix {
 				return true;
 			
 			if (node.getExpression() != null)
-				return false;
+				return true;
 			
 			IBinding binding= node.getName().resolveBinding();
 			if (!(binding instanceof IMethodBinding))
-				return false;
+				return true;
 			
 			handleMethod(node.getName(), (IMethodBinding)binding);
-			return false;
+			return true;
 		}
 
 		private void handleSimpleName(SimpleName node) {
