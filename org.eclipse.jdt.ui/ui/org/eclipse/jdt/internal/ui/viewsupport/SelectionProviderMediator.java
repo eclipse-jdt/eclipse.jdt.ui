@@ -193,6 +193,12 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 		}
 	}
 
+	public void setSelection(ISelection selection, boolean reveal) {
+		if (fViewerInFocus != null) {
+			fViewerInFocus.setSelection(selection, reveal);
+		}
+	}
+	
 	/**
 	 * Returns the viewer in focus or null if no viewer has the focus
 	 */	
