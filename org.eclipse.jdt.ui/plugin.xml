@@ -5070,16 +5070,6 @@
           </or>
 		 </possibleChildren>
          <actionProvider class="org.eclipse.ltk.ui.refactoring.model.RefactoringSynchronizationActionProvider">
-            <enablement>
-               <or>
-                  <instanceof value="org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy"/>
-                  <instanceof value="org.eclipse.ltk.core.refactoring.RefactoringDescriptor"/>
-                  <instanceof value="org.eclipse.ltk.core.refactoring.history.RefactoringHistory"/>
-                  <instanceof value="org.eclipse.jdt.core.ICompilationUnit"/>
-                  <instanceof value="org.eclipse.core.resources.IFile"/>
-                  <adapt type="org.eclipse.core.resources.IFile"/>
-               </or>
-            </enablement>
          </actionProvider>
       </navigatorContent>
    </extension>
