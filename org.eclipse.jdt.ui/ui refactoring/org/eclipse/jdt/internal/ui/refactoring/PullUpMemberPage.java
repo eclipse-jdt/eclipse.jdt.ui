@@ -72,6 +72,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.structure.HierarchyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.IMemberActionInfo;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
@@ -504,7 +505,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	}
 
 	protected void createInstanceOfCheckbox(final Composite result, final int margin) {
-		final PullUpRefactoringProcessor processor= getPullUpRefactoring().getPullUpProcessor();
+		final HierarchyProcessor processor= getPullUpRefactoring().getPullUpProcessor();
 		fInstanceofButton= new Button(result, SWT.CHECK);
 		fInstanceofButton.setSelection(false);
 		final GridData gd= new GridData();

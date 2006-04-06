@@ -67,6 +67,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.structure.HierarchyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -273,7 +274,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 
 	public void checkPulledUp() {
 		uncheckAll();
-		final PullUpRefactoringProcessor processor= getPullUpRefactoring().getPullUpProcessor();
+		final HierarchyProcessor processor= getPullUpRefactoring().getPullUpProcessor();
 		fTreeViewer.setCheckedElements(processor.getMembersToMove());
 		final IType parent= processor.getDeclaringType();
 		fTreeViewer.setChecked(parent, true);

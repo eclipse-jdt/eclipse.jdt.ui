@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 public class PullUpRefactoring extends ProcessorBasedRefactoring implements IInitializableRefactoringComponent {
 
 	/** The refactoring processor to use */
-	private final PullUpRefactoringProcessor fProcessor;
+	private final HierarchyProcessor fProcessor;
 
 	/**
 	 * Creates a new pull up refactoring.
@@ -34,7 +34,7 @@ public class PullUpRefactoring extends ProcessorBasedRefactoring implements IIni
 	 * @param processor
 	 *            the pull up refactoring processor to use
 	 */
-	public PullUpRefactoring(final PullUpRefactoringProcessor processor) {
+	public PullUpRefactoring(final HierarchyProcessor processor) {
 		super(processor);
 		fProcessor= processor;
 	}

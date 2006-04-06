@@ -440,11 +440,11 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 				result.merge(checkConstructorCalls(getDeclaringType(), new SubProgressMonitor(monitor, 1)));
 			else
 				monitor.worked(1);
-
 			if (result.hasFatalError())
 				return result;
-
 			fChangeManager= createChangeManager(new SubProgressMonitor(monitor, 1), result);
+			if (result.hasFatalError())
+				return result;
 			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits()), getRefactoring().getValidationContext()));
 			return result;
 		} finally {
@@ -609,6 +609,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 						adjustor.adjustVisibility(new SubProgressMonitor(monitor, 1));
 						adjustments.remove(member);
 						adjustors.add(adjustor);
+						status.merge(checkProjectCompliance(getCompilationUnitRewrite(rewrites, getDeclaringType().getCompilationUnit()), type, new IMember[] {infos[offset].getMember()}));
 						if (infos[offset].isFieldInfo()) {
 							final VariableDeclarationFragment oldField= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) infos[offset].getMember(), sourceRewriter.getRoot());
 							if (oldField != null) {

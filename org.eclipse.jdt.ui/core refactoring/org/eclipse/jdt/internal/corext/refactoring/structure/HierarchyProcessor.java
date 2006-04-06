@@ -97,6 +97,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTy
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextEditBasedChangeManager;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
@@ -176,6 +177,39 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 				return false;
 		}
 		return true;
+	}
+
+	protected static RefactoringStatus checkProjectCompliance(CompilationUnitRewrite sourceRewriter, IType destination, IMember[] members) {
+		RefactoringStatus status= new RefactoringStatus();
+		if (!JavaModelUtil.is50OrHigher(destination.getJavaProject())) {
+			for (int index= 0; index < members.length; index++) {
+				try {
+					BodyDeclaration decl= ASTNodeSearchUtil.getBodyDeclarationNode(members[index], sourceRewriter.getRoot());
+					if (decl != null) {
+						for (final Iterator iterator= decl.modifiers().iterator(); iterator.hasNext();) {
+							boolean reported= false;
+							final IExtendedModifier modifier= (IExtendedModifier) iterator.next();
+							if (!reported && modifier.isAnnotation()) {
+								status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.PullUpRefactoring_incompatible_langauge_constructs, new String[] { JavaElementLabels.getTextLabel(members[index], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(destination, JavaElementLabels.ALL_DEFAULT)}), JavaStatusContext.create(members[index])));
+								reported= true;
+							}
+						}
+					}
+				} catch (JavaModelException exception) {
+					JavaPlugin.log(exception);
+				}
+				if (members[index] instanceof IMethod) {
+					final IMethod method= (IMethod) members[index];
+					try {
+						if (Flags.isVarargs(method.getFlags()))
+							status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.PullUpRefactoring_incompatible_language_constructs1, new String[] { JavaElementLabels.getTextLabel(members[index], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(destination, JavaElementLabels.ALL_DEFAULT)}), JavaStatusContext.create(members[index])));
+					} catch (JavaModelException exception) {
+						JavaPlugin.log(exception);
+					}
+				}
+			}
+		}
+		return status;
 	}
 
 	protected static void copyAnnotations(final FieldDeclaration oldField, final FieldDeclaration newField) {
@@ -522,28 +556,32 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	}
 
 	protected RefactoringStatus checkConstructorCalls(final IType type, final IProgressMonitor monitor) throws JavaModelException {
-		final RefactoringStatus result= new RefactoringStatus();
-		final SearchResultGroup[] groups= ConstructorReferenceFinder.getConstructorReferences(type, fOwner, monitor, result);
-		final String message= Messages.format(RefactoringCoreMessages.HierarchyRefactoring_gets_instantiated, new Object[] { JavaElementLabels.getTextLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED) });
+		try {
+			monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, 2);
+			final RefactoringStatus result= new RefactoringStatus();
+			final SearchResultGroup[] groups= ConstructorReferenceFinder.getConstructorReferences(type, fOwner, new SubProgressMonitor(monitor, 1), result);
+			final String message= Messages.format(RefactoringCoreMessages.HierarchyRefactoring_gets_instantiated, new Object[] { JavaElementLabels.getTextLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED)});
 
-		ICompilationUnit unit= null;
-		for (int index= 0; index < groups.length; index++) {
-			unit= groups[index].getCompilationUnit();
-			if (unit != null) {
-				final CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(unit, false);
-				final ASTNode[] references= ASTNodeSearchUtil.getAstNodes(groups[index].getSearchResults(), cuNode);
-				ASTNode node= null;
-				for (int offset= 0; offset < references.length; offset++) {
-					node= references[offset];
-					if ((node instanceof ClassInstanceCreation) || ConstructorReferenceFinder.isImplicitConstructorReferenceNodeInClassCreations(node)) {
-						final RefactoringStatusContext context= JavaStatusContext.create(unit, node);
-						result.addError(message, context);
+			ICompilationUnit unit= null;
+			for (int index= 0; index < groups.length; index++) {
+				unit= groups[index].getCompilationUnit();
+				if (unit != null) {
+					final CompilationUnit cuNode= RefactoringASTParser.parseWithASTProvider(unit, false, new SubProgressMonitor(monitor, 1));
+					final ASTNode[] references= ASTNodeSearchUtil.getAstNodes(groups[index].getSearchResults(), cuNode);
+					ASTNode node= null;
+					for (int offset= 0; offset < references.length; offset++) {
+						node= references[offset];
+						if ((node instanceof ClassInstanceCreation) || ConstructorReferenceFinder.isImplicitConstructorReferenceNodeInClassCreations(node)) {
+							final RefactoringStatusContext context= JavaStatusContext.create(unit, node);
+							result.addError(message, context);
+						}
 					}
 				}
 			}
+			return result;
+		} finally {
+			monitor.done();
 		}
-		monitor.done();
-		return result;
 	}
 
 	protected RefactoringStatus checkDeclaringType(final IProgressMonitor monitor) throws JavaModelException {
