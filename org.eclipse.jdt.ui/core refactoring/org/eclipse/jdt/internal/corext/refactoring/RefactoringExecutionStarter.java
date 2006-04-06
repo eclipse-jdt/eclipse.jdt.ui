@@ -428,7 +428,7 @@ public final class RefactoringExecutionStarter {
 		}
 		CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, false, true);
 		RefactoringStarter starter= new RefactoringStarter();
-			starter.activate(refactoring, refactoringWizard, JavaPlugin.getActiveWorkbenchShell(), "Clean ups", true); //$NON-NLS-1$
+			starter.activate(refactoring, refactoringWizard, JavaPlugin.getActiveWorkbenchShell(), "Clean ups", false); //$NON-NLS-1$
 	}
 
 	public static void startCleanupRefactoring(ICompilationUnit cu) throws JavaModelException {
@@ -436,6 +436,6 @@ public final class RefactoringExecutionStarter {
 		refactoring.addCompilationUnit(cu);
 		CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, false, true);
 		RefactoringStarter starter= new RefactoringStarter();
-		starter.activate(refactoring, refactoringWizard, JavaPlugin.getActiveWorkbenchShell(), "Clean ups", true); //$NON-NLS-1$
+		starter.activate(refactoring, refactoringWizard, JavaPlugin.getActiveWorkbenchShell(), "Clean ups", false); //$NON-NLS-1$
 	}
 }
