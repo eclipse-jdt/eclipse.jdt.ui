@@ -12,11 +12,10 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -42,7 +41,6 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.CopyArguments;
@@ -108,11 +106,11 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitCh
 import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageFragmentRootChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveResourceChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRewriteUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.Changes;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
@@ -605,46 +603,38 @@ public class ReorgPolicyFactory {
 			return (ICompilationUnit) destination.getAncestor(IJavaElement.COMPILATION_UNIT);
 		}
 
-		protected static TextChange addTextEditFromRewrite(ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
-			try {
-				ITextFileBuffer buffer= RefactoringFileBuffers.acquire(cu);
-				TextEdit resultingEdits= rewrite.rewriteAST(buffer.getDocument(), cu.getJavaProject().getOptions(true));
-				TextChange textChange= new CompilationUnitChange(cu.getElementName(), cu);
-				if (textChange instanceof TextFileChange) {
-					TextFileChange tfc= (TextFileChange) textChange;
-					if (cu.isWorkingCopy())
-						tfc.setSaveMode(TextFileChange.LEAVE_DIRTY);
-				}
-				String message= RefactoringCoreMessages.ReorgPolicyFactory_copy; 
-				TextChangeCompatibility.addTextEdit(textChange, message, resultingEdits);
-				return textChange;
-			} finally {
-				RefactoringFileBuffers.release(cu);
+		protected static CompilationUnitChange createCompilationUnitChange(ICompilationUnit cu, CompilationUnitRewrite rewrite) throws CoreException {
+			CompilationUnitChange change= rewrite.createChange();
+			if (change != null) {
+				if (cu.isWorkingCopy())
+					change.setSaveMode(TextFileChange.LEAVE_DIRTY);
 			}
+			return change;
 		}
 
-		protected void copyToDestination(IJavaElement element, ASTRewrite rewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws CoreException {
+		protected void copyToDestination(IJavaElement element, CompilationUnitRewrite targetRewriter, CompilationUnit sourceCuNode, CompilationUnit targetCuNode) throws CoreException {
+			final ASTRewrite rewrite= targetRewriter.getASTRewrite();
 			switch(element.getElementType()){
 				case IJavaElement.FIELD: 
-					copyMemberToDestination(rewrite, destinationCuNode, createNewFieldDeclarationNode(((IField)element), rewrite, sourceCuNode));
+					copyMemberToDestination((IMember) element, targetRewriter, sourceCuNode, targetCuNode, createNewFieldDeclarationNode(((IField)element), rewrite, sourceCuNode));
 					break;
 				case IJavaElement.IMPORT_CONTAINER:
-					copyImportsToDestination((IImportContainer)element, rewrite, sourceCuNode, destinationCuNode);
+					copyImportsToDestination((IImportContainer)element, rewrite, sourceCuNode, targetCuNode);
 					break;
 				case IJavaElement.IMPORT_DECLARATION:
-					copyImportToDestination((IImportDeclaration)element, rewrite, sourceCuNode, destinationCuNode);
+					copyImportToDestination((IImportDeclaration)element, rewrite, sourceCuNode, targetCuNode);
 					break;
 				case IJavaElement.INITIALIZER:
-					copyInitializerToDestination((IInitializer)element, rewrite, destinationCuNode);
+					copyInitializerToDestination((IInitializer)element, targetRewriter, sourceCuNode, targetCuNode);
 					break;
 				case IJavaElement.METHOD: 
-					copyMethodToDestination((IMethod)element, rewrite, destinationCuNode);
+					copyMethodToDestination((IMethod)element, targetRewriter, sourceCuNode, targetCuNode);
 					break;
 				case IJavaElement.PACKAGE_DECLARATION:
-					copyPackageDeclarationToDestination((IPackageDeclaration)element, rewrite, sourceCuNode, destinationCuNode);
+					copyPackageDeclarationToDestination((IPackageDeclaration)element, rewrite, sourceCuNode, targetCuNode);
 					break;
 				case IJavaElement.TYPE :
-					copyTypeToDestination((IType) element, rewrite, destinationCuNode);
+					copyTypeToDestination((IType) element, targetRewriter, sourceCuNode, targetCuNode);
 					break;
 
 				default: Assert.isTrue(false); 
@@ -678,10 +668,12 @@ public class ReorgPolicyFactory {
 					newDeclaration= newConstDeclaration;
 				} else
 					Assert.isTrue(false);
-				newDeclaration.modifiers().addAll(ASTNodeFactory.newModifiers(targetAst, bodyDeclaration.getModifiers()));
-				Javadoc javadoc= bodyDeclaration.getJavadoc();
-				if (javadoc != null)
-					newDeclaration.setJavadoc((Javadoc) rewrite.createStringPlaceholder(document.get(javadoc.getStartPosition(), javadoc.getLength()), ASTNode.JAVADOC));
+				if (newDeclaration != null) {
+					newDeclaration.modifiers().addAll(ASTNodeFactory.newModifiers(targetAst, bodyDeclaration.getModifiers()));
+					Javadoc javadoc= bodyDeclaration.getJavadoc();
+					if (javadoc != null)
+						newDeclaration.setJavadoc((Javadoc) rewrite.createStringPlaceholder(document.get(javadoc.getStartPosition(), javadoc.getLength()), ASTNode.JAVADOC));
+				}
 			} catch (BadLocationException exception) {
 				JavaPlugin.log(exception);
 			} finally {
@@ -715,64 +707,69 @@ public class ReorgPolicyFactory {
 			targetRewrite.set(destinationCuNode, CompilationUnit.PACKAGE_PROPERTY, copiedNode, null);
 		}
 
-		private void copyInitializerToDestination(IInitializer initializer, ASTRewrite targetRewrite, CompilationUnit destinationCuNode) throws JavaModelException {
-			BodyDeclaration newInitializer= (BodyDeclaration) targetRewrite.createStringPlaceholder(getUnindentedSource(initializer), ASTNode.INITIALIZER);
-			copyMemberToDestination(targetRewrite, destinationCuNode, newInitializer);
+		private void copyInitializerToDestination(IInitializer initializer, CompilationUnitRewrite targetRewriter, CompilationUnit sourceCuNode, CompilationUnit targetCuNode) throws JavaModelException {
+			BodyDeclaration newInitializer= (BodyDeclaration) targetRewriter.getASTRewrite().createStringPlaceholder(getUnindentedSource(initializer), ASTNode.INITIALIZER);
+			copyMemberToDestination(initializer, targetRewriter, sourceCuNode, targetCuNode, newInitializer);
 		}
 
-		private void copyTypeToDestination(IType type, ASTRewrite targetRewrite, CompilationUnit destinationCuNode) throws JavaModelException {
-			AbstractTypeDeclaration newType= (AbstractTypeDeclaration) targetRewrite.createStringPlaceholder(getUnindentedSource(type), ASTNode.TYPE_DECLARATION);
+		private void copyTypeToDestination(IType type, CompilationUnitRewrite targetRewriter, CompilationUnit sourceCuNode, CompilationUnit targetCuNode) throws JavaModelException {
+			AbstractTypeDeclaration newType= (AbstractTypeDeclaration) targetRewriter.getASTRewrite().createStringPlaceholder(getUnindentedSource(type), ASTNode.TYPE_DECLARATION);
 			IType enclosingType= getEnclosingType(getJavaElementDestination());
 			if (enclosingType != null) {
-				copyMemberToDestination(targetRewrite, destinationCuNode, newType);
+				copyMemberToDestination(type, targetRewriter, sourceCuNode, targetCuNode, newType);
 			} else {
-				targetRewrite.getListRewrite(destinationCuNode, CompilationUnit.TYPES_PROPERTY).insertLast(newType, null);
+				targetRewriter.getASTRewrite().getListRewrite(targetCuNode, CompilationUnit.TYPES_PROPERTY).insertLast(newType, null);
 			}
 		}
 
-		private void copyMethodToDestination(IMethod method, ASTRewrite targetRewrite, CompilationUnit destinationCuNode) throws JavaModelException {
-			BodyDeclaration newMethod= (BodyDeclaration) targetRewrite.createStringPlaceholder(getUnindentedSource(method), ASTNode.METHOD_DECLARATION);
-			copyMemberToDestination(targetRewrite, destinationCuNode, newMethod);
+		private void copyMethodToDestination(IMethod method, CompilationUnitRewrite targetRewriter, CompilationUnit sourceCuNode, CompilationUnit targetCuNode) throws JavaModelException {
+			BodyDeclaration newMethod= (BodyDeclaration) targetRewriter.getASTRewrite().createStringPlaceholder(getUnindentedSource(method), ASTNode.METHOD_DECLARATION);
+			copyMemberToDestination(method, targetRewriter, sourceCuNode, targetCuNode, newMethod);
 		}
 
-		private void copyMemberToDestination(ASTRewrite targetRewrite, CompilationUnit destinationCuNode, BodyDeclaration newMember) throws JavaModelException {
+		private void copyMemberToDestination(IMember member, CompilationUnitRewrite targetRewriter, CompilationUnit sourceCuNode, CompilationUnit targetCuNode, BodyDeclaration newMember) throws JavaModelException {
 			IJavaElement javaElementDestination= getJavaElementDestination();
 			ASTNode nodeDestination;
 			ASTNode destinationContainer;
 			switch (javaElementDestination.getElementType()) {
 				case IJavaElement.INITIALIZER:
-					nodeDestination= ASTNodeSearchUtil.getInitializerNode((IInitializer) javaElementDestination, destinationCuNode);
+					nodeDestination= ASTNodeSearchUtil.getInitializerNode((IInitializer) javaElementDestination, targetCuNode);
 					destinationContainer= nodeDestination.getParent();
 					break;
 				case IJavaElement.FIELD:
-					nodeDestination= ASTNodeSearchUtil.getFieldOrEnumConstantDeclaration((IField) javaElementDestination, destinationCuNode);
+					nodeDestination= ASTNodeSearchUtil.getFieldOrEnumConstantDeclaration((IField) javaElementDestination, targetCuNode);
 					destinationContainer= nodeDestination.getParent();
 					break;
 				case IJavaElement.METHOD:
-					nodeDestination= ASTNodeSearchUtil.getMethodOrAnnotationTypeMemberDeclarationNode((IMethod) javaElementDestination, destinationCuNode);
+					nodeDestination= ASTNodeSearchUtil.getMethodOrAnnotationTypeMemberDeclarationNode((IMethod) javaElementDestination, targetCuNode);
 					destinationContainer= nodeDestination.getParent();
 					break;
 				case IJavaElement.TYPE:
 					nodeDestination= null;
 					IType typeDestination= (IType) javaElementDestination;
 					if (typeDestination.isAnonymous())
-						destinationContainer= ASTNodeSearchUtil.getClassInstanceCreationNode(typeDestination, destinationCuNode).getAnonymousClassDeclaration();
+						destinationContainer= ASTNodeSearchUtil.getClassInstanceCreationNode(typeDestination, targetCuNode).getAnonymousClassDeclaration();
 					else
-						destinationContainer= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(typeDestination, destinationCuNode);
+						destinationContainer= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(typeDestination, targetCuNode);
 					break;
 				default:
 					nodeDestination= null;
 					destinationContainer= null;
 			}
+			if (!(member instanceof IInitializer)) {
+				BodyDeclaration decl= ASTNodeSearchUtil.getBodyDeclarationNode(member, sourceCuNode);
+				if (decl != null)
+					ImportRewriteUtil.addImports(targetRewriter, decl, new HashMap(), new HashMap(), false);
+			}
 			if (destinationContainer != null) {
 				ListRewrite listRewrite;
 				if (destinationContainer instanceof AbstractTypeDeclaration) {
 					if (newMember instanceof EnumConstantDeclaration && destinationContainer instanceof EnumDeclaration)
-						listRewrite= targetRewrite.getListRewrite(destinationContainer, EnumDeclaration.ENUM_CONSTANTS_PROPERTY);
+						listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, EnumDeclaration.ENUM_CONSTANTS_PROPERTY);
 					else
-						listRewrite= targetRewrite.getListRewrite(destinationContainer, ((AbstractTypeDeclaration) destinationContainer).getBodyDeclarationsProperty());
+						listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, ((AbstractTypeDeclaration) destinationContainer).getBodyDeclarationsProperty());
 				} else
-					listRewrite= targetRewrite.getListRewrite(destinationContainer, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
+					listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
 
 				if (nodeDestination != null) {
 					final List list= listRewrite.getOriginalList();
@@ -786,8 +783,8 @@ public class ReorgPolicyFactory {
 				return; // could insert into/after destination
 			}
 			// fall-back / default:
-			final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getDestinationAsType(), destinationCuNode);
-			targetRewrite.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertLast(newMember, null);
+			final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getDestinationAsType(), targetCuNode);
+			targetRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertLast(newMember, null);
 		}
 
 		private static String getUnindentedSource(ISourceReference sourceReference) throws JavaModelException {
@@ -1129,20 +1126,18 @@ public class ReorgPolicyFactory {
 			}
 			return fModifications;
 		}
+
 		public Change createChange(IProgressMonitor pm, INewNameQueries copyQueries) throws JavaModelException {
-			try {					
+			try {
 				CompilationUnit sourceCuNode= createSourceCuNode();
-				ICompilationUnit destinationCu= getDestinationCu();
-				ASTParser parser= ASTParser.newParser(AST.JLS3);
-				parser.setSource(destinationCu);
-				CompilationUnit destinationCuNode= (CompilationUnit) parser.createAST(pm);
-				ASTRewrite rewrite= ASTRewrite.create(destinationCuNode.getAST());
+				ICompilationUnit targetCu= getDestinationCu();
+				CompilationUnitRewrite targetRewriter= new CompilationUnitRewrite(targetCu);
 				IJavaElement[] javaElements= getJavaElements();
 				for (int i= 0; i < javaElements.length; i++) {
-					copyToDestination(javaElements[i], rewrite, sourceCuNode, destinationCuNode);
+					copyToDestination(javaElements[i], targetRewriter, sourceCuNode, targetRewriter.getRoot());
 				}
-				return addTextEditFromRewrite(destinationCu, rewrite);
-			} catch (JavaModelException e){
+				return createCompilationUnitChange(targetCu, targetRewriter);
+			} catch (JavaModelException e) {
 				throw e;
 			} catch (CoreException e) {
 				throw new JavaModelException(e);
@@ -2068,10 +2063,10 @@ public class ReorgPolicyFactory {
 				}
 				IJavaElement[] javaElements= getJavaElements();
 				for (int i= 0; i < javaElements.length; i++) {
-					copyToDestination(javaElements[i], targetRewriter.getASTRewrite(), sourceRewriter.getRoot(), targetRewriter.getRoot());
+					copyToDestination(javaElements[i], targetRewriter, sourceRewriter.getRoot(), targetRewriter.getRoot());
 				}
 				ASTNodeDeleteUtil.markAsDeleted(javaElements, sourceRewriter, null);
-				Change targetCuChange= addTextEditFromRewrite(destinationCu, targetRewriter.getASTRewrite());
+				Change targetCuChange= createCompilationUnitChange(destinationCu, targetRewriter);
 				if (sourceCu.equals(destinationCu)) {
 					return targetCuChange;
 				} else {
@@ -2081,7 +2076,7 @@ public class ReorgPolicyFactory {
 					if (Arrays.asList(getJavaElements()).containsAll(Arrays.asList(sourceCu.getTypes())))
 						result.add(DeleteChangeCreator.createDeleteChange(null, new IResource[0], new ICompilationUnit[] { sourceCu}, RefactoringCoreMessages.ReorgPolicy_move)); 
 					else
-						result.add(addTextEditFromRewrite(sourceCu, sourceRewriter.getASTRewrite()));
+						result.add(createCompilationUnitChange(sourceCu, sourceRewriter));
 					return result;
 				}
 			} catch (JavaModelException e){

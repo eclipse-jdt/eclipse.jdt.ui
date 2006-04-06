@@ -1178,6 +1178,10 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String PullUpRefactoring_final_fields;
 
+	public static String PullUpRefactoring_incompatible_langauge_constructs;
+
+	public static String PullUpRefactoring_incompatible_language_constructs1;
+
 	public static String PullUpRefactoring_lower_default_visibility;
 
 	public static String PullUpRefactoring_lower_protected_visibility;
@@ -1625,8 +1629,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ReorgPolicyFactory_cannot_modify;
 
 	public static String ReorgPolicyFactory_cannot1;
-
-	public static String ReorgPolicyFactory_copy;
 
 	public static String ReorgPolicyFactory_doesnotexist0;
 
