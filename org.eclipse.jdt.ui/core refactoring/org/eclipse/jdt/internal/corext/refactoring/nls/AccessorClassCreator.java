@@ -11,7 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
 import java.text.Collator;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -220,9 +220,16 @@ public class AccessorClassCreator {
 	}
 	
 	private String createStaticFields(String lineDelim) {
-		StringBuffer buf= new StringBuffer();
 		HashSet added= new HashSet();
-		List subs= Arrays.asList(fNLSSubstitutions);
+		List subs= new ArrayList();
+		for (int i= 0; i < fNLSSubstitutions.length; i++) {
+			NLSSubstitution substitution= fNLSSubstitutions[i];
+			int newState= substitution.getState();
+			if ((substitution.hasStateChanged() || substitution.isAccessorRename())&& newState == NLSSubstitution.EXTERNALIZED) {
+				if (added.add(substitution.getKey()))
+					subs.add(substitution);
+			}
+		}
 		Collections.sort(subs, new Comparator() {
 			public int compare(Object o1, Object o2) {
 				NLSSubstitution s0= (NLSSubstitution)o1;
@@ -230,15 +237,11 @@ public class AccessorClassCreator {
 				return Collator.getInstance().compare(s0.getKey(), s1.getKey());
 			}
 		});
+		StringBuffer buf= new StringBuffer();
 		for (Iterator iter= subs.iterator(); iter.hasNext();) {
-			NLSSubstitution substitution= (NLSSubstitution)iter.next();
-			int newState= substitution.getState();
-			if ((substitution.hasStateChanged() || substitution.isAccessorRename())&& newState == NLSSubstitution.EXTERNALIZED) {
-				if (added.add(substitution.getKey()))
-					appendStaticField(buf,substitution);
-			}
+			NLSSubstitution element= (NLSSubstitution)iter.next();
+			appendStaticField(buf, element);
 		}
-		
 		return buf.toString();
 	}
 
