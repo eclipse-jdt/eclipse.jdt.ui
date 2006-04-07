@@ -48,7 +48,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -264,8 +263,8 @@ class SourceAnalyzer  {
 			} else if (binding instanceof IVariableBinding) {
 				IVariableBinding vb= (IVariableBinding)binding;
 				if (vb.isField() && ! isStaticallyImported(node)) {
-					ASTNode parent= node.getParent();
-					if (!(parent instanceof QualifiedName)) {
+					Name topName= ASTNodes.getTopMostName(node);
+					if (node == topName || node == ASTNodes.getLeftMostSimpleName(topName)) {
 						StructuralPropertyDescriptor location= node.getLocationInParent();
 						if (location != SingleVariableDeclaration.NAME_PROPERTY 
 							&& location != VariableDeclarationFragment.NAME_PROPERTY) {

@@ -321,6 +321,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performBugTest();
 	}
 	
+	public void test_98856() throws Exception {
+		performBugTest();
+	}
+	
 	/* *********************** Argument Tests ******************************* */
 		
 	private void performArgumentTest() throws Exception {
@@ -667,6 +671,14 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	
 	public void testThisReceiver() throws Exception {
 		performReceiverTestInlineMethod();
+	}
+	
+	public void testImplicitReceiverMethod() throws Exception {
+		performReceiverTest();
+	}
+	
+	public void testImplicitReceiverField() throws Exception {
+		performReceiverTest();
 	}
 	
 	/* *********************** Import Tests ******************************* */
