@@ -1803,6 +1803,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fContextMenuGroup.setContext(context);
 		fContextMenuGroup.fillContextMenu(menu);
 		fContextMenuGroup.setContext(null);
+
+		// Quick views
+		IAction action= getAction(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
+		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, action);
+		action= getAction(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY);
+		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, action);
+		
 	}
 
 	/**
