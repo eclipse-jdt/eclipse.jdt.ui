@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.mapping.ModelProvider;
@@ -24,7 +26,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 

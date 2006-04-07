@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.graphics.Image;
@@ -34,7 +36,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.PreferenceConstants;

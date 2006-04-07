@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.eclipse.text.edits.ReplaceEdit;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -40,7 +41,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;

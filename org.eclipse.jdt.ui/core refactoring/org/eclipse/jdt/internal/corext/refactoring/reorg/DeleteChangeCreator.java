@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -43,7 +44,6 @@ import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFileChange;

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -21,7 +22,6 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 /**
  * Helper methods to deal with file buffers in refactorings.

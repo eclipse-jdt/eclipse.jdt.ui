@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.core.runtime.Assert;
 
 public final class SimpleTypeConstraint implements ITypeConstraint {
 	

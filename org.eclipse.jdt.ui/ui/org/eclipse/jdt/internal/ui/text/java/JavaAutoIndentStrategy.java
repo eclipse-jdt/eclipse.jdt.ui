@@ -12,6 +12,8 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -48,7 +50,6 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 

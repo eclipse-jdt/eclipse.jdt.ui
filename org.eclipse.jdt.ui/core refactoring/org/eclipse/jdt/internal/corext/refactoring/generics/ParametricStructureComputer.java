@@ -20,7 +20,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.GenericType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;

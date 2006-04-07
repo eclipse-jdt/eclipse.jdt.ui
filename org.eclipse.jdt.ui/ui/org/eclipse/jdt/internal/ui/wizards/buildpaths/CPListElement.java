@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -31,7 +32,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.launching.JavaRuntime;

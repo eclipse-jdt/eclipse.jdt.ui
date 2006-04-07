@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -53,7 +55,6 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.contentassist.ContentAssistHandler;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 

@@ -475,7 +475,7 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 */
 	public IJavaElement handleToElement(final String handle) {
 		Assert.isNotNull(handle);
-		Assert.isLegal(!"".equals(handle)); //$NON-NLS-1$
+		Assert.isTrue(!"".equals(handle)); //$NON-NLS-1$
 		final String project= getProject();
 		return handleToElement(project, handle);
 	}
@@ -490,7 +490,7 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 */
 	public IResource handleToResource(final String handle) {
 		Assert.isNotNull(handle);
-		Assert.isLegal(!"".equals(handle)); //$NON-NLS-1$
+		Assert.isTrue(!"".equals(handle)); //$NON-NLS-1$
 		return handleToResource(getProject(), handle, getHandlePrefix(IDENTIFIER_RESOURCE));
 	}
 

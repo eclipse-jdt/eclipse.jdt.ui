@@ -16,13 +16,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.search.SearchMatch;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 public class SearchResultGroup {

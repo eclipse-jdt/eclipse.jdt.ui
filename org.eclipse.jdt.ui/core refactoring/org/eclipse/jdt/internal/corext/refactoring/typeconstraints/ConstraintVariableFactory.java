@@ -16,6 +16,8 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -24,7 +26,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 

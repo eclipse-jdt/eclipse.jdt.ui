@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.ListenerList;
 
@@ -28,7 +29,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 
 /**

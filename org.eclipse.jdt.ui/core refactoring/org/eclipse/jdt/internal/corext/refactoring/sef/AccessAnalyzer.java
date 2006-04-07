@@ -17,6 +17,8 @@ import java.util.List;
 
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.Flags;
@@ -45,7 +47,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;

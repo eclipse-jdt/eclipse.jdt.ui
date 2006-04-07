@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 
 import org.eclipse.jface.text.IRegion;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 public class Selection {
 	

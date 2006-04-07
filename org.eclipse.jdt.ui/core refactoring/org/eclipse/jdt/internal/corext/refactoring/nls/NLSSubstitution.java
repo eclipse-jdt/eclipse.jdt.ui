@@ -12,7 +12,8 @@ package org.eclipse.jdt.internal.corext.refactoring.nls;
 
 import java.util.Properties;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.core.runtime.Assert;
+
 
 public class NLSSubstitution {
 	public static final int EXTERNALIZED= 0;

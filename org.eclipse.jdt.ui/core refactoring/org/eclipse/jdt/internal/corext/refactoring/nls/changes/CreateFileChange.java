@@ -19,6 +19,7 @@ import java.net.URI;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -34,7 +35,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.util.Messages;
 

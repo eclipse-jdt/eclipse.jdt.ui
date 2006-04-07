@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
@@ -19,7 +21,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 /**
  * Proposal for a default serial version id.

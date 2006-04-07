@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
@@ -28,7 +30,6 @@ import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.CompilationUnitBuffer;

@@ -15,13 +15,14 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.internal.corext.Assert;
 
 public class Invocations {
 

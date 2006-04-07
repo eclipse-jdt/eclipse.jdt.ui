@@ -18,6 +18,8 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
@@ -35,7 +37,6 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.Statement;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CodeFormatterUtil {

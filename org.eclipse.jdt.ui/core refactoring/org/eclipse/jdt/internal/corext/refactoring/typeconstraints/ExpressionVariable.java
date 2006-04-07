@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
@@ -21,7 +23,6 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.internal.corext.Assert;
 
 public final class ExpressionVariable extends ConstraintVariable {
 	

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -43,7 +45,6 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;

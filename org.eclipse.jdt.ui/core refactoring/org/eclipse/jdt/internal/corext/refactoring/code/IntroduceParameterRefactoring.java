@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -56,7 +57,6 @@ import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;

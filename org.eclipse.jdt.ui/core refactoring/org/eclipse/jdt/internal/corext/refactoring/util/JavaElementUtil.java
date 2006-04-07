@@ -17,6 +17,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -34,7 +36,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;

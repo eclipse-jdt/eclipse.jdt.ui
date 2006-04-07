@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.PlatformObject;
@@ -24,7 +25,6 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.internal.ui.callhierarchy.MethodWrapperWorkbenchAdapter;
 

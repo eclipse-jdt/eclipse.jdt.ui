@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.corext.refactoring.delegates;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -32,7 +34,6 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.deprecation.DeprecationRefactorings;

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.core.resources.IFolder;
 
 import org.eclipse.swt.SWT;
@@ -25,7 +27,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;

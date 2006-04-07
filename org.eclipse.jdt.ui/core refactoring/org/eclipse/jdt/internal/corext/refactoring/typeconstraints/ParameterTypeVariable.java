@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.dom.IMethodBinding;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 public class ParameterTypeVariable extends ConstraintVariable {

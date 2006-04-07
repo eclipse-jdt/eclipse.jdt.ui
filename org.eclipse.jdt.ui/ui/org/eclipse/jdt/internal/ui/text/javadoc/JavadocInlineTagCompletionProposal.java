@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.CompletionProposal;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -28,7 +30,6 @@ import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;

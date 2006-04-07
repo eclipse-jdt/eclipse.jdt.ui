@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
@@ -35,7 +36,6 @@ import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 import org.eclipse.ltk.ui.refactoring.history.IRefactoringHistoryControl;
 import org.eclipse.ltk.ui.refactoring.history.RefactoringHistoryControlConfiguration;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 

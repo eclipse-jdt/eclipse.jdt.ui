@@ -64,7 +64,7 @@ public final class CreateDeprecationFixChange extends JDTChange {
 	 */
 	public CreateDeprecationFixChange(final IPath path, final String script, final String label) {
 		Assert.isNotNull(path);
-		Assert.isLegal(script != null && !"".equals(script)); //$NON-NLS-1$
+		Assert.isTrue(script != null && !"".equals(script)); //$NON-NLS-1$
 		Assert.isNotNull(label);
 		fPath= path;
 		fScript= script;

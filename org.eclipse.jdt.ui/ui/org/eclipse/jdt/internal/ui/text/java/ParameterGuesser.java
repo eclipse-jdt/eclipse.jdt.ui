@@ -23,6 +23,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -43,7 +45,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;

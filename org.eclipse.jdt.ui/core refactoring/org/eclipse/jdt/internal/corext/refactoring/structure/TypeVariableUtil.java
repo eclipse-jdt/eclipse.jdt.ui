@@ -16,6 +16,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -24,7 +26,6 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 

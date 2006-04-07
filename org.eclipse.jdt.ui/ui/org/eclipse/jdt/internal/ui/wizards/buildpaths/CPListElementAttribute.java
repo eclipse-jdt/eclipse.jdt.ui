@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 /**
   */

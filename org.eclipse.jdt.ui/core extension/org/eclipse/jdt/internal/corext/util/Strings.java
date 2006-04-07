@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.ILineTracker;
@@ -18,7 +20,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 /**
  * Helper class to provide String manipulation functions not available in standard JDK.

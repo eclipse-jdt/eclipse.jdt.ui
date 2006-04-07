@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -20,7 +22,6 @@ import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.IWorkbenchWizard;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICreateTargetQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICreateTargetQuery;
 

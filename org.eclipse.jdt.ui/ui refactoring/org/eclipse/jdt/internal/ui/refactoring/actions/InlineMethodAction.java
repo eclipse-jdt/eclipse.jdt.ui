@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -29,7 +31,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;

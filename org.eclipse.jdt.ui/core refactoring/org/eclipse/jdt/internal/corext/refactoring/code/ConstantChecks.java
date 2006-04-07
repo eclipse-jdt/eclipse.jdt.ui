@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -24,7 +26,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 

@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -29,7 +31,6 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 
 public class InputFlowAnalyzer extends FlowAnalyzer {

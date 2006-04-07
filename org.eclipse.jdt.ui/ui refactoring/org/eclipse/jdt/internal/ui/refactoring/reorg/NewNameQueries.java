@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -32,7 +33,6 @@ import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQueries;

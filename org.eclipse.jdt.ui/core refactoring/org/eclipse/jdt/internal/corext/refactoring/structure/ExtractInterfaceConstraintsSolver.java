@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsModel;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsSolver;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeSet;

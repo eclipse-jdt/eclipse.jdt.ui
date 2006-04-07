@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 /**

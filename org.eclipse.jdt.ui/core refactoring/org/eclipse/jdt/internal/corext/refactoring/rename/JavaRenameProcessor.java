@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -24,7 +25,6 @@ import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;

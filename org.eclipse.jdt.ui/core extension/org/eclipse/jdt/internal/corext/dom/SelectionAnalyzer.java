@@ -13,13 +13,14 @@ package org.eclipse.jdt.internal.corext.dom;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 /**
  * Maps a selection to a set of AST nodes.

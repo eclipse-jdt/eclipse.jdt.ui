@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,7 +25,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.util.IOCloser;
 import org.eclipse.ltk.core.refactoring.Change;

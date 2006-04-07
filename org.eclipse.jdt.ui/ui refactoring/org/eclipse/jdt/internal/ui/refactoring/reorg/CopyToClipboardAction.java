@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
@@ -42,7 +43,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.TypedSource;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgEnablementPolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;

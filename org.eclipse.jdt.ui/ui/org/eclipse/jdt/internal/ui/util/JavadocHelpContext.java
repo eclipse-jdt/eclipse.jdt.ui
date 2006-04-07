@@ -18,6 +18,7 @@ import com.ibm.icu.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.help.HelpSystem;
@@ -32,7 +33,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 

@@ -19,6 +19,7 @@ import java.util.List;
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ParameterizedCommand;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
@@ -41,7 +42,6 @@ import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;

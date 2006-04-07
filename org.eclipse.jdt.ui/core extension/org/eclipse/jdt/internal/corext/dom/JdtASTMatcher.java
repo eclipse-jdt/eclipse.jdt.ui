@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.internal.corext.Assert;
 
 public class JdtASTMatcher extends ASTMatcher {
 

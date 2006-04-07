@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.Flags;
@@ -34,7 +35,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;

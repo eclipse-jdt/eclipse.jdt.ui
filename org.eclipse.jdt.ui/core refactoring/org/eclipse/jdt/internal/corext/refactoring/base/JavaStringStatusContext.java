@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.base;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.ISourceRange;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 /**

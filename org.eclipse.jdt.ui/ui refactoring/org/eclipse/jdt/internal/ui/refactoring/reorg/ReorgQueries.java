@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.swt.SWT;
@@ -21,7 +22,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.wizard.Wizard;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IConfirmQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 

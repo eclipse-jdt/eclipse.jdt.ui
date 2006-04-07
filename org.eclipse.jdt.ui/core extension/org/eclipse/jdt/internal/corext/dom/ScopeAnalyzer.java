@@ -384,7 +384,8 @@ public class ScopeAnalyzer {
 			} else {
 				switch (binding.getKind()) {
 					case IBinding.TYPE:
-						fFound= ((ITypeBinding) binding).getTypeDeclaration() == fToSearch;
+						ITypeBinding typeDeclaration= ((ITypeBinding) binding).getTypeDeclaration();
+						fFound= typeDeclaration == fToSearch;
 						break;
 					case IBinding.VARIABLE:
 						fFound= ((IVariableBinding) binding).getVariableDeclaration() == fToSearch;

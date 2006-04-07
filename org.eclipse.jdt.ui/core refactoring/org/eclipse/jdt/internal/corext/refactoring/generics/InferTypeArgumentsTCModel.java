@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -33,7 +34,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Type;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ArrayType;

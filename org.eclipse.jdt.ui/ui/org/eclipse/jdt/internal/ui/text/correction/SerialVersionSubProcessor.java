@@ -12,11 +12,11 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Collection;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.PotentialProgrammingProblemsFix;
 

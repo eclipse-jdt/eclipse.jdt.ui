@@ -16,6 +16,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -29,7 +31,6 @@ import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 
 public class TypeEnvironment {

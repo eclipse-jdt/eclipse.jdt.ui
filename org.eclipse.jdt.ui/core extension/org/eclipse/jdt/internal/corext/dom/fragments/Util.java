@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom.fragments;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 
 /**

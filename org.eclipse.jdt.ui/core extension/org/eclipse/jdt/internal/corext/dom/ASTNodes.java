@@ -21,6 +21,8 @@ import java.util.List;
 
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -72,7 +74,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;

@@ -14,6 +14,8 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayAccess;
@@ -78,7 +80,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 public final class ConstraintCollector extends ASTVisitor {
 

@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom.fragments;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.JdtASTMatcher;
 
 class SimpleFragment extends ASTFragment {

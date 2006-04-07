@@ -43,7 +43,7 @@ public final class JavaRefactoringArguments extends RefactoringArguments {
 	 *            the project, or <code>null</code> for the workspace
 	 */
 	public JavaRefactoringArguments(final String project) {
-		Assert.isLegal(project == null || !"".equals(project)); //$NON-NLS-1$
+		Assert.isTrue(project == null || !"".equals(project)); //$NON-NLS-1$
 		fProject= project;
 	}
 

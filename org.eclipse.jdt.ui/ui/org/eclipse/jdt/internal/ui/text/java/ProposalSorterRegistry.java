@@ -57,8 +57,8 @@ public final class ProposalSorterRegistry {
 	private ProposalSorterHandle fDefaultSorter;
 
 	private ProposalSorterRegistry(final IPreferenceStore preferenceStore, final String key) {
-		Assert.isLegal(preferenceStore != null);
-		Assert.isLegal(key != null);
+		Assert.isTrue(preferenceStore != null);
+		Assert.isTrue(key != null);
 		fPreferenceStore= preferenceStore;
 		fKey= key;
 	}
@@ -119,7 +119,7 @@ public final class ProposalSorterRegistry {
 	}
 
 	public void select(ProposalSorterHandle handle) {
-		Assert.isLegal(handle != null);
+		Assert.isTrue(handle != null);
 		String id= handle.getId();
 		
 		fPreferenceStore.setValue(fKey, id);

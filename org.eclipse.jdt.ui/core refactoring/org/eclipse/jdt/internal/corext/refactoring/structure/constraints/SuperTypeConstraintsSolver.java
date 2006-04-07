@@ -18,9 +18,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;

@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.ISourceRange;
@@ -22,7 +24,6 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 public class RefactoringScanner {
 	

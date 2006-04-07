@@ -14,6 +14,8 @@ package org.eclipse.jdt.internal.corext.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -23,7 +25,6 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 public class MethodOverrideTester {
 	private static class Substitutions {

@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFile;
@@ -41,7 +42,6 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;

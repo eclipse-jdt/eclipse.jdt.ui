@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -45,7 +46,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;

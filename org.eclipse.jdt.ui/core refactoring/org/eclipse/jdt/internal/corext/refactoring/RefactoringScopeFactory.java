@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
@@ -32,7 +33,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 public class RefactoringScopeFactory {

@@ -12,8 +12,6 @@ package org.eclipse.jdt.internal.ui.jarimport;
 
 import java.net.URI;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -95,7 +93,9 @@ public final class JarImportData extends JarPackageData {
 	 *            the time stamp, or <code>-1</code> if not available
 	 */
 	public void setExistingTimeStamp(final long stamp) {
-		Assert.isLegal(stamp >= -1);
+		if (stamp < -1) {
+			throw new IllegalArgumentException();
+		}
 		fExistingStamp= stamp;
 	}
 

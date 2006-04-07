@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -56,7 +57,6 @@ import org.eclipse.jdt.core.search.FieldDeclarationMatch;
 import org.eclipse.jdt.core.search.MethodDeclarationMatch;
 import org.eclipse.jdt.core.search.SearchMatch;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;

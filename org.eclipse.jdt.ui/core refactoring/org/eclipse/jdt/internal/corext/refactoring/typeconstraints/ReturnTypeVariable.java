@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 

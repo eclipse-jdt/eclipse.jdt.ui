@@ -13,12 +13,13 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 public class ParentChecker {
 	private IResource[] fResources;

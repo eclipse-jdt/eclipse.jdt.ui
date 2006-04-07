@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 public final class RawType extends HierarchyType {
 	

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -23,7 +25,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 class ComboSelectionDialog extends Dialog{
 			

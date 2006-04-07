@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IFile;
@@ -37,7 +38,6 @@ import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 /**
  * A data structure to collect resource modifications.

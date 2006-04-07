@@ -21,6 +21,7 @@ import java.util.List;
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.Region;
@@ -31,7 +32,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 public class NLSUtil {
 

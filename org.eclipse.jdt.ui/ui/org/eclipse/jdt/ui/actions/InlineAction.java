@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -23,7 +25,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;

@@ -158,7 +158,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 			
 			ASTNode parent= ref.getParent();
-			if (parent instanceof Type) {
+			while (parent instanceof Type) {
 				parent= parent.getParent();
 			}
 			if (parent instanceof AbstractTypeDeclaration && parent.getParent() instanceof CompilationUnit) {
@@ -166,7 +166,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 			
 			if (typeBinding.isMember()) {
-				if (fAnalyzer.isDeclaredInScope(typeBinding, ref, ScopeAnalyzer.TYPES))
+				if (fAnalyzer.isDeclaredInScope(typeBinding, ref, ScopeAnalyzer.TYPES | ScopeAnalyzer.CHECK_VISIBILITY))
 					return false;
 			}
 			return true;				

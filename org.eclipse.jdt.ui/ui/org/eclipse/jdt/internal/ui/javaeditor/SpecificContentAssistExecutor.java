@@ -13,12 +13,13 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;

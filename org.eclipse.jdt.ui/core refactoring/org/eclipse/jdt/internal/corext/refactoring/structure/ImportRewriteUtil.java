@@ -16,6 +16,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -27,7 +29,6 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
 
 /**

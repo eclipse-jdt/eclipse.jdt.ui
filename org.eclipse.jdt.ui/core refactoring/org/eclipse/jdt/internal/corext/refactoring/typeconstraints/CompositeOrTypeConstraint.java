@@ -14,7 +14,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.core.runtime.Assert;
+
 
 public class CompositeOrTypeConstraint implements ITypeConstraint{
 	

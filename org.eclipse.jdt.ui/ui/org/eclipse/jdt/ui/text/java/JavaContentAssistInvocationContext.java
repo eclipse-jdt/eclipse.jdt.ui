@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.text.java;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.text.ITextViewer;
 
 import org.eclipse.ui.IEditorPart;
@@ -21,7 +23,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;

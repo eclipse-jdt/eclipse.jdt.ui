@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -34,7 +35,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.fix.LinkedFix.AbstractLinkedFixRewriteOperation;

@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.ListenerList;
 
@@ -35,7 +36,6 @@ import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.IWorkingSetUpdater;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 public class WorkingSetModel {
 

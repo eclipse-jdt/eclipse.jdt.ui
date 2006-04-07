@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure.constraints;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 

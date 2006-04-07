@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 import java.util.LinkedList;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
@@ -21,7 +23,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 /**
  * Helper class to transplant a IJavaElement handle from a certain state of the

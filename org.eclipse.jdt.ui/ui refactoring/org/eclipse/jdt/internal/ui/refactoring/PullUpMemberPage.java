@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.swt.SWT;
@@ -71,7 +72,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.HierarchyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.IMemberActionInfo;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.delegates;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -23,7 +25,6 @@ import org.eclipse.jdt.core.dom.MemberRef;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.deprecation.DeprecationRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;

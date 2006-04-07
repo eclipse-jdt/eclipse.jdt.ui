@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -46,7 +48,6 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.SearchMatch;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;

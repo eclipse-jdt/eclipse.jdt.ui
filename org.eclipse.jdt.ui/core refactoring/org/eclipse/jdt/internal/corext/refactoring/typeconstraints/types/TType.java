@@ -13,9 +13,10 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 public abstract class TType {
 	

@@ -29,6 +29,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditProcessor;
 import org.eclipse.text.edits.UndoEdit;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -70,7 +71,6 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;

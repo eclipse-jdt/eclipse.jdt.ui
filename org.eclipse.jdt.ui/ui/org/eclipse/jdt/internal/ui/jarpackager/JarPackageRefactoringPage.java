@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IProject;
@@ -40,7 +41,6 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;

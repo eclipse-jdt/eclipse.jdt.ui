@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.corext.refactoring.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
@@ -21,7 +23,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IOpenable;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 public class ResourceUtil {
 	

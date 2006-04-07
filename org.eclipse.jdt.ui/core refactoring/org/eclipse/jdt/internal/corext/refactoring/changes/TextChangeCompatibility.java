@@ -14,12 +14,13 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextEditChangeGroup;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 /**
  * A utility class to provide compatibility with the old

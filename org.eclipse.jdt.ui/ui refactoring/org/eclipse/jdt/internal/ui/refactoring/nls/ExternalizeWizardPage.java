@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IFile;
@@ -91,7 +92,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.nls.KeyValuePair;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;

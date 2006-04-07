@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -17,7 +19,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
 

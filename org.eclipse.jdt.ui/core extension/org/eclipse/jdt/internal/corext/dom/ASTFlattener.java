@@ -13,9 +13,10 @@ package org.eclipse.jdt.internal.corext.dom;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.dom.*;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 public class ASTFlattener extends GenericVisitor {
 

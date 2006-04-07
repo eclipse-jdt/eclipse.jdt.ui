@@ -20,6 +20,7 @@ import java.util.List;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -34,7 +35,6 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 

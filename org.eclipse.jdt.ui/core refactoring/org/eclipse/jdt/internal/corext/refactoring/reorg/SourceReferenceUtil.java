@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -27,7 +29,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 public class SourceReferenceUtil {
 	

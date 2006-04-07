@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import java.util.Iterator;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.ILineTracker;
@@ -26,7 +28,6 @@ import org.eclipse.jface.text.templates.TemplateVariableResolver;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CodeTemplateContext extends TemplateContext {

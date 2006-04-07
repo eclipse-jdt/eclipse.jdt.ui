@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.widgets.Shell;
@@ -25,7 +27,6 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;

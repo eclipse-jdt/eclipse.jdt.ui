@@ -16,6 +16,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -30,7 +32,6 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
 

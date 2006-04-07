@@ -14,7 +14,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.core.runtime.Assert;
+
 
 public final class ConstraintOperator {
 	

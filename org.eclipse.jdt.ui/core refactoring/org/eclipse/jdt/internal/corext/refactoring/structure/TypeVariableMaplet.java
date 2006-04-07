@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.core.runtime.Assert;
 
 /**
  * Maplet from a type variable in a source class to a type variable in a target class.

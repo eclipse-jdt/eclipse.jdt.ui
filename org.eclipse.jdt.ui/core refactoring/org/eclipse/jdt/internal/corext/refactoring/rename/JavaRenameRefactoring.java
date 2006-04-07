@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;

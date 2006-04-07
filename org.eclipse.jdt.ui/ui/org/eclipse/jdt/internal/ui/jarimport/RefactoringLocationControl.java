@@ -63,7 +63,7 @@ public class RefactoringLocationControl extends Composite {
 		fCombo= new Combo(this, SWT.SINGLE | SWT.BORDER);
 		fCombo.setLayoutData(createGridData(GridData.FILL_BOTH, 1, 0));
 		Assert.isNotNull(wizard);
-		Assert.isLegal(key != null && !"".equals(key)); //$NON-NLS-1$
+		Assert.isTrue(key != null && !"".equals(key)); //$NON-NLS-1$
 		fWizard= wizard;
 		fKey= key;
 	}

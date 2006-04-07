@@ -20,6 +20,7 @@ import org.eclipse.core.resources.mapping.ResourceMapping;
 import org.eclipse.core.resources.mapping.ResourceMappingContext;
 import org.eclipse.core.resources.mapping.ResourceTraversal;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -40,7 +41,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
