@@ -111,7 +111,10 @@ class SourceAnalyzer  {
 			return false;
 		}
 		public boolean visit(MethodInvocation node) {
-			if (fBinding != null && fBinding == node.getName().resolveBinding() && !status.hasFatalError()) {
+			IMethodBinding methodBinding= node.resolveMethodBinding();
+			if (methodBinding != null)
+				methodBinding.getMethodDeclaration();
+			if (fBinding != null && methodBinding != null && fBinding.isEqualTo(methodBinding) && !status.hasFatalError()) {
 				status.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_recursive_call); 
 				return false;
 			}
@@ -146,7 +149,10 @@ class SourceAnalyzer  {
 			return (ASTNode)statements.get(statements.size() - 1);
 		}
 		private IMethodBinding getBinding() {
-			return fDeclaration.resolveBinding();
+			IMethodBinding result= fDeclaration.resolveBinding();
+			if (result != null)
+				return result.getMethodDeclaration();
+			return result;
 		}
 	}
 	
