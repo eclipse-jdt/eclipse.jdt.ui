@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.composite;
+package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;

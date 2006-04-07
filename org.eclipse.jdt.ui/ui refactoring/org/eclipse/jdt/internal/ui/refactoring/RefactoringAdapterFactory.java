@@ -17,7 +17,7 @@ import org.eclipse.ltk.ui.refactoring.TextEditChangeNode;
 import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.composite.MultiStateCompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.MultiStateCompilationUnitChange;
 
 public class RefactoringAdapterFactory implements IAdapterFactory {
 
