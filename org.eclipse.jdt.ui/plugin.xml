@@ -5088,6 +5088,7 @@
       </navigatorContent>
    </extension>
 
+
     <!-- CommonNavigator -->
 	
 	<extension
@@ -5104,7 +5105,7 @@
 		<navigatorContent
 				activeByDefault="true"
 				contentProvider="org.eclipse.jdt.internal.ui.navigator.JavaNavigatorContentProvider"
-				icon="$nl$/icons/full/obj16/java_model.gif"
+				icon="$nl$/icons/full/eview16/jperspective.gif"
 				id="org.eclipse.jdt.java.ui.javaContent"
 				labelProvider="org.eclipse.jdt.internal.ui.navigator.JavaNavigatorLabelProvider"
 				name="%commonNavigatorContentName"
@@ -5164,9 +5165,7 @@
 			</possibleChildren>
 			<actionProvider
 					class="org.eclipse.jdt.internal.ui.navigator.PackageExplorerActionProvider"
-					overrides="org.eclipse.ui.navigator.resources.actions.RefactorActions">
-				<enablement>
-				</enablement>
+					overrides="org.eclipse.ui.navigator.resources.actions.RefactorActions"> 
 			</actionProvider>
 			<override
 					policy="InvokeAlwaysRegardlessOfSuppressedExt"
@@ -5174,7 +5173,109 @@
 			<commonSorter
 					class="org.eclipse.jdt.ui.JavaElementSorter"
 					id="org.eclipse.jdt.ui.javaElementSorter"/>
+		   <actionProvider
+		         class="org.eclipse.jdt.internal.ui.navigator.PackageExplorerOpenActionProvider"
+		         id="org.eclipse.jdt.internal.ui.navigator.PackageExplorerOpenActionProvider"
+		         overrides="org.eclipse.ui.navigator.resources.OpenActions"> 
+		   </actionProvider> 
 		</navigatorContent>
+		  <commonWizard
+		        type="new"
+		        wizardId="org.eclipse.jdt.ui.wizards.NewPackageCreationWizard">
+		     <enablement>
+		        <or>
+		           <instanceof value="org.eclipse.jdt.core.IPackageFragment"/>
+		           <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
+		           <instanceof value="org.eclipse.jdt.core.ICompilationUnit"/>
+		           <adapt type="org.eclipse.core.resources.IProject">
+		              <test
+		                    property="org.eclipse.core.resources.projectNature"
+		                    value="org.eclipse.jdt.core.javanature"/>
+		           </adapt>
+		        </or>
+		     </enablement>
+		  </commonWizard>
+		  <commonWizard
+		        type="new"
+		        wizardId="org.eclipse.jdt.ui.wizards.NewClassCreationWizard">
+		     <enablement>
+		        <or>
+		           <instanceof value="org.eclipse.jdt.core.IPackageFragment"/>
+		           <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
+		           <instanceof value="org.eclipse.jdt.core.ICompilationUnit"/>
+		           <adapt type="org.eclipse.core.resources.IProject">
+		              <test
+		                    property="org.eclipse.core.resources.projectNature"
+		                    value="org.eclipse.jdt.core.javanature"/>
+		           </adapt>
+		        </or>
+		     </enablement>
+		  </commonWizard>
+
+   	      <commonWizard
+		        type="new"
+		        wizardId="org.eclipse.jdt.ui.wizards.NewInterfaceCreationWizard">
+		     <enablement>
+		        <or>
+		           <instanceof value="org.eclipse.jdt.core.IPackageFragment"/>
+		           <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
+		           <instanceof value="org.eclipse.jdt.core.ICompilationUnit"/>
+		           <adapt type="org.eclipse.core.resources.IProject">
+		              <test
+		                    property="org.eclipse.core.resources.projectNature"
+		                    value="org.eclipse.jdt.core.javanature"/>
+		           </adapt>
+		        </or>
+		     </enablement>
+		  </commonWizard>		  
+		  <commonWizard
+		        type="new"
+		        wizardId="org.eclipse.jdt.ui.wizards.NewAnnotationCreationWizard">
+		     <enablement>
+		        <or>
+		           <instanceof value="org.eclipse.jdt.core.IPackageFragment"/>
+		           <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
+		           <instanceof value="org.eclipse.jdt.core.ICompilationUnit"/>
+		           <adapt type="org.eclipse.core.resources.IProject">
+		              <test
+		                    property="org.eclipse.core.resources.projectNature"
+		                    value="org.eclipse.jdt.core.javanature"/>
+		           </adapt>
+		        </or>
+		     </enablement>
+		  </commonWizard>
+
+		    <commonWizard
+		          type="new"
+		          wizardId="org.eclipse.jdt.ui.wizards.NewEnumCreationWizard">
+				     <enablement>
+				        <or>
+				           <instanceof value="org.eclipse.jdt.core.IPackageFragment"/>
+				           <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
+				           <instanceof value="org.eclipse.jdt.core.ICompilationUnit"/>
+				           <adapt type="org.eclipse.core.resources.IProject">
+				              <test
+				                    property="org.eclipse.core.resources.projectNature"
+				                    value="org.eclipse.jdt.core.javanature"/>
+				           </adapt>
+				        </or>
+				     </enablement>
+		    </commonWizard>	 
+		    <commonWizard
+		          type="new"
+		          wizardId="org.eclipse.jdt.ui.wizards.NewSourceFolderCreationWizard">
+				     <enablement>
+				        <or> 
+				           <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/> 
+				           <adapt type="org.eclipse.core.resources.IProject">
+				              <test
+				                    property="org.eclipse.core.resources.projectNature"
+				                    value="org.eclipse.jdt.core.javanature"/>
+				           </adapt>
+				        </or>
+				     </enablement>
+			 </commonWizard>
+		
 	</extension>
      
 </plugin>

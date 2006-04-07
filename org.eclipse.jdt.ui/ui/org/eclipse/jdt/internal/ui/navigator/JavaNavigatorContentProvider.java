@@ -11,10 +11,14 @@
 package org.eclipse.jdt.internal.ui.navigator;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 
@@ -36,6 +40,8 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.model.JavaSynchronizationContentProvider;
 import org.eclipse.jdt.internal.ui.navigator.IExtensionStateConstants.Values;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
 
@@ -55,14 +61,11 @@ public class JavaNavigatorContentProvider extends
 	private IExtensionStateModel fStateModel;
 
 	public void init(ICommonContentExtensionSite commonContentExtensionSite) {
-		IExtensionStateModel stateModel= commonContentExtensionSite.getExtensionStateModel();
-		IMemento memento= commonContentExtensionSite.getMemento();
-		
-		fStateModel = stateModel;
-		// fManager = new WorkingSetModelManager(fStateModel, this);
-		// expose the manager for the action provider
-		// fStateModel.setProperty(WorkingSetModelManager.INSTANCE_KEY,
-		// fManager);
+		IExtensionStateModel stateModel = commonContentExtensionSite
+				.getExtensionStateModel();
+		IMemento memento = commonContentExtensionSite.getMemento();
+
+		fStateModel = stateModel; 
 		restoreState(memento);
 		fStateModel.addPropertyChangeListener(new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
@@ -133,40 +136,95 @@ public class JavaNavigatorContentProvider extends
 
 	public PipelinedShapeModification interceptAdd(
 			PipelinedShapeModification addModification) {
-		// TODO Auto-generated method stub
-		return null;
+		convertToJavaElements(addModification);
+		return addModification;
 	}
 
 	public PipelinedShapeModification interceptRemove(
 			PipelinedShapeModification removeModification) {
-		// TODO Auto-generated method stub
+		convertToJavaElements(removeModification.getChildren());
+		return removeModification;
+	}
+
+	/**
+	 * Returns the java element associated with the project.
+	 * 
+	 * Reused from {@link JavaSynchronizationContentProvider}.
+	 * 
+	 * @param project
+	 *            the project
+	 * @return the associated java element, or <code>null</code> if the
+	 *         project is not a java project
+	 */
+	private IJavaElement asJavaProject(final IProject project) {
+		try {
+			if (project.getDescription().hasNature(JavaCore.NATURE_ID))
+				return JavaCore.create(project);
+		} catch (CoreException exception) {
+			JavaPlugin.log(exception);
+		}
 		return null;
 	}
 
-	public boolean interceptRefresh(PipelinedViewerUpdate refreshSynchronization) {
-		IJavaElement javaElement;
-		Set interceptedElements = new HashSet();
-		for (Iterator iter = refreshSynchronization.getRefreshTargets().iterator(); iter.hasNext();) {
-			Object element = iter.next();
-			if (element instanceof IResource) {
-				if ((javaElement = JavaCore.create((IResource) element)) != null && javaElement.exists()) {
-					iter.remove();
-					interceptedElements.add(javaElement);
-				}
+	/**
+	 * Converts the shape modification to use Java elements.
+	 * 
+	 * 
+	 * @param modification
+	 *            the shape modification to convert
+	 */
+	private boolean convertToJavaElements(
+			PipelinedShapeModification modification) {
+		Object parent = modification.getParent();
+		if (parent instanceof IContainer) {
+			IJavaElement element = JavaCore.create((IContainer) parent);
+			if (element != null && element.exists()) {
+				// we don't convert the root
+				if( !(element instanceof IJavaModel))
+					modification.setParent(element);
+				return convertToJavaElements(modification.getChildren());
+				
 			}
 		}
-		if (interceptedElements.size() > 0) {
-			refreshSynchronization.getRefreshTargets().addAll(
-					interceptedElements);
+		return false;
+	}
+
+	/**
+	 * Converts the shape modification to use Java elements.
+	 * 
+	 * 
+	 * @param currentChildren
+	 *            The set of current children that would be contributed or refreshed in the viewer.
+	 */
+	private boolean convertToJavaElements(Set currentChildren) {
+
+		LinkedHashSet convertedChildren = new LinkedHashSet();
+		IJavaElement newChild;
+		for (Iterator childrenItr = currentChildren.iterator(); childrenItr
+				.hasNext();) {
+			Object child = childrenItr.next();
+			if (child instanceof IResource)
+				if ((newChild = JavaCore.create((IResource) child)) != null
+						&& newChild.exists()) {
+					childrenItr.remove();
+					convertedChildren.add(newChild);
+				}
+		}
+		if (!convertedChildren.isEmpty()) {
+			currentChildren.addAll(convertedChildren);
 			return true;
 		}
 		return false;
 
 	}
 
-	public boolean interceptUpdate(PipelinedViewerUpdate updateSynchronization) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean interceptRefresh(PipelinedViewerUpdate refreshSynchronization) {		
+		return convertToJavaElements(refreshSynchronization.getRefreshTargets());
+
+	}
+
+	public boolean interceptUpdate(PipelinedViewerUpdate updateSynchronization) {		
+		return convertToJavaElements(updateSynchronization.getRefreshTargets());
 	}
 
 	protected void postAdd(final Object parent, final Object element) {
