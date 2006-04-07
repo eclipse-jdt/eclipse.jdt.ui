@@ -131,7 +131,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	/** The control's tree widget */
 	private TreeViewer fTreeViewer;
 	/** The current string matcher */
-	private StringMatcher fStringMatcher;
+	protected StringMatcher fStringMatcher;
 	private ICommand fInvokingCommand;
 	private KeySequence[] fInvokingCommandKeySequences;
 
@@ -384,7 +384,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 				if (length > 0 && text.charAt(length -1 ) != '*') {
 					text= text + '*';
 				}
-				setMatcherString(text);
+				setMatcherString(text, true);
 			}
 		});
 	}
@@ -411,15 +411,18 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * </p>
 	 *
 	 * @param pattern the pattern
+	 * @param update <code>true</code> if the viewer should be updated
 	 */
-	protected void setMatcherString(String pattern) {
+	protected void setMatcherString(String pattern, boolean update) {
 		if (pattern.length() == 0) {
 			fStringMatcher= null;
 		} else {
 			boolean ignoreCase= pattern.toLowerCase().equals(pattern);
 			fStringMatcher= new StringMatcher(pattern, ignoreCase, false);
 		}
-		stringMatcherUpdated();
+		
+		if (update)
+			stringMatcherUpdated();
 	}
 
 	protected StringMatcher getMatcher() {

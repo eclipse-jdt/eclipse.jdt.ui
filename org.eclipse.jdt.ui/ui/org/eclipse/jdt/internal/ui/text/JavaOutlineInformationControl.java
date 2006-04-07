@@ -72,6 +72,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.CategoryFilterActionGroup;
 import org.eclipse.jdt.internal.ui.typehierarchy.AbstractHierarchyViewerSorter;
+import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.MemberFilter;
 
@@ -102,6 +103,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	 * @since 3.2
 	 */
 	private CategoryFilterActionGroup fCategoryFilterActionGroup;
+	private String fPattern;
 
 	private class OutlineLabelProvider extends AppearanceAwareLabelProvider {
 
@@ -483,6 +485,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 					fInnerLabelProvider.setShowDefiningType(isChecked());
 					getDialogSettings().put(STORE_SORT_BY_DEFINING_TYPE_CHECKED, isChecked());
 
+					setMatcherString(fPattern, false);
 					fOutlineViewer.refresh(true);
 
 					// reveal selection
@@ -492,6 +495,28 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 				}
 			});
 		}
+	}
+	
+	/**
+	 * String matcher that can match two patterns.
+	 * 
+	 * @since 3.2
+	 */
+	private static class OrStringMatcher extends StringMatcher {
+		
+		private StringMatcher fMatcher1;
+		private StringMatcher fMatcher2;
+		
+		private OrStringMatcher(String pattern1, String pattern2, boolean ignoreCase, boolean foo) {
+			super("", false, false); //$NON-NLS-1$
+			fMatcher1= new StringMatcher(pattern1, ignoreCase, false);
+			fMatcher2= new StringMatcher(pattern2, ignoreCase, false);
+		}
+		
+		public boolean match(String text) {
+			return fMatcher2.match(text) || fMatcher1.match(text);
+		}
+		
 	}
 
 
@@ -654,6 +679,26 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		
 		fCategoryFilterActionGroup.setInput(getInputForCategories());
 		fCategoryFilterActionGroup.contributeToViewMenu(viewMenu);	
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#setMatcherString(java.lang.String, boolean)
+	 * @since 3.2
+	 */
+	protected void setMatcherString(String pattern, boolean update) {
+		fPattern= pattern;
+		if (pattern.length() == 0 || !fSortByDefiningTypeAction.isChecked()) {
+			super.setMatcherString(pattern, update);
+			return;
+		}
+		
+		boolean ignoreCase= pattern.toLowerCase().equals(pattern);
+		String pattern2= "*" + JavaElementLabels.CONCAT_STRING + pattern; //$NON-NLS-1$
+		fStringMatcher= new OrStringMatcher(pattern, pattern2, ignoreCase, false);
+
+		if (update)
+			stringMatcherUpdated();
+		
 	}
 
 	private IJavaElement[] getInputForCategories() {
