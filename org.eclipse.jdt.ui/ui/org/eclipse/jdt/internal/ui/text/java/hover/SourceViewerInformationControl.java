@@ -136,7 +136,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		// Source viewer
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		fViewer= new JavaSourceViewer(composite, null, null, false, style, store);
-		fViewer.configure(new SimpleJavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null, false));
+		fViewer.configure(new SimpleJavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, IJavaPartitions.JAVA_PARTITIONING, false));
 		fViewer.setEditable(false);
 
 		fText= fViewer.getTextWidget();
