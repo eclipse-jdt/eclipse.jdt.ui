@@ -1692,7 +1692,7 @@ public class PackageExplorerPart extends ViewPart
 				fActionSet.getWorkingSetActionGroup().setWorkingSetModel(fWorkingSetModel);
 			}
 		}
-		ISelection selection= fViewer.getSelection();
+		IStructuredSelection selection= new StructuredSelection(((IStructuredSelection) fViewer.getSelection()).toArray());
 		Object input= fViewer.getInput();
 		boolean isRootInputChange= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).equals(input) 
 			|| (fWorkingSetModel != null && fWorkingSetModel.equals(input))
