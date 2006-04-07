@@ -5087,32 +5087,6 @@
          </actionProvider>
       </navigatorContent>
    </extension>
-   <extension
-         point="org.eclipse.ui.popupMenus">
-      <objectContribution
-            adaptable="false"
-            id="org.eclipse.jdt.ui.jar.import"
-            objectClass="org.eclipse.jdt.core.IPackageFragmentRoot">
-         <menu
-               label="%ReplaceWithMenu.label"
-               path="additions"
-               id="replaceWithMenu">
-            <separator
-                  name="replaceWithGroup">
-            </separator>
-         </menu>
-         <action
-               class="org.eclipse.jdt.internal.ui.actions.JarImportWizardAction"
-               definitionId="org.eclipse.jdt.ui.import.jar"
-               enablesFor="1"
-               icon="$nl$/icons/full/obj16/jar_obj.gif"
-               id="org.eclipse.jdt.ui.import.jar"
-               label="%JarImportAction.label"
-               menubarPath="replaceWithMenu/replaceWithGroup"
-               tooltip="%JarImportAction.description"/>
-      </objectContribution>
-   </extension>
-
 
     <!-- CommonNavigator -->
 	
