@@ -66,13 +66,14 @@ import org.eclipse.jface.util.Assert;
 				new MenuItem(fMenu, SWT.SEPARATOR);
 			}
 			
+			Action others= new HistoryListAction(fHistory);
+			others.setChecked(checkOthers);
+			addActionToMenu(fMenu, others);
+			
 			Action clearAction= fHistory.getClearAction();
 			if (clearAction != null) {
 				addActionToMenu(fMenu, clearAction);
 			}
-			Action others= new HistoryListAction(fHistory);
-			others.setChecked(checkOthers);
-			addActionToMenu(fMenu, others);
 		
 			return fMenu;
 		}

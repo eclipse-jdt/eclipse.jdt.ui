@@ -282,7 +282,6 @@ public class TestRunnerViewPart extends ViewPart {
 
 		public void configureHistoryListAction(IAction action) {
 			action.setText(JUnitMessages.TestRunnerViewPart_history);
-			JUnitPlugin.setLocalImageDescriptors(action, "history_list.gif"); //$NON-NLS-1$
 		}
 
 		public void configureHistoryDropDownAction(IAction action) {
@@ -394,7 +393,7 @@ public class TestRunnerViewPart extends ViewPart {
 	
 	private class TestSessionListener implements ITestSessionListener {
 		public void sessionStarted(){
-			fTestViewer.registerViewerRefresh();
+			fTestViewer.registerViewersRefresh();
 			fShowOnErrorOnly= getShowOnErrorOnly();
 			
 			startUpdateJobs();
@@ -419,10 +418,10 @@ public class TestRunnerViewPart extends ViewPart {
 						return;	
 					fStopAction.setEnabled(lastLaunchIsKeptAlive());
 					fRerunLastFailedFirstAction.setEnabled(hasErrorsOrFailures());
+					processChangesInUI();
 					if (hasErrorsOrFailures()) {
 						selectFirstFailure();
 					}
-					updateViewIcon();
 					if (fDirtyListener == null) {
 						fDirtyListener= new DirtyListener();
 						JavaCore.addElementChangedListener(fDirtyListener);
@@ -470,6 +469,7 @@ public class TestRunnerViewPart extends ViewPart {
 		    if (fShowOnErrorOnly && (getErrorsPlusFailures() == 1)) 
 		        postShowTestResultsView();
 		    
+		    //TODO:
 		    // [Bug 35590] JUnit window doesn't report errors from junit.extensions.TestSetup [JUnit]
 		    // when a failure occurs in test setup then no test is running
 		    // to update the views we artificially signal the end of a test run
@@ -490,7 +490,7 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 		
 		public void testAdded(TestElement testElement) {
-			fTestViewer.registerViewerRefresh(); //TODO: performance: would only need to refresh parent of added element
+			fTestViewer.registerTestAdded(testElement);
 		}
 	}
 	
@@ -535,7 +535,6 @@ public class TestRunnerViewPart extends ViewPart {
 	private class ClearAction extends Action {
 		public ClearAction() {
 			setText(JUnitMessages.TestRunnerViewPart_clear_history_label);
-			JUnitPlugin.setLocalImageDescriptors(this, "removea_exc.gif"); //$NON-NLS-1$
 			
 			boolean enabled= false;
 			List testRunSessions= JUnitPlugin.getModel().getTestRunSessions();
@@ -1070,7 +1069,7 @@ action enablement
 		}
 		
 		fTestRunSession= testRunSession;
-		fTestViewer.setActiveSession(testRunSession);
+		fTestViewer.registerActiveSession(testRunSession);
 		
 		if (testRunSession == null) {
 			setTitleToolTip(null);
@@ -1254,7 +1253,7 @@ action enablement
 		});
 		top.setTopLeft(empty); // makes ViewForm draw the horizontal separator line ...
 		fTestViewer= new TestViewer(top, fClipboard, this);
-		top.setContent(fTestViewer.getTreeViewer().getTree());
+		top.setContent(fTestViewer.getTestViewerControl());
 		
 		ViewForm bottom= new ViewForm(fSashForm, SWT.NONE);
 		
@@ -1278,7 +1277,7 @@ action enablement
 	
 	public void setFocus() {
 		if (fTestViewer != null)
-			fTestViewer.getTreeViewer().getTree().setFocus();
+			fTestViewer.getTestViewerControl().setFocus();
 	}
 	
 	public void createPartControl(Composite parent) {	

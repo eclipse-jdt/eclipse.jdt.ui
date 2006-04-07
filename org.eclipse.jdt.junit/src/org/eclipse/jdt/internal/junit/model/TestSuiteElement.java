@@ -45,13 +45,15 @@ public class TestSuiteElement extends TestElement {
 				return Status.RUNNING;
 			if (childStatus == Status.NOT_RUN)
 				hasNotRun= true;
-			else if (childStatus.getPriority() < highest.getPriority())
-				highest= childStatus;
+			else 
+				highest= Status.getCombinedStatus(childStatus, highest);
 		}
-		if (hasNotRun && highest != Status.NOT_RUN)
+		if (hasNotRun && highest != Status.NOT_RUN) {
+			
 			return Status.RUNNING;
-		else
+		} else {
 			return highest;
+		}
 	}
 
 	public String toString() {

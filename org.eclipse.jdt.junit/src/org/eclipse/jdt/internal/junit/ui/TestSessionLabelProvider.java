@@ -14,7 +14,6 @@ package org.eclipse.jdt.internal.junit.ui;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
@@ -25,11 +24,11 @@ import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 public class TestSessionLabelProvider extends LabelProvider {
 	
 	private final TestRunnerViewPart fTestRunnerPart;
-	private int fLayoutMode;
+	private final int fLayoutMode;
 	
-	public TestSessionLabelProvider(TestRunnerViewPart testRunnerPart) {
+	public TestSessionLabelProvider(TestRunnerViewPart testRunnerPart, int layoutMode) {
 		fTestRunnerPart= testRunnerPart;
-		fLayoutMode= TestRunnerViewPart.LAYOUT_HIERARCHICAL;
+		fLayoutMode= layoutMode;
 	}
 	
 	public String getText(Object element) {
@@ -70,7 +69,7 @@ public class TestSessionLabelProvider extends LabelProvider {
 			Status status= ((TestSuiteElement) element).getStatus();
 			if (status == Status.NOT_RUN)
 				return fTestRunnerPart.fSuiteIcon;
-			else if (status == Status.RUNNING)
+			else if (status == Status.RUNNING || status == Status.RUNNING_ERROR || status == Status.RUNNING_FAILURE)
 				return fTestRunnerPart.fSuiteRunningIcon;
 			else if (status == Status.OK)
 				return fTestRunnerPart.fSuiteOkIcon;
@@ -83,13 +82,6 @@ public class TestSessionLabelProvider extends LabelProvider {
 		
 		} else {
 			throw new IllegalArgumentException(String.valueOf(element));
-		}
-	}
-
-	public void setLayout(int layoutMode) {
-		if (layoutMode != fLayoutMode) {
-			fLayoutMode= layoutMode;
-			fireLabelProviderChanged(new LabelProviderChangedEvent(this));
 		}
 	}
 }
