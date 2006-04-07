@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -340,25 +341,25 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJ_OVERRIDES= createUnManaged(T_OBJ, "over_co.gif");  					//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJ_IMPLEMENTS= createUnManaged(T_OBJ, "implm_co.gif");  				//$NON-NLS-1$
 	
-	public static final ImageDescriptor DESC_OVR_STATIC= createUnManaged(T_OVR, "static_co.gif"); 						//$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_FINAL= createUnManaged(T_OVR, "final_co.gif"); 						//$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_ABSTRACT= createUnManaged(T_OVR, "abstract_co.gif"); 					//$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_SYNCH= createUnManaged(T_OVR, "synch_co.gif"); 						//$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_RUN= createUnManaged(T_OVR, "run_co.gif"); 							//$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_WARNING= createUnManaged(T_OVR, "warning_co.gif"); 					//$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_ERROR= createUnManaged(T_OVR, "error_co.gif"); 						//$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_OVERRIDES= createUnManaged(T_OVR, "over_co.gif");  					//$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_IMPLEMENTS= createUnManaged(T_OVR, "implm_co.gif");  				//$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_SYNCH_AND_OVERRIDES= createUnManaged(T_OVR, "sync_over.gif");  	//$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_SYNCH_AND_IMPLEMENTS= createUnManaged(T_OVR, "sync_impl.gif");   //$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_CONSTRUCTOR= createUnManaged(T_OVR, "constr_ovr.gif");			//$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_DEPRECATED= createUnManaged(T_OVR, "deprecated.gif");			//$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_FOCUS= createUnManaged(T_OVR, "focus_ovr.gif"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_ANNOTATION= createUnManaged(T_OVR, "annotation_tsk.gif"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_ENUM= createUnManaged(T_OVR, "enum_tsk.gif"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_INTERFACE= createUnManaged(T_OVR, "interface_tsk.gif"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_CLASS= createUnManaged(T_OVR, "class_tsk.gif"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_ABSTRACT_CLASS= createUnManaged(T_OVR, "class_abs_tsk.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_STATIC= createUnManagedCached(T_OVR, "static_co.gif"); 						//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_FINAL= createUnManagedCached(T_OVR, "final_co.gif"); 						//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_ABSTRACT= createUnManagedCached(T_OVR, "abstract_co.gif"); 					//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_SYNCH= createUnManagedCached(T_OVR, "synch_co.gif"); 						//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_RUN= createUnManagedCached(T_OVR, "run_co.gif"); 							//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_WARNING= createUnManagedCached(T_OVR, "warning_co.gif"); 					//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_ERROR= createUnManagedCached(T_OVR, "error_co.gif"); 						//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_OVERRIDES= createUnManagedCached(T_OVR, "over_co.gif");  					//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_IMPLEMENTS= createUnManagedCached(T_OVR, "implm_co.gif");  				//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_SYNCH_AND_OVERRIDES= createUnManagedCached(T_OVR, "sync_over.gif");  	//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_SYNCH_AND_IMPLEMENTS= createUnManagedCached(T_OVR, "sync_impl.gif");   //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_CONSTRUCTOR= createUnManagedCached(T_OVR, "constr_ovr.gif");			//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_DEPRECATED= createUnManagedCached(T_OVR, "deprecated.gif");			//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_FOCUS= createUnManagedCached(T_OVR, "focus_ovr.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_ANNOTATION= createUnManagedCached(T_OVR, "annotation_tsk.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_ENUM= createUnManagedCached(T_OVR, "enum_tsk.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_INTERFACE= createUnManagedCached(T_OVR, "interface_tsk.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_CLASS= createUnManagedCached(T_OVR, "class_tsk.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_ABSTRACT_CLASS= createUnManagedCached(T_OVR, "class_abs_tsk.gif"); //$NON-NLS-1$
 
     // Call Hierarchy
     public static final ImageDescriptor DESC_OVR_RECURSIVE= createUnManaged(T_OVR, "recursive_co.gif");              //$NON-NLS-1$
@@ -430,6 +431,22 @@ public class JavaPluginImages {
 		createManagedFromKey(T_OBJ, IMG_CORRECTION_REMOVE);
 		createManagedFromKey(T_OBJ, IMG_CORRECTION_ADD);
 		createManagedFromKey(T_OBJ, IMG_CORRECTION_CAST);
+	}
+	
+	private static final class CachedImageDescriptor extends ImageDescriptor {
+		private ImageDescriptor fDescriptor;
+		private ImageData fData;
+
+		public CachedImageDescriptor(ImageDescriptor descriptor) {
+			fDescriptor = descriptor;
+		}
+
+		public ImageData getImageData() {
+			if (fData == null) {
+				fData= fDescriptor.getImageData();
+			}
+			return fData;
+		}
 	}
 
 	/**
@@ -546,6 +563,14 @@ public class JavaPluginImages {
 	 */
 	private static ImageDescriptor createUnManaged(String prefix, String name) {
 		return create(prefix, name, true);
+	}
+	
+	/*
+	 * Creates an image descriptor for the given prefix and name in the JDT UI bundle and let tye descriptor cache the image data.
+	 * If no image could be found, the 'missing image descriptor' is returned.
+	 */
+	private static ImageDescriptor createUnManagedCached(String prefix, String name) {
+		return new CachedImageDescriptor(create(prefix, name, true));
 	}
 		
 	/*
