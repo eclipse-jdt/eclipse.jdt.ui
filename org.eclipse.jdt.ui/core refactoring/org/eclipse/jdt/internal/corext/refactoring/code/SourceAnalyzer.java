@@ -266,6 +266,18 @@ class SourceAnalyzer  {
 							fImplicitReceivers.add(node);
 						}
 					}
+				} else if (!vb.isField()) {
+					// we have a local. Check if it is a parameter.
+					ParameterData data= (ParameterData)fParameters.get(binding);
+					if (data != null) {
+						ASTNode parent= node.getParent();
+						if (parent instanceof Expression) {
+							int precedence= OperatorPrecedence.getValue((Expression)parent);
+							if (precedence != -1) {
+								data.setOperatorPrecedence(node, precedence);
+							}
+						}
+					}
 				}
 			}
 			return true;

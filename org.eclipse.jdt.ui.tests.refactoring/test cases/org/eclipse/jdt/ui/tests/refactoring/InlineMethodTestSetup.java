@@ -49,6 +49,7 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 	private IPackageFragment fEnum;
 	private IPackageFragment fGeneric;
 	private IPackageFragment fBinary;
+	private IPackageFragment fOperator;
 
 	public InlineMethodTestSetup(Test test) {
 		super(test);
@@ -72,6 +73,7 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 		fEnum= root.createPackageFragment("enum_in", true, null);
 		fGeneric= root.createPackageFragment("generic_in", true, null);
 		fBinary= root.createPackageFragment("binary_in", true, null);
+		fOperator= root.createPackageFragment("operator_in", true, null);
 		
 		IJavaProject javaProject= getProject();
 		IProject project= javaProject.getProject();
@@ -220,5 +222,9 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 	
 	public IPackageFragment getBinaryPackage() {
 		return fBinary;
+	}
+	
+	public IPackageFragment getOperatorPackage() {
+		return fOperator;
 	}
 }

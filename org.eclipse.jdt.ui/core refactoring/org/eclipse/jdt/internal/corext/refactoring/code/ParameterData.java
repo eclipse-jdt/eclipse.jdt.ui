@@ -26,12 +26,14 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 	private SingleVariableDeclaration fDeclaration;
 	private int fAccessMode;
 	private List fReferences;
+	private int fOperatorPrecedence;
 
 	public ParameterData(SingleVariableDeclaration decl) {
 		super();
 		fDeclaration= decl;
 		fAccessMode= FlowInfo.UNUSED;
 		fReferences= new ArrayList(2);
+		fOperatorPrecedence= -1;
 	}
 
 	public String getName() {
@@ -53,7 +55,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 	public void setAccessMode(int mode) {
 		fAccessMode= mode;
 	}
-
+	
 	public boolean isUnused() {
 		return fAccessMode == FlowInfo.UNUSED;
 	}
@@ -83,4 +85,22 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 			return false;
 		return true;
 	}
+
+	public void setOperatorPrecedence(ASTNode node, int precedence) {
+		setOperatorPrecedence(precedence);
+	}
+	
+	private void setOperatorPrecedence(int newValue) {
+		if (newValue == -1) {
+			fOperatorPrecedence= newValue;
+		} else if (fOperatorPrecedence == -1) {
+			fOperatorPrecedence= newValue;
+		} else {
+			fOperatorPrecedence= Math.min(fOperatorPrecedence, newValue);
+		}
+	}
+
+	public int getOperatorPrecedence() {
+		return fOperatorPrecedence;
+	}	
 }

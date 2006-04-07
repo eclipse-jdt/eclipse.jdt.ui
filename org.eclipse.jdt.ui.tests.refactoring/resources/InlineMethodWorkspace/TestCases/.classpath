@@ -2,6 +2,6 @@
 <classpath>
 	<classpathentry excluding="binary/|binary_src/" kind="src" path=""/>
 	<classpathentry output="binary" kind="src" path="binary_src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/executionEnvironments/J2SE-1.5"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

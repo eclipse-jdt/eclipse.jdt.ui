@@ -498,7 +498,7 @@ public class CallInliner {
 			if (canInline(expression, parameter) && !canNotInline.contains(expression)) {
 				realArguments[i] = getContent(expression);
 				// fixes bugs #35905, #38471
-				if(expression instanceof CastExpression || expression instanceof ArrayCreation) {
+				if (argumentNeedsParenthesis(expression, parameter)) {
 					realArguments[i] = "(" + realArguments[i] + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			} else {
@@ -550,6 +550,17 @@ public class CallInliner {
 			return !fTypeEnvironment.create(argument).canAssignTo(fTypeEnvironment.create(parameter));
 		}
 		return true;
+	}
+	
+	private boolean argumentNeedsParenthesis(Expression expression, ParameterData param) {
+		if (expression instanceof CastExpression || expression instanceof ArrayCreation)
+			return true;
+		int argPrecedence= OperatorPrecedence.getValue(expression);
+		int paramPrecedence= param.getOperatorPrecedence();
+		if (argPrecedence != -1 && paramPrecedence != -1)
+			return argPrecedence < paramPrecedence;
+		
+		return false;
 	}
 	
 	private void computeReceiver() throws BadLocationException {
