@@ -875,6 +875,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTestInlineCall(fgTestSetup.getBinaryPackage(), getName(), INVALID_SELECTION, null);
 	}
 
+	public void test_133575() throws Exception { // uses classes.BinEnum
+		performTestInlineCall(fgTestSetup.getBinaryPackage(), getName(), COMPARE_WITH_OUTPUT, "binary_out");
+	}
+	
 	/* *********************** Operator Tests ******************************* */
 	
 	private void performOperatorTest() throws Exception {
