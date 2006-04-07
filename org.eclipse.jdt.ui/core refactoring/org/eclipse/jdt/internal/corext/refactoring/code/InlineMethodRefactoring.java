@@ -426,7 +426,7 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 				}				
 				methodDeclarationAstRoot= new RefactoringASTParser(AST.JLS3).parse(classFile, true);
 			}
-			ASTNode node= methodDeclarationAstRoot.findDeclaringNode(methodBinding.getKey());
+			ASTNode node= methodDeclarationAstRoot.findDeclaringNode(methodBinding.getMethodDeclaration().getKey());
 			if (node instanceof MethodDeclaration) {
 				return new SourceProvider(methodDeclarationAstRoot.getJavaElement(), (MethodDeclaration) node);
 			}
