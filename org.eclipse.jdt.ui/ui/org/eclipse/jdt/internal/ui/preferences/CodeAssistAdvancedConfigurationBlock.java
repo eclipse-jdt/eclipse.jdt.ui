@@ -44,10 +44,13 @@ import org.eclipse.jface.bindings.TriggerSequence;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.jface.text.Assert;
 
@@ -89,20 +92,62 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		};
 	}
 
-	private final class ComputerLabelProvider extends LabelProvider implements ITableLabelProvider {
+	private final class DefaultTableLabelProvider extends LabelProvider implements ITableLabelProvider {
 
 		/*
 		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
 		 */
 		public Image getColumnImage(Object element, int columnIndex) {
-			return ((ModelElement) element).getColumnImage(columnIndex);
+			if (columnIndex == 0)
+				return ((ModelElement) element).getImage();
+			return null;
 		}
 
 		/*
 		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
 		 */
 		public String getColumnText(Object element, int columnIndex) {
-			return ((ModelElement) element).getColumnLabel(columnIndex);
+			switch (columnIndex) {
+	            case 0:
+	            	return ((ModelElement) element).getName();
+	            case 1:
+	            	return ((ModelElement) element).getKeybindingAsString();
+	            default:
+	            	Assert.isTrue(false);
+	            	return null;
+            }
+		}
+		
+		/*
+		 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
+		 */
+		public String getText(Object element) {
+		    return getColumnText(element, 0); // needed to make the sorter work
+		}
+	}
+
+	private final class SeparateTableLabelProvider extends LabelProvider implements ITableLabelProvider {
+		
+		/*
+		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
+		 */
+		public Image getColumnImage(Object element, int columnIndex) {
+			if (columnIndex == 0)
+				return ((ModelElement) element).getImage();
+			return null;
+		}
+		
+		/*
+		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
+		 */
+		public String getColumnText(Object element, int columnIndex) {
+			switch (columnIndex) {
+				case 0:
+					return ((ModelElement) element).getName();
+				default:
+					Assert.isTrue(false);
+				return null;
+			}
 		}
 	}
 
@@ -232,33 +277,17 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 			fParam= type;
 			fPreferenceModel= model;
 		}
-		Image getColumnImage(int column) {
-			if (column == 0)
-				return CodeAssistAdvancedConfigurationBlock.this.getImage(fCategory.getImageDescriptor());
-			return null;
+		Image getImage() {
+			return CodeAssistAdvancedConfigurationBlock.this.getImage(fCategory.getImageDescriptor());
 		}
-		String getColumnLabel(int columnIndex) {
-			switch (columnIndex) {
-				case 0:
-					return fCategory.getName().replaceAll("&", ""); //$NON-NLS-1$ //$NON-NLS-2$
-				case 1:
-					if (isInDefaultCategory())
-						if (isSeparateCommand())
-							return PreferencesMessages.CodeAssistAdvancedConfigurationBlock_mode_default_and_separate;
-						else
-							return PreferencesMessages.CodeAssistAdvancedConfigurationBlock_mode_default;
-					else
-						if (isSeparateCommand())
-							return PreferencesMessages.CodeAssistAdvancedConfigurationBlock_mode_separate;
-						else
-							return PreferencesMessages.CodeAssistAdvancedConfigurationBlock_mode_none;
-				case 2:
-					final Parameterization[] params= { new Parameterization(fParam, fCategory.getId()) };
-					final ParameterizedCommand pCmd= new ParameterizedCommand(fCommand, params);
-					String key= getKeyboardShortcut(pCmd);
-					return key;
-			}
-			return null;
+		String getName() {
+			return fCategory.getName().replaceAll("&", ""); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		String getKeybindingAsString() {
+			final Parameterization[] params= { new Parameterization(fParam, fCategory.getId()) };
+			final ParameterizedCommand pCmd= new ParameterizedCommand(fCommand, params);
+			String key= getKeyboardShortcut(pCmd);
+			return key;
 		}
 		boolean isInDefaultCategory() {
 			return fPreferenceModel.readInclusionPreference(fCategory);
@@ -306,11 +335,10 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 	private final PreferenceModel fModel;
 	private final Map fImages= new HashMap();
 
-	private TableViewer fViewer;
+	private CheckboxTableViewer fDefaultViewer;
+	private CheckboxTableViewer fSeparateViewer;
 	private Button fUpButton;
 	private Button fDownButton;
-	private Button fDefaultButton;
-	private Button fSeparateButton;
 	
 	CodeAssistAdvancedConfigurationBlock(IStatusChangeListener statusListener, IWorkbenchPreferenceContainer container) {
 		super(statusListener, null, getAllKeys(), container);
@@ -328,127 +356,178 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		scrolled.setExpandVertical(true);
 		
 		Composite composite= new Composite(scrolled, SWT.NONE);
-		GridLayout layout= new GridLayout(2, false);
+		int columns= 2;
+		GridLayout layout= new GridLayout(columns, false);
 		composite.setLayout(layout);
 		
-		final ICommandService commandSvc= (ICommandService) PlatformUI.getWorkbench().getAdapter(ICommandService.class);
-		final Command command= commandSvc.getCommand(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
-		ParameterizedCommand pCmd= new ParameterizedCommand(command, null);
-		String key= getKeyboardShortcut(pCmd);
-		if (key == null)
-			key= PreferencesMessages.CodeAssistAdvancedConfigurationBlock_no_shortcut;
-
-		PixelConverter pixelConverter= new PixelConverter(parent);
-		int width= pixelConverter.convertWidthInCharsToPixels(40);
 		
-		Label label= new Label(composite, SWT.NONE | SWT.WRAP);
-		label.setText(Messages.format(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_computer_description, new Object[] { key }));
-		GridData gd= new GridData(GridData.FILL, GridData.FILL, false, false, 2, 1);
-		gd.widthHint= width;
-		label.setLayoutData(gd);
+		createDefaultLabel(composite, columns);
+		createDefaultViewer(composite, columns);
+		createKeysLink(composite, columns);
 		
-		createControls(composite);
+		createFiller(composite, columns);
 		
-		Link link= new Link(composite, SWT.NONE | SWT.WRAP);
-		link.setText(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_computer_link);
-		link.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				PreferencesUtil.createPreferenceDialogOn(getShell(), e.text, null, null);
-			}
-		});
-		// limit the size of the Link as it would take all it can get
-		gd= new GridData(GridData.FILL, GridData.FILL, false, false, 2, 1);
-		gd.widthHint= width;
-		link.setLayoutData(gd);
+		createSeparateLabel(composite, columns);
+        createSeparateSection(composite);
+        
+        createFiller(composite, columns);
+		
+		createParameterTimeoutControl(composite, columns);
 		
 		updateControls();
 		if (fModel.elements.size() > 0) {
-			fViewer.getTable().select(0);
+			fDefaultViewer.getTable().select(0);
+			fSeparateViewer.getTable().select(0);
 			handleTableSelection();
 		}
-
-		createParameterTimeoutControl(composite);
 		
 		scrolled.setContent(composite);
 		scrolled.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		return scrolled;
 	}
 	
-	private void createParameterTimeoutControl(Composite composite) {
-		Label filler= new Label(composite, SWT.NONE);
-		filler.setVisible(false);
-		filler.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
-		
-		Composite timeoutComposite= new Composite(composite, SWT.NONE);
-		GridLayout layout= new GridLayout(4, false);
-		layout.marginWidth= 0;
-		layout.marginHeight= 0;
-		timeoutComposite.setLayout(layout);
-		GridData gd= new GridData(GridData.FILL, GridData.FILL, false, false, 2, 1);
-		timeoutComposite.setLayoutData(gd);
-		
+	private void createDefaultLabel(Composite composite, int h_span) {
+	    final ICommandService commandSvc= (ICommandService) PlatformUI.getWorkbench().getAdapter(ICommandService.class);
+		final Command command= commandSvc.getCommand(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+		ParameterizedCommand pCmd= new ParameterizedCommand(command, null);
+		String key= getKeyboardShortcut(pCmd);
+		if (key == null)
+			key= PreferencesMessages.CodeAssistAdvancedConfigurationBlock_no_shortcut;
+
 		PixelConverter pixelConverter= new PixelConverter(composite);
-		String str= PreferencesMessages.CodeAssistAdvancedConfigurationBlock_parameterNameFromAttachedJavadoc_timeout; 
-		addTextField(timeoutComposite, str, PREF_CODEASSIST_TIMEOUT_FOR_PARAMETER_NAME_FROM_ATTACHED_JAVADOC, 0, pixelConverter.convertWidthInCharsToPixels(7));
+		int width= pixelConverter.convertWidthInCharsToPixels(40);
 		
-		Label ms= new Label(timeoutComposite, SWT.NONE);
-		gd= new GridData();
-		ms.setLayoutData(gd);
-		ms.setText(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_parameterNameFromAttachedJavadoc_timeout_ms);
+		Label label= new Label(composite, SWT.NONE | SWT.WRAP);
+		label.setText(Messages.format(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_page_description, new Object[] { key }));
+		GridData gd= new GridData(GridData.FILL, GridData.FILL, true, false, h_span, 1);
+		gd.widthHint= width;
+		label.setLayoutData(gd);
 		
-	}
+		createFiller(composite, h_span);
 
-	private void createControls(Composite parent) {
-		Composite composite= new Composite(parent, SWT.NONE);
-		GridLayout layout= new GridLayout(2, false);
+		label= new Label(composite, SWT.NONE | SWT.WRAP);
+		label.setText(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_default_table_description);
+		gd= new GridData(GridData.FILL, GridData.FILL, true, false, h_span, 1);
+		gd.widthHint= width;
+		label.setLayoutData(gd);
+    }
 
-		composite.setLayout(layout);
-		
-		createViewer(composite);
-		createButtonList(composite);
-	}
-
-	private void createViewer(Composite composite) {
-		fViewer= new TableViewer(composite, SWT.SINGLE | SWT.BORDER);
-		Table table= fViewer.getTable();
+	private void createDefaultViewer(Composite composite, int h_span) {
+		fDefaultViewer= CheckboxTableViewer.newCheckList(composite, SWT.SINGLE | SWT.BORDER);
+		Table table= fDefaultViewer.getTable();
 		table.setHeaderVisible(true);
 		table.setLinesVisible(false);
+		table.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false, h_span, 1));
 		
 		TableColumn nameColumn= new TableColumn(table, SWT.NONE);
-		nameColumn.setText(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_column_label_category);
+		nameColumn.setText(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_default_table_category_column_title);
 		nameColumn.setResizable(false);
-		TableColumn modeColumn= new TableColumn(table, SWT.NONE);
-		modeColumn.setText(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_column_label_mode);
-		modeColumn.setResizable(false);
 		TableColumn keyColumn= new TableColumn(table, SWT.NONE);
-		keyColumn.setText(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_column_label_keybinding);
+		keyColumn.setText(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_default_table_keybinding_column_title);
 		keyColumn.setResizable(false);
 		
-		fViewer.setContentProvider(new ArrayContentProvider());
+		fDefaultViewer.addCheckStateListener(new ICheckStateListener() {
+			public void checkStateChanged(CheckStateChangedEvent event) {
+				boolean checked= event.getChecked();
+				ModelElement element= (ModelElement) event.getElement();
+				element.setInDefaultCategory(checked);
+			}
+		});
 		
-		ComputerLabelProvider labelProvider= new ComputerLabelProvider();
-		fViewer.setLabelProvider(labelProvider);
-		fViewer.setInput(fModel.elements);
+		fDefaultViewer.setContentProvider(new ArrayContentProvider());
 		
-		final int ICON_AND_CHECKBOX_WITH= 20;
+		DefaultTableLabelProvider labelProvider= new DefaultTableLabelProvider();
+		fDefaultViewer.setLabelProvider(labelProvider);
+		fDefaultViewer.setInput(fModel.elements);
+		fDefaultViewer.setSorter(new ViewerSorter()); // sort alphabetically
+		
+		final int ICON_AND_CHECKBOX_WITH= 50;
 		final int HEADER_MARGIN= 20;
 		int minNameWidth= computeWidth(table, nameColumn.getText()) + HEADER_MARGIN;
-		int minModeWidth= computeWidth(table, modeColumn.getText()) + HEADER_MARGIN;
 		int minKeyWidth= computeWidth(table, keyColumn.getText()) + HEADER_MARGIN;
 		for (int i= 0; i < fModel.elements.size(); i++) {
 			minNameWidth= Math.max(minNameWidth, computeWidth(table, labelProvider.getColumnText(fModel.elements.get(i), 0)) + ICON_AND_CHECKBOX_WITH);
-			minKeyWidth= Math.max(minKeyWidth, computeWidth(table, labelProvider.getColumnText(fModel.elements.get(i), 2)));
+			minKeyWidth= Math.max(minKeyWidth, computeWidth(table, labelProvider.getColumnText(fModel.elements.get(i), 1)));
 		}
 		
-		final String[] values= { PreferencesMessages.CodeAssistAdvancedConfigurationBlock_mode_none, PreferencesMessages.CodeAssistAdvancedConfigurationBlock_mode_separate, PreferencesMessages.CodeAssistAdvancedConfigurationBlock_mode_default, PreferencesMessages.CodeAssistAdvancedConfigurationBlock_mode_default_and_separate };
-		for (int j= 0; j < values.length; j++) {
-			minModeWidth= Math.max(minModeWidth, computeWidth(table, values[j]));
-        }
-
 		nameColumn.setWidth(minNameWidth);
-		modeColumn.setWidth(minModeWidth);
 		keyColumn.setWidth(minKeyWidth);
+	}
+	
+	private void createKeysLink(Composite composite, int h_span) {
+	    Link link= new Link(composite, SWT.NONE | SWT.WRAP);
+		link.setText(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_key_binding_hint);
+		link.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				PreferencesUtil.createPreferenceDialogOn(getShell(), e.text, null, null);
+			}
+		});
+		
+		PixelConverter pixelConverter= new PixelConverter(composite);
+		int width= pixelConverter.convertWidthInCharsToPixels(40);
 
+		// limit the size of the Link as it would take all it can get
+		GridData gd= new GridData(GridData.FILL, GridData.FILL, false, false, h_span, 1);
+		gd.widthHint= width;
+		link.setLayoutData(gd);
+    }
+
+	private void createFiller(Composite composite, int h_span) {
+	    Label filler= new Label(composite, SWT.NONE);
+		filler.setVisible(false);
+		filler.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, h_span, 1));
+    }
+
+	private void createSeparateLabel(Composite composite, int h_span) {
+		PixelConverter pixelConverter= new PixelConverter(composite);
+		int width= pixelConverter.convertWidthInCharsToPixels(40);
+		
+		Label label= new Label(composite, SWT.NONE | SWT.WRAP);
+		label.setText(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_separate_table_description);
+		GridData gd= new GridData(GridData.FILL, GridData.FILL, false, false, h_span, 1);
+		gd.widthHint= width;
+		label.setLayoutData(gd);
+	}
+	
+	private void createSeparateSection(Composite composite) {
+		createSeparateViewer(composite);
+		createButtonList(composite);
+	}
+
+	private void createSeparateViewer(Composite composite) {
+		fSeparateViewer= CheckboxTableViewer.newCheckList(composite, SWT.SINGLE | SWT.BORDER);
+		Table table= fSeparateViewer.getTable();
+		table.setHeaderVisible(false);
+		table.setLinesVisible(false);
+		table.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, true, false, 1, 1));
+		
+		TableColumn nameColumn= new TableColumn(table, SWT.NONE);
+		nameColumn.setText(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_separate_table_category_column_title);
+		nameColumn.setResizable(false);
+		
+		fSeparateViewer.setContentProvider(new ArrayContentProvider());
+		
+		ITableLabelProvider labelProvider= new SeparateTableLabelProvider();
+		fSeparateViewer.setLabelProvider(labelProvider);
+		fSeparateViewer.setInput(fModel.elements);
+		
+		final int ICON_AND_CHECKBOX_WITH= 50;
+		final int HEADER_MARGIN= 20;
+		int minNameWidth= computeWidth(table, nameColumn.getText()) + HEADER_MARGIN;
+		for (int i= 0; i < fModel.elements.size(); i++) {
+			minNameWidth= Math.max(minNameWidth, computeWidth(table, labelProvider.getColumnText(fModel.elements.get(i), 0)) + ICON_AND_CHECKBOX_WITH);
+		}
+		
+		nameColumn.setWidth(minNameWidth);
+		
+		fSeparateViewer.addCheckStateListener(new ICheckStateListener() {
+			public void checkStateChanged(CheckStateChangedEvent event) {
+				boolean checked= event.getChecked();
+				ModelElement element= (ModelElement) event.getElement();
+				element.setSeparateCommand(checked);
+			}
+		});
+		
 		table.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				handleTableSelection();
@@ -456,7 +535,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		});
 		
 	}
-
+	
 	private void createButtonList(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false));
@@ -473,7 +552,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
         		int index= getSelectionIndex();
         		if (index != -1) {
         			((ModelElement) fModel.elements.get(index)).moveUp();
-        			fViewer.refresh();
+        			fSeparateViewer.refresh();
         			handleTableSelection();
         		}
         	}		
@@ -488,39 +567,32 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
         		int index= getSelectionIndex();
         		if (index != -1) {
         			((ModelElement) fModel.elements.get(index)).moveDown();
-        			fViewer.refresh();
+        			fSeparateViewer.refresh();
         			handleTableSelection();
         		}
         	}		
         });
         fDownButton.setLayoutData(new GridData());
         SWTUtil.setButtonDimensionHint(fDownButton);
+	}
+
+	private void createParameterTimeoutControl(Composite composite, int h_span) {
+		Composite timeoutComposite= new Composite(composite, SWT.NONE);
+		GridLayout layout= new GridLayout(4, false);
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
+		timeoutComposite.setLayout(layout);
+		GridData gd= new GridData(GridData.FILL, GridData.FILL, true, false, h_span, 1);
+		timeoutComposite.setLayoutData(gd);
 		
-		fDefaultButton= new Button(composite, SWT.CHECK);
-		fDefaultButton.setText(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_mode_default_label);
-		fDefaultButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-        		int index= getSelectionIndex();
-        		if (index != -1) {
-        			((ModelElement) fModel.elements.get(index)).setInDefaultCategory(fDefaultButton.getSelection());
-        			fViewer.refresh();
-        			handleTableSelection();
-        		}
-			}
-		});
+		PixelConverter pixelConverter= new PixelConverter(composite);
+		String str= PreferencesMessages.CodeAssistAdvancedConfigurationBlock_parameterNameFromAttachedJavadoc_timeout; 
+		addTextField(timeoutComposite, str, PREF_CODEASSIST_TIMEOUT_FOR_PARAMETER_NAME_FROM_ATTACHED_JAVADOC, 0, pixelConverter.convertWidthInCharsToPixels(7));
 		
-		fSeparateButton= new Button(composite, SWT.CHECK);
-		fSeparateButton.setText(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_mode_separate_label);
-		fSeparateButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				int index= getSelectionIndex();
-				if (index != -1) {
-					((ModelElement) fModel.elements.get(index)).setSeparateCommand(fSeparateButton.getSelection());
-					fViewer.refresh();
-					handleTableSelection();
-				}
-			}
-		});
+		Label ms= new Label(timeoutComposite, SWT.NONE);
+		gd= new GridData();
+		ms.setLayoutData(gd);
+		ms.setText(PreferencesMessages.CodeAssistAdvancedConfigurationBlock_parameterNameFromAttachedJavadoc_timeout_ms);
 		
 	}
 
@@ -530,26 +602,18 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 			int index= getSelectionIndex();
 			fUpButton.setEnabled(index > 0);
 			fDownButton.setEnabled(index < fModel.elements.size() - 1);
-			fDefaultButton.setEnabled(index != -1);
-			fDefaultButton.setSelection(item.isInDefaultCategory());
-			fSeparateButton.setEnabled(index != -1);
-			fSeparateButton.setSelection(item.isSeparateCommand());
 		} else {
 			fUpButton.setEnabled(false);
 			fDownButton.setEnabled(false);
-			fDefaultButton.setEnabled(false);
-			fDefaultButton.setSelection(false);
-			fSeparateButton.setEnabled(false);
-			fSeparateButton.setSelection(false);
 		}
 	}
 	
 	private ModelElement getSelectedItem() {
-		return (ModelElement) ((IStructuredSelection) fViewer.getSelection()).getFirstElement();
+		return (ModelElement) ((IStructuredSelection) fSeparateViewer.getSelection()).getFirstElement();
 	}
 	
 	private int getSelectionIndex() {
-		return fViewer.getTable().getSelectionIndex();
+		return fSeparateViewer.getTable().getSelectionIndex();
 	}
 	
 	/*
@@ -559,10 +623,29 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		super.updateControls();
 
 		fModel.update();
-		fViewer.refresh();
+		updateCheckedState();
+		fDefaultViewer.refresh();
+		fSeparateViewer.refresh();
 		handleTableSelection();
 	}
 	
+	private void updateCheckedState() {
+		final int size= fModel.elements.size();
+		List defaultChecked= new ArrayList(size);
+		List separateChecked= new ArrayList(size);
+
+		for (Iterator it= fModel.elements.iterator(); it.hasNext();) {
+			ModelElement element= (ModelElement) it.next();
+			if (element.isInDefaultCategory())
+				defaultChecked.add(element);
+			if (element.isSeparateCommand())
+				separateChecked.add(element);
+		}
+
+		fDefaultViewer.setCheckedElements(defaultChecked.toArray(new Object[defaultChecked.size()]));
+		fSeparateViewer.setCheckedElements(separateChecked.toArray(new Object[separateChecked.size()]));
+	}
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#processChanges(org.eclipse.ui.preferences.IWorkbenchPreferenceContainer)
 	 */
