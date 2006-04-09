@@ -2340,6 +2340,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 
 	protected void createActions() {
+		installEncodingSupport();
+		
 		super.createActions();
 
 		ActionGroup oeg, ovg, jsg;
@@ -2376,9 +2378,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY);
 		setAction(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY, action);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.OPEN_HIERARCHY_ACTION);
-
-		fEncodingSupport= new DefaultEncodingSupport();
-		fEncodingSupport.initialize(this);
 
 		fSelectionHistory= new SelectionHistory(this);
 
@@ -2431,6 +2430,20 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		action= new ClipboardOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "Editor.Paste.", this, ITextOperationTarget.PASTE); //$NON-NLS-1$
 		setAction(ITextEditorActionConstants.PASTE, action);
 	}
+	
+	/**
+	 * Installs the encoding support on the given text editor.
+	 * <p>
+ 	 * Subclasses may override to install their own encoding
+ 	 * support or to disable the default encoding support.
+ 	 * </p>
+	 * @since 3.2
+	 */
+	protected void installEncodingSupport() {
+		fEncodingSupport= new DefaultEncodingSupport();
+		fEncodingSupport.initialize(this);
+	}
+	
 
 	public void updatedTitleImage(Image image) {
 		setTitleImage(image);
