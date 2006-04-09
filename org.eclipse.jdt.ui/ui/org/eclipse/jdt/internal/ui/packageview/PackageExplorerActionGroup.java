@@ -28,6 +28,8 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.OpenEvent;
+import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.IActionBars;
@@ -272,7 +274,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 
 	/* package*/ void handleDoubleClick(DoubleClickEvent event) {
 		TreeViewer viewer= fPart.getViewer();
-		Object element= ((IStructuredSelection)event.getSelection()).getFirstElement();
+		IStructuredSelection selection= (IStructuredSelection)event.getSelection();
+		Object element= selection.getFirstElement();
 		if (viewer.isExpandable(element)) {
 			if (doubleClickGoesInto()) {
 				// don't zoom into compilation units and class files
@@ -285,7 +288,14 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 				IAction openAction= fNavigateActionGroup.getOpenAction();
 				if (openAction != null && openAction.isEnabled() && OpenStrategy.getOpenMethod() == OpenStrategy.DOUBLE_CLICK)
 					return;
-				viewer.setExpandedState(element, !viewer.getExpandedState(element));
+				if (selection instanceof TreeSelection) {
+					TreePath[] paths= ((TreeSelection)selection).getPathsFor(element);
+					for (int i= 0; i < paths.length; i++) {
+						viewer.setExpandedState(paths[i], !viewer.getExpandedState(paths[i]));
+					}
+				} else {
+					viewer.setExpandedState(element, !viewer.getExpandedState(element));
+				}
 			}
 		}
 	}
