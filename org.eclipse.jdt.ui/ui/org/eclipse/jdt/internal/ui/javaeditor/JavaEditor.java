@@ -2107,6 +2107,21 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			JavaPlugin.getActivePage().bringToTop(this);
 
 		setSelection(reference, !isActivePart());
+		
+		ISelectionProvider selectionProvider= getSelectionProvider();
+		if (selectionProvider == null )
+			return;
+		
+		ISelection textSelection= selectionProvider.getSelection();
+		if (!(textSelection instanceof ITextSelection))
+			return;
+		
+		CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(getInputJavaElement(), ASTProvider.WAIT_ACTIVE_ONLY, getProgressMonitor());
+		if (ast != null) {
+			fForcedMarkOccurrencesSelection= textSelection;
+			updateOccurrenceAnnotations((ITextSelection)textSelection, ast);
+		}
+		
 	}
 
 	/*
