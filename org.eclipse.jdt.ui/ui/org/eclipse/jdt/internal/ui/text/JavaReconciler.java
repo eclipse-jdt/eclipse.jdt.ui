@@ -41,6 +41,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -141,6 +142,8 @@ public class JavaReconciler extends MonoReconciler {
 		 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
 		 */
 		public void elementChanged(ElementChangedEvent event) {
+			if (event.getDelta().getFlags() == IJavaElementDelta.F_AST_AFFECTED)
+				return;
 			setJavaModelChanged(true);
 			if (!fIsReconciling && isEditorActive() )
 				JavaReconciler.this.forceReconciling();
