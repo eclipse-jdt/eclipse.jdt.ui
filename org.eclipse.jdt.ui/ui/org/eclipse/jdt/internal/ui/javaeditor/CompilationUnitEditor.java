@@ -1759,7 +1759,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			return;
 		
 		// Always notify AST provider
-		javaPlugin.getASTProvider().reconciled(ast, getInputJavaElement());
+		javaPlugin.getASTProvider().reconciled(ast, getInputJavaElement(), progressMonitor);
 
 		// Notify listeners
 		Object[] listeners = fReconcilingListeners.getListeners();

@@ -501,6 +501,7 @@ public final class ASTProvider {
 				}
 				return getAST(je, waitFlag, progressMonitor);
 			} catch (InterruptedException e) {
+				return null; // thread has been interrupted don't compute AST
 			}
 		} else if (waitFlag == WAIT_NO || (waitFlag == WAIT_ACTIVE_ONLY && !(isActiveElement && fAST == null)))
 			return null;
@@ -520,9 +521,9 @@ public final class ASTProvider {
 				if (fAST != null) {
 					if (DEBUG)
 						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "Ignore created AST for " + je.getElementName() + "- AST from reconciler is newer"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					reconciled(fAST, je);
+					reconciled(fAST, je, null);
 				} else
-					reconciled(ast, je);
+					reconciled(ast, je, null);
 			}
 		}
 
@@ -576,10 +577,16 @@ public final class ASTProvider {
 		if (!hasSource(je))
 			return null;
 		
+		if (progressMonitor != null && progressMonitor.isCanceled())
+			return null;
+		
 		final ASTParser parser = ASTParser.newParser(SHARED_AST_LEVEL);
 		parser.setResolveBindings(true);
 		parser.setStatementsRecovery(SHARED_AST_STATEMENT_RECOVERY);
 
+		if (progressMonitor != null && progressMonitor.isCanceled())
+			return null;
+		
 		if (je.getElementType() == IJavaElement.COMPILATION_UNIT)
 			parser.setSource((ICompilationUnit)je);
 		else if (je.getElementType() == IJavaElement.CLASS_FILE)
@@ -593,6 +600,8 @@ public final class ASTProvider {
 		SafeRunner.run(new ISafeRunnable() {
 			public void run() {
 				try {
+					if (progressMonitor != null && progressMonitor.isCanceled())
+						root[0]= null;
 					root[0]= (CompilationUnit)parser.createAST(progressMonitor);
 				} catch (OperationCanceledException ex) {
 					root[0]= null;
@@ -650,14 +659,14 @@ public final class ASTProvider {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(org.eclipse.jdt.core.dom.CompilationUnit)
 	 */
-	void reconciled(CompilationUnit ast, IJavaElement javaElement) {
+	void reconciled(CompilationUnit ast, IJavaElement javaElement, IProgressMonitor progressMonitor) {
 
 		if (DEBUG)
 			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "reconciled: " + toString(javaElement) + ", AST: " + toString(ast)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		synchronized (fReconcileLock) {
 
-			fIsReconciling= false;
+			fIsReconciling= progressMonitor != null && progressMonitor.isCanceled();
 			if (javaElement == null || !javaElement.equals(fReconcilingJavaElement)) {
 
 				if (DEBUG)
