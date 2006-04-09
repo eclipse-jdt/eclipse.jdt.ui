@@ -32,6 +32,9 @@ www jdt-ui/*
 org.eclipse.jdt.ui/core*extension\org/eclipse/jdt/internal/corext/template/default-codetemplates.xml
 org.eclipse.pde.doc.isv/buildDoc.xml
 org.eclipse.pde.doc.user/buildDoc.xml
+
+org.eclipse.platform.doc.isv/reference/misc/help_preferences.html
+
 org.eclipse.platform.doc.isv/buildDoc.xml
 org.eclipse.jdt.doc.isv/buildDoc.xml
 org.eclipse.jdt.core/*
