@@ -78,6 +78,16 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * @since 3.0
 	 */
 	private Font fStatusTextFont;
+	/**
+	 * The width size constraint.
+	 * @since 3.2
+	 */
+	private int fMaxWidth= SWT.DEFAULT;
+	/**
+	 * The height size constraint.
+	 * @since 3.2
+	 */
+	private int fMaxHeight= SWT.DEFAULT;
 
 	/**
 	 * Creates a default information control with the given shell as parent. The given
@@ -321,14 +331,15 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * @see IInformationControl#setSizeConstraints(int, int)
 	 */
 	public void setSizeConstraints(int maxWidth, int maxHeight) {
-		maxWidth= maxHeight;
+		fMaxWidth= maxWidth;
+		fMaxHeight= maxHeight;
 	}
 
 	/*
 	 * @see IInformationControl#computeSizeHint()
 	 */
 	public Point computeSizeHint() {
-		return fShell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		return fShell.computeSize(fMaxWidth, fMaxHeight);
 	}
 
 	/*
