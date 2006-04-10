@@ -110,35 +110,36 @@ public class JavaSearchQuery implements ISearchQuery {
 				SafeRunner.run(runnable);
 				totalTicks+= ticks[i];
 			}
-			monitor.beginTask(SearchMessages.JavaSearchQuery_task_label, totalTicks); 
-			IProgressMonitor mainSearchPM= new SubProgressMonitor(monitor, 1000);
-
-			boolean ignorePotentials= NewSearchUI.arePotentialMatchesIgnored();
-			NewSearchResultCollector collector= new NewSearchResultCollector(textResult, ignorePotentials);
 			
 			SearchPattern pattern;
-			String stringPattern= null;
+			String stringPattern;
 			
 			if (fPatternData instanceof ElementQuerySpecification) {
 				IJavaElement element= ((ElementQuerySpecification) fPatternData).getElement();
+				stringPattern= JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT);
 				if (!element.exists()) {
-					String elementLabel= JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT);
-					return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(SearchMessages.JavaSearchQuery_error_element_does_not_exist, elementLabel), null);  
+					return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(SearchMessages.JavaSearchQuery_error_element_does_not_exist, stringPattern), null);  
 				}
 				pattern= SearchPattern.createPattern(element, fPatternData.getLimitTo(), SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
-				stringPattern= element.getElementName();
 			} else {
 				PatternQuerySpecification patternSpec = (PatternQuerySpecification) fPatternData;
 				stringPattern= patternSpec.getPattern();
 				int matchMode= getMatchMode(stringPattern) | SearchPattern.R_ERASURE_MATCH;
 				if (patternSpec.isCaseSensitive())
 					matchMode |= SearchPattern.R_CASE_SENSITIVE;
-				pattern = SearchPattern.createPattern(patternSpec.getPattern(), patternSpec.getSearchFor(), patternSpec.getLimitTo(), matchMode);
+				pattern= SearchPattern.createPattern(patternSpec.getPattern(), patternSpec.getSearchFor(), patternSpec.getLimitTo(), matchMode);
 			}
 			
 			if (pattern == null) {
 				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(SearchMessages.JavaSearchQuery_error_unsupported_pattern, stringPattern), null);  
 			}
+			monitor.beginTask(Messages.format(SearchMessages.JavaSearchQuery_task_label, stringPattern), totalTicks); 
+			IProgressMonitor mainSearchPM= new SubProgressMonitor(monitor, 1000);
+
+			boolean ignorePotentials= NewSearchUI.arePotentialMatchesIgnored();
+			NewSearchResultCollector collector= new NewSearchResultCollector(textResult, ignorePotentials);
+			
+			
 			engine.search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() }, fPatternData.getScope(), collector, mainSearchPM);
 			for (int i= 0; i < participantDescriptors.length; i++) {
 				final ISearchRequestor requestor= new SearchRequestor(participantDescriptors[i].getParticipant(), textResult);
