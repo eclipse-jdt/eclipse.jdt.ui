@@ -113,6 +113,22 @@ public class RefactorActionGroup extends ActionGroup {
 	 */
 	public static final String GROUP_CODING2= "codingGroup2"; //$NON-NLS-1$
 
+	/**
+	 * Pop-up menu: id of the reorg group 2 of the refactor sub menu (value
+	 * <code>reorgGroup2</code>).
+	 * 
+	 * @since 3.2
+	 */
+	private static final String GROUP_REORG2= "reorgGroup2"; //$NON-NLS-1$ //TODO(3.3): make public
+	
+	/**
+	 * Pop-up menu: id of the type group 2 of the refactor sub menu (value
+	 * <code>typeGroup2</code>).
+	 * 
+	 * @since 3.2
+	 */
+	private static final String GROUP_TYPE2= "typeGroup2"; //$NON-NLS-1$ //TODO(3.3): make public
+	
 	private IWorkbenchSite fSite;
 	private CompilationUnitEditor fEditor;
 	private String fGroupName= IContextMenuConstants.GROUP_REORGANIZE;
@@ -132,7 +148,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fInferTypeArgumentsAction;
 	
 	private SelectionDispatchAction fInlineAction;
-	private SelectionDispatchAction fReplaceInvocationsAction;
+//	private SelectionDispatchAction fReplaceInvocationsAction;
 	private SelectionDispatchAction fIntroduceIndirectionAction;
 	private SelectionDispatchAction fExtractMethodAction;
 	private SelectionDispatchAction fExtractTempAction;
@@ -273,9 +289,9 @@ public class RefactorActionGroup extends ActionGroup {
 		initUpdatingAction(fExtractConstantAction, provider, selection, IJavaEditorActionDefinitionIds.EXTRACT_CONSTANT);
 		editor.setAction("ExtractConstant", fExtractConstantAction); //$NON-NLS-1$
 		
-		fReplaceInvocationsAction= new ReplaceInvocationsAction(editor);
-		initUpdatingAction(fReplaceInvocationsAction, provider, selection, IJavaEditorActionDefinitionIds.REPLACE_INVOCATIONS);
-		editor.setAction("ReplaceInvocations", fReplaceInvocationsAction); //$NON-NLS-1$
+//		fReplaceInvocationsAction= new ReplaceInvocationsAction(editor);
+//		initUpdatingAction(fReplaceInvocationsAction, provider, selection, IJavaEditorActionDefinitionIds.REPLACE_INVOCATIONS);
+//		editor.setAction("ReplaceInvocations", fReplaceInvocationsAction); //$NON-NLS-1$
 		
 		fIntroduceIndirectionAction= new IntroduceIndirectionAction(editor);
 		initUpdatingAction(fIntroduceIndirectionAction, provider, selection, IJavaEditorActionDefinitionIds.INTRODUCE_INDIRECTION);
@@ -352,8 +368,8 @@ public class RefactorActionGroup extends ActionGroup {
 		fInlineAction= new InlineAction(fSite);
 		initUpdatingAction(fInlineAction, provider, selection, IJavaEditorActionDefinitionIds.INLINE);
 		
-		fReplaceInvocationsAction= new ReplaceInvocationsAction(fSite);
-		initUpdatingAction(fReplaceInvocationsAction, provider, selection, IJavaEditorActionDefinitionIds.REPLACE_INVOCATIONS);
+//		fReplaceInvocationsAction= new ReplaceInvocationsAction(fSite);
+//		initUpdatingAction(fReplaceInvocationsAction, provider, selection, IJavaEditorActionDefinitionIds.REPLACE_INVOCATIONS);
 		
 		fIntroduceIndirectionAction= new IntroduceIndirectionAction(fSite);
 		initUpdatingAction(fIntroduceIndirectionAction, provider, selection, IJavaEditorActionDefinitionIds.INTRODUCE_INDIRECTION);
@@ -410,7 +426,7 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.INTRODUCE_PARAMETER, fIntroduceParameterAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.INTRODUCE_FACTORY, fIntroduceFactoryAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_METHOD, fExtractMethodAction);
-		actionBars.setGlobalActionHandler(JdtActionConstants.REPLACE_INVOCATIONS, fReplaceInvocationsAction);
+//		actionBars.setGlobalActionHandler(JdtActionConstants.REPLACE_INVOCATIONS, fReplaceInvocationsAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.INTRODUCE_INDIRECTION, fIntroduceIndirectionAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE, fInlineAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_INTERFACE, fExtractInterfaceAction);
@@ -462,7 +478,7 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fExtractMethodAction, provider);
 		disposeAction(fIntroduceIndirectionAction, provider);
 		disposeAction(fInlineAction, provider);
-		disposeAction(fReplaceInvocationsAction, provider);
+//		disposeAction(fReplaceInvocationsAction, provider);
 		disposeAction(fExtractInterfaceAction, provider);
 		disposeAction(fExtractSupertypeAction, provider);
 		disposeAction(fChangeTypeAction, provider);
@@ -517,29 +533,31 @@ public class RefactorActionGroup extends ActionGroup {
 		refactorSubmenu.add(new Separator(GROUP_REORG));
 		added+= addAction(refactorSubmenu, fRenameAction);
 		added+= addAction(refactorSubmenu, fMoveAction);
-		added+= addAction(refactorSubmenu, fModifyParametersAction);
-		added+= addAction(refactorSubmenu, fConvertAnonymousToNestedAction);
-		added+= addAction(refactorSubmenu, fConvertNestedToTopAction);
-		refactorSubmenu.add(new Separator(GROUP_TYPE));
-		added+= addAction(refactorSubmenu, fPullUpAction);
-		added+= addAction(refactorSubmenu, fPushDownAction);
-		added+= addAction(refactorSubmenu, fExtractSupertypeAction);
-		added+= addAction(refactorSubmenu, fExtractInterfaceAction);
-		added+= addAction(refactorSubmenu, fChangeTypeAction);
-		added+= addAction(refactorSubmenu, fUseSupertypeAction);
-		added+= addAction(refactorSubmenu, fInferTypeArgumentsAction);
 		refactorSubmenu.add(new Separator(GROUP_CODING));
-		added+= addAction(refactorSubmenu, fInlineAction);
+		added+= addAction(refactorSubmenu, fModifyParametersAction);
 		added+= addAction(refactorSubmenu, fExtractMethodAction);
 		added+= addAction(refactorSubmenu, fExtractTempAction);
 		added+= addAction(refactorSubmenu, fExtractConstantAction);
-		refactorSubmenu.add(new Separator(GROUP_CODING2));
-		added+= addAction(refactorSubmenu, fReplaceInvocationsAction);
-		added+= addAction(refactorSubmenu, fIntroduceIndirectionAction);
-		added+= addAction(refactorSubmenu, fIntroduceParameterAction);
-		added+= addAction(refactorSubmenu, fIntroduceFactoryAction);
+		added+= addAction(refactorSubmenu, fInlineAction);
+		refactorSubmenu.add(new Separator(GROUP_REORG2));
+		added+= addAction(refactorSubmenu, fConvertAnonymousToNestedAction);
+		added+= addAction(refactorSubmenu, fConvertNestedToTopAction);
 		added+= addAction(refactorSubmenu, fConvertLocalToFieldAction);
+		refactorSubmenu.add(new Separator(GROUP_TYPE));
+		added+= addAction(refactorSubmenu, fExtractInterfaceAction);
+		added+= addAction(refactorSubmenu, fExtractSupertypeAction);
+		added+= addAction(refactorSubmenu, fUseSupertypeAction);
+		added+= addAction(refactorSubmenu, fPullUpAction);
+		added+= addAction(refactorSubmenu, fPushDownAction);
+		refactorSubmenu.add(new Separator(GROUP_CODING2));
+		added+= addAction(refactorSubmenu, fIntroduceIndirectionAction);
+		added+= addAction(refactorSubmenu, fIntroduceFactoryAction);
+		added+= addAction(refactorSubmenu, fIntroduceParameterAction);
 		added+= addAction(refactorSubmenu, fSelfEncapsulateField);
+//		added+= addAction(refactorSubmenu, fReplaceInvocationsAction);
+		refactorSubmenu.add(new Separator(GROUP_TYPE2));
+		added+= addAction(refactorSubmenu, fChangeTypeAction);
+		added+= addAction(refactorSubmenu, fInferTypeArgumentsAction);
 		return added;
 	}
 	
