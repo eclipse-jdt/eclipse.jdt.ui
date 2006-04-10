@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -30,7 +31,6 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 /**
@@ -81,7 +81,7 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 	public void createControl(Composite parent) {
 		fListViewer= new ListViewer(parent, SWT.SINGLE | SWT.BORDER);
 		fListViewer.setLabelProvider(new ClasspathContainerLabelProvider());
-		fListViewer.setContentProvider(new ListContentProvider());
+		fListViewer.setContentProvider(new ArrayContentProvider());
 		fListViewer.setSorter(new ClasspathContainerSorter());
 		fListViewer.setInput(Arrays.asList(fContainers));
 		fListViewer.addSelectionChangedListener(new ISelectionChangedListener() {

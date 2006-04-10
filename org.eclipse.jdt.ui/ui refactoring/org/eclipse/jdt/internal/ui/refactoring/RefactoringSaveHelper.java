@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
@@ -39,7 +40,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.refactoring.actions.ListDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 
 public class RefactoringSaveHelper {
 
@@ -114,7 +114,7 @@ public class RefactoringSaveHelper {
 		dialog.setAddCancelButton(true);
 		dialog.setLabelProvider(createDialogLabelProvider());
 		dialog.setMessage(RefactoringMessages.RefactoringStarter_must_save); 
-		dialog.setContentProvider(new ListContentProvider());
+		dialog.setContentProvider(new ArrayContentProvider());
 		dialog.setInput(Arrays.asList(dirtyEditors));
 		return dialog.open() == Window.OK;
 	}

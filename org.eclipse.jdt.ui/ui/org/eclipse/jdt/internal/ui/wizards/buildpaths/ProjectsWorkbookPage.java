@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 
@@ -37,7 +38,6 @@ import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -395,7 +395,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			Object[] selectArr= selectable.toArray();
 			new JavaElementSorter().sort(null, selectArr);
 					
-			ListSelectionDialog dialog= new ListSelectionDialog(getShell(), Arrays.asList(selectArr), new ListContentProvider(), new JavaUILabelProvider(), NewWizardMessages.ProjectsWorkbookPage_chooseProjects_message); 
+			ListSelectionDialog dialog= new ListSelectionDialog(getShell(), Arrays.asList(selectArr), new ArrayContentProvider(), new JavaUILabelProvider(), NewWizardMessages.ProjectsWorkbookPage_chooseProjects_message); 
 			dialog.setTitle(NewWizardMessages.ProjectsWorkbookPage_chooseProjects_title); 
 			if (dialog.open() == Window.OK) {
 				Object[] result= dialog.getResult();

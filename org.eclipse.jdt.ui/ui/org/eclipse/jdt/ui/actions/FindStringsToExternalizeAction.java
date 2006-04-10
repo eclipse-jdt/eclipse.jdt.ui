@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -71,7 +72,6 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.ListDialog;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 
 /**
  * Find all strings in a package or project that are not externalized yet.
@@ -350,7 +350,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			setInput(Arrays.asList(input));
 			setTitle(ActionMessages.FindStringsToExternalizeAction_dialog_title);  
 			setMessage(Messages.format(ActionMessages.FindStringsToExternalizeAction_non_externalized, new Object[] {new Integer(count)} )); 
-			setContentProvider(new ListContentProvider());
+			setContentProvider(new ArrayContentProvider());
 			setLabelProvider(createLabelProvider());
 		}
 
