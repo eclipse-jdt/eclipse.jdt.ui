@@ -384,7 +384,7 @@ public final class RefactoringAvailabilityTester {
 			if (selection.size() == 1) {
 				final IType type= getSingleSelectedType(selection);
 				if (type != null)
-					return isExtractSupertypeAvailable(new IType[] { type});
+					return Checks.isAvailable(type) && isExtractSupertypeAvailable(new IType[] { type});
 			}
 			for (final Iterator iterator= selection.iterator(); iterator.hasNext();) {
 				if (!(iterator.next() instanceof IMember))
@@ -841,7 +841,7 @@ public final class RefactoringAvailabilityTester {
 			if (selection.size() == 1) {
 				final IType type= getSingleSelectedType(selection);
 				if (type != null)
-					return isPullUpAvailable(new IType[] { type});
+					return Checks.isAvailable(type) && isPullUpAvailable(new IType[] { type});
 			}
 			for (final Iterator iterator= selection.iterator(); iterator.hasNext();) {
 				if (!(iterator.next() instanceof IMember))
