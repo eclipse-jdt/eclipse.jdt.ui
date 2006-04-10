@@ -39,7 +39,7 @@ public class JavaTextViewer extends Viewer {
 	
 	
 	JavaTextViewer(Composite parent) {
-		fSourceViewer= new SourceViewer(parent, null, SWT.H_SCROLL + SWT.V_SCROLL);
+		fSourceViewer= new SourceViewer(parent, null, SWT.LEFT_TO_RIGHT | SWT.H_SCROLL | SWT.V_SCROLL);
 		JavaTextTools tools= JavaCompareUtilities.getJavaTextTools();
 		if (tools != null) {
 			IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();

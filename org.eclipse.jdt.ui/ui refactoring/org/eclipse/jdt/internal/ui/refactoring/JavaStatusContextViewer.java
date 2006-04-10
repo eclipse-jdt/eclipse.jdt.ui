@@ -64,7 +64,7 @@ public class JavaStatusContextViewer extends TextStatusContextViewer {
 	
 	protected SourceViewer createSourceViewer(Composite parent) {
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
-		return new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION, store);
+		return new JavaSourceViewer(parent, null, null, false, SWT.LEFT_TO_RIGHT | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION, store);
 	}
 
 	private IPackageFragmentRoot getPackageFragmentRoot(IClassFile file) {
