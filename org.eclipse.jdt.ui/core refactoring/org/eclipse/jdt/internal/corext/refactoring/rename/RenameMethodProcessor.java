@@ -109,7 +109,6 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	private GroupCategorySet fCategorySet;
 	private boolean fDelegateUpdating;
 	private boolean fDelegateDeprecation;
-	protected List fDelegateChanges= new ArrayList();
 	protected boolean fInitialized= false;
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameMethodProcessor"; //$NON-NLS-1$
@@ -686,9 +685,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
 			final TextChange[] changes= fChangeManager.getAllChanges();
-			final List list= new ArrayList(changes.length + fDelegateChanges.size());
+			final List list= new ArrayList(changes.length);
 			list.addAll(Arrays.asList(changes));
-			list.addAll(fDelegateChanges);
 			return new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges, (Change[]) list.toArray(new Change[list.size()])) {
 
 				public final ChangeDescriptor getDescriptor() {
@@ -734,7 +732,6 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	
 	void addOccurrences(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException/*thrown in subtype*/{
 		pm.beginTask("", fOccurrences.length);				 //$NON-NLS-1$
-		boolean created= false;
 		for (int i= 0; i < fOccurrences.length; i++){
 			ICompilationUnit cu= fOccurrences[i].getCompilationUnit();
 			if (cu == null)	
@@ -772,13 +769,6 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 						creator.setNewElementName(getNewElementName());
 						creator.prepareDelegate();
 						creator.createEdit();
-						if (!created) {
-							Change change= creator.createChange();
-							if (change != null) {
-								fDelegateChanges.add(change);
-								created= true;
-							}
-						}
 					}
 					// Need to handle all delegates first as this
 					// creates a completely new change object.

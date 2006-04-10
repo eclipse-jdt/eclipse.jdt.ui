@@ -20,15 +20,6 @@ public final class ActionMessages extends NLS {
 		// Do not instantiate
 	}
 
-	public static String ConfigureDeprecationFixAction_error_not_deprecated;
-	public static String ConfigureDeprecationFixDialog_Description;
-	public static String ConfigureDeprecationFixDialog_dialog_title;
-	public static String ConfigureDeprecationFixDialog_InliningRadioButtonLabel;
-	public static String ConfigureDeprecationFixDialog_NoFixCheckBoxLabel;
-	public static String ConfigureDeprecationFixDialog_ReplaceReferencesCheckBoxLabel;
-	public static String ConfigureDeprecationFixDialog_ReplaceReferencesRadioButtonLabel;
-	public static String ConfigureDeprecationFixDialog_ThisFeatureIsNotSupportedInfo;
-	
 	public static String CopyQualifiedNameAction_ActionName;
 	public static String CopyQualifiedNameAction_ErrorDescription;
 	public static String CopyQualifiedNameAction_ErrorTitle;
@@ -41,14 +32,6 @@ public final class ActionMessages extends NLS {
 	public static String FindNLSProblemsAction_Name;
 	public static String FindNLSProblemsAction_NoPropertieFilesFoundErrorDescription;
 	public static String FindNLSProblemsAction_ToolTip;
-	public static String ConfigureDeprecationFixAction_description;
-	public static String ConfigureDeprecationFixAction_dialog_title;
-	public static String ConfigureDeprecationFixAction_error_main_method;
-	public static String ConfigureDeprecationFixAction_error_read_only;
-	public static String ConfigureDeprecationFixAction_general_error;
-	public static String ConfigureDeprecationFixAction_not_applicable;
-	public static String ConfigureDeprecationFixAction_text;
-	public static String ConfigureDeprecationFixAction_tool_tip;
 	public static String OpenWithMenu_label;
 	public static String QuickAssistProcessor_create_fix_name;
 	public static String RefactorMenu_label;

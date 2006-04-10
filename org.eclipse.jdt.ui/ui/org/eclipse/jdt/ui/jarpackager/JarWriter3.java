@@ -43,7 +43,6 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -56,7 +55,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 
-import org.eclipse.jdt.internal.corext.refactoring.deprecation.DeprecationRefactorings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -114,8 +112,6 @@ public class JarWriter3 {
 				final IPath metaPath= new Path(JarPackagerUtil.getMetaEntry());
 				addDirectories(metaPath);
 				addHistory(fJarPackage, new Path(JarPackagerUtil.getRefactoringsEntry()), new NullProgressMonitor());
-				if (fJarPackage.isDeprecationAware())
-					addDeprecations(fJarPackage, projects, new NullProgressMonitor());
 			}
 		} catch (IOException exception) {
 			throw JarPackagerUtil.createCoreException(exception.getLocalizedMessage(), exception);
@@ -253,48 +249,6 @@ public class JarWriter3 {
 			 * b) closing the stream closes the last entry
 			 */
 			// fJarOutputStream.closeEntry();
-		}
-	}
-
-	/**
-	 * Creates new JAR file entries containing the deprecation infos.
-	 * 
-	 * @param data
-	 *            the jar package data
-	 * @param projects
-	 *            the projects which are exported
-	 * @param monitor
-	 *            the progress monitor to use
-	 * @throws IOException
-	 *             if the file could not be read
-	 * @throws CoreException
-	 *             if an error occurs while transforming the deprecations
-	 */
-	private void addDeprecations(final JarPackageData data, final Object[] projects, final IProgressMonitor monitor) throws IOException, CoreException {
-		Assert.isNotNull(data);
-		Assert.isNotNull(projects);
-		Assert.isNotNull(monitor);
-		for (int index= 0; index < projects.length; index++) {
-			final IProject project= (IProject) projects[index];
-			final IFolder folder= project.getFolder(DeprecationRefactorings.SCRIPT_FOLDER);
-			if (folder.exists()) {
-				final IResource[] resources= folder.members();
-				for (int offset= 0; offset < resources.length; offset++) {
-					if (resources[offset] instanceof IFile) {
-						final IFile file= (IFile) resources[offset];
-						if (file.getFileExtension().equals("xml")) { //$NON-NLS-1$
-							final URI location= file.getLocationURI();
-							if (location != null) {
-								try {
-									writeMetaData(data, new File(location), new Path(JarPackagerUtil.getDeprecationEntry(file.getName())));
-								} catch (FileNotFoundException exception) {
-									// Does not happen
-								}
-							}
-						}
-					}
-				}
-			}
 		}
 	}
 

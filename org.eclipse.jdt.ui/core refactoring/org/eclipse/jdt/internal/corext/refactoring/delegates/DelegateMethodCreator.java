@@ -22,7 +22,6 @@ import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
@@ -36,7 +35,6 @@ import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.deprecation.DeprecationRefactorings;
 
 /**
  * Delegate creator for static and non-static methods.
@@ -140,31 +138,9 @@ public class DelegateMethodCreator extends DelegateCreator {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected String createRefactoringScript() {
-		final MethodDeclaration declaration= (MethodDeclaration) getDeclaration();
-		final IMethodBinding binding= declaration.resolveBinding();
-		if (binding != null)
-			return DeprecationRefactorings.createInlineDeprecationScript(binding);
-		return null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	protected IBinding getDeclarationBinding() {
 		final MethodDeclaration declaration= (MethodDeclaration) getDeclaration();
 		return declaration.resolveBinding();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected String getRefactoringScriptName() {
-		final MethodDeclaration declaration= (MethodDeclaration) getDeclaration();
-		final IMethodBinding binding= declaration.resolveBinding();
-		if (binding != null)
-			return DeprecationRefactorings.getRefactoringScriptName(binding);
-		return null;
 	}
 
 	private void createArguments(final MethodDeclaration declaration, final List arguments, boolean methodInvocation) throws JavaModelException {

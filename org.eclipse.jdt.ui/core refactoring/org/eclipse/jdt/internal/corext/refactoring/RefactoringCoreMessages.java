@@ -270,12 +270,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String CopyResourceString_copy;
 
-	public static String CreateDeprecationScriptChange_name;
-
-	public static String CreateDeprecationScriptChange_performing_change;
-
-	public static String CreateDeprecationScriptChange_unknown_location;
-
 	public static String CreatePackageChange_Create_package;
 
 	public static String CreatePackageChange_Creating_package;

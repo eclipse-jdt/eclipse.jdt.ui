@@ -1036,9 +1036,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/** Does the move method need a target node? */
 	private boolean fTargetNode= true;
 
-	/** The delegate changes list */
-	private List fDelegateChanges= new ArrayList();
-
 	/** The target type */
 	private IType fTargetType= null;
 
@@ -1574,9 +1571,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			final TextChange[] changes= fChangeManager.getAllChanges();
 			if (changes.length == 1)
 				return changes[0];
-			final List list= new ArrayList(changes.length + fDelegateChanges.size());
+			final List list= new ArrayList(changes.length);
 			list.addAll(Arrays.asList(changes));
-			list.addAll(fDelegateChanges);
 			return new DynamicValidationStateChange(RefactoringCoreMessages.MoveInstanceMethodRefactoring_name, (Change[]) list.toArray(new Change[list.size()])) {
 
 				public final ChangeDescriptor getDescriptor() {
@@ -2106,10 +2102,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		creator.setNewElementName(fMethodName);
 		creator.prepareDelegate();
 		creator.createEdit();
-		Change change= creator.createChange();
-		if (change != null)
-			fDelegateChanges.add(change);
-		
+
 		return creator.getNeededInsertion();
 	}
 	

@@ -16,14 +16,12 @@ import java.util.List;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
-import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 
@@ -50,16 +48,11 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.deprecation.CreateDeprecationFixChange;
-import org.eclipse.jdt.internal.corext.refactoring.deprecation.DeprecationRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
  * <p>
@@ -139,8 +132,7 @@ public abstract class DelegateCreator {
 	private ITypeBinding fDestinationTypeBinding;
 	private Type fDestinationType;
 	private ITrackedNodePosition fTrackedPosition;
-	private String fDeprecationScript;
-	
+
 	private CodeGenerationSettings fPreferences;
 
 	public DelegateCreator() {
@@ -244,13 +236,6 @@ public abstract class DelegateCreator {
 	protected abstract void initialize();
 
 	/**
-	 * Creates a refactoring script which can be used to fix this deprecation.
-	 * 
-	 * This method is only called if isDeclareDeprecated() == true.
-	 */
-	protected abstract String createRefactoringScript();
-
-	/**
 	 * 
 	 * Creates the body of the delegate.
 	 * 
@@ -346,23 +331,9 @@ public abstract class DelegateCreator {
 		}
 
 		if (fDeclareDeprecated) {
-			fDeprecationScript= createRefactoringScript();
 			createJavadoc();
 		}
 	}
-
-	/**
-	 * Creates the name of the refactoring script.
-	 * 
-	 * This name is used by the quick fix infrastructure to find the appropriate
-	 * script to resolve a deprecation message. The name must be unique enough
-	 * to find the script in a package fragment.
-	 * 
-	 * This method is only called if isDeclareDeprecated() == true.
-	 * 
-	 * @return the name of the refactoring script
-	 */
-	protected abstract String getRefactoringScriptName();
 
 	/**
 	 * Creates the javadoc for the delegate.
@@ -414,26 +385,6 @@ public abstract class DelegateCreator {
 	}
 
 	protected abstract String getTextEditGroupLabel();
-
-	/**
-	 * Creates the necessary change to store the deprecation script in the
-	 * project folder.
-	 * 
-	 * @return the change for the deprecation script, or <code>null</code> if
-	 *         no script is created
-	 */
-	public Change createChange() {
-		Assert.isNotNull(fDelegateRewrite);
-		if (fDeprecationScript != null) {
-			final String name= getRefactoringScriptName();
-			if (name != null) {
-				final IPath path= DeprecationRefactorings.getRefactoringScriptFile(fDelegateRewrite.getCu().getJavaProject(), name).getFullPath();
-				if (path != null)
-					return new CreateDeprecationFixChange(path, fDeprecationScript, BindingLabelProvider.getBindingLabel(getDeclarationBinding(), JavaElementLabels.ALL_DEFAULT));
-			}
-		}
-		return null;
-	}
 
 	/**
 	 * Returns the binding of the declaration.

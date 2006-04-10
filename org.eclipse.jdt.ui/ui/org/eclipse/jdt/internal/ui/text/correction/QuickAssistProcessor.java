@@ -22,10 +22,8 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.Document;
 
-import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -89,8 +87,6 @@ import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFix;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.deprecation.CreateDeprecationFixChange;
-import org.eclipse.jdt.internal.corext.refactoring.deprecation.DeprecationRefactorings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -140,7 +136,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getConvertIterableLoopProposal(context, coveringNode, null)
 				|| getSurroundWithRunnableProposal(context, coveringNode, null)
 				|| getRemoveBlockProposals(context, coveringNode, null)
-				|| getFixDeprecationProposals(context, coveringNode, null)
 				|| getMakeVariableDeclarationFinalProposals(context, coveringNode, null);
 		}
 		return false;
@@ -173,7 +168,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
 				getSurroundWithRunnableProposal(context, coveringNode, resultingCollections);
 				getRemoveBlockProposals(context, coveringNode, resultingCollections);
-				getFixDeprecationProposals(context, coveringNode, resultingCollections);
 				getMakeVariableDeclarationFinalProposals(context, coveringNode, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
@@ -317,50 +311,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		resultingCollections.add(proposal);
 		return true;
 
-	}
-
-	private static boolean getFixDeprecationProposals(final IInvocationContext context, final ASTNode node, final Collection resultingCollections) {
-		Name name;
-		if (node instanceof Name)
-			name= (Name) node;
-		else
-			return false;
-		final IBinding binding= name.resolveBinding();
-		if (binding == null || !binding.isDeprecated())
-			return false;
-		final CompilationUnit unit= (CompilationUnit) ASTNodes.getParent(node, ASTNode.COMPILATION_UNIT);
-		if (unit == null)
-			return false;
-		String fileName= DeprecationRefactorings.getRefactoringScriptName(binding);
-		if (fileName == null)
-			return false;
-		final ICompilationUnit cu= context.getCompilationUnit();
-		if (cu == null || !cu.exists())
-			return false;
-		if (ASTNodes.isDeclaration(name)) {
-			if (resultingCollections == null)
-				return true;
-			String script= DeprecationRefactorings.createInlineDeprecationScript(binding);
-			if (script == null)
-				return false;
-			final Change change= new CreateDeprecationFixChange(DeprecationRefactorings.getRefactoringScriptFile(cu.getJavaProject(), fileName).getFullPath(), script, CorrectionMessages.QuickAssistProcessor_create_fix_name);
-			final ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.QuickAssistProcessor_create_fix_name, change, 100, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
-
-				public final String getAdditionalProposalInfo() {
-					return CorrectionMessages.QuickAssistProcessor_create_fix_info;
-				}
-			};
-			resultingCollections.add(proposal);
-			return true;
-		} else {
-			final RefactoringHistory history= DeprecationRefactorings.getRefactoringHistory(binding);
-			if (history == null)
-				return false;
-			if (resultingCollections == null)
-				return true;
-			resultingCollections.add(new FixDeprecationCorrectionProposal(context, history, binding, node));
-			return true;
-		}
 	}
 
 	private static boolean getSplitVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {

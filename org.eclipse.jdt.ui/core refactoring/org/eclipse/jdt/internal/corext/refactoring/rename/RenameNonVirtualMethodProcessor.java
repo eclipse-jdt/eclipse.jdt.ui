@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -192,9 +191,6 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 			creator.setNewElementName(getNewElementName());
 			creator.prepareDelegate();
 			creator.createEdit();
-			Change delegateChange= creator.createChange();
-			if (delegateChange != null)
-				fDelegateChanges.add(delegateChange);
 			CompilationUnitChange cuChange= rewrite.createChange();
 			if (cuChange != null) {
 				cuChange.setKeepPreviewEdits(true);

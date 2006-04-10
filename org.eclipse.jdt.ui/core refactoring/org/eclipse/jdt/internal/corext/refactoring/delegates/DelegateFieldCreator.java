@@ -20,13 +20,11 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MemberRef;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.deprecation.DeprecationRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
 
 /**
@@ -82,20 +80,6 @@ public class DelegateFieldCreator extends DelegateCreator {
 
 	protected IBinding getDeclarationBinding() {
 		return fOldFieldFragment.resolveBinding();
-	}
-
-	protected String createRefactoringScript() {
-		final IVariableBinding binding= fOldFieldFragment.resolveBinding();
-		if (binding != null && binding.isField())
-			return DeprecationRefactorings.createInlineDeprecationScript(binding);
-		return null;
-	}
-
-	protected String getRefactoringScriptName() {
-		final IVariableBinding binding= fOldFieldFragment.resolveBinding();
-		if (binding != null)
-			return DeprecationRefactorings.getRefactoringScriptName(binding);
-		return null;
 	}
 
 	protected String getTextEditGroupLabel() {

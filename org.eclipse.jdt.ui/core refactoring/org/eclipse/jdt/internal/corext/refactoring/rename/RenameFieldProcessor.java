@@ -112,7 +112,6 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	private GroupCategorySet fCategorySet;
 	private boolean fDelegateUpdating;
 	private boolean fDelegateDeprecation;
-	private List fDelegateChanges= new ArrayList();
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameFieldProcessor"; //$NON-NLS-1$
 
@@ -568,9 +567,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
 			final TextChange[] changes= fChangeManager.getAllChanges();
-			final List list= new ArrayList(changes.length + fDelegateChanges.size());
+			final List list= new ArrayList(changes.length);
 			list.addAll(Arrays.asList(changes));
-			list.addAll(fDelegateChanges);
 			return new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges, (Change[]) list.toArray(new Change[list.size()])) {
 
 				public ChangeDescriptor getDescriptor() {
@@ -685,9 +683,6 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 				creator.setSourceRewrite(rewrite);
 				creator.prepareDelegate();
 				creator.createEdit();
-				Change change= creator.createChange();
-				if (change != null)
-					fDelegateChanges.add(change);
 			}
 		}
 
@@ -716,9 +711,6 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		creator.setSourceRewrite(rewrite);
 		creator.prepareDelegate();
 		creator.createEdit();
-		Change change= creator.createChange();
-		if (change != null)
-			fDelegateChanges.add(change);
 	}
 
 	private void addTextEdit(TextChange change, String groupName, TextEdit textEdit) {

@@ -140,7 +140,6 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	private BodyDeclaration[] fMemberDeclarations;
 	private boolean fDelegateUpdating;
 	private boolean fDelegateDeprecation;
-	private List fDelegateChanges= new ArrayList();
 	private String fComment;
 
 	private static class TypeReferenceFinder extends ASTVisitor {
@@ -678,7 +677,6 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		pm.done();
-		fChange.addAll((Change[]) fDelegateChanges.toArray(new Change[fDelegateChanges.size()]));
 		return fChange;
 	}
 	
@@ -949,9 +947,6 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 					creator.setNewLocation(getDestinationBinding());
 					creator.prepareDelegate();
 					creator.createEdit();
-					Change change= creator.createChange();
-					if (change != null)
-						fDelegateChanges.add(change);
 
 					removeImportsOf= ((MethodDeclaration) declaration).getBody();
 					addedDelegate= true;
@@ -976,9 +971,6 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 						creator.setNewLocation(getDestinationBinding());
 						creator.prepareDelegate();
 						creator.createEdit();
-						Change change= creator.createChange();
-						if (change != null)
-							fDelegateChanges.add(change);
 
 						removeImportsOf= frag.getInitializer();
 						addedDelegate= true;

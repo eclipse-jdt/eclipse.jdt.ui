@@ -173,7 +173,6 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 	private ITypeHierarchy fCachedTypeHierarchy= null;
 	private boolean fDelegateUpdating;
 	private boolean fDelegateDeprecation;
-	private List fDelegateChanges= new ArrayList();
 
 	/**
 	 * Creates a new change signature refactoring.
@@ -1139,9 +1138,8 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try {
 			final TextChange[] changes= fChangeManager.getAllChanges();
-			final List list= new ArrayList(changes.length + fDelegateChanges.size());
+			final List list= new ArrayList(changes.length);
 			list.addAll(Arrays.asList(changes));
-			list.addAll(fDelegateChanges);
 			return new DynamicValidationStateChange(RefactoringCoreMessages.ChangeSignatureRefactoring_restructure_parameters, (Change[]) list.toArray(new Change[list.size()])) {
 				public final ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
@@ -1823,9 +1821,6 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 			new DocReferenceUpdate(creator.getJavadocReference(), creator.getDelegateRewrite(), fResult).updateNode();
 			
 			creator.createEdit();
-			Change change= creator.createChange();
-			if (change != null)
-				fDelegateChanges.add(change);
 		}
 		
 		/** @return {@inheritDoc} (element type: SingleVariableDeclaration) */
