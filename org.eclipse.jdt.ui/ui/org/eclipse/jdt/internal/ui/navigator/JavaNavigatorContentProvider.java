@@ -15,10 +15,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 
@@ -40,8 +37,6 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.model.JavaSynchronizationContentProvider;
 import org.eclipse.jdt.internal.ui.navigator.IExtensionStateConstants.Values;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
 
@@ -144,26 +139,6 @@ public class JavaNavigatorContentProvider extends
 			PipelinedShapeModification removeModification) {
 		convertToJavaElements(removeModification.getChildren());
 		return removeModification;
-	}
-
-	/**
-	 * Returns the java element associated with the project.
-	 * 
-	 * Reused from {@link JavaSynchronizationContentProvider}.
-	 * 
-	 * @param project
-	 *            the project
-	 * @return the associated java element, or <code>null</code> if the
-	 *         project is not a java project
-	 */
-	private IJavaElement asJavaProject(final IProject project) {
-		try {
-			if (project.getDescription().hasNature(JavaCore.NATURE_ID))
-				return JavaCore.create(project);
-		} catch (CoreException exception) {
-			JavaPlugin.log(exception);
-		}
-		return null;
 	}
 
 	/**
