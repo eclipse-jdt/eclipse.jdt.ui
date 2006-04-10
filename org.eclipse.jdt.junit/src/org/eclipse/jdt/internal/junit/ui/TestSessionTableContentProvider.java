@@ -24,8 +24,6 @@ import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 
 public class TestSessionTableContentProvider implements IStructuredContentProvider {
 
-	private final Object[] NO_CHILDREN= new Object[0];
-	
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 	}
 
