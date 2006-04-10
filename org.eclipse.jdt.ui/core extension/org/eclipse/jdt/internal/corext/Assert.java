@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
  * Note that an <code>assert</code> statement is slated to be added to the
  * Java language in JDK 1.4, rending this class obsolete.
  * </p>
+ * @deprecated Use {@link org.eclipse.core.runtime.Assert} instead.
  */
 public final class Assert {
 
