@@ -303,7 +303,9 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.FieldAccess)
 	 */
 	public final void endVisit(final FieldAccess node) {
-		endVisit(node.resolveFieldBinding(), node.getExpression(), node);
+		final IVariableBinding binding= node.resolveFieldBinding();
+		if (binding != null)
+			endVisit(binding, node.getExpression(), node);
 	}
 
 	/*
