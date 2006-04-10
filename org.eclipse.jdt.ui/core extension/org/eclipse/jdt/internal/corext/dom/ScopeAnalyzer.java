@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
@@ -309,10 +310,18 @@ public class ScopeAnalyzer {
 					return getBinding(fieldAccess.getExpression());
 				}
 				return null;			
-			case ASTNode.SUPER_FIELD_ACCESS:
-			case ASTNode.SUPER_METHOD_INVOCATION:
+			case ASTNode.SUPER_FIELD_ACCESS: {
 				ITypeBinding curr= Bindings.getBindingOfParentType(parent);
 				return curr.getSuperclass();
+			}
+			case ASTNode.SUPER_METHOD_INVOCATION: {
+				SuperMethodInvocation superInv= (SuperMethodInvocation) parent;
+				if (selector == superInv.getName()) {
+					ITypeBinding curr= Bindings.getBindingOfParentType(parent);
+					return curr.getSuperclass();
+				}
+				return null;
+			}
 			default:
 				if (parent instanceof Type) {
 					// bug 67644: in 'a.new X()', all member types of A are visible as location of X. 

@@ -2421,6 +2421,55 @@ public class ImportOrganizeTest extends CoreTests {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
+	public void test_bug135122() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class Foo extends Bar {\n");
+		buf.append("  public static final int MYCONSTANT= 9;\n");
+		buf.append("\n");
+		buf.append("  public void anotherMethod() {\n");
+		buf.append("    super.testMethod(MYCONSTANT);\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class Bar {\n");
+		buf.append("    public void testMethod(int something) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Foo.java", buf.toString(), false, null);
+
+		String[] order= new String[] { "", "#"};
+		IChooseImportQuery query= createQuery("Foo", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class Foo extends Bar {\n");
+		buf.append("  public static final int MYCONSTANT= 9;\n");
+		buf.append("\n");
+		buf.append("  public void anotherMethod() {\n");
+		buf.append("    super.testMethod(MYCONSTANT);\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class Bar {\n");
+		buf.append("    public void testMethod(int something) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	
+	
+
+	
 	public void testTypeArgumentImports() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
