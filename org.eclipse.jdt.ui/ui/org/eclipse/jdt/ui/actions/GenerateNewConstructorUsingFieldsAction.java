@@ -268,8 +268,10 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 				if (type != null) {
 					if (type.getFields().length > 0) {
 						run(type, new IField[0], true);
-						return;
+					} else {
+						MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_typeContainsNoFields_message);
 					}
+					return;
 				}
 			}
 			MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_not_applicable); 
