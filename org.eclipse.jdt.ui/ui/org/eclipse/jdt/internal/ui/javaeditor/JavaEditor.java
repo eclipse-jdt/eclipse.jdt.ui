@@ -1619,6 +1619,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.1
 	 */
 	private ToggleFoldingRunner fFoldingRunner;
+	
+	/**
+	 * Tells whether the selection changed event is caused
+	 * by a call to {@link #gotoAnnotation(boolean)}.
+	 * 
+	 * @since 3.2
+	 */
+	private boolean fSelectionChangedViaGotoAnnotation;
 
 
 	/**
@@ -1947,7 +1955,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE))
 			synchronizeOutlinePage(element);
 		setSelection(element, false);
-		updateStatusLine();
+		if (!fSelectionChangedViaGotoAnnotation)
+			updateStatusLine();
+		fSelectionChangedViaGotoAnnotation= false;
 	}
 
 	protected void setSelection(ISourceReference reference, boolean moveCursor) {
@@ -3426,7 +3436,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	private Annotation getAnnotation(int offset, int length) {
 		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
-		Iterator e= new JavaAnnotationIterator(model, true, true);
+		Iterator e= new JavaAnnotationIterator(model, true, false);
 		while (e.hasNext()) {
 			Annotation a= (Annotation) e.next();
 			Position p= model.getPosition(a);
@@ -3436,6 +3446,15 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		return null;
 	}
 
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#gotoAnnotation(boolean)
+	 * @since 3.2
+	 */
+	public Annotation gotoAnnotation(boolean forward) {
+		fSelectionChangedViaGotoAnnotation= true;
+		return super.gotoAnnotation(forward);
+	}
+	
 	/**
 	 * Computes and returns the source reference that includes the caret and
 	 * serves as provider for the outline page selection and the editor range
