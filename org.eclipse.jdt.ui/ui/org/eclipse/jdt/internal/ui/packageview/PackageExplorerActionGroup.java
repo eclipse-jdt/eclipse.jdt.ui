@@ -27,9 +27,9 @@ import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.TreePath;
-import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.IActionBars;
@@ -288,8 +288,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 				IAction openAction= fNavigateActionGroup.getOpenAction();
 				if (openAction != null && openAction.isEnabled() && OpenStrategy.getOpenMethod() == OpenStrategy.DOUBLE_CLICK)
 					return;
-				if (selection instanceof TreeSelection) {
-					TreePath[] paths= ((TreeSelection)selection).getPathsFor(element);
+				if (selection instanceof ITreeSelection) {
+					TreePath[] paths= ((ITreeSelection)selection).getPathsFor(element);
 					for (int i= 0; i < paths.length; i++) {
 						viewer.setExpandedState(paths[i], !viewer.getExpandedState(paths[i]));
 					}
