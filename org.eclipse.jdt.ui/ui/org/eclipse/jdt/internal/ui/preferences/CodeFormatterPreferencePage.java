@@ -23,6 +23,7 @@ import org.eclipse.jface.preference.IPreferencePageContainer;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.preferences.IWorkingCopyManager;
+import org.eclipse.ui.preferences.WorkingCopyManager;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.preferences.formatter.CodeFormatterConfigurationBlock;
@@ -49,14 +50,13 @@ public class CodeFormatterPreferencePage extends PropertyAndPreferencePage {
 	 */
 	public void createControl(Composite parent) {
 		IPreferencePageContainer container= getContainer();
-		PreferencesAccess access;
+		IWorkingCopyManager workingCopyManager;
 		if (container instanceof IWorkbenchPreferenceContainer) {
-			IWorkingCopyManager workingCopyManager= ((IWorkbenchPreferenceContainer) container).getWorkingCopyManager();
-			access= PreferencesAccess.getWorkingCopyPreferences(workingCopyManager);
+			workingCopyManager= ((IWorkbenchPreferenceContainer) container).getWorkingCopyManager();
 		} else {
-			access= PreferencesAccess.getOriginalPreferences();
+			workingCopyManager= new WorkingCopyManager(); // non shared 
 		}
-		
+		PreferencesAccess access= PreferencesAccess.getWorkingCopyPreferences(workingCopyManager);
 		fConfigurationBlock= new CodeFormatterConfigurationBlock(getProject(), access);
 		
 		super.createControl(parent);
@@ -129,6 +129,16 @@ public class CodeFormatterPreferencePage extends PropertyAndPreferencePage {
 			return false;
 		}	
 		return super.performOk();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
+	 */
+	public void performApply() {
+		if (fConfigurationBlock != null) {
+			fConfigurationBlock.performApply();
+		}	
+		super.performApply();
 	}
 	
 	/* (non-Javadoc)

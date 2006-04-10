@@ -22,6 +22,8 @@ import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.ui.preferences.IWorkingCopyManager;
 
+import org.osgi.service.prefs.BackingStoreException;
+
 /**
  * 
  */
@@ -51,6 +53,10 @@ public class PreferencesAccess {
 		return new ProjectScope(project);
 	}
 	
+	public void applyChanges() throws BackingStoreException {
+	}
+	
+	
 	private static class WorkingCopyPreferencesAccess extends PreferencesAccess {
 		
 		private final IWorkingCopyManager fWorkingCopyManager;
@@ -73,6 +79,13 @@ public class PreferencesAccess {
 		
 		public IScopeContext getProjectScope(IProject project) {
 			return getWorkingCopyScopeContext(super.getProjectScope(project));
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.preferences.PreferencesAccess#applyChanges()
+		 */
+		public void applyChanges() throws BackingStoreException {
+			fWorkingCopyManager.applyChanges();
 		}
 	}
 	

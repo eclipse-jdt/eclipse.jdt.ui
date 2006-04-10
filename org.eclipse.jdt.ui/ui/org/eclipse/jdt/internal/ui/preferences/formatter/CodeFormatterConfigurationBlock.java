@@ -39,6 +39,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -50,6 +52,8 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
+import org.osgi.service.prefs.BackingStoreException;
 
 
 
@@ -497,8 +501,22 @@ public class CodeFormatterConfigurationBlock {
 		return false;
 	}
 	
+	
 	public boolean performOk() {
 		return true;
+	}
+	
+	public void performApply() {
+		try {
+			fCurrContext.getNode(JavaUI.ID_PLUGIN).flush();
+			fCurrContext.getNode(JavaCore.PLUGIN_ID).flush();
+			if (fCurrContext != fInstanceScope) {
+				fInstanceScope.getNode(JavaUI.ID_PLUGIN).flush();
+				fInstanceScope.getNode(JavaCore.PLUGIN_ID).flush();
+			}
+		} catch (BackingStoreException e) {
+			JavaPlugin.log(e);
+		}
 	}
 	
 	public void performDefaults() {
@@ -521,6 +539,8 @@ public class CodeFormatterConfigurationBlock {
 			fProfileManager.clearAllSettings(fCurrContext);
 		}
 	}
+
+
 	
 
 }
