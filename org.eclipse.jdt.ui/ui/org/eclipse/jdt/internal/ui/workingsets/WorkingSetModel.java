@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.ListenerList;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -36,6 +37,7 @@ import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.IWorkingSetUpdater;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IJavaProject;
 
 public class WorkingSetModel {
 
@@ -78,11 +80,13 @@ public class WorkingSetModel {
 		private Map fWorkingSetToElement= new IdentityHashMap();
 
 		private Map fResourceToWorkingSet= new HashMap();
+		private List fNonProjectTopLevelElements= new ArrayList();
 
 		public void clear() {
 			fElementToWorkingSet.clear();
 			fWorkingSetToElement.clear();
 			fResourceToWorkingSet.clear();
+			fNonProjectTopLevelElements.clear();
 		}
 		public void rebuild(IWorkingSet[] workingSets) {
 			clear();
@@ -138,13 +142,20 @@ public class WorkingSetModel {
 		public List getAllWorkingSetsForResource(IResource resource) {
 			return getAllElements(fResourceToWorkingSet, resource);
 		}
+		public List getNonProjectTopLevelElements() {
+			return fNonProjectTopLevelElements;
+		}
 		private void put(IWorkingSet ws) {
 			if (fWorkingSetToElement.containsKey(ws))
 				return;
 			IAdaptable[] elements= ws.getElements();
 			fWorkingSetToElement.put(ws, elements);
 			for (int i= 0; i < elements.length; i++) {
-				addElement(elements[i], ws);
+				IAdaptable element= elements[i];
+				addElement(element, ws);
+				if (!(element instanceof IProject) && !(element instanceof IJavaProject)) {
+					fNonProjectTopLevelElements.add(element);
+				}
 			}
 		}
 		private void addElement(IAdaptable element, IWorkingSet ws) {
@@ -362,6 +373,10 @@ public class WorkingSetModel {
 			IWorkingSet workingSet= (IWorkingSet)iter.next();
 			active.putString(TAG_WORKING_SET_NAME, workingSet.getName());
 		}
+	}
+	
+	public List getNonProjectTopLevelElements() {
+		return fElementMapper.getNonProjectTopLevelElements();
 	}
 
 	private void restoreState(IMemento memento) {

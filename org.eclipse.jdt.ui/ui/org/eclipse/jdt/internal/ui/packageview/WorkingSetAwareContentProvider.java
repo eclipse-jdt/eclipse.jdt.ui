@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.packageview;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -208,6 +209,16 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 				toRefresh.addAll(Arrays.asList(fWorkingSetModel.getAllParents(parent)));
 			}
 		}
+		List nonProjetTopLevelElemens= fWorkingSetModel.getNonProjectTopLevelElements();
+		if (nonProjetTopLevelElemens.isEmpty())
+			return;
+		List toAdd= new ArrayList();
+		for (Iterator iter= nonProjetTopLevelElemens.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			if (isChildOf(element, toRefresh))
+				toAdd.add(element);
+		}
+		toRefresh.addAll(toAdd);
 	}
 	
 	private void workingSetModelChanged(PropertyChangeEvent event) {
@@ -222,5 +233,22 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 			toRefresh.add(newValue);
 		}
 		postRefresh(toRefresh, true);
+	}
+	
+	private boolean isChildOf(Object element, List potentialParents) {
+		// Calling super get parent to bypass working set mapping
+		Object parent= super.getParent(element);
+		if (parent == null)
+			return false;
+		for (Iterator iter= potentialParents.iterator(); iter.hasNext();) {
+			Object potentialParent= iter.next();
+			while(parent != null) {
+				if (parent.equals(potentialParent))
+					return true;
+				parent= super.getParent(parent);
+			}
+			
+		}
+		return false;
 	}
 }
