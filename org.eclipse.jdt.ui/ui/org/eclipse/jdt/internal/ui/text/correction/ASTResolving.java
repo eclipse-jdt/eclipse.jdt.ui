@@ -985,6 +985,8 @@ public class ASTResolving {
 			name= ((MethodInvocation) assignedExpression).getName().getIdentifier();
 		} else if (assignedExpression instanceof SuperMethodInvocation) {
 			name= ((SuperMethodInvocation) assignedExpression).getName().getIdentifier();
+		} else if (assignedExpression instanceof FieldAccess) {
+			return ((FieldAccess) assignedExpression).getName().getIdentifier();
 		}
 		if (name != null && name.length() > 3) {
 			if (name.startsWith("get")) { //$NON-NLS-1$

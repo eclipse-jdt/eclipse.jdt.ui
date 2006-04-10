@@ -149,11 +149,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			
 			// quick assists that show up also if there is an error/warning
 			getRenameLocalProposals(context, coveringNode, locations, noErrorsAtLocation, resultingCollections);
-
+			getAssignToVariableProposals(context, coveringNode, resultingCollections);
+			getAssignParamToFieldProposals(context, coveringNode, resultingCollections);
+			
 			if (noErrorsAtLocation) {
 				getCatchClauseToThrowsProposals(context, coveringNode, resultingCollections);
-				getAssignToVariableProposals(context, coveringNode, resultingCollections);
-				getAssignParamToFieldProposals(context, coveringNode, resultingCollections);
 				getUnWrapProposals(context, coveringNode, resultingCollections);
 				getSplitVariableProposals(context, coveringNode, resultingCollections);
 				getJoinVariableProposals(context, coveringNode, resultingCollections);
@@ -1230,7 +1230,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return null;
 	}
 	
-	private boolean getMakeVariableDeclarationFinalProposals(IInvocationContext context, ASTNode node, ArrayList resultingCollections) {
+	private static boolean getMakeVariableDeclarationFinalProposals(IInvocationContext context, ASTNode node, ArrayList resultingCollections) {
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(context.getSelectionOffset(), context.getSelectionLength()), false);
 		context.getASTRoot().accept(analyzer);
 		ASTNode[] selectedNodes= analyzer.getSelectedNodes();
