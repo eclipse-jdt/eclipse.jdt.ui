@@ -4137,24 +4137,6 @@
             commandId="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
             
-      <key
-            sequence="M2+M3+F"
-            contextId="org.eclipse.jdt.ui.javaEditorScope"
-            commandId="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            platform="carbon"
-            sequence="M2+M3+F"
-            contextId="org.eclipse.jdt.ui.javaEditorScope"
-            commandId=""
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            platform="carbon"
-            sequence="COMMAND+ALT+F"
-            contextId="org.eclipse.jdt.ui.javaEditorScope"
-            commandId="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-
 <!-- navigate -->
       <key
             sequence="M1+M2+ARROW_DOWN"
