@@ -1115,6 +1115,8 @@ action enablement
 		if (fTestRunSessionListener != null)
 			JUnitPlugin.getModel().removeTestRunSessionListener(fTestRunSessionListener);
 		
+		setActiveTestRunSession(null);
+		
 		if (fProgressImages != null)
 			fProgressImages.dispose();
 		getViewSite().getPage().removePartListener(fPartListener);
