@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.compare.CompareConfiguration;
@@ -44,7 +45,7 @@ public class PropertiesFileMergeViewer extends TextMergeViewer {
 	 * @param configuration the configuration object
 	 */
 	public PropertiesFileMergeViewer(Composite parent, CompareConfiguration configuration) {
-		super(parent, configuration);
+		super(parent, SWT.LEFT_TO_RIGHT, configuration);
 	}
 	
 	/*

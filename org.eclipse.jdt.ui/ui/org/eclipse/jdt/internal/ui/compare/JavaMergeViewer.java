@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.graphics.RGB;
@@ -42,7 +43,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 	private JavaSourceViewerConfiguration fSourceViewerConfiguration;
 		
 	public JavaMergeViewer(Composite parent, int styles, CompareConfiguration mp) {
-		super(parent, styles, mp);
+		super(parent, styles + SWT.LEFT_TO_RIGHT, mp);
 		
 		fPreferenceStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		if (fPreferenceStore != null) {
