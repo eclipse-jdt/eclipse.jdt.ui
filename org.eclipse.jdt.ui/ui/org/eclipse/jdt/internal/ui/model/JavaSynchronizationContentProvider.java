@@ -54,9 +54,12 @@ import org.eclipse.team.core.mapping.ISynchronizationContext;
 import org.eclipse.team.core.mapping.ISynchronizationScope;
 import org.eclipse.team.core.mapping.provider.ResourceDiffTree;
 
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 import org.eclipse.ltk.ui.refactoring.model.AbstractSynchronizationContentProvider;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -147,7 +150,9 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 			if (project.getDescription().hasNature(JavaCore.NATURE_ID))
 				return JavaCore.create(project);
 		} catch (final CoreException exception) {
-			JavaPlugin.log(exception);
+			// Only log the error for projects that are accessible (i.e. exist and are open)
+			if (project.isAccessible())
+				JavaPlugin.log(exception);
 		}
 		return null;
 	}
@@ -286,6 +291,28 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		if (fContentProvider == null)
 			fContentProvider= new JavaModelContentProvider();
 		return fContentProvider;
+	}
+
+	/**
+	 * Returns the projects that used to have changes in the diff tree 
+	 * but have been deleted from the workspace.
+	 * 
+	 * @param event
+	 *            the event
+	 * @return the deleted projects
+	 */
+	private Set getDeletedProjects(final IDiffChangeEvent event) {
+		final Set result= new HashSet();
+		final IPath[] deletions= event.getRemovals();
+		for (int index= 0; index < deletions.length; index++) {
+			final IPath path= deletions[index];
+			if (path.segmentCount() > 0) {
+				IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(path.segment(0));
+				if (!project.isAccessible())
+					result.add(project);
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -511,28 +538,6 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	}
 
 	/**
-	 * Returns the projects that used to have changes in the diff tree 
-	 * but have been deleted from the workspace.
-	 * 
-	 * @param event
-	 *            the event
-	 * @return the deleted projects
-	 */
-	private Set getDeletedProjects(final IDiffChangeEvent event) {
-		final Set result= new HashSet();
-		final IPath[] deletions= event.getRemovals();
-		for (int index= 0; index < deletions.length; index++) {
-			final IPath path= deletions[index];
-			if (path.segmentCount() > 0) {
-				IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(path.segment(0));
-				if (!project.isAccessible())
-					result.add(project);
-			}
-		}
-		return result;
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	protected ResourceTraversal[] getTraversals(final ISynchronizationContext context, final Object object) {
@@ -572,10 +577,10 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		final List removals= new ArrayList(changed.length);
 		for (int index= 0; index < changed.length; index++) {
 			final IJavaProject project= changed[index];
-			if (hasDiffs(event, project)) {
+			if (hasVisibleChanges(event.getTree(), project)) {
 				if (existing.contains(project))
 					refreshes.add(project);
-				else if (hasVisibleChanges(event.getTree(), project))
+				else
 					additions.add(project);
 			} else
 				removals.add(project);
@@ -608,17 +613,12 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	}
 
 	/**
-	 * Has the diff tree any diffs for the project?
-	 * 
-	 * @param event
-	 *            the diff change event
-	 * @param project
-	 *            the project
-	 * @return <code>true</code> if it has diffs, <code>false</code>
-	 *         otherwise
+	 * {@inheritDoc}
 	 */
-	private boolean hasDiffs(final IDiffChangeEvent event, final IJavaProject project) {
-		return event.getTree().getChildren(project.getResource().getFullPath()).length > 0;
+	public boolean hasChildren(final Object element) {
+		if (element instanceof ICompilationUnit || element instanceof IFile || element instanceof RefactoringDescriptorProxy || element instanceof RefactoringDescriptor)
+			return false;
+		return super.hasChildren(element);
 	}
 
 	/**
