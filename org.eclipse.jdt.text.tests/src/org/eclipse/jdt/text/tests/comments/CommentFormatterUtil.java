@@ -14,21 +14,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
+import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jface.preference.IPreferenceStore;
-
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TypedPosition;
 import org.eclipse.jface.text.formatter.FormattingContext;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
-
-import org.eclipse.jdt.ui.text.IJavaPartitions;
-
-import org.eclipse.jdt.internal.corext.Assert;
-
-import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
-import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
 
 /**
  * Utilities for the comment formatter.
