@@ -12,12 +12,12 @@ package org.eclipse.jdt.ui.tests.refactoring.infra;
 
 import java.util.Collection;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
-
-import org.eclipse.jdt.internal.corext.Assert;
 
 public class SimpleSelectionProvider implements ISelectionProvider {
 	private ISelection fSelection;

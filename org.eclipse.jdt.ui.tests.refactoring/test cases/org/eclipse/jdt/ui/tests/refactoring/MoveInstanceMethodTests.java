@@ -13,7 +13,10 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -22,15 +25,12 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class MoveInstanceMethodTests extends RefactoringTest {
 

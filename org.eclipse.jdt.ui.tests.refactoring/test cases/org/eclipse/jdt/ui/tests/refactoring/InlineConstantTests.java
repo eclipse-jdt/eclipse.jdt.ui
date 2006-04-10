@@ -13,20 +13,20 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.dom.AST;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class InlineConstantTests extends RefactoringTest {
 	private static final Class clazz = InlineConstantTests.class;
