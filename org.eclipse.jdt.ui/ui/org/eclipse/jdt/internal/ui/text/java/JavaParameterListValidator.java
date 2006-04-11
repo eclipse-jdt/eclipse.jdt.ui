@@ -11,6 +11,9 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 
@@ -23,6 +26,8 @@ import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationPresenter;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+
+import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 
 
 
@@ -78,53 +83,124 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 		return end;
 	}
 
-	private int getCharCount(IDocument document, int start, int end, String increments, String decrements, boolean considerNesting) throws BadLocationException {
+	private int getCharCount(IDocument document, final int start, final int end, String increments, String decrements, boolean considerNesting) throws BadLocationException {
 
 		Assert.isTrue((increments.length() != 0 || decrements.length() != 0) && !increments.equals(decrements));
+		
+		final int NONE= 0;
+		final int BRACKET= 1;
+		final int BRACE= 2;
+		final int PAREN= 3;
+		final int ANGLE= 4;
 
+		int nestingMode= NONE;
 		int nestingLevel= 0;
+
 		int charCount= 0;
-		while (start < end) {
-			char curr= document.getChar(start++);
+		int offset= start;
+		while (offset < end) {
+			char curr= document.getChar(offset++);
 			switch (curr) {
 				case '/':
-					if (start < end) {
-						char next= document.getChar(start);
+					if (offset < end) {
+						char next= document.getChar(offset);
 						if (next == '*') {
 							// a comment starts, advance to the comment end
-							start= getCommentEnd(document, start + 1, end);
+							offset= getCommentEnd(document, offset + 1, end);
 						} else if (next == '/') {
 							// '//'-comment: nothing to do anymore on this line
-							start= end;
+							offset= end;
 						}
 					}
 					break;
 				case '*':
-					if (start < end) {
-						char next= document.getChar(start);
+					if (offset < end) {
+						char next= document.getChar(offset);
 						if (next == '/') {
 							// we have been in a comment: forget what we read before
 							charCount= 0;
-							++ start;
+							++ offset;
 						}
 					}
 					break;
 				case '"':
 				case '\'':
-					start= getStringEnd(document, start, end, curr);
+					offset= getStringEnd(document, offset, end, curr);
 					break;
-				default:
-
+				case '[':
 					if (considerNesting) {
-
-						if ('(' == curr)
-							++ nestingLevel;
-						else if (')' == curr)
-							-- nestingLevel;
-
-						if (nestingLevel != 0)
-							break;
+						if (nestingMode == BRACKET || nestingMode == NONE) {
+							nestingMode= BRACKET;
+							nestingLevel++;
+						}
+						break;
 					}
+				case ']':
+					if (considerNesting) {
+						if (nestingMode == BRACKET)
+							if (--nestingLevel == 0)
+								nestingMode= NONE;
+						break;
+					}
+				case '(':
+					if (considerNesting) {
+						if (nestingMode == ANGLE) {
+							// generics heuristic failed
+							nestingMode=PAREN;
+							nestingLevel= 1;
+						}
+						if (nestingMode == PAREN || nestingMode == NONE) {
+							nestingMode= PAREN;
+							nestingLevel++;
+						}
+						break;
+					}
+				case ')':
+					if (considerNesting) {
+						if (nestingMode == PAREN)
+							if (--nestingLevel == 0)
+								nestingMode= NONE;
+						break;
+					}
+				case '{':
+					if (considerNesting) {
+						if (nestingMode == ANGLE) {
+							// generics heuristic failed
+							nestingMode=BRACE;
+							nestingLevel= 1;
+						}
+						if (nestingMode == BRACE || nestingMode == NONE) {
+							nestingMode= BRACE;
+							nestingLevel++;
+						}
+						break;
+					}
+				case '}':
+					if (considerNesting) {
+						if (nestingMode == BRACE)
+							if (--nestingLevel == 0)
+								nestingMode= NONE;
+						break;
+					}
+				case '<':
+					if (considerNesting) {
+						if (nestingMode == ANGLE || nestingMode == NONE && checkGenericsHeuristic(document, offset - 1, start - 1)) {
+							nestingMode= ANGLE;
+							nestingLevel++;
+						}
+						break;
+					}
+				case '>':
+					if (considerNesting) {
+						if (nestingMode == ANGLE)
+							if (--nestingLevel == 0)
+								nestingMode= NONE;
+						break;
+					}
+
+				default:
+					if (nestingLevel != 0)
+						continue;
 
 					if (increments.indexOf(curr) >= 0) {
 						++ charCount;
@@ -138,6 +214,11 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 
 		return charCount;
 	}
+
+    private boolean checkGenericsHeuristic(IDocument document, int end, int bound) throws BadLocationException {
+    	JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
+    	return scanner.looksLikeClassInstanceCreationBackward(end, bound);
+    }
 
 	/**
 	 * @see IContextInformationValidator#isContextInformationValid(int)
@@ -154,7 +235,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 			if (position < line.getOffset() || position >= document.getLength())
 				return false;
 
-			return getCharCount(document, fPosition, position, "(<", ")>", false) >= 0;  //$NON-NLS-1$//$NON-NLS-2$
+			return getCharCount(document, fPosition, position, "(<", ")>", false) >= 0; //$NON-NLS-1$ //$NON-NLS-2$
 
 		} catch (BadLocationException x) {
 			return false;
@@ -183,28 +264,15 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 		fCurrentParameter= currentParameter;
 
 		String s= fInformation.getInformationDisplayString();
-		int start= 0;
-		int occurrences= 0;
-		while (occurrences < fCurrentParameter) {
-			int found= s.indexOf(',', start);
-			if (found == -1)
-				break;
-			start= found + 1;
-			++ occurrences;
-		}
+		int[] commas= computeCommaPositions(s);
 
-		if (occurrences < fCurrentParameter) {
+		if (commas.length - 2 < fCurrentParameter) {
 			presentation.addStyleRange(new StyleRange(0, s.length(), null, null, SWT.NORMAL));
 			return true;
 		}
-
-		if (start == -1)
-			start= 0;
-
-		int end= s.indexOf(',', start);
-		if (end == -1)
-			end= s.length();
-
+		
+		int start= commas[fCurrentParameter] + 1;
+		int end= commas[fCurrentParameter + 1];
 		if (start > 0)
 			presentation.addStyleRange(new StyleRange(0, start, null, null, SWT.NORMAL));
 
@@ -216,5 +284,37 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 
 		return true;
 	}
+	
+	private int[] computeCommaPositions(String code) {
+		final int length= code.length();
+	    int pos= 0;
+		List positions= new ArrayList();
+		positions.add(new Integer(-1));
+		while (pos < length && pos != -1) {
+			char ch= code.charAt(pos);
+			switch (ch) {
+	            case ',':
+		            positions.add(new Integer(pos));
+		            break;
+	            case '<':
+	            	pos= code.indexOf('>', pos);
+	            	break;
+	            case '[':
+	            	pos= code.indexOf(']', pos);
+	            	break;
+	            default:
+	            	break;
+            }
+			if (pos != -1)
+				pos++;
+		}
+		positions.add(new Integer(length));
+		
+		int[] fields= new int[positions.size()];
+		for (int i= 0; i < fields.length; i++)
+	        fields[i]= ((Integer) positions.get(i)).intValue();
+	    return fields;
+    }
+
 }
 

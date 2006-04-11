@@ -835,4 +835,50 @@ public final class JavaHeuristicScanner implements Symbols {
 
 		return false;
 	}
+	
+	/**
+	 * Returns <code>true</code> if the document, when scanned backwards from <code>start</code>
+	 * appears to contain a class instance creation, i.e. a possibly qualified name preceded by a
+	 * <code>new</code> keyword. The <code>start</code> must be at the end of the type name, and
+	 * before any generic signature or constructor parameter list. The heuristic will return
+	 * <code>true</code> if <code>start</code> is at the following positions (|):
+	 * 
+	 * <pre>
+	 *  new java.util. ArrayList|&lt;String&gt;(10)
+	 *  new ArrayList |(10)
+	 *  new  / * comment  * / ArrayList |(10)
+	 * </pre>
+	 * 
+	 * but not the following:
+	 * 
+	 * <pre>
+	 *  new java.util. ArrayList&lt;String&gt;(10)|
+	 *  new java.util. ArrayList&lt;String&gt;|(10)
+	 *  new ArrayList (10)|
+	 *  ArrayList |(10)
+	 * </pre>
+	 * 
+	 * @param start the position where the type name of the class instance creation supposedly ends
+	 * @param bound the first position in <code>fDocument</code> to not consider any more, with
+	 *        <code>bound</code> &lt; <code>start</code>, or <code>UNBOUND</code>
+	 * @return <code>true</code> if the current position looks like after the type name of a class
+	 *         instance creation
+	 * @since 3.2
+	 */
+	public boolean looksLikeClassInstanceCreationBackward(int start, int bound) {
+		int token= previousToken(start - 1, bound);
+		if (token == Symbols.TokenIDENT) { // type name
+			token= previousToken(getPosition(), bound);
+			while (token == Symbols.TokenOTHER) { // dot of qualification
+				token= previousToken(getPosition(), bound);
+				if (token != Symbols.TokenIDENT) // qualification name
+					return false;
+				token= previousToken(getPosition(), bound);
+			}
+			return token == Symbols.TokenNEW;
+		}
+		return false;
+	}
+
+
 }

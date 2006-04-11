@@ -39,6 +39,7 @@ public class JavaHeuristicScannerTest extends TestCase {
 	private FastPartitioner fPartitioner;
 	private Document fDocument;
 	private JavaIndenter fScanner;
+	private JavaHeuristicScanner fHeuristicScanner;
 
 	public static Test suite() {
 		return new TestSuite(JavaHeuristicScannerTest.class);
@@ -73,8 +74,8 @@ public class JavaHeuristicScannerTest extends TestCase {
 		fPartitioner.connect(fDocument); 
 		fDocument.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, fPartitioner);
 		
-		JavaHeuristicScanner hScanner= new JavaHeuristicScanner(fDocument);
-		fScanner= new JavaIndenter(fDocument, hScanner);
+		fHeuristicScanner= new JavaHeuristicScanner(fDocument);
+		fScanner= new JavaIndenter(fDocument, fHeuristicScanner);
 	}
 	
 	/*
@@ -818,5 +819,32 @@ public class JavaHeuristicScannerTest extends TestCase {
 		Assert.assertEquals("		", indent);
 
     }
+
+	/*
+	 * @since 3.2 
+	 */
+	public void testClassInstanceCreationHeuristic() throws Exception {
+	    fDocument.set("   method(new java.util.ArrayList<String>(10), foo, new int[])");
+	    
+	    for (int offset= 0; offset < 15; offset++)
+	    	assertFalse(fHeuristicScanner.looksLikeClassInstanceCreationBackward(offset, JavaHeuristicScanner.UNBOUND));
+	    for (int offset= 15; offset < 19; offset++)
+	    	assertTrue(fHeuristicScanner.looksLikeClassInstanceCreationBackward(offset, JavaHeuristicScanner.UNBOUND));
+	    for (int offset= 19; offset < 20; offset++)
+	    	assertFalse(fHeuristicScanner.looksLikeClassInstanceCreationBackward(offset, JavaHeuristicScanner.UNBOUND));
+	    for (int offset= 20; offset < 24; offset++)
+	    	assertTrue(fHeuristicScanner.looksLikeClassInstanceCreationBackward(offset, JavaHeuristicScanner.UNBOUND));
+	    for (int offset= 24; offset < 25; offset++)
+	    	assertFalse(fHeuristicScanner.looksLikeClassInstanceCreationBackward(offset, JavaHeuristicScanner.UNBOUND));
+	    for (int offset= 25; offset < 34; offset++)
+	    	assertTrue(fHeuristicScanner.looksLikeClassInstanceCreationBackward(offset, JavaHeuristicScanner.UNBOUND));
+	    for (int offset= 34; offset < 57; offset++)
+	    	assertFalse(fHeuristicScanner.looksLikeClassInstanceCreationBackward(offset, JavaHeuristicScanner.UNBOUND));
+	    for (int offset= 57; offset < 60; offset++)
+	    	assertTrue(fHeuristicScanner.looksLikeClassInstanceCreationBackward(offset, JavaHeuristicScanner.UNBOUND));
+	    for (int offset= 60; offset < 63; offset++)
+	    	assertFalse(fHeuristicScanner.looksLikeClassInstanceCreationBackward(offset, JavaHeuristicScanner.UNBOUND));
+    }
+	
 }
 

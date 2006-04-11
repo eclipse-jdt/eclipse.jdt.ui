@@ -11,7 +11,9 @@
 package org.eclipse.jdt.text.tests;
 
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -56,14 +58,171 @@ public class JavaParameterListValidatorTest extends TestCase {
 		fValidator= null;
 	}
 	
-	protected void checkPresentation(TextPresentation shouldBe, TextPresentation is) {
+	public void testParameterStyling() {
+		final String code= "a, b, c, d, e";
+		assertParameterInfoStyles(code, "int a, int b, int c, int d, int e", computeCommaPositions(code));
+    }
+
+	public void testParameterStylingWithString() {
+		final String code= "a, b, \"foo, bar, and such\", d, e";
+		assertParameterInfoStyles(code, "int a, int b, String c, int d, int e", computeCommaPositions(code));
+	}
+	
+	public void testParameterStylingWithEscapedString() {
+		final String code= "a, b, \"foo, b\\\"ar, and such\\\\\", d, e";
+		assertParameterInfoStyles(code, "int a, int b, String c, int d, int e", computeCommaPositions(code));
+	}
+	
+	public void testParameterStylingWithComment() {
+		final String code= "a, b, c /* the ( argument */, d, e";
+		assertParameterInfoStyles(code, "int a, int b, String c, int d, int e", computeCommaPositions(code));
+	}
+	
+	public void testParameterStylingWithGenerics() {
+		final String code= "new HashMap <String, HashMap<String,Integer[]>>(), p1, p2";
+		assertParameterInfoStyles(code, "Map<String, Map> m, int p1, int p2", computeCommaPositions(code));
+	}
+	
+	public void testParameterStylingWithGenericsAndComments() {
+		final String code= "new HashMap <String, /* comment > */HashMap<String,Integer[]>>(), p1, p2";
+		assertParameterInfoStyles(code, "Map<String, Map> m, int p1, int p2", new int[] {64, 68});
+	}
+	
+	public void testParameterStylingWithConstants() {
+		final String code= "MAX < MIN, MAX > MIN";
+		assertParameterInfoStyles(code, "boolean b1, boolean b2", new int[] {9});
+	}
+	
+	public void testParameterStylingWithGenericsThatLookLikeConstants() {
+		final String code= "new MAX < MIN, MAX >";
+		assertParameterInfoStyles(code, "MAX<?,?>", new int[0]);
+	}
+	
+	private void assertParameterInfoStyles(String code, String infostring, int[] argumentCommas) {
+		fDocument.set(code);
+		fTextViewer.setDocument(fDocument);
+		
+		int[] parameterCommas= computeCommaPositions(infostring);
+		IContextInformation info= new ContextInformation("context", infostring);
+		fValidator.install(info, fTextViewer, 0);
+		
+		TextPresentation p= new TextPresentation();
+		for (int i= 0; i < fDocument.getLength(); i++) {
+			fValidator.updatePresentation(i, p);
+			assertEquals(createPresentation(i, parameterCommas, argumentCommas, infostring), p);
+		}
+    }
+
+	private int[] computeCommaPositions(String code) {
+	    int pos= 0;
+		List positions= new ArrayList();
+		while (pos < code.length() && pos != -1) {
+			char ch= code.charAt(pos);
+			switch (ch) {
+	            case ',':
+		            positions.add(new Integer(pos));
+		            break;
+	            case '<':
+	            	pos= code.indexOf('>', pos);
+	            	break;
+	            case '(':
+	            	pos= code.indexOf(')', pos);
+	            	break;
+	            case '[':
+	            	pos= code.indexOf(']', pos);
+	            	break;
+	            case '{':
+	            	pos= code.indexOf('}', pos);
+	            	break;
+	            case '"':
+	            	pos= findLiteralEnd(code, pos + 1, '"');
+	            	break;
+	            case '/':
+	            	if (pos < code.length() - 1 && code.charAt(pos + 1) == '*')
+	            		pos= findCommentEnd(code, pos + 2);
+	            	break;
+	            case '\'':
+	            	pos= findLiteralEnd(code, pos + 1, '\'');
+	            	break;
+	            default:
+	            	break;
+            }
+			if (pos != -1)
+				pos++;
+		}
+		
+		int[] fields= new int[positions.size()];
+		for (int i= 0; i < fields.length; i++)
+	        fields[i]= ((Integer) positions.get(i)).intValue();
+	    return fields;
+    }
+
+    private int findCommentEnd(String code, int pos) {
+    	while (pos < code.length()) {
+    		pos= code.indexOf('*', pos);
+    		if (pos == -1 || pos == code.length() - 1)
+    			break;
+    		if (code.charAt(pos + 1) == '/')
+    			return pos;
+    		pos++;
+    	}
+	    return -1;
+    }
+
+	private int findLiteralEnd(String code, int pos, char peer) {
+    	while (pos < code.length()) {
+    		char ch= code.charAt(pos);
+    		if (ch == peer)
+    			return pos;
+    		if (ch == '\\')
+    			pos += 2;
+    		else
+    			pos++;
+    	}
+	    return -1;
+    }
+	
+	private TextPresentation createPresentation(int position, int[] parameterCommas, int[] argumentCommas, String contextInfo) {
+		int length= contextInfo.length();
+		TextPresentation p= new TextPresentation();
+		
+		
+		int boldStart= 0;
+		int boldEnd= length;
+		
+		for (int i= 0; i < argumentCommas.length; i++) {
+	        int argumentComma= argumentCommas[i];
+	        int parameterComma= parameterCommas[i];
+	        
+	        if (argumentComma < position)
+	        	boldStart= parameterComma + 1;
+	        if (argumentComma >= position) {
+	        	boldEnd= parameterComma;
+	        	break;
+	        }
+        }
+		
+		if (boldStart > 0)
+			p.addStyleRange(new StyleRange(0, boldStart, null, null, SWT.NORMAL));
+		
+		p.addStyleRange(new StyleRange(boldStart, boldEnd - boldStart, null, null, SWT.BOLD));
+		
+		if (boldEnd < length)
+			p.addStyleRange(new StyleRange(boldEnd, length - boldEnd, null, null, SWT.NORMAL));
+
+		// TODO handle no range at all
+		
+		return p;
+	}
+	
+	private static void assertEquals(TextPresentation expected, TextPresentation actual) {
 		// check lengths
-		assertTrue(shouldBe.getDenumerableRanges() == is.getDenumerableRanges());
+		assertTrue(expected.getDenumerableRanges() == actual.getDenumerableRanges());
 		// check default range
-		assertEquals(shouldBe.getDefaultStyleRange(), is.getDefaultStyleRange());
+		assertEquals(expected.getDefaultStyleRange(), actual.getDefaultStyleRange());
 		// check rest
-		Iterator e1= shouldBe.getAllStyleRangeIterator();
-		Iterator e2= is.getAllStyleRangeIterator();
+		Iterator e1= expected.getAllStyleRangeIterator();
+		Iterator e2= actual.getAllStyleRangeIterator();
 		while (e1.hasNext())
 			assertEquals(e1.next(), e2.next());
 	}
@@ -86,67 +245,57 @@ public class JavaParameterListValidatorTest extends TestCase {
 		}
 		return buf.toString();	
 	}
-	
-	protected TextPresentation createSample(int position) {
-		TextPresentation p= new TextPresentation();
-		
-		int entry= Math.round((float) Math.ceil(position/3));
-		
-		if (entry > 4) {
-			p.addStyleRange(new StyleRange(0, 34, null, null, SWT.NORMAL));
-			return p;
-		}
-		
-		if (entry > 0)
-			p.addStyleRange(new StyleRange(0, entry * 7, null, null, SWT.NORMAL));
-		
-		p.addStyleRange(new StyleRange(entry * 7, 6, null, null, SWT.BOLD));
-		
-		if (entry < 4) {
-			int start= entry * 7 + 6;
-			p.addStyleRange(new StyleRange(start, 34 - start, null, null, SWT.NORMAL));
-		}
-		
-		return p;
+	public void testValidPositions() {
+		assertValidPositions("(a, b, c)");
 	}
 	
-	public void testParameterStyling() {
-		fDocument.set(" a, b, c, d, e");
-		fTextViewer.setDocument(fDocument);
-		
-		IContextInformation info= new ContextInformation("context", " int a, int b, int c, int d, int e");
-		fValidator.install(info, fTextViewer, 0);
-		
-		TextPresentation p= new TextPresentation();
-		for (int i= 0; i < fDocument.getLength(); i++) {
-			fValidator.updatePresentation(i, p);
-			checkPresentation(createSample(i), p);
-		}
+	public void testValidPositionsWithComment() {
+		assertValidPositions("(a, b /* the ( argument */, c)");
 	}
 	
-	public void testValidPositionsForward() {
-		fDocument.set("(a, b, c) ");
+	public void testValidPositionsWithString() {
+		assertValidPositions("(a, \"foo, bar, and such\", c)");
+	}
+	
+	public void testValidGenericPositions() throws Exception {
+	    assertValidPositions("(new A<T>(), new B<T>())");
+    }
+
+	public void testValidAllPositions() throws Exception {
+		assertValidPositions("(new HashMap<String, HashMap<String,Integer[]>>(), p1, p2)");
+	}
+	
+	public void testValidArrayPositions() throws Exception {
+		assertValidPositions("(foo[], bar[13])");
+	}
+	
+	/**
+	 * Asserts that the context information is invalid both at both borders of the passed string,
+	 * but valid at each position within the string.
+	 * 
+	 * @param code the code to test, typically a parenthesized expression such as
+	 *        <code>(a, b, c)</code>
+	 */
+	private void assertValidPositions(final String code) {
+	    fDocument.set(code + " ");
 		fTextViewer.setDocument(fDocument);
 		
 		IContextInformation info= new ContextInformation("context", "info");
 		fValidator.install(info, fTextViewer, 1);
 		
 		assertTrue(!fValidator.isContextInformationValid(0));		
-		for (int i= 1; i < 9; i++)
-			assertTrue(fValidator.isContextInformationValid(i));
-		assertTrue(!fValidator.isContextInformationValid(9));
-	}
-	
-	public void testValidPositionsBackward() {
-		fDocument.set("(a, b, c) ");
-		fTextViewer.setDocument(fDocument);
+		final int length= code.length();
+		final int firstInnerPosition= 1;
+		final int lastInnerPosition= length - 1;
 		
-		IContextInformation info= new ContextInformation("context", "info");
-		fValidator.install(info, fTextViewer, 1);
+		// forward
+		for (int pos= firstInnerPosition; pos <= lastInnerPosition; pos++)
+			assertTrue(fValidator.isContextInformationValid(pos));
+		assertTrue(!fValidator.isContextInformationValid(length));
 		
-		assertTrue(!fValidator.isContextInformationValid(9));
-		for (int i= 8; i > 0; i--)
-			assertTrue(fValidator.isContextInformationValid(i));
+		// backward
+		for (int pos= lastInnerPosition; pos >= firstInnerPosition; pos--)
+			assertTrue(fValidator.isContextInformationValid(pos));
 		assertTrue(!fValidator.isContextInformationValid(0));		
-	}
+    }
 }
