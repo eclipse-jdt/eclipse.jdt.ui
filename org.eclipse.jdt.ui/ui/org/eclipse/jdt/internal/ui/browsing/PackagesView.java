@@ -582,7 +582,7 @@ public class PackagesView extends JavaBrowsingPart{
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createDecoratingLabelProvider(JavaUILabelProvider)
 	 */
 	protected DecoratingLabelProvider createDecoratingLabelProvider(JavaUILabelProvider provider) {
-		return new DecoratingJavaLabelProvider(provider, false) {
+		return new DecoratingJavaLabelProvider(provider, false, isInListState()) {
 
 			public String getText(Object element){
 				if (element instanceof LogicalPackage) {

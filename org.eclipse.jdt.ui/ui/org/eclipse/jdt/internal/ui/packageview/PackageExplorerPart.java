@@ -718,7 +718,7 @@ public class PackageExplorerPart extends ViewPart
 	
 		fLabelProvider= createLabelProvider();
 		fLabelProvider.setIsFlatLayout(fIsCurrentLayoutFlat);
-		fViewer.setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, false));
+		fViewer.setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, false, fIsCurrentLayoutFlat));
 		// problem decoration provided by PackageLabelProvider
 	}
 	
@@ -730,6 +730,7 @@ public class PackageExplorerPart extends ViewPart
 		
 		fContentProvider.setIsFlatLayout(isFlatLayout());
 		fLabelProvider.setIsFlatLayout(isFlatLayout());
+		((DecoratingJavaLabelProvider) fViewer.getLabelProvider()).setFlatPackageMode(isFlatLayout());
 		
 		fViewer.getControl().setRedraw(false);
 		fViewer.refresh();

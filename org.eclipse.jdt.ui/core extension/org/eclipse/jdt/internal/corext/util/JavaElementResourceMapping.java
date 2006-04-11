@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.ui.model.JavaModelProvider;
  */
 public abstract class JavaElementResourceMapping extends ResourceMapping {
 	
-	/* package */ JavaElementResourceMapping() {
+	protected JavaElementResourceMapping() {
 	}
 	
 	public IJavaElement getJavaElement() {
