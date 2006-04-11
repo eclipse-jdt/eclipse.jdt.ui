@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BidiSegmentEvent;
 import org.eclipse.swt.custom.BidiSegmentListener;
 import org.eclipse.swt.custom.StyleRange;
@@ -416,6 +417,11 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 * @see org.eclipse.jface.text.source.SourceViewer#createControl(org.eclipse.swt.widgets.Composite, int)
 	 */
 	protected void createControl(Composite parent, int styles) {
+
+		// Use LEFT_TO_RIGHT unless otherwise specified.
+		if ((styles & SWT.RIGHT_TO_LEFT) == 0 && (styles & SWT.LEFT_TO_RIGHT) == 0)
+			styles |= SWT.LEFT_TO_RIGHT;
+			
 		super.createControl(parent, styles);
 
 		fBackspaceManager= new SmartBackspaceManager();

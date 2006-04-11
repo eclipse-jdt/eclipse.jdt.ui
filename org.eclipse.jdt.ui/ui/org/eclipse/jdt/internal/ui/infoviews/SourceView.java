@@ -176,7 +176,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	 */
 	protected void internalCreatePartControl(Composite parent) {
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
-		fViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.LEFT_TO_RIGHT, store);
+		fViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, store);
 		fViewerConfiguration= new SimpleJavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null, false);
 		fViewer.configure(fViewerConfiguration);
 		fViewer.setEditable(false);
