@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,12 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -22,17 +28,25 @@ import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.preference.PreferenceConverter;
 
 import org.eclipse.compare.CompareConfiguration;
+import org.eclipse.compare.IResourceProvider;
 import org.eclipse.compare.contentmergeviewer.ITokenComparator;
 import org.eclipse.compare.contentmergeviewer.TextMergeViewer;
 import org.eclipse.compare.structuremergeviewer.*;
 import org.eclipse.compare.ITypedElement;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.ui.text.*;
 
-
 import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
+
+import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 
 
 public class JavaMergeViewer extends TextMergeViewer {
@@ -41,19 +55,13 @@ public class JavaMergeViewer extends TextMergeViewer {
 	private IPreferenceStore fPreferenceStore;
 	private boolean fUseSystemColors;
 	private JavaSourceViewerConfiguration fSourceViewerConfiguration;
+	private ArrayList fSourceViewer;
+	
 		
 	public JavaMergeViewer(Composite parent, int styles, CompareConfiguration mp) {
-		super(parent, styles + SWT.LEFT_TO_RIGHT, mp);
-		
-		fPreferenceStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
-		if (fPreferenceStore != null) {
-			 fPreferenceChangeListener= new IPropertyChangeListener() {
-				public void propertyChange(PropertyChangeEvent event) {
-					handlePropertyChange(event);
-				}
-			};
-			fPreferenceStore.addPropertyChangeListener(fPreferenceChangeListener);
-		}
+		super(parent, styles | SWT.LEFT_TO_RIGHT, mp);
+				
+		getPreferenceStore();
 		
 		fUseSystemColors= fPreferenceStore.getBoolean(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT);
 		if (! fUseSystemColors) {
@@ -64,15 +72,78 @@ public class JavaMergeViewer extends TextMergeViewer {
 		}
 	}
 	
+	private IPreferenceStore getPreferenceStore() {
+		if (fPreferenceStore == null)
+			setPreferenceStore(createChainedPreferenceStore(null));
+		return fPreferenceStore;
+	}
+	
 	protected void handleDispose(DisposeEvent event) {
-		if (fPreferenceChangeListener != null) {
-			if (fPreferenceStore != null)
-				fPreferenceStore.removePropertyChangeListener(fPreferenceChangeListener);
-			fPreferenceChangeListener= null;
-		}
+		setPreferenceStore(null);
+		fSourceViewer= null;
 		super.handleDispose(event);
 	}
 	
+	public IJavaProject getJavaProject(ICompareInput input) {
+		
+		if (input == null)
+			return null;
+		
+		IResourceProvider rp= null;
+		ITypedElement te= input.getLeft();
+		if (te instanceof IResourceProvider)
+			rp= (IResourceProvider) te;
+		if (rp == null) {
+			te= input.getRight();
+			if (te instanceof IResourceProvider)
+				rp= (IResourceProvider) te;
+		}
+		if (rp == null) {
+			te= input.getAncestor();
+			if (te instanceof IResourceProvider)
+				rp= (IResourceProvider) te;
+		}
+		if (rp != null) {
+			IResource resource= rp.getResource();
+			if (resource != null) {
+				IJavaElement element= JavaCore.create(resource);
+				if (element != null)
+					return element.getJavaProject();
+			}
+		}
+		return null;
+	}
+
+    public void setInput(Object input) {
+    	
+    	if (input instanceof ICompareInput) {    		
+    		IJavaProject project= getJavaProject((ICompareInput)input);
+			if (project != null) {
+				setPreferenceStore(createChainedPreferenceStore(project));
+				if (fSourceViewer != null) {
+					Iterator iterator= fSourceViewer.iterator();
+					while (iterator.hasNext()) {
+						SourceViewer sourceViewer= (SourceViewer) iterator.next();
+						sourceViewer.unconfigure();
+						sourceViewer.configure(getSourceViewerConfiguration());
+					}
+				}
+			}
+    	}
+    		
+    	super.setInput(input);
+    }
+    
+    private ChainedPreferenceStore createChainedPreferenceStore(IJavaProject project) {
+    	ArrayList stores= new ArrayList(4);
+    	if (project != null)
+    		stores.add(new EclipsePreferencesAdapter(new ProjectScope(project.getProject()), JavaCore.PLUGIN_ID));
+		stores.add(JavaPlugin.getDefault().getPreferenceStore());
+		stores.add(new PreferencesAdapter(JavaCore.getPlugin().getPluginPreferences()));
+		stores.add(EditorsUI.getPreferenceStore());
+		return new ChainedPreferenceStore((IPreferenceStore[]) stores.toArray(new IPreferenceStore[stores.size()]));
+    }
+
 	private void handlePropertyChange(PropertyChangeEvent event) {
 		
 		String key= event.getProperty();
@@ -104,8 +175,8 @@ public class JavaMergeViewer extends TextMergeViewer {
 			}
 		}
 		
-		if (getSourceViewerConfiguration().affectsTextPresentation(event)) {
-			getSourceViewerConfiguration().handlePropertyChangeEvent(event);
+		if (fSourceViewerConfiguration != null && fSourceViewerConfiguration.affectsTextPresentation(event)) {
+			fSourceViewerConfiguration.handlePropertyChangeEvent(event);
 			invalidateTextPresentation();
 		}
 	}
@@ -136,6 +207,9 @@ public class JavaMergeViewer extends TextMergeViewer {
 		
 	protected void configureTextViewer(TextViewer textViewer) {
 		if (textViewer instanceof SourceViewer) {
+			if (fSourceViewer == null)
+				fSourceViewer= new ArrayList();
+			fSourceViewer.add(textViewer);
 			JavaTextTools tools= JavaCompareUtilities.getJavaTextTools();
 			if (tools != null)
 				((SourceViewer)textViewer).configure(getSourceViewerConfiguration());
@@ -143,17 +217,11 @@ public class JavaMergeViewer extends TextMergeViewer {
 	}
 	
 	private JavaSourceViewerConfiguration getSourceViewerConfiguration() {
-		JavaTextTools tools= JavaCompareUtilities.getJavaTextTools();
-		if (tools != null) {
-			if (fSourceViewerConfiguration == null) {
-				IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
-				fSourceViewerConfiguration= new JavaSourceViewerConfiguration(tools.getColorManager(), store, null, null);
-			}
-			return fSourceViewerConfiguration;
-		}
-		return null;
+		if (fSourceViewerConfiguration == null)
+			getPreferenceStore();
+		return fSourceViewerConfiguration;
 	}
-
+	
 	protected int findInsertionPosition(char type, ICompareInput input) {
 		
 		int pos= super.findInsertionPosition(type, input);
@@ -318,5 +386,24 @@ public class JavaMergeViewer extends TextMergeViewer {
 			return end-1;
 		
 		return pos;
+	}
+
+	private void setPreferenceStore(IPreferenceStore ps) {
+		if (fPreferenceChangeListener != null) {
+			if (fPreferenceStore != null)
+				fPreferenceStore.removePropertyChangeListener(fPreferenceChangeListener);
+			fPreferenceChangeListener= null;
+		}
+		fPreferenceStore= ps;
+		if (fPreferenceStore != null) {
+			JavaTextTools tools= JavaCompareUtilities.getJavaTextTools();
+			fSourceViewerConfiguration= new JavaSourceViewerConfiguration(tools.getColorManager(), fPreferenceStore, null, null);
+			fPreferenceChangeListener= new IPropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent event) {
+					handlePropertyChange(event);
+				}
+			};
+			fPreferenceStore.addPropertyChangeListener(fPreferenceChangeListener);
+		}
 	}
 }
