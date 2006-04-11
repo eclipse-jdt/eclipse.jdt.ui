@@ -54,12 +54,12 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 	private static final String PROPERTIES_FILE= "/" + PerformanceTestSetup.PROJECT + "/Eclipse SWT/common_j2se/org/eclipse/swt/internal/SWTMessages.properties";
 
 
-	private static final IContentType PLUGIN_XML_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.pde.core.pluginManifest"); //$NON-NLS-1$
+	private static final IContentType PLUGIN_XML_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.pde.pluginManifest"); //$NON-NLS-1$
 
 	private static final String PLUGIN_XML_FILE= "/" + PerformanceTestSetup.PROJECT + "/plugin.xml";
 
 
-	private static final IContentType PLUGIN_PROPERTIES_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.pde.core.pluginProperties"); //$NON-NLS-1$
+	private static final IContentType PLUGIN_PROPERTIES_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.pde.pluginProperties"); //$NON-NLS-1$
 
 	private static final String PLUGIN_PROPERTIES_FILE= "/" + PerformanceTestSetup.PROJECT + "/plugin.properties";
 
