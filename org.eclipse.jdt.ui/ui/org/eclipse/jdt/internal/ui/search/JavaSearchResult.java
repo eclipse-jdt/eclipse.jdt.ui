@@ -87,6 +87,7 @@ public class JavaSearchResult extends AbstractTextSearchResult implements IEdito
 	
 	public void setActivatedFilters(MatchFilter[] matchFilters) {
 		fActivatedMatchFilters= matchFilters;
+		MatchFilter.setLastUsedFilters(matchFilters);
 		updateFilterStateForAllMarkers();
 		fireChange(new MatchFilterEvent(this, matchFilters));
 	}
