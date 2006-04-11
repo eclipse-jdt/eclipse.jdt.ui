@@ -32,7 +32,10 @@ public class PerformanceTestSuite extends TestSuite {
 		addTest(UndoJavaEditorTest.suite());
 		addTest(OpenQuickOutlineTest.suite());
 		addTest(OpenJavaContentAssistTest.suite());
-		addTest(JavaSmartPasteTest.suite());
+		
+		// This test is currently disabled because the results vary too much.
+//		addTest(JavaSmartPasteTest.suite());
+		
 		addTest(ActivateTextEditorTest.suite());
 		addTest(SaveTextEditorTest.suite());
 		addTest(SaveJavaEditorTest.suite());

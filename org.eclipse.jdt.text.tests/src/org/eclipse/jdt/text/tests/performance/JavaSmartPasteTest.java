@@ -30,6 +30,10 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+/**
+ * This test is currently disabled because the
+ * results vary too much.
+ */
 public class JavaSmartPasteTest extends TextPerformanceTestCase {
 	
 	private static final Class THIS= JavaSmartPasteTest.class;
