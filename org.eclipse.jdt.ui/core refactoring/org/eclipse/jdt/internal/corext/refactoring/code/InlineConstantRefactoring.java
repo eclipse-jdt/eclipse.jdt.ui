@@ -40,7 +40,6 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
@@ -108,7 +107,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IDeprecationResolving;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -119,7 +117,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class InlineConstantRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent, IDeprecationResolving {
+public class InlineConstantRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	private static final String ID_INLINE_CONSTANT= "org.eclipse.jdt.ui.inline.constant"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REPLACE= "replace"; //$NON-NLS-1$
@@ -962,33 +960,5 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
-	}
-
-	public boolean canEnableDeprecationResolving() {
-		return true;
-	}
-
-	public RefactoringSessionDescriptor createDeprecationResolution() {
-		final Map arguments= new HashMap();
-		String project= null;
-		IJavaProject javaProject= fField.getJavaProject();
-		if (javaProject != null)
-			project= javaProject.getElementName();
-		int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.DEPRECATION_RESOLVING;
-		try {
-			if (!Flags.isPrivate(fField.getFlags()))
-				flags|= RefactoringDescriptor.MULTI_CHANGE;
-		} catch (JavaModelException exception) {
-			JavaPlugin.log(exception);
-		}
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_CONSTANT, project, Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_deprecation_description, new String[] { JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED) }), RefactoringCoreMessages.InlineConstantRefactoring_deprecation_comment, arguments, flags);
-		final String handle= descriptor.elementToHandle(fField.getCompilationUnit());
-		// Must be set to actual compilation unit
-		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, handle);
-		// Must be set to actual selection
-		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, "-1 -1"); //$NON-NLS-1$
-		arguments.put(ATTRIBUTE_REMOVE, Boolean.FALSE.toString());
-		arguments.put(ATTRIBUTE_REPLACE, Boolean.FALSE.toString());
-		return new RefactoringSessionDescriptor(new RefactoringDescriptor[] { descriptor }, RefactoringSessionDescriptor.VERSION_1_0, handle);
 	}
 }

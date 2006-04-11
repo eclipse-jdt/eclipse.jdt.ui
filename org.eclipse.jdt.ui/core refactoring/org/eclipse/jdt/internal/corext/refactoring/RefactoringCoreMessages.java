@@ -600,10 +600,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String InlineConstantRefactoring_blank_finals;
 
-	public static String InlineConstantRefactoring_deprecation_comment;
-
-	public static String InlineConstantRefactoring_deprecation_description;
-
 	public static String InlineConstantRefactoring_descriptor_description;
 
 	public static String InlineConstantRefactoring_inline;
@@ -633,10 +629,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InlineMethodRefactoring_checking_overridden_error;
 
 	public static String InlineMethodRefactoring_checking_overrides_error;
-
-	public static String InlineMethodRefactoring_deprecation_comment;
-
-	public static String InlineMethodRefactoring_deprecation_description;
 
 	public static String InlineMethodRefactoring_descriptor_description;
 

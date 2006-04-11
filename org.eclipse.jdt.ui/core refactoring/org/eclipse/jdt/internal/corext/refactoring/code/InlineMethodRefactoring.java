@@ -37,7 +37,6 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -77,7 +76,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IDeprecationResolving;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -86,7 +84,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /*
@@ -98,7 +95,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  *    assigned to a parameter again. No need for a separate local (important to be able
  *    to reverse extract method correctly).
  */
-public class InlineMethodRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent, IDeprecationResolving {
+public class InlineMethodRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	public static final String ID_INLINE_METHOD= "org.eclipse.jdt.ui.inline.method"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_MODE= "mode"; //$NON-NLS-1$
@@ -127,31 +124,12 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 	private Mode fInitialMode;
 	private int fSelectionStart;
 	private int fSelectionLength;
-	/**
-	 * warning: usually null!
-	 */
-	private final IMethod fMethod;
-
-	/**
-	 * Creates a new inline method refactoring.
-	 * <p>
-	 * This constructor is only used by <code>DelegateCreator</code>.
-	 * </p>
-	 * 
-	 * @param method the method to inline
-	 */
-	public InlineMethodRefactoring(IMethod method) {
-		Assert.isNotNull(method);
-		Assert.isTrue(!method.isBinary() || JavaElementUtil.isSourceAvailable(method));
-		fMethod= method;
-	}
 
 	private InlineMethodRefactoring(IJavaElement unit, ASTNode node, int offset, int length) {
 		Assert.isNotNull(unit);
 		Assert.isTrue(JavaModelUtil.isTypeContainerUnit(unit));
 		Assert.isTrue(JavaElementUtil.isSourceAvailable((ISourceReference) unit));
 		Assert.isNotNull(node);
-		fMethod= null;
 		fInitialUnit= unit;
 		fInitialNode= node;
 		fSelectionStart= offset;
@@ -605,34 +583,5 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
-	}
-
-	public boolean canEnableDeprecationResolving() {
-		return true;
-	}
-
-	public RefactoringSessionDescriptor createDeprecationResolution() {
-		Assert.isNotNull(fMethod);
-		final Map arguments= new HashMap();
-		String project= null;
-		IJavaProject javaProject= fMethod.getJavaProject();
-		if (javaProject != null)
-			project= javaProject.getElementName();
-		int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.DEPRECATION_RESOLVING | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-		try {
-			if (!Flags.isPrivate(fMethod.getFlags()))
-				flags|= RefactoringDescriptor.MULTI_CHANGE;
-		} catch (JavaModelException exception) {
-			JavaPlugin.log(exception);
-		}
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_METHOD, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_deprecation_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED) }), RefactoringCoreMessages.InlineMethodRefactoring_deprecation_comment, arguments, flags);
-		final String handle= descriptor.elementToHandle(fMethod.getCompilationUnit());
-		// Must be set to actual compilation unit
-		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, handle);
-		// Must be set to actual selection
-		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, "-1 -1"); //$NON-NLS-1$
-		arguments.put(ATTRIBUTE_DELETE, Boolean.FALSE.toString());
-		arguments.put(ATTRIBUTE_MODE, String.valueOf(0));
-		return new RefactoringSessionDescriptor(new RefactoringDescriptor[] { descriptor }, RefactoringSessionDescriptor.VERSION_1_0, handle);
 	}
 }
