@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/executionEnvironments/J2SE-1.5"/>
+	<classpathentry kind="lib" path="junit-4.0.jar" sourcepath="junit-4.0-src.jar" exported="true"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
