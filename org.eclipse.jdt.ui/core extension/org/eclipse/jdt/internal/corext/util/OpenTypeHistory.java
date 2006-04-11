@@ -22,11 +22,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -151,19 +147,12 @@ public class OpenTypeHistory extends History {
 		}
 	}
 	
-	private static class UpdateJobListener extends JobChangeAdapter {
-		public void done(IJobChangeEvent event) {
-			OpenTypeHistory history= OpenTypeHistory.getInstance();
-			event.getJob().removeJobChangeListener(this);
-			history.clearUpdateJob(event.getJob());
-		}
-	}
+	// Needs to be volatile since accesses aren't synchronized.
+	private volatile boolean fNeedsConsistencyCheck;
 	
-	private boolean fNeedsConsistencyCheck;
 	private final IElementChangedListener fDeltaListener;
-	private UpdateJob fUpdateJob;
+	private final UpdateJob fUpdateJob;
 	private final TypeInfoFactory fTypeInfoFactory;
-	private final UpdateJobListener fListener= new UpdateJobListener();
 	
 	private static final String FILENAME= "OpenTypeHistory.xml"; //$NON-NLS-1$
 	private static final String NODE_ROOT= "typeInfoHistroy"; //$NON-NLS-1$
@@ -183,7 +172,7 @@ public class OpenTypeHistory extends History {
 		return fgInstance;
 	}
 	
-	public static void shutdown() {
+	public static synchronized void shutdown() {
 		if (fgInstance == null)
 			return;
 		fgInstance.doShutdown();
@@ -196,40 +185,30 @@ public class OpenTypeHistory extends History {
 		fNeedsConsistencyCheck= true;
 		fDeltaListener= new TypeHistoryDeltaListener();
 		JavaCore.addElementChangedListener(fDeltaListener);
+		fUpdateJob= new UpdateJob();
+		// It is not necessary anymore that the update job has a rule since
+		// markAsInconsistent isn't synchronized anymore. See bugs
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=128399 and
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=135278
+		// for details.
+		fUpdateJob.setPriority(Job.SHORT);
 	}
 	
-	public synchronized void markAsInconsistent() {
+	public void markAsInconsistent() {
 		fNeedsConsistencyCheck= true;
-		if (fUpdateJob != null) {
-			fUpdateJob.cancel();
-		}
-		fUpdateJob= new UpdateJob();
-		fUpdateJob.setPriority(Job.SHORT);
-		// The update job might initialize parts of the Java model.
-		// (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=128399)
-		// So we have to set a correct rule to avoid deadlocks.
-		fUpdateJob.setRule(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getSchedulingRule());
-		fUpdateJob.addJobChangeListener(fListener);
-		// No need to sync with the old update job since we use
-		// scheduling rules. The new job will run only if the old
-		// one is finished since they have the same scheduling rule.
+		// cancel the old job. If no job is running this is a NOOP.
+		fUpdateJob.cancel();
 		fUpdateJob.schedule();
 	}
 	
-	public synchronized boolean needConsistencyCheck() {
+	public boolean needConsistencyCheck() {
 		return fNeedsConsistencyCheck;
 	}
 
 	public void checkConsistency(IProgressMonitor monitor) throws OperationCanceledException {
-		synchronized (this) {
-			if (!fNeedsConsistencyCheck)
-				return;
-		}
-		// When joining the update job make sure that we don't hold looks
-		// Otherwise the update Job can't continue normally. As a result
-		// the update job could have already finished before we join it.
-		// However this isn't a problem since the join will then be a NOP.
-		if (hasUpdateJob()) {
+		if (!fNeedsConsistencyCheck)
+			return;
+		if (fUpdateJob.getState() == Job.RUNNING) {
 			try {
 				Platform.getJobManager().join(UpdateJob.FAMILY, monitor);
 			} catch (OperationCanceledException e) {
@@ -240,13 +219,9 @@ public class OpenTypeHistory extends History {
 				// waiting for the update job.
 			}
 		}
-		// Since we gave up the lock when joining the update job
-		// we have to re check the fNeedsConsistencyCheck flag
-		synchronized(this) {
-			if (!fNeedsConsistencyCheck)
-				return;
-			internalCheckConsistency(monitor);
-		}
+		if (!fNeedsConsistencyCheck)
+			return;
+		internalCheckConsistency(monitor);
 	}
 	
 	public synchronized boolean contains(TypeInfo type) {
@@ -291,6 +266,9 @@ public class OpenTypeHistory extends History {
 	}
 
 	private synchronized void internalCheckConsistency(IProgressMonitor monitor) throws OperationCanceledException {
+		// Setting fNeedsConsistencyCheck is necessary here since 
+		// markAsInconsistent isn't synchronized.
+		fNeedsConsistencyCheck= true;
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
 		List keys= new ArrayList(getKeys());
 		monitor.beginTask(CorextMessages.TypeInfoHistory_consistency_check, keys.size());
@@ -314,15 +292,6 @@ public class OpenTypeHistory extends History {
 		}
 		monitor.done();
 		fNeedsConsistencyCheck= false;
-	}
-	
-	private synchronized void clearUpdateJob(Job toClear) {
-		if (fUpdateJob == toClear)
-			fUpdateJob= null;
-	}
-	
-	private synchronized boolean hasUpdateJob() {
-		return fUpdateJob != null;
 	}
 	
 	private void doShutdown() {
