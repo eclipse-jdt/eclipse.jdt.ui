@@ -18,8 +18,8 @@ import org.eclipse.jdt.junit.ITestRunListener;
 
 public abstract class TestElement {
 	public final static class Status {
-		public static final Status RUNNING_ERROR= new Status("RUNNING_ERROR", -2,   3); //$NON-NLS-1$
-		public static final Status RUNNING_FAILURE= new Status("RUNNING_FAILURE", -1,   3); //$NON-NLS-1$
+		public static final Status RUNNING_ERROR= new Status("RUNNING_ERROR", -2,   5); //$NON-NLS-1$
+		public static final Status RUNNING_FAILURE= new Status("RUNNING_FAILURE", -1,   6); //$NON-NLS-1$
 		public static final Status RUNNING= new Status("RUNNING", 0,   3); //$NON-NLS-1$
 		public static final Status ERROR=   new Status("ERROR",   1, /*1*/ITestRunListener.STATUS_ERROR); //$NON-NLS-1$
 		public static final Status FAILURE= new Status("FAILURE", 2, /*2*/ITestRunListener.STATUS_FAILURE); //$NON-NLS-1$
