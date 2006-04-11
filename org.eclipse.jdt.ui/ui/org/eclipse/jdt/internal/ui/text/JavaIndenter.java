@@ -1608,9 +1608,8 @@ public final class JavaIndenter {
 	/**
 	 * Returns <code>true</code> if the current tokens look like an anonymous type declaration
 	 * header (i.e. a type name (potentially qualified) and a new keyword). The heuristic calls
-	 * <code>nextToken</code> and expects an identifier (type name) and a type declaration (an
-	 * identifier with optional brackets) which also covers the visibility modifier of constructors;
-	 * it does not recognize package visible constructors.
+	 * <code>nextToken</code> and expects a possibly qualified identifier (type name) and a new
+	 * keyword
 	 * 
 	 * @return <code>true</code> if the current position looks like a anonymous type declaration
 	 *         header.
