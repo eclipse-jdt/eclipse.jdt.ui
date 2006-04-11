@@ -23,7 +23,7 @@ import java.net.Socket;
 import java.net.SocketException;
 
 import org.eclipse.core.runtime.ISafeRunnable;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
 
 import org.eclipse.jdt.junit.ITestRunListener;
 
@@ -415,7 +415,7 @@ public class RemoteTestRunnerClient {
 	private void notifyTestReran(final String testId, final String className, final String testName, final int statusCode, final String trace) {
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener listener= fListeners[i];
-			Platform.run(new ListenerSafeRunnable() { 
+			SafeRunner.run(new ListenerSafeRunnable() { 
 				public void run() {
 				    if (listener instanceof ITestRunListener2 ) 
 				        ((ITestRunListener2) listener).testReran(testId,
@@ -452,7 +452,7 @@ public class RemoteTestRunnerClient {
 			return;
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener listener= fListeners[i];
-			Platform.run(new ListenerSafeRunnable() { 
+			SafeRunner.run(new ListenerSafeRunnable() { 
 				public void run() {
 					listener.testRunStopped(elapsedTime);
 				}
@@ -465,7 +465,7 @@ public class RemoteTestRunnerClient {
 			return;
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener listener= fListeners[i];
-			Platform.run(new ListenerSafeRunnable() { 
+			SafeRunner.run(new ListenerSafeRunnable() { 
 				public void run() {
 					listener.testRunEnded(elapsedTime);
 				}
@@ -478,7 +478,7 @@ public class RemoteTestRunnerClient {
 			return;
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener listener= fListeners[i];
-			Platform.run(new ListenerSafeRunnable() { 
+			SafeRunner.run(new ListenerSafeRunnable() { 
 				public void run() {
 					String s[]= extractTestId(test);
 					listener.testEnded(s[0], s[1]);
@@ -492,7 +492,7 @@ public class RemoteTestRunnerClient {
 			return;
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener listener= fListeners[i];
-			Platform.run(new ListenerSafeRunnable() { 
+			SafeRunner.run(new ListenerSafeRunnable() { 
 				public void run() {
 					String s[]= extractTestId(test);
 					listener.testStarted(s[0], s[1]);
@@ -506,7 +506,7 @@ public class RemoteTestRunnerClient {
 			return;
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener listener= fListeners[i];
-			Platform.run(new ListenerSafeRunnable() { 
+			SafeRunner.run(new ListenerSafeRunnable() { 
 				public void run() {
 					listener.testRunStarted(count);
 				}
@@ -519,7 +519,7 @@ public class RemoteTestRunnerClient {
 			return;
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener listener= fListeners[i];
-			Platform.run(new ListenerSafeRunnable() { 
+			SafeRunner.run(new ListenerSafeRunnable() { 
 				public void run() {
 				    if (listener instanceof ITestRunListener2 )
 				        ((ITestRunListener2)listener).testFailed(fFailureKind, fFailedTestId, 
@@ -537,7 +537,7 @@ public class RemoteTestRunnerClient {
 			return;
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener listener= fListeners[i];
-			Platform.run(new ListenerSafeRunnable() { 
+			SafeRunner.run(new ListenerSafeRunnable() { 
 				public void run() {
 					listener.testRunTerminated();
 				}
