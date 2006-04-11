@@ -4412,6 +4412,14 @@
       </filter>
       <filter
             targetId="org.eclipse.jdt.ui.PackageExplorer"
+            name="%HideContainedLibraries.label"
+            enabled="false"
+            description="%HideContainedLibraries.description"
+            class="org.eclipse.jdt.internal.ui.filters.ContainedLibraryFilter"
+            id="org.eclipse.jdt.ui.PackageExplorer.ContainedLibraryFilter">
+      </filter>
+      <filter
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideJavaFiles.label"
             enabled="false"
             description="%HideJavaFiles.description"
@@ -4572,6 +4580,14 @@
             description="%HideReferencedLibraries.description"
             class="org.eclipse.jdt.internal.ui.filters.LibraryFilter"
             id="org.eclipse.jdt.ui.ProjectsView.LibraryFilter">
+      </filter>
+      <filter
+            targetId="org.eclipse.jdt.ui.ProjectsView"
+            name="%HideContainedLibraries.label"
+            enabled="false"
+            description="%HideContainedLibraries.description"
+            class="org.eclipse.jdt.internal.ui.filters.ContainedLibraryFilter"
+            id="org.eclipse.jdt.ui.ProjectsView.ContainedLibraryFilter">
       </filter>
       <filter
             targetId="org.eclipse.jdt.ui.ProjectsView"
