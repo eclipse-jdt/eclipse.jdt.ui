@@ -852,6 +852,9 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 	
 	private void processChangesInUI() {
+		if (fSashForm.isDisposed())
+			return;
+		
 		doShowInfoMessage();
 		refreshCounters();
 		
@@ -1070,6 +1073,11 @@ action enablement
 		
 		fTestRunSession= testRunSession;
 		fTestViewer.registerActiveSession(testRunSession);
+		
+		if (fSashForm.isDisposed()) {
+			stopUpdateJobs();
+			return;
+		}
 		
 		if (testRunSession == null) {
 			setTitleToolTip(null);
