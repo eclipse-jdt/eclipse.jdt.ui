@@ -70,6 +70,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -609,10 +610,12 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		final ITrackedNodePosition position= rewrite.track(declaration);
 		if (declaration.getBody() != null)
 			rewrite.remove(declaration.getBody(), null);
-		final ListRewrite modifiers= rewrite.getListRewrite(declaration, declaration.getModifiersProperty());
+		final ListRewrite list= rewrite.getListRewrite(declaration, declaration.getModifiersProperty());
 		boolean publicFound= false;
 		boolean abstractFound= false;
+		ITypeBinding binding= null;
 		Modifier modifier= null;
+		Annotation annotation= null;
 		IExtendedModifier extended= null;
 		for (final Iterator iterator= declaration.modifiers().iterator(); iterator.hasNext();) {
 			extended= (IExtendedModifier) iterator.next();
@@ -626,7 +629,12 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					abstractFound= true;
 					continue;
 				}
-				modifiers.remove(modifier, null);
+				list.remove(modifier, null);
+			} else if (extended.isAnnotation()) {
+				annotation= (Annotation) extended;
+				binding= annotation.resolveTypeBinding();
+				if (binding.getQualifiedName().equals("java.lang.Override")) //$NON-NLS-1$
+					list.remove(annotation, null);
 			}
 		}
 		final ModifierRewrite rewriter= ModifierRewrite.create(rewrite, declaration);
