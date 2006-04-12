@@ -24,6 +24,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -85,8 +86,11 @@ public class JarImportWizardAction extends Action implements IObjectActionDelega
 				if (element instanceof IPackageFragmentRoot) {
 					final IPackageFragmentRoot root= (IPackageFragmentRoot) element;
 					try {
-						if (JarImportWizard.isValidClassPathEntry(root.getRawClasspathEntry()) && JarImportWizard.isValidJavaProject(root.getJavaProject()))
-							fSelection= structured;
+						final IClasspathEntry entry= root.getRawClasspathEntry();
+						if (entry != null) {
+							if (JarImportWizard.isValidClassPathEntry(entry) && JarImportWizard.isValidJavaProject(root.getJavaProject()))
+								fSelection= structured;
+						}
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
