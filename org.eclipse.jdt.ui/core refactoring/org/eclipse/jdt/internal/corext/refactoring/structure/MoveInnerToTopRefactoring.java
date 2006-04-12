@@ -792,6 +792,7 @@ public final class MoveInnerToTopRefactoring extends CommentRefactoring implemen
 		try {
 			monitor.beginTask(RefactoringCoreMessages.MoveInnerToTopRefactoring_creating_preview, 4); 
 			final Map rewrites= new HashMap(2);
+			fSourceRewrite.clearASTAndImportRewrites();
 			rewrites.put(fSourceRewrite.getCu(), fSourceRewrite);
 			final MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fType.getPackageFragment(), fType);
 			adjustor.setRewrites(rewrites);
