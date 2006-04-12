@@ -1696,6 +1696,12 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ReorgUtils_9;
 
+	public static String ReplaceInvocationsRefactoring_cannot_find_method_declaration;
+
+	public static String ReplaceInvocationsRefactoring_cannot_replace_in_binary;
+
+	public static String ReplaceInvocationsRefactoring_select_method_to_apply;
+
 	public static String RippleMethodFinder_analizing_hierarchy;
 
 	public static String SelfEncapsulateField_AccessAnalyzer_cannot_convert_postfix_expression;

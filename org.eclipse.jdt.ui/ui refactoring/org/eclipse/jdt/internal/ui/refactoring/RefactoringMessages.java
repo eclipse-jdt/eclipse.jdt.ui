@@ -828,6 +828,12 @@ public final class RefactoringMessages extends NLS {
 
 	public static String ReplaceInvocationsAction_unavailable;
 
+	public static String ReplaceInvocationsInputPage_replaceAll;
+
+	public static String ReplaceInvocationsInputPage_replaceInvocationsBy;
+
+	public static String ReplaceInvocationsWizard_title;
+
 	public static String SelfEncapsulateField_field_access;
 
 	public static String SelfEncapsulateField_keep_references;

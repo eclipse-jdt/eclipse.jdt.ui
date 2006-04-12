@@ -183,13 +183,13 @@ public class ReplaceInvocationsRefactoring extends CommentRefactoring implements
 		
 		if (fMethod == null) {
 			if (! (fSelectionUnit instanceof ICompilationUnit))
-				return RefactoringStatus.createFatalErrorStatus("Cannot replace invocation in a binary method.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReplaceInvocationsRefactoring_cannot_replace_in_binary);
 			
 			ICompilationUnit cu= (ICompilationUnit) fSelectionUnit;
 			CompilationUnit root= new RefactoringASTParser(AST.JLS3).parse(cu, true);
 			fSelectionNode= getTargetNode(cu, root, fSelectionStart, fSelectionLength);
 			if (fSelectionNode == null)
-				return RefactoringStatus.createFatalErrorStatus("Select a method declaration or method invocation to apply this refactoring.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReplaceInvocationsRefactoring_select_method_to_apply);
 			
 			if (fSelectionNode.getNodeType() == ASTNode.METHOD_DECLARATION) {
 				MethodDeclaration methodDeclaration= (MethodDeclaration) fSelectionNode;
@@ -289,7 +289,7 @@ public class ReplaceInvocationsRefactoring extends CommentRefactoring implements
 		if (node instanceof MethodDeclaration) {
 			return new SourceProvider(unit, source, (MethodDeclaration) node);
 		} else {
-			status.addFatalError("Cannot find method declaration");
+			status.addFatalError(RefactoringCoreMessages.ReplaceInvocationsRefactoring_cannot_find_method_declaration);
 			return null;
 		}
 	}

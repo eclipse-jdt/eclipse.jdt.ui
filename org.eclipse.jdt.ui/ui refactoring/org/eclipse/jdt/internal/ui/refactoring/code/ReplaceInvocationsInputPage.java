@@ -41,6 +41,7 @@ import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 public class ReplaceInvocationsInputPage extends UserInputWizardPage {
@@ -72,12 +73,12 @@ public class ReplaceInvocationsInputPage extends UserInputWizardPage {
 		separator.setLayoutData(gridData);
 		
 		Label bodyLabel= new Label(result, SWT.NONE);
-		bodyLabel.setText("&Replace Invocations by:");
+		bodyLabel.setText(RefactoringMessages.ReplaceInvocationsInputPage_replaceInvocationsBy);
 		
 		createBody(result);
 		
 		Button replaceAll= new Button(result, SWT.CHECK);
-		replaceAll.setText("Replace &all invocations");
+		replaceAll.setText(RefactoringMessages.ReplaceInvocationsInputPage_replaceAll);
 		boolean canSingle= fRefactoring.canReplaceSingle();
 //		replaceAll.setEnabled(canSingle);
 		replaceAll.setEnabled(false); // does not work for now...

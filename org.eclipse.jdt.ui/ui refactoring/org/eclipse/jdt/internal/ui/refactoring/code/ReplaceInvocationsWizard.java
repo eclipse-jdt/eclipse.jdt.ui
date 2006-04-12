@@ -14,11 +14,13 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring;
 
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+
 public class ReplaceInvocationsWizard extends RefactoringWizard {
 	
 	public ReplaceInvocationsWizard(ReplaceInvocationsRefactoring ref){
 		super(ref, DIALOG_BASED_USER_INTERFACE);
-		setDefaultPageTitle("Replace Method Invocations");  
+		setDefaultPageTitle(RefactoringMessages.ReplaceInvocationsWizard_title);  
 	}
 
 	protected void addUserInputPages(){
