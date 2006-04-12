@@ -794,8 +794,6 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 					fChange= null;
 					return;
 				}
-				if (analyzer.needsTargetImport())
-					rewrite.getImportRewrite().addImport(targetBinding);
 				if (!(fSource.getCu().equals(unit) || fTarget.getCu().equals(unit)))
 					fChange.add(rewrite.createChange());
 			}

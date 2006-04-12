@@ -27,14 +27,15 @@ import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Type;
 
+import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-
 
 /* package */ class MoveStaticMemberAnalyzer extends ASTVisitor {
 
@@ -44,9 +45,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 	protected ITypeBinding fTarget;
 	protected CompilationUnitRewrite fCuRewrite;
 	protected IBinding[] fMembers;
-	
+
 	protected boolean fNeedsImport;
-	// TW: MoveStaticMemberAnalyzer#rewrite... should use ImportRewrite (result of addImport(..) must be used as type qualifier)
 
 	protected Set fProcessed;
 	
@@ -72,9 +72,10 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 	
 	protected void rewrite(SimpleName node, ITypeBinding type) {
 		AST ast= node.getAST();
-		QualifiedName name= ast.newQualifiedName(
-			ast.newSimpleName(type.getName()),
-			(SimpleName)fCuRewrite.getASTRewrite().createCopyTarget(node));
+		Type result= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST());
+		fCuRewrite.getImportRemover().registerAddedImport(type.getQualifiedName());
+		Name dummy= ASTNodeFactory.newName(fCuRewrite.getAST(), ASTFlattener.asString(result));
+		QualifiedName name= ast.newQualifiedName(dummy, ast.newSimpleName(node.getIdentifier()));
 		fCuRewrite.getASTRewrite().replace(node, name, fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 		fCuRewrite.getImportRemover().registerRemovedNode(node);
 		fProcessed.add(node);
@@ -89,7 +90,9 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 	protected void rewrite(FieldAccess node, ITypeBinding type) {
 		Expression exp= node.getExpression();
 		if (exp == null) {
-			exp= node.getAST().newSimpleName(type.getName());
+			Type result= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST());
+			fCuRewrite.getImportRemover().registerAddedImport(type.getQualifiedName());
+			exp= ASTNodeFactory.newName(fCuRewrite.getAST(), ASTFlattener.asString(result));
 			fCuRewrite.getASTRewrite().set(node, FieldAccess.EXPRESSION_PROPERTY, exp,  fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 			fNeedsImport= true;
 		} else if (exp instanceof Name) {
@@ -103,7 +106,9 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 	protected void rewrite(MethodInvocation node, ITypeBinding type) {
 		Expression exp= node.getExpression();
 		if (exp == null) {
-			exp= node.getAST().newSimpleName(type.getName());
+			Type result= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST());
+			fCuRewrite.getImportRemover().registerAddedImport(type.getQualifiedName());
+			exp= ASTNodeFactory.newName(fCuRewrite.getAST(), ASTFlattener.asString(result));
 			fCuRewrite.getASTRewrite().set(node, MethodInvocation.EXPRESSION_PROPERTY, exp, fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 			fNeedsImport= true;
 		} else if (exp instanceof Name) {
@@ -117,7 +122,9 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 	protected void rewrite(MemberRef node, ITypeBinding type) {
 		Name qualifier= node.getQualifier();
 		if (qualifier == null) {
-			qualifier= node.getAST().newSimpleName(type.getName());
+			Type result= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST());
+			fCuRewrite.getImportRemover().registerAddedImport(type.getQualifiedName());
+			qualifier= ASTNodeFactory.newName(fCuRewrite.getAST(), ASTFlattener.asString(result));
 			fCuRewrite.getASTRewrite().set(node, MemberRef.QUALIFIER_PROPERTY, qualifier, fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 			fNeedsImport= true;
 		} else {
@@ -129,7 +136,9 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 	protected void rewrite(MethodRef node, ITypeBinding type) {
 		Name qualifier= node.getQualifier();
 		if (qualifier == null) {
-			qualifier= node.getAST().newSimpleName(type.getName());
+			Type result= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST());
+			fCuRewrite.getImportRemover().registerAddedImport(type.getQualifiedName());
+			qualifier= ASTNodeFactory.newName(fCuRewrite.getAST(), ASTFlattener.asString(result));
 			fCuRewrite.getASTRewrite().set(node, MethodRef.QUALIFIER_PROPERTY, qualifier, fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 			fNeedsImport= true;
 		} else {
@@ -153,9 +162,12 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 				fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 			fCuRewrite.getImportRemover().registerRemovedNode(name);
 		} else {
+			Type result= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST());
+			fCuRewrite.getImportRemover().registerAddedImport(type.getQualifiedName());
+			Name n= ASTNodeFactory.newName(fCuRewrite.getAST(), ASTFlattener.asString(result));
 			fCuRewrite.getASTRewrite().replace(
 				name, 
-				creator.newSimpleName(type.getName()),
+				n,
 				fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 			fCuRewrite.getImportRemover().registerRemovedNode(name);
 			fNeedsImport= true;
@@ -163,8 +175,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 	}
 			
 	private void rewriteExpression(ASTNode node, Expression exp, ITypeBinding type) {
-		SimpleName replace= node.getAST().newSimpleName(type.getName());
-		fCuRewrite.getASTRewrite().replace(exp, replace, fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
+		fCuRewrite.getASTRewrite().replace(exp, fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST()), fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
+		fCuRewrite.getImportRemover().registerAddedImport(type.getQualifiedName());
 		fCuRewrite.getImportRemover().registerRemovedNode(exp);
 		fNeedsImport= true;
 		nonStaticAccess(node);
