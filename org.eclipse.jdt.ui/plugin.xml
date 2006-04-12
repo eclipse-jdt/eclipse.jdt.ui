@@ -2061,6 +2061,7 @@
                label="%GenerateJavadocAction.label"
                helpContextId="org.eclipse.jdt.ui.generate_javadoc_action"
                class="org.eclipse.jdt.internal.ui.actions.GenerateJavadocAction"
+               icon="$nl$/icons/full/etool16/javadoc.gif"
                menubarPath="project/additions"
                id="exportJavadoc">
          </action>
