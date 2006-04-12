@@ -193,111 +193,88 @@ public class NLSHintHelper {
 		final Object RESULT_KEY= new Object();
 		final Object FIELD_KEY= new Object();
 		
-		class STOP_VISITING extends RuntimeException {
-			private static final long serialVersionUID= 1L;
-		}
-		
-		try {
-			astRoot.accept(new ASTVisitor() {
-				
-				public boolean visit(MethodInvocation node) {
-					IMethodBinding method= node.resolveMethodBinding();
-					if (method == null)
-						return true;
-					
-					String name= method.getDeclaringClass().getQualifiedName();
-					if (!("java.util.ResourceBundle".equals(name) && "getBundle".equals(method.getName()) && node.arguments().size() > 0) && //old school //$NON-NLS-1$ //$NON-NLS-2$
+		astRoot.accept(new ASTVisitor() {
+
+			public boolean visit(MethodInvocation node) {
+				IMethodBinding method= node.resolveMethodBinding();
+				if (method == null)
+					return true;
+
+				String name= method.getDeclaringClass().getQualifiedName();
+				if (!("java.util.ResourceBundle".equals(name) && "getBundle".equals(method.getName()) && node.arguments().size() > 0) && //old school //$NON-NLS-1$ //$NON-NLS-2$
 						!("org.eclipse.osgi.util.NLS".equals(name) && "initializeMessages".equals(method.getName()) && node.arguments().size() == 2)) //Eclipse style //$NON-NLS-1$ //$NON-NLS-2$
-						return true;
-					
-					Expression argument= (Expression)node.arguments().get(0);
-					String bundleName= getBundleName(argument);
-					if (bundleName != null) {
-						resultCollector.put(RESULT_KEY, bundleName);
-						throw new STOP_VISITING();
-					}
-					
-					if (argument instanceof Name) {
-						Object fieldNameBinding= ((Name)argument).resolveBinding();
-						if (fieldNameBinding != null) {
-							resultCollector.put(FIELD_KEY, fieldNameBinding);
-							if (resultCollector.get(fieldNameBinding) != null)
-								throw new STOP_VISITING();
-						}
-					}
-					
+					return true;
+
+				Expression argument= (Expression)node.arguments().get(0);
+				String bundleName= getBundleName(argument);
+				if (bundleName != null)
+					resultCollector.put(RESULT_KEY, bundleName);
+
+				if (argument instanceof Name) {
+					Object fieldNameBinding= ((Name)argument).resolveBinding();
+					if (fieldNameBinding != null) 
+						resultCollector.put(FIELD_KEY, fieldNameBinding);
+				}
+
+				return false;
+			}
+
+			public boolean visit(VariableDeclarationFragment node) {
+				Expression initializer= node.getInitializer();
+				String bundleName= getBundleName(initializer);
+				if (bundleName != null) {
+					Object fieldNameBinding= node.getName().resolveBinding();
+					if (fieldNameBinding != null)
+						resultCollector.put(fieldNameBinding, bundleName);
 					return false;
 				}
-				
-				public boolean visit(VariableDeclarationFragment node) {
-					Expression initializer= node.getInitializer();
-					String bundleName= getBundleName(initializer);
+				return true;	
+			}
+
+			public boolean visit(Assignment node) {
+				if (node.getLeftHandSide() instanceof Name) {
+					String bundleName= getBundleName(node.getRightHandSide());
 					if (bundleName != null) {
-						Object fieldNameBinding= node.getName().resolveBinding();
+						Object fieldNameBinding= ((Name)node.getLeftHandSide()).resolveBinding();
 						if (fieldNameBinding != null) {
 							resultCollector.put(fieldNameBinding, bundleName);
-							if (fieldNameBinding.equals(resultCollector.get(FIELD_KEY)))
-								throw new STOP_VISITING();
-						}
-						return false;
-					}
-					return true;	
-				}
-				
-				public boolean visit(Assignment node) {
-					if (node.getLeftHandSide() instanceof Name) {
-						String bundleName= getBundleName(node.getRightHandSide());
-						if (bundleName != null) {
-							Object fieldNameBinding= ((Name)node.getLeftHandSide()).resolveBinding();
-							if (fieldNameBinding != null) {
-								resultCollector.put(fieldNameBinding, bundleName);
-								if (fieldNameBinding.equals(resultCollector.get(FIELD_KEY)))
-									throw new STOP_VISITING();
-								return false;
-							}
+							return false;
 						}
 					}
-					return true;
 				}
-				
-				private String getBundleName(Expression initializer) {
-					if (initializer instanceof StringLiteral)
-						return ((StringLiteral)initializer).getLiteralValue();
-					
-					if (initializer instanceof MethodInvocation) {
-						MethodInvocation methInvocation= (MethodInvocation)initializer;
-						Expression exp= methInvocation.getExpression();
-						if ((exp != null) && (exp instanceof TypeLiteral)) {
-							SimpleType simple= (SimpleType)((TypeLiteral) exp).getType();
-							ITypeBinding typeBinding= simple.resolveBinding();
-							if (typeBinding != null)
-								return typeBinding.getQualifiedName();
-						}
+				return true;
+			}
+
+			private String getBundleName(Expression initializer) {
+				if (initializer instanceof StringLiteral)
+					return ((StringLiteral)initializer).getLiteralValue();
+
+				if (initializer instanceof MethodInvocation) {
+					MethodInvocation methInvocation= (MethodInvocation)initializer;
+					Expression exp= methInvocation.getExpression();
+					if ((exp != null) && (exp instanceof TypeLiteral)) {
+						SimpleType simple= (SimpleType)((TypeLiteral) exp).getType();
+						ITypeBinding typeBinding= simple.resolveBinding();
+						if (typeBinding != null)
+							return typeBinding.getQualifiedName();
 					}
-					return null;	
 				}
-				
-			});
-			
-		} catch (STOP_VISITING ex) {
-			// stop visiting AST
-		}
+				return null;	
+			}
+
+		});
+
 		
-		String result= (String)resultCollector.get(RESULT_KEY);
-		if (result != null)
-			return result;
+		Object fieldName;
+		String result;
 		
-		Object fieldName= resultCollector.get(FIELD_KEY);
-		if (fieldName != null)
-			return (String)resultCollector.get(fieldName);
-		
-		// Fallback: try hard-coded (from NLS tooling) bundle name String field names:
+		// First try hard-coded bundle name String field names from NLS tooling:
 		Iterator iter= resultCollector.keySet().iterator();
 		while (iter.hasNext()) {
-			IBinding binding= (IBinding)iter.next();
-			if (binding == null)
+			Object o= iter.next();
+			if (!(o instanceof IBinding))
 				continue;
-			
+			IBinding binding= (IBinding)o;
 			fieldName= binding.getName();
 			if (fieldName.equals("BUNDLE_NAME") || fieldName.equals("RESOURCE_BUNDLE") || fieldName.equals("bundleName")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				result= (String)resultCollector.get(binding);
@@ -305,6 +282,14 @@ public class NLSHintHelper {
 					return result;
 			}
 		}
+
+		result= (String)resultCollector.get(RESULT_KEY);
+		if (result != null)
+			return result;
+
+		fieldName= resultCollector.get(FIELD_KEY);
+		if (fieldName != null)
+			return (String)resultCollector.get(fieldName);
 
 		return null;
 	}
