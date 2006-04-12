@@ -801,7 +801,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 				 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 				 */
 				public IInformationControl doCreateInformationControl(Shell parent) {
-					return new BrowserInformationControl(parent, SWT.NO_TRIM, SWT.NONE, null, false);
+					return new BrowserInformationControl(parent, SWT.NO_TRIM | SWT.TOOL, SWT.NONE, null, false);
 				}
 			};
 		}
