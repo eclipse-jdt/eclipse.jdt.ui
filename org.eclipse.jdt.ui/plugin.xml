@@ -5097,6 +5097,9 @@
 		<viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
 			<includes>
 				<contentExtension pattern="org.eclipse.jdt.java.ui.javaContent" />
+				<contentExtension pattern="org.eclipse.jdt.java.ui.filters.*" />	
+				<contentExtension pattern="org.eclipse.jdt.java.ui.javaLinkHelper" />	
+							
 			</includes>
 		</viewerContentBinding>
 	</extension>
@@ -5168,19 +5171,21 @@
 					class="org.eclipse.jdt.internal.ui.navigator.PackageExplorerActionProvider"
 					overrides="org.eclipse.ui.navigator.resources.actions.RefactorActions"> 
 			</actionProvider>
+			
+		   <actionProvider
+		         class="org.eclipse.jdt.internal.ui.navigator.PackageExplorerOpenActionProvider"
+		         id="org.eclipse.jdt.internal.ui.navigator.PackageExplorerOpenActionProvider"
+		         overrides="org.eclipse.ui.navigator.resources.OpenActions"> 
+		   </actionProvider> 
+		   
 			<override
 					policy="InvokeAlwaysRegardlessOfSuppressedExt"
 					suppressedExtensionId="org.eclipse.ui.navigator.resourceContent"/>
 			<commonSorter
 					class="org.eclipse.jdt.ui.JavaElementSorter"
 					id="org.eclipse.jdt.ui.javaElementSorter"/>
-		   <actionProvider
-		         class="org.eclipse.jdt.internal.ui.navigator.PackageExplorerOpenActionProvider"
-		         id="org.eclipse.jdt.internal.ui.navigator.PackageExplorerOpenActionProvider"
-		         overrides="org.eclipse.ui.navigator.resources.OpenActions"> 
-		   </actionProvider> 
-		</navigatorContent>
-		  <commonWizard
+		   
+		   <commonWizard
 		        type="new"
 		        wizardId="org.eclipse.jdt.ui.wizards.NewPackageCreationWizard">
 		     <enablement>
@@ -5276,7 +5281,150 @@
 				        </or>
 				     </enablement>
 			 </commonWizard>
-		
+		   
+		</navigatorContent>
+  		<commonFilter
+		        activeByDefault="true"
+		        class="org.eclipse.jdt.internal.ui.filters.EmptyPackageFilter"
+		        name="%HideEmptyPackages.label"
+		        description="%HideEmptyPackages.description"
+		        id="org.eclipse.jdt.java.ui.filters.HideEmptyPackages"/>
+  		<commonFilter
+		        activeByDefault="true"
+		        class="org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter"
+		        name="%HideEmptyInnerPackages.label"
+		        description="%HideEmptyInnerPackages.description"
+		        id="org.eclipse.jdt.java.ui.filters.HideEmptyInnerPackages"/>
+  		<commonFilter 
+		        class="org.eclipse.jdt.internal.ui.filters.AnnotationFilter"
+		        name="%HideAnnotation.label"
+		        description="%HideAnnotation.description"
+		        id="org.eclipse.jdt.java.ui.filters.HideAnnotations"/>
+  		<commonFilter 
+		        class="org.eclipse.jdt.internal.ui.filters.EnumFilter"
+		        name="%HideEnum.label"
+		        description="%HideEnum.description"
+		        id="org.eclipse.jdt.java.ui.filters.HideAnnotations"/>
+  		<commonFilter 
+		        class="org.eclipse.jdt.internal.ui.filters.InterfaceFilter"
+		        name="%HideInterface.label"
+		        description="%HideInterface.description"
+		        id="org.eclipse.jdt.java.ui.filters.HideInterface"/>		        		        
+  		<commonFilter 
+		        class="org.eclipse.jdt.internal.ui.filters.FieldsFilter"
+		        name="%HideFields.label"
+		        description="%HideFields.description"
+		        id="org.eclipse.jdt.java.ui.filters.HideFields"/>
+  		<commonFilter
+		        activeByDefault="true"
+		        class="org.eclipse.jdt.internal.ui.filters.ImportDeclarationFilter"
+		        name="%HideImportDeclaration.label"
+		        description="%HideImportDeclaration.description"
+		        id="org.eclipse.jdt.java.ui.filters.HideImportDeclaration"/> 
+  		<commonFilter
+		        activeByDefault="true"
+		        name="%HideInnerClassFiles.label"
+		        description="%HideInnerClassFiles.description"
+		        id="org.eclipse.jdt.java.ui.filters.HideInnerClassFiles"> 
+	         <filterExpression>
+	         	<and>
+		            <instanceof value="org.eclipse.core.resources.IFile"/>
+	            	<test property="org.eclipse.core.resources.name" value="*$*.class"/>	            
+		        </and>
+	         </filterExpression>		        
+		</commonFilter>		 
+  		<commonFilter 
+		        class="org.eclipse.jdt.internal.ui.filters.JavaFileFilter"
+		        name="%HideJavaFiles.label"
+		        description="%HideJavaFiles.description"
+		        id="org.eclipse.jdt.java.ui.filters.HideJavaFiles"/> 		 
+  		<commonFilter 
+		        class="org.eclipse.jdt.internal.ui.filters.LocalTypesFilter"
+		        name="%HideLocalTypes.label"
+		        description="%HideLocalTypes.description"
+		        id="org.eclipse.jdt.java.ui.filters.HideLocalTypes"/>    		 
+  		<commonFilter 
+		        class="org.eclipse.jdt.internal.ui.filters.NonJavaElementFilter"
+		        name="%HideNonJavaElements.label"
+		        description="%HideNonJavaElements.description"
+		        id="org.eclipse.jdt.java.ui.filters.HideNonJavaElements"/>   		
+  		<commonFilter 
+		        class="org.eclipse.jdt.internal.ui.filters.NonJavaProjectsFilter"
+		        name="%HideNonJavaProjects.label"
+		        description="%HideNonJavaProjects.description"
+		        id="org.eclipse.jdt.java.ui.filters.HideNonJavaProjects"/>   
+  		<commonFilter 
+		        class="org.eclipse.jdt.internal.ui.filters.NonPublicFilter"
+		        name="%HideNonPublic.label"
+		        description="%HideNonPublic.description"
+		        id="org.eclipse.jdt.java.ui.filters.HideNonPublic"/>   
+  		<commonFilter 
+		        class="org.eclipse.jdt.internal.ui.filters.NonSharedProjectFilter"
+		        name="%HideNonSharedProjects.label"
+		        description="%HideNonSharedProjects.description"
+		        id="org.eclipse.jdt.java.ui.filters.HideNonSharedProjects"/>   
+  		<commonFilter
+		        activeByDefault="true"
+		        class="org.eclipse.jdt.internal.ui.filters.PackageDeclarationFilter"
+		        name="%HidePackageDeclaration.label"
+		        description="%HidePackageDeclaration.description"
+		        id="org.eclipse.jdt.java.ui.filters.HidePackageDeclaration"/>   
+  		<commonFilter 
+		        class="org.eclipse.jdt.internal.ui.filters.LibraryFilter"
+		        name="%HideReferencedLibraries.label"
+		        description="%HideReferencedLibraries.description"
+		        id="org.eclipse.jdt.java.ui.filters.HideReferencedLibraries"/>   
+  		<commonFilter 
+		        class="org.eclipse.jdt.internal.ui.filters.StaticsFilter"
+		        name="%HideStatics.label"
+		        description="%HideStatics.description"
+		        id="org.eclipse.jdt.java.ui.filters.HideStatics"/>
+  		<commonFilter
+		        activeByDefault="true"
+		        class="org.eclipse.jdt.internal.ui.filters.SyntheticMembersFilter"
+		        name="%HideSyntheticMembers.label"
+		        description="%HideSyntheticMembers.description"
+		        id="org.eclipse.jdt.java.ui.filters.HideSyntheticMembers"/>
 	</extension>
+	<extension
+       point="org.eclipse.ui.navigator.linkHelper">
+		<linkHelper
+	          class="org.eclipse.jdt.internal.ui.navigator.JavaFileLinkHelper"
+	          id="org.eclipse.jdt.java.ui.javaLinkHelper">          
+	         <editorInputEnablement>
+		         <or> 
+		         	<instanceof
+							value="org.eclipse.ui.IFileEditorInput" />
+		         	<instanceof
+							value="org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput" />
+		         	<instanceof
+							value="org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput" />
+		         </or>
+	         </editorInputEnablement>
+	         <selectionEnablement>
+	         	<or>
+					<adapt
+							type="org.eclipse.core.resources.IProject" >
+					</adapt>
+					<instanceof
+							value="org.eclipse.core.resources.IWorkspaceRoot" />
+					<instanceof
+							value="org.eclipse.core.resources.IFolder" />
+					<instanceof
+							value="org.eclipse.core.resources.IFile" />
+					<instanceof
+							value="org.eclipse.jdt.core.IJavaProject" />
+					<instanceof
+							value="org.eclipse.jdt.core.IJavaElement" />
+					<instanceof
+							value="org.eclipse.jdt.internal.core.JarEntryFile" />
+					<instanceof
+							value="org.eclipse.jdt.core.IClassFile" />
+					<instanceof
+							value="org.eclipse.jdt.internal.ui.packageview.ClassPathContainer" />
+				</or>
+	         </selectionEnablement>
+      	</linkHelper>          
+ </extension>
      
 </plugin>
