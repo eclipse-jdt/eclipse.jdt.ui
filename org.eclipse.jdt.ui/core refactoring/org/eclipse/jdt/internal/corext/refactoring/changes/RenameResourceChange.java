@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -128,8 +129,10 @@ public class RenameResourceChange extends JDTChange {
 
 	public final ChangeDescriptor getDescriptor() {
 		final Map arguments= new HashMap();
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_RESOURCE, getResource().getProject().getName(), Messages.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { getResource().getFullPath().toString(), fNewName}), fComment, arguments, (RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE));
-		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.resourceToHandle(getResource()));
+		final IProject project= getResource().getProject();
+		final String name= project.getName();
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_RESOURCE, name, Messages.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { getResource().getFullPath().toString(), fNewName}), fComment, arguments, (RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE));
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, JavaRefactoringDescriptor.resourceToHandle(name, getResource()));
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fNewName);
 		return new RefactoringChangeDescriptor(descriptor);
 	}

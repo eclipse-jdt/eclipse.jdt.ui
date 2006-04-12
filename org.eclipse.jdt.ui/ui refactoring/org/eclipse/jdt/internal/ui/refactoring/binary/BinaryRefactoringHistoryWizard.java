@@ -505,15 +505,16 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 				if (arguments instanceof JavaRefactoringArguments) {
 					final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
 					if (fJavaProject != null) {
-						final String project= fJavaProject.getElementName();
+						final String name= fJavaProject.getElementName();
+						extended.setProject(name);
 						String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 						if (handle != null && !"".equals(handle)) //$NON-NLS-1$
-							extended.setAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, getTransformedHandle(project, handle));
+							extended.setAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, getTransformedHandle(name, handle));
 						int count= 1;
 						String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 						while ((handle= extended.getAttribute(attribute)) != null) {
 							if (!"".equals(handle)) //$NON-NLS-1$
-								extended.setAttribute(attribute, getTransformedHandle(project, handle));
+								extended.setAttribute(attribute, getTransformedHandle(name, handle));
 							count++;
 							attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 						}
@@ -556,7 +557,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	 */
 	private void deconfigureClasspath(final IProgressMonitor monitor) throws CoreException {
 		try {
-			monitor.beginTask(JarImportMessages.JarImportWizard_cleanup_import, 200);
+			monitor.beginTask(JarImportMessages.JarImportWizard_cleanup_import, 300);
 			if (fJavaProject != null) {
 				final IClasspathEntry[] entries= fJavaProject.readRawClasspath();
 				final boolean changed= deconfigureClasspath(entries, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
@@ -566,7 +567,6 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 					RefactoringCore.getUndoManager().flush();
 				if (valid || changed)
 					fJavaProject.setRawClasspath(entries, changed, new SubProgressMonitor(monitor, 60, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-				fJavaProject= null;
 			}
 			if (fSourceFolder != null) {
 				final IFileStore store= EFS.getStore(fSourceFolder.getRawLocationURI());
@@ -576,7 +576,15 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 				fSourceFolder.clearHistory(new SubProgressMonitor(monitor, 10, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 				fSourceFolder= null;
 			}
+			if (fJavaProject != null) {
+				try {
+					fJavaProject.getResource().refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				} catch (CoreException exception) {
+					JavaPlugin.log(exception);
+				}
+			}
 		} finally {
+			fJavaProject= null;
 			monitor.done();
 		}
 	}

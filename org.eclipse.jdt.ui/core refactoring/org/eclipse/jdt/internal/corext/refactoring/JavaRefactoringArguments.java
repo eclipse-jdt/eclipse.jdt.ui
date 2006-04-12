@@ -34,7 +34,7 @@ public final class JavaRefactoringArguments extends RefactoringArguments {
 	private final Map fAttributes= new HashMap(2);
 
 	/** The name of the project, or <code>null</code> for the workspace */
-	private final String fProject;
+	private String fProject;
 
 	/**
 	 * Creates a new java refactoring arguments.
@@ -79,6 +79,18 @@ public final class JavaRefactoringArguments extends RefactoringArguments {
 		Assert.isNotNull(name);
 		Assert.isNotNull(value);
 		fAttributes.put(name, value);
+	}
+
+	/**
+	 * Sets the name of the project.
+	 * 
+	 * @param project
+	 *            the name of the project, or <code>null</code> for the
+	 *            workspace
+	 */
+	public void setProject(final String project) {
+		Assert.isTrue(project == null || !"".equals(project)); //$NON-NLS-1$
+		fProject= project;
 	}
 
 	/**

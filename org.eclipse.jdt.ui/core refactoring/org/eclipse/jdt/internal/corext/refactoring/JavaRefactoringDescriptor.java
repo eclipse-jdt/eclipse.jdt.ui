@@ -32,6 +32,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -93,7 +94,6 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	/** The version attribute */
 	private static final String ATTRIBUTE_VERSION= "version"; //$NON-NLS-1$
 
-
 	/**
 	 * Constant describing the deprecation resolving flag.
 	 * <p>
@@ -104,21 +104,6 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * </p>
 	 */
 	public static final int DEPRECATION_RESOLVING= 1 << 17;
-
-	/** The package identifier */
-	private static final String IDENTIFIER_PACKAGE= "package"; //$NON-NLS-1$
-
-	/** The project identifier */
-	private static final String IDENTIFIER_PROJECT= "project"; //$NON-NLS-1$
-
-	/** The resource identifier */
-	private static final String IDENTIFIER_RESOURCE= "resource"; //$NON-NLS-1$
-
-	/** The root identifier */
-	private static final String IDENTIFIER_ROOT= "root"; //$NON-NLS-1$
-
-	/** The unit identifier */
-	private static final String IDENTIFIER_UNIT= "unit"; //$NON-NLS-1$
 
 	/**
 	 * Constant describing the jar importable flag.
@@ -163,47 +148,12 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * @return a corresponding input handle
 	 */
 	public static String elementToHandle(final String project, final IJavaElement element) {
-		final int elementType= element.getElementType();
-		switch (elementType) {
-			case IJavaElement.JAVA_PROJECT:
-				return getHandlePrefix(IDENTIFIER_PROJECT) + element.getElementName();
-			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-				return resourceToHandle(project, getHandlePrefix(IDENTIFIER_ROOT), element.getResource());
-			case IJavaElement.COMPILATION_UNIT:
-				return resourceToHandle(project, getHandlePrefix(IDENTIFIER_UNIT), element.getResource());
-			case IJavaElement.PACKAGE_FRAGMENT:
-				return resourceToHandle(project, getHandlePrefix(IDENTIFIER_PACKAGE), element.getResource());
-//			case IJavaElement.TYPE: {
-//				final IType type= (IType) element;
-//				final StringBuffer buffer= new StringBuffer();
-//				buffer.append(getHandlePrefix(IDENTIFIER_TYPE));
-//				if (project == null) {
-//					buffer.append(type.getJavaProject().getElementName());
-//					buffer.append(SEPARATOR_PATH);
-//				}
-//				final IPackageFragment fragment= type.getPackageFragment();
-//				if (fragment.isDefaultPackage())
-//					buffer.append(DEFAULT_PACKAGE);
-//				else
-//					buffer.append(fragment.getElementName());
-//				buffer.append(SEPARATOR_PACKAGE);
-//				buffer.append(type.getTypeQualifiedName(SEPARATOR_PACKAGE));
-//				return buffer.toString();
-//			}
+		final String handle= element.getHandleIdentifier();
+		if (project != null) {
+			final String id= element.getJavaProject().getHandleIdentifier();
+			return handle.substring(id.length());
 		}
-		return element.getHandleIdentifier();
-	}
-
-	/**
-	 * Returns the handle prefix for the corresponding identifier
-	 * 
-	 * @param identifier
-	 *            the identifier
-	 * @return the handle prefix
-	 */
-	private static String getHandlePrefix(final String identifier) {
-		Assert.isNotNull(identifier);
-		return identifier + "://"; //$NON-NLS-1$
+		return handle;
 	}
 
 	/**
@@ -234,60 +184,12 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 *         element exists
 	 */
 	public static IJavaElement handleToElement(final String project, final String handle, final boolean check) {
-		IJavaElement element= null;
-		if (handle.startsWith(getHandlePrefix(IDENTIFIER_PROJECT))) {
-			element= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot().getProject(handle.substring(getHandlePrefix(IDENTIFIER_PROJECT).length())));
-		} else if (handle.startsWith(getHandlePrefix(IDENTIFIER_ROOT))) {
-			element= JavaCore.create(handleToResource(project, handle, getHandlePrefix(IDENTIFIER_ROOT)));
-		} else if (handle.startsWith(getHandlePrefix(IDENTIFIER_UNIT))) {
-			element= JavaCore.create(handleToResource(project, handle, getHandlePrefix(IDENTIFIER_UNIT)));
-		} else if (handle.startsWith(getHandlePrefix(IDENTIFIER_PACKAGE))) {
-			element= JavaCore.create(handleToResource(project, handle, getHandlePrefix(IDENTIFIER_PACKAGE)));
-//		} else if (handle.startsWith(getHandlePrefix(IDENTIFIER_TYPE))) {
-//			String string= handle.substring(getHandlePrefix(IDENTIFIER_TYPE).length());
-//			String container= project;
-//			if (container == null) {
-//				final int index= string.indexOf(SEPARATOR_PATH);
-//				if (index > 0) {
-//					container= string.substring(0, index);
-//					if (string.length() >= index + 2)
-//						string= string.substring(index + 1);
-//					else
-//						return null;
-//				}
-//			}
-//			if (container == null)
-//				return null;
-//			String fragment= null;
-//			final int index= string.indexOf(SEPARATOR_PACKAGE);
-//			if (index > 0) {
-//				fragment= string.substring(0, index);
-//				if (string.length() >= index + 2)
-//					string= string.substring(index + 1);
-//				else
-//					return null;
-//			}
-//			if (fragment == null)
-//				return null;
-//			final IJavaProject javaProject= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot().getProject(container));
-//			if (javaProject == null || !javaProject.exists())
-//				return null;
-//			final StringBuffer buffer= new StringBuffer(string);
-//			final int length= buffer.length();
-//			for (int offset= 0; offset < length; offset++) {
-//				final char character= buffer.charAt(offset);
-//				if (character == SEPARATOR_PACKAGE && offset < length - 1) {
-//					if (!Character.isDigit(buffer.charAt(offset + 1)))
-//						buffer.setCharAt(offset, SEPARATOR_DOT);
-//				}
-//			}
-//			try {
-//				element= javaProject.findType(fragment, buffer.toString(), new NullProgressMonitor());
-//			} catch (JavaModelException exception) {
-//				JavaPlugin.log(exception);
-//			}
-		} else
-			element= JavaCore.create(handle);
+		IJavaElement element= JavaCore.create(handle);
+		if (element == null && project != null) {
+			final IJavaProject javaProject= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProject(project);
+			final String identifier= javaProject.getHandleIdentifier();
+			element= JavaCore.create(identifier + handle);
+		}
 		if (element != null && (!check || element.exists()))
 			return element;
 		return null;
@@ -301,22 +203,15 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 *            the project, or <code>null</code> for the workspace
 	 * @param handle
 	 *            the input handle
-	 * @param prefix
-	 *            the prefix
 	 * 
 	 * @return the corresponding resource, or <code>null</code> if no such
 	 *         resource exists
 	 */
-	private static IResource handleToResource(String project, final String handle, final String prefix) {
+	public static IResource handleToResource(final String project, final String handle) {
 		final IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		String string= handle;
-		if (handle.startsWith(prefix))
-			string= string.substring(prefix.length());
-		else
+		if ("".equals(handle)) //$NON-NLS-1$
 			return null;
-		if ("".equals(string)) //$NON-NLS-1$
-			return null;
-		final IPath path= Path.fromPortableString(string);
+		final IPath path= Path.fromPortableString(handle);
 		if (path == null)
 			return null;
 		if (project != null && !"".equals(project)) //$NON-NLS-1$
@@ -325,21 +220,19 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	}
 
 	/**
-	 * Converts the specified resource to a portable path with prefix.
+	 * Converts the specified resource to an input handle.
 	 * 
 	 * @param project
 	 *            the project, or <code>null</code> for the workspace
-	 * @param prefix
-	 *            the prefix
 	 * @param resource
 	 *            the resource
 	 * 
-	 * @return the prefixed portable path
+	 * @return the input handle
 	 */
-	private static String resourceToHandle(final String project, final String prefix, final IResource resource) {
+	public static String resourceToHandle(final String project, final IResource resource) {
 		if (project != null && !"".equals(project)) //$NON-NLS-1$
-			return prefix + resource.getProjectRelativePath().toPortableString();
-		return prefix + resource.getFullPath().toPortableString();
+			return resource.getProjectRelativePath().toPortableString();
+		return resource.getFullPath().toPortableString();
 	}
 
 	/** The map of arguments (element type: &lt;String, String&gt;) */
@@ -463,46 +356,5 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 */
 	public JavaRefactoringContribution getContribution() {
 		return fContribution;
-	}
-
-	/**
-	 * Converts an input handle back to the corresponding java element.
-	 * 
-	 * @param handle
-	 *            the input handle
-	 * @return the corresponding java element, or <code>null</code> if no such
-	 *         element exists
-	 */
-	public IJavaElement handleToElement(final String handle) {
-		Assert.isNotNull(handle);
-		Assert.isTrue(!"".equals(handle)); //$NON-NLS-1$
-		final String project= getProject();
-		return handleToElement(project, handle);
-	}
-
-	/**
-	 * Converts an input handle back to the corresponding resource.
-	 * 
-	 * @param handle
-	 *            the input handle
-	 * @return the corresponding resource, or <code>null</code> if no such
-	 *         resource exists
-	 */
-	public IResource handleToResource(final String handle) {
-		Assert.isNotNull(handle);
-		Assert.isTrue(!"".equals(handle)); //$NON-NLS-1$
-		return handleToResource(getProject(), handle, getHandlePrefix(IDENTIFIER_RESOURCE));
-	}
-
-	/**
-	 * Converts the specified resource to an input handle.
-	 * 
-	 * @param resource
-	 *            the resource
-	 * @return a corresponding input handle
-	 */
-	public String resourceToHandle(final IResource resource) {
-		Assert.isNotNull(resource);
-		return resourceToHandle(getProject(), getHandlePrefix(IDENTIFIER_RESOURCE), resource);
 	}
 }
