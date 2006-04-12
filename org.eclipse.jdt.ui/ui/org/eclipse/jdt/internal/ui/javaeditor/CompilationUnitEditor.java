@@ -20,15 +20,11 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -40,12 +36,9 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
@@ -87,8 +80,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.dialogs.SaveAsDialog;
-import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
@@ -98,6 +89,8 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.ResourceAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
+
+import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -112,7 +105,6 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -1412,71 +1404,17 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * The compilation unit editor implementation of this  <code>AbstractTextEditor</code>
 	 * method asks the user for the workspace path of a file resource and saves the document
 	 * there. See http://dev.eclipse.org/bugs/show_bug.cgi?id=6295
+	 * <p>
+	 * XXX: This method will be removed in 3.3: for now tell the subclass to handle it.
+	 * </p>
 	 *
 	 * @param progressMonitor the progress monitor
 	 */
 	protected void performSaveAs(IProgressMonitor progressMonitor) {
-
-		Shell shell= getSite().getShell();
-		IEditorInput input = getEditorInput();
-
-		SaveAsDialog dialog= new SaveAsDialog(shell);
-
-		IFile original= (input instanceof IFileEditorInput) ? ((IFileEditorInput) input).getFile() : null;
-		if (original != null)
-			dialog.setOriginalFile(original);
-
-		dialog.create();
-
-
-		IDocumentProvider provider= getDocumentProvider();
-		if (provider == null) {
-			// editor has been programmatically closed while the dialog was open
-			return;
-		}
-
-		if (provider.isDeleted(input) && original != null) {
-			String message= Messages.format(JavaEditorMessages.CompilationUnitEditor_warning_save_delete, new Object[] { original.getName() });
-			dialog.setErrorMessage(null);
-			dialog.setMessage(message, IMessageProvider.WARNING);
-		}
-
-		if (dialog.open() == Window.CANCEL) {
-			if (progressMonitor != null)
-				progressMonitor.setCanceled(true);
-			return;
-		}
-
-		IPath filePath= dialog.getResult();
-		if (filePath == null) {
-			if (progressMonitor != null)
-				progressMonitor.setCanceled(true);
-			return;
-		}
-
-		IWorkspaceRoot workspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
-		IFile file= workspaceRoot.getFile(filePath);
-		final IEditorInput newInput= new FileEditorInput(file);
-
-		boolean success= false;
-		try {
-
-			provider.aboutToChange(newInput);
-			getDocumentProvider().saveDocument(progressMonitor, newInput, getDocumentProvider().getDocument(getEditorInput()), true);
-			success= true;
-
-		} catch (CoreException x) {
-			IStatus status= x.getStatus();
-			if (status == null || status.getSeverity() != IStatus.CANCEL)
-				ErrorDialog.openError(shell, JavaEditorMessages.CompilationUnitEditor_error_saving_title2, JavaEditorMessages.CompilationUnitEditor_error_saving_message2, x.getStatus());
-		} finally {
-			provider.changed(newInput);
-			if (success)
-				setInput(newInput);
-		}
-
-		if (progressMonitor != null)
-			progressMonitor.setCanceled(!success);
+		IPreferenceStore store= EditorsUI.getPreferenceStore();
+		String key= getEditorSite().getId() + ".internal.delegateSaveAs"; //$NON-NLS-1$
+		store.setValue(key, true);
+		super.performSaveAs(progressMonitor);
 	}
 
 	/*
