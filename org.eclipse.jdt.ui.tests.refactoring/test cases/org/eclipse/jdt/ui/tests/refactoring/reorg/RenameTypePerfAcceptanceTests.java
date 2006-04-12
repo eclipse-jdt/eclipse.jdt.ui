@@ -69,7 +69,7 @@ public class RenameTypePerfAcceptanceTests extends RefactoringPerformanceTestCas
 	}
 	
 	public void testWarm() throws Exception {
-		tagAsSummary("Rename of Control", Dimension.CPU_TIME);
+		tagAsSummary("Rename of Control", Dimension.ELAPSED_PROCESS);
 		IType control= fProject.findType("org.eclipse.swt.widgets.Control2");
 		RenameTypeProcessor processor= new RenameTypeProcessor(control);
 		processor.setNewElementName("Control");
