@@ -2491,7 +2491,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("\n");
 		buf.append("public class A {\n");
-		buf.append("    void foo(ArrayList<String> c) {\n");
+		buf.append("    public void foo(ArrayList<String> c) {\n");
 		buf.append("        new ArrayList(c);\n"); // two warnings on this -> only one proposal!
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -2509,7 +2509,8 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("\n");
 		buf.append("public class A {\n");
-		buf.append("    @SuppressWarnings(\"unchecked\") void foo(ArrayList<String> c) {\n");
+		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    public void foo(ArrayList<String> c) {\n");
 		buf.append("        new ArrayList(c);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
