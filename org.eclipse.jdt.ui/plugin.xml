@@ -5129,6 +5129,8 @@
 					<instanceof
 							value="org.eclipse.core.resources.IFile" />
 					<instanceof
+							value="org.eclipse.core.resources.IStorage" />
+					<instanceof
 							value="org.eclipse.jdt.core.IJavaProject" />
 					<instanceof
 							value="org.eclipse.jdt.core.IJavaElement" />
@@ -5155,6 +5157,8 @@
 							value="org.eclipse.core.resources.IFolder" />
 					<instanceof
 							value="org.eclipse.core.resources.IFile" />
+					<instanceof
+							value="org.eclipse.core.resources.IStorage" />
 					<instanceof
 							value="org.eclipse.jdt.core.IJavaProject" />
 					<instanceof
@@ -5412,6 +5416,8 @@
 							value="org.eclipse.core.resources.IFolder" />
 					<instanceof
 							value="org.eclipse.core.resources.IFile" />
+					<instanceof
+							value="org.eclipse.core.resources.IStorage" />
 					<instanceof
 							value="org.eclipse.jdt.core.IJavaProject" />
 					<instanceof
