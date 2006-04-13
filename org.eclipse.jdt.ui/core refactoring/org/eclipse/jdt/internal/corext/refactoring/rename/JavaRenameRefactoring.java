@@ -18,8 +18,8 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 /**
@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
  * 
  * @since 3.2
  */
-public class JavaRenameRefactoring extends RenameRefactoring implements IInitializableRefactoringComponent {
+public class JavaRenameRefactoring extends RenameRefactoring implements IScriptableRefactoring {
 
 	/**
 	 * Creates a new java rename refactoring.
@@ -45,8 +45,8 @@ public class JavaRenameRefactoring extends RenameRefactoring implements IInitial
 	public final RefactoringStatus initialize(final RefactoringArguments arguments) {
 		Assert.isNotNull(arguments);
 		final RefactoringProcessor processor= getProcessor();
-		if (processor instanceof IInitializableRefactoringComponent) {
-			return ((IInitializableRefactoringComponent) processor).initialize(arguments);
+		if (processor instanceof IScriptableRefactoring) {
+			return ((IScriptableRefactoring) processor).initialize(arguments);
 		}
 		return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ProcessorBasedRefactoring_error_unsupported_initialization, getProcessor().getIdentifier()));
 	}

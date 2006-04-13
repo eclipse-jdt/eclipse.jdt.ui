@@ -77,7 +77,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -98,7 +97,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
-public class PromoteTempToFieldRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
+public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 
 	public static final String ID_PROMOTE_TEMP= "org.eclipse.jdt.ui.promote.temp"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_STATIC= "static"; //$NON-NLS-1$

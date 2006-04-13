@@ -83,7 +83,6 @@ import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -104,7 +103,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
-public class ExtractConstantRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
+public class ExtractConstantRefactoring extends ScriptableRefactoring {
 
 	public static final String ID_EXTRACT_CONSTANT= "org.eclipse.jdt.ui.extract.constant"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REPLACE= "replace"; //$NON-NLS-1$

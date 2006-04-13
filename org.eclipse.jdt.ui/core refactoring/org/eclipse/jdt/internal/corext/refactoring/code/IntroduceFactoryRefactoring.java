@@ -81,7 +81,6 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -105,7 +104,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  * for direct calls to a given constructor.
  * @author rfuhrer
  */
-public class IntroduceFactoryRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
+public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 
 	public static final String ID_INTRODUCE_FACTORY= "org.eclipse.jdt.ui.introduce.factory"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_PROTECT= "protect"; //$NON-NLS-1$

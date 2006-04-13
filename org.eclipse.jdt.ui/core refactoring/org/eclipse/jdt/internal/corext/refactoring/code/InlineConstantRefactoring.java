@@ -94,7 +94,6 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.IRefactoringSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
@@ -117,7 +116,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class InlineConstantRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
+public class InlineConstantRefactoring extends ScriptableRefactoring {
 
 	private static final String ID_INLINE_CONSTANT= "org.eclipse.jdt.ui.inline.constant"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REPLACE= "replace"; //$NON-NLS-1$

@@ -68,7 +68,6 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -95,7 +94,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  *    assigned to a parameter again. No need for a separate local (important to be able
  *    to reverse extract method correctly).
  */
-public class InlineMethodRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
+public class InlineMethodRefactoring extends ScriptableRefactoring {
 
 	public static final String ID_INLINE_METHOD= "org.eclipse.jdt.ui.inline.method"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_MODE= "mode"; //$NON-NLS-1$

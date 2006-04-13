@@ -100,7 +100,6 @@ import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.StatementRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
@@ -120,7 +119,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 /**
  * Extracts a method in a compilation unit based on a text selection range.
  */
-public class ExtractMethodRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
+public class ExtractMethodRefactoring extends ScriptableRefactoring {
 
 	public static final String ID_EXTRACT_METHOD= "org.eclipse.jdt.ui.extract.method"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$

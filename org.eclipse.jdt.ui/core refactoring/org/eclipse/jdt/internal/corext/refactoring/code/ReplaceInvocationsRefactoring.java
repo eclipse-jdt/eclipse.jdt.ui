@@ -69,7 +69,6 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -87,7 +86,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
-public class ReplaceInvocationsRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
+public class ReplaceInvocationsRefactoring extends ScriptableRefactoring {
 
 	public static final String ID_REPLACE_INVOCATIONS= "org.eclipse.jdt.ui.replace.invocations"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_MODE= "mode"; //$NON-NLS-1$

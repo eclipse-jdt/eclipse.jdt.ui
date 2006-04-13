@@ -8,28 +8,27 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring;
+package org.eclipse.jdt.internal.corext.refactoring.tagging;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 /**
- * Interface for refactoring components which can be initialized by refactoring
- * arguments.
+ * Interface for refactorings which can be initialized when run as a refactoring
+ * script.
  * 
  * @since 3.2
  */
-public interface IInitializableRefactoringComponent {
+public interface IScriptableRefactoring {
 
 	/**
-	 * Initializes the refactoring component with the refactoring arguments.
+	 * Initializes the refactoring with the refactoring arguments.
 	 * 
 	 * @param arguments
 	 *            the refactoring arguments
 	 * @return an object describing the status of the initialization. If the
-	 *         status has severity <code>FATAL_ERROR</code>, the associated
-	 *         refactoring will not be executed.
+	 *         status has severity <code>FATAL_ERROR</code>, the refactoring
+	 *         will not be executed.
 	 */
 	public RefactoringStatus initialize(RefactoringArguments arguments);
 }

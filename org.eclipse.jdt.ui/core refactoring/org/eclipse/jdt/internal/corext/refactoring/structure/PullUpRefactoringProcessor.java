@@ -1004,18 +1004,16 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fDestinationType));
 					arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplace).toString());
 					arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
-					if (fCachedDeclaringType != null)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(fCachedDeclaringType));
+					arguments.put(ATTRIBUTE_STUBS, Boolean.valueOf(fCreateMethodStubs).toString());
 					arguments.put(ATTRIBUTE_PULL, new Integer(fMembersToMove.length).toString());
 					for (int offset= 0; offset < fMembersToMove.length; offset++)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 2), descriptor.elementToHandle(fMembersToMove[offset]));
+						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), descriptor.elementToHandle(fMembersToMove[offset]));
 					arguments.put(ATTRIBUTE_DELETE, new Integer(fDeletedMethods.length).toString());
 					for (int offset= 0; offset < fDeletedMethods.length; offset++)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + 2), descriptor.elementToHandle(fDeletedMethods[offset]));
+						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + 1), descriptor.elementToHandle(fDeletedMethods[offset]));
 					arguments.put(ATTRIBUTE_ABSTRACT, new Integer(fAbstractMethods.length).toString());
 					for (int offset= 0; offset < fAbstractMethods.length; offset++)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + fDeletedMethods.length + 2), descriptor.elementToHandle(fAbstractMethods[offset]));
-					arguments.put(ATTRIBUTE_STUBS, Boolean.valueOf(fCreateMethodStubs).toString());
+						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + fDeletedMethods.length + 1), descriptor.elementToHandle(fAbstractMethods[offset]));
 					return new RefactoringChangeDescriptor(descriptor);
 				}
 			};
@@ -1590,14 +1588,6 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 					fDestinationType= (IType) element;
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
-			handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null || element.getElementType() != IJavaElement.TYPE)
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_PULL_UP));
-				else
-					fCachedDeclaringType= (IType) element;
-			}
 			final String stubs= extended.getAttribute(ATTRIBUTE_STUBS);
 			if (stubs != null) {
 				fCreateMethodStubs= Boolean.valueOf(stubs).booleanValue();
@@ -1646,7 +1636,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			final RefactoringStatus status= new RefactoringStatus();
 			List elements= new ArrayList();
 			for (int index= 0; index < pullCount; index++) {
-				final String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 2);
+				final String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1);
 				handle= extended.getAttribute(attribute);
 				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
@@ -1660,7 +1650,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			fMembersToMove= (IMember[]) elements.toArray(new IMember[elements.size()]);
 			elements= new ArrayList();
 			for (int index= 0; index < deleteCount; index++) {
-				final String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (pullCount + index + 2);
+				final String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (pullCount + index + 1);
 				handle= extended.getAttribute(attribute);
 				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
@@ -1674,7 +1664,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			fDeletedMethods= (IMethod[]) elements.toArray(new IMethod[elements.size()]);
 			elements= new ArrayList();
 			for (int index= 0; index < abstractCount; index++) {
-				final String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (pullCount + abstractCount + index + 2);
+				final String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (pullCount + abstractCount + index + 1);
 				handle= extended.getAttribute(attribute);
 				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);

@@ -26,7 +26,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
@@ -34,6 +33,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcesso
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
@@ -45,7 +45,7 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
-public final class JavaMoveProcessor extends MoveProcessor implements IInitializableRefactoringComponent, ICommentProvider, IQualifiedNameUpdating, IReorgDestinationValidator {
+public final class JavaMoveProcessor extends MoveProcessor implements IScriptableRefactoring, ICommentProvider, IQualifiedNameUpdating, IReorgDestinationValidator {
 	//TODO: offer IMovePolicy getMovePolicy(); IReorgPolicy getReorgPolicy();
 	// and remove delegate methods (also for CopyRefactoring)?
 	

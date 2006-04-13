@@ -104,7 +104,6 @@ import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -125,7 +124,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Extract Local Variable (from selected expression inside method or initializer).
  */
-public class ExtractTempRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
+public class ExtractTempRefactoring extends ScriptableRefactoring {
 
 	public static final String ID_EXTRACT_TEMP= "org.eclipse.jdt.ui.extract.temp"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REPLACE= "replace"; //$NON-NLS-1$

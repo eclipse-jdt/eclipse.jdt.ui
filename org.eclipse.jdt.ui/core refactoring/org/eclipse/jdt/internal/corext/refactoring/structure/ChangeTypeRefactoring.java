@@ -75,7 +75,6 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -84,7 +83,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
-import org.eclipse.jdt.internal.corext.refactoring.code.CommentRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
@@ -114,7 +113,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 /**
  * @author tip
  */
-public class ChangeTypeRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
+public class ChangeTypeRefactoring extends ScriptableRefactoring {
 
 	public static final String ID_CHANGE_TYPE= "org.eclipse.jdt.ui.change.type"; //$NON-NLS-1$
 

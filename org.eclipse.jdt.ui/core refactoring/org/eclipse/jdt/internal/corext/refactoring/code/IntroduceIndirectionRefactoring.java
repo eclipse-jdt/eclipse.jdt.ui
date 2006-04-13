@@ -85,7 +85,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
@@ -134,7 +133,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * @since 3.2
  * 
  */
-public class IntroduceIndirectionRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
+public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 
 	public static final String ID_INTRODUCE_INDIRECTION= "org.eclipse.jdt.ui.introduce.indirection"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$

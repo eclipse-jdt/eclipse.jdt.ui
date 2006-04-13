@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 /**
@@ -318,8 +319,8 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 			}
 		}
 		if (refactoring != null) {
-			if (refactoring instanceof IInitializableRefactoringComponent)
-				status.merge(((IInitializableRefactoringComponent) refactoring).initialize(createArguments()));
+			if (refactoring instanceof IScriptableRefactoring)
+				status.merge(((IScriptableRefactoring) refactoring).initialize(createArguments()));
 			else
 				status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_initialization_error, getID())));
 		}

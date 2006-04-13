@@ -25,11 +25,11 @@ import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 
-public abstract class JavaRenameProcessor extends RenameProcessor implements IInitializableRefactoringComponent, INameUpdating, ICommentProvider {
+public abstract class JavaRenameProcessor extends RenameProcessor implements IScriptableRefactoring, INameUpdating, ICommentProvider {
 	
 	private String fNewElementName;
 	private String fComment;

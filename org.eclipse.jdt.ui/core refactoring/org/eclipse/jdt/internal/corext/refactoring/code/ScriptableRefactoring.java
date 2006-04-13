@@ -11,16 +11,19 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 
 /**
- * Partial implementation of a refactoring which provides a comment for the
- * history.
+ * Partial implementation of a scriptable refactoring which provides a comment
+ * for the history.
  * 
  * @since 3.2
  */
-public abstract class CommentRefactoring extends Refactoring implements ICommentProvider {
+public abstract class ScriptableRefactoring extends Refactoring implements IScriptableRefactoring, ICommentProvider {
 
 	/** The comment */
 	private String fComment;
@@ -37,6 +40,13 @@ public abstract class CommentRefactoring extends Refactoring implements IComment
 	 */
 	public String getComment() {
 		return fComment;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public RefactoringStatus initialize(RefactoringArguments arguments) {
+		return new RefactoringStatus();
 	}
 
 	/**

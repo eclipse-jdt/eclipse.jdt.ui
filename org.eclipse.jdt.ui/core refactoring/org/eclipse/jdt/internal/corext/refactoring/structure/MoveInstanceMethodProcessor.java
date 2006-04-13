@@ -120,7 +120,6 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -132,6 +131,7 @@ import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreat
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IVisibilityAdjustment;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -150,7 +150,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 /**
  * Refactoring processor to move instance methods.
  */
-public final class MoveInstanceMethodProcessor extends MoveProcessor implements IInitializableRefactoringComponent, IDelegateUpdating, ICommentProvider {
+public final class MoveInstanceMethodProcessor extends MoveProcessor implements IScriptableRefactoring, IDelegateUpdating, ICommentProvider {
 
 	/** The comment */
 	private String fComment;

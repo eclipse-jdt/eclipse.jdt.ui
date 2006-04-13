@@ -91,7 +91,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
@@ -107,6 +106,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -120,7 +120,7 @@ import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-public final class MoveStaticMembersProcessor extends MoveProcessor implements IDelegateUpdating, IInitializableRefactoringComponent, ICommentProvider {
+public final class MoveStaticMembersProcessor extends MoveProcessor implements IDelegateUpdating, IScriptableRefactoring, ICommentProvider {
 
 	public static final String ID_STATIC_MOVE= "org.eclipse.jdt.ui.move.static"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DELEGATE="delegate"; //$NON-NLS-1$

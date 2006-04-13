@@ -102,7 +102,6 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ExceptionInfo;
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
@@ -117,7 +116,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
-import org.eclipse.jdt.internal.corext.refactoring.code.CommentRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
@@ -138,7 +137,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class ChangeSignatureRefactoring extends CommentRefactoring implements IDelegateUpdating, IInitializableRefactoringComponent {
+public class ChangeSignatureRefactoring extends ScriptableRefactoring implements IDelegateUpdating {
 	
 	private static final String ID_CHANGE_METHOD_SIGNATURE= "org.eclipse.jdt.ui.change.method.signature"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_RETURN= "return"; //$NON-NLS-1$

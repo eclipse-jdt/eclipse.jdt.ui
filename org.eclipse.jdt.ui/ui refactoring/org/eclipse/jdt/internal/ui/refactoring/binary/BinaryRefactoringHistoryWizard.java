@@ -58,7 +58,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringContribution;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
@@ -66,6 +65,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.binary.SourceCreationOperation;
 import org.eclipse.jdt.internal.corext.refactoring.binary.StubCreationOperation;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -241,7 +241,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	protected RefactoringArguments fCurrentArguments= null;
 
 	/** The current refactoring to be initialized, or <code>null</code> */
-	protected IInitializableRefactoringComponent fCurrentRefactoring= null;
+	protected IScriptableRefactoring fCurrentRefactoring= null;
 
 	/** The java project or <code>null</code> */
 	protected IJavaProject fJavaProject= null;
@@ -520,8 +520,8 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 						}
 					}
 				}
-				if (refactoring instanceof IInitializableRefactoringComponent) {
-					fCurrentRefactoring= (IInitializableRefactoringComponent) refactoring;
+				if (refactoring instanceof IScriptableRefactoring) {
+					fCurrentRefactoring= (IScriptableRefactoring) refactoring;
 					fCurrentArguments= arguments;
 				} else
 					status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_initialization_error, javaDescriptor.getID())));

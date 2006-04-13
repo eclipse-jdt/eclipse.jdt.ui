@@ -68,7 +68,6 @@ import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
@@ -84,7 +83,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
-public class IntroduceParameterRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent, IDelegateUpdating {
+public class IntroduceParameterRefactoring extends ScriptableRefactoring implements IDelegateUpdating {
 
 	public static final String ID_INTRODUCE_PARAMETER= "org.eclipse.jdt.ui.introduce.parameter"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_ARGUMENT= "argument"; //$NON-NLS-1$

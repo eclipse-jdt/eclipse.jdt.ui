@@ -17,14 +17,14 @@ import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 /**
  * Refactoring to pull up members in a type hierarchy.
  */
-public class PullUpRefactoring extends ProcessorBasedRefactoring implements IInitializableRefactoringComponent {
+public class PullUpRefactoring extends ProcessorBasedRefactoring implements IScriptableRefactoring {
 
 	/** The refactoring processor to use */
 	private final HierarchyProcessor fProcessor;
@@ -62,8 +62,8 @@ public class PullUpRefactoring extends ProcessorBasedRefactoring implements IIni
 	public final RefactoringStatus initialize(final RefactoringArguments arguments) {
 		Assert.isNotNull(arguments);
 		final RefactoringProcessor processor= getProcessor();
-		if (processor instanceof IInitializableRefactoringComponent) {
-			return ((IInitializableRefactoringComponent) processor).initialize(arguments);
+		if (processor instanceof IScriptableRefactoring) {
+			return ((IScriptableRefactoring) processor).initialize(arguments);
 		}
 		return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ProcessorBasedRefactoring_error_unsupported_initialization, getProcessor().getIdentifier()));
 	}

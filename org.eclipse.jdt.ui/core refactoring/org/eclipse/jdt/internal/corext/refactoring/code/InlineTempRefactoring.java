@@ -61,7 +61,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -78,7 +77,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
-public class InlineTempRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
+public class InlineTempRefactoring extends ScriptableRefactoring {
 
 	private static final String ID_INLINE_TEMP= "org.eclipse.jdt.ui.inline.temp"; //$NON-NLS-1$
 
