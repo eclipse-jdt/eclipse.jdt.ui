@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.infoviews;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
@@ -118,8 +120,9 @@ public class JavadocView extends AbstractInfoView {
 	private TextPresentation fPresentation= new TextPresentation();
 	/** The select all action */
 	private SelectAllAction fSelectAllAction;
-	/** The URL of the style sheet (css) */
-	private URL fStyleSheetURL;
+	/** The style sheet (css) */
+	private static String fgStyleSheet;
+
 	/** The Browser widget */
 	private boolean fIsUsingBrowserWidget;
 
@@ -302,21 +305,31 @@ public class JavadocView extends AbstractInfoView {
 			});
 		}
 
-		initStyleSheetURL();
+		initStyleSheet();
 		getViewSite().setSelectionProvider(new SelectionProvider(getControl()));
 	}
 
-	private void initStyleSheetURL() {
+	private static void initStyleSheet() {
 		Bundle bundle= Platform.getBundle(JavaPlugin.getPluginId());
-		fStyleSheetURL= bundle.getEntry("/JavadocViewStyleSheet.css"); //$NON-NLS-1$
-		if (fStyleSheetURL == null)
+		URL styleSheetURL= bundle.getEntry("/JavadocViewStyleSheet.css"); //$NON-NLS-1$
+		if (styleSheetURL == null)
 			return;
-
+		
 		try {
-			fStyleSheetURL= FileLocator.toFileURL(fStyleSheetURL);
+			styleSheetURL= FileLocator.toFileURL(styleSheetURL);
+			BufferedReader reader= new BufferedReader(new InputStreamReader(styleSheetURL.openStream()));
+			StringBuffer buffer= new StringBuffer(200);
+			String line= reader.readLine();
+			while (line != null) {
+				buffer.append(line);
+				buffer.append('\n');
+				line= reader.readLine();
+			}
+			fgStyleSheet= buffer.toString();
 		} catch (IOException ex) {
 			JavaPlugin.log(ex);
 		}
+		
 	}
 
 	/*
@@ -369,7 +382,7 @@ public class JavadocView extends AbstractInfoView {
 		fBackgroundColorRGB= color.getRGB();
 		if (getInput() == null) {
 			StringBuffer buffer= new StringBuffer(""); //$NON-NLS-1$
-			HTMLPrinter.insertPageProlog(buffer, 0, fBackgroundColorRGB, fStyleSheetURL);
+			HTMLPrinter.insertPageProlog(buffer, 0, fBackgroundColorRGB, fgStyleSheet);
 			setInput(buffer.toString());
 		} else {
 			setInput(computeInput(getInput()));
@@ -516,7 +529,7 @@ public class JavadocView extends AbstractInfoView {
 
 		boolean flushContent= true;
 		if (buffer.length() > 0 || flushContent) {
-			HTMLPrinter.insertPageProlog(buffer, 0, fBackgroundColorRGB, fStyleSheetURL);
+			HTMLPrinter.insertPageProlog(buffer, 0, fBackgroundColorRGB, fgStyleSheet);
 			HTMLPrinter.addPageEpilog(buffer);
 			return buffer.toString();
 		}

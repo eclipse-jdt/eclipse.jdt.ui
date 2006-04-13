@@ -177,7 +177,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 			return null;
 
 		if (buffer.length() > 0) {
-			HTMLPrinter.insertPageProlog(buffer, 0, getStyleSheetURL());
+			HTMLPrinter.insertPageProlog(buffer, 0, getStyleSheet());
 			HTMLPrinter.addPageEpilog(buffer);
 			return buffer.toString();
 		}

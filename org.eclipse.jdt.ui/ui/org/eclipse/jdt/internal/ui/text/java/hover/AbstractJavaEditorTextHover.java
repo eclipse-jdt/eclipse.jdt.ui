@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 
 import org.eclipse.core.runtime.FileLocator;
@@ -56,12 +58,11 @@ import org.osgi.framework.Bundle;
  */
 public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHover, ITextHoverExtension {
 
-
 	/**
-	 * The URL of the style sheet (css).
+	 * The style sheet (css).
 	 * @since 3.2
 	 */
-	private URL fStyleSheetURL;
+	private static String fgStyleSheet;
 	private IEditorPart fEditor;
 	private IBindingService fBindingService;
 	{
@@ -167,24 +168,33 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	}
 
 	/**
-	 * Returns the style sheet URL.
+	 * Returns the style sheet.
 	 *
 	 * @since 3.2
 	 */
-	protected URL getStyleSheetURL() {
-		if (fStyleSheetURL == null) {
-
+	protected static String getStyleSheet() {
+		if (fgStyleSheet == null) {
 			Bundle bundle= Platform.getBundle(JavaPlugin.getPluginId());
-			fStyleSheetURL= bundle.getEntry("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
-			if (fStyleSheetURL != null) {
+			URL styleSheetURL= bundle.getEntry("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
+			if (styleSheetURL != null) {
 				try {
-					fStyleSheetURL= FileLocator.toFileURL(fStyleSheetURL);
+					styleSheetURL= FileLocator.toFileURL(styleSheetURL);
+					BufferedReader reader= new BufferedReader(new InputStreamReader(styleSheetURL.openStream()));
+					StringBuffer buffer= new StringBuffer(200);
+					String line= reader.readLine();
+					while (line != null) {
+						buffer.append(line);
+						buffer.append('\n');
+						line= reader.readLine();
+					}
+					fgStyleSheet= buffer.toString();
 				} catch (IOException ex) {
 					JavaPlugin.log(ex);
+					fgStyleSheet= ""; //$NON-NLS-1$
 				}
 			}
 		}
-		return fStyleSheetURL;
+		return fgStyleSheet;
 	}
 	
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,9 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
-
-
-
 
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -44,6 +41,8 @@ public class HTML2TextReader extends SubstitutionTextReader {
 		fgTags= new HashSet();
 		fgTags.add("b"); //$NON-NLS-1$
 		fgTags.add("br"); //$NON-NLS-1$
+		fgTags.add("br/"); //$NON-NLS-1$
+		fgTags.add("div"); //$NON-NLS-1$
 		fgTags.add("h1"); //$NON-NLS-1$
 		fgTags.add("h2"); //$NON-NLS-1$
 		fgTags.add("h3"); //$NON-NLS-1$
@@ -56,6 +55,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 		fgTags.add("li"); //$NON-NLS-1$
 		fgTags.add("ul"); //$NON-NLS-1$
 		fgTags.add("pre"); //$NON-NLS-1$
+		fgTags.add("head"); //$NON-NLS-1$
 
 		fgEntityLookup= new HashMap(7);
 		fgEntityLookup.put("lt", "<"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -73,6 +73,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 	private int fStartOffset= -1;
 	private boolean fInParagraph= false;
 	private boolean fIsPreformattedText= false;
+	private boolean fIgnore= false;
 
 	/**
 	 * Transforms the HTML text from the reader to formatted text.
@@ -126,6 +127,8 @@ public class HTML2TextReader extends SubstitutionTextReader {
 
 		if (c == '<')
 			return  processHTMLTag();
+		else if (fIgnore)
+			return EMPTY_STRING;
 		else if (c == '&')
 			return processEntity();
 		else if (fIsPreformattedText)
@@ -179,6 +182,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 			return "\t"; //$NON-NLS-1$
 
 		if ("li".equals(html)) //$NON-NLS-1$
+			// FIXME: this hard-coded prefix does not work for RTL languages, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=91682
 			return LINE_DELIM + JavaUIMessages.HTML2TextReader_listItemPrefix;
 
 		if ("/b".equals(html)) { //$NON-NLS-1$
@@ -191,7 +195,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 			return LINE_DELIM;
 		}
 
-		if ("br".equals(html)) //$NON-NLS-1$
+		if ("br".equals(html) || "br/".equals(html) || "div".equals(html)) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			return LINE_DELIM;
 
 		if ("/p".equals(html))  { //$NON-NLS-1$
@@ -207,6 +211,16 @@ public class HTML2TextReader extends SubstitutionTextReader {
 
 		if ("/dd".equals(html)) //$NON-NLS-1$
 			return LINE_DELIM;
+		
+		if ("head".equals(html)) { //$NON-NLS-1$
+			fIgnore= true;
+			return EMPTY_STRING;
+		}
+		
+		if ("/head".equals(html)) { //$NON-NLS-1$
+			fIgnore= false;
+			return EMPTY_STRING;
+		}
 
 		return EMPTY_STRING;
 	}
