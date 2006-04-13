@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.SWT;
@@ -48,6 +49,7 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
@@ -81,7 +83,7 @@ import org.osgi.framework.Bundle;
  * 
  * @since 3.2
  */
-public abstract class AbstractJavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3 {
+public abstract class AbstractJavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension5 {
 	/**
 	 * A class to simplify tracking a reference position in a document.
 	 */
@@ -435,7 +437,25 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 */
 	public String getAdditionalProposalInfo() {
 		if (getProposalInfo() != null) {
-			String info= getProposalInfo().getInfo();
+			String info= getProposalInfo().getInfo(null);
+			if (info != null && info.length() > 0) {
+				StringBuffer buffer= new StringBuffer();
+				HTMLPrinter.insertPageProlog(buffer, 0, getStyleSheetURL());
+				buffer.append(info);
+				HTMLPrinter.addPageEpilog(buffer);
+				info= buffer.toString();
+			}
+			return info;
+		}
+		return null;
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+		if (getProposalInfo() != null) {
+			String info= getProposalInfo().getInfo(monitor);
 			if (info != null && info.length() > 0) {
 				StringBuffer buffer= new StringBuffer();
 				HTMLPrinter.insertPageProlog(buffer, 0, getStyleSheetURL());

@@ -13,6 +13,9 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -21,6 +24,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavadocContentAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 
 
 public class ProposalInfo {
@@ -46,12 +50,13 @@ public class ProposalInfo {
 	 * Gets the text for this proposal info formatted as HTML, or
 	 * <code>null</code> if no text is available.
 	 *
+	 * @param monitor a progress monitor
 	 * @return the additional info text
 	 */
-	public final String getInfo() {
+	public final String getInfo(IProgressMonitor monitor) {
 		if (!fJavadocResolved) {
 			fJavadocResolved= true;
-			fJavadoc= computeInfo();
+			fJavadoc= computeInfo(monitor);
 		}
 		return fJavadoc;
 	}
@@ -60,14 +65,15 @@ public class ProposalInfo {
 	 * Gets the text for this proposal info formatted as HTML, or
 	 * <code>null</code> if no text is available.
 	 *
+	 * @param monitor a progress monitor
 	 * @return the additional info text
 	 */
-	private String computeInfo() {
+	private String computeInfo(IProgressMonitor monitor) {
 		try {
 			final IJavaElement javaElement= getJavaElement();
 			if (javaElement instanceof IMember) {
 				IMember member= (IMember) javaElement;
-				return extractJavadoc(member);
+				return extractJavadoc(member, monitor);
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
@@ -82,19 +88,33 @@ public class ProposalInfo {
 	 * as HTML.
 	 *
 	 * @param member the member to get the documentation for
+	 * @param monitor a progress monitor
 	 * @return the javadoc for <code>member</code> or <code>null</code> if
 	 *         it is not available
 	 * @throws JavaModelException if accessing the javadoc fails
 	 * @throws IOException if reading the javadoc fails
 	 */
-	private String extractJavadoc(IMember member) throws JavaModelException, IOException {
+	private String extractJavadoc(IMember member, IProgressMonitor monitor) throws JavaModelException, IOException {
 		if (member != null) {
-			Reader reader=  JavadocContentAccess.getHTMLContentReader(member, true, true);
+			Reader reader=  getHTMLContentReader(member, monitor);
 			if (reader != null)
 				return getString(reader);
 		}
 		return null;
 	}
+
+	private Reader getHTMLContentReader(IMember member, IProgressMonitor monitor) throws JavaModelException {
+	    Reader contentReader= JavadocContentAccess.getContentReader(member, true);
+        if (contentReader != null)
+        	return new JavaDoc2HTMLTextReader(contentReader);
+        
+        if (true && member.getOpenable().getBuffer() == null) { // only if no source available
+        	String s= member.getAttachedJavadoc(monitor);
+        	if (s != null)
+        		return new StringReader(s);
+        }
+        return null;
+    }
 	
 	/**
 	 * Gets the reader content as a String
