@@ -39,7 +39,7 @@ public abstract class ActivateEditorTest extends TextPerformanceTestCase {
 	
 	private String fShortName;
 	
-	private AbstractTextEditor[] fEditors;
+	protected AbstractTextEditor[] fEditors;
 	
 	public ActivateEditorTest() {
 		super();
