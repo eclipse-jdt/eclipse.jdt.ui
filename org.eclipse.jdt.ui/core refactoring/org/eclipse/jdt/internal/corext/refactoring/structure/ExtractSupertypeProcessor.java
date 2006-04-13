@@ -52,8 +52,10 @@ import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
@@ -100,6 +102,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**
  * Refactoring processor for the extract supertype refactoring.
@@ -107,6 +110,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * @since 3.2
  */
 public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor {
+
+	/** The extract attribute */
+	private static final String ATTRIBUTE_EXTRACT= "extract"; //$NON-NLS-1$
 
 	/** The types attribute */
 	private static final String ATTRIBUTE_TYPES= "types"; //$NON-NLS-1$
@@ -253,25 +259,22 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 						JavaPlugin.log(exception);
 					}
 					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_SUPERTYPE, project, Messages.format(RefactoringCoreMessages.ExtractSupertypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_DEFAULT), JavaElementLabels.getElementLabel(fCachedDeclaringType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fDestinationType));
+					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fTypeName);
 					arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplace).toString());
 					arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
-					if (fCachedDeclaringType != null)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(fCachedDeclaringType));
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fTypeName);
-					arguments.put(ATTRIBUTE_PULL, new Integer(fMembersToMove.length).toString());
+					arguments.put(ATTRIBUTE_STUBS, Boolean.valueOf(fCreateMethodStubs).toString());
+					arguments.put(ATTRIBUTE_EXTRACT, new Integer(fMembersToMove.length).toString());
 					for (int offset= 0; offset < fMembersToMove.length; offset++)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 2), descriptor.elementToHandle(fMembersToMove[offset]));
+						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), descriptor.elementToHandle(fMembersToMove[offset]));
 					arguments.put(ATTRIBUTE_DELETE, new Integer(fDeletedMethods.length).toString());
 					for (int offset= 0; offset < fDeletedMethods.length; offset++)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + 2), descriptor.elementToHandle(fDeletedMethods[offset]));
+						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + 1), descriptor.elementToHandle(fDeletedMethods[offset]));
 					arguments.put(ATTRIBUTE_ABSTRACT, new Integer(fAbstractMethods.length).toString());
 					for (int offset= 0; offset < fAbstractMethods.length; offset++)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + fDeletedMethods.length + 2), descriptor.elementToHandle(fAbstractMethods[offset]));
+						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + fDeletedMethods.length + 1), descriptor.elementToHandle(fAbstractMethods[offset]));
 					arguments.put(ATTRIBUTE_TYPES, new Integer(fTypesToExtract.length).toString());
 					for (int offset= 0; offset < fTypesToExtract.length; offset++)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + fDeletedMethods.length + fAbstractMethods.length + 2), descriptor.elementToHandle(fTypesToExtract[offset]));
-					arguments.put(ATTRIBUTE_STUBS, Boolean.valueOf(fCreateMethodStubs).toString());
+						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + fDeletedMethods.length + fAbstractMethods.length + 1), descriptor.elementToHandle(fTypesToExtract[offset]));
 					return new RefactoringChangeDescriptor(descriptor);
 				}
 			};
@@ -905,7 +908,131 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 */
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
-			// TODO: implement
+			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+			final String name= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_NAME);
+			if (name != null && !"".equals(name)) //$NON-NLS-1$
+				fTypeName= name;
+			else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_NAME));
+			String handle= null;
+			final String stubs= extended.getAttribute(ATTRIBUTE_STUBS);
+			if (stubs != null) {
+				fCreateMethodStubs= Boolean.valueOf(stubs).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_STUBS));
+			final String instance= extended.getAttribute(ATTRIBUTE_INSTANCEOF);
+			if (instance != null) {
+				fInstanceOf= Boolean.valueOf(instance).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INSTANCEOF));
+			final String replace= extended.getAttribute(ATTRIBUTE_REPLACE);
+			if (replace != null) {
+				fReplace= Boolean.valueOf(replace).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
+			int extractCount= 0;
+			int abstractCount= 0;
+			int deleteCount= 0;
+			int typeCount= 0;
+			String value= extended.getAttribute(ATTRIBUTE_ABSTRACT);
+			if (value != null && !"".equals(value)) {//$NON-NLS-1$
+				try {
+					abstractCount= Integer.parseInt(value);
+				} catch (NumberFormatException exception) {
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ABSTRACT));
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ABSTRACT));
+			value= extended.getAttribute(ATTRIBUTE_DELETE);
+			if (value != null && !"".equals(value)) {//$NON-NLS-1$
+				try {
+					deleteCount= Integer.parseInt(value);
+				} catch (NumberFormatException exception) {
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELETE));
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELETE));
+			value= extended.getAttribute(ATTRIBUTE_EXTRACT);
+			if (value != null && !"".equals(value)) {//$NON-NLS-1$
+				try {
+					extractCount= Integer.parseInt(value);
+				} catch (NumberFormatException exception) {
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_EXTRACT));
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_EXTRACT));
+			value= extended.getAttribute(ATTRIBUTE_TYPES);
+			if (value != null && !"".equals(value)) {//$NON-NLS-1$
+				try {
+					typeCount= Integer.parseInt(value);
+				} catch (NumberFormatException exception) {
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TYPES));
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TYPES));
+			final RefactoringStatus status= new RefactoringStatus();
+			List elements= new ArrayList();
+			for (int index= 0; index < extractCount; index++) {
+				final String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1);
+				handle= extended.getAttribute(attribute);
+				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
+					if (element == null)
+						status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_EXTRACT_SUPERTYPE)));
+					else
+						elements.add(element);
+				} else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+			}
+			fMembersToMove= (IMember[]) elements.toArray(new IMember[elements.size()]);
+			elements= new ArrayList();
+			for (int index= 0; index < deleteCount; index++) {
+				final String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (extractCount + index + 1);
+				handle= extended.getAttribute(attribute);
+				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
+					if (element == null)
+						status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_EXTRACT_SUPERTYPE)));
+					else
+						elements.add(element);
+				} else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+			}
+			fDeletedMethods= (IMethod[]) elements.toArray(new IMethod[elements.size()]);
+			elements= new ArrayList();
+			for (int index= 0; index < abstractCount; index++) {
+				final String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (extractCount + abstractCount + index + 1);
+				handle= extended.getAttribute(attribute);
+				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
+					if (element == null)
+						status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_EXTRACT_SUPERTYPE)));
+					else
+						elements.add(element);
+				} else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+			}
+			fAbstractMethods= (IMethod[]) elements.toArray(new IMethod[elements.size()]);
+			elements= new ArrayList();
+			for (int index= 0; index < typeCount; index++) {
+				final String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (extractCount + abstractCount + deleteCount + index + 1);
+				handle= extended.getAttribute(attribute);
+				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
+					if (element == null)
+						status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_EXTRACT_SUPERTYPE)));
+					else
+						elements.add(element);
+				} else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+			}
+			fTypesToExtract= (IType[]) elements.toArray(new IType[elements.size()]);
+			IJavaProject project= null;
+			if (fMembersToMove.length > 0)
+				project= fMembersToMove[0].getJavaProject();
+			fSettings= JavaPreferencesSettings.getCodeGenerationSettings(project);
+			if (!status.isOK())
+				return status;
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
