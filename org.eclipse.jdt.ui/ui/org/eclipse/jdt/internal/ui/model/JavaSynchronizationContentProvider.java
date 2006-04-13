@@ -281,7 +281,30 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 			return getJavaProjectChildren(context, parent, elements);
 		else if (parent instanceof RefactoringHistory)
 			return ((RefactoringHistory) parent).getDescriptors();
-		return elements;
+		// It may be the case that the elements are folders that have a corresponding
+		// source folder in which case they should be filtered out
+		return getFilteredElements(parent, elements);
+	}
+
+	/**
+	 * Returns the filtered elements.
+	 * 
+	 * @param parent
+	 *            the parent element
+	 * @param children
+	 *            the child elements
+	 * @return the filtered elements
+	 */
+	private Object[] getFilteredElements(final Object parent, final Object[] children) {
+		final List result= new ArrayList(children.length);
+		for (int index= 0; index < children.length; index++) {
+			if (children[index] instanceof IFolder) {
+				if (!(JavaCore.create((IFolder) children[index]) instanceof IPackageFragmentRoot))
+					result.add(children[index]);
+			} else
+				result.add(children[index]);
+		}
+		return result.toArray();
 	}
 
 	/**
@@ -348,6 +371,9 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 				final IPackageFragment fragment= (IPackageFragment) children[index];
 				try {
 					if (!fragment.hasChildren())
+						continue;
+					if (fragment.isDefaultPackage() && getChildren(fragment).length == 0)
+					    // Don't add the default package unless it has children
 						continue;
 				} catch (final JavaModelException exception) {
 					JavaPlugin.log(exception);
@@ -445,8 +471,15 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 */
 	private Object[] getPackageFragmentRootChildren(final ISynchronizationContext context, final Object parent, final Object[] children) {
 		final Set set= new HashSet();
-		for (int index= 0; index < children.length; index++)
+		for (int index= 0; index < children.length; index++) {
+			if (children[index] instanceof IPackageFragment) {
+				IPackageFragment fragment = (IPackageFragment) children[index];
+				if (fragment.isOpen() && getChildren(fragment).length == 0)
+					// Don't add the default package unless it has children
+					continue;
+			}
 			set.add(children[index]);
+		}
 		final IResource resource= JavaModelProvider.getResource(parent);
 		if (resource != null) {
 			final IResourceDiffTree tree= context.getDiffTree();
@@ -456,15 +489,20 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 				final boolean contained= isInScope(context.getScope(), parent, members[index]);
 				final boolean visible= isVisible(context, members[index]);
 				if (type == IResource.FILE && contained && visible) {
+					// If the file is not a compilation unit add it.
+					// (compilation units are always children of packages so they
+					// don't need to be added here)
 					final IJavaElement element= JavaCore.create((IFile) members[index]);
-					if (element != null)
-						set.add(element);
+					if (element == null)
+						set.add(members[index]);
 				} else if (type == IResource.FOLDER && contained && visible && tree.getDiff(members[index]) != null) {
+					// If the folder is out-of-sync, add it
 					final IJavaElement element= JavaCore.create(members[index]);
 					if (element != null)
 						set.add(element);
 				}
 				if (type == IResource.FOLDER) {
+					// If the folder contains java elements, add it
 					final IFolder folder= (IFolder) members[index];
 					tree.accept(folder.getFullPath(), new IDiffVisitor() {
 
@@ -512,13 +550,36 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 						result.add(java);
 					}
 				}
+				if (element instanceof IFolder) {
+					IFolder folder = (IFolder) element;
+					IJavaElement javaElement = JavaCore.create(folder);
+					// If the folder is also a package, don't show it
+					// as a folder since it will be shown as a package
+					if (javaElement instanceof IPackageFragmentRoot) {
+						iterator.remove();
+					}
+				}
 			}
 			children.addAll(result);
-		} else if (parent instanceof ISynchronizationScope)
+		} else if (parent instanceof ISynchronizationScope) {
 			// When the root is a scope, we should return the
 			// Java model provider so all model providers appear
 			// at the root of the viewer.
 			children.add(getModelProvider());
+		} else if (parent instanceof IFolder) {
+			// Remove any children that are also source folders so they
+			// don't appear twice
+			for (final Iterator iterator= children.iterator(); iterator.hasNext();) {
+				final Object element= iterator.next();
+				if (element instanceof IFolder) {
+					IFolder folder = (IFolder) element;
+					IJavaElement javaElement = JavaCore.create(folder);
+					if (javaElement instanceof IPackageFragmentRoot) {
+						iterator.remove();
+					}
+				}
+			}
+		}
 	}
 
 	/**
