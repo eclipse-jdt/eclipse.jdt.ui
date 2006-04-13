@@ -5175,6 +5175,7 @@
 			</possibleChildren>
 			<actionProvider
 					class="org.eclipse.jdt.internal.ui.navigator.PackageExplorerActionProvider"
+					id="org.eclipse.jdt.internal.ui.navigator.PackageExplorerActionProvider"
 					overrides="org.eclipse.ui.navigator.resources.actions.RefactorActions"> 
 			</actionProvider>
 			
