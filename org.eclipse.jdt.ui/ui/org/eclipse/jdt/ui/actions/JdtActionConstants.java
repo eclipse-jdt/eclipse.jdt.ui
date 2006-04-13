@@ -386,7 +386,7 @@ public class JdtActionConstants {
 	public static final String EXTRACT_INTERFACE= "org.eclipse.jdt.ui.actions.ExtractInterface"; //$NON-NLS-1$
 
 	/**
-	 * Refactor menu: name of standard Generalize Type global action
+	 * Refactor menu: name of standard Generalize Declared Type global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.ChangeType"</code>).
 	 * 
 	 * @since 3.0

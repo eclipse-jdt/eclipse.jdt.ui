@@ -170,8 +170,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ChangeTypeRefactoring_primitivesNotSupported;
 
-	public static String ChangeTypeRefactoring_to;
-
 	public static String ChangeTypeRefactoring_typeChange;
 
 	public static String ChangeTypeRefactoring_typeParametersNotSupported;

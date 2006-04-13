@@ -553,9 +553,7 @@ public class ChangeTypeRefactoring extends CommentRefactoring implements IInitia
 							ASTRewrite unitRewriter, String typeName) {
 		
 		String oldName= fSelectionTypeBinding.getName();
-		String description= 
-		  RefactoringCoreMessages.ChangeTypeRefactoring_typeChange
-		  + oldName + RefactoringCoreMessages.ChangeTypeRefactoring_to + typeName;  
+		String description= Messages.format(RefactoringCoreMessages.ChangeTypeRefactoring_typeChange, new String[] {oldName, typeName});
 		TextEditGroup gd= new TextEditGroup(description); 
 		AST	ast= cu.getAST();
 		
