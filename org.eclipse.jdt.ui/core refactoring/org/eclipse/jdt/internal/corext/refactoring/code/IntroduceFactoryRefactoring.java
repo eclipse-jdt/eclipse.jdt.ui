@@ -30,8 +30,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -88,6 +86,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -1050,36 +1049,30 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 	}
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.IntroduceFactory_createChanges, fAllCallsTo.length); 
-		final ITypeBinding binding= fFactoryOwningClass.resolveBinding();
-		final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.IntroduceFactory_name) {
-		
-			public final ChangeDescriptor getDescriptor() {
-				final Map arguments= new HashMap();
-				String project= null;
-				IJavaProject javaProject= fCUHandle.getJavaProject();
-				if (javaProject != null)
-					project= javaProject.getElementName();
-				int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
-				if (binding.isNested() && !binding.isMember())
-					flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INTRODUCE_FACTORY, project, Messages.format(RefactoringCoreMessages.IntroduceFactory_descriptor_description, new String[] { fNewMethodName, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fCtorBinding, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCUHandle));
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fNewMethodName);
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(binding.getJavaElement()));
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
-				arguments.put(ATTRIBUTE_PROTECT, Boolean.valueOf(fProtectConstructor).toString());
-				return new RefactoringChangeDescriptor(descriptor);
-			}
-		}; 
-
 		try {
+			pm.beginTask(RefactoringCoreMessages.IntroduceFactory_createChanges, fAllCallsTo.length);
+			final ITypeBinding binding= fFactoryOwningClass.resolveBinding();
+			final Map arguments= new HashMap();
+			String project= null;
+			IJavaProject javaProject= fCUHandle.getJavaProject();
+			if (javaProject != null)
+				project= javaProject.getElementName();
+			int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+			if (binding.isNested() && !binding.isMember())
+				flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INTRODUCE_FACTORY, project, Messages.format(RefactoringCoreMessages.IntroduceFactory_descriptor_description, new String[] { fNewMethodName, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fCtorBinding, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCUHandle));
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fNewMethodName);
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(binding.getJavaElement()));
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+			arguments.put(ATTRIBUTE_PROTECT, Boolean.valueOf(fProtectConstructor).toString());
+			final DynamicValidationStateChange result= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.IntroduceFactory_name);
 			boolean hitInFactoryClass= false;
 			boolean hitInCtorClass= false;
-			for(int i=0; i < fAllCallsTo.length; i++) {
-				SearchResultGroup		rg= fAllCallsTo[i];
-				ICompilationUnit		unitHandle= rg.getCompilationUnit();
-				CompilationUnitChange	cuChange= new CompilationUnitChange(getName(), unitHandle);
+			for (int i= 0; i < fAllCallsTo.length; i++) {
+				SearchResultGroup rg= fAllCallsTo[i];
+				ICompilationUnit unitHandle= rg.getCompilationUnit();
+				CompilationUnitChange cuChange= new CompilationUnitChange(getName(), unitHandle);
 
 				if (addAllChangesFor(rg, unitHandle, cuChange))
 					result.add(cuChange);

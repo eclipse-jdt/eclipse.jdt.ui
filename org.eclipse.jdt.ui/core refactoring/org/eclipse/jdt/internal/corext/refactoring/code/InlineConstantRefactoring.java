@@ -37,8 +37,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -103,7 +101,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -828,32 +826,25 @@ public class InlineConstantRefactoring extends ScriptableRefactoring {
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
-			pm.beginTask(RefactoringCoreMessages.InlineConstantRefactoring_preview, 2); 
-			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.InlineConstantRefactoring_inline) {
-			
-				public final ChangeDescriptor getDescriptor() {
-					final Map arguments= new HashMap();
-					String project= null;
-					IJavaProject javaProject= fSelectionCu.getJavaProject();
-					if (javaProject != null)
-						project= javaProject.getElementName();
-					int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-					try {
-						if (!Flags.isPrivate(fField.getFlags()))
-							flags|= RefactoringDescriptor.MULTI_CHANGE;
-					} catch (JavaModelException exception) {
-						JavaPlugin.log(exception);
-					}
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_CONSTANT, project, Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_descriptor_description, new String[] {JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSelectionCu));
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
-					arguments.put(ATTRIBUTE_REMOVE, Boolean.valueOf(fRemoveDeclaration).toString());
-					arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllReferences).toString());
-					return new RefactoringChangeDescriptor(descriptor);
-				}
-			}; 
-			result.addAll(fChanges);
-			return result;
+			pm.beginTask(RefactoringCoreMessages.InlineConstantRefactoring_preview, 2);
+			final Map arguments= new HashMap();
+			String project= null;
+			IJavaProject javaProject= fSelectionCu.getJavaProject();
+			if (javaProject != null)
+				project= javaProject.getElementName();
+			int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+			try {
+				if (!Flags.isPrivate(fField.getFlags()))
+					flags|= RefactoringDescriptor.MULTI_CHANGE;
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_CONSTANT, project, Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSelectionCu));
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+			arguments.put(ATTRIBUTE_REMOVE, Boolean.valueOf(fRemoveDeclaration).toString());
+			arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllReferences).toString());
+			return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.InlineConstantRefactoring_inline, fChanges);
 		} finally {
 			pm.done();
 			fChanges= null;

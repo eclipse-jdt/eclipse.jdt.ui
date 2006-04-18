@@ -24,8 +24,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -65,7 +63,7 @@ import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitDescriptorChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
@@ -212,34 +210,29 @@ public class InlineTempRefactoring extends ScriptableRefactoring {
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
-			pm.beginTask(RefactoringCoreMessages.InlineTempRefactoring_preview, 2); 
-			final CompilationUnitChange result= new CompilationUnitChange(RefactoringCoreMessages.InlineTempRefactoring_inline, fCu) {
-			
-				public final ChangeDescriptor getDescriptor() {
-					final Map arguments= new HashMap();
-					String project= null;
-					IJavaProject javaProject= fCu.getJavaProject();
-					if (javaProject != null)
-						project= javaProject.getElementName();
-					final IVariableBinding binding= fTempDeclaration.resolveBinding();
-					String text= null;
-					final IMethodBinding method= binding.getDeclaringMethod();
-					if (method != null)
-						text= BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED);
-					else
-						text= '{' + JavaElementLabels.ELLIPSIS_STRING + '}';
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_TEMP, project, Messages.format(RefactoringCoreMessages.InlineTempRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), text}), getComment(), arguments, RefactoringDescriptor.NONE);
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
-					return new RefactoringChangeDescriptor(descriptor);
-				}
-			}; 
+			pm.beginTask(RefactoringCoreMessages.InlineTempRefactoring_preview, 2);
+			final Map arguments= new HashMap();
+			String project= null;
+			IJavaProject javaProject= fCu.getJavaProject();
+			if (javaProject != null)
+				project= javaProject.getElementName();
+			final IVariableBinding binding= fTempDeclaration.resolveBinding();
+			String text= null;
+			final IMethodBinding method= binding.getDeclaringMethod();
+			if (method != null)
+				text= BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED);
+			else
+				text= '{' + JavaElementLabels.ELLIPSIS_STRING + '}';
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_TEMP, project, Messages.format(RefactoringCoreMessages.InlineTempRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), text}), getComment(), arguments, RefactoringDescriptor.NONE);
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+			final CompilationUnitDescriptorChange result= new CompilationUnitDescriptorChange(descriptor, RefactoringCoreMessages.InlineTempRefactoring_inline, fCu);
 			inlineTemp(result, new SubProgressMonitor(pm, 1));
 			removeTemp(result);
 			return result;
 		} finally {
-			pm.done();	
-		}	
+			pm.done();
+		}
 	}
 
 	private void inlineTemp(TextChange change, IProgressMonitor pm) throws JavaModelException {

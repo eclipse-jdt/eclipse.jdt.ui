@@ -27,9 +27,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -68,7 +66,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateCreator;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateFieldCreator;
@@ -569,40 +567,35 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			final TextChange[] changes= fChangeManager.getAllChanges();
 			final List list= new ArrayList(changes.length);
 			list.addAll(Arrays.asList(changes));
-			return new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges, (Change[]) list.toArray(new Change[list.size()])) {
-
-				public ChangeDescriptor getDescriptor() {
-					final Map arguments= new HashMap();
-					String project= null;
-					IJavaProject javaProject= fField.getJavaProject();
-					if (javaProject != null)
-						project= javaProject.getElementName();
-					int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
-					try {
-						if (!Flags.isPrivate(fField.getFlags()))
-							flags|= RefactoringDescriptor.MULTI_CHANGE;
-					} catch (JavaModelException exception) {
-						JavaPlugin.log(exception);
-					}
-					final IType declaring= fField.getDeclaringType();
-					try {
-						if (declaring.isAnonymous() || declaring.isLocal())
-							flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-					} catch (JavaModelException exception) {
-						JavaPlugin.log(exception);
-					}
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_FIELD, project, Messages.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED) + "." + fField.getElementName(), getNewElementName()}), getComment(), arguments, flags); //$NON-NLS-1$
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fField));
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
-					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
-					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
-					arguments.put(ATTRIBUTE_RENAME_GETTER, Boolean.valueOf(fRenameGetter).toString());
-					arguments.put(ATTRIBUTE_RENAME_SETTER, Boolean.valueOf(fRenameSetter).toString());
-					arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
-					arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
-					return new RefactoringChangeDescriptor(descriptor);
-				}
-			};
+			final Map arguments= new HashMap();
+			String project= null;
+			IJavaProject javaProject= fField.getJavaProject();
+			if (javaProject != null)
+				project= javaProject.getElementName();
+			int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
+			try {
+				if (!Flags.isPrivate(fField.getFlags()))
+					flags|= RefactoringDescriptor.MULTI_CHANGE;
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+			final IType declaring= fField.getDeclaringType();
+			try {
+				if (declaring.isAnonymous() || declaring.isLocal())
+					flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_FIELD, project, Messages.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED) + "." + fField.getElementName(), getNewElementName()}), getComment(), arguments, flags); //$NON-NLS-1$
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fField));
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
+			arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+			arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
+			arguments.put(ATTRIBUTE_RENAME_GETTER, Boolean.valueOf(fRenameGetter).toString());
+			arguments.put(ATTRIBUTE_RENAME_SETTER, Boolean.valueOf(fRenameSetter).toString());
+			arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
+			arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
+			return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.Change_javaChanges, (Change[]) list.toArray(new Change[list.size()]));
 		} finally {
 			pm.done();
 		}

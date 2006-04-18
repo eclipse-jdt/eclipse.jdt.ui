@@ -44,8 +44,6 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
@@ -126,7 +124,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IVisibilityAdjustment;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
@@ -1567,41 +1565,36 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		Assert.isNotNull(monitor);
 		try {
 			monitor.beginTask("", 6); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_creating); 
+			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_creating);
 			final TextChange[] changes= fChangeManager.getAllChanges();
 			if (changes.length == 1)
 				return changes[0];
 			final List list= new ArrayList(changes.length);
 			list.addAll(Arrays.asList(changes));
-			return new DynamicValidationStateChange(RefactoringCoreMessages.MoveInstanceMethodRefactoring_name, (Change[]) list.toArray(new Change[list.size()])) {
-
-				public final ChangeDescriptor getDescriptor() {
-					final Map arguments= new HashMap();
-					String project= null;
-					final IJavaProject javaProject= fMethod.getJavaProject();
-					if (javaProject != null)
-						project= javaProject.getElementName();
-					int flags= JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
-					final IType declaring= fMethod.getDeclaringType();
-					try {
-						if (declaring.isAnonymous() || declaring.isLocal())
-							flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-					} catch (JavaModelException exception) {
-						JavaPlugin.log(exception);
-					}
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_MOVE_METHOD, project, Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fTarget, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fMethod));
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fMethodName);
-					arguments.put(ATTRIBUTE_TARGET_NAME, fTargetName);
-					arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
-					arguments.put(ATTRIBUTE_REMOVE, Boolean.valueOf(fRemove).toString());
-					arguments.put(ATTRIBUTE_INLINE, Boolean.valueOf(fInline).toString());
-					arguments.put(ATTRIBUTE_USE_GETTER, Boolean.valueOf(fUseGetters).toString());
-					arguments.put(ATTRIBUTE_USE_SETTER, Boolean.valueOf(fUseSetters).toString());
-					arguments.put(ATTRIBUTE_TARGET_INDEX, new Integer(getTargetIndex()).toString());
-					return new RefactoringChangeDescriptor(descriptor);
-				}
-			}; 
+			final Map arguments= new HashMap();
+			String project= null;
+			final IJavaProject javaProject= fMethod.getJavaProject();
+			if (javaProject != null)
+				project= javaProject.getElementName();
+			int flags= JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+			final IType declaring= fMethod.getDeclaringType();
+			try {
+				if (declaring.isAnonymous() || declaring.isLocal())
+					flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_MOVE_METHOD, project, Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fTarget, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fMethod));
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fMethodName);
+			arguments.put(ATTRIBUTE_TARGET_NAME, fTargetName);
+			arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
+			arguments.put(ATTRIBUTE_REMOVE, Boolean.valueOf(fRemove).toString());
+			arguments.put(ATTRIBUTE_INLINE, Boolean.valueOf(fInline).toString());
+			arguments.put(ATTRIBUTE_USE_GETTER, Boolean.valueOf(fUseGetters).toString());
+			arguments.put(ATTRIBUTE_USE_SETTER, Boolean.valueOf(fUseSetters).toString());
+			arguments.put(ATTRIBUTE_TARGET_INDEX, new Integer(getTargetIndex()).toString());
+			return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.MoveInstanceMethodRefactoring_name, (Change[]) list.toArray(new Change[list.size()]));
 		} finally {
 			monitor.done();
 		}

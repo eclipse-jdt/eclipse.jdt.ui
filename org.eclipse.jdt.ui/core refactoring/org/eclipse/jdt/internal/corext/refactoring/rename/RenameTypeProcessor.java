@@ -39,11 +39,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.IResourceMapper;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -93,7 +91,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
@@ -1001,36 +999,31 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.RenameTypeRefactoring_creating_change, 4);
-			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges) {
-
-				public final ChangeDescriptor getDescriptor() {
-					final Map arguments= new HashMap();
-					String project= null;
-					IJavaProject javaProject= fType.getJavaProject();
-					if (javaProject != null)
-						project= javaProject.getElementName();
-					int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
-					try {
-						if (!Flags.isPrivate(fType.getFlags()))
-							flags|= RefactoringDescriptor.MULTI_CHANGE;
-						if (fType.isAnonymous() || fType.isLocal())
-							flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-					} catch (JavaModelException exception) {
-						JavaPlugin.log(exception);
-					}
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_TYPE, project, Messages.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), getComment(), arguments, flags);
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fType));
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
-					if (fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
-						arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
-					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
-					arguments.put(ATTRIBUTE_QUALIFIED, Boolean.valueOf(fUpdateQualifiedNames).toString());
-					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
-					arguments.put(ATTRIBUTE_SIMILAR_DECLARATIONS, Boolean.valueOf(fUpdateSimilarElements).toString());
-					arguments.put(ATTRIBUTE_SIMILAR_DECLARATIONS_MATCHING_STRATEGY, Integer.toString(fRenamingStrategy));
-					return new RefactoringChangeDescriptor(descriptor);
-				}
-			};
+			final Map arguments= new HashMap();
+			String project= null;
+			IJavaProject javaProject= fType.getJavaProject();
+			if (javaProject != null)
+				project= javaProject.getElementName();
+			int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
+			try {
+				if (!Flags.isPrivate(fType.getFlags()))
+					flags|= RefactoringDescriptor.MULTI_CHANGE;
+				if (fType.isAnonymous() || fType.isLocal())
+					flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_TYPE, project, Messages.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), getComment(), arguments, flags);
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fType));
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
+			if (fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
+				arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
+			arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+			arguments.put(ATTRIBUTE_QUALIFIED, Boolean.valueOf(fUpdateQualifiedNames).toString());
+			arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
+			arguments.put(ATTRIBUTE_SIMILAR_DECLARATIONS, Boolean.valueOf(fUpdateSimilarElements).toString());
+			arguments.put(ATTRIBUTE_SIMILAR_DECLARATIONS_MATCHING_STRATEGY, Integer.toString(fRenamingStrategy));
+			final DynamicValidationRefactoringChange result= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.Change_javaChanges);
 			result.addAll(fChangeManager.getAllChanges());
 			if (willRenameCU()) {
 				IResource resource= ResourceUtil.getResource(fType);
@@ -1041,10 +1034,10 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 						renamedResourceName= getNewElementName();
 					else
 						renamedResourceName= getNewElementName() + '.' + ext;
-					result.add(new RenameResourceChange(ResourceUtil.getResource(fType), renamedResourceName, getComment()));
+					result.add(new RenameResourceChange(null, ResourceUtil.getResource(fType), renamedResourceName, getComment()));
 				} else {
 					String renamedCUName= JavaModelUtil.getRenamedCUName(fType.getCompilationUnit(), getNewElementName());
-					result.add(new RenameCompilationUnitChange(fType.getCompilationUnit(), renamedCUName, getComment()));
+					result.add(new RenameCompilationUnitChange(null, fType.getCompilationUnit(), renamedCUName, getComment()));
 				}
 			}
 			monitor.worked(1);

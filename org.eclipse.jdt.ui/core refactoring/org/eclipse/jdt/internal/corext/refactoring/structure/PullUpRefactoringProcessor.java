@@ -36,10 +36,8 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -107,7 +105,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsSolver;
@@ -984,39 +982,34 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	 */
 	public Change createChange(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		try {
-			return new DynamicValidationStateChange(RefactoringCoreMessages.PullUpRefactoring_Pull_Up, fChangeManager.getAllChanges()) {
-
-				public final ChangeDescriptor getDescriptor() {
-					final Map arguments= new HashMap();
-					String project= null;
-					final IType declaring= getDeclaringType();
-					final IJavaProject javaProject= declaring.getJavaProject();
-					if (javaProject != null)
-						project= javaProject.getElementName();
-					int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
-					try {
-						if (declaring.isLocal() || declaring.isAnonymous())
-							flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-					} catch (JavaModelException exception) {
-						JavaPlugin.log(exception);
-					}
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PULL_UP, project, fMembersToMove.length == 1 ? Messages.format(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}) : Messages.format(RefactoringCoreMessages.PullUpRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fDestinationType));
-					arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplace).toString());
-					arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
-					arguments.put(ATTRIBUTE_STUBS, Boolean.valueOf(fCreateMethodStubs).toString());
-					arguments.put(ATTRIBUTE_PULL, new Integer(fMembersToMove.length).toString());
-					for (int offset= 0; offset < fMembersToMove.length; offset++)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), descriptor.elementToHandle(fMembersToMove[offset]));
-					arguments.put(ATTRIBUTE_DELETE, new Integer(fDeletedMethods.length).toString());
-					for (int offset= 0; offset < fDeletedMethods.length; offset++)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + 1), descriptor.elementToHandle(fDeletedMethods[offset]));
-					arguments.put(ATTRIBUTE_ABSTRACT, new Integer(fAbstractMethods.length).toString());
-					for (int offset= 0; offset < fAbstractMethods.length; offset++)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + fDeletedMethods.length + 1), descriptor.elementToHandle(fAbstractMethods[offset]));
-					return new RefactoringChangeDescriptor(descriptor);
-				}
-			};
+			final Map arguments= new HashMap();
+			String project= null;
+			final IType declaring= getDeclaringType();
+			final IJavaProject javaProject= declaring.getJavaProject();
+			if (javaProject != null)
+				project= javaProject.getElementName();
+			int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+			try {
+				if (declaring.isLocal() || declaring.isAnonymous())
+					flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PULL_UP, project, fMembersToMove.length == 1 ? Messages.format(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}) : Messages.format(RefactoringCoreMessages.PullUpRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fDestinationType));
+			arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplace).toString());
+			arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
+			arguments.put(ATTRIBUTE_STUBS, Boolean.valueOf(fCreateMethodStubs).toString());
+			arguments.put(ATTRIBUTE_PULL, new Integer(fMembersToMove.length).toString());
+			for (int offset= 0; offset < fMembersToMove.length; offset++)
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), descriptor.elementToHandle(fMembersToMove[offset]));
+			arguments.put(ATTRIBUTE_DELETE, new Integer(fDeletedMethods.length).toString());
+			for (int offset= 0; offset < fDeletedMethods.length; offset++)
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + 1), descriptor.elementToHandle(fDeletedMethods[offset]));
+			arguments.put(ATTRIBUTE_ABSTRACT, new Integer(fAbstractMethods.length).toString());
+			for (int offset= 0; offset < fAbstractMethods.length; offset++)
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + fDeletedMethods.length + 1), descriptor.elementToHandle(fAbstractMethods[offset]));
+			return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.PullUpRefactoring_Pull_Up, fChangeManager.getAllChanges());
 		} finally {
 			monitor.done();
 			clearCaches();

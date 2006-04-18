@@ -39,11 +39,8 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -88,7 +85,7 @@ import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MultiStateCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -242,43 +239,37 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 */
 	public Change createChange(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		try {
-			final CompositeChange change= new DynamicValidationStateChange(RefactoringCoreMessages.ExtractSupertypeProcessor_extract_supertype, fChangeManager.getAllChanges()) {
-
-				public final ChangeDescriptor getDescriptor() {
-					final Map arguments= new HashMap();
-					String project= null;
-					final IType declaring= getDeclaringType();
-					final IJavaProject javaProject= declaring.getJavaProject();
-					if (javaProject != null)
-						project= javaProject.getElementName();
-					int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
-					try {
-						if (declaring.isLocal() || declaring.isAnonymous())
-							flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-					} catch (JavaModelException exception) {
-						JavaPlugin.log(exception);
-					}
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_SUPERTYPE, project, Messages.format(RefactoringCoreMessages.ExtractSupertypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_DEFAULT), JavaElementLabels.getElementLabel(fCachedDeclaringType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fTypeName);
-					arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplace).toString());
-					arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
-					arguments.put(ATTRIBUTE_STUBS, Boolean.valueOf(fCreateMethodStubs).toString());
-					arguments.put(ATTRIBUTE_EXTRACT, new Integer(fMembersToMove.length).toString());
-					for (int offset= 0; offset < fMembersToMove.length; offset++)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), descriptor.elementToHandle(fMembersToMove[offset]));
-					arguments.put(ATTRIBUTE_DELETE, new Integer(fDeletedMethods.length).toString());
-					for (int offset= 0; offset < fDeletedMethods.length; offset++)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + 1), descriptor.elementToHandle(fDeletedMethods[offset]));
-					arguments.put(ATTRIBUTE_ABSTRACT, new Integer(fAbstractMethods.length).toString());
-					for (int offset= 0; offset < fAbstractMethods.length; offset++)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + fDeletedMethods.length + 1), descriptor.elementToHandle(fAbstractMethods[offset]));
-					arguments.put(ATTRIBUTE_TYPES, new Integer(fTypesToExtract.length).toString());
-					for (int offset= 0; offset < fTypesToExtract.length; offset++)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + fDeletedMethods.length + fAbstractMethods.length + 1), descriptor.elementToHandle(fTypesToExtract[offset]));
-					return new RefactoringChangeDescriptor(descriptor);
-				}
-			};
+			final Map arguments= new HashMap();
+			String project= null;
 			final IType declaring= getDeclaringType();
+			final IJavaProject javaProject= declaring.getJavaProject();
+			if (javaProject != null)
+				project= javaProject.getElementName();
+			int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+			try {
+				if (declaring.isLocal() || declaring.isAnonymous())
+					flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_SUPERTYPE, project, Messages.format(RefactoringCoreMessages.ExtractSupertypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_DEFAULT), JavaElementLabels.getElementLabel(fCachedDeclaringType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fTypeName);
+			arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplace).toString());
+			arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
+			arguments.put(ATTRIBUTE_STUBS, Boolean.valueOf(fCreateMethodStubs).toString());
+			arguments.put(ATTRIBUTE_EXTRACT, new Integer(fMembersToMove.length).toString());
+			for (int offset= 0; offset < fMembersToMove.length; offset++)
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), descriptor.elementToHandle(fMembersToMove[offset]));
+			arguments.put(ATTRIBUTE_DELETE, new Integer(fDeletedMethods.length).toString());
+			for (int offset= 0; offset < fDeletedMethods.length; offset++)
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + 1), descriptor.elementToHandle(fDeletedMethods[offset]));
+			arguments.put(ATTRIBUTE_ABSTRACT, new Integer(fAbstractMethods.length).toString());
+			for (int offset= 0; offset < fAbstractMethods.length; offset++)
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + fDeletedMethods.length + 1), descriptor.elementToHandle(fAbstractMethods[offset]));
+			arguments.put(ATTRIBUTE_TYPES, new Integer(fTypesToExtract.length).toString());
+			for (int offset= 0; offset < fTypesToExtract.length; offset++)
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + fDeletedMethods.length + fAbstractMethods.length + 1), descriptor.elementToHandle(fTypesToExtract[offset]));
+			final DynamicValidationRefactoringChange change= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.ExtractSupertypeProcessor_extract_supertype, fChangeManager.getAllChanges());
 			final IFile file= ResourceUtil.getFile(declaring.getCompilationUnit());
 			if (fSuperSource != null && fSuperSource.length() > 0)
 				change.add(new CreateCompilationUnitChange(declaring.getPackageFragment().getCompilationUnit(JavaModelUtil.getRenamedCUName(declaring.getCompilationUnit(), fTypeName)), fSuperSource, file.getCharset(false)));

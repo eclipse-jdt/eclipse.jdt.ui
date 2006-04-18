@@ -34,10 +34,8 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
@@ -85,7 +83,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextEditBasedChangeManager;
@@ -638,43 +636,38 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		try {
-			return new DynamicValidationStateChange(RefactoringCoreMessages.PushDownRefactoring_change_name, fChangeManager.getAllChanges()) {
-
-				public final ChangeDescriptor getDescriptor() {
-					final Map arguments= new HashMap();
-					String project= null;
-					final IType declaring= getDeclaringType();
-					final IJavaProject javaProject= declaring.getJavaProject();
-					if (javaProject != null)
-						project= javaProject.getElementName();
-					int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
-					try {
-						if (declaring.isLocal() || declaring.isAnonymous())
-							flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-					} catch (JavaModelException exception) {
-						JavaPlugin.log(exception);
-					}
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PUSH_DOWN, project, fMembersToMove.length == 1 ? Messages.format(RefactoringCoreMessages.PushDownRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED) }) : Messages.format(RefactoringCoreMessages.PushDownRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, flags);
-					if (fCachedDeclaringType != null)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCachedDeclaringType));
-					for (int index= 0; index < fMembersToMove.length; index++) {
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1), descriptor.elementToHandle(fMembersToMove[index]));
-						for (int offset= 0; offset < fMemberInfos.length; offset++) {
-							if (fMemberInfos[offset].getMember().equals(fMembersToMove[index])) {
-								switch (fMemberInfos[offset].getAction()) {
-								case MemberActionInfo.PUSH_ABSTRACT_ACTION:
-									arguments.put(ATTRIBUTE_ABSTRACT + (index + 1), Boolean.valueOf(true).toString());
-									break;
-								case MemberActionInfo.PUSH_DOWN_ACTION:
-									arguments.put(ATTRIBUTE_PUSH + (index + 1), Boolean.valueOf(true).toString());
-									break;
-								}
-							}
+			final Map arguments= new HashMap();
+			String project= null;
+			final IType declaring= getDeclaringType();
+			final IJavaProject javaProject= declaring.getJavaProject();
+			if (javaProject != null)
+				project= javaProject.getElementName();
+			int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+			try {
+				if (declaring.isLocal() || declaring.isAnonymous())
+					flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PUSH_DOWN, project, fMembersToMove.length == 1 ? Messages.format(RefactoringCoreMessages.PushDownRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}) : Messages.format(RefactoringCoreMessages.PushDownRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+			if (fCachedDeclaringType != null)
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCachedDeclaringType));
+			for (int index= 0; index < fMembersToMove.length; index++) {
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1), descriptor.elementToHandle(fMembersToMove[index]));
+				for (int offset= 0; offset < fMemberInfos.length; offset++) {
+					if (fMemberInfos[offset].getMember().equals(fMembersToMove[index])) {
+						switch (fMemberInfos[offset].getAction()) {
+							case MemberActionInfo.PUSH_ABSTRACT_ACTION:
+								arguments.put(ATTRIBUTE_ABSTRACT + (index + 1), Boolean.valueOf(true).toString());
+								break;
+							case MemberActionInfo.PUSH_DOWN_ACTION:
+								arguments.put(ATTRIBUTE_PUSH + (index + 1), Boolean.valueOf(true).toString());
+								break;
 						}
 					}
-					return new RefactoringChangeDescriptor(descriptor);
 				}
-			};
+			}
+			return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.PushDownRefactoring_change_name, fChangeManager.getAllChanges());
 		} finally {
 			pm.done();
 			clearCaches();

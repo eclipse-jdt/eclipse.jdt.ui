@@ -10,14 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -27,39 +23,63 @@ import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-/**
- * Represents a change that renames a given resource
- */
-public class RenameResourceChange extends JDTChange {
+public final class RenameResourceChange extends JDTChange {
 
 	public static final String ID_RENAME_RESOURCE= "org.eclipse.jdt.ui.rename.resource"; //$NON-NLS-1$
 
-	/*
-	 * we cannot use handles because they became invalid when you rename the resource.
-	 * paths do not.
-	 */
-	private final IPath fResourcePath;
-	private final String fNewName;
-	private final long fStampToRestore;
-	private final String fComment;
-
-	/**
-	 * @param newName includes the extension
-	 */
-	public RenameResourceChange(IResource resource, String newName, String comment) {
-		this(resource.getFullPath(), newName, comment, IResource.NULL_STAMP);
+	public static IPath renamedResourcePath(IPath path, String newName) {
+		return path.removeLastSegments(1).append(newName);
 	}
 
-	private RenameResourceChange(IPath resourcePath, String newName, String comment, long stampToRestore) {
+	private final String fComment;
+
+	private final RefactoringDescriptor fDescriptor;
+
+	private final String fNewName;
+
+	private final IPath fResourcePath;
+
+	private final long fStampToRestore;
+
+	private RenameResourceChange(RefactoringDescriptor descriptor, IPath resourcePath, String newName, String comment, long stampToRestore) {
+		fDescriptor= descriptor;
 		fResourcePath= resourcePath;
 		fNewName= newName;
 		fComment= comment;
 		fStampToRestore= stampToRestore;
+	}
+
+	public RenameResourceChange(RefactoringDescriptor descriptor, IResource resource, String newName, String comment) {
+		this(descriptor, resource.getFullPath(), newName, comment, IResource.NULL_STAMP);
+	}
+
+	private int getCoreRenameFlags() {
+		if (getResource().isLinked())
+			return IResource.SHALLOW;
+		else
+			return IResource.NONE;
+	}
+
+	public ChangeDescriptor getDescriptor() {
+		if (fDescriptor != null)
+			return new RefactoringChangeDescriptor(fDescriptor);
+		return null;
+	}
+
+	public Object getModifiedElement() {
+		return getResource();
+	}
+
+	public String getName() {
+		return Messages.format(RefactoringCoreMessages.RenameResourceChange_name, new String[] { fResourcePath.toString(), fNewName});
+	}
+
+	public String getNewName() {
+		return fNewName;
 	}
 
 	private IResource getResource() {
@@ -68,25 +88,16 @@ public class RenameResourceChange extends JDTChange {
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		IResource resource= getResource();
-		if (resource == null || ! resource.exists()) {
-			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.RenameResourceChange_does_not_exist, fResourcePath.toString())); 
+		if (resource == null || !resource.exists()) {
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.RenameResourceChange_does_not_exist, fResourcePath.toString()));
 		} else {
-			// don't check read only. We don't change the
-			// content of the file hence we don't call
-			// validate edit upfront.
 			return super.isValid(pm, DIRTY);
 		}
 	}
-	
-	/*
-	 * to avoid the exception senders should check if a resource with the new name
-	 * already exists
-	 */
+
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		try {
-			if (false)
-				throw new NullPointerException();
-			pm.beginTask(RefactoringCoreMessages.RenameResourceChange_rename_resource, 1); 
+			pm.beginTask(RefactoringCoreMessages.RenameResourceChange_rename_resource, 1);
 
 			IResource resource= getResource();
 			long currentStamp= resource.getModificationStamp();
@@ -97,47 +108,9 @@ public class RenameResourceChange extends JDTChange {
 				newResource.revertModificationStamp(fStampToRestore);
 			}
 			String oldName= fResourcePath.lastSegment();
-			return new RenameResourceChange(newPath, oldName, fComment, currentStamp);
+			return new RenameResourceChange(null, newPath, oldName, fComment, currentStamp);
 		} finally {
 			pm.done();
 		}
-	}
-
-	private int getCoreRenameFlags() {
-		if (getResource().isLinked())
-			return IResource.SHALLOW;
-		else
-			return IResource.NONE;
-	}
-
-	/*
-	 * changes resource names /s/p/A.java renamed to B.java becomes /s/p/B.java
-	 */
-	public static IPath renamedResourcePath(IPath path, String newName) {
-		return path.removeLastSegments(1).append(newName);
-	}
-
-	public String getName() {
-		return Messages.format(
-			RefactoringCoreMessages.RenameResourceChange_name, new String[]{fResourcePath.toString(), 
-			fNewName});
-	}
-
-	public Object getModifiedElement() {
-		return getResource();
-	}
-
-	public final ChangeDescriptor getDescriptor() {
-		final Map arguments= new HashMap();
-		final IProject project= getResource().getProject();
-		final String name= project.getName();
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_RESOURCE, name, Messages.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { getResource().getFullPath().toString(), fNewName}), fComment, arguments, (RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE));
-		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, JavaRefactoringDescriptor.resourceToHandle(name, getResource()));
-		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fNewName);
-		return new RefactoringChangeDescriptor(descriptor);
-	}
-
-	public String getNewName() {
-		return fNewName;
 	}
 }

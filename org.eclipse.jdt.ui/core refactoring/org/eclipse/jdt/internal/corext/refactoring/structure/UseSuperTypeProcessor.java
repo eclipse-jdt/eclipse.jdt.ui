@@ -25,8 +25,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -55,7 +53,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsModel;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsSolver;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor;
@@ -203,27 +201,22 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 			final TextEditBasedChange[] changes= fChangeManager.getAllChanges();
 			if (changes != null && changes.length != 0) {
 				fChanges= changes.length;
-				return new DynamicValidationStateChange(RefactoringCoreMessages.UseSupertypeWherePossibleRefactoring_name, fChangeManager.getAllChanges()) {
-
-					public final ChangeDescriptor getDescriptor() {
-						final Map arguments= new HashMap();
-						IJavaProject project= null;
-						if (!fSubType.isBinary())
-							project= fSubType.getJavaProject();
-						int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
-						try {
-							if (fSubType.isLocal() || fSubType.isAnonymous())
-								flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-						} catch (JavaModelException exception) {
-							JavaPlugin.log(exception);
-						}
-						final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_USE_SUPERTYPE, project != null ? project.getElementName() : null, Messages.format(RefactoringCoreMessages.UseSuperTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fSuperType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, flags);
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSubType));
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(fSuperType));
-						arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
-						return new RefactoringChangeDescriptor(descriptor);
-					}
-				};
+				final Map arguments= new HashMap();
+				IJavaProject project= null;
+				if (!fSubType.isBinary())
+					project= fSubType.getJavaProject();
+				int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+				try {
+					if (fSubType.isLocal() || fSubType.isAnonymous())
+						flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+				} catch (JavaModelException exception) {
+					JavaPlugin.log(exception);
+				}
+				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_USE_SUPERTYPE, project != null ? project.getElementName() : null, Messages.format(RefactoringCoreMessages.UseSuperTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fSuperType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSubType));
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(fSuperType));
+				arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
+				return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.UseSupertypeWherePossibleRefactoring_name, fChangeManager.getAllChanges());
 			}
 			monitor.worked(1);
 		} finally {

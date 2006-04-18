@@ -42,8 +42,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
@@ -105,6 +103,7 @@ import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitDescriptorChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAwareSourceRangeComputer;
@@ -432,43 +431,38 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 		fAnalyzer.aboutToCreateChange();
 		BodyDeclaration declaration= fAnalyzer.getEnclosingBodyDeclaration();
 		fRewriter= ASTRewrite.create(declaration.getAST());
-		final CompilationUnitChange result= new CompilationUnitChange(RefactoringCoreMessages.ExtractMethodRefactoring_change_name, fCUnit) {
-
-			public final ChangeDescriptor getDescriptor() {
-				final Map arguments= new HashMap();
-				String project= null;
-				IJavaProject javaProject= fCUnit.getJavaProject();
-				if (javaProject != null)
-					project= javaProject.getElementName();
-				ITypeBinding type= null;
-				if (fDestination instanceof AbstractTypeDeclaration) {
-					final AbstractTypeDeclaration decl= (AbstractTypeDeclaration) fDestination;
-					type= decl.resolveBinding();
-				} else if (fDestination instanceof AnonymousClassDeclaration) {
-					final AnonymousClassDeclaration decl= (AnonymousClassDeclaration) fDestination;
-					type= decl.resolveBinding();
-				}
-				IMethodBinding method= null;
-				final BodyDeclaration enclosing= fAnalyzer.getEnclosingBodyDeclaration();
-				if (enclosing instanceof MethodDeclaration) {
-					final MethodDeclaration node= (MethodDeclaration) enclosing;
-					method= node.resolveBinding();
-				}
-				final int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_METHOD, project, Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_descriptor_description, new String[] {getSignature(), method != null ? BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED) : '{' + JavaElementLabels.ELLIPSIS_STRING + '}', BindingLabelProvider.getBindingLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCUnit));
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fMethodName);
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
-				arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
-				arguments.put(ATTRIBUTE_DESTINATION, new Integer(fDestinationIndex).toString());
-				arguments.put(ATTRIBUTE_EXCEPTIONS, Boolean.valueOf(fThrowRuntimeExceptions).toString());
-				arguments.put(ATTRIBUTE_COMMENTS, Boolean.valueOf(fGenerateJavadoc).toString());
-				arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceDuplicates).toString());
-				return new RefactoringChangeDescriptor(descriptor);
-			}
-		};
+		final Map arguments= new HashMap();
+		String project= null;
+		IJavaProject javaProject= fCUnit.getJavaProject();
+		if (javaProject != null)
+			project= javaProject.getElementName();
+		ITypeBinding type= null;
+		if (fDestination instanceof AbstractTypeDeclaration) {
+			final AbstractTypeDeclaration decl= (AbstractTypeDeclaration) fDestination;
+			type= decl.resolveBinding();
+		} else if (fDestination instanceof AnonymousClassDeclaration) {
+			final AnonymousClassDeclaration decl= (AnonymousClassDeclaration) fDestination;
+			type= decl.resolveBinding();
+		}
+		IMethodBinding method= null;
+		final BodyDeclaration enclosing= fAnalyzer.getEnclosingBodyDeclaration();
+		if (enclosing instanceof MethodDeclaration) {
+			final MethodDeclaration node= (MethodDeclaration) enclosing;
+			method= node.resolveBinding();
+		}
+		final int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_METHOD, project, Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_descriptor_description, new String[] { getSignature(), method != null ? BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED) : '{' + JavaElementLabels.ELLIPSIS_STRING + '}', BindingLabelProvider.getBindingLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCUnit));
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fMethodName);
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
+		arguments.put(ATTRIBUTE_DESTINATION, new Integer(fDestinationIndex).toString());
+		arguments.put(ATTRIBUTE_EXCEPTIONS, Boolean.valueOf(fThrowRuntimeExceptions).toString());
+		arguments.put(ATTRIBUTE_COMMENTS, Boolean.valueOf(fGenerateJavadoc).toString());
+		arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceDuplicates).toString());
+		final CompilationUnitDescriptorChange result= new CompilationUnitDescriptorChange(descriptor, RefactoringCoreMessages.ExtractMethodRefactoring_change_name, fCUnit);
 		result.setSaveMode(TextFileChange.KEEP_SAVE_STATE);
-	
+
 		MultiTextEdit root= new MultiTextEdit();
 		result.setEdit(root);
 		// This is cheap since the compilation unit is already open in a editor.
@@ -491,8 +485,8 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 			result.addTextEditGroup(insertDesc);
 			
 			if (fDestination == fDestinations[0]) {
-				ChildListPropertyDescriptor descriptor= (ChildListPropertyDescriptor)declaration.getLocationInParent();
-				ListRewrite container= fRewriter.getListRewrite(declaration.getParent(), descriptor);
+				ChildListPropertyDescriptor desc= (ChildListPropertyDescriptor)declaration.getLocationInParent();
+				ListRewrite container= fRewriter.getListRewrite(declaration.getParent(), desc);
 				container.insertAfter(mm, declaration, insertDesc);
 			} else {
 				BodyDeclarationRewrite container= BodyDeclarationRewrite.create(fRewriter, fDestination);

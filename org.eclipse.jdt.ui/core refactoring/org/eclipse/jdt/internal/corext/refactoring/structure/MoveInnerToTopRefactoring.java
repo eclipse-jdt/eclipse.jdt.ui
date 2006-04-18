@@ -31,9 +31,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.IRefactoringStatusEntryComparator;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
@@ -114,7 +112,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -758,27 +756,22 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 
 	public Change createChange(final IProgressMonitor monitor) throws CoreException {
 		monitor.beginTask(RefactoringCoreMessages.MoveInnerToTopRefactoring_creating_change, 1);
-		final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.MoveInnerToTopRefactoring_move_to_Top) {
-
-			public final ChangeDescriptor getDescriptor() {
-				final Map arguments= new HashMap();
-				String project= null;
-				IJavaProject javaProject= fType.getJavaProject();
-				if (javaProject != null)
-					project= javaProject.getElementName();
-				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_MOVE_INNER, project, Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fType.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT);
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fType));
-				if (fEnclosingInstanceFieldName != null && !"".equals(fEnclosingInstanceFieldName)) //$NON-NLS-1$
-					arguments.put(ATTRIBUTE_FIELD_NAME, fEnclosingInstanceFieldName);
-				if (fNameForEnclosingInstanceConstructorParameter != null && !"".equals(fNameForEnclosingInstanceConstructorParameter)) //$NON-NLS-1$
-					arguments.put(ATTRIBUTE_PARAMETER_NAME, fNameForEnclosingInstanceConstructorParameter);
-				arguments.put(ATTRIBUTE_FIELD, Boolean.valueOf(fCreateInstanceField).toString());
-				arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fMarkInstanceFieldAsFinal).toString());
-				arguments.put(ATTRIBUTE_POSSIBLE, Boolean.valueOf(fIsInstanceFieldCreationPossible).toString());
-				arguments.put(ATTRIBUTE_MANDATORY, Boolean.valueOf(fIsInstanceFieldCreationMandatory).toString());
-				return new RefactoringChangeDescriptor(descriptor);
-			}
-		};
+		final Map arguments= new HashMap();
+		String project= null;
+		IJavaProject javaProject= fType.getJavaProject();
+		if (javaProject != null)
+			project= javaProject.getElementName();
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_MOVE_INNER, project, Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fType.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT);
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fType));
+		if (fEnclosingInstanceFieldName != null && !"".equals(fEnclosingInstanceFieldName)) //$NON-NLS-1$
+			arguments.put(ATTRIBUTE_FIELD_NAME, fEnclosingInstanceFieldName);
+		if (fNameForEnclosingInstanceConstructorParameter != null && !"".equals(fNameForEnclosingInstanceConstructorParameter)) //$NON-NLS-1$
+			arguments.put(ATTRIBUTE_PARAMETER_NAME, fNameForEnclosingInstanceConstructorParameter);
+		arguments.put(ATTRIBUTE_FIELD, Boolean.valueOf(fCreateInstanceField).toString());
+		arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fMarkInstanceFieldAsFinal).toString());
+		arguments.put(ATTRIBUTE_POSSIBLE, Boolean.valueOf(fIsInstanceFieldCreationPossible).toString());
+		arguments.put(ATTRIBUTE_MANDATORY, Boolean.valueOf(fIsInstanceFieldCreationMandatory).toString());
+		final DynamicValidationRefactoringChange result= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.MoveInnerToTopRefactoring_move_to_Top);
 		result.addAll(fChangeManager.getAllChanges());
 		result.add(createCompilationUnitForMovedType(new SubProgressMonitor(monitor, 1)));
 		return result;

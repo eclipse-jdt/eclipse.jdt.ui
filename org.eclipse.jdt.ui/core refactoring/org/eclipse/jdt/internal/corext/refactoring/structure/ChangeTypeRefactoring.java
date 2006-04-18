@@ -32,8 +32,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -82,7 +80,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder2;
@@ -471,30 +469,23 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.ChangeTypeMessages_CreateChangesForChangeType, 1); 
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeMessages_CreateChangesForChangeType, 1);
 		try {
-			Map/*<ICompilationUnit,Set<ConstraintVariable>>*/ relevantVarsByUnit=
-			  new HashMap/*<ICompilationUnit,HashSet<ConstraintVariable>>*/();
+			Map/* <ICompilationUnit,Set<ConstraintVariable>> */relevantVarsByUnit= new HashMap/* <ICompilationUnit,HashSet<ConstraintVariable>> */();
 			groupChangesByCompilationUnit(relevantVarsByUnit);
-			
-			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.ChangeTypeRefactoring_allChanges) {
-				
-				public final ChangeDescriptor getDescriptor() {
-					final Map arguments= new HashMap();
-					String project= null;
-					IJavaProject javaProject= fCu.getJavaProject();
-					if (javaProject != null)
-						project= javaProject.getElementName();
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_CHANGE_TYPE, project, Messages.format(RefactoringCoreMessages.ChangeTypeRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(fSelectionBinding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fSelectedType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, (RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT));
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
-					arguments.put(ATTRIBUTE_TYPE, fSelectedType.getQualifiedName());
-					return new RefactoringChangeDescriptor(descriptor);
-				}
-			};
-			for (Iterator/*<ICompilationUnit>*/ it= relevantVarsByUnit.keySet().iterator(); it.hasNext(); ){
-				ICompilationUnit icu= (ICompilationUnit)it.next();
-				Set/*<ConstraintVariable>*/ cVars = (Set)relevantVarsByUnit.get(icu);
+			final Map arguments= new HashMap();
+			String project= null;
+			IJavaProject javaProject= fCu.getJavaProject();
+			if (javaProject != null)
+				project= javaProject.getElementName();
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_CHANGE_TYPE, project, Messages.format(RefactoringCoreMessages.ChangeTypeRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(fSelectionBinding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fSelectedType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, (RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT));
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+			arguments.put(ATTRIBUTE_TYPE, fSelectedType.getQualifiedName());
+			final DynamicValidationRefactoringChange result= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.ChangeTypeRefactoring_allChanges);
+			for (Iterator/* <ICompilationUnit> */it= relevantVarsByUnit.keySet().iterator(); it.hasNext();) {
+				ICompilationUnit icu= (ICompilationUnit) it.next();
+				Set/* <ConstraintVariable> */cVars= (Set) relevantVarsByUnit.get(icu);
 				CompilationUnitChange cuChange= new CompilationUnitChange(getName(), icu);
 				addAllChangesFor(icu, cVars, cuChange);
 				result.add(cuChange);

@@ -40,11 +40,8 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.Flags;
@@ -99,7 +96,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitDescriptorChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -480,34 +477,29 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 
 	private Change createChange(CompilationUnitRewrite rewrite) throws CoreException {
 		final ITypeBinding binding= fAnonymousInnerClassNode.resolveBinding();
-		final String[] labels= new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)};
-		TextChange change= new CompilationUnitChange(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_name, fCu) {
-
-			public final ChangeDescriptor getDescriptor() {
-				final Map arguments= new HashMap();
-				String project= null;
-				IJavaProject javaProject= fCu.getJavaProject();
-				if (javaProject != null)
-					project= javaProject.getElementName();
-				final int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_CONVERT_ANONYMOUS, project, Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_descriptor_description, labels), getComment(), arguments, flags);
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fClassName);
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
-				arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
-				arguments.put(ATTRIBUTE_STATIC, Boolean.valueOf(fDeclareStatic).toString());
-				arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
-				return new RefactoringChangeDescriptor(descriptor);
-			}
-		};
+		final String[] labels= new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)};
+		final Map arguments= new HashMap();
+		String project= null;
+		IJavaProject javaProject= fCu.getJavaProject();
+		if (javaProject != null)
+			project= javaProject.getElementName();
+		final int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_CONVERT_ANONYMOUS, project, Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_descriptor_description, labels), getComment(), arguments, flags);
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fClassName);
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+		arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
+		arguments.put(ATTRIBUTE_STATIC, Boolean.valueOf(fDeclareStatic).toString());
+		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
+		final CompilationUnitDescriptorChange result= new CompilationUnitDescriptorChange(descriptor, RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_name, fCu);
 		try {
 			ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fCu);
 			TextEdit resultingEdits= rewrite.getASTRewrite().rewriteAST(buffer.getDocument(), fCu.getJavaProject().getOptions(true));
-			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_edit_name, resultingEdits); 
+			TextChangeCompatibility.addTextEdit(result, RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_edit_name, resultingEdits);
 		} finally {
 			RefactoringFileBuffers.release(fCu);
 		}
-		return change;
+		return result;
 	}
 
     private void modifyConstructorCall(CompilationUnitRewrite rewrite, ITypeBinding[] parameters) {

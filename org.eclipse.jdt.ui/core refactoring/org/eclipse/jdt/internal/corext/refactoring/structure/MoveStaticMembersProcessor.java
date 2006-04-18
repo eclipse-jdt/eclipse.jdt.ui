@@ -38,9 +38,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -99,7 +97,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateFieldCreator;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
@@ -681,48 +679,41 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	}
 	
 	private void createChange(List modifiedCus, RefactoringStatus status, IProgressMonitor monitor) throws CoreException {
-		monitor.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, 5); 
+		monitor.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, 5);
 		final IMember[] members= getMembersToMove();
-		fChange= new DynamicValidationStateChange(RefactoringCoreMessages.MoveMembersRefactoring_move_members) {
-
-			public final ChangeDescriptor getDescriptor() {
-				final Map arguments= new HashMap();
-				String project= null;
-				final IJavaProject javaProject= getDeclaringType().getJavaProject();
-				if (javaProject != null)
-					project= javaProject.getElementName();
-				String description= null;
-				if (members.length == 1)
-					description= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_single, new String[] {JavaElementLabels.getElementLabel(members[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)});
-				else
-					description= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_multi, new String[] {String.valueOf(members.length), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)});
-				int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
-				final IType declaring= members[0].getDeclaringType();
-				try {
-					if (declaring.isLocal() || declaring.isAnonymous())
-						flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-				} catch (JavaModelException exception) {
-					JavaPlugin.log(exception);
-				}
-				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_STATIC_MOVE, project, Messages.format(description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fDestinationType));
-				arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
-				arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
-				for (int index= 0; index < members.length; index++)
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1), descriptor.elementToHandle(members[index]));
-				return new RefactoringChangeDescriptor(descriptor);
-			}
-		}; 
+		final Map arguments= new HashMap();
+		String project= null;
+		final IJavaProject javaProject= getDeclaringType().getJavaProject();
+		if (javaProject != null)
+			project= javaProject.getElementName();
+		String description= null;
+		if (members.length == 1)
+			description= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_single, new String[] { JavaElementLabels.getElementLabel(members[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)});
+		else
+			description= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_multi, new String[] { String.valueOf(members.length), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)});
+		int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+		final IType declaring= members[0].getDeclaringType();
+		try {
+			if (declaring.isLocal() || declaring.isAnonymous())
+				flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+		} catch (JavaModelException exception) {
+			JavaPlugin.log(exception);
+		}
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_STATIC_MOVE, project, Messages.format(description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fDestinationType));
+		arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
+		arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
+		for (int index= 0; index < members.length; index++)
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1), descriptor.elementToHandle(members[index]));
+		fChange= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.MoveMembersRefactoring_move_members);
 		fTarget= getCuRewrite(fDestinationType.getCompilationUnit());
 		ITypeBinding targetBinding= getDestinationBinding();
 		if (targetBinding == null) {
-			status.addFatalError(Messages.format(
-				RefactoringCoreMessages.MoveMembersRefactoring_compile_errors, 
-				fTarget.getCu().getElementName()));
+			status.addFatalError(Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_compile_errors, fTarget.getCu().getElementName()));
 			monitor.done();
 			return;
 		}
-		
+
 		try {
 			Map adjustments= new HashMap();
 			IMember member= null;
@@ -746,11 +737,10 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 					IncomingMemberVisibilityAdjustment adjustment= (IncomingMemberVisibilityAdjustment) adjustments.get(member);
 					ModifierKeyword kw= (adjustment != null) ? adjustment.getKeyword() : ModifierKeyword.fromFlagValue(JdtFlags.getVisibilityCode(member));
 					if (MemberVisibilityAdjustor.hasLowerVisibility(kw, threshold)) {
-						adjustments.put(member, new MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment(member, threshold, 
-								RefactoringStatus.createWarningStatus(Messages.format(MemberVisibilityAdjustor.getMessage(member), new String[] { MemberVisibilityAdjustor.getLabel(member), MemberVisibilityAdjustor.getLabel(threshold) }), JavaStatusContext.create(member))));
+						adjustments.put(member, new MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment(member, threshold, RefactoringStatus.createWarningStatus(Messages.format(MemberVisibilityAdjustor.getMessage(member), new String[] { MemberVisibilityAdjustor.getLabel(member), MemberVisibilityAdjustor.getLabel(threshold)}), JavaStatusContext.create(member))));
 					}
 				}
-				
+
 				// Check if destination type is visible from references ->
 				// error message if not (for example, when moving into a private type)
 				status.merge(checkMovedMemberAvailability(member, new SubProgressMonitor(sub, 1)));
@@ -768,7 +758,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			monitor.worked(1);
 			if (status.hasFatalError())
 				return;
-			
+
 			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2();
 			engine.setPattern(fMembersToMove, IJavaSearchConstants.ALL_OCCURRENCES);
 			engine.setGranularity(RefactoringSearchEngine2.GRANULARITY_COMPILATION_UNIT);
@@ -780,7 +770,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			modifiedCus.addAll(Arrays.asList(units));
 			final MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fDestinationType, fDestinationType);
 			sub= new SubProgressMonitor(monitor, 1);
-			sub.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, units.length); 
+			sub.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, units.length);
 			for (int index= 0; index < units.length; index++) {
 				ICompilationUnit unit= units[index];
 				CompilationUnitRewrite rewrite= getCuRewrite(unit);
@@ -800,7 +790,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			status.merge(moveMembers(fMemberDeclarations, memberSources));
 			fChange.add(fSource.createChange());
 			modifiedCus.add(fSource.getCu());
-			if (! fSource.getCu().equals(fTarget.getCu())) {
+			if (!fSource.getCu().equals(fTarget.getCu())) {
 				fChange.add(fTarget.createChange());
 				modifiedCus.add(fTarget.getCu());
 			}

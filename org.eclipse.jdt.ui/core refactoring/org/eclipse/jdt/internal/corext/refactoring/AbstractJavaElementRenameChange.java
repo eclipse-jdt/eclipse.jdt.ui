@@ -20,6 +20,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -32,15 +35,16 @@ public abstract class AbstractJavaElementRenameChange extends JDTChange {
 	private final IPath fResourcePath;
 	private final long fStampToRestore;
 	private final String fComment;
+	private final RefactoringDescriptor fDescriptor;
 
-	protected AbstractJavaElementRenameChange(IPath resourcePath, String oldName, String newName, String comment) {
-		this(resourcePath, oldName, newName, comment, IResource.NULL_STAMP);
+	protected AbstractJavaElementRenameChange(RefactoringDescriptor descriptor, IPath resourcePath, String oldName, String newName, String comment) {
+		this(descriptor, resourcePath, oldName, newName, comment, IResource.NULL_STAMP);
 	}
 
-	protected AbstractJavaElementRenameChange(IPath resourcePath, String oldName, String newName, String comment, long stampToRestore) {
+	protected AbstractJavaElementRenameChange(RefactoringDescriptor descriptor, IPath resourcePath, String oldName, String newName, String comment, long stampToRestore) {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		Assert.isNotNull(oldName, "old name"); //$NON-NLS-1$
-
+		fDescriptor= descriptor;
 		fResourcePath= resourcePath;
 		fOldName= oldName;
 		fNewName= newName;
@@ -93,5 +97,11 @@ public abstract class AbstractJavaElementRenameChange extends JDTChange {
 
 	public String getOldName() {
 		return fOldName;
+	}
+
+	public final ChangeDescriptor getDescriptor() {
+		if (fDescriptor != null)
+			return new RefactoringChangeDescriptor(fDescriptor);
+		return null;
 	}
 }

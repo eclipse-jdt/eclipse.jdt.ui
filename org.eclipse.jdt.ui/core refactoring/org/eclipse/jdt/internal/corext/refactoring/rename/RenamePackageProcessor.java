@@ -32,8 +32,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -69,7 +67,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenamePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
@@ -428,29 +426,24 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.RenamePackageRefactoring_creating_change, 1);
-			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges) {
-
-				public final ChangeDescriptor getDescriptor() {
-					final Map arguments= new HashMap();
-					String project= null;
-					IJavaProject javaProject= fPackage.getJavaProject();
-					if (javaProject != null)
-						project= javaProject.getElementName();
-					final int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_PACKAGE, project, Messages.format(RefactoringCoreMessages.RenamePackageProcessor_descriptor_description, new String[] { fPackage.getElementName(), getNewElementName()}), getComment(), arguments, flags);
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fPackage));
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
-					if (fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
-						arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
-					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
-					arguments.put(ATTRIBUTE_QUALIFIED, Boolean.valueOf(fUpdateQualifiedNames).toString());
-					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
-					arguments.put(ATTRIBUTE_HIERARCHICAL, Boolean.valueOf(fRenameSubpackages).toString());
-					return new RefactoringChangeDescriptor(descriptor);
-				}
-			};
+			final Map arguments= new HashMap();
+			String project= null;
+			IJavaProject javaProject= fPackage.getJavaProject();
+			if (javaProject != null)
+				project= javaProject.getElementName();
+			final int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_PACKAGE, project, Messages.format(RefactoringCoreMessages.RenamePackageProcessor_descriptor_description, new String[] { fPackage.getElementName(), getNewElementName()}), getComment(), arguments, flags);
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fPackage));
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
+			if (fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
+				arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
+			arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+			arguments.put(ATTRIBUTE_QUALIFIED, Boolean.valueOf(fUpdateQualifiedNames).toString());
+			arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
+			arguments.put(ATTRIBUTE_HIERARCHICAL, Boolean.valueOf(fRenameSubpackages).toString());
+			final DynamicValidationRefactoringChange result= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.Change_javaChanges);
 			result.addAll(fChangeManager.getAllChanges());
-			result.add(new RenamePackageChange(fPackage, getNewElementName(), getComment(), fRenameSubpackages));
+			result.add(new RenamePackageChange(null, fPackage, getNewElementName(), getComment(), fRenameSubpackages));
 			monitor.worked(1);
 			return result;
 		} finally {

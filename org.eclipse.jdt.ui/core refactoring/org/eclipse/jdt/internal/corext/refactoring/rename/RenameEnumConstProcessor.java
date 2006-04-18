@@ -17,9 +17,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -36,6 +33,7 @@ import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.changes.RefactoringDescriptorChange;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -105,35 +103,30 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	public Change createChange(final IProgressMonitor monitor) throws CoreException {
 		Change change= super.createChange(monitor);
 		if (change != null) {
-			final CompositeChange composite= new CompositeChange("", new Change[] { change}) { //$NON-NLS-1$
-
-				public final ChangeDescriptor getDescriptor() {
-					final Map arguments= new HashMap();
-					final IField field= getField();
-					String project= null;
-					IJavaProject javaProject= field.getJavaProject();
-					if (javaProject != null)
-						project= javaProject.getElementName();
-					int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
-					final IType declaring= field.getDeclaringType();
-					try {
-						if (!Flags.isPrivate(declaring.getFlags()))
-							flags|= RefactoringDescriptor.MULTI_CHANGE;
-						if (declaring.isAnonymous() || declaring.isLocal())
-							flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-					} catch (JavaModelException exception) {
-						JavaPlugin.log(exception);
-					}
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_ENUM_CONSTANT, project, Messages.format(RefactoringCoreMessages.RenameEnumConstProcessor_descriptor_description, new String[] { field.getElementName(), JavaElementLabels.getElementLabel(field.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), getComment(), arguments, flags);
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(field));
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
-					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
-					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
-					return new RefactoringChangeDescriptor(descriptor);
-				}
-			};
-			composite.markAsSynthetic();
-			change= composite;
+			final Map arguments= new HashMap();
+			final IField field= getField();
+			String project= null;
+			IJavaProject javaProject= field.getJavaProject();
+			if (javaProject != null)
+				project= javaProject.getElementName();
+			int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
+			final IType declaring= field.getDeclaringType();
+			try {
+				if (!Flags.isPrivate(declaring.getFlags()))
+					flags|= RefactoringDescriptor.MULTI_CHANGE;
+				if (declaring.isAnonymous() || declaring.isLocal())
+					flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_ENUM_CONSTANT, project, Messages.format(RefactoringCoreMessages.RenameEnumConstProcessor_descriptor_description, new String[] { field.getElementName(), JavaElementLabels.getElementLabel(field.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), getComment(), arguments, flags);
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(field));
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
+			arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+			arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
+			final RefactoringDescriptorChange result= new RefactoringDescriptorChange(descriptor, "", new Change[] { change}); //$NON-NLS-1$
+			result.markAsSynthetic();
+			change= result;
 		}
 		return change;
 	}

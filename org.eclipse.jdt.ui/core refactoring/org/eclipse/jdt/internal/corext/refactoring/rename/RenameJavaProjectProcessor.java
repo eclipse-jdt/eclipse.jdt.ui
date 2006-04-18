@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
@@ -26,6 +28,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -35,6 +38,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -181,12 +185,18 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 	
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
-		try{
-			return new DynamicValidationStateChange(
-				new RenameJavaProjectChange(fProject, getNewElementName(), getComment(), fUpdateReferences));
-		} finally{
+		try {
+			final Map arguments= new HashMap();
+			final String newName= getNewElementName();
+			final String comment= getComment();
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(RenameJavaProjectChange.ID_RENAME_JAVA_PROJECT, fProject.getElementName(), Messages.format(RefactoringCoreMessages.RenameJavaProjectChange_descriptor_description, new String[] { fProject.getElementName(), newName}), comment, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE);
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fProject));
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, newName);
+			arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+			return new DynamicValidationStateChange(new RenameJavaProjectChange(descriptor, fProject, newName, comment, fUpdateReferences));
+		} finally {
 			pm.done();
-		}	
+		}
 	}
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {

@@ -32,9 +32,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
@@ -89,6 +86,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.RefactoringDescriptorChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -588,33 +586,28 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 	}
 
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
-		return new CompositeChange(RefactoringCoreMessages.ExtractConstantRefactoring_name, new Change[] {fChange}) {
-		
-			public final ChangeDescriptor getDescriptor() {
-				final Map arguments= new HashMap();
-				String project= null;
-				IJavaProject javaProject= fCu.getJavaProject();
-				if (javaProject != null)
-					project= javaProject.getElementName();
-				int flags= JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-				if (JdtFlags.getVisibilityCode(fAccessModifier) != Modifier.PRIVATE)
-					flags |= RefactoringDescriptor.STRUCTURAL_CHANGE;
-				String description= ""; //$NON-NLS-1$
-				try {
-					description= BindingLabelProvider.getBindingLabel(getContainingTypeBinding(), JavaElementLabels.ALL_FULLY_QUALIFIED) + "."; //$NON-NLS-1$
-				} catch (JavaModelException exception) {
-					JavaPlugin.log(exception);
-				}
-				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_CONSTANT, project, Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_descriptor_description, new String[] { description + fConstantName, ASTNodes.asString(fSelectedExpression.getAssociatedExpression()) }), getComment(), arguments, flags);
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fConstantName);
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
-				arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllOccurrences).toString());
-				arguments.put(ATTRIBUTE_QUALIFY, Boolean.valueOf(fQualifyReferencesWithDeclaringClassName).toString());
-				arguments.put(ATTRIBUTE_VISIBILITY, new Integer(JdtFlags.getVisibilityCode(fAccessModifier)).toString());
-				return new RefactoringChangeDescriptor(descriptor);
-			}
-		};
+		final Map arguments= new HashMap();
+		String project= null;
+		IJavaProject javaProject= fCu.getJavaProject();
+		if (javaProject != null)
+			project= javaProject.getElementName();
+		int flags= JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+		if (JdtFlags.getVisibilityCode(fAccessModifier) != Modifier.PRIVATE)
+			flags|= RefactoringDescriptor.STRUCTURAL_CHANGE;
+		String description= ""; //$NON-NLS-1$
+		try {
+			description= BindingLabelProvider.getBindingLabel(getContainingTypeBinding(), JavaElementLabels.ALL_FULLY_QUALIFIED) + "."; //$NON-NLS-1$
+		} catch (JavaModelException exception) {
+			JavaPlugin.log(exception);
+		}
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_CONSTANT, project, Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_descriptor_description, new String[] { description + fConstantName, ASTNodes.asString(fSelectedExpression.getAssociatedExpression())}), getComment(), arguments, flags);
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fConstantName);
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+		arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllOccurrences).toString());
+		arguments.put(ATTRIBUTE_QUALIFY, Boolean.valueOf(fQualifyReferencesWithDeclaringClassName).toString());
+		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(JdtFlags.getVisibilityCode(fAccessModifier)).toString());
+		return new RefactoringDescriptorChange(descriptor, RefactoringCoreMessages.ExtractConstantRefactoring_name, new Change[] { fChange});
 	}
 
 	private TextEdit[] createReplaceExpressionWithConstantEdits() throws JavaModelException {

@@ -31,7 +31,6 @@ import org.eclipse.jface.text.TextSelection;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -74,6 +73,7 @@ import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
+import org.eclipse.jdt.internal.corext.refactoring.changes.RefactoringDescriptorChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.BodyUpdater;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -494,35 +494,27 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 		} finally {
 			fChangeSignatureRefactoring.setValidationContext(null);
 		}
-		return new CompositeChange(RefactoringCoreMessages.IntroduceParameterRefactoring_name, new Change[] { result}) {
-
-			public final ChangeDescriptor getDescriptor() {
-				final Change[] children= getChildren();
-				if (children != null && children.length > 0 && children[0] != null) {
-					final ChangeDescriptor descriptor= children[0].getDescriptor();
-					if (descriptor instanceof RefactoringChangeDescriptor) {
-						final RefactoringDescriptor refactoringDescriptor= ((RefactoringChangeDescriptor) descriptor).getRefactoringDescriptor();
-						if (refactoringDescriptor instanceof JavaRefactoringDescriptor) {
-							final JavaRefactoringDescriptor extended= (JavaRefactoringDescriptor) refactoringDescriptor;
-							final Map arguments= new HashMap();
-							arguments.put(ATTRIBUTE_ARGUMENT, fParameter.getNewName());
-							arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
-							arguments.putAll(extended.getArguments());
-							String signature= fChangeSignatureRefactoring.getMethodName();
-							try {
-								signature= fChangeSignatureRefactoring.getOldMethodSignature();
-							} catch (JavaModelException exception) {
-								JavaPlugin.log(exception);
-							}
-							final JavaRefactoringDescriptor newRefDesc= new JavaRefactoringDescriptor(ID_INTRODUCE_PARAMETER, extended.getProject(), Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description, new String[] { fParameter.getNewName(), signature, ASTNodes.asString(fSelectedExpression)}), getComment(), arguments, extended.getFlags());
-							return new RefactoringChangeDescriptor(newRefDesc);
-
-						}
+		if (result != null) {
+			final ChangeDescriptor descriptor= result.getDescriptor();
+			if (descriptor instanceof RefactoringChangeDescriptor) {
+				final RefactoringDescriptor refactoringDescriptor= ((RefactoringChangeDescriptor) descriptor).getRefactoringDescriptor();
+				if (refactoringDescriptor instanceof JavaRefactoringDescriptor) {
+					final JavaRefactoringDescriptor extended= (JavaRefactoringDescriptor) refactoringDescriptor;
+					final Map arguments= new HashMap();
+					arguments.put(ATTRIBUTE_ARGUMENT, fParameter.getNewName());
+					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+					arguments.putAll(extended.getArguments());
+					String signature= fChangeSignatureRefactoring.getMethodName();
+					try {
+						signature= fChangeSignatureRefactoring.getOldMethodSignature();
+					} catch (JavaModelException exception) {
+						JavaPlugin.log(exception);
 					}
+					result= new RefactoringDescriptorChange(new JavaRefactoringDescriptor(ID_INTRODUCE_PARAMETER, extended.getProject(), Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description, new String[] { fParameter.getNewName(), signature, ASTNodes.asString(fSelectedExpression)}), getComment(), arguments, extended.getFlags()), RefactoringCoreMessages.IntroduceParameterRefactoring_name, new Change[] { result});
 				}
-				return null;
 			}
-		};
+		}
+		return result;
 	}
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {

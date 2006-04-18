@@ -28,9 +28,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -94,7 +91,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder2;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -721,32 +718,25 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 	// ******************** CHANGE CREATION ***********************
 
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-		final CompositeChange result= new DynamicValidationStateChange(RefactoringCoreMessages.IntroduceIndirectionRefactoring_introduce_indirection) {
-		
-			public final ChangeDescriptor getDescriptor() {
-				final Map arguments= new HashMap();
-				String project= null;
-				IJavaProject javaProject= fTargetMethod.getJavaProject();
-				if (javaProject != null && fTargetMethod.isBinary())
-					project= javaProject.getElementName();
-				int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
-				final IType declaring= fTargetMethod.getDeclaringType();
-				try {
-					if (declaring.isLocal() || declaring.isAnonymous())
-						flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-				} catch (JavaModelException exception) {
-					JavaPlugin.log(exception);
-				}
-				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INTRODUCE_INDIRECTION, project, Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fTargetMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, flags);
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fTargetMethod));
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fIntermediaryMethodName);
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(fIntermediaryClass));
-				arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
-				return new RefactoringChangeDescriptor(descriptor);
-			}
-		};
-		result.addAll(fTextChangeManager.getAllChanges());
-		return result;
+		final Map arguments= new HashMap();
+		String project= null;
+		IJavaProject javaProject= fTargetMethod.getJavaProject();
+		if (javaProject != null && fTargetMethod.isBinary())
+			project= javaProject.getElementName();
+		int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+		final IType declaring= fTargetMethod.getDeclaringType();
+		try {
+			if (declaring.isLocal() || declaring.isAnonymous())
+				flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+		} catch (JavaModelException exception) {
+			JavaPlugin.log(exception);
+		}
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INTRODUCE_INDIRECTION, project, Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fTargetMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fTargetMethod));
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fIntermediaryMethodName);
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(fIntermediaryClass));
+		arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+		return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.IntroduceIndirectionRefactoring_introduce_indirection, fTextChangeManager.getAllChanges());
 	}
 
 	// ******************* CREATE INTERMEDIARY **********************

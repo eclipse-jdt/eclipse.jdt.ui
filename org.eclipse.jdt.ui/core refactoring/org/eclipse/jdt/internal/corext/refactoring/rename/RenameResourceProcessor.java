@@ -10,16 +10,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.mapping.IResourceChangeDescriptionFactory;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -169,12 +174,16 @@ public class RenameResourceProcessor extends RenameProcessor implements IScripta
 
 	public Change createChange(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1); //$NON-NLS-1$
-		try{
-			return new DynamicValidationStateChange(
-			  new RenameResourceChange(fResource, getNewElementName(), getComment()));
-		} finally{
+		try {
+			final Map arguments= new HashMap();
+			final IProject project= fResource.getProject();
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(RenameResourceChange.ID_RENAME_RESOURCE, project.getName(), Messages.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { fResource.getFullPath().toString(), getNewElementName()}), fComment, arguments, (RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE));
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, JavaRefactoringDescriptor.resourceToHandle(project.getName(), fResource));
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
+			return new DynamicValidationStateChange(new RenameResourceChange(descriptor, fResource, getNewElementName(), fComment));
+		} finally {
 			pm.done();
-		}	
+		}
 	}
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {

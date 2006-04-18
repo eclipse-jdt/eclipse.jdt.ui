@@ -32,8 +32,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -115,7 +113,7 @@ import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
@@ -1139,72 +1137,69 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			final TextChange[] changes= fChangeManager.getAllChanges();
 			final List list= new ArrayList(changes.length);
 			list.addAll(Arrays.asList(changes));
-			return new DynamicValidationStateChange(RefactoringCoreMessages.ChangeSignatureRefactoring_restructure_parameters, (Change[]) list.toArray(new Change[list.size()])) {
-				public final ChangeDescriptor getDescriptor() {
-					final Map arguments= new HashMap();
-					String project= null;
-					IJavaProject javaProject= fMethod.getJavaProject();
-					if (javaProject != null)
-						project= javaProject.getElementName();
-					int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
-					try {
-						if (!Flags.isPrivate(fMethod.getFlags()))
-							flags|= RefactoringDescriptor.MULTI_CHANGE;
-						final IType declaring= fMethod.getDeclaringType();
-						if (declaring.isAnonymous() || declaring.isLocal())
-							flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-					} catch (JavaModelException exception) {
-						JavaPlugin.log(exception);
-					}
-					try {
-						final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_CHANGE_METHOD_SIGNATURE, project, Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()}), getComment(), arguments, flags);
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fMethod));
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fMethodName);
-						arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
-						arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
-						if (fReturnTypeInfo.isTypeNameChanged())
-							arguments.put(ATTRIBUTE_RETURN, fReturnTypeInfo.getNewTypeName());
-						try {
-							if (!isVisibilitySameAsInitial())
-								arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
-						} catch (JavaModelException exception) {
-							JavaPlugin.log(exception);
-						}
-						int count= 1;
-						for (final Iterator iterator= fParameterInfos.iterator(); iterator.hasNext();) {
-							final ParameterInfo info= (ParameterInfo) iterator.next();
-							final StringBuffer buffer= new StringBuffer(64);
-							buffer.append(info.getOldTypeName());
-							buffer.append(" "); //$NON-NLS-1$
-							buffer.append(info.getOldName());
-							buffer.append(" "); //$NON-NLS-1$
-							buffer.append(info.getOldIndex());
-							buffer.append(" "); //$NON-NLS-1$
-							buffer.append(info.getNewTypeName());
-							buffer.append(" "); //$NON-NLS-1$
-							buffer.append(info.getNewName());
-							buffer.append(" "); //$NON-NLS-1$
-							buffer.append(info.isDeleted());
-							arguments.put(ATTRIBUTE_PARAMETER + count, buffer.toString());
-							final String value= info.getDefaultValue();
-							if (value != null && !"".equals(value)) //$NON-NLS-1$
-								arguments.put(ATTRIBUTE_DEFAULT + count, value);
-							count++;
-						}
-						count= 1;
-						for (final Iterator iterator= fExceptionInfos.iterator(); iterator.hasNext();) {
-							final ExceptionInfo info= (ExceptionInfo) iterator.next();
-							arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count, descriptor.elementToHandle(info.getType()));
-							arguments.put(ATTRIBUTE_KIND + count, new Integer(info.getKind()).toString());
-							count++;
-						}
-						return new RefactoringChangeDescriptor(descriptor);
-					} catch (JavaModelException exception) {
-						JavaPlugin.log(exception);
-						return null;
-					}
+			final Map arguments= new HashMap();
+			String project= null;
+			IJavaProject javaProject= fMethod.getJavaProject();
+			if (javaProject != null)
+				project= javaProject.getElementName();
+			int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
+			try {
+				if (!Flags.isPrivate(fMethod.getFlags()))
+					flags|= RefactoringDescriptor.MULTI_CHANGE;
+				final IType declaring= fMethod.getDeclaringType();
+				if (declaring.isAnonymous() || declaring.isLocal())
+					flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+			JavaRefactoringDescriptor descriptor= null;
+			try {
+				descriptor= new JavaRefactoringDescriptor(ID_CHANGE_METHOD_SIGNATURE, project, Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()}), getComment(), arguments, flags);
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fMethod));
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fMethodName);
+				arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
+				arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
+				if (fReturnTypeInfo.isTypeNameChanged())
+					arguments.put(ATTRIBUTE_RETURN, fReturnTypeInfo.getNewTypeName());
+				try {
+					if (!isVisibilitySameAsInitial())
+						arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
+				} catch (JavaModelException exception) {
+					JavaPlugin.log(exception);
 				}
-			};
+				int count= 1;
+				for (final Iterator iterator= fParameterInfos.iterator(); iterator.hasNext();) {
+					final ParameterInfo info= (ParameterInfo) iterator.next();
+					final StringBuffer buffer= new StringBuffer(64);
+					buffer.append(info.getOldTypeName());
+					buffer.append(" "); //$NON-NLS-1$
+					buffer.append(info.getOldName());
+					buffer.append(" "); //$NON-NLS-1$
+					buffer.append(info.getOldIndex());
+					buffer.append(" "); //$NON-NLS-1$
+					buffer.append(info.getNewTypeName());
+					buffer.append(" "); //$NON-NLS-1$
+					buffer.append(info.getNewName());
+					buffer.append(" "); //$NON-NLS-1$
+					buffer.append(info.isDeleted());
+					arguments.put(ATTRIBUTE_PARAMETER + count, buffer.toString());
+					final String value= info.getDefaultValue();
+					if (value != null && !"".equals(value)) //$NON-NLS-1$
+						arguments.put(ATTRIBUTE_DEFAULT + count, value);
+					count++;
+				}
+				count= 1;
+				for (final Iterator iterator= fExceptionInfos.iterator(); iterator.hasNext();) {
+					final ExceptionInfo info= (ExceptionInfo) iterator.next();
+					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count, descriptor.elementToHandle(info.getType()));
+					arguments.put(ATTRIBUTE_KIND + count, new Integer(info.getKind()).toString());
+					count++;
+				}
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+				return null;
+			}
+			return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.ChangeSignatureRefactoring_restructure_parameters, (Change[]) list.toArray(new Change[list.size()]));
 		} finally {
 			pm.done();
 			clearManagers();

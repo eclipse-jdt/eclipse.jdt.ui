@@ -36,8 +36,6 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.jface.text.BadLocationException;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
@@ -110,7 +108,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitDescriptorChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -443,27 +441,22 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 	}
 	
 	private TextChange doCreateChange(ITextFileBuffer buffer, IProgressMonitor pm) throws CoreException, JavaModelException {
-		TextChange change= new CompilationUnitChange(RefactoringCoreMessages.ExtractTempRefactoring_extract_temp, fCu) {
-		
-			public final ChangeDescriptor getDescriptor() {
-				final Map arguments= new HashMap();
-				String project= null;
-				IJavaProject javaProject= fCu.getJavaProject();
-				if (javaProject != null)
-					project= javaProject.getElementName();
-				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_TEMP, project, Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_descriptor_description, new String[] { fTempName, ASTNodes.asString(fSelectedExpression.getAssociatedExpression()) }), getComment(), arguments, RefactoringDescriptor.NONE);
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fTempName);
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
-				arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllOccurrences).toString());
-				arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
-				return new RefactoringChangeDescriptor(descriptor);
-			}
-		};
+		final Map arguments= new HashMap();
+		String project= null;
+		IJavaProject javaProject= fCu.getJavaProject();
+		if (javaProject != null)
+			project= javaProject.getElementName();
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_TEMP, project, Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_descriptor_description, new String[] { fTempName, ASTNodes.asString(fSelectedExpression.getAssociatedExpression())}), getComment(), arguments, RefactoringDescriptor.NONE);
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fTempName);
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+		arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllOccurrences).toString());
+		arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
+		final CompilationUnitDescriptorChange result= new CompilationUnitDescriptorChange(descriptor, RefactoringCoreMessages.ExtractTempRefactoring_extract_temp, fCu);
 		try {
 			String lineDelimiter= buffer.getDocument().getLineDelimiter(buffer.getDocument().getLineOfOffset(fSelectionStart));
 			TextEdit tempDeclarationEdit= createTempDeclarationEdit(lineDelimiter);
-			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.ExtractTempRefactoring_declare_local_variable, tempDeclarationEdit); 
+			TextChangeCompatibility.addTextEdit(result, RefactoringCoreMessages.ExtractTempRefactoring_declare_local_variable, tempDeclarationEdit);
 		} catch (CoreException exception) {
 			JavaPlugin.log(exception);
 		} catch (BadLocationException exception) {
@@ -471,11 +464,11 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 		}
 		pm.worked(1);
 		if (fImportEdit != null)
-			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.ExtractTempRefactoring_update_imports, fImportEdit.copy());
+			TextChangeCompatibility.addTextEdit(result, RefactoringCoreMessages.ExtractTempRefactoring_update_imports, fImportEdit.copy());
 		pm.worked(1);
-		addReplaceExpressionWithTemp(change);
+		addReplaceExpressionWithTemp(result);
 		pm.worked(1);
-		return change;
+		return result;
 	}
 
 	private void checkNewSource(TextChange change, RefactoringStatus result) throws CoreException {

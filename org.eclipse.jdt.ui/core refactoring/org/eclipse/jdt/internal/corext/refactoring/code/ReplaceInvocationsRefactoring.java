@@ -34,8 +34,6 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -75,7 +73,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.binary.StubCreator;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -421,26 +419,21 @@ public class ReplaceInvocationsRefactoring extends ScriptableRefactoring {
 	}
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
-		return new DynamicValidationStateChange(RefactoringCoreMessages.InlineMethodRefactoring_edit_inlineCall, fChangeManager.getAllChanges()) {
-		
-			public final ChangeDescriptor getDescriptor() {
-				//TODO: update for fSelectionStart == -1
-				final Map arguments= new HashMap();
-				String project= null;
-				IJavaProject javaProject= fSelectionUnit.getJavaProject();
-				if (javaProject != null)
-					project= javaProject.getElementName();
-				final IMethodBinding binding= fSourceProvider.getDeclaration().resolveBinding();
-				int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-				if (!Modifier.isPrivate(binding.getModifiers()))
-					flags|= RefactoringDescriptor.MULTI_CHANGE;
-				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_REPLACE_INVOCATIONS, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringClass(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSelectionUnit));
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
-				arguments.put(ATTRIBUTE_MODE, new Integer(fTargetProvider.isSingle() ? 0 : 1).toString());
-				return new RefactoringChangeDescriptor(descriptor);
-			}
-		}; 
+		// TODO: update for fSelectionStart == -1
+		final Map arguments= new HashMap();
+		String project= null;
+		IJavaProject javaProject= fSelectionUnit.getJavaProject();
+		if (javaProject != null)
+			project= javaProject.getElementName();
+		final IMethodBinding binding= fSourceProvider.getDeclaration().resolveBinding();
+		int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+		if (!Modifier.isPrivate(binding.getModifiers()))
+			flags|= RefactoringDescriptor.MULTI_CHANGE;
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_REPLACE_INVOCATIONS, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringClass(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSelectionUnit));
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+		arguments.put(ATTRIBUTE_MODE, new Integer(fTargetProvider.isSingle() ? 0 : 1).toString());
+		return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.InlineMethodRefactoring_edit_inlineCall, fChangeManager.getAllChanges());
 	}
 	
 	private IFile[] getFilesToBeModified(ICompilationUnit[] units) {

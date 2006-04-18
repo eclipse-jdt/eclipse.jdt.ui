@@ -25,6 +25,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.NullChange;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -43,14 +44,14 @@ public class RenamePackageChange extends AbstractJavaElementRenameChange {
 	private Map fCompilationUnitStamps;
 	private final boolean fRenameSubpackages;
 
-	public RenamePackageChange(IPackageFragment pack, String newName, String comment, boolean renameSubpackages) {
-		this(pack.getPath(), pack.getElementName(), newName, comment, IResource.NULL_STAMP, null, renameSubpackages);
+	public RenamePackageChange(RefactoringDescriptor descriptor, IPackageFragment pack, String newName, String comment, boolean renameSubpackages) {
+		this(descriptor, pack.getPath(), pack.getElementName(), newName, comment, IResource.NULL_STAMP, null, renameSubpackages);
 		Assert.isTrue(!pack.isReadOnly(), "package must not be read only"); //$NON-NLS-1$
 	}
 
-	private RenamePackageChange(IPath resourcePath, String oldName, String newName, String comment, long stampToRestore,
+	private RenamePackageChange(RefactoringDescriptor descriptor, IPath resourcePath, String oldName, String newName, String comment, long stampToRestore,
 		Map compilationUnitStamps, boolean renameSubpackages) {
-		super(resourcePath, oldName, newName, comment, stampToRestore);
+		super(descriptor, resourcePath, oldName, newName, comment, stampToRestore);
 		fCompilationUnitStamps= compilationUnitStamps;
 		fRenameSubpackages= renameSubpackages;
 	}
@@ -138,7 +139,7 @@ public class RenamePackageChange extends AbstractJavaElementRenameChange {
 				addStamps(stamps, currentPackage.getCompilationUnits());
 			}
 		}
-		return new RenamePackageChange(createNewPath(), getNewName(), getOldName(), getComment(), stampToRestore, stamps, fRenameSubpackages);
+		return new RenamePackageChange(null, createNewPath(), getNewName(), getOldName(), getComment(), stampToRestore, stamps, fRenameSubpackages);
 			// Note: This reverse change only works if the renamePackage change did not merge the source package into an existing target.
 	}
 

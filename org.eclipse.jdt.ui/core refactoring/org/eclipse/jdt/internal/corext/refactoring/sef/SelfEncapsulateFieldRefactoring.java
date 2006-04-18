@@ -34,8 +34,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -95,7 +93,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -381,36 +379,31 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 	}
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
-		final DynamicValidationStateChange result= new DynamicValidationStateChange(getName()) {
-
-			public final ChangeDescriptor getDescriptor() {
-				final Map arguments= new HashMap();
-				String project= null;
-				IJavaProject javaProject= fField.getJavaProject();
-				if (javaProject != null)
-					project= javaProject.getElementName();
-				int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
-				final IType declaring= fField.getDeclaringType();
-				try {
-					if (declaring.isAnonymous() || declaring.isLocal())
-						flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-				} catch (JavaModelException exception) {
-					JavaPlugin.log(exception);
-				}
-				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_SELF_ENCAPSULATE, project, Messages.format(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_descriptor_description, new String[] {JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fField));
-				arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
-				arguments.put(ATTRIBUTE_INSERTION, new Integer(fInsertionIndex).toString());
-				arguments.put(ATTRIBUTE_SETTER, fSetterName);
-				arguments.put(ATTRIBUTE_GETTER, fGetterName);
-				arguments.put(ATTRIBUTE_COMMENTS, Boolean.valueOf(fGenerateJavadoc).toString());
-				arguments.put(ATTRIBUTE_DECLARING, Boolean.valueOf(fEncapsulateDeclaringClass).toString());
-				return new RefactoringChangeDescriptor(descriptor);
-			}
-		};
+		final Map arguments= new HashMap();
+		String project= null;
+		IJavaProject javaProject= fField.getJavaProject();
+		if (javaProject != null)
+			project= javaProject.getElementName();
+		int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+		final IType declaring= fField.getDeclaringType();
+		try {
+			if (declaring.isAnonymous() || declaring.isLocal())
+				flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+		} catch (JavaModelException exception) {
+			JavaPlugin.log(exception);
+		}
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_SELF_ENCAPSULATE, project, Messages.format(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fField));
+		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
+		arguments.put(ATTRIBUTE_INSERTION, new Integer(fInsertionIndex).toString());
+		arguments.put(ATTRIBUTE_SETTER, fSetterName);
+		arguments.put(ATTRIBUTE_GETTER, fGetterName);
+		arguments.put(ATTRIBUTE_COMMENTS, Boolean.valueOf(fGenerateJavadoc).toString());
+		arguments.put(ATTRIBUTE_DECLARING, Boolean.valueOf(fEncapsulateDeclaringClass).toString());
+		final DynamicValidationRefactoringChange result= new DynamicValidationRefactoringChange(descriptor, getName());
 		TextChange[] changes= fChangeManager.getAllChanges();
 		pm.beginTask(NO_NAME, changes.length);
-		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_create_changes); 
+		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_create_changes);
 		for (int i= 0; i < changes.length; i++) {
 			result.add(changes[i]);
 			pm.worked(1);

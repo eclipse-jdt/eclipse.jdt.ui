@@ -40,10 +40,8 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -101,7 +99,7 @@ import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ASTNodeDeleteUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsModel;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsSolver;
@@ -320,34 +318,29 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
-			final DynamicValidationStateChange change= new DynamicValidationStateChange(RefactoringCoreMessages.ExtractInterfaceRefactoring_name, fChangeManager.getAllChanges()) {
-
-				public ChangeDescriptor getDescriptor() {
-					final Map arguments= new HashMap();
-					String project= null;
-					final IJavaProject javaProject= fSubType.getJavaProject();
-					if (javaProject != null)
-						project= javaProject.getElementName();
-					int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
-					try {
-						if (fSubType.isLocal() || fSubType.isAnonymous())
-							flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-					} catch (JavaModelException exception) {
-						JavaPlugin.log(exception);
-					}
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_INTERFACE, project, Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_descriptor_description, new String[] { fSuperName, JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, flags);
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSubType));
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fSuperName);
-					for (int index= 0; index < fMembers.length; index++)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1), descriptor.elementToHandle(fMembers[index]));
-					arguments.put(ATTRIBUTE_ABSTRACT, Boolean.valueOf(fAbstract).toString());
-					arguments.put(ATTRIBUTE_COMMENTS, Boolean.valueOf(fComments).toString());
-					arguments.put(ATTRIBUTE_PUBLIC, Boolean.valueOf(fPublic).toString());
-					arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplace).toString());
-					arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
-					return new RefactoringChangeDescriptor(descriptor);
-				}
-			};
+			final Map arguments= new HashMap();
+			String project= null;
+			final IJavaProject javaProject= fSubType.getJavaProject();
+			if (javaProject != null)
+				project= javaProject.getElementName();
+			int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+			try {
+				if (fSubType.isLocal() || fSubType.isAnonymous())
+					flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_INTERFACE, project, Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_descriptor_description, new String[] { fSuperName, JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSubType));
+			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fSuperName);
+			for (int index= 0; index < fMembers.length; index++)
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1), descriptor.elementToHandle(fMembers[index]));
+			arguments.put(ATTRIBUTE_ABSTRACT, Boolean.valueOf(fAbstract).toString());
+			arguments.put(ATTRIBUTE_COMMENTS, Boolean.valueOf(fComments).toString());
+			arguments.put(ATTRIBUTE_PUBLIC, Boolean.valueOf(fPublic).toString());
+			arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplace).toString());
+			arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
+			final DynamicValidationRefactoringChange change= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.ExtractInterfaceRefactoring_name, fChangeManager.getAllChanges());
 			final IFile file= ResourceUtil.getFile(fSubType.getCompilationUnit());
 			if (fSuperSource != null && fSuperSource.length() > 0)
 				change.add(new CreateCompilationUnitChange(fSubType.getPackageFragment().getCompilationUnit(JavaModelUtil.getRenamedCUName(fSubType.getCompilationUnit(), fSuperName)), fSuperSource, file.getCharset(false)));

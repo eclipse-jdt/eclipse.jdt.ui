@@ -27,12 +27,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -81,7 +78,7 @@ import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitDescriptorChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
@@ -620,36 +617,31 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 		return new MethodDeclaration[] {};
 	}
     
-    private Change createChange(ASTRewrite rewrite) throws CoreException{
-        final TextChange result= new CompilationUnitChange(RefactoringCoreMessages.PromoteTempToFieldRefactoring_name, fCu) {
-		
-			public final ChangeDescriptor getDescriptor() {
-				final Map arguments= new HashMap();
-				String project= null;
-				IJavaProject javaProject= fCu.getJavaProject();
-				if (javaProject != null)
-					project= javaProject.getElementName();
-				final IVariableBinding binding= fTempDeclarationNode.resolveBinding();
-				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PROMOTE_TEMP, project, Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fFieldName);
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
-				arguments.put(ATTRIBUTE_STATIC, Boolean.valueOf(fDeclareStatic).toString());
-				arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
-				arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
-				arguments.put(ATTRIBUTE_INITIALIZE, new Integer(fInitializeIn).toString());
-				return new RefactoringChangeDescriptor(descriptor);
-			}
-		};
-        ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fCu);
-        try {
-	        TextEdit resultingEdits= rewrite.rewriteAST(buffer.getDocument(), fCu.getJavaProject().getOptions(true));
-	        TextChangeCompatibility.addTextEdit(result, RefactoringCoreMessages.PromoteTempToFieldRefactoring_editName, resultingEdits); 
-        } finally {
-        	RefactoringFileBuffers.release(fCu);
-        }
-        return result;
-    }
+    private Change createChange(ASTRewrite rewrite) throws CoreException {
+		final Map arguments= new HashMap();
+		String project= null;
+		IJavaProject javaProject= fCu.getJavaProject();
+		if (javaProject != null)
+			project= javaProject.getElementName();
+		final IVariableBinding binding= fTempDeclarationNode.resolveBinding();
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PROMOTE_TEMP, project, Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fFieldName);
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+		arguments.put(ATTRIBUTE_STATIC, Boolean.valueOf(fDeclareStatic).toString());
+		arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
+		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
+		arguments.put(ATTRIBUTE_INITIALIZE, new Integer(fInitializeIn).toString());
+		final CompilationUnitDescriptorChange result= new CompilationUnitDescriptorChange(descriptor, RefactoringCoreMessages.PromoteTempToFieldRefactoring_name, fCu);
+		ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fCu);
+		try {
+			TextEdit resultingEdits= rewrite.rewriteAST(buffer.getDocument(), fCu.getJavaProject().getOptions(true));
+			TextChangeCompatibility.addTextEdit(result, RefactoringCoreMessages.PromoteTempToFieldRefactoring_editName, resultingEdits);
+		} finally {
+			RefactoringFileBuffers.release(fCu);
+		}
+		return result;
+	}
 
     private void addLocalDeclarationSplit(ASTRewrite rewrite) throws JavaModelException {
     	VariableDeclarationStatement tempDeclarationStatement= getTempDeclarationStatement();

@@ -27,10 +27,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -58,6 +55,7 @@ import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.RefactoringDescriptorChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameAnalyzeUtil.LocalAnalyzePackage;
@@ -359,24 +357,19 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 			Change change= fChange;
 			if (change != null) {
 				final ISourceRange range= fLocalVariable.getNameRange();
-				final CompositeChange composite= new CompositeChange("", new Change[] { change}) { //$NON-NLS-1$
-
-					public final ChangeDescriptor getDescriptor() {
-						final Map arguments= new HashMap();
-						String project= null;
-						IJavaProject javaProject= fCu.getJavaProject();
-						if (javaProject != null)
-							project= javaProject.getElementName();
-						final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_LOCAL_VARIABLE, project, Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, JavaElementLabels.getElementLabel(fLocalVariable.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), fNewName}), getComment(), arguments, RefactoringDescriptor.NONE);
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(range.getOffset()).toString() + " " + new Integer(range.getLength()).toString()); //$NON-NLS-1$
-						arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
-						return new RefactoringChangeDescriptor(descriptor);
-					}
-				};
-				composite.markAsSynthetic();
-				change= composite;
+				final Map arguments= new HashMap();
+				String project= null;
+				IJavaProject javaProject= fCu.getJavaProject();
+				if (javaProject != null)
+					project= javaProject.getElementName();
+				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_LOCAL_VARIABLE, project, Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, JavaElementLabels.getElementLabel(fLocalVariable.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), fNewName}), getComment(), arguments, RefactoringDescriptor.NONE);
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(range.getOffset()).toString() + " " + new Integer(range.getLength()).toString()); //$NON-NLS-1$
+				arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+				final RefactoringDescriptorChange result= new RefactoringDescriptorChange(descriptor, "", new Change[] { change}); //$NON-NLS-1$
+				result.markAsSynthetic();
+				change= result;
 			}
 			return change;
 		} finally {
