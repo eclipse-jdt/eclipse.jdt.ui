@@ -696,6 +696,11 @@ public final class JavaUI {
 	 * @since 3.2
 	 */
 	public static IJavaElement getEditorInputJavaElement(IEditorInput editorInput) {
+		// Performance: check working copy manager first: this is faster
+		IJavaElement je= JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editorInput);
+		if (je != null)
+			return je;
+		
 		return (IJavaElement)editorInput.getAdapter(IJavaElement.class);
 	}
 
