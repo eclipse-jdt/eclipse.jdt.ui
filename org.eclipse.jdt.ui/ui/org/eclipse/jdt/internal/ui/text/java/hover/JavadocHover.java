@@ -99,7 +99,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 				 */
 				public IInformationControl doCreateInformationControl(Shell parent) {
 					if (BrowserInformationControl.isAvailable(parent))
-						return new BrowserInformationControl(parent, SWT.TOOL | SWT.NO_TRIM, SWT.NONE, getTooltipAffordanceString(), true);
+						return new BrowserInformationControl(parent, SWT.TOOL | SWT.NO_TRIM, SWT.NONE, getTooltipAffordanceString());
 					else
 						return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true), getTooltipAffordanceString());
 				}
