@@ -690,6 +690,8 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 			
 			ASTNode parent= node.getParent();
 			ASTNode grandParent= parent.getParent();
+			if (grandParent == null)
+				return nodeTypeNotSupported();
 			
 			// adjustment needed if part of a parameterized type is selected
 			if (grandParent.getNodeType() == ASTNode.PARAMETERIZED_TYPE){
