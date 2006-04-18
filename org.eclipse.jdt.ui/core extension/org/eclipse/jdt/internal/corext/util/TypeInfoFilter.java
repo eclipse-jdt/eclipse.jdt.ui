@@ -56,14 +56,18 @@ public class TypeInfoFilter {
 		}
 		
 		public boolean matches(String text) {
-			if (fMatchKind == SearchPattern.R_PATTERN_MATCH) {
-				return fStringMatcher.match(text);
-			} else if (fMatchKind == SearchPattern.R_CAMELCASE_MATCH) {
-				return SearchPattern.camelCaseMatch(fPattern, text);
-			} else if (fMatchKind == SearchPattern.R_EXACT_MATCH) {
-				return fPattern.equalsIgnoreCase(text);
-			} else /* R_PREFIX_MATCH */ {
-				return Strings.startsWithIgnoreCase(text, fPattern);
+			switch (fMatchKind) {
+				case SearchPattern.R_PATTERN_MATCH:
+					return fStringMatcher.match(text);
+				case SearchPattern.R_EXACT_MATCH:
+					return fPattern.equalsIgnoreCase(text);
+				case SearchPattern.R_CAMELCASE_MATCH:
+					if (SearchPattern.camelCaseMatch(fPattern, text)) {
+						return true;
+					}
+					// fall through to prefix match if camel case failed (bug 137244)
+				default:
+					return Strings.startsWithIgnoreCase(text, fPattern);
 			}
 		}
 		
