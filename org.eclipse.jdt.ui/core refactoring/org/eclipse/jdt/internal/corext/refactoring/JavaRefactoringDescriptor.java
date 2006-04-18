@@ -33,6 +33,7 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
@@ -190,6 +191,12 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 			final IJavaProject javaProject= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProject(project);
 			final String identifier= javaProject.getHandleIdentifier();
 			element= JavaCore.create(identifier + handle);
+		}
+		if (check && element instanceof IMethod) {
+			final IMethod method= (IMethod) element;
+			final IMethod[] methods= method.getDeclaringType().findMethods(method);
+			if (methods != null && methods.length > 0)
+				element= methods[0];
 		}
 		if (element != null && (!check || element.exists()))
 			return element;
