@@ -106,8 +106,7 @@ public class JarWriter3 {
 			String comment= jarPackage.getComment();
 			if (comment != null)
 				fJarOutputStream.setComment(comment);
-			final Object[] projects= fJarPackage.getRefactoringProjects();
-			if (fJarPackage.isRefactoringAware() && projects != null && projects.length > 0) {
+			if (fJarPackage.isRefactoringAware()) {
 				Assert.isTrue(fJarPackage.areDirectoryEntriesIncluded());
 				final IPath metaPath= new Path(JarPackagerUtil.getMetaEntry());
 				addDirectories(metaPath);

@@ -254,31 +254,21 @@ public final class JarPackagerMessages extends NLS {
 
 	public static String JarPackageReader_warning_mainClassDoesNotExist;
 
-	public static String JarPackageRefactoringPage_description;
-
-	public static String JarPackageRefactoringPage_export_structural_only;
-
-	public static String JarPackageRefactoringPage_include_deprecation_info0;
-
-	public static String JarPackageRefactoringPage_title;
-
-	public static String JarPackageRefactoringPage_viewer_caption;
-
 	public static String JarPackageWizard_jarExport_title;
 
 	public static String JarPackageWizard_jarExportError_message;
 
 	public static String JarPackageWizard_jarExportError_title;
 
-	public static String JarPackageWizard_project_pattern;
-
 	public static String JarPackageWizard_windowTitle;
-
-	public static String JarPackageWizard_workspace_caption;
 
 	public static String JarPackageWizardPage_browseButton_text;
 
 	public static String JarPackageWizardPage_compress_text;
+
+	public static String JarPackageWizardPage_configure_label;
+
+	public static String JarPackageWizardPage_configure_tooltip;
 
 	public static String JarPackageWizardPage_description;
 
@@ -286,9 +276,13 @@ public final class JarPackagerMessages extends NLS {
 
 	public static String JarPackageWizardPage_error_cantExportJARIntoItself;
 
+	public static String JarPackageWizardPage_error_caption;
+
 	public static String JarPackageWizardPage_error_exportDestinationMustNotBeDirectory;
 
 	public static String JarPackageWizardPage_error_jarFileExistsAndNotWritable;
+
+	public static String JarPackageWizardPage_error_label;
 
 	public static String JarPackageWizardPage_error_noExportTypeChecked;
 
@@ -302,6 +296,8 @@ public final class JarPackagerMessages extends NLS {
 
 	public static String JarPackageWizardPage_info_relativeExportDestination;
 
+	public static String JarPackageWizardPage_no_refactorings_selected;
+
 	public static String JarPackageWizardPage_options_label;
 
 	public static String JarPackageWizardPage_overwrite_text;
@@ -313,6 +309,12 @@ public final class JarPackagerMessages extends NLS {
 	public static String JarPackageWizardPage_whatToExport_label;
 
 	public static String JarPackageWizardPage_whereToExport_label;
+
+	public static String JarRefactoringDialog_dialog_title;
+
+	public static String JarRefactoringDialog_export_structural;
+
+	public static String JarRefactoringDialog_workspace_caption;
 
 	public static String JarWriter_error_couldNotGetXmlBuilder;
 
@@ -361,10 +363,6 @@ public final class JarPackagerMessages extends NLS {
 	public static String OpenJarPackageWizardDelegate_error_openJarPackager_title;
 
 	public static String OpenJarPackageWizardDelegate_jarDescriptionReaderWarnings_title;
-
-	public static String RefactoringPreviewPage_description;
-
-	public static String RefactoringPreviewPage_title;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JarPackagerMessages.class);

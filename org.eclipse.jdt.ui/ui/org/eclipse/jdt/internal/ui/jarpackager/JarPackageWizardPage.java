@@ -11,11 +11,13 @@
 package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
@@ -38,11 +40,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -52,6 +56,10 @@ import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.WizardExportResourcesPage;
+
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.history.IRefactoringHistoryService;
+import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -71,6 +79,7 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
 
@@ -179,10 +188,6 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		optionsGroup.setLayout(layout);
-
-		fRefactoringsCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
-		fRefactoringsCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_refactorings_text);
-		fRefactoringsCheckbox.addListener(SWT.Selection, this);
 
 		fCompressCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
 		fCompressCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_compress_text);
@@ -528,30 +533,96 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 
 	/**
 	 * Creates the export type controls.
-	 *
-	 * @param parent the parent control
+	 * 
+	 * @param parent
+	 *            the parent control
 	 */
-	protected void createExportTypeGroup(Composite parent) {		
+	protected void createExportTypeGroup(Composite parent) {
 		Composite optionsGroup= new Composite(parent, SWT.NONE);
-		GridLayout optionsLayout= new GridLayout();
-		optionsLayout.marginHeight= 0;
-		optionsGroup.setLayout(optionsLayout);
-		
+		GridLayout layout= new GridLayout();
+		layout.marginHeight= 0;
+		optionsGroup.setLayout(layout);
+
 		fExportClassFilesCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
-		fExportClassFilesCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_exportClassFiles_text); 
+		fExportClassFilesCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_exportClassFiles_text);
 		fExportClassFilesCheckbox.addListener(SWT.Selection, this);
 
 		fExportOutputFoldersCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
-		fExportOutputFoldersCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_exportOutputFolders_text); 
+		fExportOutputFoldersCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_exportOutputFolders_text);
 		fExportOutputFoldersCheckbox.addListener(SWT.Selection, this);
 
 		fExportJavaFilesCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
-		fExportJavaFilesCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_exportJavaFiles_text); 
+		fExportJavaFilesCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_exportJavaFiles_text);
 		fExportJavaFilesCheckbox.addListener(SWT.Selection, this);
+
+		Composite refactoringsGroup= new Composite(optionsGroup, SWT.NONE);
+		layout= new GridLayout();
+		layout.horizontalSpacing= 0;
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
+		layout.numColumns= 2;
+		refactoringsGroup.setLayout(layout);
+
+		fRefactoringsCheckbox= new Button(refactoringsGroup, SWT.CHECK | SWT.LEFT);
+		fRefactoringsCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_refactorings_text);
+		fRefactoringsCheckbox.addListener(SWT.Selection, this);
+
+		final Link link= new Link(refactoringsGroup, SWT.WRAP);
+		link.setText(JarPackagerMessages.JarPackageWizardPage_configure_label);
+		link.addSelectionListener(new SelectionAdapter() {
+
+			public void widgetSelected(SelectionEvent event) {
+				openRefactoringDialog();
+			}
+
+		});
+		link.setToolTipText(JarPackagerMessages.JarPackageWizardPage_configure_tooltip);
+		GridData data= new GridData(GridData.BEGINNING | GridData.GRAB_HORIZONTAL);
+		link.setLayoutData(data);
+
+		fRefactoringsCheckbox.addSelectionListener(new SelectionAdapter() {
+
+			public void widgetSelected(SelectionEvent event) {
+				link.setEnabled(fRefactoringsCheckbox.getSelection());
+			}
+		});
 	}
 
 	/**
-	 * Updates the enablements of this page's controls. Subclasses may extend.
+	 * Opens the dialog to configure refactorings.
+	 */
+	protected void openRefactoringDialog() {
+		final RefactoringHistory[] history= { null};
+		final IRefactoringHistoryService service= RefactoringCore.getHistoryService();
+		try {
+			service.connect();
+			final Set set= new HashSet();
+			final Object[] elements= fJarPackage.getElements();
+			for (int index= 0; index < elements.length; index++) {
+				if (elements[index] instanceof IResource)
+					set.add(((IResource) elements[index]).getProject());
+			}
+			try {
+				getContainer().run(false, true, new IRunnableWithProgress() {
+
+					public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						history[0]= service.getRefactoringHistory((IProject[]) set.toArray(new IProject[set.size()]), monitor);
+					}
+				});
+			} catch (InvocationTargetException exception) {
+				ExceptionHandler.handle(exception, getShell(), JarPackagerMessages.JarPackageWizardPage_error_caption, JarPackagerMessages.JarPackageWizardPage_error_label);
+				return;
+			} catch (InterruptedException exception) {
+				return;
+			}
+			new JarRefactoringDialog(getShell(), getDialogSettings(), fJarPackage, history[0]).open();
+		} finally {
+			service.disconnect();
+		}
+	}
+
+	/**
+	 * Updates the enablement of this page's controls. Subclasses may extend.
 	 */
 	protected void updateWidgetEnablements() {
 		if (fRefactoringsCheckbox != null) {
@@ -591,11 +662,20 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		updatePageCompletion();
 	}
 	
-	protected void updatePageCompletion() {	
+	protected void updatePageCompletion() {
 		boolean pageComplete= isPageComplete();
 		setPageComplete(pageComplete);
 		if (pageComplete)
 			setErrorMessage(null);
+		updateRefactoringMessage();
+	}
+
+	protected void updateRefactoringMessage() {
+		if (fJarPackage.isRefactoringAware() && fJarPackage.getRefactoringDescriptors().length == 0) {
+			String currentMessage= getMessage();
+			if (currentMessage == null)
+				setMessage(JarPackagerMessages.JarPackageWizardPage_no_refactorings_selected, IMessageProvider.INFORMATION);
+		}
 	}
 	
 	/*

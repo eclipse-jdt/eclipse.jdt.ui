@@ -33,8 +33,6 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
 
-import org.eclipse.ltk.ui.refactoring.history.RefactoringHistoryControlConfiguration;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -130,17 +128,6 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		super.addPages();
 		fJarPackageWizardPage= new JarPackageWizardPage(fJarPackage, fSelection);
 		addPage(fJarPackageWizardPage);
-		addPage(new JarPackageRefactoringPage(fJarPackage));
-		addPage(new JarPackagePreviewPage(fJarPackage, new RefactoringHistoryControlConfiguration(null, true, true) {
-
-			public String getProjectPattern() {
-				return JarPackagerMessages.JarPackageWizard_project_pattern;
-			}
-
-			public String getWorkspaceCaption() {
-				return JarPackagerMessages.JarPackageWizard_workspace_caption;
-			}
-		}));
 		fJarOptionsWizardPage= new JarOptionsPage(fJarPackage);
 		addPage(fJarOptionsWizardPage);
 		addPage(new JarManifestWizardPage(fJarPackage));
@@ -291,12 +278,5 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 
 	void setInitializeFromJarPackage(boolean state) {
 		fInitializeFromJarPackage= state;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean canFinish() {
-		return !fJarPackage.isRefactoringAware() || fJarPackage.getRefactoringDescriptors().length > 0;
 	}
 }
