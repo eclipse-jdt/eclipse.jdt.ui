@@ -2400,6 +2400,9 @@
                label="%SourceMenu.label"
                path="edit"
                id="org.eclipse.jdt.ui.source.menu">
+		    <separator
+                  name="commentGroup">
+            </separator>
             <separator
                   name="editGroup">
             </separator>
@@ -2413,38 +2416,35 @@
                   name="codeGroup">
             </separator>
             <separator
+                  name="externalizeGroup">
+            </separator>
+            <separator
                   name="convertGroup">
             </separator>
          </menu>
-<!-- Code Group -->
+<!-- Externalize Group -->
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.find.broken.nls.keys"
                label="%FindNLSProblems.label"
                retarget="true"
-               menubarPath="org.eclipse.jdt.ui.source.menu/codeGroup"
+               menubarPath="org.eclipse.jdt.ui.source.menu/externalizeGroup"
                id="org.eclipse.jdt.ui.actions.FindNLSProblems">
          </action>
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.find.strings.to.externalize"
                label="%FindStringsToExternalizeAction.label"
                retarget="true"
-               menubarPath="org.eclipse.jdt.ui.source.menu/codeGroup"
+               menubarPath="org.eclipse.jdt.ui.source.menu/externalizeGroup"
                id="org.eclipse.jdt.ui.actions.FindStringsToExternalize">
          </action>
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.externalize.strings"
                label="%ExternalizeStringsAction.label"
                retarget="true"
-               menubarPath="org.eclipse.jdt.ui.source.menu/codeGroup"
+               menubarPath="org.eclipse.jdt.ui.source.menu/externalizeGroup"
                id="org.eclipse.jdt.ui.actions.ExternalizeStrings">
          </action>
-         <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.clean.up"
-               label="%CleanUpAction.label"
-               retarget="true"
-               menubarPath="org.eclipse.jdt.ui.source.menu/codeGroup"
-               id="org.eclipse.jdt.ui.actions.CleanUp">
-         </action>
+<!-- Code Group -->
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.surround.with.try.catch"
                label="%SurroundWithTryCatchAction.label"
@@ -2453,13 +2453,6 @@
                id="org.eclipse.jdt.ui.actions.SurroundWithTryCatch">
          </action>
 <!-- Generate Group -->
-         <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.add.javadoc.comment"
-               label="%AddJavaDocCommentAction.label"
-               retarget="true"
-               menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
-               id="org.eclipse.jdt.ui.actions.AddJavaDocComment">
-         </action>
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.add.unimplemented.constructors"
                label="%AddConstructorFromSuperclassAction.label"
@@ -2504,11 +2497,18 @@
          </action>
 <!-- Import Group -->
          <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.add.import"
-               label="%AddImportAction.label"
+               definitionId="org.eclipse.jdt.ui.edit.text.java.clean.up"
+               label="%CleanUpAction.label"
                retarget="true"
                menubarPath="org.eclipse.jdt.ui.source.menu/importGroup"
-               id="org.eclipse.jdt.ui.actions.AddImport">
+               id="org.eclipse.jdt.ui.actions.CleanUp">
+         </action>
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.sort.members"
+               label="%SortMembersAction.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.source.menu/importGroup"
+               id="org.eclipse.jdt.ui.actions.SortMembers">
          </action>
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.organize.imports"
@@ -2517,21 +2517,14 @@
                menubarPath="org.eclipse.jdt.ui.source.menu/importGroup"
                id="org.eclipse.jdt.ui.actions.OrganizeImports">
          </action>
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.add.import"
+               label="%AddImportAction.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.source.menu/importGroup"
+               id="org.eclipse.jdt.ui.actions.AddImport">
+         </action>
 <!-- edit group -->
-         <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.sort.members"
-               label="%SortMembersAction.label"
-               retarget="true"
-               menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
-               id="org.eclipse.jdt.ui.actions.SortMembers">
-         </action>
-         <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.indent"
-               label="%IndentAction.label"
-               retarget="true"
-               menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
-               id="org.eclipse.jdt.ui.actions.Indent">
-         </action>
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.quick.format"
                label="%FormatElementAction.label"
@@ -2547,6 +2540,13 @@
                id="org.eclipse.jdt.ui.actions.Format">
          </action>
          <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.indent"
+               label="%IndentAction.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
+               id="org.eclipse.jdt.ui.actions.Indent">
+         </action>
+         <action
                definitionId="org.eclipse.ui.edit.text.shiftLeft"
                label="%ShiftLeftAction.label"
                retarget="true"
@@ -2560,26 +2560,13 @@
                menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
                id="org.eclipse.jdt.ui.actions.ShiftRight">
          </action>
+<!-- Comment Group -->
          <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.remove.block.comment"
-               label="%RemoveBlockCommentAction.label"
+               definitionId="org.eclipse.jdt.ui.edit.text.java.add.javadoc.comment"
+               label="%AddJavaDocCommentAction.label"
                retarget="true"
-               menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
-               id="org.eclipse.jdt.ui.actions.RemoveBlockComment">
-         </action>
-         <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.add.block.comment"
-               label="%AddBlockCommentAction.label"
-               retarget="true"
-               menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
-               id="org.eclipse.jdt.ui.actions.AddBlockComment">
-         </action>
-         <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
-               label="%ToggleCommentAction.label"
-               retarget="true"
-               menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
-               id="org.eclipse.jdt.ui.actions.ToggleComment">
+               menubarPath="org.eclipse.jdt.ui.source.menu/commentGroup"
+               id="org.eclipse.jdt.ui.actions.AddJavaDocComment">
          </action>
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.uncomment"
@@ -2592,6 +2579,27 @@
                label="%CommentAction.label"
                retarget="true"
                id="org.eclipse.jdt.ui.actions.Comment">
+         </action>
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.remove.block.comment"
+               label="%RemoveBlockCommentAction.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.source.menu/commentGroup"
+               id="org.eclipse.jdt.ui.actions.RemoveBlockComment">
+         </action>
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.add.block.comment"
+               label="%AddBlockCommentAction.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.source.menu/commentGroup"
+               id="org.eclipse.jdt.ui.actions.AddBlockComment">
+         </action>
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
+               label="%ToggleCommentAction.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.source.menu/commentGroup"
+               id="org.eclipse.jdt.ui.actions.ToggleComment">
          </action>
       </actionSet>
    </extension>

@@ -89,6 +89,30 @@ public class GenerateActionGroup extends ActionGroup {
 	 * @since 3.0
 	 */
 	public static final String GROUP_CODE= "codeGroup";  //$NON-NLS-1$
+
+	/**
+	 * Pop-up menu: id of the externalize group of the source sub menu (value
+	 * <code>externalizeGroup</code>).
+	 * 
+	 * TODO: Make API
+	 */
+	private static final String GROUP_EXTERNALIZE= "externalizeGroup"; //$NON-NLS-1$
+
+	/**
+	 * Pop-up menu: id of the comment group of the source sub menu (value
+	 * <code>commentGroup</code>).
+	 * 
+	 * TODO: Make API
+	 */
+	private static final String GROUP_COMMENT= "commentGroup"; //$NON-NLS-1$
+
+	/**
+	 * Pop-up menu: id of the edit group of the source sub menu (value
+	 * <code>editGroup</code>).
+	 * 
+	 * TODO: Make API
+	 */
+	private static final String GROUP_EDIT= "editGroup"; //$NON-NLS-1$
 	
 	private CompilationUnitEditor fEditor;
 	private IWorkbenchSite fSite;
@@ -393,51 +417,57 @@ public class GenerateActionGroup extends ActionGroup {
 	
 	private int fillEditorSubMenu(IMenuManager source) {
 		int added= 0;
+		source.add(new Separator(GROUP_COMMENT));
 		added+= addEditorAction(source, "ToggleComment"); //$NON-NLS-1$
 		added+= addEditorAction(source, "AddBlockComment"); //$NON-NLS-1$
 		added+= addEditorAction(source, "RemoveBlockComment"); //$NON-NLS-1$
-		added+= addEditorAction(source, "Format"); //$NON-NLS-1$
+		added+= addAction(source, fAddJavaDocStub);
+		source.add(new Separator(GROUP_EDIT));
 		added+= addEditorAction(source, "Indent"); //$NON-NLS-1$
-		added+= addAction(source, fSortMembers);
+		added+= addEditorAction(source, "Format"); //$NON-NLS-1$
 		source.add(new Separator(GROUP_IMPORT));
-		added+= addAction(source, fOrganizeImports);
 		added+= addAction(source, fAddImport);
+		added+= addAction(source, fOrganizeImports);
+		added+= addAction(source, fSortMembers);
+		added+= addAction(source, fCleanUp);
 		source.add(new Separator(GROUP_GENERATE));
 		added+= addAction(source, fOverrideMethods);
 		added+= addAction(source, fAddGetterSetter);
 		added+= addAction(source, fAddDelegateMethods);
-		added+= addAction(source, fAddUnimplementedConstructors);
-		added+= addAction(source, fGenerateConstructorUsingFields);
 		added+= addAction(source, fHashCodeEquals);
-		added+= addAction(source, fAddJavaDocStub);
+		added+= addAction(source, fGenerateConstructorUsingFields);
+		added+= addAction(source, fAddUnimplementedConstructors);
 		source.add(new Separator(GROUP_CODE));
 		added+= addAction(source, fSurroundWithTryCatch);
+		source.add(new Separator(GROUP_EXTERNALIZE));
 		added+= addAction(source, fExternalizeStrings);
-		added+= addAction(source, fCleanUp);
 		return added;
 	}
 
 	private int fillViewSubMenu(IMenuManager source) {
 		int added= 0;
+		source.add(new Separator(GROUP_COMMENT));
+		added+= addAction(source, fAddJavaDocStub);
+		source.add(new Separator(GROUP_EDIT));
 		added+= addAction(source, fFormatAll);
-		added+= addAction(source, fSortMembers);
 		source.add(new Separator(GROUP_IMPORT));
-		added+= addAction(source, fOrganizeImports);
 		added+= addAction(source, fAddImport);
+		added+= addAction(source, fOrganizeImports);
+		added+= addAction(source, fSortMembers);
+		added+= addAction(source, fCleanUp);
 		source.add(new Separator(GROUP_GENERATE));
 		added+= addAction(source, fOverrideMethods);
 		added+= addAction(source, fAddGetterSetter);
 		added+= addAction(source, fAddDelegateMethods);
-		added+= addAction(source, fAddUnimplementedConstructors);
-		added+= addAction(source, fGenerateConstructorUsingFields);
 		added+= addAction(source, fHashCodeEquals);
-		added+= addAction(source, fAddJavaDocStub);
+		added+= addAction(source, fGenerateConstructorUsingFields);
+		added+= addAction(source, fAddUnimplementedConstructors);
 		source.add(new Separator(GROUP_CODE));
 		added+= addAction(source, fSurroundWithTryCatch);
+		source.add(new Separator(GROUP_EXTERNALIZE));
 		added+= addAction(source, fExternalizeStrings);
 		added+= addAction(source, fFindStringsToExternalize);
 		added+= addAction(source, fFindNLSProblems);
-		added+= addAction(source, fCleanUp);
 		return added;
 	}
 
