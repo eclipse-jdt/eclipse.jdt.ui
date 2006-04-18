@@ -24,6 +24,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -36,10 +38,8 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
-import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -74,8 +74,8 @@ public class TestViewer {
 		}
 	}
 	
-	private final class TestOpenListener implements IOpenListener {
-		public void open(OpenEvent event) {
+	private final class TestOpenListener extends SelectionAdapter {
+		public void widgetDefaultSelected(SelectionEvent e) {
 			handleDefaultSelected();
 		}
 	}
@@ -194,8 +194,8 @@ public class TestViewer {
 		fSelectionProvider= new SelectionProviderMediator(new StructuredViewer[] { fTreeViewer, fTableViewer }, fTreeViewer);
 		fSelectionProvider.addSelectionChangedListener(new TestSelectionListener());
 		TestOpenListener testOpenListener= new TestOpenListener();
-		fTreeViewer.addOpenListener(testOpenListener);
-		fTableViewer.addOpenListener(testOpenListener);
+		fTreeViewer.getTree().addSelectionListener(testOpenListener);
+		fTableViewer.getTable().addSelectionListener(testOpenListener);
 		
 		fViewerbook.showPage(fTreeViewer.getTree());
 	}
