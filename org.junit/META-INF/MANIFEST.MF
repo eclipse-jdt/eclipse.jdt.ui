@@ -14,4 +14,5 @@ Export-Package:
  junit.swingui,
  junit.swingui.icons,
  junit.textui
-Eclipse-AutoStart: true
+Eclipse-LazyStart: true
+Bundle-RequiredExecutionEnvironment: J2SE-1.3
