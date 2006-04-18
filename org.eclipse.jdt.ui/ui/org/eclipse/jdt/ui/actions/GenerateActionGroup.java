@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.ui.actions.CleanUpAction;
 import org.eclipse.jdt.internal.ui.actions.CopyQualifiedNameAction;
 import org.eclipse.jdt.internal.ui.actions.FindBrokenNLSKeysAction;
 import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
+import org.eclipse.jdt.internal.ui.actions.SurroundWithTemplateActionGroup;
 import org.eclipse.jdt.internal.ui.javaeditor.AddImportOnSelectionAction;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
@@ -140,6 +141,8 @@ public class GenerateActionGroup extends ActionGroup {
 	private FormatAllAction fFormatAll;
 	private CopyQualifiedNameAction fCopyQualifiedNameAction;
 	
+	private SurroundWithTemplateActionGroup fSurroundWithTemplateActionGroup;
+	
 	private static final String QUICK_MENU_ID= "org.eclipse.jdt.ui.edit.text.java.source.quickMenu"; //$NON-NLS-1$
 	
 	private class RefactorQuickAccessAction extends JDTQuickMenuAction {
@@ -229,6 +232,8 @@ public class GenerateActionGroup extends ActionGroup {
 		fQuickAccessAction= new RefactorQuickAccessAction(editor);
 		fKeyBindingService= editor.getEditorSite().getKeyBindingService();
 		fKeyBindingService.registerAction(fQuickAccessAction);
+		
+		fSurroundWithTemplateActionGroup= new SurroundWithTemplateActionGroup(editor);
 	}
 	
 	/**
@@ -400,6 +405,7 @@ public class GenerateActionGroup extends ActionGroup {
 		int added= 0;
 		if (isEditorOwner()) {
 			added= fillEditorSubMenu(subMenu);
+			fSurroundWithTemplateActionGroup.fillContextMenu(subMenu);
 		} else {
 			added= fillViewSubMenu(subMenu);
 		}

@@ -336,6 +336,9 @@ public final class ActionMessages extends NLS {
 	public static String AddDelegateMethodsAction_message;
 	public static String AddDelegateMethodsAction_selectioninfo_more;
 	public static String AddDelegateMethodsOperation_monitor_message;
+	
+	public static String SurroundWithTemplateActionGroup_SurroundWithTemplateSubMenuName;
+	
 	public static String ToggleLinkingAction_label;
 	public static String ToggleLinkingAction_tooltip;
 	public static String ToggleLinkingAction_description;
