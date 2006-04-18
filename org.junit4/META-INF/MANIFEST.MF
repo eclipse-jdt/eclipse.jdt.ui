@@ -4,6 +4,7 @@ Bundle-Name: %pluginName
 Bundle-SymbolicName: org.junit4
 Bundle-Version: 1.0.0
 Bundle-Localization: plugin
+Bundle-ClassPath: junit-4.0.jar
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Vendor: %providerName
 Export-Package: junit.extensions,
@@ -17,3 +18,4 @@ Export-Package: junit.extensions,
  org.junit.runner.manipulation,
  org.junit.runner.notification,
  org.junit.runners
+Eclipse-LazyStart: true
