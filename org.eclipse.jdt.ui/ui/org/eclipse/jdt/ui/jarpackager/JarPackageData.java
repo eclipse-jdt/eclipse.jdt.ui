@@ -44,8 +44,8 @@ import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
  * Model for a JAR package which stores information used during JAR export and
  * import.
  * <p>
- * All time stamps are measured in UTC milliseconds from the epoch (see
- * {@link java.util#Calendar}).
+ * All time stamps are measured as the milliseconds since January 1, 1970,
+ * 00:00:00 GMT.
  * </p>
  * <p>
  * Clients may subclass.
@@ -140,7 +140,7 @@ public class JarPackageData {
 	private boolean fRefactoringAware= false;
 
 	// Should the exporter only export refactorings causing structural changes?
-	private boolean fRefactoringStructural= true;
+	private boolean fRefactoringStructural= false;
 
 	// Should the exporter include deprecation resolving information?
 	private boolean fDeprecationAware= true;
