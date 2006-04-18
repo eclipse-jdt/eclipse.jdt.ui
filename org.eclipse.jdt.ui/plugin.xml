@@ -3870,7 +3870,32 @@
             commandId="org.eclipse.jdt.ui.edit.text.java.select.enclosing"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
+            platform="carbon"
+            sequence="M2+M3+ARROW_UP"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="CTRL+SHIFT+ARROW_UP"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.select.enclosing"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            
+      <key
             sequence="M2+M3+ARROW_RIGHT"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.select.next"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+ARROW_RIGHT"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="CTRL+SHIFT+ARROW_RIGHT"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.select.next"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
@@ -3880,7 +3905,31 @@
             commandId="org.eclipse.jdt.ui.edit.text.java.select.previous"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
+            platform="carbon"
+            sequence="M2+M3+ARROW_LEFT"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="CTRL+SHIFT+ARROW_LEFT"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.select.previous"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
             sequence="M2+M3+ARROW_DOWN"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.select.last"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+ARROW_DOWN"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="CTRL+SHIFT+ARROW_DOWN"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.select.last"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
@@ -4153,7 +4202,31 @@
             commandId="org.eclipse.jdt.ui.edit.text.java.goto.next.member"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
+            platform="carbon"
+            sequence="M1+M2+ARROW_DOWN"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="CTRL+ALT+ARROW_DOWN"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.goto.next.member"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
             sequence="M1+M2+ARROW_UP"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.goto.previous.member"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M1+M2+ARROW_UP"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="CTRL+ALT+ARROW_UP"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.goto.previous.member"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
