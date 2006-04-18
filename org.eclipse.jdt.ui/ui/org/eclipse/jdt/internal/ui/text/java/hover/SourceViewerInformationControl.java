@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -154,6 +155,8 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		fText.setLayoutData(gd);
 		fText.setForeground(parent.getDisplay().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
 		fText.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+		
+		initializeFont();
 
 		fText.addKeyListener(new KeyListener() {
 
@@ -243,6 +246,17 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 */
 	public SourceViewerInformationControl(Shell parent, String statusFieldText) {
 		this(parent, SWT.NONE, statusFieldText);
+	}
+
+	/**
+	 * Initialize the font to the Java editor font.
+	 * 
+	 * @since 3.2
+	 */
+	private void initializeFont() {
+		Font font= JFaceResources.getFont("org.eclipse.jdt.ui.editors.textfont"); //$NON-NLS-1$
+		StyledText styledText= getViewer().getTextWidget();
+		styledText.setFont(font);
 	}
 
 	/*
