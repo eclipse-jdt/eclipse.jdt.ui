@@ -131,7 +131,6 @@ public class GenerateActionGroup extends ActionGroup {
 	private AddBookmarkAction fAddBookmark;
 	private AddTaskAction fAddTaskAction;
 	private ExternalizeStringsAction fExternalizeStrings;
-	private FindStringsToExternalizeAction fFindStringsToExternalize;
 	private SurroundWithTryCatchAction fSurroundWithTryCatch;
 	private CleanUpAction fCleanUp;	
 	private FindBrokenNLSKeysAction fFindNLSProblems;
@@ -295,9 +294,6 @@ public class GenerateActionGroup extends ActionGroup {
 		fExternalizeStrings= new ExternalizeStringsAction(site);
 		fExternalizeStrings.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTERNALIZE_STRINGS);
 		
-		fFindStringsToExternalize= new FindStringsToExternalizeAction(site);
-		fFindStringsToExternalize.setActionDefinitionId(IJavaEditorActionDefinitionIds.FIND_STRINGS_TO_EXTERNALIZE);
-		
 		fFindNLSProblems= new FindBrokenNLSKeysAction(site);
 		fFindNLSProblems.setActionDefinitionId(FindBrokenNLSKeysAction.FIND_BROKEN_NLS_KEYS_ACTION_ID);
 		
@@ -325,7 +321,6 @@ public class GenerateActionGroup extends ActionGroup {
 		fHashCodeEquals.update(selection);
 		fAddJavaDocStub.update(selection);
 		fExternalizeStrings.update(selection);
-		fFindStringsToExternalize.update(selection);
 		fFindNLSProblems.update(selection);
 		fCleanUp.update(selection);
 		fAddTaskAction.update(selection);
@@ -349,7 +344,6 @@ public class GenerateActionGroup extends ActionGroup {
 		registerSelectionListener(provider, fAddJavaDocStub);
 		registerSelectionListener(provider, fAddBookmark);
 		registerSelectionListener(provider, fExternalizeStrings);
-		registerSelectionListener(provider, fFindStringsToExternalize);
 		registerSelectionListener(provider, fFindNLSProblems);
 		registerSelectionListener(provider, fOrganizeImports);
 		registerSelectionListener(provider, fFormatAll);
@@ -472,7 +466,6 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(source, fSurroundWithTryCatch);
 		source.add(new Separator(GROUP_EXTERNALIZE));
 		added+= addAction(source, fExternalizeStrings);
-		added+= addAction(source, fFindStringsToExternalize);
 		added+= addAction(source, fFindNLSProblems);
 		return added;
 	}
@@ -507,7 +500,6 @@ public class GenerateActionGroup extends ActionGroup {
 		actionBar.setGlobalActionHandler(JdtActionConstants.ADD_JAVA_DOC_COMMENT, fAddJavaDocStub);
 		actionBar.setGlobalActionHandler(JdtActionConstants.EXTERNALIZE_STRINGS, fExternalizeStrings);
 		actionBar.setGlobalActionHandler(JdtActionConstants.CLEAN_UP, fCleanUp);
-		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_STRINGS_TO_EXTERNALIZE, fFindStringsToExternalize);
 		actionBar.setGlobalActionHandler(FindBrokenNLSKeysAction.ACTION_HANDLER_ID, fFindNLSProblems);
 		actionBar.setGlobalActionHandler(JdtActionConstants.ORGANIZE_IMPORTS, fOrganizeImports);
 		actionBar.setGlobalActionHandler(JdtActionConstants.SORT_MEMBERS, fSortMembers);

@@ -280,7 +280,10 @@ public final class RefactoringAvailabilityTester {
 		return false;
 	}
 
-	public static boolean isExternalizeStringsAvailable(final IStructuredSelection selection) {
+	public static boolean isExternalizeStringsAvailable(final IStructuredSelection selection) throws JavaModelException {
+		if (selection.isEmpty())
+			return false;
+		
 		if (selection.size() == 1) {
 			ICompilationUnit unit= null;
 			final Object first= selection.getFirstElement();
@@ -288,9 +291,29 @@ public final class RefactoringAvailabilityTester {
 				unit= (ICompilationUnit) first;
 			else if (first instanceof IType)
 				unit= ((IType) first).getCompilationUnit();
-			return unit != null && unit.exists();
+			if (unit != null && unit.exists())
+				return true;
 		}
-		return false;
+		
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			if (!(element instanceof IJavaElement))
+				return false;
+			IJavaElement javaElement= (IJavaElement)element;
+			if (! javaElement.exists() || javaElement.isReadOnly())
+				return false;
+			int elementType= javaElement.getElementType();
+			if (elementType != IJavaElement.PACKAGE_FRAGMENT && 
+				elementType != IJavaElement.PACKAGE_FRAGMENT_ROOT &&
+				elementType != IJavaElement.JAVA_PROJECT)
+				return false;
+			if (elementType == IJavaElement.PACKAGE_FRAGMENT_ROOT){
+				IPackageFragmentRoot root= (IPackageFragmentRoot)javaElement;
+				if (root.isExternal() || ReorgUtils.isClassFolder(root))
+					return false;
+			}
+		}
+		return true;
 	}
 
 	public static boolean isExtractConstantAvailable(final JavaTextSelection selection) {
