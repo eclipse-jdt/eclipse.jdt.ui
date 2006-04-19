@@ -1442,6 +1442,7 @@ public class PackageExplorerPart extends ViewPart
 
 	void setWorkingSetLabel(String workingSetName) {
 		fWorkingSetLabel= workingSetName;
+		setTitleToolTip(getTitleToolTip());
 	}
 	
 	/**
