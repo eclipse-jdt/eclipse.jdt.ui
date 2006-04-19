@@ -2439,6 +2439,14 @@
          </action>
 <!-- Code Group -->
          <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.surround.with.template"
+               label="%SurroundWithTemplateAction.label"
+               style="pulldown"
+               class="org.eclipse.jdt.internal.ui.actions.SurroundWithTemplateMenuAction"
+               menubarPath="org.eclipse.jdt.ui.source.menu/codeGroup"
+               id="org.eclipse.jdt.internal.ui.actions.SurroundWithTemplateMenuAction">
+         </action>
+         <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.surround.with.try.catch"
                label="%SurroundWithTryCatchAction.label"
                retarget="true"
