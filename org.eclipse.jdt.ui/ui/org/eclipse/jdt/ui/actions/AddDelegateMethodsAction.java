@@ -476,7 +476,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			if (!ActionUtil.isProcessable(getShell(), fEditor))
 				return;
 
-			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
+			IJavaElement[] elements= SelectionConverter.codeResolveForked(fEditor, true);
 			if (elements.length == 1 && (elements[0] instanceof IField)) {
 				IField field= (IField) elements[0];
 				run(field.getDeclaringType(), new IField[] { field}, true);
@@ -495,6 +495,10 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_not_applicable); 
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_error_actionfailed); 
+		} catch (InvocationTargetException e) {
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_error_actionfailed); 
+		} catch (InterruptedException e) {
+			// cancelled
 		}
 	}
 

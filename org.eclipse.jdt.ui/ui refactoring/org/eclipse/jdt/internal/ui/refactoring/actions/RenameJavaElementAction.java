@@ -138,10 +138,11 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 	}
 	
 	public boolean canRun() {
-		IJavaElement element= getJavaElement();
-		if (element == null)
-			return false;
 		try {
+			IJavaElement element= getJavaElement();
+			if (element == null)
+				return false;
+
 			return isRenameAvailable(element);
 		} catch (JavaModelException e) {
 			if (JavaModelUtil.isExceptionToBeLogged(e))
@@ -152,8 +153,8 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		return false;
 	}
 	
-	private IJavaElement getJavaElement() {
-		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(), RefactoringMessages.RenameJavaElementAction_name); 
+	private IJavaElement getJavaElement() throws JavaModelException {
+		IJavaElement[] elements= SelectionConverter.codeResolve(fEditor); 
 		if (elements == null || elements.length != 1)
 			return null;
 		return elements[0];

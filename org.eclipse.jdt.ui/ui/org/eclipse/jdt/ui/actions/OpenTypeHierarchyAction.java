@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -45,6 +46,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 
 /**
@@ -160,16 +162,22 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), input))
 			return;		
 		
-		IJavaElement[] elements= SelectionConverter.codeResolveOrInputHandled(fEditor, getShell(), getDialogTitle());
-		if (elements == null)
-			return;
-		List candidates= new ArrayList(elements.length);
-		for (int i= 0; i < elements.length; i++) {
-			IJavaElement[] resolvedElements= OpenTypeHierarchyUtil.getCandidates(elements[i]);
-			if (resolvedElements != null)	
-				candidates.addAll(Arrays.asList(resolvedElements));
+		try {
+			IJavaElement[] elements= SelectionConverter.codeResolveOrInputForked(fEditor);
+			if (elements == null)
+				return;
+			List candidates= new ArrayList(elements.length);
+			for (int i= 0; i < elements.length; i++) {
+				IJavaElement[] resolvedElements= OpenTypeHierarchyUtil.getCandidates(elements[i]);
+				if (resolvedElements != null)	
+					candidates.addAll(Arrays.asList(resolvedElements));
+			}
+			run((IJavaElement[])candidates.toArray(new IJavaElement[candidates.size()]));
+		} catch (InvocationTargetException e) {
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.SelectionConverter_codeResolve_failed);
+		} catch (InterruptedException e) {
+			// cancelled
 		}
-		run((IJavaElement[])candidates.toArray(new IJavaElement[candidates.size()]));
 	}
 	
 	/* (non-Javadoc)

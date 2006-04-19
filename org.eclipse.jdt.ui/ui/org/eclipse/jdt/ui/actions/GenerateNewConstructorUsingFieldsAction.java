@@ -256,7 +256,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			return;
 		}
 		try {
-			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
+			IJavaElement[] elements= SelectionConverter.codeResolveForked(fEditor, true);
 			if (elements.length == 1 && (elements[0] instanceof IField)) {
 				IField field= (IField) elements[0];
 				run(field.getDeclaringType(), new IField[] { field}, false);
@@ -277,6 +277,10 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_not_applicable); 
 		} catch (CoreException exception) {
 			ExceptionHandler.handle(exception, getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_actionfailed); 
+		} catch (InvocationTargetException exception) {
+			ExceptionHandler.handle(exception, getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_actionfailed); 
+		} catch (InterruptedException e) {
+			// cancelled
 		}
 	}
 

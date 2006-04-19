@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.actions;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
 import org.eclipse.core.runtime.CoreException;
@@ -29,7 +30,6 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -136,9 +137,18 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 			return;
 		
 		try {
-			run(SelectionConverter.codeResolveOrInput(fEditor, getShell(), getDialogTitle(), ActionMessages.OpenExternalJavadocAction_select_element));  
-		} catch(JavaModelException e) {
+			IJavaElement[] elements= SelectionConverter.codeResolveOrInputForked(fEditor);
+			if (elements == null || elements.length == 0)
+				return;
+			IJavaElement candidate= elements[0];
+			if (elements.length > 1) {
+				candidate= OpenActionUtil.selectJavaElement(elements, getShell(), getDialogTitle(), ActionMessages.OpenExternalJavadocAction_select_element);
+			}
+			run(candidate);  
+		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.OpenExternalJavadocAction_code_resolve_failed); 
+		} catch (InterruptedException e) {
+			// cancelled
 		}
 	}
 	

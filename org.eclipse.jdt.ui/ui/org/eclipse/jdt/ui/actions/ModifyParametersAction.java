@@ -151,7 +151,7 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 		//- otherwise: caret position's enclosing method declaration
 		//  - when caret inside argument list of method declaration -> enclosing method declaration
 		//  - when caret inside argument list of method call -> enclosing method declaration (and NOT method call)
-		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(),  RefactoringMessages.OpenRefactoringWizardAction_refactoring); 
+		IJavaElement[] elements= SelectionConverter.codeResolve(fEditor); 
 		if (elements.length > 1)
 			return null;
 		if (elements.length == 1 && elements[0] instanceof IMethod)

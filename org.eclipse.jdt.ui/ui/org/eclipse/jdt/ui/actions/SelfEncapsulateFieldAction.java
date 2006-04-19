@@ -106,22 +106,23 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
-		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(), ActionMessages.SelfEncapsulateFieldAction_dialog_title); 
-		if (elements.length != 1 || !(elements[0] instanceof IField)) {
-			MessageDialog.openInformation(getShell(), ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_unavailable); 
-			return;
-		}
-		IField field= (IField)elements[0];
 		try {
+			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor); 
+			if (elements.length != 1 || !(elements[0] instanceof IField)) {
+				MessageDialog.openInformation(getShell(), ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_unavailable); 
+				return;
+			}
+			IField field= (IField)elements[0];
+
 			if (!RefactoringAvailabilityTester.isSelfEncapsulateAvailable(field)) {
 				MessageDialog.openInformation(getShell(), ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_unavailable); 
 				return;
 			}
+			run(field);
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 			return;
 		}
-		run(field);
 	}
 	
 	//---- structured selection -------------------------------------------------

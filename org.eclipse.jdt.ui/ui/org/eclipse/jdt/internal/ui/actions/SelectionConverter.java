@@ -10,10 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -22,6 +24,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
@@ -36,7 +39,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class SelectionConverter {
 
@@ -96,106 +98,40 @@ public class SelectionConverter {
 		return getInput(editor) != null;
 		
 	}
-	
-	/**
-	 * Converts the text selection provided by the given editor into an array of
-	 * Java elements. If the selection doesn't cover a Java element and the selection's
-	 * length is greater than 0 the methods returns the editor's input element.
-	 */
-	public static IJavaElement[] codeResolveOrInput(JavaEditor editor) throws JavaModelException {
+		
+	public static IJavaElement[] codeResolveOrInputForked(JavaEditor editor) throws InvocationTargetException, InterruptedException {
 		IJavaElement input= getInput(editor);
 		ITextSelection selection= (ITextSelection)editor.getSelectionProvider().getSelection();
-		IJavaElement[] result= codeResolve(input, selection);
+		IJavaElement[] result= performForkedCodeResolve(input, selection);
 		if (result.length == 0) {
 			result= new IJavaElement[] {input};
 		}
 		return result;
 	}
-	
-	public static IJavaElement[] codeResolveOrInputHandled(JavaEditor editor, Shell shell, String title) {
-		try {
-			return codeResolveOrInput(editor);
-		} catch(JavaModelException e) {
-			ExceptionHandler.handle(e, shell, title, ActionMessages.SelectionConverter_codeResolve_failed); 
-		}
-		return null;
-	}
-	
-	/**
-	 * Converts the text selection provided by the given editor a Java element by
-	 * asking the user if code resolve returned more than one result. If the selection 
-	 * doesn't cover a Java element and the selection's length is greater than 0 the 
-	 * methods returns the editor's input element.
-	 */
-	public static IJavaElement codeResolveOrInput(JavaEditor editor, Shell shell, String title, String message) throws JavaModelException {
-		IJavaElement[] elements= codeResolveOrInput(editor);
-		if (elements == null || elements.length == 0)
-			return null;
-		IJavaElement candidate= elements[0];
-		if (elements.length > 1) {
-			candidate= OpenActionUtil.selectJavaElement(elements, shell, title, message);
-		}
-		return candidate;
-	}
-	
-	public static IJavaElement codeResolveOrInputHandled(JavaEditor editor, Shell shell, String title, String message) {
-		try {
-			return codeResolveOrInput(editor, shell, title, message);
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, shell, title, ActionMessages.SelectionConverter_codeResolveOrInput_failed); 
-		}
-		return null;
-	}
-		
+				
 	public static IJavaElement[] codeResolve(JavaEditor editor) throws JavaModelException {
 		return codeResolve(editor, true);
 	}
-	
+		
 	/**
 	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
 	 * @since 3.2
 	 */
-	private static IJavaElement[] codeResolve(JavaEditor editor, boolean primaryOnly) throws JavaModelException {
+	public static IJavaElement[] codeResolve(JavaEditor editor, boolean primaryOnly) throws JavaModelException {
 		return codeResolve(getInput(editor, primaryOnly), (ITextSelection)editor.getSelectionProvider().getSelection());
 	}
-
-	/**
-	 * Converts the text selection provided by the given editor a Java element by
-	 * asking the user if code resolve returned more than one result. If the selection 
-	 * doesn't cover a Java element <code>null</code> is returned.
-	 */
-	public static IJavaElement codeResolve(JavaEditor editor, Shell shell, String title, String message) throws JavaModelException {
-		return codeResolve(editor, true, shell, title, message);
-	}
 	
 	/**
-	 * Converts the text selection provided by the given editor a Java element by
-	 * asking the user if code resolve returned more than one result. If the selection 
-	 * doesn't cover a Java element <code>null</code> is returned.
-	 * 
+	 * Perform a code resolve in a separate thread.
 	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
+	 * @throws InterruptedException 
+	 * @throws InvocationTargetException 
 	 * @since 3.2
 	 */
-	public static IJavaElement codeResolve(JavaEditor editor, boolean primaryOnly, Shell shell, String title, String message) throws JavaModelException {
-		IJavaElement[] elements= codeResolve(editor, primaryOnly);
-		if (elements == null || elements.length == 0)
-			return null;
-		IJavaElement candidate= elements[0];
-		if (elements.length > 1) {
-			candidate= OpenActionUtil.selectJavaElement(elements, shell, title, message);
-		}
-		return candidate;
+	public static IJavaElement[] codeResolveForked(JavaEditor editor, boolean primaryOnly) throws InvocationTargetException, InterruptedException {
+		return performForkedCodeResolve(getInput(editor, primaryOnly), (ITextSelection)editor.getSelectionProvider().getSelection());
 	}
-	
-	public static IJavaElement[] codeResolveHandled(JavaEditor editor, Shell shell, String title) {
-		try {
-			return codeResolve(editor);
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, shell, title, ActionMessages.SelectionConverter_codeResolve_failed); 
-		}
-		return null;
-	}
-	
+			
 	public static IJavaElement getElementAtOffset(JavaEditor editor) throws JavaModelException {
 		return getElementAtOffset(editor, true);
 	}
@@ -238,6 +174,22 @@ public class SelectionConverter {
 		if (editorInput instanceof ICompilationUnit)
 			return (ICompilationUnit)editorInput;
 		return null;
+	}
+	
+	private static IJavaElement[] performForkedCodeResolve(final IJavaElement input, final ITextSelection selection) throws InvocationTargetException, InterruptedException {
+		final class CodeResolveRunnable implements IRunnableWithProgress {
+			IJavaElement[] result;
+			public void run(IProgressMonitor monitor) throws InvocationTargetException {
+				try {
+					result= codeResolve(input, selection);
+				} catch (JavaModelException e) {
+					throw new InvocationTargetException(e);
+				}
+			}
+		}
+		CodeResolveRunnable runnable= new CodeResolveRunnable();
+		PlatformUI.getWorkbench().getProgressService().busyCursorWhile(runnable);
+		return runnable.result;
 	}
 
 	public static IJavaElement[] codeResolve(IJavaElement input, ITextSelection selection) throws JavaModelException {

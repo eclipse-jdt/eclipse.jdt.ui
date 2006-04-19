@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
@@ -130,20 +130,26 @@ public class OpenAction extends SelectionDispatchAction {
 		if (!isProcessable())
 			return;
 		try {
-			IJavaElement element= SelectionConverter.codeResolve(fEditor, false, getShell(), getDialogTitle(), ActionMessages.OpenAction_select_element); 
-			if (element == null) {
+			IJavaElement[] elements= SelectionConverter.codeResolveForked(fEditor, false);
+			if (elements == null || elements.length == 0) {
 				IEditorStatusLine statusLine= (IEditorStatusLine) fEditor.getAdapter(IEditorStatusLine.class);
 				if (statusLine != null)
 					statusLine.setMessage(true, ActionMessages.OpenAction_error_messageBadSelection, null); 
 				getShell().getDisplay().beep();
 				return;
 			}
+			IJavaElement element= elements[0];
+			if (elements.length > 1)
+				element= OpenActionUtil.selectJavaElement(elements, getShell(), getDialogTitle(), ActionMessages.OpenAction_select_element);
+
 			int type= element.getElementType();
 			if (type == IJavaElement.JAVA_PROJECT || type == IJavaElement.PACKAGE_FRAGMENT_ROOT || type == IJavaElement.PACKAGE_FRAGMENT)
 				element= EditorUtility.getEditorInputJavaElement(fEditor, false);
 			run(new Object[] {element} );
-		} catch (JavaModelException e) {
+		} catch (InvocationTargetException e) {
 			showError(e);
+		} catch (InterruptedException e) {
+			// ignore
 		}
 	}
 
@@ -225,7 +231,7 @@ public class OpenAction extends SelectionDispatchAction {
 		return ActionMessages.OpenAction_error_title; 
 	}
 	
-	private void showError(CoreException e) {
+	private void showError(InvocationTargetException e) {
 		ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.OpenAction_error_message); 
 	}
 }

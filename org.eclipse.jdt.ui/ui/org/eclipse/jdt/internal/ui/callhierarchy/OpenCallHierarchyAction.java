@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,9 +38,11 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * This action opens a call hierarchy on the selected method.
@@ -131,22 +134,28 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
         if (!ActionUtil.isProcessable(getShell(), input))
             return;     
         
-        IJavaElement[] elements= SelectionConverter.codeResolveOrInputHandled(fEditor, getShell(), getErrorDialogTitle());
-        if (elements == null)
-            return;
-        List candidates= new ArrayList(elements.length);
-        for (int i= 0; i < elements.length; i++) {
-            IJavaElement[] resolvedElements= CallHierarchyUI.getCandidates(elements[i]);
-            if (resolvedElements != null)   
-                candidates.addAll(Arrays.asList(resolvedElements));
-        }
-        if (candidates.isEmpty()) {
-            IJavaElement enclosingMethod= getEnclosingMethod(input, selection);
-            if (enclosingMethod != null) {
-                candidates.add(enclosingMethod);
-            }
-        }
-        run((IJavaElement[])candidates.toArray(new IJavaElement[candidates.size()]));
+        try {
+			IJavaElement[] elements= SelectionConverter.codeResolveOrInputForked(fEditor);
+			if (elements == null)
+			    return;
+			List candidates= new ArrayList(elements.length);
+			for (int i= 0; i < elements.length; i++) {
+			    IJavaElement[] resolvedElements= CallHierarchyUI.getCandidates(elements[i]);
+			    if (resolvedElements != null)   
+			        candidates.addAll(Arrays.asList(resolvedElements));
+			}
+			if (candidates.isEmpty()) {
+			    IJavaElement enclosingMethod= getEnclosingMethod(input, selection);
+			    if (enclosingMethod != null) {
+			        candidates.add(enclosingMethod);
+			    }
+			}
+			run((IJavaElement[])candidates.toArray(new IJavaElement[candidates.size()]));
+		} catch (InvocationTargetException e) {
+			ExceptionHandler.handle(e, getShell(), getErrorDialogTitle(), ActionMessages.SelectionConverter_codeResolve_failed);
+		} catch (InterruptedException e) {
+			// cancelled
+		}
     }
     
     private IJavaElement getEnclosingMethod(IJavaElement input, ITextSelection selection) {
