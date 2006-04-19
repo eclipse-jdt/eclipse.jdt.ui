@@ -245,7 +245,7 @@ public class MethodOverrideTester {
 		for (int i= 0; i < nOverridingTypeParameters; i++) {
 			String erasure1= overriddenSubst.getErasure(overriddenTypeParameters[i].getElementName());
 			String erasure2= overridingSubst.getErasure(overridingTypeParameters[i].getElementName());
-			if (!erasure1.equals(erasure2)) {
+			if (erasure1 == null || !erasure1.equals(erasure2)) {
 				return false;
 			}
 			// comparing only the erasure is not really correct: Need to compare all bounds, that can be in different order
