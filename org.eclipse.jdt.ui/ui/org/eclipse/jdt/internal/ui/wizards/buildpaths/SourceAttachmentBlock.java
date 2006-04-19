@@ -26,7 +26,6 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -91,7 +90,7 @@ public class SourceAttachmentBlock {
 	private IWorkspaceRoot fWorkspaceRoot;
 	
 	private Control fSWTWidget;
-	private CLabel fFullPathResolvedLabel;
+	private Label fFullPathResolvedLabel;
 	
 	private IJavaProject fProject;
 	private IClasspathEntry fEntry;
@@ -211,39 +210,36 @@ public class SourceAttachmentBlock {
 		if (isVariableEntry()) {
 			int widthHint= converter.convertWidthInCharsToPixels(50);
 			
-			GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-			gd.horizontalSpan= 4;
-			gd.widthHint= converter.convertWidthInCharsToPixels(50);
-
-			Label message= new Label(composite, SWT.LEFT + SWT.WRAP);
+			Label message= new Label(composite, SWT.WRAP);
+			GridData gd= new GridData(GridData.FILL, GridData.BEGINNING, false, false, 4, 1);
+			gd.widthHint= widthHint;
 			message.setLayoutData(gd);
 			message.setText(Messages.format(NewWizardMessages.SourceAttachmentBlock_message, fEntry.getPath().lastSegment())); 
 			
-			DialogField.createEmptySpace(composite, 1);
-			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+			//DialogField.createEmptySpace(composite, 1);
+
+			Label desc= new Label(composite, SWT.WRAP);
+			gd= new GridData(GridData.FILL, GridData.BEGINNING, false, false, 4, 1);
 			gd.widthHint= widthHint;
-			gd.horizontalSpan= 2;
-			Label desc= new Label(composite, SWT.LEFT + SWT.WRAP);
-			desc.setText(NewWizardMessages.SourceAttachmentBlock_filename_description); 
 			desc.setLayoutData(gd);
-			DialogField.createEmptySpace(composite, 1);
+			desc.setText(NewWizardMessages.SourceAttachmentBlock_filename_description);
 			
 			fFileNameField.doFillIntoGrid(composite, 4);
 			LayoutUtil.setWidthHint(fFileNameField.getTextControl(null), widthHint);
 
 			// label that shows the resolved path for variable jars
-			DialogField.createEmptySpace(composite, 1);	
-			fFullPathResolvedLabel= new CLabel(composite, SWT.LEFT);
+			//DialogField.createEmptySpace(composite, 1);	
+			fFullPathResolvedLabel= new Label(composite, SWT.WRAP);
 			fFullPathResolvedLabel.setText(getResolvedLabelString());
-			fFullPathResolvedLabel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-			DialogField.createEmptySpace(composite, 2);
+			gd= new GridData(GridData.FILL, GridData.BEGINNING, false, false, 4, 1);
+			gd.widthHint= widthHint;
+			fFullPathResolvedLabel.setLayoutData(gd);
 			
 			LayoutUtil.setHorizontalGrabbing(fFileNameField.getTextControl(null));
 		} else {
 			int widthHint= converter.convertWidthInCharsToPixels(60);
 			
-			GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-			gd.horizontalSpan= 3;
+			GridData gd= new GridData(GridData.FILL, GridData.BEGINNING, false, false, 3, 1);
 			gd.widthHint= converter.convertWidthInCharsToPixels(50);
 
 			Label message= new Label(composite, SWT.LEFT + SWT.WRAP);
