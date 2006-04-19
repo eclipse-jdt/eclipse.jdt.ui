@@ -11,16 +11,14 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import org.eclipse.swt.widgets.Display;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
 
@@ -60,9 +58,6 @@ public class ActivateJavaEditorTest extends ActivateEditorTest {
 		NewSelectionListenerWithASTManager manager= NewSelectionListenerWithASTManager.getDefault();
 		for (int i= 0; i < fEditors.length; i++)
 			manager.addListener(fEditors[i], fListener);
-		
-		while (true)
-			Display.getDefault().readAndDispatch();
 		
 	}
 	
