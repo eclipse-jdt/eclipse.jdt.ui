@@ -91,7 +91,7 @@ public final class JarImportWizardPage extends WizardPage {
 	private final boolean fImportWizard;
 
 	/** The import wizard */
-	private final JarImportWizard fJarImportData;
+	private final JarImportWizard fWizard;
 
 	/** The location control */
 	private RefactoringLocationControl fLocationControl= null;
@@ -102,17 +102,17 @@ public final class JarImportWizardPage extends WizardPage {
 	/**
 	 * Creates a new jar import wizard page.
 	 * 
-	 * @param parent
-	 *            the jar import wizard
 	 * @param wizard
+	 *            the jar import wizard
+	 * @param importWizard
 	 *            <code>true</code> if the wizard is part of an import wizard,
 	 *            <code>false</code> otherwise
 	 */
-	public JarImportWizardPage(final JarImportWizard parent, final boolean wizard) {
+	public JarImportWizardPage(final JarImportWizard wizard, final boolean importWizard) {
 		super(PAGE_NAME);
-		Assert.isNotNull(parent);
-		fJarImportData= parent;
-		fImportWizard= wizard;
+		Assert.isNotNull(wizard);
+		fWizard= wizard;
+		fImportWizard= importWizard;
 		if (fImportWizard) {
 			setTitle(JarImportMessages.JarImportWizardPage_page_title);
 			setDescription(JarImportMessages.JarImportWizardPage_page_description);
@@ -216,7 +216,7 @@ public final class JarImportWizardPage extends WizardPage {
 		fTreeViewer.setSorter(new JavaElementSorter());
 		fTreeViewer.setAutoExpandLevel(2);
 		fTreeViewer.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
-		final IPackageFragmentRoot root= fJarImportData.getPackageFragmentRoot();
+		final IPackageFragmentRoot root= fWizard.getPackageFragmentRoot();
 		if (root != null) {
 			fTreeViewer.setSelection(new StructuredSelection(new Object[] { root}), true);
 			fTreeViewer.expandToLevel(root, 1);
@@ -248,7 +248,7 @@ public final class JarImportWizardPage extends WizardPage {
 		final Label label= new Label(composite, SWT.NONE);
 		label.setText(JarImportMessages.JarImportWizardPage_location_label);
 		label.setLayoutData(createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, 0));
-		fLocationControl= new RefactoringLocationControl(fJarImportData, composite, SETTING_HISTORY);
+		fLocationControl= new RefactoringLocationControl(fWizard, composite, SETTING_HISTORY);
 		fLocationControl.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 1, 0));
 		fLocationControl.loadHistory();
 		fLocationControl.getControl().addModifyListener(new ModifyListener() {
@@ -284,7 +284,7 @@ public final class JarImportWizardPage extends WizardPage {
 	 */
 	protected void createRenameGroup(final Composite parent) {
 		Assert.isNotNull(parent);
-		final JarImportData data= fJarImportData.getImportData();
+		final JarImportData data= fWizard.getImportData();
 		final Button button= new Button(parent, SWT.CHECK);
 		button.setText(JarImportMessages.JarImportWizardPage_replace_jar_file);
 		button.setSelection(!data.isRenameJarFile());
@@ -322,7 +322,7 @@ public final class JarImportWizardPage extends WizardPage {
 	 * Handles the input changed event.
 	 */
 	protected void handleInputChanged() {
-		final JarImportData data= fJarImportData.getImportData();
+		final JarImportData data= fWizard.getImportData();
 		data.setRefactoringHistory(null);
 		data.setRefactoringFileLocation(null);
 		setErrorMessage(null);
@@ -361,7 +361,7 @@ public final class JarImportWizardPage extends WizardPage {
 						setPageComplete(false);
 						return;
 					}
-					final JarImportData data= fJarImportData.getImportData();
+					final JarImportData data= fWizard.getImportData();
 					data.setRefactoringFileLocation(URIUtil.toURI(path));
 					ZipEntry entry= zip.getEntry(JarPackagerUtil.getRefactoringsEntry());
 					if (entry == null) {
@@ -418,7 +418,7 @@ public final class JarImportWizardPage extends WizardPage {
 				setPageComplete(false);
 				return;
 			} else {
-				final JarImportData data= fJarImportData.getImportData();
+				final JarImportData data= fWizard.getImportData();
 				final Object element= elements[0];
 				if (element instanceof IPackageFragmentRoot)
 					data.setPackageFragmentRoot((IPackageFragmentRoot) element);
@@ -436,7 +436,7 @@ public final class JarImportWizardPage extends WizardPage {
 	 * Handles the time stamp changed event.
 	 */
 	protected void handleTimeStampChanged() {
-		final IPackageFragmentRoot root= fJarImportData.getPackageFragmentRoot();
+		final IPackageFragmentRoot root= fWizard.getPackageFragmentRoot();
 		if (root != null) {
 			try {
 				final URI uri= BinaryRefactoringHistoryWizard.getLocationURI(root.getRawClasspathEntry());
@@ -448,7 +448,7 @@ public final class JarImportWizardPage extends WizardPage {
 							zip= new ZipFile(file, ZipFile.OPEN_READ);
 							ZipEntry entry= zip.getEntry(JarPackagerUtil.getRefactoringsEntry());
 							if (entry != null) {
-								fJarImportData.getImportData().setExistingTimeStamp(entry.getTime());
+								fWizard.getImportData().setExistingTimeStamp(entry.getTime());
 							}
 						} catch (IOException exception) {
 							// Just leave it
