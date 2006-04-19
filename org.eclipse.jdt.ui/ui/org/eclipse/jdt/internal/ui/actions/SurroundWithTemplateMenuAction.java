@@ -28,6 +28,7 @@ import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
@@ -46,6 +47,9 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.IHandlerActivation;
+import org.eclipse.ui.handlers.IHandlerService;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
@@ -60,14 +64,33 @@ import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.QuickTemplateProcessor;
 
 public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownDelegate2 {
+	
+	private static final String SURROUND_WITH_QUICK_MENU_ACTION_ID= "org.eclipse.jdt.ui.edit.text.java.surround.with.quickMenu";  //$NON-NLS-1$
+	
+	private class QuickAccessAction extends JDTQuickMenuAction {
+		public QuickAccessAction(JavaEditor editor) {
+			super(editor, SURROUND_WITH_QUICK_MENU_ACTION_ID); 
+		}
+		protected void fillMenu(IMenuManager menu) {
+			fillQuickMenu(menu);
+		}
+	}
 
 	private Menu fMenu;
 	private JavaEditor fEditor;
+	private QuickAccessAction fQuickAccessAction;
+	private IHandlerActivation fHandlerActivation;
 	
 	public SurroundWithTemplateMenuAction() {}
 	
 	public SurroundWithTemplateMenuAction(JavaEditor editor) {
 		fEditor= editor;
+		fQuickAccessAction= new QuickAccessAction(editor);
+		
+		ActionHandler handler= new ActionHandler(fQuickAccessAction);
+		IHandlerService service= (IHandlerService) PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
+		if (service != null)
+			fHandlerActivation= service.activateHandler(SURROUND_WITH_QUICK_MENU_ACTION_ID, handler);
 	}
 
 	/**
@@ -90,13 +113,28 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		return fMenu;
 	}
 	
+	public void fillQuickMenu(IMenuManager menu) {
+		IAction[] actions= getActions(fEditor);
+		
+		if (actions == null)
+			return;
+		
+		for (int i= 0; i < actions.length; i++) {
+			menu.add(actions[i]);
+		}
+	}
+	
 	public void fillContextMenu(IMenuManager menu) {
 		IAction[] actions= getActions(fEditor);
 		
 		if (actions == null)
 			return;
 		
-		MenuManager subMenu = new MenuManager(ActionMessages.SurroundWithTemplateMenuAction_SurroundWithTemplateSubMenuName, "org.eclipse.jdt.ui.surround.with.template.menu"); //$NON-NLS-1$
+		String menuText= ActionMessages.SurroundWithTemplateMenuAction_SurroundWithTemplateSubMenuName;
+		if (fQuickAccessAction != null)
+			menuText= fQuickAccessAction.addShortcut(menuText);
+		
+		MenuManager subMenu = new MenuManager(menuText, "org.eclipse.jdt.ui.surround.with.template.menu"); //$NON-NLS-1$
 		for (int i= 0; i < actions.length; i++) {
 			subMenu.add(actions[i]);
 		}
@@ -108,6 +146,13 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 	 */
 	public void dispose() {
 		setMenu(null);
+		
+		if (fHandlerActivation != null) {
+			IHandlerService service= (IHandlerService) PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
+			service.deactivateHandler(fHandlerActivation);
+			fHandlerActivation= null;
+		}
+		fQuickAccessAction= null;
 	}
 
 	/**

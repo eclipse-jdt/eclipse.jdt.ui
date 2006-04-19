@@ -3379,6 +3379,12 @@
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.correction.splitJoinVariableDeclaration.assist">
       </command>
+      <command
+            name="%ActionDefinition.surroundWith.quickMenu.name"
+            description="%ActionDefinition.surround.quickMenu.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.edit.text.java.surround.with.quickMenu">
+      </command>
 <!-- perspectives -->
       <command
             name="%PerspectiveCommand.javaBrowsing.name"
@@ -4084,6 +4090,10 @@
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.correction.assignToField.assist"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>              
+       <key
+            sequence="M1+M2+Z"
+            commandId="org.eclipse.jdt.ui.edit.text.java.surround.with.quickMenu"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>        
 
 <!-- refactoring -->
       <key
