@@ -27,7 +27,7 @@ public abstract class OpenQuickControlTest extends TextPerformanceTestCase {
 
 	private static final Class THIS= OpenQuickControlTest.class;
 
-	private static final int MEASURED_RUNS= 10;
+	private static final int MEASURED_RUNS= 200;
 	
 	private static final int WARM_UP_RUNS= 10;
 	
