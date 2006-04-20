@@ -68,7 +68,7 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 	
 	private static final int WARM_UP_RUNS= 10;
 	
-	private static final int MEASURED_RUNS= 5;
+	private static final int MEASURED_RUNS= 500;
 	
 	private static final String PATH= "/Eclipse SWT/win32/org/eclipse/swt/graphics/";
 	
