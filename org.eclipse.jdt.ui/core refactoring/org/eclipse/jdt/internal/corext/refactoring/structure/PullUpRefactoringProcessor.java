@@ -478,6 +478,8 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	protected boolean canBeAccessedFrom(final IMember member, final IType target, final ITypeHierarchy hierarchy) throws JavaModelException {
 		if (super.canBeAccessedFrom(member, target, hierarchy)) {
+			if (target.isInterface())
+				return true;
 			if (target.equals(member.getDeclaringType()))
 				return true;
 			if (target.equals(member))
@@ -1170,6 +1172,12 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 						rewriteTypeOccurrences(manager, sourceRewriter, current, new HashSet(), status, new SubProgressMonitor(monitor, 16));
 				} finally {
 					subMonitor.done();
+					ICompilationUnit[] cus= manager.getAllCompilationUnits();
+					for (int index= 0; index < cus.length; index++) {
+						CompilationUnitChange current= (CompilationUnitChange) manager.get(cus[index]);
+						if (change != null && current.getEdit() == null)
+							manager.remove(cus[index]);
+					}
 					for (final Iterator iterator= workingcopies.values().iterator(); iterator.hasNext();) {
 						((ICompilationUnit) iterator.next()).discardWorkingCopy();
 					}
