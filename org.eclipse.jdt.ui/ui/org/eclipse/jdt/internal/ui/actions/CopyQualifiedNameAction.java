@@ -26,6 +26,7 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.graphics.Point;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -34,6 +35,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.part.ResourceTransfer;
+import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -84,15 +86,21 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
      */
     private final Clipboard fClipboard;
 	private CompilationUnitEditor fEditor;
+	private final IAction fPasteAction;
 
-    public CopyQualifiedNameAction(CompilationUnitEditor editor) {
-    	this(editor.getSite());
+    public CopyQualifiedNameAction(CompilationUnitEditor editor, Clipboard clipboard, IAction pastAction) {
+    	this(editor.getSite(), clipboard, pastAction);
 		fEditor= editor;
 	}
 
-	public CopyQualifiedNameAction(IWorkbenchSite site) {
+	public CopyQualifiedNameAction(IWorkbenchSite site, Clipboard clipboard, IAction pastAction) {
 		super(site);
-		fClipboard= new Clipboard(getShell().getDisplay());
+		fPasteAction= pastAction;
+		if (clipboard == null) {
+			fClipboard= new Clipboard(getShell().getDisplay());
+		} else {
+			fClipboard= clipboard;
+		}
 		setText(ActionMessages.CopyQualifiedNameAction_ActionName);
 		setToolTipText(ActionMessages.CopyQualifiedNameAction_ToolTipText);
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_COPY_QUALIFIED_NAME);
@@ -185,6 +193,18 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 			
 			try {
 				fClipboard.setContents(data, dataTypes);
+				
+				// update the enablement of the paste action
+				// workaround since the clipboard does not support callbacks				
+				if (fPasteAction != null) {
+					if (fPasteAction instanceof SelectionDispatchAction) {
+						if (((SelectionDispatchAction)fPasteAction).getSelection() != null) {
+							((SelectionDispatchAction)fPasteAction).update(((SelectionDispatchAction)fPasteAction).getSelection());
+						}
+					} else if (fPasteAction instanceof IUpdate) {
+						((IUpdate)fPasteAction).update();
+					}
+				}
 			} catch (SWTError e) {
 	            if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD) {
 					throw e;

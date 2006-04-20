@@ -25,6 +25,7 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
+import org.eclipse.jdt.internal.ui.actions.CopyQualifiedNameAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CutAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.DeleteAction;
@@ -51,6 +52,7 @@ public class CCPActionGroup extends ActionGroup {
 
  	private SelectionDispatchAction fDeleteAction;
 	private SelectionDispatchAction fCopyAction;
+	private SelectionDispatchAction fCopyQualifiedNameAction;
 	private SelectionDispatchAction fPasteAction;
 	private SelectionDispatchAction fCutAction;
 	
@@ -86,13 +88,16 @@ public class CCPActionGroup extends ActionGroup {
 		fCopyAction= new CopyToClipboardAction(fSite, fClipboard, fPasteAction);
 		fCopyAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.COPY);
 		
+		fCopyQualifiedNameAction= new CopyQualifiedNameAction(fSite, fClipboard, fPasteAction);
+		fCopyQualifiedNameAction.setActionDefinitionId(CopyQualifiedNameAction.JAVA_EDITOR_ACTION_DEFINITIONS_ID);
+		
 		fCutAction= new CutAction(fSite, fClipboard, fPasteAction);
 		fCutAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.CUT);
 		
 		fDeleteAction= new DeleteAction(fSite);
 		fDeleteAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.DELETE);
 		
-		fActions= new SelectionDispatchAction[] { fCutAction, fCopyAction, fPasteAction, fDeleteAction };
+		fActions= new SelectionDispatchAction[] { fCutAction, fCopyAction, fCopyQualifiedNameAction, fPasteAction, fDeleteAction };
 		registerActionsAsSelectionChangeListeners();
 	}
 
@@ -131,6 +136,7 @@ public class CCPActionGroup extends ActionGroup {
 		super.fillActionBars(actionBars);
 		actionBars.setGlobalActionHandler(ActionFactory.DELETE.getId(), fDeleteAction);
 		actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), fCopyAction);
+		actionBars.setGlobalActionHandler(CopyQualifiedNameAction.ACTION_HANDLER_ID, fCopyQualifiedNameAction);
 		actionBars.setGlobalActionHandler(ActionFactory.CUT.getId(), fCutAction);
 		actionBars.setGlobalActionHandler(ActionFactory.PASTE.getId(), fPasteAction);
 	}

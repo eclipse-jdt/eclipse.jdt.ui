@@ -31,6 +31,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.AddBookmarkAction;
 import org.eclipse.ui.part.Page;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
@@ -181,7 +182,8 @@ public class GenerateActionGroup extends ActionGroup {
 		fSortMembers.setActionDefinitionId(IJavaEditorActionDefinitionIds.SORT_MEMBERS);
 		editor.setAction("SortMembers", fSortMembers); //$NON-NLS-1$
 		
-		fCopyQualifiedNameAction= new CopyQualifiedNameAction(editor);
+		IAction pastAction= editor.getAction(ITextEditorActionConstants.PASTE);//IWorkbenchActionDefinitionIds.PASTE);
+		fCopyQualifiedNameAction= new CopyQualifiedNameAction(editor, null, pastAction);
 		fCopyQualifiedNameAction.setActionDefinitionId(CopyQualifiedNameAction.JAVA_EDITOR_ACTION_DEFINITIONS_ID);
 		editor.setAction("CopyQualifiedName", fCopyQualifiedNameAction); //$NON-NLS-1$
 
@@ -296,9 +298,6 @@ public class GenerateActionGroup extends ActionGroup {
 		fSortMembers= new SortMembersAction(site);
 		fSortMembers.setActionDefinitionId(IJavaEditorActionDefinitionIds.SORT_MEMBERS);
 		
-		fCopyQualifiedNameAction= new CopyQualifiedNameAction(site);
-		fCopyQualifiedNameAction.setActionDefinitionId(CopyQualifiedNameAction.JAVA_EDITOR_ACTION_DEFINITIONS_ID);
-
 		fFormatAll= new FormatAllAction(site);
 		fFormatAll.setActionDefinitionId(IJavaEditorActionDefinitionIds.FORMAT);
 		
@@ -319,7 +318,6 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddTaskAction.update(selection);
 		fOrganizeImports.update(selection);
 		fSortMembers.update(selection);
-		fCopyQualifiedNameAction.update(selection);
 		fFormatAll.update(selection);
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection ss= (IStructuredSelection)selection;
@@ -341,7 +339,6 @@ public class GenerateActionGroup extends ActionGroup {
 		registerSelectionListener(provider, fOrganizeImports);
 		registerSelectionListener(provider, fFormatAll);
 		registerSelectionListener(provider, fSortMembers);
-		registerSelectionListener(provider, fCopyQualifiedNameAction);
 		registerSelectionListener(provider, fAddTaskAction);
 		registerSelectionListener(provider, fCleanUp);
 		
@@ -496,12 +493,13 @@ public class GenerateActionGroup extends ActionGroup {
 		actionBar.setGlobalActionHandler(FindBrokenNLSKeysAction.ACTION_HANDLER_ID, fFindNLSProblems);
 		actionBar.setGlobalActionHandler(JdtActionConstants.ORGANIZE_IMPORTS, fOrganizeImports);
 		actionBar.setGlobalActionHandler(JdtActionConstants.SORT_MEMBERS, fSortMembers);
-		actionBar.setGlobalActionHandler(CopyQualifiedNameAction.ACTION_HANDLER_ID, fCopyQualifiedNameAction);
 		if (!isEditorOwner()) {
 			// editor provides its own implementation of these actions.
 			actionBar.setGlobalActionHandler(IDEActionFactory.BOOKMARK.getId(), fAddBookmark);
 			actionBar.setGlobalActionHandler(IDEActionFactory.ADD_TASK.getId(), fAddTaskAction);
 			actionBar.setGlobalActionHandler(JdtActionConstants.FORMAT, fFormatAll);
+		} else {
+			actionBar.setGlobalActionHandler(CopyQualifiedNameAction.ACTION_HANDLER_ID, fCopyQualifiedNameAction);
 		}
 	}
 	
