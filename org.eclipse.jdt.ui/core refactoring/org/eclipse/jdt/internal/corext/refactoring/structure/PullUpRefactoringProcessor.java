@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -603,6 +604,8 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	}
 
 	private void checkAccessModifiers(final RefactoringStatus result, final Set notDeletedMembersInSubtypes) throws JavaModelException {
+		if (fDestinationType.isInterface())
+			return;
 		final List toDeclareAbstract= Arrays.asList(fAbstractMethods);
 		for (final Iterator iter= notDeletedMembersInSubtypes.iterator(); iter.hasNext();) {
 			final IMember member= (IMember) iter.next();
@@ -1045,8 +1048,17 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 						continue;
 					}
 					rewrite= getCompilationUnitRewrite(fCompilationUnitRewrites, unit);
-					if (deleteMap.containsKey(unit) && !destination.isInterface())
-						deleteDeclarationNodes(sourceRewriter, sourceRewriter.getCu().equals(targetRewriter.getCu()), rewrite, (List) deleteMap.get(unit), SET_PULL_UP);
+					if (deleteMap.containsKey(unit)) {
+						LinkedList list= new LinkedList((List) deleteMap.get(unit));
+						if (destination.isInterface()) {
+							for (final Iterator iterator= list.iterator(); iterator.hasNext();) {
+								final IMember member= (IMember) iterator.next();
+								if (member instanceof IMethod)
+									iterator.remove();
+							}
+						}
+						deleteDeclarationNodes(sourceRewriter, sourceRewriter.getCu().equals(targetRewriter.getCu()), rewrite, list, SET_PULL_UP);
+					}
 					final CompilationUnit root= sourceRewriter.getRoot();
 					if (unit.equals(target)) {
 						final ASTRewrite rewriter= rewrite.getASTRewrite();
@@ -1087,6 +1099,8 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 							} else if (member instanceof IMethod) {
 								final MethodDeclaration oldMethod= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) member, root);
 								if (oldMethod != null) {
+									if (JdtFlags.isStatic(member) && fDestinationType.isInterface())
+										status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.PullUpRefactoring_moving_static_method_to_interface, new String[] {JavaElementLabels.getTextLabel(member, JavaElementLabels.ALL_FULLY_QUALIFIED)}), JavaStatusContext.create(member)));
 									final MethodDeclaration newMethod= createNewMethodDeclarationNode(sourceRewriter, rewrite, ((IMethod) member), oldMethod, root, mapping, adjustments, new SubProgressMonitor(subsub, 1), status);
 									rewriter.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, declaration.bodyDeclarations()), rewrite.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PULL_UP));
 									ImportRewriteUtil.addImports(rewrite, oldMethod, new HashMap(), new HashMap(), false);
@@ -1525,6 +1539,12 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			adjustment.setNeedsRewriting(false);
 			adjustments.put(member, adjustment);
 			return JdtFlags.clearAccessModifiers(modifiers) | Modifier.PROTECTED;
+		}
+		if (getDestinationType().isInterface()) {
+			final int flags= JdtFlags.clearAccessModifiers(modifiers) | Modifier.PUBLIC;
+			if (member instanceof IMethod)
+				return JdtFlags.clearFlag(Modifier.STATIC, flags);
+			return flags;
 		}
 		return modifiers;
 	}
