@@ -64,7 +64,7 @@ public class LineTrackerPerformanceTest extends TextPerformanceTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		setWarmUpRuns(20);
-		setMeasuredRuns(40);
+		setMeasuredRuns(20);
 
 		fLineTracker= createLineTracker();
 	}
