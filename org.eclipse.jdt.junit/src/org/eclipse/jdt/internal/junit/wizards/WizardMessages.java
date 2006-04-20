@@ -37,7 +37,6 @@ public final class WizardMessages extends NLS {
 	public static String CheckedTableSelectionDialog_deselectAll;
 	public static String NewTestCaseWizardPageOne_title;
 	public static String NewTestCaseWizardPageOne_description;
-	public static String NewTestCaseWizardPageOne_methodStub_testRunner;
 	public static String NewTestCaseWizardPageOne_methodStub_setUp;
 	public static String NewTestCaseWizardPageOne_methodStub_tearDown;
 	public static String NewTestCaseWizardPageOne_methodStub_constructor;
@@ -50,7 +49,6 @@ public final class WizardMessages extends NLS {
 	public static String NewTestCaseWizardPageOne_error_superclass_is_interface;
 	public static String NewTestCaseWizardPageOne_error_superclass_not_implementing_test_interface;
 	public static String NewTestCaseWizardPageOne_error_superclass_empty;
-	public static String NewTestClassWizPage_testcase_label;
 	public static String NewTestClassWizPage_cannot_add_title;
 	public static String NewTestClassWizPage_cannot_add_message;
 	public static String NewTestCaseWizardPageOne_error_class_to_test_not_valid;
@@ -59,20 +57,15 @@ public final class WizardMessages extends NLS {
 	public static String NewTestCaseWizardPageOne_warning_class_to_test_not_visible;
 	public static String NewTestCaseWizardPageOne_comment_class_to_test;
 	public static String NewTestCaseWizardPageOne_error_junitNotOnbuildpath;
-	public static String NewTestClassWizPage_info_add_to_classpath;
-	public static String NewTestCaseWizardPageOne_Interface;
-	public static String NewTestCaseWizardPageOne_Class;
 	public static String NewTestCaseWizardPageTwo_selected_methods_label_one;
 	public static String NewTestCaseWizardPageTwo_selected_methods_label_many;
 	public static String NewTestCaseWizardPageTwo_title;
 	public static String NewTestCaseWizardPageTwo_description;
 	public static String NewTestCaseWizardPageTwo_create_tasks_text;
 	public static String NewTestCaseWizardPageTwo_create_final_method_stubs_text;
-	public static String NewTestClassWizPage2_create_constructor_text;
 	public static String NewTestCaseWizardPageTwo_methods_tree_label;
 	public static String NewTestCaseWizardPageTwo_selectAll;
 	public static String NewTestCaseWizardPageTwo_deselectAll;
-	public static String NewTestClassWizPage2_method_Stub_label;
 	public static String NewTestSuiteWiz_unsavedchangesDialog_title;
 	public static String NewTestSuiteWiz_unsavedchangesDialog_message;
 	public static String NewTestSuiteWizPage_title;
@@ -85,7 +78,6 @@ public final class WizardMessages extends NLS {
 	public static String NewTestSuiteWizPage_createType_updateErrorDialog_title;
 	public static String NewTestSuiteWizPage_createType_updateErrorDialog_message;
 	public static String NewTestSuiteWizPage_classes_in_suite_error_no_testclasses_selected;
-	public static String NewTestSuiteWizPage_suiteName_text;
 	public static String NewTestSuiteWizPage_typeName_error_name_empty;
 	public static String NewTestSuiteWizPage_typeName_error_name_qualified;
 	public static String NewTestSuiteWizPage_typeName_error_name_not_valid;
@@ -93,12 +85,9 @@ public final class WizardMessages extends NLS {
 	public static String NewTestSuiteWizPage_typeName_warning_already_exists;
 	public static String NewTestSuiteWizPage_cannotUpdateDialog_title;
 	public static String NewTestSuiteWizPage_cannotUpdateDialog_message;
-	public static String NewTestSuiteWizPage_error_tile;
-	public static String NewTestSuiteWizPage_error_message;
 	public static String NewTestClassWizPage_treeCaption_classSelected;
 	public static String NewTestClassWizPage_treeCaption_classesSelected;
 	public static String NewTestSuiteCreationWizardPage_infinite_recursion;
-	public static String NewTestSuiteCreationWizardPage_methodStub_testRunner;
 	public static String UpdateAllTests_selected_methods_label_one;
 	public static String UpdateAllTests_selected_methods_label_many;
 	public static String UpdateAllTests_title;
@@ -115,13 +104,6 @@ public final class WizardMessages extends NLS {
 	public static String UpdateTestSuite_error;
 	public static String UpdateTestSuite_update;
 	public static String UpdateTestSuite_could_not_update;
-	public static String NewTestCaseWizardPageOne_not_on_buildpath_title;
-	public static String NewTestCaseWizardPageOne_not_on_buildpath_message;
-	public static String NewTestCaseWizardPageOne_cannot_add_title;
-	public static String NewTestCaseWizardPageOne_cannot_add_message;
-	public static String MethodStubsSelectionButtonGroup_text;
-	public static String MethodStubsSelectionButtonGroup_swing;
-	public static String MethodStubsSelectionButtonGroup_awt;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, WizardMessages.class);
