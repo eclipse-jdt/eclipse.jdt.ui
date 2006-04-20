@@ -65,6 +65,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 
@@ -94,6 +95,8 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		fClipboard= new Clipboard(getShell().getDisplay());
 		setText(ActionMessages.CopyQualifiedNameAction_ActionName);
 		setToolTipText(ActionMessages.CopyQualifiedNameAction_ToolTipText);
+		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_COPY_QUALIFIED_NAME);
+		setImageDescriptor(JavaPluginImages.DESC_ELCL_COPY_QUALIFIED_NAME);
 	}
 	
 	/**
