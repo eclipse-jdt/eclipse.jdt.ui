@@ -677,7 +677,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	/**
 	 * Information provider used to present focusable information shells.
 	 *
-	 * @since 3.0
+	 * @since 3.2
 	 */
 	private static final class InformationProvider implements IInformationProvider, IInformationProviderExtension, IInformationProviderExtension2 {
 		
@@ -783,6 +783,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * @param sourceViewer the source viewer to display the hover over
 		 * @param textHover the hover to make focusable
 		 * @return <code>true</code> if successful, <code>false</code> otherwise
+		 * @since 3.2
 		 */
 		private boolean makeTextHoverFocusable(ISourceViewer sourceViewer, ITextHover textHover) {
 			Point hoverEventLocation= ((ITextViewerExtension2) sourceViewer).getHoverEventLocation();
@@ -823,6 +824,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * @param sourceViewer the source viewer to display the hover over
 		 * @param annotationHover the hover to make focusable
 		 * @return <code>true</code> if successful, <code>false</code> otherwise
+		 * @since 3.2
 		 */
 		private boolean makeAnnotationHoverFocusable(ISourceViewer sourceViewer, IAnnotationHover annotationHover) {
 			IVerticalRulerInfo info= getVerticalRuler();
