@@ -221,8 +221,12 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	 * @return the location URI
 	 */
 	public static URI getLocationURI(final IClasspathEntry entry) {
+		IPath path= null;
+		if (entry.getEntryKind() == IClasspathEntry.CPE_VARIABLE)
+			path= JavaCore.getResolvedVariablePath(entry.getPath());
+		else
+			path= entry.getPath();
 		final IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		final IPath path= entry.getPath();
 		URI location= null;
 		if (root.exists(path)) {
 			location= root.getFile(path).getRawLocationURI();
