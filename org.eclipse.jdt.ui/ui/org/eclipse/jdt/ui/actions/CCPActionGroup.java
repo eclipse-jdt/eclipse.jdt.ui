@@ -22,6 +22,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.navigator.ICommonMenuConstants;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
@@ -30,8 +31,6 @@ import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CutAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
  * Action group that adds the copy, cut, paste actions to a view part's context
@@ -150,7 +149,7 @@ public class CCPActionGroup extends ActionGroup {
 			SelectionDispatchAction action= fActions[i];
 			if (action == fCutAction && !fCutAction.isEnabled())
 				continue;
-			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, action);
+			menu.appendToGroup(ICommonMenuConstants.GROUP_EDIT, action);
 		}		
 	}		
 	
