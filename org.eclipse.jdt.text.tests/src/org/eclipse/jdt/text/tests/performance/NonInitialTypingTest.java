@@ -14,7 +14,6 @@ package org.eclipse.jdt.text.tests.performance;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
-import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
@@ -54,9 +53,13 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 		dirtyEditor();
 		Performance performance= Performance.getDefault();
 		fMeter= performance.createPerformanceMeter(getScenarioId());
-		String summaryName= getSummaryName();
-		if (summaryName != null)
-			performance.tagAsSummary(fMeter, summaryName, Dimension.ELAPSED_PROCESS);
+		
+		
+		// FIXME: Currently removed from summary because unstable under Linux
+//		String summaryName= getSummaryName();
+//		if (summaryName != null)
+//			performance.tagAsSummary(fMeter, summaryName, Dimension.ELAPSED_PROCESS);
+		
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
 	}
