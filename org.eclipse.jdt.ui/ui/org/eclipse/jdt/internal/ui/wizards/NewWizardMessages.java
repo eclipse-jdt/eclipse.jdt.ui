@@ -379,6 +379,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewVariableEntryDialog_ExtensionDialog_title;
 	public static String NewVariableEntryDialog_ExtensionDialog_description;
 	public static String NewVariableEntryDialog_info_isfolder;
+	public static String NewVariableEntryDialog_info_notexists;
 	public static String NewVariableEntryDialog_info_noselection;
 	public static String NewVariableEntryDialog_info_selected;
 	

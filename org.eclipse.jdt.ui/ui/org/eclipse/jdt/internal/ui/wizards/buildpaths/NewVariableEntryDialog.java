@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -40,6 +41,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -158,6 +160,13 @@ public class NewVariableEntryDialog extends StatusDialog {
 		super.configureShell(shell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.NEW_VARIABLE_ENTRY_DIALOG);
 	}	
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.Dialog#getDialogBoundsSettings()
+	 */
+	protected IDialogSettings getDialogBoundsSettings() {
+		return JavaPlugin.getDefault().getDialogSettingsSection(getClass().getName());
+	}
 			
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
@@ -176,6 +185,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 		GridData listData= (GridData) fVariablesList.getListControl(null).getLayoutData();
 		listData.grabExcessHorizontalSpace= true;
 		listData.heightHint= convertHeightInCharsToPixels(10);
+		listData.widthHint= convertWidthInCharsToPixels(70);
 		
 		Composite lowerComposite= new Composite(composite, SWT.NONE);
 		lowerComposite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
@@ -219,9 +229,17 @@ public class NewVariableEntryDialog extends StatusDialog {
 			for (int i= 0; i < nSelected; i++) {
 				CPVariableElement curr= (CPVariableElement) selected.get(i);
 				fResultPaths[i]= new Path(curr.getName());
-				if (!curr.getPath().toFile().isFile()) {
-					status.setInfo(NewWizardMessages.NewVariableEntryDialog_info_isfolder); 
+				File file= curr.getPath().toFile();
+				if (!file.exists()) {
+					status.setError(NewWizardMessages.NewVariableEntryDialog_info_notexists);
+					isValidSelection= false;
+					break;
+				}
+				if (file.isDirectory()) {
+					status.setError(NewWizardMessages.NewVariableEntryDialog_info_isfolder); 
 					canExtend= true;
+					isValidSelection= false;
+					break;
 				}
 			}
 		} else {
