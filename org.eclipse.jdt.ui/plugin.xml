@@ -2442,7 +2442,7 @@
          </action>
 <!-- Code Group -->
          <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.surround.with.template"
+               definitionId="org.eclipse.jdt.ui.edit.text.java.surround.with.quickMenu"
                label="%SurroundWithTemplateAction.label"
                style="pulldown"
                class="org.eclipse.jdt.internal.ui.actions.SurroundWithTemplateMenuAction"
@@ -3377,7 +3377,7 @@
       </command>
       <command
             name="%ActionDefinition.surroundWith.quickMenu.name"
-            description="%ActionDefinition.surround.quickMenu.description"
+            description="%ActionDefinition.surroundWith.quickMenu.description"
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.edit.text.java.surround.with.quickMenu">
       </command>
