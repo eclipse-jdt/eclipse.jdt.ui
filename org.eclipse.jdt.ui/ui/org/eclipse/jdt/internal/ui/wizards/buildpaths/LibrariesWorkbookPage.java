@@ -281,6 +281,14 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#addElement(org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement)
+	 */
+	public void addElement(CPListElement element) {
+		fLibrariesList.addElement(element);
+		fLibrariesList.postSetSelection(new StructuredSelection(element));
+	}
+	
 	private void askForAddingExclusionPatternsDialog(List newEntries) {
 		HashSet modified= new HashSet();
 		List existing= fClassPathList.getElements();

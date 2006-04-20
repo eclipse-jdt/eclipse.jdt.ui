@@ -664,7 +664,9 @@ public class BuildPathsBlock {
 			description.setNatureIds(newNatures);
 			project.setDescription(description, monitor);
 		} else {
-			monitor.worked(1);
+			if (monitor != null) {
+				monitor.worked(1);
+			}
 		}
 	}
 	
@@ -969,6 +971,21 @@ public class BuildPathsBlock {
 				selection.add(elementToSelect);
 				page.setSelection(selection, true);
 			}	
+		}
+	}
+	
+	public void addElement(IClasspathEntry entry) {
+		int pageIndex= getPageIndex(entry.getEntryKind());
+		if (fTabFolder == null) {
+			fPageIndex= pageIndex;
+		} else {
+			fTabFolder.setSelection(pageIndex);
+
+			Object page=  fTabFolder.getItem(pageIndex).getData();
+			if (page instanceof LibrariesWorkbookPage) {
+				CPListElement element= CPListElement.createFromExisting(entry, fCurrJProject);
+				((LibrariesWorkbookPage) page).addElement(element);
+			}
 		}
 	}
 }

@@ -29,6 +29,10 @@ public abstract class BuildPathBasePage {
 	public abstract List getSelection();
 	public abstract void setSelection(List selection, boolean expand);
 	
+	public void addElement(CPListElement element) {
+		
+	}
+	
 	public abstract boolean isEntryKind(int kind);
 			
 	protected void filterAndSetSelection(List list) {
