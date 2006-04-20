@@ -22,12 +22,14 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -44,10 +46,13 @@ import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.handlers.IHandlerActivation;
 import org.eclipse.ui.handlers.IHandlerService;
 
@@ -55,17 +60,45 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.actions.JdtActionConstants;
+import org.eclipse.jdt.ui.actions.SurroundWithTryCatchAction;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.QuickTemplateProcessor;
 
-public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownDelegate2 {
+public class SurroundWithTemplateMenuAction extends ActionGroup implements IWorkbenchWindowPulldownDelegate2 {
 	
 	private static final String SURROUND_WITH_QUICK_MENU_ACTION_ID= "org.eclipse.jdt.ui.edit.text.java.surround.with.quickMenu";  //$NON-NLS-1$
+	
+	private static final String JAVA_TEMPLATE_PREFERENCE_PAGE_ID= "org.eclipse.jdt.ui.preferences.JavaTemplatePreferencePage"; //$NON-NLS-1$
+	
+	private static final String TEMPLATE_GROUP= "templateGroup"; //$NON-NLS-1$
+	
+	private static final String CONFIG_GROUP= "configGroup"; //$NON-NLS-1$
+	
+	private class ConfigureTemplatesAction extends Action {
+
+		public ConfigureTemplatesAction() {
+			super(ActionMessages.SurroundWithTemplateMenuAction_ConfigureTemplatesActionName);
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public void run() {
+			PreferencesUtil.createPreferenceDialogOn(getShell(), JAVA_TEMPLATE_PREFERENCE_PAGE_ID, new String[] {JAVA_TEMPLATE_PREFERENCE_PAGE_ID}, null).open();
+		}
+
+		private Shell getShell() {
+			return JavaPlugin.getActiveWorkbenchWindow().getShell();
+		}
+	}
 	
 	private class QuickAccessAction extends JDTQuickMenuAction {
 		public QuickAccessAction(JavaEditor editor) {
@@ -75,15 +108,25 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 			fillQuickMenu(menu);
 		}
 	}
+	
+	private static Action NONE_APPLICABLE_ACTION= new Action(ActionMessages.SurroundWithTemplateMenuAction_NoneApplicable) {
+		public void run() {
+			//Do nothing
+		}
+		public boolean isEnabled() {
+			return false;
+		}
+	};
 
 	private Menu fMenu;
-	private JavaEditor fEditor;
+	private CompilationUnitEditor fEditor;
 	private QuickAccessAction fQuickAccessAction;
 	private IHandlerActivation fHandlerActivation;
+	private SurroundWithTryCatchAction fSurroundWithTryCatchAction;
 	
 	public SurroundWithTemplateMenuAction() {}
 	
-	public SurroundWithTemplateMenuAction(JavaEditor editor) {
+	public SurroundWithTemplateMenuAction(CompilationUnitEditor editor) {
 		fEditor= editor;
 		fQuickAccessAction= new QuickAccessAction(editor);
 		
@@ -91,6 +134,8 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		IHandlerService service= (IHandlerService) PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
 		if (service != null)
 			fHandlerActivation= service.activateHandler(SURROUND_WITH_QUICK_MENU_ACTION_ID, handler);
+		
+		fSurroundWithTryCatchAction= createSurroundWithTryCatchAction(fEditor);
 	}
 
 	/**
@@ -113,21 +158,33 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		return fMenu;
 	}
 	
+	/**
+	 * The menu to show when pressing the shortcut
+	 * (inline in the editor)
+	 */
 	public void fillQuickMenu(IMenuManager menu) {
-		IAction[] actions= getActions(fEditor);
+		IAction[] actions= getTemplateActions(fEditor);
+		fSurroundWithTryCatchAction.update(fEditor.getSelectionProvider().getSelection());
 		
-		if (actions == null)
+		if (actions == null && !fSurroundWithTryCatchAction.isEnabled())
 			return;
 		
-		for (int i= 0; i < actions.length; i++) {
-			menu.add(actions[i]);
-		}
+		fillMenu(menu, actions);
 	}
 	
+	public void fillActionBars(IActionBars actionBar) {
+		actionBar.setGlobalActionHandler(JdtActionConstants.SURROUND_WITH_TRY_CATCH, fSurroundWithTryCatchAction);
+	}
+	
+	/**
+	 * The Menu to show when right click on the editore
+	 * {@inheritDoc}
+	 */
 	public void fillContextMenu(IMenuManager menu) {
-		IAction[] actions= getActions(fEditor);
+		IAction[] actions= getTemplateActions(fEditor);
+		fSurroundWithTryCatchAction.update(fEditor.getSelectionProvider().getSelection());
 		
-		if (actions == null)
+		if (actions == null && !fSurroundWithTryCatchAction.isEnabled())
 			return;
 		
 		String menuText= ActionMessages.SurroundWithTemplateMenuAction_SurroundWithTemplateSubMenuName;
@@ -135,10 +192,28 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 			menuText= fQuickAccessAction.addShortcut(menuText);
 		
 		MenuManager subMenu = new MenuManager(menuText, "org.eclipse.jdt.ui.surround.with.template.menu"); //$NON-NLS-1$
-		for (int i= 0; i < actions.length; i++) {
-			subMenu.add(actions[i]);
-		}
+				
+		fillMenu(subMenu, actions);
+		
 		menu.appendToGroup(GenerateActionGroup.GROUP_CODE, subMenu);
+	}
+
+	private void fillMenu(IMenuManager menu, IAction[] actions) {
+		menu.add(fSurroundWithTryCatchAction);
+		
+		menu.add(new Separator(TEMPLATE_GROUP));
+		
+		if (actions == null) {
+			menu.add(NONE_APPLICABLE_ACTION);
+		} else {
+			for (int i= 0; i < actions.length; i++) {
+				menu.add(actions[i]);
+			}
+		}
+		
+		menu.add(new Separator(CONFIG_GROUP));
+		
+		menu.add(new ConfigureTemplatesAction());
 	}
 
 	/**
@@ -175,26 +250,29 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		// Default do nothing
 	}
 	
+	/**
+	 * The menu to show in the workbench menu
+	 */
 	protected void fillMenu(Menu menu) {
-		JavaEditor editor;
 		
 		IEditorPart activeEditor= JavaPlugin.getActivePage().getActiveEditor();
-		if (activeEditor instanceof JavaEditor) {
-			editor= (JavaEditor)activeEditor;
-		} else {
-			editor= null;
-		}
+		if (!(activeEditor instanceof CompilationUnitEditor))
+			return;
 		
-		IAction[] actions= getActions(editor);
+		CompilationUnitEditor editor= (CompilationUnitEditor)activeEditor;
+		
+		IAction[] actions= getTemplateActions(editor);
+		
+		SurroundWithTryCatchAction surroundAction= createSurroundWithTryCatchAction(editor);
+		surroundAction.update(editor.getSelectionProvider().getSelection());
+		ActionContributionItem surroundItem= new ActionContributionItem(surroundAction);
+		surroundItem.fill(menu, -1);
+		
+		Separator templateGroup= new Separator(TEMPLATE_GROUP);
+		templateGroup.fill(menu, -1);
 		
 		if (actions == null || actions.length == 0) {
-			Action action= new Action(ActionMessages.SurroundWithTemplateMenuAction_NoneApplicable) {
-				public void run() {
-					//Do nothing
-				}
-			};
-			action.setEnabled(false);
-			ActionContributionItem item= new ActionContributionItem(action);
+			ActionContributionItem item= new ActionContributionItem(NONE_APPLICABLE_ACTION);
 			item.fill(menu, -1);
 		} else {
 			for (int i= 0; i < actions.length; i++) {
@@ -202,6 +280,21 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 				item.fill(menu, -1);
 			}
 		}
+		
+		Separator configGroup= new Separator(CONFIG_GROUP);
+		configGroup.fill(menu, -1);
+		
+		ActionContributionItem configAction= new ActionContributionItem(new ConfigureTemplatesAction());
+		configAction.fill(menu, -1);
+		
+	}
+
+	private SurroundWithTryCatchAction createSurroundWithTryCatchAction(CompilationUnitEditor editor) {
+		SurroundWithTryCatchAction result= new SurroundWithTryCatchAction(editor);
+		result.setText(ActionMessages.SurroundWithTemplateMenuAction_SurroundWithTryCatchActionName);
+		result.setActionDefinitionId(IJavaEditorActionDefinitionIds.SURROUND_WITH_TRY_CATCH);
+		editor.setAction("SurroundWithTryCatch", result); //$NON-NLS-1$		
+		return result;
 	}
 
 	protected void initMenu() {
@@ -224,10 +317,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		fMenu = menu;
 	}
 	
-	private IAction[] getActions(JavaEditor editor) {
-		if (editor == null)
-			return null;
-		
+	private IAction[] getTemplateActions(JavaEditor editor) {
 		ISelectionProvider selectionProvider= editor.getSelectionProvider();
 		if (selectionProvider == null)
 			return null;

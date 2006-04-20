@@ -131,7 +131,6 @@ public class GenerateActionGroup extends ActionGroup {
 	private AddBookmarkAction fAddBookmark;
 	private AddTaskAction fAddTaskAction;
 	private ExternalizeStringsAction fExternalizeStrings;
-	private SurroundWithTryCatchAction fSurroundWithTryCatch;
 	private CleanUpAction fCleanUp;	
 	private FindBrokenNLSKeysAction fFindNLSProblems;
 	
@@ -213,12 +212,6 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddJavaDocStub= new AddJavaDocStubAction(editor);
 		fAddJavaDocStub.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_JAVADOC_COMMENT);
 		editor.setAction("AddJavadocComment", fAddJavaDocStub); //$NON-NLS-1$
-		
-		fSurroundWithTryCatch= new SurroundWithTryCatchAction(editor);
-		fSurroundWithTryCatch.setActionDefinitionId(IJavaEditorActionDefinitionIds.SURROUND_WITH_TRY_CATCH);
-		fSurroundWithTryCatch.update(selection);
-		provider.addSelectionChangedListener(fSurroundWithTryCatch);
-		editor.setAction("SurroundWithTryCatch", fSurroundWithTryCatch); //$NON-NLS-1$		
 		
 		fCleanUp= new CleanUpAction(editor);
 		fCleanUp.setActionDefinitionId(IJavaEditorActionDefinitionIds.CLEAN_UP);
@@ -384,6 +377,9 @@ public class GenerateActionGroup extends ActionGroup {
 	public void fillActionBars(IActionBars actionBar) {
 		super.fillActionBars(actionBar);
 		setGlobalActionHandlers(actionBar);
+		if (isEditorOwner()) {
+			fSurroundWithTemplateMenuAction.fillActionBars(actionBar);
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -438,7 +434,6 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(source, fGenerateConstructorUsingFields);
 		added+= addAction(source, fAddUnimplementedConstructors);
 		source.add(new Separator(GROUP_CODE));
-		added+= addAction(source, fSurroundWithTryCatch);
 		source.add(new Separator(GROUP_EXTERNALIZE));
 		added+= addAction(source, fExternalizeStrings);
 		return added;
@@ -463,7 +458,6 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(source, fGenerateConstructorUsingFields);
 		added+= addAction(source, fAddUnimplementedConstructors);
 		source.add(new Separator(GROUP_CODE));
-		added+= addAction(source, fSurroundWithTryCatch);
 		source.add(new Separator(GROUP_EXTERNALIZE));
 		added+= addAction(source, fExternalizeStrings);
 		added+= addAction(source, fFindNLSProblems);
@@ -490,7 +484,6 @@ public class GenerateActionGroup extends ActionGroup {
 	
 	private void setGlobalActionHandlers(IActionBars actionBar) {
 		actionBar.setGlobalActionHandler(JdtActionConstants.ADD_IMPORT, fAddImport);
-		actionBar.setGlobalActionHandler(JdtActionConstants.SURROUND_WITH_TRY_CATCH, fSurroundWithTryCatch);
 		actionBar.setGlobalActionHandler(JdtActionConstants.OVERRIDE_METHODS, fOverrideMethods);
 		actionBar.setGlobalActionHandler(JdtActionConstants.GENERATE_GETTER_SETTER, fAddGetterSetter);
 		actionBar.setGlobalActionHandler(JdtActionConstants.GENERATE_DELEGATE_METHODS, fAddDelegateMethods);
