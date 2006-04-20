@@ -1560,9 +1560,9 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
 			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null || element.getElementType() != IJavaElement.TYPE)
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_MOVE_INNER));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
+					return createInputFatalStatus(element, ID_MOVE_INNER);
 				else {
 					fType= (IType) element;
 					fCodeGenerationSettings= JavaPreferencesSettings.getCodeGenerationSettings(fType.getJavaProject());

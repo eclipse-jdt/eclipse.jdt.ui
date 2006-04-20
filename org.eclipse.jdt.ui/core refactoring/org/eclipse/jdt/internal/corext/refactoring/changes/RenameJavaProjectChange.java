@@ -35,8 +35,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 public final class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 
-	public static final String ID_RENAME_JAVA_PROJECT= "org.eclipse.jdt.ui.rename.java.project"; //$NON-NLS-1$
-
 	private boolean fUpdateReferences;
 
 	public RenameJavaProjectChange(RefactoringDescriptor descriptor, IJavaProject project, String newName, String comment, boolean updateReferences) {

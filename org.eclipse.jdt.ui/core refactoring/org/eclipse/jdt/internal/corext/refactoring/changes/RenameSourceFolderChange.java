@@ -30,8 +30,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 public final class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 
-	public static final String ID_RENAME_SOURCE_FOLDER= "org.eclipse.jdt.ui.rename.source.folder"; //$NON-NLS-1$
-
 	private static RefactoringStatus checkIfModifiable(IPackageFragmentRoot root, IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		checkExistence(result, root);

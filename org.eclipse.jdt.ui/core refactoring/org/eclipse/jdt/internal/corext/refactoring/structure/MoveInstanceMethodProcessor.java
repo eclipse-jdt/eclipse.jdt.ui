@@ -125,6 +125,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
+import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IVisibilityAdjustment;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
@@ -2734,9 +2735,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
 			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null || element.getElementType() != IJavaElement.METHOD)
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_MOVE_METHOD));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists() || element.getElementType() != IJavaElement.METHOD)
+					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_MOVE_METHOD);
 				else {
 					fMethod= (IMethod) element;
 					initialize(fMethod);

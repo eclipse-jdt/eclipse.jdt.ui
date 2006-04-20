@@ -645,15 +645,15 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
 			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null || element.getElementType() != IJavaElement.FIELD)
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_SELF_ENCAPSULATE));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists() || element.getElementType() != IJavaElement.FIELD)
+					return createInputFatalStatus(element, ID_SELF_ENCAPSULATE);
 				else {
 					fField= (IField) element;
 					try {
 						initialize(fField);
 					} catch (JavaModelException exception) {
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_SELF_ENCAPSULATE));
+						return createInputFatalStatus(element, ID_SELF_ENCAPSULATE);
 					}
 				}
 			} else

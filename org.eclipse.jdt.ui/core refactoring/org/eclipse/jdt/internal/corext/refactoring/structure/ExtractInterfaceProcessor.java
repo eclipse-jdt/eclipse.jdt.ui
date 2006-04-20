@@ -100,6 +100,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
+import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ASTNodeDeleteUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsModel;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsSolver;
@@ -824,9 +825,9 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
 			String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null || element.getElementType() != IJavaElement.TYPE)
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_EXTRACT_INTERFACE));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
+					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_EXTRACT_INTERFACE);
 				else
 					fSubType= (IType) element;
 			} else
@@ -869,9 +870,9 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 			final RefactoringStatus status= new RefactoringStatus();
 			while ((handle= extended.getAttribute(attribute)) != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null)
-					status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_EXTRACT_INTERFACE)));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists())
+					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), ID_EXTRACT_INTERFACE));
 				else
 					elements.add(element);
 				count++;
@@ -879,7 +880,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			}
 			fMembers= (IMember[]) elements.toArray(new IMember[elements.size()]);
 			if (elements.isEmpty())
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_EXTRACT_INTERFACE));
+				return ScriptableRefactoring.createInputWarningStatus(null, getRefactoring().getName(), ID_EXTRACT_INTERFACE);
 			fSettings= JavaPreferencesSettings.getCodeGenerationSettings(fSubType.getJavaProject());
 			if (!status.isOK())
 				return status;

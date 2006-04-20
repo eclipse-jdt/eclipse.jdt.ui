@@ -77,9 +77,9 @@ public final class InlineMethodRefactoringContribution extends JavaRefactoringCo
 			}
 			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null)
-					throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, InlineMethodRefactoring.ID_INLINE_METHOD), null));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists())
+					throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(RefactoringCoreMessages.InitializableRefactoring_inputs_do_not_exist, new String[] { RefactoringCoreMessages.InlineMethodRefactoring_name, InlineMethodRefactoring.ID_INLINE_METHOD}), null));
 				else {
 					if (element instanceof ICompilationUnit) {
 						unit= (ICompilationUnit) element;
@@ -95,7 +95,7 @@ public final class InlineMethodRefactoringContribution extends JavaRefactoringCo
 							} else
 								throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { handle, JavaRefactoringDescriptor.ATTRIBUTE_INPUT}), null));
 						} catch (JavaModelException exception) {
-							throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, InlineMethodRefactoring.ID_INLINE_METHOD), exception));
+							throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(RefactoringCoreMessages.InitializableRefactoring_inputs_do_not_exist, new String[] { RefactoringCoreMessages.InlineMethodRefactoring_name, InlineMethodRefactoring.ID_INLINE_METHOD}), exception));
 						}
 						unit= method.getCompilationUnit();
 					} else

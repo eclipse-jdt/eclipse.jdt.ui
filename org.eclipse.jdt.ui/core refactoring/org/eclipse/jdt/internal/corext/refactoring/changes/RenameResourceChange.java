@@ -29,8 +29,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 public final class RenameResourceChange extends JDTChange {
 
-	public static final String ID_RENAME_RESOURCE= "org.eclipse.jdt.ui.rename.resource"; //$NON-NLS-1$
-
 	public static IPath renamedResourcePath(IPath path, String newName) {
 		return path.removeLastSegments(1).append(newName);
 	}

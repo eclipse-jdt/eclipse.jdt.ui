@@ -95,6 +95,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefa
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
@@ -1166,9 +1167,9 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
 			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null || element.getElementType() != IJavaElement.TYPE)
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_TYPE));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
+					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_RENAME_TYPE);
 				else
 					fType= (IType) element;
 			} else

@@ -379,16 +379,16 @@ public class InlineTempRefactoring extends ScriptableRefactoring {
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_SELECTION));
 			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INLINE_TEMP));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
+					return createInputFatalStatus(element, ID_INLINE_TEMP);
 				else {
 					fCu= (ICompilationUnit) element;
 		        	final ASTParser parser= ASTParser.newParser(AST.JLS3);
 		        	parser.setResolveBindings(true);
 		        	parser.setSource(fCu);
 		        	if (checkIfTempSelected((CompilationUnit) parser.createAST(null)).hasFatalError())
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INLINE_TEMP));
+						return createInputFatalStatus(element, ID_INLINE_TEMP);
 				}
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));

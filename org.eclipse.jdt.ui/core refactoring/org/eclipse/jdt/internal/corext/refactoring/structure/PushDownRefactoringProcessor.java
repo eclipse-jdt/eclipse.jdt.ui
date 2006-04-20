@@ -84,6 +84,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
+import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextEditBasedChangeManager;
@@ -940,9 +941,9 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
 			String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null || element.getElementType() != IJavaElement.TYPE)
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_PUSH_DOWN));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
+					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_PUSH_DOWN);
 				else
 					fCachedDeclaringType= (IType) element;
 			}
@@ -952,9 +953,9 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 			final RefactoringStatus status= new RefactoringStatus();
 			while ((handle= extended.getAttribute(attribute)) != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null)
-					status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_PUSH_DOWN)));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists())
+					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), ID_PUSH_DOWN));
 				else
 					elements.add(element);
 				if (extended.getAttribute(ATTRIBUTE_ABSTRACT + count) != null)

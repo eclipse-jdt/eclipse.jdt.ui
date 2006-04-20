@@ -70,6 +70,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenamePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor.ImportsManager.ImportChange;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
@@ -905,9 +906,9 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
 			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null || element.getElementType() != IJavaElement.PACKAGE_FRAGMENT)
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_PACKAGE));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists() || element.getElementType() != IJavaElement.PACKAGE_FRAGMENT)
+					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_RENAME_PACKAGE);
 				else
 					fPackage= (IPackageFragment) element;
 			} else

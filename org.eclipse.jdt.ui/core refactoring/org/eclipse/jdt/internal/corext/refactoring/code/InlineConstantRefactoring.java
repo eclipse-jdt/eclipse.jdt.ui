@@ -904,9 +904,9 @@ public class InlineConstantRefactoring extends ScriptableRefactoring {
 			}
 			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null)
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INLINE_CONSTANT));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists())
+					return createInputFatalStatus(element, ID_INLINE_CONSTANT);
 				else {
 					if (element instanceof ICompilationUnit) {
 						fSelectionCu= (ICompilationUnit) element;
@@ -922,7 +922,7 @@ public class InlineConstantRefactoring extends ScriptableRefactoring {
 							} else
 								return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ID_INLINE_CONSTANT));
 						} catch (JavaModelException exception) {
-							return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INLINE_CONSTANT));
+							return createInputFatalStatus(element, ID_INLINE_CONSTANT);
 						}
 						fSelectionCu= field.getCompilationUnit();
 					} else
@@ -933,7 +933,7 @@ public class InlineConstantRefactoring extends ScriptableRefactoring {
 					final CompilationUnit unit= (CompilationUnit) parser.createAST(null);
 					initialize(fSelectionCu, unit);
 					if (checkStaticFinalConstantNameSelected().hasFatalError())
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INLINE_CONSTANT));
+						return createInputFatalStatus(element, ID_INLINE_CONSTANT);
 				}
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));

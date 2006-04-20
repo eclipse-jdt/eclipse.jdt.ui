@@ -594,6 +594,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String InitializableRefactoring_input_not_exists;
 
+	public static String InitializableRefactoring_inputs_do_not_exist;
+
 	public static String InlineConstantRefactoring_binary_file;
 
 	public static String InlineConstantRefactoring_blank_finals;

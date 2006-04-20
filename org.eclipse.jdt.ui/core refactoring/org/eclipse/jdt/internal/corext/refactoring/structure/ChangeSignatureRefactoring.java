@@ -2383,9 +2383,9 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
 			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null || element.getElementType() != IJavaElement.METHOD)
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_CHANGE_METHOD_SIGNATURE));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists() || element.getElementType() != IJavaElement.METHOD)
+					return createInputFatalStatus(element, ID_CHANGE_METHOD_SIGNATURE);
 				else {
 					fMethod= (IMethod) element;
 					fMethodName= fMethod.getElementName();
@@ -2457,9 +2457,9 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 				ExceptionInfo info= null;
 				final String kind= extended.getAttribute(ATTRIBUTE_KIND + count);
 				if (kind != null) {
-					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-					if (element == null)
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_CHANGE_METHOD_SIGNATURE));
+					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+					if (element == null || !element.exists())
+						return createInputFatalStatus(element, ID_CHANGE_METHOD_SIGNATURE);
 					else {
 						try {
 							info= new ExceptionInfo((IType) element, Integer.valueOf(kind).intValue(), null);

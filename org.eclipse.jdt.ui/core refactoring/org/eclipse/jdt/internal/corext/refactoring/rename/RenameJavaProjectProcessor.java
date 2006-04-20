@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameJavaProjectChange;
+import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -50,6 +51,7 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 
 public class RenameJavaProjectProcessor extends JavaRenameProcessor implements IReferenceUpdating {
 	
+	private static final String ID_RENAME_JAVA_PROJECT= "org.eclipse.jdt.ui.rename.java.project"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
@@ -189,7 +191,7 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 			final Map arguments= new HashMap();
 			final String newName= getNewElementName();
 			final String comment= getComment();
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(RenameJavaProjectChange.ID_RENAME_JAVA_PROJECT, fProject.getElementName(), Messages.format(RefactoringCoreMessages.RenameJavaProjectChange_descriptor_description, new String[] { fProject.getElementName(), newName}), comment, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE);
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(RenameJavaProjectProcessor.ID_RENAME_JAVA_PROJECT, fProject.getElementName(), Messages.format(RefactoringCoreMessages.RenameJavaProjectChange_descriptor_description, new String[] { fProject.getElementName(), newName}), comment, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fProject));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, newName);
 			arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
@@ -206,7 +208,7 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 			if (path != null) {
 				final IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(path));
 				if (resource == null || !resource.exists())
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, RenameJavaProjectChange.ID_RENAME_JAVA_PROJECT));
+					return ScriptableRefactoring.createInputFatalStatus(resource, getRefactoring().getName(), ID_RENAME_JAVA_PROJECT);
 				else
 					fProject= (IJavaProject) JavaCore.create(resource);
 			} else

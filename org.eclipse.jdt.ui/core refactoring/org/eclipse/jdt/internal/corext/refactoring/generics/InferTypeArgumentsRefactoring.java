@@ -580,9 +580,9 @@ public class InferTypeArgumentsRefactoring extends ScriptableRefactoring {
 			String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 			final RefactoringStatus status= new RefactoringStatus();
 			while ((handle= generic.getAttribute(attribute)) != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(generic.getProject(), handle);
-				if (element == null)
-					status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INFER_TYPE_ARGUMENTS)));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(generic.getProject(), handle, false);
+				if (element == null || !element.exists())
+					return createInputFatalStatus(element, ID_INFER_TYPE_ARGUMENTS);
 				else
 					elements.add(element);
 				count++;
@@ -590,7 +590,7 @@ public class InferTypeArgumentsRefactoring extends ScriptableRefactoring {
 			}
 			fElements= (IJavaElement[]) elements.toArray(new IJavaElement[elements.size()]);
 			if (elements.isEmpty())
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INFER_TYPE_ARGUMENTS));
+				return createInputFatalStatus(null, ID_INFER_TYPE_ARGUMENTS);
 			if (!status.isOK())
 				return status;
 		} else

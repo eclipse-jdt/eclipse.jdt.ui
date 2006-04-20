@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
+import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
@@ -61,6 +62,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class RenameCompilationUnitProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating, ISimilarDeclarationUpdating, IResourceMapper, IJavaElementMapper {
 	
+	private static final String ID_RENAME_COMPILATION_UNIT= "org.eclipse.jdt.ui.rename.compilationunit"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 	
@@ -387,7 +389,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 			final Map arguments= new HashMap();
 			final IProject project= resource.getProject();
 			final String name= project.getName();
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(RenameResourceChange.ID_RENAME_RESOURCE, name, Messages.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { resource.getFullPath().toString(), newName}), comment, arguments, (RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE));
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(RenameResourceProcessor.ID_RENAME_RESOURCE, name, Messages.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { resource.getFullPath().toString(), newName}), comment, arguments, (RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, JavaRefactoringDescriptor.resourceToHandle(name, resource));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, newName);
 			return new DynamicValidationStateChange(new RenameResourceChange(descriptor, resource, newName, comment));
@@ -402,7 +404,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		} else
 			label= fCu.getElementName();
 		final Map arguments= new HashMap();
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(RenameCompilationUnitChange.ID_RENAME_COMPILATION_UNIT, fCu.getJavaProject().getElementName(), Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { label, newName}), comment, arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(RenameCompilationUnitProcessor.ID_RENAME_COMPILATION_UNIT, fCu.getJavaProject().getElementName(), Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { label, newName}), comment, arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, newName);
 		return new DynamicValidationStateChange(new RenameCompilationUnitChange(descriptor, fCu, newName, comment));
@@ -424,7 +426,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 			if (path != null) {
 				final IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(path));
 				if (resource == null || !resource.exists())
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, RenameCompilationUnitChange.ID_RENAME_COMPILATION_UNIT));
+					return ScriptableRefactoring.createInputFatalStatus(resource, getRefactoring().getName(), ID_RENAME_COMPILATION_UNIT);
 				else {
 					fCu= (ICompilationUnit) JavaCore.create(resource);
 					try {

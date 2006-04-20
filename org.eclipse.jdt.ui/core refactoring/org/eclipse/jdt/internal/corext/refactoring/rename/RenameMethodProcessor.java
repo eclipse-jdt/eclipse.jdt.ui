@@ -72,6 +72,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateCreator;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
@@ -818,21 +819,24 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
 			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				final String refactoring= getRefactoring().getName();
 				if (element instanceof IMethod) {
 					final IMethod method= (IMethod) element;
 					final IType declaring= method.getDeclaringType();
 					if (declaring != null && declaring.exists()) {
 						final IMethod[] methods= declaring.findMethods(method);
 						if (methods != null && methods.length == 1 && methods[0] != null) {
+							if (!methods[0].exists())
+								return ScriptableRefactoring.createInputFatalStatus(methods[0], refactoring, ID_RENAME_METHOD);
 							fMethod= methods[0];
 							initializeWorkingCopyOwner();
 						} else
-							return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_METHOD));
+							return ScriptableRefactoring.createInputFatalStatus(null, refactoring, ID_RENAME_METHOD);
 					} else
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_METHOD));
+						return ScriptableRefactoring.createInputFatalStatus(element, refactoring, ID_RENAME_METHOD);
 				} else
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_METHOD));
+					return ScriptableRefactoring.createInputFatalStatus(element, refactoring, ID_RENAME_METHOD);
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
 			final String name= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_NAME);

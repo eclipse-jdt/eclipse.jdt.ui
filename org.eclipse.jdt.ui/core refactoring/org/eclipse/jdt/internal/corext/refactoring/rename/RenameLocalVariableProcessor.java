@@ -57,6 +57,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RefactoringDescriptorChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameAnalyzeUtil.LocalAnalyzePackage;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
@@ -382,9 +383,9 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
 			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_LOCAL_VARIABLE));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
+					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_RENAME_LOCAL_VARIABLE);
 				else
 					fCu= (ICompilationUnit) element;
 			} else
@@ -415,7 +416,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 								}
 							}
 							if (fLocalVariable == null)
-								return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_LOCAL_VARIABLE));
+								return ScriptableRefactoring.createInputFatalStatus(null, getRefactoring().getName(), ID_RENAME_LOCAL_VARIABLE);
 						} catch (JavaModelException exception) {
 							JavaPlugin.log(exception);
 						}

@@ -1299,18 +1299,18 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
 			String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null || element.getElementType() != IJavaElement.METHOD)
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INTRODUCE_INDIRECTION));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists() || element.getElementType() != IJavaElement.METHOD)
+					return createInputFatalStatus(element, ID_INTRODUCE_INDIRECTION);
 				else
 					fTargetMethod= (IMethod) element;
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
 			handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null || element.getElementType() != IJavaElement.TYPE)
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INTRODUCE_INDIRECTION));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
+					return createInputFatalStatus(element, ID_INTRODUCE_INDIRECTION);
 				else
 					fIntermediaryClass= (IType) element;
 			} else

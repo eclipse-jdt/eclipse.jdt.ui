@@ -31,8 +31,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 public final class RenameCompilationUnitChange extends AbstractJavaElementRenameChange {
 
-	public static final String ID_RENAME_COMPILATION_UNIT= "org.eclipse.jdt.ui.rename.compilationunit"; //$NON-NLS-1$
-
 	public RenameCompilationUnitChange(RefactoringDescriptor descriptor, ICompilationUnit unit, String newName, String comment) {
 		this(descriptor, ResourceUtil.getResource(unit).getFullPath(), unit.getElementName(), newName, comment, IResource.NULL_STAMP);
 		Assert.isTrue(!unit.isReadOnly(), "compilation unit must not be read-only"); //$NON-NLS-1$

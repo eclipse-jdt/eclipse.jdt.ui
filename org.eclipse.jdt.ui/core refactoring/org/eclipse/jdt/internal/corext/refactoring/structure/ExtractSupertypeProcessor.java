@@ -87,6 +87,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MultiStateCompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextEditBasedChangeManager;
@@ -967,9 +968,9 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				final String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1);
 				handle= extended.getAttribute(attribute);
 				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
-					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-					if (element == null)
-						status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_EXTRACT_SUPERTYPE)));
+					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+					if (element == null || !element.exists())
+						status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), ID_EXTRACT_SUPERTYPE));
 					else
 						elements.add(element);
 				} else
@@ -981,9 +982,9 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				final String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (extractCount + index + 1);
 				handle= extended.getAttribute(attribute);
 				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
-					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-					if (element == null)
-						status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_EXTRACT_SUPERTYPE)));
+					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+					if (element == null || !element.exists())
+						status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), ID_EXTRACT_SUPERTYPE));
 					else
 						elements.add(element);
 				} else
@@ -995,9 +996,9 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				final String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (extractCount + abstractCount + index + 1);
 				handle= extended.getAttribute(attribute);
 				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
-					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-					if (element == null)
-						status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_EXTRACT_SUPERTYPE)));
+					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+					if (element == null || !element.exists())
+						status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), ID_EXTRACT_SUPERTYPE));
 					else
 						elements.add(element);
 				} else
@@ -1009,9 +1010,9 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				final String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (extractCount + abstractCount + deleteCount + index + 1);
 				handle= extended.getAttribute(attribute);
 				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
-					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-					if (element == null)
-						status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_EXTRACT_SUPERTYPE)));
+					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+					if (element == null || !element.exists())
+						status.merge(ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_EXTRACT_SUPERTYPE));
 					else
 						elements.add(element);
 				} else

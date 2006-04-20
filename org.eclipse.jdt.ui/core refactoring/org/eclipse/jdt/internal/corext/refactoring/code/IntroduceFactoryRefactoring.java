@@ -1282,9 +1282,9 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_SELECTION));
 			String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INTRODUCE_FACTORY));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
+					return createInputFatalStatus(element, ID_INTRODUCE_FACTORY);
 				else {
 					fCUHandle= (ICompilationUnit) element;
 		        	initialize();
@@ -1293,9 +1293,9 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
 			handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null || element.getElementType() != IJavaElement.TYPE)
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INTRODUCE_FACTORY));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
+					return createInputFatalStatus(element, ID_INTRODUCE_FACTORY);
 				else {
 					final IType type= (IType) element;
 					fFactoryClassName= type.getFullyQualifiedName();

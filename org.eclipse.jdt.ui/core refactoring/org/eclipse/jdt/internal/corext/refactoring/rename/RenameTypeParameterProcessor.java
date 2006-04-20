@@ -56,6 +56,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RefactoringDescriptorChange;
+import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -373,9 +374,9 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PARAMETER));
 			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null)
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_TYPE_PARAMETER));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists())
+					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_RENAME_TYPE_PARAMETER);
 				else {
 					if (element instanceof IMethod)
 						fTypeParameter= ((IMethod) element).getTypeParameter(parameter);
@@ -384,7 +385,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 					else
 						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { handle, JavaRefactoringDescriptor.ATTRIBUTE_INPUT}));
 					if (fTypeParameter == null || !fTypeParameter.exists())
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_TYPE_PARAMETER));
+						return ScriptableRefactoring.createInputFatalStatus(fTypeParameter, getRefactoring().getName(), ID_RENAME_TYPE_PARAMETER);
 				}
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));

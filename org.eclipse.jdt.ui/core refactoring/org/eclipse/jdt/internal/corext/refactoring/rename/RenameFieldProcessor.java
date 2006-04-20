@@ -68,6 +68,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateCreator;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateFieldCreator;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
@@ -846,9 +847,9 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
 			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
-				if (element == null || element.getElementType() != IJavaElement.FIELD)
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_FIELD));
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists() || element.getElementType() != IJavaElement.FIELD)
+					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_RENAME_FIELD);
 				else
 					fField= (IField) element;
 			} else
