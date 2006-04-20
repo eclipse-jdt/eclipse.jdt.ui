@@ -64,7 +64,7 @@ public class LineTrackerPerformanceTest extends TextPerformanceTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		setWarmUpRuns(20);
-		setMeasuredRuns(20);
+		setMeasuredRuns(40);
 
 		fLineTracker= createLineTracker();
 	}
@@ -157,6 +157,7 @@ public class LineTrackerPerformanceTest extends TextPerformanceTestCase {
 	
 	public void testLineByOffset() throws Exception {
 		fLineTracker.set(FAUST1);
+		fLineTracker.replace(0, 0, ""); // trigger replacement with TreeLineTracker implementation
 		
 		PerformanceMeter meter= getNullPerformanceMeter();
 		int runs= getWarmUpRuns();
@@ -182,8 +183,36 @@ public class LineTrackerPerformanceTest extends TextPerformanceTestCase {
 		meter.stop();
 	}
 
+	public void testLineByOffset2() throws Exception {
+		fLineTracker.set(FAUST1);
+		
+		PerformanceMeter meter= getNullPerformanceMeter();
+		int runs= getWarmUpRuns();
+		for (int run= 0; run < runs; run++)
+			measureLineByOffset2(meter);
+		
+		meter= createPerformanceMeter();
+		runs= getMeasuredRuns();
+		for (int run= 0; run < runs; run++)
+			measureLineByOffset2(meter);
+		
+		commitAllMeasurements();
+		assertAllPerformance();
+		
+	}
+	
+	private void measureLineByOffset2(PerformanceMeter meter) throws BadLocationException {
+		int chars= FAUST1.length();
+		meter.start();
+		for (int times= 0; times < 30; times++)
+			for (int offset= 0; offset <= chars; offset++)
+				fLineTracker.getLineNumberOfOffset(offset);
+		meter.stop();
+	}
+	
 	public void testLineByIndex() throws Exception {
 		fLineTracker.set(FAUST1);
+		fLineTracker.replace(0, 0, ""); // trigger replacement with TreeLineTracker implementation
 		
 		PerformanceMeter meter= getNullPerformanceMeter();
 		int runs= getWarmUpRuns();
@@ -201,6 +230,33 @@ public class LineTrackerPerformanceTest extends TextPerformanceTestCase {
 	}
 	
 	private void measureLineByIndex(PerformanceMeter meter) throws BadLocationException {
+		int lines= fLineTracker.getNumberOfLines();
+		meter.start();
+		for (int times= 0; times < 1000; times++)
+			for (int line= 0; line < lines; line++)
+				fLineTracker.getLineOffset(line);
+		meter.stop();
+	}
+
+	public void testLineByIndex2() throws Exception {
+		fLineTracker.set(FAUST1);
+		
+		PerformanceMeter meter= getNullPerformanceMeter();
+		int runs= getWarmUpRuns();
+		for (int run= 0; run < runs; run++)
+			measureLineByIndex2(meter);
+		
+		meter= createPerformanceMeter();
+		runs= getMeasuredRuns();
+		for (int run= 0; run < runs; run++)
+			measureLineByIndex2(meter);
+		
+		commitAllMeasurements();
+		assertAllPerformance();
+		
+	}
+	
+	private void measureLineByIndex2(PerformanceMeter meter) throws BadLocationException {
 		int lines= fLineTracker.getNumberOfLines();
 		meter.start();
 		for (int times= 0; times < 1000; times++)
