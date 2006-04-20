@@ -175,7 +175,12 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 	 */
 	public static boolean isValidClassPathEntry(final IClasspathEntry entry) {
 		Assert.isNotNull(entry);
-		return entry.getContentKind() == IPackageFragmentRoot.K_BINARY && entry.getEntryKind() != IClasspathEntry.CPE_CONTAINER;
+		final int kind= entry.getEntryKind();
+		if (kind == IClasspathEntry.CPE_LIBRARY)
+			return entry.getContentKind() == IPackageFragmentRoot.K_BINARY;
+		else if (kind == IClasspathEntry.CPE_VARIABLE)
+			return true; // be optimistic
+		return false;
 	}
 
 	/**
