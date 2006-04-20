@@ -87,17 +87,20 @@ public final class JarImportWizardPage extends WizardPage {
 	/** The history dialog setting */
 	protected static final String SETTING_HISTORY= "org.eclipse.jdt.ui.refactoring.jarHistory"; //$NON-NLS-1$
 
+	/** Is the wizard page displayed for the first time? */
+	private boolean fFirstTime= true;
+
 	/** Is the wizard part of an import wizard? */
 	private final boolean fImportWizard;
-
-	/** The import wizard */
-	private final JarImportWizard fWizard;
 
 	/** The location control */
 	private RefactoringLocationControl fLocationControl= null;
 
 	/** The java model viewer */
 	private TreeViewer fTreeViewer= null;
+
+	/** The import wizard */
+	private final JarImportWizard fWizard;
 
 	/**
 	 * Creates a new jar import wizard page.
@@ -342,7 +345,9 @@ public final class JarImportWizardPage extends WizardPage {
 		if (fLocationControl != null) {
 			final String path= fLocationControl.getText();
 			if ("".equals(path)) { //$NON-NLS-1$
-				setErrorMessage(JarImportMessages.JarImportWizardPage_empty_location);
+				if (!fFirstTime)
+					setErrorMessage(JarImportMessages.JarImportWizardPage_empty_location);
+				fFirstTime= false;
 				setPageComplete(false);
 				return;
 			} else {
@@ -399,9 +404,12 @@ public final class JarImportWizardPage extends WizardPage {
 					}
 				} finally {
 					if (zip != null) {
-						try { zip.close(); } catch (IOException e) {}
+						try {
+							zip.close();
+						} catch (IOException e) {
+						}
 					}
-				}				
+				}
 			}
 		}
 	}
@@ -454,7 +462,10 @@ public final class JarImportWizardPage extends WizardPage {
 							// Just leave it
 						} finally {
 							if (zip != null) {
-								try { zip.close(); } catch (IOException e) {}
+								try {
+									zip.close();
+								} catch (IOException e) {
+								}
 							}
 						}
 					}
