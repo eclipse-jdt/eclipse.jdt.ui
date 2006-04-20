@@ -20,7 +20,6 @@ import org.eclipse.ui.keys.IBindingService;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.SurroundWithTryCatchAction;
@@ -31,9 +30,11 @@ public class SurroundWithActionGroup extends ActionGroup {
 	
 	private CompilationUnitEditor fEditor;
 	private SurroundWithTryCatchAction fSurroundWithTryCatchAction;
+	private final String fGroup;
 	
-	public SurroundWithActionGroup(CompilationUnitEditor editor) {
+	public SurroundWithActionGroup(CompilationUnitEditor editor, String group) {
 		fEditor= editor;
+		fGroup= group;
 		fSurroundWithTryCatchAction= createSurroundWithTryCatchAction(fEditor);
 	}
 	
@@ -57,7 +58,7 @@ public class SurroundWithActionGroup extends ActionGroup {
 		MenuManager subMenu = new MenuManager(menuText, SurroundWithTemplateMenuAction.SURROUND_WITH_QUICK_MENU_ACTION_ID);	
 				
 		if (SurroundWithTemplateMenuAction.fillMenu(subMenu, fEditor, fSurroundWithTryCatchAction))
-			menu.appendToGroup(GenerateActionGroup.GROUP_CODE, subMenu);
+			menu.appendToGroup(fGroup, subMenu);
 	}
 	
 	private String getShortcutString() {

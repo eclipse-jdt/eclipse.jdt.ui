@@ -119,6 +119,7 @@ import org.eclipse.jdt.internal.ui.actions.AddBlockCommentAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.IndentAction;
 import org.eclipse.jdt.internal.ui.actions.RemoveBlockCommentAction;
+import org.eclipse.jdt.internal.ui.actions.SurroundWithActionGroup;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
@@ -1252,7 +1253,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 		fGenerateActionGroup= new GenerateActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
 		ActionGroup rg= new RefactorActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
-
+		ActionGroup surroundWith= new SurroundWithActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
+		
+		fActionGroups.addGroup(surroundWith);
 		fActionGroups.addGroup(rg);
 		fActionGroups.addGroup(fGenerateActionGroup);
 
@@ -1260,6 +1263,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {
 			fGenerateActionGroup,
 			rg,
+			surroundWith,
 			new LocalHistoryActionGroup(this, ITextEditorActionConstants.GROUP_EDIT)});
 		
 		fCorrectionCommands= new CorrectionCommandInstaller(); // allow shortcuts for quick fix/assist
