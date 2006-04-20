@@ -685,7 +685,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Creates the Java plug-in standard groups in a context menu.
+	 * Creates the Java plug-in's standard groups for view context menus.
 	 * 
 	 * @param menu the menu manager to be populated
 	 */
