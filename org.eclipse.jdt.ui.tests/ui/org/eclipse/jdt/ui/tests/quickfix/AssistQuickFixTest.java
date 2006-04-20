@@ -3677,7 +3677,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 9);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -3726,7 +3726,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 9);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -3785,7 +3785,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 9);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -3836,7 +3836,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 10);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -3888,7 +3888,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 10);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -3930,7 +3930,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 10);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -3971,7 +3971,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 9);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4016,7 +4016,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 10);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4061,7 +4061,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 10);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4105,7 +4105,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 10);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4147,7 +4147,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 10);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4186,7 +4186,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 9);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4226,7 +4226,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 9);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4266,7 +4266,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 9);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4308,7 +4308,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 9);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4351,7 +4351,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 10);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4391,7 +4391,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 9);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4432,7 +4432,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 9);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4472,7 +4472,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 9);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4516,7 +4516,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 10);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4556,7 +4556,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 11);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4604,7 +4604,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 10);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4648,7 +4648,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 10);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4691,7 +4691,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 10);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4835,7 +4835,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 9);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4877,7 +4877,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 10);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4923,7 +4923,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 10);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -4965,7 +4965,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 9);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		StringBuffer expected1= new StringBuffer();
@@ -5013,7 +5013,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 8);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);	
 	}
 	
@@ -5037,7 +5037,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 11);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();

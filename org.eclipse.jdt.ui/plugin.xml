@@ -189,11 +189,6 @@
             id="org.eclipse.jdt.ui.text.correction.QuickAssistProcessor">
       </quickAssistProcessor>
       <quickAssistProcessor
-            name="%quickTemplateAssistProcessor"
-            class="org.eclipse.jdt.internal.ui.text.correction.QuickTemplateProcessor"
-            id="org.eclipse.jdt.ui.text.correction.QuickTemplateProcessor">
-      </quickAssistProcessor>
-      <quickAssistProcessor
             name="%advancedQuickAssistProcessor"
             class="org.eclipse.jdt.internal.ui.text.correction.AdvancedQuickAssistProcessor"
             id="org.eclipse.jdt.ui.text.correction.AdvancedQuickAssistProcessor">

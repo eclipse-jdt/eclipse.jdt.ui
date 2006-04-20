@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -37,6 +38,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.QuickTemplateProcessor;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -1680,10 +1682,10 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List proposals= Arrays.asList((new QuickTemplateProcessor()).getAssists(context, null));
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 8);
+		assertNumberOfProposals(proposals, 7);
 
 		String[] expected= new String[7];
 
@@ -1788,10 +1790,10 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List proposals= Arrays.asList((new QuickTemplateProcessor()).getAssists(context, null));
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 8);
+		assertNumberOfProposals(proposals, 7);
 
 		String[] expected= new String[7];
 
@@ -1904,10 +1906,10 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List proposals= Arrays.asList((new QuickTemplateProcessor()).getAssists(context, null));
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 10);
+		assertNumberOfProposals(proposals, 7);
 
 		String[] expected= new String[7];
 
@@ -2034,10 +2036,10 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List proposals= Arrays.asList((new QuickTemplateProcessor()).getAssists(context, null));
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 8);
+		assertNumberOfProposals(proposals, 7);
 
 		String[] expected= new String[7];
 
