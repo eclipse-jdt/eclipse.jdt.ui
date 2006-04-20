@@ -89,6 +89,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
@@ -482,9 +483,12 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				if (declaration != null)
 					return declaration.getInitializer() != null;
 
-			case IJavaElement.TYPE:
+			case IJavaElement.TYPE: {
+				IType type= (IType) member;
+				if (type.isInterface() && !Checks.isTopLevel(type))
+					return true;
 				return (Flags.isPublic(flags) && Flags.isStatic(flags));
-
+			}
 			default:
 				return false;
 		}
