@@ -28,7 +28,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -45,23 +44,16 @@ import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 
-import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.dialogs.PreferencesUtil;
-import org.eclipse.ui.keys.IBindingService;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.internal.corext.util.Messages;
-
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
-import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.SurroundWithTryCatchAction;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -74,7 +66,8 @@ import org.eclipse.jdt.internal.ui.text.correction.QuickTemplateProcessor;
 
 public class SurroundWithTemplateMenuAction extends ActionGroup implements IWorkbenchWindowPulldownDelegate2 {
 	
-	private static final String SURROUND_WITH_QUICK_MENU_ACTION_ID= "org.eclipse.jdt.ui.edit.text.java.surround.with.quickMenu";  //$NON-NLS-1$
+	//TODO make api
+	public static final String SURROUND_WITH_QUICK_MENU_ACTION_ID= "org.eclipse.jdt.ui.edit.text.java.surround.with.quickMenu";  //$NON-NLS-1$
 	
 	private static final String JAVA_TEMPLATE_PREFERENCE_PAGE_ID= "org.eclipse.jdt.ui.preferences.JavaTemplatePreferencePage"; //$NON-NLS-1$
 	
@@ -110,15 +103,6 @@ public class SurroundWithTemplateMenuAction extends ActionGroup implements IWork
 	};
 
 	private Menu fMenu;
-	private CompilationUnitEditor fEditor;
-	private SurroundWithTryCatchAction fSurroundWithTryCatchAction;
-	
-	public SurroundWithTemplateMenuAction() {}
-	
-	public SurroundWithTemplateMenuAction(CompilationUnitEditor editor) {
-		fEditor= editor;
-		fSurroundWithTryCatchAction= createSurroundWithTryCatchAction(fEditor);
-	}
 
 	/**
 	 * {@inheritDoc}
@@ -138,36 +122,6 @@ public class SurroundWithTemplateMenuAction extends ActionGroup implements IWork
 		fillMenu(fMenu);
 		initMenu();
 		return fMenu;
-	}
-	
-	public void fillActionBars(IActionBars actionBar) {
-		actionBar.setGlobalActionHandler(JdtActionConstants.SURROUND_WITH_TRY_CATCH, fSurroundWithTryCatchAction);
-	}
-	
-	/**
-	 * The Menu to show when right click on the editor
-	 * {@inheritDoc}
-	 */
-	public void fillContextMenu(IMenuManager menu) {
-		String menuText= ActionMessages.SurroundWithTemplateMenuAction_SurroundWithTemplateSubMenuName;
-				
-		String shortcutString= getShortcutString();
-		if (shortcutString != null) {
-			String[] args= new String[] { menuText, shortcutString};
-			menuText= Messages.format(ActionMessages.QuickMenuAction_menuTextWithShortcut, args); 
-		}
-		
-		MenuManager subMenu = new MenuManager(menuText, SURROUND_WITH_QUICK_MENU_ACTION_ID);	
-				
-		if (fillMenu(subMenu, fEditor, fSurroundWithTryCatchAction))
-			menu.appendToGroup(GenerateActionGroup.GROUP_CODE, subMenu);
-	}
-	
-	private String getShortcutString() {
-		IBindingService bindingService= (IBindingService)PlatformUI.getWorkbench().getAdapter(IBindingService.class);
-		if (bindingService == null)
-			return null;
-		return bindingService.getBestActiveBindingFormattedFor(SURROUND_WITH_QUICK_MENU_ACTION_ID);
 	}
 
 	public static boolean fillMenu(IMenuManager menu, CompilationUnitEditor editor, SurroundWithTryCatchAction surroundWithTryCatchAction) {
