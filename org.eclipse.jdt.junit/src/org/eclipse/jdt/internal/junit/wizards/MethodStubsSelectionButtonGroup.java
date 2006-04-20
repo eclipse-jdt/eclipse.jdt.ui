@@ -10,20 +10,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.wizards;
 
-import org.eclipse.jdt.internal.junit.util.*;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.jface.util.Assert;
+
+import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 
 /**
  * A group of controls used in the JUnit TestCase and TestSuite wizards
@@ -44,13 +45,10 @@ public class MethodStubsSelectionButtonGroup {
 	private String[] fButtonNames;
 	private boolean[] fButtonsSelected;
 	private boolean[] fButtonsEnabled;
-	private Combo fMainCombo;
-	private boolean fMainComboEnabled;
 	
 	private int fGroupBorderStyle;
 	private int fGroupNumberOfColumns;
 	private int fButtonsStyle;	
-	private boolean fUseSuiteInMainForTextRunner= false;
 	
 
 	public interface SelectionButtonGroupListener {
@@ -88,7 +86,7 @@ public class MethodStubsSelectionButtonGroup {
 			fButtonsSelected[i]= false;
 			fButtonsEnabled[i]= true;
 		}
-		fMainComboEnabled= true;
+		
 		if (buttonsStyle == SWT.RADIO) {
 			fButtonsSelected[0]= true;
 		}
@@ -98,11 +96,7 @@ public class MethodStubsSelectionButtonGroup {
 		
 		fButtonsStyle= buttonsStyle;
 	}
-	
-	public void setUseSuiteInMainForTextRunner(boolean useSuiteInMain) {
-		fUseSuiteInMainForTextRunner= useSuiteInMain;
-	}
-	
+		
 	/*
 	 * @see DialogField#doFillIntoGrid
 	 */
@@ -138,71 +132,12 @@ public class MethodStubsSelectionButtonGroup {
 		Button button= new Button(group, fButtonsStyle | SWT.LEFT);
 		button.setFont(group.getFont());			
 		button.setText(fButtonNames[index]);
-		button.setEnabled(isEnabled() && fButtonsEnabled[index]);
-		button.setSelection(fButtonsSelected[index]);
+		button.setEnabled(isEnabled() && isEnabled(index));
+		button.setSelection(isSelected(index));
 		button.addSelectionListener(listener);
-		button.setLayoutData(new GridData());
 		return button;
 	}
 	
-	private Button createMainCombo(int index, Composite group, SelectionListener listener) {
-		Composite buttonComboGroup= new Composite(group, 0);
-
-		GridLayout layout= new GridLayout();
-		layout.marginHeight= 0;
-		layout.marginWidth= 20;
-		layout.numColumns= 2;
-		buttonComboGroup.setLayout(layout);
-		
-		Button button= new Button(buttonComboGroup, fButtonsStyle | SWT.LEFT);
-		button.setFont(group.getFont());			
-		button.setText(fButtonNames[index]);
-		button.setEnabled(isEnabled() && fButtonsEnabled[index]);
-		button.setSelection(fButtonsSelected[index]);
-		button.addSelectionListener(listener);
-		button.setLayoutData(new GridData());
-
-
-		fMainCombo= new Combo(buttonComboGroup, SWT.READ_ONLY);
-		fMainCombo.setItems(new String[] {
-				WizardMessages.MethodStubsSelectionButtonGroup_text, 
-				WizardMessages.MethodStubsSelectionButtonGroup_swing, 
-				WizardMessages.MethodStubsSelectionButtonGroup_awt}); 
-		fMainCombo.select(0);
-		fMainCombo.setEnabled(isEnabled() && fMainComboEnabled);
-		fMainCombo.setFont(group.getFont());
-		fMainCombo.setLayoutData(new GridData());
-		return button;
-	}
-
-	public String getMainMethod(String typeName) {
-		StringBuffer main= new StringBuffer("public static void main(String[] args) {"); //$NON-NLS-1$
-		if (isSelected(1)) {
-			main.append("junit."); //$NON-NLS-1$
-			switch (getComboSelection()) {
-				case 0:
-					main.append("textui"); //$NON-NLS-1$
-					break;
-				case 1:
-					main.append("swingui"); //$NON-NLS-1$
-					break;
-				case 2 :
-					main.append("awtui"); //$NON-NLS-1$
-					break;
-				default :
-					main.append("textui"); //$NON-NLS-1$
-					break;
-			}
-			// fix for 53352 Test case wizard generates wrong code 
-			if (fUseSuiteInMainForTextRunner && getComboSelection() == 0) {
-				main.append(".TestRunner.run(" + typeName + ".suite());"); //$NON-NLS-1$ //$NON-NLS-2$				
-			} else {
-				main.append(".TestRunner.run(" + typeName + ".class);"); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-		}
-		main.append("}\n\n"); //$NON-NLS-1$
-		return main.toString();
-	}
 
 	/**
 	 * Returns the group widget. When called the first time, the widget will be created.
@@ -214,7 +149,7 @@ public class MethodStubsSelectionButtonGroup {
 			assertCompositeNotNull(parent);
 			
 			GridLayout layout= new GridLayout();
-			layout.makeColumnsEqualWidth= true;
+			//layout.makeColumnsEqualWidth= true;
 			layout.numColumns= fGroupNumberOfColumns;			
 			
 			if (fGroupBorderStyle != SWT.NONE) {
@@ -241,9 +176,7 @@ public class MethodStubsSelectionButtonGroup {
 			int nButtons= fButtonNames.length;
 			fButtons= new Button[nButtons];
 
-			fButtons[0]= createSelectionButton(0, fButtonComposite, listener);
-			fButtons[1]= createMainCombo(1, fButtonComposite, listener);
-			for (int i= 2; i < nButtons; i++) {
+			for (int i= 0; i < nButtons; i++) {
 				fButtons[i]= createSelectionButton(i, fButtonComposite, listener);
 			}
 			int nRows= nButtons / fGroupNumberOfColumns;
@@ -287,7 +220,7 @@ public class MethodStubsSelectionButtonGroup {
 	 */
 	public boolean isSelected(int index) {
 		if (index >= 0 && index < fButtonsSelected.length) {
-			return fButtonsSelected[index];
+			return fButtonsSelected[index] && fButtonsEnabled[index];
 		}
 		return false;
 	}
@@ -301,7 +234,7 @@ public class MethodStubsSelectionButtonGroup {
 				fButtonsSelected[index]= selected;
 				if (fButtons != null) {
 					Button button= fButtons[index];
-					if (isOkToUse(button)) {
+					if (isOkToUse(button) && button.isEnabled()) {
 						button.setSelection(selected);
 					}
 				}
@@ -327,14 +260,15 @@ public class MethodStubsSelectionButtonGroup {
 		if (index >= 0 && index < fButtonsEnabled.length) {
 			if (fButtonsEnabled[index] != enabled) {
 				fButtonsEnabled[index]= enabled;
-				if (index == 1)
-					fMainComboEnabled= enabled;
 				if (fButtons != null) {
 					Button button= fButtons[index];
 					if (isOkToUse(button)) {
 						button.setEnabled(enabled);
-						if (index == 1)
-							fMainCombo.setEnabled(isEnabled() && enabled);
+						if (!enabled) {
+							button.setSelection(false);
+						} else {
+							button.setSelection(fButtonsSelected[index]);
+						}
 					}
 				}
 			}
@@ -353,18 +287,8 @@ public class MethodStubsSelectionButtonGroup {
 					button.setEnabled(enabled && fButtonsEnabled[i]);
 				}
 			}
-			fMainCombo.setEnabled(enabled && fMainComboEnabled);
 		}
 	}
-	
-	public int getComboSelection() {
-		return fMainCombo.getSelectionIndex();
-	}
-	
-	public void setComboSelection(int index) {
-		fMainCombo.select(index);
-	}
-
 
 	/**
 	 * Sets the label of the dialog field.

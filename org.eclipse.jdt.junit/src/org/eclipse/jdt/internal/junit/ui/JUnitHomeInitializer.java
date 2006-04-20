@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.ClasspathVariableInitializer;
@@ -35,56 +37,69 @@ public class JUnitHomeInitializer extends ClasspathVariableInitializer {
 	}
 
 	private void initializeHome() {
-		Bundle bundle= Platform.getBundle("org.junit"); //$NON-NLS-1$
-		if (bundle == null) {
-			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_HOME, null);
-			return;
-		}
-		URL installLocation= bundle.getEntry("/"); //$NON-NLS-1$
-		URL local= null;
 		try {
-			local= Platform.asLocalURL(installLocation);
-		} catch (IOException e) {
-			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_HOME, null);
-			return;
-		}
-		try {
-			String fullPath= new File(local.getPath()).getAbsolutePath();
-			JavaCore.setClasspathVariable(JUnitPlugin.JUNIT_HOME, Path.fromOSString(fullPath), null);
+			IPath location= getBundleLocation("org.junit"); //$NON-NLS-1$
+			if (location != null) {
+				JavaCore.setClasspathVariable(JUnitPlugin.JUNIT_HOME, location, null);
+			} else {
+				JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_HOME, null);
+			}
 		} catch (JavaModelException e1) {
 			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_HOME, null);
 		}
 	}
 	
 	private void initializeSource() {
-		Bundle bundle= Platform.getBundle("org.junit"); //$NON-NLS-1$
-		if (bundle == null) {
-			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_SRC_HOME, null);
-			return;
-		}
-		String version= (String)bundle.getHeaders().get("Bundle-Version"); //$NON-NLS-1$
-		if (version == null) {
-			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_SRC_HOME, null);
-			return;
-		}
-		bundle= Platform.getBundle("org.eclipse.jdt.source"); //$NON-NLS-1$
-		if (bundle == null) {
-			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_SRC_HOME, null);
-			return;
-		}
-		URL local= null;
 		try {
-			local= Platform.asLocalURL(bundle.getEntry("/")); //$NON-NLS-1$
-		} catch (IOException e) {
-			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_SRC_HOME, null);
-			return;
-		}
-		try {
-			String fullPath= new File(local.getPath()).getAbsolutePath() 
-				+ File.separator + "src" + File.separator + "org.junit_" + version;   //$NON-NLS-1$ //$NON-NLS-2$
-			JavaCore.setClasspathVariable(JUnitPlugin.JUNIT_SRC_HOME, Path.fromOSString(fullPath), null);
+			IPath sourceLocation= getSourceLocation("org.junit"); //$NON-NLS-1$
+			if (sourceLocation != null) {
+				JavaCore.setClasspathVariable(JUnitPlugin.JUNIT_SRC_HOME, sourceLocation, null);
+			} else {
+				JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_SRC_HOME, null);
+			}
 		} catch (JavaModelException e1) {
 			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_SRC_HOME, null);
 		}
 	}
+	
+	public static IPath getBundleLocation(String bundleName) {
+		Bundle bundle= Platform.getBundle(bundleName);
+		if (bundle == null) {
+			return null;
+		}
+		URL local= null;
+		try {
+			local= FileLocator.toFileURL(bundle.getEntry("/")); //$NON-NLS-1$
+		} catch (IOException e) {
+			return null;
+		}
+		String fullPath= new File(local.getPath()).getAbsolutePath();
+		return Path.fromOSString(fullPath);
+	}
+	
+	public static IPath getSourceLocation(String bundleName) {
+		Bundle bundle= Platform.getBundle(bundleName);
+		if (bundle == null) {
+			return null;
+		}
+		String version= (String)bundle.getHeaders().get("Bundle-Version"); //$NON-NLS-1$
+		if (version == null) {
+			return null;
+		}
+		bundle= Platform.getBundle("org.eclipse.jdt.source"); //$NON-NLS-1$
+		if (bundle == null) {
+			return null;
+		}
+		URL local= null;
+		try {
+			local= FileLocator.toFileURL(bundle.getEntry("/")); //$NON-NLS-1$
+		} catch (IOException e) {
+			return null;
+		}
+		String fullPath= new File(local.getPath()).getAbsolutePath() 
+			+ File.separator + "src" + File.separator + bundleName + "_" + version;   //$NON-NLS-1$ //$NON-NLS-2$
+		return Path.fromOSString(fullPath);
+	}
+	
+	
 }

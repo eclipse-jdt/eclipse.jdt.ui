@@ -20,6 +20,16 @@ public final class WizardMessages extends NLS {
 		// Do not instantiate
 	}
 
+	public static String NewTestCaseWizardPageOne__error_junit4NotOnbuildpath;
+	public static String NewTestCaseWizardPageOne_error_java5required;
+	public static String NewTestCaseWizardPageOne_junit3_radio_label;
+	public static String NewTestCaseWizardPageOne_junit4_radio_label;
+	public static String NewTestCaseWizardPageOne_linkedtext_java5required;
+	public static String NewTestCaseWizardPageOne_linkedtext_junit3_notonbuildpath;
+	public static String NewTestCaseWizardPageOne_linkedtext_junit4_notonbuildpath;
+	public static String NewTestCaseWizardPageOne_methodStub_setUpBeforeClass;
+	public static String NewTestCaseWizardPageOne_methodStub_tearDownAfterClass;
+	public static String NewTestCaseWizardPageOne_not_yet_implemented_string;
 	public static String Wizard_title_new_testcase;
 	public static String Wizard_title_new_testsuite;
 	public static String CheckedTableSelectionDialog_emptyListMessage;

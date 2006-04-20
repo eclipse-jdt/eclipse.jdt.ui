@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -60,7 +59,6 @@ import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
-import org.eclipse.jdt.internal.junit.wizards.MethodStubsSelectionButtonGroup;
 import org.eclipse.jdt.internal.junit.wizards.SuiteClassesContentProvider;
 import org.eclipse.jdt.internal.junit.wizards.TestSuiteClassListRange;
 import org.eclipse.jdt.internal.junit.wizards.UpdateTestSuite;
@@ -100,16 +98,10 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	/** Field ID of the class in suite field. */
 	public final static String CLASSES_IN_SUITE= PAGE_NAME + ".classesinsuite"; //$NON-NLS-1$
 
-	private final static String STORE_GENERATE_MAIN= PAGE_NAME + ".GENERATE_MAIN"; //$NON-NLS-1$
-	private final static String STORE_USE_TESTRUNNER= PAGE_NAME + ".USE_TESTRUNNER";	//$NON-NLS-1$
-	private final static String STORE_TESTRUNNER_TYPE= PAGE_NAME + ".TESTRUNNER_TYPE"; //$NON-NLS-1$
-	
 	private CheckboxTableViewer fClassesInSuiteTable;
 	private IStatus fClassesInSuiteStatus;
 
 	private Label fSelectedClassesLabel;
-
-	private MethodStubsSelectionButtonGroup fMethodStubsButtons;
 	
 	private boolean fUpdatedExistingClassButton;
 
@@ -121,14 +113,6 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		setTitle(WizardMessages.NewTestSuiteWizPage_title); 
 		setDescription(WizardMessages.NewTestSuiteWizPage_description); 
 		
-		String[] buttonNames= new String[] {
-			"public static void main(Strin&g[] args)", //$NON-NLS-1$
-			WizardMessages.NewTestSuiteCreationWizardPage_methodStub_testRunner, 
-		};
-		
-		fMethodStubsButtons= new MethodStubsSelectionButtonGroup(SWT.CHECK, buttonNames, 1);
-		fMethodStubsButtons.setLabelText(WizardMessages.NewTestClassWizPage2_method_Stub_label); 
-		fMethodStubsButtons.setUseSuiteInMainForTextRunner(true);
 		fClassesInSuiteStatus= new JUnitStatus();
 	}
 
@@ -165,9 +149,6 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	 * @param nColumns number of columns to span
 	 */	
 	protected void createMethodStubSelectionControls(Composite composite, int nColumns) {
-		LayoutUtil.setHorizontalSpan(fMethodStubsButtons.getLabelControl(composite), nColumns);
-		LayoutUtil.createEmptySpace(composite,1);
-		LayoutUtil.setHorizontalSpan(fMethodStubsButtons.getSelectionButtonsGroup(composite), nColumns - 1);	
 	}	
 
 	/**
@@ -180,10 +161,6 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		initContainerPage(jelem);
 		initSuitePage(jelem);
 		doStatusUpdate();
-
-		fMethodStubsButtons.setSelection(0, false); //main
-		fMethodStubsButtons.setSelection(1, false); //add textrunner
-		fMethodStubsButtons.setEnabled(1, false); //add text
 	}
 
 	private void initSuitePage(IJavaElement jelem) {
@@ -350,13 +327,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	 */
 	protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		writeImports(imports);
-		if (fMethodStubsButtons.isEnabled() && fMethodStubsButtons.isSelected(0)) 
-			createMain(type);
 		type.createMethod(getSuiteMethodString(), null, false, null);	
-	}
-
-	private void createMain(IType type) throws JavaModelException {
-		type.createMethod(fMethodStubsButtons.getMainMethod(getTypeName()), null, false, null);	
 	}
 
 	/*
@@ -497,11 +468,9 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 			ICompilationUnit cu= pack.getCompilationUnit(typeName + ".java"); //$NON-NLS-1$
 			if (cu.exists()) {
 				status.setWarning(WizardMessages.NewTestSuiteWizPage_typeName_warning_already_exists); 
-				fMethodStubsButtons.setEnabled(false);
 				return status;
 			}
 		}
-		fMethodStubsButtons.setEnabled(true);
 		return status;
 	}
 
@@ -538,20 +507,6 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	 *	last time this wizard was used to completion
 	 */
 	private void restoreWidgetValues() {
-		IDialogSettings settings= getDialogSettings();
-		if (settings != null) {
-			boolean generateMain= settings.getBoolean(STORE_GENERATE_MAIN);
-			fMethodStubsButtons.setSelection(0, generateMain);
-			fMethodStubsButtons.setEnabled(1, generateMain);
-			fMethodStubsButtons.setSelection(1,settings.getBoolean(STORE_USE_TESTRUNNER));
-			//The next 2 lines are necessary. Otherwise, if fMethodsStubsButtons is disabled, and USE_TESTRUNNER gets enabled,
-			//then the checkbox for USE_TESTRUNNER will be the only enabled component of fMethodsStubsButton
-			fMethodStubsButtons.setEnabled(!fMethodStubsButtons.isEnabled());
-			fMethodStubsButtons.setEnabled(!fMethodStubsButtons.isEnabled());
-			try {
-				fMethodStubsButtons.setComboSelection(settings.getInt(STORE_TESTRUNNER_TYPE));
-			} catch(NumberFormatException e) {}
-		}		
 	}	
 
 	/**
@@ -559,11 +514,5 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	 *	will persist into the next invocation of this wizard page
 	 */
 	private void saveWidgetValues() {
-		IDialogSettings settings= getDialogSettings();
-		if (settings != null) {
-			settings.put(STORE_GENERATE_MAIN, fMethodStubsButtons.isSelected(0));
-			settings.put(STORE_USE_TESTRUNNER, fMethodStubsButtons.isSelected(1));
-			settings.put(STORE_TESTRUNNER_TYPE, fMethodStubsButtons.getComboSelection());
-		}
 	}	
 }

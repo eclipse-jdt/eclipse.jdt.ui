@@ -14,8 +14,10 @@ package org.eclipse.jdt.junit.wizards;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,6 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -31,19 +34,21 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -95,18 +100,36 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	
 	/** Field ID of the class under test field. */
 	public final static String CLASS_UNDER_TEST= PAGE_NAME + ".classundertest"; //$NON-NLS-1$
+	
+	/**
+	 * Field ID of the Junit4 toggle
+	 * @since 3.2 
+	 */
+	public final static String JUNIT4TOGGLE= PAGE_NAME + ".junit4toggle"; //$NON-NLS-1$
+	
+	private static final String COMPLIANCE_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"; //$NON-NLS-1$
+	private static final String BUILD_PATH_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage"; //$NON-NLS-1$
+	private static final Object BUILD_PATH_KEY_ADD_ENTRY= "add_classpath_entry"; //$NON-NLS-1$
+	private static final String KEY_NO_LINK= "PropertyAndPreferencePage.nolink"; //$NON-NLS-1$
 
 	private final static String QUESTION_MARK_TAG= "Q"; //$NON-NLS-1$
 	private final static String OF_TAG= "Of"; //$NON-NLS-1$
 
 	private final static String TEST_SUFFIX= "Test"; //$NON-NLS-1$
-	private final static String SETUP= "setUp"; //$NON-NLS-1$
-	private final static String TEARDOWN= "tearDown"; //$NON-NLS-1$
 	private final static String PREFIX= "test"; //$NON-NLS-1$
 
-	private final static String STORE_GENERATE_MAIN= PAGE_NAME + ".GENERATE_MAIN"; //$NON-NLS-1$
-	private final static String STORE_USE_TESTRUNNER= PAGE_NAME + ".USE_TESTRUNNER";	//$NON-NLS-1$
-	private final static String STORE_TESTRUNNER_TYPE= PAGE_NAME + ".TESTRUNNER_TYPE"; //$NON-NLS-1$
+	private final static String STORE_SETUP= PAGE_NAME + ".USE_SETUP";	//$NON-NLS-1$
+	private final static String STORE_TEARDOWN= PAGE_NAME + ".USE_TEARDOWN"; //$NON-NLS-1$
+	private final static String STORE_SETUP_CLASS= PAGE_NAME + ".USE_SETUPCLASS";	//$NON-NLS-1$
+	private final static String STORE_TEARDOWN_CLASS= PAGE_NAME + ".USE_TEARDOWNCLASS"; //$NON-NLS-1$
+	private final static String STORE_CONSTRUCTOR= PAGE_NAME + ".USE_CONSTRUCTOR"; //$NON-NLS-1$
+	
+
+	private final static int IDX_SETUP_CLASS= 0;
+	private final static int IDX_TEARDOWN_CLASS= 1;
+	private final static int IDX_SETUP= 2;
+	private final static int IDX_TEARDOWN= 3;
+	private final static int IDX_CONSTRUCTOR= 4;
 	
 	private NewTestCaseWizardPageTwo fPage2;
 	private MethodStubsSelectionButtonGroup fMethodStubsButtons;
@@ -119,6 +142,14 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	
 	private Button fClassUnderTestButton;
 	private JavaTypeCompletionProcessor fClassToTestCompletionProcessor;
+
+
+	private Button fJUnit4Toggle;
+	private boolean fIsJunit4;
+	private IStatus fJunit4Status; // status
+	private boolean fIsJunit4Enabled;
+	private Link fLink;
+	private Label fImage;
 
 	/**
 	 * Creates a new <code>NewTestCaseCreationWizardPage</code>.
@@ -134,14 +165,15 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		setDescription(WizardMessages.NewTestCaseWizardPageOne_description); 
 		
 		String[] buttonNames= new String[] {
-			"&public static void main(String[] args)", //$NON-NLS-1$
-			WizardMessages.NewTestCaseWizardPageOne_methodStub_testRunner, 
-			WizardMessages.NewTestCaseWizardPageOne_methodStub_setUp, 
-			WizardMessages.NewTestCaseWizardPageOne_methodStub_tearDown, 
-			WizardMessages.NewTestCaseWizardPageOne_methodStub_constructor
+			/* IDX_SETUP_CLASS */ WizardMessages.NewTestCaseWizardPageOne_methodStub_setUpBeforeClass,
+			/* IDX_TEARDOWN_CLASS */ WizardMessages.NewTestCaseWizardPageOne_methodStub_tearDownAfterClass,
+			/* IDX_SETUP */ WizardMessages.NewTestCaseWizardPageOne_methodStub_setUp, 
+			/* IDX_TEARDOWN */ WizardMessages.NewTestCaseWizardPageOne_methodStub_tearDown, 
+			/* IDX_CONSTRUCTOR */ WizardMessages.NewTestCaseWizardPageOne_methodStub_constructor
 		};
+		enableCommentControl(true);
 		
-		fMethodStubsButtons= new MethodStubsSelectionButtonGroup(SWT.CHECK, buttonNames, 1);
+		fMethodStubsButtons= new MethodStubsSelectionButtonGroup(SWT.CHECK, buttonNames, 2);
 		fMethodStubsButtons.setLabelText(WizardMessages.NewTestCaseWizardPageOne_method_Stub_label); 
 		
 		fClassToTestCompletionProcessor= new JavaTypeCompletionProcessor(false, false); 
@@ -149,6 +181,9 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		fClassUnderTestStatus= new JUnitStatus();
 		
 		fClassUnderTestText= ""; //$NON-NLS-1$
+		
+		fJunit4Status= new JUnitStatus();
+		fIsJunit4= false;
 	}
 
 	/**
@@ -195,17 +230,65 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				}
 			}
 		}
-		fMethodStubsButtons.setSelection(0, false); //main
-		fMethodStubsButtons.setSelection(1, false); //add textrunner
-		fMethodStubsButtons.setEnabled(1, false); //add text
-		fMethodStubsButtons.setSelection(2, false); //setUp
-		fMethodStubsButtons.setSelection(3, false); //tearDown
-		fMethodStubsButtons.setSelection(4, false); //constructor
+
+		restoreWidgetValues();
+		
+		boolean isJunit4= false;
+		if (element != null && element.getElementType() != IJavaElement.JAVA_MODEL) {
+			IJavaProject project= element.getJavaProject();
+			try {
+				isJunit4= project.findType(JUnitPlugin.JUNIT4_ANNOTATION_NAME) != null;
+			} catch (JavaModelException e) {
+				// ignore
+			}
+		}
+		setJUnit4(isJunit4, true);
 		
 		updateStatus(getStatusList());
 	}
 	
+	private IStatus junit4Changed() {
+		JUnitStatus status= new JUnitStatus();
+		return status;
+	}
 	
+	/**
+	 * Specifies if the test should be created as JUnit 4 test.
+	 * @param isJUnit4 If set, a Junit 4 test will be created
+	 * @param isEnabled if <code>true</code> the modifier fields are
+	 * editable; otherwise they are read-only
+	 * 
+	 * @since 3.2
+	 */
+	public void setJUnit4(boolean isJUnit4, boolean isEnabled) {
+		fIsJunit4Enabled= isEnabled;
+		if (fJUnit4Toggle != null && !fJUnit4Toggle.isDisposed()) {
+			fJUnit4Toggle.setSelection(isJUnit4);
+			fJUnit4Toggle.setEnabled(isEnabled);
+		}
+		internalSetJUnit4(isJUnit4);
+	}
+	
+	/**
+	 * Returns <code>true</code> if the test should be created as Junit 4 test
+	 * @return returns <code>true</code> if the test should be created as Junit 4 test
+	 * 
+	 * @since 3.2
+	 */
+	public boolean isJUnit4() {
+		return fIsJunit4;
+	}
+	
+	private void internalSetJUnit4(boolean isJUnit4) {
+		fIsJunit4= isJUnit4;
+		fJunit4Status= junit4Changed();
+		if (fIsJunit4) {
+			setSuperClass("java.lang.Object", false); //$NON-NLS-1$
+		} else {
+			setSuperClass(JUnitPlugin.TEST_SUPERCLASS_NAME, true);
+		}
+		handleFieldChanged(JUNIT4TOGGLE);
+	}
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.NewContainerWizardPage#handleFieldChanged(String)
@@ -217,6 +300,14 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			if (fClassUnderTestButton != null && !fClassUnderTestButton.isDisposed()) {
 				fClassUnderTestButton.setEnabled(getPackageFragmentRoot() != null);
 			}
+			fJunit4Status= junit4Changed();
+			
+			updateBuildPathMessage();
+		} else if (fieldName.equals(JUNIT4TOGGLE)) {
+			updateBuildPathMessage();
+			fMethodStubsButtons.setEnabled(IDX_SETUP_CLASS, isJUnit4());
+			fMethodStubsButtons.setEnabled(IDX_TEARDOWN_CLASS, isJUnit4());
+			fMethodStubsButtons.setEnabled(IDX_CONSTRUCTOR, !isJUnit4());
 		}
 		updateStatus(getStatusList());
 	}
@@ -232,7 +323,8 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				fTypeNameStatus,
 				fClassUnderTestStatus,
 				fModifierStatus,
-				fSuperClassStatus
+				fSuperClassStatus,
+				fJunit4Status
 		};
 	}
 	
@@ -250,16 +342,17 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		GridLayout layout= new GridLayout();
 		layout.numColumns= nColumns;		
 		composite.setLayout(layout);
-
+		createJUnit4Controls(composite, nColumns);
 		createContainerControls(composite, nColumns);	
 		createPackageControls(composite, nColumns);
 		createSeparator(composite, nColumns);
-		createTypeNameControls(composite, nColumns);		
+		createTypeNameControls(composite, nColumns);
 		createSuperClassControls(composite, nColumns);
 		createMethodStubSelectionControls(composite, nColumns);
-		setSuperClass(JUnitPlugin.TEST_SUPERCLASS_NAME, true);
+		createCommentControls(composite, nColumns);
 		createSeparator(composite, nColumns);
 		createClassUnderTestControls(composite, nColumns);
+		createBuildPathConfigureControls(composite, nColumns);
 		
 		setControl(composite);
 			
@@ -268,10 +361,11 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		if (classUnderTest.length() > 0) {
 			setTypeName(Signature.getSimpleName(classUnderTest)+TEST_SUFFIX, true);
 		}
-		restoreWidgetValues();
-		Dialog.applyDialogFont(composite);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJUnitHelpContextIds.NEW_TESTCASE_WIZARD_PAGE);	
 
+		Dialog.applyDialogFont(composite);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJUnitHelpContextIds.NEW_TESTCASE_WIZARD_PAGE);
+		
+		setFocus();
 	}
 
 	/**
@@ -334,8 +428,142 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		fClassUnderTestButton.setLayoutData(gd);
 
 		ControlContentAssistHelper.createTextContentAssistant(fClassUnderTestControl, fClassToTestCompletionProcessor);
-		setFocus();
 	}
+	
+	/**
+	 * Creates the controls for the JUnit 4 toggle control. Expects a <code>GridLayout</code> with 
+	 * at least 3 columns.
+	 * 
+	 * @param composite the parent composite
+	 * @param nColumns number of columns to span
+	 * 
+	 * @since 3.2
+	 */
+	protected void createJUnit4Controls(Composite composite, int nColumns) {
+		Composite inner= new Composite(composite, SWT.NONE);
+		inner.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, nColumns, 1));
+		GridLayout layout= new GridLayout(2, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		inner.setLayout(layout);
+		
+		SelectionAdapter listener= new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				boolean isSelected= ((Button) e.widget).getSelection();
+				internalSetJUnit4(isSelected);
+			}
+		};
+		
+		Button junti3Toggle= new Button(inner, SWT.RADIO);
+		junti3Toggle.setText(WizardMessages.NewTestCaseWizardPageOne_junit3_radio_label);
+		junti3Toggle.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1));
+		
+		fJUnit4Toggle= new Button(inner, SWT.RADIO);
+		fJUnit4Toggle.setText(WizardMessages.NewTestCaseWizardPageOne_junit4_radio_label);
+		fJUnit4Toggle.setSelection(fIsJunit4);
+		fJUnit4Toggle.setEnabled(fIsJunit4Enabled);
+		fJUnit4Toggle.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1));
+		fJUnit4Toggle.addSelectionListener(listener);
+	}
+	
+	/**
+	 * Creates the controls for the JUnit 4 toggle control. Expects a <code>GridLayout</code> with 
+	 * at least 3 columns.
+	 * 
+	 * @param composite the parent composite
+	 * @param nColumns number of columns to span
+	 * 
+	 * @since 3.2
+	 */
+	protected void createBuildPathConfigureControls(Composite composite, int nColumns) {
+		Composite inner= new Composite(composite, SWT.NONE);
+		inner.setLayoutData(new GridData(GridData.FILL, GridData.FILL, false, false, nColumns, 1));
+		GridLayout layout= new GridLayout(2, false);
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
+		inner.setLayout(layout);
+		
+		fImage= new Label(inner, SWT.NONE);
+		fImage.setImage(JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
+		fImage.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1, 1));
+
+		fLink= new Link(inner, SWT.WRAP);
+		fLink.setText("\n\n"); //$NON-NLS-1$
+		fLink.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				performBuildpathConfiguration(e.text);
+			}
+		});
+		GridData gd= new GridData(GridData.FILL, GridData.BEGINNING, true, false, 1, 1);
+		gd.widthHint= convertWidthInCharsToPixels(60);
+		fLink.setLayoutData(gd);
+		updateBuildPathMessage();
+	}
+	
+	private void performBuildpathConfiguration(Object data) {
+		IPackageFragmentRoot root= getPackageFragmentRoot();
+		if (root == null) {
+			return; // should not happen. Link shouldn't be visible
+		}
+		IJavaProject javaProject= root.getJavaProject();
+		
+		if ("a3".equals(data)) { // add and configure JUnit 3 //$NON-NLS-1$
+			String id= BUILD_PATH_PAGE_ID;
+			Map input= new HashMap();
+			IClasspathEntry newEntry= JUnitAddLibraryProposal.getJunit3ClasspathEntry();
+			input.put(BUILD_PATH_KEY_ADD_ENTRY, newEntry);
+			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, id, new String[] { id }, input).open();
+		} else if ("a4".equals(data)) { // add and configure JUnit 4 //$NON-NLS-1$
+			String id= BUILD_PATH_PAGE_ID;
+			Map input= new HashMap();
+			IClasspathEntry newEntry= JUnitAddLibraryProposal.getJunit4ClasspathEntry();
+			input.put(BUILD_PATH_KEY_ADD_ENTRY, newEntry);
+			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, id, new String[] { id }, input).open();
+		} else if ("b".equals(data)) { // open build path //$NON-NLS-1$
+			String id= BUILD_PATH_PAGE_ID;
+			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, id, new String[] { id }, null).open();
+		} else if ("c".equals(data)) { // open compliance //$NON-NLS-1$
+			String buildPath= BUILD_PATH_PAGE_ID;
+			String complianceId= COMPLIANCE_PAGE_ID;
+			Map input= new HashMap();
+			input.put(KEY_NO_LINK, Boolean.TRUE);
+			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, buildPath, new String[] { buildPath, complianceId  }, data).open();
+		}
+		updateBuildPathMessage();
+	}
+
+	private void updateBuildPathMessage() {
+		if (fLink == null || fLink.isDisposed()) {
+			return;
+		}
+		
+		String message= null;
+		IPackageFragmentRoot root= getPackageFragmentRoot();
+		if (root != null) {
+			try {
+				IJavaProject project= root.getJavaProject();
+				if (isJUnit4()) {
+					if (!JUnitStubUtility.is50OrHigher(project)) {
+						message= WizardMessages.NewTestCaseWizardPageOne_linkedtext_java5required;
+					} else if (project.findType(JUnitPlugin.JUNIT4_ANNOTATION_NAME) == null) {
+						message= Messages.format(WizardMessages.NewTestCaseWizardPageOne_linkedtext_junit4_notonbuildpath, project.getElementName());
+					}
+				} else {			
+					if (project.findType(JUnitPlugin.TEST_SUPERCLASS_NAME) == null) {
+						message= Messages.format(WizardMessages.NewTestCaseWizardPageOne_linkedtext_junit3_notonbuildpath, project.getElementName());
+					}
+				}
+			} catch (JavaModelException e) {
+			}
+		}
+		fLink.setVisible(message != null);
+		fImage.setVisible(message != null);
+		
+		if (message != null) {
+			fLink.setText(message);
+		}
+	}
+	
 
 	private void classToTestButtonPressed() {
 		IType type= chooseClassToTestType();
@@ -414,11 +642,11 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				return status;
 			}
 			if (type.isInterface()) {
-				status.setWarning(Messages.format(WizardMessages.NewTestCaseWizardPageOne_warning_class_to_test_is_interface,classToTestName)); 
+				status.setWarning(Messages.format(WizardMessages.NewTestCaseWizardPageOne_warning_class_to_test_is_interface, classToTestName)); 
 			}
 			
 			if (pack != null && !JUnitStubUtility.isVisible(type, pack)) {
-				status.setWarning(Messages.format(WizardMessages.NewTestCaseWizardPageOne_warning_class_to_test_not_visible, new String[] {(type.isInterface())?WizardMessages.NewTestCaseWizardPageOne_Interface:WizardMessages.NewTestCaseWizardPageOne_Class , classToTestName})); 
+				status.setWarning(Messages.format(WizardMessages.NewTestCaseWizardPageOne_warning_class_to_test_not_visible, classToTestName)); 
 			}
 			fClassUnderTest= type;
 			fPage2.setClassUnderTest(fClassUnderTest);
@@ -467,30 +695,41 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.NewTypeWizardPage#createTypeMembers(org.eclipse.jdt.core.IType, org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
-		if (fMethodStubsButtons.isSelected(0)) 
-			createMain(type);
-		
-		if (fMethodStubsButtons.isSelected(4))
+	protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {		
+		if (fMethodStubsButtons.isSelected(IDX_CONSTRUCTOR))
 			createConstructor(type, imports); 	
 		
-		if (fMethodStubsButtons.isSelected(2)) {
+		if (fMethodStubsButtons.isSelected(IDX_SETUP)) {
 			createSetUp(type, imports);
 		}
 		
-		if (fMethodStubsButtons.isSelected(3)) {
+		if (fMethodStubsButtons.isSelected(IDX_TEARDOWN)) {
 			createTearDown(type, imports);
+		}
+		
+		if (fMethodStubsButtons.isSelected(IDX_SETUP_CLASS)) {
+			createSetUpClass(type, imports);
+		}
+		
+		if (fMethodStubsButtons.isSelected(IDX_TEARDOWN_CLASS)) {
+			createTearDownClass(type, imports);
 		}
 
 		if (fClassUnderTest != null) {
-			createTestMethodStubs(type);
+			createTestMethodStubs(type, imports);
 		}
+		
+		// todo: wait for bug 137732
+		//if (isJUnit4()) { 
+		//	imports.addStaticImport("org.junit.Assert", "*", false); //$NON-NLS-1$ //$NON-NLS-2$
+		//}
+		
 	}
 
-	private void createConstructor(IType type, ImportsManager imports) throws JavaModelException {
+	private void createConstructor(IType type, ImportsManager imports) throws CoreException {
 		ITypeHierarchy typeHierarchy= null;
 		IType[] superTypes= null;
-		String content= ""; //$NON-NLS-1$
+		String content;
 		IMethod methodTemplate= null;
 		if (type.exists()) {
 			typeHierarchy= type.newSupertypeHierarchy(null);
@@ -505,112 +744,111 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				}
 			}
 		}
+		GenStubSettings settings= JUnitStubUtility.getCodeGenerationSettings(type.getJavaProject());
+		settings.createComments= isAddComments();
+		
 		if (methodTemplate != null) {
-			GenStubSettings settings= JUnitStubUtility.getCodeGenerationSettings(type.getJavaProject());
-			settings.fCallSuper= true;				
-			settings.fMethodOverwrites= true;
-			content= JUnitStubUtility.genStub(getTypeName(), methodTemplate, settings, imports);
+			settings.callSuper= true;				
+			settings.methodOverwrites= true;
+			content= JUnitStubUtility.genStub(type.getCompilationUnit(), getTypeName(), methodTemplate, settings, null, imports);
 		} else {
 			final String delimiter= getLineDelimiter();
 			StringBuffer buffer= new StringBuffer(32);
 			buffer.append("public "); //$NON-NLS-1$
 			buffer.append(getTypeName());
-			buffer.append("("); //$NON-NLS-1$
-			buffer.append(imports.addImport("java.lang.String")); //$NON-NLS-1$
-			buffer.append(" name) {"); //$NON-NLS-1$
+			buffer.append('(');
+			if (!isJUnit4()) {
+				buffer.append(imports.addImport("java.lang.String")).append(" name"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			buffer.append(") {"); //$NON-NLS-1$
 			buffer.append(delimiter);
-			buffer.append("super(name);"); //$NON-NLS-1$
+			if (!isJUnit4()) {
+				buffer.append("super(name);").append(delimiter); //$NON-NLS-1$
+			}
+			buffer.append('}');
 			buffer.append(delimiter);
-			buffer.append("}"); //$NON-NLS-1$
-			buffer.append(delimiter);
-			content += buffer.toString();
+			content= buffer.toString();
 		}
 		type.createMethod(content, null, true, null);	
 	}
 
-	private void createMain(IType type) throws JavaModelException {
-		type.createMethod(fMethodStubsButtons.getMainMethod(getTypeName()), null, false, null);	
-	}
-
-	private void createSetUp(IType type, ImportsManager imports) throws JavaModelException {
+	private IMethod findInHierarchy(IType type, String methodName) throws JavaModelException {
 		ITypeHierarchy typeHierarchy= null;
 		IType[] superTypes= null;
-		String content= ""; //$NON-NLS-1$
-		IMethod methodTemplate= null;
 		if (type.exists()) {
 			typeHierarchy= type.newSupertypeHierarchy(null);
 			superTypes= typeHierarchy.getAllSuperclasses(type);
 			for (int i= 0; i < superTypes.length; i++) {
 				if (superTypes[i].exists()) {
-					IMethod testMethod= superTypes[i].getMethod(SETUP, new String[] {});
+					IMethod testMethod= superTypes[i].getMethod(methodName, new String[] {});
 					if (testMethod.exists()) {
-						methodTemplate= testMethod;
-						break;
+						return testMethod;
 					}
 				}
 			}
 		}
+		return null;
+	}
+	
+	private void createSetupStubs(IType type, String methodName, String annotationType, ImportsManager imports) throws CoreException {
+		String content= null;
+		IMethod methodTemplate= findInHierarchy(type, methodName);
+		String annotation= null;
+		if (isJUnit4()) {
+			annotation= '@' + imports.addImport(annotationType);
+		}
 		
 		GenStubSettings settings= JUnitStubUtility.getCodeGenerationSettings(type.getJavaProject());
+		settings.createComments= isAddComments();
+		
 		if (methodTemplate != null) {
-			settings.fCallSuper= true;
-			settings.fMethodOverwrites= true;
-			content= JUnitStubUtility.genStub(getTypeName(), methodTemplate, settings, imports);
+			settings.callSuper= true;
+			settings.methodOverwrites= true;
+			content= JUnitStubUtility.genStub(type.getCompilationUnit(), getTypeName(), methodTemplate, settings, annotation, imports);
 		} else {
 			final String delimiter= getLineDelimiter();
 			StringBuffer buffer= new StringBuffer();
 			if (settings.createComments) {
-				buffer.append("/**"); //$NON-NLS-1$
-				buffer.append(delimiter);
-				buffer.append(" * Sets up the fixture, for example, open a network connection."); //$NON-NLS-1$
-				buffer.append(delimiter);
-				buffer.append(" * This method is called before a test is executed."); //$NON-NLS-1$
-				buffer.append(delimiter);
-				buffer.append(delimiter);
-				buffer.append(" * @throws "); //$NON-NLS-1$
-				buffer.append(imports.addImport("java.lang.Exception")); //$NON-NLS-1$
-				buffer.append(delimiter);
-				buffer.append(" */"); //$NON-NLS-1$
-				buffer.append(delimiter);
+				String[] excSignature= { Signature.createTypeSignature("java.lang.Exception", true) }; //$NON-NLS-1$
+				String comment= CodeGeneration.getMethodComment(type.getCompilationUnit(), type.getElementName(), methodName, new String[0], excSignature, Signature.SIG_VOID, null, delimiter);
+				if (comment != null) {
+					buffer.append(comment);
+				}
 			}
+			if (annotation != null) {
+				buffer.append(annotation).append(delimiter);
+			}
+			
 			buffer.append("protected void "); //$NON-NLS-1$
-			buffer.append(SETUP);
+			buffer.append(methodName);
 			buffer.append("() throws "); //$NON-NLS-1$
 			buffer.append(imports.addImport("java.lang.Exception")); //$NON-NLS-1$
 			buffer.append(" {}"); //$NON-NLS-1$
 			buffer.append(delimiter);
+			content= buffer.toString();
 		}
 		type.createMethod(content, null, false, null);
 	}
 	
-	private void createTearDown(IType type, ImportsManager imports) throws JavaModelException {
-		ITypeHierarchy typeHierarchy= null;
-		IType[] superTypes= null;
-		String tearDown= ""; //$NON-NLS-1$
-		IMethod methodTemplate= null;
-		if (type.exists()) {
-			typeHierarchy= type.newSupertypeHierarchy(null);
-			superTypes= typeHierarchy.getAllSuperclasses(type);
-			for (int i= 0; i < superTypes.length; i++) {
-				if (superTypes[i].exists()) {
-					IMethod testM= superTypes[i].getMethod(TEARDOWN, new String[] {});
-					if (testM.exists()) {
-						methodTemplate= testM;
-						break;
-					}
-				}
-			}
-		}
-		if (methodTemplate != null) {
-			GenStubSettings settings= JUnitStubUtility.getCodeGenerationSettings(type.getJavaProject());
-			settings.fCallSuper= true;
-			settings.fMethodOverwrites= true;
-			tearDown= JUnitStubUtility.genStub(getTypeName(), methodTemplate, settings, imports);
-			type.createMethod(tearDown, null, false, null);	
-		}				
+	
+	
+	private void createSetUp(IType type, ImportsManager imports) throws CoreException {
+		createSetupStubs(type, "setUp", "org.junit.Before", imports); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	private void createTearDown(IType type, ImportsManager imports) throws CoreException {
+		createSetupStubs(type, "tearDown", "org.junit.After", imports); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	private void createSetUpClass(IType type, ImportsManager imports) throws CoreException {
+		createSetupStubs(type, "setUpBeforeClass", "org.junit.BeforeClass", imports); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	private void createTearDownClass(IType type, ImportsManager imports) throws CoreException {
+		createSetupStubs(type, "tearDownAfterClass", "org.junit.AfterClass", imports); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	private void createTestMethodStubs(IType type) throws JavaModelException {
+	private void createTestMethodStubs(IType type, ImportsManager imports) throws CoreException {
 		IMethod[] methods= fPage2.getCheckedMethods();
 		if (methods.length == 0)
 			return;
@@ -618,14 +856,14 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		IMethod[] allMethodsArray= fPage2.getAllMethods();
 		List allMethods= new ArrayList();
 		allMethods.addAll(Arrays.asList(allMethodsArray));
-		List overloadedMethods= getOveloadedMethods(allMethods);
+		List overloadedMethods= getOverloadedMethods(allMethods);
 			
 		/* used when for example both sum and Sum methods are present. Then
 		 * sum -> testSum
 		 * Sum -> testSum1
 		 */
 		List names= new ArrayList();				
-			for (int i = 0; i < methods.length; i++) {
+		for (int i = 0; i < methods.length; i++) {
 			IMethod method= methods[i];
 			String elementName= method.getElementName();
 			StringBuffer name= new StringBuffer(PREFIX).append(Character.toUpperCase(elementName.charAt(0))).append(elementName.substring(1));
@@ -636,11 +874,10 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				appendParameterNamesToMethodName(name, method.getParameterTypes());
 
 			replaceIllegalCharacters(name);
-			/* Should I for examples have methods
-			 * 	void foo(java.lang.StringBuffer sb) {}
+			/* void foo(java.lang.StringBuffer sb) {}
 			 *  void foo(mypackage1.StringBuffer sb) {}
 			 *  void foo(mypackage2.StringBuffer sb) {}
-			 * I will get in the test class:
+			 * ->
 			 *  testFooStringBuffer()
 			 *  testFooStringBuffer1()
 			 *  testFooStringBuffer2()
@@ -654,18 +891,21 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			}
 			testName= name.toString();
 			names.add(testName);
-			appendMethodComment(buffer, method);
+			
+			if (isAddComments()) {
+				appendMethodComment(buffer, method);
+			}
+			if (isJUnit4()) {
+				buffer.append('@').append(imports.addImport(JUnitPlugin.JUNIT4_ANNOTATION_NAME)).append(getLineDelimiter());
+			}
+			
 			buffer.append("public ");//$NON-NLS-1$ 
 			if (fPage2.getCreateFinalMethodStubsButtonSelection())
 				buffer.append("final "); //$NON-NLS-1$
 			buffer.append("void ");//$NON-NLS-1$ 
 			buffer.append(testName);
 			buffer.append("()");//$NON-NLS-1$ 
-			try {
-				appendTestMethodBody(buffer, testName, method, type.getCompilationUnit());
-			} catch (CoreException exception) {
-				throw new JavaModelException(exception);
-			}
+			appendTestMethodBody(buffer, testName, method, type.getCompilationUnit(), imports);
 			type.createMethod(buffer.toString(), null, false, null);	
 		}
 	}
@@ -694,15 +934,23 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		return getPackageFragment().findRecommendedLineSeparator();
 	}
 
-	private void appendTestMethodBody(StringBuffer buffer, String name, IMethod method, ICompilationUnit targetCu) throws CoreException {
+	private void appendTestMethodBody(StringBuffer buffer, String name, IMethod method, ICompilationUnit targetCu, ImportsManager imports) throws CoreException {
 		final String delimiter= getLineDelimiter();
-		buffer.append("{").append(delimiter); //$NON-NLS-1$
+		buffer.append('{').append(delimiter);
+		String todoTask= ""; //$NON-NLS-1$
 		if (fPage2.isCreateTasks()) {
-			final String content= CodeGeneration.getMethodBodyContent(targetCu, CLASS_UNDER_TEST, name, false, "", delimiter); //$NON-NLS-1$
-			if (content != null && content.length() > 0)
-				buffer.append(content);
+			String todoTaskTag= JUnitStubUtility.getTodoTaskTag(targetCu.getJavaProject());
+			if (todoTaskTag != null) {
+				todoTask= " // " + todoTaskTag; //$NON-NLS-1$
+			}
 		}
-		buffer.append(delimiter).append("}").append(delimiter).append(delimiter); //$NON-NLS-1$
+		String message= WizardMessages.NewTestCaseWizardPageOne_not_yet_implemented_string;
+		if (isJUnit4()) {
+			buffer.append(imports.addImport("org.junit.Assert")).append('.'); //$NON-NLS-1$
+		}
+		buffer.append(Messages.format("fail(\"{0}\");", message)).append(todoTask).append(delimiter); //$NON-NLS-1$
+		
+		buffer.append('}').append(delimiter);
 	}
 
 	private void appendParameterNamesToMethodName(StringBuffer buffer, String[] parameters) {
@@ -720,9 +968,23 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 	private void appendMethodComment(StringBuffer buffer, IMethod method) throws JavaModelException {
 		final String delimiter= getLineDelimiter();
-		final StringBuffer buf= new StringBuffer(16);
-		JavaElementLabels.getMethodLabel(method, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.M_FULLY_QUALIFIED, buf);
-		buffer.append("/*");//$NON-NLS-1$
+		final StringBuffer buf= new StringBuffer("{@link "); //$NON-NLS-1$	
+		JavaElementLabels.getTypeLabel(method.getDeclaringType(), JavaElementLabels.T_FULLY_QUALIFIED, buf);
+		buf.append('#');
+		buf.append(method.getElementName());
+		buf.append('(');
+		String[] paramTypes= JUnitStubUtility.getParameterTypeNamesForSeeTag(method);
+		for (int i= 0; i < paramTypes.length; i++) {
+			if (i != 0) {
+				buf.append(", "); //$NON-NLS-1$
+			}
+			buf.append(paramTypes[i]);
+			
+		}
+		buf.append(')');
+		buf.append('}');
+		
+		buffer.append("/**");//$NON-NLS-1$
 		buffer.append(delimiter);
 		buffer.append(" * ");//$NON-NLS-1$
 		buffer.append(Messages.format(WizardMessages.NewTestCaseWizardPageOne_comment_class_to_test, buf.toString()));
@@ -730,8 +992,9 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		buffer.append(" */");//$NON-NLS-1$
 		buffer.append(delimiter);
 	}
+	
 
-	private List getOveloadedMethods(List allMethods) {
+	private List getOverloadedMethods(List allMethods) {
 		List overloadedMethods= new ArrayList();
 		for (int i= 0; i < allMethods.size(); i++) {
 			IMethod current= (IMethod) allMethods.get(i);
@@ -764,21 +1027,6 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		
 		//if (visible) setFocus();
 	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.NewTypeWizardPage#containerChanged()
-	 */
-	protected IStatus containerChanged() {
-		IStatus containerStatus= super.containerChanged();
-		if (!containerStatus.matches(IStatus.ERROR)) {
-			IStatus projectStatus= validateIfJUnitProject();
-			if (!projectStatus.isOK()) {
-				return projectStatus;
-			}
-		}
-		return containerStatus;
-	}
-	
 	
 	/**
 	 * The method is called when the container has changed to validate if the project
@@ -789,25 +1037,27 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	protected IStatus validateIfJUnitProject() {
 		JUnitStatus status= new JUnitStatus();
 		IPackageFragmentRoot root= getPackageFragmentRoot();
-		if (root == null)
-			return status;
-		
-		IJavaProject jp= root.getJavaProject();
-		
-		try {
-			if (jp.findType(JUnitPlugin.TEST_SUPERCLASS_NAME) != null)
-				return status;
-		} catch (JavaModelException e) {
-		}
-		if (MessageDialog.openQuestion(getShell(), WizardMessages.NewTestCaseWizardPageOne_not_on_buildpath_title, WizardMessages.NewTestCaseWizardPageOne_not_on_buildpath_message)) { 
+		if (root != null) {
 			try {
-				JUnitAddLibraryProposal.addJUnitToBuildPath(getShell(), jp);
-				return status;
-			} catch(JavaModelException e) {
-				ErrorDialog.openError(getShell(), WizardMessages.NewTestCaseWizardPageOne_cannot_add_title, WizardMessages.NewTestCaseWizardPageOne_cannot_add_message, e.getStatus()); 
-			}	
+				IJavaProject project= root.getJavaProject();
+				if (isJUnit4()) {
+					if (!JUnitStubUtility.is50OrHigher(project)) {
+						status.setError(WizardMessages.NewTestCaseWizardPageOne_error_java5required);
+						return status;
+					}
+					if (project.findType(JUnitPlugin.JUNIT4_ANNOTATION_NAME) == null) {
+						status.setWarning(WizardMessages.NewTestCaseWizardPageOne__error_junit4NotOnbuildpath); 
+						return status;
+					}
+				} else {			
+					if (project.findType(JUnitPlugin.TEST_SUPERCLASS_NAME) == null) {
+						status.setWarning(WizardMessages.NewTestCaseWizardPageOne_error_junitNotOnbuildpath); 
+						return status;
+					}
+				}
+			} catch (JavaModelException e) {
+			}
 		}
-		status.setWarning(WizardMessages.NewTestCaseWizardPageOne_error_junitNotOnbuildpath); 
 		return status;
 	}
 
@@ -816,6 +1066,9 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	 */
 	protected IStatus superClassChanged() {
 		// replaces the super class validation of of the normal type wizard
+		if (isJUnit4()) {
+			return new JUnitStatus();
+		}
 		
 		String superClassName= getSuperClass();
 		JUnitStatus status= new JUnitStatus();
@@ -827,7 +1080,6 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			try {
 				IType type= resolveClassNameToType(getPackageFragmentRoot().getJavaProject(), getPackageFragment(), superClassName);	
 				if (type == null) {
-					/* TODO: is this a warning or error? */
 					status.setWarning(WizardMessages.NewTestCaseWizardPageOne_error_superclass_not_exist); 
 					return status;	
 				}
@@ -876,14 +1128,18 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	private void restoreWidgetValues() {
 		IDialogSettings settings= getDialogSettings();
 		if (settings != null) {
-			boolean generateMain= settings.getBoolean(STORE_GENERATE_MAIN);
-			fMethodStubsButtons.setSelection(0, generateMain);
-			fMethodStubsButtons.setEnabled(1, generateMain);
-			fMethodStubsButtons.setSelection(1,settings.getBoolean(STORE_USE_TESTRUNNER));
-			try {
-				fMethodStubsButtons.setComboSelection(settings.getInt(STORE_TESTRUNNER_TYPE));
-			} catch(NumberFormatException e) {}
-		}		
+			fMethodStubsButtons.setSelection(IDX_SETUP, settings.getBoolean(STORE_SETUP));
+			fMethodStubsButtons.setSelection(IDX_TEARDOWN, settings.getBoolean(STORE_TEARDOWN));
+			fMethodStubsButtons.setSelection(IDX_SETUP_CLASS, settings.getBoolean(STORE_SETUP_CLASS));
+			fMethodStubsButtons.setSelection(IDX_TEARDOWN_CLASS, settings.getBoolean(STORE_TEARDOWN_CLASS));
+			fMethodStubsButtons.setSelection(IDX_CONSTRUCTOR, settings.getBoolean(STORE_CONSTRUCTOR));
+		} else {
+			fMethodStubsButtons.setSelection(IDX_SETUP, false); //setUp
+			fMethodStubsButtons.setSelection(IDX_TEARDOWN, false); //tearDown
+			fMethodStubsButtons.setSelection(IDX_SETUP_CLASS, false); //setUpBeforeClass
+			fMethodStubsButtons.setSelection(IDX_TEARDOWN_CLASS, false); //setUpAfterClass
+			fMethodStubsButtons.setSelection(IDX_CONSTRUCTOR, false); //constructor
+		}
 	}	
 
 	/**
@@ -893,9 +1149,11 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	private void saveWidgetValues() {
 		IDialogSettings settings= getDialogSettings();
 		if (settings != null) {
-			settings.put(STORE_GENERATE_MAIN, fMethodStubsButtons.isSelected(0));
-			settings.put(STORE_USE_TESTRUNNER, fMethodStubsButtons.isSelected(1));
-			settings.put(STORE_TESTRUNNER_TYPE, fMethodStubsButtons.getComboSelection());
+			settings.put(STORE_SETUP, fMethodStubsButtons.isSelected(IDX_SETUP));
+			settings.put(STORE_TEARDOWN, fMethodStubsButtons.isSelected(IDX_TEARDOWN));
+			settings.put(STORE_SETUP_CLASS, fMethodStubsButtons.isSelected(IDX_SETUP_CLASS));
+			settings.put(STORE_TEARDOWN_CLASS, fMethodStubsButtons.isSelected(IDX_TEARDOWN_CLASS));
+			settings.put(STORE_CONSTRUCTOR, fMethodStubsButtons.isSelected(IDX_CONSTRUCTOR));
 		}
 	}
 

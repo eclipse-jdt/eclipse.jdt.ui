@@ -31,13 +31,12 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
-
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -46,6 +45,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
 
@@ -70,7 +71,7 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 	public void apply(IDocument document) {   
 		IJavaProject project= fContext.getCompilationUnit().getJavaProject();
 		try {
-			addJUnitToBuildPath(JUnitPlugin.getActiveWorkbenchShell(), project);
+			addJUnitToBuildPath(JUnitPlugin.getActiveWorkbenchShell(), project, new BusyIndicatorRunnableContext());
 			// force a reconcile
 			int offset= fContext.getSelectionOffset();
 			int length= fContext.getSelectionLength();
@@ -83,24 +84,59 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 		}
 	}
 	
-	public static void addJUnitToBuildPath(Shell shell, IJavaProject project) throws JavaModelException {
+	public static IClasspathEntry getJunit3ClasspathEntry() {
 		IProject junitProject= ResourcesPlugin.getWorkspace().getRoot().getProject("org.junit"); //$NON-NLS-1$
-		IClasspathEntry entry= null;
 		if (junitProject.exists()) {
-			entry= JavaCore.newProjectEntry(junitProject.getFullPath());
+			return JavaCore.newProjectEntry(junitProject.getFullPath());
 		} else {
 			IPath junitHome= new Path(JUnitPlugin.JUNIT_HOME).append("junit.jar"); //$NON-NLS-1$
 			IPath sourceHome= new Path(JUnitPlugin.JUNIT_SRC_HOME).append("junitsrc.zip"); //$NON-NLS-1$
-			entry= JavaCore.newVariableEntry(junitHome, sourceHome, null);
+			return JavaCore.newVariableEntry(junitHome, sourceHome, null);
 		}
-		addToClasspath(shell, project, entry);
+	}
+	
+
+	public static IClasspathEntry getJunit4ClasspathEntry() {
+		IProject junitProject= ResourcesPlugin.getWorkspace().getRoot().getProject("org.junit4"); //$NON-NLS-1$
+		if (junitProject.exists()) {
+			return JavaCore.newProjectEntry(junitProject.getFullPath());
+		} else {
+			// TODO
+			IPath bundleBase= JUnitHomeInitializer.getBundleLocation("org.junit4"); //$NON-NLS-1$
+			if (bundleBase != null) {
+				IPath jarLocation= bundleBase.append("junit-4.0.jar"); //$NON-NLS-1$
+				
+				IPath sourceBase= JUnitHomeInitializer.getSourceLocation("org.junit4"); //$NON-NLS-1$
+				IPath srcLocation= sourceBase != null ? sourceBase.append("junit-4.0-src.jar") : null; //$NON-NLS-1$
+				
+				return JavaCore.newLibraryEntry(jarLocation, srcLocation, null);
+			}
+		}
+		return null;
+	}
+	
+	
+	public static boolean addJUnitToBuildPath(Shell shell, IJavaProject project, IRunnableContext context) throws JavaModelException {
+		IClasspathEntry entry= getJunit3ClasspathEntry();
+		if (entry != null) {
+			return addToClasspath(shell, project, entry, context);
+		}
+		return false;
+	}
+	
+	public static boolean addJUnit4ToBuildPath(Shell shell, IJavaProject project, IRunnableContext context) throws JavaModelException {
+		IClasspathEntry entry= getJunit4ClasspathEntry();
+		if (entry != null) {
+			return addToClasspath(shell, project, entry, context);
+		}
+		return false;
 	}	
 	
-	private static void addToClasspath(Shell shell, final IJavaProject project, IClasspathEntry entry) throws JavaModelException {
+	private static boolean addToClasspath(Shell shell, final IJavaProject project, IClasspathEntry entry, IRunnableContext context) throws JavaModelException {
 		IClasspathEntry[] oldEntries= project.getRawClasspath();
 		for (int i= 0; i < oldEntries.length; i++) {
 			if (oldEntries[i].equals(entry)) {
-				return;
+				return true;
 			}
 		}
 		int nEntries= oldEntries.length;
@@ -109,7 +145,7 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 		newEntries[nEntries]= entry;
 		// fix for 64974 OCE in New JUnit Test Case wizard while workspace is locked [JUnit] 
 		try {
-			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
+			context.run(true, false, new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 						project.setRawClasspath(newEntries, monitor);
@@ -118,14 +154,17 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 					}
 				}
 			});
+			return true;
 		} catch (InvocationTargetException e) {
 			Throwable t = e.getTargetException();
 			if (t instanceof CoreException) {	
 				ErrorDialog.openError(shell, WizardMessages.NewTestClassWizPage_cannot_add_title, WizardMessages.NewTestClassWizPage_cannot_add_message, ((CoreException)t).getStatus());  
 			}
+			return false;
 		} catch (InterruptedException e) {
-			return;
+			return false;
 		}
+
 	}
 	
 	/* (non-Javadoc)
@@ -150,7 +189,6 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
 	 */
 	public Image getImage() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	/* (non-Javadoc)
