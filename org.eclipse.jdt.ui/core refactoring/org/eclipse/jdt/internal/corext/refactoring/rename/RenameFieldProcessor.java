@@ -384,20 +384,17 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return count;
 	}
 
-	// -------------- Preconditions -----------------------
-	
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException{
-		IField orig= (IField)JavaModelUtil.toOriginal(fField);
-		if (orig == null || ! orig.exists()){
-			String message= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_deleted, 
-								fField.getCompilationUnit().getElementName());
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
+		IField primary= (IField) fField.getPrimaryElement();
+		if (primary == null || !primary.exists()) {
+			String message= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_deleted, fField.getCompilationUnit().getElementName());
 			return RefactoringStatus.createFatalErrorStatus(message);
-		}	
-		fField= orig;
-		
+		}
+		fField= primary;
+
 		return Checks.checkIfCuBroken(fField);
 	}
-	
+
 	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		try{
 			pm.beginTask("", 18); //$NON-NLS-1$
