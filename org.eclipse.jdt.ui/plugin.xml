@@ -4066,6 +4066,16 @@
             sequence="M2+M3+Z"
             commandId="org.eclipse.jdt.ui.edit.text.java.surround.with.quickMenu"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>        
+       <key
+            platform="carbon"
+            sequence="M2+M3+Z"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+       <key
+            platform="carbon"
+            sequence="COMMAND+ALT+Z"
+            commandId="org.eclipse.jdt.ui.edit.text.java.surround.with.quickMenu"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 
 <!-- refactoring -->
       <key
