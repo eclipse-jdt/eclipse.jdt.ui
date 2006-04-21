@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
@@ -63,12 +62,12 @@ class ChangeHoverInformationControl extends SourceViewerInformationControl {
 	 * Creates a new information control.
 	 *
 	 * @param parent the shell that is the parent of this hover / control
-	 * @param orientation the orientation, allowed values are: SWT#RIGHT_TO_LEFT or SWT#LEFT_TO_RIGHT
+	 * @param shellStyle the additional styles for the shell
+	 * @param style the additional styles for the styled text widget
 	 * @param partition the initial partition type to be used for the underlying viewer
 	 */
-	public ChangeHoverInformationControl(Shell parent, int orientation, String partition) {
-		super(parent, orientation, SWT.NONE);
-		Assert.isLegal(orientation == SWT.RIGHT_TO_LEFT || orientation == SWT.LEFT_TO_RIGHT);
+	public ChangeHoverInformationControl(Shell parent, int shellStyle, int style, String partition) {
+		super(parent, shellStyle, style);
 		setViewerFont();
 		setStartingPartitionType(partition);
 	}

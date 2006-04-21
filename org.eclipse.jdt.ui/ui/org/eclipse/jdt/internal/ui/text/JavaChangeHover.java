@@ -73,13 +73,30 @@ public class JavaChangeHover extends LineChangeHover  {
 	public IInformationControlCreator getHoverControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				fInformationControl= new ChangeHoverInformationControl(parent, fOrientation, fPartition);
+				int shellStyle= SWT.TOOL | SWT.NO_TRIM | fOrientation;
+				fInformationControl= new ChangeHoverInformationControl(parent, shellStyle, SWT.NONE, fPartition);
 				fInformationControl.setHorizontalScrollPixel(fLastScrollIndex);
 				return fInformationControl;
 			}
 		};
 	}
 
+	/*
+	 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
+	 * @since 3.2
+	 */
+	public IInformationControlCreator getInformationPresenterControlCreator() {
+		return new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell parent) {
+				int shellStyle= SWT.RESIZE | SWT.TOOL | fOrientation;
+				int style= SWT.V_SCROLL | SWT.H_SCROLL;
+				fInformationControl= new ChangeHoverInformationControl(parent, shellStyle, style, fPartition);
+				fInformationControl.setHorizontalScrollPixel(fLastScrollIndex);
+				return fInformationControl;
+			}
+		};
+	}
+	
 	/*
 	 * @see org.eclipse.jface.text.source.LineChangeHover#computeLineRange(org.eclipse.jface.text.source.ISourceViewer, int, int, int)
 	 */
