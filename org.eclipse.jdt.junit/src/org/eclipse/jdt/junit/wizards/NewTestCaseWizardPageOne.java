@@ -736,10 +736,9 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			createTestMethodStubs(type, imports);
 		}
 		
-		// todo: wait for bug 137732
-		//if (isJUnit4()) { 
-		//	imports.addStaticImport("org.junit.Assert", "*", false); //$NON-NLS-1$ //$NON-NLS-2$
-		//}
+		if (isJUnit4()) { 
+			imports.addStaticImport("org.junit.Assert", "*", false); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		
 	}
 
@@ -837,7 +836,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			}
 			
 			if (isJUnit4()) {
-				buffer.append("public"); //$NON-NLS-1$
+				buffer.append("public "); //$NON-NLS-1$
 			} else {
 				buffer.append("protected "); //$NON-NLS-1$
 			}
@@ -970,9 +969,6 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			}
 		}
 		String message= WizardMessages.NewTestCaseWizardPageOne_not_yet_implemented_string;
-		if (isJUnit4()) {
-			buffer.append(imports.addStaticImport("org.junit.Assert", "*", true)).append('.'); //$NON-NLS-1$ //$NON-NLS-2$
-		}
 		buffer.append(Messages.format("fail(\"{0}\");", message)).append(todoTask).append(delimiter); //$NON-NLS-1$
 		
 		buffer.append('}').append(delimiter);
