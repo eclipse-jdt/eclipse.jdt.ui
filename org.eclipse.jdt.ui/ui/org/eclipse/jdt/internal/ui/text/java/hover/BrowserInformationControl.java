@@ -419,10 +419,6 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	 * @see IInformationControl#setLocation(Point)
 	 */
 	public void setLocation(Point location) {
-		Rectangle trim= fShell.computeTrim(0, 0, 0, 0);
-		Point textLocation= fBrowser.getLocation();
-		location.x += trim.x - textLocation.x;
-		location.y += trim.y - textLocation.y;
 		fShell.setLocation(location);
 	}
 
