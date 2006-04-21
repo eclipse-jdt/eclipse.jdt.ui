@@ -58,8 +58,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String Change_is_unsaved;
 
-	public static String Change_javaChanges;
-
 	public static String Change_same_read_only;
 
 	public static String ChangeSignatureRefactoring_add_constructor;
@@ -840,6 +838,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String JavaElementUtil_initializer;
 
+	public static String JavaMoveProcessor_change_name;
+
 	public static String JavaRefactoringDescriptor_inferred_setting_pattern;
 
 	public static String JavaRefactoringDescriptor_initialization_error;
@@ -1414,7 +1414,11 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenameMethodInInterfaceRefactoring_special_case;
 
+	public static String RenameMethodProcessor_change_name;
+
 	public static String RenameMethodProcessor_descriptor_description;
+
+	public static String RenameMethodProcessor_descriptor_description_short;
 
 	public static String RenameMethodProcessor_is_binary;
 
@@ -1452,9 +1456,15 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenamePackageProcessor_descriptor_description;
 
+	public static String RenamePackageProcessor_descriptor_description_short;
+
+	public static String RenamePackageProcessor_rename_subpackages;
+
 	public static String RenamePackageRefactoring_aleady_exists;
 
 	public static String RenamePackageRefactoring_another_name;
+
+	public static String RenamePackageRefactoring_change_name;
 
 	public static String RenamePackageRefactoring_checking;
 
@@ -1503,6 +1513,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameResourceRefactoring_invalidName;
 
 	public static String RenameSourceFolderChange_descriptor_description;
+
+	public static String RenameSourceFolderChange_descriptor_description_short;
 
 	public static String RenameSourceFolderChange_rename;
 
@@ -1568,6 +1580,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenameTypeProcessor_cannot_rename_methods_same_new_name;
 
+	public static String RenameTypeProcessor_change_name;
+
 	public static String RenameTypeProcessor_changeCategory_fields;
 
 	public static String RenameTypeProcessor_changeCategory_fields_description;
@@ -1589,6 +1603,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameTypeProcessor_creating_changes;
 
 	public static String RenameTypeProcessor_descriptor_description;
+
+	public static String RenameTypeProcessor_descriptor_description_short;
 
 	public static String RenameTypeProcessor_deselected_method_is_overridden;
 

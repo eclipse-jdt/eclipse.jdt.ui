@@ -85,6 +85,7 @@ import org.eclipse.jdt.core.search.TypeReferenceMatch;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -428,23 +429,16 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		return element;
 	}
 
-	//------------- Conditions -----------------
-	
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
-		IType orig= (IType)JavaModelUtil.toOriginal(fType);
-		if (orig == null || ! orig.exists()){
-			String message= Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_does_not_exist, 
-						new String[]{JavaModelUtil.getFullyQualifiedName(fType), fType.getCompilationUnit().getElementName()});
+		IType primary= (IType) fType.getPrimaryElement();
+		if (primary == null || !primary.exists()) {
+			String message= Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_does_not_exist, new String[] { JavaModelUtil.getFullyQualifiedName(fType), fType.getCompilationUnit().getElementName()});
 			return RefactoringStatus.createFatalErrorStatus(message);
-		}	
-		fType= orig;
-		
+		}
+		fType= primary;
 		return Checks.checkIfCuBroken(fType);
 	}
-	
-	/* non java-doc
-	 * @see Refactoring#checkInput
-	 */		
+
 	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		Assert.isNotNull(fType, "type"); //$NON-NLS-1$
 		Assert.isNotNull(getNewElementName(), "newName"); //$NON-NLS-1$
@@ -1014,7 +1008,10 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			} catch (JavaModelException exception) {
 				JavaPlugin.log(exception);
 			}
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_TYPE, project, Messages.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), getComment(), arguments, flags);
+			final String description= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description_short, fType.getElementName());
+			final String header= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()});
+			final String comment= new JavaRefactoringDescriptorComment(this, header).asString();
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_TYPE, project, description, comment, arguments, flags);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fType));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
 			if (fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
@@ -1024,7 +1021,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
 			arguments.put(ATTRIBUTE_SIMILAR_DECLARATIONS, Boolean.valueOf(fUpdateSimilarElements).toString());
 			arguments.put(ATTRIBUTE_SIMILAR_DECLARATIONS_MATCHING_STRATEGY, Integer.toString(fRenamingStrategy));
-			final DynamicValidationRefactoringChange result= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.Change_javaChanges);
+			final DynamicValidationRefactoringChange result= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.RenameTypeProcessor_change_name);
 			result.addAll(fChangeManager.getAllChanges());
 			if (willRenameCU()) {
 				IResource resource= ResourceUtil.getResource(fType);
@@ -1035,10 +1032,10 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 						renamedResourceName= getNewElementName();
 					else
 						renamedResourceName= getNewElementName() + '.' + ext;
-					result.add(new RenameResourceChange(null, ResourceUtil.getResource(fType), renamedResourceName, getComment()));
+					result.add(new RenameResourceChange(null, ResourceUtil.getResource(fType), renamedResourceName, comment));
 				} else {
 					String renamedCUName= JavaModelUtil.getRenamedCUName(fType.getCompilationUnit(), getNewElementName());
-					result.add(new RenameCompilationUnitChange(null, fType.getCompilationUnit(), renamedCUName, getComment()));
+					result.add(new RenameCompilationUnitChange(null, fType.getCompilationUnit(), renamedCUName, comment));
 				}
 			}
 			monitor.worked(1);
