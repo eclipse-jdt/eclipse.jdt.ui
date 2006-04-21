@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.Modifier;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -32,14 +29,25 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
+
 import org.eclipse.jface.text.Document;
 
 import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -49,13 +57,6 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssis
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
-import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
 public class ChangeSignatureWizard extends RefactoringWizard {
 
@@ -281,8 +282,11 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 		}
 	
 		private Control createParameterTableControl(Composite composite) {
+			Composite border= new Composite(composite, SWT.NONE);
+			border.setLayout(new GridLayout());
+			
 			String labelText= null; //no label
-			ChangeParametersControl cp= new ChangeParametersControl(composite, SWT.NONE, labelText, new IParameterListChangeListener() {
+			ChangeParametersControl cp= new ChangeParametersControl(border, SWT.NONE, labelText, new IParameterListChangeListener() {
 				public void parameterChanged(ParameterInfo parameter) {
 					update(true);
 				}
@@ -295,18 +299,21 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			}, ChangeParametersControl.Mode.CHANGE_METHOD_SIGNATURE, getChangeMethodSignatureRefactoring().getStubTypeContext());
 			cp.setLayoutData(new GridData(GridData.FILL_BOTH));
 			cp.setInput(getChangeMethodSignatureRefactoring().getParameterInfos());
-			return cp;
+			return border;
 		}
 		
 		private Control createExceptionsTableControl(Composite parent) {
-			ChangeExceptionsControl cp= new ChangeExceptionsControl(parent, SWT.NONE, new IExceptionListChangeListener() {
+			Composite border= new Composite(parent, SWT.NONE);
+			border.setLayout(new GridLayout());
+			
+			ChangeExceptionsControl cp= new ChangeExceptionsControl(border, SWT.NONE, new IExceptionListChangeListener() {
 				public void exceptionListChanged() {
 					update(true);
 				}
 			}, getChangeMethodSignatureRefactoring().getMethod().getJavaProject());
 			cp.setLayoutData(new GridData(GridData.FILL_BOTH));
 			cp.setInput(getChangeMethodSignatureRefactoring().getExceptionInfos());
-			return cp;
+			return border;
 		}
 
 		public void dispose() {
