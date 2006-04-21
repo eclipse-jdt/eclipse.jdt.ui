@@ -47,7 +47,6 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
-import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -64,7 +63,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.QuickTemplateProcessor;
 
-public class SurroundWithTemplateMenuAction extends ActionGroup implements IWorkbenchWindowPulldownDelegate2 {
+public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownDelegate2 {
 	
 	//TODO make api
 	public static final String SURROUND_WITH_QUICK_MENU_ACTION_ID= "org.eclipse.jdt.ui.edit.text.java.surround.with.quickMenu";  //$NON-NLS-1$
