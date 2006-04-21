@@ -2203,7 +2203,6 @@
             <separator name="codingGroup2"/>
             <separator name="typeGroup2"/>
             <separator name="scriptGroup"/>
-            <separator name="historyGroup"/>
          </menu>
          
 <!-- reorg group  -->
@@ -2376,7 +2375,13 @@
                id="org.eclipse.jdt.ui.actions.ChangeType">
          </action>
 
-<!-- script group  -->         
+<!-- script group  -->
+        <action
+              class="org.eclipse.jdt.internal.ui.refactoring.actions.ShowRefactoringHistoryAction"
+              definitionId="org.eclipse.ltk.ui.refactor.show.refactoring.history"
+              id="org.eclipse.ltk.ui.actions.ShowRefactoringHistory"
+              label="%Refactoring.showHistory.label"
+              menubarPath="org.eclipse.jdt.ui.refactoring.menu/scriptGroup"/>         
         <action
                class="org.eclipse.jdt.internal.ui.refactoring.actions.ApplyRefactoringScriptAction"
                definitionId="org.eclipse.ltk.ui.refactor.apply.refactoring.script"
@@ -2389,12 +2394,6 @@
               id="org.eclipse.ltk.ui.actions.CreateRefactoringScript"
               label="%Refactoring.createScript.label"
               menubarPath="org.eclipse.jdt.ui.refactoring.menu/scriptGroup"/>
-        <action
-              class="org.eclipse.jdt.internal.ui.refactoring.actions.ShowRefactoringHistoryAction"
-              definitionId="org.eclipse.ltk.ui.refactor.show.refactoring.history"
-              id="org.eclipse.ltk.ui.actions.ShowRefactoringHistory"
-              label="%Refactoring.showHistory.label"
-              menubarPath="org.eclipse.jdt.ui.refactoring.menu/historyGroup"/>
          
 <!-- =========================================================================== -->
 <!-- Source Menu                                                                 -->
