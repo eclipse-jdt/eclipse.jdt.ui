@@ -164,7 +164,6 @@ public class GenerateActionGroup extends ActionGroup {
 		fGroupName= groupName;
 				
 		ISelectionProvider provider= fSite.getSelectionProvider();
-		ISelection selection= provider.getSelection();
 	
 		fAddImport= new AddImportOnSelectionAction(editor);
 		fAddImport.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_IMPORT);
