@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RefactoringDescriptorChange;
@@ -43,21 +44,21 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 
-	public static final String ID_RENAME_ENUM_CONSTANT= "org.eclipse.jdt.ui.rename.enum.constant"; //$NON-NLS-1$
+	private static final String ID_RENAME_ENUM_CONSTANT= "org.eclipse.jdt.ui.rename.enum.constant"; //$NON-NLS-1$
+
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameEnumConstProcessor"; //$NON-NLS-1$
 
 	/**
 	 * Creates a new rename enum const processor.
-	 * @param field the enum constant, or <code>null</code> if invoked by scripting
+	 * 
+	 * @param field
+	 *            the enum constant, or <code>null</code> if invoked by
+	 *            scripting
 	 */
 	public RenameEnumConstProcessor(IField field) {
 		super(field);
 	}
 
-	public boolean isApplicable() throws CoreException {
-		return RefactoringAvailabilityTester.isRenameEnumConstAvailable(getField());
-	}
-	
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor#canEnableGetterRenaming()
 	 */
@@ -78,24 +79,10 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
 		RefactoringStatus result= Checks.checkEnumConstantName(newName);
 		if (Checks.isAlreadyNamed(getField(), newName))
-			result.addFatalError(RefactoringCoreMessages.RenameEnumConstRefactoring_another_name); 
+			result.addFatalError(RefactoringCoreMessages.RenameEnumConstRefactoring_another_name);
 		if (getField().getDeclaringType().getField(newName).exists())
-			result.addFatalError(RefactoringCoreMessages.RenameEnumConstRefactoring_const_already_defined); 
+			result.addFatalError(RefactoringCoreMessages.RenameEnumConstRefactoring_const_already_defined);
 		return result;
-	}
-
-	/*
-	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getIdentifier()
-	 */
-	public String getIdentifier() {
-		return IDENTIFIER;
-	}
-
-	/*
-	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
-	 */
-	public String getProcessorName() {
-		return Messages.format(RefactoringCoreMessages.RenameEnumConstRefactoring_name, new String[] { getCurrentElementName(), getNewElementName()}); 
 	}
 
 	/*
@@ -120,16 +107,33 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 			} catch (JavaModelException exception) {
 				JavaPlugin.log(exception);
 			}
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_ENUM_CONSTANT, project, Messages.format(RefactoringCoreMessages.RenameEnumConstProcessor_descriptor_description, new String[] { field.getElementName(), JavaElementLabels.getElementLabel(field.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), getComment(), arguments, flags);
+			final String description= Messages.format(RefactoringCoreMessages.RenameEnumConstProcessor_descriptor_description_short, fField.getElementName());
+			final String header= Messages.format(RefactoringCoreMessages.RenameEnumConstProcessor_descriptor_description, new String[] { field.getElementName(), JavaElementLabels.getElementLabel(field.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()});
+			final String comment= new JavaRefactoringDescriptorComment(this, header).asString();
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_ENUM_CONSTANT, project, description, comment, arguments, flags);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(field));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
 			arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 			arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
-			final RefactoringDescriptorChange result= new RefactoringDescriptorChange(descriptor, "", new Change[] { change}); //$NON-NLS-1$
+			final RefactoringDescriptorChange result= new RefactoringDescriptorChange(descriptor, RefactoringCoreMessages.RenameEnumConstProcessor_change_name, new Change[] { change});
 			result.markAsSynthetic();
 			change= result;
 		}
 		return change;
+	}
+
+	/*
+	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getIdentifier()
+	 */
+	public String getIdentifier() {
+		return IDENTIFIER;
+	}
+
+	/*
+	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
+	 */
+	public String getProcessorName() {
+		return Messages.format(RefactoringCoreMessages.RenameEnumConstRefactoring_name, new String[] { getCurrentElementName(), getNewElementName()});
 	}
 
 	/*
@@ -165,5 +169,9 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
+	}
+
+	public boolean isApplicable() throws CoreException {
+		return RefactoringAvailabilityTester.isRenameEnumConstAvailable(getField());
 	}
 }

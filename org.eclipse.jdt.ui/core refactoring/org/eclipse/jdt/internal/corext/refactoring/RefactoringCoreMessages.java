@@ -1326,7 +1326,11 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenameCompilationUnitRefactoring_same_name;
 
+	public static String RenameEnumConstProcessor_change_name;
+
 	public static String RenameEnumConstProcessor_descriptor_description;
+
+	public static String RenameEnumConstProcessor_descriptor_description_short;
 
 	public static String RenameEnumConstRefactoring_another_name;
 
@@ -1344,11 +1348,15 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenameFieldRefactoring_another_name2;
 
+	public static String RenameFieldRefactoring_change_name;
+
 	public static String RenameFieldRefactoring_checking;
 
 	public static String RenameFieldRefactoring_declared_in_supertype;
 
 	public static String RenameFieldRefactoring_deleted;
+
+	public static String RenameFieldRefactoring_descriptor_description_short;
 
 	public static String RenameFieldRefactoring_field_already_defined;
 
@@ -1365,6 +1373,10 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameFieldRefactoring_overridden_or_overrides;
 
 	public static String RenameFieldRefactoring_searching;
+
+	public static String RenameFieldRefactoring_setting_rename_getter;
+
+	public static String RenameFieldRefactoring_setting_rename_settter;
 
 	public static String RenameFieldRefactoring_should_start_lowercase;
 
@@ -1383,6 +1395,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameJavaProjectChange_rename;
 
 	public static String RenameJavaProjectChange_update;
+
+	public static String RenameJavaProjectProcessor_descriptor_description_short;
 
 	public static String RenameJavaProjectProcessor_folder_already_exists;
 

@@ -87,17 +87,15 @@ public final class JavaRefactoringDescriptorComment {
 	public String asString() {
 		final StringBuffer buffer= new StringBuffer(256);
 		buffer.append(fHeader);
-		if (fUserSettings.size() + fInferredSettings.size() > 0) {
-			for (final Iterator iterator= fUserSettings.iterator(); iterator.hasNext();) {
-				final String setting= (String) iterator.next();
-				buffer.append(LINE_DELIMITER);
-				buffer.append(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_user_setting_pattern, setting));
-			}
-			for (final Iterator iterator= fInferredSettings.iterator(); iterator.hasNext();) {
-				final String setting= (String) iterator.next();
-				buffer.append(LINE_DELIMITER);
-				buffer.append(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_inferred_setting_pattern, setting));
-			}
+		for (final Iterator iterator= fInferredSettings.iterator(); iterator.hasNext();) {
+			final String setting= (String) iterator.next();
+			buffer.append(LINE_DELIMITER);
+			buffer.append(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_inferred_setting_pattern, setting));
+		}
+		for (final Iterator iterator= fUserSettings.iterator(); iterator.hasNext();) {
+			final String setting= (String) iterator.next();
+			buffer.append(LINE_DELIMITER);
+			buffer.append(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_user_setting_pattern, setting));
 		}
 		return buffer.toString();
 	}
