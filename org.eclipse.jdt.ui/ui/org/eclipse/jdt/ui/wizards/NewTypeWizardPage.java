@@ -121,6 +121,7 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jdt.ui.CodeStyleConfiguration;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -180,7 +181,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		private ImportRewrite fImportsRewrite;
 				
 		/* package */ ImportsManager(CompilationUnit astRoot) throws CoreException {
-			fImportsRewrite= StubUtility.createImportRewrite(astRoot, true);
+			fImportsRewrite= CodeStyleConfiguration.createImportRewrite(astRoot, true);
 		}
 
 		/* package */ ICompilationUnit getCompilationUnit() {
@@ -213,6 +214,24 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		 */				
 		public String addImport(ITypeBinding typeBinding) {
 			return fImportsRewrite.addImport(typeBinding);
+		}
+		
+		/**
+		 * Adds a new import declaration for a static type that is sorted in the existing imports.
+		 * If an import already exists or the import would conflict with an import
+		 * of an other static import with the same simple name, the import is not added.
+		 * 
+		 * @param declaringTypeName The qualified name of the static's member declaring type
+		 * @param simpleName the simple name of the member; either a field or a method name.
+		 * @param isField <code>true</code> specifies that the member is a field, <code>false</code> if it is a
+		 * method.
+		 * @return returns either the simple member name if the import was successful or else the qualified name if
+		 * an import conflict prevented the import.
+		 * 
+		 * @since 3.2
+		 */				
+		public String addStaticImport(String declaringTypeName, String simpleName, boolean isField) {
+			return fImportsRewrite.addStaticImport(declaringTypeName, simpleName, isField);
 		}
 				
 		/* package */ void create(boolean needsSave, IProgressMonitor monitor) throws CoreException {
