@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.refactoring.RenameTypeArguments;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -374,8 +375,6 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 			return fileName;
 		return fileName.substring(0, fileName.lastIndexOf(".")); //$NON-NLS-1$
 	}
-	
-	//--- changes
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		// renaming the file is taken care of in renameTypeRefactoring
@@ -383,13 +382,15 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 			return fRenameTypeProcessor.createChange(pm);
 		fRenameTypeProcessor= null;
 		final String newName= getNewElementName();
-		IResource resource= ResourceUtil.getResource(fCu);
-		final String comment= getComment();
+		final IResource resource= ResourceUtil.getResource(fCu);
 		if (resource != null && resource.isLinked()) {
 			final Map arguments= new HashMap();
 			final IProject project= resource.getProject();
 			final String name= project.getName();
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(RenameResourceProcessor.ID_RENAME_RESOURCE, name, Messages.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { resource.getFullPath().toString(), newName}), comment, arguments, (RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE));
+			final String description= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description_short, resource.getName());
+			final String header= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { resource.getFullPath().toString(), newName});
+			final String comment= new JavaRefactoringDescriptorComment(this, header).asString();
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(RenameResourceProcessor.ID_RENAME_RESOURCE, name, description, comment, arguments, (RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, JavaRefactoringDescriptor.resourceToHandle(name, resource));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, newName);
 			return new DynamicValidationStateChange(new RenameResourceChange(descriptor, resource, newName, comment));
@@ -404,7 +405,11 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		} else
 			label= fCu.getElementName();
 		final Map arguments= new HashMap();
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(RenameCompilationUnitProcessor.ID_RENAME_COMPILATION_UNIT, fCu.getJavaProject().getElementName(), Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { label, newName}), comment, arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+		final String name= fCu.getJavaProject().getElementName();
+		final String description= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description_short, fCu.getElementName());
+		final String header= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { label, newName});
+		final String comment= new JavaRefactoringDescriptorComment(this, header).asString();
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(RenameCompilationUnitProcessor.ID_RENAME_COMPILATION_UNIT, name, description, comment, arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, newName);
 		return new DynamicValidationStateChange(new RenameCompilationUnitChange(descriptor, fCu, newName, comment));

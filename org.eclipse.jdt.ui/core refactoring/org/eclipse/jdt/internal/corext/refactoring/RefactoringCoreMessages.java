@@ -840,7 +840,37 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String JavaElementUtil_initializer;
 
+	public static String JavaRefactoringDescriptor_inferred_setting_pattern;
+
 	public static String JavaRefactoringDescriptor_initialization_error;
+
+	public static String JavaRefactoringDescriptor_keep_original;
+
+	public static String JavaRefactoringDescriptor_keep_original_deprecated;
+
+	public static String JavaRefactoringDescriptor_not_available;
+
+	public static String JavaRefactoringDescriptor_original_element_pattern;
+
+	public static String JavaRefactoringDescriptor_original_elements;
+
+	public static String JavaRefactoringDescriptor_qualified_names;
+
+	public static String JavaRefactoringDescriptor_qualified_names_pattern;
+
+	public static String JavaRefactoringDescriptor_rename_similar;
+
+	public static String JavaRefactoringDescriptor_rename_similar_embedded;
+
+	public static String JavaRefactoringDescriptor_rename_similar_suffix;
+
+	public static String JavaRefactoringDescriptor_renamed_element_pattern;
+
+	public static String JavaRefactoringDescriptor_textual_occurrences;
+
+	public static String JavaRefactoringDescriptor_update_references;
+
+	public static String JavaRefactoringDescriptor_user_setting_pattern;
 
 	public static String LocalTypeAnalyzer_local_type_from_outside;
 
@@ -1284,6 +1314,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenameCompilationUnitChange_descriptor_description;
 
+	public static String RenameCompilationUnitChange_descriptor_description_short;
+
 	public static String RenameCompilationUnitChange_name;
 
 	public static String RenameCompilationUnitRefactoring_name;
@@ -1362,6 +1394,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenameLocalVariableProcessor_descriptor_description;
 
+	public static String RenameLocalVariableProcessor_descriptor_description_short;
+
 	public static String RenameMethodInInterfaceRefactoring_already_defined;
 
 	public static String RenameMethodInInterfaceRefactoring_special_case;
@@ -1438,6 +1472,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenameResourceChange_descriptor_description;
 
+	public static String RenameResourceChange_descriptor_description_short;
+
 	public static String RenameResourceChange_does_not_exist;
 
 	public static String RenameResourceChange_name;
@@ -1484,7 +1520,11 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenameTempRefactoring_rename;
 
+	public static String RenameTypeParameterProcessor_change_name;
+
 	public static String RenameTypeParameterProcessor_descriptor_description;
+
+	public static String RenameTypeParameterProcessor_descriptor_description_short;
 
 	public static String RenameTypeParameterProcessor_name;
 

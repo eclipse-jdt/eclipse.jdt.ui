@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -73,7 +74,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class RenameLocalVariableProcessor extends JavaRenameProcessor implements INameUpdating, IReferenceUpdating {
 
-	public static final String ID_RENAME_LOCAL_VARIABLE= "org.eclipse.jdt.ui.rename.local.variable"; //$NON-NLS-1$
+	private static final String ID_RENAME_LOCAL_VARIABLE= "org.eclipse.jdt.ui.rename.local.variable"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 
 	private ILocalVariable fLocalVariable;
@@ -214,14 +215,10 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating#getNewElement()
 	 */
-	public Object getNewElement(){
+	public Object getNewElement() {
 		return null; //cannot create an ILocalVariable
 	}
-	
-	
-	/* non java-doc
-	 * @see Refactoring#checkActivation(IProgressMonitor)
-	 */
+
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		initAST();
 		if (fTempDeclarationNode == null || fTempDeclarationNode.resolveBinding() == null)
@@ -363,12 +360,15 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 				IJavaProject javaProject= fCu.getJavaProject();
 				if (javaProject != null)
 					project= javaProject.getElementName();
-				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_LOCAL_VARIABLE, project, Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, JavaElementLabels.getElementLabel(fLocalVariable.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), fNewName}), getComment(), arguments, RefactoringDescriptor.NONE);
+				final String header= Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, JavaElementLabels.getElementLabel(fLocalVariable.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), fNewName});
+				final String description= Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description_short, fCurrentName);
+				final String comment= new JavaRefactoringDescriptorComment(this, header).asString();
+				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_LOCAL_VARIABLE, project, description, comment, arguments, RefactoringDescriptor.NONE);
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(range.getOffset()).toString() + " " + new Integer(range.getLength()).toString()); //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
-				final RefactoringDescriptorChange result= new RefactoringDescriptorChange(descriptor, "", new Change[] { change}); //$NON-NLS-1$
+				final RefactoringDescriptorChange result= new RefactoringDescriptorChange(descriptor, RefactoringCoreMessages.RenameTempRefactoring_rename, new Change[] { change});
 				result.markAsSynthetic();
 				change= result;
 			}

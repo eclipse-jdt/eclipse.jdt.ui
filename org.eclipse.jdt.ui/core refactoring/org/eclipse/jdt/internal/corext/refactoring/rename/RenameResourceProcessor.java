@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -52,7 +53,7 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 
 public class RenameResourceProcessor extends RenameProcessor implements IScriptableRefactoring, ICommentProvider, INameUpdating {
 
-	public static final String ID_RENAME_RESOURCE= "org.eclipse.jdt.ui.rename.resource"; //$NON-NLS-1$
+	static final String ID_RENAME_RESOURCE= "org.eclipse.jdt.ui.rename.resource"; //$NON-NLS-1$
 	private IResource fResource;
 	private String fNewElementName;
 	private String fComment;
@@ -179,7 +180,10 @@ public class RenameResourceProcessor extends RenameProcessor implements IScripta
 		try {
 			final Map arguments= new HashMap();
 			final IProject project= fResource.getProject();
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(RenameResourceProcessor.ID_RENAME_RESOURCE, project.getName(), Messages.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { fResource.getFullPath().toString(), getNewElementName()}), fComment, arguments, (RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE));
+			final String header= Messages.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { fResource.getFullPath().toString(), getNewElementName()});
+			final String description= Messages.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description_short, fResource.getName());
+			final String comment= new JavaRefactoringDescriptorComment(this, header).asString();
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(RenameResourceProcessor.ID_RENAME_RESOURCE, project.getName(), description, comment, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, JavaRefactoringDescriptor.resourceToHandle(project.getName(), fResource));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
 			return new DynamicValidationStateChange(new RenameResourceChange(descriptor, fResource, getNewElementName(), fComment));
