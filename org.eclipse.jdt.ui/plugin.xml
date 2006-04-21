@@ -4063,7 +4063,7 @@
             commandId="org.eclipse.jdt.ui.correction.assignToField.assist"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>              
        <key
-            sequence="M1+M2+Z"
+            sequence="M2+M3+Z"
             commandId="org.eclipse.jdt.ui.edit.text.java.surround.with.quickMenu"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>        
 
