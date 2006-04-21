@@ -46,7 +46,7 @@ final public class TemplateInformationControlCreator implements IInformationCont
 	 * @see org.eclipse.jface.text.IInformationControlCreator#createInformationControl(org.eclipse.swt.widgets.Shell)
 	 */
 	public IInformationControl createInformationControl(Shell parent) {
-		fControl= new SourceViewerInformationControl(parent, fOrientation, SWT.NONE);
+		fControl= new SourceViewerInformationControl(parent, SWT.TOOL | fOrientation, SWT.NONE);
 		fControl.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
 				fControl= null;
