@@ -219,7 +219,6 @@ public class OpenViewActionGroup extends ActionGroup {
 			appendToGroup(menu, fOpenTypeHierarchy);
         if (!fIsCallHiararchyViewerOwner)
             appendToGroup(menu, fOpenCallHierarchy);
-		appendToGroup(menu, fOpenSuperImplementation);
 		IStructuredSelection selection= getStructuredSelection();
 		if (getShowProperties() && fOpenPropertiesDialog != null && fOpenPropertiesDialog.isEnabled() && selection != null &&fOpenPropertiesDialog.isApplicableForSelection(selection))
 			menu.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, fOpenPropertiesDialog);
