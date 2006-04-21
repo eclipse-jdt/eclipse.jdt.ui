@@ -2673,37 +2673,13 @@
                id="org.eclipse.jdt.ui.actions.OpenJavaSearchPage">
          </action>
 <!-- context menu group  -->
-         <menu
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file.quickMenu"
                label="%occurrencesSubMenu.label"
-               path="org.eclipse.search.menu/contextMenuActionsGroup"
-               id="occurrencesSubMenu">
-            <separator
-                  name="group1">
-            </separator>
-         </menu>
-         <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.search.implement.occurrences"
-               label="%ImplementOccurrences.label"
-               retarget="true"
-               menubarPath="org.eclipse.search.menu/occurrencesSubMenu/group1"
-               allowLabelUpdate="true"
-               id="org.eclipse.jdt.ui.actions.ImplementOccurrences">
-         </action>
-         <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.search.exception.occurrences"
-               label="%ExceptionOccurrences.label"
-               retarget="true"
-               menubarPath="org.eclipse.search.menu/occurrencesSubMenu/group1"
-               allowLabelUpdate="true"
-               id="org.eclipse.jdt.ui.actions.ExceptionOccurrences">
-         </action>
-         <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
-               label="%OccurrencesInFile.label"
-               retarget="true"
-               menubarPath="org.eclipse.search.menu/occurrencesSubMenu/group1"
-               allowLabelUpdate="true"
-               id="org.eclipse.jdt.ui.actions.OccurrencesInFile">
+               style="pulldown"
+               class="org.eclipse.jdt.internal.ui.actions.OccurrencesSearchMenuAction"
+               menubarPath="org.eclipse.search.menu/contextMenuActionsGroup"
+               id="org.eclipse.jdt.internal.ui.actions.OccurrencesSearchMenuAction">
          </action>
          <menu
                label="%writeAccessSubMenu.label"

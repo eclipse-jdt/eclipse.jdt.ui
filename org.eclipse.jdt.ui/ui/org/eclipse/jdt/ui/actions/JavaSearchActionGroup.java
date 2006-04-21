@@ -138,8 +138,6 @@ public class JavaSearchActionGroup extends ActionGroup {
 				fReadAccessGroup.fillContextMenu(menu);
 				fWriteAccessGroup.fillContextMenu(menu);
 			}
-			fOccurrencesGroup.fillContextMenu(menu);
-
 		} else {
 			IMenuManager target= menu;
 			IMenuManager searchSubMenu= null;
@@ -155,10 +153,11 @@ public class JavaSearchActionGroup extends ActionGroup {
 			fImplementorsGroup.fillContextMenu(target);
 			fReadAccessGroup.fillContextMenu(target);
 			fWriteAccessGroup.fillContextMenu(target);
-			fOccurrencesGroup.fillContextMenu(target);
 			
-			if (searchSubMenu != null)
+			if (searchSubMenu != null) {
+				fOccurrencesGroup.fillContextMenu(target);
 				searchSubMenu.add(new Separator());
+			}
 			
 			// no other way to find out if we have added items.
 			if (searchSubMenu != null && searchSubMenu.getItems().length > 2) {		

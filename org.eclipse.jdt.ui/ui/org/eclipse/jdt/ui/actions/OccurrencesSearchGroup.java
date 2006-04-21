@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -20,17 +19,17 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IKeyBindingService;
-import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.part.IPageSite;
+import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
-import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
@@ -41,40 +40,10 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * <p>
- * The quick menu shortcut is currently not visible in the global sub-menu,
- * see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=79162
- * </p>
- * <p>
- * The quick menu is currently not working for <code>IPage</code>s, e.g. Outline pages
- * see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=53812
- * </p>
  * 
  * @since 3.1
  */
 public class OccurrencesSearchGroup extends ActionGroup  {
-
-	private static final String MENU_TEXT= SearchMessages.group_occurrences; 
-
-	private class QuickAccessAction extends JDTQuickMenuAction {
-		public QuickAccessAction(JavaEditor editor) {
-			super(editor, IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE_QUICK_MENU); 
-		}
-		protected void fillMenu(IMenuManager menu) {
-			fillQuickMenu(menu);
-		}
-	}
-	
-	private static class NoActionAvailable extends Action {
-		public NoActionAvailable() {
-			setEnabled(false);
-			setText(SearchMessages.group_occurrences_quickMenu_noEntriesAvailable); 
-		}
-	}
-	
-	private Action fNoActionAvailable= new NoActionAvailable(); 
-	private QuickAccessAction fQuickAccessAction;
-	private IKeyBindingService fKeyBindingService;
 
 	private IWorkbenchSite fSite;
 	private JavaEditor fEditor;
@@ -114,17 +83,6 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 		registerAction(fOccurrencesInFileAction, provider, selection);
 		registerAction(fExceptionOccurrencesAction, provider, selection);
 		registerAction(fFindImplementorOccurrencesAction, provider, selection);
-		
-		if (site instanceof IWorkbenchPartSite) {
-			fQuickAccessAction= new QuickAccessAction(null);
-			fKeyBindingService= ((IWorkbenchPartSite)site).getKeyBindingService();
-			fKeyBindingService.registerAction(fQuickAccessAction);
-		} else if (site instanceof IPageSite) {
-			/*
-			 * FIXME: Can't get key binding service for page site (e.g. Outline view)
-			 * 		  see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=53812
-			 */  
-		}
 	}
 
 	/**
@@ -150,10 +108,6 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 		fFindImplementorOccurrencesAction= new FindImplementOccurrencesAction(fEditor);
 		fFindImplementorOccurrencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_IMPLEMENT_OCCURRENCES_IN_FILE);
 		fEditor.setAction("SearchImplementOccurrences", fFindImplementorOccurrencesAction); //$NON-NLS-1$
-		
-		fQuickAccessAction= new QuickAccessAction(editor);
-		fKeyBindingService= editor.getEditorSite().getKeyBindingService();
-		fKeyBindingService.registerAction(fQuickAccessAction);
 	}
 
 	private void registerAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection){
@@ -161,7 +115,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 		provider.addSelectionChangedListener(action);
 	}
 
-	private IAction[] getActions(ISelection sel) {
+	private IAction[] getActions() {
 		IAction[] actions= new IAction[3];
 		actions[0]= fOccurrencesInFileAction;
 		actions[1]= fExceptionOccurrencesAction;
@@ -173,12 +127,15 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 	 * Method declared on ActionGroup.
 	 */
 	public void fillContextMenu(IMenuManager manager) {
-		String menuText= MENU_TEXT;
-		if (fQuickAccessAction != null)
-			menuText= fQuickAccessAction.addShortcut(menuText);
+		String menuText= SearchMessages.group_occurrences;
+		String shortcut= getShortcutString();
+		if (shortcut != null) {
+			String[] args= new String[] { menuText, shortcut};
+			menuText= Messages.format(ActionMessages.QuickMenuAction_menuTextWithShortcut, args); 
+		}
 
 		MenuManager javaSearchMM= new MenuManager(menuText, IContextMenuConstants.GROUP_SEARCH);
-		IAction[] actions= getActions(getContext().getSelection());
+		IAction[] actions= getActions();
 		for (int i= 0; i < actions.length; i++) {
 			IAction action= actions[i];
 			if (action.isEnabled())
@@ -189,25 +146,11 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 			manager.appendToGroup(fGroupId, javaSearchMM);
 	}
 	
-	private void fillQuickMenu(IMenuManager manager) {
-		ISelection sel= null;
-		ActionContext context= getContext();
-		if (context != null)
-			sel= context.getSelection();
-		else {
-			if (fEditor != null)
-				sel= fEditor.getSelectionProvider().getSelection();
-			else
-				sel= fSite.getSelectionProvider().getSelection();
-		}
-		IAction[] actions= getActions(sel);
-		for (int i= 0; i < actions.length; i++) {
-			IAction action= actions[i];
-			if (action.isEnabled())
-				manager.add(action);
-		}
-		if (manager.isEmpty())
-			manager.add(fNoActionAvailable);
+	private String getShortcutString() {
+		IBindingService bindingService= (IBindingService)PlatformUI.getWorkbench().getAdapter(IBindingService.class);
+		if (bindingService == null)
+			return null;
+		return bindingService.getBestActiveBindingFormattedFor(IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE_QUICK_MENU);
 	}
 
 	/* 
@@ -235,12 +178,6 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 		fExceptionOccurrencesAction= null;
 		fOccurrencesInFileAction= null;
 		updateGlobalActionHandlers();
-		
-		if (fQuickAccessAction != null && fKeyBindingService != null)
-			fKeyBindingService.unregisterAction(fQuickAccessAction);
-		fKeyBindingService= null;
-		fQuickAccessAction= null;
-		
 	}
 
 	private void updateGlobalActionHandlers() {
@@ -256,5 +193,3 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 			provider.removeSelectionChangedListener(action);
 	}
 }
-
-
