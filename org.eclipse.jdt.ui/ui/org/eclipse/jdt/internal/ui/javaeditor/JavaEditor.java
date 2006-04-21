@@ -852,11 +852,27 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				String contentType= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
 
 				IInformationControlCreator controlCreator= null;
-				if (annotationHover instanceof IInformationProviderExtension2)
-					controlCreator= ((IInformationProviderExtension2) annotationHover).getInformationPresenterControlCreator();
-				else if (annotationHover instanceof IAnnotationHoverExtension)
-					controlCreator= ((IAnnotationHoverExtension) annotationHover).getHoverControlCreator();
-
+				
+				/* 
+				 * XXX: This is a hack to avoid API changes at the end of 3.2,
+				 * and should be fixed for 3.3, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=137967
+				 */
+				if ("org.eclipse.jface.text.source.projection.ProjectionAnnotationHover".equals(annotationHover.getClass().getName())) { //$NON-NLS-1$
+					controlCreator= new IInformationControlCreator() {
+						public IInformationControl createInformationControl(Shell shell) {
+							int shellStyle= SWT.RESIZE | SWT.TOOL | getOrientation();
+							int style= SWT.V_SCROLL | SWT.H_SCROLL;
+							return new SourceViewerInformationControl(shell, shellStyle, style);
+						}
+					};
+					
+				} else {
+					if (annotationHover instanceof IInformationProviderExtension2)
+						controlCreator= ((IInformationProviderExtension2) annotationHover).getInformationPresenterControlCreator();
+					else if (annotationHover instanceof IAnnotationHoverExtension)
+						controlCreator= ((IAnnotationHoverExtension) annotationHover).getHoverControlCreator();
+				}
+				
 				IInformationProvider informationProvider= new InformationProvider(new Region(offset, 0), hoverInfo, controlCreator);
 
 				fInformationPresenter.setOffset(offset);
