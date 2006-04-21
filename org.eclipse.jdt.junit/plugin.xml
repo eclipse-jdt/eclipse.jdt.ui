@@ -282,11 +282,11 @@
          point="org.eclipse.jdt.core.classpathVariableInitializer">
       <classpathVariableInitializer
             variable="JUNIT_HOME"
-            class="org.eclipse.jdt.internal.junit.ui.JUnitHomeInitializer">
+            class="org.eclipse.jdt.internal.junit.buildpath.JUnitHomeInitializer">
       </classpathVariableInitializer>
       <classpathVariableInitializer
             variable="JUNIT_SRC_HOME"
-            class="org.eclipse.jdt.internal.junit.ui.JUnitHomeInitializer">
+            class="org.eclipse.jdt.internal.junit.buildpath.JUnitHomeInitializer">
       </classpathVariableInitializer>
    </extension>
    <extension
@@ -402,6 +402,25 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer class="org.eclipse.jdt.internal.junit.ui.JunitPreferenceInitializer"/>
+   </extension>
+   
+    <!-- JUnit Container -->
+   
+   <extension
+      point="org.eclipse.jdt.core.classpathContainerInitializer">
+      <classpathContainerInitializer
+            class="org.eclipse.jdt.internal.junit.buildpath.JUnitContainerInitializer"
+            id="org.eclipse.jdt.junit.JUNIT_CONTAINER">
+      </classpathContainerInitializer>
+   </extension>
+   
+   <extension
+         point="org.eclipse.jdt.ui.classpathContainerPage">
+      <classpathContainerPage
+            name="%JUnitContainerName"
+            class="org.eclipse.jdt.internal.junit.buildpath.JUnitContainerWizardPage"
+            id="org.eclipse.jdt.junit.JUNIT_CONTAINER">
+      </classpathContainerPage>
    </extension>
    
 </plugin>

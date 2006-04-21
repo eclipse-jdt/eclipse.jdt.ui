@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,8 +73,8 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssis
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 
 import org.eclipse.jdt.internal.junit.Messages;
+import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
 import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
-import org.eclipse.jdt.internal.junit.ui.JUnitAddLibraryProposal;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
@@ -110,6 +110,8 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	private static final String COMPLIANCE_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"; //$NON-NLS-1$
 	private static final String BUILD_PATH_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage"; //$NON-NLS-1$
 	private static final Object BUILD_PATH_KEY_ADD_ENTRY= "add_classpath_entry"; //$NON-NLS-1$
+	private static final Object BUILD_PATH_BLOCK= "block_until_buildpath_applied"; //$NON-NLS-1$
+
 	private static final String KEY_NO_LINK= "PropertyAndPreferencePage.nolink"; //$NON-NLS-1$
 
 	private final static String QUESTION_MARK_TAG= "Q"; //$NON-NLS-1$
@@ -457,6 +459,8 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		Button junti3Toggle= new Button(inner, SWT.RADIO);
 		junti3Toggle.setText(WizardMessages.NewTestCaseWizardPageOne_junit3_radio_label);
 		junti3Toggle.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1));
+		junti3Toggle.setSelection(!fIsJunit4);
+		junti3Toggle.setEnabled(fIsJunit4Enabled);
 		
 		fJUnit4Toggle= new Button(inner, SWT.RADIO);
 		fJUnit4Toggle.setText(WizardMessages.NewTestCaseWizardPageOne_junit4_radio_label);
@@ -510,25 +514,38 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		if ("a3".equals(data)) { // add and configure JUnit 3 //$NON-NLS-1$
 			String id= BUILD_PATH_PAGE_ID;
 			Map input= new HashMap();
-			IClasspathEntry newEntry= JUnitAddLibraryProposal.getJunit3ClasspathEntry();
+			IClasspathEntry newEntry= BuildPathSupport.getJUnit3ClasspathEntry();
 			input.put(BUILD_PATH_KEY_ADD_ENTRY, newEntry);
+			input.put(BUILD_PATH_BLOCK, Boolean.TRUE);
 			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, id, new String[] { id }, input).open();
 		} else if ("a4".equals(data)) { // add and configure JUnit 4 //$NON-NLS-1$
 			String id= BUILD_PATH_PAGE_ID;
 			Map input= new HashMap();
-			IClasspathEntry newEntry= JUnitAddLibraryProposal.getJunit4ClasspathEntry();
+			IClasspathEntry newEntry= BuildPathSupport.getJUnit4ClasspathEntry();
 			input.put(BUILD_PATH_KEY_ADD_ENTRY, newEntry);
+			input.put(BUILD_PATH_BLOCK, Boolean.TRUE);
 			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, id, new String[] { id }, input).open();
 		} else if ("b".equals(data)) { // open build path //$NON-NLS-1$
 			String id= BUILD_PATH_PAGE_ID;
-			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, id, new String[] { id }, null).open();
+			Map input= new HashMap();
+			input.put(BUILD_PATH_BLOCK, Boolean.TRUE);
+			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, id, new String[] { id }, input).open();
 		} else if ("c".equals(data)) { // open compliance //$NON-NLS-1$
 			String buildPath= BUILD_PATH_PAGE_ID;
 			String complianceId= COMPLIANCE_PAGE_ID;
 			Map input= new HashMap();
+			input.put(BUILD_PATH_BLOCK, Boolean.TRUE);
 			input.put(KEY_NO_LINK, Boolean.TRUE);
-			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, buildPath, new String[] { buildPath, complianceId  }, data).open();
+			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, complianceId, new String[] { buildPath, complianceId  }, data).open();
 		}
+		try {
+			IClasspathEntry[] rawClasspath= javaProject.getRawClasspath();
+			for (int i= 0; i < rawClasspath.length; i++) {
+				System.out.println(rawClasspath[i].getPath());
+			}
+		} catch (JavaModelException e) {
+		}
+		
 		updateBuildPathMessage();
 	}
 
@@ -790,7 +807,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		return null;
 	}
 	
-	private void createSetupStubs(IType type, String methodName, String annotationType, ImportsManager imports) throws CoreException {
+	private void createSetupStubs(IType type, String methodName, boolean isStatic, String annotationType, ImportsManager imports) throws CoreException {
 		String content= null;
 		IMethod methodTemplate= findInHierarchy(type, methodName);
 		String annotation= null;
@@ -819,7 +836,15 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				buffer.append(annotation).append(delimiter);
 			}
 			
-			buffer.append("protected void "); //$NON-NLS-1$
+			if (isJUnit4()) {
+				buffer.append("public"); //$NON-NLS-1$
+			} else {
+				buffer.append("protected "); //$NON-NLS-1$
+			}
+			if (isStatic) {
+				buffer.append("static "); //$NON-NLS-1$
+			}
+			buffer.append("void "); //$NON-NLS-1$
 			buffer.append(methodName);
 			buffer.append("() throws "); //$NON-NLS-1$
 			buffer.append(imports.addImport("java.lang.Exception")); //$NON-NLS-1$
@@ -833,19 +858,19 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	
 	
 	private void createSetUp(IType type, ImportsManager imports) throws CoreException {
-		createSetupStubs(type, "setUp", "org.junit.Before", imports); //$NON-NLS-1$ //$NON-NLS-2$
+		createSetupStubs(type, "setUp", false, "org.junit.Before", imports); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	private void createTearDown(IType type, ImportsManager imports) throws CoreException {
-		createSetupStubs(type, "tearDown", "org.junit.After", imports); //$NON-NLS-1$ //$NON-NLS-2$
+		createSetupStubs(type, "tearDown", false, "org.junit.After", imports); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	private void createSetUpClass(IType type, ImportsManager imports) throws CoreException {
-		createSetupStubs(type, "setUpBeforeClass", "org.junit.BeforeClass", imports); //$NON-NLS-1$ //$NON-NLS-2$
+		createSetupStubs(type, "setUpBeforeClass", true, "org.junit.BeforeClass", imports); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	private void createTearDownClass(IType type, ImportsManager imports) throws CoreException {
-		createSetupStubs(type, "tearDownAfterClass", "org.junit.AfterClass", imports); //$NON-NLS-1$ //$NON-NLS-2$
+		createSetupStubs(type, "tearDownAfterClass", true, "org.junit.AfterClass", imports); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private void createTestMethodStubs(IType type, ImportsManager imports) throws CoreException {
@@ -946,7 +971,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		}
 		String message= WizardMessages.NewTestCaseWizardPageOne_not_yet_implemented_string;
 		if (isJUnit4()) {
-			buffer.append(imports.addImport("org.junit.Assert")).append('.'); //$NON-NLS-1$
+			buffer.append(imports.addStaticImport("org.junit.Assert", "*", true)).append('.'); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		buffer.append(Messages.format("fail(\"{0}\");", message)).append(todoTask).append(delimiter); //$NON-NLS-1$
 		

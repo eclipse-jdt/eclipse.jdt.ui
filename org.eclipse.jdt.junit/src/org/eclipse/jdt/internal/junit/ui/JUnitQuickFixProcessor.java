@@ -11,7 +11,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
+import java.util.ArrayList;
+
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -19,7 +22,12 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
 
+import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
+
 public class JUnitQuickFixProcessor implements IQuickFixProcessor {
+	
+	private static final int JUNIT3= 1;
+	private static final int JUNIT4= 2;
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.text.java.IQuickFixProcessor#hasCorrections(org.eclipse.jdt.core.ICompilationUnit, int)
@@ -32,12 +40,22 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 	 * @see org.eclipse.jdt.ui.text.java.IQuickFixProcessor#getCorrections(org.eclipse.jdt.ui.text.java.IInvocationContext, org.eclipse.jdt.ui.text.java.IProblemLocation[])
 	 */
 	public IJavaCompletionProposal[] getCorrections(final IInvocationContext context, IProblemLocation[] locations)  {
-		if (isJUnitProblem(context, locations))
-			return new IJavaCompletionProposal[] { new JUnitAddLibraryProposal(context) };
+		int res= isJUnitProblem(context, locations);
+		if (res != 0) {
+			ArrayList proposals= new ArrayList(1);
+			IJavaProject javaProject= context.getCompilationUnit().getJavaProject();
+			if (JUnitStubUtility.is50OrHigher(javaProject) && ((res & JUNIT4) != 0)) {
+				proposals.add(new JUnitAddLibraryProposal(true, context, 10));
+			}
+			if ((res & JUNIT3) != 0) {
+				proposals.add(new JUnitAddLibraryProposal(false, context, 8));
+			}
+			return (IJavaCompletionProposal[]) proposals.toArray(new IJavaCompletionProposal[proposals.size()]);
+		}
 		return null;
 	}
 
-	private boolean isJUnitProblem(IInvocationContext context, IProblemLocation[] locations) {
+	private int isJUnitProblem(IInvocationContext context, IProblemLocation[] locations) {
 		ICompilationUnit unit= context.getCompilationUnit();
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation location= locations[i];
@@ -45,15 +63,19 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 				break; 
 			try {
 				String s= unit.getBuffer().getText(location.getOffset(), location.getLength());
-				if (s.equals("TestCase") //$NON-NLS-1$
-						|| s.equals("junit") //$NON-NLS-1$
-						|| s.equals("TestSuite") //$NON-NLS-1$
-						|| s.equals("Test")) //$NON-NLS-1$
-					return true; 
+				if (s.equals("org.junit")) { //$NON-NLS-1$
+					return JUNIT4;
+				}
+				if (s.equals("TestCase") || s.equals("TestSuite") || s.equals("junit")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					return JUNIT3;
+				}
+				if (s.equals("Test")) { //$NON-NLS-1$
+					return JUNIT3 | JUNIT4;
+				}
 			} catch (JavaModelException e) {
 			    JUnitPlugin.log(e.getStatus());
 			}
 		}
-		return false;
+		return 0;
 	}
 }

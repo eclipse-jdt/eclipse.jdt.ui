@@ -44,14 +44,49 @@ public final class JUnitMessages extends NLS {
 	public static String GotoReferencedTestAction_dialog_select_message;
 	public static String GotoReferencedTestAction_dialog_title;
 	public static String GotoReferencedTestAction_selectdialog_title;
-	public static String JUnitAddLibraryProposal_cannotAdd;
+
+	public static String JUnitAddLibraryProposa_junit4_label;
+
 	public static String JUnitAddLibraryProposal_info;
-	public static String JUnitAddLibraryProposal_label;
 	public static String JUnitAddLibraryProposal_title;
+	public static String JUnitAddLibraryProposal_cannotAdd;
+
+	public static String JUnitAddLibraryProposal_junit4_info;
+	public static String JUnitAddLibraryProposal_label;
 	public static String JUnitBaseLaunchConfiguration_error_invalidproject;
 	public static String JUnitBaseLaunchConfiguration_error_junitnotonpath;
 	public static String JUnitBaseLaunchConfiguration_error_notests;
 	public static String JUnitBaseLaunchConfiguration_error_novmrunner;
+
+	public static String JUnitContainerInitializer_description_initializer_junit3;
+
+	public static String JUnitContainerInitializer_description_initializer_junit4;
+
+	public static String JUnitContainerInitializer_description_initializer_unresolved;
+
+	public static String JUnitContainerInitializer_description_junit3;
+
+	public static String JUnitContainerInitializer_description_junit4;
+
+	public static String JUnitContainerWizardPage_combo_label;
+
+	public static String JUnitContainerWizardPage_error_problem_configuring_container;
+
+	public static String JUnitContainerWizardPage_error_title;
+
+	public static String JUnitContainerWizardPage_error_version_not_available;
+
+	public static String JUnitContainerWizardPage_option_junit3;
+
+	public static String JUnitContainerWizardPage_option_junit4;
+
+	public static String JUnitContainerWizardPage_resolved_label;
+
+	public static String JUnitContainerWizardPage_warning_java5_required;
+
+	public static String JUnitContainerWizardPage_wizard_description;
+
+	public static String JUnitContainerWizardPage_wizard_title;
 	public static String JUnitMainTab_error_invalidProjectName;
 	public static String JUnitMainTab_error_noContainer;
 	public static String JUnitMainTab_error_notJavaProject;
@@ -111,6 +146,7 @@ public final class JUnitMessages extends NLS {
 	public static String LaunchTestAction_message_selectRunConfiguration;
 	public static String LaunchTestAction_message_selectTestToDebug;
 	public static String LaunchTestAction_message_selectTestToRun;
+
 	public static String OpenEditorAction_action_label;
 	public static String OpenEditorAction_error_cannotopen_message;
 	public static String OpenEditorAction_error_cannotopen_title;
