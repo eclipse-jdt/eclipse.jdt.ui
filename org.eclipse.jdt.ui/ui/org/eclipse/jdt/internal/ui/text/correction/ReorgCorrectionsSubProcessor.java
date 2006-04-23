@@ -235,7 +235,7 @@ public class ReorgCorrectionsSubProcessor {
 						String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_project_description, args);
 						IClasspathEntry newEntry= JavaCore.newProjectEntry(other.getPath());
 						AddToClasspathChange change= new AddToClasspathChange(project, newEntry);
-						if (!change.entryAlreadyExists()) {
+						if (change.validateClasspath()) {
 							ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(label, change, 8, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 							proposals.add(proposal);
 						}
@@ -244,7 +244,7 @@ public class ReorgCorrectionsSubProcessor {
 						String label= getAddClasspathLabel(entry, root, project);
 						if (label != null) {
 							AddToClasspathChange change= new AddToClasspathChange(project, entry);
-							if (!change.entryAlreadyExists()) {
+							if (change.validateClasspath()) {
 								ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(label, change, 7, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 								proposals.add(proposal);
 							}
@@ -259,10 +259,10 @@ public class ReorgCorrectionsSubProcessor {
 		switch (entry.getEntryKind()) {
 			case IClasspathEntry.CPE_LIBRARY:
 				if (root.isArchive()) {
-					String[] args= { JavaElementLabels.getElementLabel(root, 0), project.getElementName() };
+					String[] args= { JavaElementLabels.getElementLabel(root, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED), project.getElementName() };
 					return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_archive_description, args);
 				} else {
-					String[] args= { JavaElementLabels.getElementLabel(root, 0), project.getElementName() };
+					String[] args= { JavaElementLabels.getElementLabel(root, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED), project.getElementName() };
 					return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_classfolder_description, args);
 				}
 			case IClasspathEntry.CPE_VARIABLE: {

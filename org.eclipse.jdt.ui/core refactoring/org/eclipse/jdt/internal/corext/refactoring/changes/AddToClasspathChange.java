@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -66,7 +67,7 @@ public class AddToClasspathChange extends JDTChange {
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(getName(), 1);
 		try {
-			if (!entryAlreadyExists()) {
+			if (validateClasspath()) {
 				getJavaProject().setRawClasspath(getNewClasspathEntries(), new SubProgressMonitor(pm, 1));
 				IPath classpathEntryPath= JavaCore.getResolvedClasspathEntry(fEntryToAdd).getPath();
 				return new DeleteFromClasspathChange(classpathEntryPath, getJavaProject());
@@ -78,14 +79,11 @@ public class AddToClasspathChange extends JDTChange {
 		}		
 	}
 	
-	public boolean entryAlreadyExists() throws JavaModelException {
-		IClasspathEntry[] entries= getJavaProject().getRawClasspath();
-		for (int i= 0; i < entries.length; i++) {
-			if (entries[i].equals(fEntryToAdd)) {
-				return true;
-			}
-		}
-		return false;
+	public boolean validateClasspath() throws JavaModelException {
+		IJavaProject javaProject= getJavaProject();
+		IPath outputLocation= javaProject.getOutputLocation();
+		IClasspathEntry[] newClasspathEntries= getNewClasspathEntries();
+		return JavaConventions.validateClasspath(javaProject, newClasspathEntries, outputLocation).isOK();
 	}
 	
 	private IClasspathEntry[] getNewClasspathEntries() throws JavaModelException{
