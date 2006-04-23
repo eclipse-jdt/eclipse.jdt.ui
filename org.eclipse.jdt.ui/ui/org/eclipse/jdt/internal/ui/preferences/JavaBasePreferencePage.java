@@ -182,7 +182,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		
 		Button clearButton= new Button(dontAskGroup, SWT.PUSH);
 		clearButton.setText(PreferencesMessages.JavaBasePreferencePage_do_not_hide_button);
-		clearButton.setLayoutData(new GridData(GridData.FILL, GridData.FILL, false, false));
+		clearButton.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false));
 		clearButton.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				unhideAllDialogs();
