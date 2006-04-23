@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
@@ -285,6 +286,11 @@ public class ASTResolving {
 				return ((SwitchStatement) parent.getParent()).getExpression().resolveTypeBinding();
 			}
 			break;
+		case ASTNode.ASSERT_STATEMENT:
+			if (node.getLocationInParent() == AssertStatement.EXPRESSION_PROPERTY) {
+				return parent.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
+			}
+			return parent.getAST().resolveWellKnownType("java.lang.String"); //$NON-NLS-1$			
 		case ASTNode.SINGLE_MEMBER_ANNOTATION: {
 			IMethodBinding annotMember= findAnnotationMember((Annotation) parent, "value"); //$NON-NLS-1$
 			if (annotMember != null) {
