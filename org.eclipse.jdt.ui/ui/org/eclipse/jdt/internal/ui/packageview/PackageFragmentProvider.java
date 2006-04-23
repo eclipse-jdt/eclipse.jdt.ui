@@ -431,13 +431,15 @@ public class PackageFragmentProvider implements IPropertyChangeListener {
 	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
-		if(arePackagesFoldedInHierarchicalLayout() != fFoldPackages){
+		if (arePackagesFoldedInHierarchicalLayout() != fFoldPackages){
 			fFoldPackages= arePackagesFoldedInHierarchicalLayout();
-			fViewer.getControl().setRedraw(false);
-			Object[] expandedObjects= fViewer.getExpandedElements();
-			fViewer.refresh();	
-			fViewer.setExpandedElements(expandedObjects);
-			fViewer.getControl().setRedraw(true);
+			if (fViewer != null && !fViewer.getControl().isDisposed()) {
+				fViewer.getControl().setRedraw(false);
+				Object[] expandedObjects= fViewer.getExpandedElements();
+				fViewer.refresh();	
+				fViewer.setExpandedElements(expandedObjects);
+				fViewer.getControl().setRedraw(true);
+			}
 		}
 	}
 
