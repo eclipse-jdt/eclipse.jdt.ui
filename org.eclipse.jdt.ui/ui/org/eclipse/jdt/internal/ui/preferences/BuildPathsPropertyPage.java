@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -29,6 +30,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.preference.IPreferencePageContainer;
 
 import org.eclipse.ui.PlatformUI;
@@ -45,6 +47,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 
@@ -58,10 +61,15 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	private static final String PAGE_SETTINGS= "BuildPathsPropertyPage"; //$NON-NLS-1$
 	private static final String INDEX= "pageIndex"; //$NON-NLS-1$
 
+	public static final Object DATA_ADD_ENTRY= "add_classpath_entry"; //$NON-NLS-1$
+	
 	public static final Object DATA_REVEAL_ENTRY= "select_classpath_entry"; //$NON-NLS-1$
 	public static final Object DATA_REVEAL_ATTRIBUTE_KEY= "select_classpath_attribute_key"; //$NON-NLS-1$
+	
+	public static final Object DATA_BLOCK= "block_until_buildpath_applied"; //$NON-NLS-1$
 		
 	private BuildPathsBlock fBuildPathsBlock;
+	private boolean fBlockOnApply= false;
 	
 	/*
 	 * @see PreferencePage#createControl(Composite)
@@ -207,7 +215,18 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 					}
 				};
 				WorkbenchRunnableAdapter op= new WorkbenchRunnableAdapter(runnable);
-				op.runAsUserJob(PreferencesMessages.BuildPathsPropertyPage_job_title, null);
+				if (fBlockOnApply) {
+					try {
+						new ProgressMonitorDialog(getShell()).run(true, true, op);
+					} catch (InvocationTargetException e) {
+						ExceptionHandler.handle(e, getShell(), "Setting Build Path", "Setting build path failed.");
+						return false;
+					} catch (InterruptedException e) {
+						return false;
+					}
+				} else {
+					op.runAsUserJob(PreferencesMessages.BuildPathsPropertyPage_job_title, null);
+				}
 			}
 		}
 		return true;
@@ -236,6 +255,13 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 					fBuildPathsBlock.setElementToReveal(entry, attributeKey);
 				}
 			}
+			Object entryToAdd= map.get(DATA_ADD_ENTRY);
+			if (entryToAdd instanceof IClasspathEntry) {
+				if (fBuildPathsBlock != null) {
+					fBuildPathsBlock.addElement((IClasspathEntry) entryToAdd);
+				}
+			}
+			fBlockOnApply= Boolean.TRUE.equals(map.get(DATA_BLOCK));
 		}
 	}
 
