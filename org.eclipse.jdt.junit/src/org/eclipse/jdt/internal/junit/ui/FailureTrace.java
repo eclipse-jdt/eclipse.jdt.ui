@@ -142,7 +142,7 @@ public class FailureTrace implements IMenuListener {
 	}
 	
 	/**
-	 * Refresh the table from the the trace.
+	 * Refresh the table from the trace.
 	 */
 	public void refresh() {
 		updateTable(fInputTrace);

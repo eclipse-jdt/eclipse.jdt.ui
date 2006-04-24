@@ -655,7 +655,7 @@ public class TestRunnerViewPart extends ViewPart {
 				case IJavaElement.JAVA_PROJECT:
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 				case IJavaElement.PACKAGE_FRAGMENT:
-					// If we did some different than changing a child we flush the the undo / redo stack.
+					// If we did something different than changing a child we flush the undo / redo stack.
 					if (kind != IJavaElementDelta.CHANGED || details != IJavaElementDelta.F_CHILDREN) {
 						codeHasChanged();
 						return false;
