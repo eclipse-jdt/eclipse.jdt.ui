@@ -100,7 +100,7 @@ public class BuildPathSupport {
 			IPath jarLocation= bundleBase.append("junit-4.0.jar"); //$NON-NLS-1$
 			
 			IPath sourceBase= getSourceLocation(JUNIT4_PLUGIN_ID);
-			IPath srcLocation= sourceBase != null ? sourceBase.append("junit-4.0-src.jar") : null; //$NON-NLS-1$
+			IPath srcLocation= sourceBase != null ? sourceBase.append("junit-4.0src.zip") : null; //$NON-NLS-1$
 			
 			return JavaCore.newLibraryEntry(jarLocation, srcLocation, null);
 		}
