@@ -107,7 +107,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	}
 
 	/**
-	 * Creates the the viewer of this part.
+	 * Creates the viewer of this part.
 	 *
 	 * @param parent	the parent for the viewer
 	 */

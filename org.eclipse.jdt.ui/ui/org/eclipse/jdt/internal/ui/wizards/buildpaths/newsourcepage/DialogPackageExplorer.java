@@ -443,7 +443,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
     }
     
     /**
-     * The the current list of selected elements. The 
+     * The current list of selected elements. The 
      * list may be empty if no element is selected.
      * 
      * @return the current selection

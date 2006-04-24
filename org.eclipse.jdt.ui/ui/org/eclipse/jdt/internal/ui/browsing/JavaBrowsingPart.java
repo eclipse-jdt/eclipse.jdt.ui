@@ -858,7 +858,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	/**
-	 * Creates the the viewer of this part.
+	 * Creates the viewer of this part.
 	 *
 	 * @param parent	the parent for the viewer
 	 */
@@ -879,7 +879,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	/**
-	 * Creates the the content provider of this part.
+	 * Creates the content provider of this part.
 	 */
 	protected IContentProvider createContentProvider() {
 		return new JavaBrowsingContentProvider(true, this);

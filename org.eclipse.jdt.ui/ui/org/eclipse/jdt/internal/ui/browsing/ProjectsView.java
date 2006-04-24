@@ -50,7 +50,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	private FilterUpdater fFilterUpdater;
 
 	/**
-	 * Creates the the viewer of this part.
+	 * Creates the viewer of this part.
 	 *
 	 * @param parent	the parent for the viewer
 	 */
@@ -87,7 +87,7 @@ public class ProjectsView extends JavaBrowsingPart {
 
 
 	/**
-	 * Creates the the content provider of this part.
+	 * Creates the content provider of this part.
 	 */
 	protected IContentProvider createContentProvider() {
 		return new ProjectAndSourceFolderContentProvider(this);

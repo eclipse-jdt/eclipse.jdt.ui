@@ -106,7 +106,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	 * Returns <code>true</code> if the argument list should be inserted by the proposal,
 	 * <code>false</code> if not.
 	 * 
-	 * @return <code>true</code> when the the proposal is not in javadoc and comprises the
+	 * @return <code>true</code> when the proposal is not in javadoc and comprises the
 	 *         parameter list
 	 */
 	protected boolean hasArgumentList() {

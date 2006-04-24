@@ -239,7 +239,7 @@ public class PackagesView extends JavaBrowsingPart{
 
 	/**
 	 * Overrides the createContentProvider from JavaBrowsingPart
-	 * Creates the the content provider of this part.
+	 * Creates the content provider of this part.
 	 */
 	protected IContentProvider createContentProvider() {
 		if(isInListState())

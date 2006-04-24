@@ -200,7 +200,7 @@ public class JavadocOptionsManager {
 
 
 	/*
-	 * Returns the the Java project that is parent top all selected elements or null if
+	 * Returns the Java project that is parent top all selected elements or null if
 	 * the elements are from several projects.
 	 */
 	private IJavaProject getSingleProjectFromInitialSelection() {
@@ -521,7 +521,7 @@ public class JavadocOptionsManager {
 				String name= tokenizer.nextToken().trim();
 				if (JavaCore.isJavaLikeFileName(name)) {
 					IPath path= makeAbsolutePathFromRelative(new Path(name));
-					//if unable to create an absolute path the the resource skip it
+					//if unable to create an absolute path to the resource skip it
 					if (path != null) {
 						IFile[] files= root.findFilesForLocation(path);
 						for (int i= 0; i < files.length; i++) {
