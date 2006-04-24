@@ -616,6 +616,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 				return;
 			}
 			new JarRefactoringDialog(getShell(), getDialogSettings(), fJarPackage, history[0]).open();
+			updatePageCompletion();
 		} finally {
 			service.disconnect();
 		}
@@ -671,11 +672,12 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	}
 
 	protected void updateRefactoringMessage() {
+		String currentMessage= getMessage();
 		if (fJarPackage.isRefactoringAware() && fJarPackage.getRefactoringDescriptors().length == 0) {
-			String currentMessage= getMessage();
 			if (currentMessage == null)
 				setMessage(JarPackagerMessages.JarPackageWizardPage_no_refactorings_selected, IMessageProvider.INFORMATION);
-		}
+		} else if (JarPackagerMessages.JarPackageWizardPage_no_refactorings_selected.equals(currentMessage))
+			setMessage(null);
 	}
 	
 	/*
