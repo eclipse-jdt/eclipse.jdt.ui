@@ -308,7 +308,7 @@ public final class ASTProvider {
 			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "active editor is: " + toString(javaElement)); //$NON-NLS-1$ //$NON-NLS-2$
 
 		synchronized (fReconcileLock) {
-			if (fIsReconciling && !fReconcilingJavaElement.equals(javaElement)) {
+			if (fIsReconciling && (fReconcilingJavaElement == null || !fReconcilingJavaElement.equals(javaElement))) {
 				fIsReconciling= false;
 				fReconcilingJavaElement= null;
 			} else if (javaElement == null) {
