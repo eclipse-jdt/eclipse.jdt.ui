@@ -87,6 +87,7 @@ public final class JarRefactoringDialog extends TrayDialog {
 		super(shell);
 		Assert.isNotNull(data);
 		Assert.isNotNull(history);
+		setShellStyle(getShellStyle() | SWT.RESIZE);
 		fSettings= settings;
 		fData= data;
 		fHistory= history;
@@ -136,7 +137,7 @@ public final class JarRefactoringDialog extends TrayDialog {
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		composite.setLayout(layout);
-		composite.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
+		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
 		final RefactoringHistoryControlConfiguration configuration= new RefactoringHistoryControlConfiguration(null, true, true) {
 
 			public final String getWorkspaceCaption() {
