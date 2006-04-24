@@ -26,7 +26,7 @@ public interface IClasspathContainerPageExtension2 {
 	
 	/**
 	 * Method {@link #getNewContainers()} is called instead of {@link IClasspathContainerPage#getSelection() }
-	 * to get the the newly added containers. {@link IClasspathContainerPage#getSelection() } is still used
+	 * to get the newly added containers. {@link IClasspathContainerPage#getSelection() } is still used
 	 * to get the edited elements.
 	 * @return the classpath entries created on the page. All returned entries must be on kind
 	 * {@link IClasspathEntry#CPE_CONTAINER}

@@ -22,7 +22,7 @@ package org.eclipse.jdt.ui.dialogs;
 public interface ITypeInfoFilterExtension {
 	
 	/**
-	 * Returns whether the the given type makes it into the list or
+	 * Returns whether the given type makes it into the list or
 	 * not.
 	 * 
 	 * @param typeInfoRequestor the <code>ITypeInfoRequestor</code> to 

@@ -20,7 +20,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
  * <code>org.eclipse.jdt.ui.foldingStructureProvider</code> extension
  * point must specify an implementation of this interface which will create and
  * maintain {@link org.eclipse.jface.text.source.projection.ProjectionAnnotation} objects
- * that define folded regions in the the {@link org.eclipse.jface.text.source.projection.ProjectionViewer}.
+ * that define folded regions in the {@link org.eclipse.jface.text.source.projection.ProjectionViewer}.
  * <p>
  * Clients may implement this interface.
  * </p>

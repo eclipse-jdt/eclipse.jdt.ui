@@ -107,7 +107,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	/**
 	 * Initializes the page with the project and default classpath.
 	 * <p>
-	 * The default classpath entries must correspond the the given project.
+	 * The default classpath entries must correspond the given project.
 	 * </p>
 	 * <p>
 	 * The caller of this method is responsible for creating the underlying project. The page will create the output,
