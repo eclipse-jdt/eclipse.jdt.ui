@@ -78,6 +78,7 @@ import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
@@ -441,6 +442,12 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 				monitor.worked(1);
 			if (result.hasFatalError())
 				return result;
+			List members= new ArrayList(fMemberInfos.length);
+			for (int index= 0; index < fMemberInfos.length; index++) {
+				if (fMemberInfos[index].getAction() != MemberActionInfo.NO_ACTION)
+					members.add(fMemberInfos[index].getMember());
+			}
+			fMembersToMove= (IMember[]) members.toArray(new IMember[members.size()]);
 			fChangeManager= createChangeManager(new SubProgressMonitor(monitor, 1), result);
 			if (result.hasFatalError())
 				return result;
@@ -650,7 +657,15 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			} catch (JavaModelException exception) {
 				JavaPlugin.log(exception);
 			}
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PUSH_DOWN, project, fMembersToMove.length == 1 ? Messages.format(RefactoringCoreMessages.PushDownRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}) : Messages.format(RefactoringCoreMessages.PushDownRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+			final String description= fMembersToMove.length == 1 ? Messages.format(RefactoringCoreMessages.PushDownRefactoring_descriptor_description_short_multi, fMembersToMove[0].getElementName()) : RefactoringCoreMessages.PushDownRefactoring_descriptor_description_short;
+			final String header= fMembersToMove.length == 1 ? Messages.format(RefactoringCoreMessages.PushDownRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED) }) : Messages.format(RefactoringCoreMessages.PushDownRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED) });
+			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+			final String[] settings= new String[fMembersToMove.length];
+			for (int index= 0; index < settings.length; index++)
+				settings[index]= JavaElementLabels.getElementLabel(fMembersToMove[index], JavaElementLabels.ALL_FULLY_QUALIFIED);
+			comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.PushDownRefactoring_pushed_members_pattern, settings));
+			addSuperTypeSettings(comment, true);
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PUSH_DOWN, project, description, comment.asString(), arguments, flags);
 			if (fCachedDeclaringType != null)
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCachedDeclaringType));
 			for (int index= 0; index < fMembersToMove.length; index++) {

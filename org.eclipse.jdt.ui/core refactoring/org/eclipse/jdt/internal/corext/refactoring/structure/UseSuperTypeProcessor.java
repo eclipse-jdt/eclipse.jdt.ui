@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
@@ -75,7 +76,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 
-	public static final String ID_USE_SUPERTYPE= "org.eclipse.jdt.ui.use.supertype"; //$NON-NLS-1$
+	static final String ID_USE_SUPERTYPE= "org.eclipse.jdt.ui.use.supertype"; //$NON-NLS-1$
 
 	private static final String IDENTIFIER= "org.eclipse.jdt.ui.useSuperTypeProcessor"; //$NON-NLS-1$
 
@@ -130,6 +131,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 */
 	public UseSuperTypeProcessor(final IType subType) {
 		super(null);
+		fReplace= true;
 		fSubType= subType;
 	}
 
@@ -145,13 +147,13 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 */
 	public UseSuperTypeProcessor(final IType subType, final IType superType) {
 		super(null);
+		fReplace= true;
 		fSubType= subType;
 		fSuperType= superType;
 	}
 
 	/*
-	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor,
-	 *      org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext)
+	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor,org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext)
 	 */
 	public final RefactoringStatus checkFinalConditions(final IProgressMonitor monitor, final CheckConditionsContext context) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
@@ -213,7 +215,12 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 				} catch (JavaModelException exception) {
 					JavaPlugin.log(exception);
 				}
-				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_USE_SUPERTYPE, project != null ? project.getElementName() : null, Messages.format(RefactoringCoreMessages.UseSuperTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fSuperType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+				final String description= Messages.format(RefactoringCoreMessages.UseSuperTypeProcessor_descriptor_description_short, fSuperType.getElementName());
+				final String header= Messages.format(RefactoringCoreMessages.UseSuperTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fSuperType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED) });
+				final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+				comment.addSetting(Messages.format(RefactoringCoreMessages.UseSuperTypeProcessor_refactored_element_pattern, JavaElementLabels.getElementLabel(fSuperType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+				addSuperTypeSettings(comment, false);
+				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_USE_SUPERTYPE, project != null ? project.getElementName() : null, description, comment.asString(), arguments, flags);
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSubType));
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(fSuperType));
 				arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());

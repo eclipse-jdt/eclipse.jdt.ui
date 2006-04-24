@@ -82,6 +82,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
@@ -159,7 +160,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 		if (members != null) {
 			final IType declaring= getDeclaringType();
 			if (declaring != null)
-				fTypesToExtract= new IType[] { declaring};
+				fTypesToExtract= new IType[] { declaring };
 		}
 	}
 
@@ -253,7 +254,21 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			} catch (JavaModelException exception) {
 				JavaPlugin.log(exception);
 			}
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_SUPERTYPE, project, Messages.format(RefactoringCoreMessages.ExtractSupertypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_DEFAULT), JavaElementLabels.getElementLabel(fCachedDeclaringType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+			final String description= Messages.format(RefactoringCoreMessages.ExtractSupertypeProcessor_descriptor_description_short, fTypeName);
+			final String header= Messages.format(RefactoringCoreMessages.ExtractSupertypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fCachedDeclaringType, JavaElementLabels.ALL_FULLY_QUALIFIED) });
+			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+			final IType[] types= getTypesToExtract();
+			String[] settings= new String[types.length];
+			for (int index= 0; index < settings.length; index++)
+				settings[index]= JavaElementLabels.getElementLabel(types[index], JavaElementLabels.ALL_FULLY_QUALIFIED);
+			comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ExtractSupertypeProcessor_subtypes_pattern, settings));
+			comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractSupertypeProcessor_refactored_element_pattern, JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+			settings= new String[fMembersToMove.length];
+			for (int index= 0; index < settings.length; index++)
+				settings[index]= JavaElementLabels.getElementLabel(fMembersToMove[index], JavaElementLabels.ALL_FULLY_QUALIFIED);
+			comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ExtractInterfaceProcessor_extracted_members_pattern, settings));
+			addSuperTypeSettings(comment, true);
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_SUPERTYPE, project, description, comment.asString(), arguments, flags);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fTypeName);
 			arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplace).toString());
 			arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
@@ -739,7 +754,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 					}
 					collection.add(current);
 				}
-				final ITypeBinding[] extractBindings= { null};
+				final ITypeBinding[] extractBindings= { null };
 				final ASTParser extractParser= ASTParser.newParser(AST.JLS3);
 				extractParser.setWorkingCopyOwner(fOwner);
 				extractParser.setResolveBindings(true);
@@ -865,6 +880,13 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			}
 		}
 		return fPossibleCandidates;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Object[] getElements() {
+		return new Object[] { getDeclaringType() };
 	}
 
 	/**
@@ -1090,7 +1112,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				parser.setResolveBindings(true);
 				parser.setProject(project);
 				parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-				parser.createASTs(new ICompilationUnit[] { copy}, new String[0], new ASTRequestor() {
+				parser.createASTs(new ICompilationUnit[] { copy }, new String[0], new ASTRequestor() {
 
 					public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
 						try {

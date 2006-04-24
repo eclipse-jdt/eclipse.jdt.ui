@@ -92,6 +92,7 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -122,7 +123,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public final class MoveStaticMembersProcessor extends MoveProcessor implements IDelegateUpdating, IScriptableRefactoring, ICommentProvider {
 
-	public static final String ID_STATIC_MOVE= "org.eclipse.jdt.ui.move.static"; //$NON-NLS-1$
+	private static final String ID_STATIC_MOVE= "org.eclipse.jdt.ui.move.static"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DELEGATE="delegate"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DEPRECATE="deprecate"; //$NON-NLS-1$
 	private static final String TRACKED_POSITION_PROPERTY= "MoveStaticMembersProcessor.trackedPosition"; //$NON-NLS-1$
@@ -691,11 +692,11 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		final IJavaProject javaProject= getDeclaringType().getJavaProject();
 		if (javaProject != null)
 			project= javaProject.getElementName();
-		String description= null;
+		String header= null;
 		if (members.length == 1)
-			description= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_single, new String[] { JavaElementLabels.getElementLabel(members[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)});
+			header= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_single, new String[] { JavaElementLabels.getElementLabel(members[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED) });
 		else
-			description= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_multi, new String[] { String.valueOf(members.length), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)});
+			header= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_multi, new String[] { String.valueOf(members.length), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED) });
 		int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 		final IType declaring= members[0].getDeclaringType();
 		try {
@@ -704,7 +705,10 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 		}
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_STATIC_MOVE, project, Messages.format(description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+		final String description= members.length == 1 ? Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_description_descriptor_short_multi, members[0].getElementName()) : RefactoringCoreMessages.MoveMembersRefactoring_move_members;
+		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+		comment.addSetting(Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_target_element_pattern, JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_STATIC_MOVE, project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fDestinationType));
 		arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
 		arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());

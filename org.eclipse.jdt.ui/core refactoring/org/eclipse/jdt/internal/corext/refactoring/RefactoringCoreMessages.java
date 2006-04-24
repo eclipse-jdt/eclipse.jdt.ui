@@ -374,6 +374,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractInterfaceProcessor_creating;
 
+	public static String ExtractInterfaceProcessor_description_descriptor_short;
+
 	public static String ExtractInterfaceProcessor_descriptor_description;
 
 	public static String ExtractInterfaceProcessor_existing_compilation_unit;
@@ -381,6 +383,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractInterfaceProcessor_existing_default_type;
 
 	public static String ExtractInterfaceProcessor_existing_type;
+
+	public static String ExtractInterfaceProcessor_extracted_members_pattern;
 
 	public static String ExtractInterfaceProcessor_internal_error;
 
@@ -391,6 +395,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractInterfaceProcessor_no_anonymous;
 
 	public static String ExtractInterfaceProcessor_no_binary;
+
+	public static String ExtractInterfaceProcessor_refactored_element_pattern;
 
 	public static String ExtractInterfaceProcessor_remove_field_label;
 
@@ -480,9 +486,15 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractSupertypeProcessor_descriptor_description;
 
+	public static String ExtractSupertypeProcessor_descriptor_description_short;
+
 	public static String ExtractSupertypeProcessor_extract_supertype;
 
 	public static String ExtractSupertypeProcessor_preparing;
+
+	public static String ExtractSupertypeProcessor_refactored_element_pattern;
+
+	public static String ExtractSupertypeProcessor_subtypes_pattern;
 
 	public static String ExtractSupertypeProcessor_unexpected_exception;
 
@@ -870,7 +882,7 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String JavaRefactoringDescriptor_update_references;
 
-	public static String JavaRefactoringDescriptor_user_setting_pattern;
+	public static String JavaRefactoringDescriptorComment_element_delimiter;
 
 	public static String LocalTypeAnalyzer_local_type_from_outside;
 
@@ -986,6 +998,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveInstanceMethodProcessor_descriptor_description;
 
+	public static String MoveInstanceMethodProcessor_descriptor_description_short;
+
 	public static String MoveInstanceMethodProcessor_inline_binary_project;
 
 	public static String MoveInstanceMethodProcessor_inline_binary_resource;
@@ -1002,7 +1016,11 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveInstanceMethodProcessor_method_already_exists;
 
+	public static String MoveInstanceMethodProcessor_method_name_pattern;
+
 	public static String MoveInstanceMethodProcessor_method_type_clash;
+
+	public static String MoveInstanceMethodProcessor_moved_element_pattern;
 
 	public static String MoveInstanceMethodProcessor_name;
 
@@ -1028,6 +1046,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveInstanceMethodProcessor_no_type_variables;
 
+	public static String MoveInstanceMethodProcessor_parameter_name_pattern;
+
 	public static String MoveInstanceMethodProcessor_potentially_recursive;
 
 	public static String MoveInstanceMethodProcessor_present_type_parameter_warning;
@@ -1039,6 +1059,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String MoveInstanceMethodProcessor_replace_body_with_delegation;
 
 	public static String MoveInstanceMethodProcessor_single_implementation;
+
+	public static String MoveInstanceMethodProcessor_target_element_pattern;
 
 	public static String MoveInstanceMethodProcessor_target_name_already_used;
 
@@ -1116,9 +1138,13 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveStaticMemberAnalyzer_nonStatic;
 
+	public static String MoveStaticMembersProcessor_description_descriptor_short_multi;
+
 	public static String MoveStaticMembersProcessor_descriptor_description_multi;
 
 	public static String MoveStaticMembersProcessor_descriptor_description_single;
+
+	public static String MoveStaticMembersProcessor_target_element_pattern;
 
 	public static String MultiStateCompilationUnitChange_name_pattern;
 
@@ -1175,6 +1201,10 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String PullUpRefactoring_descriptor_description;
 
 	public static String PullUpRefactoring_descriptor_description_full;
+
+	public static String PullUpRefactoring_descriptor_description_short;
+
+	public static String PullUpRefactoring_descriptor_description_short_multiple;
 
 	public static String PullUpRefactoring_different_field_type;
 
@@ -1246,6 +1276,10 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String PushDownRefactoring_descriptor_description_full;
 
+	public static String PushDownRefactoring_descriptor_description_short;
+
+	public static String PushDownRefactoring_descriptor_description_short_multi;
+
 	public static String PushDownRefactoring_field_not_accessible;
 
 	public static String PushDownRefactoring_make_abstract;
@@ -1255,6 +1289,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String PushDownRefactoring_name;
 
 	public static String PushDownRefactoring_no_subclasses;
+
+	public static String PushDownRefactoring_pushed_members_pattern;
 
 	public static String PushDownRefactoring_referenced;
 
@@ -1850,6 +1886,10 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String SuperTypeRefactoringProcessor_update_type_occurrence;
 
+	public static String SuperTypeRefactoringProcessor_use_in_instanceof_setting;
+
+	public static String SuperTypeRefactoringProcessor_user_supertype_setting;
+
 	public static String SurroundWithTryCatchAnalyzer_cannotHandleSuper;
 
 	public static String SurroundWithTryCatchAnalyzer_cannotHandleThis;
@@ -1908,9 +1948,13 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String UseSuperTypeProcessor_descriptor_description;
 
+	public static String UseSuperTypeProcessor_descriptor_description_short;
+
 	public static String UseSuperTypeProcessor_internal_error;
 
 	public static String UseSuperTypeProcessor_name;
+
+	public static String UseSuperTypeProcessor_refactored_element_pattern;
 
 	public static String UseSupertypeWherePossibleRefactoring_name;
 

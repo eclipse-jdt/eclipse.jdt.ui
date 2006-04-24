@@ -96,6 +96,7 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
@@ -135,7 +136,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	private static final String ATTRIBUTE_PUBLIC= "public"; //$NON-NLS-1$
 
-	public static final String ID_EXTRACT_INTERFACE= "org.eclipse.jdt.ui.extract.interface"; //$NON-NLS-1$
+	static final String ID_EXTRACT_INTERFACE= "org.eclipse.jdt.ui.extract.interface"; //$NON-NLS-1$
 
 	/** The identifier of this processor */
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.extractInterfaceProcessor"; //$NON-NLS-1$
@@ -157,12 +158,12 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	protected static boolean isExtractableMember(final IMember member) throws JavaModelException {
 		Assert.isNotNull(member);
 		switch (member.getElementType()) {
-		case IJavaElement.METHOD:
-			return JdtFlags.isPublic(member) && !JdtFlags.isStatic(member) && !((IMethod) member).isConstructor();
-		case IJavaElement.FIELD:
-			return JdtFlags.isPublic(member) && JdtFlags.isStatic(member) && JdtFlags.isFinal(member) && !JdtFlags.isEnum(member);
-		default:
-			return false;
+			case IJavaElement.METHOD:
+				return JdtFlags.isPublic(member) && !JdtFlags.isStatic(member) && !((IMethod) member).isConstructor();
+			case IJavaElement.FIELD:
+				return JdtFlags.isPublic(member) && JdtFlags.isStatic(member) && JdtFlags.isFinal(member) && !JdtFlags.isEnum(member);
+			default:
+				return false;
 		}
 	}
 
@@ -184,7 +185,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/** The subtype where to extract the supertype */
 	private IType fSubType;
 
-	/** The subtype name */
+	/** The supertype name */
 	private String fSuperName;
 
 	/** The source of the new supertype */
@@ -331,7 +332,19 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			} catch (JavaModelException exception) {
 				JavaPlugin.log(exception);
 			}
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_INTERFACE, project, Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_descriptor_description, new String[] { fSuperName, JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+			final IPackageFragment fragment= fSubType.getPackageFragment();
+			final ICompilationUnit cu= fragment.getCompilationUnit(JavaModelUtil.getRenamedCUName(fSubType.getCompilationUnit(), fSuperName));
+			final IType type= cu.getType(fSuperName);
+			final String description= Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_description_descriptor_short, fSuperName);
+			final String header= Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED) });
+			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+			comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_refactored_element_pattern, JavaElementLabels.getElementLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+			final String[] settings= new String[fMembers.length];
+			for (int index= 0; index < settings.length; index++)
+				settings[index]= JavaElementLabels.getElementLabel(fMembers[index], JavaElementLabels.ALL_FULLY_QUALIFIED);
+			comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ExtractInterfaceProcessor_extracted_members_pattern, settings));
+			addSuperTypeSettings(comment, true);
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_INTERFACE, project, description, comment.asString(), arguments, flags);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSubType));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fSuperName);
 			for (int index= 0; index < fMembers.length; index++)
