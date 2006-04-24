@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 
@@ -259,6 +260,10 @@ public class AddFolderToBuildpathAction extends Action implements ISelectionChan
 					if (type != DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT && type != DialogPackageExplorerActionGroup.INCLUDED_FOLDER)
 						return false;
 				} else if (element instanceof IFolder) {
+					IProject project= ((IFolder)element).getProject();
+					IJavaProject javaProject= JavaCore.create(project);
+					if (javaProject == null || !javaProject.exists())
+						return false;
 				} else {
 					return false;
 				}
