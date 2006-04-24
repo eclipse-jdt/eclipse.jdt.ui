@@ -106,11 +106,6 @@ public class ScopeAnalyzer {
 			if (binding == null)
 				return false;
 			
-			if (hasFlag(CHECK_VISIBILITY, fFlags)) {
-				if (!isVisible(binding, fParentTypeBinding)) {
-					return false;
-				}
-			}
 			String signature= getSignature(binding);
 			if (signature != null && fNamesAdded.add(signature)) { // avoid duplicated results from inheritance
 				fResult.add(binding);
@@ -119,6 +114,14 @@ public class ScopeAnalyzer {
 		}
 
 		public List getResult() {
+			if (hasFlag(CHECK_VISIBILITY, fFlags)) {
+				for (int i= fResult.size() - 1; i >= 0; i--) {
+					IBinding binding= (IBinding) fResult.get(i);
+					if (!isVisible(binding, fParentTypeBinding)) {
+						fResult.remove(i);
+					}
+				}
+			}
 			return fResult;
 		}
 		
@@ -388,20 +391,23 @@ public class ScopeAnalyzer {
 			if (binding == null)
 				return false;
 			
+			if (fToSearch.getKind() != binding.getKind()) {
+				return false;
+			}
+			
+			
 			if (binding == fToSearch) {
 				fFound= true;
 			} else {
-				switch (binding.getKind()) {
-					case IBinding.TYPE:
-						ITypeBinding typeDeclaration= ((ITypeBinding) binding).getTypeDeclaration();
-						fFound= typeDeclaration == fToSearch;
-						break;
-					case IBinding.VARIABLE:
-						fFound= ((IVariableBinding) binding).getVariableDeclaration() == fToSearch;
-						break;
-					case IBinding.METHOD:
-						fFound= ((IMethodBinding) binding).getMethodDeclaration() == fToSearch;
-						break;
+				binding= Bindings.getDeclaration(binding);
+				if (binding == fToSearch) {
+					fFound= true;
+				} else if (binding.getName().equals(fToSearch.getName())) {
+					String signature= getSignature(binding);
+					if (signature != null && signature.equals(getSignature(fToSearch))) {
+						fIsVisible= false;
+						return true; // found element that hides the binding to find
+					}
 				}
 			}
 			if (fFound && hasFlag(CHECK_VISIBILITY, fFlags)) {

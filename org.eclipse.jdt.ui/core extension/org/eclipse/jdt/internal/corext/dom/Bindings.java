@@ -1069,6 +1069,19 @@ public class Bindings {
 		}
 		return true;
 	}
+	
+	
+	public static IBinding getDeclaration(IBinding binding) {
+		switch (binding.getKind()) {
+			case IBinding.TYPE:
+				return ((ITypeBinding) binding).getTypeDeclaration();
+			case IBinding.VARIABLE:
+				return ((IVariableBinding) binding).getVariableDeclaration();
+			case IBinding.METHOD:
+				return ((IMethodBinding) binding).getMethodDeclaration();
+		}
+		return binding;
+	}
 
 
 	/**
