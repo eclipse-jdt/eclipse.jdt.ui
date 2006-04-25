@@ -36,15 +36,17 @@ import org.eclipse.jface.text.source.IAnnotationPresentation;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.ImageUtilities;
 
-import org.eclipse.ui.internal.texteditor.AnnotationExpandHover;
-import org.eclipse.ui.internal.texteditor.AnnotationExpansionControl;
-import org.eclipse.ui.internal.texteditor.AnnotationExpansionControl.AnnotationHoverInput;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
+import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
+import org.eclipse.jdt.internal.ui.text.java.hover.AnnotationExpansionControl.AnnotationHoverInput;
 
 /**
  *
@@ -90,6 +92,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 	 * @see org.eclipse.ui.internal.texteditor.AnnotationExpandHover#getHoverInfoForLine(org.eclipse.jface.text.source.ISourceViewer, int)
 	 */
 	protected Object getHoverInfoForLine(final ISourceViewer viewer, final int line) {
+		final boolean showTemporaryProblems= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CORRECTION_INDICATION);
 		IAnnotationModel model= viewer.getAnnotationModel();
 		IDocument document= viewer.getDocument();
 
@@ -103,19 +106,12 @@ public class JavaExpandHover extends AnnotationExpandHover {
 		while (e.hasNext()) {
 			Annotation annotation= (Annotation) e.next();
 
-			// don't prune deleted ones as we don't get many errors this way
-//			if (annotation.isMarkedDeleted())
-//				continue;
-
 			if (fAnnotationAccess instanceof IAnnotationAccessExtension)
 				if (!((IAnnotationAccessExtension)fAnnotationAccess).isPaintable(annotation))
 					continue;
-
-// TODO need a new check this one is not OK
-//
-//			if (annotation instanceof IJavaAnnotation && annotation instanceof IAnnotationPresentation)
-//				if (((IJavaAnnotation) annotation).getImage(display) == null)
-//					continue;
+			
+			if (annotation instanceof IJavaAnnotation && !isIncluded((IJavaAnnotation)annotation, showTemporaryProblems))
+				continue;
 
 			AnnotationPreference pref= fLookup.getAnnotationPreference(annotation);
 			if (pref != null) {
@@ -149,7 +145,6 @@ public class JavaExpandHover extends AnnotationExpandHover {
 		}
 
 		if (exact.size() <= 1)
-//		if (exact.size() < 1)
 			return null;
 
 		AnnotationHoverInput input= new AnnotationHoverInput();
@@ -168,6 +163,24 @@ public class JavaExpandHover extends AnnotationExpandHover {
 		input.model= model;
 
 		return input;
+	}
+
+	private boolean isIncluded(IJavaAnnotation annotation, boolean showTemporaryProblems) {
+		
+		if (!annotation.isProblem())
+			return true;
+		
+		if (annotation.isMarkedDeleted() && !annotation.hasOverlay())
+			return true;
+		
+		if (annotation.hasOverlay() && !annotation.isMarkedDeleted())
+			return true;
+		
+		
+		if (annotation.hasOverlay())
+			return (!isIncluded(annotation.getOverlay(), showTemporaryProblems));
+		
+		return showTemporaryProblems && JavaCorrectionProcessor.hasCorrections((Annotation)annotation);
 	}
 
 	/*
