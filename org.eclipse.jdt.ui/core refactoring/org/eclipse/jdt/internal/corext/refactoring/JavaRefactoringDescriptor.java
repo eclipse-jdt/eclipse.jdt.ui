@@ -151,7 +151,7 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 */
 	public static String elementToHandle(final String project, final IJavaElement element) {
 		final String handle= element.getHandleIdentifier();
-		if (project != null) {
+		if (project != null && !(element instanceof IJavaProject)) {
 			final String id= element.getJavaProject().getHandleIdentifier();
 			return handle.substring(id.length());
 		}
