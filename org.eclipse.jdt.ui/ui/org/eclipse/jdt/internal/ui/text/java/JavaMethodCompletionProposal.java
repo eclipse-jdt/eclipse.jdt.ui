@@ -106,10 +106,12 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	 * Returns <code>true</code> if the argument list should be inserted by the proposal,
 	 * <code>false</code> if not.
 	 * 
-	 * @return <code>true</code> when the proposal is not in javadoc and comprises the
+	 * @return <code>true</code> when the proposal is not in javadoc nor within an import and comprises the
 	 *         parameter list
 	 */
 	protected boolean hasArgumentList() {
+		if (CompletionProposal.METHOD_NAME_REFERENCE == fProposal.getKind())
+			return false;
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		boolean noOverwrite= preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION) ^ isToggleEating();
 		char[] completion= fProposal.getCompletion();
