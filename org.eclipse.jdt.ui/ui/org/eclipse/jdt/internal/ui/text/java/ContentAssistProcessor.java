@@ -16,9 +16,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.commands.Command;
-import org.eclipse.core.commands.ParameterizedCommand;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -26,6 +23,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.bindings.TriggerSequence;
+import org.eclipse.jface.bindings.keys.KeySequence;
 
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ContentAssistEvent;
@@ -34,11 +32,11 @@ import org.eclipse.jface.text.contentassist.ICompletionListener;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistantExtension2;
+import org.eclipse.jface.text.contentassist.IContentAssistantExtension3;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 
@@ -127,6 +125,10 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 						extension.setStatusLineVisible(true);
 						extension.setStatusMessage(createIterationMessage());
 						extension.setShowEmptyList(true);
+						if (extension instanceof IContentAssistantExtension3) {
+							IContentAssistantExtension3 ext3= (IContentAssistantExtension3) extension;
+							((ContentAssistant) ext3).setRepeatedInvocationTrigger(getIterationBinding());
+						}
 					}
 				
 				}
@@ -152,6 +154,10 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 					extension.setShowEmptyList(false);
 					extension.setRepeatedInvocationMode(false);
 					extension.setStatusLineVisible(false);
+					if (extension instanceof IContentAssistantExtension3) {
+						IContentAssistantExtension3 ext3= (IContentAssistantExtension3) extension;
+						((ContentAssistant) ext3).setRepeatedInvocationTrigger(KeySequence.getInstance());
+					}
 				}
 			}
 
@@ -419,18 +425,17 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	}
 
 	private String getIterationGesture() {
-		final IBindingService bindingSvc= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
-		TriggerSequence[] triggers= bindingSvc.getActiveBindingsFor(getContentAssistCommand());
-		return triggers.length > 0 ? 
-				  Messages.format(JavaTextMessages.ContentAssistProcessor_toggle_affordance_press_gesture, new Object[] { triggers[0].format() })
+		TriggerSequence binding= getIterationBinding();
+		return binding != null ? 
+				  Messages.format(JavaTextMessages.ContentAssistProcessor_toggle_affordance_press_gesture, new Object[] { binding.format() })
 				: JavaTextMessages.ContentAssistProcessor_toggle_affordance_click_gesture;
 	}
 
-	private ParameterizedCommand getContentAssistCommand() {
-		final ICommandService commandSvc= (ICommandService) PlatformUI.getWorkbench().getAdapter(ICommandService.class);
-		final Command command= commandSvc.getCommand(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
-		ParameterizedCommand pCmd= new ParameterizedCommand(command, null);
-		return pCmd;
-	}
-	
+	private KeySequence getIterationBinding() {
+	    final IBindingService bindingSvc= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
+		TriggerSequence binding= bindingSvc.getBestActiveBindingFor(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+		if (binding instanceof KeySequence)
+			return (KeySequence) binding;
+		return null;
+    }
 }
