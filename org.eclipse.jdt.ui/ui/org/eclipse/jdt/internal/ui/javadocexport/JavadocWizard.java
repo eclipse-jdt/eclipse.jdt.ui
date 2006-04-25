@@ -145,11 +145,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		IJavaProject[] checkedProjects= fJTWPage.getCheckedProjects();
 		updateStore(checkedProjects);
 		
-		//If the wizard was not launched from an ant file store the settings 
-		if (fXmlJavadocFile == null) {
-			fStore.updateDialogSettings(getDialogSettings(), checkedProjects);
-		}
-		
+		fStore.updateDialogSettings(getDialogSettings(), checkedProjects);
 
 		// Wizard should not run with dirty editors
 		if (!new RefactoringSaveHelper(false).saveEditors(getShell())) {
