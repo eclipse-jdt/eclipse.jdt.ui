@@ -167,9 +167,20 @@ public class CPUserLibraryElement {
 			} else {
 				fChildren.add(element);
 			}
+			copyAttribute(existingElement, element, CPListElement.JAVADOC);
+			copyAttribute(existingElement, element, CPListElement.SOURCEATTACHMENT);
+			copyAttribute(existingElement, element, CPListElement.NATIVE_LIB_PATH);
+			copyAttribute(existingElement, element, CPListElement.ACCESSRULES);
 		}
 	}
 	
+	private void copyAttribute(CPListElement source, CPListElement target, String attributeName) {
+		Object value= source.getAttribute(attributeName);
+		if (value != null) {
+			target.setAttribute(attributeName, value);
+		}
+	}
+
 	public IClasspathContainer getUpdatedContainer() {
 		return new UpdatedClasspathContainer();
 	}
