@@ -13,11 +13,9 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import org.eclipse.jface.action.IAction;
 
 import org.eclipse.jface.text.Assert;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 
@@ -26,6 +24,8 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
 
 /**
@@ -65,55 +65,19 @@ public class JavaElementHyperlinkDetector implements IHyperlinkDetector {
 			return null;
 
 		try {
-
-			IJavaElement[] elements= null;
-			elements= ((ICodeAssist) input).codeSelect(offset, 0);
-
 			IDocument document= fTextEditor.getDocumentProvider().getDocument(fTextEditor.getEditorInput());
-
+			IRegion wordRegion= JavaWordFinder.findWord(document, offset);
+			if (wordRegion == null)
+				return null;
+			
+			IJavaElement[] elements= null;
+			elements= ((ICodeAssist) input).codeSelect(wordRegion.getOffset(), wordRegion.getLength());
 			if (elements != null && elements.length > 0)
-				return new IHyperlink[] {new JavaElementHyperlink(selectWord(document, offset), openAction)};
+				return new IHyperlink[] {new JavaElementHyperlink(wordRegion, openAction)};
 		} catch (JavaModelException e) {
 			return null;
 		}
 
 		return null;
-	}
-
-	private IRegion selectWord(IDocument document, int anchor) {
-
-		try {
-			int offset= anchor;
-			char c;
-
-			while (offset >= 0) {
-				c= document.getChar(offset);
-				if (!Character.isJavaIdentifierPart(c))
-					break;
-				--offset;
-			}
-
-			int start= offset;
-
-			offset= anchor;
-			int length= document.getLength();
-
-			while (offset < length) {
-				c= document.getChar(offset);
-				if (!Character.isJavaIdentifierPart(c))
-					break;
-				++offset;
-			}
-
-			int end= offset;
-
-			if (start == end)
-				return new Region(start, 0);
-			else
-				return new Region(start + 1, end - start - 1);
-
-		} catch (BadLocationException x) {
-			return null;
-		}
 	}
 }
