@@ -96,7 +96,18 @@ public class NLSHintHelper {
 			if (args.indexOf(nlsStringLiteral) != 0) {
 				return null; // must be first argument in lookup method
 			}
-				
+			
+			Expression firstArgument= (Expression)args.get(0);
+			ITypeBinding argumentBinding= firstArgument.resolveTypeBinding();
+			if (argumentBinding == null || !argumentBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
+				return null;
+			}
+			
+			ITypeBinding typeBinding= methodInvocation.resolveTypeBinding();
+			if (typeBinding == null || !typeBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
+				return null;
+			}
+			
 			IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
 			if (methodBinding == null || !Modifier.isStatic(methodBinding.getModifiers())) {
 				return null; // only static methods qualify
