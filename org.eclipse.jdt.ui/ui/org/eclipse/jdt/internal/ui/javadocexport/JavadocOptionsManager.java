@@ -469,23 +469,27 @@ public class JavadocOptionsManager {
 	
 	private IContainer[] getSourceContainers(Element element) {
 		String sourcePaths= element.getAttribute(SOURCEPATH);
-		StringTokenizer tokenizer= new StringTokenizer(sourcePaths, String.valueOf(File.pathSeparatorChar));
-		ArrayList res= new ArrayList();
 		
+		if (sourcePaths.endsWith(File.pathSeparator)) {
+			sourcePaths += '.';
+		}
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		
-		while (tokenizer.hasMoreTokens()) {
-			IPath path= makeAbsolutePathFromRelative(new Path(tokenizer.nextToken().trim()));
+		ArrayList res= new ArrayList();
+		
+		String[] strings= sourcePaths.split(File.pathSeparator);
+		for (int i= 0; i < strings.length; i++) {
+			IPath path= makeAbsolutePathFromRelative(new Path(strings[i].trim()));
 			if (path != null) {
 				IContainer[] containers= root.findContainersForLocation(path);
-				for (int i= 0; i < containers.length; i++) {
-					res.add(containers[i]);
+				for (int k= 0; k < containers.length; k++) {
+					res.add(containers[k]);
 				}
 			}
+			
 		}
 		return (IContainer[]) res.toArray(new IContainer[res.size()]);
-	}
-	
+	}	
 
 	private IJavaElement[] getSelectedElementsFromAnt(Element element) {
 		List res= new ArrayList();
