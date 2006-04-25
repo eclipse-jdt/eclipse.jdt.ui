@@ -16,6 +16,8 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -24,20 +26,26 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -143,6 +151,7 @@ public abstract class SurroundWith {
 
 	private final CompilationUnit fRootNode;
 	private final Statement[] fSelectedStatements;
+	private boolean fIsNewContext;
 	
 	public SurroundWith(CompilationUnit root, Statement[] selectedStatements) {
 		fRootNode= root;
@@ -183,12 +192,20 @@ public abstract class SurroundWith {
 		BodyDeclaration enclosingBodyDeclaration= (BodyDeclaration)ASTNodes.getParent(selectedStatements[0], BodyDeclaration.class);
 		int maxVariableId= LocalVariableIndex.perform(enclosingBodyDeclaration) + 1;
 		
+		fIsNewContext= isNewContext();
+		
 		List accessedAfter= getVariableDeclarationsAccessedAfter(selectedStatements[selectedStatements.length - 1], maxVariableId);
 		List readInside;
 		readInside= getVariableDeclarationReadsInside(selectedStatements, maxVariableId);
 		
 		ListRewrite listRewrite= rewrite.getListRewrite(newBody, Block.STATEMENTS_PROPERTY);
 		moveToBlock(selectedStatements, listRewrite, accessedAfter, readInside, rewrite);
+		if (fIsNewContext) {
+			ImportRewrite importRewrite= StubUtility.createImportRewrite((CompilationUnit)selectedStatements[0].getRoot(), false);
+			for (int i= 0; i < selectedStatements.length; i++) {
+				qualifyThisExpressions(selectedStatements[i], rewrite, importRewrite);
+			}
+		}
 		
 		if (selectedStatements.length == 1 && ASTNodes.isControlStatementBody(selectedStatements[0].getLocationInParent())) {
 			Block wrap= ast.newBlock();
@@ -207,6 +224,11 @@ public abstract class SurroundWith {
 	 * @return The root of the new code.
 	 */
 	protected abstract Statement generateCodeSkeleton(Block newBody, ASTRewrite rewrite);
+	
+	/**
+	 * Will the code be moved to a new context?
+	 */
+	protected abstract boolean isNewContext();
 
 	/**
 	 * List of VariableDeclaration of variables which are read in <code>selectedNodes</code>.
@@ -217,6 +239,8 @@ public abstract class SurroundWith {
 	 */
 	protected List getVariableDeclarationReadsInside(Statement[] selectedNodes, int maxVariableId) {
 		ArrayList result= new ArrayList();
+		if (!fIsNewContext)
+			return result;
 		
 		IVariableBinding[] reads= getReads(selectedNodes, maxVariableId);
 		for (int i= 0; i < reads.length; i++) {
@@ -433,6 +457,28 @@ public abstract class SurroundWith {
 		if (ASTNodes.findModifierNode(Modifier.FINAL, ASTNodes.getModifiers(fragment)) == null) {
 			ModifierRewrite.create(rewrite, statement).setModifiers(Modifier.FINAL, Modifier.NONE, null);
 		}
+	}
+	
+	private void qualifyThisExpressions(ASTNode node, final ASTRewrite rewrite, final ImportRewrite importRewrite) {
+		node.accept(new GenericVisitor() {
+			/**
+			 * {@inheritDoc}
+			 */
+			public boolean visit(ThisExpression thisExpr) {
+				if (thisExpr.getQualifier() == null) {
+					ITypeBinding typeBinding= thisExpr.resolveTypeBinding();
+					if (typeBinding != null) {
+						IJavaElement javaElement= typeBinding.getJavaElement();
+						if (javaElement instanceof IType) {
+							String typeName= ((IType)javaElement).getElementName();
+							SimpleName simpleName= thisExpr.getAST().newSimpleName(typeName);
+							rewrite.set(thisExpr, ThisExpression.QUALIFIER_PROPERTY, simpleName, null);	
+						}
+					}
+				}
+				return super.visit(thisExpr);
+			}
+		});
 	}
 	
 	/**

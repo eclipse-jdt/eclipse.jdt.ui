@@ -98,6 +98,13 @@ public class SurroundWithRunnableProposal extends LinkedCorrectionProposal {
 		public ITrackedNodePosition getNamePosition() {
 			return fNamePosition;
 		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		protected boolean isNewContext() {
+			return true;
+		}
 	}
 	
 	private final SurroundWithRunnable fSurround;

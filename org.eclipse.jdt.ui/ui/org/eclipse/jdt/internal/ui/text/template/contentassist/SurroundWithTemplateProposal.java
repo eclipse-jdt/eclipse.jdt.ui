@@ -100,7 +100,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 			return new ArrayList();
 		}
 		
-		private boolean isNewContext() {
+		protected boolean isNewContext() {
 
 			final String templateVariableRegEx= "\\$\\{[^\\}]*\\}"; //$NON-NLS-1$
 			
