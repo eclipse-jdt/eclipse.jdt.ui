@@ -94,9 +94,7 @@ public class RenameResourceProcessor extends RenameProcessor implements IScripta
 	}
 	
 	public String getProcessorName() {
-		String message= Messages.format(RefactoringCoreMessages.RenameResourceProcessor_name, 
-				new String[]{getCurrentElementName(), getNewElementName()});
-		return message;
+		return RefactoringCoreMessages.RenameResourceProcessor_name;
 	}
 	
 	public Object[] getElements() {

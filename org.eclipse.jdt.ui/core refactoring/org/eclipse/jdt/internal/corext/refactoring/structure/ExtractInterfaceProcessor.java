@@ -799,7 +799,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
 	public final String getProcessorName() {
-		return Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_name, new String[] { fSubType.getElementName() });
+		return RefactoringCoreMessages.ExtractInterfaceProcessor_name;
 	}
 
 	/**

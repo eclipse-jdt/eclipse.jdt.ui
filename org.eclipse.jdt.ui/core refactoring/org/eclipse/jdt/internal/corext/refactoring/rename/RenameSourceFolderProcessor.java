@@ -75,9 +75,7 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 	}
 	
 	public String getProcessorName() {
-		return Messages.format(
-			RefactoringCoreMessages.RenameSourceFolderRefactoring_rename, 
-			new String[]{fSourceFolder.getElementName(), getNewElementName()});
+		return RefactoringCoreMessages.RenameSourceFolderRefactoring_rename;
 	}
 	
 	protected String[] getAffectedProjectNatures() throws CoreException {

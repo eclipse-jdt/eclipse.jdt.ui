@@ -133,8 +133,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	}
 	
 	public String getProcessorName(){
-		return Messages.format(RefactoringCoreMessages.RenamePackageRefactoring_name,  
-						new String[]{fPackage.getElementName(), getNewElementName()});
+		return RefactoringCoreMessages.RenamePackageRefactoring_name;
 	}
 	
 	protected String[] getAffectedProjectNatures() throws CoreException {

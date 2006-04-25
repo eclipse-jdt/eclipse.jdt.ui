@@ -340,7 +340,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
 	public final String getProcessorName() {
-		return Messages.format(RefactoringCoreMessages.UseSuperTypeProcessor_name, new String[] { fSubType.getElementName(), fSuperType.getElementName() });
+		return RefactoringCoreMessages.UseSuperTypeProcessor_name;
 	}
 
 	/**

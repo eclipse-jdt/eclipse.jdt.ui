@@ -169,9 +169,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 
 	public String getProcessorName() {
-		return Messages.format(
-			RefactoringCoreMessages.RenameMethodRefactoring_name, 
-			new String[]{fMethod.getElementName(), getNewElementName()});
+		return RefactoringCoreMessages.RenameMethodRefactoring_name;
 	}
 	
 	protected String[] getAffectedProjectNatures() throws CoreException {

@@ -2703,7 +2703,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
 	public final String getProcessorName() {
-		return Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_name, new String[] { fMethod.getElementName() });
+		return RefactoringCoreMessages.MoveInstanceMethodProcessor_name;
 	}
 
 	/**

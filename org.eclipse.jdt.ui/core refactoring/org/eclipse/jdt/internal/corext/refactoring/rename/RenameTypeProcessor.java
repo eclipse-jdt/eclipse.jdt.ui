@@ -216,9 +216,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	}
 	 
 	public String getProcessorName() {
-		return Messages.format(
-			RefactoringCoreMessages.RenameTypeRefactoring_name,  
-			new String[]{JavaModelUtil.getFullyQualifiedName(fType), getNewElementName()});
+		return RefactoringCoreMessages.RenameTypeRefactoring_name;
 	}
 	
 	protected String[] getAffectedProjectNatures() throws CoreException {

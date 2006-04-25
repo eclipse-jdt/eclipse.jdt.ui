@@ -95,9 +95,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 	}
 	
 	public String getProcessorName() {
-		return Messages.format(
-			RefactoringCoreMessages.RenameCompilationUnitRefactoring_name,  
-			new String[]{fCu.getElementName(), getNewElementName()});
+		return RefactoringCoreMessages.RenameCompilationUnitRefactoring_name;
 	}
 
 	protected String[] getAffectedProjectNatures() throws CoreException {

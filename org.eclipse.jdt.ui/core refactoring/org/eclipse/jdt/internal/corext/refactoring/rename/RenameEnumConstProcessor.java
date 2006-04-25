@@ -133,7 +133,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
 	public String getProcessorName() {
-		return Messages.format(RefactoringCoreMessages.RenameEnumConstRefactoring_name, new String[] { getCurrentElementName(), getNewElementName()});
+		return RefactoringCoreMessages.RenameEnumConstRefactoring_name;
 	}
 
 	/*

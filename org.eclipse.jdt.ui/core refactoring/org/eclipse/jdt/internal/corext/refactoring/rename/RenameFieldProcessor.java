@@ -163,9 +163,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	}
 	
 	public String getProcessorName() {
-		return Messages.format(
-			RefactoringCoreMessages.RenameFieldRefactoring_name, 
-			new String[]{fField.getElementName(), getNewElementName()});
+		return RefactoringCoreMessages.RenameFieldRefactoring_name;
 	}
 	
 	protected String[] getAffectedProjectNatures() throws CoreException {

@@ -363,7 +363,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	}
 
 	public final String getProcessorName() {
-		return Messages.format(RefactoringCoreMessages.RenameTypeParameterProcessor_name, new String[] { fTypeParameter.getElementName(), getNewElementName()});
+		return RefactoringCoreMessages.RenameTypeParameterProcessor_name;
 	}
 
 	public final boolean getUpdateReferences() {

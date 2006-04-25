@@ -1808,6 +1808,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ReplaceInvocationsRefactoring_cannot_replace_in_binary;
 
+	public static String ReplaceInvocationsRefactoring_name;
+
 	public static String ReplaceInvocationsRefactoring_select_method_to_apply;
 
 	public static String RippleMethodFinder_analizing_hierarchy;

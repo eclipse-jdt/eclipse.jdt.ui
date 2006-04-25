@@ -82,9 +82,7 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 	}
 	
 	public String getProcessorName() {
-		return Messages.format(
-			RefactoringCoreMessages.RenameJavaProjectRefactoring_rename, 
-			new String[]{getCurrentElementName(), getNewElementName()});
+		return RefactoringCoreMessages.RenameJavaProjectRefactoring_rename;
 	}
 	
 	protected String[] getAffectedProjectNatures() throws CoreException {

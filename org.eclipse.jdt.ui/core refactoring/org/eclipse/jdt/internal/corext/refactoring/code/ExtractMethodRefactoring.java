@@ -230,7 +230,7 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 	}
 
 	 public String getName() {
-	 	return Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_name, new String[]{fMethodName, fCUnit.getElementName()}); 
+	 	return RefactoringCoreMessages.ExtractMethodRefactoring_name; 
 	 }
 
 	/**

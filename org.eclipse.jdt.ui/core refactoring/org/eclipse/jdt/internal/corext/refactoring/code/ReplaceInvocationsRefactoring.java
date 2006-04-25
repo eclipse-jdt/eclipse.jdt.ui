@@ -141,7 +141,7 @@ public class ReplaceInvocationsRefactoring extends ScriptableRefactoring {
 	}
 	
 	public String getName() {
-		return RefactoringCoreMessages.InlineMethodRefactoring_name; 
+		return RefactoringCoreMessages.ReplaceInvocationsRefactoring_name;
 	}
 	
 	/**
