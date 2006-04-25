@@ -3089,6 +3089,49 @@ public class CleanUpTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 	
+	public void testCodeStyleBug_138318() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E<I> {\n");
+		buf.append("    private static int I;\n");
+		buf.append("    private static String STR() {return \"\";}\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Runnable runnable = new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                System.out.println(I);\n");
+		buf.append("                System.out.println(STR());\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS | CodeStyleCleanUp.QUALIFY_STATIC_METHOD_ACCESS);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E<I> {\n");
+		buf.append("    private static int I;\n");
+		buf.append("    private static String STR() {return \"\";}\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Runnable runnable = new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                System.out.println(E.I);\n");
+		buf.append("                System.out.println(E.STR());\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
 	public void testJava50ForLoop01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

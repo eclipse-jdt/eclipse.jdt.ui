@@ -17,6 +17,8 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -30,6 +32,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -341,7 +344,7 @@ public class CodeStyleFix extends AbstractFix {
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			CompilationUnit compilationUnit= cuRewrite.getRoot();
-			Type qualifier= importType(fDeclaringClass, fName, cuRewrite.getImportRewrite(), compilationUnit);
+			importType(fDeclaringClass, fName, cuRewrite.getImportRewrite(), compilationUnit);
 			TextEditGroup group;
 			if (fName.resolveBinding() instanceof IMethodBinding) {
 				group= createTextEditGroup(FixMessages.CodeStyleFix_QualifyMethodWithDeclClass_description);
@@ -349,8 +352,15 @@ public class CodeStyleFix extends AbstractFix {
 				group= createTextEditGroup(FixMessages.CodeStyleFix_QualifyFieldWithDeclClass_description);
 			}
 			textEditGroups.add(group);
-			rewrite.replace(fName, compilationUnit.getAST().newQualifiedType(qualifier, (SimpleName)rewrite.createMoveTarget(fName)), group);
+			IJavaElement javaElement= fDeclaringClass.getJavaElement();
+			if (javaElement instanceof IType) {
+				Name qualifierName= compilationUnit.getAST().newName(((IType)javaElement).getElementName());
+				SimpleName simpleName= (SimpleName)rewrite.createMoveTarget(fName);
+				QualifiedName qualifiedName= compilationUnit.getAST().newQualifiedName(qualifierName, simpleName);
+				rewrite.replace(fName, qualifiedName, group);
+			}
 		}
+		
 	}
 	
 	private final static class ToStaticAccessOperation extends AbstractFixRewriteOperation {
