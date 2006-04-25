@@ -357,12 +357,15 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				updateProject(new SubProgressMonitor(monitor, 1));
 			}
 			configureJavaProject(new SubProgressMonitor(monitor, 2));
-			String compliance= fFirstPage.getCompilerCompliance();
-			if (compliance != null) {
-				IJavaProject project= JavaCore.create(fCurrProject);
-				Map options= project.getOptions(false);
-				JavaModelUtil.setCompilanceOptions(options, compliance);
-				project.setOptions(options);
+			
+			if (!fKeepContent) {
+				String compliance= fFirstPage.getCompilerCompliance();
+				if (compliance != null) {
+					IJavaProject project= JavaCore.create(fCurrProject);
+					Map options= project.getOptions(false);
+					JavaModelUtil.setCompilanceOptions(options, compliance);
+					project.setOptions(options);
+				}
 			}
 		} finally {
 			monitor.done();
