@@ -71,7 +71,7 @@ public final class CompletionProposalCategory {
 		else
 			fName= name;
 		
-		String icon= element.getAttributeAsIs(ICON);
+		String icon= element.getAttribute(ICON);
 		ImageDescriptor img= null;
 		if (icon != null) {
 			Bundle bundle= getBundle();

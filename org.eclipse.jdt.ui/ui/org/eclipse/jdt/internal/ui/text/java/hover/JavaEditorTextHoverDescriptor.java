@@ -108,7 +108,7 @@ public class JavaEditorTextHoverDescriptor {
 	 * Creates the Java editor text hover.
 	 */
 	public IJavaEditorTextHover createTextHover() {
- 		String pluginId = fElement.getNamespace();
+ 		String pluginId = fElement.getContributor().getName();
 		boolean isHoversPlugInActivated= Platform.getBundle(pluginId).getState() == Bundle.ACTIVE;
 		if (isHoversPlugInActivated || canActivatePlugIn()) {
 			try {

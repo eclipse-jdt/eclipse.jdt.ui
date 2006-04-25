@@ -162,6 +162,6 @@ public class RefactoringElementFilterDescriptor implements IPluginContribution {
      * @see org.eclipse.ui.IPluginContribution#getPluginId()
      */
     public String getPluginId() {
-        return fElement.getNamespace();
+        return fElement.getContributor().getName();
     }
 }

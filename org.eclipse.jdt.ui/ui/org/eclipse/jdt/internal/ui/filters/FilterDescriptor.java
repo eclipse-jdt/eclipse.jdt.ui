@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.filters;
 
 import com.ibm.icu.text.Collator;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -275,6 +276,6 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 	}
 
     public String getPluginId() {
-        return fElement.getNamespace();
+        return fElement.getContributor().getName();
     }
 }

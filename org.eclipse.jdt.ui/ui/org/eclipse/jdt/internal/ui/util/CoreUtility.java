@@ -70,7 +70,7 @@ public class CoreUtility {
 	public static Object createExtension(final IConfigurationElement element, final String classAttribute) throws CoreException {
 		// If plugin has been loaded create extension.
 		// Otherwise, show busy cursor then create extension.
-		String pluginId = element.getNamespace();
+		String pluginId = element.getContributor().getName();
 		Bundle bundle = Platform.getBundle(pluginId);
 		if (bundle != null && bundle.getState() == Bundle.ACTIVE ) {
 			return element.createExecutableExtension(classAttribute);

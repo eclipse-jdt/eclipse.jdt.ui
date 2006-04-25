@@ -136,20 +136,20 @@ final class CompletionProposalComputerDescriptor {
 			fPartitions= PARTITION_SET; // add to all partition types if no partition is configured
 		} else {
 			for (int i= 0; i < children.length; i++) {
-				String type= children[i].getAttributeAsIs(TYPE);
+				String type= children[i].getAttribute(TYPE);
 				checkNotNull(type, TYPE);
 				partitions.add(type);
 			}
 			fPartitions= Collections.unmodifiableSet(partitions);
 		}
 		
-		String activateAttribute= element.getAttributeAsIs(ACTIVATE);
+		String activateAttribute= element.getAttribute(ACTIVATE);
 		fActivate= Boolean.valueOf(activateAttribute).booleanValue();
 
-		fClass= element.getAttributeAsIs(CLASS);
+		fClass= element.getAttribute(CLASS);
 		checkNotNull(fClass, CLASS);
 		
-		String categoryId= element.getAttributeAsIs(CATEGORY_ID);
+		String categoryId= element.getAttribute(CATEGORY_ID);
 		if (categoryId == null)
 			categoryId= DEFAULT_CATEGORY_ID;
 		CompletionProposalCategory category= null;
@@ -177,7 +177,7 @@ final class CompletionProposalComputerDescriptor {
 	 */
 	private void checkNotNull(Object obj, String attribute) throws InvalidRegistryObjectException {
 		if (obj == null) {
-			Object[] args= { getId(), fElement.getNamespace(), attribute };
+			Object[] args= { getId(), fElement.getContributor().getName(), attribute };
 			String message= Messages.format(JavaTextMessages.CompletionProposalComputerDescriptor_illegal_attribute_message, args);
 			IStatus status= new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, message, null);
 			JavaPlugin.log(status);
@@ -236,7 +236,7 @@ final class CompletionProposalComputerDescriptor {
 	}
 
 	private Bundle getBundle() {
-		String namespace= fElement.getDeclaringExtension().getNamespace();
+		String namespace= fElement.getDeclaringExtension().getContributor().getName();
 		Bundle bundle= Platform.getBundle(namespace);
 		return bundle;
 	}
