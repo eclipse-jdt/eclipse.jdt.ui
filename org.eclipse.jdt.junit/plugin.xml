@@ -175,10 +175,12 @@
                label="%searchMenu.label"
                path="navigate"
                id="org.eclipse.search.menu">
-            <groupMarker name="internalDialogGroup"/>   <!-- not to be used by clients  -->
-            <groupMarker name="dialogGroup"/>           <!-- to be used by clients      -->
-            <separator name="contextMenuActionsGroup"/>
-            <separator name="internalOccurrencesGroup"/> <!-- not to be used by clients  -->
+				<groupMarker name="internalDialogGroup"/>   <!-- not to be used by clients  -->
+				<groupMarker name="dialogGroup"/>           <!-- to be used by clients      -->
+				<separator name="fileSearchContextMenuActionsGroup"/> <!-- to be used by clients      -->
+	         	<separator name="contextMenuActionsGroup"/> <!-- to be used by clients -->
+	         	<separator name="occurencesActionsGroup"/> <!-- to be used by clients -->
+	         	<separator name="extraSearchGroup"/> <!-- to be used by clients -->
          </menu>
 		<action
                definitionId="org.eclipse.jdt.junit.gotoTest"
@@ -186,7 +188,7 @@
                helpContextId="org.eclipse.jdt.junit.goto_referenced_test_action_context"
                class="org.eclipse.jdt.internal.junit.ui.GotoReferencedTestAction"
                tooltip="%GotoTestAction.tooltip"
-               menubarPath="org.eclipse.search.menu/internalOccurrencesGroup"
+               menubarPath="org.eclipse.search.menu/extraSearchGroup"
                id="junit.actions.GotoTestAction">
          </action>
       </actionSet>

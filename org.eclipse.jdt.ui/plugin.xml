@@ -2638,7 +2638,7 @@
             description="%JavaSearchActionSet.description"
             visible="false"
             id="org.eclipse.jdt.ui.SearchActionSet">
-<!-- see http://bugs.eclipse.org/bugs/show_bug.cgi?id=155684    -->
+<!-- see http://bugs.eclipse.org/bugs/show_bug.cgi?id=15684    -->
 <!-- Note: The menu (re-) definition has to be here due to bug: -->
 <!-- =================================================================== -->
 <!-- Search Menu                                                         -->
@@ -2647,20 +2647,12 @@
                label="%searchMenu.label"
                path="navigate"
                id="org.eclipse.search.menu">
-            <groupMarker
-                  name="internalDialogGroup">
-            </groupMarker>
-<!-- not to be used by clients  -->
-            <groupMarker
-                  name="dialogGroup">
-            </groupMarker>
-<!-- to be used by clients      -->
-            <separator
-                  name="contextMenuActionsGroup">
-            </separator>
-            <separator
-                  name="internalOccurrencesGroup">
-            </separator>
+				<groupMarker name="internalDialogGroup"/>   <!-- not to be used by clients  -->
+				<groupMarker name="dialogGroup"/>           <!-- to be used by clients      -->
+				<separator name="fileSearchContextMenuActionsGroup"/> <!-- to be used by clients      -->
+	         	<separator name="contextMenuActionsGroup"/> <!-- to be used by clients -->
+	         	<separator name="occurencesActionsGroup"/> <!-- to be used by clients -->
+	         	<separator name="extraSearchGroup"/> <!-- to be used by clients -->
          </menu>
 <!-- dialog group  -->
          <action
@@ -2677,7 +2669,7 @@
                label="%occurrencesSubMenu.label"
                style="pulldown"
                class="org.eclipse.jdt.internal.ui.actions.OccurrencesSearchMenuAction"
-               menubarPath="org.eclipse.search.menu/contextMenuActionsGroup"
+               menubarPath="org.eclipse.search.menu/occurencesActionsGroup"
                id="org.eclipse.jdt.internal.ui.actions.OccurrencesSearchMenuAction">
          </action>
          <menu
