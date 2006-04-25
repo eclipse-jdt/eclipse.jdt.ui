@@ -3532,6 +3532,92 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2, expected3});
 	}   
 	
+	public void testRemoveIfBlockBug128843() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else if (false) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else {\n");
+		buf.append("            ;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		String str= " (false) {";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else if (false)\n");
+		buf.append("            ;\n");
+		buf.append("        else {\n");
+		buf.append("            ;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else if (false) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else\n");
+		buf.append("            ;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true)\n");
+		buf.append("            ;\n");
+		buf.append("        else if (false)\n");
+		buf.append("            ;\n");
+		buf.append("        else\n");
+		buf.append("            ;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else if (true) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else {\n");
+		buf.append("            ;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected4= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2, expected3, expected4});
+	}   
+	
 	public void testRemoveWhileBlock01() throws Exception {
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
