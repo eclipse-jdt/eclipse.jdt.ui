@@ -538,13 +538,6 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			input.put(KEY_NO_LINK, Boolean.TRUE);
 			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, complianceId, new String[] { buildPath, complianceId  }, data).open();
 		}
-		try {
-			IClasspathEntry[] rawClasspath= javaProject.getRawClasspath();
-			for (int i= 0; i < rawClasspath.length; i++) {
-				System.out.println(rawClasspath[i].getPath());
-			}
-		} catch (JavaModelException e) {
-		}
 		
 		updateBuildPathMessage();
 	}
