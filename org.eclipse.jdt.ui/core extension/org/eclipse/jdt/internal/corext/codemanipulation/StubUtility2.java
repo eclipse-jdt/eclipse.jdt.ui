@@ -79,7 +79,7 @@ public final class StubUtility2 {
 		}
 	}
 
-	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, IMethodBinding binding, String type, int modifiers, boolean omitSuper, boolean todo, CodeGenerationSettings settings) throws CoreException {
+	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, IMethodBinding binding, String type, int modifiers, boolean omitSuperForDefConst, boolean todo, CodeGenerationSettings settings) throws CoreException {
 		AST ast= rewrite.getAST();
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
@@ -116,7 +116,7 @@ public final class StubUtility2 {
 
 		String delimiter= StubUtility.getLineDelimiterUsed(unit);
 		String bodyStatement= ""; //$NON-NLS-1$
-		if (!omitSuper) {
+		if (!omitSuperForDefConst || !parameters.isEmpty()) {
 			SuperConstructorInvocation invocation= ast.newSuperConstructorInvocation();
 			SingleVariableDeclaration varDecl= null;
 			for (Iterator iterator= parameters.iterator(); iterator.hasNext();) {

@@ -2470,6 +2470,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 			if (doConstructors) {
 				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(unit, binding, null, -1, false, true, false);
+				operation.setOmitSuper(true);
 				operation.setCreateComments(isAddComments());
 				operation.run(monitor);
 				createImports(imports, operation.getCreatedImports());
