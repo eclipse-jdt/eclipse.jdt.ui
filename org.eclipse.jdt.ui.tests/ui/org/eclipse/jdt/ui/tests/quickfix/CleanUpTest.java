@@ -3132,6 +3132,84 @@ public class CleanUpTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 	
+	public void testCodeStyleBug138325_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E<I> {\n");
+		buf.append("    private int i;\n");
+		buf.append("    private String str() {return \"\";}\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("        System.out.println(str());\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+
+		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS | CodeStyleCleanUp.QUALIFY_METHOD_ACCESS);
+		refactoring.addCleanUp(cleanUp);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E<I> {\n");
+		buf.append("    private int i;\n");
+		buf.append("    private String str() {return \"\";}\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(this.i);\n");
+		buf.append("        System.out.println(this.str());\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+
+	public void testCodeStyleBug138325_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E<I> {\n");
+		buf.append("    private int i;\n");
+		buf.append("    private String str() {return \"\";}\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Runnable runnable = new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                System.out.println(i);\n");
+		buf.append("                System.out.println(str());\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+
+		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS | CodeStyleCleanUp.QUALIFY_METHOD_ACCESS);
+		refactoring.addCleanUp(cleanUp);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E<I> {\n");
+		buf.append("    private int i;\n");
+		buf.append("    private String str() {return \"\";}\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Runnable runnable = new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                System.out.println(E.this.i);\n");
+		buf.append("                System.out.println(E.this.str());\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+
 	public void testJava50ForLoop01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

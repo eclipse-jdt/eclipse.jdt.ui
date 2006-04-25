@@ -617,21 +617,30 @@ public class CodeStyleFix extends AbstractFix {
 	
 	private static String getQualifier(IVariableBinding binding, ImportRewrite imports, SimpleName name) {
 		ITypeBinding declaringClass= binding.getDeclaringClass();
-		String qualifier;
 		if (Modifier.isStatic(binding.getModifiers())) {
-			qualifier= imports.addImport(declaringClass);
+			IJavaElement javaElement= declaringClass.getJavaElement();
+			if (javaElement instanceof IType) {
+				return ((IType)javaElement).getElementName();
+			}
 		} else {
-			qualifier= getNonStaticQualifier(declaringClass, imports, name);
+			return getNonStaticQualifier(declaringClass, imports, name);
 		}
 
-		return qualifier;
+		return null;
 	}
-	
+
 	private static String getNonStaticQualifier(ITypeBinding declaringClass, ImportRewrite imports, SimpleName name) {
 		ITypeBinding parentType= Bindings.getBindingOfParentType(name);
 		ITypeBinding currType= parentType;
 		while (currType != null && !Bindings.isSuperType(declaringClass, currType)) {
 			currType= currType.getDeclaringClass();
+		}
+		if (currType == null) {
+			declaringClass= declaringClass.getTypeDeclaration();
+			currType= parentType;
+			while (currType != null && !Bindings.isSuperType(declaringClass, currType)) {
+				currType= currType.getDeclaringClass();
+			}
 		}
 		if (currType != parentType) {
 			if (currType == null)
