@@ -899,13 +899,17 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				return -1;
 
 			try {
-				int widgetLocation= styledText.getOffsetAtLocation(new Point(x, y));
+				int widgetOffset= styledText.getOffsetAtLocation(new Point(x, y));
+				Point p= styledText.getLocationAtOffset(widgetOffset);
+				if (p.x > x)
+					widgetOffset--;
+				
 				if (textViewer instanceof ITextViewerExtension5) {
 					ITextViewerExtension5 extension= (ITextViewerExtension5) textViewer;
-					return extension.widgetOffset2ModelOffset(widgetLocation);
+					return extension.widgetOffset2ModelOffset(widgetOffset);
 				} else {
 					IRegion visibleRegion= textViewer.getVisibleRegion();
-					return widgetLocation + visibleRegion.getOffset();
+					return widgetOffset + visibleRegion.getOffset();
 				}
 			} catch (IllegalArgumentException e) {
 				return -1;
