@@ -841,7 +841,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					ILineRange hoverLineRange= extension.getHoverLineRange(sourceViewer, line);
 					if (hoverLineRange == null)
 						return false;
-					hoverInfo= extension.getHoverInfo(sourceViewer, hoverLineRange, hoverLineRange.getNumberOfLines());
+					final int maxVisibleLines= Integer.MAX_VALUE; // allow any number of lines being displayed, as we support scrolling
+					hoverInfo= extension.getHoverInfo(sourceViewer, hoverLineRange, maxVisibleLines);
 				} else {
 					hoverInfo= annotationHover.getHoverInfo(sourceViewer, line);
 				}
