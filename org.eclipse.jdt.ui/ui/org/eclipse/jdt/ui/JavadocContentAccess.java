@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocCommentReader;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 
@@ -70,8 +70,7 @@ public class JavadocContentAccess {
 		}
 
 		if (allowInherited && (member.getElementType() == IJavaElement.METHOD)) {
-			IMethod method= (IMethod) member;
-			return findDocInHierarchy(method.getDeclaringType(), method.getElementName(), method.getParameterTypes(), method.isConstructor());
+			return findDocInHierarchy((IMethod) member);
 		}
 		
 		return null;
@@ -144,13 +143,18 @@ public class JavadocContentAccess {
 		return getHTMLContentReader(member, allowInherited, false);
 	}
 
-	private static Reader findDocInHierarchy(IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
+	private static Reader findDocInHierarchy(IMethod method) throws JavaModelException {
+		IType type= method.getDeclaringType();
 		ITypeHierarchy hierarchy= type.newSupertypeHierarchy(null);
+		
+		MethodOverrideTester tester= new MethodOverrideTester(type, hierarchy);
+		
 		IType[] superTypes= hierarchy.getAllSupertypes(type);
 		for (int i= 0; i < superTypes.length; i++) {
-			IMethod method= JavaModelUtil.findMethod(name, paramTypes, isConstructor, superTypes[i]);
-			if (method != null) {
-				Reader reader= getContentReader(method, false);
+			IType curr= superTypes[i];
+			IMethod overridden= tester.findOverriddenMethodInType(curr, method);
+			if (overridden != null) {
+				Reader reader= getContentReader(overridden, false);
 				if (reader != null) {
 					return reader;
 				}
