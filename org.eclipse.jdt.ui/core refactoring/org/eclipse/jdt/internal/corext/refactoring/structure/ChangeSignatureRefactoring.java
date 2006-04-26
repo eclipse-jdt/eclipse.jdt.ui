@@ -102,6 +102,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ExceptionInfo;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -1154,7 +1155,52 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			}
 			JavaRefactoringDescriptor descriptor= null;
 			try {
-				descriptor= new JavaRefactoringDescriptor(ID_CHANGE_METHOD_SIGNATURE, project, Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()}), getComment(), arguments, flags);
+				final String description= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description_short, fMethod.getElementName());
+				final String header= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()});
+				final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+				if (!fMethod.getElementName().equals(fMethodName))
+					comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_new_name_pattern, fMethodName));
+				if (!isVisibilitySameAsInitial()) {
+					String visibility= JdtFlags.getVisibilityString(fVisibility);
+					if ("".equals(visibility)) //$NON-NLS-1$
+						visibility= RefactoringCoreMessages.ChangeSignatureRefactoring_default_visibility;
+					comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_new_visibility_pattern, visibility));
+				}
+				if (fReturnTypeInfo.isTypeNameChanged())
+					comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_new_return_type_pattern, fReturnTypeInfo.getNewTypeName()));
+				List deleted= new ArrayList();
+				List added= new ArrayList();
+				List changed= new ArrayList();
+				for (final Iterator iterator= fParameterInfos.iterator(); iterator.hasNext();) {
+					final ParameterInfo info= (ParameterInfo) iterator.next();
+					if (info.isDeleted())
+						deleted.add(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_deleted_parameter_pattern, new String[] { info.getOldTypeName(), info.getOldName()}));
+					else if (info.isAdded())
+						added.add(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_added_parameter_pattern, new String[] { info.getOldTypeName(), info.getNewName()}));
+					else if (info.isRenamed() || info.isTypeNameChanged() || info.isVarargChanged())
+						changed.add(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_changed_parameter_pattern, new String[] { info.getOldTypeName(), info.getOldName()}));
+				}
+				if (!added.isEmpty())
+					comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_added_parameters, (String[]) added.toArray(new String[added.size()])));
+				if (!deleted.isEmpty())
+					comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_removed_parameters, (String[]) deleted.toArray(new String[deleted.size()])));
+				if (!changed.isEmpty())
+					comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_changed_parameters, (String[]) changed.toArray(new String[changed.size()])));
+				added.clear();
+				deleted.clear();
+				changed.clear();
+				for (final Iterator iterator= fExceptionInfos.iterator(); iterator.hasNext();) {
+					final ExceptionInfo info= (ExceptionInfo) iterator.next();
+					if (info.isAdded())
+						added.add(info.getType().getElementName());
+					else if (info.isDeleted())
+						deleted.add(info.getType().getElementName());
+				}
+				if (!added.isEmpty())
+					comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_added_exceptions, (String[]) added.toArray(new String[added.size()])));
+				if (!deleted.isEmpty())
+					comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_removed_exceptions, (String[]) deleted.toArray(new String[deleted.size()])));
+				descriptor= new JavaRefactoringDescriptor(ID_CHANGE_METHOD_SIGNATURE, project, description, comment.asString(), arguments, flags);
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fMethod));
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fMethodName);
 				arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());

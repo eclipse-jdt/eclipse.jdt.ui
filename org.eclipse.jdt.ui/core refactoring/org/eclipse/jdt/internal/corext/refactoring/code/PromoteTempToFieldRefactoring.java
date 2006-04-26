@@ -76,6 +76,7 @@ import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitDescriptorChange;
@@ -96,7 +97,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 
-	public static final String ID_PROMOTE_TEMP= "org.eclipse.jdt.ui.promote.temp"; //$NON-NLS-1$
+	private static final String ID_PROMOTE_TEMP= "org.eclipse.jdt.ui.promote.temp"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_STATIC= "static"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_FINAL= "final"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
@@ -616,7 +617,7 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 		}
 		return new MethodDeclaration[] {};
 	}
-    
+
     private Change createChange(ASTRewrite rewrite) throws CoreException {
 		final Map arguments= new HashMap();
 		String project= null;
@@ -624,7 +625,33 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 		if (javaProject != null)
 			project= javaProject.getElementName();
 		final IVariableBinding binding= fTempDeclarationNode.resolveBinding();
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PROMOTE_TEMP, project, Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
+		final String description= Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_descriptor_description_short, binding.getName());
+		final String header= Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
+		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+		comment.addSetting(Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_original_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_field_pattern, fFieldName));
+		switch (fInitializeIn) {
+			case INITIALIZE_IN_CONSTRUCTOR:
+				comment.addSetting(RefactoringCoreMessages.PromoteTempToFieldRefactoring_initialize_constructor);
+				break;
+			case INITIALIZE_IN_FIELD:
+				comment.addSetting(RefactoringCoreMessages.PromoteTempToFieldRefactoring_initialize_declaration);
+				break;
+			case INITIALIZE_IN_METHOD:
+				comment.addSetting(RefactoringCoreMessages.PromoteTempToFieldRefactoring_initialize_method);
+				break;
+		}
+		String visibility= JdtFlags.getVisibilityString(fVisibility);
+		if ("".equals(visibility)) //$NON-NLS-1$
+			visibility= RefactoringCoreMessages.PromoteTempToFieldRefactoring_default_visibility;
+		comment.addSetting(Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_visibility_pattern, visibility));
+		if (fDeclareFinal && fDeclareStatic)
+			comment.addSetting(RefactoringCoreMessages.PromoteTempToFieldRefactoring_declare_final_static);
+		else if (fDeclareFinal)
+			comment.addSetting(RefactoringCoreMessages.PromoteTempToFieldRefactoring_declare_final);
+		else if (fDeclareStatic)
+			comment.addSetting(RefactoringCoreMessages.PromoteTempToFieldRefactoring_declare_static);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PROMOTE_TEMP, project, description, comment.asString(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fFieldName);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$

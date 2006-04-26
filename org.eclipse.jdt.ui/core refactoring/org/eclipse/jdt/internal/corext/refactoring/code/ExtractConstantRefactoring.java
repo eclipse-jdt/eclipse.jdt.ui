@@ -82,6 +82,7 @@ import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
@@ -103,19 +104,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class ExtractConstantRefactoring extends ScriptableRefactoring {
 
-	public static final String ID_EXTRACT_CONSTANT= "org.eclipse.jdt.ui.extract.constant"; //$NON-NLS-1$
+	private static final String ID_EXTRACT_CONSTANT= "org.eclipse.jdt.ui.extract.constant"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REPLACE= "replace"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_QUALIFY= "qualify"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
 
-	public static final String PUBLIC= 	JdtFlags.VISIBILITY_STRING_PUBLIC;
-	public static final String PROTECTED= JdtFlags.VISIBILITY_STRING_PROTECTED;
-	public static final String PACKAGE= 	JdtFlags.VISIBILITY_STRING_PACKAGE;
-	public static final String PRIVATE= 	JdtFlags.VISIBILITY_STRING_PRIVATE;
-
 	private static final String MODIFIER= "static final"; //$NON-NLS-1$
 	private static final String[] KNOWN_METHOD_NAME_PREFIXES= {"get", "is"}; //$NON-NLS-2$ //$NON-NLS-1$
-	
 	
 	private CompilationUnitRewrite fCuRewrite;
 	private int fSelectionStart;
@@ -127,7 +122,7 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 	private boolean fReplaceAllOccurrences= true; //default value
 	private boolean fQualifyReferencesWithDeclaringClassName= false;	//default value
 
-	private String fAccessModifier= PRIVATE; //default value
+	private String fVisibility= JdtFlags.VISIBILITY_STRING_PRIVATE; //default value
 	private boolean fTargetIsInterface= false;
 	private String fConstantName= ""; //$NON-NLS-1$;
 	private String[] fExcludedVariableNames;
@@ -169,15 +164,15 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 		fReplaceAllOccurrences= replaceAllOccurrences;
 	}
 	
-	public void setAccessModifier(String am) {
+	public void setVisibility(String am) {
 		Assert.isTrue(
-			am == PRIVATE || am == PROTECTED || am == PACKAGE || am == PUBLIC
+			am == JdtFlags.VISIBILITY_STRING_PRIVATE || am == JdtFlags.VISIBILITY_STRING_PROTECTED || am == JdtFlags.VISIBILITY_STRING_PACKAGE || am == JdtFlags.VISIBILITY_STRING_PUBLIC
 		);
-		fAccessModifier= am;
+		fVisibility= am;
 	}
 	
-	public String getAccessModifier() {
-		return fAccessModifier;	
+	public String getVisibility() {
+		return fVisibility;	
 	}
 	
 	public boolean getTargetIsInterface() {
@@ -364,7 +359,7 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 			ITypeBinding targetType= getContainingTypeBinding();
 			if (targetType.isAnnotation() || targetType.isInterface()) {
 				fTargetIsInterface= true;
-				fAccessModifier= PUBLIC;
+				fVisibility= JdtFlags.VISIBILITY_STRING_PUBLIC;
 			}
 			
 			return result;
@@ -491,7 +486,7 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 	// !! similar to ExtractTempRefactoring equivalent
 	public String getConstantSignaturePreview() throws JavaModelException {
 		String space= " "; //$NON-NLS-1$
-		return getAccessModifier() + space + MODIFIER + space + getConstantTypeName() + space + fConstantName;
+		return getVisibility() + space + MODIFIER + space + getConstantTypeName() + space + fConstantName;
 	}
 
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
@@ -549,7 +544,7 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 		
 		FieldDeclaration fieldDeclaration= ast.newFieldDeclaration(variableDeclarationFragment);
 		fieldDeclaration.setType(type);
-		Modifier.ModifierKeyword accessModifier= Modifier.ModifierKeyword.toKeyword(fAccessModifier);
+		Modifier.ModifierKeyword accessModifier= Modifier.ModifierKeyword.toKeyword(fVisibility);
 		if (accessModifier != null)
 			fieldDeclaration.modifiers().add(ast.newModifier(accessModifier));
 		fieldDeclaration.modifiers().add(ast.newModifier(Modifier.ModifierKeyword.STATIC_KEYWORD));
@@ -592,21 +587,35 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 		if (javaProject != null)
 			project= javaProject.getElementName();
 		int flags= JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-		if (JdtFlags.getVisibilityCode(fAccessModifier) != Modifier.PRIVATE)
+		if (JdtFlags.getVisibilityCode(fVisibility) != Modifier.PRIVATE)
 			flags|= RefactoringDescriptor.STRUCTURAL_CHANGE;
-		String description= ""; //$NON-NLS-1$
+		String pattern= ""; //$NON-NLS-1$
 		try {
-			description= BindingLabelProvider.getBindingLabel(getContainingTypeBinding(), JavaElementLabels.ALL_FULLY_QUALIFIED) + "."; //$NON-NLS-1$
+			pattern= BindingLabelProvider.getBindingLabel(getContainingTypeBinding(), JavaElementLabels.ALL_FULLY_QUALIFIED) + "."; //$NON-NLS-1$
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 		}
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_CONSTANT, project, Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_descriptor_description, new String[] { description + fConstantName, ASTNodes.asString(fSelectedExpression.getAssociatedExpression())}), getComment(), arguments, flags);
+		final String expression= ASTNodes.asString(fSelectedExpression.getAssociatedExpression());
+		final String description= Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_descriptor_description_short, fConstantName);
+		final String header= Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_descriptor_description, new String[] { pattern + fConstantName, expression});
+		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_constant_name_pattern, fConstantName));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_constant_expression_pattern, expression));
+		String visibility= fVisibility;
+		if ("".equals(visibility)) //$NON-NLS-1$
+			visibility= RefactoringCoreMessages.ExtractConstantRefactoring_default_visibility;
+		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_visibility_pattern, visibility));
+		if (fReplaceAllOccurrences)
+			comment.addSetting(RefactoringCoreMessages.ExtractConstantRefactoring_replace_occurrences);
+		if (fQualifyReferencesWithDeclaringClassName)
+			comment.addSetting(RefactoringCoreMessages.ExtractConstantRefactoring_qualify_references);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_CONSTANT, project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fConstantName);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 		arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllOccurrences).toString());
 		arguments.put(ATTRIBUTE_QUALIFY, Boolean.valueOf(fQualifyReferencesWithDeclaringClassName).toString());
-		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(JdtFlags.getVisibilityCode(fAccessModifier)).toString());
+		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(JdtFlags.getVisibilityCode(fVisibility)).toString());
 		return new RefactoringDescriptorChange(descriptor, RefactoringCoreMessages.ExtractConstantRefactoring_name, new Change[] { fChange});
 	}
 
@@ -870,7 +879,7 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 				} catch (NumberFormatException exception) {
 					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_VISIBILITY));
 				}
-				fAccessModifier= JdtFlags.getVisibilityString(flag);
+				fVisibility= JdtFlags.getVisibilityString(flag);
 			}
 			final String name= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_NAME);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$

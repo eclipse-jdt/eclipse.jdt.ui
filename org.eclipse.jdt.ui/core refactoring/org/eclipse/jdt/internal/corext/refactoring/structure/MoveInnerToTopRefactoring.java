@@ -105,6 +105,7 @@ import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
@@ -761,9 +762,20 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 		IJavaProject javaProject= fType.getJavaProject();
 		if (javaProject != null)
 			project= javaProject.getElementName();
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_MOVE_INNER, project, Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fType.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT);
+		final String description= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_descriptor_description_short, fType.getElementName());
+		final String header= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fType.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
+		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+		comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_original_pattern, JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+		final boolean enclosing= fEnclosingInstanceFieldName != null && !"".equals(fEnclosingInstanceFieldName); //$NON-NLS-1$
+		if (enclosing)
+			comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_field_pattern, fEnclosingInstanceFieldName));
+		if (fNameForEnclosingInstanceConstructorParameter != null && !"".equals(fNameForEnclosingInstanceConstructorParameter)) //$NON-NLS-1$
+			comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_parameter_pattern, fNameForEnclosingInstanceConstructorParameter));
+		if (enclosing && fMarkInstanceFieldAsFinal)
+			comment.addSetting(RefactoringCoreMessages.MoveInnerToTopRefactoring_declare_final);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_MOVE_INNER, project, description, comment.asString(), arguments, RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fType));
-		if (fEnclosingInstanceFieldName != null && !"".equals(fEnclosingInstanceFieldName)) //$NON-NLS-1$
+		if (enclosing)
 			arguments.put(ATTRIBUTE_FIELD_NAME, fEnclosingInstanceFieldName);
 		if (fNameForEnclosingInstanceConstructorParameter != null && !"".equals(fNameForEnclosingInstanceConstructorParameter)) //$NON-NLS-1$
 			arguments.put(ATTRIBUTE_PARAMETER_NAME, fNameForEnclosingInstanceConstructorParameter);

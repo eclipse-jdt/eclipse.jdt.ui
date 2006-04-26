@@ -81,6 +81,7 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
@@ -90,6 +91,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefa
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
@@ -105,7 +107,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  */
 public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 
-	public static final String ID_INTRODUCE_FACTORY= "org.eclipse.jdt.ui.introduce.factory"; //$NON-NLS-1$
+	private static final String ID_INTRODUCE_FACTORY= "org.eclipse.jdt.ui.introduce.factory"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_PROTECT= "protect"; //$NON-NLS-1$
 
 	/**
@@ -833,8 +835,6 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return fProtectConstructor && fCtorOwningClass != null;
 	}
 
-	static final int VISIBILITY_MASK= (Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE);
-
 	/**
 	 * Creates and adds the necessary change to make the constructor method protected.
 	 * Returns false iff the constructor didn't exist (i.e. was implicit)
@@ -843,7 +843,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		MethodDeclaration constructor= (MethodDeclaration) unitAST.findDeclaringNode(fCtorBinding.getKey());
 
 		// No need to rewrite the modifiers if the visibility is what we already want it to be.
-		if (constructor == null || (constructor.getModifiers() & VISIBILITY_MASK) == fConstructorVisibility)
+		if (constructor == null || (JdtFlags.getVisibilityCode(constructor)) == fConstructorVisibility)
 			return false;
 		ModifierRewrite.create(unitRewriter, constructor).setVisibility(fConstructorVisibility, declGD);
 		return true;
@@ -1060,7 +1060,15 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 			int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			if (binding.isNested() && !binding.isMember())
 				flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INTRODUCE_FACTORY, project, Messages.format(RefactoringCoreMessages.IntroduceFactory_descriptor_description, new String[] { fNewMethodName, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fCtorBinding, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+			final String description= Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_descriptor_description_short, fCtorOwningClass.getName());
+			final String header= Messages.format(RefactoringCoreMessages.IntroduceFactory_descriptor_description, new String[] { fNewMethodName, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fCtorBinding, JavaElementLabels.ALL_FULLY_QUALIFIED)});
+			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_original_pattern, BindingLabelProvider.getBindingLabel(fCtorBinding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_factory_pattern, fNewMethodName));
+			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_owner_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+			if (fProtectConstructor)
+				comment.addSetting(RefactoringCoreMessages.IntroduceFactoryRefactoring_declare_private);
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INTRODUCE_FACTORY, project, description, comment.asString(), arguments, flags);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCUHandle));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fNewMethodName);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(binding.getJavaElement()));

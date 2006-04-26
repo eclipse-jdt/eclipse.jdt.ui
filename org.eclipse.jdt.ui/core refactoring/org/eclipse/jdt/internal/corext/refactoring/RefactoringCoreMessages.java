@@ -64,6 +64,12 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ChangeSignatureRefactoring_add_super_call;
 
+	public static String ChangeSignatureRefactoring_added_exceptions;
+
+	public static String ChangeSignatureRefactoring_added_parameter_pattern;
+
+	public static String ChangeSignatureRefactoring_added_parameters;
+
 	public static String ChangeSignatureRefactoring_already_has;
 
 	public static String ChangeSignatureRefactoring_anonymous_subclass;
@@ -72,13 +78,23 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ChangeSignatureRefactoring_change_signature;
 
+	public static String ChangeSignatureRefactoring_changed_parameter_pattern;
+
+	public static String ChangeSignatureRefactoring_changed_parameters;
+
 	public static String ChangeSignatureRefactoring_checking_preconditions;
 
 	public static String ChangeSignatureRefactoring_constructor_name;
 
 	public static String ChangeSignatureRefactoring_default_value;
 
+	public static String ChangeSignatureRefactoring_default_visibility;
+
+	public static String ChangeSignatureRefactoring_deleted_parameter_pattern;
+
 	public static String ChangeSignatureRefactoring_descriptor_description;
+
+	public static String ChangeSignatureRefactoring_descriptor_description_short;
 
 	public static String ChangeSignatureRefactoring_duplicate_name;
 
@@ -91,6 +107,12 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ChangeSignatureRefactoring_modify_Parameters;
 
 	public static String ChangeSignatureRefactoring_native;
+
+	public static String ChangeSignatureRefactoring_new_name_pattern;
+
+	public static String ChangeSignatureRefactoring_new_return_type_pattern;
+
+	public static String ChangeSignatureRefactoring_new_visibility_pattern;
 
 	public static String ChangeSignatureRefactoring_no_exception_binding;
 
@@ -105,6 +127,10 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ChangeSignatureRefactoring_parameter_used;
 
 	public static String ChangeSignatureRefactoring_preview;
+
+	public static String ChangeSignatureRefactoring_removed_exceptions;
+
+	public static String ChangeSignatureRefactoring_removed_parameters;
 
 	public static String ChangeSignatureRefactoring_restructure_parameters;
 
@@ -138,6 +164,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ChangeTypeRefactoring_descriptor_description;
 
+	public static String ChangeTypeRefactoring_descriptor_description_short;
+
 	public static String ChangeTypeRefactoring_enumsNotSupported;
 
 	public static String ChangeTypeRefactoring_failedToSelectType;
@@ -166,7 +194,13 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ChangeTypeRefactoring_notSupportedOnNodeType;
 
+	public static String ChangeTypeRefactoring_original_element_pattern;
+
+	public static String ChangeTypeRefactoring_original_type_pattern;
+
 	public static String ChangeTypeRefactoring_primitivesNotSupported;
+
+	public static String ChangeTypeRefactoring_refactored_type_pattern;
 
 	public static String ChangeTypeRefactoring_typeChange;
 
@@ -226,9 +260,21 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ConvertAnonymousToNestedRefactoring_another_name;
 
+	public static String ConvertAnonymousToNestedRefactoring_class_name_pattern;
+
 	public static String ConvertAnonymousToNestedRefactoring_compile_errors;
 
+	public static String ConvertAnonymousToNestedRefactoring_declare_final;
+
+	public static String ConvertAnonymousToNestedRefactoring_declare_final_static;
+
+	public static String ConvertAnonymousToNestedRefactoring_declare_static;
+
+	public static String ConvertAnonymousToNestedRefactoring_default_visibility;
+
 	public static String ConvertAnonymousToNestedRefactoring_descriptor_description;
+
+	public static String ConvertAnonymousToNestedRefactoring_descriptor_description_short;
 
 	public static String ConvertAnonymousToNestedRefactoring_edit_name;
 
@@ -241,6 +287,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ConvertAnonymousToNestedRefactoring_place_caret;
 
 	public static String ConvertAnonymousToNestedRefactoring_type_exists;
+
+	public static String ConvertAnonymousToNestedRefactoring_visibility_pattern;
 
 	public static String CopyCompilationUnitChange_copy;
 
@@ -342,11 +390,19 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractConstantRefactoring_checking_preconditions;
 
+	public static String ExtractConstantRefactoring_constant_expression_pattern;
+
+	public static String ExtractConstantRefactoring_constant_name_pattern;
+
 	public static String ExtractConstantRefactoring_convention;
 
 	public static String ExtractConstantRefactoring_declare_constant;
 
+	public static String ExtractConstantRefactoring_default_visibility;
+
 	public static String ExtractConstantRefactoring_descriptor_description;
+
+	public static String ExtractConstantRefactoring_descriptor_description_short;
 
 	public static String ExtractConstantRefactoring_name;
 
@@ -356,11 +412,17 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractConstantRefactoring_null_literals;
 
+	public static String ExtractConstantRefactoring_qualify_references;
+
 	public static String ExtractConstantRefactoring_replace;
+
+	public static String ExtractConstantRefactoring_replace_occurrences;
 
 	public static String ExtractConstantRefactoring_select_expression;
 
 	public static String ExtractConstantRefactoring_syntax_error;
+
+	public static String ExtractConstantRefactoring_visibility_pattern;
 
 	public static String ExtractInterfaceProcessor_add_comment;
 
@@ -454,7 +516,15 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractMethodRefactoring_checking_new_name;
 
+	public static String ExtractMethodRefactoring_declare_thrown_exceptions;
+
+	public static String ExtractMethodRefactoring_default_visibility;
+
 	public static String ExtractMethodRefactoring_descriptor_description;
+
+	public static String ExtractMethodRefactoring_descriptor_description_short;
+
+	public static String ExtractMethodRefactoring_destination_pattern;
 
 	public static String ExtractMethodRefactoring_duplicates_multi;
 
@@ -466,13 +536,21 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractMethodRefactoring_error_vararg_ordering;
 
+	public static String ExtractMethodRefactoring_generate_comment;
+
 	public static String ExtractMethodRefactoring_name;
+
+	public static String ExtractMethodRefactoring_name_pattern;
 
 	public static String ExtractMethodRefactoring_no_set_of_statements;
 
 	public static String ExtractMethodRefactoring_organize_imports;
 
+	public static String ExtractMethodRefactoring_replace_occurrences;
+
 	public static String ExtractMethodRefactoring_substitute_with_call;
+
+	public static String ExtractMethodRefactoring_visibility_pattern;
 
 	public static String ExtractSupertypeProcessor_add_supertype;
 
@@ -512,13 +590,21 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractTempRefactoring_convention;
 
+	public static String ExtractTempRefactoring_declare_final;
+
 	public static String ExtractTempRefactoring_declare_local_variable;
 
 	public static String ExtractTempRefactoring_descriptor_description;
 
+	public static String ExtractTempRefactoring_descriptor_description_short;
+
+	public static String ExtractTempRefactoring_destination_pattern;
+
 	public static String ExtractTempRefactoring_explicit_constructor;
 
 	public static String ExtractTempRefactoring_expr_in_method_or_initializer;
+
+	public static String ExtractTempRefactoring_expression_pattern;
 
 	public static String ExtractTempRefactoring_extract_temp;
 
@@ -527,6 +613,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractTempRefactoring_name;
 
 	public static String ExtractTempRefactoring_name_in_new;
+
+	public static String ExtractTempRefactoring_name_pattern;
 
 	public static String ExtractTempRefactoring_names_in_declarations;
 
@@ -539,6 +627,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractTempRefactoring_refers_to_for_variable;
 
 	public static String ExtractTempRefactoring_replace;
+
+	public static String ExtractTempRefactoring_replace_occurrences;
 
 	public static String ExtractTempRefactoring_select_expression;
 
@@ -570,6 +660,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String InferTypeArgumentsRefactoring_addTypeArguments;
 
+	public static String InferTypeArgumentsRefactoring_assume_clone;
+
 	public static String InferTypeArgumentsRefactoring_building;
 
 	public static String InferTypeArgumentsRefactoring_calculating_dependencies;
@@ -586,11 +678,15 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String InferTypeArgumentsRefactoring_internal_error;
 
+	public static String InferTypeArgumentsRefactoring_leave_unconstrained;
+
 	public static String InferTypeArgumentsRefactoring_name;
 
 	public static String InferTypeArgumentsRefactoring_not50;
 
 	public static String InferTypeArgumentsRefactoring_not50Library;
+
+	public static String InferTypeArgumentsRefactoring_original_elements;
 
 	public static String InferTypeArgumentsRefactoring_removeCast;
 
@@ -612,6 +708,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String InlineConstantRefactoring_descriptor_description;
 
+	public static String InlineConstantRefactoring_descriptor_description_short;
+
 	public static String InlineConstantRefactoring_inline;
 
 	public static String InlineConstantRefactoring_Inline;
@@ -622,9 +720,13 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String InlineConstantRefactoring_name;
 
+	public static String InlineConstantRefactoring_original_pattern;
+
 	public static String InlineConstantRefactoring_preview;
 
 	public static String InlineConstantRefactoring_remove_declaration;
+
+	public static String InlineConstantRefactoring_replace_references;
 
 	public static String InlineConstantRefactoring_source_code_unavailable;
 
@@ -642,6 +744,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String InlineMethodRefactoring_descriptor_description;
 
+	public static String InlineMethodRefactoring_descriptor_description_short;
+
 	public static String InlineMethodRefactoring_edit_delete;
 
 	public static String InlineMethodRefactoring_edit_import;
@@ -658,7 +762,13 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String InlineMethodRefactoring_nestedInvocation;
 
+	public static String InlineMethodRefactoring_original_pattern;
+
 	public static String InlineMethodRefactoring_processing;
+
+	public static String InlineMethodRefactoring_remove_method;
+
+	public static String InlineMethodRefactoring_replace_references;
 
 	public static String InlineMethodRefactoring_searching;
 
@@ -678,6 +788,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String InlineTempRefactoring_descriptor_description;
 
+	public static String InlineTempRefactoring_descriptor_description_short;
+
 	public static String InlineTempRefactoring_exceptions_declared;
 
 	public static String InlineTempRefactoring_for_initializers;
@@ -691,6 +803,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InlineTempRefactoring_name;
 
 	public static String InlineTempRefactoring_not_initialized;
+
+	public static String InlineTempRefactoring_original_pattern;
 
 	public static String InlineTempRefactoring_preview;
 
@@ -758,6 +872,16 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String IntroduceFactory_unsupportedNestedTypes;
 
+	public static String IntroduceFactoryRefactoring_declare_private;
+
+	public static String IntroduceFactoryRefactoring_descriptor_description_short;
+
+	public static String IntroduceFactoryRefactoring_factory_pattern;
+
+	public static String IntroduceFactoryRefactoring_original_pattern;
+
+	public static String IntroduceFactoryRefactoring_owner_pattern;
+
 	public static String IntroduceIndirectionRefactoring_adjusting_visibility;
 
 	public static String IntroduceIndirectionRefactoring_call_warning_anonymous_cannot_qualify;
@@ -794,7 +918,11 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String IntroduceIndirectionRefactoring_could_not_parse_declaring_class_error;
 
+	public static String IntroduceIndirectionRefactoring_declaring_pattern;
+
 	public static String IntroduceIndirectionRefactoring_descriptor_description;
+
+	public static String IntroduceIndirectionRefactoring_descriptor_description_short;
 
 	public static String IntroduceIndirectionRefactoring_duplicate_method_name_in_declaring_class_error;
 
@@ -808,6 +936,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String IntroduceIndirectionRefactoring_looking_for_references;
 
+	public static String IntroduceIndirectionRefactoring_method_pattern;
+
 	public static String IntroduceIndirectionRefactoring_not_available_for_constructors;
 
 	public static String IntroduceIndirectionRefactoring_not_available_for_local_or_anonymous_types;
@@ -818,19 +948,29 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String IntroduceIndirectionRefactoring_open_hierarchy_error;
 
+	public static String IntroduceIndirectionRefactoring_original_pattern;
+
 	public static String IntroduceIndirectionRefactoring_unable_determine_declaring_type;
 
 	public static String IntroduceParameterRefactoring_cannot_introduce;
 
 	public static String IntroduceParameterRefactoring_descriptor_description;
 
+	public static String IntroduceParameterRefactoring_descriptor_description_short;
+
 	public static String IntroduceParameterRefactoring_expression_in_method;
+
+	public static String IntroduceParameterRefactoring_expression_pattern;
 
 	public static String IntroduceParameterRefactoring_name;
 
 	public static String IntroduceParameterRefactoring_no_binding;
 
 	public static String IntroduceParameterRefactoring_no_void;
+
+	public static String IntroduceParameterRefactoring_original_pattern;
+
+	public static String IntroduceParameterRefactoring_parameter_pattern;
 
 	public static String IntroduceParameterRefactoring_replace;
 
@@ -968,7 +1108,13 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveInnerToTopRefactoring_creating_preview;
 
+	public static String MoveInnerToTopRefactoring_declare_final;
+
 	public static String MoveInnerToTopRefactoring_descriptor_description;
+
+	public static String MoveInnerToTopRefactoring_descriptor_description_short;
+
+	public static String MoveInnerToTopRefactoring_field_pattern;
 
 	public static String MoveInnerToTopRefactoring_move_to_Top;
 
@@ -977,6 +1123,10 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String MoveInnerToTopRefactoring_name_used;
 
 	public static String MoveInnerToTopRefactoring_names_start_lowercase;
+
+	public static String MoveInnerToTopRefactoring_original_pattern;
+
+	public static String MoveInnerToTopRefactoring_parameter_pattern;
 
 	public static String MoveInnerToTopRefactoring_type_exists;
 
@@ -1160,11 +1310,29 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String PromoteTempToFieldRefactoring_cannot_promote;
 
+	public static String PromoteTempToFieldRefactoring_declare_final;
+
+	public static String PromoteTempToFieldRefactoring_declare_final_static;
+
+	public static String PromoteTempToFieldRefactoring_declare_static;
+
+	public static String PromoteTempToFieldRefactoring_default_visibility;
+
 	public static String PromoteTempToFieldRefactoring_descriptor_description;
+
+	public static String PromoteTempToFieldRefactoring_descriptor_description_short;
 
 	public static String PromoteTempToFieldRefactoring_editName;
 
 	public static String PromoteTempToFieldRefactoring_exceptions;
+
+	public static String PromoteTempToFieldRefactoring_field_pattern;
+
+	public static String PromoteTempToFieldRefactoring_initialize_constructor;
+
+	public static String PromoteTempToFieldRefactoring_initialize_declaration;
+
+	public static String PromoteTempToFieldRefactoring_initialize_method;
 
 	public static String PromoteTempToFieldRefactoring_method_parameters;
 
@@ -1176,11 +1344,15 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String PromoteTempToFieldRefactoring_only_declared_in_methods;
 
+	public static String PromoteTempToFieldRefactoring_original_pattern;
+
 	public static String PromoteTempToFieldRefactoring_select_declaration;
 
 	public static String PromoteTempToFieldRefactoring_uses_type_declared_locally;
 
 	public static String PromoteTempToFieldRefactoring_uses_types_declared_locally;
+
+	public static String PromoteTempToFieldRefactoring_visibility_pattern;
 
 	public static String PullUpRefactoring_add_abstract_method;
 

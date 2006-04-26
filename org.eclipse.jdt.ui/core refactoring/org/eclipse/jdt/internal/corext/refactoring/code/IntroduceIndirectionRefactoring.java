@@ -84,6 +84,7 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -132,7 +133,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 
-	public static final String ID_INTRODUCE_INDIRECTION= "org.eclipse.jdt.ui.introduce.indirection"; //$NON-NLS-1$
+	private static final String ID_INTRODUCE_INDIRECTION= "org.eclipse.jdt.ui.introduce.indirection"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 
 	// User selections:
@@ -721,7 +722,7 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 		final Map arguments= new HashMap();
 		String project= null;
 		IJavaProject javaProject= fTargetMethod.getJavaProject();
-		if (javaProject != null && fTargetMethod.isBinary())
+		if (javaProject != null)
 			project= javaProject.getElementName();
 		int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 		final IType declaring= fTargetMethod.getDeclaringType();
@@ -731,7 +732,15 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 		}
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INTRODUCE_INDIRECTION, project, Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fTargetMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+		final String description= Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_descriptor_description_short, fTargetMethod.getElementName());
+		final String header= Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fTargetMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)});
+		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_original_pattern, JavaElementLabels.getTextLabel(fTargetMethod, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_method_pattern, fIntermediaryMethodName));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_declaring_pattern, JavaElementLabels.getTextLabel(fIntermediaryClass, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+		if (fUpdateReferences)
+			comment.addSetting(RefactoringCoreMessages.JavaRefactoringDescriptor_update_references);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INTRODUCE_INDIRECTION, project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fTargetMethod));
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fIntermediaryMethodName);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(fIntermediaryClass));

@@ -132,6 +132,10 @@ public class BindingLabelProvider extends LabelProvider {
 			getTypeLabel(binding.getType(), (flags & JavaElementLabels.T_TYPE_PARAMETERS), buffer);
 			buffer.append(' ');
 		}
+		if (((flags & JavaElementLabels.F_FULLY_QUALIFIED) != 0)) {
+			getMethodLabel(binding.getDeclaringMethod(), flags, buffer);
+			buffer.append('.');
+		}
 		buffer.append(binding.getName());
 		if (((flags & JavaElementLabels.F_APP_TYPE_SIGNATURE) != 0)) {
 			buffer.append(JavaElementLabels.DECL_STRING);

@@ -69,6 +69,7 @@ import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -80,12 +81,14 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 public class IntroduceParameterRefactoring extends ScriptableRefactoring implements IDelegateUpdating {
 
-	public static final String ID_INTRODUCE_PARAMETER= "org.eclipse.jdt.ui.introduce.parameter"; //$NON-NLS-1$
+	private static final String ID_INTRODUCE_PARAMETER= "org.eclipse.jdt.ui.introduce.parameter"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_ARGUMENT= "argument"; //$NON-NLS-1$
 
 	private static final String[] KNOWN_METHOD_NAME_PREFIXES= {"get", "is"}; //$NON-NLS-2$ //$NON-NLS-1$
@@ -510,7 +513,13 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
-					result= new RefactoringDescriptorChange(new JavaRefactoringDescriptor(ID_INTRODUCE_PARAMETER, extended.getProject(), Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description, new String[] { fParameter.getNewName(), signature, ASTNodes.asString(fSelectedExpression)}), getComment(), arguments, extended.getFlags()), RefactoringCoreMessages.IntroduceParameterRefactoring_name, new Change[] { result});
+					final String description= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description_short, fChangeSignatureRefactoring.getMethod().getElementName());
+					final String header= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description, new String[] { fParameter.getNewName(), signature, ASTNodes.asString(fSelectedExpression)});
+					final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+					comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_original_pattern, JavaElementLabels.getTextLabel(fChangeSignatureRefactoring.getMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)));
+					comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_pattern, ASTNodes.asString(fSelectedExpression)));
+					comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_parameter_pattern, getAddedParameterInfo().getNewName()));
+					result= new RefactoringDescriptorChange(new JavaRefactoringDescriptor(ID_INTRODUCE_PARAMETER, extended.getProject(), description, comment.asString(), arguments, extended.getFlags()), RefactoringCoreMessages.IntroduceParameterRefactoring_name, new Change[] { result});
 				}
 			}
 		}

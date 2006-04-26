@@ -31,6 +31,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactoring;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
@@ -135,7 +136,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 		}
 	
 		private void addAccessModifierGroup(Composite result, RowLayouter layouter) {
-			fAccessModifier= getExtractConstantRefactoring().getAccessModifier();
+			fAccessModifier= getExtractConstantRefactoring().getVisibility();
 			if (getExtractConstantRefactoring().getTargetIsInterface())
 				return;
 			
@@ -154,10 +155,10 @@ public class ExtractConstantWizard extends RefactoringWizard {
 				RefactoringMessages.ExtractMethodInputPage_default, 
 				RefactoringMessages.ExtractMethodInputPage_private
 			};
-			String[] data= new String[] { ExtractConstantRefactoring.PUBLIC,
-										  ExtractConstantRefactoring.PROTECTED,
-										  ExtractConstantRefactoring.PACKAGE,
-										  ExtractConstantRefactoring.PRIVATE }; //   
+			String[] data= new String[] { JdtFlags.VISIBILITY_STRING_PUBLIC,
+										  JdtFlags.VISIBILITY_STRING_PROTECTED,
+										  JdtFlags.VISIBILITY_STRING_PACKAGE,
+										  JdtFlags.VISIBILITY_STRING_PRIVATE }; //   
 
 			updateContentAssistImage();
 			for (int i= 0; i < labels.length; i++) {
@@ -180,11 +181,11 @@ public class ExtractConstantWizard extends RefactoringWizard {
 				return;
 			
 			int flags;
-			if (fAccessModifier == ExtractConstantRefactoring.PRIVATE) {
+			if (fAccessModifier == JdtFlags.VISIBILITY_STRING_PRIVATE) {
 				flags= Flags.AccPrivate;
-			} else if (fAccessModifier == ExtractConstantRefactoring.PROTECTED) {
+			} else if (fAccessModifier == JdtFlags.VISIBILITY_STRING_PROTECTED) {
 				flags= Flags.AccProtected;
-			} else if (fAccessModifier == ExtractConstantRefactoring.PUBLIC) {
+			} else if (fAccessModifier == JdtFlags.VISIBILITY_STRING_PUBLIC) {
 				flags= Flags.AccPublic;
 			} else {
 				flags= Flags.AccDefault;
@@ -261,7 +262,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 		}
 
 		private void setAccessModifier(String accessModifier) {
-			getExtractConstantRefactoring().setAccessModifier(accessModifier);
+			getExtractConstantRefactoring().setVisibility(accessModifier);
 			fAccessModifier= accessModifier;
 			updateContentAssistImage();
 			updatePreviewLabel();

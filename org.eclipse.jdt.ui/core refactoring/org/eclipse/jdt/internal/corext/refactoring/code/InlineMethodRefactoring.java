@@ -68,6 +68,7 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -362,7 +363,15 @@ public class InlineMethodRefactoring extends ScriptableRefactoring {
 		final ITypeBinding declaring= binding.getDeclaringClass();
 		if (!Modifier.isPrivate(binding.getModifiers()))
 			flags|= RefactoringDescriptor.MULTI_CHANGE;
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_METHOD, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+		final String description= Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_descriptor_description_short, binding.getName());
+		final String header= Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)});
+		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+		comment.addSetting(Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_original_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+		if (fDeleteSource)
+			comment.addSetting(RefactoringCoreMessages.InlineMethodRefactoring_remove_method);
+		if (fCurrentMode == Mode.INLINE_ALL)
+			comment.addSetting(RefactoringCoreMessages.InlineMethodRefactoring_replace_references);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_METHOD, project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fInitialUnit));
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 		arguments.put(ATTRIBUTE_DELETE, Boolean.valueOf(fDeleteSource).toString());

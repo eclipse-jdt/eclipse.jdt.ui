@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -533,7 +534,19 @@ public class InferTypeArgumentsRefactoring extends ScriptableRefactoring {
 				public final ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
 					final IJavaProject project= getSingleProject();
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INFER_TYPE_ARGUMENTS, project != null ? project.getElementName() : null, project != null ? Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description_project, project.getElementName()) : RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description, getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+					final String description= RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description;
+					final String header= project != null ? Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description_project, project.getElementName()) : RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description;
+					final String name= project != null ? project.getElementName() : null;
+					final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+					final String[] settings= new String[fElements.length];
+					for (int index= 0; index < settings.length; index++)
+						settings[index]= JavaElementLabels.getTextLabel(fElements[index], JavaElementLabels.ALL_FULLY_QUALIFIED);
+					comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.InferTypeArgumentsRefactoring_original_elements, settings));
+					if (fAssumeCloneReturnsSameType)
+						comment.addSetting(RefactoringCoreMessages.InferTypeArgumentsRefactoring_assume_clone);
+					if (fLeaveUnconstrainedRaw)
+						comment.addSetting(RefactoringCoreMessages.InferTypeArgumentsRefactoring_leave_unconstrained);
+					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INFER_TYPE_ARGUMENTS, name, description, comment.asString(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 					for (int index= 0; index < fElements.length; index++)
 						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1), descriptor.elementToHandle(fElements[index]));
 					arguments.put(ATTRIBUTE_CLONE, Boolean.valueOf(fAssumeCloneReturnsSameType).toString());

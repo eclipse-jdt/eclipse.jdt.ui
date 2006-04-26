@@ -66,6 +66,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -104,6 +105,7 @@ import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
@@ -117,14 +119,17 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
  * Extract Local Variable (from selected expression inside method or initializer).
  */
 public class ExtractTempRefactoring extends ScriptableRefactoring {
 
-	public static final String ID_EXTRACT_TEMP= "org.eclipse.jdt.ui.extract.temp"; //$NON-NLS-1$
+	private static final String ID_EXTRACT_TEMP= "org.eclipse.jdt.ui.extract.temp"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REPLACE= "replace"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_FINAL= "final"; //$NON-NLS-1$
 
@@ -446,7 +451,23 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 		IJavaProject javaProject= fCu.getJavaProject();
 		if (javaProject != null)
 			project= javaProject.getElementName();
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_TEMP, project, Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_descriptor_description, new String[] { fTempName, ASTNodes.asString(fSelectedExpression.getAssociatedExpression())}), getComment(), arguments, RefactoringDescriptor.NONE);
+		final String description= Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_descriptor_description_short, fTempName);
+		final String expression= ASTNodes.asString(fSelectedExpression.getAssociatedExpression());
+		final String header= Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_descriptor_description, new String[] { fTempName, expression});
+		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_name_pattern, fTempName));
+		final BodyDeclaration decl= (BodyDeclaration) ASTNodes.getParent(fSelectedExpression.getAssociatedExpression(), BodyDeclaration.class);
+		if (decl instanceof MethodDeclaration) {
+			final IMethodBinding method= ((MethodDeclaration) decl).resolveBinding();
+			final String label= method != null ? BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED) : '{' + JavaElementLabels.ELLIPSIS_STRING + '}';
+			comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_destination_pattern, label));
+		}
+		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_expression_pattern, expression));
+		if (fReplaceAllOccurrences)
+			comment.addSetting(RefactoringCoreMessages.ExtractTempRefactoring_replace_occurrences);
+		if (fDeclareFinal)
+			comment.addSetting(RefactoringCoreMessages.ExtractTempRefactoring_declare_final);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_TEMP, project, description, comment.asString(), arguments, RefactoringDescriptor.NONE);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fTempName);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
