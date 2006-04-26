@@ -4,6 +4,7 @@
 
    <extension-point id="testRunListeners" name="%testRunListeners.name" schema="schema/testRunListeners.exsd"/>
    <extension-point id="junitLaunchConfigs" name="%junitLaunchConfigs.name" schema="schema/junitLaunchConfigs.exsd"/>
+   <extension-point id="internal_testKinds" name="%testKinds.name" schema="schema/internal_testKinds.exsd"/>
 
    <extension
          point="org.eclipse.ui.views">
@@ -261,6 +262,11 @@
                  				<test property="org.eclipse.jdt.launching.isContainer"/>
                  				<test property="org.eclipse.jdt.launching.buildpathReference" args="junit"/>
                  			</and>
+                 			<test property="org.eclipse.jdt.launching.hasMethodWithAnnotation" args="Test, public"/>
+                 			<test property="org.eclipse.jdt.launching.hasTypeWithAnnotation" args="RunWith"/>
+<!-- TODO: loads plug-in !
+	                 		<test property="org.eclipse.jdt.junit.isTest"/>
+ -->
                  		</or>
                		</iterate>
                </with>
@@ -423,6 +429,34 @@
             class="org.eclipse.jdt.internal.junit.buildpath.JUnitContainerWizardPage"
             id="org.eclipse.jdt.junit.JUNIT_CONTAINER">
       </classpathContainerPage>
+   </extension>
+   
+   <extension
+         point="org.eclipse.jdt.junit.internal_testKinds">
+      <kind
+            id="org.eclipse.jdt.junit.loader.junit3"
+            displayName="%testKind.junit3"
+            finderClass="org.eclipse.jdt.internal.junit.launcher.JUnit3TestFinder"
+            loaderPluginId="org.eclipse.jdt.junit.runtime"
+            loaderClass="org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestLoader">
+         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit" pathToJar="junitsupport.jar" />     	
+         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit.runtime" pathToJar="junitruntime.jar" />     	
+      </kind>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.junit.internal_testKinds">
+      <kind
+            id="org.eclipse.jdt.junit.loader.junit4"
+            displayName="%testKind.junit4" 
+            finderClass="org.eclipse.jdt.internal.junit.launcher.JUnit4TestFinder"
+            loaderPluginId="org.eclipse.jdt.junit4.runtime"
+            loaderClass="org.eclipse.jdt.internal.junit4.runner.JUnit4TestLoader">
+         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit4.runtime" />
+         <!-- TODO: do we need these? -->
+         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit" pathToJar="junitsupport.jar" />     	
+         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit.runtime" pathToJar="junitruntime.jar" />     	
+         <!-- END : do we need these? -->
+      </kind>
    </extension>
    
 </plugin>

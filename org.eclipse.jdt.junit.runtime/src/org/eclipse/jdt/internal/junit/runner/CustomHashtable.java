@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     Peter Shipton - original hashtable implementation
  *     Nick Edgar - added element comparer support
+ *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.junit.runner;
@@ -18,7 +19,7 @@ import java.util.NoSuchElementException;
 /**
  * This is a copy of CustomHashtable from org.eclipse.jface.viewers
  */
-/* package */final class CustomHashtable {
+/* package */public final class CustomHashtable {
 
 	/**
 	 * HashMapEntry is an internal class which is used to hold the entries of a

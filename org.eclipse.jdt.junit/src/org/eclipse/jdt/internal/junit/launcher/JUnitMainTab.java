@@ -8,11 +8,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sebastian Davids: sdavids@gmx.de bug: 26293, 27889 
+ *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.launcher;
 
- 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -39,7 +40,14 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
@@ -106,6 +114,8 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	private Button fTestRadioButton;
 	private Label fTestLabel; 
 	
+	private ComboViewer fTestLoaderViewer;
+
 	/**
 	 * @see ILaunchConfigurationTab#createControl(org.eclipse.swt.widgets.Composite)
 	 */
@@ -117,22 +127,51 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		topLayout.numColumns= 3;
 		comp.setLayout(topLayout);		
 		
-		Label label = new Label(comp, SWT.NONE);
-		GridData gd = new GridData();
-		gd.horizontalSpan = 3;
-		label.setLayoutData(gd);
-		
 		createSingleTestSection(comp);
 		createTestContainerSelectionGroup(comp);
 		
-		label = new Label(comp, SWT.NONE);
-		gd = new GridData();
-		gd.horizontalSpan = 3;
-		label.setLayoutData(gd);
+		createSpacer(comp);
+		
+		createTestLoaderGroup(comp);
+
+		createSpacer(comp);
 		
 		createKeepAliveGroup(comp);
 		Dialog.applyDialogFont(comp);
 		validatePage();
+	}
+
+	private void createTestLoaderGroup(Composite comp) {
+		Label loaderLabel= new Label(comp, SWT.NONE);
+		loaderLabel.setText(JUnitMessages.JUnitMainTab_Test_Loader);
+		GridData gd= new GridData();
+		gd.horizontalIndent= 0;
+		loaderLabel.setLayoutData(gd);
+
+		fTestLoaderViewer= new ComboViewer(comp, SWT.DROP_DOWN | SWT.READ_ONLY);
+		fTestLoaderViewer.getCombo().setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		ArrayList/*<TestKind>*/ items= TestKindRegistry.getDefault().getAllKinds();
+		fTestLoaderViewer.setContentProvider(new ArrayContentProvider());
+		fTestLoaderViewer.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				return ((TestKind) element).getDisplayName();
+			}
+		});
+		fTestLoaderViewer.setInput(items);
+		fTestLoaderViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				validatePage();
+				updateLaunchConfigurationDialog();
+			}
+		});
+	}
+
+	private void createSpacer(Composite comp) {
+		Label label= new Label(comp, SWT.NONE);
+		GridData gd= new GridData();
+		gd.horizontalSpan= 3;
+		label.setLayoutData(gd);
 	}
 	
 	protected void createSingleTestSection(Composite comp) {
@@ -143,7 +182,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		fTestRadioButton.setLayoutData(gd); 
 		fTestRadioButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				if (fTestRadioButton.getSelection())
+				if (fTestContainerRadioButton.getSelection()) //TODO: ???
 					testModeChanged();
 			}
 		});
@@ -190,7 +229,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		});
 		
 		fSearchButton = new Button(comp, SWT.PUSH);
-		fSearchButton.setEnabled(fProjText.getText().length() > 0);		
+		fSearchButton.setEnabled(fProjText.getText().length() > 0);
 		fSearchButton.setText(JUnitMessages.JUnitMainTab_label_search); 
 		fSearchButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent evt) {
@@ -265,6 +304,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 			public void widgetSelected(SelectionEvent e) {
 				updateLaunchConfigurationDialog();
 			}
+
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
@@ -298,8 +338,17 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		else
 			updateTestTypeFromConfig(config);
 		updateKeepRunning(config);
+		updateTestLoaderFromConfig(config);
 	}
 
+
+	private void updateTestLoaderFromConfig(ILaunchConfiguration config) {
+		TestKind testKind= TestKindRegistry.getDefault().getKind(config);
+		if (testKind == null || testKind.isNull())
+			testKind= (TestKind) TestKindRegistry.getDefault().getAllKinds().get(0); // TODO: assumes JUnit3 is first
+		fTestLoaderViewer.setSelection(new StructuredSelection(testKind));
+	}
+	
 	private void updateKeepRunning(ILaunchConfiguration config) {
 		boolean running= false;
 		try {
@@ -345,13 +394,16 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 
 	protected void updateTestContainerFromConfig(ILaunchConfiguration config) {
 		String containerHandle= ""; //$NON-NLS-1$
+		IJavaElement containerElement = null;
 		try {
 			containerHandle = config.getAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, ""); //$NON-NLS-1$
 			if (containerHandle.length() > 0) {
-				fContainerElement= JavaCore.create(containerHandle);
+				containerElement= JavaCore.create(containerHandle);
 			}
 		} catch (CoreException ce) {			
 		}
+		if (containerElement != null)
+			fContainerElement = containerElement;
 		fTestContainerRadioButton.setSelection(true);
 		setEnableSingleTestGroup(false);
 		setEnableContainerTestGroup(true);				
@@ -377,7 +429,14 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 			config.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, fOriginalTestMethodName);
 		}
 		config.setAttribute(JUnitBaseLaunchConfiguration.ATTR_KEEPRUNNING, fKeepRunning.getSelection());
+		
+		IStructuredSelection testKindSelection= (IStructuredSelection) fTestLoaderViewer.getSelection();
+		if (! testKindSelection.isEmpty()) {
+			TestKind testKind= (TestKind) testKindSelection.getFirstElement();
+			config.setAttribute(JUnitBaseLaunchConfiguration.TEST_KIND_ATTR, testKind.getId());
+		}
 	}
+	
 	/*
 	 * @see ILaunchConfigurationTab#dispose()
 	 */

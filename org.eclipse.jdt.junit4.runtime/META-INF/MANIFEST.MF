@@ -5,7 +5,7 @@ Bundle-Vendor: %providerName
 Bundle-SymbolicName: org.eclipse.jdt.junit4.runtime
 Bundle-Version: 1.0.0.qualifier
 Bundle-Localization: plugin
-Export-Package: org.eclipse.jdt.internal.junit4.runner.junit
+Export-Package: org.eclipse.jdt.internal.junit4.runner;x-internal:=true
 Require-Bundle: org.junit4,
  org.eclipse.jdt.junit.runtime
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

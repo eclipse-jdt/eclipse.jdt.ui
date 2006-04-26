@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
@@ -223,6 +224,8 @@ public final class JUnitMessages extends NLS {
 	private JUnitMessages() {
 		// Do not instantiate
 	}
+
+	public static String JUnitMainTab_Test_Loader;
 
 	public static String TestSessionLabelProvider_testMethodName_className;
 

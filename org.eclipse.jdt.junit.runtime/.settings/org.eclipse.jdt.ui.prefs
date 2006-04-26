@@ -1,5 +1,6 @@
-#Tue Dec 21 11:35:06 CET 2004
+#Tue Oct 11 12:03:39 EDT 2005
 eclipse.preferences.version=1
-org.eclipse.jdt.ui.ondemandthreshold=99
+internal.default.compliance=user
 org.eclipse.jdt.ui.ignorelowercasenames=true
 org.eclipse.jdt.ui.importorder=junit;
+org.eclipse.jdt.ui.ondemandthreshold=99

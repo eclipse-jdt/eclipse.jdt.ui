@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,29 +21,16 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.Socket;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Vector;
-import junit.extensions.TestDecorator;
-import junit.framework.AssertionFailedError;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestFailure;
-import junit.framework.TestListener;
-import junit.framework.TestResult;
-import junit.framework.TestSuite;
+
+import org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestLoader;
 
 /**
  * A TestRunner that reports results via a socket connection.
- * See MessageIds for more information about the protocl.
+ * See MessageIds for more information about the protocol.
  */
-public class RemoteTestRunner implements TestListener {
+public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	/**
 	 * Holder for information for a rerun request
 	 */
@@ -59,10 +46,12 @@ public class RemoteTestRunner implements TestListener {
 		}
 
 	}
+
+	public static final String RERAN_FAILURE = "FAILURE"; //$NON-NLS-1$
 	
-	private static final String SET_UP_TEST_METHOD_NAME= "setUpTest"; //$NON-NLS-1$
+	public static final String RERAN_ERROR = "ERROR"; //$NON-NLS-1$
 	
-	private static final String SUITE_METHODNAME= "suite";	 //$NON-NLS-1$
+	public static final String RERAN_OK = "OK"; //$NON-NLS-1$
 	
 	/**
 	 * The name of the test classes to be executed
@@ -75,7 +64,7 @@ public class RemoteTestRunner implements TestListener {
 	/**
 	 * The current test result
 	 */
-	private TestResult fTestResult;
+	private TestExecution fExecution;
 
 	/**
 	 * The version expected by the client
@@ -126,14 +115,16 @@ public class RemoteTestRunner implements TestListener {
 
 	private String fRerunTest;
 	
-	/**
-	 * Map to map tests to unique IDs
-	 */
-	private CustomHashtable fIdMap;
-	private int	fNextId= 1;
+	private final TestIdMap fIds = new TestIdMap();
 
 	private String[] fFailureNames;
 		
+	private ITestLoader fLoader;
+
+	private MessageSender fSender;
+
+	private boolean fConsoleMode = false;
+
 	/**
 	 * Reader thread that processes messages from the client.
 	 */
@@ -179,6 +170,14 @@ public class RemoteTestRunner implements TestListener {
 		}
 	}	
 	
+	public RemoteTestRunner() {
+		setMessageSender(this);
+	}
+
+	public void setMessageSender(MessageSender sender) {
+		fSender = sender;
+	}
+
 	/** 
 	 * The main entry point.
 	 * Parameters<pre>
@@ -195,6 +194,8 @@ public class RemoteTestRunner implements TestListener {
 			RemoteTestRunner testRunServer= new RemoteTestRunner();
 			testRunServer.init(args);
 			testRunServer.run();
+		} catch (RuntimeException e) {
+			e.printStackTrace(); // don't allow System.exit(0) to swallow exceptions
 		} finally {
 			// fix for 14434
 			System.exit(0);
@@ -213,7 +214,7 @@ public class RemoteTestRunner implements TestListener {
 	 * The class loader to be used for loading tests.
 	 * Subclasses may override to use another class loader.
 	 */
-	protected ClassLoader getClassLoader() {
+	protected ClassLoader getTestClassLoader() {
 		return getClass().getClassLoader();
 	}
 	
@@ -279,8 +280,18 @@ public class RemoteTestRunner implements TestListener {
 			else if(args[i].toLowerCase().equals("-version")){ //$NON-NLS-1$
 			    fVersion= args[i+1];
 			    i++;
+			} else if (args[i].toLowerCase().equals("-junitconsole")) { //$NON-NLS-1$
+			    fConsoleMode  = true;
+			} else if (args[i].toLowerCase().equals("-testloaderclass")) { //$NON-NLS-1$
+				String className = args[i + 1];
+				createLoader(className);
+				i++;
 			}
 		}
+
+		if (getTestLoader() == null)
+			initDefaultLoader();
+
 		if(fTestClassNames == null || fTestClassNames.length == 0)
 			throw new IllegalArgumentException(JUnitMessages.getString("RemoteTestRunner.error.classnamemissing")); //$NON-NLS-1$
 
@@ -288,6 +299,33 @@ public class RemoteTestRunner implements TestListener {
 			throw new IllegalArgumentException(JUnitMessages.getString("RemoteTestRunner.error.portmissing")); //$NON-NLS-1$
 		if (fDebugMode)
 			System.out.println("keepalive "+fKeepAlive); //$NON-NLS-1$
+	}
+
+	public void initDefaultLoader() {
+		createLoader(JUnit3TestLoader.class.getName());
+	}
+
+	public void createLoader(String className) {
+		setLoader(createRawTestLoader(className));
+	}
+
+	protected ITestLoader createRawTestLoader(String className) {
+		try {
+			return (ITestLoader) loadTestLoaderClass(className).newInstance();
+		} catch (Exception e) {
+			StringWriter trace= new StringWriter();
+			e.printStackTrace(new PrintWriter(trace));
+			String message= JUnitMessages.getFormattedString("RemoteTestRunner.error.invalidloader", new Object[] {className, trace.toString()}); //$NON-NLS-1$
+			throw new IllegalArgumentException(message);
+		}
+	}
+
+	protected Class loadTestLoaderClass(String className) throws ClassNotFoundException {
+		return Class.forName(className);
+	}
+
+	public void setLoader(ITestLoader newInstance) {
+		fLoader = newInstance;
 	}
 
 	private void readTestNames(String testNameFile) throws IOException {
@@ -339,23 +377,22 @@ public class RemoteTestRunner implements TestListener {
 		if (!connect())
 			return;
 		if (fRerunTest != null) {
-			rerunTest(Integer.parseInt(fRerunTest), fTestClassNames[0], fTestName);
+			rerunTest(new RerunRequest(Integer.parseInt(fRerunTest), fTestClassNames[0], fTestName));
 			return;
 		}
-		fTestResult= new TestResult();
-		fTestResult.addListener(this);
-		runTests(fTestClassNames, fTestName);
-		fTestResult.removeListener(this);
-		
-		if (fTestResult != null) {
-			fTestResult.stop();
-			fTestResult= null;
-		}
+
+		FirstRunExecutionListener listener= firstRunExecutionListener();
+		fExecution= new TestExecution(listener, getClassifier());
+		runTests(fExecution);
 		if (fKeepAlive)
 			waitForReruns();
 			
 		shutDown();
 		
+	}
+		
+	public FirstRunExecutionListener firstRunExecutionListener() {
+		return new FirstRunExecutionListener(fSender, fIds);
 	}
 
 	/**
@@ -367,98 +404,45 @@ public class RemoteTestRunner implements TestListener {
 				wait();
 				if (!fStopped && fRerunRequests.size() > 0) {
 					RerunRequest r= (RerunRequest)fRerunRequests.remove(0);
-					rerunTest(r.fRerunTestId, r.fRerunClassName, r.fRerunTestName);
+					rerunTest(r);
 				}
 			} catch (InterruptedException e) {
 			}
 		}
 	}
 	
-	/**
-	 * Returns the Test corresponding to the given suite. 
-	 */
-	private Test getTest(String suiteClassName, String testName) {
-		Class testClass= null;
-		try {
-			testClass= loadSuiteClass(suiteClassName);
-		} catch (ClassNotFoundException e) {
-			String clazz= e.getMessage();
-			if (clazz == null) 
-				clazz= suiteClassName;
-			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.classnotfound", clazz), e); //$NON-NLS-1$
-			return null;
-		} catch(Exception e) {
-			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.exception", e ), e); //$NON-NLS-1$
-			return null;
-		}
-		if (testName != null) {
-			return setupTest(testClass, createTest(testName, testClass));
-		}
-		Method suiteMethod= null;
-		try {
-			suiteMethod= testClass.getMethod(SUITE_METHODNAME, new Class[0]);
-	 	} catch(Exception e) {
-	 		// try to extract a test suite automatically
-			return new TestSuite(testClass);
-		}
-		Test test= null;
-		try {
-			test= (Test)suiteMethod.invoke(null, new Class[0]); // static method
-		} 
-		catch (InvocationTargetException e) {
-			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.invoke", e.getTargetException().toString() ), e.getTargetException()); //$NON-NLS-1$
-			return null;
-		}
-		catch (IllegalAccessException e) {
-			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.invoke", e.toString() ), e); //$NON-NLS-1$
-			return null;
-		}
-		return test;
-	}
-
-	protected void runFailed(String message, Throwable exception) {
+	public void runFailed(String message, Exception exception) {
+		//TODO: remove System.err.println?
 		System.err.println(message);
 		if (exception != null)
-			exception.printStackTrace();
-	}
-	
-	/**
-	 * Loads the test suite class.
-	 */
-	private Class loadSuiteClass(String className) throws ClassNotFoundException {
-		if (className == null) 
-			return null;
-		return getClassLoader().loadClass(className);
+			exception.printStackTrace(System.err);
 	}
 			
+	protected Class[] loadClasses(String[] testClassNames) {
+		Class[] classes = new Class[testClassNames.length];
+		for (int i = 0; i < testClassNames.length; i++) {
+			String name = testClassNames[i];
+			classes[i] = loadClass(name, this);
+		}
+		return classes;
+	}
+	
+	protected void notifyListenersOfTestEnd(TestExecution execution,
+			long testStartTime) {
+		if (execution == null || execution.shouldStop())
+			notifyTestRunStopped(System.currentTimeMillis() - testStartTime);
+		else
+			notifyTestRunEnded(System.currentTimeMillis() - testStartTime);
+	}
+
 	/**
 	 * Runs a set of tests.
 	 */
-	private void runTests(String[] testClassNames, String testName) {
-		// instantiate all tests
-		Test[] suites= new Test[testClassNames.length];
-		ITestPrioritizer prioritizer;
-
-		if (fFailureNames != null) 
-			prioritizer= new FailuresFirstPrioritizer(fFailureNames);
-		else
-			prioritizer= new NullPrioritizer(); 
-		
-		for (int i= 0; i < suites.length; i++) {
-			suites[i]= getTest(testClassNames[i], testName);
-			prioritizer.prioritize(suites[i]);
-		}
+	public void runTests(String[] testClassNames, String testName, TestExecution execution) {
+		ITestReference[] suites= fLoader.loadTests(loadClasses(testClassNames), testName, fFailureNames, this);
 		
 		// count all testMethods and inform ITestRunListeners	
 		int count= countTests(suites);
-		fIdMap= new CustomHashtable(count, new IElementComparer() {
-			public boolean equals(Object a, Object b) {
-				return a == b;
-			}
-			public int hashCode(Object element) {
-				return System.identityHashCode(element);
-			}
-		});
 		
 		notifyTestRunStarted(count);
 		
@@ -467,31 +451,30 @@ public class RemoteTestRunner implements TestListener {
 			return;
 		}
 		
-		long startTime= System.currentTimeMillis();
-		if (fDebugMode)
-			System.out.print("start send tree..."); //$NON-NLS-1$
-		for (int i= 0; i < suites.length; i++) {
-			sendTree(suites[i]);
-		}
-		if (fDebugMode)
-			System.out.println("done send tree - time(ms): "+(System.currentTimeMillis()-startTime)); //$NON-NLS-1$
+		sendTrees(suites);
 
 		long testStartTime= System.currentTimeMillis();
-		for (int i= 0; i < suites.length; i++) {
-			suites[i].run(fTestResult);
-		}
-		// inform ITestRunListeners of test end
-		if (fTestResult == null || fTestResult.shouldStop())
-			notifyTestRunStopped(System.currentTimeMillis() - testStartTime);
-		else
-			notifyTestRunEnded(System.currentTimeMillis() - testStartTime);
+		execution.run(suites);
+		notifyListenersOfTestEnd(execution, testStartTime);
 	}
 	
-	private int countTests(Test[] tests) {
+	private void sendTrees(ITestReference[] suites) {
+		long startTime = System.currentTimeMillis();
+		if (fDebugMode)
+			System.out.print("start send tree..."); //$NON-NLS-1$
+		for (int i = 0; i < suites.length; i++) {
+			suites[i].sendTree(this);
+			}
+		if (fDebugMode)
+			System.out.println("done send tree - time(ms): " + (System.currentTimeMillis() - startTime)); //$NON-NLS-1$
+	}
+	
+	private int countTests(ITestReference[] tests) {
 		int count= 0;
 		for (int i= 0; i < tests.length; i++) {
-			if (tests[i] != null)
-				count= count + tests[i].countTestCases();
+			ITestReference test= tests[i];
+			if (test != null)
+				count= count + test.countTestCases();
 		}
 		return count;
 	}
@@ -500,184 +483,30 @@ public class RemoteTestRunner implements TestListener {
 	 * Reruns a test as defined by the fully qualified class name and
 	 * the name of the test.
 	 */
-	public void rerunTest(int testId, String className, String testName) {
-		Test reloadedTest= null;
-		Class reloadedTestClass= null;
-		try {
-			reloadedTestClass= getClassLoader().loadClass(className);
-			reloadedTest= createTest(testName, reloadedTestClass);
-		} catch(Exception e) {
-			reloadedTest= warning(JUnitMessages.getFormattedString("RemoteTestRunner.error.couldnotcreate", testName));  //$NON-NLS-1$ 
-		}
-		Test rerunTest= setupTest(reloadedTestClass, reloadedTest);
-		TestResult result= new TestResult();
-		rerunTest.run(result);
-		notifyTestReran(result, Integer.toString(testId), className, testName);
+	public void rerunTest(RerunRequest r) {
+		final Class[] classes= loadClasses(new String[] { r.fRerunClassName });
+		ITestReference rerunTest1= fLoader.loadTests(classes, r.fRerunTestName, null, this)[0];
+		RerunExecutionListener service= rerunExecutionListener();
+
+		TestExecution execution= new TestExecution(service, getClassifier());
+		ITestReference[] suites= new ITestReference[] { rerunTest1 };
+		execution.run(suites);
+
+		notifyRerunComplete(r, service.getStatus());
 	}
 
-	/**
-	 * Prepare a single test to be run standalone. If the test case class provides
-	 * a static method Test setUpTest(Test test) then this method will be invoked.
-	 * Instead of calling the test method directly the "decorated" test returned from
-	 * setUpTest will be called. The purpose of this mechanism is to enable
-	 * tests which requires a set-up to be run individually.
-	 */
-	private Test setupTest(Class reloadedTestClass, Test reloadedTest) {
-		Method setup= null;
-		try {
-			setup= reloadedTestClass.getMethod(SET_UP_TEST_METHOD_NAME, new Class[] {Test.class});
-		} catch (SecurityException e1) {
-			return reloadedTest;
-		} catch (NoSuchMethodException e) {
-			return reloadedTest;
-		}
-		if (setup.getReturnType() != Test.class)
-			return warning(JUnitMessages.getString("RemoteTestRunner.error.notestreturn")); //$NON-NLS-1$
-		if (!Modifier.isPublic(setup.getModifiers()))
-			return warning(JUnitMessages.getString("RemoteTestRunner.error.shouldbepublic"));  //$NON-NLS-1$
-		if (!Modifier.isStatic(setup.getModifiers()))
-			return warning(JUnitMessages.getString("RemoteTestRunner.error.shouldbestatic"));  //$NON-NLS-1$
-		try {
-			Test test= (Test)setup.invoke(null, new Object[] {reloadedTest});
-			if (test == null)
-				return warning(JUnitMessages.getString("RemoteTestRunner.error.nullreturn")); //$NON-NLS-1$
-			return test;
-		} catch (IllegalArgumentException e) {
-			return warning(JUnitMessages.getFormattedString("RemoteTestRunner.error.couldnotinvoke", e)); //$NON-NLS-1$
-		} catch (IllegalAccessException e) {
-			return warning(JUnitMessages.getFormattedString("RemoteTestRunner.error.couldnotinvoke", e)); //$NON-NLS-1$
-		} catch (InvocationTargetException e) {
-			return warning(JUnitMessages.getFormattedString("RemoteTestRunner.error.invocationexception", e.getTargetException())); //$NON-NLS-1$
-		} 
+	public RerunExecutionListener rerunExecutionListener() {
+		return new RerunExecutionListener(fSender, fIds);
 	}
 
-	/**
-	 * Returns a test which will fail and log a warning message.
-	 */
-	 private Test warning(final String message) {
-		return new TestCase("warning") { //$NON-NLS-1$
-			protected void runTest() {
-				fail(message);
-			}
-		};		
+	protected IClassifiesThrowables getClassifier() {
+		return new DefaultClassifier(fVersion);
 	}
 
-	private Test createTest(String testName, Class testClass) {
-		Class[] classArgs= { String.class };
-		Test test;
-		Constructor constructor= null;
-		try {
-			try {
-				constructor= testClass.getConstructor(classArgs);
-				test= (Test)constructor.newInstance(new Object[]{testName});
-			} catch (NoSuchMethodException e) {
-				// try the no arg constructor supported in 3.8.1
-				constructor= testClass.getConstructor(new Class[0]);
-				test= (Test)constructor.newInstance(new Object[0]);
-				if (test instanceof TestCase)
-					((TestCase) test).setName(testName);
-			}
-			if (test != null)
-				return test;
-		} catch (InstantiationException e) {
-		} catch (IllegalAccessException e) {
-		} catch (InvocationTargetException e) {
-		} catch (NoSuchMethodException e) {
-		} catch (ClassCastException e) {
-		}
-		return warning("Could not create test \'"+testName+"\' "); //$NON-NLS-1$ //$NON-NLS-2$
+	public void visitTreeEntry(ITestIdentifier id, boolean b, int i) {
+		notifyTestTreeEntry(getTestId(id) + ',' + escapeComma(id.getName()) + ',' + b + ',' + i);
 	}
 
-
-	/*
-	 * @see TestListener#addError(Test, Throwable)
-	 */
-	public final void addError(Test test, Throwable throwable) {
-		notifyTestFailed(test, MessageIds.TEST_ERROR, getTrace(throwable));
-	}
-
-	/*
-	 * @see TestListener#addFailure(Test, AssertionFailedError)
-	 */
-	public final void addFailure(Test test, AssertionFailedError assertionFailedError) {
-		if ("3".equals(fVersion)) { //$NON-NLS-1$
-			if (isComparisonFailure(assertionFailedError)) {
-		        // transmit the expected and the actual string
-		        Object expected = getField(assertionFailedError, "fExpected"); //$NON-NLS-1$
-		        Object actual = getField(assertionFailedError, "fActual"); //$NON-NLS-1$
-		        if (expected != null && actual != null) {
-		            notifyTestFailed2(test, MessageIds.TEST_FAILED, getTrace(assertionFailedError), (String)expected, (String)actual);
-		            return;
-		       }
-		    }
-		} 
-		notifyTestFailed(test, MessageIds.TEST_FAILED, getTrace(assertionFailedError));
-	}
-
-	private boolean isComparisonFailure(Throwable throwable) {
-		// avoid reference to comparison failure to avoid a dependency on 3.8.1
-		return throwable.getClass().getName().equals("junit.framework.ComparisonFailure"); //$NON-NLS-1$
-	}
-
-	/*
-	 * @see TestListener#endTest(Test)
-	 */
-	public void endTest(Test test) {
-		notifyTestEnded(test);
-	}
-
-	/*
-	 * @see TestListener#startTest(Test)
-	 */
-	public void startTest(Test test) {
-		notifyTestStarted(test);
-	}
-	
-	private void sendTree(Test test){
-		if(test instanceof TestDecorator){
-			TestDecorator decorator= (TestDecorator) test;
-			notifyTestTreeEntry(getTestId(test)+','+escapeComma(decorator.getClass().getName()) + ',' + true + ',' + 1);
-			sendTree(decorator.getTest());		
-		}
-		else if(test instanceof TestSuite){
-			TestSuite suite= (TestSuite) test;
-			notifyTestTreeEntry(getTestId(test)+','+escapeComma(suite.toString().trim()) + ',' + true + ',' + suite.testCount());
-			for(int i= 0; i < suite.testCount(); i++){	
-				sendTree(suite.testAt(i));		
-			}				
-		}
-        else if (isJUnit4TestSuiteAdapter(test)) {
-        	notifyTestTreeEntry(getTestId(test)+ ',' + escapeComma(getTestName(test).trim()) + ',' + true + ',' +  test.countTestCases());
-			List tests = (List) callJUnit4GetterMethod(test, "getTests"); //$NON-NLS-1$
-			for (Iterator iter = tests.iterator(); iter.hasNext();) {
-				Test child = (Test) iter.next();
-				sendTree(child);
-			}
-        }
-		else {
-			notifyTestTreeEntry(getTestId(test)+ ',' + escapeComma(getTestName(test).trim()) + ',' + false + ',' +  test.countTestCases());
-		}
-	}
-
-	private Object callJUnit4GetterMethod(Test test, String methodName) {
-		Object result;
-		try {
-			Method method = test.getClass().getMethod(methodName, new Class[0]);
-			result = method.invoke(test, new Object[0]);
-		} catch (Exception e) {
-			runFailed(JUnitMessages.getString("RemoteTestRunner.junit4"), e); //$NON-NLS-1$
-			result = null;
-		}
-		return result;
-	}
-
-	private boolean isJUnit4TestSuiteAdapter(Test test) {
-		return test.getClass().getName().equals("junit.framework.JUnit4TestAdapter"); //$NON-NLS-1$
-	}
-
-	private boolean isJUnit4TestCaseAdapter(Test test) {
-		return test.getClass().getName().equals("junit.framework.JUnit4TestCaseAdapter"); //$NON-NLS-1$
-	}	
 	private String escapeComma(String s) {
 		if ((s.indexOf(',') < 0) && (s.indexOf('\\') < 0))
 			return s;
@@ -694,70 +523,32 @@ public class RemoteTestRunner implements TestListener {
 		return sb.toString();
 	}
 
-	private String getTestId(Test test) {
-		Object id= fIdMap.get(test);
-		if (id != null) 
-			return (String)id;
-		String newId= Integer.toString(fNextId++);
-		fIdMap.put(test, newId); 
-		return newId;
-	}
-	
-	private String getTestName(Test test) {
-		if (isJUnit4TestCaseAdapter(test)) {
-			Method method = (Method) callJUnit4GetterMethod(test, "getTestMethod"); //$NON-NLS-1$
-			return JUnitMessages.getFormattedString("RemoteTestRunner.testName", new String[] {method.getName(), method.getDeclaringClass().getName()}); //$NON-NLS-1$			
-		}
-		if (test instanceof TestCase) {
-			TestCase testCase= (TestCase) test;
-			return JUnitMessages.getFormattedString("RemoteTestRunner.testName", new String[] {testCase.getName(),  test.getClass().getName()}); //$NON-NLS-1$
-		}
-		if (test instanceof TestSuite) {
-			TestSuite suite= (TestSuite) test;
-			if (suite.getName() != null)
-				return suite.getName();
-			return getClass().getName();
-		}
-		if (isJUnit4TestSuiteAdapter(test)) {
-			Class testClass = (Class) callJUnit4GetterMethod(test, "getTestClass"); //$NON-NLS-1$
-			return testClass.getName();
-		}
-		return test.toString();
-	}
-	
-	/**
-	 * Returns the stack trace for the given throwable.
-	 */
-	private String getTrace(Throwable t) {
-		StringWriter stringWriter= new StringWriter();
-		PrintWriter writer= new PrintWriter(stringWriter);
-		try {
-			t.printStackTrace(writer);
-		} catch (RuntimeException e) {
-			writer.println(JUnitMessages.getString("RemoteTestRunner.error.couldnotprintstacktrace")); //$NON-NLS-1$
-			try {
-				e.printStackTrace(writer);
-			} catch (RuntimeException ignored) {
-				// ignore any further problems, see bug 133925
-			} 
-		}
-		StringBuffer buffer= stringWriter.getBuffer();
-		return buffer.toString();
+	// WANT: work in bug fixes since RC2?
+	private String getTestId(ITestIdentifier id) {
+		return fIds.getTestId(id);
 	}
 
 	/**
 	 * Stop the current test run.
 	 */
 	protected void stop() {
-		if (fTestResult != null) {
-			fTestResult.stop();
+		if (fExecution != null) {
+			fExecution.stop();
 		}
 	}
 	
 	/**
 	 * Connect to the remote test listener.
 	 */
-	private boolean connect() {
+	protected boolean connect() {
+		if (fConsoleMode) {
+			fClientSocket = null;
+			fWriter = new PrintWriter(System.out);
+			fReader = new BufferedReader(new InputStreamReader(System.in));
+			fReaderThread= new ReaderThread();
+			fReaderThread.start();
+			return true;
+		}
 		if (fDebugMode)
 			System.out.println("RemoteTestRunner: trying to connect" + fHost + ":" + fPort); //$NON-NLS-1$ //$NON-NLS-2$
 		Exception exception= null;
@@ -824,125 +615,72 @@ public class RemoteTestRunner implements TestListener {
 		}
 	}
 
-
-	private void sendMessage(String msg) {
+	/*
+	 * @see org.eclipse.jdt.internal.junit.runner.MessageSender#sendMessage(java.lang.String)
+	 */
+	public void sendMessage(String msg) {
 		if(fWriter == null) 
 			return;
 		fWriter.println(msg);
+//		if (!fConsoleMode)
+//			System.out.println(msg);
 	}
 
-
-	private void notifyTestRunStarted(int testCount) {
-		sendMessage(MessageIds.TEST_RUN_START + testCount + " " + "v2"); //$NON-NLS-1$ //$NON-NLS-2$
+	protected void notifyTestRunStarted(int testCount) {
+		fSender.sendMessage(MessageIds.TEST_RUN_START + testCount + " " + "v2"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-
 
 	private void notifyTestRunEnded(long elapsedTime) {
-		sendMessage(MessageIds.TEST_RUN_END + elapsedTime);
-		fWriter.flush();
+		fSender.sendMessage(MessageIds.TEST_RUN_END + elapsedTime);
+		fSender.flush();
 		//shutDown();
 	}
 
-
-	private void notifyTestRunStopped(long elapsedTime) {
-		sendMessage(MessageIds.TEST_STOPPED + elapsedTime );
-		fWriter.flush();
+	protected void notifyTestRunStopped(long elapsedTime) {
+		fSender.sendMessage(MessageIds.TEST_STOPPED + elapsedTime);
+		fSender.flush();
 		//shutDown();
 	}
 
-	private void notifyTestStarted(Test test) {
-		sendMessage(MessageIds.TEST_START + getTestId(test) + ','+getTestName(test));
-		fWriter.flush();
+	protected void notifyTestTreeEntry(String treeEntry) {
+		fSender.sendMessage(MessageIds.TEST_TREE + treeEntry);
 	}
 
-	private void notifyTestEnded(Test test) {
-		sendMessage(MessageIds.TEST_END + getTestId(test)+','+getTestName(test));
+	/*
+	 * @see org.eclipse.jdt.internal.junit.runner.RerunCompletionListener#notifyRerunComplete(org.eclipse.jdt.internal.junit.runner.RerunRequest,
+	 *      java.lang.String)
+	 */
+	public void notifyRerunComplete(RerunRequest r, String status) {
+		if (fPort != -1) {
+			fSender.sendMessage(MessageIds.TEST_RERAN + r.fRerunTestId + " " + r.fRerunClassName + " " + r.fRerunTestName + " " + status); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			fSender.flush();
+		}
 	}
-
-	private void notifyTestFailed(Test test, String status, String trace) {
-		sendMessage(status + getTestId(test) + ',' + getTestName(test));
-		sendMessage(MessageIds.TRACE_START);
-		sendMessage(trace);
-		sendMessage(MessageIds.TRACE_END);
-		fWriter.flush();
-	}
-
-	private void notifyTestFailed2(Test test, String status, String trace, String expected, String actual) {
-	    sendMessage(status + getTestId(test) + ',' + getTestName(test));
-	    
-	    sendMessage(MessageIds.EXPECTED_START);
-	    sendMessage(expected);
-	    sendMessage(MessageIds.EXPECTED_END);
-	    
-	    sendMessage(MessageIds.ACTUAL_START);
-	    sendMessage(actual);
-	    sendMessage(MessageIds.ACTUAL_END);
-	    
-	    sendMessage(MessageIds.TRACE_START);
-	    sendMessage(trace);
-	    sendMessage(MessageIds.TRACE_END);
-	    
+	
+	public void flush() {
 	    fWriter.flush();
 	}
 	
-	private void notifyTestTreeEntry(String treeEntry) {
-		sendMessage(MessageIds.TEST_TREE + treeEntry);
-	}
-	
-	private void notifyTestReran(TestResult result, String testId, String testClass, String testName) {
-		TestFailure failure= null;
-		if (result.errorCount() > 0) {
-			failure= (TestFailure)result.errors().nextElement();
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.jdt.internal.junit.runner.TestRunner#runTests(org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.TestExecution)
+	 */
+	public void runTests(TestExecution execution) {
+		runTests(fTestClassNames, fTestName, execution);
 		}
-		if (result.failureCount() > 0) {
-			failure= (TestFailure)result.failures().nextElement();
-		}
-		if (failure != null) {
-			Throwable t= failure.thrownException();
 			
-			if ("3".equals(fVersion)) { //$NON-NLS-1$
-			    if (isComparisonFailure(t)) {
-			        // transmit the expected and the actual string
-			        Object expected = getField(t, "fExpected"); //$NON-NLS-1$
-			        Object actual = getField(t, "fActual"); //$NON-NLS-1$
-			        if (expected != null && actual != null) {
-			    	    sendMessage(MessageIds.EXPECTED_START);
-			    	    sendMessage((String) expected);
-			    	    sendMessage(MessageIds.EXPECTED_END);
-			    	    
-			    	    sendMessage(MessageIds.ACTUAL_START);
-			    	    sendMessage((String) actual);
-			    	    sendMessage(MessageIds.ACTUAL_END);
-			        }
-			    }
-			}
-			String trace= getTrace(t);
-			sendMessage(MessageIds.RTRACE_START);
-			sendMessage(trace);
-			sendMessage(MessageIds.RTRACE_END);
-			fWriter.flush();
-		}
-		String status= "OK"; //$NON-NLS-1$
-		if (result.errorCount() > 0)
-			status= "ERROR"; //$NON-NLS-1$
-		else if (result.failureCount() > 0)
-			status= "FAILURE"; //$NON-NLS-1$
-		if (fPort != -1) {
-			sendMessage(MessageIds.TEST_RERAN + testId+ " "+testClass+" "+testName+" "+status); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			fWriter.flush();
-		}
+	public ITestLoader getTestLoader() {
+		return fLoader;
 	}
 	
-	public static Object getField(Object object, String fieldName) {
-	    Class clazz= object.getClass();
-	    try {
-	        Field field= clazz.getDeclaredField(fieldName);
-	        field.setAccessible(true);
-	        return field.get(object);	       
-	    } catch (Exception e) {
-	        // fall through
-	    }
-	    return null;
+	public Class loadClass(String className, RemoteTestRunner listener) {
+		Class clazz= null;
+		try {
+			clazz= getTestClassLoader().loadClass(className);
+		} catch (ClassNotFoundException e) {
+			listener.runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.classnotfound", className), null); //$NON-NLS-1$
+		}
+		return clazz;
 	}
-
 }	

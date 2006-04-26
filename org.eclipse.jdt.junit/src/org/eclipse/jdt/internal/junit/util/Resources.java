@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.util;
 
@@ -102,7 +103,7 @@ public class Resources {
 		List readOnlyFiles= new ArrayList();
 		for (int i= 0; i < resources.length; i++) {
 			IResource resource= resources[i];
-			if (resource.getType() == IResource.FILE && resource.isReadOnly())	
+			if (resource.getType() == IResource.FILE && resource.getResourceAttributes().isReadOnly())	
 				readOnlyFiles.add(resource);
 		}
 		if (readOnlyFiles.size() == 0)

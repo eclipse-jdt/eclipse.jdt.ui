@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *   Julien Ruaux: jruaux@octo.com
  * 	 Vincent Massol: vmassol@octo.com
+ *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.junit.ui;
@@ -61,6 +62,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	public static final String PLUGIN_ID= "org.eclipse.jdt.junit"; //$NON-NLS-1$
 	public static final String ID_EXTENSION_POINT_TESTRUN_LISTENERS= PLUGIN_ID + "." + "testRunListeners"; //$NON-NLS-1$ //$NON-NLS-2$
 	public static final String ID_EXTENSION_POINT_JUNIT_LAUNCHCONFIGS= PLUGIN_ID + "." + "junitLaunchConfigs"; //$NON-NLS-1$ //$NON-NLS-2$
+	public static final String ID_EXTENSION_POINT_TEST_KINDS= PLUGIN_ID + "." + "internal_testKinds"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	public final static String TEST_SUPERCLASS_NAME= "junit.framework.TestCase"; //$NON-NLS-1$
 	public final static String TEST_INTERFACE_NAME= "junit.framework.Test"; //$NON-NLS-1$

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.junit.runner;
@@ -18,6 +19,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Vector;
+
 import junit.extensions.TestDecorator;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -43,9 +45,7 @@ public class FailuresFirstPrioritizer implements ITestPrioritizer {
 		} else if (suite instanceof TestSuite) {
 			TestSuite aSuite= (TestSuite)suite;
 			path.add(suite);
-			for (Enumeration e= aSuite.tests(); e.hasMoreElements();) {
-				doPrioritize((Test)e.nextElement(), path);
-			}
+			loopTests(path, aSuite);
 			path.remove(path.size()-1);
 		} else if (suite instanceof TestDecorator) {
 			TestDecorator aDecorator= (TestDecorator)suite;
@@ -55,6 +55,13 @@ public class FailuresFirstPrioritizer implements ITestPrioritizer {
 		}
 	}
 
+	private void loopTests(List path, TestSuite aSuite) {
+		for (Enumeration e= aSuite.tests(); e.hasMoreElements();) {
+			doPrioritize((Test)e.nextElement(), path);
+		}
+	}
+
+	
 	private void reorder(Test test, List path) {
 		doReorder(test, path, path.size()-1);
 	}
@@ -71,7 +78,7 @@ public class FailuresFirstPrioritizer implements ITestPrioritizer {
 		doReorder(topTest, path, top-1);
 	}
 
-	private void moveTestToFront(TestSuite suite, Test test) {
+	void moveTestToFront(TestSuite suite, Test test) {
 		Vector tests= (Vector)getField(suite, "fTests"); //$NON-NLS-1$
 		for(int i= 0; i < tests.size(); i++) {
 			if (tests.get(i) == test) {
@@ -81,6 +88,7 @@ public class FailuresFirstPrioritizer implements ITestPrioritizer {
 		}
 	}
 
+	
 	private boolean hasPriority(TestCase testCase) {
 		return fPriorities.contains(testCase.toString());
 	}

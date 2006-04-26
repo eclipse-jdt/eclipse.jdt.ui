@@ -7,29 +7,38 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.launcher;
-
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.jface.util.Assert;
+
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchManager;
+
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+
 import org.eclipse.jdt.launching.ExecutionArguments;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
-import org.eclipse.jface.util.Assert;
+
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+
+import org.osgi.framework.Bundle;
 
 /**
  * Launch configuration delegate for a plain JUnit test.
@@ -41,10 +50,18 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration  {
 	 * Add a VMRunner with a class path that includes org.eclipse.jdt.junit plugin.
 	 * In addition it adds the port for the RemoteTestRunner as an argument
 	 */
-	protected VMRunnerConfiguration createVMRunner(ILaunchConfiguration configuration, IType[] testTypes, int port, String runMode) throws CoreException {
-		String[] classPath= createClassPath(configuration);	
-		String progArgs= getProgramArguments(configuration);
+	protected VMRunnerConfiguration createVMRunner(ILaunchConfiguration configuration, TestSearchResult testTypes, int port, String runMode) throws CoreException {
+		String[] classPath = createClassPath(configuration, testTypes.getTestKind());
 		VMRunnerConfiguration vmConfig= new VMRunnerConfiguration("org.eclipse.jdt.internal.junit.runner.RemoteTestRunner", classPath); //$NON-NLS-1$
+		Vector argv= getVMArgs(configuration, testTypes, port, runMode);
+		String[] args= new String[argv.size()];
+		argv.copyInto(args);
+		vmConfig.setProgramArguments(args);
+		return vmConfig;
+	}
+
+	public Vector getVMArgs(ILaunchConfiguration configuration, TestSearchResult result, int port, String runMode) throws CoreException {
+		String progArgs= getProgramArguments(configuration);
 		String testName= configuration.getAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, ""); //$NON-NLS-1$
 		String testFailureNames= configuration.getAttribute(JUnitBaseLaunchConfiguration.FAILURES_FILENAME_ATTR, ""); //$NON-NLS-1$
 		
@@ -56,15 +73,9 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration  {
 			argv.add(pa[i]);
 		}
 	
-		argv.add("-version"); //$NON-NLS-1$
-		argv.add("3"); //$NON-NLS-1$
+		argv.addAll(getBasicArguments(configuration, port, runMode, result));
 		
-		argv.add("-port"); //$NON-NLS-1$
-		argv.add(Integer.toString(port));
-		//argv("-debugging");
-				
-		if (keepAlive(configuration) && runMode.equals(ILaunchManager.DEBUG_MODE))
-			argv.add(0, "-keepalive"); //$NON-NLS-1$
+		IType[] testTypes = result.getTypes();
 		
 		// a testname was specified just run the single test
 		if (testName.length() > 0) {
@@ -83,10 +94,8 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration  {
 			argv.add("-testfailures"); //$NON-NLS-1$
 			argv.add(testFailureNames);			
 		}
-		String[] args= new String[argv.size()];
-		argv.copyInto(args);
-		vmConfig.setProgramArguments(args);
-		return vmConfig;
+
+		return argv;
 	}
 
 	private String createTestNamesFile(IType[] testTypes) throws CoreException {
@@ -112,51 +121,79 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration  {
 		}
 	}
 	
-	private String[] createClassPath(ILaunchConfiguration configuration) throws CoreException {
-		URL runtimeURL= Platform.getBundle("org.eclipse.jdt.junit.runtime").getEntry("/"); //$NON-NLS-1$ //$NON-NLS-2$
-		URL url= Platform.getBundle(JUnitPlugin.PLUGIN_ID).getEntry("/"); //$NON-NLS-1$
-		
+	public String[] createClassPath(ILaunchConfiguration configuration, ITestKind kind) throws CoreException {
 		String[] cp= getClasspath(configuration);
-		String[] classPath= null;
-		
-		try {
-			if (Platform.inDevelopmentMode()) {
-				// we first try the bin output folder
-				List junitEntries= new ArrayList();
 				
-				try {
-					junitEntries.add(Platform.asLocalURL(new URL(url, "bin")).getFile()); //$NON-NLS-1$
-				} catch (IOException e3) {
-					try {
-						junitEntries.add(Platform.asLocalURL(new URL(url, "junitsupport.jar")).getFile()); //$NON-NLS-1$
-					} catch (IOException e4) {
-						// fall through
-					}
-				}
-				try {
-					junitEntries.add(Platform.asLocalURL(new URL(runtimeURL, "bin")).getFile()); //$NON-NLS-1$
-				} catch (IOException e1) {
-					try {
-						junitEntries.add(Platform.asLocalURL(new URL(runtimeURL, "junitruntime.jar")).getFile()); //$NON-NLS-1$
-					} catch (IOException e4) {
-						// fall through
-					}
-				}
-				Assert.isTrue(junitEntries.size() == 2, "Required JARs available"); //$NON-NLS-1$
+		List junitEntries = new ClasspathLocalizer(Platform.inDevelopmentMode()).localizeClasspath(kind);
 				
-				classPath= new String[cp.length + junitEntries.size()];
-				Object[] jea= junitEntries.toArray();
-				System.arraycopy(cp, 0, classPath, 0, cp.length);
-				System.arraycopy(jea, 0, classPath, cp.length, jea.length);
-			} else {
-				classPath= new String[cp.length + 2];
-				System.arraycopy(cp, 0, classPath, 0, cp.length);
-				classPath[cp.length]= Platform.asLocalURL(new URL(url, "junitsupport.jar")).getFile(); //$NON-NLS-1$
-				classPath[cp.length + 1]= Platform.asLocalURL(new URL(runtimeURL, "junitruntime.jar")).getFile(); //$NON-NLS-1$
-			}
-		} catch (IOException e) {
-			JUnitPlugin.log(e); // TODO abort run and inform user
-		}
+		String[] classPath= new String[cp.length + junitEntries.size()];
+		Object[] jea= junitEntries.toArray();
+		System.arraycopy(cp, 0, classPath, 0, cp.length);
+		System.arraycopy(jea, 0, classPath, cp.length, jea.length);
 		return classPath;
 	}		
 }
+
+class ClasspathLocalizer {
+	private static final String UPDATE_PREFIX = "update@"; //$NON-NLS-1$
+	
+	private boolean fInDevelopmentMode;
+
+	protected ClasspathLocalizer() {
+		this(false);
+	}
+
+	public ClasspathLocalizer(boolean inDevelopmentMode) {
+		fInDevelopmentMode = inDevelopmentMode;
+	}
+
+	protected List localizeClasspath(ITestKind kind) {
+		JUnitRuntimeClasspathEntry[] entries= kind.getClasspathEntries();
+		List junitEntries= new ArrayList();
+		
+		for (int i= 0; i < entries.length; i++) {
+			try {
+				addEntry(junitEntries, entries[i]);
+			} catch (IOException e) {
+				Assert.isTrue(false, entries[i].getPluginId() + " is available (required JAR)"); //$NON-NLS-1$
+			}
+		}
+		return junitEntries;
+	}
+
+	private void addEntry(List junitEntries, final JUnitRuntimeClasspathEntry entry) throws IOException, MalformedURLException {
+		String entryString= entryString(entry);
+		if (entryString != null)
+			junitEntries.add(entryString);
+	}
+
+	private String entryString(final JUnitRuntimeClasspathEntry entry) throws IOException, MalformedURLException {
+		if (inDevelopmentMode()) {
+			try {
+				return localURL(entry.developmentModeEntry());
+			} catch (IOException e3) {
+				// fall through and try default
+			}
+		}
+		return localURL(entry);
+	}
+
+	private boolean inDevelopmentMode() {
+		return fInDevelopmentMode;
+	}
+	
+	private String localURL(JUnitRuntimeClasspathEntry jar) throws IOException, MalformedURLException {
+		if (jar.getPluginRelativePath() == null) {
+			//TODO: INTERNAL call:
+//			String location= Platform.getPlatformAdmin().getState(false).getBundle(jar.getPluginId(), null).getLocation();
+			String location= Platform.getBundle(jar.getPluginId()).getLocation();
+			if (location.startsWith(UPDATE_PREFIX))
+				location= location.substring(UPDATE_PREFIX.length());
+			return Platform.getInstallLocation().getURL().getFile() + location;
+		}
+		Bundle bundle= Platform.getBundle(jar.getPluginId());
+		URL url= new URL(bundle.getEntry("/"), jar.getPluginRelativePath()); //$NON-NLS-1$
+		return FileLocator.toFileURL(url).getFile();
+	}
+}
+

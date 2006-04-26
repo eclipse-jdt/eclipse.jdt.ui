@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
@@ -52,15 +53,18 @@ public class JUnitPreferencesConstants {
 	 */
 	public static final String MAX_TEST_RUNS= JUnitPlugin.PLUGIN_ID + ".max_test_runs"; //$NON-NLS-1$
 
-	private static String[] fgDefaultFilterPatterns= new String[] { "org.eclipse.jdt.internal.junit.runner.*", //$NON-NLS-1$
+	private static String[] fgDefaultFilterPatterns= new String[] {
+		"org.eclipse.jdt.internal.junit.runner.*", //$NON-NLS-1$
+		"org.eclipse.jdt.internal.junit4.runner.*", //$NON-NLS-1$
 		"org.eclipse.jdt.internal.junit.ui.*", //$NON-NLS-1$
 		"junit.framework.TestCase", //$NON-NLS-1$
 		"junit.framework.TestResult", //$NON-NLS-1$
+		"junit.framework.TestResult$1", //$NON-NLS-1$
 		"junit.framework.TestSuite", //$NON-NLS-1$
 		"junit.framework.Assert", //$NON-NLS-1$
+		"org.junit.*", //$NON-NLS-1$ //TODO: filter all these?
 		"java.lang.reflect.Method.invoke", //$NON-NLS-1$
-		"junit.framework.TestResult$1" //$NON-NLS-1$
-
+		"sun.reflect.*", //$NON-NLS-1$
 	};
 	
 	private JUnitPreferencesConstants() {

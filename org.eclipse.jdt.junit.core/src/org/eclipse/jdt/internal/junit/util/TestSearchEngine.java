@@ -43,7 +43,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -54,6 +53,7 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
+import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
@@ -79,13 +79,14 @@ public class TestSearchEngine {
 			IMethod method= (IMethod)enclosingElement;		
 			
 			IType declaringType= method.getDeclaringType();
-			if (fMatches.contains(declaringType) || fFailed.contains(declaringType))
+			if (fMatches.contains(declaringType)
+					|| fFailed.contains(declaringType))
 				return;
-			if (!hasSuiteMethod(declaringType) && !isTestType(declaringType)) {
+			if (isTestOrTestSuite(declaringType)) {
+				fMatches.add(declaringType);
+			} else {
 				fFailed.add(declaringType);
-				return;
 			}
-			fMatches.add(declaringType);
 		}
 		
 		public void endReporting() {
@@ -93,27 +94,47 @@ public class TestSearchEngine {
 		}
 	}
 	
-	private List searchMethod(IProgressMonitor pm, final IJavaSearchScope scope) throws CoreException {
+	public static boolean isTestOrTestSuite(IType declaringType)
+			throws JavaModelException {
+		return isTestOrTestSuite(declaringType, TestKindRegistry.getDefault());
+	}
+
+	public static boolean isTestOrTestSuite(IType declaringType, TestKindRegistry registry) {
+		return ! registry.getKind(declaringType).isNull();
+	}
+
+	private List searchMethod(IProgressMonitor pm, final IJavaSearchScope scope)
+			throws CoreException {
 		final List typesFound= new ArrayList(200);	
 		searchMethod(typesFound, scope, pm);
 		return typesFound;	
 	}
 
-	private List searchMethod(final List v, IJavaSearchScope scope, final IProgressMonitor progressMonitor) throws CoreException {		
+	private List searchMethod(final List v, IJavaSearchScope scope,
+			final IProgressMonitor progressMonitor) throws CoreException {
 		SearchRequestor requestor= new JUnitSearchResultCollector(v);
-		int matchRule= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE | SearchPattern.R_ERASURE_MATCH;
-		SearchPattern suitePattern= SearchPattern.createPattern("suite() Test", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, matchRule); //$NON-NLS-1$
-		SearchParticipant[] participants= new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()};
-		new SearchEngine().search(suitePattern, participants, scope, requestor, progressMonitor); 
+		int matchRule = SearchPattern.R_EXACT_MATCH
+				| SearchPattern.R_CASE_SENSITIVE
+				| SearchPattern.R_ERASURE_MATCH;
+		SearchPattern suitePattern = SearchPattern
+				.createPattern(
+						"suite() Test", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, matchRule); //$NON-NLS-1$
+		SearchParticipant[] participants = new SearchParticipant[] { SearchEngine
+				.getDefaultSearchParticipant() };
+		new SearchEngine().search(suitePattern, participants, scope, requestor,
+				progressMonitor);
 		return v;
 	}
 	
-	public static IType[] findTests(IRunnableContext context, final Object[] elements) throws InvocationTargetException, InterruptedException {
+	public static IType[] findTests(IRunnableContext context,
+			final Object[] elements) throws InvocationTargetException,
+			InterruptedException {
 		final Set result= new HashSet();
 		
 			if (elements.length > 0) {
 				IRunnableWithProgress runnable= new IRunnableWithProgress() {
-					public void run(IProgressMonitor pm) throws InterruptedException {
+				public void run(IProgressMonitor pm)
+						throws InterruptedException {
 						doFindTests(elements, result, pm);
 					}
 				};
@@ -155,14 +176,16 @@ public class TestSearchEngine {
 		}
 	}
 
-
-	private static void collectTypes(Object element, IProgressMonitor pm, Set result) throws CoreException/*, InvocationTargetException*/ {
+	private static void collectTypes(Object element, IProgressMonitor pm,
+			Set result) throws CoreException/* , InvocationTargetException */{
 		pm.beginTask(JUnitMessages.TestSearchEngine_message_searching, 10);  
 	    element= computeScope(element);
 	    try {
-			while((element instanceof ISourceReference) && !(element instanceof ICompilationUnit)) {
+			while ((element instanceof ISourceReference)
+					&& !(element instanceof ICompilationUnit)) {
 				if(element instanceof IType) {
-					if (hasSuiteMethod((IType)element) || isTestType((IType)element)) {
+					IType type = (IType) element;
+					if (isTestOrTestSuite(type)) {
 						result.add(element);
 						return;
 					}
@@ -174,13 +197,15 @@ public class TestSearchEngine {
 				IType[] types= cu.getAllTypes();
 	
 				for (int i= 0; i < types.length; i++) {
-					if (hasSuiteMethod(types[i])  || isTestType(types[i]))
-						result.add(types[i]);
+					IType type = types[i];
+					if (isTestOrTestSuite(type))
+						result.add(type);
 				}
-			} 
-			else if (element instanceof IJavaElement) {
-			    List testCases= findTestCases((IJavaElement)element, new SubProgressMonitor(pm, 7));
-				List suiteMethods= searchSuiteMethods(new SubProgressMonitor(pm, 3), (IJavaElement)element);			
+			} else if (element instanceof IJavaElement) {
+				List testCases = findTestCases((IJavaElement) element,
+						new SubProgressMonitor(pm, 7));
+				List suiteMethods = searchSuiteMethods(new SubProgressMonitor(
+						pm, 3), (IJavaElement) element);
 				while (!suiteMethods.isEmpty()) {
 					if (!testCases.contains(suiteMethods.get(0))) {
 						testCases.add(suiteMethods.get(0));
@@ -255,42 +280,18 @@ public class TestSearchEngine {
 		return element;
 	}
 	
-	private static List searchSuiteMethods(IProgressMonitor pm, IJavaElement element) throws CoreException {	
-		// fix for bug 36449  JUnit should constrain tests to selected project [JUnit]
-		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element },
-				IJavaSearchScope.SOURCES);
+	private static List searchSuiteMethods(IProgressMonitor pm,
+			IJavaElement element) throws CoreException {
+		// fix for bug 36449 JUnit should constrain tests to selected project
+		// [JUnit]
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(
+				new IJavaElement[] { element }, IJavaSearchScope.SOURCES);
 		TestSearchEngine searchEngine= new TestSearchEngine(); 
 		return searchEngine.searchMethod(pm, scope);
 	}
 		
-	public static boolean hasSuiteMethod(IType type) throws JavaModelException {
-		IMethod method= type.getMethod("suite", new String[0]); //$NON-NLS-1$
-		if (method == null || !method.exists()) 
-			return false;
-		
-		if (!Flags.isStatic(method.getFlags()) ||	
-			!Flags.isPublic(method.getFlags()) ||			
-			!Flags.isPublic(method.getDeclaringType().getFlags())) { 
-			return false;
-		}
-		if (!Signature.getSimpleName(Signature.toString(method.getReturnType())).equals(JUnitPlugin.SIMPLE_TEST_INTERFACE_NAME)) {
-			return false;
-		}
-		return true;
-	}
-	
-	private static boolean isTestType(IType type) throws JavaModelException {
-	    if (!hasValidModifiers(type))
-		    return false;
-		
-		IType[] interfaces= type.newSupertypeHierarchy(null).getAllSuperInterfaces(type);
-		for (int i= 0; i < interfaces.length; i++)
-			if(interfaces[i].getFullyQualifiedName('.').equals(JUnitPlugin.TEST_INTERFACE_NAME))
-				return true;
-		return false;
-	}
-	
-	private static boolean hasValidModifiers(IType type) throws JavaModelException {
+	public static boolean hasValidModifiers(IType type)
+			throws JavaModelException {
 		if (Flags.isAbstract(type.getFlags())) 
 			return false;
 		if (!Flags.isPublic(type.getFlags())) 
@@ -298,18 +299,16 @@ public class TestSearchEngine {
 		return true;
 	}
 
-	public static boolean isTestImplementor(IType type) throws JavaModelException {
+	public static boolean isTestImplementor(IType type)
+			throws JavaModelException {
 		ITypeHierarchy typeHier= type.newSupertypeHierarchy(null);
 		IType[] superInterfaces= typeHier.getAllInterfaces();
 		for (int i= 0; i < superInterfaces.length; i++) {
-			if (superInterfaces[i].getFullyQualifiedName('.').equals(JUnitPlugin.TEST_INTERFACE_NAME))
+			if (superInterfaces[i].getFullyQualifiedName('.').equals(
+					JUnitPlugin.TEST_INTERFACE_NAME))
 				return true;
 		}
 		return false;
-	}
-
-	public static boolean isTestOrTestSuite(IType type) throws JavaModelException {
-		return hasSuiteMethod(type) || isTestType(type);
 	}
 
 	public static boolean hasTestCaseType(IJavaProject javaProject) {

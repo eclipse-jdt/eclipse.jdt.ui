@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.launcher;
 
@@ -38,11 +39,9 @@ import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.ILaunchShortcut;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -53,9 +52,8 @@ import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 public class JUnitLaunchShortcut implements ILaunchShortcut {
-
 	public class LaunchCancelledByUserException extends Exception {
-		private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID= 1L;
 	}
 
 	/**
@@ -63,40 +61,39 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	 */
 	public void launch(IEditorPart editor, String mode) {
 		IJavaElement element= null;
-		IEditorInput input = editor.getEditorInput();
-		element = (IJavaElement) input.getAdapter(IJavaElement.class);
+		IEditorInput input= editor.getEditorInput();
+		element= (IJavaElement) input.getAdapter(IJavaElement.class);
 
 		if (element != null) {
-			searchAndLaunch(new Object[] {element}, mode);
-		} 
+			searchAndLaunch(new Object[] { element }, mode);
+		}
 	}
-	
+
 	/**
 	 * @see ILaunchShortcut#launch(ISelection, String)
 	 */
 	public void launch(ISelection selection, String mode) {
 		if (selection instanceof IStructuredSelection) {
-			searchAndLaunch(((IStructuredSelection)selection).toArray(), mode);
-		} 
+			searchAndLaunch( ((IStructuredSelection) selection).toArray(), mode);
+		}
 	}
 
 	protected void searchAndLaunch(Object[] search, String mode) {
 		try {
 			if (search != null) {
 				if (search.length == 0) {
-					MessageDialog.openInformation(JUnitPlugin.getActiveWorkbenchShell(),
-							JUnitMessages.LaunchTestAction_dialog_title,
+					MessageDialog.openInformation(JUnitPlugin.getActiveWorkbenchShell(), JUnitMessages.LaunchTestAction_dialog_title,
 							JUnitMessages.LaunchTestAction_message_notests);
 					return;
 				}
 				if (search[0] instanceof IJavaElement) {
-					IJavaElement element = (IJavaElement) search[0];
+					IJavaElement element= (IJavaElement) search[0];
 					if (element.getElementType() < IJavaElement.COMPILATION_UNIT) {
-						launchContainer(element, mode);
+						launch(mode, describeContainerLaunch(element));
 						return;
 					}
 					if (element.getElementType() == IJavaElement.METHOD) {
-						launchMethod((IMethod) element, mode);
+						launch(mode, describeMethodLaunch( ((IMethod) element)));
 						return;
 					}
 				}
@@ -107,11 +104,11 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 			// OK, silently move on
 		}
 	}
-	
+
 	protected void launchType(Object[] search, String mode) {
 		IType[] types= null;
 		try {
-			types= TestSearchEngine.findTests(search); 
+			types= TestSearchEngine.findTests(search);
 		} catch (InterruptedException e) {
 			JUnitPlugin.log(e);
 			return;
@@ -121,7 +118,8 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		}
 		IType type= null;
 		if (types.length == 0) {
-			MessageDialog.openInformation(JUnitPlugin.getActiveWorkbenchShell(), JUnitMessages.LaunchTestAction_dialog_title, JUnitMessages.LaunchTestAction_message_notests); 
+			MessageDialog.openInformation(JUnitPlugin.getActiveWorkbenchShell(), JUnitMessages.LaunchTestAction_dialog_title,
+					JUnitMessages.LaunchTestAction_message_notests);
 		} else if (types.length > 1) {
 			type= chooseType(types, mode);
 		} else {
@@ -129,131 +127,172 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		}
 		if (type != null) {
 			try {
-				launch(type, mode);
+				launch(mode, describeTypeLaunch(type));
 			} catch (LaunchCancelledByUserException e) {
 				// OK, silently move on
 			}
 		}
 	}
 
-	private void launchContainer(IJavaElement container, String mode) throws LaunchCancelledByUserException {
-		String handleIdentifier= container.getHandleIdentifier();
-		ILaunchConfiguration config = findLaunchConfiguration(
-			mode, 
-			container, 
-			handleIdentifier, 
-			"",  //$NON-NLS-1$
-			"" //$NON-NLS-1$
-		);
-		String name= JavaElementLabels.getTextLabel(container, JavaElementLabels.ALL_FULLY_QUALIFIED);
-		name = name.substring(name.lastIndexOf(IPath.SEPARATOR) + 1);
-		if (config == null) {
-			config = createConfiguration(
-				container.getJavaProject(),
-				name,
-				"", //$NON-NLS-1$
-				handleIdentifier,
-				"" //$NON-NLS-1$
-			);
-		}
-		launchConfiguration(mode, config);
-	}
-	
-	private void launch(IType type, String mode) throws LaunchCancelledByUserException {
-		String fullyQualifiedName= type.getFullyQualifiedName('.');
-		ILaunchConfiguration config = findLaunchConfiguration(
-			mode, 
-			type, 
-			"",  //$NON-NLS-1$
-			fullyQualifiedName, 
-			"" //$NON-NLS-1$
-		);
-		if (config == null) {
-			config= createConfiguration(
-				type.getJavaProject(),
-				type.getElementName(),
-				fullyQualifiedName,
-				"", //$NON-NLS-1$
-				"" //$NON-NLS-1$
-			);
-		}
-		launchConfiguration(mode, config);
-	}
+	private void launch(String mode, JUnitLaunchDescription description) throws LaunchCancelledByUserException {
+		ILaunchConfiguration config= findOrCreateLaunchConfiguration(mode, this, description);
 
-	private void launchMethod(IMethod method, String mode) throws LaunchCancelledByUserException {
-		IType declaringType= method.getDeclaringType();
-		String fullyQualifiedName= declaringType.getFullyQualifiedName('.');
-		ILaunchConfiguration config = findLaunchConfiguration(
-			mode, 
-			method, 
-			"",  //$NON-NLS-1$
-			fullyQualifiedName, 
-			method.getElementName()
-		);
-
-		if (config == null) {
-			config= createConfiguration(
-				method.getJavaProject(),
-				declaringType.getElementName()+"."+method.getElementName(), //$NON-NLS-1$
-				fullyQualifiedName,
-				"", //$NON-NLS-1$
-				method.getElementName()
-			);
-		}
-		launchConfiguration(mode, config);
-	}
-
-
-	protected void launchConfiguration(String mode, ILaunchConfiguration config) {
 		if (config != null) {
 			DebugUITools.launch(config, mode);
 		}
 	}
-	
+
+	public JUnitLaunchDescription describeContainerLaunch(IJavaElement container) {
+		JUnitLaunchDescription description= new JUnitLaunchDescription(container, getContainerLabel(container));
+		description.setContainer(container.getHandleIdentifier());
+		return description;
+	}
+
+	protected String getContainerLabel(IJavaElement container) {
+		String name= JavaElementLabels.getTextLabel(container, JavaElementLabels.ALL_FULLY_QUALIFIED);
+		return name.substring(name.lastIndexOf(IPath.SEPARATOR) + 1);
+	}
+
+	public JUnitLaunchDescription describeTypeLaunch(IType type) {
+		JUnitLaunchDescription description= new JUnitLaunchDescription(type, type.getElementName());
+
+		description.setMainType(type);
+		return description;
+	}
+
+	public JUnitLaunchDescription describeMethodLaunch(IMethod method) {
+		IType declaringType= method.getDeclaringType();
+
+		String name= declaringType.getElementName() + "." + method.getElementName(); //$NON-NLS-1$
+		JUnitLaunchDescription description= new JUnitLaunchDescription(method, name);
+		description.setMainType(declaringType);
+		description.setTestName(method.getElementName());
+		return description;
+	}
+
+	public ILaunchConfiguration findOrCreateLaunchConfiguration(String mode, JUnitLaunchShortcut registry, JUnitLaunchDescription description)
+			throws LaunchCancelledByUserException {
+		ILaunchConfiguration config= registry.findLaunchConfiguration(mode, description);
+
+		if (config == null) {
+			config= registry.createConfiguration(description);
+		}
+		return config;
+	}
+
 	/**
 	 * Prompts the user to select a type
+	 * 
 	 * @param types
 	 * @param mode
 	 * @return the selected type or <code>null</code> if none.
 	 */
 	protected IType chooseType(IType[] types, String mode) {
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(JUnitPlugin.getActiveWorkbenchShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_POST_QUALIFIED));
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(JUnitPlugin.getActiveWorkbenchShell(), new JavaElementLabelProvider(
+				JavaElementLabelProvider.SHOW_POST_QUALIFIED));
 		dialog.setElements(types);
-		dialog.setTitle(JUnitMessages.LaunchTestAction_dialog_title2); 
+		dialog.setTitle(JUnitMessages.LaunchTestAction_dialog_title2);
 		if (mode.equals(ILaunchManager.DEBUG_MODE)) {
-			dialog.setMessage(JUnitMessages.LaunchTestAction_message_selectTestToRun);  
+			dialog.setMessage(JUnitMessages.LaunchTestAction_message_selectTestToRun);
 		} else {
-			dialog.setMessage(JUnitMessages.LaunchTestAction_message_selectTestToDebug); 
+			dialog.setMessage(JUnitMessages.LaunchTestAction_message_selectTestToDebug);
 		}
 		dialog.setMultipleSelection(false);
 		if (dialog.open() == Window.OK) {
-			return (IType)dialog.getFirstResult();
+			return (IType) dialog.getFirstResult();
 		}
 		return null;
 	}
-	
-	private ILaunchConfiguration findLaunchConfiguration(String mode, IJavaElement element, String container, String testClass, String testName) throws LaunchCancelledByUserException {
+
+	protected ILaunchManager getLaunchManager() {
+		return DebugPlugin.getDefault().getLaunchManager();
+	}
+
+	/**
+	 * Show a selection dialog that allows the user to choose one of the
+	 * specified launch configurations. Return the chosen config, or
+	 * <code>null</code> if the user cancelled the dialog.
+	 * 
+	 * @param configList
+	 * @param mode
+	 * @return ILaunchConfiguration
+	 * @throws LaunchCancelledByUserException
+	 */
+	protected ILaunchConfiguration chooseConfiguration(List configList, String mode) throws LaunchCancelledByUserException {
+		IDebugModelPresentation labelProvider= DebugUITools.newDebugModelPresentation();
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(JUnitPlugin.getActiveWorkbenchShell(), labelProvider);
+		dialog.setElements(configList.toArray());
+		dialog.setTitle(JUnitMessages.LaunchTestAction_message_selectConfiguration);
+		if (mode.equals(ILaunchManager.DEBUG_MODE)) {
+			dialog.setMessage(JUnitMessages.LaunchTestAction_message_selectDebugConfiguration);
+		} else {
+			dialog.setMessage(JUnitMessages.LaunchTestAction_message_selectRunConfiguration);
+		}
+		dialog.setMultipleSelection(false);
+		int result= dialog.open();
+		labelProvider.dispose();
+		if (result == Window.OK) {
+			return (ILaunchConfiguration) dialog.getFirstResult();
+		}
+		throw new LaunchCancelledByUserException();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.jdt.internal.junit.launcher.IJUnitLaunchCreator#createConfiguration(org.eclipse.jdt.core.IJavaProject,
+	 *      java.lang.String, java.lang.String, java.lang.String,
+	 *      java.lang.String)
+	 */
+	public ILaunchConfiguration createConfiguration(JUnitLaunchDescription description) {
+		ILaunchConfiguration config= null;
+		try {
+			ILaunchConfigurationWorkingCopy wc= newWorkingCopy(description.getName());
+			description.copyAttributesInto(wc);
+			AssertionVMArg.setArgDefault(wc);
+			config= wc.doSave();
+		} catch (CoreException ce) {
+			JUnitPlugin.log(ce);
+		}
+		return config;
+	}
+
+	protected ILaunchConfigurationWorkingCopy newWorkingCopy(String name) throws CoreException {
+		ILaunchConfigurationType configType= getJUnitLaunchConfigType();
+		return configType.newInstance(null, getLaunchManager().generateUniqueLaunchConfigurationNameFrom(name));
+	}
+
+	/**
+	 * Returns the local java launch config type
+	 * 
+	 * @return ILaunchConfigurationType
+	 */
+	protected ILaunchConfigurationType getJUnitLaunchConfigType() {
+		ILaunchManager lm= getLaunchManager();
+		return lm.getLaunchConfigurationType(JUnitLaunchConfiguration.ID_JUNIT_APPLICATION);
+	}
+
+	public ILaunchConfiguration findLaunchConfiguration(String mode, JUnitLaunchDescription description) throws LaunchCancelledByUserException {
 		ILaunchConfigurationType configType= getJUnitLaunchConfigType();
 		List candidateConfigs= Collections.EMPTY_LIST;
 		try {
-			ILaunchConfiguration[] configs= DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurations(configType);
+			ILaunchConfiguration[] configs= getLaunchManager().getLaunchConfigurations(configType);
 			candidateConfigs= new ArrayList(configs.length);
 			for (int i= 0; i < configs.length; i++) {
 				ILaunchConfiguration config= configs[i];
-				if ((config.getAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, "").equals(container)) && //$NON-NLS-1$
-					(config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "").equals(testClass)) && //$NON-NLS-1$
-					(config.getAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR,"").equals(testName)) &&   //$NON-NLS-1$
-					(config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "").equals(element.getJavaProject().getElementName()))) {  //$NON-NLS-1$
-						candidateConfigs.add(config);
+				if (description.attributesMatch(config)) {
+					candidateConfigs.add(config);
 				}
 			}
 		} catch (CoreException e) {
 			JUnitPlugin.log(e);
 		}
-		
-		// If there are no existing configs associated with the IType, create one.
+
+		// If there are no existing configs associated with the IType, create
+		// one.
 		// If there is exactly one config associated with the IType, return it.
-		// Otherwise, if there is more than one config associated with the IType, prompt the
+		// Otherwise, if there is more than one config associated with the
+		// IType, prompt the
 		// user to choose one.
 		int candidateCount= candidateConfigs.size();
 		if (candidateCount < 1) {
@@ -261,74 +300,15 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		} else if (candidateCount == 1) {
 			return (ILaunchConfiguration) candidateConfigs.get(0);
 		} else {
-			// Prompt the user to choose a config.  A null result means the user
+			// Prompt the user to choose a config. A null result means the user
 			// cancelled the dialog, in which case this method returns null,
-			// since cancelling the dialog should also cancel launching anything.
+			// since cancelling the dialog should also cancel launching
+			// anything.
 			ILaunchConfiguration config= chooseConfiguration(candidateConfigs, mode);
 			if (config != null) {
 				return config;
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Show a selection dialog that allows the user to choose one of the specified
-	 * launch configurations.  Return the chosen config, or <code>null</code> if the
-	 * user cancelled the dialog.
-	 * @param configList 
-	 * @param mode 
-	 * @return ILaunchConfiguration
-	 * @throws LaunchCancelledByUserException 
-	 */
-	protected ILaunchConfiguration chooseConfiguration(List configList, String mode) throws LaunchCancelledByUserException {
-		IDebugModelPresentation labelProvider = DebugUITools.newDebugModelPresentation();
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(JUnitPlugin.getActiveWorkbenchShell(), labelProvider);
-		dialog.setElements(configList.toArray());
-		dialog.setTitle(JUnitMessages.LaunchTestAction_message_selectConfiguration); 
-		if (mode.equals(ILaunchManager.DEBUG_MODE)) {
-			dialog.setMessage(JUnitMessages.LaunchTestAction_message_selectDebugConfiguration); 
-		} else {
-			dialog.setMessage(JUnitMessages.LaunchTestAction_message_selectRunConfiguration); 
-		}
-		dialog.setMultipleSelection(false);
-		int result= dialog.open();
-		labelProvider.dispose();
-		if (result == Window.OK) {
-			return (ILaunchConfiguration)dialog.getFirstResult();
-		}
-		throw new LaunchCancelledByUserException();
-	}
-	
-
-	protected ILaunchConfiguration createConfiguration(
-			IJavaProject project, String name, String mainType, 
-			String container, String testName) {
-				
-		ILaunchConfiguration config= null;
-		try {
-			ILaunchConfigurationType configType= getJUnitLaunchConfigType();
-			ILaunchConfigurationWorkingCopy wc = configType.newInstance(null, DebugPlugin.getDefault().getLaunchManager().generateUniqueLaunchConfigurationNameFrom(name)); 
-			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, mainType);
-			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, project.getElementName());
-			wc.setAttribute(JUnitBaseLaunchConfiguration.ATTR_KEEPRUNNING, false);
-			wc.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, container);
-			if (testName.length() > 0)
-				wc.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, testName);	
-			AssertionVMArg.setArgDefault(wc);
-			config= wc.doSave();		
-		} catch (CoreException ce) {
-			JUnitPlugin.log(ce);
-		}
-		return config;
-	}
-	
-	/**
-	 * Returns the local java launch config type
-	 * @return ILaunchConfigurationType
-	 */
-	protected ILaunchConfigurationType getJUnitLaunchConfigType() {
-		ILaunchManager lm= DebugPlugin.getDefault().getLaunchManager();
-		return lm.getLaunchConfigurationType(JUnitLaunchConfiguration.ID_JUNIT_APPLICATION);		
 	}
 }
