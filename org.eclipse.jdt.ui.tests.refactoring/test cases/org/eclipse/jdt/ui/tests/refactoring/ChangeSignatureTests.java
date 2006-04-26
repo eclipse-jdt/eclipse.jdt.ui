@@ -61,7 +61,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		} else {
 			System.err.println("*** Running only parts of " + clazz.getName() + "!");
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ChangeSignatureTests("testAll58"));
+			suite.addTest(new ChangeSignatureTests("testDelegate05"));
 			return new RefactoringTestSetup(suite);
 		}
 	}
@@ -136,13 +136,14 @@ public class ChangeSignatureTests extends RefactoringTest {
 	/*
 	 * Rename method 'A.m(signature)' to 'A.newMethodName(signature)'
 	 */
-	private void helperRenameMethod(String[] signature, String newMethodName) throws Exception {
+	private void helperRenameMethod(String[] signature, String newMethodName, boolean createDelegate) throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method m does not exist in A", method.exists());
 		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 		ref.setNewMethodName(newMethodName);
+		ref.setDelegateUpdating(createDelegate);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
 		
@@ -1575,12 +1576,12 @@ public class ChangeSignatureTests extends RefactoringTest {
 	
 	public void testName01() throws Exception {
 		String[] signature= {"QString;"};
-		helperRenameMethod(signature, "newName");
+		helperRenameMethod(signature, "newName", false);
 	}
 
 	public void testName02() throws Exception {
 		String[] signature= {"QString;"};
-		helperRenameMethod(signature, "newName");
+		helperRenameMethod(signature, "newName", false);
 	}
 	
 	public void testFailImport01() throws Exception {
@@ -1784,7 +1785,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 	
 	public void testStaticImport01() throws Exception {
-		helperRenameMethod(new String[0], "abc");
+		helperRenameMethod(new String[0], "abc", false);
 	}
 	
 	public void testStaticImport02() throws Exception {
@@ -2101,6 +2102,12 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.PRIVATE;
 		String newReturnTypeName= null;
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName, true);	
+	}
+	
+	public void testDelegate05() throws Exception {
+		// bug 138320
+		String[] signature= {};
+		helperRenameMethod(signature, "renamed", true);
 	}
 	
 }

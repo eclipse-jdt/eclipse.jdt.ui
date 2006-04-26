@@ -153,6 +153,7 @@ public abstract class DelegateCreator {
 		fPreferences= JavaPreferencesSettings.getCodeGenerationSettings(rewrite.getCu().getJavaProject());
 
 		fDelegateRewrite= new CompilationUnitRewrite(rewrite.getCu(), rewrite.getRoot());
+		fDelegateRewrite.getASTRewrite().setTargetSourceRangeComputer(rewrite.getASTRewrite().getExtendedSourceRangeComputer());
 	}
 
 	/**
