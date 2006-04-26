@@ -233,6 +233,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 	private void init(FindOccurrencesInFileAction findIdentifier, ISelection selection) {
 		findIdentifier.update(selection);
 		findIdentifier.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE);
+		findIdentifier.setText(SearchMessages.Search_FindOccurrencesInFile_shortLabel);
 	}
 
 	private void setMenu(Menu menu) {
