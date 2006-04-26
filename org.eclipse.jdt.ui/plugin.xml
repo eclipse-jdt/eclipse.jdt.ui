@@ -2153,7 +2153,7 @@
                label="%CopyQualifiedName.label"
                retarget="true"
                menubarPath="edit/copy"
-               icon="$nl$/icons/full/elcl16/copy_qualified_name_edit.gif"
+               icon="$nl$/icons/full/elcl16/copy_qualified.gif"
                id="org.eclipse.jdt.ui.actions.CopyQualifiedName">
          </action>
 <!-- =========================================================================== -->
