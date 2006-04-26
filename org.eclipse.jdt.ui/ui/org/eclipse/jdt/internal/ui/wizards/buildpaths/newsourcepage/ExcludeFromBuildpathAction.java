@@ -17,12 +17,17 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -48,7 +53,6 @@ import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
@@ -161,7 +165,16 @@ public class ExcludeFromBuildpathAction extends Action implements ISelectionChan
 	}
 	
 	private void showExceptionDialog(CoreException exception) {
-		ExceptionHandler.handle(exception, fSite.getShell(), NewWizardMessages.ExcludeFromBuildathAction_ErrorTitle, exception.getMessage());
+		showError(exception, fSite.getShell(), NewWizardMessages.ExcludeFromBuildathAction_ErrorTitle, exception.getMessage());
+	}
+	
+	private void showError(CoreException e, Shell shell, String title, String message) {
+		IStatus status= e.getStatus();
+		if (status != null) {
+			ErrorDialog.openError(shell, message, title, status);
+		} else {
+			MessageDialog.openError(shell, title, message);
+		}
 	}
 	
 	private void selectAndReveal(final ISelection selection) {
