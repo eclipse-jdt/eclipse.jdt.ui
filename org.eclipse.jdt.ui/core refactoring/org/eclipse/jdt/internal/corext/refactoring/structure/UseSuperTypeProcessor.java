@@ -429,7 +429,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 					if (sourceUnit.equals(unit))
 						currentRewrite= rewrite;
 					else
-						currentRewrite= new CompilationUnitRewrite(unit, node);
+						currentRewrite= new CompilationUnitRewrite(fOwner, unit, node);
 					for (final Iterator iterator= collection.iterator(); iterator.hasNext();) {
 						variable= (ISourceConstraintVariable) iterator.next();
 						estimate= (TType) variable.getData(SuperTypeConstraintsSolver.DATA_TYPE_ESTIMATE);
