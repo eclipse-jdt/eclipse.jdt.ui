@@ -406,6 +406,11 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	public void test35() throws Exception {
 		helper1(new String[] { "test1.TestTarget", "test1.Test1", "test1.Test2"}, "test1.Test1", 3, 21, 3, 33, FIELD, "target", true, true);
 	}
+	
+	// Test search engine for secondary types (bug 108030).
+	public void test36() throws Exception {
+		helper1(new String[] { "p.A", "p.B" }, "p.A", 9, 17, 9, 27, FIELD, "fB", false, false);
+	}
 
 	// Move mA1 to field fB, do not inline delegator
 	public void test3() throws Exception {
