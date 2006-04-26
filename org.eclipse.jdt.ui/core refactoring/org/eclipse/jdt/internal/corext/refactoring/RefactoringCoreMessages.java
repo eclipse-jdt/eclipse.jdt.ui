@@ -1980,7 +1980,17 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ReplaceInvocationsRefactoring_cannot_replace_in_binary;
 
+	public static String ReplaceInvocationsRefactoring_change_name;
+
+	public static String ReplaceInvocationsRefactoring_descriptor_description;
+
+	public static String ReplaceInvocationsRefactoring_descriptor_description_short;
+
 	public static String ReplaceInvocationsRefactoring_name;
+
+	public static String ReplaceInvocationsRefactoring_original_pattern;
+
+	public static String ReplaceInvocationsRefactoring_replace_references;
 
 	public static String ReplaceInvocationsRefactoring_select_method_to_apply;
 
@@ -2014,13 +2024,31 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String SelfEncapsulateField_create_changes;
 
+	public static String SelfEncapsulateField_default_visibility;
+
+	public static String SelfEncapsulateField_descriptor_description_short;
+
+	public static String SelfEncapsulateField_do_not_use_accessors;
+
+	public static String SelfEncapsulateField_generate_comments;
+
+	public static String SelfEncapsulateField_getter_pattern;
+
 	public static String SelfEncapsulateField_method_exists;
 
 	public static String SelfEncapsulateField_name;
 
+	public static String SelfEncapsulateField_original_pattern;
+
 	public static String SelfEncapsulateField_searching_for_cunits;
 
+	public static String SelfEncapsulateField_setter_pattern;
+
 	public static String SelfEncapsulateField_type_not_resolveable;
+
+	public static String SelfEncapsulateField_use_accessors;
+
+	public static String SelfEncapsulateField_visibility_pattern;
 
 	public static String SelfEncapsulateFieldRefactoring_descriptor_description;
 

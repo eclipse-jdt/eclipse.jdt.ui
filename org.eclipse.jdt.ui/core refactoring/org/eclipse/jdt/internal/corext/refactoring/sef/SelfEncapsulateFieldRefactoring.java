@@ -89,6 +89,7 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -112,7 +113,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  */
 public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 
-	public static final String ID_SELF_ENCAPSULATE= "org.eclipse.jdt.ui.self.encapsulate"; //$NON-NLS-1$
+	private static final String ID_SELF_ENCAPSULATE= "org.eclipse.jdt.ui.self.encapsulate"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_GETTER= "getter"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_SETTER= "setter"; //$NON-NLS-1$
@@ -392,7 +393,23 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 		}
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_SELF_ENCAPSULATE, project, Messages.format(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+		final String description= Messages.format(RefactoringCoreMessages.SelfEncapsulateField_descriptor_description_short, fField.getElementName());
+		final String header= Messages.format(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)});
+		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+		comment.addSetting(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_original_pattern, JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_getter_pattern, fGetterName));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_setter_pattern, fSetterName));
+		String visibility= JdtFlags.getVisibilityString(fVisibility);
+		if ("".equals(visibility)) //$NON-NLS-1$
+			visibility= RefactoringCoreMessages.SelfEncapsulateField_default_visibility;
+		comment.addSetting(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_visibility_pattern, visibility));
+		if (fEncapsulateDeclaringClass)
+			comment.addSetting(RefactoringCoreMessages.SelfEncapsulateField_use_accessors);
+		else
+			comment.addSetting(RefactoringCoreMessages.SelfEncapsulateField_do_not_use_accessors);			
+		if (fGenerateJavadoc)
+			comment.addSetting(RefactoringCoreMessages.SelfEncapsulateField_generate_comments);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_SELF_ENCAPSULATE, project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fField));
 		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
 		arguments.put(ATTRIBUTE_INSERTION, new Integer(fInsertionIndex).toString());
