@@ -1384,11 +1384,27 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
 
+		boolean negated= isNegated(expression);
+		
 		Statement body= null;
-		if (locationInParent == IfStatement.EXPRESSION_PROPERTY) {
-			body= ((IfStatement) node.getParent()).getThenStatement();
-		} else if (locationInParent == WhileStatement.EXPRESSION_PROPERTY) {
-			body= ((WhileStatement) node.getParent()).getBody();
+		ASTNode insertionPosition= null;
+		if (negated) {
+			insertionPosition= node.getParent();
+			if (locationInParent == IfStatement.EXPRESSION_PROPERTY) {
+				body= ((IfStatement) node.getParent()).getElseStatement();
+				if (body != null) {
+					negated= false;
+				}
+			}
+			if (body == null && insertionPosition.getParent() instanceof Block) {
+				body= (Statement)insertionPosition.getParent();
+			}
+		} else {
+			if (locationInParent == IfStatement.EXPRESSION_PROPERTY) {
+				body= ((IfStatement) node.getParent()).getThenStatement();
+			} else if (locationInParent == WhileStatement.EXPRESSION_PROPERTY) {
+				body= ((WhileStatement) node.getParent()).getBody();
+			}
 		}
 		if (body == null) {
 			return false;
@@ -1429,16 +1445,22 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		// prepare new variable declaration statement
 		VariableDeclarationStatement vds= ast.newVariableDeclarationStatement(vdf);
 		vds.setType((Type) ASTNode.copySubtree(ast, originalType));
-		// add new variable declaration statement
-		if (body instanceof Block) {
+		
+		// add new variable declaration statement		
+		if (negated) {
 			ListRewrite listRewriter= rewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY);
-			listRewriter.insertAt(vds, 0, null);
+			listRewriter.insertAfter(vds, insertionPosition, null);
 		} else {
-			Block newBlock= ast.newBlock();
-			List statements= newBlock.statements();
-			statements.add(vds);
-			statements.add(rewrite.createMoveTarget(body));
-			rewrite.replace(body, newBlock, null);
+			if (body instanceof Block) {
+				ListRewrite listRewriter= rewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY);
+				listRewriter.insertAt(vds, 0, null);
+			} else {
+				Block newBlock= ast.newBlock();
+				List statements= newBlock.statements();
+				statements.add(vds);
+				statements.add(rewrite.createMoveTarget(body));
+				rewrite.replace(body, newBlock, null);
+			}
 		}
 
 		// setup linked positions
@@ -1451,6 +1473,20 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
+	private static boolean isNegated(Expression expression) {
+		if (!(expression.getParent() instanceof ParenthesizedExpression))
+			return false;
+		
+		ParenthesizedExpression parenthesis= (ParenthesizedExpression)expression.getParent();
+		if (!(parenthesis.getParent() instanceof PrefixExpression))
+			return false;
+		
+		PrefixExpression prefix= (PrefixExpression)parenthesis.getParent();
+		if (!(prefix.getOperator() == PrefixExpression.Operator.NOT))
+			return false;
+		
+		return true;
+	}
 	private static String[] suggestLocalVariableNames(ICompilationUnit cu, ITypeBinding binding) {
 		ITypeBinding base= binding.isArray() ? binding.getElementType() : binding;
 		IPackageBinding packBinding= base.getPackage();
