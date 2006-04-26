@@ -421,7 +421,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	}
 	
 	private String toString(CompletionProposalCategory category) {
-		return category.getName().replaceAll("&", ""); //$NON-NLS-1$ //$NON-NLS-2$;
+		return category.getDisplayName();
 	}
 
 	private String getIterationGesture() {
