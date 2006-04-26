@@ -94,6 +94,16 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				this.typeKinds= ASTResolving.getPossibleTypeKinds(ref, true);
 				this.foundInfos= new ArrayList(3);
 			}
+			
+			public void addInfo(TypeInfo info) {
+				for (int i= this.foundInfos.size() - 1; i >= 0; i--) {
+					TypeInfo curr= (TypeInfo) this.foundInfos.get(i);
+					if (curr.getTypeContainerName().equals(info.getTypeContainerName())) {
+						return; // not added. already contains type with same name
+					}
+				}
+				foundInfos.add(info);
+			}
 		}
 		
 		private Set fOldSingleImports;
@@ -234,7 +244,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 					UnresolvedTypeData data= (UnresolvedTypeData) fUnresolvedTypes.get(curr.getTypeName());
 					if (data != null && isVisible(curr) && isOfKind(curr, data.typeKinds, is50OrHigher)) {
 						if (fAllowDefaultPackageImports || curr.getPackageName().length() > 0) {
-							data.foundInfos.add(curr);
+							data.addInfo(curr);
 						}
 					}
 				}
