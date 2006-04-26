@@ -709,20 +709,20 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		if (fMethodStubsButtons.isSelected(IDX_CONSTRUCTOR))
 			createConstructor(type, imports); 	
 		
-		if (fMethodStubsButtons.isSelected(IDX_SETUP)) {
-			createSetUp(type, imports);
-		}
-		
-		if (fMethodStubsButtons.isSelected(IDX_TEARDOWN)) {
-			createTearDown(type, imports);
-		}
-		
 		if (fMethodStubsButtons.isSelected(IDX_SETUP_CLASS)) {
 			createSetUpClass(type, imports);
 		}
 		
 		if (fMethodStubsButtons.isSelected(IDX_TEARDOWN_CLASS)) {
 			createTearDownClass(type, imports);
+		}
+		
+		if (fMethodStubsButtons.isSelected(IDX_SETUP)) {
+			createSetUp(type, imports);
+		}
+		
+		if (fMethodStubsButtons.isSelected(IDX_TEARDOWN)) {
+			createTearDown(type, imports);
 		}
 
 		if (fClassUnderTest != null) {
