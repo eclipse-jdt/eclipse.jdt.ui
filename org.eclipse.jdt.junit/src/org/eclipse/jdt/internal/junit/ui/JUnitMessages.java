@@ -136,6 +136,10 @@ public final class JUnitMessages extends NLS {
 	public static String JUnitPreferencePage_enableassertionscheckbox_label;
 	public static String JUnitPreferencePage_enableassertionscheckbox_tooltip;
 
+	public static String JUnitQuickFixProcessor_add_assert_description;
+
+	public static String JUnitQuickFixProcessor_add_assert_info;
+
 	public static String LaunchConfigChange_configDeleted;
 	public static String LaunchConfigRenameChange_name;
 	public static String LaunchConfigSetAttributeChange_name;
