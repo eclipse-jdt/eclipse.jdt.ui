@@ -158,14 +158,6 @@
       </classpathContainerPage>
    </extension>
    <extension
-         point="org.eclipse.jdt.ui.javadocCompletionProcessor">
-      <javadocCompletionProcessor
-            name="%defaultJavadocCompletionProcessor"
-            class="org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionEvaluator"
-            id="org.eclipse.jdt.ui.text.javadoc.JavaDocCompletionEvaluator">
-      </javadocCompletionProcessor>
-   </extension>
-   <extension
          point="org.eclipse.jdt.ui.quickFixProcessors">
       <quickFixProcessor
             name="%defaultQuickFixProcessor"
@@ -268,6 +260,15 @@
 		id="JavadocCompletionProposalComputer">
 		<javaCompletionProposalComputer 
 			class="org.eclipse.jdt.internal.ui.text.javadoc.JavadocCompletionProposalComputer"
+			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory">
+			<partition type="__java_javadoc"/>
+		</javaCompletionProposalComputer>
+	</extension>
+	<extension
+		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+		id="JavadocHTMLCompletionProposalComputer">
+		<javaCompletionProposalComputer 
+			class="org.eclipse.jdt.internal.ui.text.javadoc.HTMLTagCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory">
 			<partition type="__java_javadoc"/>
 		</javaCompletionProposalComputer>

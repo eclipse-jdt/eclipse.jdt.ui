@@ -12,7 +12,10 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
@@ -21,7 +24,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
@@ -30,13 +32,14 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 
-public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, IJavaDocTagConstants, IHtmlTagConstants {
+public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposalComputer, IJavaDocTagConstants, IHtmlTagConstants {
 
 	private static final String[] fgHTMLProposals= new String[HTML_GENERAL_TAGS.length * 2];
 	{
@@ -62,8 +65,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 
 	private boolean fRestrictToMatchingCase;
 
-	public JavaDocCompletionEvaluator() {
-		fResult= new ArrayList();
+	public HTMLTagCompletionProposalComputer() {
 	}
 
 	private static boolean isWordPart(char ch) {
@@ -112,15 +114,24 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		}
 		return pos;
 	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.text.java.IJavaDocCompletionProcessor#computeCompletionProposals(org.eclipse.jdt.core.ICompilationUnit, int, int, int)
+	
+	/*
+	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#computeCompletionProposals(org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
+	 * @since 3.2
 	 */
-	public IJavaCompletionProposal[] computeCompletionProposals(ICompilationUnit cu, int offset, int length, int flags) {
-		fCurrentPos= offset;
-		fCurrentLength= length;
-		fRestrictToMatchingCase= (flags & RESTRICT_TO_MATCHING_CASE) != 0;
+	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
+		if (!(context instanceof JavadocContentAssistInvocationContext))
+			return Collections.EMPTY_LIST;
+		
+		JavadocContentAssistInvocationContext docContext= (JavadocContentAssistInvocationContext) context;
+		int flags= docContext.getFlags();
+		fCurrentPos= docContext.getInvocationOffset();
+		fCurrentLength= docContext.getSelectionLength();
+		fRestrictToMatchingCase= (flags & IJavadocCompletionProcessor.RESTRICT_TO_MATCHING_CASE) != 0;
 
+		ICompilationUnit cu= docContext.getCompilationUnit();
+		if (cu == null)
+			return Collections.EMPTY_LIST;
 		IEditorInput editorInput= new FileEditorInput((IFile) cu.getResource());
 		fDocument= JavaUI.getDocumentProvider().getDocument(editorInput);
 		if (fDocument == null) {
@@ -128,12 +139,13 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		}
 
 		try {
+			fResult= new ArrayList(100);
 			evalProposals();
-			return (JavaCompletionProposal[]) fResult.toArray(new JavaCompletionProposal[fResult.size()]);
+			return fResult;
 		} catch (JavaModelException e) {
 			fErrorMessage= e.getLocalizedMessage();
 		} finally {
-			fResult.clear();
+			fResult= null;
 		}
 		return null;
 	}
@@ -200,23 +212,43 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		if (fCurrentLength == 0)
 			length= findReplaceEndPos(fDocument, newText, oldText, fCurrentPos) - offset;
 
+		// bump opening over closing tags
+		if (!newText.startsWith(HTML_CLOSE_PREFIX))
+			severity++;
 		JavaCompletionProposal proposal= new JavaCompletionProposal(newText, offset, length, image, labelText, severity, true);
 		proposal.setTriggerCharacters( new char[] { '>' });
 		return proposal;
 	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.text.java.IJavaDocCompletionProcessor#computeContextInformation(org.eclipse.jdt.core.ICompilationUnit, int)
+	
+	/*
+	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#computeContextInformation(org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
+	 * @since 3.2
 	 */
-	public IContextInformation[] computeContextInformation(ICompilationUnit cu, int offset) {
-		fErrorMessage= null;
-		return null;
+	public List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
+		return Collections.EMPTY_LIST;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.text.java.IJavaDocCompletionProcessor#getErrorMessage()
+	/*
+	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#getErrorMessage()
+	 * @since 3.2
 	 */
 	public String getErrorMessage() {
 		return fErrorMessage;
 	}
+
+	/*
+     * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionEnded()
+     * @since 3.2
+     */
+    public void sessionEnded() {
+    	fErrorMessage= null;
+    }
+
+	/*
+     * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionStarted()
+     * @since 3.2
+     */
+    public void sessionStarted() {
+    	fErrorMessage= null;
+    }
 }

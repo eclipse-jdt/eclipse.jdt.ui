@@ -68,7 +68,7 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 				fSubProcessors= result;
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
-				fSubProcessors= new IJavadocCompletionProcessor[] { new JavaDocCompletionEvaluator() };
+				fSubProcessors= new IJavadocCompletionProcessor[0];
 			}
 		}
 		return fSubProcessors;
