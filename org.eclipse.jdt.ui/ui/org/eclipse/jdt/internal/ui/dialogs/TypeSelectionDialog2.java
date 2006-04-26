@@ -260,14 +260,15 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		for (int i= 0; i < selected.length; i++) {
 			try {
 				TypeInfo typeInfo= selected[i];
-				history.accessed(typeInfo);
 				IType type= typeInfo.resolveType(fScope);
 				if (type == null) {
 					String title= JavaUIMessages.TypeSelectionDialog_errorTitle; 
 					String message= Messages.format(JavaUIMessages.TypeSelectionDialog_dialogMessage, typeInfo.getPath()); 
 					MessageDialog.openError(getShell(), title, message);
+					history.remove(typeInfo);
 					setResult(null);
 				} else {
+					history.accessed(typeInfo);
 					result.add(type);
 				}
 			} catch (JavaModelException e) {

@@ -10,11 +10,22 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
+import java.net.URI;
+
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileInfo;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
@@ -119,5 +130,37 @@ public class IFileTypeInfo extends TypeInfo {
 	
 	public String getExtension() {
 		return fExtension;
+	}
+	
+	public long getContainerTimestamp() {
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+		IPath path= new Path(getPath());
+		IResource resource= root.findMember(path);
+		if (resource != null) {
+			URI location= resource.getLocationURI();
+			if (location != null) {
+				try {
+					IFileInfo info= EFS.getStore(location).fetchInfo();
+					if (info.exists()) {
+						return info.getLastModified();
+					}
+				} catch (CoreException e) {
+					// Fall through
+				}
+			}
+		}
+		return IResource.NULL_STAMP;
+	}
+	
+	public boolean isContainerDirty() {
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+		IPath path= new Path(getPath());
+		IResource resource= root.findMember(path);
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		ITextFileBuffer textFileBuffer= manager.getTextFileBuffer(resource.getFullPath());
+		if (textFileBuffer != null) {
+			return textFileBuffer.isDirty();
+		}
+		return false;
 	}
 }

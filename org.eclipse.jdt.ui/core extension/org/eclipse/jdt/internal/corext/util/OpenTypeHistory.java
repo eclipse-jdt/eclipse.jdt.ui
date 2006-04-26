@@ -13,8 +13,10 @@
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -23,6 +25,8 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -149,6 +153,8 @@ public class OpenTypeHistory extends History {
 	
 	// Needs to be volatile since accesses aren't synchronized.
 	private volatile boolean fNeedsConsistencyCheck;
+	// Map of cached time stamps
+	private Map fTimestampMapping;
 	
 	private final IElementChangedListener fDeltaListener;
 	private final UpdateJob fUpdateJob;
@@ -162,6 +168,7 @@ public class OpenTypeHistory extends History {
 	private static final String NODE_ENCLOSING_NAMES= "enclosingTypes"; //$NON-NLS-1$
 	private static final String NODE_PATH= "path"; //$NON-NLS-1$
 	private static final String NODE_MODIFIERS= "modifiers";  //$NON-NLS-1$
+	private static final String NODE_TIMESTAMP= "timestamp"; //$NON-NLS-1$
 	private static final char[][] EMPTY_ENCLOSING_NAMES= new char[0][0];
 	
 	private static OpenTypeHistory fgInstance;
@@ -181,8 +188,9 @@ public class OpenTypeHistory extends History {
 	private OpenTypeHistory() {
 		super(FILENAME, NODE_ROOT, NODE_TYPE_INFO);
 		fTypeInfoFactory= new TypeInfoFactory();
-		load();
+		fTimestampMapping= new HashMap();
 		fNeedsConsistencyCheck= true;
+		load();
 		fDeltaListener= new TypeHistoryDeltaListener();
 		JavaCore.addElementChangedListener(fDeltaListener);
 		fUpdateJob= new UpdateJob();
@@ -229,10 +237,12 @@ public class OpenTypeHistory extends History {
 	}
 
 	public synchronized void accessed(TypeInfo info) {
+		fTimestampMapping.put(info, new Long(info.getContainerTimestamp()));
 		super.accessed(info);
 	}
 
 	public synchronized TypeInfo remove(TypeInfo info) {
+		fTimestampMapping.remove(info);
 		return (TypeInfo)super.remove(info);
 	}
 
@@ -270,11 +280,15 @@ public class OpenTypeHistory extends History {
 		// markAsInconsistent isn't synchronized.
 		fNeedsConsistencyCheck= true;
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
-		List keys= new ArrayList(getKeys());
-		monitor.beginTask(CorextMessages.TypeInfoHistory_consistency_check, keys.size());
+		List typesToCheck= new ArrayList(getKeys());
+		monitor.beginTask(CorextMessages.TypeInfoHistory_consistency_check, typesToCheck.size());
 		monitor.setTaskName(CorextMessages.TypeInfoHistory_consistency_check);
-		for (Iterator iter= keys.iterator(); iter.hasNext();) {
+		for (Iterator iter= typesToCheck.iterator(); iter.hasNext();) {
 			TypeInfo type= (TypeInfo)iter.next();
+			long currentTimestamp= type.getContainerTimestamp();
+			Long lastTested= (Long)fTimestampMapping.get(type);
+			if (lastTested != null && currentTimestamp == lastTested.longValue() && !type.isContainerDirty())
+				continue;
 			try {
 				IType jType= type.resolveType(scope);
 				if (jType == null || !jType.exists()) {
@@ -282,6 +296,7 @@ public class OpenTypeHistory extends History {
 				} else {
 					// copy over the modifiers since they may have changed
 					type.setModifiers(jType.getFlags());
+					fTimestampMapping.put(type, new Long(currentTimestamp));
 				}
 			} catch (JavaModelException e) {
 				remove(type);
@@ -296,6 +311,7 @@ public class OpenTypeHistory extends History {
 	
 	private void doShutdown() {
 		JavaCore.removeElementChangedListener(fDeltaListener);
+		save();
 	}
 	
 	protected Object createFromElement(Element type) {
@@ -311,6 +327,19 @@ public class OpenTypeHistory extends History {
 		}
 		TypeInfo info= fTypeInfoFactory.create(
 			pack.toCharArray(), name.toCharArray(), enclosingNames, modifiers, path);
+		long timestamp= IResource.NULL_STAMP;
+		String timestampValue= type.getAttribute(NODE_TIMESTAMP);
+		if (timestampValue != null && timestampValue.length() > 0) {
+			try {
+				timestamp= Long.parseLong(timestampValue);
+			} catch (NumberFormatException e) {
+				// take null stamp
+			}
+		}
+		long currentTimestamp= info.getContainerTimestamp();
+		if (timestamp != IResource.NULL_STAMP && currentTimestamp != IResource.NULL_STAMP && timestamp == currentTimestamp) {
+			fTimestampMapping.put(info, new Long(currentTimestamp));
+		}
 		return info;
 	}
 
@@ -321,6 +350,7 @@ public class OpenTypeHistory extends History {
 		typeElement.setAttribute(NODE_ENCLOSING_NAMES, type.getEnclosingName());
 		typeElement.setAttribute(NODE_PATH, type.getPath());
 		typeElement.setAttribute(NODE_MODIFIERS, Integer.toString(type.getModifiers()));
+		typeElement.setAttribute(NODE_TIMESTAMP, Long.toString(type.getContainerTimestamp()));
 	}
 
 	private char[][] getEnclosingNames(Element type) {

@@ -278,5 +278,9 @@ public abstract class TypeInfo {
 		buf.append("; name= ");		 //$NON-NLS-1$
 		buf.append(fName);
 		return buf.toString();
-	}	
+	}
+	
+	public abstract long getContainerTimestamp();
+	
+	public abstract boolean isContainerDirty();
 }

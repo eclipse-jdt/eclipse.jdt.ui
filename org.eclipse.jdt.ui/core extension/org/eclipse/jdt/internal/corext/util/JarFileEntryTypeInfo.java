@@ -10,12 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileInfo;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -130,6 +137,34 @@ public class JarFileEntryTypeInfo extends TypeInfo {
 		result.append(IJavaSearchScope.JAR_FILE_ENTRY_SEPARATOR);
 		getElementPath(result);
 		return result.toString();
+	}
+	
+	public long getContainerTimestamp() {
+		// First try internal Jar
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+		IPath path= new Path(fJar);
+		IResource resource= root.findMember(path);
+		IFileInfo info= null;
+		if (resource != null && resource.exists()) {
+			URI location= resource.getLocationURI();
+			if (location != null) {
+				try {
+					info= EFS.getStore(location).fetchInfo();
+				} catch (CoreException e) {
+					// Fall through
+				}
+			}
+		} else {
+			info= EFS.getLocalFileSystem().getStore(Path.fromOSString(fJar)).fetchInfo();
+		}
+		if (info != null && info.exists()) {
+			return info.getLastModified();
+		}
+		return IResource.NULL_STAMP;
+	}
+	
+	public boolean isContainerDirty() {
+		return false;
 	}
 		
 	private void getElementPath(StringBuffer result) {

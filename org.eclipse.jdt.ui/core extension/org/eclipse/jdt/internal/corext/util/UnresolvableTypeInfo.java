@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.corext.util;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
@@ -54,5 +56,13 @@ public class UnresolvableTypeInfo extends TypeInfo {
 	
 	protected IJavaElement getContainer(IJavaSearchScope scope) {
 		return null;
+	}
+	
+	public long getContainerTimestamp() {
+		return IResource.NULL_STAMP;
+	}
+	
+	public boolean isContainerDirty() {
+		return false;
 	}
 }
