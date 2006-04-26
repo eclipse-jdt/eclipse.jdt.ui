@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -197,6 +198,20 @@ public class CleanUpTest extends QuickFixTest {
 		String[] previews= new String[children.length]; 
 		for (int i= 0; i < children.length; i++) {
 			previews[i]= ((TextEditBasedChange)children[i]).getPreviewContent(null);
+		}
+
+		assertEqualStringsIgnoreOrder(previews, expected);
+	}
+	
+	private void assertRefactoringResultAsExpectedIgnoreHashValue(CleanUpRefactoring refactoring, String[] expected) throws CoreException {
+		refactoring.checkAllConditions(new NullProgressMonitor());
+		CompositeChange change= (CompositeChange)refactoring.createChange(null);
+		Change[] children= change.getChildren();
+		String[] previews= new String[children.length]; 
+		Pattern regex= Pattern.compile("long serialVersionUID = .*L;");
+		for (int i= 0; i < children.length; i++) {
+			String previewContent= ((TextEditBasedChange)children[i]).getPreviewContent(null);
+			previews[i]= previewContent.replaceAll(regex.pattern(), "long serialVersionUID = 1L;");
 		}
 
 		assertEqualStringsIgnoreOrder(previews, expected);
@@ -3930,7 +3945,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpectedIgnoreHashValue(refactoring, new String[] {expected1});
 	}
 	
 	public void testSerialVersion02() throws Exception {
@@ -3972,7 +3987,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpectedIgnoreHashValue(refactoring, new String[] {expected1});
 	}
 	
 	public void testSerialVersion03() throws Exception {
@@ -4019,7 +4034,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2});
+		assertRefactoringResultAsExpectedIgnoreHashValue(refactoring, new String[] {expected1, expected2});
 	}
 	
 	public void testSerialVersion04() throws Exception {
@@ -4059,7 +4074,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpectedIgnoreHashValue(refactoring, new String[] {expected1});
 	}
 	
 	public void testSerialVersion05() throws Exception {
@@ -4098,7 +4113,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpectedIgnoreHashValue(refactoring, new String[] {expected1});
 	}
 	
 	public void testRemoveBlock01() throws Exception {
