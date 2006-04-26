@@ -22,7 +22,7 @@ public class DefaultClassifier implements IClassifiesThrowables {
 	private String fVersion;
 
 	public DefaultClassifier(String version) {
-		fVersion = version;
+		fVersion= version;
 	}
 
 	/*
@@ -31,10 +31,10 @@ public class DefaultClassifier implements IClassifiesThrowables {
 	 * @see org.eclipse.jdt.internal.junit.runner.ThrowableClassifier#getTrace(java.lang.Throwable)
 	 */
 	public String getTrace(Throwable t) {
-		StringWriter stringWriter = new StringWriter();
-		PrintWriter writer = new PrintWriter(stringWriter);
+		StringWriter stringWriter= new StringWriter();
+		PrintWriter writer= new PrintWriter(stringWriter);
 		t.printStackTrace(writer);
-		StringBuffer buffer = stringWriter.getBuffer();
+		StringBuffer buffer= stringWriter.getBuffer();
 		return buffer.toString();
 	}
 
@@ -44,10 +44,9 @@ public class DefaultClassifier implements IClassifiesThrowables {
 	 * @see org.eclipse.jdt.internal.junit.runner.ThrowableClassifier#isComparisonFailure(java.lang.Throwable)
 	 */
 	public boolean isComparisonFailure(Throwable throwable) {
-		if (fVersion != "3") //$NON-NLS-1$
+		if (! fVersion.equals("3")) //$NON-NLS-1$
 			return false;
 		// avoid reference to comparison failure to avoid a dependency on 3.8.1
-		return throwable.getClass().getName().equals(
-				"junit.framework.ComparisonFailure"); //$NON-NLS-1$
+		return throwable.getClass().getName().equals("junit.framework.ComparisonFailure"); //$NON-NLS-1$
 	}
 }
