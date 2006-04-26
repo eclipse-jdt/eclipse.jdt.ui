@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
-import java.text.Collator;
+import com.ibm.icu.text.Collator;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -231,10 +232,11 @@ public class AccessorClassCreator {
 			}
 		}
 		Collections.sort(subs, new Comparator() {
+			private Collator fCollator= Collator.getInstance();
 			public int compare(Object o1, Object o2) {
 				NLSSubstitution s0= (NLSSubstitution)o1;
 				NLSSubstitution s1= (NLSSubstitution)o2;
-				return Collator.getInstance().compare(s0.getKey(), s1.getKey());
+				return fCollator.compare(s0.getKey(), s1.getKey());
 			}
 		});
 		StringBuffer buf= new StringBuffer();

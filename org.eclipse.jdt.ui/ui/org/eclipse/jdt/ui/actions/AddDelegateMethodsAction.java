@@ -13,8 +13,9 @@
 
 package org.eclipse.jdt.ui.actions;
 
+import com.ibm.icu.text.Collator;
+
 import java.lang.reflect.InvocationTargetException;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

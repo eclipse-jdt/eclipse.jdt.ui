@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.text.Collator;
+import com.ibm.icu.text.Collator;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

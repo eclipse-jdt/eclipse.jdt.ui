@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
-import java.text.Collator;
+import com.ibm.icu.text.Collator;
+
 import java.util.Comparator;
 import java.util.List;
 

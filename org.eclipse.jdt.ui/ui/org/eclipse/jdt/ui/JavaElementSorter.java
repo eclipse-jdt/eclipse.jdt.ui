@@ -10,14 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
-import java.text.Collator;
+import com.ibm.icu.text.Collator;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
@@ -42,6 +43,7 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
@@ -82,6 +84,7 @@ public class JavaElementSorter extends ViewerSorter {
 	private static final int OTHERS= 51;
 	
 	private MembersOrderPreferenceCache fMemberOrderCache;
+	private Collator fNewCollator; // collator from ICU
 	
 	/**
 	 * Constructor.
@@ -89,6 +92,7 @@ public class JavaElementSorter extends ViewerSorter {
 	public JavaElementSorter() {	
 		super(null); // delay initialization of collator
 		fMemberOrderCache= JavaPlugin.getDefault().getMemberOrderPreferenceCache();
+		fNewCollator= null;
 	}
 		
 	/**
@@ -223,7 +227,7 @@ public class JavaElementSorter extends ViewerSorter {
 			String name1= getNonJavaElementLabel(viewer, e1);
 			String name2= getNonJavaElementLabel(viewer, e2);
 			if (name1 != null && name2 != null) {
-				return getCollator().compare(name1, name2);
+				return getNewCollator().compare(name1, name2);
 			}
 			return 0; // can't compare
 		}
@@ -250,7 +254,7 @@ public class JavaElementSorter extends ViewerSorter {
 			if (name1.length() == 0) {
 				if (name2.length() == 0) {
 					try {
-						return getCollator().compare(((IType) e1).getSuperclassName(), ((IType) e2).getSuperclassName());
+						return getNewCollator().compare(((IType) e1).getSuperclassName(), ((IType) e2).getSuperclassName());
 					} catch (JavaModelException e) {
 						return 0;
 					}
@@ -262,7 +266,7 @@ public class JavaElementSorter extends ViewerSorter {
 			}
 		}
 				
-		int cmp= getCollator().compare(name1, name2);
+		int cmp= getNewCollator().compare(name1, name2);
 		if (cmp != 0) {
 			return cmp;
 		}
@@ -272,7 +276,7 @@ public class JavaElementSorter extends ViewerSorter {
 			String[] params2= ((IMethod) e2).getParameterTypes();
 			int len= Math.min(params1.length, params2.length);
 			for (int i = 0; i < len; i++) {
-				cmp= getCollator().compare(Signature.toString(params1[i]), Signature.toString(params2[i]));
+				cmp= getNewCollator().compare(Signature.toString(params1[i]), Signature.toString(params2[i]));
 				if (cmp != 0) {
 					return cmp;
 				}
@@ -332,11 +336,19 @@ public class JavaElementSorter extends ViewerSorter {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ViewerSorter#getCollator()
 	 */
-	public final Collator getCollator() {
+	public final java.text.Collator getCollator() {
+		// kept in for API compatibility
 		if (collator == null) {
-			collator= Collator.getInstance();
+			collator= java.text.Collator.getInstance();
 		}
 		return collator;
+	}
+	
+	private final Collator getNewCollator() {
+		if (fNewCollator == null) {
+			fNewCollator= Collator.getInstance();
+		}
+		return fNewCollator;
 	}
 
 	private boolean needsClasspathComparision(Object e1, int cat1, Object e2, int cat2) {

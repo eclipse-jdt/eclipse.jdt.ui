@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.text.Collator;
+import com.ibm.icu.text.Collator;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;

@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import com.ibm.icu.text.Collator;
+
 import java.lang.reflect.InvocationTargetException;
-import java.text.Collator;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;

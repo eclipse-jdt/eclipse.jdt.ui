@@ -11,9 +11,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
+import com.ibm.icu.text.Collator;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;

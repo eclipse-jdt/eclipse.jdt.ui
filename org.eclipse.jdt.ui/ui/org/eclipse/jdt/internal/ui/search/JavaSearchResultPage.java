@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import java.text.Collator;
+import com.ibm.icu.text.Collator;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -97,10 +98,13 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	public static class DecoratorIgnoringViewerSorter extends ViewerSorter {
 
 		private final ILabelProvider fLabelProvider;
+		private Collator fNewCollator;
+		
 
 		public DecoratorIgnoringViewerSorter(ILabelProvider labelProvider) {
 			super(null); // lazy initialization
 			fLabelProvider= labelProvider;
+			fNewCollator= null;
 		}
 		
 	    public int compare(Viewer viewer, Object e1, Object e2) {
@@ -110,17 +114,25 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	            name1 = "";//$NON-NLS-1$
 	        if (name2 == null)
 	            name2 = "";//$NON-NLS-1$
-	        return getCollator().compare(name1, name2);
+	        return getNewCollator().compare(name1, name2);
 	    }
 	    
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.ViewerSorter#getCollator()
 		 */
-		public final Collator getCollator() {
+		public final java.text.Collator getCollator() {
+			// kept in for API compatibility
 			if (collator == null) {
-				collator= Collator.getInstance();
+				collator= java.text.Collator.getInstance();
 			}
 			return collator;
+		}
+		
+		private final Collator getNewCollator() {
+			if (fNewCollator == null) {
+				fNewCollator= Collator.getInstance();
+			}
+			return fNewCollator;
 		}
 	}
 
