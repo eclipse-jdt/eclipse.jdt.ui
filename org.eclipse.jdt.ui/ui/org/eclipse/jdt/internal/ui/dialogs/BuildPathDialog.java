@@ -93,8 +93,8 @@ public class BuildPathDialog extends StatusDialog {
 		try {
 			PlatformUI.getWorkbench().getProgressService().run(true, true, op);
 		} catch (InvocationTargetException e) {
-			String title= PreferencesMessages.BuildPathsPropertyPage_error_title; 
-			String message= PreferencesMessages.BuildPathsPropertyPage_error_message; 
+			String title= PreferencesMessages.BuildPathDialog_error_title; 
+			String message= PreferencesMessages.BuildPathDialog_error_message; 
 			ExceptionHandler.handle(e, shell, title, message);
 		} catch (InterruptedException e) {
 			// cancelled

@@ -21,6 +21,8 @@ public final class PreferencesMessages extends NLS {
 		// Do not instantiate
 	}
 
+	public static String BuildPathDialog_error_title;
+	public static String BuildPathDialog_error_message;
 	public static String BuildPathsPropertyPage_error_message;
 	public static String BuildPathsPropertyPage_error_title;
 	public static String BuildPathsPropertyPage_job_title;

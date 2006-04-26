@@ -219,7 +219,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 					try {
 						new ProgressMonitorDialog(getShell()).run(true, true, op);
 					} catch (InvocationTargetException e) {
-						ExceptionHandler.handle(e, getShell(), "Setting Build Path", "Setting build path failed.");
+						ExceptionHandler.handle(e, getShell(), PreferencesMessages.BuildPathsPropertyPage_error_title, PreferencesMessages.BuildPathsPropertyPage_error_message);
 						return false;
 					} catch (InterruptedException e) {
 						return false;
