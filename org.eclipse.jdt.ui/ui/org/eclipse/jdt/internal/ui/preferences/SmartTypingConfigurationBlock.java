@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -33,6 +35,7 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -191,7 +194,12 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		// TODO create a link with an argument, so the formatter preference page can open the 
 		// current profile automatically.
 		String linkTooltip= PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_tooltip; 
-		String text= Messages.format(PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_text, new String[] {Integer.toString(getIndentSize()), getIndentChar()}); 
+		String text;
+		String indentMode= JavaPlugin.getDefault().getCombinedPreferenceStore().getString(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
+		if (JavaCore.TAB.equals(indentMode))
+			text= Messages.format(PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_tab_text, new String[] {Integer.toString(getTabDisplaySize())});
+		else
+			text= Messages.format(PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_others_text, new String[] {Integer.toString(getTabDisplaySize()), Integer.toString(getIndentSize()), getIndentMode()}); 
 		
 		final Link link= new Link(composite, SWT.NONE);
 		link.setText(text);
@@ -232,18 +240,29 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 				}
 		});
 	}
-	
-	private String getIndentChar() {
-		boolean useSpace= JavaCore.SPACE.equals(JavaPlugin.getDefault().getCombinedPreferenceStore().getString(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR));
-		if (useSpace)
+
+	private String getIndentMode() {
+		String indentMode= JavaPlugin.getDefault().getCombinedPreferenceStore().getString(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
+		
+		if (JavaCore.SPACE.equals(indentMode))
 			return PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_spaces; 
-		else
-			return PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_tabs; 
+		
+		if (JavaCore.TAB.equals(indentMode))
+			return PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_tabs;
+		
+		if (DefaultCodeFormatterConstants.MIXED.equals(indentMode))
+			return PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_tabsAndSpaces;
+
+		Assert.isTrue(false, "Illegal indent mode - must not happen"); //$NON-NLS-1$
+		return null;
 	}
 
 	private int getIndentSize() {
-		return JavaPlugin.getDefault().getCombinedPreferenceStore().getInt(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
+		return CodeFormatterUtil.getIndentWidth(null);
 	}
-
+	
+	private int getTabDisplaySize() {
+		return CodeFormatterUtil.getTabWidth(null);
+	}
 
 }

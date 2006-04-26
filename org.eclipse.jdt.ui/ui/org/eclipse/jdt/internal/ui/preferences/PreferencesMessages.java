@@ -684,10 +684,12 @@ public final class PreferencesMessages extends NLS {
 	public static String SmartTypingConfigurationBlock_autoclose_title;
 	public static String SmartTypingConfigurationBlock_automove_title;
 	public static String SmartTypingConfigurationBlock_tabs_title;
-	public static String SmartTypingConfigurationBlock_tabs_message_text;
+	public static String SmartTypingConfigurationBlock_tabs_message_tab_text;
+	public static String SmartTypingConfigurationBlock_tabs_message_others_text;
 	public static String SmartTypingConfigurationBlock_tabs_message_tooltip;
 	public static String SmartTypingConfigurationBlock_tabs_message_spaces;
 	public static String SmartTypingConfigurationBlock_tabs_message_tabs;
+	public static String SmartTypingConfigurationBlock_tabs_message_tabsAndSpaces;
 	public static String SmartTypingConfigurationBlock_pasting_title;
 	public static String SmartTypingConfigurationBlock_strings_title;
 	public static String CodeAssistConfigurationBlock_sortingSection_title;
