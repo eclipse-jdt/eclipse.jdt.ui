@@ -134,6 +134,17 @@ public final class CompletionProposalCategory {
 	}
 	
 	/**
+	 * Returns the name of the described extension
+	 * without mnemonic hint in order to be displayed
+	 * in a message.
+	 * 
+	 * @return Returns the name
+	 */
+	public String getDisplayName() {
+		return fName.replaceAll("&", ""); //$NON-NLS-1$ //$NON-NLS-2$;
+	}
+	
+	/**
 	 * Returns the image descriptor of the described category.
 	 * 
 	 * @return the image descriptor of the described category

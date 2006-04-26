@@ -324,7 +324,7 @@ public final class CompletionProposalComputerRegistry {
 	void informUser(CompletionProposalComputerDescriptor descriptor, IStatus status) {
 		JavaPlugin.log(status);
         String title= JavaTextMessages.CompletionProposalComputerRegistry_error_dialog_title;
-        final String avoidHint= Messages.format(JavaTextMessages.CompletionProposalComputerRegistry_messageAvoidanceHint, descriptor.getCategory().getName());
+        final String avoidHint= Messages.format(JavaTextMessages.CompletionProposalComputerRegistry_messageAvoidanceHint, descriptor.getCategory().getDisplayName());
         String message= status.getMessage();
         
         // inlined from MessageDialog.openError

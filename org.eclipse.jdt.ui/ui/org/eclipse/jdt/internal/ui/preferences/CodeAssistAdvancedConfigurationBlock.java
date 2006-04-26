@@ -281,7 +281,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 			return CodeAssistAdvancedConfigurationBlock.this.getImage(fCategory.getImageDescriptor());
 		}
 		String getName() {
-			return fCategory.getName().replaceAll("&", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			return fCategory.getDisplayName();
 		}
 		String getKeybindingAsString() {
 			final Parameterization[] params= { new Parameterization(fParam, fCategory.getId()) };

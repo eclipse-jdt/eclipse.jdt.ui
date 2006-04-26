@@ -31,7 +31,7 @@ public final class ContentAssistComputerParameter implements IParameterValues {
 		Map map= new HashMap(descriptors.size());
 		for (Iterator it= descriptors.iterator(); it.hasNext();) {
 			CompletionProposalCategory category= (CompletionProposalCategory) it.next();
-			map.put(category.getName().replaceAll("&", ""), category.getId()); //$NON-NLS-1$ //$NON-NLS-2$
+			map.put(category.getDisplayName(), category.getId());
 		}
 		return map;
 	}
