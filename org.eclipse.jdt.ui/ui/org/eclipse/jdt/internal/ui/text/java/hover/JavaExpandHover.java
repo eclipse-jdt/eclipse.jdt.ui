@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider.ProblemAnnotation;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.hover.AnnotationExpansionControl.AnnotationHoverInput;
 
@@ -166,6 +167,10 @@ public class JavaExpandHover extends AnnotationExpandHover {
 	}
 
 	private boolean isIncluded(IJavaAnnotation annotation, boolean showTemporaryProblems) {
+		
+		// XXX: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=138601
+		if (annotation instanceof ProblemAnnotation && JavaMarkerAnnotation.TASK_ANNOTATION_TYPE.equals(annotation.getType()))
+			return false;
 		
 		if (!annotation.isProblem())
 			return true;
