@@ -28,6 +28,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 public class JUnitLaunchDescription {
@@ -132,7 +134,7 @@ public class JUnitLaunchDescription {
 	}
 
 	void setMainType(IType type) {
-		setMainType(type.getFullyQualifiedName('.'));
+		setMainType(JavaModelUtil.getFullyQualifiedName(type));
 	}
 
 	private boolean areEqual(Object thing, Object otherThing) {
