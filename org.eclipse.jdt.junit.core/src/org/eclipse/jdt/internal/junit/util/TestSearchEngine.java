@@ -166,10 +166,7 @@ public class TestSearchEngine {
 		}
 	}
 
-	private static void collectTypes(Object element, IProgressMonitor pm, Set result) throws CoreException/*
-																											 * ,
-																											 * InvocationTargetException
-																											 */{
+	private static void collectTypes(Object element, IProgressMonitor pm, Set result) throws CoreException {
 		pm.beginTask(JUnitMessages.TestSearchEngine_message_searching, 10);
 		element= computeScope(element);
 		try {
