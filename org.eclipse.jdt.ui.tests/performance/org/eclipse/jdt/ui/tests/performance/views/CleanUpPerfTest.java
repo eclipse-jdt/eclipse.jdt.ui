@@ -47,8 +47,6 @@ import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 
-import org.eclipse.test.performance.Dimension;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
@@ -195,7 +193,8 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 				VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_PARAMETERS |
 				VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_LOCAL_VARIABLES));
 		
-		tagAsSummary("Code Clean Up - 25 clean-ups", Dimension.ELAPSED_PROCESS);
+		//See https://bugs.eclipse.org/bugs/show_bug.cgi?id=135219
+//		tagAsSummary("Code Clean Up - 25 clean-ups", Dimension.ELAPSED_PROCESS);
 		
 		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
 		cleanUpRefactoring.createChange(null);
