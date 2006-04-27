@@ -39,6 +39,7 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 	private final String fJobLabel;
 	private final String fSingularLabel;
 	private final String fPluralLabel;
+	private final String fName;
 	
 	public OccurrencesSearchQuery(IOccurrencesFinder finder, IDocument document, IJavaElement element) {
 		fFinder= finder;
@@ -46,10 +47,11 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 		fElement= element;
 		fJobLabel= fFinder.getJobLabel();
 		fResult= new OccurrencesSearchResult(this);
-		fSingularLabel= fFinder.getSingularLabel(element.getElementName());
-		fPluralLabel= fFinder.getPluralLabel(element.getElementName());
+		fSingularLabel= fFinder.getUnformattedSingularLabel();
+		fPluralLabel= fFinder.getUnformattedPluralLabel();
+		fName= fFinder.getElementName();
 	}
-
+	
 	/*
 	 * @see org.eclipse.search.ui.ISearchQuery#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
@@ -81,10 +83,10 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 	}
 	
 	public String getResultLabel(int nMatches) {
-		if (nMatches == 0) {
-			return fSingularLabel;
+		if (nMatches == 1) {
+			return Messages.format(fSingularLabel, new Object[] { fName, fElement.getElementName() });
 		} else {
-			return Messages.format(fPluralLabel, new Object[] { new Integer(nMatches) });
+			return Messages.format(fPluralLabel, new Object[] { fName, new Integer(nMatches), fElement.getElementName() });
 		}
 	}
 		

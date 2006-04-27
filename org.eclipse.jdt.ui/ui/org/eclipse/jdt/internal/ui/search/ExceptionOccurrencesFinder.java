@@ -52,7 +52,6 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrencesFinder {
 
@@ -165,14 +164,19 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return SearchMessages.ExceptionOccurrencesFinder_searchfor ; 
 	}
 	
-	public String getPluralLabel(String elementName) {
-		String[] args= new String[] {ASTNodes.asString(fSelectedName), "{0}", elementName}; //$NON-NLS-1$
-		return Messages.format(SearchMessages.ExceptionOccurrencesFinder_label_plural, args); 
+	public String getElementName() {
+		if (fSelectedName != null) {
+			return ASTNodes.asString(fSelectedName);
+		}
+		return null;
 	}
 	
-	public String getSingularLabel(String elementName) {
-		String[] args= new String[] {ASTNodes.asString(fSelectedName), elementName}; 
-		return Messages.format(SearchMessages.ExceptionOccurrencesFinder_label_singular, args); 
+	public String getUnformattedPluralLabel() {
+		return SearchMessages.ExceptionOccurrencesFinder_label_plural;
+	}
+	
+	public String getUnformattedSingularLabel() {
+		return SearchMessages.ExceptionOccurrencesFinder_label_singular;
 	}
 	
 	public boolean visit(AnonymousClassDeclaration node) {

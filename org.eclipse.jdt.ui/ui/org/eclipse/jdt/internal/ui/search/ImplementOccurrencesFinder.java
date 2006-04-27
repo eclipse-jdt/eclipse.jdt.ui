@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 
 /**
@@ -149,14 +148,19 @@ public class ImplementOccurrencesFinder implements org.eclipse.jdt.internal.ui.s
 		return SearchMessages.ImplementOccurrencesFinder_searchfor ; 
 	}
 	
-	public String getPluralLabel(String elementName) {
-		String[] args= new String[] {ASTNodes.asString(fSelectedNode), "{0}", elementName}; //$NON-NLS-1$
-		return Messages.format(SearchMessages.ImplementOccurrencesFinder_label_plural, args); 
+	public String getElementName() {
+		if (fSelectedNode != null) {
+			return ASTNodes.asString(fSelectedNode);
+		}
+		return null;
 	}
 	
-	public String getSingularLabel(String elementName) {
-		String[] args= new String[] {ASTNodes.asString(fSelectedNode), elementName}; 
-		return Messages.format(SearchMessages.ImplementOccurrencesFinder_label_singular, args); 
+	public String getUnformattedPluralLabel() {
+		return SearchMessages.ImplementOccurrencesFinder_label_plural;
+	}
+	
+	public String getUnformattedSingularLabel() {
+		return SearchMessages.ImplementOccurrencesFinder_label_singular;
 	}
 	
 	public void releaseAST() {
