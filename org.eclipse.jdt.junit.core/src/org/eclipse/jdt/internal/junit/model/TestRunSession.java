@@ -425,7 +425,13 @@ public class TestRunSession {
 		}
 
 		private String nullifyEmpty(String string) {
-			return string.length() == 0 ? null : string;
+			int length= string.length();
+			if (length == 0)
+				return null;
+			else if (string.charAt(length - 1) == '\n')
+				return string.substring(0, length - 1);
+			else
+				return string;
 		}
 	
 		public void testReran(String testId, String testClass, String testName, int status, String trace) {
