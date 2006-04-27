@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -37,7 +35,6 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.VariableNamesProcessor;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
 public class ExtractTempWizard extends RefactoringWizard {
@@ -65,7 +62,6 @@ public class ExtractTempWizard extends RefactoringWizard {
 		private static final String DECLARE_FINAL= "declareFinal";  //$NON-NLS-1$
 		private static final String REPLACE_ALL= "replaceOccurrences";  //$NON-NLS-1$
 		
-		private Label fLabel;
 		private final boolean fInitialValid;
 		private static final String DESCRIPTION = RefactoringMessages.ExtractTempInputPage_enter_name; 
 		private String[] fTempNameProposals;
@@ -100,8 +96,6 @@ public class ExtractTempWizard extends RefactoringWizard {
 			
 			addReplaceAllCheckbox(result, layouter);
 			addDeclareFinalCheckbox(result, layouter);
-			addSeparator(result, layouter);
-			addLabel(result, layouter);
 			
 			validateTextField(text.getText());
 			
@@ -146,36 +140,11 @@ public class ExtractTempWizard extends RefactoringWizard {
 			});		
 		}
 		
-		private void addLabel(Composite result, RowLayouter layouter) {
-			fLabel= new Label(result, SWT.WRAP);
-			GridData gd= new GridData(GridData.FILL_BOTH);
-			gd.widthHint= convertWidthInCharsToPixels(50);
-			fLabel.setLayoutData(gd);
-			updatePreviewLabel();
-			layouter.perform(fLabel);
-		}
-	
-		private void addSeparator(Composite result, RowLayouter layouter) {
-			Label separator= new Label(result, SWT.SEPARATOR | SWT.HORIZONTAL);
-			separator.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
-			layouter.perform(separator);
-		}
-		
-		private void updatePreviewLabel(){
-			try {
-				if (fLabel != null)
-					fLabel.setText(RefactoringMessages.ExtractTempInputPage_signature_preview + getExtractTempRefactoring().getTempSignaturePreview()); 
-			} catch (CoreException e) {
-				ExceptionHandler.handle(e, RefactoringMessages.ExtractTempInputPage_extract_local, RefactoringMessages.ExtractTempInputPage_exception); 
-			}
-		}
-		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#textModified(java.lang.String)
 		 */
 		protected void textModified(String text) {
 			getExtractTempRefactoring().setTempName(text);
-			updatePreviewLabel();
 			super.textModified(text);
 		}
 		

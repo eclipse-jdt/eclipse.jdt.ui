@@ -793,10 +793,6 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 		return fSelectedExpression;
 	}
 
-	public String getTempSignaturePreview() throws CoreException {
-		return getTempTypeName() + " " + fTempName; //$NON-NLS-1$
-	}
-	
 	private String getTempTypeName() throws CoreException {
 		if (fTempTypeName == null) {
 			String tempTypeName;
