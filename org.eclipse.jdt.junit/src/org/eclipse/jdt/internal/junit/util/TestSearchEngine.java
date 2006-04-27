@@ -64,23 +64,24 @@ public class TestSearchEngine {
 
 	private static class JUnitSearchResultCollector extends SearchRequestor {
 		List fList;
+
 		Set fFailed= new HashSet();
+
 		Set fMatches= new HashSet();
-		
+
 		public JUnitSearchResultCollector(List list) {
 			fList= list;
 		}
-		
+
 		public void acceptSearchMatch(SearchMatch match) throws CoreException {
 			Object enclosingElement= match.getElement();
-			if (!(enclosingElement instanceof IMethod)) 
+			if (! (enclosingElement instanceof IMethod))
 				return;
-			
-			IMethod method= (IMethod)enclosingElement;		
-			
+
+			IMethod method= (IMethod) enclosingElement;
+
 			IType declaringType= method.getDeclaringType();
-			if (fMatches.contains(declaringType)
-					|| fFailed.contains(declaringType))
+			if (fMatches.contains(declaringType) || fFailed.contains(declaringType))
 				return;
 			if (isTestOrTestSuite(declaringType)) {
 				fMatches.add(declaringType);
@@ -88,78 +89,67 @@ public class TestSearchEngine {
 				fFailed.add(declaringType);
 			}
 		}
-		
+
 		public void endReporting() {
 			fList.addAll(fMatches);
 		}
 	}
-	
-	public static boolean isTestOrTestSuite(IType declaringType)
-			throws JavaModelException {
+
+	public static boolean isTestOrTestSuite(IType declaringType) throws JavaModelException {
 		return isTestOrTestSuite(declaringType, TestKindRegistry.getDefault());
 	}
 
 	public static boolean isTestOrTestSuite(IType declaringType, TestKindRegistry registry) {
-		return ! registry.getKind(declaringType).isNull();
+		return !registry.getKind(declaringType).isNull();
 	}
 
-	private List searchMethod(IProgressMonitor pm, final IJavaSearchScope scope)
-			throws CoreException {
-		final List typesFound= new ArrayList(200);	
+	private List searchMethod(IProgressMonitor pm, final IJavaSearchScope scope) throws CoreException {
+		final List typesFound= new ArrayList(200);
 		searchMethod(typesFound, scope, pm);
-		return typesFound;	
+		return typesFound;
 	}
 
-	private List searchMethod(final List v, IJavaSearchScope scope,
-			final IProgressMonitor progressMonitor) throws CoreException {
+	private List searchMethod(final List v, IJavaSearchScope scope, final IProgressMonitor progressMonitor) throws CoreException {
 		SearchRequestor requestor= new JUnitSearchResultCollector(v);
-		int matchRule = SearchPattern.R_EXACT_MATCH
-				| SearchPattern.R_CASE_SENSITIVE
-				| SearchPattern.R_ERASURE_MATCH;
-		SearchPattern suitePattern = SearchPattern
-				.createPattern(
-						"suite() Test", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, matchRule); //$NON-NLS-1$
-		SearchParticipant[] participants = new SearchParticipant[] { SearchEngine
-				.getDefaultSearchParticipant() };
-		new SearchEngine().search(suitePattern, participants, scope, requestor,
-				progressMonitor);
+		int matchRule= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE | SearchPattern.R_ERASURE_MATCH;
+		SearchPattern suitePattern= SearchPattern.createPattern(
+				"suite() Test", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, matchRule); //$NON-NLS-1$
+		SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
+		new SearchEngine().search(suitePattern, participants, scope, requestor, progressMonitor);
 		return v;
 	}
-	
-	public static IType[] findTests(IRunnableContext context,
-			final Object[] elements) throws InvocationTargetException,
-			InterruptedException {
-		final Set result= new HashSet();
-		
-			if (elements.length > 0) {
-				IRunnableWithProgress runnable= new IRunnableWithProgress() {
-				public void run(IProgressMonitor pm)
-						throws InterruptedException {
-						doFindTests(elements, result, pm);
-					}
-				};
-				context.run(true, true, runnable);			
-			}
-			return (IType[]) result.toArray(new IType[result.size()]) ;
-	}
 
-	public static IType[] findTests(final Object[] elements) throws InvocationTargetException, InterruptedException{
+	public static IType[] findTests(IRunnableContext context, final Object[] elements) throws InvocationTargetException, InterruptedException {
 		final Set result= new HashSet();
-	
+
 		if (elements.length > 0) {
 			IRunnableWithProgress runnable= new IRunnableWithProgress() {
 				public void run(IProgressMonitor pm) throws InterruptedException {
 					doFindTests(elements, result, pm);
 				}
 			};
-			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(runnable);			
+			context.run(true, true, runnable);
 		}
-		return (IType[]) result.toArray(new IType[result.size()]) ;
+		return (IType[]) result.toArray(new IType[result.size()]);
 	}
-	
+
+	public static IType[] findTests(final Object[] elements) throws InvocationTargetException, InterruptedException {
+		final Set result= new HashSet();
+
+		if (elements.length > 0) {
+			IRunnableWithProgress runnable= new IRunnableWithProgress() {
+				public void run(IProgressMonitor pm) throws InterruptedException {
+					doFindTests(elements, result, pm);
+				}
+			};
+			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(runnable);
+		}
+		return (IType[]) result.toArray(new IType[result.size()]);
+	}
+
 	public static void doFindTests(Object[] elements, Set result, IProgressMonitor pm) throws InterruptedException {
 		int nElements= elements.length;
-		pm.beginTask(JUnitMessages.TestSearchEngine_message_searching, nElements);  
+		pm.beginTask(JUnitMessages.TestSearchEngine_message_searching, nElements);
 		try {
 			for (int i= 0; i < nElements; i++) {
 				try {
@@ -176,36 +166,35 @@ public class TestSearchEngine {
 		}
 	}
 
-	private static void collectTypes(Object element, IProgressMonitor pm,
-			Set result) throws CoreException/* , InvocationTargetException */{
-		pm.beginTask(JUnitMessages.TestSearchEngine_message_searching, 10);  
-	    element= computeScope(element);
-	    try {
-			while ((element instanceof ISourceReference)
-					&& !(element instanceof ICompilationUnit)) {
-				if(element instanceof IType) {
-					IType type = (IType) element;
+	private static void collectTypes(Object element, IProgressMonitor pm, Set result) throws CoreException/*
+																											 * ,
+																											 * InvocationTargetException
+																											 */{
+		pm.beginTask(JUnitMessages.TestSearchEngine_message_searching, 10);
+		element= computeScope(element);
+		try {
+			while ( (element instanceof ISourceReference) && ! (element instanceof ICompilationUnit)) {
+				if (element instanceof IType) {
+					IType type= (IType) element;
 					if (isTestOrTestSuite(type)) {
 						result.add(element);
 						return;
 					}
 				}
-				element= ((IJavaElement)element).getParent();
+				element= ((IJavaElement) element).getParent();
 			}
 			if (element instanceof ICompilationUnit) {
-				ICompilationUnit cu= (ICompilationUnit)element;
+				ICompilationUnit cu= (ICompilationUnit) element;
 				IType[] types= cu.getAllTypes();
-	
+
 				for (int i= 0; i < types.length; i++) {
-					IType type = types[i];
+					IType type= types[i];
 					if (isTestOrTestSuite(type))
 						result.add(type);
 				}
 			} else if (element instanceof IJavaElement) {
-				List testCases = findTestCases((IJavaElement) element,
-						new SubProgressMonitor(pm, 7));
-				List suiteMethods = searchSuiteMethods(new SubProgressMonitor(
-						pm, 3), (IJavaElement) element);
+				List testCases= findTestCases((IJavaElement) element, new SubProgressMonitor(pm, 7));
+				List suiteMethods= searchSuiteMethods(new SubProgressMonitor(pm, 3), (IJavaElement) element);
 				while (!suiteMethods.isEmpty()) {
 					if (!testCases.contains(suiteMethods.get(0))) {
 						testCases.add(suiteMethods.get(0));
@@ -214,31 +203,32 @@ public class TestSearchEngine {
 				}
 				result.addAll(testCases);
 			}
-	    } finally {
-	        pm.done();
-	    }
+		} finally {
+			pm.done();
+		}
 	}
-	
+
 	private static List findTestCases(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
-		List found = new ArrayList();
+		List found= new ArrayList();
 		IJavaProject javaProject= element.getJavaProject();
 
-		IType testCaseType = testCaseType(javaProject); 
+		IType testCaseType= testCaseType(javaProject);
 		if (testCaseType == null)
 			return found;
-		
-		IType[] subtypes= javaProject.newTypeHierarchy(testCaseType, getRegion(element), pm).getAllSubtypes(testCaseType);
-			
-		if (subtypes == null)
-		    throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JUnitPlugin.PLUGIN_ID, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE, JUnitMessages.JUnitBaseLaunchConfiguration_error_notests, null))); 
 
-		for (int i = 0; i < subtypes.length; i++) {
-		    try {
-		        if (hasValidModifiers(subtypes[i]))
-		            found.add(subtypes[i]);
-		    } catch (JavaModelException e) {
-		        JUnitPlugin.log(e.getStatus());
-		    }
+		IType[] subtypes= javaProject.newTypeHierarchy(testCaseType, getRegion(element), pm).getAllSubtypes(testCaseType);
+
+		if (subtypes == null)
+			throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JUnitPlugin.PLUGIN_ID,
+					IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE, JUnitMessages.JUnitBaseLaunchConfiguration_error_notests, null)));
+
+		for (int i= 0; i < subtypes.length; i++) {
+			try {
+				if (hasValidModifiers(subtypes[i]))
+					found.add(subtypes[i]);
+			} catch (JavaModelException e) {
+				JUnitPlugin.log(e.getStatus());
+			}
 		}
 		return found;
 	}
@@ -249,10 +239,10 @@ public class TestSearchEngine {
 		} catch (JavaModelException e) {
 			JUnitPlugin.log(e.getStatus());
 			return null;
-		} 
+		}
 	}
-	
-	private static IRegion getRegion(IJavaElement element) throws JavaModelException{
+
+	private static IRegion getRegion(IJavaElement element) throws JavaModelException {
 		IRegion result= JavaCore.newRegion();
 		if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
 			// for projects only add the contained source folders
@@ -270,42 +260,37 @@ public class TestSearchEngine {
 
 	private static Object computeScope(Object element) throws JavaModelException {
 		if (element instanceof IFileEditorInput)
-			element= ((IFileEditorInput)element).getFile();
+			element= ((IFileEditorInput) element).getFile();
 		if (element instanceof IResource)
-			element= JavaCore.create((IResource)element);
+			element= JavaCore.create((IResource) element);
 		if (element instanceof IClassFile) {
-			IClassFile cf= (IClassFile)element;
+			IClassFile cf= (IClassFile) element;
 			element= cf.getType();
 		}
 		return element;
 	}
-	
-	private static List searchSuiteMethods(IProgressMonitor pm,
-			IJavaElement element) throws CoreException {
+
+	private static List searchSuiteMethods(IProgressMonitor pm, IJavaElement element) throws CoreException {
 		// fix for bug 36449 JUnit should constrain tests to selected project
 		// [JUnit]
-		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(
-				new IJavaElement[] { element }, IJavaSearchScope.SOURCES);
-		TestSearchEngine searchEngine= new TestSearchEngine(); 
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element }, IJavaSearchScope.SOURCES);
+		TestSearchEngine searchEngine= new TestSearchEngine();
 		return searchEngine.searchMethod(pm, scope);
 	}
-		
-	public static boolean hasValidModifiers(IType type)
-			throws JavaModelException {
-		if (Flags.isAbstract(type.getFlags())) 
+
+	public static boolean hasValidModifiers(IType type) throws JavaModelException {
+		if (Flags.isAbstract(type.getFlags()))
 			return false;
-		if (!Flags.isPublic(type.getFlags())) 
+		if (!Flags.isPublic(type.getFlags()))
 			return false;
 		return true;
 	}
 
-	public static boolean isTestImplementor(IType type)
-			throws JavaModelException {
+	public static boolean isTestImplementor(IType type) throws JavaModelException {
 		ITypeHierarchy typeHier= type.newSupertypeHierarchy(null);
 		IType[] superInterfaces= typeHier.getAllInterfaces();
 		for (int i= 0; i < superInterfaces.length; i++) {
-			if (superInterfaces[i].getFullyQualifiedName('.').equals(
-					JUnitPlugin.TEST_INTERFACE_NAME))
+			if (superInterfaces[i].getFullyQualifiedName('.').equals(JUnitPlugin.TEST_INTERFACE_NAME))
 				return true;
 		}
 		return false;
