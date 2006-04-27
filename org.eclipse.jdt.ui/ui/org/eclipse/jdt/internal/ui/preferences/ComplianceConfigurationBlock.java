@@ -199,6 +199,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		
 		fControlsComposite= new Composite(composite, SWT.NONE);
 		fControlsComposite.setFont(composite.getFont());
+		fControlsComposite.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false));
 		
 		layout= new GridLayout();
 		layout.marginHeight= 0;
@@ -214,7 +215,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		Group group= new Group(fControlsComposite, SWT.NONE);
 		group.setFont(fControlsComposite.getFont());
 		group.setText(PreferencesMessages.ComplianceConfigurationBlock_compliance_group_label); 
-		group.setLayoutData(new GridData(GridData.FILL, GridData.FILL, false, false));
+		group.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false));
 		group.setLayout(layout);
 	
 		String label= PreferencesMessages.ComplianceConfigurationBlock_compiler_compliance_label; 
@@ -267,7 +268,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		group= new Group(fControlsComposite, SWT.NONE);
 		group.setFont(fControlsComposite.getFont());
 		group.setText(PreferencesMessages.ComplianceConfigurationBlock_classfiles_group_label); 
-		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		group.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false));
 		group.setLayout(layout);
 
 		String[] generateValues= new String[] { GENERATE, DO_NOT_GENERATE };
