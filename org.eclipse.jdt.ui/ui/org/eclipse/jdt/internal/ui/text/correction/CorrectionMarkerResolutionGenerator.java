@@ -64,6 +64,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
@@ -90,6 +92,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 	public static class CorrectionMarkerResolution extends WorkbenchMarkerResolution {
 
 		private static final IMarker[] NO_MARKERS= new IMarker[0];
+		private static final int BATCH_SIZE= 40;
 
 		private ICompilationUnit fCompilationUnit;
 		private int fOffset;
@@ -284,7 +287,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			cleanUp.beginCleanUp(project, compilationUnits, new SubProgressMonitor(monitor, 1));
 			for (int i= 0; i < compilationUnits.length; i++) {
 				ICompilationUnit cu= compilationUnits[i];
-				CompilationUnit root= JavaPlugin.getDefault().getASTProvider().getAST(cu, ASTProvider.WAIT_YES, new SubProgressMonitor(monitor, 1));
+				CompilationUnit root= getASTRoot(cu, new SubProgressMonitor(monitor, 1));
 				List locationList= (List)problemLocations.get(cu);
 				IProblemLocation[] locations= (IProblemLocation[])locationList.toArray(new IProblemLocation[locationList.size()]);
 
@@ -325,36 +328,146 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		 * {@inheritDoc}
 		 */
 		public IMarker[] findOtherMarkers(IMarker[] markers) {
-			if (fProposal instanceof FixCorrectionProposal) {
-				FixCorrectionProposal fix= (FixCorrectionProposal)fProposal;
-				ICleanUp cleanUp= fix.getCleanUp();
-				if (cleanUp != null) {
-					List result= new ArrayList();
-					for (int i= 0; i < markers.length; i++) {
-						IMarker marker= markers[i];
-						if (!marker.equals(fMarker)) {
-							ICompilationUnit cu= getCompilationUnit(marker);
-							if (cu != null) {
-								try {
-									IEditorInput input= EditorUtility.getEditorInput(cu);
+			if (!(fProposal instanceof FixCorrectionProposal))
+				return NO_MARKERS;
+			
+			FixCorrectionProposal fix= (FixCorrectionProposal)fProposal;
+			final ICleanUp cleanUp= fix.getCleanUp();
+			if (cleanUp == null) 
+				return NO_MARKERS;
+			
+			final Hashtable fileMarkerTable= getMarkersForFiles(markers);
+			if (fileMarkerTable.isEmpty())
+				return NO_MARKERS;
+			
+			Hashtable projectICUTable= getCompilationUnitsForProjects(fileMarkerTable);
+			if (projectICUTable.size() == 0)
+				return NO_MARKERS;
+			
+			final List result= new ArrayList();
+			
+			for (Iterator iter= projectICUTable.keySet().iterator(); iter.hasNext();) {
+				IJavaProject project= (IJavaProject)iter.next();
+				List cus= (List)projectICUTable.get(project);
+				ASTParser parser= getParser(project);
+				
+				int start= 0;
+				int end= 0;
+				while (end < cus.size()) {
+					end= Math.min(start + BATCH_SIZE, cus.size());
+				
+					List toParse= cus.subList(start, end);
+					ICompilationUnit[] units= (ICompilationUnit[])toParse.toArray(new ICompilationUnit[toParse.size()]);
+					parser.createASTs(units, new String[0], new ASTRequestor() {
+						/**
+						 * {@inheritDoc}
+						 */
+						public void acceptAST(ICompilationUnit cu, CompilationUnit root) {
+							try {
+								IEditorInput input= EditorUtility.getEditorInput(cu);
+								
+								List fileMarkers= (List)fileMarkerTable.get(cu.getResource());
+								
+								for (Iterator iterator= fileMarkers.iterator(); iterator.hasNext();) {
+									IMarker marker= (IMarker)iterator.next();
 									IProblemLocation location= findProblemLocation(input, marker);
 									if (location != null) {
-										IInvocationContext context= new AssistContext(cu,  location.getOffset(), location.getLength());
-										CompilationUnit root= context.getASTRoot();
 										if (cleanUp.canFix(root, location)) {
 											result.add(marker);
 										}
-									}
-								} catch (CoreException e) {
-									JavaPlugin.log(e);
+									}						
 								}
+							} catch (CoreException e) {
+								JavaPlugin.log(e);
 							}
 						}
+					}, new NullProgressMonitor());
+					
+					start= end;
+				}
+			}	
+			if (result.size() == 0)
+				return NO_MARKERS;
+			
+			return (IMarker[])result.toArray(new IMarker[result.size()]);
+		}
+
+		/**
+		 * Returns the markers with the same type as fMarker.getType for each IFile.
+		 */
+		private Hashtable/*<IFile, List<IMarker>>*/ getMarkersForFiles(IMarker[] markers) {
+			final Hashtable result= new Hashtable();
+			
+			String markerType;
+			try {
+				markerType= fMarker.getType();
+			} catch (CoreException e1) {
+				JavaPlugin.log(e1);
+				return result;
+			}
+			
+			for (int i= 0; i < markers.length; i++) {
+				IMarker marker= markers[i];
+				if (!marker.equals(fMarker)) {
+					String currMarkerType= null;
+					try {
+						currMarkerType= marker.getType();
+					} catch (CoreException e1) {
+						JavaPlugin.log(e1);
 					}
-					return (IMarker[])result.toArray(new IMarker[result.size()]);
+				
+					if (currMarkerType != null && currMarkerType.equals(markerType)) {
+						IResource res= marker.getResource();
+						if (res instanceof IFile && res.isAccessible()) {
+							List markerList= (List)result.get(res);
+							if (markerList == null) {
+								markerList= new ArrayList();
+								result.put(res, markerList);
+							}
+							markerList.add(marker);
+						}
+					}
 				}
 			}
-			return NO_MARKERS;
+			return result;
+		}
+		
+		/**
+		 * Returns the ICompilationUnits for each IJavaProject 
+		 */
+		private Hashtable/*<IJavaProject, List<ICompilationUnit>>*/ getCompilationUnitsForProjects(final Hashtable/*<IFile, List<IMarker>>*/ fileMarkerTable) {
+			Hashtable result= new Hashtable();
+			for (Iterator iter= fileMarkerTable.keySet().iterator(); iter.hasNext();) {
+				IFile res= (IFile)iter.next();
+				IJavaElement element= JavaCore.create(res);
+				
+				if (element instanceof ICompilationUnit) {
+					ICompilationUnit cu= (ICompilationUnit)element;
+					List cus= (List)result.get(cu.getJavaProject());
+					if (cus == null) {
+						cus= new ArrayList();
+						result.put(cu.getJavaProject(), cus);
+					}
+					cus.add(cu);
+				}
+			}
+			return result;
+		}
+
+		private static ASTParser getParser(IJavaProject javaProject) {
+			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+			parser.setResolveBindings(true);
+			parser.setProject(javaProject);
+			return parser;
+		}
+		
+		private static CompilationUnit getASTRoot(ICompilationUnit compilationUnit, IProgressMonitor monitor) {
+			CompilationUnit result= ASTProvider.getASTProvider().getAST(compilationUnit, ASTProvider.WAIT_YES, monitor);
+			if (result == null) {
+				// see bug 63554
+				result= ASTResolving.createQuickFixAST(compilationUnit, monitor);
+			}
+			return result;
 		}
 	}
 
