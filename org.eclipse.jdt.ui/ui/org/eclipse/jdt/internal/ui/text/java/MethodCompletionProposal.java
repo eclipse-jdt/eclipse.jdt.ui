@@ -58,9 +58,6 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal impleme
 
 		if (prefix.length() > 0 && !"main".equals(prefix) && !hasMethod(methods, prefix) && suggestedMethods.add(prefix)) { //$NON-NLS-1$
 			if (!JavaConventions.validateMethodName(prefix).matches(IStatus.ERROR)) {
-				if (Character.isLowerCase(prefix.charAt(0))) {
-					relevance += 500;
-				}
 				result.add(new MethodCompletionProposal(type, prefix, Signature.SIG_VOID, offset, length, relevance));
 			}
 		}
