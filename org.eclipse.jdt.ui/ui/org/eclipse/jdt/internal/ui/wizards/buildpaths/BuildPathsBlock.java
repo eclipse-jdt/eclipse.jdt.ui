@@ -672,7 +672,7 @@ public class BuildPathsBlock {
 	
 	public void configureJavaProject(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		
-		flush(fClassPathList.getElements(), getOutputLocation(), monitor);
+		flush(fClassPathList.getElements(), getOutputLocation(), getJavaProject(), monitor);
 		initializeTimeStamps();
 		
 		updateUI();
@@ -682,10 +682,7 @@ public class BuildPathsBlock {
 	 * Creates the Java project and sets the configured build path and output location.
 	 * If the project already exists only build paths are updated.
 	 */
-	public static void flush(List classPathEntries, IPath outputLocation, IProgressMonitor monitor) throws CoreException, OperationCanceledException {		
-		if (classPathEntries.isEmpty())
-			return;
-		
+	public static void flush(List classPathEntries, IPath outputLocation, IJavaProject javaProject, IProgressMonitor monitor) throws CoreException, OperationCanceledException {		
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
@@ -693,7 +690,6 @@ public class BuildPathsBlock {
 		monitor.beginTask("", classPathEntries.size() * 4 + 4); //$NON-NLS-1$
 		try {
 			
-			IJavaProject javaProject= ((CPListElement)classPathEntries.get(0)).getJavaProject();
 			IProject project= javaProject.getProject();
 			IPath projPath= project.getFullPath();
 			

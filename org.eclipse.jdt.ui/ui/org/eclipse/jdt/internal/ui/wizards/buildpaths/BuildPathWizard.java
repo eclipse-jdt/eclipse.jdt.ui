@@ -56,9 +56,10 @@ public abstract class BuildPathWizard extends NewElementWizard {
 	 */
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 		if (fDoFlushChange) {
-			BuildPathsBlock.flush(getExistingEntries(), getOutputLocation(), monitor);
-			
 			IJavaProject javaProject= getEntryToEdit().getJavaProject();
+			
+			BuildPathsBlock.flush(getExistingEntries(), getOutputLocation(), javaProject, monitor);
+			
 			IProject project= javaProject.getProject();
 			IPath projPath= project.getFullPath();
 			IPath path= getEntryToEdit().getPath();
