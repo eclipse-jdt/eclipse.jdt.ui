@@ -70,7 +70,7 @@ public class PullUpTests extends RefactoringTest {
 		if (methods != null && methods.length > 0)
 			project= methods[0].getJavaProject();
 		if (RefactoringAvailabilityTester.isPullUpAvailable(methods))
-			return new PullUpRefactoring(new PullUpRefactoringProcessor(methods, JavaPreferencesSettings.getCodeGenerationSettings(project), false));
+			return new PullUpRefactoring(new PullUpRefactoringProcessor(methods, JavaPreferencesSettings.getCodeGenerationSettings(project)));
 		return null;
 	}
 	
