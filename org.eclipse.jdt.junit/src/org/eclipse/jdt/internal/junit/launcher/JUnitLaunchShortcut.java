@@ -39,8 +39,11 @@ import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.ILaunchShortcut;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -238,20 +241,37 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		throw new LaunchCancelledByUserException();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jdt.internal.junit.launcher.IJUnitLaunchCreator#createConfiguration(org.eclipse.jdt.core.IJavaProject,
-	 *      java.lang.String, java.lang.String, java.lang.String,
-	 *      java.lang.String)
-	 */
 	public ILaunchConfiguration createConfiguration(JUnitLaunchDescription description) {
+		String mainType= description.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME);
+		String testName= description.getAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR);
+		ILaunchConfiguration config= createConfiguration(description.getProject(), description.getName(), mainType, description.getContainer(), testName);
+		
+		try {
+			ILaunchConfigurationWorkingCopy wc= config.getWorkingCopy();
+			String testKind= description.getAttribute(JUnitBaseLaunchConfiguration.TEST_KIND_ATTR);
+			wc.setAttribute(JUnitBaseLaunchConfiguration.TEST_KIND_ATTR, testKind);
+			config= wc.doSave();
+		} catch (CoreException ce) {
+			JUnitPlugin.log(ce);
+		}
+		return config;
+	}
+
+	/*
+	 * Overridden by org.eclipse.pde.internal.ui.launcher.JUnitWorkbenchShortcut; don't remove!
+	 */
+	protected ILaunchConfiguration createConfiguration(IJavaProject project, String name, String mainType, String container, String testName) {
 		ILaunchConfiguration config= null;
 		try {
-			ILaunchConfigurationWorkingCopy wc= newWorkingCopy(description.getName());
-			description.copyAttributesInto(wc);
+			ILaunchConfigurationWorkingCopy wc= newWorkingCopy(name);
+			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, mainType);
+			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, project.getElementName());
+			wc.setAttribute(JUnitBaseLaunchConfiguration.ATTR_KEEPRUNNING, false);
+			wc.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, container);
+			if (testName.length() > 0)
+				wc.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, testName);	
 			AssertionVMArg.setArgDefault(wc);
-			config= wc.doSave();
+			config= wc.doSave();		
 		} catch (CoreException ce) {
 			JUnitPlugin.log(ce);
 		}

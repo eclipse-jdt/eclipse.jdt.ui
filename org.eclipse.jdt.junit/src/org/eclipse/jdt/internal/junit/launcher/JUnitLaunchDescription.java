@@ -143,7 +143,7 @@ public class JUnitLaunchDescription {
 		return thing.equals(otherThing);
 	}
 
-	private IJavaProject getProject() {
+	public IJavaProject getProject() {
 		return fElement == null ? null : fElement.getJavaProject();
 	}
 
