@@ -96,11 +96,12 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	private Button	fExportClassFilesCheckbox;
 	private Button	fExportOutputFoldersCheckbox;
 	private Button	fExportJavaFilesCheckbox;	
+	private Button	fExportRefactoringsCheckbox;
+	private Link fRefactoringLink;
 	
 	private Combo	fDestinationNamesCombo;
 	private Button	fDestinationBrowseButton;
 	
-	private Button		fRefactoringsCheckbox;
 	private Button		fCompressCheckbox;
 	private Button		fOverwriteCheckbox;
 	private Button		fIncludeDirectoryEntriesCheckbox;
@@ -172,6 +173,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 
 		setControl(composite);
 		update();
+		fRefactoringLink.setEnabled(fExportRefactoringsCheckbox.getSelection());
 		giveFocusToDestination();
 		
 		Dialog.applyDialogFont(composite);
@@ -311,8 +313,8 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		}
 		
 		// options
-		if (fRefactoringsCheckbox != null)
-			fRefactoringsCheckbox.setSelection(fJarPackage.isRefactoringAware());
+		if (fExportRefactoringsCheckbox != null)
+			fExportRefactoringsCheckbox.setSelection(fJarPackage.isRefactoringAware());
 		fCompressCheckbox.setSelection(fJarPackage.isCompressed());
 		fIncludeDirectoryEntriesCheckbox.setSelection(fJarPackage.areDirectoryEntriesIncluded());
 		fOverwriteCheckbox.setSelection(fJarPackage.allowOverwrite());
@@ -372,8 +374,8 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		fJarPackage.setJarLocation(path);
 
 		// options
-		if (fRefactoringsCheckbox != null)
-			fJarPackage.setRefactoringAware(fRefactoringsCheckbox.getSelection());
+		if (fExportRefactoringsCheckbox != null)
+			fJarPackage.setRefactoringAware(fExportRefactoringsCheckbox.getSelection());
 		else
 			fJarPackage.setRefactoringAware(false);
 		fJarPackage.setCompress(fCompressCheckbox.getSelection());
@@ -563,27 +565,27 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		layout.numColumns= 2;
 		refactoringsGroup.setLayout(layout);
 
-		fRefactoringsCheckbox= new Button(refactoringsGroup, SWT.CHECK | SWT.LEFT);
-		fRefactoringsCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_refactorings_text);
-		fRefactoringsCheckbox.addListener(SWT.Selection, this);
+		fExportRefactoringsCheckbox= new Button(refactoringsGroup, SWT.CHECK | SWT.LEFT);
+		fExportRefactoringsCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_refactorings_text);
+		fExportRefactoringsCheckbox.addListener(SWT.Selection, this);
 
-		final Link link= new Link(refactoringsGroup, SWT.WRAP);
-		link.setText(JarPackagerMessages.JarPackageWizardPage_configure_label);
-		link.addSelectionListener(new SelectionAdapter() {
+		fRefactoringLink= new Link(refactoringsGroup, SWT.WRAP);
+		fRefactoringLink.setText(JarPackagerMessages.JarPackageWizardPage_configure_label);
+		fRefactoringLink.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(SelectionEvent event) {
 				openRefactoringDialog();
 			}
 
 		});
-		link.setToolTipText(JarPackagerMessages.JarPackageWizardPage_configure_tooltip);
+		fRefactoringLink.setToolTipText(JarPackagerMessages.JarPackageWizardPage_configure_tooltip);
 		GridData data= new GridData(GridData.BEGINNING | GridData.GRAB_HORIZONTAL);
-		link.setLayoutData(data);
+		fRefactoringLink.setLayoutData(data);
 
-		fRefactoringsCheckbox.addSelectionListener(new SelectionAdapter() {
+		fExportRefactoringsCheckbox.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(SelectionEvent event) {
-				link.setEnabled(fRefactoringsCheckbox.getSelection());
+				fRefactoringLink.setEnabled(fExportRefactoringsCheckbox.getSelection());
 			}
 		});
 	}
@@ -626,8 +628,8 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	 * Updates the enablement of this page's controls. Subclasses may extend.
 	 */
 	protected void updateWidgetEnablements() {
-		if (fRefactoringsCheckbox != null) {
-			final boolean selection= fRefactoringsCheckbox.getSelection();
+		if (fExportRefactoringsCheckbox != null) {
+			final boolean selection= fExportRefactoringsCheckbox.getSelection();
 			fIncludeDirectoryEntriesCheckbox.setEnabled(!selection);
 			if (selection) {
 				fIncludeDirectoryEntriesCheckbox.setSelection(true);
