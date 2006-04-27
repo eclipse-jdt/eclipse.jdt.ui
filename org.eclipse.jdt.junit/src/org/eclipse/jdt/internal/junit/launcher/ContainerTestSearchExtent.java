@@ -39,7 +39,7 @@ class ContainerTestSearchExtent implements ITestSearchExtent {
 	public IType[] find(ITestFinder finder) {
 		IJavaElement container = JavaCore.create(fHandle);
 		Set result = new HashSet();
-		finder.findTestsInContainer(container, result, fPm);
+		finder.findTestsInContainer(new Object[] { container }, result, fPm);
 		return (IType[]) result.toArray(new IType[result.size()]);
 	}
 }

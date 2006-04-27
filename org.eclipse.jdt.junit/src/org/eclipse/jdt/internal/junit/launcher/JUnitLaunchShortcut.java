@@ -42,13 +42,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
-
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
-
 
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
@@ -99,19 +98,19 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 						launch(mode, describeMethodLaunch( ((IMethod) element)));
 						return;
 					}
+					// launch a CU or type
+					launchType(element, mode);
 				}
-				// launch a CU or type
-				launchType(search, mode);
 			}
 		} catch (LaunchCancelledByUserException e) {
 			// OK, silently move on
 		}
 	}
 
-	protected void launchType(Object[] search, String mode) {
+	protected void launchType(IJavaElement search, String mode) {
 		IType[] types= null;
 		try {
-			types= TestSearchEngine.findTests(search);
+			types= TestSearchEngine.findTests(new Object[] { search });
 		} catch (InterruptedException e) {
 			JUnitPlugin.log(e);
 			return;
@@ -148,6 +147,22 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	public JUnitLaunchDescription describeContainerLaunch(IJavaElement container) {
 		JUnitLaunchDescription description= new JUnitLaunchDescription(container, getContainerLabel(container));
 		description.setContainer(container.getHandleIdentifier());
+		//guess test kind from java project: 
+		IJavaProject javaProject= container.getJavaProject();
+		if (javaProject != null) {
+			try {
+				IType testAnnotation= javaProject.findType("org.junit.Test"); //$NON-NLS-1$
+				if (testAnnotation != null) {
+					ArrayList kinds= TestKindRegistry.getDefault().getAllKinds();
+					if (kinds.size() >= 2) {
+						ITestKind jUnit4Kind= (ITestKind) kinds.get(1); //TODO: assumes JUnit4 is second
+						description.setTestKind((jUnit4Kind).getId());
+					}
+				}
+			} catch (JavaModelException e) {
+				// leave default
+			}
+		}
 		return description;
 	}
 

@@ -30,6 +30,8 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
+import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
+
 
 public class JUnit4TestFinder implements ITestFinder {
 	private static class Annotation {
@@ -88,18 +90,27 @@ public class JUnit4TestFinder implements ITestFinder {
 		}
 	}
 
-	public void findTestsInContainer(IJavaElement container, Set result, IProgressMonitor pm) {
+	public void findTestsInContainer(Object[] elements, Set result, IProgressMonitor pm) {
 		try {
-			if (container instanceof IJavaProject) {
-				IJavaProject project= (IJavaProject) container;
-				findTestsInProject(project, result);
-			} else if (container instanceof IPackageFragmentRoot) {
-				IPackageFragmentRoot root= (IPackageFragmentRoot) container;
-				findTestsInPackageFragmentRoot(root, result);
-			} else if (container instanceof IPackageFragment) {
-				IPackageFragment fragment= (IPackageFragment) container;
-				findTestsInPackageFragment(fragment, result);
-			}
+			for (int i= 0; i < elements.length; i++) {
+				Object container= TestSearchEngine.computeScope(elements[i]);
+				if (container instanceof IJavaProject) {
+					IJavaProject project= (IJavaProject) container;
+					findTestsInProject(project, result);
+				} else if (container instanceof IPackageFragmentRoot) {
+					IPackageFragmentRoot root= (IPackageFragmentRoot) container;
+					findTestsInPackageFragmentRoot(root, result);
+				} else if (container instanceof IPackageFragment) {
+					IPackageFragment fragment= (IPackageFragment) container;
+					findTestsInPackageFragment(fragment, result);
+				} else if (container instanceof ICompilationUnit) {
+					ICompilationUnit cu= (ICompilationUnit) container;
+					findTestsInCompilationUnit(cu, result);
+				} else if (container instanceof IType) {
+					IType type= (IType) container;
+					findTestsInType(type, result);
+				}
+			}			
 		} catch (JavaModelException e) {
 			// do nothing
 		}
@@ -125,13 +136,21 @@ public class JUnit4TestFinder implements ITestFinder {
 		ICompilationUnit[] compilationUnits= fragment.getCompilationUnits();
 		for (int k= 0; k < compilationUnits.length; k++) {
 			ICompilationUnit unit= compilationUnits[k];
-			IType[] types= unit.getAllTypes();
-			for (int l= 0; l < types.length; l++) {
-				IType type= types[l];
-				if (isTest(type))
-					result.add(type);
-			}
+			findTestsInCompilationUnit(unit, result);
 		}
+	}
+
+	private void findTestsInCompilationUnit(ICompilationUnit unit, Set result) throws JavaModelException {
+		IType[] types= unit.getAllTypes();
+		for (int l= 0; l < types.length; l++) {
+			IType type= types[l];
+			findTestsInType(type, result);
+		}
+	}
+
+	private void findTestsInType(IType type, Set result) throws JavaModelException {
+		if (isTest(type))
+			result.add(type);
 	}
 
 	public boolean isTest(IType type) throws JavaModelException {

@@ -73,6 +73,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -182,7 +184,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		fTestRadioButton.setLayoutData(gd); 
 		fTestRadioButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				if (fTestContainerRadioButton.getSelection()) //TODO: ???
+				if (fTestRadioButton.getSelection())
 					testModeChanged();
 			}
 		});
@@ -349,6 +351,11 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		fTestLoaderViewer.setSelection(new StructuredSelection(testKind));
 	}
 	
+	private TestKind getSelectedTestKind() {
+		IStructuredSelection selection= (IStructuredSelection) fTestLoaderViewer.getSelection();
+		return (TestKind) selection.getFirstElement();
+	}
+	
 	private void updateKeepRunning(ILaunchConfiguration config) {
 		boolean running= false;
 		try {
@@ -469,7 +476,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 			radioSetting[0]= fTestRadioButton.getSelection();
 			radioSetting[1]= fTestContainerRadioButton.getSelection();
 			
-			types= TestSearchEngine.findTests(getLaunchConfigurationDialog(), new Object[] {javaProject}); 
+			types= TestSearchEngine.findTests(getLaunchConfigurationDialog(), new Object[] {javaProject}, getSelectedTestKind()); 
 		} catch (InterruptedException e) {
 			setErrorMessage(e.getMessage());
 			return;
@@ -710,6 +717,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	 */
 	protected void initializeTestType(IJavaElement javaElement, ILaunchConfigurationWorkingCopy config) {
 		String name= ""; //$NON-NLS-1$
+		ITestKind testKind= null;
 		try {
 			// we only do a search for compilation units or class files or 
 			// or source references
@@ -722,7 +730,8 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 					return;
 				}
 				// Simply grab the first main type found in the searched element
-				name = types[0].getFullyQualifiedName('.');
+				name= JavaModelUtil.getFullyQualifiedName(types[0]);
+				testKind= TestKindRegistry.getDefault().getKind(types[0]);
 			}	
 		} catch (InterruptedException ie) {
 		} catch (InvocationTargetException ite) {
@@ -730,6 +739,8 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		if (name == null)
 			name= ""; //$NON-NLS-1$
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, name);
+		if (testKind != null && ! testKind.isNull())
+			config.setAttribute(JUnitBaseLaunchConfiguration.TEST_KIND_ATTR, testKind.getId());
 		initializeName(config, name);
 	}
 	

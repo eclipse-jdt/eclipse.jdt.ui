@@ -11,23 +11,21 @@
 package org.eclipse.jdt.internal.junit.launcher;
 
  
-import java.lang.reflect.InvocationTargetException;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.ui.dialogs.TwoPaneElementSelector;
+
+import org.eclipse.jdt.core.IType;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 /**
  * A dialog to select a test class or a test suite from a list of types.
  */
 public class TestSelectionDialog extends TwoPaneElementSelector {
 
-	private IJavaProject fProject;
-	private IType[] fTypes;
+	private final IType[] fTypes;
 	
 	private static class PackageRenderer extends JavaElementLabelProvider {
 		public PackageRenderer() {
@@ -41,17 +39,6 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 		public String getText(Object element) {
 			return super.getText(((IType)element).getPackageFragment());
 		}
-	}
-	
-	/**
-	 * Constructor.
-	 */
-	public TestSelectionDialog(Shell shell, IJavaProject project)
-	{
-		super(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS), 
-			new PackageRenderer());
-
-		fProject= project;
 	}
 	
 	public TestSelectionDialog(Shell shell, IType[] types) {
@@ -72,18 +59,6 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 	 * @see Window#open()
 	 */
 	public int open() {
-		if (fTypes == null) {
-			fTypes= new IType[0];
-			try {
-				fTypes= TestSearchEngine.findTests(new Object[]{fProject});
-			} catch (InterruptedException e) {
-				return CANCEL;
-			} catch (InvocationTargetException e) {
-				JUnitPlugin.log(e.getTargetException());
-				return CANCEL;
-			}
-		}
-		
 		setElements(fTypes);
 		return super.open();
 	}

@@ -18,20 +18,18 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 public class JUnit3TestFinder implements ITestFinder {
-	public void findTestsInContainer(IJavaElement container, Set result, IProgressMonitor pm) {
+	public void findTestsInContainer(Object[] elements, Set result, IProgressMonitor pm) {
 		try {
-			TestSearchEngine.doFindTests(new Object[] { container }, result, pm);
+			TestSearchEngine.doFindJUnit3Tests(elements, result, pm);
 		} catch (InterruptedException e) {
 		}
 	}

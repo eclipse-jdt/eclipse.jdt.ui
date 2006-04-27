@@ -17,7 +17,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -27,7 +26,7 @@ import org.eclipse.jdt.core.JavaModelException;
  */
 public interface ITestFinder {
 	ITestFinder NULL= new ITestFinder() {
-		public void findTestsInContainer(IJavaElement container, Set result, IProgressMonitor pm) {
+		public void findTestsInContainer(Object[] elements, Set result, IProgressMonitor pm) {
 			// do nothing
 		}
 
@@ -36,7 +35,12 @@ public interface ITestFinder {
 		}
 	};
 
-	public abstract void findTestsInContainer(IJavaElement container, Set result, IProgressMonitor pm);
+	/**
+	 * @param elements elements to search for tests
+	 * @param result a Set to add ITypes
+	 * @param pm
+	 */
+	public abstract void findTestsInContainer(Object[] elements, Set/*<IType>*/ result, IProgressMonitor pm);
 
 	public abstract boolean isTest(IType type) throws JavaModelException;
 }

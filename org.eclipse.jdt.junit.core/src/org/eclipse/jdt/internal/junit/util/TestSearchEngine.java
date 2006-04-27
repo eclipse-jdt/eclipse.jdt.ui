@@ -53,6 +53,8 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
+import org.eclipse.jdt.internal.junit.launcher.ITestKind;
+import org.eclipse.jdt.internal.junit.launcher.TestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
@@ -96,11 +98,8 @@ public class TestSearchEngine {
 	}
 
 	public static boolean isTestOrTestSuite(IType declaringType) throws JavaModelException {
-		return isTestOrTestSuite(declaringType, TestKindRegistry.getDefault());
-	}
-
-	public static boolean isTestOrTestSuite(IType declaringType, TestKindRegistry registry) {
-		return !registry.getKind(declaringType).isNull();
+		//TODO: finds JUnit3 and JUnit4 tests, although some of the callers only search for JUnit3
+		return !TestKindRegistry.getDefault().getKind(declaringType).isNull();
 	}
 
 	private List searchMethod(IProgressMonitor pm, final IJavaSearchScope scope) throws CoreException {
@@ -119,13 +118,14 @@ public class TestSearchEngine {
 		return v;
 	}
 
-	public static IType[] findTests(IRunnableContext context, final Object[] elements) throws InvocationTargetException, InterruptedException {
+	public static IType[] findTests(IRunnableContext context, final Object[] elements, final ITestKind testKind) throws InvocationTargetException, InterruptedException {
 		final Set result= new HashSet();
 
 		if (elements.length > 0) {
 			IRunnableWithProgress runnable= new IRunnableWithProgress() {
 				public void run(IProgressMonitor pm) throws InterruptedException {
-					doFindTests(elements, result, pm);
+					testKind.createFinder().findTestsInContainer(elements, result, pm);
+//					doFindJUnit3Tests(elements, result, pm);
 				}
 			};
 			context.run(true, true, runnable);
@@ -139,7 +139,18 @@ public class TestSearchEngine {
 		if (elements.length > 0) {
 			IRunnableWithProgress runnable= new IRunnableWithProgress() {
 				public void run(IProgressMonitor pm) throws InterruptedException {
-					doFindTests(elements, result, pm);
+					ArrayList/*<TestKind>*/ kinds= TestKindRegistry.getDefault().getAllKinds();
+					int kindCount= kinds.size();
+					pm.beginTask("", kindCount); //$NON-NLS-1$
+					for (int i= 0; i < kindCount; i++) {
+						TestKind kind= (TestKind) kinds.get(i);
+						kind.createFinder().findTestsInContainer(elements, result, new SubProgressMonitor(pm, 1));
+						if (! result.isEmpty()) {
+							break;
+						}
+					}
+					pm.done();
+//					doFindJUnit3Tests(elements, result, pm);
 				}
 			};
 			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(runnable);
@@ -147,7 +158,7 @@ public class TestSearchEngine {
 		return (IType[]) result.toArray(new IType[result.size()]);
 	}
 
-	public static void doFindTests(Object[] elements, Set result, IProgressMonitor pm) throws InterruptedException {
+	public static void doFindJUnit3Tests(Object[] elements, Set result, IProgressMonitor pm) throws InterruptedException {
 		int nElements= elements.length;
 		pm.beginTask(JUnitMessages.TestSearchEngine_message_searching, nElements);
 		try {
@@ -174,7 +185,7 @@ public class TestSearchEngine {
 				if (element instanceof IType) {
 					IType type= (IType) element;
 					if (isTestOrTestSuite(type)) {
-						result.add(element);
+						result.add(type);
 						return;
 					}
 				}
@@ -255,7 +266,7 @@ public class TestSearchEngine {
 		return result;
 	}
 
-	private static Object computeScope(Object element) throws JavaModelException {
+	public static Object computeScope(Object element) throws JavaModelException {
 		if (element instanceof IFileEditorInput)
 			element= ((IFileEditorInput) element).getFile();
 		if (element instanceof IResource)
