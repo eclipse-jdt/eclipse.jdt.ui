@@ -57,13 +57,13 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 public class AddSelectedLibraryToBuildpathAction extends Action implements ISelectionChangedListener {
 
 	private final IWorkbenchSite fSite;
-	private final List fSelectedElements; //IFile
+	private IFile[] fSelectedElements;
 
 	public AddSelectedLibraryToBuildpathAction(IWorkbenchSite site) {
 		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_label, JavaPluginImages.DESC_OBJS_EXTJAR);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_tooltip);
 		fSite= site;
-		fSelectedElements= new ArrayList();
+		fSelectedElements= null;
 	}
 	
 	/**
@@ -71,11 +71,16 @@ public class AddSelectedLibraryToBuildpathAction extends Action implements ISele
 	 */
 	public void run() {
 		try {
+			final IFile[] files= fSelectedElements;
+			if (files == null) {
+				return;
+			}
+			
 			final IRunnableWithProgress runnable= new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
-				        IJavaProject project= JavaCore.create(((IFile)fSelectedElements.get(0)).getProject());
-				        List result= addLibraryEntries(fSelectedElements, project, monitor);
+				        IJavaProject project= JavaCore.create(files[0].getProject());
+				        List result= addLibraryEntries(files, project, monitor);
 						selectAndReveal(new StructuredSelection(result));
 					} catch (CoreException e) {
 						throw new InvocationTargetException(e);
@@ -93,12 +98,12 @@ public class AddSelectedLibraryToBuildpathAction extends Action implements ISele
 		}
 	}
 	
-	private List addLibraryEntries(List resources, IJavaProject project, IProgressMonitor monitor) throws CoreException {
+	private List addLibraryEntries(IFile[] resources, IJavaProject project, IProgressMonitor monitor) throws CoreException {
 		List addedEntries= new ArrayList();
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 4); 
-			for (int i= 0; i < resources.size(); i++) {
-				IResource res= (IResource) resources.get(i);
+			for (int i= 0; i < resources.length; i++) {
+				IResource res= resources[i];
 				addedEntries.add(new CPListElement(project, IClasspathEntry.CPE_LIBRARY, res.getFullPath(), res));
 			}
 			monitor.worked(1);
@@ -108,8 +113,8 @@ public class AddSelectedLibraryToBuildpathAction extends Action implements ISele
 			ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(monitor, 1));
 
 			List result= new ArrayList(addedEntries.size());
-			for (int i= 0; i < resources.size(); i++) {
-				IResource res= (IResource) resources.get(i);
+			for (int i= 0; i < resources.length; i++) {
+				IResource res= resources[i];
 				IJavaElement elem= project.getPackageFragmentRoot(res);
 				if (elem != null) {
 					result.add(elem);
@@ -136,31 +141,37 @@ public class AddSelectedLibraryToBuildpathAction extends Action implements ISele
 	}
 
 	private boolean canHandle(IStructuredSelection elements) {
+		fSelectedElements= getSelectedResources(elements);
+		return fSelectedElements != null;
+	}
+	
+	private IFile[] getSelectedResources(IStructuredSelection elements) {
 		if (elements.size() == 0)
-			return false;
+			return null;
 		
+		ArrayList res= new ArrayList();
 		try {
-			fSelectedElements.clear();
 			for (Iterator iter= elements.iterator(); iter.hasNext();) {
 				Object element= iter.next();
-				fSelectedElements.add(element);
 				if (element instanceof IFile) {
 					IFile file= (IFile)element;
 					IJavaProject project= JavaCore.create(file.getProject());
 					if (project == null)
-						return false;
+						return null;
 					
 					if (!ClasspathModifier.isArchive(file, project))
-						return false;
+						return null;
 				} else {
-					return false;
+					return null;
 				}
+				res.add(element);
 			}
-        return true;
+			return (IFile[]) res.toArray(new IFile[res.size()]);
 		} catch (CoreException e) {
 		}
-		return false;
+		return null;
 	}
+	
 	
 	private void showExceptionDialog(CoreException exception) {
 		showError(exception, fSite.getShell(), NewWizardMessages.AddSelectedLibraryToBuildpathAction_ErrorTitle, exception.getMessage());
