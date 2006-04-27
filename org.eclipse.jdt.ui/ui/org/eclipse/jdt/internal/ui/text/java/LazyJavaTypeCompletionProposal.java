@@ -80,27 +80,48 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeReplacementString()
 	 */
 	protected String computeReplacementString() {
+		String replacement= super.computeReplacementString();
+
+		// no import mangling from within the import section
 		if (isImportCompletion())
-			return super.computeReplacementString();
+	        return replacement;
 		
+		// always use the simple name for text references to types
 		// TODO fix
 		 if (fProposal.getKind() == CompletionProposal.TYPE_REF &&  fInvocationContext.getCoreContext().isInJavadocText())
 			 return getSimpleTypeName();
 		
 		String qualifiedTypeName= getQualifiedTypeName();
-		if (qualifiedTypeName.indexOf('.') == -1) {
-			return qualifiedTypeName; // not a qualified type name, no need to import
+ 		if (qualifiedTypeName.indexOf('.') == -1) {
+ 			// default package - no imports needed 
+ 			return qualifiedTypeName;
+ 		}
+ 		
+ 		IDocument document= fInvocationContext.getDocument();
+		if (document != null) {
+			String prefix= getPrefix(document, getReplacementOffset() + getReplacementLength());
+			if (prefix.indexOf('.') != -1 && qualifiedTypeName.toLowerCase().startsWith(prefix.toLowerCase()))
+				return qualifiedTypeName;
 		}
-		 
+		
+		if (replacement.indexOf('.') == -1) {
+			return replacement;
+		}
+		
+		// add imports for normal types
 		fImportRewrite= createImportRewrite();
 		if (fImportRewrite != null) {
 			return fImportRewrite.addImport(qualifiedTypeName, fImportContext);
 		}
 		
+		// fall back for the case we don't have an import rewrite (see allowAddingImports)
+		
+		// no imports for implicit imports
 		if (fCompilationUnit != null && JavaModelUtil.isImplicitImport(Signature.getQualifier(qualifiedTypeName), fCompilationUnit)) {
 			return Signature.getSimpleName(qualifiedTypeName);
 		}
 		
+		// otherwise, use the fqn
 		return qualifiedTypeName;
 	}
 

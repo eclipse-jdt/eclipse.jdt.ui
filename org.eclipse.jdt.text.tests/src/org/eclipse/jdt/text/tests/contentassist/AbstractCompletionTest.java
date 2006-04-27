@@ -103,6 +103,12 @@ public class AbstractCompletionTest extends TestCase {
 		options.put(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.DISABLED);
 		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
 	}
+	
+	protected void setCoreOption(String key, String value) {
+		Hashtable options= JavaCore.getOptions();
+		options.put(key, value);
+		JavaCore.setOptions(options);
+	}
 
 	protected IPreferenceStore getJDTUIPrefs() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();

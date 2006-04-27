@@ -70,10 +70,16 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 		assertTypeJavadocProposal(" * @see Str|", "String ", " * @see String|");
 	}
 	
+	public void testSeeImportedQualifiedType() throws Exception {
+		addImport("java.util.List");
+		expectImport("java.util.List");
+		assertTypeJavadocProposal(" * @see java.util.Lis|", "List ", " * @see java.util.List|");
+	}
+	
 	public void testSeeImportedType() throws Exception {
 		addImport("java.util.List");
 		expectImport("java.util.List");
-		assertTypeJavadocProposal(" * @see Lis|", "List ", " * @see java.util.List|");
+		assertTypeJavadocProposal(" * @see Lis|", "List ", " * @see List|");
 	}
 	
 	public void testSeeImportedTypeImportsOn() throws Exception {

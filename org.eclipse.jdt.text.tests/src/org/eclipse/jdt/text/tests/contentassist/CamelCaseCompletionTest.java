@@ -44,14 +44,6 @@ public class CamelCaseCompletionTest extends AbstractCompletionTest {
 		options.put(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
 	}
 
-	public void testType() throws Exception {
-		if (true) {
-			System.out.println("disabled unreliable camel case test for now"); // TODO reenable
-			return;
-		}
-		assertMethodBodyProposal("SB|", "StringBuffer ", "StringBuffer|");
-	}
-	
 	public void testMethod() throws Exception {
 		addMembers("void methodCallWithParams(int par) {}");
 		assertMethodBodyProposal("this.mCW|", "methodCallWith", "this.methodCallWithParams(|)");

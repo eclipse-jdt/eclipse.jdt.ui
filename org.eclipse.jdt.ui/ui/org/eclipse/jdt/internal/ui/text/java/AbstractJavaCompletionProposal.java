@@ -646,7 +646,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	}
 
 	/**
-	 * Returns the text in <code>document</code> from {@link #getReplacementOffset() } to
+	 * Returns the text in <code>document</code> from {@link #getReplacementOffset()} to
 	 * <code>offset</code>. Returns the empty string if <code>offset</code> is before the
 	 * replacement offset or if an exception occurs when accessing the document.
 	 * 
