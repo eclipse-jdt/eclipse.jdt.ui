@@ -157,13 +157,18 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 							ICompilationUnit cu= getCompilationUnit(marker);
 							
 							if (cu != null) {
-								IProblemLocation location= CorrectionMarkerResolutionGenerator.createFromMarker(marker, cu);
-								if (location != null) {
-									if (!problemLocations.containsKey(cu.getPrimary())) {
-										problemLocations.put(cu.getPrimary(), new ArrayList());
+								try {
+									IEditorInput input= EditorUtility.getEditorInput(cu);
+									IProblemLocation location= findProblemLocation(input, marker);
+									if (location != null) {
+										if (!problemLocations.containsKey(cu.getPrimary())) {
+											problemLocations.put(cu.getPrimary(), new ArrayList());
+										}
+										List l= (List)problemLocations.get(cu.getPrimary());
+										l.add(location);
 									}
-									List l= (List)problemLocations.get(cu.getPrimary());
-									l.add(location);
+								} catch (JavaModelException e) {
+									JavaPlugin.log(e);
 								}
 							}
 						}
@@ -330,12 +335,15 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 						if (!marker.equals(fMarker)) {
 							ICompilationUnit cu= getCompilationUnit(marker);
 							if (cu != null) {
-								IProblemLocation location= createFromMarker(marker, cu);
 								try {
-									IInvocationContext context= new AssistContext(cu,  location.getOffset(), location.getLength());
-									CompilationUnit root= context.getASTRoot();
-									if (cleanUp.canFix(root, location)) {
-										result.add(marker);
+									IEditorInput input= EditorUtility.getEditorInput(cu);
+									IProblemLocation location= findProblemLocation(input, marker);
+									if (location != null) {
+										IInvocationContext context= new AssistContext(cu,  location.getOffset(), location.getLength());
+										CompilationUnit root= context.getASTRoot();
+										if (cleanUp.canFix(root, location)) {
+											result.add(marker);
+										}
 									}
 								} catch (CoreException e) {
 									JavaPlugin.log(e);
