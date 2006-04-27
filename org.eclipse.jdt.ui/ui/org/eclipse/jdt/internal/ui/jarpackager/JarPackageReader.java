@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -25,6 +26,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -33,6 +36,12 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.util.Assert;
+
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
+import org.eclipse.ltk.core.refactoring.history.IRefactoringHistoryService;
+import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -155,9 +164,48 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	}
 
 	private void xmlReadRefactoring(JarPackageData jarPackage, Element element) throws java.io.IOException {
-		if (element.getNodeName().equals("refactoring")) { //$NON-NLS-1$
+		if (element.getNodeName().equals("storedRefactorings")) { //$NON-NLS-1$
 			jarPackage.setExportStructuralOnly(getBooleanAttribute(element, "structuralOnly", jarPackage.isExportStructuralOnly())); //$NON-NLS-1$
 			jarPackage.setDeprecationAware(getBooleanAttribute(element, "deprecationInfo", jarPackage.isDeprecationAware())); //$NON-NLS-1$
+			List elements= new ArrayList();
+			int count= 1;
+			String value= element.getAttribute("project" + count); //$NON-NLS-1$
+			while (value != null && !"".equals(value)) { //$NON-NLS-1$
+				final IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(value);
+				if (project.exists())
+					elements.add(project);
+				count++;
+				value= element.getAttribute("project" + count); //$NON-NLS-1$
+			}
+			jarPackage.setRefactoringProjects((IProject[]) elements.toArray(new IProject[elements.size()]));
+			elements.clear();
+			count= 1;
+			IRefactoringHistoryService service= RefactoringCore.getHistoryService();
+			try {
+				service.connect();
+				value= element.getAttribute("refactoring" + count); //$NON-NLS-1$
+				while (value != null && !"".equals(value)) { //$NON-NLS-1$
+					final ByteArrayInputStream stream= new ByteArrayInputStream(value.getBytes("UTF-8")); //$NON-NLS-1$
+					try {
+						final RefactoringHistory history= service.readRefactoringHistory(stream, RefactoringDescriptor.NONE);
+						if (history != null) {
+							final RefactoringDescriptorProxy[] descriptors= history.getDescriptors();
+							if (descriptors.length > 0) {
+								for (int index= 0; index < descriptors.length; index++) {
+									elements.add(descriptors[index]);
+								}
+							}
+						}
+					} catch (CoreException exception) {
+						JavaPlugin.log(exception);
+					}
+					count++;
+					value= element.getAttribute("refactoring" + count); //$NON-NLS-1$
+				}
+			} finally {
+				service.disconnect();
+			}
+			jarPackage.setRefactoringDescriptors((RefactoringDescriptorProxy[]) elements.toArray(new RefactoringDescriptorProxy[elements.size()]));
 		}
 	}
 

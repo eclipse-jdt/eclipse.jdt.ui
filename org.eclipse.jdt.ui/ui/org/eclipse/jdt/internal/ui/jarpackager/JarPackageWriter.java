@@ -11,8 +11,10 @@
 package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -28,9 +30,15 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.util.Assert;
+
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
+import org.eclipse.ltk.core.refactoring.history.IRefactoringHistoryService;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -136,10 +144,36 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 	}
 
 	private void xmlWriteRefactoring(JarPackageData jarPackage, Document document, Element xmlJarDesc) throws DOMException {
-		Element refactoring= document.createElement("refactoring"); //$NON-NLS-1$
+		Element refactoring= document.createElement("storedRefactorings"); //$NON-NLS-1$
 		xmlJarDesc.appendChild(refactoring);
 		refactoring.setAttribute("structuralOnly", "" + jarPackage.isExportStructuralOnly()); //$NON-NLS-1$ //$NON-NLS-2$
 		refactoring.setAttribute("deprecationInfo", "" + jarPackage.isDeprecationAware()); //$NON-NLS-1$ //$NON-NLS-2$
+		final IProject[] projects= jarPackage.getRefactoringProjects();
+		if (projects != null && projects.length > 0) {
+			for (int index= 0; index < projects.length; index++)
+				refactoring.setAttribute("project" + (index + 1), projects[index].getName()); //$NON-NLS-1$
+		}
+		final RefactoringDescriptorProxy[] proxies= jarPackage.getRefactoringDescriptors();
+		if (proxies != null && proxies.length > 0) {
+			int count= 1;
+			IRefactoringHistoryService service= RefactoringCore.getHistoryService();
+			try {
+				service.connect();
+				for (int index= 0; index < proxies.length; index++, count++) {
+					try {
+						final ByteArrayOutputStream stream= new ByteArrayOutputStream();
+						service.writeRefactoringDescriptors(new RefactoringDescriptorProxy[] { proxies[index]}, stream, RefactoringDescriptor.NONE, true, null);
+						refactoring.setAttribute("refactoring" + count, stream.toString("UTF-8")); //$NON-NLS-1$ //$NON-NLS-2$
+					} catch (CoreException exception) {
+						JavaPlugin.log(exception);
+					} catch (UnsupportedEncodingException exception) {
+						Assert.isTrue(false);
+					}
+				}
+			} finally {
+				service.disconnect();
+			}
+		}
 	}
 
 	private void xmlWriteManifest(JarPackageData jarPackage, Document document, Element xmlJarDesc) throws DOMException {
