@@ -68,7 +68,7 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 	
 	private static final int WARM_UP_RUNS= 10;
 	
-	private static final int MEASURED_RUNS= 500;
+	private static final int MEASURED_RUNS= 50;
 	
 	private static final String PATH= "/Eclipse SWT/win32/org/eclipse/swt/graphics/";
 	
@@ -91,7 +91,13 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 	public static Test suite() {
 		// ensure sequence
 		TestSuite suite= new TestSuite(THIS.getName());
-		suite.addTest(new OpenJavaEditorTest("testOpenFirstEditor"));
+
+		/*
+		 * Petty useless since it only does one run and hence the
+		 * measured values have a very big dispersion.
+		 */
+//		suite.addTest(new OpenTextEditorTest("testOpenFirstEditor"));
+
 		suite.addTest(new OpenJavaEditorTest("testOpenJavaEditor1"));
 		suite.addTest(new OpenJavaEditorTest("testOpenJavaEditor2"));
 		suite.addTest(new OpenJavaEditorTest("testOpenEditor3"));
