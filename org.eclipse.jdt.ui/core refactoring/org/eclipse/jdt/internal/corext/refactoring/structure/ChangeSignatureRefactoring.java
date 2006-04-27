@@ -1176,7 +1176,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 					if (info.isDeleted())
 						deleted.add(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_deleted_parameter_pattern, new String[] { info.getOldTypeName(), info.getOldName()}));
 					else if (info.isAdded())
-						added.add(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_added_parameter_pattern, new String[] { info.getOldTypeName(), info.getNewName()}));
+						added.add(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_added_parameter_pattern, new String[] { info.getNewTypeName(), info.getNewName()}));
 					else if (info.isRenamed() || info.isTypeNameChanged() || info.isVarargChanged())
 						changed.add(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_changed_parameter_pattern, new String[] { info.getOldTypeName(), info.getOldName()}));
 				}
