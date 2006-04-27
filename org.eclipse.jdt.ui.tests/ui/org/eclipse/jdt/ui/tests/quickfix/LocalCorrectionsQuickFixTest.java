@@ -5769,4 +5769,47 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 	
+	public void testUnusedCode() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public String getName() {\n");
+		buf.append("        try{\n");
+		buf.append("            return \"fred\";\n");
+		buf.append("        }\n");
+		buf.append("        catch (Exception e){\n");
+		buf.append("            return e.getLocalizedMessage();\n");
+		buf.append("        }\n");
+		buf.append("        System.err.print(\"wow\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public String getName() {\n");
+		buf.append("        try{\n");
+		buf.append("            return \"fred\";\n");
+		buf.append("        }\n");
+		buf.append("        catch (Exception e){\n");
+		buf.append("            return e.getLocalizedMessage();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	
+	
 }

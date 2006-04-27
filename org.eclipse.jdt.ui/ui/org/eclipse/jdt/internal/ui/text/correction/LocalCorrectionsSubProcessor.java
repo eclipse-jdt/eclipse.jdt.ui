@@ -777,9 +777,10 @@ public class LocalCorrectionsSubProcessor {
 		if (selectedNode == null) {
 			return;
 		}
-		if (selectedNode instanceof ExpressionStatement) {
+		if (selectedNode.getParent() instanceof ExpressionStatement) {
 			selectedNode= selectedNode.getParent();
 		}
+		
 		if (selectedNode instanceof Statement) {
 			ASTRewrite rewrite= ASTRewrite.create(selectedNode.getAST());
 			rewrite.remove(selectedNode, null);
