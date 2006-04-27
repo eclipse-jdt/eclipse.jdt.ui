@@ -99,6 +99,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
@@ -352,7 +353,7 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 	 * @return the intermediary class name or the empty string
 	 */
 	public String getIntermediaryClassName() {
-		return fIntermediaryClass != null ? fIntermediaryClass.getFullyQualifiedName() : ""; //$NON-NLS-1$
+		return fIntermediaryClass != null ? JavaModelUtil.getFullyQualifiedName(fIntermediaryClass) : ""; //$NON-NLS-1$
 	}
 
 	// ********** CONDITION CHECKING **********
@@ -393,15 +394,17 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 
 				IMethodBinding targetMethodBinding= null;
 
-				if (selectionNode.getNodeType() == ASTNode.METHOD_INVOCATION)
+				if (selectionNode.getNodeType() == ASTNode.METHOD_INVOCATION) {
 					targetMethodBinding= ((MethodInvocation) selectionNode).resolveMethodBinding();
-				else if (selectionNode.getNodeType() == ASTNode.METHOD_DECLARATION)
+				} else if (selectionNode.getNodeType() == ASTNode.METHOD_DECLARATION) {
 					targetMethodBinding= ((MethodDeclaration) selectionNode).resolveBinding();
-				else if (selectionNode.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION)
+				} else if (selectionNode.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION) {
 					// Allow invocation on super methods calls. makes sense as other
 					// calls or even only the declaration can be updated.
 					targetMethodBinding= ((SuperMethodInvocation) selectionNode).resolveMethodBinding();
-
+				} else {
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_not_available_on_this_selection);
+				}
 				fTargetMethodBinding= targetMethodBinding.getMethodDeclaration(); // resolve generics
 				fTargetMethod= (IMethod) fTargetMethodBinding.getJavaElement();
 
@@ -830,7 +833,7 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 		// method comment
 		ICompilationUnit targetCU= imRewrite.getCu();
 		if (StubUtility.doAddComments(targetCU.getJavaProject())) {
-			String comment= CodeGeneration.getMethodComment(targetCU, fIntermediaryClass.getFullyQualifiedName('.'), intermediary, null, StubUtility.getLineDelimiterUsed(targetCU));
+			String comment= CodeGeneration.getMethodComment(targetCU, getIntermediaryClassName(), intermediary, null, StubUtility.getLineDelimiterUsed(targetCU));
 			if (comment != null) {
 				Javadoc javadoc= (Javadoc) imRewrite.getASTRewrite().createStringPlaceholder(comment, ASTNode.JAVADOC);
 				intermediary.setJavadoc(javadoc);
