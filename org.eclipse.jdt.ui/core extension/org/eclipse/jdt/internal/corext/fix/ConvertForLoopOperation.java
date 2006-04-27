@@ -275,8 +275,11 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 			FieldAccess fieldAccess= (FieldAccess)expression;
 			return isNameDifferentThanInferredArray(fieldAccess.getName());
 		} else if (expression instanceof MethodInvocation){
-			MethodInvocation methodCall= (MethodInvocation)expression;
-			return isNameDifferentThanInferredArray(methodCall.getName());
+			//Be more conservative here, just because it's the same name
+			//does not imply that it is the same array. The method can
+			//return different arrays. It could even be a method call on
+			//a different object. https://bugs.eclipse.org/bugs/show_bug.cgi?id=138353
+			return true;
 		}else {
 			return true; //conservative approach: if it doesn't fall within the above cases
 						 // I return that it's an access to a different Array (causing the precondition

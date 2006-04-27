@@ -503,32 +503,9 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		List proposals= fetchConvertingProposal(buf, cu);
 
-		assertNotNull(fConvertLoopProposal);
+		assertNull(fConvertLoopProposal);
 
 		assertCorrectLabels(proposals);
-
-		        String preview1 = getPreviewContent(fConvertLoopProposal);
-		        
-		
-		        buf = new StringBuffer();
-		        buf.append("package test1;\n");
-		        buf.append("class Weirdy{}\n");
-		        buf.append("public class A {\n");
-		        buf.append("	private Weirdy[] weirdies;\n");
-		        buf.append("	private Weirdy[] getArray(){\n");
-		        buf.append("		return weirdies;\n");
-		        buf.append("	}\n");
-		        buf.append("    public void foo(){\n");
-		        buf.append("		for (Weirdy p : getArray()) {\n");
-		        buf.append("			System.out.println();\n");
-			    buf.append("		    if (p != null){\n");
-			    buf.append("				System.out.println(p);\n");
-			    buf.append("	    	}\n");
-			    buf.append("	    }\n");
-		        buf.append("    }\n");
-		        buf.append("}\n");
-		        String expected = buf.toString();
-		        assertEqualString(preview1, expected);
 	}
 
 	public void testMatrix() throws Exception {
@@ -1129,6 +1106,60 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
+	}
+	
+	public void testBug138353_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    private class Bar {\n");
+		buf.append("        public int[] getBar() {\n");
+		buf.append("            return null;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Bar bar1= null;\n");
+		buf.append("        Bar bar2= null;\n");
+		buf.append("        for (int i = 0; i < bar1.getBar().length; i++) {\n");
+		buf.append("            System.out.println(bar1.getBar()[i]);\n");
+		buf.append("            System.out.println(bar2.getBar()[i]);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		List proposals= fetchConvertingProposal(buf, cu);
+
+		assertNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+	}
+	
+	public void testBug138353_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    private class Bar {\n");
+		buf.append("        public int[] getBar() {\n");
+		buf.append("            return null;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Bar bar1= null;\n");
+		buf.append("        for (int i = 0; i < bar1.getBar().length; i++) {\n");
+		buf.append("            System.out.println(bar1.getBar()[i]);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		List proposals= fetchConvertingProposal(buf, cu);
+
+		assertNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
 	}
 	
 	private List fetchConvertingProposal(StringBuffer buf, ICompilationUnit cu) throws Exception {
