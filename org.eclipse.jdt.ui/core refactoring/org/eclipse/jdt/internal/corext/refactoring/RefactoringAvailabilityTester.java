@@ -405,6 +405,8 @@ public final class RefactoringAvailabilityTester {
 	public static boolean isExtractSupertypeAvailable(final IStructuredSelection selection) throws JavaModelException {
 		if (!selection.isEmpty()) {
 			if (selection.size() == 1) {
+				if (selection.getFirstElement() instanceof ICompilationUnit)
+					return true; // Do not force opening
 				final IType type= getSingleSelectedType(selection);
 				if (type != null)
 					return Checks.isAvailable(type) && isExtractSupertypeAvailable(new IType[] { type});
@@ -862,6 +864,8 @@ public final class RefactoringAvailabilityTester {
 	public static boolean isPullUpAvailable(final IStructuredSelection selection) throws JavaModelException {
 		if (!selection.isEmpty()) {
 			if (selection.size() == 1) {
+				if (selection.getFirstElement() instanceof ICompilationUnit)
+					return true; // Do not force opening
 				final IType type= getSingleSelectedType(selection);
 				if (type != null)
 					return Checks.isAvailable(type) && isPullUpAvailable(new IType[] { type});
@@ -926,6 +930,8 @@ public final class RefactoringAvailabilityTester {
 	public static boolean isPushDownAvailable(final IStructuredSelection selection) throws JavaModelException {
 		if (!selection.isEmpty()) {
 			if (selection.size() == 1) {
+				if (selection.getFirstElement() instanceof ICompilationUnit)
+					return true; // Do not force opening
 				final IType type= getSingleSelectedType(selection);
 				if (type != null)
 					return isPushDownAvailable(new IType[] { type});

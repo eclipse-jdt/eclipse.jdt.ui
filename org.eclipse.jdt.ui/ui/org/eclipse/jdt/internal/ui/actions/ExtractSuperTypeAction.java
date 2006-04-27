@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import java.io.CharConversionException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -169,9 +170,10 @@ public class ExtractSuperTypeAction extends SelectionDispatchAction {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isExtractSupertypeAvailable(selection));
 		} catch (JavaModelException exception) {
-			if (JavaModelUtil.isExceptionToBeLogged(exception))
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			if (!(exception.getException() instanceof CharConversionException) && JavaModelUtil.isExceptionToBeLogged(exception))
 				JavaPlugin.log(exception);
-			setEnabled(false);
+			setEnabled(false);//no UI - happens on selection changes
 		}
 	}
 
