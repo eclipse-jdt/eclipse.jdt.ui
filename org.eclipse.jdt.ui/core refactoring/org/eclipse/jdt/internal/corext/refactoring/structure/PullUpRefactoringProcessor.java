@@ -54,7 +54,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeParameter;
@@ -327,10 +326,13 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	/** The methods to be declared abstract */
 	protected IMethod[] fAbstractMethods= new IMethod[0];
 
+	/** The cached supertype hierarchy of the declaring type */
 	private ITypeHierarchy fCachedDeclaringSuperTypeHierarchy;
 
+	/** The cached type hierarchy of the destination type */
 	private ITypeHierarchy fCachedDestinationTypeHierarchy;
 
+	/** The cached set of skipped supertypes */
 	private Set fCachedSkippedSuperTypes;
 
 	/** The map of compilation units to compilation unit rewrites */
@@ -354,18 +356,32 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	 * @param settings
 	 *            the code generation settings, or <code>null</code> if
 	 *            invoked by scripting
-	 * @param layer
-	 *            <code>true</code> to create a working copy layer on the
-	 *            input, <code>false</code> otherwise
 	 */
-	public PullUpRefactoringProcessor(final IMember[] members, final CodeGenerationSettings settings, final boolean layer) {
+	public PullUpRefactoringProcessor(final IMember[] members, final CodeGenerationSettings settings) {
+		this(members, settings, false);
+	}
+
+	/**
+	 * Creates a new pull up refactoring processor.
+	 * 
+	 * @param members
+	 *            the members to pull up, or <code>null</code> if invoked by
+	 *            scripting
+	 * @param settings
+	 *            the code generation settings, or <code>null</code> if
+	 *            invoked by scripting
+	 * @param layer
+	 *            <code>true</code> to create a working copy layer,
+	 *            <code>false</code> otherwise
+	 */
+	protected PullUpRefactoringProcessor(final IMember[] members, final CodeGenerationSettings settings, final boolean layer) {
 		super(members, settings, layer);
 		if (members != null) {
-			final IType type= RefactoringAvailabilityTester.getTopLevelType(members);
+			final IType type= RefactoringAvailabilityTester.getTopLevelType(fMembersToMove);
 			try {
 				if (type != null && RefactoringAvailabilityTester.getPullUpMembers(type).length != 0) {
+					fCachedDeclaringType= RefactoringAvailabilityTester.getTopLevelType(fMembersToMove);
 					fMembersToMove= new IMember[0];
-					fCachedDeclaringType= RefactoringAvailabilityTester.getTopLevelType(members);
 				}
 			} catch (JavaModelException exception) {
 				JavaPlugin.log(exception);
@@ -912,30 +928,6 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		fCachedDeclaringSuperTypeHierarchy= null;
 	}
 
-	protected void clearWorkingCopies() {
-		try {
-			for (final Iterator iterator= fWorkingCopies.iterator(); iterator.hasNext();) {
-				final ICompilationUnit unit= (ICompilationUnit) iterator.next();
-				try {
-					unit.discardWorkingCopy();
-				} catch (JavaModelException exception) {
-					JavaPlugin.log(exception);
-				}
-			}
-		} finally {
-			if (fDeclaringWorkingCopy != null) {
-				try {
-					fDeclaringWorkingCopy.discardWorkingCopy();
-				} catch (JavaModelException exception) {
-					JavaPlugin.log(exception);
-				}
-				fDeclaringWorkingCopy= null;
-			}
-			fWorkingCopies.clear();
-			fWorkingCopiesCreated= false;
-		}
-	}
-
 	private void copyBodyOfPulledUpMethod(final CompilationUnitRewrite sourceRewrite, final CompilationUnitRewrite targetRewrite, final IMethod method, final MethodDeclaration oldMethod, final MethodDeclaration newMethod, final TypeVariableMaplet[] mapping, final IProgressMonitor monitor) throws JavaModelException {
 		final Block body= oldMethod.getBody();
 		if (body == null) {
@@ -1002,8 +994,8 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			} catch (JavaModelException exception) {
 				JavaPlugin.log(exception);
 			}
-			final String description= fMembersToMove.length == 1 ? Messages.format(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_short, new String[] { fMembersToMove[0].getElementName(), fDestinationType.getElementName() }) : Messages.format(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_short_multiple, fDestinationType.getElementName());
-			final String header= fMembersToMove.length == 1 ? Messages.format(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED) }) : Messages.format(RefactoringCoreMessages.PullUpRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED) });
+			final String description= fMembersToMove.length == 1 ? Messages.format(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_short, new String[] { fMembersToMove[0].getElementName(), fDestinationType.getElementName()}) : Messages.format(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_short_multiple, fDestinationType.getElementName());
+			final String header= fMembersToMove.length == 1 ? Messages.format(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}) : Messages.format(RefactoringCoreMessages.PullUpRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)});
 			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
 			comment.addSetting(Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_target_element_pattern, JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 			addSuperTypeSettings(comment, true);
@@ -1107,7 +1099,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 								final MethodDeclaration oldMethod= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) member, root);
 								if (oldMethod != null) {
 									if (JdtFlags.isStatic(member) && fDestinationType.isInterface())
-										status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.PullUpRefactoring_moving_static_method_to_interface, new String[] {JavaElementLabels.getTextLabel(member, JavaElementLabels.ALL_FULLY_QUALIFIED)}), JavaStatusContext.create(member)));
+										status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.PullUpRefactoring_moving_static_method_to_interface, new String[] { JavaElementLabels.getTextLabel(member, JavaElementLabels.ALL_FULLY_QUALIFIED)}), JavaStatusContext.create(member)));
 									final MethodDeclaration newMethod= createNewMethodDeclarationNode(sourceRewriter, rewrite, ((IMethod) member), oldMethod, root, mapping, adjustments, new SubProgressMonitor(subsub, 1), status);
 									rewriter.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, declaration.bodyDeclarations()), rewrite.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PULL_UP));
 									ImportRewriteUtil.addImports(rewrite, oldMethod, new HashMap(), new HashMap(), false);
@@ -1198,9 +1190,6 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 						CompilationUnitChange current= (CompilationUnitChange) manager.get(cus[index]);
 						if (change != null && current.getEdit() == null)
 							manager.remove(cus[index]);
-					}
-					for (final Iterator iterator= workingcopies.values().iterator(); iterator.hasNext();) {
-						((ICompilationUnit) iterator.next()).discardWorkingCopy();
 					}
 				}
 			}
@@ -1296,7 +1285,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	private ICompilationUnit createWorkingCopy(final ICompilationUnit unit, final TextEdit edit, final RefactoringStatus status, final IProgressMonitor monitor) {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, 1);
-			final ICompilationUnit copy= ((IPackageFragment) unit.getParent()).getCompilationUnit(unit.getElementName()).getWorkingCopy(fOwner, null, new SubProgressMonitor(monitor, 1));
+			final ICompilationUnit copy= getSharedWorkingCopy(unit.getPrimary(), new SubProgressMonitor(monitor, 1));
 			final IDocument document= new Document(unit.getBuffer().getContents());
 			edit.apply(document, TextEdit.UPDATE_REGIONS);
 			copy.getBuffer().setContents(document.get());
@@ -1324,6 +1313,10 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	protected RefactoringStatus createWorkingCopyLayer(IProgressMonitor monitor) {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, 1);
+			ICompilationUnit unit= getDeclaringType().getCompilationUnit();
+			if (fLayer)
+				unit= unit.findWorkingCopy(fOwner);
+			resetWorkingCopies(unit);
 			return new RefactoringStatus();
 		} finally {
 			monitor.done();
@@ -1482,9 +1475,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	}
 
 	private Map getMatchingMembers(final ITypeHierarchy hierarchy, final IType type, final boolean includeAbstract) throws JavaModelException {
-		final Map result= new HashMap(); // IMember -> Set of IMembers (of
-		// the same
-		// type as key)
+		final Map result= new HashMap();
 		result.putAll(getMatchingMembersMapping(type));
 		final IType[] subTypes= hierarchy.getAllSubtypes(type);
 		for (int i= 0; i < subTypes.length; i++) {
@@ -1724,15 +1715,12 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	private boolean isAvailableInDestination(final IMethod method, final IProgressMonitor monitor) throws JavaModelException {
 		try {
-			final boolean isConstructor= false;
-			final String[] paramTypes= method.getParameterTypes();
-			final String name= method.getElementName();
 			final IType destination= getDestinationType();
-			final ITypeHierarchy hierarchy= getDestinationTypeHierarchy(monitor);
-			final IMethod first= JavaModelUtil.findMethod(name, paramTypes, isConstructor, destination);
+			final IMethod first= JavaModelUtil.findMethod(method.getElementName(), method.getParameterTypes(), false, destination);
 			if (first != null && MethodChecks.isVirtual(first))
 				return true;
-			final IMethod found= JavaModelUtil.findMethodInHierarchy(hierarchy, destination, name, paramTypes, isConstructor);
+			final ITypeHierarchy hierarchy= getDestinationTypeHierarchy(monitor);
+			final IMethod found= JavaModelUtil.findMethodInHierarchy(hierarchy, destination, method.getElementName(), method.getParameterTypes(), false);
 			return found != null && MethodChecks.isVirtual(found);
 		} finally {
 			monitor.done();
@@ -1740,9 +1728,10 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	}
 
 	private boolean isRequiredPullableMember(final List queue, final IMember member) throws JavaModelException {
-		if (member.getDeclaringType() == null) // not a member
+		final IType declaring= member.getDeclaringType();
+		if (declaring == null) // not a member
 			return false;
-		return member.getDeclaringType().equals(getDeclaringType()) && !queue.contains(member) && RefactoringAvailabilityTester.isPullUpAvailable(member);
+		return declaring.equals(getDeclaringType()) && !queue.contains(member) && RefactoringAvailabilityTester.isPullUpAvailable(member);
 	}
 
 	protected void registerChanges(final TextEditBasedChangeManager manager) throws CoreException {
@@ -1757,6 +1746,16 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 					manager.manage(unit, change);
 			}
 		}
+	}
+
+	/**
+	 * Resets the environment before the first wizard page becomes visible.
+	 */
+	public void resetEnvironment() {
+		ICompilationUnit unit= getDeclaringType().getCompilationUnit();
+		if (fLayer)
+			unit= unit.findWorkingCopy(fOwner);
+		resetWorkingCopies(unit);
 	}
 
 	/**
@@ -1864,20 +1863,46 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		}
 	}
 
+	/**
+	 * Sets the methods to declare abstract.
+	 * 
+	 * @param methods
+	 *            the methods to declare abstract
+	 */
 	public void setAbstractMethods(final IMethod[] methods) {
 		Assert.isNotNull(methods);
 		fAbstractMethods= methods;
 	}
 
+	/**
+	 * Determines whether to create method stubs for non-implemented abstract
+	 * methods.
+	 * 
+	 * @param create
+	 *            <code>true</code> to create stubs, <code>false</code>
+	 *            otherwise
+	 */
 	public void setCreateMethodStubs(final boolean create) {
 		fCreateMethodStubs= create;
 	}
 
+	/**
+	 * Sets the methods to delete
+	 * 
+	 * @param methods
+	 *            the methods to delete
+	 */
 	public void setDeletedMethods(final IMethod[] methods) {
 		Assert.isNotNull(methods);
 		fDeletedMethods= methods;
 	}
 
+	/**
+	 * Sets the destination type.
+	 * 
+	 * @param type
+	 *            the destination type
+	 */
 	public void setDestinationType(final IType type) {
 		Assert.isNotNull(type);
 		if (!type.equals(fDestinationType))
@@ -1885,6 +1910,12 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		fDestinationType= type;
 	}
 
+	/**
+	 * Sets the members to move.
+	 * 
+	 * @param members
+	 *            the members to move
+	 */
 	public void setMembersToMove(final IMember[] members) {
 		Assert.isNotNull(members);
 		fMembersToMove= (IMember[]) SourceReferenceUtil.sortByOffset(members);

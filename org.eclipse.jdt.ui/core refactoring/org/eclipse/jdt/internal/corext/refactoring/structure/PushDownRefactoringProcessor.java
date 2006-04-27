@@ -432,6 +432,10 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_checking, 5);
 			clearCaches();
+			ICompilationUnit unit= getDeclaringType().getCompilationUnit();
+			if (fLayer)
+				unit= unit.findWorkingCopy(fOwner);
+			resetWorkingCopies(unit);
 			final RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkMembersInDestinationClasses(new SubProgressMonitor(monitor, 1)));
 			result.merge(checkElementsAccessedByModifiedMembers(new SubProgressMonitor(monitor, 1)));

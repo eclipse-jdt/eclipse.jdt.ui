@@ -489,6 +489,7 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 		final String description= RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_descriptor_description_short;
 		final String header= Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_descriptor_description, labels);
 		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+		comment.addSetting(Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_original_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_class_name_pattern, fClassName));
 		String visibility= JdtFlags.getVisibilityString(fVisibility);
 		if ("".equals(visibility)) //$NON-NLS-1$

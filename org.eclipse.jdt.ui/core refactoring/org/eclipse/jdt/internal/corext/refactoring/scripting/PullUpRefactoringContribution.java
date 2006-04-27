@@ -30,6 +30,6 @@ public final class PullUpRefactoringContribution extends JavaRefactoringContribu
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(final RefactoringDescriptor descriptor) throws CoreException {
-		return new PullUpRefactoring(new PullUpRefactoringProcessor(null, null, false));
+		return new PullUpRefactoring(new PullUpRefactoringProcessor(null, null));
 	}
 }

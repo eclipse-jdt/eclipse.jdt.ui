@@ -160,7 +160,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 		if (members != null) {
 			final IType declaring= getDeclaringType();
 			if (declaring != null)
-				fTypesToExtract= new IType[] { declaring };
+				fTypesToExtract= new IType[] { declaring};
 		}
 	}
 
@@ -255,7 +255,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				JavaPlugin.log(exception);
 			}
 			final String description= Messages.format(RefactoringCoreMessages.ExtractSupertypeProcessor_descriptor_description_short, fTypeName);
-			final String header= Messages.format(RefactoringCoreMessages.ExtractSupertypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fCachedDeclaringType, JavaElementLabels.ALL_FULLY_QUALIFIED) });
+			final String header= Messages.format(RefactoringCoreMessages.ExtractSupertypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fCachedDeclaringType, JavaElementLabels.ALL_FULLY_QUALIFIED)});
 			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
 			final IType[] types= getTypesToExtract();
 			String[] settings= new String[types.length];
@@ -293,7 +293,6 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 		} finally {
 			monitor.done();
 			clearCaches();
-			clearWorkingCopies();
 		}
 	}
 
@@ -311,25 +310,22 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 */
 	protected final RefactoringStatus createExtractedSuperType(final IType superType, final IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(monitor);
+		fSuperSource= null;
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
 			monitor.beginTask(RefactoringCoreMessages.ExtractSupertypeProcessor_preparing, 20);
-			fSuperSource= null;
-			ICompilationUnit extractedWorkingCopy= null;
-			try {
-				final IType declaring= getDeclaringType();
-				final CompilationUnitRewrite declaringRewrite= new CompilationUnitRewrite(fOwner, declaring.getCompilationUnit());
-				final AbstractTypeDeclaration declaringDeclaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(declaring, declaringRewrite.getRoot());
-				if (declaringDeclaration != null) {
-					extractedWorkingCopy= declaring.getPackageFragment().getCompilationUnit(JavaModelUtil.getRenamedCUName(declaring.getCompilationUnit(), fTypeName)).getWorkingCopy(fOwner, null, new SubProgressMonitor(monitor, 10));
-					fSuperSource= createSuperTypeSource(extractedWorkingCopy, superType, declaringDeclaration, status, new SubProgressMonitor(monitor, 10));
-					if (fSuperSource != null) {
-						extractedWorkingCopy.getBuffer().setContents(fSuperSource);
-						JavaModelUtil.reconcile(extractedWorkingCopy);
-					}
+			final IType declaring= getDeclaringType();
+			final CompilationUnitRewrite declaringRewrite= new CompilationUnitRewrite(fOwner, declaring.getCompilationUnit());
+			final AbstractTypeDeclaration declaringDeclaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(declaring, declaringRewrite.getRoot());
+			if (declaringDeclaration != null) {
+				final String name= JavaModelUtil.getRenamedCUName(declaring.getCompilationUnit(), fTypeName);
+				final ICompilationUnit original= declaring.getPackageFragment().getCompilationUnit(name);
+				final ICompilationUnit copy= getSharedWorkingCopy(original.getPrimary(), new SubProgressMonitor(monitor, 10));
+				fSuperSource= createSuperTypeSource(copy, superType, declaringDeclaration, status, new SubProgressMonitor(monitor, 10));
+				if (fSuperSource != null) {
+					copy.getBuffer().setContents(fSuperSource);
+					JavaModelUtil.reconcile(copy);
 				}
-			} finally {
-				fWorkingCopies.add(extractedWorkingCopy);
 			}
 		} finally {
 			monitor.done();
@@ -371,11 +367,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 					copy.apply(document, TextEdit.NONE);
 				}
 			}
-			ICompilationUnit copy= unit.findWorkingCopy(fOwner);
-			if (copy == null) {
-				copy= unit.getWorkingCopy(fOwner, null, new NullProgressMonitor());
-				fWorkingCopies.add(copy);
-			}
+			final ICompilationUnit copy= getSharedWorkingCopy(unit, new NullProgressMonitor());
 			copy.getBuffer().setContents(document.get());
 			JavaModelUtil.reconcile(copy);
 		} catch (CoreException exception) {
@@ -713,139 +705,114 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 */
 	public final RefactoringStatus createWorkingCopyLayer(final IProgressMonitor monitor) {
 		Assert.isNotNull(monitor);
-		if (!fWorkingCopiesCreated) {
-			final RefactoringStatus status= new RefactoringStatus();
-			try {
-				monitor.beginTask(RefactoringCoreMessages.ExtractSupertypeProcessor_preparing, 70);
-				status.merge(super.createWorkingCopyLayer(new SubProgressMonitor(monitor, 10)));
-				final IType declaring= getDeclaringType();
-				status.merge(createExtractedSuperType(getDeclaringSuperTypeHierarchy(new SubProgressMonitor(monitor, 10)).getSuperclass(declaring), new SubProgressMonitor(monitor, 10)));
-				if (status.hasFatalError())
-					return status;
-				final IType extractedType= computeExtractedType(fTypeName);
-				setDestinationType(extractedType);
-				final List subTypes= new ArrayList(Arrays.asList(fTypesToExtract));
-				if (!subTypes.contains(declaring))
-					subTypes.add(declaring);
-				final Map unitToTypes= new HashMap(subTypes.size());
-				final Set units= new HashSet(subTypes.size());
-				for (int index= 0; index < subTypes.size(); index++) {
-					final IType type= (IType) subTypes.get(index);
-					final ICompilationUnit unit= type.getCompilationUnit();
-					units.add(unit);
-					Collection collection= (Collection) unitToTypes.get(unit);
-					if (collection == null) {
-						collection= new ArrayList(2);
-						unitToTypes.put(unit, collection);
-					}
-					collection.add(type);
-				}
-				final Map projectToUnits= new HashMap();
-				Collection collection= null;
-				IJavaProject project= null;
-				ICompilationUnit current= null;
-				for (final Iterator iterator= units.iterator(); iterator.hasNext();) {
-					current= (ICompilationUnit) iterator.next();
-					project= current.getJavaProject();
-					collection= (Collection) projectToUnits.get(project);
-					if (collection == null) {
-						collection= new ArrayList();
-						projectToUnits.put(project, collection);
-					}
-					collection.add(current);
-				}
-				final ITypeBinding[] extractBindings= { null };
-				final ASTParser extractParser= ASTParser.newParser(AST.JLS3);
-				extractParser.setWorkingCopyOwner(fOwner);
-				extractParser.setResolveBindings(true);
-				extractParser.setProject(project);
-				extractParser.setSource(extractedType.getCompilationUnit());
-				final CompilationUnit extractUnit= (CompilationUnit) extractParser.createAST(new SubProgressMonitor(monitor, 10));
-				if (extractUnit != null) {
-					final AbstractTypeDeclaration extractDeclaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(extractedType, extractUnit);
-					if (extractDeclaration != null)
-						extractBindings[0]= extractDeclaration.resolveBinding();
-				}
-				final ASTParser parser= ASTParser.newParser(AST.JLS3);
-				final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 30);
-				try {
-					final Set keySet= projectToUnits.keySet();
-					subMonitor.beginTask("", keySet.size()); //$NON-NLS-1$
-					subMonitor.setTaskName(RefactoringCoreMessages.ExtractSupertypeProcessor_preparing);
-					for (final Iterator iterator= keySet.iterator(); iterator.hasNext();) {
-						project= (IJavaProject) iterator.next();
-						collection= (Collection) projectToUnits.get(project);
-						parser.setWorkingCopyOwner(fOwner);
-						parser.setResolveBindings(true);
-						parser.setProject(project);
-						parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-						final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 1);
-						try {
-							subsubMonitor.beginTask("", collection.size()); //$NON-NLS-1$
-							subsubMonitor.setTaskName(RefactoringCoreMessages.ExtractSupertypeProcessor_preparing);
-							parser.createASTs((ICompilationUnit[]) collection.toArray(new ICompilationUnit[collection.size()]), new String[0], new ASTRequestor() {
-
-								public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
-									try {
-										final Collection types= (Collection) unitToTypes.get(unit);
-										if (types != null) {
-											for (final Iterator innerIterator= types.iterator(); innerIterator.hasNext();) {
-												final IType currentType= (IType) innerIterator.next();
-												final AbstractTypeDeclaration currentDeclaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(currentType, node);
-												if (currentDeclaration != null)
-													createModifiedSubType(unit, node, extractedType, extractBindings[0], currentDeclaration, status);
-											}
-										}
-									} catch (CoreException exception) {
-										JavaPlugin.log(exception);
-										status.merge(RefactoringStatus.createFatalErrorStatus(exception.getLocalizedMessage()));
-									} finally {
-										subsubMonitor.worked(1);
-									}
-								}
-
-								public final void acceptBinding(final String key, final IBinding binding) {
-									// Do nothing
-								}
-							}, subsubMonitor);
-						} finally {
-							subsubMonitor.done();
-						}
-					}
-				} finally {
-					subMonitor.done();
-				}
-			} catch (CoreException exception) {
-				JavaPlugin.log(exception);
-				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception_on_layer));
-			} finally {
-				fWorkingCopiesCreated= true;
-				monitor.done();
-			}
-			return status;
-		}
-		return new RefactoringStatus();
-	}
-
-	/**
-	 * Destroys the working copy layer.
-	 */
-	public void destroyWorkingCopyLayer() {
+		final RefactoringStatus status= new RefactoringStatus();
 		try {
-			fLayerChanges.clear();
-			for (final Iterator iterator= fWorkingCopies.iterator(); iterator.hasNext();) {
-				final ICompilationUnit unit= (ICompilationUnit) iterator.next();
-				try {
-					unit.discardWorkingCopy();
-				} catch (JavaModelException exception) {
-					JavaPlugin.log(exception);
+			monitor.beginTask(RefactoringCoreMessages.ExtractSupertypeProcessor_preparing, 70);
+			status.merge(super.createWorkingCopyLayer(new SubProgressMonitor(monitor, 10)));
+			final IType declaring= getDeclaringType();
+			status.merge(createExtractedSuperType(getDeclaringSuperTypeHierarchy(new SubProgressMonitor(monitor, 10)).getSuperclass(declaring), new SubProgressMonitor(monitor, 10)));
+			if (status.hasFatalError())
+				return status;
+			final IType extractedType= computeExtractedType(fTypeName);
+			setDestinationType(extractedType);
+			final List subTypes= new ArrayList(Arrays.asList(fTypesToExtract));
+			if (!subTypes.contains(declaring))
+				subTypes.add(declaring);
+			final Map unitToTypes= new HashMap(subTypes.size());
+			final Set units= new HashSet(subTypes.size());
+			for (int index= 0; index < subTypes.size(); index++) {
+				final IType type= (IType) subTypes.get(index);
+				final ICompilationUnit unit= type.getCompilationUnit();
+				units.add(unit);
+				Collection collection= (Collection) unitToTypes.get(unit);
+				if (collection == null) {
+					collection= new ArrayList(2);
+					unitToTypes.put(unit, collection);
 				}
+				collection.add(type);
 			}
+			final Map projectToUnits= new HashMap();
+			Collection collection= null;
+			IJavaProject project= null;
+			ICompilationUnit current= null;
+			for (final Iterator iterator= units.iterator(); iterator.hasNext();) {
+				current= (ICompilationUnit) iterator.next();
+				project= current.getJavaProject();
+				collection= (Collection) projectToUnits.get(project);
+				if (collection == null) {
+					collection= new ArrayList();
+					projectToUnits.put(project, collection);
+				}
+				collection.add(current);
+			}
+			final ITypeBinding[] extractBindings= { null};
+			final ASTParser extractParser= ASTParser.newParser(AST.JLS3);
+			extractParser.setWorkingCopyOwner(fOwner);
+			extractParser.setResolveBindings(true);
+			extractParser.setProject(project);
+			extractParser.setSource(extractedType.getCompilationUnit());
+			final CompilationUnit extractUnit= (CompilationUnit) extractParser.createAST(new SubProgressMonitor(monitor, 10));
+			if (extractUnit != null) {
+				final AbstractTypeDeclaration extractDeclaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(extractedType, extractUnit);
+				if (extractDeclaration != null)
+					extractBindings[0]= extractDeclaration.resolveBinding();
+			}
+			final ASTParser parser= ASTParser.newParser(AST.JLS3);
+			final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 30);
+			try {
+				final Set keySet= projectToUnits.keySet();
+				subMonitor.beginTask("", keySet.size()); //$NON-NLS-1$
+				subMonitor.setTaskName(RefactoringCoreMessages.ExtractSupertypeProcessor_preparing);
+				for (final Iterator iterator= keySet.iterator(); iterator.hasNext();) {
+					project= (IJavaProject) iterator.next();
+					collection= (Collection) projectToUnits.get(project);
+					parser.setWorkingCopyOwner(fOwner);
+					parser.setResolveBindings(true);
+					parser.setProject(project);
+					parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
+					final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 1);
+					try {
+						subsubMonitor.beginTask("", collection.size()); //$NON-NLS-1$
+						subsubMonitor.setTaskName(RefactoringCoreMessages.ExtractSupertypeProcessor_preparing);
+						parser.createASTs((ICompilationUnit[]) collection.toArray(new ICompilationUnit[collection.size()]), new String[0], new ASTRequestor() {
+
+							public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
+								try {
+									final Collection types= (Collection) unitToTypes.get(unit);
+									if (types != null) {
+										for (final Iterator innerIterator= types.iterator(); innerIterator.hasNext();) {
+											final IType currentType= (IType) innerIterator.next();
+											final AbstractTypeDeclaration currentDeclaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(currentType, node);
+											if (currentDeclaration != null)
+												createModifiedSubType(unit, node, extractedType, extractBindings[0], currentDeclaration, status);
+										}
+									}
+								} catch (CoreException exception) {
+									JavaPlugin.log(exception);
+									status.merge(RefactoringStatus.createFatalErrorStatus(exception.getLocalizedMessage()));
+								} finally {
+									subsubMonitor.worked(1);
+								}
+							}
+
+							public final void acceptBinding(final String key, final IBinding binding) {
+								// Do nothing
+							}
+						}, subsubMonitor);
+					} finally {
+						subsubMonitor.done();
+					}
+				}
+			} finally {
+				subMonitor.done();
+			}
+		} catch (CoreException exception) {
+			JavaPlugin.log(exception);
+			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception_on_layer));
 		} finally {
-			fSuperSource= null;
-			fWorkingCopies.clear();
-			fWorkingCopiesCreated= false;
+			monitor.done();
 		}
+		return status;
 	}
 
 	/**
@@ -886,7 +853,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 * {@inheritDoc}
 	 */
 	public Object[] getElements() {
-		return new Object[] { getDeclaringType() };
+		return new Object[] { getDeclaringType()};
 	}
 
 	/**
@@ -1097,6 +1064,13 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	}
 
 	/**
+	 * Resets the changes necessary for the working copy layer.
+	 */
+	public void resetChanges() {
+		fLayerChanges.clear();
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	protected void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit copy, final Set replacements, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
@@ -1112,7 +1086,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				parser.setResolveBindings(true);
 				parser.setProject(project);
 				parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-				parser.createASTs(new ICompilationUnit[] { copy }, new String[0], new ASTRequestor() {
+				parser.createASTs(new ICompilationUnit[] { copy}, new String[0], new ASTRequestor() {
 
 					public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
 						try {

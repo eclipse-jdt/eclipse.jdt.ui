@@ -68,7 +68,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -568,18 +567,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		super.setVisible(visible);
 		if (visible) {
 			fNameField.setFocus();
-			try {
-				getWizard().getContainer().run(true, false, new IRunnableWithProgress() {
-
-					public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						getProcessor().destroyWorkingCopyLayer();
-					}
-				});
-			} catch (InvocationTargetException exception) {
-				JavaPlugin.log(exception);
-			} catch (InterruptedException exception) {
-				// Does not happen
-			}
+			getProcessor().resetChanges();
 		}
 	}
 }

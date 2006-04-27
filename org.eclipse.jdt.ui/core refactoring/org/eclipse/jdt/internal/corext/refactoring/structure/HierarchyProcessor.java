@@ -13,11 +13,9 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
@@ -504,17 +502,11 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	/** The text edit based change manager */
 	protected TextEditBasedChangeManager fChangeManager;
 
-	/** The declaring working copy, or <code>null</code> if no layer exists */
-	protected ICompilationUnit fDeclaringWorkingCopy;
+	/** Does the refactoring use a working copy layer? */
+	protected final boolean fLayer;
 
 	/** The members to move (may be in working copies) */
 	protected IMember[] fMembersToMove;
-
-	/** The working copies (working copy owner is <code>fOwner</code>) */
-	protected Set fWorkingCopies= new HashSet(8);
-
-	/** Have the working copies already been created? */
-	protected boolean fWorkingCopiesCreated= false;
 
 	/**
 	 * Creates a new hierarchy processor.
@@ -522,21 +514,22 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	 * @param members
 	 *            the members, or <code>null</code> if invoked by scripting
 	 * @param layer
-	 *            <code>true</code> to create a working copy layer on the
-	 *            input, <code>false</code> otherwise
+	 *            <code>true</code> to create a working copy layer,
+	 *            <code>false</code> otherwise
 	 */
 	protected HierarchyProcessor(final IMember[] members, final CodeGenerationSettings settings, boolean layer) {
 		super(settings);
+		fLayer= layer;
 		if (members != null) {
 			fMembersToMove= (IMember[]) SourceReferenceUtil.sortByOffset(members);
 			if (layer && fMembersToMove.length > 0) {
-				final ICompilationUnit unit= fMembersToMove[0].getCompilationUnit();
-				if (unit != null) {
+				final ICompilationUnit original= fMembersToMove[0].getCompilationUnit();
+				if (original != null) {
 					try {
-						fDeclaringWorkingCopy= unit.getWorkingCopy(fOwner, null, new NullProgressMonitor());
-						if (fDeclaringWorkingCopy != null) {
+						final ICompilationUnit copy= getSharedWorkingCopy(original.getPrimary(), new NullProgressMonitor());
+						if (copy != null) {
 							for (int index= 0; index < fMembersToMove.length; index++) {
-								final IJavaElement[] elements= fDeclaringWorkingCopy.findElements(fMembersToMove[index]);
+								final IJavaElement[] elements= copy.findElements(fMembersToMove[index]);
 								if (elements != null && elements.length > 0 && elements[0] instanceof IMember) {
 									fMembersToMove[index]= (IMember) elements[0];
 								}

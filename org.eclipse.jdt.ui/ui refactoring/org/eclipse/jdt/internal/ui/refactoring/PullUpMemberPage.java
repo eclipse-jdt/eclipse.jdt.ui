@@ -495,15 +495,6 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.PULL_UP_WIZARD_PAGE);
 	}
 
-	protected void initializeEnablement() {
-		MemberActionInfo[] infos= asMemberActionInfos();
-		final boolean enabled= infos.length > 0;
-		fTableViewer.getTable().setEnabled(enabled);
-		fStatusLine.setEnabled(enabled);
-		fAddButton.setEnabled(enabled);
-		fLabel.setEnabled(enabled);
-	}
-
 	protected void createInstanceOfCheckbox(final Composite result, final int margin) {
 		final HierarchyProcessor processor= getPullUpRefactoring().getPullUpProcessor();
 		fInstanceofButton= new Button(result, SWT.CHECK);
@@ -870,6 +861,15 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		initializeCheckBox(fInstanceofButton, SETTING_INSTANCEOF, false);
 	}
 
+	protected void initializeEnablement() {
+		MemberActionInfo[] infos= asMemberActionInfos();
+		final boolean enabled= infos.length > 0;
+		fTableViewer.getTable().setEnabled(enabled);
+		fStatusLine.setEnabled(enabled);
+		fAddButton.setEnabled(enabled);
+		fLabel.setEnabled(enabled);
+	}
+
 	private void initializeRefactoring() {
 		final PullUpRefactoringProcessor processor= getPullUpRefactoring().getPullUpProcessor();
 		processor.setMembersToMove(getMembersForAction(PULL_UP_ACTION));
@@ -932,8 +932,12 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	public void setVisible(final boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
-			fTableViewer.setSelection(new StructuredSelection(getActiveInfos()), true);
-			fTableViewer.getControl().setFocus();
+			try {
+				getPullUpRefactoring().getPullUpProcessor().resetEnvironment();
+			} finally {
+				fTableViewer.setSelection(new StructuredSelection(getActiveInfos()), true);
+				fTableViewer.getControl().setFocus();
+			}
 		}
 	}
 

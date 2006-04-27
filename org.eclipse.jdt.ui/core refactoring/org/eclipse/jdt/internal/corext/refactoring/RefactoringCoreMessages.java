@@ -284,6 +284,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ConvertAnonymousToNestedRefactoring_name_hides;
 
+	public static String ConvertAnonymousToNestedRefactoring_original_pattern;
+
 	public static String ConvertAnonymousToNestedRefactoring_place_caret;
 
 	public static String ConvertAnonymousToNestedRefactoring_type_exists;

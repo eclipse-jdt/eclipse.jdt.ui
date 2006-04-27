@@ -384,7 +384,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		try {
 			monitor.beginTask("", 300); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
-			fSuperSource= null;
+			resetEnvironment();
 			final TextEditBasedChangeManager manager= new TextEditBasedChangeManager();
 			final CompilationUnitRewrite sourceRewrite= new CompilationUnitRewrite(fSubType.getCompilationUnit());
 			final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fSubType, sourceRewrite.getRoot());
@@ -398,23 +398,19 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					if (methods.length > 0)
 						ASTNodeDeleteUtil.markAsDeleted(methods, sourceRewrite, sourceRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.ExtractInterfaceProcessor_remove_method_label, SET_EXTRACT_INTERFACE));
 				}
-				ICompilationUnit superUnit= null;
-				try {
-					superUnit= fSubType.getPackageFragment().getCompilationUnit(JavaModelUtil.getRenamedCUName(fSubType.getCompilationUnit(), fSuperName)).getWorkingCopy(fOwner, null, new SubProgressMonitor(monitor, 20));
-					fSuperSource= createTypeSource(superUnit, fSubType, fSuperName, sourceRewrite, declaration, status, new SubProgressMonitor(monitor, 40));
-					if (fSuperSource != null) {
-						superUnit.getBuffer().setContents(fSuperSource);
-						JavaModelUtil.reconcile(superUnit);
-					}
-					final Set replacements= new HashSet();
-					if (fReplace)
-						rewriteTypeOccurrences(manager, sourceRewrite, superUnit, replacements, status, new SubProgressMonitor(monitor, 220));
-					createMethodComments(sourceRewrite, replacements);
-					manager.manage(fSubType.getCompilationUnit(), sourceRewrite.createChange());
-				} finally {
-					if (superUnit != null)
-						superUnit.discardWorkingCopy();
+				final String name= JavaModelUtil.getRenamedCUName(fSubType.getCompilationUnit(), fSuperName);
+				final ICompilationUnit original= fSubType.getPackageFragment().getCompilationUnit(name);
+				final ICompilationUnit copy= getSharedWorkingCopy(original.getPrimary(), new SubProgressMonitor(monitor, 20));
+				fSuperSource= createTypeSource(copy, fSubType, fSuperName, sourceRewrite, declaration, status, new SubProgressMonitor(monitor, 40));
+				if (fSuperSource != null) {
+					copy.getBuffer().setContents(fSuperSource);
+					JavaModelUtil.reconcile(copy);
 				}
+				final Set replacements= new HashSet();
+				if (fReplace)
+					rewriteTypeOccurrences(manager, sourceRewrite, copy, replacements, status, new SubProgressMonitor(monitor, 220));
+				createMethodComments(sourceRewrite, replacements);
+				manager.manage(fSubType.getCompilationUnit(), sourceRewrite.createChange());
 			}
 			return manager;
 		} finally {
@@ -944,6 +940,14 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	}
 
 	/**
+	 * Resets the environment.
+	 */
+	protected void resetEnvironment() {
+		fSuperSource= null;
+		resetWorkingCopies();
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	protected final void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements, final IProgressMonitor monitor) throws CoreException {
@@ -1027,90 +1031,84 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		try {
 			monitor.beginTask("", 300); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
-			ICompilationUnit subUnit= null;
+			final ICompilationUnit subUnit= getSharedWorkingCopy(fSubType.getCompilationUnit().getPrimary(), new SubProgressMonitor(monitor, 20));
+			final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fSubType.getCompilationUnit());
+			final ASTRewrite rewrite= sourceRewrite.getASTRewrite();
 			try {
-				subUnit= fSubType.getCompilationUnit().getPrimary().getWorkingCopy(fOwner, null, new SubProgressMonitor(monitor, 20));
-				final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fSubType.getCompilationUnit());
-				final ASTRewrite rewrite= sourceRewrite.getASTRewrite();
+				final IDocument document= new Document(buffer.getDocument().get());
 				try {
-					final IDocument document= new Document(buffer.getDocument().get());
-					try {
-						rewrite.rewriteAST(document, fSubType.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
-					} catch (MalformedTreeException exception) {
-						JavaPlugin.log(exception);
-					} catch (BadLocationException exception) {
-						JavaPlugin.log(exception);
-					}
-					subUnit.getBuffer().setContents(document.get());
-				} finally {
-					RefactoringFileBuffers.release(fSubType.getCompilationUnit());
+					rewrite.rewriteAST(document, fSubType.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
+				} catch (MalformedTreeException exception) {
+					JavaPlugin.log(exception);
+				} catch (BadLocationException exception) {
+					JavaPlugin.log(exception);
 				}
-				JavaModelUtil.reconcile(subUnit);
-				final IJavaProject project= subUnit.getJavaProject();
-				final ASTParser parser= ASTParser.newParser(AST.JLS3);
-				parser.setWorkingCopyOwner(fOwner);
-				parser.setResolveBindings(true);
-				parser.setProject(project);
-				parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-				parser.createASTs(new ICompilationUnit[] { subUnit }, new String[0], new ASTRequestor() {
+				subUnit.getBuffer().setContents(document.get());
+			} finally {
+				RefactoringFileBuffers.release(fSubType.getCompilationUnit());
+			}
+			JavaModelUtil.reconcile(subUnit);
+			final IJavaProject project= subUnit.getJavaProject();
+			final ASTParser parser= ASTParser.newParser(AST.JLS3);
+			parser.setWorkingCopyOwner(fOwner);
+			parser.setResolveBindings(true);
+			parser.setProject(project);
+			parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
+			parser.createASTs(new ICompilationUnit[] { subUnit}, new String[0], new ASTRequestor() {
 
-					public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
-						try {
-							final IType subType= (IType) JavaModelUtil.findInCompilationUnit(unit, fSubType);
-							final AbstractTypeDeclaration subDeclaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(subType, node);
-							if (subDeclaration != null) {
-								final ITypeBinding subBinding= subDeclaration.resolveBinding();
-								if (subBinding != null) {
-									String name= null;
-									ITypeBinding superBinding= null;
-									final ITypeBinding[] superBindings= subBinding.getInterfaces();
-									for (int index= 0; index < superBindings.length; index++) {
-										name= superBindings[index].getName();
-										if (name.startsWith(fSuperName) && superBindings[index].getTypeArguments().length == subBinding.getTypeParameters().length)
-											superBinding= superBindings[index];
-									}
-									if (superBinding != null) {
-										solveSuperTypeConstraints(unit, node, subType, subBinding, superBinding, new SubProgressMonitor(monitor, 80), status);
-										if (!status.hasFatalError()) {
-											rewriteTypeOccurrences(manager, this, sourceRewrite, unit, node, replacements, status, new SubProgressMonitor(monitor, 200));
-											if (manager.containsChangesIn(superUnit)) {
-												final TextEditBasedChange change= manager.get(superUnit);
-												if (change instanceof TextChange) {
-													final TextEdit edit= ((TextChange) change).getEdit();
-													if (edit != null) {
-														final IDocument document= new Document(superUnit.getBuffer().getContents());
-														try {
-															edit.apply(document, TextEdit.UPDATE_REGIONS);
-														} catch (MalformedTreeException exception) {
-															JavaPlugin.log(exception);
-															status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
-														} catch (BadLocationException exception) {
-															JavaPlugin.log(exception);
-															status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
-														}
-														fSuperSource= document.get();
-														manager.remove(superUnit);
+				public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
+					try {
+						final IType subType= (IType) JavaModelUtil.findInCompilationUnit(unit, fSubType);
+						final AbstractTypeDeclaration subDeclaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(subType, node);
+						if (subDeclaration != null) {
+							final ITypeBinding subBinding= subDeclaration.resolveBinding();
+							if (subBinding != null) {
+								String name= null;
+								ITypeBinding superBinding= null;
+								final ITypeBinding[] superBindings= subBinding.getInterfaces();
+								for (int index= 0; index < superBindings.length; index++) {
+									name= superBindings[index].getName();
+									if (name.startsWith(fSuperName) && superBindings[index].getTypeArguments().length == subBinding.getTypeParameters().length)
+										superBinding= superBindings[index];
+								}
+								if (superBinding != null) {
+									solveSuperTypeConstraints(unit, node, subType, subBinding, superBinding, new SubProgressMonitor(monitor, 80), status);
+									if (!status.hasFatalError()) {
+										rewriteTypeOccurrences(manager, this, sourceRewrite, unit, node, replacements, status, new SubProgressMonitor(monitor, 200));
+										if (manager.containsChangesIn(superUnit)) {
+											final TextEditBasedChange change= manager.get(superUnit);
+											if (change instanceof TextChange) {
+												final TextEdit edit= ((TextChange) change).getEdit();
+												if (edit != null) {
+													final IDocument document= new Document(superUnit.getBuffer().getContents());
+													try {
+														edit.apply(document, TextEdit.UPDATE_REGIONS);
+													} catch (MalformedTreeException exception) {
+														JavaPlugin.log(exception);
+														status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
+													} catch (BadLocationException exception) {
+														JavaPlugin.log(exception);
+														status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
 													}
+													fSuperSource= document.get();
+													manager.remove(superUnit);
 												}
 											}
 										}
 									}
 								}
 							}
-						} catch (JavaModelException exception) {
-							JavaPlugin.log(exception);
-							status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
 						}
+					} catch (JavaModelException exception) {
+						JavaPlugin.log(exception);
+						status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
 					}
+				}
 
-					public final void acceptBinding(final String key, final IBinding binding) {
-						// Do nothing
-					}
-				}, new NullProgressMonitor());
-			} finally {
-				if (subUnit != null)
-					subUnit.discardWorkingCopy();
-			}
+				public final void acceptBinding(final String key, final IBinding binding) {
+					// Do nothing
+				}
+			}, new NullProgressMonitor());
 		} finally {
 			monitor.done();
 		}

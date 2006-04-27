@@ -349,7 +349,7 @@ public final class RefactoringExecutionStarter {
 		IJavaProject project= null;
 		if (members != null && members.length > 0)
 			project= members[0].getJavaProject();
-		final PullUpRefactoring refactoring= new PullUpRefactoring(new PullUpRefactoringProcessor(members, JavaPreferencesSettings.getCodeGenerationSettings(project), false));
+		final PullUpRefactoring refactoring= new PullUpRefactoring(new PullUpRefactoringProcessor(members, JavaPreferencesSettings.getCodeGenerationSettings(project)));
 		if (!ActionUtil.isProcessable(shell, refactoring.getPullUpProcessor().getDeclaringType()))
 			return;
 		new RefactoringStarter().activate(refactoring, new PullUpWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);

@@ -49,12 +49,12 @@ public class ExtractSupertypeMethodPage extends PullUpMethodPage {
 	 */
 	public void setVisible(final boolean visible) {
 		if (visible) {
+			final ExtractSupertypeProcessor processor= getProcessor();
+			processor.resetChanges();
 			try {
 				getWizard().getContainer().run(false, false, new IRunnableWithProgress() {
 
 					public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						final ExtractSupertypeProcessor processor= getProcessor();
-						processor.destroyWorkingCopyLayer();
 						processor.createWorkingCopyLayer(monitor);
 					}
 				});

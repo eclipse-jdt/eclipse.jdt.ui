@@ -49,6 +49,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.AST;
@@ -502,6 +503,13 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	/**
 	 * {@inheritDoc}
 	 */
+	protected void finalize() throws Throwable {
+		resetWorkingCopies();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public final String getComment() {
 		return fComment;
 	}
@@ -687,6 +695,17 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		return null;
 	}
 
+	protected ICompilationUnit getSharedWorkingCopy(final ICompilationUnit unit, final IProgressMonitor monitor) throws JavaModelException {
+		try {
+			ICompilationUnit copy= unit.findWorkingCopy(fOwner);
+			if (copy == null)
+				copy= unit.getWorkingCopy(fOwner, null, monitor);
+			return copy;
+		} finally {
+			monitor.done();
+		}
+	}
+
 	/**
 	 * Returns whether type occurrences in instanceof's should be rewritten.
 	 * 
@@ -768,6 +787,47 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			monitor.worked(20);
 		} finally {
 			monitor.done();
+		}
+	}
+
+	/**
+	 * Resets the working copies.
+	 */
+	protected void resetWorkingCopies() {
+		final ICompilationUnit[] units= JavaCore.getWorkingCopies(fOwner);
+		for (int index= 0; index < units.length; index++) {
+			final ICompilationUnit unit= units[index];
+			try {
+				unit.discardWorkingCopy();
+			} catch (Exception exception) {
+				// Do nothing
+			}
+		}
+	}
+
+	/**
+	 * Resets the working copies.
+	 * 
+	 * @param unit
+	 *            the compilation unit to discard
+	 */
+	protected void resetWorkingCopies(final ICompilationUnit unit) {
+		final ICompilationUnit[] units= JavaCore.getWorkingCopies(fOwner);
+		for (int index= 0; index < units.length; index++) {
+			if (!units[index].equals(unit)) {
+				try {
+					units[index].discardWorkingCopy();
+				} catch (Exception exception) {
+					// Do nothing
+				}
+			} else {
+				try {
+					units[index].getBuffer().setContents(unit.getPrimary().getBuffer().getContents());
+					JavaModelUtil.reconcile(units[index]);
+				} catch (JavaModelException exception) {
+					JavaPlugin.log(exception);
+				}
+			}
 		}
 	}
 
