@@ -413,6 +413,10 @@ public class ControlStatementsFix extends AbstractFix {
 			Block block= (Block)node;
 			List statements= block.statements();
 			if (statements.size() == 1) {
+				if (statement instanceof IfStatement && IfStatement.THEN_STATEMENT_PROPERTY == child) {
+					if (!canRemoveBlockArroundThen((IfStatement)statement, (ASTNode)statements.get(0)))
+						return null;
+				}
 				if (onlyReturnAndThrows) {
 					ASTNode stmt= (ASTNode)statements.get(0);
 					if (stmt instanceof ReturnStatement || stmt instanceof ThrowStatement) {
@@ -424,6 +428,16 @@ public class ControlStatementsFix extends AbstractFix {
 			}
 		}
 		return null;
+	}
+
+	private static boolean canRemoveBlockArroundThen(IfStatement statement, ASTNode thenStatement) {
+		if (statement.getElseStatement() == null)
+			return true;
+		
+		if (!(thenStatement instanceof IfStatement))
+			return true;
+
+		return false;
 	}
 
 	public static IFix createCleanUp(CompilationUnit compilationUnit, 
