@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IContributor;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
@@ -31,6 +33,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
@@ -324,9 +327,18 @@ public final class CompletionProposalComputerRegistry {
 	void informUser(CompletionProposalComputerDescriptor descriptor, IStatus status) {
 		JavaPlugin.log(status);
         String title= JavaTextMessages.CompletionProposalComputerRegistry_error_dialog_title;
-        final String avoidHint= Messages.format(JavaTextMessages.CompletionProposalComputerRegistry_messageAvoidanceHint, descriptor.getCategory().getDisplayName());
-        String message= status.getMessage();
+        CompletionProposalCategory category= descriptor.getCategory();
+        IContributor culprit= descriptor.getContributor();
+        Set affectedPlugins= getAffectedContributors(category, culprit);
         
+		final String avoidHint;
+		final String culpritName= culprit == null ? null : culprit.getName();
+		if (affectedPlugins.isEmpty())
+			avoidHint= Messages.format(JavaTextMessages.CompletionProposalComputerRegistry_messageAvoidanceHint, new Object[] {culpritName, category.getDisplayName()});
+		else
+			avoidHint= Messages.format(JavaTextMessages.CompletionProposalComputerRegistry_messageAvoidanceHintWithWarning, new Object[] {culpritName, category.getDisplayName(), toString(affectedPlugins)});
+        
+		String message= status.getMessage();
         // inlined from MessageDialog.openError
         MessageDialog dialog = new MessageDialog(JavaPlugin.getActiveWorkbenchShell(), title, null /* default image */, message, MessageDialog.ERROR, new String[] { IDialogConstants.OK_LABEL }, 0) {
         	protected Control createCustomArea(Composite parent) {
@@ -337,11 +349,41 @@ public final class CompletionProposalComputerRegistry {
         				PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.CodeAssistPreferenceAdvanced", null, null).open(); //$NON-NLS-1$
         			}
         		});
+        		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+        		gridData.widthHint= this.getMinimumMessageWidth();
+				link.setLayoutData(gridData);
         		return link;
         	}
         };
         dialog.open();
 	}
+
+	/**
+	 * Returns the names of contributors affected by disabling a category. 
+	 * 
+	 * @param category the category that would be disabled
+	 * @param culprit the cuprit plug-in, which is not included in the returned list
+	 * @return the names of the contributors other than <code>culprit</code> that contribute to <code>category</code> (element type: {@link String})
+	 */
+	private Set getAffectedContributors(CompletionProposalCategory category, IContributor culprit) {
+	    Set affectedPlugins= new HashSet();
+        for (Iterator it= getProposalComputerDescriptors().iterator(); it.hasNext();) {
+	        CompletionProposalComputerDescriptor desc= (CompletionProposalComputerDescriptor) it.next();
+	        CompletionProposalCategory cat= desc.getCategory();
+	        if (cat.equals(category)) {
+	        	IContributor contributor= desc.getContributor();
+	        	if (contributor != null && !culprit.equals(contributor))
+	        		affectedPlugins.add(contributor.getName());
+	        }
+        }
+	    return affectedPlugins;
+    }
+
+    private Object toString(Collection collection) {
+    	// strip brackets off AbstractCollection.toString()
+    	String string= collection.toString();
+    	return string.substring(1, string.length() - 1);
+    }
 
 	private void informUser(IStatus status) {
 		JavaPlugin.log(status);

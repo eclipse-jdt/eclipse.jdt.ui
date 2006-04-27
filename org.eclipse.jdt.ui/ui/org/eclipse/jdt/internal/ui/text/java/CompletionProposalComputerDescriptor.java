@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IContributor;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -65,10 +66,18 @@ final class CompletionProposalComputerDescriptor {
 	/** The name of the performance event used to trace extensions. */
 	private static final String PERFORMANCE_EVENT= JavaPlugin.getPluginId() + "/perf/content_assist/extensions"; //$NON-NLS-1$
 	/**
-	 * If <code>true</code>, execution time of extensions is measured and extensions may be
-	 * disabled if execution takes too long.
+	 * If <code>true</code>, execution time of extensions is measured and the data forwarded to
+	 * core's {@link PerformanceStats} service.
 	 */
 	private static final boolean MEASURE_PERFORMANCE= PerformanceStats.isEnabled(PERFORMANCE_EVENT);
+	/**
+	 * Independently of the {@link PerformanceStats} service, any operation that takes longer than
+	 * {@value} milliseconds will be flagged as an violation. This timeout does not apply to the
+	 * first invocation, as it may take longer due to plug-in initialization etc. See also
+	 * {@link #fMeasureMaxDelay}.
+	 */
+	private static final long MAX_DELAY= 5000;
+	
 	/* log constants */
 	private static final String COMPUTE_COMPLETION_PROPOSALS= "computeCompletionProposals()"; //$NON-NLS-1$
 	private static final String COMPUTE_CONTEXT_INFORMATION= "computeContextInformation()"; //$NON-NLS-1$
@@ -107,6 +116,12 @@ final class CompletionProposalComputerDescriptor {
 	private final CompletionProposalCategory fCategory;
 	/** The first error message in the most recent operation, or <code>null</code>. */
 	private String fLastError;
+	/**
+	 * Whether to measure the performance (other than blame performance).
+	 */
+	private boolean fMeasureMaxDelay= false;
+	/** The start of the last operation. */
+	private long fStart;
 
 	/**
 	 * Creates a new descriptor.
@@ -398,6 +413,7 @@ final class CompletionProposalComputerDescriptor {
 			computer.sessionEnded();
 			stopMeter(stats, SESSION_ENDED);
 			
+			fMeasureMaxDelay= true; // start timing execution after the first session - the first one may take longer due to plug-in initialization etc.
 			return;
 		} catch (InvalidRegistryObjectException x) {
 			status= createExceptionStatus(x);
@@ -409,18 +425,6 @@ final class CompletionProposalComputerDescriptor {
 		
 		fRegistry.informUser(this, status);
 	}
-	
-	
-	private void stopMeter(final PerformanceStats stats, String operation) {
-		IStatus status;
-		if (MEASURE_PERFORMANCE) {
-			stats.endRun();
-			if (stats.isFailure()) {
-				status= createPerformanceStatus(operation);
-				fRegistry.informUser(this, status);
-			}
-		}
-	}
 
 	private PerformanceStats startMeter(Object context, IJavaCompletionProposalComputer computer) {
 		final PerformanceStats stats;
@@ -430,38 +434,62 @@ final class CompletionProposalComputerDescriptor {
 		} else {
 			stats= null;
 		}
+		
+		if (fMeasureMaxDelay) {
+			fStart= System.currentTimeMillis();
+		}
+		
 		return stats;
 	}
 
-	private Status createExceptionStatus(InvalidRegistryObjectException x) {
+	private void stopMeter(final PerformanceStats stats, String operation) {
+		if (MEASURE_PERFORMANCE) {
+			stats.endRun();
+			if (stats.isFailure()) {
+				IStatus status= createPerformanceStatus(operation);
+				fRegistry.informUser(this, status);
+				return;
+			}
+		}
+		
+		if (fMeasureMaxDelay) {
+			long current= System.currentTimeMillis();
+			if (current - fStart > MAX_DELAY) {
+				IStatus status= createPerformanceStatus(operation);
+				fRegistry.informUser(this, status);
+			}
+		}
+	}
+
+	private IStatus createExceptionStatus(InvalidRegistryObjectException x) {
 		// extension has become invalid - log & disable
 		String blame= createBlameMessage();
 		String reason= JavaTextMessages.CompletionProposalComputerDescriptor_reason_invalid;
 		return new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, blame + " " + reason, x); //$NON-NLS-1$
 	}
 
-	private Status createExceptionStatus(CoreException x) {
+	private IStatus createExceptionStatus(CoreException x) {
 		// unable to instantiate the extension - log & disable
 		String blame= createBlameMessage();
 		String reason= JavaTextMessages.CompletionProposalComputerDescriptor_reason_instantiation;
 		return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, blame + " " + reason, x); //$NON-NLS-1$
 	}
 	
-	private Status createExceptionStatus(RuntimeException x) {
+	private IStatus createExceptionStatus(RuntimeException x) {
 		// misbehaving extension - log & disable
 		String blame= createBlameMessage();
 		String reason= JavaTextMessages.CompletionProposalComputerDescriptor_reason_runtime_ex;
 		return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, blame + " " + reason, x); //$NON-NLS-1$
 	}
 
-	private Status createAPIViolationStatus(String operation) {
+	private IStatus createAPIViolationStatus(String operation) {
 		String blame= createBlameMessage();
 		Object[] args= {operation};
 		String reason= Messages.format(JavaTextMessages.CompletionProposalComputerDescriptor_reason_API, args);
 		return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, blame + " " + reason, null); //$NON-NLS-1$
 	}
 
-	private Status createPerformanceStatus(String operation) {
+	private IStatus createPerformanceStatus(String operation) {
 		String blame= createBlameMessage();
 		Object[] args= {operation};
 		String reason= Messages.format(JavaTextMessages.CompletionProposalComputerDescriptor_reason_performance, args);
@@ -495,5 +523,18 @@ final class CompletionProposalComputerDescriptor {
 	public String getErrorMessage() {
 		return fLastError;
 	}
+
+	/**
+	 * Returns the contributor of the described extension.
+	 * 
+	 * @return the contributor of the described extension
+	 */
+    IContributor getContributor()  {
+        try {
+	        return fElement.getContributor();
+        } catch (InvalidRegistryObjectException e) {
+        	return null;
+        }	    
+    }
 	
 }

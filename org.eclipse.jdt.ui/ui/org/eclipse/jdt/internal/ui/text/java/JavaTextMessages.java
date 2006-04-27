@@ -28,6 +28,7 @@ final class JavaTextMessages extends NLS {
 	public static String CompletionProcessor_error_notOnBuildPath_title;
 	public static String CompletionProcessor_error_notOnBuildPath_message;
 	public static String CompletionProposalComputerRegistry_messageAvoidanceHint;
+	public static String CompletionProposalComputerRegistry_messageAvoidanceHintWithWarning;
 	public static String ExperimentalProposal_error_msg;
 	public static String ParameterGuessingProposal_error_msg;
 	public static String ProposalInfo_more_to_come;
