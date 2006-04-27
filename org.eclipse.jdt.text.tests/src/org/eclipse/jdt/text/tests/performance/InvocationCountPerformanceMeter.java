@@ -519,7 +519,16 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * Deletes all breakpoint requests.
 	 */
 	private void deleteBreakpointRequests() {
-		fVM.eventRequestManager().deleteAllBreakpoints();
+		try {
+			fVM.eventRequestManager().deleteAllBreakpoints();
+		} catch (VMDisconnectedException x) {
+			/*
+			 * No need to let the test fail at this point since
+			 * next step is to disconnect from the VM.
+			 */ 
+			System.out.println("VM unexpectedly disconnected"); //$NON-NLS-1$
+			x.printStackTrace();
+		}
 	}
 	
 	/**
