@@ -33,7 +33,7 @@ public class HistoryAction extends Action {
 	private IJavaElement fElement;
 	
 	public HistoryAction(TypeHierarchyViewPart viewPart, IJavaElement element) {
-		super();
+        super("", AS_RADIO_BUTTON); //$NON-NLS-1$
 		fViewPart= viewPart;
 		fElement= element;		
 		

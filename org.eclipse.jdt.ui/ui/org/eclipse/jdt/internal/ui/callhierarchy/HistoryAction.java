@@ -38,7 +38,7 @@ class HistoryAction extends Action {
     private IMethod fMethod;
 
     public HistoryAction(CallHierarchyViewPart viewPart, IMethod element) {
-        super();
+        super("", AS_RADIO_BUTTON); //$NON-NLS-1$
         fView = viewPart;
         fMethod = element;
 

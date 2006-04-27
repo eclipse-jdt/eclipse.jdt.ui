@@ -29,6 +29,7 @@ import org.eclipse.jface.util.Assert;
 		private final Object fElement;
 
 		public HistoryAction(Object element, int accelerator) {
+	        super("", AS_RADIO_BUTTON); //$NON-NLS-1$
 			Assert.isNotNull(element);
 			fElement= element;
 
