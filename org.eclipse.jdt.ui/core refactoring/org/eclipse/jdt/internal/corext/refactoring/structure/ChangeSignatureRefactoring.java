@@ -2503,7 +2503,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 				ExceptionInfo info= null;
 				final String kind= extended.getAttribute(ATTRIBUTE_KIND + count);
 				if (kind != null) {
-					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), value, false);
 					if (element == null || !element.exists())
 						return createInputFatalStatus(element, ID_CHANGE_METHOD_SIGNATURE);
 					else {
