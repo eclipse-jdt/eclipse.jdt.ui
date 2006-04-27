@@ -155,8 +155,8 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 
 	public JUnitLaunchDescription describeTypeLaunch(IType type) {
 		JUnitLaunchDescription description= new JUnitLaunchDescription(type, type.getElementName());
-
 		description.setMainType(type);
+		description.setTestKind(TestKindRegistry.getDefault().getKind(type).getId());
 		return description;
 	}
 
@@ -167,6 +167,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		JUnitLaunchDescription description= new JUnitLaunchDescription(method, name);
 		description.setMainType(declaringType);
 		description.setTestName(method.getElementName());
+		description.setTestKind(TestKindRegistry.getDefault().getKind(method.getDeclaringType()).getId());
 		return description;
 	}
 
