@@ -63,6 +63,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -230,17 +231,51 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		pm.beginTask(ActionMessages.FindStringsToExternalizeAction_find_strings, elements.size()); 
 					
 		try{
-			List l= new ArrayList();	
+			List result= new ArrayList();	
 			for (Iterator iter= elements.iterator(); iter.hasNext();) {
-				IJavaElement element= (IJavaElement) iter.next();
-				if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
-					l.addAll(analyze((IPackageFragment) element, new SubProgressMonitor(pm, 1)));
-				else if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT)
-					l.addAll(analyze((IPackageFragmentRoot) element, new SubProgressMonitor(pm, 1)));
-				if (element.getElementType() == IJavaElement.JAVA_PROJECT)
-					l.addAll(analyze((IJavaProject) element, new SubProgressMonitor(pm, 1)));
+				Object obj= iter.next();
+				if (obj instanceof IJavaElement) {
+					IJavaElement element= (IJavaElement) obj;
+					int elementType= element.getElementType();
+					
+					if (elementType == IJavaElement.PACKAGE_FRAGMENT) {
+						result.addAll(analyze((IPackageFragment) element, new SubProgressMonitor(pm, 1)));
+					} else if (elementType == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
+						IPackageFragmentRoot root= (IPackageFragmentRoot)element;
+						if (!root.isExternal() && !ReorgUtils.isClassFolder(root)) {
+							result.addAll(analyze((IPackageFragmentRoot) element, new SubProgressMonitor(pm, 1)));
+						} else {
+							pm.worked(1);
+						}
+					} else if (elementType == IJavaElement.JAVA_PROJECT) {
+						result.addAll(analyze((IJavaProject) element, new SubProgressMonitor(pm, 1)));
+					} else if (elementType == IJavaElement.COMPILATION_UNIT) {
+						ICompilationUnit cu= (ICompilationUnit)element;
+						if (cu.exists()) {
+							NonNLSElement nlsElement= analyze(cu);
+							if (nlsElement != null) {
+								result.add(nlsElement);
+							}							
+						}
+						pm.worked(1);
+					} else if (elementType == IJavaElement.TYPE) {
+						IType type= (IType)element;
+						ICompilationUnit cu= type.getCompilationUnit();
+						if (cu != null && cu.exists()) {
+							NonNLSElement nlsElement= analyze(cu);
+							if (nlsElement != null) {
+								result.add(nlsElement);
+							}							
+						}
+						pm.worked(1);
+					} else {
+						pm.worked(1);
+					}
+				} else {
+					pm.worked(1);
+				}
 			}
-			return (NonNLSElement[]) l.toArray(new NonNLSElement[l.size()]);
+			return (NonNLSElement[]) result.toArray(new NonNLSElement[result.size()]);
 		} finally{
 			pm.done();
 		}
