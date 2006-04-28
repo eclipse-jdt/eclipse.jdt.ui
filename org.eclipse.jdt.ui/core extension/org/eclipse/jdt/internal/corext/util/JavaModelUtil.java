@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.Assert;
@@ -896,34 +897,53 @@ public final class JavaModelUtil {
 			monitor= new NullProgressMonitor();
 		}
 		monitor.beginTask(CorextMessages.JavaModelUtil_applyedit_operation, 3); 
-		
-		IDocument document= null;
-		DocumentRewriteSession session= null;
+
 		try {
-			document= aquireDocument(cu, new SubProgressMonitor(monitor, 1));
-			if (document instanceof IDocumentExtension4) {
-				 session= ((IDocumentExtension4)document).startRewriteSession(
-					DocumentRewriteSessionType.UNRESTRICTED);
-			}
-			if (save) {
-				commitDocument(cu, document, edit, new SubProgressMonitor(monitor, 1));
-			} else {
-				edit.apply(document);
-			}
-		} catch (BadLocationException e) {
-			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
-		} finally {
+			if (!save && isEmpty(edit))
+				return;
+			
+			IDocument document= null;
+			DocumentRewriteSession session= null;
 			try {
-				if (session != null && document != null) {
-					((IDocumentExtension4)document).stopRewriteSession(session);
+				document= aquireDocument(cu, new SubProgressMonitor(monitor, 1));
+				if (document instanceof IDocumentExtension4) {
+					session= ((IDocumentExtension4)document).startRewriteSession(
+							DocumentRewriteSessionType.UNRESTRICTED);
 				}
+				if (save) {
+					commitDocument(cu, document, edit, new SubProgressMonitor(monitor, 1));
+				} else {
+					edit.apply(document);
+				}
+			} catch (BadLocationException e) {
+				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 			} finally {
-				releaseDocument(cu, document, new SubProgressMonitor(monitor, 1));
+				try {
+					if (session != null && document != null) {
+						((IDocumentExtension4)document).stopRewriteSession(session);
+					}
+				} finally {
+					releaseDocument(cu, document, new SubProgressMonitor(monitor, 1));
+				}
 			}
+		} finally {
 			monitor.done();
-		}
+		}		
 	}
-	
+
+	/**
+	 * If this method returns <code>true</code>, <code>edit</code> is a no-op. Note that the
+	 * contrary may not be true: a complex edit that results in a no-op may not be detected as such.
+	 * 
+	 * @param edit a text edit to test
+	 * @return <code>false</code> if <code>edit</code> may contain real changes,
+	 *         <code>true</code> if it certainly does not
+	 * @since 3.2
+	 */
+    private static boolean isEmpty(TextEdit edit) {
+    	return edit instanceof MultiTextEdit && !((MultiTextEdit) edit).hasChildren();
+    }
+
 	private static IDocument aquireDocument(ICompilationUnit cu, IProgressMonitor monitor) throws CoreException {
 		if (JavaModelUtil.isPrimary(cu)) {
 			IFile file= (IFile) cu.getResource();
