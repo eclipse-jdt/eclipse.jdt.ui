@@ -35,9 +35,9 @@ import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 public class JUnit4TestFinder implements ITestFinder {
 	private static class Annotation {
-		private static final JUnit4TestFinder.Annotation RUN_WITH= new JUnit4TestFinder.Annotation(new String[] { "RunWith", "org.junit.runner.RunWith" });
+		private static final JUnit4TestFinder.Annotation RUN_WITH= new JUnit4TestFinder.Annotation(new String[] { "RunWith", "org.junit.runner.RunWith" }); //$NON-NLS-1$ //$NON-NLS-2$
 
-		private static final JUnit4TestFinder.Annotation TEST= new JUnit4TestFinder.Annotation(new String[] { "Test", "org.junit.Test" });
+		private static final JUnit4TestFinder.Annotation TEST= new JUnit4TestFinder.Annotation(new String[] { "Test", "org.junit.Test" }); //$NON-NLS-1$ //$NON-NLS-2$
 
 		private final String[] names;
 
