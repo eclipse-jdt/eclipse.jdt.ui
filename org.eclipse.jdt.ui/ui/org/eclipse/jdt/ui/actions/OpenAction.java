@@ -131,16 +131,23 @@ public class OpenAction extends SelectionDispatchAction {
 			return;
 		try {
 			IJavaElement[] elements= SelectionConverter.codeResolveForked(fEditor, false);
-			if (elements == null || elements.length == 0) {
+			IJavaElement element= null;
+			if (elements != null) {
+				if (elements.length == 1) {
+					element= elements[0];
+				} else if (elements.length > 1) {
+					element= OpenActionUtil.selectJavaElement(elements, getShell(), getDialogTitle(), ActionMessages.OpenAction_select_element);
+					if (element == null) // cancelled
+						return;
+				}
+			}
+			if (element == null) {
 				IEditorStatusLine statusLine= (IEditorStatusLine) fEditor.getAdapter(IEditorStatusLine.class);
 				if (statusLine != null)
 					statusLine.setMessage(true, ActionMessages.OpenAction_error_messageBadSelection, null); 
 				getShell().getDisplay().beep();
 				return;
 			}
-			IJavaElement element= elements[0];
-			if (elements.length > 1)
-				element= OpenActionUtil.selectJavaElement(elements, getShell(), getDialogTitle(), ActionMessages.OpenAction_select_element);
 
 			int type= element.getElementType();
 			if (type == IJavaElement.JAVA_PROJECT || type == IJavaElement.PACKAGE_FRAGMENT_ROOT || type == IJavaElement.PACKAGE_FRAGMENT)
