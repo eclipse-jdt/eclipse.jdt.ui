@@ -455,7 +455,8 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentChanged(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IDocument)
 	 */
 	public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
-		scheduleJob();
+		if (newInput != null)
+			scheduleJob();
 	}
 	
 	/**
