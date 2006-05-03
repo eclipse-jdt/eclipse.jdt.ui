@@ -177,7 +177,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	protected void internalCreatePartControl(Composite parent) {
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		fViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, store);
-		fViewerConfiguration= new SimpleJavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null, false);
+		fViewerConfiguration= new SimpleJavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, IJavaPartitions.JAVA_PARTITIONING, false);
 		fViewer.configure(fViewerConfiguration);
 		fViewer.setEditable(false);
 
@@ -421,11 +421,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 		if (firstCharNotWhitespace)
 			sourceLines[0]= firstLine;
 
-		source= Strings.concatenate(sourceLines, delim);
-
-		IDocument doc= new Document(source);
-		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(doc, IJavaPartitions.JAVA_PARTITIONING);
-		return doc;
+		return Strings.concatenate(sourceLines, delim);
 	}
 
 	/*
