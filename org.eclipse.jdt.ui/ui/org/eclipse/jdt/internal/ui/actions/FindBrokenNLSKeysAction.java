@@ -111,6 +111,9 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void run(IStructuredSelection selection) {
+		if (selection.size() == 1 && !ActionUtil.isProcessable(getShell(), selection.getFirstElement()))
+			return;
+		
 		SearchPatternData[] data= getNLSFiles(selection);
 		if (data == null || data.length == 0) {
 			MessageDialog.openInformation(getShell(), ActionMessages.FindNLSProblemsAction_ErrorDialogTitle, ActionMessages.FindNLSProblemsAction_NoPropertieFilesFoundErrorDescription);
@@ -289,6 +292,9 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 		if (compilationUnit == null)
 			return null;
 		
+		if (!ActionUtil.isOnBuildPath(compilationUnit))
+			return null;
+		
 		IType[] types= compilationUnit.getTypes();
 		if (types.length > 1)
 			return null;
@@ -324,7 +330,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 
 			if (cuFile != null && cuFile.exists()) {
 				IJavaElement  element= JavaCore.create(cuFile);
-				if (element != null && element.exists() && element.getElementType() == IJavaElement.COMPILATION_UNIT) {
+				if (element != null && element.exists() && element.getElementType() == IJavaElement.COMPILATION_UNIT && ActionUtil.isOnBuildPath(element)) {
 					ICompilationUnit compilationUnit= (ICompilationUnit)element;
 					IType type= (compilationUnit).findPrimaryType();
 					if (type != null) {
