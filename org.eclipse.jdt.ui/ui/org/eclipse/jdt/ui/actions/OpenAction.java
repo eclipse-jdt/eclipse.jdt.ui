@@ -139,8 +139,11 @@ public class OpenAction extends SelectionDispatchAction {
 				return;
 			}
 			IJavaElement element= elements[0];
-			if (elements.length > 1)
+			if (elements.length > 1) {
 				element= OpenActionUtil.selectJavaElement(elements, getShell(), getDialogTitle(), ActionMessages.OpenAction_select_element);
+				if (element == null)
+					return;
+			}
 
 			int type= element.getElementType();
 			if (type == IJavaElement.JAVA_PROJECT || type == IJavaElement.PACKAGE_FRAGMENT_ROOT || type == IJavaElement.PACKAGE_FRAGMENT)
