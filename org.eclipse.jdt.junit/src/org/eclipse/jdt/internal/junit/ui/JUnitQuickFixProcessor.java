@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
@@ -160,9 +161,9 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 			if (binding != null) {
 				IAnnotationBinding[] annotations= binding.getAnnotations();
 				for (int i= 0; i < annotations.length; i++) {
-					if (annotations[i].getAnnotationType().getQualifiedName().equals(JUnitPlugin.JUNIT4_ANNOTATION_NAME)) {
+					final ITypeBinding annotationType= annotations[i].getAnnotationType();
+					if (annotationType != null && JUnitPlugin.JUNIT4_ANNOTATION_NAME.equals(annotationType.getQualifiedName()))
 						return true;
-					}
 				}
 			}
 		}
