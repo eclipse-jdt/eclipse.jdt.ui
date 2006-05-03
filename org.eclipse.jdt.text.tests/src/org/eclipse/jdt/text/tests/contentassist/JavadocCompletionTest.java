@@ -16,6 +16,8 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
+import org.eclipse.jdt.core.JavaCore;
+
 public class JavadocCompletionTest extends AbstractCompletionTest {
 	/*
 	 * This test tests only <= 1.5 source level tags.
@@ -163,6 +165,51 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 		expectImport("java.util.List");
 		assertTypeJavadocProposal(" * Prefix List|", "{@link List}", " * Prefix {@link List}|");
 	}
+
+	public void testDirectLinkTypeExistingImport() throws Exception {
+		addImport("java.util.List");
+		expectImport("java.util.List");
+		assertTypeJavadocProposal(" * Prefix List|", "{@link List}", " * Prefix {@link List}|");
+	}
+	
+	public void testDirectLinkImportsOnExistingImport() throws Exception {
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_ADDIMPORT, true);
+		addImport("java.util.List");
+		expectImport("java.util.List");
+		assertTypeJavadocProposal(" * Prefix List|", "{@link List}", " * Prefix {@link List}|");
+	}
+	
+	public void testDirectLinkImportsOnExistingImportQualifiedPrefix() throws Exception {
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_ADDIMPORT, true);
+		addImport("java.util.List");
+		expectImport("java.util.List");
+		assertTypeJavadocProposal(" * Prefix java.util.List|", "{@link List}", " * Prefix {@link java.util.List}|");
+	}
+
+	public void testDirectLinkImportsOnExistingImportCamelCase() throws Exception {
+		if (true) {
+			System.out.println("disabled unreliable camel case tests");
+			return;
+		}
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_ADDIMPORT, true);
+		setCoreOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
+		addImport("java.text.DateFormat");
+		expectImport("java.text.DateFormat");
+		assertTypeJavadocProposal(" * Prefix DF|", "{@link DateFormat}", " * Prefix {@link DateFormat}|");
+	}
+	
+	public void testDirectLinkImportsOnExistingImportCamelCaseQualifiedPrefix() throws Exception {
+		if (true) {
+			System.out.println("disabled unreliable camel case tests");
+			return;
+		}
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_ADDIMPORT, true);
+		setCoreOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
+		addImport("java.text.DateFormat");
+		expectImport("java.text.DateFormat");
+		assertTypeJavadocProposal(" * Prefix java.text.DF|", "{@link DateFormat}", " * Prefix {@link java.text.DateFormat}|");
+	}
+	
 	public void testDirectLinkTypeNoAutoCloseImportsOn() throws Exception {
 		if (true) {
 			System.out.println("not testing autoclosing behavior, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=113544");

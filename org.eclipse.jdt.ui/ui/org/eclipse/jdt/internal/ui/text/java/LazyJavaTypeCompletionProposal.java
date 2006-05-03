@@ -82,33 +82,44 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	protected String computeReplacementString() {
 		String replacement= super.computeReplacementString();
 
-		// no import mangling from within the import section
+		/* No import rewriting ever from within the import section. */
 		if (isImportCompletion())
 	        return replacement;
 		
-		// always use the simple name for text references to types
+		/* Always use the simple name for non-formal javadoc references to types. */
 		// TODO fix
 		 if (fProposal.getKind() == CompletionProposal.TYPE_REF &&  fInvocationContext.getCoreContext().isInJavadocText())
 			 return getSimpleTypeName();
 		
 		String qualifiedTypeName= getQualifiedTypeName();
- 		if (qualifiedTypeName.indexOf('.') == -1) {
+ 		if (qualifiedTypeName.indexOf('.') == -1)
  			// default package - no imports needed 
  			return qualifiedTypeName;
- 		}
- 		
+
+ 		/*
+		 * If the user types in the qualification, don't force import rewriting on him - insert the
+		 * qualified name.
+		 */
  		IDocument document= fInvocationContext.getDocument();
 		if (document != null) {
 			String prefix= getPrefix(document, getReplacementOffset() + getReplacementLength());
-			if (prefix.indexOf('.') != -1 && qualifiedTypeName.toLowerCase().startsWith(prefix.toLowerCase()))
+			int dotIndex= prefix.lastIndexOf('.');
+			// match up to the last dot in order to make higher level matching still work (camel case...)
+			if (dotIndex != -1 && qualifiedTypeName.toLowerCase().startsWith(prefix.substring(0, dotIndex + 1).toLowerCase()))
 				return qualifiedTypeName;
 		}
 		
+		/*
+		 * The replacement does not contain a qualification (e.g. an inner type qualified by its
+		 * parent) - use the replacement directly.
+		 */
 		if (replacement.indexOf('.') == -1) {
+			if (isInJavadoc())
+				return getSimpleTypeName(); // don't use the braces added for javadoc link proposals
 			return replacement;
 		}
 		
-		// add imports for normal types
+		/* Add imports if the preference is on. */
 		fImportRewrite= createImportRewrite();
 		if (fImportRewrite != null) {
 			return fImportRewrite.addImport(qualifiedTypeName, fImportContext);
@@ -116,12 +127,12 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		
 		// fall back for the case we don't have an import rewrite (see allowAddingImports)
 		
-		// no imports for implicit imports
+		/* No imports for implicit imports. */
 		if (fCompilationUnit != null && JavaModelUtil.isImplicitImport(Signature.getQualifier(qualifiedTypeName), fCompilationUnit)) {
 			return Signature.getSimpleName(qualifiedTypeName);
 		}
 		
-		// otherwise, use the fqn
+		/* Default: use the fully qualified type name. */
 		return qualifiedTypeName;
 	}
 
