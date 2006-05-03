@@ -152,18 +152,19 @@ public class TypeInfoViewer {
 	     		return -1;
 	     	if (leftCategory > rightCategory)
 	     		return +1;
-	     	leftCategory= getElementTypeCategory(leftInfo);
-	     	rightCategory= getElementTypeCategory(rightInfo);
-	     	if (leftCategory < rightCategory)
-	     		return -1;
-	     	if (leftCategory > rightCategory)
-	     		return +1;
 	     	int result= compareName(leftInfo.getTypeName(), rightInfo.getTypeName());
 	     	if (result != 0)
 	     		return result;
 	     	result= compareTypeContainerName(leftInfo.getTypeContainerName(), rightInfo.getTypeContainerName());
 	     	if (result != 0)
 	     		return result;
+	     	
+	     	leftCategory= getElementTypeCategory(leftInfo);
+	     	rightCategory= getElementTypeCategory(rightInfo);
+	     	if (leftCategory < rightCategory)
+	     		return -1;
+	     	if (leftCategory > rightCategory)
+	     		return +1;
 	     	return compareContainerName(leftInfo, rightInfo);
 	    }
 		private int compareName(String leftString, String rightString) {
