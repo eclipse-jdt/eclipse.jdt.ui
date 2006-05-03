@@ -48,6 +48,7 @@ import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -538,6 +539,10 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				buffer.append(delimiter);
 			}
 			buffer.append(JdtFlags.VISIBILITY_STRING_PUBLIC);
+			if (superType != null && Flags.isAbstract(superType.getFlags())) {
+				buffer.append(' ');
+				buffer.append("abstract "); //$NON-NLS-1$
+			}
 			buffer.append(' ');
 			buffer.append("class "); //$NON-NLS-1$
 			buffer.append(fTypeName);
