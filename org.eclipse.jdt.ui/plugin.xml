@@ -2395,6 +2395,12 @@
               id="org.eclipse.ltk.ui.actions.CreateRefactoringScript"
               label="%Refactoring.createScript.label"
               menubarPath="org.eclipse.jdt.ui.refactoring.menu/scriptGroup"/>
+        <action
+              class="org.eclipse.jdt.internal.ui.refactoring.actions.MigrateJarFileAction"
+              definitionId="org.eclipse.jdt.ui.refactor.migrate.jar"
+              id="org.eclipse.jdt.ui.actions.MigrateJarFile"
+              label="%Refactoring.migrateJar.label"
+              menubarPath="org.eclipse.jdt.ui.refactoring.menu/scriptGroup"/>
          
 <!-- =========================================================================== -->
 <!-- Source Menu                                                                 -->
@@ -3580,6 +3586,12 @@
             description="%ActionDefinition.create.description"
             id="org.eclipse.ltk.ui.refactor.create.refactoring.script"
             name="%ActionDefinition.create.name">
+       </command>
+      <command
+            categoryId="org.eclipse.jdt.ui.category.refactoring"
+            description="%ActionDefinition.migrate.description"
+            id="org.eclipse.jdt.ui.refactor.migrate.jar"
+            name="%ActionDefinition.migrate.name">
        </command>
 <!-- navigate -->
       <command

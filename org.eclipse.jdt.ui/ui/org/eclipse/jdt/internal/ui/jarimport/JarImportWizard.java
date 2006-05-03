@@ -29,8 +29,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -193,30 +191,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 	 */
 	public static boolean isValidJavaProject(final IJavaProject project) throws JavaModelException {
 		Assert.isNotNull(project);
-		boolean result= false;
-		final IProject resource= project.getProject();
-		if (resource.isAccessible()) {
-			try {
-				result= true;
-				final IProjectDescription description= resource.getDescription();
-				final String[] ids= description.getNatureIds();
-				for (int offset= 0; offset < ids.length && result; offset++) {
-					if ("org.eclipse.pde.PluginNature".equals(ids[offset])) { //$NON-NLS-1$
-						boolean found= false;
-						final IClasspathEntry[] entries= project.getRawClasspath();
-						for (int position= 0; position < entries.length && !found; position++) {
-							if (entries[position].getContentKind() == IPackageFragmentRoot.K_SOURCE && entries[position].getEntryKind() == IClasspathEntry.CPE_SOURCE)
-								found= true;
-						}
-						if (!found)
-							result= false;
-					}
-				}
-			} catch (CoreException exception) {
-				throw new JavaModelException(exception);
-			}
-		}
-		return result;
+		return project.getProject().isAccessible();
 	}
 
 	/** The refactoring history proxy */
