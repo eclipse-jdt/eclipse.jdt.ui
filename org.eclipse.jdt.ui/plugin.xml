@@ -4367,6 +4367,7 @@
       </markerTypeCategory>
       <markerTypeCategory name="%markerCategory.buildpath_problem">
          <markerTypeReference id="org.eclipse.jdt.core.buildpath_problem"/>
+         <markerTypeReference id="org.eclipse.jdt.launching.jreContainerMarker"/>
       </markerTypeCategory>
       
     <markerGrouping id="org.eclipse.jdt.ui.java_marker_category" label="%MarkerCategory.name"/>
