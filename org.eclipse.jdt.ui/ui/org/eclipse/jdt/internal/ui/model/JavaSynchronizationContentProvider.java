@@ -379,6 +379,12 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 					JavaPlugin.log(exception);
 				}
 			}
+			// We need to check whether a folder has non-fragment children (bug 138767)
+			if (children[index] instanceof IFolder) {
+				IFolder folder = (IFolder) children[index];
+				if (getChildren(folder).length == 0)
+					continue;
+			}
 			list.add(children[index]);
 		}
 
