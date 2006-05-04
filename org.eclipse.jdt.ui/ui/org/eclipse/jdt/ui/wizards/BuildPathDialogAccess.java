@@ -13,6 +13,9 @@ package org.eclipse.jdt.ui.wizards;
 import java.net.URL;
 import java.util.ArrayList;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -20,8 +23,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
@@ -32,6 +33,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+
 import org.eclipse.ui.views.navigator.ResourceSorter;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -354,6 +356,7 @@ public final class BuildPathDialogAccess {
 		IResource focus= initialSelection != null ? root.findMember(initialSelection) : null;
 		
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(shell, new WorkbenchLabelProvider(), new WorkbenchContentProvider());
+		dialog.setHelpAvailable(false);
 		dialog.setValidator(validator);
 		dialog.setTitle(NewWizardMessages.BuildPathDialogAccess_JARArchiveDialog_new_title); 
 		dialog.setMessage(NewWizardMessages.BuildPathDialogAccess_JARArchiveDialog_new_description); 
@@ -504,6 +507,7 @@ public final class BuildPathDialogAccess {
 		dialog.setExisting(used);
 		dialog.setTitle(title); 
 		dialog.setMessage(message); 
+		dialog.setHelpAvailable(false);
 		dialog.addFilter(new TypedViewerFilter(acceptedClasses, used));
 		dialog.setInput(root);
 		dialog.setInitialFocus(focus);
