@@ -80,6 +80,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 
 public class AddSourceFolderWizardPage extends NewElementWizardPage {
@@ -187,7 +188,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		
 	private static final String PAGE_NAME= "NewSourceFolderWizardPage"; //$NON-NLS-1$
 
-	private final StringButtonDialogField fRootDialogField;
+	private final StringDialogField fRootDialogField;
 	private final SelectionButtonDialogField fAddExclusionPatterns, fRemoveProjectFolder, fIgnoreConflicts;
 	private final LinkFields fLinkFields;
 	
@@ -267,9 +268,13 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		
 		RootFieldAdapter adapter= new RootFieldAdapter();
 		
-		fRootDialogField= new StringButtonDialogField(adapter);
-		fRootDialogField.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_root_label); 
-		fRootDialogField.setButtonLabel(NewWizardMessages.NewSourceFolderWizardPage_root_button); 
+		if (linkedMode) {
+			fRootDialogField= new StringDialogField();
+		} else {
+			fRootDialogField= new StringButtonDialogField(adapter);
+			((StringButtonDialogField)fRootDialogField).setButtonLabel(NewWizardMessages.NewSourceFolderWizardPage_root_button);
+		}
+		fRootDialogField.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_root_label);
 		if (fNewElement.getPath() == null) {
 			fRootDialogField.setText(""); //$NON-NLS-1$
 		} else {
@@ -324,10 +329,12 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		layout.numColumns= 4;
 		composite.setLayout(layout);
 		
-		if (fLinkedMode)
+		if (fLinkedMode) {
 			fLinkFields.doFillIntoGrid(composite, layout.numColumns);
-		
-		fRootDialogField.doFillIntoGrid(composite, layout.numColumns);
+			fRootDialogField.doFillIntoGrid(composite, layout.numColumns - 1);
+		} else {
+			fRootDialogField.doFillIntoGrid(composite, layout.numColumns);
+		}
 		
 		if (fAllowRemoveProjectFolder)
 			fRemoveProjectFolder.doFillIntoGrid(composite, layout.numColumns);
@@ -604,9 +611,13 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		IWorkspace workspace= JavaPlugin.getWorkspace();
 		IPath path= Path.fromOSString(fLinkFields.fLinkLocation.getText());
 
-		IStatus locationStatus= workspace.validateLinkLocation(fNewElement.getJavaProject().getProject().getFolder(new Path(folderName)), path);
+		IFolder folder= fNewElement.getJavaProject().getProject().getFolder(new Path(folderName));
+		IStatus locationStatus= workspace.validateLinkLocation(folder, path);
 		if (locationStatus.matches(IStatus.ERROR))
 			return locationStatus;
+		
+		if (folder.exists() && !folder.getFullPath().equals(fOrginalPath))
+			return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewFolderDialog_folderNameEmpty_alreadyExists, folder.getFullPath().toString()));
 		
 		IPathVariableManager pathVariableManager = ResourcesPlugin.getWorkspace().getPathVariableManager();
 		IPath path1= Path.fromOSString(fLinkFields.fLinkLocation.getText());
