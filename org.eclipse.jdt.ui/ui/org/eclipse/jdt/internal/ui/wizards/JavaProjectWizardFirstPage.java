@@ -769,7 +769,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
 
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.OPEN_PROJECT_WIZARD_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(getShell(), IJavaHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
 	}	
 
 	/**

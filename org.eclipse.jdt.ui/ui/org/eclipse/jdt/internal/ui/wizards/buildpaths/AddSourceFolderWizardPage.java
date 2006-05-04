@@ -38,6 +38,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -729,7 +730,13 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 
 		IProject currProject= fNewElement.getJavaProject().getProject();
 
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp) {
+			protected Control createDialogArea(Composite parent) {
+				Control result= super.createDialogArea(parent);
+				PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJavaHelpContextIds.BP_CHOOSE_EXISTING_FOLDER_TO_MAKE_SOURCE_FOLDER);
+				return result;
+			}
+		};
 		dialog.setValidator(validator);
 		dialog.setTitle(title);
 		dialog.setMessage(message);

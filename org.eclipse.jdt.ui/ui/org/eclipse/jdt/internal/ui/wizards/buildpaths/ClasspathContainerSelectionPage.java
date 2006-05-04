@@ -28,6 +28,9 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.WizardPage;
 
+import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
@@ -103,6 +106,8 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 		validatePage();
 		setControl(fListViewer.getList());
 		Dialog.applyDialogFont(fListViewer.getList());
+		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJavaHelpContextIds.BP_SELECT_CLASSPATH_CONTAINER);
 	}
 
 	/**

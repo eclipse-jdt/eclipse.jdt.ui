@@ -29,10 +29,13 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.NewFolderDialog;
+
 import org.eclipse.ui.views.navigator.ResourceSorter;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 /**
@@ -65,7 +68,10 @@ public class FolderSelectionDialog extends ElementTreeSelectionDialog implements
 		button.setFont(parent.getFont());
 		fNewFolderButton= button;
 		
-		applyDialogFont(result);		
+		applyDialogFont(result);
+
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJavaHelpContextIds.BP_SELECT_DEFAULT_OUTPUT_FOLDER_DIALOG);
+		
 		return result;
 	}
 
@@ -82,7 +88,12 @@ public class FolderSelectionDialog extends ElementTreeSelectionDialog implements
 	}	
 	
 	protected void newFolderButtonPressed() {
-		NewFolderDialog dialog= new NewFolderDialog(getShell(), fSelectedContainer);
+		NewFolderDialog dialog= new NewFolderDialog(getShell(), fSelectedContainer) {
+			protected Control createContents(Composite parent) {
+				PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJavaHelpContextIds.BP_CREATE_NEW_FOLDER);
+				return super.createContents(parent);
+			}
+		};
 		if (dialog.open() == Window.OK) {
 			TreeViewer treeViewer= getTreeViewer();
 			treeViewer.refresh(fSelectedContainer);

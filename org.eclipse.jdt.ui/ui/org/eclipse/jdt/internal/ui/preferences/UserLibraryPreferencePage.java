@@ -171,6 +171,9 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			fNameField.postSetFocusOnDialogField(parent.getDisplay());
 			
 			Dialog.applyDialogFont(composite);
+			
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.CP_EDIT_USER_LIBRARY);
+			
 			return composite;
 		}
 		
@@ -325,6 +328,13 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			fLocationField.postSetFocusOnDialogField(parent.getDisplay());
 			
 			Dialog.applyDialogFont(composite);
+			
+			if (isSave()) {
+				PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.CP_EXPORT_USER_LIBRARY);
+			} else {
+				PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.CP_IMPORT_USER_LIBRARY);
+			}
+			
 			return composite;
 		}
 		

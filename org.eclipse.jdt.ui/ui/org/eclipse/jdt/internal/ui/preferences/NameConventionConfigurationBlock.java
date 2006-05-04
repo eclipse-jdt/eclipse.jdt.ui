@@ -33,6 +33,7 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.JavaConventions;
@@ -44,6 +45,7 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -153,7 +155,10 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 			
 			fPrefixField.postSetFocusOnDialogField(parent.getDisplay());
 			
-			applyDialogFont(composite);		
+			applyDialogFont(composite);
+			
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.CODE_STYLE_EDIT_PREFIX_SUFFIX);
+			
 			return composite;
 		}
 		
