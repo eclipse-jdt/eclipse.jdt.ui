@@ -208,6 +208,7 @@ public final class JUnitMessages extends NLS {
 	public static String TestRunnerViewPart_toggle_automatic_label;
 	public static String TestRunnerViewPart_toggle_horizontal_label;
 	public static String TestRunnerViewPart_toggle_vertical_label;
+	public static String TestRunnerViewPart_titleToolTip;
 	public static String TestRunnerViewPart_wrapperJobName;
 	public static String TestRunnerViewPart_history;
 	public static String TestRunnerViewPart_test_run_history;

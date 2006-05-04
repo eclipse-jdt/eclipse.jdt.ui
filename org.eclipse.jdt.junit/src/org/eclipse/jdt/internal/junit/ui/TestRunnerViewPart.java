@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.util.Date;
 import java.util.Iterator;
@@ -97,6 +98,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.ViewHistory;
 
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
+import org.eclipse.jdt.internal.junit.launcher.TestKind;
+import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.model.ITestRunSessionListener;
 import org.eclipse.jdt.internal.junit.model.ITestSessionListener;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
@@ -1097,7 +1100,8 @@ action enablement
 			fTestSessionListener= new TestSessionListener();
 			fTestRunSession.addTestSessionListener(fTestSessionListener);
 			
-			setTitleToolTip(fTestRunSession.getTestRunName());
+			setTitleToolTip();
+						
 			clearStatus();
 			fFailureTrace.clear();
 			registerInfoMessage(fTestRunSession.getTestRunName());
@@ -1116,6 +1120,32 @@ action enablement
 				fStopAction.setEnabled(fTestRunSession.isKeptAlive());
 			}
 		}
+	}
+	
+	private void setTitleToolTip() {
+		String testKindDisplayStr= null;
+		ILaunchConfiguration config= fTestRunSession.getLaunch().getLaunchConfiguration();
+		if (config != null) {
+			TestKind kind= TestKindRegistry.getDefault().getKind(config);
+			if (kind.isNull())
+				testKindDisplayStr= getJunit3DisplayName();
+			else
+				testKindDisplayStr= kind.getDisplayName();
+		}
+		if (testKindDisplayStr != null)
+			setTitleToolTip(MessageFormat.format(JUnitMessages.TestRunnerViewPart_titleToolTip, new String[] {fTestRunSession.getTestRunName(), testKindDisplayStr}));
+		else
+			setTitleToolTip(fTestRunSession.getTestRunName());
+	}
+	
+	private String getJunit3DisplayName() {
+		Iterator iter= TestKindRegistry.getDefault().getAllKinds().iterator();
+		while (iter.hasNext()) {
+			TestKind kind= (TestKind)iter.next();
+			if ("org.eclipse.jdt.junit.loader.junit3".equals(kind.getId())) //$NON-NLS-1$
+				return kind.getDisplayName();
+		}
+		return null;
 	}
 
 	public synchronized void dispose(){
