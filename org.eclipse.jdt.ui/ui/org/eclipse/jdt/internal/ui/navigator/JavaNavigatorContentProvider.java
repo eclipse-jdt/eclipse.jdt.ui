@@ -84,6 +84,14 @@ public class JavaNavigatorContentProvider extends
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		super.inputChanged(viewer, oldInput, findInputElement(newInput));
 	}
+	
+	public Object getParent(Object element) {
+		Object parent= super.getParent(element);
+		if (parent instanceof IJavaModel) {
+			return getViewerInput() != null ? getViewerInput() : parent;
+		}
+		return parent;
+	}
 
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof IWorkspaceRoot)
