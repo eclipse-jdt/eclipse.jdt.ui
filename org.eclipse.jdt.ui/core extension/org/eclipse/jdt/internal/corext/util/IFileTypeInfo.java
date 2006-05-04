@@ -142,7 +142,11 @@ public class IFileTypeInfo extends TypeInfo {
 				try {
 					IFileInfo info= EFS.getStore(location).fetchInfo();
 					if (info.exists()) {
-						return info.getLastModified();
+						// The element could be removed from the build path. So check
+						// if the Java element still exists.
+						IJavaElement element= JavaCore.create(resource);
+						if (element != null && element.exists())
+							return info.getLastModified();
 					}
 				} catch (CoreException e) {
 					// Fall through

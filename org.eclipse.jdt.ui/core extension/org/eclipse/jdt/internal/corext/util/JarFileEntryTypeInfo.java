@@ -145,19 +145,31 @@ public class JarFileEntryTypeInfo extends TypeInfo {
 		IPath path= new Path(fJar);
 		IResource resource= root.findMember(path);
 		IFileInfo info= null;
+		IJavaElement element= null;
 		if (resource != null && resource.exists()) {
 			URI location= resource.getLocationURI();
 			if (location != null) {
 				try {
 					info= EFS.getStore(location).fetchInfo();
+					if (info.exists()) {
+						element= JavaCore.create(resource);
+						// The exist test for external jars is expensive due to
+						// JDT/Core. So do the test here since we know that the
+						// Java element points to an internal Jar. 
+						if (element != null && !element.exists())
+							element= null;
+					}
 				} catch (CoreException e) {
 					// Fall through
 				}
 			}
 		} else {
 			info= EFS.getLocalFileSystem().getStore(Path.fromOSString(fJar)).fetchInfo();
+			if (info.exists()) {
+				element= getPackageFragementRootForExternalJar();
+			}
 		}
-		if (info != null && info.exists()) {
+		if (info != null && info.exists() && element != null) {
 			return info.getLastModified();
 		}
 		return IResource.NULL_STAMP;
@@ -176,5 +188,22 @@ public class JarFileEntryTypeInfo extends TypeInfo {
 		result.append(getFileName());
 		result.append('.');
 		result.append(getExtension());
+	}
+	
+	private IPackageFragmentRoot getPackageFragementRootForExternalJar() {
+		try {
+			IJavaModel jmodel= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+			IJavaProject[] projects= jmodel.getJavaProjects();
+			for (int i= 0; i < projects.length; i++) {
+				IJavaProject project= projects[i];
+				IPackageFragmentRoot root= project.getPackageFragmentRoot(fJar);
+				// Cheaper check than calling root.exists().
+				if (project.isOnClasspath(root))
+					return root;
+			}
+		} catch (JavaModelException e) {
+			// Fall through
+		}
+		return null;
 	}
 }

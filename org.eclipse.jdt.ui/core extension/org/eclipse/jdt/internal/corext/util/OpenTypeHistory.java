@@ -237,7 +237,11 @@ public class OpenTypeHistory extends History {
 	}
 
 	public synchronized void accessed(TypeInfo info) {
-		fTimestampMapping.put(info, new Long(info.getContainerTimestamp()));
+		// Fetching the timestamp might not be cheap (remote file system
+		// external Jars. So check if we alreay have one.
+		if (!fTimestampMapping.containsKey(info)) {
+			fTimestampMapping.put(info, new Long(info.getContainerTimestamp()));
+		}
 		super.accessed(info);
 	}
 
@@ -287,7 +291,7 @@ public class OpenTypeHistory extends History {
 			TypeInfo type= (TypeInfo)iter.next();
 			long currentTimestamp= type.getContainerTimestamp();
 			Long lastTested= (Long)fTimestampMapping.get(type);
-			if (lastTested != null && currentTimestamp == lastTested.longValue() && !type.isContainerDirty())
+			if (lastTested != null && currentTimestamp != IResource.NULL_STAMP && currentTimestamp == lastTested.longValue() && !type.isContainerDirty())
 				continue;
 			try {
 				IType jType= type.resolveType(scope);
@@ -336,9 +340,8 @@ public class OpenTypeHistory extends History {
 				// take null stamp
 			}
 		}
-		long currentTimestamp= info.getContainerTimestamp();
-		if (timestamp != IResource.NULL_STAMP && currentTimestamp != IResource.NULL_STAMP && timestamp == currentTimestamp) {
-			fTimestampMapping.put(info, new Long(currentTimestamp));
+		if (timestamp != IResource.NULL_STAMP) {
+			fTimestampMapping.put(info, new Long(timestamp));
 		}
 		return info;
 	}
