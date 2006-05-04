@@ -49,12 +49,13 @@ public final class SerialVersionDefaultOperation extends AbstractSerialVersionOp
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void addInitializer(final VariableDeclarationFragment fragment, final ASTNode declarationNode) {
+	protected boolean addInitializer(final VariableDeclarationFragment fragment, final ASTNode declarationNode) {
 		Assert.isNotNull(fragment);
 
 		final Expression expression= fragment.getAST().newNumberLiteral(DEFAULT_EXPRESSION);
 		if (expression != null)
 			fragment.setInitializer(expression);
+		return true;
 	}
 
 	/**

@@ -4116,6 +4116,58 @@ public class CleanUpTest extends QuickFixTest {
 		assertRefactoringResultAsExpectedIgnoreHashValue(refactoring, new String[] {expected1});
 	}
 	
+	public void testSerialVersionBug139381() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo1() {\n");
+		buf.append("        new Serializable() {\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("    void foo2() {\n");
+		buf.append("        new Object() {\n");
+		buf.append("        };\n");
+		buf.append("        new Serializable() {\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+
+		ICleanUp cleanUp1= new PotentialProgrammingProblemsCleanUp(PotentialProgrammingProblemsCleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
+		refactoring.addCleanUp(cleanUp1);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo1() {\n");
+		buf.append("        new Serializable() {\n");
+		buf.append("\n");
+		buf.append("            " + FIELD_COMMENT + "\n");
+		buf.append("            private static final long serialVersionUID = 1L;\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("    void foo2() {\n");
+		buf.append("        new Object() {\n");
+		buf.append("        };\n");
+		buf.append("        new Serializable() {\n");
+		buf.append("\n");
+		buf.append("            " + FIELD_COMMENT + "\n");
+		buf.append("            private static final long serialVersionUID = 1L;\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpectedIgnoreHashValue(refactoring, new String[] { expected1 });
+	}
+
 	public void testRemoveBlock01() throws Exception {
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

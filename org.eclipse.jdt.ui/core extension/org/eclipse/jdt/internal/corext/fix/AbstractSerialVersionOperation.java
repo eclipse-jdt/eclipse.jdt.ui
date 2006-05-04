@@ -74,9 +74,10 @@ public abstract class AbstractSerialVersionOperation extends AbstractLinkedFixRe
 	 * Adds an initializer to the specified variable declaration fragment.
 	 *
 	 * @param fragment the variable declaration fragment to add an initializer
+	 * @return false if no id could be calculated
 	 * @throws CoreException 
 	 */
-	protected abstract void addInitializer(final VariableDeclarationFragment fragment, final ASTNode declarationNode) throws CoreException;
+	protected abstract boolean addInitializer(final VariableDeclarationFragment fragment, final ASTNode declarationNode) throws CoreException;
 	
 	/**
 	 * Adds the necessary linked positions for the specified fragment.
@@ -134,7 +135,8 @@ public abstract class AbstractSerialVersionOperation extends AbstractLinkedFixRe
 			declaration.setType(ast.newPrimitiveType(PrimitiveType.LONG));
 			declaration.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL));
 
-			addInitializer(fragment, node);
+			if (!addInitializer(fragment, node))
+				continue;
 
 			if (fragment.getInitializer() != null) {
 				

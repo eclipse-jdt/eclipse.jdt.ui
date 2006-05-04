@@ -52,6 +52,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.SerialVersionHashOperation;
+import org.eclipse.jdt.internal.ui.text.correction.SerialVersionLaunchConfigurationDelegate;
 
 
 public class PotentialProgrammingProblemsFix extends AbstractFix {
@@ -98,7 +99,9 @@ public class PotentialProgrammingProblemsFix extends AbstractFix {
 				}
 					
 				for (int i= 0; i < ids.length; i++) {
-					fIdsTable.put(fQualifiedNames[i], new Long(ids[i]));
+					long id= ids[i];
+					if (id != SerialVersionLaunchConfigurationDelegate.FAILING_ID)
+						fIdsTable.put(fQualifiedNames[i], new Long(id));
 				}
 			}
 		}
@@ -143,12 +146,13 @@ public class PotentialProgrammingProblemsFix extends AbstractFix {
 		/**
 		 * {@inheritDoc}
 		 */
-		protected void addInitializer(VariableDeclarationFragment fragment, ASTNode declarationNode) throws CoreException {
+		protected boolean addInitializer(VariableDeclarationFragment fragment, ASTNode declarationNode) throws CoreException {
 			long id= fContext.getSerialVersionId(getQualifiedName(declarationNode));
-			if (id == -1)
-				id= SERIAL_VALUE;
+			if (id == SerialVersionLaunchConfigurationDelegate.FAILING_ID)
+				return false;
 			
 			fragment.setInitializer(fragment.getAST().newNumberLiteral(id + LONG_SUFFIX));
+			return true;
 		}
 
 		/**

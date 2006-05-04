@@ -169,7 +169,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 	 * {@inheritDoc}
 	 * @throws CoreException 
 	 */
-	protected void addInitializer(final VariableDeclarationFragment fragment, final ASTNode declarationNode) throws CoreException {
+	protected boolean addInitializer(final VariableDeclarationFragment fragment, final ASTNode declarationNode) throws CoreException {
 		Assert.isNotNull(fragment);
 		try {
 			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
@@ -185,6 +185,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		} catch (InterruptedException exception) {
 			// Do nothing
 		}
+		return true;
 	}
 
 	/**
