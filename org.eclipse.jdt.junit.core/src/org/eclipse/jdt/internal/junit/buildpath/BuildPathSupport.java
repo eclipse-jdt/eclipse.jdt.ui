@@ -87,7 +87,7 @@ public class BuildPathSupport {
 			IPath jarLocation= bundleBase.append("junit.jar"); //$NON-NLS-1$
 			
 			IPath sourceBase= getSourceLocation(JUNIT3_PLUGIN_ID);
-			IPath srcLocation= sourceBase != null ? sourceBase.append("junitsrc.jar") : null; //$NON-NLS-1$
+			IPath srcLocation= sourceBase != null ? sourceBase.append("junitsrc.zip") : null; //$NON-NLS-1$
 			
 			return JavaCore.newLibraryEntry(jarLocation, srcLocation, null);
 		}
