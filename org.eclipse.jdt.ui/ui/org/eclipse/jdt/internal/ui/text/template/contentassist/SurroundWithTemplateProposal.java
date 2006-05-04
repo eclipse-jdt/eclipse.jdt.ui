@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.RangeMarker;
@@ -283,6 +284,18 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		edits.removeChild(i);
 		while (!(children[i] instanceof RangeMarker)) {
 			i++;
+		}
+		children= edits.getChildren();
+		TextEdit edit= children[i - 2];
+		if (edit instanceof InsertEdit) {
+			final InsertEdit insert= (InsertEdit) edit;
+			final String text= insert.getText();
+			if (text != null && text.startsWith(";")) { //$NON-NLS-1$
+				children[i - 2]= new InsertEdit(edit.getOffset(), ";"); //$NON-NLS-1$
+				edits.removeChildren();
+				edits.addChildren(children);
+				return;
+			}
 		}
 		edits.removeChild(i - 2);
 	}
