@@ -46,6 +46,7 @@ public class JARFileSelectionDialog extends ElementTreeSelectionDialog {
 		setSorter(new FileViewerSorter());
 		addFilter(new FileArchiveFileFilter());
 		setValidator(new FileSelectionValidator(multiSelect, acceptFolders));
+		setHelpAvailable(false);
 	}
 	
 	private static boolean isArchive(File file) {

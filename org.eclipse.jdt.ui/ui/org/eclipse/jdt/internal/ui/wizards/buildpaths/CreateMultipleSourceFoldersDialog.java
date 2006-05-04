@@ -27,6 +27,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
@@ -40,6 +42,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.INewWizard;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
@@ -51,6 +54,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.AbstractOpenWizardAction;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 
@@ -140,6 +144,13 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 
 
 		MultipleFolderSelectionDialog dialog= new MultipleFolderSelectionDialog(getShell(), lp, cp) {
+			
+			protected Control createDialogArea(Composite parent) {
+				Control result= super.createDialogArea(parent);
+				PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJavaHelpContextIds.BP_CHOOSE_EXISTING_FOLDER_TO_MAKE_SOURCE_FOLDER);
+				return result;
+			}
+			
 			protected Object createFolder(final IContainer container) {
 				final Object[] result= new Object[1];
 				final CPListElement newElement= new CPListElement(fJavaProject, IClasspathEntry.CPE_SOURCE);

@@ -397,6 +397,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 					
 			ListSelectionDialog dialog= new ListSelectionDialog(getShell(), Arrays.asList(selectArr), new ArrayContentProvider(), new JavaUILabelProvider(), NewWizardMessages.ProjectsWorkbookPage_chooseProjects_message); 
 			dialog.setTitle(NewWizardMessages.ProjectsWorkbookPage_chooseProjects_title); 
+			dialog.setHelpAvailable(false);
 			if (dialog.open() == Window.OK) {
 				Object[] result= dialog.getResult();
 				CPListElement[] cpElements= new CPListElement[result.length];
