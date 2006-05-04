@@ -187,10 +187,6 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 	}
 
 	public void testDirectLinkImportsOnExistingImportCamelCase() throws Exception {
-		if (true) {
-			System.out.println("disabled unreliable camel case tests");
-			return;
-		}
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_ADDIMPORT, true);
 		setCoreOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
 		addImport("java.text.DateFormat");
@@ -199,10 +195,6 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 	}
 	
 	public void testDirectLinkImportsOnExistingImportCamelCaseQualifiedPrefix() throws Exception {
-		if (true) {
-			System.out.println("disabled unreliable camel case tests");
-			return;
-		}
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_ADDIMPORT, true);
 		setCoreOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
 		addImport("java.text.DateFormat");

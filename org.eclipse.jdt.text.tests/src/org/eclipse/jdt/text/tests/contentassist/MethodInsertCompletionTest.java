@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
+import org.eclipse.jdt.core.JavaCore;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -65,4 +67,15 @@ public class MethodInsertCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyProposal("e|foobar", "equals(", "equals(|)foobar");
 	}
 	
+	/* camel case */
+	
+	public void testCamelCase() throws Exception {
+		setCoreOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
+		assertMethodBodyProposal("hC", "hashCode(", "hashCode()");
+    }
+	
+	public void testCamelCaseWithEmptyPrefix() throws Exception {
+		setCoreOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
+		assertMethodBodyProposal("", "hashCode(", "hashCode()");
+	}
 }

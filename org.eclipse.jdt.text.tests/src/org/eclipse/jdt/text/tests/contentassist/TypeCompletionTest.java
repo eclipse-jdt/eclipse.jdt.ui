@@ -98,10 +98,9 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 	}
 
 	public void testInnerImportedType() throws Exception {
-		if (true) {
-			return; // TODO disabled as the proposal does not show up relieably 
-		}
+		waitBeforeCompleting(true);
 		addImport("java.security.KeyStore");
+		expectImport("java.security.KeyStore");
 		expectImport("java.security.KeyStore.Entry");
 		assertMethodBodyProposal("Entry|", "Entry - java.security.KeyStore", "Entry|");
     }
@@ -125,7 +124,9 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 
 	public void testInnerTypeOfGenericOuter2() throws Exception {
 		if (true) {
-			return; // TODO disabled as the proposal does not show up relieably 
+			// FIXME re-enable one bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=139000 is fixed
+			System.out.println("disabled, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=139000");
+			return;
 		}
 		addMembers("static class Outer<E> { class Inner {} }");
 		expectImport("test1.Completion_" + getName() + ".Outer.Inner");
@@ -190,9 +191,6 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 	}
 	
 	public void testCamelCase() throws Exception {
-		if (true) {
-			return; // TODO disabled as the proposal does not show up relieably 
-		}
 		setCoreOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
 		
 		// first trigger availability in the model
@@ -204,5 +202,70 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 	public void testConstructorParentheses() throws Exception {
 		setTrigger('(');
 		assertMethodBodyProposal("StringBuf|", "StringBuffer ", "StringBuffer(|)");
+	}
+	
+	public void testIncrementalInsertion() throws Exception {
+	    getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
+	    getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
+	    
+	    assertMethodBodyIncrementalCompletion("Strin|", "String|");
+    }
+	
+	public void testNoIncrementalInsertion() throws Exception {
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
+		
+		assertMethodBodyIncrementalCompletion("String|", "String|");
+	}
+	
+	public void testIncrementalInsertionPrefixCorrection() throws Exception {
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
+		
+		assertMethodBodyIncrementalCompletion("StRiN|", "String|");
+	}
+
+	public void testNoIncrementalInsertionPrefixCorrection() throws Exception {
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
+		
+		assertMethodBodyIncrementalCompletion("StRiNg|", "String|");
+	}
+	
+	public void testNoIncrementalInsertionCamelCase() throws Exception {
+		setCoreOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
+		
+		// no auto-insertion of IOException, as IndexOutOfBoundsException is a valid camel case match
+		assertMethodBodyIncrementalCompletion("IO|", "IO|");
+	}
+	
+	public void testIncrementalInsertionCamelCase() throws Exception {
+		setCoreOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
+		expectImport("java.util.jar.JarEntry");
+		
+		assertMethodBodyIncrementalCompletion("JaEn|", "JarEntry|");
+	}
+	
+	public void testNoIncrementalInsertionCamelCase2() throws Exception {
+		setCoreOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
+		
+		// JarEntry vs. JarException - note that the common prefix 'Jar' is not inserted
+		// as the common camelCase prefix is 'JaE'
+		assertMethodBodyIncrementalCompletion("JaE|", "JaE|");
+	}
+	
+	public void testIncrementalInsertionCamelCase2() throws Exception {
+		setCoreOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
+		
+		// no auto-insertion, but prefix-completion of IOException, as InvalidObjectException is a valid camel case match
+		assertMethodBodyIncrementalCompletion("IOExce|", "IOException|");
 	}
 }

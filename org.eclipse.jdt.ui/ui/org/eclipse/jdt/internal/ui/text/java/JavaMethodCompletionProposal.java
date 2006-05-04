@@ -56,8 +56,15 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	}
 	
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
-		if (hasArgumentList())
-			return String.valueOf(fProposal.getName());
+		if (hasArgumentList()) {
+			String completion= String.valueOf(fProposal.getName());
+			if (isCamelCaseMatching()) {
+				String prefix= getPrefix(document, completionOffset);
+				return getCamelCaseCompound(prefix, completion);
+			}
+
+			return completion;
+		}
 		return super.getPrefixCompletionText(document, completionOffset);
 	}
 	

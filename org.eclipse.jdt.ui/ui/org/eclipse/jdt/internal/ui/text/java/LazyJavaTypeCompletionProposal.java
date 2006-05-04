@@ -300,7 +300,19 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal#getCompletionText()
 	 */
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
-		return getSimpleTypeName();
+		String prefix= getPrefix(document, completionOffset);
+		
+		String completion;
+		// return the qualified name if the prefix is already qualified
+		if (prefix.indexOf('.') != -1)
+			completion= getQualifiedTypeName();
+		else
+			completion= getSimpleTypeName();
+		
+		if (isCamelCaseMatching())
+			return getCamelCaseCompound(prefix, completion);
+
+		return completion;
 	}
 	
 	/*

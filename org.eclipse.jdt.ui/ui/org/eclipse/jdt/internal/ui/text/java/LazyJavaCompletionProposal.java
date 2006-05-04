@@ -314,13 +314,6 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getReplacementText()
-	 */
-	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
-		return getReplacementString();
-	}
-
-	/*
 	 * @see ICompletionProposal#getImage()
 	 */
 	public final Image getImage() {

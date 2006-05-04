@@ -29,6 +29,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
+import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
@@ -66,10 +67,9 @@ public class AbstractCompletionTest extends TestCase {
 	private String fBeforeImports;
 	private String fAfterImports;
 	private String fMembers;
-
 	private String fLocals;
-
 	private char fTrigger;
+	private boolean fWaitBeforeCompleting;
 	
 	protected void setUp() throws Exception {
 		Hashtable options= TestOptions.getDefaultOptions();
@@ -94,6 +94,7 @@ public class AbstractCompletionTest extends TestCase {
 		fMembers= "";
 		fLocals= "";
 		fTrigger= '\0';
+		fWaitBeforeCompleting= false;
 	}
 
 	protected void configureCoreOptions(Hashtable options) {
@@ -108,6 +109,10 @@ public class AbstractCompletionTest extends TestCase {
 		Hashtable options= JavaCore.getOptions();
 		options.put(key, value);
 		JavaCore.setOptions(options);
+	}
+	
+	protected void waitBeforeCompleting(boolean wait) {
+		fWaitBeforeCompleting= wait;
 	}
 
 	protected IPreferenceStore getJDTUIPrefs() {
@@ -129,6 +134,8 @@ public class AbstractCompletionTest extends TestCase {
 		store.setToDefault(PreferenceConstants.CODEASSIST_ADDIMPORT);
 		store.setToDefault(PreferenceConstants.EDITOR_CLOSE_BRACKETS);
 		store.setToDefault(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
+		store.setToDefault(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION);
+		store.setToDefault(PreferenceConstants.CODEASSIST_AUTOINSERT);
 		fCU= null;
 	}
 	
@@ -185,6 +192,23 @@ public class AbstractCompletionTest extends TestCase {
 		IRegion expectedSelection= assembleMethodBodyTestCUExtractSelection(result, expected, fAfterImports);
 
 		assertProposal(selector, contents, preSelection, result, expectedSelection);
+	}
+	
+	/**
+	 * Creates a CU with a method containing <code>before</code>, then runs incremental code
+	 * assist and asserts that the method's body now has the content of <code>expected</code>.
+	 * 
+	 * @param expected the expected contents of the type javadoc line
+	 * @param before the contents of the javadoc line before code completion is run
+	 * @throws CoreException
+	 */
+	protected void assertMethodBodyIncrementalCompletion(String before, String expected) throws CoreException {
+		StringBuffer contents= new StringBuffer();
+		IRegion preSelection= assembleMethodBodyTestCUExtractSelection(contents, before, fBeforeImports);
+		StringBuffer result= new StringBuffer();
+		IRegion expectedSelection= assembleMethodBodyTestCUExtractSelection(result, expected, fAfterImports);
+		
+		assertIncrementalCompletion(contents, preSelection, result, expectedSelection);
 	}
 	
 	/**
@@ -273,6 +297,24 @@ public class AbstractCompletionTest extends TestCase {
 			EditorTestHelper.closeEditor(fEditor);
 		}
 
+		assertEquals(result.toString(), doc.get());
+		assertEquals(expectedSelection.getOffset(), postSelection.getOffset());
+		assertEquals(expectedSelection.getLength(), postSelection.getLength());
+	}
+	
+	private void assertIncrementalCompletion(StringBuffer contents, IRegion preSelection, StringBuffer result, IRegion expectedSelection) throws CoreException {
+		fCU= createCU(CompletionTestSetup.getAnonymousTestPackage(), contents.toString());
+		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
+		IDocument doc;
+		ITextSelection postSelection;
+		try {
+			incrementalAssist(fCU, preSelection);
+			doc= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
+			postSelection= (ITextSelection) fEditor.getSelectionProvider().getSelection();
+		} finally {
+			EditorTestHelper.closeEditor(fEditor);
+		}
+		
 		assertEquals(result.toString(), doc.get());
 		assertEquals(expectedSelection.getOffset(), postSelection.getOffset());
 		assertEquals(expectedSelection.getLength(), postSelection.getLength());
@@ -424,7 +466,7 @@ public class AbstractCompletionTest extends TestCase {
 	}
 
 	private ICompletionProposal[] collectProposals(ICompilationUnit cu, IRegion selection) throws JavaModelException, PartInitException {
-		
+		waitBeforeCoreCompletion();
 		ContentAssistant assistant= new ContentAssistant();
 		assistant.setDocumentPartitioning(IJavaPartitions.JAVA_PARTITIONING);
 		IContentAssistProcessor javaProcessor= new JavaCompletionProcessor(fEditor, assistant, getContentType());
@@ -432,6 +474,37 @@ public class AbstractCompletionTest extends TestCase {
 		ICompletionProposal[] proposals= javaProcessor.computeCompletionProposals(fEditor.getViewer(), selection.getOffset());
 		return proposals;
 	}
+
+	private void incrementalAssist(ICompilationUnit cu, IRegion selection) throws JavaModelException, PartInitException {
+		waitBeforeCoreCompletion();
+		ContentAssistant assistant= new ContentAssistant();
+		assistant.enableAutoInsert(true);
+		final ISourceViewer viewer= fEditor.getViewer();
+		viewer.setSelectedRange(selection.getOffset(), selection.getLength());
+		assistant.install(viewer);
+		assistant.setDocumentPartitioning(IJavaPartitions.JAVA_PARTITIONING);
+		IContentAssistProcessor javaProcessor= new JavaCompletionProcessor(fEditor, assistant, getContentType());
+		assistant.setContentAssistProcessor(javaProcessor, getContentType());
+
+		assistant.completePrefix();
+		assistant.uninstall();
+	}
+
+	/**
+	 * Invokes {@link Thread#sleep(long)} if {@link #waitBeforeCompleting(boolean)} was set to
+	 * <code>true</code> or camel case completions are enabled. For some reasons, inner types and
+	 * camel case matches don't show up otherwise.
+	 * 
+	 * @since 3.2
+	 */
+	private void waitBeforeCoreCompletion() {
+	    if (fWaitBeforeCompleting || JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH))) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException x) {
+			}
+		}
+    }
 
 	protected String getContentType() {
 		return IDocument.DEFAULT_CONTENT_TYPE;

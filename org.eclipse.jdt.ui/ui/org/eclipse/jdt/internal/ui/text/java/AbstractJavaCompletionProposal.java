@@ -560,7 +560,11 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getReplacementText()
 	 */
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
-		return getReplacementString();
+		if (!isCamelCaseMatching())
+			return getReplacementString();
+		
+		String prefix= getPrefix(document, completionOffset);
+		return getCamelCaseCompound(prefix, getReplacementString());
 	}
 
 	/*
@@ -673,6 +677,42 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			return false;
 		String start= string.substring(0, prefix.length());
 		return start.equalsIgnoreCase(prefix) || isCamelCaseMatching() && CharOperation.camelCaseMatch(prefix.toCharArray(), string.toCharArray());
+	}
+
+	/**
+	 * Matches <code>prefix</code> against <code>string</code> and replaces the matched region
+	 * by prefix. Case is preserved as much as possible. This method returns <code>string</code> if camel case completion
+	 * is disabled. Examples when camel case completion is enabled:
+	 * <ul>
+	 * <li>getCamelCompound("NuPo", "NullPointerException") -> "NuPointerException"</li>
+	 * <li>getCamelCompound("NuPoE", "NullPointerException") -> "NuPoException"</li>
+	 * <li>getCamelCompound("hasCod", "hashCode") -> "hasCode"</li>
+	 * </ul>
+	 * 
+	 * @param prefix the prefix to match against
+	 * @param string the string to match
+	 * @return a compound of prefix and any postfix taken from <code>string</code>
+	 * @since 3.2
+	 */
+	protected final String getCamelCaseCompound(String prefix, String string) {
+		if (prefix.length() > string.length())
+			return string;
+
+		// a normal prefix - no camel case logic at all
+		String start= string.substring(0, prefix.length());
+		if (start.equalsIgnoreCase(prefix))
+			return string;
+
+		final char[] patternChars= prefix.toCharArray();
+		final char[] stringChars= string.toCharArray();
+
+		for (int i= 1; i <= stringChars.length; i++)
+			if (CharOperation.camelCaseMatch(patternChars, 0, patternChars.length, stringChars, 0, i))
+				return prefix + string.substring(i);
+
+		// Not a camel case match at all.
+		// This should not happen -> stay with the default behavior
+		return string;
 	}
 
 	/**
