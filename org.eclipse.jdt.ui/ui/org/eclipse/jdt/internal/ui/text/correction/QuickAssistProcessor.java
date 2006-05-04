@@ -363,7 +363,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		Expression placeholder= (Expression) rewrite.createMoveTarget(fragment.getInitializer());
 		ITypeBinding binding= fragment.getInitializer().resolveTypeBinding();
-		if (binding.isArray() && placeholder instanceof ArrayInitializer) {
+		if (placeholder instanceof ArrayInitializer && binding != null && binding.isArray()) {
 			ArrayCreation creation= ast.newArrayCreation();
 			creation.setInitializer((ArrayInitializer) placeholder);
 			final ITypeBinding componentType= binding.getComponentType();
