@@ -356,7 +356,7 @@ public class PackagesViewContentProviderTests extends TestCase {
 		CPListElement element= CPListElement.createFromExisting(src1, fJProject2);
 		element.setAttribute(CPListElement.INCLUSION, new IPath[] {new Path("pack3/pack5/")});
 		fJProject2.setRawClasspath(new IClasspathEntry[] {rawClasspath[0], element.getClasspathEntry(), rawClasspath[2]}, null);
-		Object[] expectedChildren= new Object[]{fPack12.getResource(), fPack32.getResource(), fPackDefault2};
+		Object[] expectedChildren= new Object[]{fPack12.getResource(), fPack32.getResource()};
 		Object[] children= fProvider.getChildren(fRoot2);
 		assertTrue("Wrong children found for project", compareArrays(children, expectedChildren));//$NON-NLS-1$
 	}
