@@ -5250,6 +5250,34 @@
 					class="org.eclipse.jdt.internal.ui.navigator.PackageExplorerActionProvider"
 					id="org.eclipse.jdt.internal.ui.navigator.PackageExplorerActionProvider"
 					overrides="org.eclipse.ui.navigator.resources.actions.RefactorActions"> 
+				<enablement>
+					<or>
+					<adapt
+							type="org.eclipse.core.resources.IProject" >
+					</adapt>
+					<instanceof
+							value="org.eclipse.core.resources.IWorkspaceRoot" />
+					<instanceof
+							value="org.eclipse.core.resources.IFolder" />
+					<instanceof
+							value="org.eclipse.core.resources.IFile" />
+					<instanceof
+							value="org.eclipse.core.resources.IStorage" />
+					<instanceof
+							value="org.eclipse.jdt.core.IJavaProject" />
+					<instanceof
+							value="org.eclipse.jdt.core.IJavaElement" />
+					<instanceof
+							value="org.eclipse.jdt.internal.core.JarEntryFile" />
+					<instanceof
+							value="org.eclipse.jdt.core.IClassFile" />
+					<instanceof
+							value="org.eclipse.jdt.internal.ui.packageview.ClassPathContainer" /> 
+					<adapt type="java.util.Collection"> 
+						<count value="0" />
+					</adapt>				
+				</or>
+				</enablement>
 			</actionProvider>
 			
 		   <actionProvider
@@ -5266,6 +5294,7 @@
 					id="org.eclipse.jdt.ui.javaElementSorter"/>
 		   
 		   <commonWizard
+		        menuGroupId="org.eclipse.jdt.ui.java"
 		        type="new"
 		        wizardId="org.eclipse.jdt.ui.wizards.NewPackageCreationWizard">
 		     <enablement>
@@ -5282,6 +5311,7 @@
 		     </enablement>
 		  </commonWizard>
 		  <commonWizard
+		        menuGroupId="org.eclipse.jdt.ui.java"
 		        type="new"
 		        wizardId="org.eclipse.jdt.ui.wizards.NewClassCreationWizard">
 		     <enablement>
@@ -5299,6 +5329,7 @@
 		  </commonWizard>
 
    	      <commonWizard
+		        menuGroupId="org.eclipse.jdt.ui.java"
 		        type="new"
 		        wizardId="org.eclipse.jdt.ui.wizards.NewInterfaceCreationWizard">
 		     <enablement>
@@ -5315,6 +5346,7 @@
 		     </enablement>
 		  </commonWizard>		  
 		  <commonWizard
+		        menuGroupId="org.eclipse.jdt.ui.java"
 		        type="new"
 		        wizardId="org.eclipse.jdt.ui.wizards.NewAnnotationCreationWizard">
 		     <enablement>
@@ -5332,6 +5364,7 @@
 		  </commonWizard>
 
 		    <commonWizard
+		          menuGroupId="org.eclipse.jdt.ui.java"
 		          type="new"
 		          wizardId="org.eclipse.jdt.ui.wizards.NewEnumCreationWizard">
 				     <enablement>
@@ -5348,6 +5381,7 @@
 				     </enablement>
 		    </commonWizard>	 
 		    <commonWizard
+		          menuGroupId="org.eclipse.jdt.ui.java"
 		          type="new"
 		          wizardId="org.eclipse.jdt.ui.wizards.NewSourceFolderCreationWizard">
 				     <enablement>
@@ -5365,13 +5399,13 @@
 		</navigatorContent>
   		<commonFilter
 		        activeByDefault="true"
-		        class="org.eclipse.jdt.internal.ui.filters.EmptyPackageFilter"
+		        class="org.eclipse.jdt.internal.ui.navigator.NonEssentialEmptyPackageFilter"
 		        name="%HideEmptyPackages.label"
 		        description="%HideEmptyPackages.description"
 		        id="org.eclipse.jdt.java.ui.filters.HideEmptyPackages"/>
   		<commonFilter
 		        activeByDefault="true"
-		        class="org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter"
+		        class="org.eclipse.jdt.internal.ui.navigator.NonEssentialEmptyInnerPackageFilter"
 		        name="%HideEmptyInnerPackages.label"
 		        description="%HideEmptyInnerPackages.description"
 		        id="org.eclipse.jdt.java.ui.filters.HideEmptyInnerPackages"/>
