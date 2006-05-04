@@ -778,6 +778,10 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String InlineMethodRefactoring_SourceAnalyzer_declaration_has_errors;
 
+	public static String InlineMethodRefactoring_SourceAnalyzer_methoddeclaration_has_errors;
+
+	public static String InlineMethodRefactoring_SourceAnalyzer_native_methods;
+
 	public static String InlineMethodRefactoring_SourceAnalyzer_qualified_this_expressions;
 
 	public static String InlineMethodRefactoring_SourceAnalyzer_recursive_call;

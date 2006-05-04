@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -377,11 +378,19 @@ class SourceAnalyzer  {
 				createJavaStatusContext(fUnit, fDeclaration));		
 			return result;
 		}
-		if (fDeclaration.getBody() == null) {
-			result.addFatalError(
-				RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_abstract_methods,  
-				createJavaStatusContext(fUnit, fDeclaration));
+		final IMethodBinding declarationBinding= fDeclaration.resolveBinding();
+		if (declarationBinding != null) {
+			final int modifiers= declarationBinding.getModifiers();
+			if (Modifier.isAbstract(modifiers)) {
+				result.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_abstract_methods, createJavaStatusContext(fUnit, fDeclaration));
 				return result;
+			} else if (Modifier.isNative(modifiers)) {
+				result.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_native_methods, createJavaStatusContext(fUnit, fDeclaration));
+				return result;
+			}
+		} else {
+			result.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_methoddeclaration_has_errors, createJavaStatusContext(fUnit));
+			return result;
 		}
 		ActivationAnalyzer analyzer= new ActivationAnalyzer();
 		fDeclaration.accept(analyzer);
@@ -405,7 +414,7 @@ class SourceAnalyzer  {
 			
 			fTypeParameterReferences= new ArrayList(0);
 			fTypeParameterMapping= new HashMap();
-			ITypeBinding declaringType= fDeclaration.resolveBinding().getDeclaringClass();
+			ITypeBinding declaringType= declarationBinding.getDeclaringClass();
 			if (declaringType == null) {
 				result.addFatalError(
 					RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_typedeclaration_has_errors, 
@@ -421,7 +430,7 @@ class SourceAnalyzer  {
 			
 			fMethodTypeParameterReferences= new ArrayList(0);
 			fMethodTypeParameterMapping= new HashMap();
-			IMethodBinding method= fDeclaration.resolveBinding();
+			IMethodBinding method= declarationBinding;
 			typeParameters= method.getTypeParameters();
 			for (int i= 0; i < typeParameters.length; i++) {
 				NameData data= new NameData(typeParameters[i].getName());
