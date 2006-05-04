@@ -268,7 +268,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		
 		RootFieldAdapter adapter= new RootFieldAdapter();
 		
-		if (linkedMode) {
+		if (linkedMode || fOrginalPath != null) {
 			fRootDialogField= new StringDialogField();
 		} else {
 			fRootDialogField= new StringButtonDialogField(adapter);
@@ -331,6 +331,8 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		
 		if (fLinkedMode) {
 			fLinkFields.doFillIntoGrid(composite, layout.numColumns);
+			fRootDialogField.doFillIntoGrid(composite, layout.numColumns - 1);
+		} else if (fOrginalPath != null) {
 			fRootDialogField.doFillIntoGrid(composite, layout.numColumns - 1);
 		} else {
 			fRootDialogField.doFillIntoGrid(composite, layout.numColumns);
@@ -439,6 +441,12 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 					projectEntryIndex= i;
 				}
 			}
+		}
+		
+		if (fLinkedMode || fOrginalPath != null) {
+			IFolder folder= fNewElement.getJavaProject().getProject().getFolder(new Path(fRootDialogField.getText()));
+			if (folder.exists() && !folder.getFullPath().equals(fOrginalPath))
+				return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewFolderDialog_folderNameEmpty_alreadyExists, folder.getFullPath().toString()));
 		}
 				
 		boolean isProjectASourceFolder= projectEntryIndex != -1;
@@ -615,9 +623,6 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		IStatus locationStatus= workspace.validateLinkLocation(folder, path);
 		if (locationStatus.matches(IStatus.ERROR))
 			return locationStatus;
-		
-		if (folder.exists() && !folder.getFullPath().equals(fOrginalPath))
-			return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewFolderDialog_folderNameEmpty_alreadyExists, folder.getFullPath().toString()));
 		
 		IPathVariableManager pathVariableManager = ResourcesPlugin.getWorkspace().getPathVariableManager();
 		IPath path1= Path.fromOSString(fLinkFields.fLinkLocation.getText());
