@@ -54,6 +54,8 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitAddLibraryProposal_junit4_info;
 	public static String JUnitAddLibraryProposal_label;
+	
+	public static String JUnitBaseLaunchConfiguration_dialog_title;
 	public static String JUnitBaseLaunchConfiguration_error_invalidproject;
 	public static String JUnitBaseLaunchConfiguration_error_junitnotonpath;
 	public static String JUnitBaseLaunchConfiguration_error_notests;

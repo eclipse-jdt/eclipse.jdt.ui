@@ -23,6 +23,11 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.variables.VariablesPlugin;
 
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
@@ -108,19 +113,26 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 	protected TestSearchResult findTestTypes(ILaunchConfiguration configuration, IProgressMonitor pm) throws CoreException {
 		IJavaProject javaProject= getJavaProject(configuration);
 		if ((javaProject == null) || !javaProject.exists()) {
-			abort(JUnitMessages.JUnitBaseLaunchConfiguration_error_invalidproject, null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT); 
+			informAndAbort(JUnitMessages.JUnitBaseLaunchConfiguration_error_invalidproject, null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT); 
 		}
 		if (!TestSearchEngine.hasTestCaseType(javaProject)) {
-			abort(JUnitMessages.JUnitBaseLaunchConfiguration_error_junitnotonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
+			informAndAbort(JUnitMessages.JUnitBaseLaunchConfiguration_error_junitnotonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 		}
 		final ITestSearchExtent testTarget= testSearchTarget(configuration, javaProject, pm);
 		TestSearchResult searchResult= TestKindRegistry.getDefault().getTestTypes(configuration, testTarget);
 		if (searchResult.isEmpty()) {
-			abort(JUnitMessages.JUnitBaseLaunchConfiguration_error_notests, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE); 
+			informAndAbort(JUnitMessages.JUnitBaseLaunchConfiguration_error_notests, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE); 
 		}
 		return searchResult;
 	}
-	
+
+	protected void informAndAbort(String message, Throwable exception, int code) throws CoreException {
+		IStatus status= new Status(IStatus.INFO, JUnitPlugin.PLUGIN_ID, code, message, exception);
+		if (showStatusMessage(status))
+			throw new CoreException(status);
+		abort(message, exception, code);
+	}
+
 	protected VMRunnerConfiguration launchTypes(ILaunchConfiguration configuration,
 					String mode, TestSearchResult tests, int port) throws CoreException {
 		File workingDir = verifyWorkingDirectory(configuration);
@@ -175,6 +187,32 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 			testTypeDoesNotExist();
 		}
 		return new SingleTypeTestSearchExtent(type);
+	}
+	
+	private boolean showStatusMessage(final IStatus status) {
+		final boolean[] success= new boolean[] { false };
+		getDisplay().syncExec(
+				new Runnable() {
+					public void run() {
+						Shell shell= JUnitPlugin.getActiveWorkbenchShell();
+						if (shell == null)
+							shell= getDisplay().getActiveShell();
+						if (shell != null) {
+							MessageDialog.openInformation(shell, JUnitMessages.JUnitBaseLaunchConfiguration_dialog_title, status.getMessage());
+							success[0]= true;
+						}
+					}
+				}
+		);
+		return success[0];
+	}
+	
+	private Display getDisplay() {
+		Display display;
+		display= Display.getCurrent();
+		if (display == null)
+			display= Display.getDefault();
+		return display;		
 	}
 	
 	private void testTypeDoesNotExist() throws CoreException {
