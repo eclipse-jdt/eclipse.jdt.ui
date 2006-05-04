@@ -201,7 +201,6 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		IAction[] actions= getTemplateActions(editor);
 		
 		SurroundWithTryCatchAction surroundAction= createSurroundWithTryCatchAction(editor);
-		surroundAction.update(editor.getSelectionProvider().getSelection());
 		ActionContributionItem surroundItem= new ActionContributionItem(surroundAction);
 		surroundItem.fill(menu, -1);
 		
