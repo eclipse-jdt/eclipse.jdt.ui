@@ -437,7 +437,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		NonNLSListDialog(Shell parent, NonNLSElement[] input, int count) {
 			super(parent);
 			setInput(Arrays.asList(input));
-			setTitle(ActionMessages.FindStringsToExternalizeAction_dialog_title);  
+			setTitle(ActionMessages.ExternalizeStringsAction_dialog_title);  
 			setMessage(Messages.format(ActionMessages.FindStringsToExternalizeAction_non_externalized, new Object[] {new Integer(count)} )); 
 			setContentProvider(new ArrayContentProvider());
 			setLabelProvider(createLabelProvider());
