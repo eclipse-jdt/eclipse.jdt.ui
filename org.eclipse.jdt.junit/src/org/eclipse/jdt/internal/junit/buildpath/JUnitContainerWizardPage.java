@@ -35,6 +35,8 @@ import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension;
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
@@ -52,6 +54,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		super("JUnitContainerPage"); //$NON-NLS-1$
 		setTitle(JUnitMessages.JUnitContainerWizardPage_wizard_title);
 		setDescription(JUnitMessages.JUnitContainerWizardPage_wizard_description);
+		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_ADD_LIBRARY);
 		
 		fContainerEntryResult= JavaCore.newContainerEntry(JUnitContainerInitializer.JUNIT3_PATH);
 	}
@@ -126,11 +129,12 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		label= new Label(composite, SWT.NONE);
 		label.setFont(composite.getFont());
 		label.setText(JUnitMessages.JUnitContainerWizardPage_resolved_label);
-		label.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1));
+		label.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false, 1, 1));
 		
 		fResolvedPath= new Label(composite, SWT.WRAP);
-		data= new GridData(GridData.FILL, GridData.FILL, false, false, 1, 1);
+		data= new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1);
 		data.widthHint= converter.convertWidthInCharsToPixels(60);
+		fResolvedPath.setFont(composite.getFont());
 		fResolvedPath.setLayoutData(data);
 		
 		doSelectionChanged();
