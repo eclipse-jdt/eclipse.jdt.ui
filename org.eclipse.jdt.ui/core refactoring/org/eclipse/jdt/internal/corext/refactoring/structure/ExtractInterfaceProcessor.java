@@ -888,8 +888,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 			}
 			fMembers= (IMember[]) elements.toArray(new IMember[elements.size()]);
-			if (elements.isEmpty())
-				return ScriptableRefactoring.createInputWarningStatus(null, getRefactoring().getName(), ID_EXTRACT_INTERFACE);
 			fSettings= JavaPreferencesSettings.getCodeGenerationSettings(fSubType.getJavaProject());
 			if (!status.isOK())
 				return status;

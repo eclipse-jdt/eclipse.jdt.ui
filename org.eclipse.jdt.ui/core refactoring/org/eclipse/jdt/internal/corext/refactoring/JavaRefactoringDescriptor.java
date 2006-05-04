@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -190,11 +191,37 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 *         element exists
 	 */
 	public static IJavaElement handleToElement(final String project, final String handle, final boolean check) {
-		IJavaElement element= JavaCore.create(handle);
+		return handleToElement(null, project, handle, check);
+	}
+
+	/**
+	 * Converts an input handle back to the corresponding java element.
+	 * 
+	 * @param owner
+	 *            the working copy owner
+	 * @param project
+	 *            the project, or <code>null</code> for the workspace
+	 * @param handle
+	 *            the input handle
+	 * @param check
+	 *            <code>true</code> to check for existence of the element,
+	 *            <code>false</code> otherwise
+	 * @return the corresponding java element, or <code>null</code> if no such
+	 *         element exists
+	 */
+	public static IJavaElement handleToElement(final WorkingCopyOwner owner, final String project, final String handle, final boolean check) {
+		IJavaElement element= null;
+		if (owner != null)
+			element= JavaCore.create(handle, owner);
+		else
+			element= JavaCore.create(handle);
 		if (element == null && project != null) {
 			final IJavaProject javaProject= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProject(project);
 			final String identifier= javaProject.getHandleIdentifier();
-			element= JavaCore.create(identifier + handle);
+			if (owner != null)
+				element= JavaCore.create(identifier + handle, owner);
+			else
+				element= JavaCore.create(identifier + handle);
 		}
 		if (check && element instanceof IMethod) {
 			final IMethod method= (IMethod) element;
