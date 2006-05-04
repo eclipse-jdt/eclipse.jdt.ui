@@ -1955,7 +1955,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 				 // if (Bindings.isSuperType(typeToRemove, currentType))
 				if (currentType == null)
 					continue; // newly added or unresolvable type
-				if (Bindings.equals(typeToRemove, currentType)) {
+				if (Bindings.equals(currentType, typeToRemove) || toRemove.getType().getElementName().equals(currentType.getName())) {
 					getASTRewrite().remove(currentName, fDescription);
 					registerImportRemoveNode(currentName);
 				}
@@ -2108,11 +2108,22 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 					Name name= (Name) tag.fragments().get(0);
 					for (int j= 0; j < fExceptionInfos.size(); j++) {
 						ExceptionInfo info= (ExceptionInfo) fExceptionInfos.get(j);
-						if (info.isDeleted() && Bindings.equals(info.getTypeBinding(), name.resolveTypeBinding())) {
-							getASTRewrite().remove(tag, fDescription);
-							registerImportRemoveNode(tag);
-							tagDeleted= true;
-							break;
+						if (info.isDeleted()) {
+							boolean remove= false;
+							final ITypeBinding nameBinding= name.resolveTypeBinding();
+							if (nameBinding != null) {
+								final ITypeBinding infoBinding= info.getTypeBinding();
+								if (infoBinding != null && Bindings.equals(infoBinding, nameBinding))
+									remove= true;
+								else if (info.getType().getElementName().equals(nameBinding.getName()))
+									remove= true;
+								if (remove) {
+									getASTRewrite().remove(tag, fDescription);
+									registerImportRemoveNode(tag);
+									tagDeleted= true;
+									break;
+								}
+							}
 						}
 					}
 					if (! tagDeleted)
@@ -2124,7 +2135,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 				for (Iterator infoIter= fExceptionInfos.iterator(); infoIter.hasNext();) {
 					ExceptionInfo info= (ExceptionInfo) infoIter.next();
 					if (info.isAdded()) {
-						if (! isTopOfRipple)
+						if (!isTopOfRipple)
 							continue;
 						TagElement excptNode= createExceptionTag(info.getType().getElementName());
 						insertTag(excptNode, previousTag, tagsRewrite);
@@ -2133,12 +2144,21 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 						for (Iterator tagIter= exceptionTags.iterator(); tagIter.hasNext();) {
 							TagElement tag= (TagElement) tagIter.next();
 							Name tagName= (Name) tag.fragments().get(0);
-							if (Bindings.equals(info.getTypeBinding(), tagName.resolveTypeBinding())) {
-								tagIter.remove();
-								TagElement movedTag= (TagElement) getASTRewrite().createMoveTarget(tag);
-								getASTRewrite().remove(tag, fDescription);
-								insertTag(movedTag, previousTag, tagsRewrite);
-								previousTag= movedTag;
+							final ITypeBinding nameBinding= tagName.resolveTypeBinding();
+							if (nameBinding != null) {
+								boolean process= false;
+								final ITypeBinding infoBinding= info.getTypeBinding();
+								if (infoBinding != null && Bindings.equals(infoBinding, nameBinding))
+									process= true;
+								else if (info.getType().getElementName().equals(nameBinding.getName()))
+									process= true;
+								if (process) {
+									tagIter.remove();
+									TagElement movedTag= (TagElement) getASTRewrite().createMoveTarget(tag);
+									getASTRewrite().remove(tag, fDescription);
+									insertTag(movedTag, previousTag, tagsRewrite);
+									previousTag= movedTag;
+								}
 							}
 						}
 					}
