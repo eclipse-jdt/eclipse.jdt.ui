@@ -134,7 +134,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getConvertForLoopProposal(context, coveringNode, null)
 				|| getExtractLocalProposal(context, coveringNode, null)
 				|| getConvertIterableLoopProposal(context, coveringNode, null)
-				|| getSurroundWithRunnableProposal(context, coveringNode, null)
 				|| getRemoveBlockProposals(context, coveringNode, null)
 				|| getMakeVariableDeclarationFinalProposals(context, coveringNode, null);
 		}
@@ -166,7 +165,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getExtractLocalProposal(context, coveringNode, resultingCollections);
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
-				getSurroundWithRunnableProposal(context, coveringNode, resultingCollections);
 				getRemoveBlockProposals(context, coveringNode, resultingCollections);
 				getMakeVariableDeclarationFinalProposals(context, coveringNode, resultingCollections);
 			}
@@ -984,33 +982,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				resultingCollections.add(proposal);
 			}
 		}
-		return true;
-	}
-	
-	private static boolean getSurroundWithRunnableProposal(IInvocationContext context, ASTNode node, ArrayList resultingCollections) throws CoreException {
-		Statement[] selectedStatements= SurroundWith.getSelectedStatements(context);
-		if (selectedStatements == null)
-			return false;
-		
-		IProblem[] problems= context.getASTRoot().getProblems();
-		for (int i= 0; i < problems.length; i++) {
-			IProblem problem= problems[i];
-			if (problem.getID() == IProblem.UnnecessaryElse) {
-				int selectionOffset= context.getSelectionOffset();
-				int selectionLength= context.getSelectionLength();
-				if (problem.getSourceStart() == selectionOffset && problem.getSourceEnd() + 1 == selectionOffset + selectionLength)
-					return false;
-			}
-		}
-		
-		if (resultingCollections == null)
-			return true;
-		
-		String label= CorrectionMessages.QuickAssistProcessor_surround_with_runnable;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		
-		SurroundWithRunnableProposal proposal= new SurroundWithRunnableProposal(label, context, 10, image, selectedStatements);
-		resultingCollections.add(proposal);
 		return true;
 	}
 
