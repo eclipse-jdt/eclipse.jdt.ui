@@ -4118,6 +4118,8 @@ public class CleanUpTest extends QuickFixTest {
 	
 	public void testSerialVersionBug139381() throws Exception {
 
+		JavaProjectHelper.set14CompilerOptions(fJProject1);
+		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4166,6 +4168,9 @@ public class CleanUpTest extends QuickFixTest {
 		String expected1= buf.toString();
 
 		assertRefactoringResultAsExpectedIgnoreHashValue(refactoring, new String[] { expected1 });
+		
+		JavaProjectHelper.set15CompilerOptions(fJProject1);
+		
 	}
 
 	public void testRemoveBlock01() throws Exception {
