@@ -373,10 +373,9 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD) {
 				throw e;
 			}
-			// silently fail.  see e.g. bug 65975
+			// silently fail.  see e.g. https://bugs.eclipse.org/bugs/show_bug.cgi?id=65975
 		}
 	}
-
 
 	private boolean isNonTrivialSelection(ITextSelection selection) {
 		if (selection.getLength() < 30) {
