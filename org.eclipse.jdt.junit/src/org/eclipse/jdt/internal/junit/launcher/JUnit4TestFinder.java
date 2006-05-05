@@ -15,6 +15,8 @@ package org.eclipse.jdt.internal.junit.launcher;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -154,6 +156,8 @@ public class JUnit4TestFinder implements ITestFinder {
 	}
 
 	public boolean isTest(IType type) throws JavaModelException {
-		return Annotation.RUN_WITH.annotates(type) || Annotation.TEST.annotatesAtLeastOneMethod(type);
+		if (!Flags.isAbstract(type.getFlags()))
+			return Annotation.RUN_WITH.annotates(type) || Annotation.TEST.annotatesAtLeastOneMethod(type);
+		return false;
 	}
 }
