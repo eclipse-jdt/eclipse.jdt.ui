@@ -135,7 +135,6 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration  {
 }
 
 class ClasspathLocalizer {
-	private static final String UPDATE_PREFIX = "update@"; //$NON-NLS-1$
 	
 	private boolean fInDevelopmentMode;
 
@@ -183,16 +182,12 @@ class ClasspathLocalizer {
 	}
 	
 	private String localURL(JUnitRuntimeClasspathEntry jar) throws IOException, MalformedURLException {
-		if (jar.getPluginRelativePath() == null) {
-			//TODO: INTERNAL call:
-//			String location= Platform.getPlatformAdmin().getState(false).getBundle(jar.getPluginId(), null).getLocation();
-			String location= Platform.getBundle(jar.getPluginId()).getLocation();
-			if (location.startsWith(UPDATE_PREFIX))
-				location= location.substring(UPDATE_PREFIX.length());
-			return Platform.getInstallLocation().getURL().getFile() + location;
-		}
-		Bundle bundle= Platform.getBundle(jar.getPluginId());
-		URL url= new URL(bundle.getEntry("/"), jar.getPluginRelativePath()); //$NON-NLS-1$
+		Bundle bundle= JUnitPlugin.getDefault().getBundle(jar.getPluginId());
+		URL url;
+		if (jar.getPluginRelativePath() == null)
+			url= bundle.getEntry("/"); //$NON-NLS-1$
+		else
+			url= bundle.getEntry(jar.getPluginRelativePath());
 		return FileLocator.toFileURL(url).getFile();
 	}
 }

@@ -47,6 +47,8 @@ import org.eclipse.jdt.internal.junit.model.JUnitModel;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  * The plug-in runtime class for the JUnit plug-in.
@@ -95,6 +97,8 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	 * List storing the registered JUnit launch configuration types
 	 */
 	private List fJUnitLaunchConfigTypeIDs;
+
+	private BundleContext fBundleContext;
 
 	private static boolean fIsStopped= false;
 
@@ -214,6 +218,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		fBundleContext= context;
 		fJUnitModel.start();
 	}
 
@@ -227,6 +232,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		} finally {
 			super.stop(context);
 		}
+		fBundleContext= null;
 	}
 	
 	public static JUnitModel getModel() {
@@ -293,6 +299,28 @@ public class JUnitPlugin extends AbstractUIPlugin {
 			loadLaunchConfigTypeIDs();
 		}
 		return fJUnitLaunchConfigTypeIDs;
+	}
+
+	/**
+	 * Returns the bundle for a given bundle name,
+	 * regardless whether the bundle is resolved or not.
+	 * 
+	 * @param bundleName the bundle name
+	 * @return the bundle
+	 * @since 3.2
+	 */
+	public Bundle getBundle(String bundleName) {
+		Bundle bundle= Platform.getBundle(bundleName);
+		if (bundle != null)
+			return bundle;
+		
+		// Accessing unresolved bundle
+		ServiceReference serviceRef= fBundleContext.getServiceReference(PackageAdmin.class.getName());
+		PackageAdmin admin= (PackageAdmin)fBundleContext.getService(serviceRef);
+		Bundle[] bundles= admin.getBundles(bundleName, null);
+		if (bundles != null && bundles.length > 0)
+			return bundles[0];
+		return null;
 	}
 
 	/**

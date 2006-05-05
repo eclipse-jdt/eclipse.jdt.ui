@@ -18,10 +18,11 @@ import java.net.URL;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 import org.osgi.framework.Bundle;
 
@@ -33,12 +34,11 @@ public class BuildPathSupport {
 	public static final String JUNIT3_PLUGIN_ID= "org.junit"; //$NON-NLS-1$
 	public static final String JUNIT4_PLUGIN_ID= "org.junit4"; //$NON-NLS-1$
 	
-	
 	public static IPath getBundleLocation(String bundleName) {
-		Bundle bundle= Platform.getBundle(bundleName);
-		if (bundle == null) {
+		Bundle bundle= JUnitPlugin.getDefault().getBundle(bundleName);
+		if (bundle == null)
 			return null;
-		}
+		
 		URL local= null;
 		try {
 			local= FileLocator.toFileURL(bundle.getEntry("/")); //$NON-NLS-1$
@@ -50,15 +50,15 @@ public class BuildPathSupport {
 	}
 	
 	public static IPath getSourceLocation(String bundleName) {
-		Bundle bundle= Platform.getBundle(bundleName);
-		if (bundle == null) {
+		Bundle bundle= JUnitPlugin.getDefault().getBundle(bundleName);
+		if (bundle == null)
 			return null;
-		}
+			
 		String version= (String)bundle.getHeaders().get("Bundle-Version"); //$NON-NLS-1$
 		if (version == null) {
 			return null;
 		}
-		bundle= Platform.getBundle("org.eclipse.jdt.source"); //$NON-NLS-1$
+		bundle= JUnitPlugin.getDefault().getBundle("org.eclipse.jdt.source"); //$NON-NLS-1$
 		if (bundle == null) {
 			return null;
 		}
