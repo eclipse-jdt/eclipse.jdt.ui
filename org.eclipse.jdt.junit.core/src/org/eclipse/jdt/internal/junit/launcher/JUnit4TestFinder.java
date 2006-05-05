@@ -36,6 +36,9 @@ import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 
 public class JUnit4TestFinder implements ITestFinder {
+	
+	private JUnit3TestFinder fJUnit3TestFinder= new JUnit3TestFinder();
+	
 	private static class Annotation {
 		private static final JUnit4TestFinder.Annotation RUN_WITH= new JUnit4TestFinder.Annotation(new String[] { "RunWith", "org.junit.runner.RunWith" }); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -156,8 +159,11 @@ public class JUnit4TestFinder implements ITestFinder {
 	}
 
 	public boolean isTest(IType type) throws JavaModelException {
-		if (!Flags.isAbstract(type.getFlags()))
-			return Annotation.RUN_WITH.annotates(type) || Annotation.TEST.annotatesAtLeastOneMethod(type);
+		if (!Flags.isAbstract(type.getFlags())) {
+			if (Annotation.RUN_WITH.annotates(type) || Annotation.TEST.annotatesAtLeastOneMethod(type))
+				return true;
+			return fJUnit3TestFinder.isTest(type);
+		}
 		return false;
 	}
 }
