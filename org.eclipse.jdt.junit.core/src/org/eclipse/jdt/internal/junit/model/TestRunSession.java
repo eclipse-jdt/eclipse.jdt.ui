@@ -383,6 +383,7 @@ public class TestRunSession {
 				return;
 			}
 			TestCaseElement testCaseElement= (TestCaseElement) testElement;
+			testCaseElement.setName(testName);
 
 			if (testCaseElement.getStatus() == Status.RUNNING)
 				setStatus(testCaseElement, Status.OK);

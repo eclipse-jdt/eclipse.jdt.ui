@@ -51,7 +51,11 @@ public class TestSessionLabelProvider extends LabelProvider {
 	
 	public Image getImage(Object element) {
 		if (element instanceof TestCaseElement) {
-			Status status= ((TestCaseElement) element).getStatus();
+			TestCaseElement testCaseElement= ((TestCaseElement) element);
+			if (testCaseElement.getTestName().startsWith("@Ignore: ")) //$NON-NLS-1$
+				return fTestRunnerPart.fTestIcon;
+			
+			Status status=testCaseElement.getStatus();
 			if (status.isNotRun())
 				return fTestRunnerPart.fTestIcon;
 			else if (status.isError())

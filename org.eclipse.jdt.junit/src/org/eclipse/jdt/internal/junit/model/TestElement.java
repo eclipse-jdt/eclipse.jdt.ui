@@ -137,7 +137,7 @@ public abstract class TestElement {
 	
 	private final TestSuiteElement fParent;
 	private final String fId;
-	private final String fTestName;
+	private String fTestName;
 
 	private Status fStatus;
 	private String fTrace;
@@ -173,6 +173,10 @@ public abstract class TestElement {
 	
 	public String getTestName() {
 		return fTestName;
+	}
+	
+	public void setName(String name) {
+		fTestName= name;
 	}
 	
 	public void setStatus(Status status) {

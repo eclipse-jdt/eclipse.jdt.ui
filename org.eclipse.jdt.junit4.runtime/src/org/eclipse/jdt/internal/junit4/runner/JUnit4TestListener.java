@@ -24,6 +24,21 @@ import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 
 public class JUnit4TestListener extends RunListener {
+	
+	
+	private static class IgnoredTestIdentifier extends JUnit4Identifier {
+		public IgnoredTestIdentifier(Description description) {
+			super(description);
+		}
+		public String getName() {
+			String name= super.getName();
+			if (name != null)
+				return "@Ignore: " + name; //$NON-NLS-1$
+			return null;
+		}
+	}
+
+	
 	private final IListensToTestExecutions fNotified;
 
 	public JUnit4TestListener(IListensToTestExecutions notified) {
@@ -32,28 +47,29 @@ public class JUnit4TestListener extends RunListener {
 
 	@Override
 	public void testStarted(Description plan) throws Exception {
-		fNotified.notifyTestStarted(identifier(plan));
+		fNotified.notifyTestStarted(getIdentifier(plan));
 	}
 
 	@Override
 	public void testFailure(Failure failure) throws Exception {
 		String status= new FailureException(failure.getException()).getStatus();
-		fNotified.notifyTestFailed(new TestReferenceFailure(new JUnit4Identifier(failure.getDescription()), status, failure.getTrace()));
+		fNotified.notifyTestFailed(new TestReferenceFailure(getIdentifier(failure.getDescription()), status, failure.getTrace()));
 	}
 
 	@Override
 	public void testIgnored(Description plan) throws Exception {
-		// do nothing
-		// WANT: handle ignores in the UI
-		// WANT: prioritization works for plug-in tests.
+		// Send message to listeners which would be stale otherwise 
+		ITestIdentifier identifier= new IgnoredTestIdentifier(plan);
+		fNotified.notifyTestStarted(identifier);
+		fNotified.notifyTestEnded(identifier);
 	}
 
 	@Override
 	public void testFinished(Description plan) throws Exception {
-		fNotified.notifyTestEnded(identifier(plan));
+		fNotified.notifyTestEnded(getIdentifier(plan));
 	}
 
-	private ITestIdentifier identifier(Description plan) {
+	private ITestIdentifier getIdentifier(Description plan) {
 		return new JUnit4Identifier(plan);
 	}
 }
