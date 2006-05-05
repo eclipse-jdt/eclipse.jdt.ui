@@ -420,7 +420,7 @@ public class TestRunnerViewPart extends ViewPart {
 					if (isDisposed()) 
 						return;	
 					fStopAction.setEnabled(lastLaunchIsKeptAlive());
-					fRerunLastFailedFirstAction.setEnabled(hasErrorsOrFailures());
+					updateRerunFailedFirstAction();
 					processChangesInUI();
 					if (hasErrorsOrFailures()) {
 						selectFirstFailure();
@@ -1007,7 +1007,7 @@ public class TestRunnerViewPart extends ViewPart {
 					return;	
 				resetViewIcon();
 				fStopAction.setEnabled(false);
-				fRerunLastFailedFirstAction.setEnabled(hasErrorsOrFailures());
+				updateRerunFailedFirstAction();
 			}
 		});	
 		stopUpdateJobs();
@@ -1106,7 +1106,7 @@ action enablement
 			fFailureTrace.clear();
 			registerInfoMessage(fTestRunSession.getTestRunName());
 			
-			fRerunLastFailedFirstAction.setEnabled(hasErrorsOrFailures());
+			updateRerunFailedFirstAction();
 			fRerunLastTestAction.setEnabled(true);
 			
 			if (fTestRunSession.isRunning()) {
@@ -1121,7 +1121,24 @@ action enablement
 			}
 		}
 	}
+
+	private void updateRerunFailedFirstAction() {
+		boolean state= isJUnit3() && hasErrorsOrFailures();
+	    fRerunLastFailedFirstAction.setEnabled(state);
+    }
 	
+    private boolean isJUnit3() {
+	    if (fTestRunSession == null)
+	    	return true; // optimistic
+	    
+		ILaunchConfiguration config= fTestRunSession.getLaunch().getLaunchConfiguration();
+		if (config == null)
+			return true;
+
+		TestKind kind= TestKindRegistry.getDefault().getKind(config);
+		return kind.isNull() || "org.eclipse.jdt.junit.loader.junit3".equals(kind.getId()); //$NON-NLS-1$
+    }
+
 	private void setTitleToolTip() {
 		String testKindDisplayStr= null;
 		ILaunchConfiguration config= fTestRunSession.getLaunch().getLaunchConfiguration();
