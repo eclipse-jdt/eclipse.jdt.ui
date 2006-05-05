@@ -36,7 +36,6 @@ import org.eclipse.jdt.ui.actions.FindOccurrencesInFileAction;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
@@ -96,10 +95,10 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 	 */
 	public void run(IAction action) {
 		IEditorPart activeEditor= JavaPlugin.getActivePage().getActiveEditor();
-		if (!(activeEditor instanceof CompilationUnitEditor))
+		if (!(activeEditor instanceof JavaEditor))
 			return;
 		
-		final CompilationUnitEditor editor= (CompilationUnitEditor)activeEditor;
+		final JavaEditor editor= (JavaEditor)activeEditor;
 		
 		(new JDTQuickMenuAction(editor, IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE_QUICK_MENU) {
 			protected void fillMenu(IMenuManager menu) {
