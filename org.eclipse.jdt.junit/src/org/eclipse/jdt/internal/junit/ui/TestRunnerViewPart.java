@@ -336,15 +336,15 @@ public class TestRunnerViewPart extends ViewPart {
 				return fSuiteIconDescriptor;
 				
 			TestElement.Status status= session.getTestRoot().getStatus();
-			if (status == TestElement.Status.NOT_RUN)
+			if (status.isNotRun())
 				return fSuiteIconDescriptor;
-			else if (status == TestElement.Status.RUNNING)
+			else if (status.isRunning())
 				return fSuiteRunningIconDescriptor;
-			else if (status == TestElement.Status.OK)
+			else if (status.isOK())
 				return fSuiteOkIconDescriptor;
-			else if (status == TestElement.Status.ERROR)
+			else if (status.isError())
 				return fSuiteErrorIconDescriptor;
-			else if (status == TestElement.Status.FAILURE)
+			else if (status.isFailure())
 				return fSuiteFailIconDescriptor;
 			else
 				throw new IllegalStateException(element.toString());
@@ -462,11 +462,11 @@ public class TestRunnerViewPart extends ViewPart {
 			registerInfoMessage(status); 
 		}
 
-		public void testFailed(TestCaseElement testCaseElement, TestElement.Status status, String trace, String expected, String actual) {
+		public void testFailed(TestElement testElement, TestElement.Status status, String trace, String expected, String actual) {
 			if (isAutoScroll()) {
-				fTestViewer.registerFailedForAutoScroll(testCaseElement);
+				fTestViewer.registerFailedForAutoScroll(testElement);
 			}
-			fTestViewer.registerViewerUpdate(testCaseElement);
+			fTestViewer.registerViewerUpdate(testElement);
 
 		    // show the view on the first error only
 		    if (fShowOnErrorOnly && (getErrorsPlusFailures() == 1)) 
@@ -945,13 +945,13 @@ public class TestRunnerViewPart extends ViewPart {
 		try {
 			File file= File.createTempFile("testFailures", ".txt"); //$NON-NLS-1$ //$NON-NLS-2$
 			file.deleteOnExit();
-			TestCaseElement[] failures= fTestRunSession.getAllFailedTestCaseElements();
+			TestElement[] failures= fTestRunSession.getAllFailedTestElements();
 			BufferedWriter bw= null;
 			try {
 				bw= new BufferedWriter(new FileWriter(file));
 				for (int i= 0; i < failures.length; i++) {
-					TestCaseElement testCaseElement= failures[i];
-					bw.write(testCaseElement.getTestName());
+					TestElement testElement= failures[i];
+					bw.write(testElement.getTestName());
 					bw.newLine();
 				}
 			} finally {
@@ -1482,16 +1482,11 @@ action enablement
 	}
 
 	public void handleTestSelected(TestElement test) {
-		if (test instanceof TestCaseElement) {
-			showFailure((TestCaseElement) test);
-		} else {
-			showFailure(null); 
-		}
-		
+		showFailure(test);
 		fCopyAction.handleTestSelected(test);
 	}
 	
-	private void showFailure(final TestCaseElement test) {
+	private void showFailure(final TestElement test) {
 		postSyncRunnable(new Runnable() {
 			public void run() {
 				if (!isDisposed())
@@ -1643,7 +1638,7 @@ action enablement
 		fTestViewer.setShowFailuresOnly(failuresOnly, mode);
 	}
 
-	TestCaseElement[] getAllFailures() {
-		return fTestRunSession.getAllFailedTestCaseElements();
+	TestElement[] getAllFailures() {
+		return fTestRunSession.getAllFailedTestElements();
 	}
 }

@@ -52,31 +52,31 @@ public class TestSessionLabelProvider extends LabelProvider {
 	public Image getImage(Object element) {
 		if (element instanceof TestCaseElement) {
 			Status status= ((TestCaseElement) element).getStatus();
-			if (status == Status.NOT_RUN)
+			if (status.isNotRun())
 				return fTestRunnerPart.fTestIcon;
-			else if (status == Status.RUNNING)
-				return fTestRunnerPart.fTestRunningIcon;
-			else if (status == Status.OK)
-				return fTestRunnerPart.fTestOkIcon;
-			else if (status == Status.ERROR)
+			else if (status.isError())
 				return fTestRunnerPart.fTestErrorIcon;
-			else if (status == Status.FAILURE)
+			else if (status.isFailure())
 				return fTestRunnerPart.fTestFailIcon;
+			else if (status.isRunning())
+				return fTestRunnerPart.fTestRunningIcon;
+			else if (status.isOK())
+				return fTestRunnerPart.fTestOkIcon;
 			else
 				throw new IllegalStateException(element.toString());
 			
 		} else if (element instanceof TestSuiteElement) {
 			Status status= ((TestSuiteElement) element).getStatus();
-			if (status == Status.NOT_RUN)
+			if (status.isNotRun())
 				return fTestRunnerPart.fSuiteIcon;
-			else if (status == Status.RUNNING || status == Status.RUNNING_ERROR || status == Status.RUNNING_FAILURE)
-				return fTestRunnerPart.fSuiteRunningIcon;
-			else if (status == Status.OK)
-				return fTestRunnerPart.fSuiteOkIcon;
-			else if (status == Status.ERROR)
+			else if (status.isError())
 				return fTestRunnerPart.fSuiteErrorIcon;
-			else if (status == Status.FAILURE)
+			else if (status.isFailure())
 				return fTestRunnerPart.fSuiteFailIcon;
+			else if (status.isRunning())
+				return fTestRunnerPart.fSuiteRunningIcon;
+			else if (status.isOK())
+				return fTestRunnerPart.fSuiteOkIcon;
 			else
 				throw new IllegalStateException(element.toString());
 		

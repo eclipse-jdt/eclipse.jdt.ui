@@ -18,36 +18,23 @@ import org.eclipse.jdt.junit.ITestRunListener;
 
 public abstract class TestElement {
 	public final static class Status {
-		public static final Status RUNNING_ERROR= new Status("RUNNING_ERROR", -2,   5); //$NON-NLS-1$
-		public static final Status RUNNING_FAILURE= new Status("RUNNING_FAILURE", -1,   6); //$NON-NLS-1$
-		public static final Status RUNNING= new Status("RUNNING", 0,   3); //$NON-NLS-1$
-		public static final Status ERROR=   new Status("ERROR",   1, /*1*/ITestRunListener.STATUS_ERROR); //$NON-NLS-1$
-		public static final Status FAILURE= new Status("FAILURE", 2, /*2*/ITestRunListener.STATUS_FAILURE); //$NON-NLS-1$
-		public static final Status OK=      new Status("OK",      3, /*0*/ITestRunListener.STATUS_OK); //$NON-NLS-1$
-		public static final Status NOT_RUN= new Status("NOT_RUN", 4,   4); //$NON-NLS-1$
+		public static final Status RUNNING_ERROR= new Status("RUNNING_ERROR", 5); //$NON-NLS-1$
+		public static final Status RUNNING_FAILURE= new Status("RUNNING_FAILURE", 6); //$NON-NLS-1$
+		public static final Status RUNNING= new Status("RUNNING", 3); //$NON-NLS-1$
+		
+		public static final Status ERROR=   new Status("ERROR",   /*1*/ITestRunListener.STATUS_ERROR); //$NON-NLS-1$
+		public static final Status FAILURE= new Status("FAILURE", /*2*/ITestRunListener.STATUS_FAILURE); //$NON-NLS-1$
+		public static final Status OK=      new Status("OK",      /*0*/ITestRunListener.STATUS_OK); //$NON-NLS-1$
+		public static final Status NOT_RUN= new Status("NOT_RUN", 4); //$NON-NLS-1$
 		
 		private static final Status[] OLD_CODE= { OK, ERROR, FAILURE};
 		
 		private final String fName;
-		private final int fPriority;
 		private final int fOldCode;
 		
-		private Status(String name, int priority, int oldCode) {
+		private Status(String name, int oldCode) {
 			fName= name;
-			fPriority= priority;
 			fOldCode= oldCode;
-		}
-		
-		/**
-		 * @param a a status
-		 * @param b another status
-		 * @return the status with higher precedence
-		 */
-		public static Status getCombinedStatus(Status a, Status b) {
-			if (a.fPriority < b.fPriority)
-				return a;
-			else
-				return b;
 		}
 		
 		public int getOldCode() {
@@ -58,6 +45,87 @@ public abstract class TestElement {
 			return fName;
 		}
 
+		/* error state predicates */
+		
+		public boolean isOK() {
+			return this == OK || this == RUNNING || this == NOT_RUN;
+		}
+		
+		public boolean isFailure() {
+			return this == FAILURE || this == RUNNING_FAILURE;
+		}
+		
+		public boolean isError() {
+			return this == ERROR || this == RUNNING_ERROR;
+		}
+		
+		public boolean isErrorOrFailure() {
+			return isError() || isFailure();
+		}
+		
+		/* progress state predicates */
+		
+		public boolean isNotRun() {
+			return this == NOT_RUN;
+		}
+		
+		public boolean isRunning() {
+			return this == RUNNING || this == RUNNING_FAILURE || this == RUNNING_ERROR;
+		}
+		
+		public boolean isDone() {
+			return this == OK || this == FAILURE || this == ERROR;
+		}
+
+		public static Status combineStatus(Status one, Status two) {
+			Status progress= combineProgress(one, two);
+			Status error= combineError(one, two);
+			return combineProgressAndErrorStatus(progress, error);
+		}
+
+		private static Status combineProgress(Status one, Status two) {
+			if (one.isNotRun() && two.isNotRun())
+				return NOT_RUN;
+			else if (one.isDone() && two.isDone())
+				return OK;
+			else if (!one.isRunning() && !two.isRunning())
+				return OK; // one done, one not-run -> a parent failed and its children are not run
+			else
+				return RUNNING;
+		}
+		
+		private static Status combineError(Status one, Status two) {
+			if (one.isError() || two.isError())
+				return ERROR;
+			else if (one.isFailure() || two.isFailure())
+				return FAILURE;
+			else
+				return OK;
+		}
+		
+		private static Status combineProgressAndErrorStatus(Status progress, Status error) {
+			if (progress.isDone()) {
+				if (error.isError())
+					return ERROR;
+				if (error.isFailure())
+					return FAILURE;
+				return OK;
+			}
+			
+			if (progress.isNotRun()) {
+//				Assert.isTrue(!error.isErrorOrFailure());
+				return NOT_RUN;
+			}
+			
+//			Assert.isTrue(progress.isRunning());
+			if (error.isError())
+				return RUNNING_ERROR;
+			if (error.isFailure())
+				return RUNNING_FAILURE;
+//			Assert.isTrue(error.isOK());
+			return RUNNING;
+		}
+		
 		/**
 		 * @param oldStatus one of {@link ITestRunListener}'s STATUS_* constants
 		 * @return the Status
@@ -65,19 +133,17 @@ public abstract class TestElement {
 		public static Status convert(int oldStatus) {
 			return OLD_CODE[oldStatus];
 		}
-
-		/**
-		 * @return <code>true</code> iff this is a {@link #FAILURE} or an {@link #ERROR}
-		 */
-		public boolean isFailure() {
-			return this == FAILURE || this == ERROR;
-		}
 	}
 	
 	private final TestSuiteElement fParent;
 	private final String fId;
 	private final String fTestName;
 
+	private Status fStatus;
+	private String fTrace;
+	private String fExpected;
+	private String fActual;
+	
 	/**
 	 * @param parent the parent, can be <code>null</code>
 	 * @param id the test id
@@ -91,6 +157,7 @@ public abstract class TestElement {
 		fTestName= testName;
 		if (parent != null)
 			parent.addChild(this);
+		fStatus= Status.NOT_RUN;
 	}
 	
 	/**
@@ -108,6 +175,41 @@ public abstract class TestElement {
 		return fTestName;
 	}
 	
+	public void setStatus(Status status) {
+		//TODO: notify about change?
+		//TODO: multiple errors/failures per test https://bugs.eclipse.org/bugs/show_bug.cgi?id=125296
+		fStatus= status;
+	}
+	
+	public void setStatus(Status status, String trace, String expected, String actual) {
+		//TODO: notify about change?
+		//TODO: multiple errors/failures per test https://bugs.eclipse.org/bugs/show_bug.cgi?id=125296
+		fStatus= status;
+		fTrace= trace;
+		fExpected= expected;
+		fActual= actual;
+	}
+
+	public Status getStatus() {
+		return fStatus;
+	}
+	
+	public String getTrace() {
+		return fTrace;
+	}		
+	
+	public String getExpected() {
+		return fExpected;
+	}		
+	
+	public String getActual() {
+		return fActual;
+	}		
+	
+	public boolean isComparisonFailure() {
+		return fExpected != null && fActual != null;
+	}
+	
 	// TODO: Format of testName is highly underspecified. See RemoteTestRunner#getTestName(Test).
 	
 	public String getClassName() {
@@ -121,8 +223,6 @@ public abstract class TestElement {
 		testNameString= testNameString.substring(index + 1);
 		return testNameString.substring(0, testNameString.indexOf(')'));
 	}
-	
-	public abstract Status getStatus();
 	
 	public TestRoot getRoot() {
 		return getParent().getRoot();

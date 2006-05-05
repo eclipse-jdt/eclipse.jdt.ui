@@ -225,11 +225,11 @@ public final class JUnitModel {
 					}
 				}
 				
-				public void testFailed(TestCaseElement testCaseElement, Status status, String trace, String expected, String actual) {
+				public void testFailed(TestElement testElement, Status status, String trace, String expected, String actual) {
 					ITestRunListener[] testRunListeners= JUnitPlugin.getDefault().getTestRunListeners();
 					for (int i= 0; i < testRunListeners.length; i++) {
 						ITestRunListener testRunListener= testRunListeners[i];
-						testRunListener.testFailed(status.getOldCode(), testCaseElement.getId(), testCaseElement.getTestName(), trace);
+						testRunListener.testFailed(status.getOldCode(), testElement.getId(), testElement.getTestName(), trace);
 					}
 				}
 				

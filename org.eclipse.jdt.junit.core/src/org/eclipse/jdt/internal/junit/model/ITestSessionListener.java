@@ -60,7 +60,7 @@ public interface ITestSessionListener {
 	/**
 	 * An individual test has failed with a stack trace.
 	 * 
-	 * @param testCaseElement the test
+	 * @param testElement the test
 	 * @param status the outcome of the test; one of 
 	 * {@link Status#ERROR} or
 	 * {@link Status#FAILURE}
@@ -68,7 +68,7 @@ public interface ITestSessionListener {
 	 * @param expected expected value
 	 * @param actual actual value
 	 */
-	public void testFailed(TestCaseElement testCaseElement, Status status, String trace, String expected, String actual);
+	public void testFailed(TestElement testElement, Status status, String trace, String expected, String actual);
 	/**
  	 * An individual test has been rerun.
 	 * 

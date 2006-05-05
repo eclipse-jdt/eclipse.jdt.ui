@@ -23,7 +23,7 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.jdt.internal.junit.model.TestCaseElement;
+import org.eclipse.jdt.internal.junit.model.TestElement;
 
 /**
  * Copies the names of the methods that failed and their traces to the clipboard.
@@ -60,11 +60,11 @@ public class CopyFailureListAction extends Action {
 	
 	public String getAllFailureTraces() {
 		StringBuffer buf= new StringBuffer();
-		TestCaseElement[] failures= fRunner.getAllFailures();
+		TestElement[] failures= fRunner.getAllFailures();
 		
 		String lineDelim= System.getProperty("line.separator", "\n");  //$NON-NLS-1$//$NON-NLS-2$
 		for (int i= 0; i < failures.length; i++) {
-			TestCaseElement failure= failures[i];
+			TestElement failure= failures[i];
 			buf.append(failure.getTestName()).append(lineDelim);
 			String failureTrace= failure.getTrace();
 			if (failureTrace != null) {

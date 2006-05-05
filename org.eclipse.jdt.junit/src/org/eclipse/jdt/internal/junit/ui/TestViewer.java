@@ -87,15 +87,10 @@ public class TestViewer {
 
 		public boolean select(TestElement testElement) {
 			Status status= testElement.getStatus();
-			if (status == Status.FAILURE || status == Status.ERROR)
+			if (status.isErrorOrFailure())
 				return true;
-			
-			if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL
-					&& testElement instanceof TestSuiteElement
-					&& (status == Status.RUNNING || status == Status.RUNNING_FAILURE || status == Status.RUNNING_ERROR))
-				return true;
-			
-			return false;
+			else
+				return ! fTestRunSession.isRunning() && status == Status.RUNNING;  // rerunning
 		}
 	}
 
@@ -436,7 +431,7 @@ public class TestViewer {
 				toUpdate= fNeedUpdate.toArray();
 				fNeedUpdate.clear();
 			}
-			if (! fTreeNeedsRefresh) {
+			if (! fTreeNeedsRefresh && toUpdate.length > 0) {
 				if (fTreeHasFilter)
 					for (int i= 0; i < toUpdate.length; i++)
 						updateElementInTree((TestElement) toUpdate[i]);
@@ -453,7 +448,7 @@ public class TestViewer {
 					fTreeViewer.update(toUpdateWithParents.toArray(), null);
 				}
 			}
-			if (! fTableNeedsRefresh) {
+			if (! fTableNeedsRefresh && toUpdate.length > 0) {
 				if (fTableHasFilter)
 					for (int i= 0; i < toUpdate.length; i++)
 						updateElementInTable((TestElement) toUpdate[i]);
@@ -476,9 +471,9 @@ public class TestViewer {
 				} else {
 					TestElement parent= current;
 					if (toCreate != null) {
-						Iterator iter= toCreate.listIterator(toCreate.size()); // backwards, top first
-						while (iter.hasNext()) {
-							TestElement child= (TestElement) iter.next();
+						ListIterator iter= toCreate.listIterator(toCreate.size()); // backwards, top first
+						while (iter.hasPrevious()) {
+							TestElement child= (TestElement) iter.previous();
 							fTreeViewer.add(parent, child);
 							parent= child;
 						}
@@ -508,8 +503,9 @@ public class TestViewer {
 						insertionIndex= fTableViewer.getTable().indexOf(item);
 				}
 				fTableViewer.insert(element, insertionIndex);
+			} else  {
+				fTableViewer.update(element, null);
 			}
-			
 		} else {
 			fTableViewer.remove(element);
 		}
@@ -609,7 +605,7 @@ public class TestViewer {
 		int nextIndex= siblings.indexOf(current) + 1;
 		for (int i= nextIndex; i < siblings.size(); i++) {
 			TestElement sibling= (TestElement) siblings.get(i);
-			if (sibling.getStatus().isFailure()) {
+			if (sibling.getStatus().isErrorOrFailure()) {
 				if (sibling instanceof TestCaseElement) {
 					return (TestCaseElement) sibling;
 				} else {
@@ -626,7 +622,7 @@ public class TestViewer {
 			children= new ReverseList(children);
 		for (int i= 0; i < children.size(); i++) {
 			TestElement child= (TestElement) children.get(i);
-			if (child.getStatus().isFailure()) {
+			if (child.getStatus().isErrorOrFailure()) {
 				if (child instanceof TestCaseElement) {
 					return (TestCaseElement) child;
 				} else {
@@ -667,8 +663,10 @@ public class TestViewer {
 		fAutoScrollTarget= testCaseElement;
 	}
 
-	public synchronized void registerFailedForAutoScroll(TestCaseElement testCaseElement) {
-		fAutoExpand.add(fTreeContentProvider.getParent(testCaseElement));
+	public synchronized void registerFailedForAutoScroll(TestElement testElement) {
+		Object parent= fTreeContentProvider.getParent(testElement);
+		if (parent != null)
+			fAutoExpand.add(parent);
 	}
 	
 }

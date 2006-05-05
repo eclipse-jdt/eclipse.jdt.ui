@@ -34,28 +34,30 @@ public class TestSuiteElement extends TestElement {
 	
 	public Status getStatus() {
 		//TODO: Cache failure count in hierarchy? Recheck behavior when introducing filters
-		Status highest= Status.NOT_RUN;
-		boolean hasNotRun= false;
+		Status suiteStatus= getSuiteStatus();
+//		Assert.isTrue(suiteStatus.isNotRun()
+//				|| (suiteStatus == Status.FAILURE || suiteStatus == Status.ERROR));
+		
 		TestElement[] children= (TestElement[]) fChildren.toArray(new TestElement[fChildren.size()]); // copy list to avoid concurreny problems
-		for (int i= 0; i < children.length; i++) {
-			TestElement testElement= children[i];
-			Status childStatus= testElement.getStatus();
-			
-			if (childStatus == Status.RUNNING)
-				return Status.RUNNING;
-			if (childStatus == Status.NOT_RUN)
-				hasNotRun= true;
-			else 
-				highest= Status.getCombinedStatus(childStatus, highest);
+		if (children.length == 0)
+			return suiteStatus;
+		
+		Status cumulated= children[0].getStatus();
+		
+		for (int i= 1; i < children.length; i++) {
+			Status childStatus= children[i].getStatus();
+			cumulated= Status.combineStatus(cumulated, childStatus);
 		}
-		if (hasNotRun && highest != Status.NOT_RUN) {
-			
-			return Status.RUNNING;
-		} else {
-			return highest;
-		}
+		// not necessary, see special code in Status.combineProgress()
+//		if (suiteStatus.isErrorOrFailure() && cumulated.isNotRun())
+//			return suiteStatus; //progress is Done if error in Suite and no children run
+		return Status.combineStatus(cumulated, suiteStatus);
 	}
 
+	public Status getSuiteStatus() {
+		return super.getStatus();
+	}
+	
 	public String toString() {
 		return super.toString() + " (" + fChildren.size() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}

@@ -100,6 +100,10 @@ public class JUnit3TestReference implements ITestReference {
 				return suite.getName();
 			return suite.getClass().getName();
 		}
+		if (fTest instanceof TestDecorator) {
+			TestDecorator decorator= (TestDecorator) fTest;
+			return decorator.getClass().getName();
+		}
 		if (isJUnit4TestSuiteAdapter(fTest)) {
 			Class testClass= (Class) callJUnit4GetterMethod(fTest, "getTestClass"); //$NON-NLS-1$
 			return testClass.getName();

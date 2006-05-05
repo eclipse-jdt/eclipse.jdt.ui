@@ -16,50 +16,9 @@ import org.eclipse.jface.util.Assert;
 
 public class TestCaseElement extends TestElement {
 
-	private Status fStatus;
-	private String fTrace;
-	private String fExpected;
-	private String fActual;
-	
 	public TestCaseElement(TestSuiteElement parent, String id, String testName) {
 		super(parent, id, testName);
 		Assert.isNotNull(parent);
-		fStatus= Status.NOT_RUN;
-	}
-	
-	public void setStatus(Status status) {
-		//TODO: notify about change?
-		//TODO: multiple errors/failures per test https://bugs.eclipse.org/bugs/show_bug.cgi?id=125296
-		fStatus= status;
-	}
-	
-	public void setStatus(Status status, String trace, String expected, String actual) {
-		//TODO: notify about change?
-		//TODO: multiple errors/failures per test https://bugs.eclipse.org/bugs/show_bug.cgi?id=125296
-		fStatus= status;
-		fTrace= trace;
-		fExpected= expected;
-		fActual= actual;
-	}
-
-	public Status getStatus() {
-		return fStatus;
-	}
-	
-	public String getTrace() {
-		return fTrace;
-	}		
-	
-	public String getExpected() {
-		return fExpected;
-	}		
-	
-	public String getActual() {
-		return fActual;
-	}		
-	
-	public boolean isComparisonFailure() {
-		return fExpected != null && fActual != null;
 	}
 	
 	public String getTestMethodName() {

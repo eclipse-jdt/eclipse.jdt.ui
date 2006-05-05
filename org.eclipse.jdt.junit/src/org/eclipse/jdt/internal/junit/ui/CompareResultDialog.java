@@ -57,7 +57,7 @@ import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.contentmergeviewer.TextMergeViewer;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
 
-import org.eclipse.jdt.internal.junit.model.TestCaseElement;
+import org.eclipse.jdt.internal.junit.model.TestElement;
 
 public class CompareResultDialog extends TrayDialog {
     private static class CompareResultMergeViewer extends TextMergeViewer {
@@ -144,7 +144,7 @@ public class CompareResultDialog extends TrayDialog {
     private int fPrefix;
     private int fSuffix;
 	
-	public CompareResultDialog(Shell parentShell, TestCaseElement element) {
+	public CompareResultDialog(Shell parentShell, TestElement element) {
 		super(parentShell);
 		fgThis= this;
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX);

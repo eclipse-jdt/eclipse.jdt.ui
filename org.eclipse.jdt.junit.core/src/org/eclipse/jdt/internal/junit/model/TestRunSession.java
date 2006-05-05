@@ -403,14 +403,13 @@ public class TestRunSession {
 		 */
 		public void testFailed(int statusCode, String testId, String testName, String trace, String expected, String actual) {
 			TestElement testElement= getTestElement(testId);
-			if (! (testElement instanceof TestCaseElement)) {
+			if (testElement == null) {
 				logUnexpectedTest(testId, testElement);
 				return;
 			}
-			TestCaseElement test= (TestCaseElement) testElement;
 
 			Status status= Status.convert(statusCode);
-			setStatus(test, status, trace, nullifyEmpty(expected), nullifyEmpty(actual));
+			setStatus(testElement, status, trace, nullifyEmpty(expected), nullifyEmpty(actual));
 			
 			if (statusCode == ITestRunListener.STATUS_ERROR) {
 				fErrorCount++;
@@ -420,7 +419,7 @@ public class TestRunSession {
 			
 			Object[] listeners= fSessionListeners.getListeners();
 			for (int i= 0; i < listeners.length; ++i) {
-				((ITestSessionListener) listeners[i]).testFailed(test, status, trace, expected, actual);
+				((ITestSessionListener) listeners[i]).testFailed(testElement, status, trace, expected, actual);
 			}
 		}
 
@@ -463,12 +462,12 @@ public class TestRunSession {
 			}
 		}
 	
-		private void setStatus(TestCaseElement testCaseElement, Status status) {
-			testCaseElement.setStatus(status);
+		private void setStatus(TestElement testElement, Status status) {
+			testElement.setStatus(status);
 		}
 		
-		private void setStatus(TestCaseElement testCaseElement, Status status, String trace, String expected, String actual) {
-			testCaseElement.setStatus(status, trace, expected, actual);
+		private void setStatus(TestElement testElement, Status status, String trace, String expected, String actual) {
+			testElement.setStatus(status, trace, expected, actual);
 		}
 		
 		private void logUnexpectedTest(String testId, TestElement testElement) {
@@ -486,19 +485,17 @@ public class TestRunSession {
 		}
 	}
 
-	public TestCaseElement[] getAllFailedTestCaseElements() {
+	public TestElement[] getAllFailedTestElements() {
 		ArrayList failures= new ArrayList();
 		addFailures(failures, getTestRoot());
-		return (TestCaseElement[]) failures.toArray(new TestCaseElement[failures.size()]);
+		return (TestElement[]) failures.toArray(new TestElement[failures.size()]);
 	}
 
 	private void addFailures(ArrayList failures, TestElement testElement) {
-		if (testElement instanceof TestCaseElement) {
-			TestCaseElement testCaseElement= (TestCaseElement) testElement;
-			if (testCaseElement.getStatus().isFailure()) {
-				failures.add(testCaseElement);
-			}
-		} else {
+		if (testElement.getStatus().isErrorOrFailure()) {
+			failures.add(testElement);
+		}
+		if (testElement instanceof TestSuiteElement) {
 			TestSuiteElement testSuiteElement= (TestSuiteElement) testElement;
 			TestElement[] children= testSuiteElement.getChildren();
 			for (int i= 0; i < children.length; i++) {
