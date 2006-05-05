@@ -1127,27 +1127,16 @@ action enablement
 		ILaunchConfiguration config= fTestRunSession.getLaunch().getLaunchConfiguration();
 		if (config != null) {
 			TestKind kind= TestKindRegistry.getDefault().getKind(config);
-			if (kind.isNull())
-				testKindDisplayStr= getJunit3DisplayName();
-			else
+			if (!kind.isNull())
 				testKindDisplayStr= kind.getDisplayName();
 		}
+		
 		if (testKindDisplayStr != null)
 			setTitleToolTip(MessageFormat.format(JUnitMessages.TestRunnerViewPart_titleToolTip, new String[] {fTestRunSession.getTestRunName(), testKindDisplayStr}));
 		else
 			setTitleToolTip(fTestRunSession.getTestRunName());
 	}
 	
-	private String getJunit3DisplayName() {
-		Iterator iter= TestKindRegistry.getDefault().getAllKinds().iterator();
-		while (iter.hasNext()) {
-			TestKind kind= (TestKind)iter.next();
-			if ("org.eclipse.jdt.junit.loader.junit3".equals(kind.getId())) //$NON-NLS-1$
-				return kind.getDisplayName();
-		}
-		return null;
-	}
-
 	public synchronized void dispose(){
 		fIsDisposed= true;
 		if (fTestRunSessionListener != null)

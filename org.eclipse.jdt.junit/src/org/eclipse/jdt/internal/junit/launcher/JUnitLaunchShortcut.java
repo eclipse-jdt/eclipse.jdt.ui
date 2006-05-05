@@ -147,18 +147,17 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	public JUnitLaunchDescription describeContainerLaunch(IJavaElement container) {
 		JUnitLaunchDescription description= new JUnitLaunchDescription(container, getContainerLabel(container));
 		description.setContainer(container.getHandleIdentifier());
+
+		// set default test kind i.e. JUnit 3
+		description.setTestKind("org.eclipse.jdt.junit.loader.junit3"); //$NON-NLS-1$
+		
 		//guess test kind from java project: 
 		IJavaProject javaProject= container.getJavaProject();
 		if (javaProject != null) {
 			try {
 				IType testAnnotation= javaProject.findType("org.junit.Test"); //$NON-NLS-1$
-				if (testAnnotation != null) {
-					ArrayList kinds= TestKindRegistry.getDefault().getAllKinds();
-					if (kinds.size() >= 2) {
-						ITestKind jUnit4Kind= (ITestKind) kinds.get(1); //TODO: assumes JUnit4 is second
-						description.setTestKind((jUnit4Kind).getId());
-					}
-				}
+				if (testAnnotation != null)
+					description.setTestKind("org.eclipse.jdt.junit.loader.junit4"); //$NON-NLS-1$
 			} catch (JavaModelException e) {
 				// leave default
 			}
