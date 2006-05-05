@@ -14,6 +14,8 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.core.resources.IContainer;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
@@ -26,16 +28,24 @@ public class AddSourceFolderWizard extends BuildPathWizard {
 	private final boolean fAllowRemoveProjectFolder;
 	private final boolean fAllowAddExclusionPatterns;
 	private final boolean fCanCommitConflict;
+	private final IContainer fParent;
 	
 	public AddSourceFolderWizard(CPListElement[] existingEntries, CPListElement newEntry, IPath outputLocation, 
 			boolean linkedMode, boolean canCommitConflict, 
 			boolean allowConflict, boolean allowRemoveProjectFolder, boolean allowAddExclusionPatterns) {
+		this(existingEntries, newEntry, outputLocation, linkedMode, canCommitConflict, allowConflict, allowRemoveProjectFolder, allowAddExclusionPatterns, newEntry.getJavaProject().getProject());
+	}
+	
+	public AddSourceFolderWizard(CPListElement[] existingEntries, CPListElement newEntry, IPath outputLocation, 
+			boolean linkedMode, boolean canCommitConflict, 
+			boolean allowConflict, boolean allowRemoveProjectFolder, boolean allowAddExclusionPatterns, IContainer parent) {
 		super(existingEntries, newEntry, outputLocation, getTitel(newEntry, linkedMode), JavaPluginImages.DESC_WIZBAN_NEWSRCFOLDR);
 		fLinkedMode= linkedMode;
 		fCanCommitConflict= canCommitConflict;
 		fAllowConflict= allowConflict;
 		fAllowRemoveProjectFolder= allowRemoveProjectFolder;
 		fAllowAddExclusionPatterns= allowAddExclusionPatterns;
+		fParent= parent;
 	}
 
 	private static String getTitel(CPListElement newEntry, boolean linkedMode) {
@@ -58,7 +68,7 @@ public class AddSourceFolderWizard extends BuildPathWizard {
 	
 		fAddFolderPage= new AddSourceFolderWizardPage(getEntryToEdit(), getExistingEntries(), getOutputLocation(), 
 				fLinkedMode, fCanCommitConflict,
-				fAllowConflict, fAllowRemoveProjectFolder, fAllowAddExclusionPatterns);
+				fAllowConflict, fAllowRemoveProjectFolder, fAllowAddExclusionPatterns, fParent);
 		addPage(fAddFolderPage);
 		
 		fFilterPage= new SetFilterWizardPage(getEntryToEdit(), getExistingEntries(), getOutputLocation());

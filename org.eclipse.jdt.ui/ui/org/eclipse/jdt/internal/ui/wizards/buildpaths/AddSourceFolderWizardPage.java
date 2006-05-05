@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IPathVariableManager;
 import org.eclipse.core.resources.IProject;
@@ -210,10 +211,11 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	private final boolean fAllowRemoveProjectFolder;
 	private final boolean fAllowAddExclusionPatterns;
 	private final boolean fCanCommitConflictingBuildpath;
+	private final IContainer fParent;
 	
 	public AddSourceFolderWizardPage(CPListElement newElement, List/*<CPListElement>*/ existingEntries, IPath outputLocation, 
 			boolean linkedMode, boolean canCommitConflictingBuildpath,
-			boolean allowIgnoreConflicts, boolean allowRemoveProjectFolder, boolean allowAddExclusionPatterns) {
+			boolean allowIgnoreConflicts, boolean allowRemoveProjectFolder, boolean allowAddExclusionPatterns, IContainer parent) {
 		
 		super(PAGE_NAME);
 		
@@ -222,6 +224,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		fAllowConflict= allowIgnoreConflicts;
 		fAllowRemoveProjectFolder= allowRemoveProjectFolder;
 		fAllowAddExclusionPatterns= allowAddExclusionPatterns;
+		fParent= parent;
 				
 		fOrginalExlusionFilters= new Hashtable();
 		fOrginalInclusionFilters= new Hashtable();
@@ -255,7 +258,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			if (linkedMode) {
 				setDescription(Messages.format(NewWizardMessages.NewFolderDialog_createIn, newElement.getJavaProject().getElementName()));
 			} else {
-				setDescription(NewWizardMessages.NewSourceFolderWizardPage_description);
+				setDescription(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_description, fParent.getFullPath().toString()));
 			}
 		} else {
 			setDescription(NewWizardMessages.NewSourceFolderWizardPage_edit_description);
@@ -269,12 +272,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		
 		RootFieldAdapter adapter= new RootFieldAdapter();
 		
-		if (linkedMode || fOrginalPath != null) {
-			fRootDialogField= new StringDialogField();
-		} else {
-			fRootDialogField= new StringButtonDialogField(adapter);
-			((StringButtonDialogField)fRootDialogField).setButtonLabel(NewWizardMessages.NewSourceFolderWizardPage_root_button);
-		}
+		fRootDialogField= new StringDialogField();
 		fRootDialogField.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_root_label);
 		if (fNewElement.getPath() == null) {
 			fRootDialogField.setText(""); //$NON-NLS-1$
@@ -333,10 +331,8 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		if (fLinkedMode) {
 			fLinkFields.doFillIntoGrid(composite, layout.numColumns);
 			fRootDialogField.doFillIntoGrid(composite, layout.numColumns - 1);
-		} else if (fOrginalPath != null) {
-			fRootDialogField.doFillIntoGrid(composite, layout.numColumns - 1);
 		} else {
-			fRootDialogField.doFillIntoGrid(composite, layout.numColumns);
+			fRootDialogField.doFillIntoGrid(composite, layout.numColumns - 1);
 		}
 		
 		if (fAllowRemoveProjectFolder)
@@ -407,7 +403,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		IJavaProject javaProject= fNewElement.getJavaProject();		
 		IProject project= javaProject.getProject();		
 		
-		StatusInfo pathNameStatus= validatePathName(fRootDialogField.getText(), project);
+		StatusInfo pathNameStatus= validatePathName(fRootDialogField.getText(), fParent);
 		
 		if (!pathNameStatus.isOK())
 			return pathNameStatus;
@@ -425,7 +421,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		result.setOK();
 
 		IPath projPath= project.getFullPath();	
-		IPath path= projPath.append(fRootDialogField.getText());
+		IPath path= fParent.getFullPath().append(fRootDialogField.getText());
 
 		restoreCPElements();
 		
@@ -444,12 +440,10 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			}
 		}
 		
-		if (fLinkedMode || fOrginalPath != null) {
-			IFolder folder= fNewElement.getJavaProject().getProject().getFolder(new Path(fRootDialogField.getText()));
-			if (folder.exists() && !folder.getFullPath().equals(fOrginalPath))
-				return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewFolderDialog_folderNameEmpty_alreadyExists, folder.getFullPath().toString()));
-		}
-				
+		IFolder folder= fParent.getFolder(new Path(fRootDialogField.getText()));
+		if (folder.exists() && !folder.getFullPath().equals(fOrginalPath))
+			return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewFolderDialog_folderNameEmpty_alreadyExists, folder.getFullPath().toString()));
+
 		boolean isProjectASourceFolder= projectEntryIndex != -1;
 		
 		fModifiedElements.clear();
@@ -645,18 +639,18 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		return new StatusInfo(locationStatus.getSeverity(), locationStatus.getMessage());
 	}
 
-	private static StatusInfo validatePathName(String str, IProject project) {
+	private static StatusInfo validatePathName(String str, IContainer parent) {
 		StatusInfo result= new StatusInfo();
 		result.setOK();
 
-		IPath projPath= project.getFullPath();
+		IPath parentPath= parent.getFullPath();
 		
 		if (str.length() == 0) {
-			result.setError(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_error_EnterRootName, projPath.toString()));
+			result.setError(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_error_EnterRootName, parentPath.toString()));
 			return result;
 		}
 		
-		IPath path= projPath.append(str);
+		IPath path= parentPath.append(str);
 
 		IWorkspaceRoot workspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
 		IStatus validate= workspaceRoot.getWorkspace().validatePath(path.toString(), IResource.FOLDER);
@@ -673,10 +667,10 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			}
 		} else {
 			
-			URI projLocation= project.getLocationURI();
-			if (projLocation != null) {
+			URI parentLocation= parent.getLocationURI();
+			if (parentLocation != null) {
 				try {
-					IFileStore store= EFS.getStore(projLocation).getChild(str);
+					IFileStore store= EFS.getStore(parentLocation).getChild(str);
 					if (store.fetchInfo().exists()) {
 						result.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExistingDifferentCase); 
 						return result;
@@ -707,7 +701,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	}
 	
 	public IResource getCorrespondingResource() {
-		return fNewElement.getJavaProject().getProject().getFolder(fRootDialogField.getText());
+		return fParent.getFolder(new Path(fRootDialogField.getText()));
 	}
 	
 	public IPath getOutputLocation() {

@@ -144,7 +144,6 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 
 
 		MultipleFolderSelectionDialog dialog= new MultipleFolderSelectionDialog(getShell(), lp, cp) {
-			
 			protected Control createDialogArea(Composite parent) {
 				Control result= super.createDialogArea(parent);
 				PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJavaHelpContextIds.BP_CHOOSE_EXISTING_FOLDER_TO_MAKE_SOURCE_FOLDER);
@@ -154,7 +153,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 			protected Object createFolder(final IContainer container) {
 				final Object[] result= new Object[1];
 				final CPListElement newElement= new CPListElement(fJavaProject, IClasspathEntry.CPE_SOURCE);
-				final AddSourceFolderWizard wizard= newSourceFolderWizard(newElement, fExistingElements, fOutputLocation);
+				final AddSourceFolderWizard wizard= newSourceFolderWizard(newElement, fExistingElements, fOutputLocation, container);
 				AbstractOpenWizardAction action= new AbstractOpenWizardAction() {
 					protected INewWizard createWizard() throws CoreException {
 						return wizard;
@@ -164,7 +163,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 					public void propertyChange(PropertyChangeEvent event) {
 						if (event.getProperty().equals(IAction.RESULT)) {
 							if (event.getNewValue().equals(Boolean.TRUE)) {
-								result[0]= addFakeFolder(container, newElement);
+								result[0]= addFakeFolder(fJavaProject.getProject(), newElement);
 							} else {
 								wizard.cancel();
 							}
@@ -262,8 +261,8 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 		}
 	}
 	
-	private AddSourceFolderWizard newSourceFolderWizard(CPListElement element, CPListElement[] existing, String outputLocation) {
-		AddSourceFolderWizard wizard= new AddSourceFolderWizard(existing, element, new Path(outputLocation).makeAbsolute(), false, true, false, false, false);
+	private AddSourceFolderWizard newSourceFolderWizard(CPListElement element, CPListElement[] existing, String outputLocation, IContainer parent) {
+		AddSourceFolderWizard wizard= new AddSourceFolderWizard(existing, element, new Path(outputLocation).makeAbsolute(), false, true, false, false, false, parent);
 		wizard.setDoFlushChange(false);
 		return wizard;
 	}
