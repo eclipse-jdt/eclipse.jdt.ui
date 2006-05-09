@@ -188,6 +188,8 @@ class ClasspathLocalizer {
 			url= bundle.getEntry("/"); //$NON-NLS-1$
 		else
 			url= bundle.getEntry(jar.getPluginRelativePath());
+		if (url == null)
+			throw new IOException();
 		return FileLocator.toFileURL(url).getFile();
 	}
 }
