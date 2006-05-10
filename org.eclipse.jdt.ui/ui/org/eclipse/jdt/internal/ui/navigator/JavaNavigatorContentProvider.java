@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.navigator;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
@@ -55,6 +56,8 @@ public class JavaNavigatorContentProvider extends
 
 	private IExtensionStateModel fStateModel;
 
+	private Object fRealInput;
+
 	public void init(ICommonContentExtensionSite commonContentExtensionSite) {
 		IExtensionStateModel stateModel = commonContentExtensionSite
 				.getExtensionStateModel();
@@ -81,14 +84,15 @@ public class JavaNavigatorContentProvider extends
 		setProvideMembers(showCUChildren);
 	}
 
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) { 
+		fRealInput = newInput;
 		super.inputChanged(viewer, oldInput, findInputElement(newInput));
 	}
 	
 	public Object getParent(Object element) {
 		Object parent= super.getParent(element);
 		if (parent instanceof IJavaModel) {
-			return getViewerInput() != null ? getViewerInput() : parent;
+			return getViewerInput() != null ? fRealInput : parent;
 		}
 		return parent;
 	}
@@ -216,5 +220,21 @@ public class JavaNavigatorContentProvider extends
 		else
 			super.postAdd(parent, element);
 	}
+	
+
+	protected void postRefresh(final List toRefresh, final boolean updateLabels) {
+		for (Iterator iter = toRefresh.iterator(); iter.hasNext();) {
+			Object element = iter.next();
+			if(element instanceof IJavaModel) {
+				iter.remove();
+				toRefresh.add(fRealInput);
+				super.postRefresh(toRefresh, updateLabels);
+				return;
+			}
+		} 
+		super.postRefresh(toRefresh, updateLabels);
+		
+	}
+ 
 
 }
