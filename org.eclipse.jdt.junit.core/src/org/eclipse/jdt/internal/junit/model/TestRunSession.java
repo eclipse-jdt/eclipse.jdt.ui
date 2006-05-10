@@ -44,6 +44,7 @@ public class TestRunSession {
 
 	private final IType fLaunchedType;
 	private final ILaunch fLaunch;
+	private final String fLaunchConfigName;
 
 	private final RemoteTestRunnerClient fTestRunnerClient;
 
@@ -95,6 +96,11 @@ public class TestRunSession {
 		
 		fLaunchedType= launchedType;
 		fLaunch= launch;
+		ILaunchConfiguration launchConfiguration= launch.getLaunchConfiguration();
+		if (launchConfiguration != null)
+			fLaunchConfigName= launchConfiguration.getName();
+		else
+			fLaunchConfigName= launchedType.getElementName();
 		
 		fTestRoot= new TestRoot();
 		fIdToTest= new HashMap();
@@ -118,7 +124,7 @@ public class TestRunSession {
 	}
 	
 	public String getTestRunName() {
-		return fLaunch.getLaunchConfiguration().getName();
+		return fLaunchConfigName;
 	}
 	
 	public int getErrorCount() {
