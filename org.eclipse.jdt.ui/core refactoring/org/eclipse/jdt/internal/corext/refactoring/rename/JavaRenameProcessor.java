@@ -24,6 +24,7 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
@@ -49,7 +50,9 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements ISc
 		for (int i= 0; i < changed.length; i++) {
 			deltaFactory.change(changed[i]);
 		}
-		getRenameModifications().buildDelta(deltaFactory);
+		RenameModifications renameModifications= getRenameModifications();
+		renameModifications.buildDelta(deltaFactory);
+		renameModifications.buildValidateEdits((ValidateEditChecker)context.getChecker(ValidateEditChecker.class));
 		return result;
 	}
 	

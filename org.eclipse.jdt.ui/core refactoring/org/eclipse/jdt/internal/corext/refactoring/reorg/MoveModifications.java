@@ -33,6 +33,7 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -137,6 +138,19 @@ public class MoveModifications extends RefactoringModifications {
 		getResourceModifications().buildDelta(builder);
 	}
 	
+	public void buildValidateEdits(ValidateEditChecker checker) {
+		for (Iterator iter= fMoves.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			if (element instanceof ICompilationUnit) {
+				ICompilationUnit unit= (ICompilationUnit)element;
+				IResource resource= unit.getResource();
+				if (resource != null && resource.getType() == IResource.FILE) {
+					checker.addFile((IFile)resource);
+				}
+			}
+		}
+	}
+
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared) {
 		List result= new ArrayList();
 		for (int i= 0; i < fMoves.size(); i++) {

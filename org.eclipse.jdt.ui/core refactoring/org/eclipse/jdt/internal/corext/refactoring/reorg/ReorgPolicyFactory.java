@@ -51,6 +51,7 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
 import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -303,6 +304,7 @@ public class ReorgPolicyFactory {
 			}
 			if (modifications != null) {
 				modifications.buildDelta(deltaFactory);
+				modifications.buildValidateEdits((ValidateEditChecker)context.getChecker(ValidateEditChecker.class));
 			}
 			return new RefactoringStatus();
 		}

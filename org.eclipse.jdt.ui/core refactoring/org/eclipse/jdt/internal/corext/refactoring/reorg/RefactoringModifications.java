@@ -24,6 +24,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -46,6 +47,10 @@ public abstract class RefactoringModifications {
 	public abstract RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared);
 
 	public abstract void buildDelta(IResourceChangeDescriptionFactory builder);
+	
+	public void buildValidateEdits(ValidateEditChecker checker) {
+		// Default implementation does nothing.
+	}
 
 	protected void createIncludingParents(IContainer container) {
 		while (container != null && !(container.exists() || getResourceModifications().willExist(container))) {
