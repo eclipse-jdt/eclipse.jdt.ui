@@ -7,12 +7,12 @@ Bundle-ClassPath: junit.jar
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Export-Package: 
- junit.awtui,
- junit.extensions,
- junit.framework,
- junit.runner,
- junit.swingui,
- junit.swingui.icons,
- junit.textui
+ junit.awtui;version="3.8.1",
+ junit.extensions;version="3.8.1",
+ junit.framework;version="3.8.1",
+ junit.runner;version="3.8.1",
+ junit.swingui;version="3.8.1",
+ junit.swingui.icons;version="3.8.1",
+ junit.textui;version="3.8.1"
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.3
