@@ -31,6 +31,7 @@ public class CounterPanel extends Composite {
 	protected Text fNumberOfFailures;
 	protected Text fNumberOfRuns;
 	protected int fTotal;
+	protected int fIgnoredCount;
 	
 	private final Image fErrorIcon= TestRunnerViewPart.createImage("ovr16/error_ovr.gif"); //$NON-NLS-1$
 	private final Image fFailureIcon= TestRunnerViewPart.createImage("ovr16/failed_ovr.gif"); //$NON-NLS-1$
@@ -83,7 +84,7 @@ public class CounterPanel extends Composite {
 	public void reset() {
 		setErrorValue(0);
 		setFailureValue(0);
-		setRunValue(0);
+		setRunValue(0, 0);
 		fTotal= 0;
 	}
 	
@@ -95,12 +96,21 @@ public class CounterPanel extends Composite {
 		return fTotal;
 	}
 	
-	public void setRunValue(int value) {
-		String runString= Messages.format(JUnitMessages.CounterPanel_runcount, new String[] { Integer.toString(value), Integer.toString(fTotal) }); 
+	public void setRunValue(int value, int ignoredCount) {
+		String runString;
+		if (ignoredCount == 0)
+			runString= Messages.format(JUnitMessages.CounterPanel_runcount, new String[] { Integer.toString(value), Integer.toString(fTotal) });
+		else
+			runString= Messages.format(JUnitMessages.CounterPanel_runcount_ignored, new String[] { Integer.toString(value), Integer.toString(fTotal), Integer.toString(ignoredCount) });
 		fNumberOfRuns.setText(runString);
 
-		fNumberOfRuns.redraw();
-		redraw();
+		if (fIgnoredCount == 0 && ignoredCount > 0	|| fIgnoredCount != 0 && ignoredCount == 0) {
+			layout();
+		} else {
+			fNumberOfRuns.redraw();
+			redraw();
+		}
+		fIgnoredCount= ignoredCount;
 	}
 	
 	public void setErrorValue(int value) {

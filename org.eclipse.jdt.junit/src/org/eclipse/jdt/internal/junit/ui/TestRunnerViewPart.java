@@ -191,6 +191,7 @@ public class TestRunnerViewPart extends ViewPart {
 	final Image fTestErrorIcon= TestRunnerViewPart.createImage("obj16/testerr.gif"); //$NON-NLS-1$
 	final Image fTestFailIcon= TestRunnerViewPart.createImage("obj16/testfail.gif"); //$NON-NLS-1$
 	final Image fTestRunningIcon= TestRunnerViewPart.createImage("obj16/testrun.gif"); //$NON-NLS-1$
+	final Image fTestIgnoredIcon= TestRunnerViewPart.createImage("obj16/testignored.gif"); //$NON-NLS-1$
 	
 	final ImageDescriptor fSuiteIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuite.gif"); //$NON-NLS-1$
 	final ImageDescriptor fSuiteOkIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuiteok.gif"); //$NON-NLS-1$
@@ -1178,6 +1179,7 @@ action enablement
 		fTestOkIcon.dispose();
 		fTestErrorIcon.dispose();
 		fTestFailIcon.dispose();
+		fTestIgnoredIcon.dispose();
 		
 		fSuiteIcon.dispose();
 		fSuiteRunningIcon.dispose();
@@ -1196,6 +1198,7 @@ action enablement
 		// - improve components to only redraw on changes (once!).
 		
 		int startedCount;
+		int ignoredCount;
 		int totalCount;
 		int errorCount;
 		int failureCount;
@@ -1204,6 +1207,7 @@ action enablement
 		
 		if (fTestRunSession != null) {
 			startedCount= fTestRunSession.getStartedCount();
+			ignoredCount= fTestRunSession.getIgnoredCount();
 			totalCount= fTestRunSession.getTotalCount();
 			errorCount= fTestRunSession.getErrorCount();
 			failureCount= fTestRunSession.getFailureCount();
@@ -1211,6 +1215,7 @@ action enablement
 			stopped= fTestRunSession.isStopped();
 		} else {
 			startedCount= 0;
+			ignoredCount= 0;
 			totalCount= 0;
 			errorCount= 0;
 			failureCount= 0;
@@ -1219,7 +1224,7 @@ action enablement
 		}
 		
 		fCounterPanel.setTotal(totalCount);
-		fCounterPanel.setRunValue(startedCount);
+		fCounterPanel.setRunValue(startedCount, ignoredCount);
 		fCounterPanel.setErrorValue(errorCount);
 		fCounterPanel.setFailureValue(failureCount);
 		

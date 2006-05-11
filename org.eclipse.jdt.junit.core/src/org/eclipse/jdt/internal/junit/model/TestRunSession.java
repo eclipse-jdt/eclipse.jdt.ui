@@ -70,6 +70,10 @@ public class TestRunSession {
  	 */
 	volatile int fStartedCount;
 	/**
+	 * Number of tests ignored during this test run.
+	 */
+	volatile int fIgnoredCount;
+	/**
 	 * Number of errors during this test run.
 	 */
 	volatile int fErrorCount;
@@ -139,6 +143,10 @@ public class TestRunSession {
 		return fStartedCount;
 	}
 
+	public int getIgnoredCount() {
+		return fIgnoredCount;
+	}
+	
 	public int getTotalCount() {
 		return fTotalCount;
 	}
@@ -311,6 +319,7 @@ public class TestRunSession {
 			fIncompleteTestSuites= new ArrayList();
 			
 			fStartedCount= 0;
+			fIgnoredCount= 0;
 			fFailureCount= 0;
 			fErrorCount= 0;
 			fTotalCount= testCount;
@@ -389,7 +398,10 @@ public class TestRunSession {
 				return;
 			}
 			TestCaseElement testCaseElement= (TestCaseElement) testElement;
-			testCaseElement.setName(testName);
+			if (testName.startsWith("@Ignore: ")) { //$NON-NLS-1$
+				testCaseElement.setIgnored(true);
+				fIgnoredCount++;
+			}
 
 			if (testCaseElement.getStatus() == Status.RUNNING)
 				setStatus(testCaseElement, Status.OK);

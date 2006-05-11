@@ -16,6 +16,8 @@ import org.eclipse.jface.util.Assert;
 
 public class TestCaseElement extends TestElement {
 
+	private boolean fIgnored;
+
 	public TestCaseElement(TestSuiteElement parent, String id, String testName) {
 		super(parent, id, testName);
 		Assert.isNotNull(parent);
@@ -29,5 +31,13 @@ public class TestCaseElement extends TestElement {
 		if(index > 0)
 			return getTestName().substring(0, index);
 		return getTestName();
+	}
+
+	public void setIgnored(boolean ignored) {
+		fIgnored= ignored;
+	}
+	
+	public boolean isIgnored() {
+		return fIgnored;
 	}
 }

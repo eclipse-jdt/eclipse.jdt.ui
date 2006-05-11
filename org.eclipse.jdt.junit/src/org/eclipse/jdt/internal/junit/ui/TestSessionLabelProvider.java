@@ -67,8 +67,8 @@ public class TestSessionLabelProvider extends LabelProvider {
 	public Image getImage(Object element) {
 		if (element instanceof TestCaseElement) {
 			TestCaseElement testCaseElement= ((TestCaseElement) element);
-			if (testCaseElement.getTestName().startsWith("@Ignore: ")) //$NON-NLS-1$
-				return fTestRunnerPart.fTestIcon;
+			if (testCaseElement.isIgnored())
+				return fTestRunnerPart.fTestIgnoredIcon;
 			
 			Status status=testCaseElement.getStatus();
 			if (status.isNotRun())
