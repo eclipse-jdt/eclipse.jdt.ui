@@ -133,13 +133,9 @@ public class TestRunnerViewPart extends ViewPart {
 	 */
 	private int fCurrentOrientation;
 	/**
-	 * The current layout mode with FailuresOnlyFilter enabled.
+	 * The current layout mode (LAYOUT_FLAT or LAYOUT_HIERARCHICAL).
 	 */
-	private int fLayoutFailures= LAYOUT_FLAT;
-	/**
-	 * The current layout mode with FailuresOnlyFilter disabled.
-	 */
-	private int fLayoutAll= LAYOUT_HIERARCHICAL; 
+	private int fLayout= LAYOUT_HIERARCHICAL; 
 	
 //	private boolean fTestIsRunning= false;
 
@@ -217,11 +213,7 @@ public class TestRunnerViewPart extends ViewPart {
 	/**
 	 * @since 3.2
 	 */
-	static final String TAG_LAYOUT_FAILURES= "layoutFailures"; //$NON-NLS-1$
-	/**
-	 * @since 3.2
-	 */
-	static final String TAG_LAYOUT_ALL= "layoutAll"; //$NON-NLS-1$
+	static final String TAG_LAYOUT= "layout"; //$NON-NLS-1$
 	/**
 	 * @since 3.2
 	 */
@@ -767,8 +759,7 @@ public class TestRunnerViewPart extends ViewPart {
 		memento.putInteger(TAG_ORIENTATION, fOrientation);
 		
 		memento.putString(TAG_FAILURES_ONLY, fFailuresOnlyFilterAction.isChecked() ? "true" : "false"); //$NON-NLS-1$ //$NON-NLS-2$
-		memento.putInteger(TAG_LAYOUT_FAILURES, fLayoutFailures);
-		memento.putInteger(TAG_LAYOUT_ALL, fLayoutAll);
+		memento.putInteger(TAG_LAYOUT, fLayout);
 	}
 	
 	private void restoreLayoutState(IMemento memento) {
@@ -793,23 +784,17 @@ public class TestRunnerViewPart extends ViewPart {
 			setAutoScroll(!fScrollLockAction.isChecked());
 		}
 		
-		Integer layoutFailures= memento.getInteger(TAG_LAYOUT_FAILURES);
-		if (layoutFailures != null)
-			fLayoutFailures= layoutFailures.intValue();
-		Integer layoutAll= memento.getInteger(TAG_LAYOUT_ALL);
-		if (layoutAll != null)
-			fLayoutAll= layoutAll.intValue();
+		Integer layout= memento.getInteger(TAG_LAYOUT);
+		int layoutValue= LAYOUT_HIERARCHICAL;
+		if (layout != null)
+			layoutValue= layout.intValue();
 		
 		String failuresOnly= memento.getString(TAG_FAILURES_ONLY);
-		boolean showFailuresOnly;
-		if (failuresOnly == null) {
-			Integer page= memento.getInteger(TAG_PAGE);
-			showFailuresOnly= page == null || page.intValue() == 0;
-		} else {
+		boolean showFailuresOnly= false;
+		if (failuresOnly != null)
 			showFailuresOnly= failuresOnly.equals("true"); //$NON-NLS-1$
-		}
-		fFailuresOnlyFilterAction.setChecked(showFailuresOnly);
-		setShowFailuresOnly(showFailuresOnly);
+		
+		setFilterAndLayout(showFailuresOnly, layoutValue);
 	}
 	
 	/**
@@ -1362,7 +1347,7 @@ action enablement
 		
 		getViewSite().getPage().addPartListener(fPartListener);
 
-		setShowFailuresOnly(true);
+		setFilterAndLayout(false, LAYOUT_HIERARCHICAL);
 		if (fMemento != null) {
 			restoreLayoutState(fMemento);
 		}
@@ -1418,7 +1403,6 @@ action enablement
 		fRerunLastFailedFirstAction= new RerunLastFailedFirstAction();
 		
 		fFailuresOnlyFilterAction= new FailuresOnlyFilterAction();
-		fFailuresOnlyFilterAction.setChecked(true);
 		
 		fScrollLockAction= new ScrollLockAction(this);
 		fScrollLockAction.setChecked(!fAutoScroll);
@@ -1647,20 +1631,19 @@ action enablement
 	}
 	
 	
-	public void setShowFailuresOnly(boolean failuresOnly) {
-		int layoutMode= failuresOnly ? fLayoutFailures : fLayoutAll;
-		setLayoutMode(layoutMode);
+	void setShowFailuresOnly(boolean failuresOnly) {
+		setFilterAndLayout(failuresOnly, fLayout);
 	}
 	
 	private void setLayoutMode(int mode) {
-		fShowTestHierarchyAction.setChecked(mode == LAYOUT_HIERARCHICAL);
-		boolean failuresOnly= fFailuresOnlyFilterAction.isChecked();
-		if (failuresOnly) {
-			fLayoutFailures= mode;
-		} else {
-			fLayoutAll= mode;
-		}
-		fTestViewer.setShowFailuresOnly(failuresOnly, mode);
+		setFilterAndLayout(fFailuresOnlyFilterAction.isChecked(), mode);
+	}
+	
+	private void setFilterAndLayout(boolean failuresOnly, int layoutMode) {
+		fShowTestHierarchyAction.setChecked(layoutMode == LAYOUT_HIERARCHICAL);
+		fLayout= layoutMode;
+		fFailuresOnlyFilterAction.setChecked(failuresOnly);
+		fTestViewer.setShowFailuresOnly(failuresOnly, layoutMode);
 	}
 
 	TestElement[] getAllFailures() {
