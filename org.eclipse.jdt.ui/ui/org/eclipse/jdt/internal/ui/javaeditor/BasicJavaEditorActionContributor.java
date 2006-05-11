@@ -220,6 +220,11 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		action= getAction(textEditor, ITextEditorActionConstants.PREVIOUS);
 		actionBars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_PREVIOUS_ANNOTATION, action);
 		actionBars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, action);
+		
+		// XXX: Workaround for Platform UI bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=137091
+		actionBars.setGlobalActionHandler(ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY, fTogglePresentation);
+		actionBars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.TOGGLE_MARK_OCCURRENCES, fToggleMarkOccurrencesAction);
+		
 	}
 
 	/*
