@@ -154,9 +154,8 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 				subMonitor.beginTask(getOperationLabel(), size * 50);
 				final String name= fragment.getElementName();
 				IFileStore store= EFS.getStore(fOutputURI);
-				String pack= ""; //$NON-NLS-1$
 				if (!"".equals(name)) { //$NON-NLS-1$
-					pack= name;
+					final String pack= name;
 					buffer.setLength(0);
 					buffer.append(name);
 					final int length= buffer.length();
@@ -167,7 +166,8 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 					store= store.getChild(new Path(buffer.toString()));
 					if (!pack.startsWith(".")) //$NON-NLS-1$
 						createPackageFragment(store, pack, new SubProgressMonitor(subMonitor, 10));
-				}
+				} else
+					createPackageFragment(store, "", new SubProgressMonitor(subMonitor, 10)); //$NON-NLS-1$
 				final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 30);
 				try {
 					subsubMonitor.beginTask(getOperationLabel(), size * 100);
