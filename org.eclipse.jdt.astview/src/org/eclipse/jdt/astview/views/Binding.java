@@ -104,8 +104,9 @@ public class Binding extends ASTAttribute {
 					
 				case IBinding.TYPE:
 					ITypeBinding typeBinding= (ITypeBinding) fBinding;
-					int typeKind= getTypeKind(typeBinding);
+					res.add(new BindingProperty(this, "QUALIFIED NAME", typeBinding.getQualifiedName(), true)); //$NON-NLS-1$
 					
+					int typeKind= getTypeKind(typeBinding);
 					boolean isRefType= isType(typeKind, REF_TYPE);
 					final boolean isNonPrimitive= ! isType(typeKind, PRIMITIVE_TYPE);
 					
@@ -123,15 +124,14 @@ public class Binding extends ASTAttribute {
 					if (typeBinding.isEnum()) kinds.append(" isEnum"); //$NON-NLS-1$
 					res.add(new BindingProperty(this, kinds, true)); //$NON-NLS-1$
 					
-					kinds= new StringBuffer("GENERICS:"); //$NON-NLS-1$
-					if (typeBinding.isRawType()) kinds.append(" isRawType"); //$NON-NLS-1$
-					if (typeBinding.isGenericType()) kinds.append(" isGenericType"); //$NON-NLS-1$
-					if (typeBinding.isParameterizedType()) kinds.append(" isParameterizedType"); //$NON-NLS-1$
+					StringBuffer generics= new StringBuffer("GENERICS:"); //$NON-NLS-1$
+					if (typeBinding.isRawType()) generics.append(" isRawType"); //$NON-NLS-1$
+					if (typeBinding.isGenericType()) generics.append(" isGenericType"); //$NON-NLS-1$
+					if (typeBinding.isParameterizedType()) generics.append(" isParameterizedType"); //$NON-NLS-1$
 					if (!isType(typeKind, GENERIC | PARAMETRIZED)) {
-						kinds.append(" (non-generic, non-parameterized)");
+						generics.append(" (non-generic, non-parameterized)");
 					}
-					
-					res.add(new BindingProperty(this, kinds, isRefType)); //$NON-NLS-1$
+					res.add(new BindingProperty(this, generics, isRefType)); //$NON-NLS-1$
 
 					res.add(new Binding(this, "ELEMENT TYPE", typeBinding.getElementType(), isType(typeKind, ARRAY_TYPE))); //$NON-NLS-1$
 					res.add(new Binding(this, "COMPONENT TYPE", typeBinding.getComponentType(), isType(typeKind, ARRAY_TYPE))); //$NON-NLS-1$
@@ -144,7 +144,7 @@ public class Binding extends ASTAttribute {
 					if (typeBinding.isNested()) origin.append(" isNested"); //$NON-NLS-1$
 					if (typeBinding.isLocal()) origin.append(" isLocal"); //$NON-NLS-1$
 					if (typeBinding.isMember()) origin.append(" isMember"); //$NON-NLS-1$
-					if (typeBinding.isAnonymous()) kinds.append(" isAnonymous"); //$NON-NLS-1$
+					if (typeBinding.isAnonymous()) origin.append(" isAnonymous"); //$NON-NLS-1$
 					res.add(new BindingProperty(this, origin, isRefType));
 					
 					res.add(new BindingProperty(this, "IS FROM SOURCE", typeBinding.isFromSource(), isType(typeKind, REF_TYPE | VARIABLE_TYPE | CAPTURE_TYPE))); //$NON-NLS-1$
