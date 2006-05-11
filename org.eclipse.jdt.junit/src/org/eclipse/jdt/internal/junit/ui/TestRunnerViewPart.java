@@ -1139,7 +1139,10 @@ action enablement
 		return kind.isNull() || "org.eclipse.jdt.junit.loader.junit3".equals(kind.getId()); //$NON-NLS-1$
     }
 
-	private void setTitleToolTip() {
+    /**
+     * @return the display name of the current test run sessions kind, or <code>null</code>
+     */
+    public String getTestKindDisplayName() {
 		String testKindDisplayStr= null;
 		ILaunchConfiguration config= fTestRunSession.getLaunch().getLaunchConfiguration();
 		if (config != null) {
@@ -1147,6 +1150,11 @@ action enablement
 			if (!kind.isNull())
 				testKindDisplayStr= kind.getDisplayName();
 		}
+		return testKindDisplayStr;
+	}
+    
+	private void setTitleToolTip() {
+		String testKindDisplayStr= getTestKindDisplayName();
 		
 		if (testKindDisplayStr != null)
 			setTitleToolTip(MessageFormat.format(JUnitMessages.TestRunnerViewPart_titleToolTip, new String[] {fTestRunSession.getTestRunName(), testKindDisplayStr}));

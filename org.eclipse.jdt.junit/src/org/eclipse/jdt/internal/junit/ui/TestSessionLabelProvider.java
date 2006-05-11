@@ -18,6 +18,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestElement;
+import org.eclipse.jdt.internal.junit.model.TestRoot;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 
@@ -30,25 +31,39 @@ public class TestSessionLabelProvider extends LabelProvider {
 		fTestRunnerPart= testRunnerPart;
 		fLayoutMode= layoutMode;
 	}
-	
+
 	public String getText(Object element) {
 		if (element instanceof TestCaseElement) {
-			String testMethodName= ((TestCaseElement) element).getTestMethodName();
+			TestCaseElement testCaseElement= (TestCaseElement) element;
+			String testMethodName= testCaseElement.getTestMethodName();
 			if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
-				return testMethodName;
+				return getElementLabel(testMethodName, testCaseElement);
 			} else {
-				String className= ((TestCaseElement) element).getClassName();
+				String className= testCaseElement.getClassName();
 				return Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { testMethodName, className });
 			}
 			
 		} else if (element instanceof TestElement) {
-			return ((TestElement) element).getTestName();
-			
+			TestElement testElement= (TestElement) element;
+			String testName= testElement.getTestName();
+			return getElementLabel(testName, testElement);
 		} else {
 			throw new IllegalArgumentException(String.valueOf(element));
 		}
 	}
-	
+
+	private String getElementLabel(String name, TestElement testElement) {
+		if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL && testElement.getParent() instanceof TestRoot) {
+			String testKindDisplayName= fTestRunnerPart.getTestKindDisplayName();
+				if (testKindDisplayName == null)
+					return name;
+				else
+					return Messages.format(JUnitMessages.TestSessionLabelProvider_testName_JUnitVersion, new Object[] { name, testKindDisplayName });
+		} else
+			return name;
+		
+	}
+
 	public Image getImage(Object element) {
 		if (element instanceof TestCaseElement) {
 			TestCaseElement testCaseElement= ((TestCaseElement) element);

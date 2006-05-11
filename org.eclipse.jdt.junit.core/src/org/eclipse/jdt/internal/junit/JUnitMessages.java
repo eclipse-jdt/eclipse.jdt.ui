@@ -221,6 +221,8 @@ public final class JUnitMessages extends NLS {
 	
 	public static String TestSearchEngine_message_searching;
 
+	public static String TestSessionLabelProvider_testName_JUnitVersion;
+
 	public static String TypeRenameParticipant_change_name;
 	public static String TypeRenameParticipant_name;
 
