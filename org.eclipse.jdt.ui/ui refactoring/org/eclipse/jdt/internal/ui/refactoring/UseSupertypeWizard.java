@@ -94,9 +94,8 @@ public class UseSupertypeWizard extends RefactoringWizard{
 					result.add(superInterface[i]);
 				}
 				try {
-					final IType subType= getUseSupertypeProcessor().getSubType();
-					if (subType.isInterface()) {
-						IType found= subType.getJavaProject().findType("java.lang.Object"); //$NON-NLS-1$
+					if (type.isInterface()) {
+						IType found= type.getJavaProject().findType("java.lang.Object"); //$NON-NLS-1$
 						result.add(found);
 					}
 				} catch (JavaModelException exception) {
