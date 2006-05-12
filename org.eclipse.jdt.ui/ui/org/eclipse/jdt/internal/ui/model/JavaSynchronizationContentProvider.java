@@ -455,8 +455,11 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 					if (diff != null && isVisible(diff))
 						if (isInScope(context.getScope(), parent, members[index])) {
 							final IJavaElement element= JavaCore.create(members[index]);
-							if (element != null)
+							if (element == null) {
+								set.add(members[index]);
+							} else {
 								set.add(element);
+							}
 						}
 				}
 			}
