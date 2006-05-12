@@ -903,11 +903,25 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_NAME));
 			String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(fOwner, extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				if (element == null || element.getElementType() != IJavaElement.TYPE)
 					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_EXTRACT_SUPERTYPE);
+				IType type= null;
+				final ICompilationUnit unit= ((IType) element).getCompilationUnit();
+				if (unit != null && unit.exists()) {
+					try {
+						final ICompilationUnit copy= getSharedWorkingCopy(unit, new NullProgressMonitor());
+						final IJavaElement[] elements= copy.findElements(element);
+						if (elements != null && elements.length == 1 && elements[0] instanceof IType && elements[0].exists())
+							type= (IType) elements[0];
+					} catch (JavaModelException exception) {
+						// TODO: log exception
+					}
+				}
+				if (type != null)
+					fCachedDeclaringType= type;
 				else
-					fCachedDeclaringType= (IType) element;
+					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_EXTRACT_SUPERTYPE);
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
 			final String stubs= extended.getAttribute(ATTRIBUTE_STUBS);
