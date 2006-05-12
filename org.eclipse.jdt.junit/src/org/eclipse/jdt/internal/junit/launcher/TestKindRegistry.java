@@ -26,12 +26,19 @@ import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 public class TestKindRegistry {
+	
+	public static final String JUNIT3_TEST_KIND_ID= "org.eclipse.jdt.junit.loader.junit3"; //$NON-NLS-1$
+	public static final String JUNIT4_TEST_KIND_ID= "org.eclipse.jdt.junit.loader.junit4"; //$NON-NLS-1$
+
 	public static TestKindRegistry getDefault() {
 		if (fgRegistry != null)
 			return fgRegistry;
@@ -95,10 +102,28 @@ public class TestKindRegistry {
 			loaderId = launchConfiguration.getAttribute(JUnitBaseLaunchConfiguration.TEST_KIND_ATTR, (String) null);
 		} catch (CoreException e) {
 		}
-		if (loaderId != null) {
+		TestKind configuredKind= getKind(loaderId);
+		if (configuredKind.isNull()) {
+			try {
+				IJavaProject javaProject= new JUnitLaunchConfiguration().getJavaProject(launchConfiguration);
+				if (javaProject != null)
+					return getKind(getContainerTestKindId(javaProject));
+			} catch (CoreException e) {
+				// fallback to default
+			}
+		}
+		return configuredKind;
+	}
+
+	/**
+	 * @param testKindId an id, can be <code>null</code>
+	 * @return a TestKind, ITestKind.NULL if not available
+	 */
+	private TestKind getKind(String testKindId) {
+		if (testKindId != null) {
 			for (Iterator iter= getAllKinds().iterator(); iter.hasNext();) {
 				TestKind kind= (TestKind) iter.next();
-				if (loaderId.equals(kind.getId()))
+				if (testKindId.equals(kind.getId()))
 					return kind;
 			}
 		}
@@ -106,11 +131,24 @@ public class TestKindRegistry {
 	}
 
 	public ITestKind getKind(IType type) {
+		TestKind projectKind= getKind(getContainerTestKindId(type));
+		if (projectKind.isNull())
+			return ITestKind.NULL;
+		
 		try {
-			return autoDetectTestTypes(new SingleTypeTestSearchExtent(type)).getTestKind();
+			TestSearchResult result= projectKind.search(new SingleTypeTestSearchExtent(type));
+			if (!result.isEmpty()) {
+				return projectKind;
+			} else {
+				return ITestKind.NULL;
+			}
 		} catch (JavaModelException e) {
 			return ITestKind.NULL;
 		}
+	}
+	
+	public static String getContainerTestKindId(IJavaElement element) {
+		return element != null && TestSearchEngine.hasTestAnnotation(element.getJavaProject()) ? JUNIT4_TEST_KIND_ID : JUNIT3_TEST_KIND_ID;
 	}
 
 	private ArrayList getConfigurationElements() {
@@ -141,17 +179,6 @@ public class TestKindRegistry {
 		final TestKind configuredKind= getKind(configuration);
 		if (!configuredKind.isNull())
 			return configuredKind.search(extent);
-		return autoDetectTestTypes(extent);
-	}
-
-	private TestSearchResult autoDetectTestTypes(final ITestSearchExtent testTarget) throws JavaModelException {
-		for (Iterator iter= getAllKinds().iterator(); iter.hasNext();) {
-			TestKind kind= (TestKind) iter.next();
-			TestSearchResult result= kind.search(testTarget);
-			if (!result.isEmpty())
-				return result;
-		}
-
 		return new TestSearchResult(new IType[0], ITestKind.NULL);
 	}
 }

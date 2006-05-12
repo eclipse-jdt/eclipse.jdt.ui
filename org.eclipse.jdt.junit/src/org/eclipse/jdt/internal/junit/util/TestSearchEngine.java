@@ -308,4 +308,12 @@ public class TestSearchEngine {
 		return testCaseType(javaProject) != null;
 	}
 
+	public static boolean hasTestAnnotation(IJavaProject project) {
+		try {
+			return project != null && project.findType(JUnitPlugin.JUNIT4_ANNOTATION_NAME) != null;
+		} catch (JavaModelException e) {
+			// not available
+		}
+		return false;
+	}
 }

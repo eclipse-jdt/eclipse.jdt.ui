@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
@@ -147,21 +146,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	public JUnitLaunchDescription describeContainerLaunch(IJavaElement container) {
 		JUnitLaunchDescription description= new JUnitLaunchDescription(container, getContainerLabel(container));
 		description.setContainer(container.getHandleIdentifier());
-
-		// set default test kind i.e. JUnit 3
-		description.setTestKind("org.eclipse.jdt.junit.loader.junit3"); //$NON-NLS-1$
-		
-		//guess test kind from java project: 
-		IJavaProject javaProject= container.getJavaProject();
-		if (javaProject != null) {
-			try {
-				IType testAnnotation= javaProject.findType("org.junit.Test"); //$NON-NLS-1$
-				if (testAnnotation != null)
-					description.setTestKind("org.eclipse.jdt.junit.loader.junit4"); //$NON-NLS-1$
-			} catch (JavaModelException e) {
-				// leave default
-			}
-		}
+		description.setTestKind(TestKindRegistry.getContainerTestKindId(container));
 		return description;
 	}
 
@@ -173,7 +158,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	public JUnitLaunchDescription describeTypeLaunch(IType type) {
 		JUnitLaunchDescription description= new JUnitLaunchDescription(type, type.getElementName());
 		description.setMainType(type);
-		description.setTestKind(TestKindRegistry.getDefault().getKind(type).getId());
+		description.setTestKind(TestKindRegistry.getContainerTestKindId(type));
 		return description;
 	}
 
@@ -184,7 +169,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		JUnitLaunchDescription description= new JUnitLaunchDescription(method, name);
 		description.setMainType(declaringType);
 		description.setTestName(method.getElementName());
-		description.setTestKind(TestKindRegistry.getDefault().getKind(method.getDeclaringType()).getId());
+		description.setTestKind(TestKindRegistry.getContainerTestKindId(method));
 		return description;
 	}
 

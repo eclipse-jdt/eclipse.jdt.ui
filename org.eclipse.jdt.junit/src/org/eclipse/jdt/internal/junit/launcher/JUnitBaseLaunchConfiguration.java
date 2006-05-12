@@ -118,10 +118,21 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		if (!TestSearchEngine.hasTestCaseType(javaProject)) {
 			informAndAbort(JUnitMessages.JUnitBaseLaunchConfiguration_error_junitnotonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 		}
+		boolean isJUnit4Configuration= TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(TestKindRegistry.getDefault().getKind(configuration).getId());
+		if (isJUnit4Configuration && ! TestSearchEngine.hasTestAnnotation(javaProject)) {
+			informAndAbort(JUnitMessages.JUnitBaseLaunchConfiguration_error_junit4notonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
+		}
 		final ITestSearchExtent testTarget= testSearchTarget(configuration, javaProject, pm);
 		TestSearchResult searchResult= TestKindRegistry.getDefault().getTestTypes(configuration, testTarget);
 		if (searchResult.isEmpty()) {
-			informAndAbort(JUnitMessages.JUnitBaseLaunchConfiguration_error_notests, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE); 
+			final String msg;
+			ITestKind testKind= searchResult.getTestKind();
+			if (testKind == null || testKind.isNull()) {
+				msg= JUnitMessages.JUnitBaseLaunchConfiguration_error_notests;
+			} else {
+				msg= Messages.format(JUnitMessages.JUnitBaseLaunchConfiguration_error_notests_kind, testKind.getDisplayName());
+			}
+			informAndAbort(msg, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE); 
 		}
 		return searchResult;
 	}

@@ -1122,7 +1122,7 @@ action enablement
 			return true;
 
 		TestKind kind= TestKindRegistry.getDefault().getKind(config);
-		return kind.isNull() || "org.eclipse.jdt.junit.loader.junit3".equals(kind.getId()); //$NON-NLS-1$
+		return kind.isNull() || TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(kind.getId());
     }
 
     /**
