@@ -171,6 +171,18 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	protected final RefactoringStatus checkDeclaringSuperTypes(final IProgressMonitor monitor) throws JavaModelException {
 		return new RefactoringStatus();
 	}
+	
+	protected CompilationUnitRewrite getCompilationUnitRewrite(final Map rewrites, final ICompilationUnit unit) {
+		Assert.isNotNull(rewrites);
+		Assert.isNotNull(unit);
+		CompilationUnitRewrite rewrite= (CompilationUnitRewrite) rewrites.get(unit);
+		if (rewrite == null) {
+			rewrite= new CompilationUnitRewrite(fOwner, unit);
+			rewrite.rememberContent();
+			rewrites.put(unit, rewrite);
+		}
+		return rewrite;
+	}
 
 	/**
 	 * Checks whether the compilation unit to be extracted is valid.

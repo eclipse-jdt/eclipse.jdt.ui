@@ -21,10 +21,14 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -59,7 +63,8 @@ public class CompilationUnitRewrite {
 	private boolean fResolveBindings= true;
 	private boolean fStatementsRecovery= false;
 	private final WorkingCopyOwner fOwner;
-
+	private IDocument fRememberContent= null;
+	
 	public CompilationUnitRewrite(ICompilationUnit cu) {
 		this(null, cu, null);
 	}
@@ -77,6 +82,11 @@ public class CompilationUnitRewrite {
 		fCu= cu;
 		fRoot= root;
 	}
+	
+	public void rememberContent() {
+		fRememberContent= new Document();
+	}
+	
 
 	/**
 	 * Requests that the compiler should provide binding information for the AST
@@ -189,7 +199,12 @@ public class CompilationUnitRewrite {
 			}
 				
 			if (needsAstRewrite) {
-				TextEdit rewriteEdit= fRewrite.rewriteAST();
+				TextEdit rewriteEdit;
+				if (fRememberContent != null) {
+					rewriteEdit= fRewrite.rewriteAST(fRememberContent, fCu.getJavaProject().getOptions(true));
+				} else {
+					rewriteEdit= fRewrite.rewriteAST();
+				}
 				if (!isEmptyEdit(rewriteEdit)) {
 					multiEdit.addChild(rewriteEdit);
 					for (Iterator iter= fTextEditGroups.iterator(); iter.hasNext();) {
@@ -240,8 +255,16 @@ public class CompilationUnitRewrite {
 	}
 
 	public ASTRewrite getASTRewrite() {
-		if (fRewrite == null)
+		if (fRewrite == null) {
 			fRewrite= ASTRewrite.create(getRoot().getAST());
+			if (fRememberContent != null) { // wain until ast rewrite is accessed first
+				try {
+					fRememberContent.set(fCu.getSource());
+				} catch (JavaModelException e) {
+					fRememberContent= null;
+				}
+			}
+		}
 		return fRewrite;
 	}
 
