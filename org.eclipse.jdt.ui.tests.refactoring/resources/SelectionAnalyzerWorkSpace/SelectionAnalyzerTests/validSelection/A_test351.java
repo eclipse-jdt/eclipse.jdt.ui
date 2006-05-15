@@ -1,5 +1,6 @@
 package validSelection;
-public class A_test351 {
+
+public class A_test351 {
 
 	public void foo() {
 		foo();/*[*/
