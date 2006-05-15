@@ -23,8 +23,11 @@ import org.eclipse.swt.widgets.Group;
 
 import org.eclipse.jface.dialogs.Dialog;
 
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
@@ -104,6 +107,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 			}
 		});		
 		Dialog.applyDialogFont(result);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INLINE_METHOD_WIZARD_PAGE);
 	}
 	
 	private void changeRefactoring(InlineMethodRefactoring.Mode mode) {

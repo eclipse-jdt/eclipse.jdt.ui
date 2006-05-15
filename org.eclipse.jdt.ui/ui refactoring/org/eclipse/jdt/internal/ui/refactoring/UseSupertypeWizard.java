@@ -41,6 +41,8 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizardPage;
 
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
@@ -56,6 +58,7 @@ import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class UseSupertypeWizard extends RefactoringWizard{
@@ -192,6 +195,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			});
 
 			Dialog.applyDialogFont(composite);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.USE_SUPERTYPE_WIZARD_PAGE);
 		}
 
 		private void addTreeViewer(Composite composite) {

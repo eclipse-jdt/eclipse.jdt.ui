@@ -27,10 +27,12 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -86,6 +88,15 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 	
 	protected void openCodeTempatePage(String id) {
 		PreferencesUtil.createPreferenceDialogOn(getShell(), MembersOrderPreferencePage.PREF_ID, null, null).open();
+	}
+	
+	/*
+	 * @see org.eclipse.jface.dialogs.IconAndMessageDialog#createContents(org.eclipse.swt.widgets.Composite)
+	 */
+	protected Control createContents(Composite parent) {
+		Control contents= super.createContents(parent);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJavaHelpContextIds.SORT_MEMBERS_DIALOG);
+		return contents;
 	}
 
 	/* (non-Javadoc)

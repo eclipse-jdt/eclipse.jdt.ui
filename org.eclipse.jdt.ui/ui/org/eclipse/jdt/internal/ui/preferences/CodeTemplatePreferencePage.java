@@ -54,7 +54,7 @@ public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 		fCodeTemplateConfigurationBlock= new CodeTemplateBlock(getProject());
 		
 		super.createControl(parent);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.CODE_MANIPULATION_PREFERENCE_PAGE);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.CODE_TEMPLATES_PREFERENCE_PAGE);
 	}	
 
 	/* (non-Javadoc)
