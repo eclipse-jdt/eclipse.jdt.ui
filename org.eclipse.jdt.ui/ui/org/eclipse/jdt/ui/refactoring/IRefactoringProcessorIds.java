@@ -109,7 +109,7 @@ public interface IRefactoringProcessorIds {
 	 * in their extension contribution will not be loaded if the user selects the 
 	 * "update similar declarations" feature.</p> 
 	 * 
-	 * <p>Rename type participans can retrieve information about similar declarations by casting the
+	 * <p>Rename type participants can retrieve information about similar declarations by casting the
 	 * RenameArguments to RenameTypeArguments. The new signatures of similar declarations are available 
 	 * through the interfaces IJavaElementMapper and IResourceMapper, which can be retrieved from the 
 	 * processor using the getAdapter() method.</p>

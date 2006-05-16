@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 
 /**
- * Helper needed get the content of a Javadoc comment.
+ * Helper needed to get the content of a Javadoc comment.
  * 
  * <p>
  * This class is not intended to be subclassed or instantiated by clients.
