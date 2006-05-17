@@ -128,7 +128,7 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 	}
 
 	/**
-	 * Creates a new generate hashcode equals action.
+	 * Creates a new generate hashCode equals action.
 	 * <p>
 	 * The action requires that the selection provided by the site's selection
 	 * provider is of type

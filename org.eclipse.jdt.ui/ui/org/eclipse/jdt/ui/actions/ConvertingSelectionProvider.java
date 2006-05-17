@@ -125,7 +125,7 @@ public class ConvertingSelectionProvider implements ISelectionProvider {
 
 	/**
 	 * Converts a selection to a viewer selection. The default implementation does not convert
-	 * the selection. Implementors want to override this behaviour. 
+	 * the selection. Implementors want to override this behavior. 
 	 * 
 	 * @param selection the selection to convert
 	 * 

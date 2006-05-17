@@ -190,7 +190,7 @@ public class JarWriter2 {
 	}
 
 	/**
-	 * Calculates the crc and size of the resource and updates the jarEntry.
+	 * Calculates the CRC and size of the resource and updates the jarEntry.
 	 * 
 	 * @param jarEntry			the JarEntry to update
 	 * @param resource			the file to calculate 

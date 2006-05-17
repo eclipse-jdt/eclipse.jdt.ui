@@ -158,7 +158,7 @@ public class ContentAssistInvocationContext {
 	 * 
 	 * 	...
 	 * 
-	 * 	public boolean equals(Object obb) {
+	 * 	public boolean equals(Object obj) {
 	 * 		if (!super.equals(obj))
 	 * 			return false;
 	 * 		MyContext other= (MyContext) obj;

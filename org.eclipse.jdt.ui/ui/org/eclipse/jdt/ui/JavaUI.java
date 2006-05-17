@@ -874,10 +874,9 @@ public final class JavaUI {
 
 	/**
 	 * Returns the Javadoc base URL for an element. The base location contains the
-	 * index file. This location doesn't have to exist. Returns
-	 * <code>null</code> if no javadoc location has been attached to the
-	 * element's library or project. Example of a returned URL is <i>http://www.
-	 * junit. org/junit/javadoc</i>.
+	 * index file. This location doesn't have to exist. Returns <code>null</code>
+	 * if no javadoc location has been attached to the element's library or project.
+	 * Example of a returned URL is <i>http://www.junit.org/junit/javadoc</i>.
 	 * 
 	 * @param element the element for which the documentation URL is requested.
 	 * @return the base location
