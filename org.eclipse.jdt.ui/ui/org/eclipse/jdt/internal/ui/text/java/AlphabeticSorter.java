@@ -16,7 +16,7 @@ import org.eclipse.jdt.ui.text.java.AbstractProposalSorter;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 
 /**
- * A relevance based sorter.
+ * A alphabetic proposal based sorter.
  * 
  * @since 3.2
  */
