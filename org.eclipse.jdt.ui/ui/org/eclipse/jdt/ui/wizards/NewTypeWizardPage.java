@@ -1776,6 +1776,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		dialog.setMessage(NewWizardMessages.NewTypeWizardPage_ChoosePackageDialog_description); 
 		dialog.setEmptyListMessage(NewWizardMessages.NewTypeWizardPage_ChoosePackageDialog_empty); 
 		dialog.setElements(packages);
+		dialog.setHelpAvailable(false);
+		
 		IPackageFragment pack= getPackageFragment();
 		if (pack != null) {
 			dialog.setInitialSelections(new Object[] { pack });
