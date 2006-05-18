@@ -22,12 +22,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
 
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
@@ -134,8 +129,6 @@ public class InlineConstantWizard extends RefactoringWizard {
 				}
 			});		
 			Dialog.applyDialogFont(result);
-			
-			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INLINE_CONSTANT_WIZARD_PAGE);
 		}
 
 		/*

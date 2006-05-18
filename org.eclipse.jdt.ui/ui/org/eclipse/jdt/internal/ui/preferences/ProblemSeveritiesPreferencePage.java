@@ -55,9 +55,9 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 		
 		super.createControl(parent);
 		if (isProjectPreferencePage()) {
-			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.PROBLEM_SEVERITIES_PROPERTY_PAGE);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.COMPILER_PROPERTY_PAGE);
 		} else {
-			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.PROBLEM_SEVERITIES_PREFERENCE_PAGE);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.COMPILER_PREFERENCE_PAGE);
 		}
 	}
 

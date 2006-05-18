@@ -14,16 +14,11 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.swt.widgets.Composite;
-
 import org.eclipse.jface.operation.IRunnableWithProgress;
-
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeRefactoring;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -49,14 +44,6 @@ public class ExtractSupertypeMethodPage extends PullUpMethodPage {
 		return getExtractSuperTypeRefactoring().getExtractSupertypeProcessor();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void createControl(Composite parent) {
-		super.createControl(parent);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.EXTRACT_SUPERTYPE_WIZARD_PAGE);
-	}
-	
 	/**
 	 * {@inheritDoc}
 	 */

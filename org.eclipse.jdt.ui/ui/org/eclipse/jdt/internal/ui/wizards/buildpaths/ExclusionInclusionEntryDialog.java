@@ -267,7 +267,6 @@ public class ExclusionInclusionEntryDialog extends StatusDialog {
 		dialog.setInput(currentSourceFolder);
 		dialog.setInitialSelection(initialElement);
 		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
-		dialog.setHelpAvailable(false);
 		
 		if (dialog.open() == Window.OK) {
 			Object[] objects= dialog.getResult();

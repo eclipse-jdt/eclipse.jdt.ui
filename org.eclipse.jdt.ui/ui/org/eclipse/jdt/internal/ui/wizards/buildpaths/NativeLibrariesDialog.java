@@ -45,7 +45,6 @@ public class NativeLibrariesDialog extends StatusDialog {
 		};	
 		
 		fConfigurationBlock= new NativeLibrariesConfigurationBlock(listener, parent, selElement);
-		setHelpAvailable(false);
 	}
 	
 	/* (non-Javadoc)
@@ -55,7 +54,7 @@ public class NativeLibrariesDialog extends StatusDialog {
 		Composite composite= (Composite) super.createDialogArea(parent);
 		Control inner= fConfigurationBlock.createContents(composite);
 		inner.setLayoutData(new GridData(GridData.FILL_BOTH));
-		applyDialogFont(composite);	
+		applyDialogFont(composite);		
 		return composite;
 	}
 

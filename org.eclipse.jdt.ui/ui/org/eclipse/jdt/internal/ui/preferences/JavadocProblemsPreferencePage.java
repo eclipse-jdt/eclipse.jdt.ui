@@ -50,9 +50,9 @@ public class JavadocProblemsPreferencePage extends PropertyAndPreferencePage {
 		
 		super.createControl(parent);
 		if (isProjectPreferencePage()) {
-			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.JAVADOC_PROBLEMS_PROPERTY_PAGE);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.COMPILER_PROPERTY_PAGE);
 		} else {
-			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.JAVADOC_PROBLEMS_PREFERENCE_PAGE);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.COMPILER_PREFERENCE_PAGE);
 		}
 	}
 

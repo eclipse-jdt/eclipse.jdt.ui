@@ -58,7 +58,6 @@ import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -140,12 +139,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		fContent.populate(fSelectionMode);
 		getOkButton().setEnabled(fContent.getSelection().length > 0);
 	}
-	
-	protected void configureShell(Shell shell) {
-		super.configureShell(shell);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.TYPE_SELECTION_DIALOG2);
-	}
-	
+
 	protected Control createDialogArea(Composite parent) {
 		Composite area= (Composite)super.createDialogArea(parent);
 		fContent= new TypeSelectionComponent(area, SWT.NONE, getMessage(), 

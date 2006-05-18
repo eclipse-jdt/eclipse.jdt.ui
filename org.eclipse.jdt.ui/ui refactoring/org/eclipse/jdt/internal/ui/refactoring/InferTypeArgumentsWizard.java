@@ -108,7 +108,7 @@ public class InferTypeArgumentsWizard extends RefactoringWizard {
 			
 			updateStatus();
 			Dialog.applyDialogFont(result);
-			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INFER_TYPE_ARGUMENTS_WIZARD_PAGE);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INTRODUCE_PARAMETER_WIZARD_PAGE);
 		}
 
 		private void setAssumeCloseReturnsSameType(boolean selection) {

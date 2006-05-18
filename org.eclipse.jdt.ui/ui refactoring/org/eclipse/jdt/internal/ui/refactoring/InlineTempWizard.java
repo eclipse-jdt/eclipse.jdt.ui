@@ -10,16 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 public class InlineTempWizard extends RefactoringWizard {
 
@@ -43,12 +37,7 @@ public class InlineTempWizard extends RefactoringWizard {
 		public InlineTempInputPage() {
 			super(PAGE_NAME, true, MessageWizardPage.STYLE_QUESTION);
 		}
-		
-		public void createControl(Composite parent) {
-			super.createControl(parent);
-			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INLINE_TEMP_WIZARD_PAGE);
-		}
-		
+
 		protected String getMessageString() {
 			InlineTempRefactoring refactoring= (InlineTempRefactoring)getRefactoring();
 			int occurences= refactoring.getReferenceOffsets().length;

@@ -149,8 +149,6 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			LayoutUtil.setHorizontalGrabbing(fCategoryList.getListControl(null));
 			Dialog.applyDialogFont(composite);
 			
-			setHelpAvailable(false);
-			
 			return composite;
 		}
 

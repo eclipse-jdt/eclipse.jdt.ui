@@ -30,7 +30,6 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -38,7 +37,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.PackageSelectionDialog;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
@@ -143,7 +141,7 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 	 */
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.TYPE_FILTER_PREFERENCE_PAGE);
+		//PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.TYPE_FILTER_PREFERENCE_PAGE);
 	}
 	
 	protected Control createContents(Composite parent) {
