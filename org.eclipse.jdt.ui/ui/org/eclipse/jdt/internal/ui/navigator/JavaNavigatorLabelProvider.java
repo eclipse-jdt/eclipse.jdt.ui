@@ -34,7 +34,6 @@ import org.eclipse.jdt.internal.ui.navigator.IExtensionStateConstants.Values;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
@@ -48,21 +47,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  */
 public class JavaNavigatorLabelProvider implements ICommonLabelProvider {
 
-	private static class DecoratingNavigatorLabelProvider extends DecoratingJavaLabelProvider {
-
-		public DecoratingNavigatorLabelProvider(PackageExplorerLabelProvider provider, boolean flatLayout) {
-			super(provider, true, flatLayout);
-		}
-
-		public void propertyChange(PropertyChangeEvent event) {
-			((PackageExplorerLabelProvider) getLabelProvider()).propertyChange(event);
-		}
-
-		public void addLabelDecorator(ILabelDecorator decorator) {
-			((PackageExplorerLabelProvider) getLabelProvider()).addLabelDecorator(decorator);
-		}
-	}
-
 	private final long LABEL_FLAGS = JavaElementLabels.DEFAULT_QUALIFIED
 			| JavaElementLabels.ROOT_POST_QUALIFIED
 			| JavaElementLabels.APPEND_ROOT_PATH
@@ -73,7 +57,7 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider {
 			| JavaElementLabels.F_APP_TYPE_SIGNATURE
 			| JavaElementLabels.T_TYPE_PARAMETERS;
 
-	private DecoratingNavigatorLabelProvider delegeteLabelProvider;
+	private PackageExplorerLabelProvider delegeteLabelProvider;
 
 	private PackageExplorerContentProvider fContentProvider;
 
@@ -85,15 +69,17 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider {
 	public void init(ICommonContentExtensionSite commonContentExtensionSite) {
 		fStateModel = commonContentExtensionSite.getExtensionStateModel();
 		fContentProvider = (PackageExplorerContentProvider) commonContentExtensionSite.getExtension().getContentProvider();
-		final boolean isFlatLayout = fStateModel.getBooleanProperty(Values.IS_LAYOUT_FLAT);
-		delegeteLabelProvider = new DecoratingNavigatorLabelProvider(createLabelProvider(), isFlatLayout);
+		delegeteLabelProvider = createLabelProvider();
+
+		delegeteLabelProvider.setIsFlatLayout(fStateModel
+				.getBooleanProperty(Values.IS_LAYOUT_FLAT));
 		fStateModel.addPropertyChangeListener(new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				if (Values.IS_LAYOUT_FLAT.equals(event.getProperty())) {
 					if (event.getNewValue() != null) {
 						boolean newValue = ((Boolean) event.getNewValue())
 								.booleanValue() ? true : false;
-						delegeteLabelProvider.setFlatPackageMode(newValue);
+						delegeteLabelProvider.setIsFlatLayout(newValue);
 					}
 				}
 
@@ -169,7 +155,7 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider {
 	}
 
 	public void setIsFlatLayout(boolean state) {
-		delegeteLabelProvider.setFlatPackageMode(state);
+		delegeteLabelProvider.setIsFlatLayout(state);
 	}
 
 	// Taken from StatusBarUpdater
