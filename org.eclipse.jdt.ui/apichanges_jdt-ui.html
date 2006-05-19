@@ -23,8 +23,6 @@ Breaking API changes from R3.1 to R3.2</b></font> <br>
     </tr>
     <tr>
       <td>
-      <ul>
-      </ul>
       </td>
     </tr>
   </tbody>
@@ -38,11 +36,11 @@ Non-breaking API changes from R3.1 to R3.2</b></font> <br>
       </td>
     </tr>
     <tr>
-      <td>New and deprecated API in <code>org.eclipse.jdt.ui.JavadocContentAccess</code>:<br>
-      <code>getHTMLContentReader(IMember, boolean)</code> has been
+      <td>New and deprecated API in <code>org.eclipse.jdt.ui.JavadocContentAccess</code>:
+      <ul><li><code>getHTMLContentReader(IMember, boolean)</code> has been
 deprecated in favor of <code>getHTMLContentReader(IMember, boolean,
 boolean)</code> which allows to specify whether attached Javadoc should
-be respected. </td>
+be respected.</li></ul> </td>
     </tr>
     <tr>
       <td> New API added on JavaUI<br>
@@ -85,6 +83,7 @@ IJavaSearchScope, int, boolean, String, TypeSelectionExtension)
       <td>New API added on ISharedImages<br>
       <ul>
         <li>IMG_OBJS_CLASSPATH_VAR_ENTRY</li>
+        <li>IMG_OBJS_JAVADOCTAG</li>
       </ul>
       </td>
     </tr>
@@ -102,9 +101,8 @@ IPackagesViewPart<br>
       <td>New API added on NewTypeWizardPage<br>
       <ul>
         <li>getCompilationUnitName(String)</li>
-        <li>accessors that return the input field labels can be
-overridden</li>
-        <ul>
+        <li>accessors that return the input field labels can be overridden</li>
+         <ul>
           <li>getPackageLabel()</li>
           <li>getEnclosingTypeLabel()</li>
           <li>getTypeNameLabel()</li>
@@ -113,8 +111,7 @@ overridden</li>
           <li>getSuperInterfacesLabel()<br>
           </li>
         </ul>
-        <li>methods that open the selection dialogs can now be
-overridden</li>
+        <li>methods that open the selection dialogs can now be overridden</li>
         <ul>
           <li>choosePackage()</li>
           <li>chooseEnclosingType()</li>
@@ -129,13 +126,11 @@ overridden</li>
       <td style="vertical-align: top;">New API added on
 NewContainerWizardPage<br>
       <ul>
-        <li>accessors that return the input field labels can be
-overridden</li>
+        <li>accessors that return the input field labels can be overridden</li>
         <ul>
           <li>getContainerLabel()</li>
         </ul>
-        <li>methods that open the selection dialogs can now be
-overridden</li>
+        <li>methods that open the selection dialogs can now be overridden</li>
         <ul>
           <li>chooseContainer()</li>
         </ul>
@@ -192,6 +187,44 @@ configured with the JDT.UI preference settings.<br>
       </ul>
       </td>
     </tr>
+    <tr>
+      <td style="vertical-align: top;">New API on CodeGeneration
+      <ul>
+        <li>CodeGeneration.getTypeBody(...) and constants</li>
+      </ul>
+      </td>
+    </tr>
+     <tr>
+      <td style="vertical-align: top;">New API on JavaElementLabels
+      <ul>
+        <li>Constants added to show element categories</li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">New API JarWriter3
+      <ul>
+        <li>JarWriter3 has been added to create JARs with refactoring scripts</li>
+      </ul>
+      </td>
+    </tr>    
+     <tr>
+      <td style="vertical-align: top;">New API for folding structure provider
+      <ul>
+        <li>IJavaFoldingStructureProviderExtension</li>
+        <li>DefaultJavaFoldingStructureProvider</li>
+      </ul>
+      </td>
+    </tr>
+         <tr>
+      <td style="vertical-align: top;">New actions added to give access to new functionality
+      <ul>
+        <li>GenerateHashCodeEqualsAction</li>
+        <li>IntroduceIndirectionAction</li>
+        <li>ReplaceInvocationsAction</li>
+      </ul>
+      </td>
+    </tr>     
     <tr>
       <td style="vertical-align: top;">New API to allow QuickFix and
 QuickAssist processors to work on (non-jdt.core) problems contributed
