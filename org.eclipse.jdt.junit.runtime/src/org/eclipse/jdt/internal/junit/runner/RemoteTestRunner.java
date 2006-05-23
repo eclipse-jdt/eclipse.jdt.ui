@@ -194,7 +194,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 			RemoteTestRunner testRunServer= new RemoteTestRunner();
 			testRunServer.init(args);
 			testRunServer.run();
-		} catch (RuntimeException e) {
+		} catch (Throwable e) {
 			e.printStackTrace(); // don't allow System.exit(0) to swallow exceptions
 		} finally {
 			// fix for 14434
@@ -419,12 +419,15 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 			
 	protected Class[] loadClasses(String[] testClassNames) {
-		Class[] classes = new Class[testClassNames.length];
+		Vector classes= new Vector();
 		for (int i = 0; i < testClassNames.length; i++) {
 			String name = testClassNames[i];
-			classes[i] = loadClass(name, this);
+			Class clazz = loadClass(name, this);
+			if (clazz != null) {
+				classes.add(clazz);
+			}
 		}
-		return classes;
+		return (Class[]) classes.toArray(new Class[classes.size()]);
 	}
 	
 	protected void notifyListenersOfTestEnd(TestExecution execution,
@@ -679,7 +682,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		try {
 			clazz= getTestClassLoader().loadClass(className);
 		} catch (ClassNotFoundException e) {
-			listener.runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.classnotfound", className), null); //$NON-NLS-1$
+			listener.runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.classnotfound", className), e); //$NON-NLS-1$
 		}
 		return clazz;
 	}
