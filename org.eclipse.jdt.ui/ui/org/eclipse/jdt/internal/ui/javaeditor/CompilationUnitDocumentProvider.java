@@ -1177,9 +1177,11 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 
 			Assert.isTrue(resource instanceof IFile);
 
+			boolean isSynchronized= resource.isSynchronized(IResource.DEPTH_ZERO);
+			
 			/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=98327
 			 * Make sure file gets save in commit() if the underlying file has been deleted */
-			if (!resource.isSynchronized(IResource.DEPTH_ZERO) && isDeleted(element))
+			if (!isSynchronized && isDeleted(element))
 				info.fTextFileBuffer.setDirty(true);
 
 			if (!resource.exists()) {
@@ -1199,7 +1201,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			IProgressMonitor subMonitor3= getSubProgressMonitor(monitor, 50);
 			try {
 				fIsAboutToSave= true;
-				info.fCopy.commitWorkingCopy(overwrite, subMonitor3);
+				info.fCopy.commitWorkingCopy(isSynchronized || overwrite, subMonitor3);
 			} catch (CoreException x) {
 				// inform about the failure
 				fireElementStateChangeFailed(element);
