@@ -5398,7 +5398,7 @@
 		   
 		</navigatorContent>
   		<commonFilter
-		        activeByDefault="true"
+		        activeByDefault="false"
 		        class="org.eclipse.jdt.internal.ui.navigator.NonEssentialEmptyPackageFilter"
 		        name="%HideEmptyPackages.label"
 		        description="%HideEmptyPackages.description"
