@@ -258,7 +258,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			if (linkedMode) {
 				setDescription(Messages.format(NewWizardMessages.NewFolderDialog_createIn, newElement.getJavaProject().getElementName()));
 			} else {
-				setDescription(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_description, fParent.getFullPath().toString()));
+				setDescription(Messages.format(NewWizardMessages.AddSourceFolderWizardPage_description, fParent.getFullPath().toString()));
 			}
 		} else {
 			setDescription(NewWizardMessages.NewSourceFolderWizardPage_edit_description);
