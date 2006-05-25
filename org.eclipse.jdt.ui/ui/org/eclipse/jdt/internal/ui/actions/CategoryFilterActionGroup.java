@@ -431,8 +431,10 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			Collections.sort(sortedCategories, Collator.getInstance());
 			for (Iterator iter= sortedCategories.iterator(); iter.hasNext() && count < MAX_NUMBER_OF_CATEGORIES_IN_MENU;) {
 				String element= (String)iter.next();
-				result.add(element);
-				count++;
+				if (!foundLRUCategories.contains(element)) {
+					result.add(element);
+					count++;
+				}
 			}
 		}
 		return hasUncategorizedMember[0];
