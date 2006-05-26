@@ -44,6 +44,8 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceMeter;
 import org.eclipse.ui.PartInitException;
 
@@ -164,14 +166,16 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 
 	public void testCompletionNoParamters() throws Exception {
 		measureCompletionNoParameters(getNullPerformanceMeter(), getWarmUpRuns());
-		measureCompletionNoParameters(createPerformanceMeter(), getMeasuredRuns());
+		PerformanceMeter performanceMeter= createPerformanceMeterForGlobalSummary("Java Editor: completion proposal computation", Dimension.ELAPSED_PROCESS); 		
+		measureCompletionNoParameters(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
 	
 	public void testApplicationNoParamters() throws Exception {
 		measureApplicationNoParameters(getNullPerformanceMeter(), getWarmUpRuns());
-		measureApplicationNoParameters(createPerformanceMeter(), getMeasuredRuns());
+		PerformanceMeter performanceMeter= createPerformanceMeterForSummary("Java Editor: completion proposal insertion", Dimension.ELAPSED_PROCESS);
+		measureApplicationNoParameters(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
@@ -370,7 +374,8 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		createTypeHierarchy();
 		
 		measureApplicationWithParamterGuesses2(getNullPerformanceMeter(), getWarmUpRuns());
-		measureApplicationWithParamterGuesses2(createPerformanceMeter(), getMeasuredRuns());
+		PerformanceMeter performanceMeter= createPerformanceMeterForGlobalSummary("Java Editor: completion proposal insertion (param guessing)", Dimension.ELAPSED_PROCESS);
+		measureApplicationWithParamterGuesses2(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
 	}

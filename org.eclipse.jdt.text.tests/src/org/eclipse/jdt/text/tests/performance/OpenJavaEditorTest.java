@@ -18,17 +18,11 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IFile;
 
-
-import org.eclipse.ui.PartInitException;
-
-
-
-
-
-
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
+
+import org.eclipse.ui.PartInitException;
 
 /**
  * @since 3.1
@@ -61,8 +55,6 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 	private static final Class THIS= OpenJavaEditorTest.class;
 
 	private static final String SHORT_NAME_FIRST_RUN= "Open Java editor (first in session)";
-
-	private static final String SHORT_NAME_WARM_RUN= "Open Java editor (reopen)";
 
 	private static final String SHORT_NAME_WARM_RUN_FIRST= "Open Java editor (reopen first)";
 	
@@ -137,7 +129,7 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 	
 	public void testOpenJavaEditor2() throws Exception {
 		measureOpenInEditor(ResourceTestHelper.findFiles(PREFIX, FILE_SUFFIX, 0, getWarmUpRuns()), Performance.getDefault().getNullPerformanceMeter(), false);
-		PerformanceMeter performanceMeter= createPerformanceMeterForGlobalSummary(SHORT_NAME_WARM_RUN, Dimension.ELAPSED_PROCESS); 
+		PerformanceMeter performanceMeter= createPerformanceMeter(); 
 		measureOpenInEditor(ResourceTestHelper.findFiles(PREFIX, FILE_SUFFIX, getWarmUpRuns(), getMeasuredRuns()), performanceMeter, false);
 	}
 	

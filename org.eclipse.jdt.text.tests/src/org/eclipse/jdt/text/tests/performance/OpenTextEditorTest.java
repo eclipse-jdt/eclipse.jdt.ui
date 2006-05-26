@@ -64,8 +64,6 @@ public class OpenTextEditorTest extends OpenEditorTest {
 
 	private static final String SHORT_NAME_WARM_RUN= "Open text editor (reopen)";
 
-	private static final String SHORT_NAME_WARM_RUN_FIRST= "Open text editor (reopen first)";
-
 	private static final int WARM_UP_RUNS= 10;
 	
 	private static final int MEASURED_RUNS= 200;
@@ -145,7 +143,7 @@ public class OpenTextEditorTest extends OpenEditorTest {
 	}
 	
 	public void testOpenEditor3() throws Exception {
-		PerformanceMeter performanceMeter= createPerformanceMeterForGlobalSummary(SHORT_NAME_WARM_RUN_FIRST, Dimension.ELAPSED_PROCESS); 
+		PerformanceMeter performanceMeter= createPerformanceMeter(); 
 		measureOpenInEditor(LARGE_FILE, performanceMeter);
 	}
 }
