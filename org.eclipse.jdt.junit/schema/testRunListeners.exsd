@@ -6,7 +6,7 @@
          <meta.schema plugin="org.eclipse.jdt.junit" id="testRunListeners" name="Test Run Listeners"/>
       </appInfo>
       <documentation>
-         Extension point to register additional test run listeners. A test run listeners is notified about the execution of a test run.
+         Extension point to register additional test run listeners. A test run listener is notified about the execution of a test run.
       </documentation>
    </annotation>
 
