@@ -47,7 +47,7 @@
          <attribute name="configTypeID" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  the id of the launch configuration type (see extension point org.eclipse.debug.core.launchConfigurationTypes)
                </documentation>
             </annotation>
          </attribute>
