@@ -12,10 +12,10 @@
 package org.eclipse.jdt.internal.junit.ui;
 
 import java.util.AbstractList;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -461,34 +461,33 @@ public class TestViewer {
 
 	private void updateElementInTree(final TestElement testElement) {
 		if (isShown(testElement)) {
-			ArrayList toCreate= null;
-			TestElement current= testElement;
-			while (! (current instanceof TestRoot)) {
-				if (fTreeViewer.testFindItem(current) == null) {
-					if (toCreate == null)
-						toCreate= new ArrayList();
-					toCreate.add(current);
-				} else {
-					TestElement parent= current;
-					if (toCreate != null) {
-						ListIterator iter= toCreate.listIterator(toCreate.size()); // backwards, top first
-						while (iter.hasPrevious()) {
-							TestElement child= (TestElement) iter.previous();
-							fTreeViewer.add(parent, child);
-							parent= child;
-						}
-					}					
-					fTreeViewer.update(current, null);
-				}
-				current= (TestElement) fTreeContentProvider.getParent(current);
-			}
-			
+			updateShownElementInTree(testElement);
 		} else {
 			TestElement current= testElement;
 			do {
-				fTreeViewer.remove(current);
+				if (fTreeViewer.testFindItem(current) != null)
+					fTreeViewer.remove(current);
 				current= current.getParent();
 			} while (! (current instanceof TestRoot) && ! isShown(current));
+			
+			while (current != null && ! (current instanceof TestRoot)) {
+				fTreeViewer.update(current, null);
+				current= current.getParent();
+			}
+		}
+	}
+
+	private void updateShownElementInTree(TestElement testElement) {
+		if (testElement == null || testElement instanceof TestRoot) // paranoia null check
+			return;
+		
+		TestSuiteElement parent= testElement.getParent();
+		updateShownElementInTree(parent); // make sure parent is shown and up-to-date
+		
+		if (fTreeViewer.testFindItem(testElement) == null) {
+			fTreeViewer.add(parent, testElement); // if not yet in tree: add
+		} else {
+			fTreeViewer.update(testElement, null); // if in tree: update
 		}
 	}
 
@@ -640,7 +639,7 @@ public class TestViewer {
 	}
 
 	private void clearUpdateAndExpansion() {
-		fNeedUpdate= new HashSet();
+		fNeedUpdate= new LinkedHashSet();
 		fAutoClose= new LinkedList();
 		fAutoExpand= new HashSet();
 	}

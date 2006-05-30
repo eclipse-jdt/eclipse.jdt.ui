@@ -73,12 +73,12 @@ public class TestSessionLabelProvider extends LabelProvider {
 			Status status=testCaseElement.getStatus();
 			if (status.isNotRun())
 				return fTestRunnerPart.fTestIcon;
+			else if (status.isRunning())
+				return fTestRunnerPart.fTestRunningIcon;
 			else if (status.isError())
 				return fTestRunnerPart.fTestErrorIcon;
 			else if (status.isFailure())
 				return fTestRunnerPart.fTestFailIcon;
-			else if (status.isRunning())
-				return fTestRunnerPart.fTestRunningIcon;
 			else if (status.isOK())
 				return fTestRunnerPart.fTestOkIcon;
 			else
@@ -88,12 +88,12 @@ public class TestSessionLabelProvider extends LabelProvider {
 			Status status= ((TestSuiteElement) element).getStatus();
 			if (status.isNotRun())
 				return fTestRunnerPart.fSuiteIcon;
+			else if (status.isRunning())
+				return fTestRunnerPart.fSuiteRunningIcon;
 			else if (status.isError())
 				return fTestRunnerPart.fSuiteErrorIcon;
 			else if (status.isFailure())
 				return fTestRunnerPart.fSuiteFailIcon;
-			else if (status.isRunning())
-				return fTestRunnerPart.fSuiteRunningIcon;
 			else if (status.isOK())
 				return fTestRunnerPart.fSuiteOkIcon;
 			else

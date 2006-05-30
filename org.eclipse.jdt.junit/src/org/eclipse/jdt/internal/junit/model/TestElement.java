@@ -155,9 +155,9 @@ public abstract class TestElement {
 		fParent= parent;
 		fId= id;
 		fTestName= testName;
+		fStatus= Status.NOT_RUN;
 		if (parent != null)
 			parent.addChild(this);
-		fStatus= Status.NOT_RUN;
 	}
 	
 	/**
@@ -183,15 +183,18 @@ public abstract class TestElement {
 		//TODO: notify about change?
 		//TODO: multiple errors/failures per test https://bugs.eclipse.org/bugs/show_bug.cgi?id=125296
 		fStatus= status;
+		TestSuiteElement parent= getParent();
+		if (parent != null)
+			parent.childChangedStatus(this, status);
 	}
 	
 	public void setStatus(Status status, String trace, String expected, String actual) {
 		//TODO: notify about change?
 		//TODO: multiple errors/failures per test https://bugs.eclipse.org/bugs/show_bug.cgi?id=125296
-		fStatus= status;
 		fTrace= trace;
 		fExpected= expected;
 		fActual= actual;
+		setStatus(status);
 	}
 
 	public Status getStatus() {
