@@ -16,20 +16,15 @@ import junit.framework.TestSuite;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.test.performance.Dimension;
-import org.eclipse.test.performance.PerformanceMeter;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 import org.eclipse.jface.action.IAction;
-
+import org.eclipse.test.performance.PerformanceMeter;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
-
-import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 public class OpenQuickOutlineTest extends OpenQuickControlTest {
 	
 	private static final Class THIS= OpenQuickOutlineTest.class;
-	
-	private static final String SHORT_NAME_COLD= "Open Quick Outline (first time)";
 	
 	private boolean fWasOutlineViewShown;
 	
@@ -62,7 +57,7 @@ public class OpenQuickOutlineTest extends OpenQuickControlTest {
 	}
 
 	public void testOpenQuickOutline1() throws Exception {
-		PerformanceMeter coldMeter= createPerformanceMeterForSummary("-cold", SHORT_NAME_COLD, Dimension.ELAPSED_PROCESS);
+		PerformanceMeter coldMeter= createPerformanceMeter("-cold");
 		PerformanceMeter warmMeter= createPerformanceMeter("-warm");
 		measureOpenQuickControl(coldMeter, warmMeter);
 	}

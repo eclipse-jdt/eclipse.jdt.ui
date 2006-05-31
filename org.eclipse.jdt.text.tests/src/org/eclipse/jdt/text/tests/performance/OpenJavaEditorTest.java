@@ -56,8 +56,6 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 
 	private static final String SHORT_NAME_FIRST_RUN= "Open Java editor (first in session)";
 
-	private static final String SHORT_NAME_WARM_RUN_FIRST= "Open Java editor (reopen first)";
-	
 	private static final int WARM_UP_RUNS= 10;
 	
 	private static final int MEASURED_RUNS= 50;
@@ -134,7 +132,7 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 	}
 	
 	public void testOpenEditor3() throws Exception {
-		PerformanceMeter performanceMeter= createPerformanceMeterForSummary(SHORT_NAME_WARM_RUN_FIRST, Dimension.ELAPSED_PROCESS); 
+		PerformanceMeter performanceMeter= createPerformanceMeter(); 
 		measureOpenInEditor(LARGE_FILE, true, true, performanceMeter);
 	}
 

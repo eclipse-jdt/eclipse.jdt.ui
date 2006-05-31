@@ -16,6 +16,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.action.IAction;
@@ -63,7 +64,8 @@ public class JavaFormatterTest extends TextPerformanceTestCase {
 	 */
 	public void test() throws Exception {
 		measure(getNullPerformanceMeter(), getWarmUpRuns());
-		measure(createPerformanceMeter(), getMeasuredRuns());
+		PerformanceMeter performanceMeter= createPerformanceMeterForSummary("Java Editor: format", Dimension.ELAPSED_PROCESS);
+		measure(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
 	}

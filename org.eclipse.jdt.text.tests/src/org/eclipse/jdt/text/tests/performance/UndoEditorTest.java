@@ -13,11 +13,8 @@ package org.eclipse.jdt.text.tests.performance;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.test.performance.Performance;
-import org.eclipse.test.performance.PerformanceMeter;
-
 import org.eclipse.jface.action.IAction;
-
+import org.eclipse.test.performance.PerformanceMeter;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
@@ -28,10 +25,11 @@ public abstract class UndoEditorTest extends TextPerformanceTestCase {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		Performance performance= Performance.getDefault();
-		fPerformanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
+		fPerformanceMeter= createMeter();
 		EditorTestHelper.runEventQueue();
 	}
+
+	protected abstract PerformanceMeter createMeter();
 
 	protected void tearDown() throws Exception {
 		super.tearDown();

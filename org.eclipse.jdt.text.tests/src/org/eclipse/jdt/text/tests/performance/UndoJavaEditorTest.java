@@ -14,6 +14,9 @@ package org.eclipse.jdt.text.tests.performance;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.Performance;
+import org.eclipse.test.performance.PerformanceMeter;
 import org.eclipse.ui.PartInitException;
 
 public class UndoJavaEditorTest extends UndoEditorTest {
@@ -38,5 +41,16 @@ public class UndoJavaEditorTest extends UndoEditorTest {
 	
 	public void testUndoJavaEditor2() throws PartInitException {
 		measureUndo(ResourceTestHelper.findFile(FILE));
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.text.tests.performance.UndoEditorTest#createMeter()
+	 * @since 3.3
+	 */
+	protected PerformanceMeter createMeter() {
+		Performance performance= Performance.getDefault();
+		PerformanceMeter meter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
+		performance.tagAsSummary(meter, "Undo in Java editor", Dimension.ELAPSED_PROCESS);
+		return meter;
 	}
 }

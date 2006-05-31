@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.swt.SWT;
@@ -42,6 +43,8 @@ public abstract class AbstractJavaReplaceAllTest extends TextPerformanceTestCase
 	
 	private AbstractTextEditor fEditor;
 
+	private String fShortName= null;
+
 	
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -66,7 +69,12 @@ public abstract class AbstractJavaReplaceAllTest extends TextPerformanceTestCase
 	 */
 	public void test() throws Exception {
 		measure(getNullPerformanceMeter(), getWarmUpRuns());
-		measure(createPerformanceMeter(), getMeasuredRuns());
+		PerformanceMeter performanceMeter;
+		if (getShortName() != null)
+			performanceMeter= createPerformanceMeterForSummary(getShortName(), Dimension.ELAPSED_PROCESS);
+		else
+			performanceMeter= createPerformanceMeter();
+		measure(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
@@ -121,4 +129,14 @@ public abstract class AbstractJavaReplaceAllTest extends TextPerformanceTestCase
 		action.run();
 		EditorTestHelper.runEventQueue();
 	}
+	
+	
+	protected final String getShortName() {
+		return fShortName;
+	}
+	
+	protected final void setShortName(String shortName) {
+		fShortName= shortName;
+	}
+
 }

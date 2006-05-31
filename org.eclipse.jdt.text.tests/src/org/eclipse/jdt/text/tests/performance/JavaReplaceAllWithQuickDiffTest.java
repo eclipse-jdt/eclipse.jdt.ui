@@ -30,4 +30,9 @@ public class JavaReplaceAllWithQuickDiffTest extends AbstractJavaReplaceAllTest 
 		return true;
 	}
 	
+	public void test() throws Exception {
+		setShortName("Replace All in Java editor (with quick diff)");
+		super.test();
+	}
+	
 }

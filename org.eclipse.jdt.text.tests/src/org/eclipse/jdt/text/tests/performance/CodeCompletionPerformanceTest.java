@@ -166,7 +166,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 
 	public void testCompletionNoParamters() throws Exception {
 		measureCompletionNoParameters(getNullPerformanceMeter(), getWarmUpRuns());
-		PerformanceMeter performanceMeter= createPerformanceMeterForGlobalSummary("Java Editor: completion proposal computation", Dimension.ELAPSED_PROCESS); 		
+		PerformanceMeter performanceMeter= createPerformanceMeterForGlobalSummary("Java Editor: proposal computation", Dimension.ELAPSED_PROCESS); 		
 		measureCompletionNoParameters(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
@@ -174,7 +174,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 	
 	public void testApplicationNoParamters() throws Exception {
 		measureApplicationNoParameters(getNullPerformanceMeter(), getWarmUpRuns());
-		PerformanceMeter performanceMeter= createPerformanceMeterForSummary("Java Editor: completion proposal insertion", Dimension.ELAPSED_PROCESS);
+		PerformanceMeter performanceMeter= createPerformanceMeter();
 		measureApplicationNoParameters(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
@@ -218,7 +218,8 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 	
 	public void testCompletionWithParamterNames() throws Exception {
 		measureCompletionWithParamterNames(getNullPerformanceMeter(), getWarmUpRuns());
-		measureCompletionWithParamterNames(createPerformanceMeter(), getMeasuredRuns());
+		PerformanceMeter performanceMeter= createPerformanceMeterForSummary("Java Editor: proposal computation", Dimension.ELAPSED_PROCESS);
+		measureCompletionWithParamterNames(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
@@ -262,7 +263,8 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 	
 	public void testCompletionWithParamterGuesses() throws Exception {
 		measureCompletionWithParamterGuesses(getNullPerformanceMeter(), getWarmUpRuns());
-		measureCompletionWithParamterGuesses(createPerformanceMeter(), getMeasuredRuns());
+		PerformanceMeter performanceMeter= createPerformanceMeterForSummary("Java Editor: proposal computation (param guessing)", Dimension.ELAPSED_PROCESS);
+		measureCompletionWithParamterNames(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
@@ -286,7 +288,8 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 
 	public void testApplicationWithParamterGuesses() throws Exception {
 		measureApplicationWithParamterGuesses(getNullPerformanceMeter(), getWarmUpRuns());
-		measureApplicationWithParamterGuesses(createPerformanceMeter(), getMeasuredRuns());
+		PerformanceMeter performanceMeter= createPerformanceMeterForSummary("Java Editor: proposal insertion (param guessing)", Dimension.ELAPSED_PROCESS);
+		measureCompletionWithParamterNames(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
@@ -316,7 +319,8 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		createTypeHierarchy();
 
 		measureCompletionWithParamterGuesses2(getNullPerformanceMeter(), getWarmUpRuns());
-		measureCompletionWithParamterGuesses2(createPerformanceMeter(), getMeasuredRuns());
+		PerformanceMeter performanceMeter= createPerformanceMeterForSummary("Java Editor: proposal computation (param guesses, in type hierarchy)", Dimension.ELAPSED_PROCESS);
+		measureCompletionWithParamterNames(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
@@ -374,7 +378,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		createTypeHierarchy();
 		
 		measureApplicationWithParamterGuesses2(getNullPerformanceMeter(), getWarmUpRuns());
-		PerformanceMeter performanceMeter= createPerformanceMeterForGlobalSummary("Java Editor: completion proposal insertion (param guessing)", Dimension.ELAPSED_PROCESS);
+		PerformanceMeter performanceMeter= createPerformanceMeterForGlobalSummary("Java Editor: proposal insertion (param guessing)", Dimension.ELAPSED_PROCESS);
 		measureApplicationWithParamterGuesses2(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
