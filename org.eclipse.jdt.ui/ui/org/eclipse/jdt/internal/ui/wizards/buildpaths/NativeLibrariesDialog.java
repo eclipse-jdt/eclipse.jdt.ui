@@ -45,6 +45,7 @@ public class NativeLibrariesDialog extends StatusDialog {
 		};	
 		
 		fConfigurationBlock= new NativeLibrariesConfigurationBlock(listener, parent, selElement);
+		setHelpAvailable(false);
 	}
 	
 	/* (non-Javadoc)

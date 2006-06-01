@@ -403,7 +403,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	 */
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.PROPERTIES_FILE_EDITOR_PREFERENCE_PAGE);
 	}
 
 	private void handleSyntaxColorListSelection() {

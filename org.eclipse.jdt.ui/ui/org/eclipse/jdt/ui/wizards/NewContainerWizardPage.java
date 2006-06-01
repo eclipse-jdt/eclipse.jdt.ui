@@ -490,6 +490,7 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 		dialog.addFilter(filter);
 		dialog.setInput(JavaCore.create(fWorkspaceRoot));
 		dialog.setInitialSelection(initElement);
+		dialog.setHelpAvailable(false);
 		
 		if (dialog.open() == Window.OK) {
 			Object element= dialog.getFirstResult();

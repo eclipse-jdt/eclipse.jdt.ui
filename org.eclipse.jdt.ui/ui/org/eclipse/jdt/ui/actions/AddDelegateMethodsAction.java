@@ -256,6 +256,11 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			super(parent, labelProvider, contentProvider, editor, type, isConstructor);
 		}
 
+		protected void configureShell(Shell shell) {
+			super.configureShell(shell);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.ADD_DELEGATE_METHODS_SELECTION_DIALOG);
+		}
+		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
 		 */

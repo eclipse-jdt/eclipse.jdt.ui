@@ -22,7 +22,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -33,11 +32,8 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -64,6 +60,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 			
 			createHistoryList();
 			createMaxEntriesField();
+			setHelpAvailable(false);
 		}
 		
 		private void createHistoryList() {
@@ -185,14 +182,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 			return fMaxEntries;
 		}
 		
-		/*
-		 * @see org.eclipse.jface.dialogs.StatusDialog#configureShell(org.eclipse.swt.widgets.Shell)
-		 */
-		protected void configureShell(Shell newShell) {
-			super.configureShell(newShell);
-			PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.HISTORY_LIST_DIALOG);
-		}
-
 		/*
 		 * @see org.eclipse.jface.dialogs.StatusDialog#create()
 		 */

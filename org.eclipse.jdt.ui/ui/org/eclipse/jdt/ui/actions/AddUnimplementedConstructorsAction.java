@@ -202,6 +202,11 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			fOmitSuper= fAddConstructorsSettings.getBoolean(OMIT_SUPER);
 		}
 
+		protected void configureShell(Shell shell) {
+			super.configureShell(shell);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.ADD_UNIMPLEMENTED_CONSTRUCTORS_DIALOG);
+		}
+		
 		protected Control createDialogArea(Composite parent) {
 			initializeDialogUnits(parent);
 

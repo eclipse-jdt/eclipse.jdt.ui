@@ -32,6 +32,8 @@ import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.wizard.IWizardPage;
 
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
@@ -47,6 +49,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaElementSorter;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -131,6 +134,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			Dialog.applyDialogFont(result);
 			initializeCheckboxes();
 			updateUIElementEnablement();
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.EXTRACT_INTERFACE_WIZARD_PAGE);
 		}
 
 		private void addGenerateCommentsCheckbox(Composite result) {

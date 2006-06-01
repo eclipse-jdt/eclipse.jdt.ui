@@ -40,6 +40,8 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.wizard.IWizardPage;
 
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
@@ -48,6 +50,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
@@ -267,6 +270,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			
 			addTreeComponent(composite);			
 			Dialog.applyDialogFont(composite);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.CHANGE_TYPE_WIZARD_PAGE);
 		}
 		
 		/**

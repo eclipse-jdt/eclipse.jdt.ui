@@ -227,6 +227,7 @@ public class NativeLibrariesConfigurationBlock {
 		dialog.setMessage(NewWizardMessages.NativeLibrariesDialog_intfiledialog_message); 
 		dialog.setInput(root);
 		dialog.setInitialSelection(initSel);
+		dialog.setHelpAvailable(false);
 		if (dialog.open() == Window.OK) {
 			IResource res= (IResource) dialog.getFirstResult();
 			return res.getFullPath().makeRelative().toString();

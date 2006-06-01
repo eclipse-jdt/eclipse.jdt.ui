@@ -37,6 +37,8 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -45,6 +47,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
@@ -165,6 +168,11 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		}
 	}
 
+	protected void configureShell(Shell shell) {
+		super.configureShell(shell);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.GENERATE_CONSTRUCTOR_USING_FIELDS_SELECTION_DIALOG);
+	}
+	
 	protected Control createDialogArea(Composite parent) {
 		initializeDialogUnits(parent);
 

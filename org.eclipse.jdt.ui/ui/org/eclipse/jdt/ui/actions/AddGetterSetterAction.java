@@ -872,6 +872,11 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			}
 		}
 
+		protected void configureShell(Shell shell) {
+			super.configureShell(shell);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.ADD_GETTER_SETTER_SELECTION_DIALOG);
+		}
+		
 		private void createGetterSetterButtons(Composite buttonComposite) {
 			createButton(buttonComposite, SELECT_GETTERS_ID, ActionMessages.GetterSetterTreeSelectionDialog_select_getters, false); 
 			createButton(buttonComposite, SELECT_SETTERS_ID, ActionMessages.GetterSetterTreeSelectionDialog_select_setters, false); 
