@@ -83,8 +83,8 @@ public class OpenTextEditorStartupTest extends StartupPerformanceTestCase {
 	public void testTextEditorStartup() {
 		PerformanceMeter perfMeter= createPerformanceMeterForSummary(SHORT_NAME, Dimension.ELAPSED_PROCESS);
 		explainDegradation("The startup with open Text editor performance has been decreased due to general start-up time degradation. " +
-				"See the <a href=\"org.eclipse.core.tests.runtime.perf.UIStartupTest.testUIApplicationStartup.html\">UI Start-up test</a> " +
-				"of the <a href=\"org.eclipse.core.php?\">org.eclipse.core plug-in</a>.", perfMeter);
+				"See the org.eclipse.core.tests.runtime.perf.UIStartupTest.testUIApplicationStartup performance test on the detailed org.eclipse.core " +
+				"performance results page.", perfMeter);
 		measureStartup(perfMeter);
 		
 	}
