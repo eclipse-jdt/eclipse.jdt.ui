@@ -20,39 +20,32 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.zip.CRC32;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.util.Assert;
-
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.core.refactoring.history.IRefactoringHistoryService;
-import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.jarpackager.JarPackageData;
-
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Utility methods for JAR Import/Export.
@@ -263,36 +256,5 @@ public final class JarPackagerUtil {
 		}
 		entry.setSize(size);
 		entry.setCrc(crc.getValue());
-	}
-
-	/**
-	 * Returns the refactoring history for the specified projects.
-	 * 
-	 * @param projects
-	 *            the projects whose history to retrieve
-	 * @param start
-	 *            the start time stamp, inclusive
-	 * @param end
-	 *            the end time stamp, inclusive
-	 * @param filter
-	 *            the refactoring descriptor flags which must be present in
-	 *            order to be returned in the refactoring history object, or
-	 *            <code>RefactoringDescriptor#NONE</code>
-	 * @param monitor
-	 *            the progress monitor to use, or <code>null</code>
-	 * @return the refactoring history, or <code>null</code>
-	 */
-	public static RefactoringHistory getRefactoringHistory(final IProject[] projects, final long start, final long end, final int filter, final IProgressMonitor monitor) {
-		Assert.isNotNull(projects);
-		if (start >= 0 && end >= start) {
-			final IRefactoringHistoryService service= RefactoringCore.getHistoryService();
-			try {
-				service.connect();
-				return service.getRefactoringHistory(projects, start, end, JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | filter, monitor);
-			} finally {
-				service.disconnect();
-			}
-		}
-		return null;
 	}
 }
