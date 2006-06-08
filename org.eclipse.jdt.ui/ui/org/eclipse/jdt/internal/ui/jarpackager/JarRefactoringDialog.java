@@ -129,6 +129,14 @@ public final class JarRefactoringDialog extends TrayDialog {
 	/**
 	 * {@inheritDoc}
 	 */
+	public void create() {
+		super.create();
+		getButton(OK).setEnabled(!fHistory.isEmpty());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	protected Control createDialogArea(final Composite parent) {
 		final Composite container= (Composite) super.createDialogArea(parent);
 		initializeDialogUnits(container);
