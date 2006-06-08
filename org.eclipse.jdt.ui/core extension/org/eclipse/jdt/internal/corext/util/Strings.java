@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.corext.util;
 
 import org.eclipse.core.runtime.Assert;
 
+import org.eclipse.jface.action.LegacyActionTools;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.ILineTracker;
@@ -429,16 +431,6 @@ public class Strings {
 	}
 	
 	public static String removeMnemonicIndicator(String string) {
-		int length= string.length();
-		StringBuffer result= new StringBuffer(length);
-		char lastChar= ' '; // everything except & is OK as an initializer
-		for(int i= 0; i < length; i++) {
-			char ch= string.charAt(i);
-			if (ch != '&' || lastChar == '&') {
-				result.append(ch);				
-			}
-			lastChar= ch;
-		}
-		return result.toString();
+		return LegacyActionTools.removeMnemonics(string);
 	}
 }

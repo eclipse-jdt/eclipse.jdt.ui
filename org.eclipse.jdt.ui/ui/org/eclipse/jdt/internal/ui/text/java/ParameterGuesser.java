@@ -229,6 +229,7 @@ public class ParameterGuesser {
 	private static final char[] VOID= "void".toCharArray(); //$NON-NLS-1$
 	private static final char[] HASHCODE= "hashCode()".toCharArray(); //$NON-NLS-1$
 	private static final char[] TOSTRING= "toString()".toCharArray(); //$NON-NLS-1$
+	private static final char[] CLONE= "clone()".toCharArray(); //$NON-NLS-1$
 	
 	private final class VariableCollector extends CompletionRequestor {
 
@@ -331,7 +332,7 @@ public class ParameterGuesser {
 		}
 
 		private boolean filter(char[] returnTypeName, char[] completionName) {
-			return Arrays.equals(VOID, returnTypeName) || Arrays.equals(HASHCODE, completionName) || Arrays.equals(TOSTRING, completionName);
+			return Arrays.equals(VOID, returnTypeName) || Arrays.equals(HASHCODE, completionName) || Arrays.equals(TOSTRING, completionName) || Arrays.equals(CLONE, completionName);
 		}
 
 		protected ImageDescriptor getMemberDescriptor(int modifiers) {

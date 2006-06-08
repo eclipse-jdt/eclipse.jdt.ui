@@ -25,6 +25,7 @@ import org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
@@ -88,7 +89,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 				int sourceLength= partitionOffset + position.getLength();
 				String source= document.get(sourceOffset, sourceLength);
 				CodeFormatter commentFormatter= ToolFactory.createCodeFormatter(preferences);
-				int indentationLevel= inferIndentationLevel(source.substring(0, partitionOffset), getTabSize(preferences));
+				int indentationLevel= inferIndentationLevel(source.substring(0, partitionOffset), getTabSize(preferences), getIndentSize(preferences));
 				edit= commentFormatter.format(getKindForPartitionType(position.getType()), source, partitionOffset, position.getLength(), indentationLevel, TextUtilities.getDefaultLineDelimiter(document));
 
 				// move edit offset to match document
@@ -153,19 +154,19 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	 *
 	 * @param reference the reference indentation
 	 * @param tabSize the tab size
+	 * @param indentSize the indent size in space equivalents
 	 * @return the inferred indentation level
 	 * @since 3.1
 	 */
-	private int inferIndentationLevel(String reference, int tabSize) {
+	private int inferIndentationLevel(String reference, int tabSize, int indentSize) {
 		StringBuffer expanded= expandTabs(reference, tabSize);
 
 		int referenceWidth= expanded.length();
 		if (tabSize == 0)
 			return referenceWidth;
 
-		int spaceWidth= 1;
-		int level= referenceWidth / (tabSize * spaceWidth);
-		if (referenceWidth % (tabSize * spaceWidth) > 0)
+		int level= referenceWidth / indentSize;
+		if (referenceWidth % indentSize > 0)
 			level++;
 		return level;
 	}
@@ -198,22 +199,59 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	}
 
 	/**
-	 * Returns the value of {@link DefaultCodeFormatterConstants#FORMATTER_TAB_SIZE}
-	 * from the given preferences.
+	 * Returns the visual tab size.
 	 *
 	 * @param preferences the preferences
-	 * @return the value of {@link DefaultCodeFormatterConstants#FORMATTER_TAB_SIZE}
-	 *         from the given preferences
+	 * @return the visual tab size
 	 * @since 3.1
 	 */
 	private static int getTabSize(Map preferences) {
-		if (preferences.containsKey(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE))
+		/*
+		 * If the tab-char is SPACE, FORMATTER_INDENTATION_SIZE is not used
+		 * by the core formatter.
+		 * We piggy back the visual tab length setting in that preference in
+		 * that case. See CodeFormatterUtil.
+		 */
+		String key;
+		if (JavaCore.SPACE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR)))
+			key= DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE;
+		else
+			key= DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE;
+
+		if (preferences.containsKey(key))
 			try {
-				return Integer.parseInt((String) preferences.get(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE));
+				return Integer.parseInt((String) preferences.get(key));
 			} catch (NumberFormatException e) {
 				// use default
 			}
 		return 4;
+	}
+	
+	/**
+	 * Returns the indentation size in space equivalents.
+	 *
+	 * @param preferences the preferences
+	 * @return the indentation size in space equivalents
+	 * @since 3.3
+	 */
+	private static int getIndentSize(Map preferences) {
+		/*
+		 * FORMATTER_INDENTATION_SIZE is only used if FORMATTER_TAB_CHAR is MIXED. Otherwise, the
+		 * indentation size is in FORMATTER_TAB_CHAR. See CodeFormatterUtil.
+		 */
+		String key;
+		if (DefaultCodeFormatterConstants.MIXED.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR)))
+			key= DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE;
+		else
+			key= DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR;
+		
+		if (preferences.containsKey(key))
+			try {
+				return Integer.parseInt((String) preferences.get(key));
+			} catch (NumberFormatException e) {
+				// use default
+			}
+			return 4;
 	}
 
 	/**

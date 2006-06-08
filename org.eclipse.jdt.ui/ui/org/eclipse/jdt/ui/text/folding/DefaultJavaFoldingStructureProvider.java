@@ -896,7 +896,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				collapse= ctx.collapseImportContainer();
 				break;
 			case IJavaElement.TYPE:
-				collapseCode= isInnerType((IType) element);
+				collapseCode= isInnerType((IType) element) && !isAnonymousEnum((IType) element);
 				collapse= ctx.collapseInnerTypes() && collapseCode;
 				break;
 			case IJavaElement.METHOD:
@@ -935,6 +935,22 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 						ctx.addProjectionRange(new JavaProjectionAnnotation(collapse, element, false), position);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Returns <code>true</code> if <code>type</code> is an anonymous enum declaration,
+	 * <code>false</code> otherwise. See also https://bugs.eclipse.org/bugs/show_bug.cgi?id=143276
+	 * 
+	 * @param type the type to test
+	 * @return <code>true</code> if <code>type</code> is an anonymous enum declaration
+	 * @since 3.2
+	 */
+	private boolean isAnonymousEnum(IType type) {
+		try {
+			return type.isEnum() && type.isAnonymous();
+		} catch (JavaModelException x) {
+			return false; // optimistically
 		}
 	}
 

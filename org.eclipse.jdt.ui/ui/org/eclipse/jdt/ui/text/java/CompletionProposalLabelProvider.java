@@ -90,8 +90,50 @@ public class CompletionProposalLabelProvider {
 		for (int i= 0; i < parameterTypes.length; i++) {
 			parameterTypes[i]= createTypeDisplayName(SignatureUtil.getLowerBound(parameterTypes[i]));
 		}
+		if (Flags.isVarargs(methodProposal.getFlags())) {
+			int index= parameterTypes.length - 1;
+			parameterTypes[index]= convertToVararg(parameterTypes[index]);
+		}
 		return appendParameterSignature(buffer, parameterTypes, parameterNames);
 	}
+
+	/**
+	 * Converts the display name for an array type into a variable arity display name.
+	 * <p>
+	 * Examples:
+	 * <ul>
+	 * <li> "int[]" -> "int..."</li>
+	 * <li> "Object[][]" -> "Object[]..."</li>
+	 * <li> "String" -> "String"</li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * If <code>typeName</code> does not include the substring "[]", it is returned unchanged.
+	 * </p>
+	 * 
+	 * @param typeName the type name to convert
+	 * @return the converted type name
+	 * @since 3.2
+	 */
+    private char[] convertToVararg(char[] typeName) {
+    	if (typeName == null)
+    		return typeName;
+    	final int len= typeName.length;
+		if (len < 2)
+    		return typeName;
+    	
+    	if (typeName[len - 1] != ']')
+    		return typeName;
+    	if (typeName[len - 2] != '[')
+    		return typeName;
+    	
+		char[] vararg= new char[len + 1];
+		System.arraycopy(typeName, 0, vararg, 0, len - 2);
+		vararg[len - 2]= '.';
+		vararg[len - 1]= '.';
+		vararg[len]= '.';
+	    return vararg;
+    }
 
 	/**
 	 * Returns the display string for a java type signature.

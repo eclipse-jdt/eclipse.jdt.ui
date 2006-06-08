@@ -2246,7 +2246,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			IJavaElement element= getElementAt(offset);
 			while (element instanceof ISourceReference) {
 				ISourceRange range= ((ISourceReference) element).getSourceRange();
-				if (offset < range.getOffset() + range.getLength() && range.getOffset() < offset + length) {
+				if (range != null && offset < range.getOffset() + range.getLength() && range.getOffset() < offset + length) {
 
 					ISourceViewer viewer= getSourceViewer();
 					if (viewer instanceof ITextViewerExtension5) {
