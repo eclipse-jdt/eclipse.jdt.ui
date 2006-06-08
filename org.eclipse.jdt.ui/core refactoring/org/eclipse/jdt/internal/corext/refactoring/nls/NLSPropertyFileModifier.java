@@ -56,6 +56,7 @@ public class NLSPropertyFileModifier {
 		}
 
 		textChange= new TextFileChange(name, getPropertyFile(propertyFilePath));
+		textChange.setTextType("properties"); //$NON-NLS-1$
 
 		addChanges(textChange, nlsSubstitutions);
 
