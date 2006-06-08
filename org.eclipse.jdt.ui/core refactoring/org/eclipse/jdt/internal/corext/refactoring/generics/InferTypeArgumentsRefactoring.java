@@ -537,7 +537,7 @@ public class InferTypeArgumentsRefactoring extends ScriptableRefactoring {
 					final String description= RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description;
 					final String header= project != null ? Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description_project, project.getElementName()) : RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description;
 					final String name= project != null ? project.getElementName() : null;
-					final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+					final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(name, this, header);
 					final String[] settings= new String[fElements.length];
 					for (int index= 0; index < settings.length; index++)
 						settings[index]= JavaElementLabels.getTextLabel(fElements[index], JavaElementLabels.ALL_FULLY_QUALIFIED);

@@ -1030,6 +1030,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String JavaRefactoringDescriptorComment_element_delimiter;
 
+	public static String JavaRefactoringDescriptorComment_original_project;
+
 	public static String LocalTypeAnalyzer_local_type_from_outside;
 
 	public static String LocalTypeAnalyzer_local_type_referenced_outside;

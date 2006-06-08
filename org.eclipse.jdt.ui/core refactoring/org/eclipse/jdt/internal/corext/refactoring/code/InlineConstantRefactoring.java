@@ -842,7 +842,7 @@ public class InlineConstantRefactoring extends ScriptableRefactoring {
 			}
 			final String description= Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_descriptor_description_short, fField.getElementName());
 			final String header= Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
-			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
 			comment.addSetting(Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_original_pattern, JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 			if (fRemoveDeclaration)
 				comment.addSetting(RefactoringCoreMessages.InlineConstantRefactoring_remove_declaration);

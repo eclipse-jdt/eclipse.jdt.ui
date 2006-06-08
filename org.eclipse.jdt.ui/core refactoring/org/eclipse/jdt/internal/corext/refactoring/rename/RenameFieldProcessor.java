@@ -586,7 +586,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			}
 			final String description= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_descriptor_description_short, fField.getElementName());
 			final String header= Messages.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { fField.getElementName(), JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()});
-			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
 			if (fRenameGetter)
 				comment.addSetting(RefactoringCoreMessages.RenameFieldRefactoring_setting_rename_getter);
 			if (fRenameSetter)

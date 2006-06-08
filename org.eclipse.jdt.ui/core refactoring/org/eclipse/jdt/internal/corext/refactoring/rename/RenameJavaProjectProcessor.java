@@ -188,7 +188,7 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 			final Map arguments= new HashMap();
 			final String description= Messages.format(RefactoringCoreMessages.RenameJavaProjectProcessor_descriptor_description_short, fProject.getElementName());
 			final String header= Messages.format(RefactoringCoreMessages.RenameJavaProjectChange_descriptor_description, new String[] { fProject.getElementName(), getNewElementName()});
-			final String comment= new JavaRefactoringDescriptorComment(this, header).asString();
+			final String comment= new JavaRefactoringDescriptorComment(null, this, header).asString();
 			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(RenameJavaProjectProcessor.ID_RENAME_JAVA_PROJECT, null, description, comment, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fProject));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());

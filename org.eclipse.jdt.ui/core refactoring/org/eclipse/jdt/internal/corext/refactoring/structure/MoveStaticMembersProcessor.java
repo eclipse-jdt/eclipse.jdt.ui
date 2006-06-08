@@ -706,7 +706,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			JavaPlugin.log(exception);
 		}
 		final String description= members.length == 1 ? Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_description_descriptor_short_multi, members[0].getElementName()) : RefactoringCoreMessages.MoveMembersRefactoring_move_members;
-		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_target_element_pattern, JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_STATIC_MOVE, project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fDestinationType));

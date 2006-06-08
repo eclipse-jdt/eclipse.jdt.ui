@@ -1157,7 +1157,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			try {
 				final String description= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description_short, fMethod.getElementName());
 				final String header= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()});
-				final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+				final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
 				if (!fMethod.getElementName().equals(fMethodName))
 					comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_new_name_pattern, fMethodName));
 				if (!isVisibilitySameAsInitial()) {

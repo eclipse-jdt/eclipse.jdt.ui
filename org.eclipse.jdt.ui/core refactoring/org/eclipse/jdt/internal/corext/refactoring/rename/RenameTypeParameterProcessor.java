@@ -276,7 +276,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 					project= javaProject.getElementName();
 				final String description= Messages.format(RefactoringCoreMessages.RenameTypeParameterProcessor_descriptor_description_short, fTypeParameter.getElementName());
 				final String header= Messages.format(RefactoringCoreMessages.RenameTypeParameterProcessor_descriptor_description, new String[] { fTypeParameter.getElementName(), JavaElementLabels.getElementLabel(fTypeParameter.getDeclaringMember(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()});
-				final String comment= new JavaRefactoringDescriptorComment(this, header).asString();
+				final String comment= new JavaRefactoringDescriptorComment(project, this, header).asString();
 				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_TYPE_PARAMETER, project, description, comment, arguments, RefactoringDescriptor.NONE);
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fTypeParameter.getDeclaringMember()));
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());

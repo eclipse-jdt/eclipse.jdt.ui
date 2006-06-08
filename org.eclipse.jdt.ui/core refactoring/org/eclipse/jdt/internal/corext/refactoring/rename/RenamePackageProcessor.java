@@ -433,7 +433,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 			final int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final String description= Messages.format(RefactoringCoreMessages.RenamePackageProcessor_descriptor_description_short, fPackage.getElementName());
 			final String header= Messages.format(RefactoringCoreMessages.RenamePackageProcessor_descriptor_description, new String[] { fPackage.getElementName(), getNewElementName()});
-			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
 			if (fRenameSubpackages)
 				comment.addSetting(RefactoringCoreMessages.RenamePackageProcessor_rename_subpackages);
 			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_PACKAGE, project, description, comment.asString(), arguments, flags);

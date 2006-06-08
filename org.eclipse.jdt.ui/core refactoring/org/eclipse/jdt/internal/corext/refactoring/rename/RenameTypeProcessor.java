@@ -1008,7 +1008,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			}
 			final String description= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description_short, fType.getElementName());
 			final String header= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()});
-			final String comment= new JavaRefactoringDescriptorComment(this, header).asString();
+			final String comment= new JavaRefactoringDescriptorComment(project, this, header).asString();
 			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_TYPE, project, description, comment, arguments, flags);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fType));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());

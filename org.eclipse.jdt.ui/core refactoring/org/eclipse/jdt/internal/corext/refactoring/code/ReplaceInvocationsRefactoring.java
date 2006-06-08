@@ -432,7 +432,7 @@ public class ReplaceInvocationsRefactoring extends ScriptableRefactoring {
 			flags|= RefactoringDescriptor.MULTI_CHANGE;
 		final String description= Messages.format(RefactoringCoreMessages.ReplaceInvocationsRefactoring_descriptor_description_short, binding.getName());
 		final String header= Messages.format(RefactoringCoreMessages.ReplaceInvocationsRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringClass(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
-		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.ReplaceInvocationsRefactoring_original_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 		if (!fTargetProvider.isSingle())
 			comment.addSetting(RefactoringCoreMessages.ReplaceInvocationsRefactoring_replace_references);

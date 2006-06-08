@@ -215,12 +215,13 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 				} catch (JavaModelException exception) {
 					JavaPlugin.log(exception);
 				}
+				final String name= project != null ? project.getElementName() : null;
 				final String description= Messages.format(RefactoringCoreMessages.UseSuperTypeProcessor_descriptor_description_short, fSuperType.getElementName());
 				final String header= Messages.format(RefactoringCoreMessages.UseSuperTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fSuperType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED) });
-				final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+				final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(name, this, header);
 				comment.addSetting(Messages.format(RefactoringCoreMessages.UseSuperTypeProcessor_refactored_element_pattern, JavaElementLabels.getElementLabel(fSuperType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 				addSuperTypeSettings(comment, false);
-				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_USE_SUPERTYPE, project != null ? project.getElementName() : null, description, comment.asString(), arguments, flags);
+				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_USE_SUPERTYPE, name, description, comment.asString(), arguments, flags);
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSubType));
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(fSuperType));
 				arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());

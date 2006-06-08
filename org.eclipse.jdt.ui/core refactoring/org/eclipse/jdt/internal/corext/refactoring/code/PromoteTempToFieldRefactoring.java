@@ -627,7 +627,7 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 		final IVariableBinding binding= fTempDeclarationNode.resolveBinding();
 		final String description= Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_descriptor_description_short, binding.getName());
 		final String header= Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
-		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_original_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_field_pattern, fFieldName));
 		switch (fInitializeIn) {

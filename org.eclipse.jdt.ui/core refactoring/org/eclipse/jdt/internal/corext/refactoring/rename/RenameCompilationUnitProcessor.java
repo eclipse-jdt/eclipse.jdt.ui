@@ -387,7 +387,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 			final String name= project.getName();
 			final String description= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description_short, resource.getName());
 			final String header= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { resource.getFullPath().toString(), newName});
-			final String comment= new JavaRefactoringDescriptorComment(this, header).asString();
+			final String comment= new JavaRefactoringDescriptorComment(name, this, header).asString();
 			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(RenameResourceProcessor.ID_RENAME_RESOURCE, name, description, comment, arguments, (RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, JavaRefactoringDescriptor.resourceToHandle(name, resource));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, newName);
@@ -406,7 +406,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		final String name= fCu.getJavaProject().getElementName();
 		final String description= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description_short, fCu.getElementName());
 		final String header= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { label, newName});
-		final String comment= new JavaRefactoringDescriptorComment(this, header).asString();
+		final String comment= new JavaRefactoringDescriptorComment(name, this, header).asString();
 		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(RenameCompilationUnitProcessor.ID_RENAME_COMPILATION_UNIT, name, description, comment, arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, newName);

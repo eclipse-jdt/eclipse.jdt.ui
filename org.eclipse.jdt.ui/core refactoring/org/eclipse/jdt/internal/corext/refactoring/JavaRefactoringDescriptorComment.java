@@ -58,7 +58,6 @@ public final class JavaRefactoringDescriptorComment {
 		Assert.isNotNull(caption);
 		Assert.isNotNull(settings);
 		final StringBuffer buffer= new StringBuffer(128);
-		buffer.append(caption);
 		for (int index= 0; index < settings.length; index++) {
 			if (settings[index] != null && !"".equals(settings[index])) { //$NON-NLS-1$
 				buffer.append(LINE_DELIMITER);
@@ -70,11 +69,16 @@ public final class JavaRefactoringDescriptorComment {
 				buffer.append(RefactoringCoreMessages.JavaRefactoringDescriptor_not_available);
 			}
 		}
+		if (buffer.length() > 0)
+			buffer.insert(0, caption);
 		return buffer.toString();
 	}
 
 	/** The header of the comment */
 	private final String fHeader;
+
+	/** The project name, or <code>null</code> */
+	private final String fProject;
 
 	/** The settings list */
 	private final List fSettings= new ArrayList(6);
@@ -82,15 +86,18 @@ public final class JavaRefactoringDescriptorComment {
 	/**
 	 * Creates a new java refactoring descriptor comment.
 	 * 
+	 * @param project
+	 *            the project name, or <code>null</code>
 	 * @param object
 	 *            the refactoring object to generate a comment for
 	 * @param header
 	 *            the header of the comment (typically the unique description of
 	 *            the refactoring with fully qualified element names)
 	 */
-	public JavaRefactoringDescriptorComment(final Object object, final String header) {
+	public JavaRefactoringDescriptorComment(final String project, final Object object, final String header) {
 		Assert.isNotNull(object);
 		Assert.isNotNull(header);
+		fProject= project;
 		fHeader= header;
 		initializeInferredSettings(object);
 	}
@@ -114,12 +121,11 @@ public final class JavaRefactoringDescriptorComment {
 	 * Adds the specified setting to this comment.
 	 * 
 	 * @param setting
-	 *            the setting to add
+	 *            the setting to add, or <code>null</code> for no setting
 	 */
 	public void addSetting(final String setting) {
-		Assert.isNotNull(setting);
-		Assert.isTrue(!"".equals(setting)); //$NON-NLS-1$
-		fSettings.add(setting);
+		if (setting != null && !"".equals(setting)) //$NON-NLS-1$
+			fSettings.add(setting);
 	}
 
 	/**
@@ -130,6 +136,10 @@ public final class JavaRefactoringDescriptorComment {
 	public String asString() {
 		final StringBuffer buffer= new StringBuffer(256);
 		buffer.append(fHeader);
+		if (fProject != null && !"".equals(fProject)) { //$NON-NLS-1$
+			buffer.append(LINE_DELIMITER);
+			buffer.append(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptorComment_original_project, fProject));
+		}
 		for (final Iterator iterator= fSettings.iterator(); iterator.hasNext();) {
 			final String setting= (String) iterator.next();
 			buffer.append(LINE_DELIMITER);

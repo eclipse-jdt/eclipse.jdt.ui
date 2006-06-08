@@ -362,7 +362,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 					project= javaProject.getElementName();
 				final String header= Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, JavaElementLabels.getElementLabel(fLocalVariable.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), fNewName});
 				final String description= Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description_short, fCurrentName);
-				final String comment= new JavaRefactoringDescriptorComment(this, header).asString();
+				final String comment= new JavaRefactoringDescriptorComment(project, this, header).asString();
 				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_LOCAL_VARIABLE, project, description, comment, arguments, RefactoringDescriptor.NONE);
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());

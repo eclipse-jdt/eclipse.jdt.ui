@@ -395,7 +395,7 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 		}
 		final String description= Messages.format(RefactoringCoreMessages.SelfEncapsulateField_descriptor_description_short, fField.getElementName());
 		final String header= Messages.format(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)});
-		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_original_pattern, JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_getter_pattern, fGetterName));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_setter_pattern, fSetterName));

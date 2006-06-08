@@ -598,7 +598,7 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 		final String expression= ASTNodes.asString(fSelectedExpression.getAssociatedExpression());
 		final String description= Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_descriptor_description_short, fConstantName);
 		final String header= Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_descriptor_description, new String[] { pattern + fConstantName, expression});
-		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_constant_name_pattern, fConstantName));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_constant_expression_pattern, expression));
 		String visibility= fVisibility;

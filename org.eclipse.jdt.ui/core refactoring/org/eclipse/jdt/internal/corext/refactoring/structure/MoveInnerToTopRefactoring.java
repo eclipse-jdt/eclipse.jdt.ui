@@ -764,7 +764,7 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 			project= javaProject.getElementName();
 		final String description= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_descriptor_description_short, fType.getElementName());
 		final String header= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fType.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
-		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_original_pattern, JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 		final boolean enclosing= fEnclosingInstanceFieldName != null && !"".equals(fEnclosingInstanceFieldName); //$NON-NLS-1$
 		if (enclosing)

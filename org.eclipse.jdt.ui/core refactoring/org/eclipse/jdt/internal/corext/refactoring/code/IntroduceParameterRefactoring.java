@@ -515,7 +515,7 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 					}
 					final String description= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description_short, fChangeSignatureRefactoring.getMethod().getElementName());
 					final String header= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description, new String[] { fParameter.getNewName(), signature, ASTNodes.asString(fSelectedExpression)});
-					final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(this, header);
+					final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(extended.getProject(), this, header);
 					comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_original_pattern, JavaElementLabels.getTextLabel(fChangeSignatureRefactoring.getMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)));
 					comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_pattern, ASTNodes.asString(fSelectedExpression)));
 					comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_parameter_pattern, getAddedParameterInfo().getNewName()));
