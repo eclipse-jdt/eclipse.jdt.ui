@@ -52,7 +52,7 @@ public class NLSPropertyFileModifier {
 			textChange= new DocumentChange(name, document);
 			addChanges(textChange, nlsSubstitutions);
 			textChange.perform(new NullProgressMonitor());
-			return new CreateTextFileChange(propertyFilePath, textChange.getCurrentContent(new NullProgressMonitor()), "8859_1", "txt"); //$NON-NLS-1$ //$NON-NLS-2$
+			return new CreateTextFileChange(propertyFilePath, textChange.getCurrentContent(new NullProgressMonitor()), "8859_1", "properties"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		textChange= new TextFileChange(name, getPropertyFile(propertyFilePath));
