@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.jface.action.LegacyActionTools;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -141,7 +142,7 @@ public final class CompletionProposalCategory {
 	 * @return Returns the name
 	 */
 	public String getDisplayName() {
-		return fName.replaceAll("&", ""); //$NON-NLS-1$ //$NON-NLS-2$;
+		return LegacyActionTools.removeMnemonics(fName);
 	}
 	
 	/**
