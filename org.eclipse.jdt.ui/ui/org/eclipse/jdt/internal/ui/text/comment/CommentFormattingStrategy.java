@@ -243,7 +243,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 		if (DefaultCodeFormatterConstants.MIXED.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR)))
 			key= DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE;
 		else
-			key= DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR;
+			key= DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE;
 		
 		if (preferences.containsKey(key))
 			try {
