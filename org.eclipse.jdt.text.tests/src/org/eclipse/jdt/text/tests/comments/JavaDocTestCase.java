@@ -62,6 +62,7 @@ public class JavaDocTestCase extends CommentTestCase {
 		String expected= PREFIX + DELIMITER + "   " + INFIX + "test test" + DELIMITER + "   " + POSTFIX;  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		setUserOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		setUserOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "3"); //$NON-NLS-1$
+		setUserOption(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE, "3"); //$NON-NLS-1$ // this is really the visual tab length setting
 		assertEquals(prefix + expected + postfix, testFormat(prefix + content + postfix, prefix.length(), content.length()));
 	}
 	
