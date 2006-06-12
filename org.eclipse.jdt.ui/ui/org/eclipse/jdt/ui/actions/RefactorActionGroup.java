@@ -30,6 +30,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -38,11 +39,12 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.handlers.IHandlerActivation;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.operations.UndoRedoActionGroup;
 import org.eclipse.ui.part.Page;
 
@@ -173,8 +175,9 @@ public class RefactorActionGroup extends ActionGroup {
 		}
 	}
 	
-	private RefactorQuickAccessAction fQuickAccessAction;
-	private IKeyBindingService fKeyBindingService;
+	private JDTQuickMenuAction fQuickAccessAction;
+	private IHandlerActivation fQuickAccessHandlerActivation;
+	private IHandlerService fHandlerService;
 
 	private static class NoActionAvailable extends Action {
 		public NoActionAvailable() {
@@ -192,7 +195,7 @@ public class RefactorActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public RefactorActionGroup(IViewPart part) {
-		this(part.getSite(), part.getSite().getKeyBindingService());
+		this(part.getSite());
 		
 		IUndoContext workspaceContext= (IUndoContext)ResourcesPlugin.getWorkspace().getAdapter(IUndoContext.class);
 		fUndoRedoActionGroup= new UndoRedoActionGroup(part.getViewSite(), workspaceContext, true);
@@ -206,7 +209,7 @@ public class RefactorActionGroup extends ActionGroup {
 	 * @param page the page that owns this action group
 	 */
 	public RefactorActionGroup(Page page) {
-		this(page.getSite(), null);
+		this(page.getSite());
 	}
 	
 	/**
@@ -313,14 +316,12 @@ public class RefactorActionGroup extends ActionGroup {
 		initAction(fSelfEncapsulateField, selection, IJavaEditorActionDefinitionIds.SELF_ENCAPSULATE_FIELD);
 		editor.setAction("SelfEncapsulateField", fSelfEncapsulateField); //$NON-NLS-1$
 		
-		fQuickAccessAction= new RefactorQuickAccessAction(editor);
-		fKeyBindingService= editor.getEditorSite().getKeyBindingService();
-		fKeyBindingService.registerAction(fQuickAccessAction);
+		installQuickAccessAction();
 		
 		stats.endRun();
 	}
 
-	private RefactorActionGroup(IWorkbenchSite site, IKeyBindingService keyBindingService) {
+	private RefactorActionGroup(IWorkbenchSite site) {
 
 		final PerformanceStats stats= PerformanceStats.getStats(PERF_REFACTOR_ACTION_GROUP, this);
 		stats.startRun();
@@ -380,13 +381,17 @@ public class RefactorActionGroup extends ActionGroup {
 		fConvertAnonymousToNestedAction= new ConvertAnonymousToNestedAction(fSite);
 		initUpdatingAction(fConvertAnonymousToNestedAction, provider, selection, IJavaEditorActionDefinitionIds.CONVERT_ANONYMOUS_TO_NESTED);
 		
-		fKeyBindingService= keyBindingService;
-		if (fKeyBindingService != null) {
-			fQuickAccessAction= new RefactorQuickAccessAction(null);
-			fKeyBindingService.registerAction(fQuickAccessAction);
-		}
+		installQuickAccessAction();
 		
 		stats.endRun();
+	}
+	
+	private void installQuickAccessAction() {
+		fHandlerService= (IHandlerService)fSite.getService(IHandlerService.class);
+		if (fHandlerService != null) {
+			fQuickAccessAction= new RefactorQuickAccessAction(fEditor);
+			fQuickAccessHandlerActivation= fHandlerService.activateHandler(fQuickAccessAction.getActionDefinitionId(), new ActionHandler(fQuickAccessAction));
+		}
 	}
 	
 	private void initAction(SelectionDispatchAction action, ISelection selection, String actionDefinitionId){
@@ -487,8 +492,8 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fInferTypeArgumentsAction, provider);
 		disposeAction(fConvertLocalToFieldAction, provider);
 		disposeAction(fConvertAnonymousToNestedAction, provider);
-		if (fQuickAccessAction != null && fKeyBindingService != null) {
-			fKeyBindingService.unregisterAction(fQuickAccessAction);
+		if (fQuickAccessHandlerActivation != null && fHandlerService != null) {
+			fHandlerService.deactivateHandler(fQuickAccessHandlerActivation);
 		}
 		if (fUndoRedoActionGroup != null) {
 			fUndoRedoActionGroup.dispose();

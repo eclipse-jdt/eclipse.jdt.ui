@@ -18,6 +18,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -25,11 +26,12 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.AddBookmarkAction;
+import org.eclipse.ui.handlers.IHandlerActivation;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IUpdate;
@@ -141,8 +143,8 @@ public class GenerateActionGroup extends ActionGroup {
 	
 	private static final String QUICK_MENU_ID= "org.eclipse.jdt.ui.edit.text.java.source.quickMenu"; //$NON-NLS-1$
 	
-	private class RefactorQuickAccessAction extends JDTQuickMenuAction {
-		public RefactorQuickAccessAction(CompilationUnitEditor editor) {
+	private class SourceQuickAccessAction extends JDTQuickMenuAction {
+		public SourceQuickAccessAction(CompilationUnitEditor editor) {
 			super(editor, QUICK_MENU_ID); 
 		}
 		protected void fillMenu(IMenuManager menu) {
@@ -150,8 +152,9 @@ public class GenerateActionGroup extends ActionGroup {
 		}
 	}
 	
-	private RefactorQuickAccessAction fQuickAccessAction;
-	private IKeyBindingService fKeyBindingService;
+	private JDTQuickMenuAction fQuickAccessAction;
+	private IHandlerActivation fQuickAccessHandlerActivation;
+	private IHandlerService fHandlerService;
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
@@ -217,9 +220,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fExternalizeStrings.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTERNALIZE_STRINGS);
 		editor.setAction("ExternalizeStrings", fExternalizeStrings); //$NON-NLS-1$	
 				
-		fQuickAccessAction= new RefactorQuickAccessAction(editor);
-		fKeyBindingService= editor.getEditorSite().getKeyBindingService();
-		fKeyBindingService.registerAction(fQuickAccessAction);
+		installQuickAccessAction();
 	}
 	
 	/**
@@ -230,7 +231,7 @@ public class GenerateActionGroup extends ActionGroup {
 	 * @param page the page that owns this action group
 	 */
 	public GenerateActionGroup(Page page) {
-		this(page.getSite(), null);
+		this(page.getSite());
 	}
 
 	/**
@@ -241,10 +242,10 @@ public class GenerateActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public GenerateActionGroup(IViewPart part) {
-		this(part.getSite(), part.getSite().getKeyBindingService());
+		this(part.getSite());
 	}
 	
-	private GenerateActionGroup(IWorkbenchSite site, IKeyBindingService keyBindingService) {
+	private GenerateActionGroup(IWorkbenchSite site) {
 		fSite= site;
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();
@@ -334,10 +335,14 @@ public class GenerateActionGroup extends ActionGroup {
 		registerSelectionListener(provider, fAddTaskAction);
 		registerSelectionListener(provider, fCleanUp);
 		
-		fKeyBindingService= keyBindingService;
-		if (fKeyBindingService != null) {
-			fQuickAccessAction= new RefactorQuickAccessAction(null);
-			fKeyBindingService.registerAction(fQuickAccessAction);
+		installQuickAccessAction();
+	}
+	
+	private void installQuickAccessAction() {
+		fHandlerService= (IHandlerService)fSite.getService(IHandlerService.class);
+		if (fHandlerService != null) {
+			fQuickAccessAction= new SourceQuickAccessAction(fEditor);
+			fQuickAccessHandlerActivation= fHandlerService.activateHandler(fQuickAccessAction.getActionDefinitionId(), new ActionHandler(fQuickAccessAction));
 		}
 	}
 	
@@ -460,8 +465,8 @@ public class GenerateActionGroup extends ActionGroup {
 				provider.removeSelectionChangedListener(listener);
 			}
 		}
-		if (fQuickAccessAction != null && fKeyBindingService != null) {
-			fKeyBindingService.unregisterAction(fQuickAccessAction);
+		if (fQuickAccessHandlerActivation != null && fHandlerService != null) {
+			fHandlerService.deactivateHandler(fQuickAccessHandlerActivation);
 		}
 		fEditor= null;
 		super.dispose();
