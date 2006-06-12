@@ -97,7 +97,7 @@ public class InferTypeArgumentsTCModel {
 	
 	public InferTypeArgumentsTCModel() {
 		fTypeConstraints= new HashMap();
-		fConstraintVariables= new HashMap();
+		fConstraintVariables= new LinkedHashMap(); // make iteration independent of hashCode() implementation
 		fCastVariables= new ArrayList();
 		
 		fCuScopedConstraintVariables= new HashSet();
