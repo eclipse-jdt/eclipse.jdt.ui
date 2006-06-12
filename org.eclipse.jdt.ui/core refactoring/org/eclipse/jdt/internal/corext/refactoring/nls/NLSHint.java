@@ -11,10 +11,10 @@
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -128,7 +128,7 @@ public class NLSHint {
 	private AccessorClassReference createEclipseNLSLines(final IDocument document, CompilationUnit astRoot, List nlsLines) {
 		
 		final AccessorClassReference[] firstAccessor= new AccessorClassReference[1];
-		final Map lineToNLSLine= new HashMap();
+		final SortedMap lineToNLSLine= new TreeMap();
 		
 		astRoot.accept(new ASTVisitor() {
 			

@@ -852,8 +852,8 @@ public class NLSSourceModifierTest extends TestCase {
         
         assertEquals(
                 "public class Test {\n" +
-                "	private String str1=Accessor.key_0;\n" +
-                "	private String str2=Accessor.nls_0;\n" +
+                "	private String str1=Accessor.nls_0;\n" +
+                "	private String str2=Accessor.key_0;\n" +
                 "}\n",  
             	doc.get());
         
@@ -1026,8 +1026,8 @@ public class NLSSourceModifierTest extends TestCase {
         
         assertEquals(
                 "public class Test {\n" +
-                "	private String str1=Accessor.key_i;\n" +
-                "	private String str2=Accessor.key_g;\n" +
+                "	private String str1=Accessor.key_g;\n" +
+                "	private String str2=Accessor.key_i;\n" +
                 "	private String str3=Accessor.key_h;\n" +
                 "	private String str4=Accessor.key_a;\n" +
                 "	private String str5=Accessor.key_z;\n" +
