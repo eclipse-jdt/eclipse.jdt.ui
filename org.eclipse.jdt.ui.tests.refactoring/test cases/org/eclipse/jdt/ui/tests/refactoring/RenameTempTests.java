@@ -423,6 +423,16 @@ public class RenameTempTests extends RefactoringTest{
 		helper1("x");
 	}
 	
+	public void test62() throws Exception {
+//		printTestDisabledMessage("bug#47822");
+		helper1("xxx");
+	}
+	
+	public void test63() throws Exception {
+		// regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=144426
+		helper1("xxx");
+	}
+	
 // -----
 	public void testFail0() throws Exception{
 		if (BUG_checkDeclInNestedClass) {
@@ -557,10 +567,4 @@ public class RenameTempTests extends RefactoringTest{
 		helper2("j");
 	}
 
-	// no testFail29, testFail30, testFail31
-	
-	public void testFail32() throws Exception {
-//		printTestDisabledMessage("bug#47822");
-		failHelperNoElement(6, 19, 6, 20);
-	}
 }
