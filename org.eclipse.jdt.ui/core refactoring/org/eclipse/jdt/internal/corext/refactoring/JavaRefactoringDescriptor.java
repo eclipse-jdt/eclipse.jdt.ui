@@ -399,4 +399,16 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	public JavaRefactoringContribution getContribution() {
 		return fContribution;
 	}
+
+	/**
+	 * Converts the specified resource to an input handle.
+	 * 
+	 * @param resource
+	 *            the resource
+	 * @return a corresponding input handle
+	 */
+	public String resourceToHandle(final IResource resource) {
+		Assert.isNotNull(resource);
+		return resourceToHandle(getProject(), resource);
+	}
 }
