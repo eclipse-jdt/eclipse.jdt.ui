@@ -24,6 +24,10 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
@@ -73,7 +77,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_ADD_LIBRARY);
 		updateDescription(null);
 		fUsedPaths= new HashSet();
-		fProject= UserLibraryPreferencePage.getPlaceholderProject();
+		fProject= createPlaceholderProject();
 		
 		LibraryListAdapter adapter= new LibraryListAdapter();
 		String[] buttonLabels= new String[] {
@@ -85,6 +89,18 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		fEditResult= null;
 		updateStatus(validateSetting(Collections.EMPTY_LIST));
 	}
+    
+    private static IJavaProject createPlaceholderProject() {
+        String name= "####internal"; //$NON-NLS-1$
+        IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+        while (true) {
+            IProject project= root.getProject(name);
+            if (!project.exists()) {
+                return JavaCore.create(project);
+            }
+            name += '1';
+        }       
+    }
 
 	private void updateDescription(IClasspathEntry containerEntry) {
 		if (containerEntry == null || containerEntry.getPath().segmentCount() != 2) {

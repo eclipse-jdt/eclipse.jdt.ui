@@ -731,7 +731,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	 */
 	public UserLibraryPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		fDummyProject= getPlaceholderProject();
+		fDummyProject= createPlaceholderProject();
 	
 		// title only used when page is shown programatically
 		setTitle(PreferencesMessages.UserLibraryPreferencePage_title); 
@@ -777,7 +777,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		doSelectionChanged(fLibraryList); //update button enable state 
 	}
 	
-	public static IJavaProject getPlaceholderProject() {
+	private static IJavaProject createPlaceholderProject() {
 		String name= "####internal"; //$NON-NLS-1$
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		while (true) {
@@ -809,7 +809,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 					}
 				}
 				if (createIfNotExists) {
-					CPUserLibraryElement elem= new CPUserLibraryElement((String) selectedLibrary, null, getPlaceholderProject());
+					CPUserLibraryElement elem= new CPUserLibraryElement((String) selectedLibrary, null, createPlaceholderProject());
 					fLibraryList.addElement(elem);
 					fLibraryList.selectElements(new StructuredSelection(elem));
 				}
@@ -903,9 +903,6 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		
 		ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(JavaCore.USER_LIBRARY_CONTAINER_ID);
 		IJavaProject jproject= fDummyProject;
-		
-		IJavaProject[] projectInit= new IJavaProject[] { jproject };
-		IClasspathContainer[] containerInit= new IClasspathContainer[] { null };
 				
 		for (int i= 0; i < nExisting; i++) {
 			CPUserLibraryElement element= (CPUserLibraryElement) list.get(i);
@@ -914,8 +911,6 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				IClasspathContainer updatedContainer= element.getUpdatedContainer();
 				try {
 					initializer.requestClasspathContainerUpdate(path, jproject, updatedContainer);
-					containerInit[0]= updatedContainer;
-					JavaCore.setClasspathContainer(path, projectInit, containerInit, null); // force updating of containers, bug 62250 
 				} catch (CoreException e) {
 					multiStatus.add(e.getStatus());
 				}
@@ -923,7 +918,6 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			monitor.worked(1);
 		}
 		
-		containerInit[0]= null;
 		Iterator iter= oldNames.iterator();
 		while (iter.hasNext()) {
 			String name= (String) iter.next();
@@ -931,7 +925,6 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			IPath path= new Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append(name);
 			try {
 				initializer.requestClasspathContainerUpdate(path, jproject, null);
-				JavaCore.setClasspathContainer(path, projectInit, containerInit, null); // force updating of containers, bug 62250 
 			} catch (CoreException e) {
 				multiStatus.add(e.getStatus());
 			}
