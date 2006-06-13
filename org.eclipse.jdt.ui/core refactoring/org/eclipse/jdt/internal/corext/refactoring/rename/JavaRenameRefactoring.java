@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
  * 
  * @since 3.2
  */
-public class JavaRenameRefactoring extends RenameRefactoring implements IScriptableRefactoring {
+public final class JavaRenameRefactoring extends RenameRefactoring implements IScriptableRefactoring {
 
 	/**
 	 * Creates a new java rename refactoring.
@@ -42,7 +42,7 @@ public class JavaRenameRefactoring extends RenameRefactoring implements IScripta
 	/**
 	 * {@inheritDoc}
 	 */
-	public final RefactoringStatus initialize(final RefactoringArguments arguments) {
+	public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		Assert.isNotNull(arguments);
 		final RefactoringProcessor processor= getProcessor();
 		if (processor instanceof IScriptableRefactoring) {
