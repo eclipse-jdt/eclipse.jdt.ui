@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -603,8 +604,12 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			final Set set= new HashSet();
 			final Object[] elements= fJarPackage.getElements();
 			for (int index= 0; index < elements.length; index++) {
-				if (elements[index] instanceof IResource)
-					set.add(((IResource) elements[index]).getProject());
+				if (elements[index] instanceof IAdaptable) {
+					final IAdaptable adaptable= (IAdaptable) elements[index];
+					final IResource resource= (IResource) adaptable.getAdapter(IResource.class);
+					if (resource != null)
+						set.add(resource.getProject());
+				}
 			}
 			try {
 				getContainer().run(false, true, new IRunnableWithProgress() {
