@@ -44,10 +44,12 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 
 public class NLSSearchResult extends AbstractTextSearchResult implements IEditorMatchAdapter, IFileMatchAdapter {
+
+	private static final Match[] NO_MATCHES= new Match[0];
+
 	/*
 	 * Element (group key) is always IJavaElement or FileEntry.
 	 */
-	
 	private NLSSearchQuery fQuery;
 	private final List fFileEntryGroups;
 	private final List fCompilationUnitGroups;
@@ -81,7 +83,7 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 			collectMatches(matches, classFileEditorInput.getClassFile());
 			return (Match[]) matches.toArray(new Match[matches.size()]);
 		}
-		return null;
+		return NO_MATCHES;
 	}
 
 	/*
@@ -107,7 +109,7 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
-			return null;
+			return NO_MATCHES;
 		}
 		
 		//TODO: copied from JavaSearchResult:
