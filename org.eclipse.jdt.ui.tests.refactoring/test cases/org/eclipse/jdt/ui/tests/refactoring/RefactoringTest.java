@@ -98,6 +98,10 @@ public abstract class RefactoringTest extends TestCase {
 		performDummySearch(getPackageP());
 	}	
 
+	/**
+	 * Removes contents of {@link #getPackageP()} and {@link #getRoot()} (except for p).
+	 * @throws Exception 
+	 */
 	protected void tearDown() throws Exception {
 		refreshFromLocal();	
 		performDummySearch();

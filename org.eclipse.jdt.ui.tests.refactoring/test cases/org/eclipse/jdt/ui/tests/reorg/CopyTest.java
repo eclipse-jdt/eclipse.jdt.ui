@@ -2928,7 +2928,8 @@ public class CopyTest extends RefactoringTest {
 		} finally{
 			performDummySearch();
 			folder.delete(true, new NullProgressMonitor());			
-			newFolder.delete(true, new NullProgressMonitor());			
+			if (newFolder != null)
+					newFolder.delete(true, new NullProgressMonitor());			
 		}
 	}
 
@@ -2972,6 +2973,7 @@ public class CopyTest extends RefactoringTest {
 		IFolder folder= superFolder.getFolder(folderName);
 		folder.create(true, true, null);
 
+		IPackageFragmentRoot rootCopy= null;
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
@@ -2985,11 +2987,20 @@ public class CopyTest extends RefactoringTest {
 			assertEquals(null, status);
 			
 			assertTrue("source does not exist after copying", folder.exists());
-			
 			assertTrue("copied folder does not exist after copying", RefactoringTestSetup.getProject().getProject().getFolder(folderName).exists());
+			
+			IFolder folderCopy= superFolder.getFolder(MockNewNameQueries.NEW_PACKAGE_FRAGMENT_ROOT_NAME);
+			rootCopy= RefactoringTestSetup.getProject().getPackageFragmentRoot(folderCopy);
+			assertTrue("copy does not exist after copying", folderCopy.exists());
+			assertTrue("copy package fragment root does not exist after copying", rootCopy.exists());
+			
 		} finally{
 			performDummySearch();
-			folder.delete(true, new NullProgressMonitor());			
+			folder.delete(true, new NullProgressMonitor());
+			if (rootCopy != null) {
+				rootCopy.delete(IResource.FORCE, IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH, null);
+			}
+			
 		}
 	}
 

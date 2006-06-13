@@ -209,12 +209,20 @@ public class TestRunListenerTest extends TestCase {
 			"	protected int fValue1;\n" + 
 			"	protected int fValue2;\n" + 
 			"\n" + 
+			"	public ATestCase(String name) {\n" + 
+			"		super(name);\n" + 
+			"	}\n" + 
 			"	protected void setUp() {\n" + 
 			"		fValue1= 2;\n" + 
 			"		fValue2= 3;\n" + 
 			"	}\n" + 
 			"	public static Test suite() {\n" + 
-			"		return new TestSuite(ATestCase.class);\n" + 
+			"		// ensure ordering:\n" + 
+			"		TestSuite result= new TestSuite(\"ATestCase\");\n" +
+			"		result.addTest(new ATestCase(\"testAdd\"));\n" + 
+			"		result.addTest(new ATestCase(\"testDivideByZero\"));\n" + 
+			"		result.addTest(new ATestCase(\"testEquals\"));\n" + 
+			"		return result;\n" + 
 			"	}\n" + 
 			"	public void testAdd() {\n" + 
 			"		double result= fValue1 + fValue2;\n" + 
