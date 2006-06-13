@@ -329,6 +329,7 @@ public final class JarImportWizardPage extends WizardPage {
 		data.setRefactoringHistory(null);
 		data.setRefactoringFileLocation(null);
 		setErrorMessage(null);
+		setMessage(null, NONE);
 		setPageComplete(true);
 		handleJarFileChanged();
 		if (isPageComplete())
