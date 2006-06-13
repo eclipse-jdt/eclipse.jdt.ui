@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 /**
  * Query that can be used when manipulating package fragment roots.
  * Depending on the context, <code>confirmManipulation</code> can be used to
- * determine wheter, for example, the package fragment root is to be deleted or
+ * determine whether, for example, the package fragment root is to be deleted or
  * not or if the classpath of the referencing projects is to be updated.
  */
 public interface IPackageFragmentRootManipulationQuery {
