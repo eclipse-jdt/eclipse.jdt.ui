@@ -36,7 +36,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.UserLibraryPreferencePage;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 /**
@@ -229,8 +228,6 @@ public class BuildPathSupport {
 		ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerPath.segment(0));
 		if (initializer != null) {
 			initializer.requestClasspathContainerUpdate(containerPath, jproject, updatedContainer);
-			initializer.requestClasspathContainerUpdate(containerPath, UserLibraryPreferencePage.getPlaceholderProject(), updatedContainer);
-			JavaCore.setClasspathContainer(containerPath, new IJavaProject[] {jproject, UserLibraryPreferencePage.getPlaceholderProject()}, new IClasspathContainer[] {updatedContainer, updatedContainer}, null); // force updating of containers, bug 62250 
 		}
 	}
 
