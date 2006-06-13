@@ -15,7 +15,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaElement;
 
 public interface IReorgDestinationValidator {
-	//TODO: Do we need this interface? Or should IReorgPolicy be public and available from JavaMoveProcessor and CopyRefactoring?
+
 	public boolean canChildrenBeDestinations(IResource resource);
 	public boolean canChildrenBeDestinations(IJavaElement javaElement);
 	public boolean canElementBeDestination(IResource resource);
