@@ -155,14 +155,14 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		return fType;
 	}
 
-	private boolean asBoolean(String string, boolean defaultValue) {
+	protected boolean asBoolean(String string, boolean defaultValue) {
 		if (string != null) {
 			return StringConverter.asBoolean(string, defaultValue);
 		}
 		return defaultValue;
 	}
 
-	private int asInt(String string, int defaultValue) {
+	protected int asInt(String string, int defaultValue) {
 		if (string != null) {
 			return StringConverter.asInt(string, defaultValue);
 		}
@@ -632,5 +632,9 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 			return ((ISourceReference) elementPosition).getSourceRange().getOffset();
 		}
 		return -1;
+	}
+
+	protected IDialogSettings getDialogSettings() {
+		return fSettings;
 	}
 }

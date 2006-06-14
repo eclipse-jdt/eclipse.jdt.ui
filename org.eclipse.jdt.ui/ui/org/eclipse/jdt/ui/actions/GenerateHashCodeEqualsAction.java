@@ -348,7 +348,7 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 				target.beginCompoundChange();
 			try {
 				final GenerateHashCodeEqualsOperation operation= new GenerateHashCodeEqualsOperation(fTypeBinding, selectedBindings, fUnit, dialog
-						.getElementPosition(), settings, regenerate, true, false);
+						.getElementPosition(), settings, dialog.isUseInstanceOf(), regenerate, true, false);
 				IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 				if (context == null)
 					context= new BusyIndicatorRunnableContext();

@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -212,6 +213,9 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	/** The primitive types to generate custom hashCode() methods for */
 	private Set fCustomHashCodeTypes= new HashSet();
 
+	/** <code>true</code> to use 'instanceof' to compare types, <code>false</code> otherwise */
+	private final boolean fUseInstanceOf;
+
 	/**
 	 * Creates a new add hash code equals operation.
 	 * 
@@ -220,6 +224,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	 * @param unit the compilation unit ast node
 	 * @param insert the insertion point, or <code>null</code>
 	 * @param settings the code generation settings to use
+	 * @param useInstanceof <code>true</code> to use 'instanceof' to compare types, <code>false</code> otherwise
 	 * @param force <code>true</code> to force the regeneration of existing methods,
 	 *            <code>false</code> otherwise
 	 * @param apply <code>true</code> if the resulting edit should be applied,
@@ -228,7 +233,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	 *            saved, <code>false</code> otherwise
 	 */
 	public GenerateHashCodeEqualsOperation(final ITypeBinding type, final IVariableBinding[] fields, final CompilationUnit unit,
-			final IJavaElement insert, final CodeGenerationSettings settings, final boolean force, final boolean apply, final boolean save) {
+			final IJavaElement insert, final CodeGenerationSettings settings, final boolean useInstanceof, final boolean force, final boolean apply, final boolean save) {
 		Assert.isNotNull(type);
 		Assert.isNotNull(fields);
 		Assert.isNotNull(unit);
@@ -238,6 +243,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		fUnit= unit;
 		fFields= fields;
 		fSettings= settings;
+		fUseInstanceOf= useInstanceof;
 		fSave= save;
 		fApply= apply;
 		fDoubleCount= 0;
@@ -818,16 +824,33 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			body.statements().add(superEqualsIf);
 		}
 
-		// if (getClass() != obj.getClass()) return false;
-		MethodInvocation thisClass= fAst.newMethodInvocation();
-		thisClass.setName(fAst.newSimpleName(METHODNAME_GETCLASS));
+		if (fUseInstanceOf) {
+			// if (!(obj instanceof Type)) return false;
+			InstanceofExpression expression= fAst.newInstanceofExpression();
+			expression.setLeftOperand(fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM));
+			expression.setRightOperand(fRewrite.getImportRewrite().addImport(fType, fAst));
 
-		MethodInvocation objGetClass= fAst.newMethodInvocation();
-		objGetClass.setExpression(fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM));
-		objGetClass.setName(fAst.newSimpleName(METHODNAME_GETCLASS));
+			PrefixExpression notExpression= fAst.newPrefixExpression();
+			notExpression.setOperator(org.eclipse.jdt.core.dom.PrefixExpression.Operator.NOT);
+			
+			ParenthesizedExpression parenthesizedExpression= fAst.newParenthesizedExpression();
+			parenthesizedExpression.setExpression(expression);
+			
+			notExpression.setOperand(parenthesizedExpression);
 
-		body.statements().add(createReturningIfStatement(thisClass, objGetClass, Operator.NOT_EQUALS, false));
+			body.statements().add(createReturningIfStatement(false, notExpression));
+		} else {
+			// if (getClass() != obj.getClass()) return false;
+			MethodInvocation thisClass= fAst.newMethodInvocation();
+			thisClass.setName(fAst.newSimpleName(METHODNAME_GETCLASS));
 
+			MethodInvocation objGetClass= fAst.newMethodInvocation();
+			objGetClass.setExpression(fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM));
+			objGetClass.setName(fAst.newSimpleName(METHODNAME_GETCLASS));
+
+			body.statements().add(createReturningIfStatement(thisClass, objGetClass, Operator.NOT_EQUALS, false));
+		}
+		
 		// Type other= (Type) obj;
 		VariableDeclarationFragment sd= fAst.newVariableDeclarationFragment();
 		sd.setName(fAst.newSimpleName(VARIABLE_NAME_EQUALS_CASTED));
@@ -965,11 +988,15 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		newCondition.setOperator(operator);
 		newCondition.setLeftOperand(left);
 		newCondition.setRightOperand(right);
+		return createReturningIfStatement(whatToReturn, newCondition);
+	}
+
+	private Statement createReturningIfStatement(boolean result, Expression condition) {
 		IfStatement firstIf= fAst.newIfStatement();
-		firstIf.setExpression(newCondition);
+		firstIf.setExpression(condition);
 
 		ReturnStatement returner= fAst.newReturnStatement();
-		returner.setExpression(fAst.newBooleanLiteral(whatToReturn));
+		returner.setExpression(fAst.newBooleanLiteral(result));
 		firstIf.setThenStatement(returner);
 		return firstIf;
 	}

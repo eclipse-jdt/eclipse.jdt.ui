@@ -12,6 +12,12 @@ package org.eclipse.jdt.internal.ui.dialogs;
 
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -52,8 +58,15 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 			this.fBindings= allFields;
 		}
 
+		public void dispose() {
+		}
+
 		public Object[] getChildren(Object parentElement) {
 			return new Object[0];
+		}
+
+		public Object[] getElements(Object inputElement) {
+			return fBindings;
 		}
 
 		public Object getParent(Object element) {
@@ -62,13 +75,6 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 
 		public boolean hasChildren(Object element) {
 			return false;
-		}
-
-		public Object[] getElements(Object inputElement) {
-			return fBindings;
-		}
-
-		public void dispose() {
 		}
 
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -99,13 +105,15 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 			if (count == 0)
 				return new StatusInfo(IStatus.ERROR, JavaUIMessages.GenerateHashCodeEqualsDialog_select_at_least_one_field);
 
-			return new StatusInfo(IStatus.INFO, Messages.format(JavaUIMessages.GenerateHashCodeEqualsDialog_selectioninfo_more, new String[] {
-					String.valueOf(count), String.valueOf(fNumFields) }));
+			return new StatusInfo(IStatus.INFO, Messages.format(JavaUIMessages.GenerateHashCodeEqualsDialog_selectioninfo_more, new String[] { String.valueOf(count), String.valueOf(fNumFields)}));
 		}
 	}
 
-	public GenerateHashCodeEqualsDialog(Shell shell, CompilationUnitEditor editor, IType type, IVariableBinding[] allFields,
-			IVariableBinding[] selectedFields) throws JavaModelException {
+	private static final String SETTINGS_INSTANCEOF= "InstanceOf"; //$NON-NLS-1$
+
+	private boolean fUseInstanceOf;
+
+	public GenerateHashCodeEqualsDialog(Shell shell, CompilationUnitEditor editor, IType type, IVariableBinding[] allFields, IVariableBinding[] selectedFields) throws JavaModelException {
 		super(shell, new BindingLabelProvider(), new GenerateHashCodeEqualsContentProvider(allFields), editor, type, false);
 		setEmptyListMessage(JavaUIMessages.GenerateHashCodeEqualsDialog_no_entries);
 
@@ -116,6 +124,16 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 		setValidator(new GenerateHashCodeEqualsValidator(allFields.length));
 		setSize(60, 18);
 		setInput(new Object());
+
+		fUseInstanceOf= asBoolean(getDialogSettings().get(SETTINGS_INSTANCEOF), false);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean close() {
+		getDialogSettings().put(SETTINGS_INSTANCEOF, fUseInstanceOf);
+		return super.close();
 	}
 
 	protected void configureShell(Shell shell) {
@@ -123,4 +141,34 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.GENERATE_HASHCODE_EQUALS_SELECTION_DIALOG);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	protected Composite createCommentSelection(final Composite parent) {
+		final Composite composite= super.createCommentSelection(parent);
+
+		Button button= new Button(composite, SWT.CHECK);
+		button.setText(JavaUIMessages.GenerateHashCodeEqualsDialog_instanceof_button);
+
+		button.addSelectionListener(new SelectionAdapter() {
+
+			public void widgetSelected(SelectionEvent event) {
+				setUseInstanceOf((((Button) event.widget).getSelection()));
+			}
+		});
+		button.setSelection(isUseInstanceOf());
+		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		data.horizontalSpan= 2;
+		button.setLayoutData(data);
+
+		return composite;
+	}
+
+	public boolean isUseInstanceOf() {
+		return fUseInstanceOf;
+	}
+
+	public void setUseInstanceOf(boolean use) {
+		fUseInstanceOf= use;
+	}
 }
