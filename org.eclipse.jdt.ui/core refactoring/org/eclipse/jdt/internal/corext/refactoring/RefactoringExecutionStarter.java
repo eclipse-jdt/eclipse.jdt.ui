@@ -170,7 +170,7 @@ public final class RefactoringExecutionStarter {
 			return;
 		final UserInterfaceStarter starter= new UserInterfaceStarter() {
 
-			public final void activate(final Refactoring ref, final Shell parent, final boolean save) throws CoreException {
+			public final boolean activate(final Refactoring ref, final Shell parent, final boolean save) throws CoreException {
 				final RefactoringStatus status= ref.checkInitialConditions(new NullProgressMonitor());
 				if (status.hasFatalError()) {
 					final RefactoringStatusEntry entry= status.getEntryMatchingSeverity(RefactoringStatus.FATAL);
@@ -193,10 +193,10 @@ public final class RefactoringExecutionStarter {
 							}
 							action.setEnabled(wasEnabled);
 						}
-						return;
+						return false;
 					}
 				}
-				super.activate(ref, parent, save);
+				return super.activate(ref, parent, save);
 			}
 		};
 		starter.initialize(new ChangeSignatureWizard(refactoring));

@@ -31,18 +31,22 @@ public class RefactoringStarter {
 	private RefactoringSaveHelper fSaveHelper= new RefactoringSaveHelper();
 	private RefactoringStatus fStatus;
 
-	public void activate(Refactoring refactoring, RefactoringWizard wizard, Shell parent, String dialogTitle, boolean mustSaveEditors) throws JavaModelException {
+	public boolean activate(Refactoring refactoring, RefactoringWizard wizard, Shell parent, String dialogTitle, boolean mustSaveEditors) throws JavaModelException {
 		if (! canActivate(mustSaveEditors, parent))
-			return;
+			return false;
 
 		try {
 			RefactoringWizardOpenOperation op= new RefactoringWizardOpenOperation(wizard);
 			int result= op.run(parent, dialogTitle);
 			fStatus= op.getInitialConditionCheckingStatus();
-			if (result == IDialogConstants.CANCEL_ID || result == RefactoringWizardOpenOperation.INITIAL_CONDITION_CHECKING_FAILED)
+			if (result == IDialogConstants.CANCEL_ID || result == RefactoringWizardOpenOperation.INITIAL_CONDITION_CHECKING_FAILED) {
 				fSaveHelper.triggerBuild();
+				return false;
+			} else {
+				return true;
+			}
 		} catch (InterruptedException e) {
-			// do nothing. User action got cancelled
+			return false; // User action got cancelled
 		}
 	}
 	

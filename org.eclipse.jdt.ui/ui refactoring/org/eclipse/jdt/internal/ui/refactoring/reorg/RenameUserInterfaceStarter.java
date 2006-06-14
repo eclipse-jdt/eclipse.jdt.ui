@@ -144,17 +144,18 @@ public class RenameUserInterfaceStarter extends UserInterfaceStarter {
 		}
 	}
 	
-	public void activate(Refactoring refactoring, Shell parent, boolean save) throws CoreException {
+	public boolean activate(Refactoring refactoring, Shell parent, boolean save) throws CoreException {
 		RenameProcessor processor= (RenameProcessor)refactoring.getAdapter(RenameProcessor.class);
 		Object[] elements= processor.getElements();
 		SelectionState state= elements.length == 1 ? new SelectionState(elements[0]) : null;
-		super.activate(refactoring, parent, save);
+		boolean executed= super.activate(refactoring, parent, save);
 		INameUpdating nameUpdating= (INameUpdating)refactoring.getAdapter(INameUpdating.class);
-		if (nameUpdating != null && state != null) {
+		if (executed && nameUpdating != null && state != null) {
 			Object newElement= nameUpdating.getNewElement();
 			if (newElement != null) {
 				state.restore(newElement);
 			}			
 		}
+		return executed;
 	}
 }
