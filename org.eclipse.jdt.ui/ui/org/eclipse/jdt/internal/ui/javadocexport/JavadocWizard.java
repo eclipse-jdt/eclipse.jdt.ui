@@ -31,8 +31,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -232,13 +230,12 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 	private void setAllJavadocLocations(IJavaProject[] projects, URL newURL) {
 		Shell shell= getShell();
-		Image image= shell == null ? null : shell.getDisplay().getSystemImage(SWT.ICON_QUESTION);
 		String[] buttonlabels= new String[] { IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.NO_TO_ALL_LABEL };
 
 		for (int j= 0; j < projects.length; j++) {
 			IJavaProject iJavaProject= projects[j];
 			String message= Messages.format(JavadocExportMessages.JavadocWizard_updatejavadoclocation_message, new String[] { iJavaProject.getElementName(), fDestination.toOSString()}); 
-			MessageDialog dialog= new MessageDialog(shell, JavadocExportMessages.JavadocWizard_updatejavadocdialog_label, image, message, 4, buttonlabels, 1);
+			MessageDialog dialog= new MessageDialog(shell, JavadocExportMessages.JavadocWizard_updatejavadocdialog_label, null, message, MessageDialog.QUESTION, buttonlabels, 1);
 
 			switch (dialog.open()) {
 				case YES :
