@@ -291,7 +291,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	 * @since 3.2
 	 */
 	protected String getBackgroundColorKey() {
-		return "org.eclipse.jdt.ui.DeclarationsView.backgroundColor";		 //$NON-NLS-1$
+		return "org.eclipse.jdt.ui.DeclarationView.backgroundColor";		 //$NON-NLS-1$
 	}
 	
 	/**
