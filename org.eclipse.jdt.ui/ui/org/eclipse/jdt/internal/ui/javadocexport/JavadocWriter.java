@@ -48,9 +48,10 @@ public class JavadocWriter {
 	
 	private static final char PATH_SEPARATOR= '/'; // use forward slash for all platforms
 	
-	private OutputStream fOutputStream;
-	private IJavaProject[] fJavaProjects;
-	private IPath fBasePath;
+	private final OutputStream fOutputStream;
+	private final IJavaProject[] fJavaProjects;
+	private final IPath fBasePath;
+	private final String fEncoding;
 
 	/**
 	 * Create a JavadocWriter on the given output stream.
@@ -58,9 +59,11 @@ public class JavadocWriter {
 	 * @param basePath The base path to which all path will be made relative (if
 	 * possible). If <code>null</code>, paths are not made relative.
 	 */
-	public JavadocWriter(OutputStream outputStream, IPath basePath, IJavaProject[] projects) {
+	public JavadocWriter(OutputStream outputStream, String encoding, IPath basePath, IJavaProject[] projects) {
 		Assert.isNotNull(outputStream);
+		Assert.isNotNull(encoding);
 		fOutputStream= new BufferedOutputStream(outputStream);
+		fEncoding= encoding;
 		fBasePath= basePath;
 		fJavaProjects= projects;
 	}
@@ -95,7 +98,7 @@ public class JavadocWriter {
 		// Write the document to the stream
 		Transformer transformer=TransformerFactory.newInstance().newTransformer();
 		transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
-		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
+		transformer.setOutputProperty(OutputKeys.ENCODING, fEncoding);
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
 		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount","4"); //$NON-NLS-1$ //$NON-NLS-2$
 		DOMSource source = new DOMSource(document);

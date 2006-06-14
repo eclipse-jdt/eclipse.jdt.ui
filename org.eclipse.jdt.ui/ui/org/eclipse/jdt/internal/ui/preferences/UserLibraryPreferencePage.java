@@ -45,6 +45,7 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -439,32 +440,49 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 						return;
 					}
 				}
-				final List elements= fExportImportList.getCheckedElements();
-
-				IRunnableContext context= PlatformUI.getWorkbench().getProgressService();
 				try {
-					context.run(true, true, new IRunnableWithProgress() {
-						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-							try {
-								saveLibraries(elements, file, monitor);
-							} catch (IOException e) {
-								throw new InvocationTargetException(e);
-							}
+					String encoding= "UTF-8"; //$NON-NLS-1$
+					IPath filePath= Path.fromOSString(file.getCanonicalPath());
+					final IPath workspacePath= ResourcesPlugin.getWorkspace().getRoot().getLocation();
+					if (filePath.matchingFirstSegments(workspacePath) == workspacePath.segmentCount()) {
+						IPath path= filePath.removeFirstSegments(workspacePath.segmentCount());
+						path= path.makeRelative();
+						final IFile result= ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+						try {
+							encoding= result.getCharset(true);
+						} catch (CoreException exception) {
+							JavaPlugin.log(exception);
 						}
-					});
-					fSettings.put(PREF_LASTPATH, file.getPath());
-				} catch (InvocationTargetException e) {
-					String errorTitle= PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_save_errordialog_title; 
-					String errorMessage= Messages.format(PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_save_errordialog_message, e.getMessage()); 
-					ExceptionHandler.handle(e, getShell(), errorTitle, errorMessage);
-					return;
-				} catch (InterruptedException e) {
-					// cancelled
-					return;
+					}
+					final List elements= fExportImportList.getCheckedElements();
+					final String charset= encoding;
+					IRunnableContext context= PlatformUI.getWorkbench().getProgressService();
+					try {
+						context.run(true, true, new IRunnableWithProgress() {
+							public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+								try {
+									saveLibraries(elements, file, charset, monitor);
+								} catch (IOException e) {
+									throw new InvocationTargetException(e);
+								}
+							}
+						});
+						fSettings.put(PREF_LASTPATH, file.getPath());
+					} catch (InvocationTargetException e) {
+						String errorTitle= PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_save_errordialog_title; 
+						String errorMessage= Messages.format(PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_save_errordialog_message, e.getMessage()); 
+						ExceptionHandler.handle(e, getShell(), errorTitle, errorMessage);
+						return;
+					} catch (InterruptedException e) {
+						// cancelled
+						return;
+					}
+					String savedTitle= PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_save_ok_title; 
+					String savedMessage= PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_save_ok_message; 
+					MessageDialog.openInformation(getShell(), savedTitle, savedMessage);
+				} catch (IOException exception) {
+					JavaPlugin.log(exception);
 				}
-				String savedTitle= PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_save_ok_title; 
-				String savedMessage= PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_save_ok_message; 
-				MessageDialog.openInformation(getShell(), savedTitle, savedMessage);
 			} else {
 				HashSet map= new HashSet(fExistingLibraries.size());
 				for (int k= 0; k < fExistingLibraries.size(); k++) {
@@ -533,7 +551,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			return new StatusInfo();
 		}
 		
-		protected static void saveLibraries(List libraries, File file, IProgressMonitor monitor) throws IOException {
+		protected static void saveLibraries(List libraries, File file, String encoding, IProgressMonitor monitor) throws IOException {
 			OutputStream stream= new FileOutputStream(file);
 			try {
 				DocumentBuilder docBuilder= null;
@@ -595,7 +613,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				// Write the document to the stream
 				Transformer transformer=TransformerFactory.newInstance().newTransformer();
 				transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
-				transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
+				transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
 				transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
 				transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount","4"); //$NON-NLS-1$ //$NON-NLS-2$
 

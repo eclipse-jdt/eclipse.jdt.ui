@@ -988,12 +988,18 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		if (fJarPackage.isManifestReused())
 			fJarPackage.setGenerateManifest(false);
 		ByteArrayOutputStream objectStreamOutput= new ByteArrayOutputStream();
-		IJarDescriptionWriter writer= fJarPackage.createJarDescriptionWriter(objectStreamOutput);
+		IFile descriptionFile= fJarPackage.getDescriptionFile();
+		String encoding= "UTF-8"; //$NON-NLS-1$
+		try {
+			encoding= descriptionFile.getCharset(true);
+		} catch (CoreException exception) {
+			JavaPlugin.log(exception);
+		}
+		IJarDescriptionWriter writer= fJarPackage.createJarDescriptionWriter(objectStreamOutput, encoding);
 		ByteArrayInputStream fileInput= null;
 		try {
 			writer.write(fJarPackage);
 			fileInput= new ByteArrayInputStream(objectStreamOutput.toByteArray());
-			IFile descriptionFile= fJarPackage.getDescriptionFile();
 			if (descriptionFile.isAccessible()) {
 				if (fJarPackage.allowOverwrite() || JarPackagerUtil.askForOverwritePermission(fParentShell, descriptionFile.getFullPath().toString()))
 					descriptionFile.setContents(fileInput, true, true, null);

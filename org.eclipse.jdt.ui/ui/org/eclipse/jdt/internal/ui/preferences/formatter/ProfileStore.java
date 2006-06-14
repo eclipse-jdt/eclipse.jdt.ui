@@ -71,7 +71,10 @@ import org.xml.sax.helpers.DefaultHandler;
 
 
 public class ProfileStore {
-	
+
+	/** The default encoding to use */
+	public static final String ENCODING= "UTF-8"; //$NON-NLS-1$
+
 	/**
 	 * A SAX event handler to parse the xml format for profiles. 
 	 */
@@ -168,10 +171,10 @@ public class ProfileStore {
 	public static void writeProfiles(Collection profiles, IScopeContext instanceScope) throws CoreException {
 		ByteArrayOutputStream stream= new ByteArrayOutputStream(2000);
 		try {
-			writeProfilesToStream(profiles, stream);
+			writeProfilesToStream(profiles, stream, ENCODING);
 			String val;
 			try {
-				val= stream.toString("UTF-8"); //$NON-NLS-1$
+				val= stream.toString(ENCODING);
 			} catch (UnsupportedEncodingException e) {
 				val= stream.toString(); 
 			}
@@ -188,7 +191,7 @@ public class ProfileStore {
 		if (string != null && string.length() > 0) {
 			byte[] bytes;
 			try {
-				bytes= string.getBytes("UTF-8"); //$NON-NLS-1$
+				bytes= string.getBytes(ENCODING);
 			} catch (UnsupportedEncodingException e) {
 				bytes= string.getBytes();
 			}
@@ -294,16 +297,17 @@ public class ProfileStore {
 	 * Write the available profiles to the internal XML file.
 	 * @param profiles List of <code>CustomProfile</code>
 	 * @param file File to write
+	 * @param encoding the encoding to use
 	 * @throws CoreException
 	 */
-	public static void writeProfilesToFile(Collection profiles, File file) throws CoreException {
-		final OutputStream writer;
+	public static void writeProfilesToFile(Collection profiles, File file, String encoding) throws CoreException {
+		final OutputStream stream;
 		try {
-			writer= new FileOutputStream(file);
+			stream= new FileOutputStream(file);
 			try {
-				writeProfilesToStream(profiles, writer);
+				writeProfilesToStream(profiles, stream, encoding);
 			} finally {
-				try { writer.close(); } catch (IOException e) { /* ignore */ }
+				try { stream.close(); } catch (IOException e) { /* ignore */ }
 			}
 		} catch (IOException e) {
 			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_serializing_xml_message);  
@@ -312,11 +316,12 @@ public class ProfileStore {
 	
 	/**
 	 * Save profiles to an XML stream
-	 * @param profiles List of <code>CustomProfile</code>
-	 * @param stream Stream to write
+	 * @param profiles the list of <code>CustomProfile</code>
+	 * @param stream the stream to write to
+	 * @param encoding the encoding to use
 	 * @throws CoreException
 	 */
-	private static void writeProfilesToStream(Collection profiles, OutputStream stream) throws CoreException {
+	private static void writeProfilesToStream(Collection profiles, OutputStream stream, String encoding) throws CoreException {
 
 		try {
 			final DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
@@ -338,7 +343,7 @@ public class ProfileStore {
 
 			Transformer transformer=TransformerFactory.newInstance().newTransformer();
 			transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
-			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
+			transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
 			transformer.transform(new DOMSource(document), new StreamResult(stream));
 		} catch (TransformerException e) {

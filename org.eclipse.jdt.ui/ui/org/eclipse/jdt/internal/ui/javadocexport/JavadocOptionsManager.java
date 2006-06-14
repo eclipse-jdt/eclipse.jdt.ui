@@ -29,6 +29,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.content.IContentType;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -823,24 +825,27 @@ public class JavadocOptionsManager {
 		FileOutputStream objectStreamOutput= null;
 		//@change
 		//for now only writing ant files for single project selection
-		String antpath= fAntpath;
 		try {
-			if (antpath.length() > 0) {
-				File file= new File(antpath);
+			if (fAntpath.length() > 0) {
+				File file= new File(fAntpath);
 
-				IPath antPath= Path.fromOSString(antpath);
-				IPath antDir= antPath.removeLastSegments(1);
+				String encoding= "UTF-8"; //$NON-NLS-1$
+				IContentType type= Platform.getContentTypeManager().getContentType("org.eclipse.ant.core.antBuildFile"); //$NON-NLS-1$
+				if (type != null)
+					encoding= type.getDefaultCharset();
+				IPath filePath= Path.fromOSString(fAntpath);
+				IPath directoryPath= filePath.removeLastSegments(1);
 				
 				IPath basePath= null;
 				IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-				if (root.findFilesForLocation(antPath).length > 0) {
-					basePath= antDir; // only do relative path if ant file is stored in the workspace
+				if (root.findFilesForLocation(filePath).length > 0) {
+					basePath= directoryPath; // only do relative path if ant file is stored in the workspace
 				}
 				
-				antDir.toFile().mkdirs();
+				directoryPath.toFile().mkdirs();
 			
 				objectStreamOutput= new FileOutputStream(file);
-				JavadocWriter writer= new JavadocWriter(objectStreamOutput, basePath, projects);
+				JavadocWriter writer= new JavadocWriter(objectStreamOutput, encoding, basePath, projects);
 				writer.writeXML(this);
 				return file;
 			}

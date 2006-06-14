@@ -914,11 +914,27 @@ public class JarPackageData {
 	 * </p>
 	 * @param outputStream	the output stream to write to
 	 * @return a JarWriter
+	 * @deprecated Use {@link #createJarDescriptionWriter(OutputStream, String)} instead
 	 */
 	public IJarDescriptionWriter createJarDescriptionWriter(OutputStream outputStream) {
-		return new JarPackageWriter(outputStream);
+		return new JarPackageWriter(outputStream, "UTF-8"); //$NON-NLS-1$
 	}
-	
+
+	/**
+	 * Creates and returns a JAR package data description writer
+	 * for this JAR package data object.
+	 * <p>
+     * It is the client's responsibility to close this writer.
+	 * </p>
+	 * @param outputStream	the output stream to write to
+	 * @param encoding the encoding to use
+	 * @return a JarWriter
+     * @since 3.3
+	 */
+	public IJarDescriptionWriter createJarDescriptionWriter(OutputStream outputStream, String encoding) {
+		return new JarPackageWriter(outputStream, encoding);
+	}
+
 	/**
 	 * Creates and returns a JAR package data description reader
 	 * for this JAR package data object.

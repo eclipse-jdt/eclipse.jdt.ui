@@ -58,15 +58,17 @@ import org.w3c.dom.Element;
  */
 public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 	
-	protected OutputStream fOutputStream;
+	private final OutputStream fOutputStream;
+	private final String fEncoding;
 	
 	/**
 	 * Create a JarPackageWriter on the given output stream.
 	 * It is the clients responsibility to close the output stream.
 	 */
-	public JarPackageWriter(OutputStream outputStream) {
+	public JarPackageWriter(OutputStream outputStream, String encoding) {
 		Assert.isNotNull(outputStream);
 		fOutputStream= new BufferedOutputStream(outputStream);
+		fEncoding= encoding;
 	}
 	
 	public void write(JarPackageData jarPackage) throws CoreException {
@@ -111,7 +113,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 			// Write the document to the stream
 			Transformer transformer=TransformerFactory.newInstance().newTransformer();
 			transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
-			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
+			transformer.setOutputProperty(OutputKeys.ENCODING, fEncoding);
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
 			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount","4"); //$NON-NLS-1$ //$NON-NLS-2$
 			DOMSource source = new DOMSource(document);

@@ -19,6 +19,8 @@ import java.util.Observable;
 import java.util.Observer;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
@@ -244,15 +246,17 @@ public class CodeFormatterConfigurationBlock {
 			if (file.exists() && !MessageDialog.openQuestion(fComposite.getShell(), FormatterMessages.CodingStyleConfigurationBlock_save_profile_overwrite_title, Messages.format(FormatterMessages.CodingStyleConfigurationBlock_save_profile_overwrite_message, path))) { 
 				return;
 			}
-			
+			String encoding= ProfileStore.ENCODING;
+			final IContentType type= Platform.getContentTypeManager().getContentType("org.eclipse.core.runtime.xml"); //$NON-NLS-1$
+			if (type != null)
+				encoding= type.getDefaultCharset();
 			final Collection profiles= new ArrayList();
-
 			profiles.add(selected);
 			try {
-				ProfileStore.writeProfilesToFile(profiles, file);
+				ProfileStore.writeProfilesToFile(profiles, file, encoding);
 			} catch (CoreException e) {
-				final String title= FormatterMessages.CodingStyleConfigurationBlock_save_profile_error_title; 
-				final String message= FormatterMessages.CodingStyleConfigurationBlock_save_profile_error_message; 
+				final String title= FormatterMessages.CodingStyleConfigurationBlock_save_profile_error_title;
+				final String message= FormatterMessages.CodingStyleConfigurationBlock_save_profile_error_message;
 				ExceptionHandler.handle(e, fComposite.getShell(), title, message);
 			}
 		}
