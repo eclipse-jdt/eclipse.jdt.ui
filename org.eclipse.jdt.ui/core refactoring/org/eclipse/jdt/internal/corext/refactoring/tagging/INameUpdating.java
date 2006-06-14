@@ -43,7 +43,7 @@ public interface INameUpdating {
 	public Object[] getElements();
 	
 	/**
-	 * Gets the element after renaming.
+	 * Gets the element after renaming, or <code>null</code> if not available.
 	 */	
 	public Object getNewElement() throws CoreException;
 
