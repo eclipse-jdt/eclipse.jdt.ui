@@ -37,7 +37,8 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
-import org.eclipse.ltk.internal.ui.refactoring.history.BrowseRefactoringHistoryControl;
+import org.eclipse.ltk.ui.refactoring.RefactoringUI;
+import org.eclipse.ltk.ui.refactoring.history.ISortableRefactoringHistoryControl;
 import org.eclipse.ltk.ui.refactoring.history.RefactoringHistoryControlConfiguration;
 
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
@@ -46,8 +47,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 /**
  * Dialog to configure the refactorings to export.
- * 
- * TODO: introduce API in LTK UI to create a browse refactoring history control.
  * 
  * @since 3.2
  */
@@ -66,7 +65,7 @@ public final class JarRefactoringDialog extends TrayDialog {
 	private final RefactoringHistory fHistory;
 
 	/** The refactoring history control */
-	private BrowseRefactoringHistoryControl fHistoryControl= null;
+	private ISortableRefactoringHistoryControl fHistoryControl= null;
 
 	/** The dialog settings */
 	private final IDialogSettings fSettings;
@@ -152,7 +151,7 @@ public final class JarRefactoringDialog extends TrayDialog {
 				return JarPackagerMessages.JarRefactoringDialog_workspace_caption;
 			}
 		};
-		fHistoryControl= new BrowseRefactoringHistoryControl(composite, configuration);
+		fHistoryControl= (ISortableRefactoringHistoryControl) RefactoringUI.createSortableRefactoringHistoryControl(parent, configuration);
 		fHistoryControl.createControl();
 		boolean sortProjects= true;
 		final IDialogSettings settings= fSettings;
@@ -165,7 +164,7 @@ public final class JarRefactoringDialog extends TrayDialog {
 		GridData data= new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
 		data.heightHint= convertHeightInCharsToPixels(32);
 		data.widthHint= convertWidthInCharsToPixels(72);
-		fHistoryControl.setLayoutData(data);
+		fHistoryControl.getControl().setLayoutData(data);
 		fHistoryControl.setInput(fHistory);
 		fHistoryControl.setCheckedDescriptors(fData.getRefactoringDescriptors());
 		createPlainLabel(composite, JarPackagerMessages.JarPackageWizardPage_options_label);
