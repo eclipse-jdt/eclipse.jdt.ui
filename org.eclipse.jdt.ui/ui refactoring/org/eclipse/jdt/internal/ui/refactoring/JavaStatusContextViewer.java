@@ -25,6 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -44,6 +45,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
@@ -58,8 +60,11 @@ public class JavaStatusContextViewer extends TextStatusContextViewer {
 	 */
 	public void createControl(Composite parent) {
 		super.createControl(parent);
+		final SourceViewer viewer= getSourceViewer();
+		viewer.unconfigure();
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
-		getSourceViewer().configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
+		viewer.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
+		viewer.getControl().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
 	}
 	
 	protected SourceViewer createSourceViewer(Composite parent) {
@@ -99,6 +104,8 @@ public class JavaStatusContextViewer extends TextStatusContextViewer {
 					IEditorInput editorInput= new FileEditorInput((IFile)cunit.getResource());
 					document= getDocument(JavaPlugin.getDefault().getCompilationUnitDocumentProvider(), editorInput);
 				}
+				if (document == null)
+					document= new Document(RefactoringMessages.JavaStatusContextViewer_no_source_available);
 				updateTitle(cunit);
 			}
 			setInput(document, createRegion(jsc.getSourceRange()));

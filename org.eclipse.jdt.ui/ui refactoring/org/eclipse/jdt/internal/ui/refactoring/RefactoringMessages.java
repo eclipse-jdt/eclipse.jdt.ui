@@ -440,6 +440,8 @@ public final class RefactoringMessages extends NLS {
 
 	public static String IntroduceParameterWizard_parameters;
 
+	public static String JavaStatusContextViewer_no_source_available;
+
 	public static String JavaStatusContextViewer_no_source_found0;
 
 	public static String JavaTypeCompletionProcessor_no_completion;
