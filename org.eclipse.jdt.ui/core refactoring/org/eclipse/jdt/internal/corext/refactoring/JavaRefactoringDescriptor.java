@@ -18,9 +18,7 @@ import java.util.Map.Entry;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -41,8 +39,6 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
 
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Descriptor object of a java refactoring.
@@ -357,13 +353,10 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 			}
 		}
 		if (refactoring != null) {
-			if (refactoring instanceof IScriptableRefactoring) {
-				final RefactoringStatus result= ((IScriptableRefactoring) refactoring).initialize(createArguments());
-				if (result.hasFatalError())
-					throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, result.getMessageMatchingSeverity(RefactoringStatus.FATAL), null));
-				status.merge(result);
-			} else
-				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_initialization_error, getDescription()), null));
+			if (refactoring instanceof IScriptableRefactoring)
+				status.merge(((IScriptableRefactoring) refactoring).initialize(createArguments()));
+			else
+				status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_initialization_error, getID())));
 		}
 		return refactoring;
 	}
