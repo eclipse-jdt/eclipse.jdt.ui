@@ -474,7 +474,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 				"	/**\r\n" + 
 				"	 * @param field1\r\n" + 
 				"	 */\r\n" + 
-				"	public A(final A field1) {\r\n" + 
+				"	public A(A field1) {\r\n" + 
 				"		super();\r\n" + 
 				"		this.field1 = field1;\r\n" + 
 				"	}\r\n" + 

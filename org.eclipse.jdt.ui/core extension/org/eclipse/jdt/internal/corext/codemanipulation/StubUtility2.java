@@ -50,7 +50,6 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.WildcardType;
-import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
@@ -206,8 +205,6 @@ public final class StubUtility2 {
 		for (int i= 0; i < variableBindings.length; i++) {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 			var.setType(imports.addImport(variableBindings[i].getType(), ast));
-			if (Modifier.isFinal(variableBindings[i].getModifiers()))
-				var.modifiers().add(ast.newModifier(ModifierKeyword.FINAL_KEYWORD));
 			excluded= new String[list.size()];
 			list.toArray(excluded);
 			param= getParameterName(unit, variableBindings[i], excluded);
