@@ -88,7 +88,6 @@ import org.eclipse.jface.text.ITextViewerExtension4;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.IInformationProviderExtension;
@@ -2067,8 +2066,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			return;
 
 		ISelection selection= getSelectionProvider().getSelection();
-		if (selection instanceof TextSelection) {
-			TextSelection textSelection= (TextSelection) selection;
+		if (selection instanceof ITextSelection) {
+			ITextSelection textSelection= (ITextSelection) selection;
 			// PR 39995: [navigation] Forward history cleared after going back in navigation history:
 			// mark only in navigation history if the cursor is being moved (which it isn't if
 			// this is called from a PostSelectionEvent that should only update the magnet)
