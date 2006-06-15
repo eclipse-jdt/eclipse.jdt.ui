@@ -685,6 +685,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performReceiverTest();
 	}
 	
+	public void testRemoteFieldReceiver() throws Exception {
+		performReceiverTest();
+	}
+	
 	/* *********************** Import Tests ******************************* */
 		
 	private void performImportTest() throws Exception {

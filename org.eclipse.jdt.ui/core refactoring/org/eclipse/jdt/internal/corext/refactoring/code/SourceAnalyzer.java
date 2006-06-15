@@ -190,17 +190,10 @@ class SourceAnalyzer  {
 			fTypeCounter--;
 		}
 		public boolean visit(FieldAccess node) {
-			Expression expression= node.getExpression();
-			if (node.getExpression() == null && !isStaticallyImported(node.getName())) {
-				fImplicitReceivers.add(node);
-				return true;
-			} else if (expression instanceof ThisExpression) {
-				// only visit the this expression and not the simple name
-				expression.accept(this);
-				addReferencesToName(node.getName());
-				return false;
-			}
-			return true;
+			// only visit the expression and not the simple name
+			node.getExpression().accept(this);
+			addReferencesToName(node.getName());
+			return false;
 		}
 		public boolean visit(MethodDeclaration node) {
 			if (node.isConstructor()) {
