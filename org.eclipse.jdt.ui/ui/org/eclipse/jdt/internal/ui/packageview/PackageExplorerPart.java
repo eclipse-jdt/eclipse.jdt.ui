@@ -83,14 +83,16 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPageLayout;
-import org.eclipse.ui.IPartListener;
+import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PartInitException;
@@ -211,18 +213,23 @@ public class PackageExplorerPart extends ViewPart
 	
 	private String fWorkingSetLabel;
 	
-	private IPartListener fPartListener= new IPartListener() {
-		public void partActivated(IWorkbenchPart part) {
-			if (part instanceof IEditorPart)
-				editorActivated((IEditorPart) part);
+	private IPartListener2 fLinkWithEditorListener= new IPartListener2() {
+		public void partActivated(IWorkbenchPartReference partRef) {}
+		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
+		public void partClosed(IWorkbenchPartReference partRef) {}
+		public void partDeactivated(IWorkbenchPartReference partRef) {}
+		public void partHidden(IWorkbenchPartReference partRef) {}
+		public void partOpened(IWorkbenchPartReference partRef) {}
+		public void partInputChanged(IWorkbenchPartReference partRef) {
+			if (partRef instanceof IEditorReference) {
+				editorActivated(((IEditorReference) partRef).getEditor(true));
+			}
 		}
-		public void partBroughtToTop(IWorkbenchPart part) {
-		}
-		public void partClosed(IWorkbenchPart part) {
-		}
-		public void partDeactivated(IWorkbenchPart part) {
-		}
-		public void partOpened(IWorkbenchPart part) {
+
+		public void partVisible(IWorkbenchPartReference partRef) {
+			if (partRef instanceof IEditorReference) {
+				editorActivated(((IEditorReference) partRef).getEditor(true));
+			}
 		}
 	};
 	
@@ -566,7 +573,9 @@ public class PackageExplorerPart extends ViewPart
 	 public void dispose() {
 		if (fContextMenu != null && !fContextMenu.isDisposed())
 			fContextMenu.dispose();
-		getSite().getPage().removePartListener(fPartListener);
+		
+		getSite().getPage().removePartListener(fLinkWithEditorListener); // always remove even if we didn't register
+		
 		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
 		if (fViewer != null) {
 			fViewer.removeTreeListener(fExpansionListener);
@@ -623,7 +632,6 @@ public class PackageExplorerPart extends ViewPart
 		IWorkbenchPartSite site= getSite();
 		site.registerContextMenu(menuMgr, fViewer);
 		site.setSelectionProvider(fViewer);
-		site.getPage().addPartListener(fPartListener);
 		
 		if (fMemento != null) {
 			restoreLinkingEnabled(fMemento);
@@ -674,12 +682,7 @@ public class PackageExplorerPart extends ViewPart
 		// Syncing the package explorer has to be done here. It can't be done
 		// when restoring the link state since the package explorers input isn't
 		// set yet.
-		if (isLinkingEnabled()) {
-			IEditorPart editor= getViewSite().getPage().getActiveEditor();
-			if (editor != null) {
-				editorActivated(editor);
-			}
-		}
+		setLinkingEnabled(isLinkingEnabled());
 		
 		stats.endRun();
 	}
@@ -1019,9 +1022,12 @@ public class PackageExplorerPart extends ViewPart
 		
 		} else if (original instanceof IResource) {
 			IJavaElement je= JavaCore.create((IResource)original);
-			if (je != null && je.exists()) 
-				return je;
-		
+			if (je != null && je.exists()) {
+				IJavaProject javaProject= je.getJavaProject();
+				if (javaProject != null && javaProject.exists()) {
+					return je;
+				}
+			}
 		} else if (original instanceof IAdaptable) {
 			IAdaptable adaptable= (IAdaptable)original;
 			IJavaElement je= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
@@ -1291,8 +1297,6 @@ public class PackageExplorerPart extends ViewPart
 	 * to be the editor's input, if linking is enabled.
 	 */
 	void editorActivated(IEditorPart editor) {
-		if (!isLinkingEnabled())  
-			return;
 		Object input= getElementOfInput(editor.getEditorInput());
 		if (input == null) 
 			return;
@@ -1562,12 +1566,17 @@ public class PackageExplorerPart extends ViewPart
 	public void setLinkingEnabled(boolean enabled) {
 		fLinkingEnabled= enabled;
 		PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.LINK_PACKAGES_TO_EDITOR, enabled);
-
+		
+		IWorkbenchPage page= getSite().getPage();
 		if (enabled) {
-			IEditorPart editor = getSite().getPage().getActiveEditor();
+			page.addPartListener(fLinkWithEditorListener);
+			
+			IEditorPart editor = page.getActiveEditor();
 			if (editor != null) {
 				editorActivated(editor);
 			}
+		} else {
+			page.removePartListener(fLinkWithEditorListener);
 		}
 	}
 
