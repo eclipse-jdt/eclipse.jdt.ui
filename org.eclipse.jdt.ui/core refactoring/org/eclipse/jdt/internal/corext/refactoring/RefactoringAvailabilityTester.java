@@ -673,7 +673,7 @@ public final class RefactoringAvailabilityTester {
 		if (elements.length == 1)
 			return (elements[0] instanceof IMethod) && isIntroduceIndirectionAvailable(((IMethod) elements[0]));
 		ASTNode[] selectedNodes= selection.resolveSelectedNodes();
-		if (selectedNodes.length != 1)
+		if (selectedNodes == null || selectedNodes.length != 1)
 			return false;
 		switch (selectedNodes[0].getNodeType()) {
 			case ASTNode.METHOD_DECLARATION:
