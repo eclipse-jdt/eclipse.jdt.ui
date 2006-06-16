@@ -7,10 +7,14 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rodrigo Kumpera <kumpera AT gmail.com> - bug 95232
+ *     
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.workingsets;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -251,7 +255,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		} else {
 			// Add inaccessible resources
 			IAdaptable[] oldItems= fWorkingSet.getElements();
-			ArrayList closedWithChildren= new ArrayList(elements.size());
+			HashSet closedWithChildren= new HashSet(elements.size());
 			for (int i= 0; i < oldItems.length; i++) {
 				IResource oldResource= null;
 				if (oldItems[i] instanceof IResource) {
@@ -261,7 +265,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 				}
 				if (oldResource != null && oldResource.isAccessible() == false) {
 					IProject project= oldResource.getProject();
-					if (elements.contains(project) || closedWithChildren.contains(project)) {
+					if (closedWithChildren.contains(project) || elements.contains(project)) {
 						elements.add(oldItems[i]);
 						elements.remove(project);
 						closedWithChildren.add(project);
@@ -375,10 +379,14 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		Object parent= fTreeContentProvider.getParent(child);
 		if (parent == null)
 			return;
+		
+		updateObjectState(parent, baseChildState);
+	}
+
+	private void updateObjectState(Object element, boolean baseChildState) {		
 
 		boolean allSameState= true;
-		Object[] children= null;
-		children= fTreeContentProvider.getChildren(parent);
+		Object[] children= fTreeContentProvider.getChildren(element);
 
 		for (int i= children.length -1; i >= 0; i--) {
 			if (fTree.getChecked(children[i]) != baseChildState || fTree.getGrayed(children[i])) {
@@ -387,10 +395,10 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 			}
 		}
 	
-		fTree.setGrayed(parent, !allSameState);
-		fTree.setChecked(parent, !allSameState || baseChildState);
+		fTree.setGrayed(element, !allSameState);
+		fTree.setChecked(element, !allSameState || baseChildState);
 		
-		updateParentState(parent, baseChildState);
+		updateParentState(element, baseChildState);
 	}
 
 	private void initializeCheckedState() {
@@ -440,13 +448,24 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 				}
 
 				fTree.setCheckedElements(elements);
+				HashSet parents = new HashSet();
 				for (int i= 0; i < elements.length; i++) {
 					Object element= elements[i];
 					if (isExpandable(element))
 						setSubtreeChecked(element, true, true);
 						
-					updateParentState(element, true);
+					if (element instanceof IAdaptable) {
+						IResource resource= (IResource) ((IAdaptable)element).getAdapter(IResource.class);
+						if (resource != null && !resource.isAccessible())
+							continue;
+					}
+					Object parent= fTreeContentProvider.getParent(element);
+					if (parent != null)
+						parents.add(parent);
 				}
+				
+				for (Iterator i = parents.iterator(); i.hasNext();)
+					updateObjectState(i.next(), true);
 			}
 		});
 	}
