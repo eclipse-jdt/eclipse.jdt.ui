@@ -12,7 +12,9 @@ package org.eclipse.jdt.internal.ui.actions;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.PlatformUI;
 
@@ -23,12 +25,23 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
  */
 public class SelectAllAction extends Action {
 
-	private TableViewer fViewer;
+	private StructuredViewer fViewer;
 
 	/**
-	 * Creates the action.
+	 * Creates the action for a TreeViewer
+	 */
+	public SelectAllAction(TreeViewer viewer) {
+		this((StructuredViewer) viewer);
+	}
+	
+	/**
+	 * Creates the action for a TableViewer
 	 */
 	public SelectAllAction(TableViewer viewer) {
+		this((StructuredViewer) viewer);
+	}
+
+	private SelectAllAction(StructuredViewer viewer) {
 		super("selectAll"); //$NON-NLS-1$
 		setText(ActionMessages.SelectAllAction_label); 
 		setToolTipText(ActionMessages.SelectAllAction_tooltip); 
@@ -41,7 +54,11 @@ public class SelectAllAction extends Action {
 	 * Selects all resources in the view.
 	 */
 	public void run() {
-		fViewer.getTable().selectAll();
+		if (fViewer instanceof TreeViewer) {
+			((TreeViewer) fViewer).getTree().selectAll();
+		} else if (fViewer instanceof TableViewer) {
+			((TableViewer) fViewer).getTable().selectAll();
+		}
 		// force viewer selection change
 		fViewer.setSelection(fViewer.getSelection());
 	}

@@ -72,6 +72,7 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
+import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.GenerateBuildPathActionGroup;
 import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetActionGroup;
@@ -89,6 +90,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 	private GotoPackageAction fGotoPackageAction;
 	private GotoResourceAction fGotoResourceAction;
 	private CollapseAllAction fCollapseAllAction;
+	private SelectAllAction fSelectAllAction;
 	
 	
 	private ToggleLinkingAction fToggleLinkingAction;
@@ -148,6 +150,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		fCollapseAllAction= new CollapseAllAction(fPart);	
 		fToggleLinkingAction = new ToggleLinkingAction(fPart); 
 		fGotoRequiredProjectAction= new GotoRequiredProjectAction(fPart);
+		fSelectAllAction= new SelectAllAction(fPart.getTreeViewer());
 	}
 
 	public void dispose() {
@@ -193,6 +196,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.GO_TO_RESOURCE, fGotoResourceAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.GOTO_TYPE, fGotoTypeAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.GOTO_PACKAGE, fGotoPackageAction);
+		actionBars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(), fSelectAllAction);
 		
 		fRefactorActionGroup.retargetFileMenuActions(actionBars);
 	}
