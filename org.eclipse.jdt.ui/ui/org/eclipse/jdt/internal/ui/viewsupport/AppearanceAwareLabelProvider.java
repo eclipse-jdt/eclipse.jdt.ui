@@ -15,6 +15,10 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
+import org.eclipse.ui.IEditorRegistry;
+import org.eclipse.ui.IPropertyListener;
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -22,7 +26,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  * JavaUILabelProvider that respects settings from the Appearance preference page.
  * Triggers a viewer update when a preference changes.
  */
-public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements IPropertyChangeListener {
+public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements IPropertyChangeListener, IPropertyListener {
 
 	public final static long DEFAULT_TEXTFLAGS= JavaElementLabels.ROOT_VARIABLE | JavaElementLabels.T_TYPE_PARAMETERS | JavaElementLabels.M_PARAMETER_TYPES |  
 		JavaElementLabels.M_APP_TYPE_PARAMETERS | JavaElementLabels.M_APP_RETURNTYPE  | JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED;
@@ -30,7 +34,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	
 	private long fTextFlagMask;
 	private int fImageFlagMask;
-
+	
 	/**
 	 * Constructor for AppearanceAwareLabelProvider.
 	 */
@@ -38,6 +42,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 		super(textFlags, imageFlags);
 		initMasks();
 		PreferenceConstants.getPreferenceStore().addPropertyChangeListener(this);
+		PlatformUI.getWorkbench().getEditorRegistry().addPropertyListener(this);
 	}
 
 	/**
@@ -81,12 +86,22 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 			fireLabelProviderChanged(lpEvent);
 		}		
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.IPropertyListener#propertyChanged(java.lang.Object, int)
+	 */
+	public void propertyChanged(Object source, int propId) {
+		if (propId == IEditorRegistry.PROP_CONTENTS) {
+			fireLabelProviderChanged(new LabelProviderChangedEvent(this, null)); // refresh all
+		}
+	}
 
 	/*
 	 * @see IBaseLabelProvider#dispose()
 	 */
 	public void dispose() {
 		PreferenceConstants.getPreferenceStore().removePropertyChangeListener(this);
+		PlatformUI.getWorkbench().getEditorRegistry().removePropertyListener(this);
 		super.dispose();
 	}
 
