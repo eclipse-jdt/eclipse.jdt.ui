@@ -41,20 +41,20 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class RenameJavaElementAction extends SelectionDispatchAction {
 
-	private CompilationUnitEditor fEditor;
+	private JavaEditor fEditor;
 	
 	public RenameJavaElementAction(IWorkbenchSite site) {
 		super(site);
 	}
 	
-	public RenameJavaElementAction(CompilationUnitEditor editor) {
+	public RenameJavaElementAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));

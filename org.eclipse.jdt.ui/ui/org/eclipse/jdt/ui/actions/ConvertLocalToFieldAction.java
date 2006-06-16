@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefact
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.PromoteTempWizard;
@@ -33,7 +33,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Action to convert a local variable to a field.
- * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
@@ -42,14 +41,14 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class ConvertLocalToFieldAction extends SelectionDispatchAction {
 
-	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.ConvertLocalToField_title; 
-	private final CompilationUnitEditor fEditor;
+	private final JavaEditor fEditor;
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * @param editor the compilation unit editor
+	 * 
+	 * @param editor the java editor
 	 */
-	public ConvertLocalToFieldAction(CompilationUnitEditor editor) {
+	public ConvertLocalToFieldAction(JavaEditor editor) {
 		super(editor.getEditorSite());
 		setText(RefactoringMessages.ConvertLocalToField_label); 
 		fEditor= editor;
@@ -84,9 +83,9 @@ public class ConvertLocalToFieldAction extends SelectionDispatchAction {
 		try{
 			ICompilationUnit cunit= SelectionConverter.getInputAsCompilationUnit(fEditor);
 			final PromoteTempToFieldRefactoring refactoring= new PromoteTempToFieldRefactoring(cunit, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings(cunit.getJavaProject()));
-			new RefactoringStarter().activate(refactoring, new PromoteTempWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
+			new RefactoringStarter().activate(refactoring, new PromoteTempWizard(refactoring), getShell(), RefactoringMessages.ConvertLocalToField_title, false);
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.NewTextRefactoringAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.ConvertLocalToField_title, RefactoringMessages.NewTextRefactoringAction_exception); 
 		}	
 	}
 }

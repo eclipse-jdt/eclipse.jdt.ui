@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
@@ -61,6 +62,8 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
@@ -80,10 +83,12 @@ import org.eclipse.jdt.core.util.IClassFileReader;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
 
@@ -488,6 +493,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	private Composite fViewerComposite;
 	private Control fSourceAttachmentForm;
 
+	private CompositeActionGroup fContextMenuGroup;
+
 	private InputUpdater fInputUpdater= new InputUpdater();
 
 	/**
@@ -511,6 +518,10 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		setAction(ITextEditorActionConstants.SAVE, null);
 		setAction(ITextEditorActionConstants.REVERT_TO_SAVED, null);
 
+		final ActionGroup group= new RefactorActionGroup(this, ITextEditorActionConstants.GROUP_EDIT, true);
+		fActionGroups.addGroup(group);
+		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {group});
+
 		/*
 		 * 1GF82PL: ITPJUI:ALL - Need to be able to add bookmark to classfile
 		 *
@@ -521,6 +532,18 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		 *	setAction(ITextEditorActionConstants.RULER_MANAGE_BOOKMARKS, new ClassFileMarkerRulerAction("ManageBookmarks.", getVerticalRuler(), this, IMarker.BOOKMARK, true)); //$NON-NLS-1$
 		 *	setAction(ITextEditorActionConstants.RULER_MANAGE_TASKS, new ClassFileMarkerRulerAction("ManageTasks.", getVerticalRuler(), this, IMarker.TASK, true)); //$NON-NLS-1$
 		 */
+	}
+
+	/*
+	 * @see AbstractTextEditor#editorContextMenuAboutToShow(IMenuManager)
+	 */
+	public void editorContextMenuAboutToShow(IMenuManager menu) {
+		super.editorContextMenuAboutToShow(menu);
+
+		ActionContext context= new ActionContext(getSelectionProvider().getSelection());
+		fContextMenuGroup.setContext(context);
+		fContextMenuGroup.fillContextMenu(menu);
+		fContextMenuGroup.setContext(null);
 	}
 
 	/*

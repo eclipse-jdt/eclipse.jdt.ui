@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -51,7 +51,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	
-	private CompilationUnitEditor fEditor;
+	private JavaEditor fEditor;
 	
 	/**
 	 * Creates a new <code>SelfEncapsulateFieldAction</code>. The action requires 
@@ -69,9 +69,9 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * 
-	 * @param editor the compilation unit editor
+	 * @param editor the java editor
 	 */
-	public SelfEncapsulateFieldAction(CompilationUnitEditor editor) {
+	public SelfEncapsulateFieldAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));

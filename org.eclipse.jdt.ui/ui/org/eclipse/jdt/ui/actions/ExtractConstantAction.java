@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactori
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.ExtractConstantWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -41,14 +41,13 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class ExtractConstantAction extends SelectionDispatchAction {
 
-	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.ExtractConstantAction_extract_constant; 
-	private final CompilationUnitEditor fEditor;
+	private final JavaEditor fEditor;
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * @param editor the compilation unit editor
+	 * @param editor the java editor
 	 */
-	public ExtractConstantAction(CompilationUnitEditor editor) {
+	public ExtractConstantAction(JavaEditor editor) {
 		super(editor.getEditorSite());
 		setText(RefactoringMessages.ExtractConstantAction_label); 
 		fEditor= editor;
@@ -78,9 +77,9 @@ public class ExtractConstantAction extends SelectionDispatchAction {
 			return;
 		try{
 			final ExtractConstantRefactoring refactoring= new ExtractConstantRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
-			new RefactoringStarter().activate(refactoring, new ExtractConstantWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
+			new RefactoringStarter().activate(refactoring, new ExtractConstantWizard(refactoring), getShell(), RefactoringMessages.ExtractConstantAction_extract_constant, false);
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.NewTextRefactoringAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.ExtractConstantAction_extract_constant, RefactoringMessages.NewTextRefactoringAction_exception); 
 		}	
 	}
 }

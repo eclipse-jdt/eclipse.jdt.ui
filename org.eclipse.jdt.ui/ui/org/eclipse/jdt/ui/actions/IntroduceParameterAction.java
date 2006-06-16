@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefact
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.IntroduceParameterWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -40,14 +40,13 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */ 
 public class IntroduceParameterAction extends SelectionDispatchAction {
 
-	private final CompilationUnitEditor fEditor;
-	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.IntroduceParameterAction_dialog_title;
+	private final JavaEditor fEditor;
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * @param editor the compilation unit editor
+	 * @param editor the java editor
 	 */
-	public IntroduceParameterAction(CompilationUnitEditor editor) {
+	public IntroduceParameterAction(JavaEditor editor) {
 		super(editor.getEditorSite());
 		setText(RefactoringMessages.IntroduceParameterAction_label);
 		fEditor= editor;
@@ -77,9 +76,9 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 			return;
 		try{
 			final IntroduceParameterRefactoring refactoring= new IntroduceParameterRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
-			new RefactoringStarter().activate(refactoring, new IntroduceParameterWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, true);
+			new RefactoringStarter().activate(refactoring, new IntroduceParameterWizard(refactoring), getShell(), RefactoringMessages.IntroduceParameterAction_dialog_title, true);
 		} catch (CoreException e){
-			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.NewTextRefactoringAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.IntroduceParameterAction_dialog_title, RefactoringMessages.NewTextRefactoringAction_exception); 
 		}
 	}
 }

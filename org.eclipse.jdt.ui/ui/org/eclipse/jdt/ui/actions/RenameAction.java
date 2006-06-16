@@ -11,18 +11,18 @@
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+import org.eclipse.jface.text.ITextSelection;
+
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RenameJavaElementAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RenameResourceAction;
@@ -44,7 +44,7 @@ public class RenameAction extends SelectionDispatchAction {
 	private RenameJavaElementAction fRenameJavaElement;
 	private RenameResourceAction fRenameResource;
 
-	private CompilationUnitEditor fEditor;
+	private JavaEditor fEditor;
 	
 	/**
 	 * Creates a new <code>RenameAction</code>. The action requires
@@ -65,9 +65,9 @@ public class RenameAction extends SelectionDispatchAction {
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * @param editor the compilation unit editor
+	 * @param editor the java editor
 	 */
-	public RenameAction(CompilationUnitEditor editor) {
+	public RenameAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
 		fRenameJavaElement= new RenameJavaElementAction(editor);

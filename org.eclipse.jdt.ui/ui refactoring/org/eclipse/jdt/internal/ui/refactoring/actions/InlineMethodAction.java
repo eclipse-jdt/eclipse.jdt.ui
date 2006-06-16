@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -57,13 +57,13 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class InlineMethodAction extends SelectionDispatchAction {
 
-	private CompilationUnitEditor fEditor;
+	private JavaEditor fEditor;
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * @param editor the compilation unit editor
+	 * @param editor the java editor
 	 */
-	public InlineMethodAction(CompilationUnitEditor editor) {
+	public InlineMethodAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
@@ -150,9 +150,9 @@ public class InlineMethodAction extends SelectionDispatchAction {
 		}
 	}
 
-	public boolean tryInlineMethod(ICompilationUnit unit, CompilationUnit node, ITextSelection selection, Shell shell) {
+	public boolean tryInlineMethod(IJavaElement container, CompilationUnit node, ITextSelection selection, Shell shell) {
 		try {
-			if (RefactoringExecutionStarter.startInlineMethodRefactoring(unit, node, selection.getOffset(), selection.getLength(), shell, false)) {
+			if (RefactoringExecutionStarter.startInlineMethodRefactoring(container, node, selection.getOffset(), selection.getLength(), shell, false)) {
 				run(selection);
 				return true;
 			}

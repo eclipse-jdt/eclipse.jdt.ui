@@ -2447,6 +2447,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fEditorSelectionChangedListener= null;
 		}
 
+		if (fActionGroups != null) {
+			fActionGroups.dispose();
+			fActionGroups= null;
+		}
+		
 		super.dispose();
 	}
 

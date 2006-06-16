@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
@@ -42,14 +42,14 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */ 
 public class ExtractMethodAction extends SelectionDispatchAction {
 
-	private final CompilationUnitEditor fEditor;
-	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.ExtractMethodAction_dialog_title;
+	private final JavaEditor fEditor;
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * @param editor the compilation unit editor
+	 * 
+	 * @param editor the java editor
 	 */
-	public ExtractMethodAction(CompilationUnitEditor editor) {
+	public ExtractMethodAction(JavaEditor editor) {
 		super(editor.getEditorSite());
 		setText(RefactoringMessages.ExtractMethodAction_label);
 		fEditor= editor;
@@ -79,9 +79,9 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 			return;
 		try{
 			final ExtractMethodRefactoring refactoring= new ExtractMethodRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
-			new RefactoringStarter().activate(refactoring, new ExtractMethodWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
+			new RefactoringStarter().activate(refactoring, new ExtractMethodWizard(refactoring), getShell(), RefactoringMessages.ExtractMethodAction_dialog_title, false);
 		} catch (CoreException e){
-			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.NewTextRefactoringAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.ExtractMethodAction_dialog_title, RefactoringMessages.NewTextRefactoringAction_exception); 
 		}
 	}
 }

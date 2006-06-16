@@ -21,7 +21,9 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -30,7 +32,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.InlineConstantAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.InlineMethodAction;
@@ -46,7 +48,7 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.InlineMethodAction;
  */
 public class InlineAction extends SelectionDispatchAction {
 
-	private CompilationUnitEditor fEditor;
+	private JavaEditor fEditor;
 	private final InlineTempAction fInlineTemp;
 	private final InlineMethodAction fInlineMethod;
 	private final InlineConstantAction fInlineConstant;
@@ -71,7 +73,7 @@ public class InlineAction extends SelectionDispatchAction {
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the compilation unit editor
 	 */
-	public InlineAction(CompilationUnitEditor editor) {
+	public InlineAction(JavaEditor editor) {
 		//don't want to call 'this' here - it'd create useless action objects
 		super(editor.getEditorSite());
 		setText(RefactoringMessages.InlineAction_Inline); 
@@ -100,19 +102,29 @@ public class InlineAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 
+		IClassFile cf= null;
 		ICompilationUnit cu= SelectionConverter.getInputAsCompilationUnit(fEditor);
-		if (cu == null) 
-			return;
+		if (cu == null) {
+			cf= SelectionConverter.getInputAsClassFile(fEditor);
+			if (cf == null)
+				return;
+		}
 
-		CompilationUnit node= new RefactoringASTParser(AST.JLS3).parse(cu, true);
-		if (fInlineTemp.isEnabled() && fInlineTemp.tryInlineTemp(cu, node, selection, getShell()))
-			return;
+		CompilationUnit node= null;
+		if (cu != null)
+			node= new RefactoringASTParser(AST.JLS3).parse(cu, true);
+		else
+			node= new RefactoringASTParser(AST.JLS3).parse(cf, true);
+		
+		if (cu != null) {
+			if (fInlineTemp.isEnabled() && fInlineTemp.tryInlineTemp(cu, node, selection, getShell()))
+				return;
 
-		if (fInlineConstant.isEnabled() && fInlineConstant.tryInlineConstant(cu, node, selection, getShell()))
-			return;
-
+			if (fInlineConstant.isEnabled() && fInlineConstant.tryInlineConstant(cu, node, selection, getShell()))
+				return;
+		}
 		//InlineMethod is last (also tries enclosing element):
-		if (fInlineMethod.isEnabled() && fInlineMethod.tryInlineMethod(cu, node, selection, getShell()))
+		if (fInlineMethod.isEnabled() && fInlineMethod.tryInlineMethod(cu != null ? (IJavaElement) cu : (IJavaElement) cf, node, selection, getShell()))
 			return;
 
 		MessageDialog.openInformation(getShell(), RefactoringMessages.InlineAction_dialog_title, RefactoringMessages.InlineAction_select); 

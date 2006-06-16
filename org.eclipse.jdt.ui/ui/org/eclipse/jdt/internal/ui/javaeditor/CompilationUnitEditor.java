@@ -1252,7 +1252,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		}
 
 		fGenerateActionGroup= new GenerateActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
-		ActionGroup rg= new RefactorActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
+		ActionGroup rg= new RefactorActionGroup(this, ITextEditorActionConstants.GROUP_EDIT, false);
 		ActionGroup surroundWith= new SurroundWithActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
 		
 		fActionGroups.addGroup(surroundWith);
@@ -1529,11 +1529,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			fJavaEditorErrorTickUpdater= null;
 		}
 
-		if (fActionGroups != null) {
-			fActionGroups.dispose();
-			fActionGroups= null;
-		}
-		
 		if (fCorrectionCommands != null) {
 			fCorrectionCommands.deregisterCommands();
 			fCorrectionCommands= null;

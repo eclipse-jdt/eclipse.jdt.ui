@@ -37,7 +37,7 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * 
  * @since 3.2
  */
-public class ExtractSuperTypeAction extends SelectionDispatchAction {
+public class ExtractSuperClassAction extends SelectionDispatchAction {
 
 	/**
 	 * Action definition ID of the refactor -> extract supertype action (value
@@ -94,17 +94,17 @@ public class ExtractSuperTypeAction extends SelectionDispatchAction {
 		return (IMember[]) set.toArray(new IMember[set.size()]);
 	}
 
-	/** The compilation unit editor */
-	private CompilationUnitEditor fEditor;
+	/** The java editor */
+	private JavaEditor fEditor;
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call
 	 * this constructor.
 	 * 
 	 * @param editor
-	 *            the compilation unit editor
+	 *            the java editor
 	 */
-	public ExtractSuperTypeAction(final CompilationUnitEditor editor) {
+	public ExtractSuperClassAction(final JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
@@ -118,7 +118,7 @@ public class ExtractSuperTypeAction extends SelectionDispatchAction {
 	 * @param site
 	 *            the workbench site
 	 */
-	public ExtractSuperTypeAction(final IWorkbenchSite site) {
+	public ExtractSuperClassAction(final IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.ExtractSuperTypeAction_label);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.EXTRACT_SUPERTYPE_ACTION);
