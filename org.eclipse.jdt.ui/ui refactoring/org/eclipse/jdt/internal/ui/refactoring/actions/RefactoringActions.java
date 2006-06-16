@@ -31,13 +31,16 @@ public class RefactoringActions {
 	 * Converts the given selection into a type using the following rules:
 	 * <ul>
 	 *   <li>if the selection is enclosed by a type than that type is returned.</li>
-	 *   <li>if the selection is inside a compilaiton unit or class file than the 
+	 *   <li>if the selection is inside a compilation unit or class file than the 
 	 *       primary type is returned.</li>
 	 *   <li>otherwise <code>null</code> is returned.
 	 * </ul>
 	 */
 	public static IType getEnclosingOrPrimaryType(JavaTextSelection selection) throws JavaModelException {
-		return convertToEnclosingOrPrimaryType(selection.resolveEnclosingElement());
+		final IJavaElement element= selection.resolveEnclosingElement();
+		if (element != null)
+			return convertToEnclosingOrPrimaryType(element);
+		return null;
 	}
 	public static IType getEnclosingOrPrimaryType(JavaEditor editor) throws JavaModelException {
 		return convertToEnclosingOrPrimaryType(SelectionConverter.resolveEnclosingElement(
