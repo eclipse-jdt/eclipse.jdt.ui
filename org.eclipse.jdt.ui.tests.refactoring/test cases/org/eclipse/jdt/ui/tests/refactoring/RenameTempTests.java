@@ -139,13 +139,6 @@ public class RenameTempTests extends RefactoringTest{
 		failTestHelper(newName, updateReferences, cu, selection);
 	}
 
-	private void failHelperNoElement(int startLine, int startColumn, int endLine, int endColumn)  throws Exception{
-		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
-		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-		IJavaElement[] elements= cu.codeSelect(selection.getOffset(), selection.getLength());
-		assertEquals(0, elements.length);
-	}
-
 	private void helper2(String newName) throws Exception{
 		helper2(newName, true);
 	}
