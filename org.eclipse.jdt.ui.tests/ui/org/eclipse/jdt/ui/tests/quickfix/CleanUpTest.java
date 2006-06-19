@@ -81,7 +81,12 @@ public class CleanUpTest extends QuickFixTest {
 	}
 	
 	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+		TestSuite suite= new TestSuite();
+		
+		suite.addTest(CleanUpStressTest.suite());
+		suite.addTest(new ProjectTestSetup(new TestSuite(THIS)));
+		
+		return suite;
 	}
 	
 	public static Test suite() {
