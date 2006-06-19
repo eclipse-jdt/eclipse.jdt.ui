@@ -22,10 +22,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
 
-import org.eclipse.swt.dnd.Clipboard;
-import org.eclipse.swt.dnd.TextTransfer;
-import org.eclipse.swt.dnd.Transfer;
-
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -38,7 +34,6 @@ import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.MultiStateTextFileChange;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
-import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -46,11 +41,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.WorkingCopyOwner;
-import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.ASTRequestor;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -72,7 +62,6 @@ import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -4853,7 +4842,7 @@ public class CleanUpStressTest extends TestCase {
 		int numberOfBrokenCUs= 58;
 		assertTrue("Number of broken cus is " + changes.length + " expected " + numberOfBrokenCUs, changes.length == numberOfBrokenCUs);
 	
-		generateTable(cleanUpRefactoring.getCompilationUnits(), changes);
+//		generateTable(cleanUpRefactoring.getCompilationUnits(), changes);
 		
 		for (int i= 0; i < changes.length; i++) {
 			String previewContent= getNormalizedContent(new Document(getPreviewContent(changes[i])));
@@ -4927,134 +4916,134 @@ public class CleanUpStressTest extends TestCase {
 	}
 	
 //	Do not remove, used to generate the table
-	private static void generateTable(ICompilationUnit[] units, Change[] changes) throws CoreException {
-
-		testNoCompileErrors(units, changes);
-		
-		StringBuffer buf= new StringBuffer();
-		
-		buf.append("    private static Hashtable fExpectedChangesAllTests;").append("\n");
-		buf.append("    static {").append("\n");
-		buf.append("        fExpectedChangesAllTests= new Hashtable();").append("\n");
-		buf.append("        StringBuffer buf= null;").append("\n");
-		
-		for (int i= 0; i < changes.length; i++) {
-			String previewContent= getPreviewContent(changes[i]);
-			String bufWrappedContext= getBufWrappedContext(new Document(previewContent));
-			ICompilationUnit cu= getCompilationUnit(changes[i]);
-			
-			buf.append("        buf= new StringBuffer();").append("\n");
-			buf.append(bufWrappedContext).append("\n");
-			buf.append("        fExpectedChangesAllTests.put(\""+ getCompilationUnitName(cu) +"\", buf.toString());").append("\n");
-        }
-		
-		buf.append("    }").append("\n");
-	
-		Clipboard clipboard= new Clipboard(null);
-		clipboard.setContents(new Object[] { buf.toString() }, new Transfer[] { TextTransfer.getInstance() } );
-		clipboard.dispose();
-	}
-	
-	private static String getBufWrappedContext(IDocument document) {
-		StringBuffer buf= new StringBuffer();
-		try {
-			int selectionOffset= 0;
-			int selectionLength= document.getLength();
-			int startLine= document.getLineOfOffset(selectionOffset);
-			int endLine= document.getLineOfOffset(selectionOffset + selectionLength);
-			
-			for (int i= startLine; i <= endLine; i++) {
-				IRegion lineInfo= document.getLineInformation(i);
-				String lineContent= document.get(lineInfo.getOffset(), lineInfo.getLength());
-				buf.append("        buf.append(\"");
-				for (int k= 0; k < lineContent.length(); k++) {
-                	char ch= lineContent.charAt(k);
-                	if (ch == '\t') {
-                		buf.append("    "); // 4 spaces
-                	} else if (ch == '"' || ch == '\\') {
-                		buf.append('\\').append(ch);
-                	} else {
-                		buf.append(ch);
-                	}
-                }
-				
-				if (i != endLine) {
-					buf.append("\\n\");");
-					buf.append('\n');
-				} else {
-					buf.append("\");");
-				}
-			}
-		} catch (BadLocationException e) {
-			// ignore
-		}
-		return buf.toString();
-	}
-	
-	private static void testNoCompileErrors(ICompilationUnit[] compilationUnits, Change[] changes) throws JavaModelException, CoreException {
-        ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
-        parser.setResolveBindings(true);
-        parser.setProject(MyTestSetup.fJProject1);
-
-        ICompilationUnit[] units= new ICompilationUnit[compilationUnits.length];
-        try {
-	        for (int i= 0; i < compilationUnits.length; i++) {
-		        ICompilationUnit unit= compilationUnits[i];
-		        Change change= getChangeForUnit(unit, changes);
-		        if (change == null) {
-		        	units[i]= unit;
-		        } else {
-		        	units[i]= createWorkingCopy(unit, change);
-		        }
-	        }
-	        
-	        parser.createASTs(units, new String[0], new ASTRequestor() {
-	        	public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
-	        	    IProblem[] problems= ast.getProblems();
-
-        	    	StringBuffer buf= new StringBuffer();
-	        	    for (int i= 0; i < problems.length; i++) {
-	                    if (problems[i].isError()) {
-	                        buf.append(problems[i].getMessage()).append('\n');	
-	                    }
-                    }
-	        	    if (buf.length() != 0) {
-	        	    	buf.insert(0, "Found errors in " + source.getElementName() + ":\n");
-	        	    	assertTrue(buf.toString(), false);
-	        	    }
-	        	}
-	        }, new NullProgressMonitor());
-        } finally {
-	        for (int i= 0; i < units.length; i++) {
-		        units[i].discardWorkingCopy();
-	        }
-        }
-    }
-	
-	private static Change getChangeForUnit(ICompilationUnit unit, Change[] changes) {
-		for (int i= 0; i < changes.length; i++) {
-	        if (changes[i] instanceof CompilationUnitChange) {
-	        	if (((CompilationUnitChange)changes[i]).getCompilationUnit().equals(unit))
-	        		return changes[i];
-	        } else if (changes[i] instanceof MultiStateCompilationUnitChange) {
-	        	if (((MultiStateCompilationUnitChange)changes[i]).getCompilationUnit().equals(unit))
-	        		return changes[i];
-	        }
-        }
-	    return null;
-    }
-
-	private static ICompilationUnit createWorkingCopy(ICompilationUnit compilationUnit, Change change) throws JavaModelException, CoreException {
-        ICompilationUnit workingCopy= compilationUnit.getWorkingCopy(new WorkingCopyOwner() {}, null, null);
-        
-        IBuffer buffer= workingCopy.getBuffer();
-        if (change instanceof TextChange) {
-        	buffer.setContents(((TextChange)change).getPreviewContent(null));
-        } else if (change instanceof MultiStateTextFileChange) {
-        	buffer.setContents(((MultiStateTextFileChange)change).getPreviewContent(null));
-        } else {
-        	assertTrue(false);
-        }
-        return workingCopy;
-    }
+//	private static void generateTable(ICompilationUnit[] units, Change[] changes) throws CoreException {
+//
+//		testNoCompileErrors(units, changes);
+//		
+//		StringBuffer buf= new StringBuffer();
+//		
+//		buf.append("    private static Hashtable fExpectedChangesAllTests;").append("\n");
+//		buf.append("    static {").append("\n");
+//		buf.append("        fExpectedChangesAllTests= new Hashtable();").append("\n");
+//		buf.append("        StringBuffer buf= null;").append("\n");
+//		
+//		for (int i= 0; i < changes.length; i++) {
+//			String previewContent= getPreviewContent(changes[i]);
+//			String bufWrappedContext= getBufWrappedContext(new Document(previewContent));
+//			ICompilationUnit cu= getCompilationUnit(changes[i]);
+//			
+//			buf.append("        buf= new StringBuffer();").append("\n");
+//			buf.append(bufWrappedContext).append("\n");
+//			buf.append("        fExpectedChangesAllTests.put(\""+ getCompilationUnitName(cu) +"\", buf.toString());").append("\n");
+//        }
+//		
+//		buf.append("    }").append("\n");
+//	
+//		Clipboard clipboard= new Clipboard(null);
+//		clipboard.setContents(new Object[] { buf.toString() }, new Transfer[] { TextTransfer.getInstance() } );
+//		clipboard.dispose();
+//	}
+//	
+//	private static String getBufWrappedContext(IDocument document) {
+//		StringBuffer buf= new StringBuffer();
+//		try {
+//			int selectionOffset= 0;
+//			int selectionLength= document.getLength();
+//			int startLine= document.getLineOfOffset(selectionOffset);
+//			int endLine= document.getLineOfOffset(selectionOffset + selectionLength);
+//			
+//			for (int i= startLine; i <= endLine; i++) {
+//				IRegion lineInfo= document.getLineInformation(i);
+//				String lineContent= document.get(lineInfo.getOffset(), lineInfo.getLength());
+//				buf.append("        buf.append(\"");
+//				for (int k= 0; k < lineContent.length(); k++) {
+//                	char ch= lineContent.charAt(k);
+//                	if (ch == '\t') {
+//                		buf.append("    "); // 4 spaces
+//                	} else if (ch == '"' || ch == '\\') {
+//                		buf.append('\\').append(ch);
+//                	} else {
+//                		buf.append(ch);
+//                	}
+//                }
+//				
+//				if (i != endLine) {
+//					buf.append("\\n\");");
+//					buf.append('\n');
+//				} else {
+//					buf.append("\");");
+//				}
+//			}
+//		} catch (BadLocationException e) {
+//			// ignore
+//		}
+//		return buf.toString();
+//	}
+//	
+//	private static void testNoCompileErrors(ICompilationUnit[] compilationUnits, Change[] changes) throws JavaModelException, CoreException {
+//        ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+//        parser.setResolveBindings(true);
+//        parser.setProject(MyTestSetup.fJProject1);
+//
+//        ICompilationUnit[] units= new ICompilationUnit[compilationUnits.length];
+//        try {
+//	        for (int i= 0; i < compilationUnits.length; i++) {
+//		        ICompilationUnit unit= compilationUnits[i];
+//		        Change change= getChangeForUnit(unit, changes);
+//		        if (change == null) {
+//		        	units[i]= unit;
+//		        } else {
+//		        	units[i]= createWorkingCopy(unit, change);
+//		        }
+//	        }
+//	        
+//	        parser.createASTs(units, new String[0], new ASTRequestor() {
+//	        	public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
+//	        	    IProblem[] problems= ast.getProblems();
+//
+//        	    	StringBuffer buf= new StringBuffer();
+//	        	    for (int i= 0; i < problems.length; i++) {
+//	                    if (problems[i].isError()) {
+//	                        buf.append(problems[i].getMessage()).append('\n');	
+//	                    }
+//                    }
+//	        	    if (buf.length() != 0) {
+//	        	    	buf.insert(0, "Found errors in " + source.getElementName() + ":\n");
+//	        	    	assertTrue(buf.toString(), false);
+//	        	    }
+//	        	}
+//	        }, new NullProgressMonitor());
+//        } finally {
+//	        for (int i= 0; i < units.length; i++) {
+//		        units[i].discardWorkingCopy();
+//	        }
+//        }
+//    }
+//	
+//	private static Change getChangeForUnit(ICompilationUnit unit, Change[] changes) {
+//		for (int i= 0; i < changes.length; i++) {
+//	        if (changes[i] instanceof CompilationUnitChange) {
+//	        	if (((CompilationUnitChange)changes[i]).getCompilationUnit().equals(unit))
+//	        		return changes[i];
+//	        } else if (changes[i] instanceof MultiStateCompilationUnitChange) {
+//	        	if (((MultiStateCompilationUnitChange)changes[i]).getCompilationUnit().equals(unit))
+//	        		return changes[i];
+//	        }
+//        }
+//	    return null;
+//    }
+//
+//	private static ICompilationUnit createWorkingCopy(ICompilationUnit compilationUnit, Change change) throws JavaModelException, CoreException {
+//        ICompilationUnit workingCopy= compilationUnit.getWorkingCopy(new WorkingCopyOwner() {}, null, null);
+//        
+//        IBuffer buffer= workingCopy.getBuffer();
+//        if (change instanceof TextChange) {
+//        	buffer.setContents(((TextChange)change).getPreviewContent(null));
+//        } else if (change instanceof MultiStateTextFileChange) {
+//        	buffer.setContents(((MultiStateTextFileChange)change).getPreviewContent(null));
+//        } else {
+//        	assertTrue(false);
+//        }
+//        return workingCopy;
+//    }
 }
