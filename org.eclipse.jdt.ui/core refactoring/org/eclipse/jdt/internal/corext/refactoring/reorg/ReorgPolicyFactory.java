@@ -142,6 +142,7 @@ public class ReorgPolicyFactory {
 	private static final String ATTRIBUTE_UNITS= "units"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_ROOTS= "roots"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_FRAGMENTS= "fragments"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_MEMBERS= "members"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_QUALIFIED= "qualified"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_PATTERNS= "patterns"; //$NON-NLS-1$
@@ -1009,8 +1010,38 @@ public class ReorgPolicyFactory {
 			return false;
 		}
 
-		public ChangeDescriptor getDescriptor() {
-			return null;
+		public final ChangeDescriptor getDescriptor() {
+			final Map arguments= new HashMap();
+			final int length= fJavaElements.length;
+			final String description= length == 1 ? getDescriptionSingular() : getDescriptionPlural();
+			final IProject resource= getSingleProject();
+			final String project= resource != null ? resource.getName() : null;
+			final String header= Messages.format(getHeaderPattern(), new String[] { String.valueOf(length), getDestinationLabel()});
+			int flags= JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(getProcessorId(), project, description, comment.asString(), arguments, flags);
+			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
+			arguments.put(ATTRIBUTE_MEMBERS, new Integer(fJavaElements.length).toString());
+			for (int offset= 0; offset < fJavaElements.length; offset++)
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), descriptor.elementToHandle(fJavaElements[offset]));
+			arguments.putAll(getRefactoringArguments(project));
+			return new RefactoringChangeDescriptor(descriptor);
+		}
+
+		protected abstract String getHeaderPattern();
+		protected abstract String getDescriptionPlural();
+		protected abstract String getDescriptionSingular();
+		protected abstract String getProcessorId();
+
+		private IProject getSingleProject() {
+			IProject result= null;
+			for (int index= 0; index < fJavaElements.length; index++) {
+				if (result == null)
+					result= fJavaElements[index].getJavaProject().getProject();
+				else if (!result.equals(fJavaElements[index].getJavaProject().getProject()))
+					return null;
+			}
+			return result;
 		}
 
 		public RefactoringStatus initialize(RefactoringArguments arguments) {
@@ -1377,6 +1408,22 @@ public class ReorgPolicyFactory {
 
 		public String getPolicyId() {
 			return POLICY_COPY_MEMBERS;
+		}
+
+		protected String getDescriptionPlural() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_copy_elements_plural;
+		}
+
+		protected String getDescriptionSingular() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_copy_elements_singular;
+		}
+
+		protected String getHeaderPattern() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_copy_elements_header;
+		}
+
+		protected String getProcessorId() {
+			return JavaCopyProcessor.ID_COPY;
 		}
 	}
 	private static class CopyFilesFoldersAndCusPolicy extends FilesFoldersAndCusReorgPolicy implements ICopyPolicy{
@@ -2480,8 +2527,24 @@ public class ReorgPolicyFactory {
 		public String getPolicyId() {
 			return POLICY_MOVE_RESOURCES;
 		}
+
+		protected String getDescriptionPlural() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_move_elements_plural;
+		}
+
+		protected String getDescriptionSingular() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_move_elements_singular;
+		}
+
+		protected String getHeaderPattern() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_move_elements_header;
+		}
+
+		protected String getProcessorId() {
+			return JavaMoveProcessor.ID_MOVE;
+		}
 	}
-		
+
 	private static class NoMovePolicy extends ReorgPolicy implements IMovePolicy{
 		protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_noMoving); 

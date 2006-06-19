@@ -1922,6 +1922,12 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ReorgPolicyFactory_copy_description_singular;
 
+	public static String ReorgPolicyFactory_copy_elements_header;
+
+	public static String ReorgPolicyFactory_copy_elements_plural;
+
+	public static String ReorgPolicyFactory_copy_elements_singular;
+
 	public static String ReorgPolicyFactory_copy_header;
 
 	public static String ReorgPolicyFactory_copy_package_singular;
@@ -1955,6 +1961,12 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ReorgPolicyFactory_move_description_plural;
 
 	public static String ReorgPolicyFactory_move_description_singular;
+
+	public static String ReorgPolicyFactory_move_elements_header;
+
+	public static String ReorgPolicyFactory_move_elements_plural;
+
+	public static String ReorgPolicyFactory_move_elements_singular;
 
 	public static String ReorgPolicyFactory_move_header;
 
