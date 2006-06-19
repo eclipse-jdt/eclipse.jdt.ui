@@ -18,6 +18,7 @@ public final class FixMessages extends NLS {
 	private FixMessages() {
 	}
 
+	public static String CleanUpRefactoring_Parser_Startup_message;
 	public static String CleanUpRefactoring_Refactoring_name;
 	public static String CleanUpRefactoring_ProcessingCompilationUnit_message;
 	public static String CleanUpRefactoring_Initialize_message;
