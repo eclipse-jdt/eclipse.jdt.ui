@@ -22,6 +22,7 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
@@ -240,6 +241,11 @@ public final class JavaRefactoringDescriptorComment {
 					}
 					fSettings.add(buffer.toString());
 				}
+			}
+			if (object instanceof IMovePolicy) {
+				final IMovePolicy extended= (IMovePolicy) object;
+				if (extended.isTextualMove())
+					fSettings.add(RefactoringCoreMessages.JavaRefactoringDescriptorComment_textual_move_only);
 			}
 		}
 		if (object instanceof IReferenceUpdating) {
