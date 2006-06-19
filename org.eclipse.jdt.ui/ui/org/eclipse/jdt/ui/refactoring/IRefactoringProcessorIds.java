@@ -10,6 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.refactoring;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.resources.mapping.ResourceMapping;
+import org.eclipse.core.resources.mapping.ResourceMappingContext;
+
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameEnumConstProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
@@ -19,6 +25,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameResourceProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameSourceFolderProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 
@@ -226,4 +233,34 @@ public interface IRefactoringProcessorIds {
 	 * </ul>
 	 */
 	public static String DELETE_PROCESSOR= JavaDeleteProcessor.IDENTIFIER;	
+
+	/**
+	 * Processor ID of the copy processor (value <code>"org.eclipse.jdt.ui.CopyProcessor"</code>).
+	 * 
+	 * The copy processor is used when copying elements via drag and drop or when pasting
+	 * elements from the clipboard. The copy processor loads the following participants,
+	 * depending on the type of the element that gets copied:
+	 * <ul>
+	 *   <li><code>IJavaProject</code>: no participants are loaded.</li>
+	 *   <li><code>IPackageFragmentRoot</code>: participants registered for copying 
+	 *       <code>IPackageFragmentRoot</code> and <code>ResourceMapping</code>.</li>
+	 *   <li><code>IPackageFragment</code>: participants registered for copying 
+	 *       <code>IPackageFragment</code> and <code>ResourceMapping</code>.</li>
+	 *   <li><code>ICompilationUnit</code>: participants registered for copying 
+	 *       <code>ICompilationUnit</code> and <code>ResourceMapping</code>.</li>
+	 *   <li><code>IType</code>: like ICompilationUnit if the primary top level type is copied.
+	 *       Otherwise no participants are loaded.</li>
+	 *   <li><code>IMember</code>: no participants are loaded.</li>
+	 *   <li><code>IFolder</code>: participants registered for copying folders.</li>
+	 *   <li><code>IFile</code>: participants registered for copying files.</li>
+	 * </ul>
+	 * <p>
+	 * Use the method {@link ResourceMapping#accept(ResourceMappingContext context, IResourceVisitor visitor, IProgressMonitor monitor)} 
+	 * to enumerate the resources which form the Java element. <code>ResourceMappingContext.LOCAL_CONTEXT</code> 
+	 * should be use as the <code>ResourceMappingContext</code> passed to the accept method.
+	 * </p>
+	 * @see org.eclipse.core.resources.mapping.ResourceMapping
+	 * @since 3.3
+	 */
+	public static String COPY_PROCESSOR= JavaCopyProcessor.IDENTIFIER;
 }
