@@ -29,6 +29,7 @@ import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.CopyProcessor;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
@@ -36,18 +37,16 @@ import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.IInternalRefactoringProcessorIds;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-public final class JavaCopyProcessor extends CopyProcessor implements IReorgDestinationValidator, ICommentProvider {
-	//TODO: offer ICopyPolicy getCopyPolicy(); IReorgPolicy getReorgPolicy();
-	// and remove delegate methods (also for JavaMoveProcessor)?
+public final class JavaCopyProcessor extends CopyProcessor implements IReorgDestinationValidator, IScriptableRefactoring, ICommentProvider {
 
 	private INewNameQueries fNewNameQueries;
 	private IReorgQueries fReorgQueries;
@@ -55,14 +54,10 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 	private ReorgExecutionLog fExecutionLog;
 	private String fComment;
 	
-	public static JavaCopyProcessor create(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
-		ICopyPolicy copyPolicy= ReorgPolicyFactory.createCopyPolicy(resources, javaElements);
-		if (! copyPolicy.canEnable())
-			return null;
-		return new JavaCopyProcessor(copyPolicy);
-	}
-
-	private JavaCopyProcessor(ICopyPolicy copyPolicy) {
+	public static final String ID_COPY= "org.eclipse.jdt.ui.copy"; //$NON-NLS-1$
+	public static final String IDENTIFIER= "org.eclipse.jdt.ui.CopyProcessor";  //$NON-NLS-1$
+	
+	public JavaCopyProcessor(ICopyPolicy copyPolicy) {
 		fCopyPolicy= copyPolicy;
 	}
 	
@@ -71,7 +66,7 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 	}
 	
 	public String getIdentifier() {
-		return IInternalRefactoringProcessorIds.COPY_PROCESSOR;
+		return IDENTIFIER;
 	}
 	
 	public boolean isApplicable() throws CoreException {
@@ -170,6 +165,10 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 						return fExecutionLog;
 					return super.getAdapter(adapter);
 				}
+// TODO: enable for scripting
+//				public ChangeDescriptor getDescriptor() {
+//					return fCopyPolicy.getDescriptor();
+//				}
 			};
 			Change change= fCopyPolicy.createChange(pm, new MonitoringNewNameQueries(fNewNameQueries, fExecutionLog));
 			if (change instanceof CompositeChange){
@@ -213,5 +212,24 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 
 	public void setComment(String comment) {
 		fComment= comment;
+	}
+
+	public RefactoringStatus initialize(RefactoringArguments arguments) {
+		setReorgQueries(new NullReorgQueries());
+		final RefactoringStatus status= new RefactoringStatus();
+		fCopyPolicy= ReorgPolicyFactory.createCopyPolicy(status, arguments);
+		if (fCopyPolicy != null && !status.hasFatalError()) {
+			status.merge(fCopyPolicy.initialize(arguments));
+			final ReorgExecutionLog log= createReorgExecutionLog(status, arguments);
+			if (log != null && !status.hasFatalError())
+				setNewNameQueries(new LoggedNewNameQueries(log));
+		}
+		return status;
+	}
+
+	private ReorgExecutionLog createReorgExecutionLog(RefactoringStatus status, RefactoringArguments arguments) {
+		// TODO: implement
+
+		return new ReorgExecutionLog();
 	}
 }

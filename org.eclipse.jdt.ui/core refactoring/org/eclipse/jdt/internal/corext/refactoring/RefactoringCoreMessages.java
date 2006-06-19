@@ -990,9 +990,25 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String JavaDeleteProcessor_confirm_linked_folder_delete;
 
+	public static String JavaDeleteProcessor_creating_change;
+
+	public static String JavaDeleteProcessor_delete_accessors;
+
 	public static String JavaDeleteProcessor_delete_linked_folder_question;
 
+	public static String JavaDeleteProcessor_delete_subpackages;
+
+	public static String JavaDeleteProcessor_description_plural;
+
+	public static String JavaDeleteProcessor_description_singular;
+
+	public static String JavaDeleteProcessor_header;
+
+	public static String JavaDeleteProcessor_project_pattern;
+
 	public static String JavaDeleteProcessor_unsaved_changes;
+
+	public static String JavaDeleteProcessor_workspace;
 
 	public static String JavaElementUtil_initializer;
 
@@ -1027,6 +1043,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String JavaRefactoringDescriptor_textual_occurrences;
 
 	public static String JavaRefactoringDescriptor_update_references;
+
+	public static String JavaRefactoringDescriptorComment_destination_pattern;
 
 	public static String JavaRefactoringDescriptorComment_element_delimiter;
 
@@ -1898,6 +1916,12 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ReorgPolicyFactory_cannot1;
 
+	public static String ReorgPolicyFactory_copy_description_plural;
+
+	public static String ReorgPolicyFactory_copy_description_singular;
+
+	public static String ReorgPolicyFactory_copy_header;
+
 	public static String ReorgPolicyFactory_doesnotexist0;
 
 	public static String ReorgPolicyFactory_doesnotexist1;
@@ -1913,6 +1937,12 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ReorgPolicyFactory_jmodel;
 
 	public static String ReorgPolicyFactory_linked;
+
+	public static String ReorgPolicyFactory_move_description_plural;
+
+	public static String ReorgPolicyFactory_move_description_singular;
+
+	public static String ReorgPolicyFactory_move_header;
 
 	public static String ReorgPolicyFactory_no_resource;
 

@@ -44,7 +44,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.TypedSource;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgEnablementPolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ParentChecker;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
@@ -301,7 +300,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		}
 	}
 	
-	private static class CopyToClipboardEnablementPolicy implements IReorgEnablementPolicy{
+	private static class CopyToClipboardEnablementPolicy {
 		private final IResource[] fResources;
 		private final IJavaElement[] fJavaElements;
 		public CopyToClipboardEnablementPolicy(IResource[] resources, IJavaElement[] javaElements){

@@ -4976,6 +4976,15 @@
       <contribution
             class="org.eclipse.jdt.internal.corext.refactoring.scripting.ExtractSupertypeRefactoringContribution"
             id="org.eclipse.jdt.ui.extract.superclass"/>
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.DeleteRefactoringContribution"
+            id="org.eclipse.jdt.ui.delete"/>
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.MoveRefactoringContribution"
+            id="org.eclipse.jdt.ui.move"/>
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.CopyRefactoringContribution"
+            id="org.eclipse.jdt.ui.copy"/>
    </extension>
 
 <!-- End Refactoring -->

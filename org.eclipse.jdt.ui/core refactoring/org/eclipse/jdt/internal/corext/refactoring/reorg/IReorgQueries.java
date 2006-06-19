@@ -17,7 +17,7 @@ public interface IReorgQueries {
 	public static final int CONFIRM_DELETE_REFERENCED_ARCHIVES= 				3;
 	public static final int CONFIRM_DELETE_FOLDERS_CONTAINING_SOURCE_FOLDERS= 	4;
 	public static final int CONFIRM_READ_ONLY_ELEMENTS= 						5;
-	public static final int CONFIRM_OVERWRITTING=								6;
+	public static final int CONFIRM_OVERWRITING=								6;
 	public static final int CONFIRM_SKIPPING=									7;
 	public static final int CONFIRM_DELETE_LINKED_PARENT=						8;
 	

@@ -51,7 +51,9 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -103,13 +105,14 @@ public class CopyTest extends RefactoringTest {
 
 	private void verifyDisabled(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
 		assertTrue("copy should be disabled", ! RefactoringAvailabilityTester.isCopyAvailable(resources, javaElements));
-		assertTrue(JavaCopyProcessor.create(resources, javaElements) == null);
+		assertTrue(!ReorgPolicyFactory.createCopyPolicy(resources, javaElements).canEnable());
 	}
 
 	private JavaCopyProcessor verifyEnabled(IResource[] resources, IJavaElement[] javaElements, INewNameQueries newNameQueries, IReorgQueries reorgQueries) throws JavaModelException {
 		assertTrue("copy should be enabled", RefactoringAvailabilityTester.isCopyAvailable(resources, javaElements));
-		JavaCopyProcessor processor= JavaCopyProcessor.create(resources, javaElements);
-		assertNotNull(processor);
+		ICopyPolicy copyPolicy= ReorgPolicyFactory.createCopyPolicy(resources, javaElements);
+		assertTrue(copyPolicy.canEnable());
+		JavaCopyProcessor processor= new JavaCopyProcessor(copyPolicy);
 		if (newNameQueries != null)
 			processor.setNewNameQueries(newNameQueries);
 		if (reorgQueries != null)

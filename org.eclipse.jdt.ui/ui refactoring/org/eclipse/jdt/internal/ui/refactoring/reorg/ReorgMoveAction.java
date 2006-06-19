@@ -104,7 +104,7 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 			IResource[] resources= ReorgUtils.getResources(elements);
 			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
 			if (RefactoringAvailabilityTester.isMoveAvailable(resources, javaElements))
-				RefactoringExecutionStarter.startRefactoring(resources, javaElements, getShell());
+				RefactoringExecutionStarter.startMoveRefactoring(resources, javaElements, getShell());
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}

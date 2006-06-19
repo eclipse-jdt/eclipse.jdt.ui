@@ -84,13 +84,13 @@ class OverwriteHelper {
 		return fPackageFragments;
 	}
 
-	public void confirmOverwritting(IReorgQueries reorgQueries, IJavaElement destination) {
+	public void confirmOverwriting(IReorgQueries reorgQueries, IJavaElement destination) {
 		Assert.isNotNull(destination);
 		fDestination= destination;
 		confirmOverwritting(reorgQueries);
 	}
 
-	public void confirmOverwritting(IReorgQueries reorgQueries, IResource destination) {
+	public void confirmOverwriting(IReorgQueries reorgQueries, IResource destination) {
 		Assert.isNotNull(destination);
 		Assert.isNotNull(reorgQueries);
 		fDestination= destination;
@@ -98,7 +98,7 @@ class OverwriteHelper {
 	}
 	
 	private void confirmOverwritting(IReorgQueries reorgQueries) {
-		IConfirmQuery overwriteQuery= reorgQueries.createYesYesToAllNoNoToAllQuery(RefactoringCoreMessages.OverwriteHelper_0, true, IReorgQueries.CONFIRM_OVERWRITTING); 
+		IConfirmQuery overwriteQuery= reorgQueries.createYesYesToAllNoNoToAllQuery(RefactoringCoreMessages.OverwriteHelper_0, true, IReorgQueries.CONFIRM_OVERWRITING); 
 		IConfirmQuery skipQuery= reorgQueries.createSkipQuery(RefactoringCoreMessages.OverwriteHelper_2, IReorgQueries.CONFIRM_SKIPPING); 
 		confirmFileOverwritting(overwriteQuery);
 		confirmFolderOverwritting(skipQuery);

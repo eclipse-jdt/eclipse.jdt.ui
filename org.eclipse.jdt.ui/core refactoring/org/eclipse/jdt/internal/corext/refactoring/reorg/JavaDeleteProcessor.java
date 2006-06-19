@@ -38,9 +38,11 @@ import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.mapping.IResourceChangeDescriptionFactory;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.DeleteProcessor;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
@@ -57,11 +59,17 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
+import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -70,8 +78,14 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public final class JavaDeleteProcessor extends DeleteProcessor implements ICommentProvider {
-	
+public final class JavaDeleteProcessor extends DeleteProcessor implements IScriptableRefactoring, ICommentProvider {
+
+	private static final String ATTRIBUTE_RESOURCES= "resources"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_ELEMENTS= "elements"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_SUGGEST_ACCESSORS= "accessors"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_DELETE_SUBPACKAGES= "subPackages"; //$NON-NLS-1$
+	private static final String ID_DELETE= "org.eclipse.jdt.ui.delete"; //$NON-NLS-1$
+
 	private boolean fWasCanceled;
 	private boolean fSuggestGetterSetterDeletion;
 	private Object[] fElements;
@@ -85,17 +99,17 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IComme
 	private boolean fDeleteSubPackages;
 	
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.DeleteProcessor"; //$NON-NLS-1$
-	
+
 	public JavaDeleteProcessor(Object[] elements) {
 		fElements= elements;
-		fResources= RefactoringAvailabilityTester.getResources(elements);
-		fJavaElements= RefactoringAvailabilityTester.getJavaElements(elements);
+		if (fElements != null) {
+			fResources= RefactoringAvailabilityTester.getResources(elements);
+			fJavaElements= RefactoringAvailabilityTester.getJavaElements(elements);
+		}
 		fSuggestGetterSetterDeletion= true;
 		fDeleteSubPackages= false;
 		fWasCanceled= false;
 	}
-	
-	//---- IRefactoringProcessor ---------------------------------------------------
 
 	public String getIdentifier() {
 		return IDENTIFIER;
@@ -602,11 +616,53 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IComme
 		}
 		return (IFile[])result.toArray(new IFile[result.size()]);
 	}
-	
-	public Change createChange(IProgressMonitor pm) throws CoreException {
-		pm.beginTask("", 1); //$NON-NLS-1$
-		pm.done();
-		return fDeleteChange;
+
+	public Change createChange(IProgressMonitor monitor) throws CoreException {
+		try {
+			monitor.beginTask(RefactoringCoreMessages.JavaDeleteProcessor_creating_change, 1);
+			final Map arguments= new HashMap();
+			final String description= fElements.length == 1 ? RefactoringCoreMessages.JavaDeleteProcessor_description_singular : RefactoringCoreMessages.JavaDeleteProcessor_description_plural;
+			final IProject resource= getSingleProject();
+			final String project= resource != null ? resource.getName() : null;
+			final String source= project != null ? Messages.format(RefactoringCoreMessages.JavaDeleteProcessor_project_pattern, project) : RefactoringCoreMessages.JavaDeleteProcessor_workspace;
+			final String header= Messages.format(RefactoringCoreMessages.JavaDeleteProcessor_header, new String[] { String.valueOf(fElements.length), source});
+			int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
+			if (fDeleteSubPackages)
+				comment.addSetting(RefactoringCoreMessages.JavaDeleteProcessor_delete_subpackages);
+			if (fSuggestGetterSetterDeletion)
+				comment.addSetting(RefactoringCoreMessages.JavaDeleteProcessor_delete_accessors);
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_DELETE, project, description, comment.asString(), arguments, flags);
+			arguments.put(ATTRIBUTE_DELETE_SUBPACKAGES, Boolean.valueOf(fDeleteSubPackages).toString());
+			arguments.put(ATTRIBUTE_SUGGEST_ACCESSORS, Boolean.valueOf(fSuggestGetterSetterDeletion).toString());
+			arguments.put(ATTRIBUTE_RESOURCES, new Integer(fResources.length).toString());
+			for (int offset= 0; offset < fResources.length; offset++)
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), descriptor.resourceToHandle(fResources[offset]));
+			arguments.put(ATTRIBUTE_ELEMENTS, new Integer(fJavaElements.length).toString());
+			for (int offset= 0; offset < fJavaElements.length; offset++)
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fResources.length + 1), descriptor.elementToHandle(fJavaElements[offset]));
+			return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.DeleteRefactoring_7, new Change[] { fDeleteChange});
+		} finally {
+			monitor.done();
+		}
+	}
+
+	private IProject getSingleProject() {
+		IProject first= null;
+		for (int index= 0; index < fElements.length; index++) {
+			IProject project= null;
+			if (fElements[index] instanceof IJavaElement)
+				project= ((IJavaElement) fElements[index]).getJavaProject().getProject();
+			else if (fElements[index] instanceof IResource)
+				project= ((IResource) fElements[index]).getProject();
+			if (project != null) {
+				if (first == null)
+					first= project;
+				else if (!project.equals(first))
+					return null;
+			}
+		}
+		return first;
 	}
 
 	private void addToSetToDelete(IJavaElement[] newElements){
@@ -774,5 +830,79 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IComme
 
 	public void setComment(String comment) {
 		fComment= comment;
+	}
+
+	public RefactoringStatus initialize(RefactoringArguments arguments) {
+		setQueries(new NullReorgQueries());
+		if (arguments instanceof JavaRefactoringArguments) {
+			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+			final String subPackages= extended.getAttribute(ATTRIBUTE_DELETE_SUBPACKAGES);
+			if (subPackages != null) {
+				fDeleteSubPackages= Boolean.valueOf(subPackages).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELETE_SUBPACKAGES));
+			final String suggest= extended.getAttribute(ATTRIBUTE_SUGGEST_ACCESSORS);
+			if (suggest != null) {
+				fSuggestGetterSetterDeletion= Boolean.valueOf(suggest).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SUGGEST_ACCESSORS));
+			int resourceCount= 0;
+			int elementCount= 0;
+			String value= extended.getAttribute(ATTRIBUTE_RESOURCES);
+			if (value != null && !"".equals(value)) {//$NON-NLS-1$
+				try {
+					resourceCount= Integer.parseInt(value);
+				} catch (NumberFormatException exception) {
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_RESOURCES));
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_RESOURCES));
+			value= extended.getAttribute(ATTRIBUTE_ELEMENTS);
+			if (value != null && !"".equals(value)) {//$NON-NLS-1$
+				try {
+					elementCount= Integer.parseInt(value);
+				} catch (NumberFormatException exception) {
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ELEMENTS));
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ELEMENTS));
+			String handle= null;
+			final RefactoringStatus status= new RefactoringStatus();
+			List elements= new ArrayList();
+			for (int index= 0; index < resourceCount; index++) {
+				final String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1);
+				handle= extended.getAttribute(attribute);
+				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+					final IResource resource= JavaRefactoringDescriptor.handleToResource(extended.getProject(), handle);
+					if (resource == null || !resource.exists())
+						return ScriptableRefactoring.createInputFatalStatus(resource, getRefactoring().getName(), ID_DELETE);
+					else
+						elements.add(resource);
+				} else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+			}
+			fResources= (IResource[]) elements.toArray(new IResource[elements.size()]);
+			elements= new ArrayList();
+			for (int index= 0; index < elementCount; index++) {
+				final String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (resourceCount + index + 1);
+				handle= extended.getAttribute(attribute);
+				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+					if (element == null || !element.exists())
+						status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), ID_DELETE));
+					else
+						elements.add(element);
+				} else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+			}
+			fJavaElements= (IJavaElement[]) elements.toArray(new IJavaElement[elements.size()]);
+			fElements= new Object[fResources.length + fJavaElements.length];
+			System.arraycopy(fResources, 0, fElements, 0, fResources.length);
+			System.arraycopy(fJavaElements, 0, fElements, fResources.length, fJavaElements.length);
+			if (!status.isOK())
+				return status;
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+		return new RefactoringStatus();
 	}
 }

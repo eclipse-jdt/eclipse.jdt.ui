@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
@@ -27,12 +28,18 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 
-public interface IReorgPolicy extends IReorgEnablementPolicy, IQualifiedNameUpdating {
+public interface IReorgPolicy extends IReferenceUpdating, IQualifiedNameUpdating, IScriptableRefactoring {
+
+	public ChangeDescriptor getDescriptor();
+
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws CoreException;
 	public RefactoringStatus setDestination(IResource resource) throws JavaModelException;
 	public RefactoringStatus setDestination(IJavaElement javaElement) throws JavaModelException;
 	
+	public boolean canEnable() throws JavaModelException;
 	public boolean canChildrenBeDestinations(IResource resource);
 	public boolean canChildrenBeDestinations(IJavaElement javaElement);
 	public boolean canElementBeDestination(IResource resource);
@@ -47,12 +54,12 @@ public interface IReorgPolicy extends IReorgEnablementPolicy, IQualifiedNameUpda
 	public boolean hasAllInputSet();
 
 	public boolean canUpdateReferences();
-	public void setUpdateReferences(boolean update);
-	public boolean getUpdateReferences();
 	public boolean canUpdateQualifiedNames();
 	
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException;
 	
+	public String getPolicyId();
+
 	public static interface ICopyPolicy extends IReorgPolicy{
 		public Change createChange(IProgressMonitor pm, INewNameQueries copyQueries) throws JavaModelException;
 		public ReorgExecutionLog getReorgExecutionLog();

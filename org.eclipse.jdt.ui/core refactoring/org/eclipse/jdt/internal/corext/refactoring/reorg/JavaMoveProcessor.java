@@ -23,6 +23,16 @@ import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -35,26 +45,16 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.util.Resources;
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
-import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
-import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 public final class JavaMoveProcessor extends MoveProcessor implements IScriptableRefactoring, ICommentProvider, IQualifiedNameUpdating, IReorgDestinationValidator {
-	//TODO: offer IMovePolicy getMovePolicy(); IReorgPolicy getReorgPolicy();
-	// and remove delegate methods (also for CopyRefactoring)?
-	
+
 	private IReorgQueries fReorgQueries;
 	private IMovePolicy fMovePolicy;
 	private ICreateTargetQueries fCreateTargetQueries;
 	private boolean fWasCanceled;
 	private String fComment;
 
+	public static final String ID_MOVE= "org.eclipse.jdt.ui.move"; //$NON-NLS-1$
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.MoveProcessor"; //$NON-NLS-1$
 	
 	public JavaMoveProcessor(IMovePolicy policy) {
@@ -176,6 +176,10 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 					}
 					return change;
 				}
+// TODO: enable for scripting
+//				public ChangeDescriptor getDescriptor() {
+//					return fMovePolicy.getDescriptor();
+//				}
 			};
 			Change change= fMovePolicy.createChange(pm);
 			if (change instanceof CompositeChange){
@@ -258,8 +262,14 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 	}
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
-		// TODO Auto-generated method stub
-		return null;
+		setReorgQueries(new NullReorgQueries());
+		final RefactoringStatus status= new RefactoringStatus();
+		fMovePolicy= ReorgPolicyFactory.createMovePolicy(status, arguments);
+		if (fMovePolicy != null && !status.hasFatalError()) {
+			status.merge(fMovePolicy.initialize(arguments));
+			setCreateTargetQueries(new LoggedCreateTargetQueries());
+		}
+		return status;
 	}
 
 	/**

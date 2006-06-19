@@ -20,14 +20,11 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.CopyProjectAction;
 
-import org.eclipse.ltk.core.refactoring.participants.CopyRefactoring;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -36,7 +33,6 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
@@ -91,22 +87,9 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 			IResource[] resources= ReorgUtils.getResources(elements);
 			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
 			if (RefactoringAvailabilityTester.isCopyAvailable(resources, javaElements)) 
-				startRefactoring(resources, javaElements);
+				RefactoringExecutionStarter.startCopyRefactoring(resources, javaElements, getShell());
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}
-	}
-
-	private void startRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
-		JavaCopyProcessor processor= JavaCopyProcessor.create(resources, javaElements);
-		CopyRefactoring refactoring= new CopyRefactoring(processor);
-		RefactoringWizard wizard= new ReorgCopyWizard(refactoring);
-		/*
-		 * We want to get the shell from the refactoring dialog but it's not known at this point, 
-		 * so we pass the wizard and then, once the dialog is open, we will have access to its shell.
-		 */
-		processor.setNewNameQueries(new NewNameQueries(wizard));
-		processor.setReorgQueries(new ReorgQueries(wizard));
-		new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages.OpenRefactoringWizardAction_refactoring, false); 
 	}
 }

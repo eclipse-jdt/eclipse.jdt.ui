@@ -22,32 +22,28 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.core.refactoring.participants.CopyRefactoring;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 
 public class ReorgCopyStarter {
-	
-	private final JavaCopyProcessor fCopyProcessor;
 
-	private ReorgCopyStarter(JavaCopyProcessor copyProcessor) {
-		Assert.isNotNull(copyProcessor);
-		fCopyProcessor= copyProcessor;
-	}
-	
 	public static ReorgCopyStarter create(IJavaElement[] javaElements, IResource[] resources, IJavaElement destination) throws JavaModelException {
 		Assert.isNotNull(javaElements);
 		Assert.isNotNull(resources);
 		Assert.isNotNull(destination);
-		JavaCopyProcessor copyProcessor= JavaCopyProcessor.create(resources, javaElements);
-		if (copyProcessor == null)
+		ICopyPolicy copyPolicy= ReorgPolicyFactory.createCopyPolicy(resources, javaElements);
+		if (!copyPolicy.canEnable())
 			return null;
-		if (! copyProcessor.setDestination(destination).isOK())
+		JavaCopyProcessor copyProcessor= new JavaCopyProcessor(copyPolicy);
+		if (!copyProcessor.setDestination(destination).isOK())
 			return null;
 		return new ReorgCopyStarter(copyProcessor);
 	}
@@ -56,18 +52,26 @@ public class ReorgCopyStarter {
 		Assert.isNotNull(javaElements);
 		Assert.isNotNull(resources);
 		Assert.isNotNull(destination);
-		JavaCopyProcessor copyProcessor= JavaCopyProcessor.create(resources, javaElements);
-		if (copyProcessor == null)
+		ICopyPolicy copyPolicy= ReorgPolicyFactory.createCopyPolicy(resources, javaElements);
+		if (!copyPolicy.canEnable())
 			return null;
-		if (! copyProcessor.setDestination(destination).isOK())
+		JavaCopyProcessor copyProcessor= new JavaCopyProcessor(copyPolicy);
+		if (!copyProcessor.setDestination(destination).isOK())
 			return null;
 		return new ReorgCopyStarter(copyProcessor);
 	}
-	
+
+	private final JavaCopyProcessor fCopyProcessor;
+
+	private ReorgCopyStarter(JavaCopyProcessor copyProcessor) {
+		Assert.isNotNull(copyProcessor);
+		fCopyProcessor= copyProcessor;
+	}
+
 	public void run(Shell parent) throws InterruptedException, InvocationTargetException {
 		IRunnableContext context= new ProgressMonitorDialog(parent);
 		fCopyProcessor.setNewNameQueries(new NewNameQueries(parent));
 		fCopyProcessor.setReorgQueries(new ReorgQueries(parent));
-		new RefactoringExecutionHelper(new CopyRefactoring(fCopyProcessor), RefactoringCore.getConditionCheckingFailedSeverity(), false, parent, context).perform(false);
+		new RefactoringExecutionHelper(new JavaCopyRefactoring(fCopyProcessor), RefactoringCore.getConditionCheckingFailedSeverity(), false, parent, context).perform(false);
 	}
 }

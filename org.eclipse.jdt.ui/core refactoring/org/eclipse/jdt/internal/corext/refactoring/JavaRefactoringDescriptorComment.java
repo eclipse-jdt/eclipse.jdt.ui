@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -20,6 +21,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
@@ -185,6 +187,40 @@ public final class JavaRefactoringDescriptorComment {
 		} else if (object instanceof RefactoringProcessor) {
 			final RefactoringProcessor processor= (RefactoringProcessor) object;
 			final Object[] elements= processor.getElements();
+			if (elements != null) {
+				if (elements.length == 1 && elements[0] != null)
+					fSettings.add(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_original_element_pattern, JavaElementLabels.getTextLabel(elements[0], JavaElementLabels.ALL_FULLY_QUALIFIED)));
+				else if (elements.length > 1) {
+					final StringBuffer buffer= new StringBuffer(128);
+					buffer.append(RefactoringCoreMessages.JavaRefactoringDescriptor_original_elements);
+					for (int index= 0; index < elements.length; index++) {
+						if (elements[index] != null) {
+							buffer.append(LINE_DELIMITER);
+							buffer.append(ELEMENT_DELIMITER);
+							buffer.append(JavaElementLabels.getTextLabel(elements[index], JavaElementLabels.ALL_FULLY_QUALIFIED));
+						} else {
+							buffer.append(LINE_DELIMITER);
+							buffer.append(ELEMENT_DELIMITER);
+							buffer.append(RefactoringCoreMessages.JavaRefactoringDescriptor_not_available);
+						}
+					}
+					fSettings.add(buffer.toString());
+				}
+			}
+		} else if (object instanceof IReorgPolicy) {
+			final IReorgPolicy policy= (IReorgPolicy) object;
+			Object destination= policy.getJavaElementDestination();
+			if (destination != null)
+				fSettings.add(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptorComment_destination_pattern, JavaElementLabels.getTextLabel(destination, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+			else {
+				destination= policy.getResourceDestination();
+				if (destination != null)
+					fSettings.add(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptorComment_destination_pattern, JavaElementLabels.getTextLabel(destination, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+			}
+			final List list= new ArrayList();
+			list.addAll(Arrays.asList(policy.getJavaElements()));
+			list.addAll(Arrays.asList(policy.getResources()));
+			final Object[] elements= list.toArray();
 			if (elements != null) {
 				if (elements.length == 1 && elements[0] != null)
 					fSettings.add(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_original_element_pattern, JavaElementLabels.getTextLabel(elements[0], JavaElementLabels.ALL_FULLY_QUALIFIED)));

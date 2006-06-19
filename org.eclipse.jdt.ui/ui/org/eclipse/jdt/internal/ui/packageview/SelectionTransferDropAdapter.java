@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
@@ -206,8 +207,10 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 
 	private int handleValidateCopy(Object target, DropTargetEvent event) throws JavaModelException{
 
-		if (fCopyProcessor == null)
-			fCopyProcessor= JavaCopyProcessor.create(ReorgUtils.getResources(fElements), ReorgUtils.getJavaElements(fElements));
+		if (fCopyProcessor == null) {
+			final ICopyPolicy policy= ReorgPolicyFactory.createCopyPolicy(ReorgUtils.getResources(fElements), ReorgUtils.getJavaElements(fElements));
+			fCopyProcessor= policy.canEnable() ? new JavaCopyProcessor(policy) : null;
+		}
 
 		if (!canCopyElements())
 			return DND.DROP_NONE;	

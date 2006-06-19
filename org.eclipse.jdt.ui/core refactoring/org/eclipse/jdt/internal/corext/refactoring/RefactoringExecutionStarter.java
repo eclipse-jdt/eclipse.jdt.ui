@@ -33,6 +33,7 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
+import org.eclipse.ltk.core.refactoring.participants.CopyRefactoring;
 import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
@@ -63,9 +64,13 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefact
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameResourceProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
@@ -118,7 +123,9 @@ import org.eclipse.jdt.internal.ui.refactoring.code.InlineMethodWizard;
 import org.eclipse.jdt.internal.ui.refactoring.code.ReplaceInvocationsWizard;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CreateTargetQueries;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.DeleteUserInterfaceManager;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.NewNameQueries;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceManager;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgCopyWizard;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMoveWizard;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgQueries;
 import org.eclipse.jdt.internal.ui.refactoring.sef.SelfEncapsulateFieldWizard;
@@ -127,7 +134,9 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * Helper class to run refactorings from action code.
  * <p>
- * This class has been introduced to decouple actions from the refactoring code, in order not to eagerly load refactoring classes during action initialization.
+ * This class has been introduced to decouple actions from the refactoring code,
+ * in order not to eagerly load refactoring classes during action
+ * initialization.
  * </p>
  * 
  * @since 3.1
@@ -182,8 +191,10 @@ public final class RefactoringExecutionStarter {
 						if (element != null && MessageDialog.openQuestion(shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, message)) {
 
 							final IStructuredSelection selection= new StructuredSelection(element);
-							//TODO: should not hijack this ModifiyParametersAction.
-							// The action is set up on an editor, but we use it as if it were set up on a ViewPart.
+							// TODO: should not hijack this
+							// ModifiyParametersAction.
+							// The action is set up on an editor, but we use it
+							// as if it were set up on a ViewPart.
 							boolean wasEnabled= action.isEnabled();
 							action.selectionChanged(selection);
 							if (action.isEnabled()) {
@@ -212,20 +223,50 @@ public final class RefactoringExecutionStarter {
 		new RefactoringStarter().activate(refactoring, new ChangeTypeWizard(refactoring), shell, RefactoringMessages.ChangeTypeAction_dialog_title, false);
 	}
 
+	public static void startCleanupRefactoring(ICompilationUnit cu) throws JavaModelException {
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu);
+		CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, false, true);
+		RefactoringStarter starter= new RefactoringStarter();
+		starter.activate(refactoring, refactoringWizard, JavaPlugin.getActiveWorkbenchShell(), "Clean ups", false); //$NON-NLS-1$
+	}
+
+	public static void startCleanupRefactoring(final ICompilationUnit[] cus) throws JavaModelException {
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		for (int i= 0; i < cus.length; i++) {
+			refactoring.addCompilationUnit(cus[i]);
+		}
+		CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, false, true);
+		RefactoringStarter starter= new RefactoringStarter();
+		starter.activate(refactoring, refactoringWizard, JavaPlugin.getActiveWorkbenchShell(), "Clean ups", false); //$NON-NLS-1$
+	}
+
 	public static void startConvertAnonymousRefactoring(final ICompilationUnit unit, final int offset, final int length, final Shell shell) throws JavaModelException {
 		final ConvertAnonymousToNestedRefactoring refactoring= new ConvertAnonymousToNestedRefactoring(unit, JavaPreferencesSettings.getCodeGenerationSettings(unit.getJavaProject()), offset, length);
 		new RefactoringStarter().activate(refactoring, new ConvertAnonymousToNestedWizard(refactoring), shell, RefactoringMessages.ConvertAnonymousToNestedAction_dialog_title, false);
+	}
+
+	public static void startCopyRefactoring(IResource[] resources, IJavaElement[] javaElements, Shell shell) throws JavaModelException {
+		ICopyPolicy copyPolicy= ReorgPolicyFactory.createCopyPolicy(resources, javaElements);
+		if (copyPolicy.canEnable()) {
+			JavaCopyProcessor processor= new JavaCopyProcessor(copyPolicy);
+			CopyRefactoring refactoring= new JavaCopyRefactoring(processor);
+			RefactoringWizard wizard= new ReorgCopyWizard(refactoring);
+			processor.setNewNameQueries(new NewNameQueries(wizard));
+			processor.setReorgQueries(new ReorgQueries(wizard));
+			new RefactoringStarter().activate(refactoring, wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, false);
+		}
 	}
 
 	public static void startCutRefactoring(final Object[] elements, final Shell shell) throws CoreException, InterruptedException, InvocationTargetException {
 		final JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
 		processor.setSuggestGetterSetterDeletion(false);
 		processor.setQueries(new ReorgQueries(shell));
-		new RefactoringExecutionHelper(new DeleteRefactoring(processor), RefactoringCore.getConditionCheckingFailedSeverity(), false, shell, new ProgressMonitorDialog(shell)).perform(false);
+		new RefactoringExecutionHelper(new JavaDeleteRefactoring(processor), RefactoringCore.getConditionCheckingFailedSeverity(), false, shell, new ProgressMonitorDialog(shell)).perform(false);
 	}
 
 	public static void startDeleteRefactoring(final Object[] elements, final Shell shell) throws CoreException {
-		final DeleteRefactoring refactoring= new DeleteRefactoring(new JavaDeleteProcessor(elements));
+		final DeleteRefactoring refactoring= new JavaDeleteRefactoring(new JavaDeleteProcessor(elements));
 		DeleteUserInterfaceManager.getDefault().getStarter(refactoring).activate(refactoring, shell, false);
 	}
 
@@ -233,7 +274,19 @@ public final class RefactoringExecutionStarter {
 		final ExtractInterfaceRefactoring refactoring= new ExtractInterfaceRefactoring(new ExtractInterfaceProcessor(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject())));
 		if (!ActionUtil.isProcessable(shell, refactoring.getExtractInterfaceProcessor().getType()))
 			return;
-		new RefactoringStarter().activate(refactoring, new ExtractInterfaceWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true); 
+		new RefactoringStarter().activate(refactoring, new ExtractInterfaceWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
+	}
+
+	public static void startExtractSupertypeRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
+		if (!RefactoringAvailabilityTester.isExtractSupertypeAvailable(members))
+			return;
+		IJavaProject project= null;
+		if (members != null && members.length > 0)
+			project= members[0].getJavaProject();
+		final ExtractSupertypeRefactoring refactoring= new ExtractSupertypeRefactoring(new ExtractSupertypeProcessor(members, JavaPreferencesSettings.getCodeGenerationSettings(project)));
+		if (!ActionUtil.isProcessable(shell, refactoring.getExtractSupertypeProcessor().getDeclaringType()))
+			return;
+		new RefactoringStarter().activate(refactoring, new ExtractSupertypeWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
 	}
 
 	public static void startInferTypeArgumentsRefactoring(final IJavaElement[] elements, final Shell shell) {
@@ -287,17 +340,17 @@ public final class RefactoringExecutionStarter {
 		final IntroduceFactoryRefactoring refactoring= new IntroduceFactoryRefactoring(unit, selection.getOffset(), selection.getLength());
 		new RefactoringStarter().activate(refactoring, new IntroduceFactoryWizard(refactoring, RefactoringMessages.IntroduceFactoryAction_use_factory), shell, RefactoringMessages.IntroduceFactoryAction_dialog_title, false);
 	}
-	
-	public static void startIntroduceIndirectionRefactoring(final ICompilationUnit unit, final int offset, final int length, final Shell shell) throws JavaModelException {
-		final IntroduceIndirectionRefactoring refactoring= new IntroduceIndirectionRefactoring(unit, offset, length);
-		new RefactoringStarter().activate(refactoring, new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell, RefactoringMessages.IntroduceIndirectionAction_dialog_title, true);
-	}
-	
+
 	public static void startIntroduceIndirectionRefactoring(final IClassFile file, final int offset, final int length, final Shell shell) throws JavaModelException {
 		final IntroduceIndirectionRefactoring refactoring= new IntroduceIndirectionRefactoring(file, offset, length);
 		new RefactoringStarter().activate(refactoring, new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell, RefactoringMessages.IntroduceIndirectionAction_dialog_title, true);
 	}
-	
+
+	public static void startIntroduceIndirectionRefactoring(final ICompilationUnit unit, final int offset, final int length, final Shell shell) throws JavaModelException {
+		final IntroduceIndirectionRefactoring refactoring= new IntroduceIndirectionRefactoring(unit, offset, length);
+		new RefactoringStarter().activate(refactoring, new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell, RefactoringMessages.IntroduceIndirectionAction_dialog_title, true);
+	}
+
 	public static void startIntroduceIndirectionRefactoring(final IMethod method, final Shell shell) throws JavaModelException {
 		final IntroduceIndirectionRefactoring refactoring= new IntroduceIndirectionRefactoring(method);
 		new RefactoringStarter().activate(refactoring, new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell, RefactoringMessages.IntroduceIndirectionAction_dialog_title, true);
@@ -317,6 +370,18 @@ public final class RefactoringExecutionStarter {
 		new RefactoringStarter().activate(refactoring, new MoveInstanceMethodWizard(refactoring), shell, RefactoringMessages.MoveInstanceMethodAction_dialog_title, true);
 	}
 
+	public static void startMoveRefactoring(final IResource[] resources, final IJavaElement[] elements, final Shell shell) throws JavaModelException {
+		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(resources, elements);
+		if (policy.canEnable()) {
+			final JavaMoveProcessor processor= new JavaMoveProcessor(policy);
+			final JavaMoveRefactoring refactoring= new JavaMoveRefactoring(processor);
+			final RefactoringWizard wizard= new ReorgMoveWizard(refactoring);
+			processor.setCreateTargetQueries(new CreateTargetQueries(wizard));
+			processor.setReorgQueries(new ReorgQueries(wizard));
+			new RefactoringStarter().activate(refactoring, wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
+		}
+	}
+
 	public static void startMoveStaticMembersRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
 		if (!RefactoringAvailabilityTester.isMoveStaticAvailable(members))
 			return;
@@ -329,18 +394,6 @@ public final class RefactoringExecutionStarter {
 		final JavaMoveRefactoring refactoring= new JavaMoveRefactoring(new MoveStaticMembersProcessor(elements, JavaPreferencesSettings.getCodeGenerationSettings(project)));
 		if (ActionUtil.isProcessable(shell, ((MoveStaticMembersProcessor) refactoring.getAdapter(MoveStaticMembersProcessor.class)).getMembersToMove()[0].getCompilationUnit()))
 			new RefactoringStarter().activate(refactoring, new MoveMembersWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
-	}
-
-	public static void startExtractSupertypeRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
-		if (!RefactoringAvailabilityTester.isExtractSupertypeAvailable(members))
-			return;
-		IJavaProject project= null;
-		if (members != null && members.length > 0)
-			project= members[0].getJavaProject();
-		final ExtractSupertypeRefactoring refactoring= new ExtractSupertypeRefactoring(new ExtractSupertypeProcessor(members, JavaPreferencesSettings.getCodeGenerationSettings(project)));
-		if (!ActionUtil.isProcessable(shell, refactoring.getExtractSupertypeProcessor().getDeclaringType()))
-			return;
-		new RefactoringStarter().activate(refactoring, new ExtractSupertypeWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
 	}
 
 	public static void startPullUpRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
@@ -364,18 +417,6 @@ public final class RefactoringExecutionStarter {
 		new RefactoringStarter().activate(refactoring, new PushDownWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
 	}
 
-	public static void startRefactoring(final IResource[] resources, final IJavaElement[] elements, final Shell shell) throws JavaModelException {
-		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(resources, elements);
-		if (policy.canEnable()) {
-			final JavaMoveProcessor processor= new JavaMoveProcessor(policy);
-			final JavaMoveRefactoring refactoring= new JavaMoveRefactoring(processor);
-			final RefactoringWizard wizard= new ReorgMoveWizard(refactoring);
-			processor.setCreateTargetQueries(new CreateTargetQueries(wizard));
-			processor.setReorgQueries(new ReorgQueries(wizard));
-			new RefactoringStarter().activate(refactoring, wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
-		}
-	}
-
 	public static void startRenameRefactoring(final IJavaElement element, final Shell shell) throws CoreException {
 		final RenameSupport support= createRenameSupport(element, null, RenameSupport.UPDATE_REFERENCES);
 		if (support != null && support.preCheck().isOK())
@@ -386,12 +427,12 @@ public final class RefactoringExecutionStarter {
 		final JavaRenameRefactoring refactoring= new JavaRenameRefactoring(new RenameResourceProcessor(resource));
 		RenameUserInterfaceManager.getDefault().getStarter(refactoring).activate(refactoring, shell, true);
 	}
-	
+
 	public static void startReplaceInvocationsRefactoring(final IJavaElement unit, final int offset, final int length, final Shell shell) throws JavaModelException {
 		final ReplaceInvocationsRefactoring refactoring= new ReplaceInvocationsRefactoring(unit, offset, length);
 		new RefactoringStarter().activate(refactoring, new ReplaceInvocationsWizard(refactoring), shell, RefactoringMessages.ReplaceInvocationsAction_dialog_title, true);
 	}
-	
+
 	public static void startReplaceInvocationsRefactoring(final IMethod method, final Shell shell) throws JavaModelException {
 		final ReplaceInvocationsRefactoring refactoring= new ReplaceInvocationsRefactoring(method);
 		new RefactoringStarter().activate(refactoring, new ReplaceInvocationsWizard(refactoring), shell, RefactoringMessages.ReplaceInvocationsAction_dialog_title, true);
@@ -419,23 +460,5 @@ public final class RefactoringExecutionStarter {
 
 	private RefactoringExecutionStarter() {
 		// Not for instantiation
-	}
-
-	public static void startCleanupRefactoring(final ICompilationUnit[] cus) throws JavaModelException {
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		for (int i= 0; i < cus.length; i++) {
-			refactoring.addCompilationUnit(cus[i]);
-		}
-		CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, false, true);
-		RefactoringStarter starter= new RefactoringStarter();
-			starter.activate(refactoring, refactoringWizard, JavaPlugin.getActiveWorkbenchShell(), "Clean ups", false); //$NON-NLS-1$
-	}
-
-	public static void startCleanupRefactoring(ICompilationUnit cu) throws JavaModelException {
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu);
-		CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, false, true);
-		RefactoringStarter starter= new RefactoringStarter();
-		starter.activate(refactoring, refactoringWizard, JavaPlugin.getActiveWorkbenchShell(), "Clean ups", false); //$NON-NLS-1$
 	}
 }
