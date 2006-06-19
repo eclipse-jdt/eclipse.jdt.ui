@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<site-build
-      autobuild="false"
-      scrub-output="false"
-      use-console="true">
-   <feature id="org.eclipse.jdt.astview.feature" version="1.0.5"/>
-</site-build>
