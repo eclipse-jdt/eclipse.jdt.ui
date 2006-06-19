@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -53,6 +54,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
@@ -148,6 +150,26 @@ public class FullConstraintCreator extends ConstraintCreator{
 		} else 
 			return definesConstraint;
 	}
+	
+	public ITypeConstraint[] create(CatchClause node) {
+		SingleVariableDeclaration exception= node.getException();
+		ConstraintVariable nameVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(exception.getName(), getContext());
+		
+		ITypeConstraint[] defines= fTypeConstraintFactory.createDefinesConstraint(
+				nameVariable,
+				fConstraintVariableFactory.makeTypeVariable(exception.getType()));
+		
+		ITypeBinding throwable= node.getAST().resolveWellKnownType("java.lang.Throwable"); //$NON-NLS-1$
+		ITypeConstraint[] catchBound= fTypeConstraintFactory.createSubtypeConstraint(
+				nameVariable,
+				fConstraintVariableFactory.makeRawBindingVariable(throwable));
+		
+		ArrayList result= new ArrayList();
+		result.addAll(Arrays.asList(defines));
+		result.addAll(Arrays.asList(catchBound));
+		return (ITypeConstraint[]) result.toArray(new ITypeConstraint[result.size()]);		
+	}
+
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ClassInstanceCreation)
