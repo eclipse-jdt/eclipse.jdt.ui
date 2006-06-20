@@ -151,7 +151,7 @@ public final class JarRefactoringDialog extends TrayDialog {
 				return JarPackagerMessages.JarRefactoringDialog_workspace_caption;
 			}
 		};
-		fHistoryControl= (ISortableRefactoringHistoryControl) RefactoringUI.createSortableRefactoringHistoryControl(parent, configuration);
+		fHistoryControl= (ISortableRefactoringHistoryControl) RefactoringUI.createSortableRefactoringHistoryControl(composite, configuration);
 		fHistoryControl.createControl();
 		boolean sortProjects= true;
 		final IDialogSettings settings= fSettings;
