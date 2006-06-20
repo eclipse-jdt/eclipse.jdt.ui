@@ -371,7 +371,6 @@ public class ReorgPolicyFactory {
 			return false;
 		}
 		public boolean canUpdateReferences() {
-			Assert.isTrue(false);//should not be called if canEnableUpdateReferences is not overridden and returns false
 			return false;
 		}
 		public boolean getUpdateReferences() {
