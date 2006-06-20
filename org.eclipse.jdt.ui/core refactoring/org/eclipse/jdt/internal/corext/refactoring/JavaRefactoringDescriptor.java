@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
  * 
  * @since 3.2
  */
-public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
+public class JavaRefactoringDescriptor extends RefactoringDescriptor {
 
 	/**
 	 * Predefined argument called <code>element&lt;Number&gt;</code>.
@@ -328,7 +328,7 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 */
 	public RefactoringArguments createArguments() {
 		final JavaRefactoringArguments arguments= new JavaRefactoringArguments(getProject());
-		for (final Iterator iterator= fArguments.entrySet().iterator(); iterator.hasNext();) {
+		for (final Iterator iterator= getArguments().entrySet().iterator(); iterator.hasNext();) {
 			final Map.Entry entry= (Entry) iterator.next();
 			final String name= (String) entry.getKey();
 			final String value= (String) entry.getValue();
