@@ -63,22 +63,6 @@ public class MockWorkbenchSite extends PlatformObject implements IWorkbenchSite 
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.ui.services.IServiceLocator#getService(java.lang.Object)
-	 * TODO: Old API, can be removed after M5
-	 */
-	public Object getService(Object key) {
-		return null;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.services.IServiceLocator#hasService(java.lang.Object)
-	 * TODO: Old API, can be removed after M5
-	 */
-	public boolean hasService(Object key) {
-		return false;
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.eclipse.ui.services.IServiceLocator#getService(java.lang.Class)
 	 */
 	public Object getService(Class key) {
