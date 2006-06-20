@@ -11,8 +11,6 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import junit.framework.Test;
@@ -36,14 +34,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
-import org.eclipse.jdt.internal.corext.fix.IFix;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -59,8 +53,6 @@ import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -128,72 +120,6 @@ public class CleanUpTest extends QuickFixTest {
 
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
-	}
-	
-	protected static void assertNumberOfChanges(CompilationUnitChange[] changes, int expectedChanges) {
-		if (changes.length != expectedChanges) {
-			StringBuffer buf= new StringBuffer();
-			buf.append("Wrong number of changes, is: ").append(changes.length). append(", expected: ").append(expectedChanges).append('\n');
-			for (int i= 0; i < changes.length; i++) {
-				CompilationUnitChange curr= changes[i];
-				buf.append(" - ").append(curr.getName()).append(" in ").append(curr.getCompilationUnit().getElementName()).append('\n');
-			}
-			assertTrue(buf.toString(), false);
-		}
-	}
-	
-	public static void assertNumberOfProblems(CompilationUnit unit, int expected) {
-		IProblem[] problems= unit.getProblems();
-		if (problems.length != expected) {
-			StringBuffer buf= new StringBuffer();
-			buf.append("Wrong number of problems, is: ").append(problems.length). append(", expected: ").append(expected).append('\n');
-			for (int i= 0; i < problems.length; i++) {
-				buf.append(" - ").append(problems[i].getMessage()).append('\n');
-			}
-			assertTrue(buf.toString(), false);
-		}
-	}
-	
-	private CompilationUnit[] compile(ICompilationUnit[] units) {
-		CompilationUnit[] result= new CompilationUnit[units.length];
-		for (int i= 0; i < units.length; i++) {
-			result[i]= compile(units[i]);
-		}
-		return result;
-	}
-	
-	private CompilationUnit compile(ICompilationUnit compilationUnit) {
-		CompilationUnit result= JavaPlugin.getDefault().getASTProvider().getAST(compilationUnit, ASTProvider.WAIT_YES, null);
-		if (result == null) {
-			// see bug 63554
-			result= ASTResolving.createQuickFixAST(compilationUnit, null);
-		}
-		return result;
-	}
-	
-	private void setOptions(ICleanUp fix) {
-		setOptions(new ICleanUp[] {fix});
-	}
-	
-	private void setOptions(ICleanUp[] fixes) {
-		Hashtable options= JavaCore.getOptions();
-		for (Iterator iter= options.keySet().iterator(); iter.hasNext();) {
-			String key= (String)iter.next();
-			String value= (String)options.get(key);
-			if ("error".equals(value) || "warning".equals(value)) {  
-				options.put(key, "ignore"); 
-			}
-		}
-		
-		for (int i= 0; i < fixes.length; i++) {
-			ICleanUp fix= fixes[i];
-			Map fixOptions= fix.getRequiredOptions();
-			if (fixOptions != null) {
-				options.putAll(fixOptions);
-			}
-		}
-
-		JavaCore.setOptions(options);
 	}
 	
 	private void assertRefactoringResultAsExpected(CleanUpRefactoring refactoring, String[] expected) throws CoreException {
@@ -270,14 +196,13 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		refactoring.addCompilationUnit(cu2);
+		refactoring.addCompilationUnit(cu3);
+		
 		ICleanUp cleanUp= new StringCleanUp(StringCleanUp.ADD_MISSING_NLS_TAG);
-		
-		setOptions(cleanUp);
-		
-		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
-		assertNumberOfProblems(units[0], 1);
-		assertNumberOfProblems(units[1], 3);
-		assertNumberOfProblems(units[2], 4);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -311,18 +236,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 		
-		int numberOfFixes= 3;
-		int offset= 0;
-		String[] previews= new String[numberOfFixes];
-		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= cleanUp.createFix(units[i]);
-			assertNotNull("There are problems but no fix", fix);
-			TextChange change= fix.createChange();
-			assertNotNull("Null change for an existing fix", change);
-			previews[i - offset]= change.getPreviewContent(null);
-		}
-
-		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});	
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});	
 	}
 	
 	public void testRemoveNLSTag01() throws Exception {
@@ -359,15 +273,14 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		refactoring.addCompilationUnit(cu2);
+		refactoring.addCompilationUnit(cu3);
 
 		ICleanUp cleanUp= new StringCleanUp(StringCleanUp.REMOVE_UNNECESSARY_NLS_TAG);
-		
-		setOptions(cleanUp);
-		
-		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
-		assertNumberOfProblems(units[0], 1);
-		assertNumberOfProblems(units[1], 3);
-		assertNumberOfProblems(units[2], 4);
+		refactoring.addCleanUp(cleanUp);		
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -401,18 +314,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		int numberOfFixes= 3;
-		int offset= 0;
-		String[] previews= new String[numberOfFixes];
-		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= cleanUp.createFix(units[i]);
-			assertNotNull("There are problems but no fix", fix);
-			TextChange change= fix.createChange();
-			assertNotNull("Null change for an existing fix", change);
-			previews[i - offset]= change.getPreviewContent(null);
-		}
-
-		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});	
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});	
 	}
 
 	public void testUnusedCode01() throws Exception {
@@ -445,14 +347,13 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		refactoring.addCompilationUnit(cu2);
+		refactoring.addCompilationUnit(cu3);
+		
 		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_IMPORTS);
-		
-		setOptions(cleanUp);
-		
-		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
-		assertNumberOfProblems(units[0], 1);
-		assertNumberOfProblems(units[1], 2);
-		assertNumberOfProblems(units[2], 3);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -475,18 +376,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		int numberOfFixes= 3;
-		int offset= 0;
-		String[] previews= new String[numberOfFixes];
-		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= cleanUp.createFix(units[i]);
-			assertNotNull("There are problems but no fix", fix);
-			TextChange change= fix.createChange();
-			assertNotNull("Null change for an existing fix", change);
-			previews[i - offset]= change.getPreviewContent(null);
-		}
-
-		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});	
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});	
 	}
 	
 	public void testUnusedCode02() throws Exception {
@@ -522,14 +412,13 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		refactoring.addCompilationUnit(cu2);
+		refactoring.addCompilationUnit(cu3);
+		
 		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_METHODS);
-		
-		setOptions(cleanUp);
-		
-		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
-		assertNumberOfProblems(units[0], 1);
-		assertNumberOfProblems(units[1], 2);
-		assertNumberOfProblems(units[2], 3);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -556,18 +445,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		int numberOfFixes= 3;
-		int offset= 0;
-		String[] previews= new String[numberOfFixes];
-		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= cleanUp.createFix(units[i]);
-			assertNotNull("There are problems but no fix", fix);
-			TextChange change= fix.createChange();
-			assertNotNull("Null change for an existing fix", change);
-			previews[i - offset]= change.getPreviewContent(null);
-		}
-
-		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});	
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});	
 	}
 	
 	public void testUnusedCode03() throws Exception {
@@ -600,14 +478,13 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		refactoring.addCompilationUnit(cu2);
+		refactoring.addCompilationUnit(cu3);
+		
 		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_CONSTRUCTORS);
-		
-		setOptions(cleanUp);
-		
-		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
-		assertNumberOfProblems(units[0], 1);
-		assertNumberOfProblems(units[1], 2);
-		assertNumberOfProblems(units[2], 2);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -632,18 +509,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		int numberOfFixes= 3;
-		int offset= 0;
-		String[] previews= new String[numberOfFixes];
-		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= cleanUp.createFix(units[i]);
-			assertNotNull("There are problems but no fix", fix);
-			TextChange change= fix.createChange();
-			assertNotNull("Null change for an existing fix", change);
-			previews[i - offset]= change.getPreviewContent(null);
-		}
-
-		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});	
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});	
 	}
 	
 	public void testUnusedCode04() throws Exception {
@@ -737,14 +603,13 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		refactoring.addCompilationUnit(cu2);
+		refactoring.addCompilationUnit(cu3);
+		
 		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_TYPES);
-		
-		setOptions(cleanUp);
-		
-		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
-		assertNumberOfProblems(units[0], 1);
-		assertNumberOfProblems(units[1], 2);
-		assertNumberOfProblems(units[2], 1);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -767,18 +632,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		int numberOfFixes= 3;
-		int offset= 0;
-		String[] previews= new String[numberOfFixes];
-		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= cleanUp.createFix(units[i]);
-			assertNotNull("There are problems but no fix", fix);
-			TextChange change= fix.createChange();
-			assertNotNull("Null change for an existing fix", change);
-			previews[i - offset]= change.getPreviewContent(null);
-		}
-
-		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});	
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});	
 	}
 	
 	public void testUnusedCode06() throws Exception {
@@ -1104,13 +958,12 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		refactoring.addCompilationUnit(cu2);
+		
 		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.ADD_DEPRECATED_ANNOTATION);
-		
-		setOptions(cleanUp);
-		
-		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2});
-		assertNumberOfProblems(units[0], 1);
-		assertNumberOfProblems(units[1], 2);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1139,18 +992,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		int numberOfFixes= 2;
-		int offset= 0;
-		String[] previews= new String[numberOfFixes];
-		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= cleanUp.createFix(units[i]);
-			assertNotNull("There are problems but no fix", fix);
-			TextChange change= fix.createChange();
-			assertNotNull("Null change for an existing fix", change);
-			previews[i - offset]= change.getPreviewContent(null);
-		}
-
-		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2});	
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2});	
 	}
 	
 	public void testJava5002() throws Exception {
@@ -1179,13 +1021,12 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		refactoring.addCompilationUnit(cu2);
+		
 		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.ADD_DEPRECATED_ANNOTATION);
-		
-		setOptions(cleanUp);
-		
-		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2});
-		assertNumberOfProblems(units[0], 1);
-		assertNumberOfProblems(units[1], 2);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1214,18 +1055,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		int numberOfFixes= 2;
-		int offset= 0;
-		String[] previews= new String[numberOfFixes];
-		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= cleanUp.createFix(units[i]);
-			assertNotNull("There are problems but no fix", fix);
-			TextChange change= fix.createChange();
-			assertNotNull("Null change for an existing fix", change);
-			previews[i - offset]= change.getPreviewContent(null);
-		}
-
-		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2});	
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2});	
 	}
 	
 	public void testJava5003() throws Exception {
@@ -1253,13 +1083,12 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		refactoring.addCompilationUnit(cu2);
+		
 		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.ADD_DEPRECATED_ANNOTATION);
-		
-		setOptions(cleanUp);
-		
-		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2});
-		assertNumberOfProblems(units[0], 1);
-		assertNumberOfProblems(units[1], 2);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1287,18 +1116,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		int numberOfFixes= 2;
-		int offset= 0;
-		String[] previews= new String[numberOfFixes];
-		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= cleanUp.createFix(units[i]);
-			assertNotNull("There are problems but no fix", fix);
-			TextChange change= fix.createChange();
-			assertNotNull("Null change for an existing fix", change);
-			previews[i - offset]= change.getPreviewContent(null);
-		}
-
-		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2});
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2});
 	}
 	
 	public void testJava5004() throws Exception {
@@ -1666,14 +1484,13 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		refactoring.addCompilationUnit(cu2);
+		refactoring.addCompilationUnit(cu3);
+		
 		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
-		
-		setOptions(cleanUp);
-		
-		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
-		assertNumberOfProblems(units[0], 1);
-		assertNumberOfProblems(units[1], 2);
-		assertNumberOfProblems(units[2], 2);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1710,18 +1527,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		int numberOfFixes= 3;
-		int offset= 0;
-		String[] previews= new String[numberOfFixes];
-		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= cleanUp.createFix(units[i]);
-			assertNotNull("There are problems but no fix", fix);
-			TextChange change= fix.createChange();
-			assertNotNull("Null change for an existing fix", change);
-			previews[i - offset]= change.getPreviewContent(null);
-		}
-
-		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});
 	}
 	
 	public void testCodeStyle04() throws Exception {
@@ -2888,12 +2694,11 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
 		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
-		
-		setOptions(cleanUp);
-		
-		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1});
-		assertNumberOfProblems(units[0], 1);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2905,18 +2710,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		int numberOfFixes= 1;
-		int offset= 0;
-		String[] previews= new String[numberOfFixes];
-		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= cleanUp.createFix(units[i]);
-			assertNotNull("There are problems but no fix", fix);
-			TextChange change= fix.createChange();
-			assertNotNull("Null change for an existing fix", change);
-			previews[i - offset]= change.getPreviewContent(null);
-		}
-
-		assertEqualStringsIgnoreOrder(previews, new String[] { expected1});
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 	
 	public void testCodeStyleBug119170_01() throws Exception {
