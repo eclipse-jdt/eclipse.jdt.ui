@@ -15,7 +15,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringContribution;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringContribution;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 
@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRef
  * 
  * @since 3.2
  */
-public final class ExtractInterfaceRefactoringContribution extends JavaRefactoringContribution {
+public final class ExtractInterfaceRefactoringContribution extends JDTRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}

@@ -20,17 +20,17 @@ import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 
 /**
- * Partial implementation of a java refactoring contribution.
+ * Partial implementation of a JDT refactoring contribution.
  * 
  * @since 3.2
  */
-public abstract class JavaRefactoringContribution extends RefactoringContribution {
+public abstract class JDTRefactoringContribution extends RefactoringContribution {
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public final RefactoringDescriptor createDescriptor(final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
-		return new JavaRefactoringDescriptor(this, id, project, description, comment, arguments, flags);
+		return new JDTRefactoringDescriptor(this, id, project, description, comment, arguments, flags);
 	}
 
 	/**
@@ -49,8 +49,8 @@ public abstract class JavaRefactoringContribution extends RefactoringContributio
 	 */
 	public final Map retrieveArgumentMap(final RefactoringDescriptor descriptor) {
 		Assert.isNotNull(descriptor);
-		if (descriptor instanceof JavaRefactoringDescriptor)
-			return ((JavaRefactoringDescriptor) descriptor).getArguments();
+		if (descriptor instanceof JDTRefactoringDescriptor)
+			return ((JDTRefactoringDescriptor) descriptor).getArguments();
 		return super.retrieveArgumentMap(descriptor);
 	}
 }

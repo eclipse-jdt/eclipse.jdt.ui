@@ -61,7 +61,7 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -626,21 +626,21 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 			final String project= resource != null ? resource.getName() : null;
 			final String source= project != null ? Messages.format(RefactoringCoreMessages.JavaDeleteProcessor_project_pattern, project) : RefactoringCoreMessages.JavaDeleteProcessor_workspace;
 			final String header= Messages.format(RefactoringCoreMessages.JavaDeleteProcessor_header, new String[] { String.valueOf(fElements.length), source});
-			int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+			int flags= JDTRefactoringDescriptor.JAR_IMPORTABLE | JDTRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
 			if (fDeleteSubPackages)
 				comment.addSetting(RefactoringCoreMessages.JavaDeleteProcessor_delete_subpackages);
 			if (fSuggestGetterSetterDeletion)
 				comment.addSetting(RefactoringCoreMessages.JavaDeleteProcessor_delete_accessors);
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.DELETE, project, description, comment.asString(), arguments, flags);
+			final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(IJavaRefactorings.DELETE, project, description, comment.asString(), arguments, flags);
 			arguments.put(ATTRIBUTE_DELETE_SUBPACKAGES, Boolean.valueOf(fDeleteSubPackages).toString());
 			arguments.put(ATTRIBUTE_SUGGEST_ACCESSORS, Boolean.valueOf(fSuggestGetterSetterDeletion).toString());
 			arguments.put(ATTRIBUTE_RESOURCES, new Integer(fResources.length).toString());
 			for (int offset= 0; offset < fResources.length; offset++)
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), descriptor.resourceToHandle(fResources[offset]));
+				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), descriptor.resourceToHandle(fResources[offset]));
 			arguments.put(ATTRIBUTE_ELEMENTS, new Integer(fJavaElements.length).toString());
 			for (int offset= 0; offset < fJavaElements.length; offset++)
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fResources.length + 1), descriptor.elementToHandle(fJavaElements[offset]));
+				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fResources.length + 1), descriptor.elementToHandle(fJavaElements[offset]));
 			return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.DeleteRefactoring_7, new Change[] { fDeleteChange});
 		} finally {
 			monitor.done();
@@ -870,10 +870,10 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 			final RefactoringStatus status= new RefactoringStatus();
 			List elements= new ArrayList();
 			for (int index= 0; index < resourceCount; index++) {
-				final String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1);
+				final String attribute= JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1);
 				handle= extended.getAttribute(attribute);
 				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
-					final IResource resource= JavaRefactoringDescriptor.handleToResource(extended.getProject(), handle);
+					final IResource resource= JDTRefactoringDescriptor.handleToResource(extended.getProject(), handle);
 					if (resource == null || !resource.exists())
 						return ScriptableRefactoring.createInputFatalStatus(resource, getRefactoring().getName(), IJavaRefactorings.DELETE);
 					else
@@ -884,10 +884,10 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 			fResources= (IResource[]) elements.toArray(new IResource[elements.size()]);
 			elements= new ArrayList();
 			for (int index= 0; index < elementCount; index++) {
-				final String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (resourceCount + index + 1);
+				final String attribute= JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + (resourceCount + index + 1);
 				handle= extended.getAttribute(attribute);
 				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
-					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+					final IJavaElement element= JDTRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 					if (element == null || !element.exists())
 						status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.DELETE));
 					else

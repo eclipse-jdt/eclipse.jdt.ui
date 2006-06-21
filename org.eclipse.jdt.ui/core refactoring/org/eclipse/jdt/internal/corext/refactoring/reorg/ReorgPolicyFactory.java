@@ -105,7 +105,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -287,8 +287,8 @@ public final class ReorgPolicyFactory {
 			return createCopyResourceChange(resource, nameProposer, copyQueries, dest);
 		}
 
-		protected JavaRefactoringDescriptor createRefactoringDescriptor(JavaRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
-			return new JavaCopyRefactoringDescriptor(getReorgExecutionLog(), getProcessorId(), project, description, comment.asString(), arguments, flags);
+		protected JDTRefactoringDescriptor createRefactoringDescriptor(JavaRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
+			return new JDTCopyRefactoringDescriptor(getReorgExecutionLog(), getProcessorId(), project, description, comment.asString(), arguments, flags);
 		}
 
 		protected String getDescriptionPlural() {
@@ -386,8 +386,8 @@ public final class ReorgPolicyFactory {
 			return composite;
 		}
 
-		protected JavaRefactoringDescriptor createRefactoringDescriptor(JavaRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
-			return new JavaCopyRefactoringDescriptor(getReorgExecutionLog(), getProcessorId(), project, description, comment.asString(), arguments, flags);
+		protected JDTRefactoringDescriptor createRefactoringDescriptor(JavaRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
+			return new JDTCopyRefactoringDescriptor(getReorgExecutionLog(), getProcessorId(), project, description, comment.asString(), arguments, flags);
 		}
 
 		protected String getDescriptionPlural() {
@@ -482,8 +482,8 @@ public final class ReorgPolicyFactory {
 			return composite;
 		}
 
-		protected JavaRefactoringDescriptor createRefactoringDescriptor(JavaRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
-			return new JavaCopyRefactoringDescriptor(getReorgExecutionLog(), getProcessorId(), project, description, comment.asString(), arguments, flags);
+		protected JDTRefactoringDescriptor createRefactoringDescriptor(JavaRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
+			return new JDTCopyRefactoringDescriptor(getReorgExecutionLog(), getProcessorId(), project, description, comment.asString(), arguments, flags);
 		}
 
 		protected String getDescriptionPlural() {
@@ -564,8 +564,8 @@ public final class ReorgPolicyFactory {
 			}
 		}
 
-		protected JavaRefactoringDescriptor createRefactoringDescriptor(JavaRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
-			return new JavaCopyRefactoringDescriptor(getReorgExecutionLog(), getProcessorId(), project, description, comment.asString(), arguments, flags);
+		protected JDTRefactoringDescriptor createRefactoringDescriptor(JavaRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
+			return new JDTCopyRefactoringDescriptor(getReorgExecutionLog(), getProcessorId(), project, description, comment.asString(), arguments, flags);
 		}
 
 		private CompilationUnit createSourceCuNode() {
@@ -731,8 +731,8 @@ public final class ReorgPolicyFactory {
 			return ReorgUtils.containsLinkedResources(fFiles) || ReorgUtils.containsLinkedResources(fFolders) || ReorgUtils.containsLinkedResources(fCus);
 		}
 
-		protected JavaRefactoringDescriptor createRefactoringDescriptor(final JavaRefactoringDescriptorComment comment, final Map arguments, final String description, final String project, int flags) {
-			return new JavaRefactoringDescriptor(getProcessorId(), project, description, comment.asString(), arguments, flags);
+		protected JDTRefactoringDescriptor createRefactoringDescriptor(final JavaRefactoringDescriptorComment comment, final Map arguments, final String description, final String project, int flags) {
+			return new JDTRefactoringDescriptor(getProcessorId(), project, description, comment.asString(), arguments, flags);
 		}
 
 		protected final ICompilationUnit[] getCus() {
@@ -750,19 +750,19 @@ public final class ReorgPolicyFactory {
 			final IProject resource= getSingleProject();
 			final String project= resource != null ? resource.getName() : null;
 			final String header= Messages.format(getHeaderPattern(), new String[] { String.valueOf(length), getDestinationLabel()});
-			int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+			int flags= JDTRefactoringDescriptor.JAR_IMPORTABLE | JDTRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
-			final JavaRefactoringDescriptor descriptor= createRefactoringDescriptor(comment, arguments, description, project, flags);
+			final JDTRefactoringDescriptor descriptor= createRefactoringDescriptor(comment, arguments, description, project, flags);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
 			arguments.put(ATTRIBUTE_FILES, new Integer(fFiles.length).toString());
 			for (int offset= 0; offset < fFiles.length; offset++)
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), descriptor.resourceToHandle(fFiles[offset]));
+				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), descriptor.resourceToHandle(fFiles[offset]));
 			arguments.put(ATTRIBUTE_FOLDERS, new Integer(fFolders.length).toString());
 			for (int offset= 0; offset < fFolders.length; offset++)
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fFiles.length + 1), descriptor.resourceToHandle(fFolders[offset]));
+				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fFiles.length + 1), descriptor.resourceToHandle(fFolders[offset]));
 			arguments.put(ATTRIBUTE_UNITS, new Integer(fCus.length).toString());
 			for (int offset= 0; offset < fCus.length; offset++)
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fFolders.length + fFiles.length + 1), descriptor.elementToHandle(fCus[offset]));
+				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fFolders.length + fFiles.length + 1), descriptor.elementToHandle(fCus[offset]));
 			arguments.putAll(getRefactoringArguments(project));
 			return new RefactoringChangeDescriptor(descriptor);
 		}
@@ -1882,8 +1882,8 @@ public final class ReorgPolicyFactory {
 			fPackageFragmentRoots= oh.getPackageFragmentRootsWithoutUnconfirmedOnes();
 		}
 
-		protected JavaRefactoringDescriptor createRefactoringDescriptor(final JavaRefactoringDescriptorComment comment, final Map arguments, final String description, final String project, int flags) {
-			return new JavaRefactoringDescriptor(getProcessorId(), project, description, comment.asString(), arguments, flags);
+		protected JDTRefactoringDescriptor createRefactoringDescriptor(final JavaRefactoringDescriptorComment comment, final Map arguments, final String description, final String project, int flags) {
+			return new JDTRefactoringDescriptor(getProcessorId(), project, description, comment.asString(), arguments, flags);
 		}
 
 		protected abstract String getDescriptionPlural();
@@ -1899,11 +1899,11 @@ public final class ReorgPolicyFactory {
 			final String header= Messages.format(getHeaderPattern(), new String[] { String.valueOf(length), getDestinationLabel()});
 			int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
-			final JavaRefactoringDescriptor descriptor= createRefactoringDescriptor(comment, arguments, description, project, flags);
+			final JDTRefactoringDescriptor descriptor= createRefactoringDescriptor(comment, arguments, description, project, flags);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
 			arguments.put(ATTRIBUTE_ROOTS, new Integer(fPackageFragmentRoots.length).toString());
 			for (int offset= 0; offset < fPackageFragmentRoots.length; offset++)
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), descriptor.elementToHandle(fPackageFragmentRoots[offset]));
+				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), descriptor.elementToHandle(fPackageFragmentRoots[offset]));
 			arguments.putAll(getRefactoringArguments(project));
 			return new RefactoringChangeDescriptor(descriptor);
 		}
@@ -2039,8 +2039,8 @@ public final class ReorgPolicyFactory {
 			fPackageFragments= helper.getPackagesWithoutUnconfirmedOnes();
 		}
 
-		protected JavaRefactoringDescriptor createRefactoringDescriptor(final JavaRefactoringDescriptorComment comment, final Map arguments, final String description, final String project, int flags) {
-			return new JavaRefactoringDescriptor(getProcessorId(), project, description, comment.asString(), arguments, flags);
+		protected JDTRefactoringDescriptor createRefactoringDescriptor(final JavaRefactoringDescriptorComment comment, final Map arguments, final String description, final String project, int flags) {
+			return new JDTRefactoringDescriptor(getProcessorId(), project, description, comment.asString(), arguments, flags);
 		}
 
 		protected abstract String getDescriptionPlural();
@@ -2054,13 +2054,13 @@ public final class ReorgPolicyFactory {
 			final IProject resource= getSingleProject();
 			final String project= resource != null ? resource.getName() : null;
 			final String header= Messages.format(getHeaderPattern(), new String[] { String.valueOf(length), getDestinationLabel()});
-			int flags= JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+			int flags= JDTRefactoringDescriptor.JAR_REFACTORABLE | JDTRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
-			final JavaRefactoringDescriptor descriptor= createRefactoringDescriptor(comment, arguments, description, project, flags);
+			final JDTRefactoringDescriptor descriptor= createRefactoringDescriptor(comment, arguments, description, project, flags);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
 			arguments.put(ATTRIBUTE_FRAGMENTS, new Integer(fPackageFragments.length).toString());
 			for (int offset= 0; offset < fPackageFragments.length; offset++)
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), descriptor.elementToHandle(fPackageFragments[offset]));
+				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), descriptor.elementToHandle(fPackageFragments[offset]));
 			arguments.putAll(getRefactoringArguments(project));
 			return new RefactoringChangeDescriptor(descriptor);
 		}
@@ -2243,11 +2243,11 @@ public final class ReorgPolicyFactory {
 			final Map arguments= new HashMap();
 			final IJavaElement element= getJavaElementDestination();
 			if (element != null)
-				arguments.put(ATTRIBUTE_DESTINATION, JavaRefactoringDescriptor.elementToHandle(project, element));
+				arguments.put(ATTRIBUTE_DESTINATION, JDTRefactoringDescriptor.elementToHandle(project, element));
 			else {
 				final IResource resource= getResourceDestination();
 				if (resource != null)
-					arguments.put(ATTRIBUTE_DESTINATION, JavaRefactoringDescriptor.resourceToHandle(project, resource));
+					arguments.put(ATTRIBUTE_DESTINATION, JDTRefactoringDescriptor.resourceToHandle(project, resource));
 			}
 			return arguments;
 		}
@@ -2571,8 +2571,8 @@ public final class ReorgPolicyFactory {
 			return newDeclaration;
 		}
 
-		protected JavaRefactoringDescriptor createRefactoringDescriptor(final JavaRefactoringDescriptorComment comment, final Map arguments, final String description, final String project, int flags) {
-			return new JavaRefactoringDescriptor(getProcessorId(), project, description, comment.asString(), arguments, flags);
+		protected JDTRefactoringDescriptor createRefactoringDescriptor(final JavaRefactoringDescriptorComment comment, final Map arguments, final String description, final String project, int flags) {
+			return new JDTRefactoringDescriptor(getProcessorId(), project, description, comment.asString(), arguments, flags);
 		}
 
 		protected abstract String getDescriptionPlural();
@@ -2586,13 +2586,13 @@ public final class ReorgPolicyFactory {
 			final IProject resource= getSingleProject();
 			final String project= resource != null ? resource.getName() : null;
 			final String header= Messages.format(getHeaderPattern(), new String[] { String.valueOf(length), getDestinationLabel()});
-			int flags= JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+			int flags= JDTRefactoringDescriptor.JAR_REFACTORABLE | JDTRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
-			final JavaRefactoringDescriptor descriptor= createRefactoringDescriptor(comment, arguments, description, project, flags);
+			final JDTRefactoringDescriptor descriptor= createRefactoringDescriptor(comment, arguments, description, project, flags);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
 			arguments.put(ATTRIBUTE_MEMBERS, new Integer(fJavaElements.length).toString());
 			for (int offset= 0; offset < fJavaElements.length; offset++)
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), descriptor.elementToHandle(fJavaElements[offset]));
+				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), descriptor.elementToHandle(fJavaElements[offset]));
 			arguments.putAll(getRefactoringArguments(project));
 			return new RefactoringChangeDescriptor(descriptor);
 		}
@@ -2882,9 +2882,9 @@ public final class ReorgPolicyFactory {
 		String value= null;
 		if (tokenizer.hasMoreTokens()) {
 			value= tokenizer.nextToken();
-			Object element= JavaRefactoringDescriptor.handleToElement(arguments.getProject(), value);
+			Object element= JDTRefactoringDescriptor.handleToElement(arguments.getProject(), value);
 			if (element == null)
-				element= JavaRefactoringDescriptor.handleToResource(arguments.getProject(), value);
+				element= JDTRefactoringDescriptor.handleToResource(arguments.getProject(), value);
 			if (tokenizer.hasMoreTokens()) {
 				final boolean processed= Boolean.valueOf(tokenizer.nextToken()).booleanValue();
 				if (processed) {
@@ -2916,11 +2916,11 @@ public final class ReorgPolicyFactory {
 				boolean recognized= false;
 				if (object instanceof IJavaElement) {
 					final IJavaElement element= (IJavaElement) object;
-					buffer.append(JavaRefactoringDescriptor.elementToHandle(project, element));
+					buffer.append(JDTRefactoringDescriptor.elementToHandle(project, element));
 					recognized= true;
 				} else if (object instanceof IResource) {
 					final IResource resource= (IResource) object;
-					buffer.append(JavaRefactoringDescriptor.resourceToHandle(project, resource));
+					buffer.append(JDTRefactoringDescriptor.resourceToHandle(project, resource));
 					recognized= true;
 				}
 				if (recognized) {

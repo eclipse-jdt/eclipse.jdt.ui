@@ -69,7 +69,7 @@ import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
@@ -501,11 +501,11 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 			final ChangeDescriptor descriptor= result.getDescriptor();
 			if (descriptor instanceof RefactoringChangeDescriptor) {
 				final RefactoringDescriptor refactoringDescriptor= ((RefactoringChangeDescriptor) descriptor).getRefactoringDescriptor();
-				if (refactoringDescriptor instanceof JavaRefactoringDescriptor) {
-					final JavaRefactoringDescriptor extended= (JavaRefactoringDescriptor) refactoringDescriptor;
+				if (refactoringDescriptor instanceof JDTRefactoringDescriptor) {
+					final JDTRefactoringDescriptor extended= (JDTRefactoringDescriptor) refactoringDescriptor;
 					final Map arguments= new HashMap();
 					arguments.put(ATTRIBUTE_ARGUMENT, fParameter.getNewName());
-					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+					arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 					arguments.putAll(extended.getArguments());
 					String signature= fChangeSignatureRefactoring.getMethodName();
 					try {
@@ -519,7 +519,7 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 					comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_original_pattern, JavaElementLabels.getTextLabel(fChangeSignatureRefactoring.getMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)));
 					comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_pattern, ASTNodes.asString(fSelectedExpression)));
 					comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_parameter_pattern, getAddedParameterInfo().getNewName()));
-					result= new RefactoringDescriptorChange(new JavaRefactoringDescriptor(IJavaRefactorings.INTRODUCE_PARAMETER, extended.getProject(), description, comment.asString(), arguments, extended.getFlags()), RefactoringCoreMessages.IntroduceParameterRefactoring_name, new Change[] { result});
+					result= new RefactoringDescriptorChange(new JDTRefactoringDescriptor(IJavaRefactorings.INTRODUCE_PARAMETER, extended.getProject(), description, comment.asString(), arguments, extended.getFlags()), RefactoringCoreMessages.IntroduceParameterRefactoring_name, new Change[] { result});
 				}
 			}
 		}
@@ -530,7 +530,7 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 		fArguments= arguments;
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String selection= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION);
+			final String selection= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_SELECTION);
 			if (selection != null) {
 				int offset= -1;
 				int length= -1;
@@ -543,18 +543,18 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 					fSelectionStart= offset;
 					fSelectionLength= length;
 				} else
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.ATTRIBUTE_SELECTION}));
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JDTRefactoringDescriptor.ATTRIBUTE_SELECTION}));
 			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_SELECTION));
-			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_SELECTION));
+			final String handle= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				final IJavaElement element= JDTRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
 					return createInputFatalStatus(element, IJavaRefactorings.INTRODUCE_PARAMETER);
 				else
 					fSourceCU= ((IMethod) element).getCompilationUnit();
 			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_INPUT));
 			final String name= extended.getAttribute(ATTRIBUTE_ARGUMENT);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				fParameterName= name;

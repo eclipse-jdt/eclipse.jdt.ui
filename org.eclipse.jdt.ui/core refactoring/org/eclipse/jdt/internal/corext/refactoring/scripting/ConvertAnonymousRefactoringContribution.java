@@ -15,7 +15,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringContribution;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringContribution;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 
 /**
@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNested
  * 
  * @since 3.2
  */
-public final class ConvertAnonymousRefactoringContribution extends JavaRefactoringContribution {
+public final class ConvertAnonymousRefactoringContribution extends JDTRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}

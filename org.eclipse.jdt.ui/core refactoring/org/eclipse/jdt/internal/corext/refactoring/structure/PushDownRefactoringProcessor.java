@@ -78,7 +78,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -653,10 +653,10 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			final IJavaProject javaProject= declaring.getJavaProject();
 			if (javaProject != null)
 				project= javaProject.getElementName();
-			int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+			int flags= JDTRefactoringDescriptor.JAR_IMPORTABLE | JDTRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			try {
 				if (declaring.isLocal() || declaring.isAnonymous())
-					flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+					flags|= JDTRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 			} catch (JavaModelException exception) {
 				JavaPlugin.log(exception);
 			}
@@ -668,11 +668,11 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 				settings[index]= JavaElementLabels.getElementLabel(fMembersToMove[index], JavaElementLabels.ALL_FULLY_QUALIFIED);
 			comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.PushDownRefactoring_pushed_members_pattern, settings));
 			addSuperTypeSettings(comment, true);
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.PUSH_DOWN, project, description, comment.asString(), arguments, flags);
+			final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(IJavaRefactorings.PUSH_DOWN, project, description, comment.asString(), arguments, flags);
 			if (fCachedDeclaringType != null)
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCachedDeclaringType));
+				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCachedDeclaringType));
 			for (int index= 0; index < fMembersToMove.length; index++) {
-				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1), descriptor.elementToHandle(fMembersToMove[index]));
+				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1), descriptor.elementToHandle(fMembersToMove[index]));
 				for (int offset= 0; offset < fMemberInfos.length; offset++) {
 					if (fMemberInfos[offset].getMember().equals(fMembersToMove[index])) {
 						switch (fMemberInfos[offset].getAction()) {
@@ -957,9 +957,9 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
+			String handle= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				final IJavaElement element= JDTRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
 					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.PUSH_DOWN);
 				else
@@ -968,10 +968,10 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			int count= 1;
 			final List elements= new ArrayList();
 			final List infos= new ArrayList();
-			String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
+			String attribute= JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 			final RefactoringStatus status= new RefactoringStatus();
 			while ((handle= extended.getAttribute(attribute)) != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				final IJavaElement element= JDTRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists())
 					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.PUSH_DOWN));
 				else
@@ -983,7 +983,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 				else
 					infos.add(MemberActionInfo.create((IMember) element, MemberActionInfo.NO_ACTION));
 				count++;
-				attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
+				attribute= JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 			}
 			fMembersToMove= (IMember[]) elements.toArray(new IMember[elements.size()]);
 			fMemberInfos= (MemberActionInfo[]) infos.toArray(new MemberActionInfo[infos.size()]);

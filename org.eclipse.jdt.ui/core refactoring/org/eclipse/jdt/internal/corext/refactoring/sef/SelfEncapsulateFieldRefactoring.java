@@ -89,7 +89,7 @@ import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -385,11 +385,11 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 		IJavaProject javaProject= fField.getJavaProject();
 		if (javaProject != null)
 			project= javaProject.getElementName();
-		int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | JavaRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+		int flags= JDTRefactoringDescriptor.JAR_IMPORTABLE | JDTRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 		final IType declaring= fField.getDeclaringType();
 		try {
 			if (declaring.isAnonymous() || declaring.isLocal())
-				flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+				flags|= JDTRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 		}
@@ -409,8 +409,8 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 			comment.addSetting(RefactoringCoreMessages.SelfEncapsulateField_do_not_use_accessors);			
 		if (fGenerateJavadoc)
 			comment.addSetting(RefactoringCoreMessages.SelfEncapsulateField_generate_comments);
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.ENCAPSULATE_FIELD, project, description, comment.asString(), arguments, flags);
-		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fField));
+		final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(IJavaRefactorings.ENCAPSULATE_FIELD, project, description, comment.asString(), arguments, flags);
+		arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fField));
 		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
 		arguments.put(ATTRIBUTE_INSERTION, new Integer(fInsertionIndex).toString());
 		arguments.put(ATTRIBUTE_SETTER, fSetterName);
@@ -660,9 +660,9 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
+			final String handle= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				final IJavaElement element= JDTRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.FIELD)
 					return createInputFatalStatus(element, IJavaRefactorings.ENCAPSULATE_FIELD);
 				else {
@@ -674,7 +674,7 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 					}
 				}
 			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_INPUT));
 			String name= extended.getAttribute(ATTRIBUTE_GETTER);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				fGetterName= name;

@@ -15,7 +15,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringContribution;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringContribution;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor;
 
@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring
  * 
  * @since 3.2
  */
-public final class PushDownRefactoringContribution extends JavaRefactoringContribution {
+public final class PushDownRefactoringContribution extends JDTRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}

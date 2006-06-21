@@ -15,7 +15,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringContribution;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringContribution;
 import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 
@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodPro
  * 
  * @since 3.2
  */
-public final class RenameMethodRefactoringContribution extends JavaRefactoringContribution {
+public final class RenameMethodRefactoringContribution extends JDTRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}

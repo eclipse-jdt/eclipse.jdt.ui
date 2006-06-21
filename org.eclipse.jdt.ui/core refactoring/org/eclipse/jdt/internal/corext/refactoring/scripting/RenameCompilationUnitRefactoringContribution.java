@@ -15,7 +15,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringContribution;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringContribution;
 import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
 
@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitP
  * 
  * @since 3.2
  */
-public final class RenameCompilationUnitRefactoringContribution extends JavaRefactoringContribution {
+public final class RenameCompilationUnitRefactoringContribution extends JDTRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}

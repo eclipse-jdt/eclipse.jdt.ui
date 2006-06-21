@@ -41,11 +41,11 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactorin
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 /**
- * Descriptor object of a java refactoring.
+ * Descriptor object of a JDT refactoring.
  * 
  * @since 3.2
  */
-public class JavaRefactoringDescriptor extends RefactoringDescriptor {
+public class JDTRefactoringDescriptor extends RefactoringDescriptor {
 
 	/**
 	 * Predefined argument called <code>element&lt;Number&gt;</code>.
@@ -274,10 +274,10 @@ public class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	private final Map fArguments;
 
 	/** The refactoring contribution, or <code>null</code> */
-	private JavaRefactoringContribution fContribution;
+	private JDTRefactoringContribution fContribution;
 
 	/**
-	 * Creates a new java refactoring descriptor.
+	 * Creates a new JDT refactoring descriptor.
 	 * 
 	 * @param contribution
 	 *            the refactoring contribution, or <code>null</code>
@@ -294,7 +294,7 @@ public class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * @param flags
 	 *            the flags
 	 */
-	public JavaRefactoringDescriptor(final JavaRefactoringContribution contribution, final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
+	public JDTRefactoringDescriptor(final JDTRefactoringContribution contribution, final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
 		super(id, project, description, comment, flags);
 		Assert.isNotNull(arguments);
 		fContribution= contribution;
@@ -302,7 +302,7 @@ public class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	}
 
 	/**
-	 * Creates a new java refactoring descriptor.
+	 * Creates a new JDT refactoring descriptor.
 	 * 
 	 * @param id
 	 *            the unique id of the refactoring
@@ -317,7 +317,7 @@ public class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * @param flags
 	 *            the flags
 	 */
-	public JavaRefactoringDescriptor(final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
+	public JDTRefactoringDescriptor(final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
 		this(null, id, project, description, comment, arguments, flags);
 	}
 
@@ -347,8 +347,8 @@ public class JavaRefactoringDescriptor extends RefactoringDescriptor {
 			refactoring= fContribution.createRefactoring(this);
 		else {
 			final RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(getID());
-			if (contribution instanceof JavaRefactoringContribution) {
-				fContribution= (JavaRefactoringContribution) contribution;
+			if (contribution instanceof JDTRefactoringContribution) {
+				fContribution= (JDTRefactoringContribution) contribution;
 				refactoring= fContribution.createRefactoring(this);
 			}
 		}
@@ -389,7 +389,7 @@ public class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * 
 	 * @return the refactoring contribution, or <code>null</code>
 	 */
-	public JavaRefactoringContribution getContribution() {
+	public JDTRefactoringContribution getContribution() {
 		return fContribution;
 	}
 

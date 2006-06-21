@@ -15,7 +15,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringContribution;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringContribution;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 
 /**
@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactori
  * 
  * @since 3.2
  */
-public final class ChangeTypeRefactoringContribution extends JavaRefactoringContribution {
+public final class ChangeTypeRefactoringContribution extends JDTRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}

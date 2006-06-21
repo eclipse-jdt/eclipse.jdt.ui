@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.scripting;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringContribution;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringContribution;
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeRefactoring;
 
@@ -24,7 +24,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
  * 
  * @since 3.2
  */
-public final class UseSupertypeRefactoringContribution extends JavaRefactoringContribution {
+public final class UseSupertypeRefactoringContribution extends JDTRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}

@@ -15,7 +15,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringContribution;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringContribution;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 
@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringPr
  * 
  * @since 3.2
  */
-public final class PullUpRefactoringContribution extends JavaRefactoringContribution {
+public final class PullUpRefactoringContribution extends JDTRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}

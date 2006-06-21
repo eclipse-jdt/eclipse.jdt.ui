@@ -65,7 +65,7 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
@@ -546,9 +546,9 @@ public class InferTypeArgumentsRefactoring extends ScriptableRefactoring {
 						comment.addSetting(RefactoringCoreMessages.InferTypeArgumentsRefactoring_assume_clone);
 					if (fLeaveUnconstrainedRaw)
 						comment.addSetting(RefactoringCoreMessages.InferTypeArgumentsRefactoring_leave_unconstrained);
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.INFER_TYPE_ARGUMENTS, name, description, comment.asString(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+					final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(IJavaRefactorings.INFER_TYPE_ARGUMENTS, name, description, comment.asString(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 					for (int index= 0; index < fElements.length; index++)
-						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1), descriptor.elementToHandle(fElements[index]));
+						arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1), descriptor.elementToHandle(fElements[index]));
 					arguments.put(ATTRIBUTE_CLONE, Boolean.valueOf(fAssumeCloneReturnsSameType).toString());
 					arguments.put(ATTRIBUTE_LEAVE, Boolean.valueOf(fLeaveUnconstrainedRaw).toString());
 					return new RefactoringChangeDescriptor(descriptor);
@@ -590,16 +590,16 @@ public class InferTypeArgumentsRefactoring extends ScriptableRefactoring {
 			int count= 1;
 			final List elements= new ArrayList();
 			String handle= null;
-			String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
+			String attribute= JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 			final RefactoringStatus status= new RefactoringStatus();
 			while ((handle= generic.getAttribute(attribute)) != null) {
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(generic.getProject(), handle, false);
+				final IJavaElement element= JDTRefactoringDescriptor.handleToElement(generic.getProject(), handle, false);
 				if (element == null || !element.exists())
 					return createInputFatalStatus(element, IJavaRefactorings.INFER_TYPE_ARGUMENTS);
 				else
 					elements.add(element);
 				count++;
-				attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
+				attribute= JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 			}
 			fElements= (IJavaElement[]) elements.toArray(new IJavaElement[elements.size()]);
 			if (elements.isEmpty())

@@ -17,20 +17,20 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
 
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 
 /**
- * Descriptor object of a java copy refactoring.
+ * Descriptor object of a JDT copy refactoring.
  * 
  * @since 3.3
  */
-public final class JavaCopyRefactoringDescriptor extends JavaRefactoringDescriptor {
+public final class JDTCopyRefactoringDescriptor extends JDTRefactoringDescriptor {
 
 	/** The reorg execution log */
 	private final ReorgExecutionLog fLog;
 
 	/**
-	 * Creates a new java copy refactoring descriptor.
+	 * Creates a new JDT copy refactoring descriptor.
 	 * 
 	 * @param log
 	 *            the reorg execution log
@@ -47,7 +47,7 @@ public final class JavaCopyRefactoringDescriptor extends JavaRefactoringDescript
 	 * @param flags
 	 *            the flags
 	 */
-	public JavaCopyRefactoringDescriptor(final ReorgExecutionLog log, final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
+	public JDTCopyRefactoringDescriptor(final ReorgExecutionLog log, final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
 		super(null, id, project, description, comment, arguments, flags);
 		Assert.isNotNull(log);
 		fLog= log;

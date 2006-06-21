@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.scripting;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringContribution;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringContribution;
 import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameResourceProcessor;
 
@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameResourceProcesso
  * 
  * @since 3.2
  */
-public final class RenameResourceRefactoringContribution extends JavaRefactoringContribution {
+public final class RenameResourceRefactoringContribution extends JDTRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}
