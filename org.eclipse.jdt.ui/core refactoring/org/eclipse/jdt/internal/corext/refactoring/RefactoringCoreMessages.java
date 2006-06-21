@@ -316,6 +316,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String CopyResourceString_copy;
 
+	public static String CreateCopyOfCompilationUnitChange_create_copy;
+
 	public static String CreatePackageChange_Create_package;
 
 	public static String CreatePackageChange_Creating_package;

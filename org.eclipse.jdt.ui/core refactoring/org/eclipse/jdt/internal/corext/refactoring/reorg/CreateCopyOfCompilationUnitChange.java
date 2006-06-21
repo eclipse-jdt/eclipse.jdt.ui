@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
@@ -90,9 +91,6 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 		}
 	}
 
-	/*
-	 * @see CreateFileChange#getOldFile()
-	 */
 	protected IFile getOldFile(IProgressMonitor pm) {
 		pm.beginTask("", 10); //$NON-NLS-1$
 		String oldSource= super.getSource();
@@ -175,10 +173,24 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 	}
 	
 	private void markAsExecuted(ICompilationUnit unit, ResourceMapping mapping) {
-		ReorgExecutionLog log= (ReorgExecutionLog)getAdapter(ReorgExecutionLog.class);
+		ReorgExecutionLog log= (ReorgExecutionLog) getAdapter(ReorgExecutionLog.class);
 		if (log != null) {
 			log.markAsProcessed(unit);
 			log.markAsProcessed(mapping);
 		}
+	}
+
+	private String getPathLabel(IResource resource) {
+		final StringBuffer buffer= new StringBuffer(resource.getProject().getName());
+		final String path= resource.getParent().getProjectRelativePath().toString();
+		if (path.length() > 0) {
+			buffer.append('/');
+			buffer.append(path);
+		}
+		return buffer.toString();
+	}
+
+	public String getName() {
+		return Messages.format(RefactoringCoreMessages.CreateCopyOfCompilationUnitChange_create_copy, new String[] { fOldCu.getElementName(), getPathLabel(fOldCu.getResource())});
 	}
 }
