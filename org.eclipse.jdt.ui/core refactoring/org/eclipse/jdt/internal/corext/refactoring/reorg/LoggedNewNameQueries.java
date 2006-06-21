@@ -59,6 +59,9 @@ public final class LoggedNewNameQueries implements INewNameQueries {
 				final IJavaElement element= (IJavaElement) fObject;
 				final ResourceMapping mapping= JavaElementResourceMapping.create(element);
 				return fLog.getNewName(mapping);
+			} else if (fObject instanceof JavaElementResourceMapping) {
+				final JavaElementResourceMapping mapping= (JavaElementResourceMapping) fObject;
+				return fLog.getNewName(mapping);
 			} else if (fObject instanceof IResource) {
 				final IResource resource= (IResource) fObject;
 				return fLog.getNewName(resource);
