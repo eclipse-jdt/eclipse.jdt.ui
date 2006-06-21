@@ -37,6 +37,7 @@ import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
@@ -217,19 +218,17 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		setReorgQueries(new NullReorgQueries());
 		final RefactoringStatus status= new RefactoringStatus();
-		fCopyPolicy= ReorgPolicyFactory.createCopyPolicy(status, arguments);
-		if (fCopyPolicy != null && !status.hasFatalError()) {
-			status.merge(fCopyPolicy.initialize(arguments));
-			final ReorgExecutionLog log= createReorgExecutionLog(status, arguments);
-			if (log != null && !status.hasFatalError())
-				setNewNameQueries(new LoggedNewNameQueries(log));
-		}
+		if (arguments instanceof JavaRefactoringArguments) {
+			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+			fCopyPolicy= ReorgPolicyFactory.createCopyPolicy(status, extended);
+			if (fCopyPolicy != null && !status.hasFatalError()) {
+				status.merge(fCopyPolicy.initialize(arguments));
+				final ReorgExecutionLog log= ReorgPolicyFactory.loadReorgExecutionLog(status, extended);
+				if (log != null && !status.hasFatalError())
+					setNewNameQueries(new LoggedNewNameQueries(log));
+			}
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return status;
-	}
-
-	private ReorgExecutionLog createReorgExecutionLog(RefactoringStatus status, RefactoringArguments arguments) {
-		// TODO: implement
-
-		return new ReorgExecutionLog();
 	}
 }

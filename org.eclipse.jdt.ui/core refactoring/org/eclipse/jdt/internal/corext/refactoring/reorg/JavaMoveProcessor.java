@@ -36,6 +36,7 @@ import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
@@ -264,11 +265,17 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		setReorgQueries(new NullReorgQueries());
 		final RefactoringStatus status= new RefactoringStatus();
-		fMovePolicy= ReorgPolicyFactory.createMovePolicy(status, arguments);
-		if (fMovePolicy != null && !status.hasFatalError()) {
-			status.merge(fMovePolicy.initialize(arguments));
-			setCreateTargetQueries(new LoggedCreateTargetQueries());
-		}
+		if (arguments instanceof JavaRefactoringArguments) {
+			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+			fMovePolicy= ReorgPolicyFactory.createMovePolicy(status, arguments);
+			if (fMovePolicy != null && !status.hasFatalError()) {
+				status.merge(fMovePolicy.initialize(arguments));
+				setCreateTargetQueries(new LoggedCreateTargetQueries(extended.getProject(), "test"));
+				
+				// TODO: implement
+			}
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return status;
 	}
 
