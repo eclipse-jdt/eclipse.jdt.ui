@@ -104,9 +104,9 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyCompilationUnitChange;
@@ -118,6 +118,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitCh
 import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageFragmentRootChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveResourceChange;
+import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
@@ -234,10 +235,6 @@ public final class ReorgPolicyFactory {
 			return new CopyResourceChange(resource, destination, nameQuery);
 		}
 
-		public static ICopyPolicy createPolicy(RefactoringStatus status, JavaRefactoringArguments extended) {
-			return null;
-		}
-
 		private CopyModifications fModifications;
 
 		private ReorgExecutionLog fReorgExecutionLog;
@@ -336,6 +333,10 @@ public final class ReorgPolicyFactory {
 			return IJavaRefactorings.COPY;
 		}
 
+		protected String getRefactoringId() {
+			return IJavaRefactorings.COPY;
+		}
+
 		public ReorgExecutionLog getReorgExecutionLog() {
 			return fReorgExecutionLog;
 		}
@@ -344,10 +345,6 @@ public final class ReorgPolicyFactory {
 	private static class CopyPackageFragmentRootsPolicy extends PackageFragmentRootsReorgPolicy implements ICopyPolicy {
 
 		private static final String POLICY_COPY_ROOTS= "org.eclipse.jdt.ui.copyRoots"; //$NON-NLS-1$
-
-		public static ICopyPolicy createPolicy(RefactoringStatus status, JavaRefactoringArguments extended) {
-			return null;
-		}
 
 		private CopyModifications fModifications;
 
@@ -425,6 +422,10 @@ public final class ReorgPolicyFactory {
 			return IJavaRefactorings.COPY;
 		}
 
+		protected String getRefactoringId() {
+			return IJavaRefactorings.COPY;
+		}
+
 		public ReorgExecutionLog getReorgExecutionLog() {
 			return fReorgExecutionLog;
 		}
@@ -433,10 +434,6 @@ public final class ReorgPolicyFactory {
 	private static class CopyPackagesPolicy extends PackagesReorgPolicy implements ICopyPolicy {
 
 		private static final String POLICY_COPY_PACKAGES= "org.eclipse.jdt.ui.copyPackages"; //$NON-NLS-1$
-
-		public static ICopyPolicy createPolicy(RefactoringStatus status, JavaRefactoringArguments extended) {
-			return null;
-		}
 
 		private CopyModifications fModifications;
 
@@ -522,6 +519,10 @@ public final class ReorgPolicyFactory {
 			return IJavaRefactorings.COPY;
 		}
 
+		protected String getRefactoringId() {
+			return IJavaRefactorings.COPY;
+		}
+
 		public ReorgExecutionLog getReorgExecutionLog() {
 			return fReorgExecutionLog;
 		}
@@ -530,10 +531,6 @@ public final class ReorgPolicyFactory {
 	private static class CopySubCuElementsPolicy extends SubCuElementReorgPolicy implements ICopyPolicy {
 
 		private static final String POLICY_COPY_MEMBERS= "org.eclipse.jdt.ui.copyMembers"; //$NON-NLS-1$
-
-		public static ICopyPolicy createPolicy(RefactoringStatus status, JavaRefactoringArguments extended) {
-			return null;
-		}
 
 		private CopyModifications fModifications;
 
@@ -614,6 +611,10 @@ public final class ReorgPolicyFactory {
 		}
 
 		protected String getProcessorId() {
+			return IJavaRefactorings.COPY;
+		}
+
+		protected String getRefactoringId() {
 			return IJavaRefactorings.COPY;
 		}
 
@@ -809,8 +810,6 @@ public final class ReorgPolicyFactory {
 			return fCus;
 		}
 
-		protected abstract String getProcessorId();
-
 		public final IResource[] getResources() {
 			return ReorgUtils.union(fFiles, fFolders);
 		}
@@ -839,7 +838,85 @@ public final class ReorgPolicyFactory {
 		}
 
 		public RefactoringStatus initialize(RefactoringArguments arguments) {
-			return new RefactoringStatus();
+			if (arguments instanceof JavaRefactoringArguments) {
+				final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+				int fileCount= 0;
+				int folderCount= 0;
+				int unitCount= 0;
+				String value= extended.getAttribute(ATTRIBUTE_FILES);
+				if (value != null && !"".equals(value)) {//$NON-NLS-1$
+					try {
+						fileCount= Integer.parseInt(value);
+					} catch (NumberFormatException exception) {
+						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FILES));
+					}
+				} else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FILES));
+				value= extended.getAttribute(ATTRIBUTE_FOLDERS);
+				if (value != null && !"".equals(value)) {//$NON-NLS-1$
+					try {
+						folderCount= Integer.parseInt(value);
+					} catch (NumberFormatException exception) {
+						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FOLDERS));
+					}
+				} else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FOLDERS));
+				value= extended.getAttribute(ATTRIBUTE_UNITS);
+				if (value != null && !"".equals(value)) {//$NON-NLS-1$
+					try {
+						unitCount= Integer.parseInt(value);
+					} catch (NumberFormatException exception) {
+						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_UNITS));
+					}
+				} else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_UNITS));
+				String handle= null;
+				final RefactoringStatus status= new RefactoringStatus();
+				List elements= new ArrayList();
+				for (int index= 0; index < fileCount; index++) {
+					final String attribute= JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1);
+					handle= extended.getAttribute(attribute);
+					if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+						final IResource resource= JDTRefactoringDescriptor.handleToResource(extended.getProject(), handle);
+						if (resource == null || !resource.exists())
+							return ScriptableRefactoring.createInputFatalStatus(resource, getProcessorId(), getRefactoringId());
+						else
+							elements.add(resource);
+					} else
+						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+				}
+				fFiles= (IFile[]) elements.toArray(new IFile[elements.size()]);
+				elements= new ArrayList();
+				for (int index= 0; index < folderCount; index++) {
+					final String attribute= JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + (fileCount + index + 1);
+					handle= extended.getAttribute(attribute);
+					if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+						final IResource resource= JDTRefactoringDescriptor.handleToResource(extended.getProject(), handle);
+						if (resource == null || !resource.exists())
+							return ScriptableRefactoring.createInputFatalStatus(resource, getProcessorId(), getRefactoringId());
+						else
+							elements.add(resource);
+					} else
+						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+				}
+				fFolders= (IFolder[]) elements.toArray(new IFolder[elements.size()]);
+				elements= new ArrayList();
+				for (int index= 0; index < unitCount; index++) {
+					final String attribute= JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + (folderCount + fileCount + index + 1);
+					handle= extended.getAttribute(attribute);
+					if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+						final IJavaElement element= JDTRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+						if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
+							status.merge(ScriptableRefactoring.createInputWarningStatus(element, getProcessorId(), getRefactoringId()));
+						else
+							elements.add(element);
+					} else
+						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+				}
+				fCus= (ICompilationUnit[]) elements.toArray(new ICompilationUnit[elements.size()]);
+			} else
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return super.initialize(arguments);
 		}
 
 		private boolean isChildOfOrEqualToAnyFolder(IResource resource) {
@@ -912,10 +989,6 @@ public final class ReorgPolicyFactory {
 	private static class MoveFilesFoldersAndCusPolicy extends FilesFoldersAndCusReorgPolicy implements IMovePolicy {
 
 		private static final String POLICY_MOVE_RESOURCES= "org.eclipse.jdt.ui.moveResources"; //$NON-NLS-1$
-
-		public static IMovePolicy createPolicy(RefactoringStatus status, JavaRefactoringArguments extended) {
-			return null;
-		}
 
 		private static Change moveCuToPackage(ICompilationUnit cu, IPackageFragment dest) {
 			// XXX workaround for bug 31998 we will have to disable renaming of
@@ -1209,6 +1282,10 @@ public final class ReorgPolicyFactory {
 			return arguments;
 		}
 
+		protected String getRefactoringId() {
+			return IJavaRefactorings.MOVE;
+		}
+
 		public boolean getUpdateQualifiedNames() {
 			return fUpdateQualifiedNames;
 		}
@@ -1291,10 +1368,6 @@ public final class ReorgPolicyFactory {
 	private static class MovePackageFragmentRootsPolicy extends PackageFragmentRootsReorgPolicy implements IMovePolicy {
 
 		private static final String POLICY_MOVE_ROOTS= "org.eclipse.jdt.ui.moveRoots"; //$NON-NLS-1$
-
-		public static IMovePolicy createPolicy(RefactoringStatus status, JavaRefactoringArguments extended) {
-			return null;
-		}
 
 		private static boolean isParentOfAny(IJavaProject javaProject, IPackageFragmentRoot[] roots) {
 			for (int i= 0; i < roots.length; i++) {
@@ -1401,6 +1474,10 @@ public final class ReorgPolicyFactory {
 			return IJavaRefactorings.MOVE;
 		}
 
+		protected String getRefactoringId() {
+			return IJavaRefactorings.MOVE;
+		}
+
 		public boolean isTextualMove() {
 			return false;
 		}
@@ -1423,10 +1500,6 @@ public final class ReorgPolicyFactory {
 	private static class MovePackagesPolicy extends PackagesReorgPolicy implements IMovePolicy {
 
 		private static final String POLICY_MOVE_PACKAGES= "org.eclipse.jdt.ui.movePackages"; //$NON-NLS-1$
-
-		public static IMovePolicy createPolicy(RefactoringStatus status, JavaRefactoringArguments extended) {
-			return null;
-		}
 
 		private static boolean isParentOfAny(IPackageFragmentRoot root, IPackageFragment[] fragments) {
 			for (int i= 0; i < fragments.length; i++) {
@@ -1518,6 +1591,10 @@ public final class ReorgPolicyFactory {
 			return IJavaRefactorings.MOVE;
 		}
 
+		protected String getRefactoringId() {
+			return IJavaRefactorings.MOVE;
+		}
+
 		public boolean isTextualMove() {
 			return false;
 		}
@@ -1541,10 +1618,6 @@ public final class ReorgPolicyFactory {
 	private static class MoveSubCuElementsPolicy extends SubCuElementReorgPolicy implements IMovePolicy {
 
 		private static final String POLICY_MOVE_MEMBERS= "org.eclipse.jdt.ui.moveMembers"; //$NON-NLS-1$
-
-		public static IMovePolicy createPolicy(RefactoringStatus status, JavaRefactoringArguments extended) {
-			return null;
-		}
 
 		MoveSubCuElementsPolicy(IJavaElement[] javaElements) {
 			super(javaElements);
@@ -1621,6 +1694,10 @@ public final class ReorgPolicyFactory {
 		}
 
 		protected String getProcessorId() {
+			return IJavaRefactorings.MOVE;
+		}
+
+		protected String getRefactoringId() {
 			return IJavaRefactorings.MOVE;
 		}
 
@@ -1753,6 +1830,14 @@ public final class ReorgPolicyFactory {
 			return "no_copy"; //$NON-NLS-1$
 		}
 
+		protected String getProcessorId() {
+			return "no_id"; //$NON-NLS-1$
+		}
+
+		protected String getRefactoringId() {
+			return "no_id"; //$NON-NLS-1$
+		}
+
 		public ReorgExecutionLog getReorgExecutionLog() {
 			return null;
 		}
@@ -1800,6 +1885,14 @@ public final class ReorgPolicyFactory {
 			return "no_move"; //$NON-NLS-1$
 		}
 
+		protected String getProcessorId() {
+			return "no_id"; //$NON-NLS-1$
+		}
+
+		protected String getRefactoringId() {
+			return "no_id"; //$NON-NLS-1$
+		}
+
 		public IResource[] getResources() {
 			return new IResource[0];
 		}
@@ -1830,7 +1923,6 @@ public final class ReorgPolicyFactory {
 		private IPackageFragmentRoot[] fPackageFragmentRoots;
 
 		public PackageFragmentRootsReorgPolicy(IPackageFragmentRoot[] roots) {
-			Assert.isNotNull(roots);
 			fPackageFragmentRoots= roots;
 		}
 
@@ -1929,8 +2021,6 @@ public final class ReorgPolicyFactory {
 			return fPackageFragmentRoots;
 		}
 
-		protected abstract String getProcessorId();
-
 		public IResource[] getResources() {
 			return new IResource[0];
 		}
@@ -1979,7 +2069,6 @@ public final class ReorgPolicyFactory {
 		private IPackageFragment[] fPackageFragments;
 
 		public PackagesReorgPolicy(IPackageFragment[] packageFragments) {
-			Assert.isNotNull(packageFragments);
 			fPackageFragments= packageFragments;
 		}
 
@@ -2096,8 +2185,6 @@ public final class ReorgPolicyFactory {
 		protected IPackageFragment[] getPackages() {
 			return fPackageFragments;
 		}
-
-		protected abstract String getProcessorId();
 
 		public IResource[] getResources() {
 			return new IResource[0];
@@ -2239,6 +2326,8 @@ public final class ReorgPolicyFactory {
 			return null;
 		}
 
+		protected abstract String getProcessorId();
+
 		protected Map getRefactoringArguments(String project) {
 			final Map arguments= new HashMap();
 			final IJavaElement element= getJavaElementDestination();
@@ -2251,6 +2340,8 @@ public final class ReorgPolicyFactory {
 			}
 			return arguments;
 		}
+
+		protected abstract String getRefactoringId();
 
 		public final IResource getResourceDestination() {
 			return fResourceDestination;
@@ -2274,6 +2365,42 @@ public final class ReorgPolicyFactory {
 
 		public boolean hasAllInputSet() {
 			return fJavaElementDestination != null || fResourceDestination != null;
+		}
+
+		public RefactoringStatus initialize(RefactoringArguments arguments) {
+			if (arguments instanceof JavaRefactoringArguments) {
+				final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+				final String handle= extended.getAttribute(ATTRIBUTE_DESTINATION);
+				if (handle != null) {
+					final IJavaElement element= JDTRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+					if (element != null) {
+						if (!element.exists())
+							return ScriptableRefactoring.createInputFatalStatus(element, getProcessorId(), getRefactoringId());
+						else {
+							try {
+								return setDestination(element);
+							} catch (JavaModelException exception) {
+								JavaPlugin.log(exception);
+								return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { handle, JDTRefactoringDescriptor.ATTRIBUTE_INPUT}));
+							}
+						}
+					} else {
+						final IResource resource= JDTRefactoringDescriptor.handleToResource(extended.getProject(), handle);
+						if (resource == null || !resource.exists())
+							return ScriptableRefactoring.createInputFatalStatus(resource, getProcessorId(), getRefactoringId());
+						else {
+							try {
+								return setDestination(resource);
+							} catch (JavaModelException exception) {
+								JavaPlugin.log(exception);
+								return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { handle, JDTRefactoringDescriptor.ATTRIBUTE_INPUT}));
+							}
+						}
+					}
+				} else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_INPUT));
+			} else
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		}
 
 		public final RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException {
@@ -2370,7 +2497,6 @@ public final class ReorgPolicyFactory {
 		private final IJavaElement[] fJavaElements;
 
 		SubCuElementReorgPolicy(IJavaElement[] javaElements) {
-			Assert.isNotNull(javaElements);
 			fJavaElements= javaElements;
 		}
 
@@ -2619,8 +2745,6 @@ public final class ReorgPolicyFactory {
 			return fJavaElements;
 		}
 
-		protected abstract String getProcessorId();
-
 		public final IResource[] getResources() {
 			return new IResource[0];
 		}
@@ -2747,13 +2871,13 @@ public final class ReorgPolicyFactory {
 			final String policy= extended.getAttribute(ATTRIBUTE_POLICY);
 			if (policy != null && !"".equals(policy)) { //$NON-NLS-1$
 				if (CopyFilesFoldersAndCusPolicy.POLICY_COPY_RESOURCE.equals(policy)) {
-					return CopyFilesFoldersAndCusPolicy.createPolicy(status, extended);
+					return new CopyFilesFoldersAndCusPolicy(null, null, null);
 				} else if (CopyPackageFragmentRootsPolicy.POLICY_COPY_ROOTS.equals(policy)) {
-					return CopyPackageFragmentRootsPolicy.createPolicy(status, extended);
+					return new CopyPackageFragmentRootsPolicy(null);
 				} else if (CopyPackagesPolicy.POLICY_COPY_PACKAGES.equals(policy)) {
-					return CopyPackagesPolicy.createPolicy(status, extended);
+					return new CopyPackagesPolicy(null);
 				} else if (CopySubCuElementsPolicy.POLICY_COPY_MEMBERS.equals(policy)) {
-					return CopySubCuElementsPolicy.createPolicy(status, extended);
+					return new CopySubCuElementsPolicy(null);
 				} else
 					status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { policy, ATTRIBUTE_POLICY})));
 			} else
@@ -2773,13 +2897,13 @@ public final class ReorgPolicyFactory {
 			final String policy= extended.getAttribute(ATTRIBUTE_POLICY);
 			if (policy != null && !"".equals(policy)) { //$NON-NLS-1$
 				if (MoveFilesFoldersAndCusPolicy.POLICY_MOVE_RESOURCES.equals(policy)) {
-					return MoveFilesFoldersAndCusPolicy.createPolicy(status, extended);
+					return new MoveFilesFoldersAndCusPolicy(null, null, null);
 				} else if (MovePackageFragmentRootsPolicy.POLICY_MOVE_ROOTS.equals(policy)) {
-					return MovePackageFragmentRootsPolicy.createPolicy(status, extended);
+					return new MovePackageFragmentRootsPolicy(null);
 				} else if (MovePackagesPolicy.POLICY_MOVE_PACKAGES.equals(policy)) {
-					return MovePackagesPolicy.createPolicy(status, extended);
+					return new MovePackagesPolicy(null);
 				} else if (MoveSubCuElementsPolicy.POLICY_MOVE_MEMBERS.equals(policy)) {
-					return MoveSubCuElementsPolicy.createPolicy(status, extended);
+					return new MoveSubCuElementsPolicy(null);
 				} else
 					status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { policy, ATTRIBUTE_POLICY})));
 			} else
