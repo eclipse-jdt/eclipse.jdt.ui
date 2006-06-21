@@ -11,16 +11,12 @@
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-
-import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
 /**
  * Logged implementation of new name queries.
@@ -52,20 +48,31 @@ public final class LoggedNewNameQueries implements INewNameQueries {
 		}
 
 		/**
+		 * Returns the new name of the compilation unit, without any extension.
+		 * 
+		 * @return the new name, or <code>null</code>
+		 */
+		private String getCompilationUnitName() {
+			String name= fLog.getNewName(fObject);
+			if (name != null) {
+				int index= name.lastIndexOf('.');
+				if (index > 0)
+					name= name.substring(0, index);
+			}
+			return name;
+		}
+
+		/**
 		 * {@inheritDoc}
 		 */
 		public String getNewName() {
-			if (fObject instanceof IJavaElement) {
-				final IJavaElement element= (IJavaElement) fObject;
-				final ResourceMapping mapping= JavaElementResourceMapping.create(element);
-				return fLog.getNewName(mapping);
-			} else if (fObject instanceof JavaElementResourceMapping) {
-				final JavaElementResourceMapping mapping= (JavaElementResourceMapping) fObject;
-				return fLog.getNewName(mapping);
-			} else if (fObject instanceof IResource) {
-				final IResource resource= (IResource) fObject;
-				return fLog.getNewName(resource);
-			}
+			String name= null;
+			if (fObject instanceof ICompilationUnit)
+				name= getCompilationUnitName();
+			else
+				name= fLog.getNewName(fObject);
+			if (name == null)
+				name= fName;
 			return fName;
 		}
 	}
