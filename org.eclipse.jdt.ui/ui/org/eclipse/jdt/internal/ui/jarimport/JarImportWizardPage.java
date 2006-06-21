@@ -139,7 +139,7 @@ public final class JarImportWizardPage extends WizardPage {
 		createRenameGroup(composite);
 		setPageComplete(false);
 		if (fImportWizard && !fTreeViewer.getControl().isEnabled())
-			setErrorMessage(JarImportMessages.JarImportWizardPage_no_jar_files);
+			setMessage(JarImportMessages.JarImportWizardPage_no_jar_files, INFORMATION);
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.JARIMPORT_WIZARD_PAGE);
@@ -334,8 +334,12 @@ public final class JarImportWizardPage extends WizardPage {
 		handleJarFileChanged();
 		if (isPageComplete())
 			handlePackageFragmentRootChanged();
-		if (fImportWizard && !fTreeViewer.getControl().isEnabled())
-			setErrorMessage(JarImportMessages.JarImportWizardPage_no_jar_files);
+		if (fImportWizard && !fTreeViewer.getControl().isEnabled()) {
+			if (fFirstTime)
+				setMessage(JarImportMessages.JarImportWizardPage_no_jar_files, INFORMATION);
+			else
+				setErrorMessage(JarImportMessages.JarImportWizardPage_no_jar_files);
+		}
 		getContainer().updateButtons();
 	}
 
