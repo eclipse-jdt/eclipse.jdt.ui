@@ -69,6 +69,7 @@ import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -104,7 +105,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class ExtractConstantRefactoring extends ScriptableRefactoring {
 
-	private static final String ID_EXTRACT_CONSTANT= "org.eclipse.jdt.ui.extract.constant"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REPLACE= "replace"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_QUALIFY= "qualify"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
@@ -609,7 +609,7 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 			comment.addSetting(RefactoringCoreMessages.ExtractConstantRefactoring_replace_occurrences);
 		if (fQualifyReferencesWithDeclaringClassName)
 			comment.addSetting(RefactoringCoreMessages.ExtractConstantRefactoring_qualify_references);
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_CONSTANT, project, description, comment.asString(), arguments, flags);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.EXTRACT_CONSTANT, project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fConstantName);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
@@ -866,7 +866,7 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-					return createInputFatalStatus(element, ID_EXTRACT_CONSTANT);
+					return createInputFatalStatus(element, IJavaRefactorings.EXTRACT_CONSTANT);
 				else
 					fCu= (ICompilationUnit) element;
 			} else

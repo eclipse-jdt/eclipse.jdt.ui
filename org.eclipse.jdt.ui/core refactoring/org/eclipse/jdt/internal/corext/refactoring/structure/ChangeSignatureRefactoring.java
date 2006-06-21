@@ -84,6 +84,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchPattern;
@@ -138,7 +139,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class ChangeSignatureRefactoring extends ScriptableRefactoring implements IDelegateUpdating {
 	
-	private static final String ID_CHANGE_METHOD_SIGNATURE= "org.eclipse.jdt.ui.change.method.signature"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_RETURN= "return"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_PARAMETER= "parameter"; //$NON-NLS-1$
@@ -1200,7 +1200,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 					comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_added_exceptions, (String[]) added.toArray(new String[added.size()])));
 				if (!deleted.isEmpty())
 					comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_removed_exceptions, (String[]) deleted.toArray(new String[deleted.size()])));
-				descriptor= new JavaRefactoringDescriptor(ID_CHANGE_METHOD_SIGNATURE, project, description, comment.asString(), arguments, flags);
+				descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.CHANGE_METHOD_SIGNATURE, project, description, comment.asString(), arguments, flags);
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fMethod));
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fMethodName);
 				arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
@@ -2451,7 +2451,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.METHOD)
-					return createInputFatalStatus(element, ID_CHANGE_METHOD_SIGNATURE);
+					return createInputFatalStatus(element, IJavaRefactorings.CHANGE_METHOD_SIGNATURE);
 				else {
 					fMethod= (IMethod) element;
 					fMethodName= fMethod.getElementName();
@@ -2525,7 +2525,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 				if (kind != null) {
 					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), value, false);
 					if (element == null || !element.exists())
-						return createInputFatalStatus(element, ID_CHANGE_METHOD_SIGNATURE);
+						return createInputFatalStatus(element, IJavaRefactorings.CHANGE_METHOD_SIGNATURE);
 					else {
 						try {
 							info= new ExceptionInfo((IType) element, Integer.valueOf(kind).intValue(), null);

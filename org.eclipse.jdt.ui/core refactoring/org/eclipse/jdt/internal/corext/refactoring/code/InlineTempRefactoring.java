@@ -53,6 +53,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -77,8 +78,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class InlineTempRefactoring extends ScriptableRefactoring {
-
-	private static final String ID_INLINE_TEMP= "org.eclipse.jdt.ui.inline.temp"; //$NON-NLS-1$
 
 	private int fSelectionStart;
 	private int fSelectionLength;
@@ -228,7 +227,7 @@ public class InlineTempRefactoring extends ScriptableRefactoring {
 			final String header= Messages.format(RefactoringCoreMessages.InlineTempRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), text});
 			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
 			comment.addSetting(Messages.format(RefactoringCoreMessages.InlineTempRefactoring_original_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_TEMP, project, description, comment.asString(), arguments, RefactoringDescriptor.NONE);
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.INLINE_LOCAL_VARIABLE, project, description, comment.asString(), arguments, RefactoringDescriptor.NONE);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 			final CompilationUnitDescriptorChange result= new CompilationUnitDescriptorChange(descriptor, RefactoringCoreMessages.InlineTempRefactoring_inline, fCu);
@@ -386,14 +385,14 @@ public class InlineTempRefactoring extends ScriptableRefactoring {
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-					return createInputFatalStatus(element, ID_INLINE_TEMP);
+					return createInputFatalStatus(element, IJavaRefactorings.INLINE_LOCAL_VARIABLE);
 				else {
 					fCu= (ICompilationUnit) element;
 		        	final ASTParser parser= ASTParser.newParser(AST.JLS3);
 		        	parser.setResolveBindings(true);
 		        	parser.setSource(fCu);
 		        	if (checkIfTempSelected((CompilationUnit) parser.createAST(null)).hasFatalError())
-						return createInputFatalStatus(element, ID_INLINE_TEMP);
+						return createInputFatalStatus(element, IJavaRefactorings.INLINE_LOCAL_VARIABLE);
 				}
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));

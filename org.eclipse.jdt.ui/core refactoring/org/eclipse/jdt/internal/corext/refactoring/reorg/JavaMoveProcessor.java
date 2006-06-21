@@ -55,7 +55,6 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 	private boolean fWasCanceled;
 	private String fComment;
 
-	public static final String ID_MOVE= "org.eclipse.jdt.ui.move"; //$NON-NLS-1$
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.MoveProcessor"; //$NON-NLS-1$
 	
 	public JavaMoveProcessor(IMovePolicy policy) {

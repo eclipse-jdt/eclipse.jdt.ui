@@ -49,6 +49,7 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -94,7 +95,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class RenameFieldProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IDelegateUpdating {
 
-	private static final String ID_RENAME_FIELD= "org.eclipse.jdt.ui.rename.field"; //$NON-NLS-1$
 	protected static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 	protected static final String ATTRIBUTE_TEXTUAL_MATCHES= "textual"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_RENAME_GETTER= "getter"; //$NON-NLS-1$
@@ -591,7 +591,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 				comment.addSetting(RefactoringCoreMessages.RenameFieldRefactoring_setting_rename_getter);
 			if (fRenameSetter)
 				comment.addSetting(RefactoringCoreMessages.RenameFieldRefactoring_setting_rename_settter);
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_FIELD, project, description, comment.asString(), arguments, flags);
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.RENAME_FIELD, project, description, comment.asString(), arguments, flags);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fField));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
 			arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
@@ -853,7 +853,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.FIELD)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_RENAME_FIELD);
+					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_FIELD);
 				else
 					fField= (IField) element;
 			} else

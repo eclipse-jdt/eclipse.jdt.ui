@@ -81,6 +81,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
@@ -123,7 +124,6 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public final class MoveStaticMembersProcessor extends MoveProcessor implements IDelegateUpdating, IScriptableRefactoring, ICommentProvider {
 
-	private static final String ID_STATIC_MOVE= "org.eclipse.jdt.ui.move.static"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DELEGATE="delegate"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DEPRECATE="deprecate"; //$NON-NLS-1$
 	private static final String TRACKED_POSITION_PROPERTY= "MoveStaticMembersProcessor.trackedPosition"; //$NON-NLS-1$
@@ -708,7 +708,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		final String description= members.length == 1 ? Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_description_descriptor_short_multi, members[0].getElementName()) : RefactoringCoreMessages.MoveMembersRefactoring_move_members;
 		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_target_element_pattern, JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_STATIC_MOVE, project, description, comment.asString(), arguments, flags);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.MOVE_STATIC_MEMBERS, project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fDestinationType));
 		arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
 		arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
@@ -1029,7 +1029,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_STATIC_MOVE);
+					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.MOVE_STATIC_MEMBERS);
 				else {
 					fDestinationType= (IType) element;
 					fDestinationTypeName= fDestinationType.getFullyQualifiedName();
@@ -1053,7 +1053,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			while ((handle= extended.getAttribute(attribute)) != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists())
-					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), ID_STATIC_MOVE));
+					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.MOVE_STATIC_MEMBERS));
 				else
 					elements.add(element);
 				count++;
@@ -1061,7 +1061,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			}
 			fMembersToMove= (IMember[]) elements.toArray(new IMember[elements.size()]);
 			if (elements.isEmpty())
-				return ScriptableRefactoring.createInputFatalStatus(null, getRefactoring().getName(), ID_STATIC_MOVE);
+				return ScriptableRefactoring.createInputFatalStatus(null, getRefactoring().getName(), IJavaRefactorings.MOVE_STATIC_MEMBERS);
 			IJavaProject project= null;
 			if (fMembersToMove.length > 0)
 				project= fMembersToMove[0].getJavaProject();

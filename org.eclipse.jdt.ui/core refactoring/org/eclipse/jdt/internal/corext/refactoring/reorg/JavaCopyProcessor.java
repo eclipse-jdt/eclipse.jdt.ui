@@ -55,7 +55,6 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 	private ReorgExecutionLog fExecutionLog;
 	private String fComment;
 	
-	public static final String ID_COPY= "org.eclipse.jdt.ui.copy"; //$NON-NLS-1$
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.CopyProcessor";  //$NON-NLS-1$
 	
 	public JavaCopyProcessor(ICopyPolicy copyPolicy) {

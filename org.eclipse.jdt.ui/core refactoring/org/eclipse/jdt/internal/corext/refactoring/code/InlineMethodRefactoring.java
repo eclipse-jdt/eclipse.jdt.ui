@@ -63,6 +63,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -95,7 +96,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  */
 public class InlineMethodRefactoring extends ScriptableRefactoring {
 
-	public static final String ID_INLINE_METHOD= "org.eclipse.jdt.ui.inline.method"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_MODE= "mode"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DELETE= "delete";	 //$NON-NLS-1$
 
@@ -371,7 +371,7 @@ public class InlineMethodRefactoring extends ScriptableRefactoring {
 			comment.addSetting(RefactoringCoreMessages.InlineMethodRefactoring_remove_method);
 		if (fCurrentMode == Mode.INLINE_ALL)
 			comment.addSetting(RefactoringCoreMessages.InlineMethodRefactoring_replace_references);
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_METHOD, project, description, comment.asString(), arguments, flags);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.INLINE_METHOD, project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fInitialUnit));
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 		arguments.put(ATTRIBUTE_DELETE, Boolean.valueOf(fDeleteSource).toString());

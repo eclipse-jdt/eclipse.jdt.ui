@@ -87,6 +87,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -135,8 +136,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	private static final String ATTRIBUTE_COMMENTS= "comments"; //$NON-NLS-1$
 
 	private static final String ATTRIBUTE_PUBLIC= "public"; //$NON-NLS-1$
-
-	static final String ID_EXTRACT_INTERFACE= "org.eclipse.jdt.ui.extract.interface"; //$NON-NLS-1$
 
 	/** The identifier of this processor */
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.extractInterfaceProcessor"; //$NON-NLS-1$
@@ -344,7 +343,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				settings[index]= JavaElementLabels.getElementLabel(fMembers[index], JavaElementLabels.ALL_FULLY_QUALIFIED);
 			comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ExtractInterfaceProcessor_extracted_members_pattern, settings));
 			addSuperTypeSettings(comment, true);
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_INTERFACE, project, description, comment.asString(), arguments, flags);
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.EXTRACT_INTERFACE, project, description, comment.asString(), arguments, flags);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSubType));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fSuperName);
 			for (int index= 0; index < fMembers.length; index++)
@@ -836,7 +835,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_EXTRACT_INTERFACE);
+					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.EXTRACT_INTERFACE);
 				else
 					fSubType= (IType) element;
 			} else
@@ -881,7 +880,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			while ((handle= extended.getAttribute(attribute)) != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists())
-					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), ID_EXTRACT_INTERFACE));
+					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.EXTRACT_INTERFACE));
 				else
 					elements.add(element);
 				count++;

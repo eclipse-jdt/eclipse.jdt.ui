@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -88,7 +89,6 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 public class IntroduceParameterRefactoring extends ScriptableRefactoring implements IDelegateUpdating {
 
-	private static final String ID_INTRODUCE_PARAMETER= "org.eclipse.jdt.ui.introduce.parameter"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_ARGUMENT= "argument"; //$NON-NLS-1$
 
 	private static final String[] KNOWN_METHOD_NAME_PREFIXES= {"get", "is"}; //$NON-NLS-2$ //$NON-NLS-1$
@@ -519,7 +519,7 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 					comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_original_pattern, JavaElementLabels.getTextLabel(fChangeSignatureRefactoring.getMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)));
 					comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_pattern, ASTNodes.asString(fSelectedExpression)));
 					comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_parameter_pattern, getAddedParameterInfo().getNewName()));
-					result= new RefactoringDescriptorChange(new JavaRefactoringDescriptor(ID_INTRODUCE_PARAMETER, extended.getProject(), description, comment.asString(), arguments, extended.getFlags()), RefactoringCoreMessages.IntroduceParameterRefactoring_name, new Change[] { result});
+					result= new RefactoringDescriptorChange(new JavaRefactoringDescriptor(IJavaRefactorings.INTRODUCE_PARAMETER, extended.getProject(), description, comment.asString(), arguments, extended.getFlags()), RefactoringCoreMessages.IntroduceParameterRefactoring_name, new Change[] { result});
 				}
 			}
 		}
@@ -550,7 +550,7 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-					return createInputFatalStatus(element, ID_INTRODUCE_PARAMETER);
+					return createInputFatalStatus(element, IJavaRefactorings.INTRODUCE_PARAMETER);
 				else
 					fSourceCU= ((IMethod) element).getCompilationUnit();
 			} else

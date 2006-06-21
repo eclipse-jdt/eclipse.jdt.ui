@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -74,7 +75,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class RenameLocalVariableProcessor extends JavaRenameProcessor implements INameUpdating, IReferenceUpdating {
 
-	private static final String ID_RENAME_LOCAL_VARIABLE= "org.eclipse.jdt.ui.rename.local.variable"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 
 	private ILocalVariable fLocalVariable;
@@ -363,7 +363,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 				final String header= Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, JavaElementLabels.getElementLabel(fLocalVariable.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), fNewName});
 				final String description= Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description_short, fCurrentName);
 				final String comment= new JavaRefactoringDescriptorComment(project, this, header).asString();
-				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_LOCAL_VARIABLE, project, description, comment, arguments, RefactoringDescriptor.NONE);
+				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.RENAME_LOCAL_VARIABLE, project, description, comment, arguments, RefactoringDescriptor.NONE);
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(range.getOffset()).toString() + " " + new Integer(range.getLength()).toString()); //$NON-NLS-1$
@@ -385,7 +385,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_RENAME_LOCAL_VARIABLE);
+					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_LOCAL_VARIABLE);
 				else
 					fCu= (ICompilationUnit) element;
 			} else
@@ -416,7 +416,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 								}
 							}
 							if (fLocalVariable == null)
-								return ScriptableRefactoring.createInputFatalStatus(null, getRefactoring().getName(), ID_RENAME_LOCAL_VARIABLE);
+								return ScriptableRefactoring.createInputFatalStatus(null, getRefactoring().getName(), IJavaRefactorings.RENAME_LOCAL_VARIABLE);
 						} catch (JavaModelException exception) {
 							JavaPlugin.log(exception);
 						}

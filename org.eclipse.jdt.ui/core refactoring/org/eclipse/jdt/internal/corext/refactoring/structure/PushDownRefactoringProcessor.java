@@ -66,6 +66,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
@@ -237,8 +238,6 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 	private static final String ATTRIBUTE_ABSTRACT= "abstract"; //$NON-NLS-1$
 
 	private static final String ATTRIBUTE_PUSH= "push"; //$NON-NLS-1$
-
-	private static final String ID_PUSH_DOWN= "org.eclipse.jdt.ui.push.down"; //$NON-NLS-1$
 
 	/** The identifier of this processor */
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.pushDownProcessor"; //$NON-NLS-1$
@@ -669,7 +668,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 				settings[index]= JavaElementLabels.getElementLabel(fMembersToMove[index], JavaElementLabels.ALL_FULLY_QUALIFIED);
 			comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.PushDownRefactoring_pushed_members_pattern, settings));
 			addSuperTypeSettings(comment, true);
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PUSH_DOWN, project, description, comment.asString(), arguments, flags);
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.PUSH_DOWN, project, description, comment.asString(), arguments, flags);
 			if (fCachedDeclaringType != null)
 				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCachedDeclaringType));
 			for (int index= 0; index < fMembersToMove.length; index++) {
@@ -962,7 +961,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_PUSH_DOWN);
+					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.PUSH_DOWN);
 				else
 					fCachedDeclaringType= (IType) element;
 			}
@@ -974,7 +973,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			while ((handle= extended.getAttribute(attribute)) != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists())
-					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), ID_PUSH_DOWN));
+					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.PUSH_DOWN));
 				else
 					elements.add(element);
 				if (extended.getAttribute(ATTRIBUTE_ABSTRACT + count) != null)

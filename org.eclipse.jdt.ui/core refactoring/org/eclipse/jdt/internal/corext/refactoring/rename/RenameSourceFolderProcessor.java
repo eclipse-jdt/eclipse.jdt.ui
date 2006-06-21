@@ -34,6 +34,7 @@ import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
@@ -48,7 +49,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 	
-	private static final String ID_RENAME_SOURCE_FOLDER= "org.eclipse.jdt.ui.rename.source.folder"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 	
@@ -169,7 +169,7 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 			final String description= Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_descriptor_description_short, fSourceFolder.getElementName());
 			final String header= Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_descriptor_description, new String[] { resource.getFullPath().toString(), newName});
 			final String comment= new JavaRefactoringDescriptorComment(project, this, header).asString();
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_SOURCE_FOLDER, project, description, comment, arguments, RefactoringDescriptor.NONE);
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.RENAME_SOURCE_FOLDER, project, description, comment, arguments, RefactoringDescriptor.NONE);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(JavaCore.create(resource)));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, newName);
 			return new DynamicValidationStateChange(new RenameSourceFolderChange(descriptor, fSourceFolder, newName, comment));
@@ -185,7 +185,7 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 			if (path != null) {
 				final IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(path));
 				if (resource == null || !resource.exists())
-					return ScriptableRefactoring.createInputFatalStatus(resource, getRefactoring().getName(), ID_RENAME_SOURCE_FOLDER);
+					return ScriptableRefactoring.createInputFatalStatus(resource, getRefactoring().getName(), IJavaRefactorings.RENAME_SOURCE_FOLDER);
 				else
 					fSourceFolder= (IPackageFragmentRoot) JavaCore.create(resource);
 			} else

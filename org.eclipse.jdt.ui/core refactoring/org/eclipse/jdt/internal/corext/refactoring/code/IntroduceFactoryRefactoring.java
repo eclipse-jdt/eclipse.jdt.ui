@@ -67,6 +67,7 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
@@ -107,7 +108,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  */
 public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 
-	private static final String ID_INTRODUCE_FACTORY= "org.eclipse.jdt.ui.introduce.factory"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_PROTECT= "protect"; //$NON-NLS-1$
 
 	/**
@@ -1068,7 +1068,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_owner_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 			if (fProtectConstructor)
 				comment.addSetting(RefactoringCoreMessages.IntroduceFactoryRefactoring_declare_private);
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INTRODUCE_FACTORY, project, description, comment.asString(), arguments, flags);
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.INTRODUCE_FACTORY, project, description, comment.asString(), arguments, flags);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCUHandle));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fNewMethodName);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(binding.getJavaElement()));
@@ -1292,7 +1292,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-					return createInputFatalStatus(element, ID_INTRODUCE_FACTORY);
+					return createInputFatalStatus(element, IJavaRefactorings.INTRODUCE_FACTORY);
 				else {
 					fCUHandle= (ICompilationUnit) element;
 		        	initialize();
@@ -1303,7 +1303,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-					return createInputFatalStatus(element, ID_INTRODUCE_FACTORY);
+					return createInputFatalStatus(element, IJavaRefactorings.INTRODUCE_FACTORY);
 				else {
 					final IType type= (IType) element;
 					fFactoryClassName= type.getFullyQualifiedName();

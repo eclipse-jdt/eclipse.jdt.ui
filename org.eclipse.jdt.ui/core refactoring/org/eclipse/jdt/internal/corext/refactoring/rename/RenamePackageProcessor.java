@@ -50,6 +50,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -90,7 +91,6 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 public class RenamePackageProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating {
 	
-	private static final String ID_RENAME_PACKAGE= "org.eclipse.jdt.ui.rename.package"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_QUALIFIED= "qualified"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_TEXTUAL_MATCHES= "textual"; //$NON-NLS-1$
@@ -436,7 +436,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
 			if (fRenameSubpackages)
 				comment.addSetting(RefactoringCoreMessages.RenamePackageProcessor_rename_subpackages);
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_PACKAGE, project, description, comment.asString(), arguments, flags);
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.RENAME_PACKAGE, project, description, comment.asString(), arguments, flags);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fPackage));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
 			if (fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
@@ -911,7 +911,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.PACKAGE_FRAGMENT)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_RENAME_PACKAGE);
+					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_PACKAGE);
 				else
 					fPackage= (IPackageFragment) element;
 			} else

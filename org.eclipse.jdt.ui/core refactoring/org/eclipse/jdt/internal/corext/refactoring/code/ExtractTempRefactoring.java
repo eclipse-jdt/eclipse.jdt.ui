@@ -92,6 +92,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -129,7 +130,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  */
 public class ExtractTempRefactoring extends ScriptableRefactoring {
 
-	private static final String ID_EXTRACT_TEMP= "org.eclipse.jdt.ui.extract.temp"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REPLACE= "replace"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_FINAL= "final"; //$NON-NLS-1$
 
@@ -467,7 +467,7 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 			comment.addSetting(RefactoringCoreMessages.ExtractTempRefactoring_replace_occurrences);
 		if (fDeclareFinal)
 			comment.addSetting(RefactoringCoreMessages.ExtractTempRefactoring_declare_final);
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_TEMP, project, description, comment.asString(), arguments, RefactoringDescriptor.NONE);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.EXTRACT_LOCAL_VARIABLE, project, description, comment.asString(), arguments, RefactoringDescriptor.NONE);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fTempName);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
@@ -977,7 +977,7 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-					return createInputFatalStatus(element, ID_EXTRACT_TEMP);
+					return createInputFatalStatus(element, IJavaRefactorings.EXTRACT_LOCAL_VARIABLE);
 				else
 					fCu= (ICompilationUnit) element;
 			} else

@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.MethodDeclarationMatch;
@@ -94,7 +95,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating, IDelegateUpdating {
 
-	public static final String ID_RENAME_METHOD= "org.eclipse.jdt.ui.rename.method"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DELEGATE= "delegate"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DEPRECATE= "deprecate"; //$NON-NLS-1$
@@ -707,7 +707,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			final String description= Messages.format(RefactoringCoreMessages.RenameMethodProcessor_descriptor_description_short, fMethod.getElementName());
 			final String header= Messages.format(RefactoringCoreMessages.RenameMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()});
 			final String comment= new JavaRefactoringDescriptorComment(project, this, header).asString();
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_METHOD, project, description, comment, arguments, flags);
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.RENAME_METHOD, project, description, comment, arguments, flags);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fMethod));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
 			arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
@@ -830,15 +830,15 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 						final IMethod[] methods= declaring.findMethods(method);
 						if (methods != null && methods.length == 1 && methods[0] != null) {
 							if (!methods[0].exists())
-								return ScriptableRefactoring.createInputFatalStatus(methods[0], refactoring, ID_RENAME_METHOD);
+								return ScriptableRefactoring.createInputFatalStatus(methods[0], refactoring, IJavaRefactorings.RENAME_METHOD);
 							fMethod= methods[0];
 							initializeWorkingCopyOwner();
 						} else
-							return ScriptableRefactoring.createInputFatalStatus(null, refactoring, ID_RENAME_METHOD);
+							return ScriptableRefactoring.createInputFatalStatus(null, refactoring, IJavaRefactorings.RENAME_METHOD);
 					} else
-						return ScriptableRefactoring.createInputFatalStatus(element, refactoring, ID_RENAME_METHOD);
+						return ScriptableRefactoring.createInputFatalStatus(element, refactoring, IJavaRefactorings.RENAME_METHOD);
 				} else
-					return ScriptableRefactoring.createInputFatalStatus(element, refactoring, ID_RENAME_METHOD);
+					return ScriptableRefactoring.createInputFatalStatus(element, refactoring, IJavaRefactorings.RENAME_METHOD);
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
 			final String name= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_NAME);

@@ -75,6 +75,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.refactoring.IJavaElementMapper;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.RenameTypeArguments;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -120,7 +121,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpdating, IReferenceUpdating, IQualifiedNameUpdating, ISimilarDeclarationUpdating, IResourceMapper, IJavaElementMapper {
 
-	public static final String ID_RENAME_TYPE= "org.eclipse.jdt.ui.rename.type"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_QUALIFIED= "qualified"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_TEXTUAL_MATCHES= "textual"; //$NON-NLS-1$
@@ -1009,7 +1009,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			final String description= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description_short, fType.getElementName());
 			final String header= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()});
 			final String comment= new JavaRefactoringDescriptorComment(project, this, header).asString();
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_TYPE, project, description, comment, arguments, flags);
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.RENAME_TYPE, project, description, comment, arguments, flags);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fType));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
 			if (fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
@@ -1164,7 +1164,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_RENAME_TYPE);
+					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_TYPE);
 				else
 					fType= (IType) element;
 			} else

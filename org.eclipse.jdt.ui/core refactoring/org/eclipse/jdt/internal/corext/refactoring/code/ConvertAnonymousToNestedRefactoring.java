@@ -85,6 +85,7 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -116,7 +117,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 
-	private static final String ID_CONVERT_ANONYMOUS= "org.eclipse.jdt.ui.convert.anonymous"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_FINAL= "final"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_STATIC= "static"; //$NON-NLS-1$
@@ -501,7 +501,7 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 			comment.addSetting(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_declare_final);			
 		else if (fDeclareStatic)
 			comment.addSetting(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_declare_static);			
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_CONVERT_ANONYMOUS, project, description, comment.asString(), arguments, flags);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.CONVERT_ANONYMOUS, project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fClassName);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
@@ -1073,7 +1073,7 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-					return createInputFatalStatus(element, ID_CONVERT_ANONYMOUS);
+					return createInputFatalStatus(element, IJavaRefactorings.CONVERT_ANONYMOUS);
 				else {
 					fCu= (ICompilationUnit) element;
 		        	fSettings= JavaPreferencesSettings.getCodeGenerationSettings(fCu.getJavaProject());

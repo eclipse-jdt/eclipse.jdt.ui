@@ -67,6 +67,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -97,7 +98,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 
-	private static final String ID_PROMOTE_TEMP= "org.eclipse.jdt.ui.promote.temp"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_STATIC= "static"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_FINAL= "final"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
@@ -651,7 +651,7 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 			comment.addSetting(RefactoringCoreMessages.PromoteTempToFieldRefactoring_declare_final);
 		else if (fDeclareStatic)
 			comment.addSetting(RefactoringCoreMessages.PromoteTempToFieldRefactoring_declare_static);
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PROMOTE_TEMP, project, description, comment.asString(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.CONVERT_LOCAL_VARIABLE, project, description, comment.asString(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fFieldName);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
@@ -866,7 +866,7 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-					return createInputFatalStatus(element, ID_PROMOTE_TEMP);
+					return createInputFatalStatus(element, IJavaRefactorings.CONVERT_LOCAL_VARIABLE);
 				else
 					fCu= (ICompilationUnit) element;
 			} else

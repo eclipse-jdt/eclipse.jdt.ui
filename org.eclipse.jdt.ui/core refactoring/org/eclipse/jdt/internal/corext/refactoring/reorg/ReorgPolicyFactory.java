@@ -98,6 +98,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -332,7 +333,7 @@ public final class ReorgPolicyFactory {
 		}
 
 		protected String getProcessorId() {
-			return JavaCopyProcessor.ID_COPY;
+			return IJavaRefactorings.COPY;
 		}
 
 		public ReorgExecutionLog getReorgExecutionLog() {
@@ -421,7 +422,7 @@ public final class ReorgPolicyFactory {
 		}
 
 		protected String getProcessorId() {
-			return JavaCopyProcessor.ID_COPY;
+			return IJavaRefactorings.COPY;
 		}
 
 		public ReorgExecutionLog getReorgExecutionLog() {
@@ -518,7 +519,7 @@ public final class ReorgPolicyFactory {
 		}
 
 		protected String getProcessorId() {
-			return JavaCopyProcessor.ID_COPY;
+			return IJavaRefactorings.COPY;
 		}
 
 		public ReorgExecutionLog getReorgExecutionLog() {
@@ -613,7 +614,7 @@ public final class ReorgPolicyFactory {
 		}
 
 		protected String getProcessorId() {
-			return JavaCopyProcessor.ID_COPY;
+			return IJavaRefactorings.COPY;
 		}
 
 		public ReorgExecutionLog getReorgExecutionLog() {
@@ -1195,7 +1196,7 @@ public final class ReorgPolicyFactory {
 		}
 
 		protected String getProcessorId() {
-			return JavaMoveProcessor.ID_MOVE;
+			return IJavaRefactorings.MOVE;
 		}
 
 		protected Map getRefactoringArguments(String project) {
@@ -1397,7 +1398,7 @@ public final class ReorgPolicyFactory {
 		}
 
 		protected String getProcessorId() {
-			return JavaMoveProcessor.ID_MOVE;
+			return IJavaRefactorings.MOVE;
 		}
 
 		public boolean isTextualMove() {
@@ -1514,7 +1515,7 @@ public final class ReorgPolicyFactory {
 		}
 
 		protected String getProcessorId() {
-			return JavaMoveProcessor.ID_MOVE;
+			return IJavaRefactorings.MOVE;
 		}
 
 		public boolean isTextualMove() {
@@ -1620,7 +1621,7 @@ public final class ReorgPolicyFactory {
 		}
 
 		protected String getProcessorId() {
-			return JavaMoveProcessor.ID_MOVE;
+			return IJavaRefactorings.MOVE;
 		}
 
 		public boolean isTextualMove() {

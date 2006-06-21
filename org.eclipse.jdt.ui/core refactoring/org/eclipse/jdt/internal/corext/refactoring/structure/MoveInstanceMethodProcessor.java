@@ -105,6 +105,7 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
@@ -978,8 +979,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	private static final String ATTRIBUTE_USE_SETTER= "setter"; //$NON-NLS-1$
 
-	private static final String ID_MOVE_METHOD= "org.eclipse.jdt.ui.move.method"; //$NON-NLS-1$
-
 	/** The identifier of this processor */
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.moveInstanceMethodProcessor"; //$NON-NLS-1$
 
@@ -1690,7 +1689,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_method_name_pattern, getMethodName()));
 			if (needsTargetNode())
 				comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_parameter_name_pattern, getTargetName()));
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_MOVE_METHOD, project, description, comment.asString(), arguments, flags);
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.MOVE_METHOD, project, description, comment.asString(), arguments, flags);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fMethod));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fMethodName);
 			arguments.put(ATTRIBUTE_TARGET_NAME, fTargetName);
@@ -2776,7 +2775,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.METHOD)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_MOVE_METHOD);
+					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.MOVE_METHOD);
 				else {
 					fMethod= (IMethod) element;
 					initialize(fMethod);

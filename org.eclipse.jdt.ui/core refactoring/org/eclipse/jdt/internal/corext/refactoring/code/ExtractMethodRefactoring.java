@@ -87,6 +87,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
@@ -122,7 +123,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  */
 public class ExtractMethodRefactoring extends ScriptableRefactoring {
 
-	private static final String ID_EXTRACT_METHOD= "org.eclipse.jdt.ui.extract.method"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DESTINATION= "destination"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_COMMENTS= "comments"; //$NON-NLS-1$
@@ -469,7 +469,7 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 			comment.addSetting(RefactoringCoreMessages.ExtractMethodRefactoring_replace_occurrences);
 		if (fGenerateJavadoc)
 			comment.addSetting(RefactoringCoreMessages.ExtractMethodRefactoring_generate_comment);
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_METHOD, project, description, comment.asString(), arguments, flags);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.EXTRACT_METHOD, project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCUnit));
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fMethodName);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
@@ -978,7 +978,7 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-					return createInputFatalStatus(element, ID_EXTRACT_METHOD);
+					return createInputFatalStatus(element, IJavaRefactorings.EXTRACT_METHOD);
 				else {
 					fCUnit= (ICompilationUnit) element;
 		        	try {

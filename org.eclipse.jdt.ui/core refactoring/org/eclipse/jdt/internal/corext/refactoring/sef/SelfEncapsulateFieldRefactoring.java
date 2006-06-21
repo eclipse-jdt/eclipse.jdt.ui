@@ -77,6 +77,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchPattern;
 
@@ -113,7 +114,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  */
 public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 
-	private static final String ID_SELF_ENCAPSULATE= "org.eclipse.jdt.ui.self.encapsulate"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_GETTER= "getter"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_SETTER= "setter"; //$NON-NLS-1$
@@ -409,7 +409,7 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 			comment.addSetting(RefactoringCoreMessages.SelfEncapsulateField_do_not_use_accessors);			
 		if (fGenerateJavadoc)
 			comment.addSetting(RefactoringCoreMessages.SelfEncapsulateField_generate_comments);
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_SELF_ENCAPSULATE, project, description, comment.asString(), arguments, flags);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.ENCAPSULATE_FIELD, project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fField));
 		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
 		arguments.put(ATTRIBUTE_INSERTION, new Integer(fInsertionIndex).toString());
@@ -664,13 +664,13 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.FIELD)
-					return createInputFatalStatus(element, ID_SELF_ENCAPSULATE);
+					return createInputFatalStatus(element, IJavaRefactorings.ENCAPSULATE_FIELD);
 				else {
 					fField= (IField) element;
 					try {
 						initialize(fField);
 					} catch (JavaModelException exception) {
-						return createInputFatalStatus(element, ID_SELF_ENCAPSULATE);
+						return createInputFatalStatus(element, IJavaRefactorings.ENCAPSULATE_FIELD);
 					}
 				}
 			} else

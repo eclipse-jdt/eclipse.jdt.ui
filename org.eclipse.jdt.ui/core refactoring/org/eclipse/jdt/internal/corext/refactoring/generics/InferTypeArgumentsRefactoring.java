@@ -60,6 +60,7 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeLiteral;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -93,7 +94,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class InferTypeArgumentsRefactoring extends ScriptableRefactoring {
 
-	private static final String ID_INFER_TYPE_ARGUMENTS= "org.eclipse.jdt.ui.infer.typearguments"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_CLONE= "clone"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_LEAVE= "leave"; //$NON-NLS-1$
 
@@ -546,7 +546,7 @@ public class InferTypeArgumentsRefactoring extends ScriptableRefactoring {
 						comment.addSetting(RefactoringCoreMessages.InferTypeArgumentsRefactoring_assume_clone);
 					if (fLeaveUnconstrainedRaw)
 						comment.addSetting(RefactoringCoreMessages.InferTypeArgumentsRefactoring_leave_unconstrained);
-					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INFER_TYPE_ARGUMENTS, name, description, comment.asString(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.INFER_TYPE_ARGUMENTS, name, description, comment.asString(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 					for (int index= 0; index < fElements.length; index++)
 						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1), descriptor.elementToHandle(fElements[index]));
 					arguments.put(ATTRIBUTE_CLONE, Boolean.valueOf(fAssumeCloneReturnsSameType).toString());
@@ -595,7 +595,7 @@ public class InferTypeArgumentsRefactoring extends ScriptableRefactoring {
 			while ((handle= generic.getAttribute(attribute)) != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(generic.getProject(), handle, false);
 				if (element == null || !element.exists())
-					return createInputFatalStatus(element, ID_INFER_TYPE_ARGUMENTS);
+					return createInputFatalStatus(element, IJavaRefactorings.INFER_TYPE_ARGUMENTS);
 				else
 					elements.add(element);
 				count++;
@@ -603,7 +603,7 @@ public class InferTypeArgumentsRefactoring extends ScriptableRefactoring {
 			}
 			fElements= (IJavaElement[]) elements.toArray(new IJavaElement[elements.size()]);
 			if (elements.isEmpty())
-				return createInputFatalStatus(null, ID_INFER_TYPE_ARGUMENTS);
+				return createInputFatalStatus(null, IJavaRefactorings.INFER_TYPE_ARGUMENTS);
 			if (!status.isOK())
 				return status;
 		} else

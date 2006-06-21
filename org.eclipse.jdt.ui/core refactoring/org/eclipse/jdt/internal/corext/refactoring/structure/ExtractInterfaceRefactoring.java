@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import org.eclipse.core.runtime.Assert;
 
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -67,6 +69,6 @@ public final class ExtractInterfaceRefactoring extends ProcessorBasedRefactoring
 		if (processor instanceof IScriptableRefactoring) {
 			return ((IScriptableRefactoring) processor).initialize(arguments);
 		}
-		return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ProcessorBasedRefactoring_error_unsupported_initialization, ExtractInterfaceProcessor.ID_EXTRACT_INTERFACE));
+		return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ProcessorBasedRefactoring_error_unsupported_initialization, IJavaRefactorings.EXTRACT_INTERFACE));
 	}
 }

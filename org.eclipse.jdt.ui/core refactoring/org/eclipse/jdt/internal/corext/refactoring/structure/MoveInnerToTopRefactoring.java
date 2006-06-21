@@ -92,6 +92,7 @@ import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
@@ -136,7 +137,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 
-	private static final String ID_MOVE_INNER= "org.eclipse.jdt.ui.move.inner"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_FIELD= "field"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_MANDATORY= "mandatory"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_POSSIBLE= "possible"; //$NON-NLS-1$
@@ -773,7 +773,7 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 			comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_parameter_pattern, fNameForEnclosingInstanceConstructorParameter));
 		if (enclosing && fMarkInstanceFieldAsFinal)
 			comment.addSetting(RefactoringCoreMessages.MoveInnerToTopRefactoring_declare_final);
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_MOVE_INNER, project, description, comment.asString(), arguments, RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.CONVERT_MEMBER_TYPE, project, description, comment.asString(), arguments, RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fType));
 		if (enclosing)
 			arguments.put(ATTRIBUTE_FIELD_NAME, fEnclosingInstanceFieldName);
@@ -1574,7 +1574,7 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-					return createInputFatalStatus(element, ID_MOVE_INNER);
+					return createInputFatalStatus(element, IJavaRefactorings.CONVERT_MEMBER_TYPE);
 				else {
 					fType= (IType) element;
 					fCodeGenerationSettings= JavaPreferencesSettings.getCodeGenerationSettings(fType.getJavaProject());

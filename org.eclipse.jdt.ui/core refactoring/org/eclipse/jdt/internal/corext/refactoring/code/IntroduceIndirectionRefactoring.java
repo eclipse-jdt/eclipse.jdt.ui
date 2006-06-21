@@ -71,6 +71,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
@@ -134,7 +135,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 
-	private static final String ID_INTRODUCE_INDIRECTION= "org.eclipse.jdt.ui.introduce.indirection"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 
 	// User selections:
@@ -743,7 +743,7 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_declaring_pattern, JavaElementLabels.getTextLabel(fIntermediaryClass, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 		if (fUpdateReferences)
 			comment.addSetting(RefactoringCoreMessages.JavaRefactoringDescriptor_update_references);
-		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INTRODUCE_INDIRECTION, project, description, comment.asString(), arguments, flags);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.INTRODUCE_INDIRECTION, project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fTargetMethod));
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fIntermediaryMethodName);
 		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(fIntermediaryClass));
@@ -1313,7 +1313,7 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.METHOD)
-					return createInputFatalStatus(element, ID_INTRODUCE_INDIRECTION);
+					return createInputFatalStatus(element, IJavaRefactorings.INTRODUCE_INDIRECTION);
 				else
 					fTargetMethod= (IMethod) element;
 			} else
@@ -1322,7 +1322,7 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-					return createInputFatalStatus(element, ID_INTRODUCE_INDIRECTION);
+					return createInputFatalStatus(element, IJavaRefactorings.INTRODUCE_INDIRECTION);
 				else
 					fIntermediaryClass= (IType) element;
 			} else

@@ -63,6 +63,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchPattern;
@@ -114,7 +115,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  */
 public class ChangeTypeRefactoring extends ScriptableRefactoring {
 
-	private static final String ID_CHANGE_TYPE= "org.eclipse.jdt.ui.change.type"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_TYPE= "type"; //$NON-NLS-1$
 
 	private final Map/*<ICompilationUnit, Collection<ITypeConstraint>>*/ fConstraintCache;
@@ -481,7 +481,7 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 			comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeTypeRefactoring_original_element_pattern, BindingLabelProvider.getBindingLabel(fSelectionBinding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 			comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeTypeRefactoring_original_type_pattern, BindingLabelProvider.getBindingLabel(getOriginalType(), JavaElementLabels.ALL_FULLY_QUALIFIED)));
 			comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeTypeRefactoring_refactored_type_pattern, BindingLabelProvider.getBindingLabel(fSelectedType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_CHANGE_TYPE, project, description, comment.asString(), arguments, (RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT));
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.GENERALIZE_TYPE, project, description, comment.asString(), arguments, (RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORABLE | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 			arguments.put(ATTRIBUTE_TYPE, fSelectedType.getQualifiedName());
@@ -1501,7 +1501,7 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-					return createInputFatalStatus(element, ID_CHANGE_TYPE);
+					return createInputFatalStatus(element, IJavaRefactorings.GENERALIZE_TYPE);
 				else
 					fCu= (ICompilationUnit) element;
 			} else

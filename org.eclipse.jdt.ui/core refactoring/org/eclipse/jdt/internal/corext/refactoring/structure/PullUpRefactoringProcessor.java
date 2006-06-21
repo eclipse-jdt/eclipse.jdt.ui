@@ -90,6 +90,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -252,8 +253,6 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	protected static final String ATTRIBUTE_PULL= "pull"; //$NON-NLS-1$
 
 	protected static final String ATTRIBUTE_STUBS= "stubs"; //$NON-NLS-1$
-
-	private static final String ID_PULL_UP= "org.eclipse.jdt.ui.pull.up"; //$NON-NLS-1$
 
 	private static final String IDENTIFIER= "org.eclipse.jdt.ui.pullUpProcessor"; //$NON-NLS-1$
 
@@ -999,7 +998,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
 			comment.addSetting(Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_target_element_pattern, JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 			addSuperTypeSettings(comment, true);
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PULL_UP, project, description, comment.asString(), arguments, flags);
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.PULL_UP, project, description, comment.asString(), arguments, flags);
 			arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fDestinationType));
 			arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplace).toString());
 			arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
@@ -1602,7 +1601,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), ID_PULL_UP);
+					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.PULL_UP);
 				else
 					fDestinationType= (IType) element;
 			} else
@@ -1660,7 +1659,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 					if (element == null || !element.exists())
-						status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), ID_PULL_UP));
+						status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.PULL_UP));
 					else
 						elements.add(element);
 				} else
@@ -1674,7 +1673,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 					if (element == null || !element.exists())
-						status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), ID_PULL_UP));
+						status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.PULL_UP));
 					else
 						elements.add(element);
 				} else
@@ -1688,7 +1687,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 					if (element == null || !element.exists())
-						status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), ID_PULL_UP));
+						status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.PULL_UP));
 					else
 						elements.add(element);
 				} else

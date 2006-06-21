@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -84,7 +85,6 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 	private static final String ATTRIBUTE_ELEMENTS= "elements"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_SUGGEST_ACCESSORS= "accessors"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DELETE_SUBPACKAGES= "subPackages"; //$NON-NLS-1$
-	private static final String ID_DELETE= "org.eclipse.jdt.ui.delete"; //$NON-NLS-1$
 
 	private boolean fWasCanceled;
 	private boolean fSuggestGetterSetterDeletion;
@@ -632,7 +632,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 				comment.addSetting(RefactoringCoreMessages.JavaDeleteProcessor_delete_subpackages);
 			if (fSuggestGetterSetterDeletion)
 				comment.addSetting(RefactoringCoreMessages.JavaDeleteProcessor_delete_accessors);
-			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_DELETE, project, description, comment.asString(), arguments, flags);
+			final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(IJavaRefactorings.DELETE, project, description, comment.asString(), arguments, flags);
 			arguments.put(ATTRIBUTE_DELETE_SUBPACKAGES, Boolean.valueOf(fDeleteSubPackages).toString());
 			arguments.put(ATTRIBUTE_SUGGEST_ACCESSORS, Boolean.valueOf(fSuggestGetterSetterDeletion).toString());
 			arguments.put(ATTRIBUTE_RESOURCES, new Integer(fResources.length).toString());
@@ -875,7 +875,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 					final IResource resource= JavaRefactoringDescriptor.handleToResource(extended.getProject(), handle);
 					if (resource == null || !resource.exists())
-						return ScriptableRefactoring.createInputFatalStatus(resource, getRefactoring().getName(), ID_DELETE);
+						return ScriptableRefactoring.createInputFatalStatus(resource, getRefactoring().getName(), IJavaRefactorings.DELETE);
 					else
 						elements.add(resource);
 				} else
@@ -889,7 +889,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 					if (element == null || !element.exists())
-						status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), ID_DELETE));
+						status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.DELETE));
 					else
 						elements.add(element);
 				} else
