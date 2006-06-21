@@ -96,7 +96,7 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitDescriptorChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
@@ -488,7 +488,7 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 		final int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JDTRefactoringDescriptor.JAR_REFACTORABLE | JDTRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 		final String description= RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_descriptor_description_short;
 		final String header= Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_descriptor_description, labels);
-		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
+		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_original_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_class_name_pattern, fClassName));
 		String visibility= JdtFlags.getVisibilityString(fVisibility);

@@ -82,7 +82,7 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
@@ -1062,7 +1062,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 				flags|= JDTRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 			final String description= Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_descriptor_description_short, fCtorOwningClass.getName());
 			final String header= Messages.format(RefactoringCoreMessages.IntroduceFactory_descriptor_description, new String[] { fNewMethodName, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fCtorBinding, JavaElementLabels.ALL_FULLY_QUALIFIED)});
-			final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
+			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_original_pattern, BindingLabelProvider.getBindingLabel(fCtorBinding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_factory_pattern, fNewMethodName));
 			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_owner_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));

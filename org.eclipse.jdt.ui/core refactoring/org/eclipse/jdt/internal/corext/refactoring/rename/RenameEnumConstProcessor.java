@@ -31,7 +31,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RefactoringDescriptorChange;
@@ -109,7 +109,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 			}
 			final String description= Messages.format(RefactoringCoreMessages.RenameEnumConstProcessor_descriptor_description_short, fField.getElementName());
 			final String header= Messages.format(RefactoringCoreMessages.RenameEnumConstProcessor_descriptor_description, new String[] { field.getElementName(), JavaElementLabels.getElementLabel(field.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()});
-			final String comment= new JavaRefactoringDescriptorComment(project, this, header).asString();
+			final String comment= new JDTRefactoringDescriptorComment(project, this, header).asString();
 			final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(ID_RENAME_ENUM_CONSTANT, project, description, comment, arguments, flags);
 			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(field));
 			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());

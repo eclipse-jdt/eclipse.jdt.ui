@@ -103,7 +103,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ExceptionInfo;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -1157,7 +1157,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			try {
 				final String description= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description_short, fMethod.getElementName());
 				final String header= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()});
-				final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
+				final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 				if (!fMethod.getElementName().equals(fMethodName))
 					comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_new_name_pattern, fMethodName));
 				if (!isVisibilitySameAsInitial()) {
@@ -1181,11 +1181,11 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 						changed.add(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_changed_parameter_pattern, new String[] { info.getOldTypeName(), info.getOldName()}));
 				}
 				if (!added.isEmpty())
-					comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_added_parameters, (String[]) added.toArray(new String[added.size()])));
+					comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_added_parameters, (String[]) added.toArray(new String[added.size()])));
 				if (!deleted.isEmpty())
-					comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_removed_parameters, (String[]) deleted.toArray(new String[deleted.size()])));
+					comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_removed_parameters, (String[]) deleted.toArray(new String[deleted.size()])));
 				if (!changed.isEmpty())
-					comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_changed_parameters, (String[]) changed.toArray(new String[changed.size()])));
+					comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_changed_parameters, (String[]) changed.toArray(new String[changed.size()])));
 				added.clear();
 				deleted.clear();
 				changed.clear();
@@ -1197,9 +1197,9 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 						deleted.add(info.getType().getElementName());
 				}
 				if (!added.isEmpty())
-					comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_added_exceptions, (String[]) added.toArray(new String[added.size()])));
+					comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_added_exceptions, (String[]) added.toArray(new String[added.size()])));
 				if (!deleted.isEmpty())
-					comment.addSetting(JavaRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_removed_exceptions, (String[]) deleted.toArray(new String[deleted.size()])));
+					comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_removed_exceptions, (String[]) deleted.toArray(new String[deleted.size()])));
 				descriptor= new JDTRefactoringDescriptor(IJavaRefactorings.CHANGE_METHOD_SIGNATURE, project, description, comment.asString(), arguments, flags);
 				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fMethod));
 				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_NAME, fMethodName);

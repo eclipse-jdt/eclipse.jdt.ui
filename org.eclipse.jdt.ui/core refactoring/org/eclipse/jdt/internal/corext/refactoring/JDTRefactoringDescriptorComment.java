@@ -40,7 +40,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 3.2
  */
-public final class JavaRefactoringDescriptorComment {
+public final class JDTRefactoringDescriptorComment {
 
 	/** The element delimiter */
 	private static final String ELEMENT_DELIMITER= RefactoringCoreMessages.JavaRefactoringDescriptorComment_element_delimiter;
@@ -87,7 +87,7 @@ public final class JavaRefactoringDescriptorComment {
 	private final List fSettings= new ArrayList(6);
 
 	/**
-	 * Creates a new java refactoring descriptor comment.
+	 * Creates a new JDT refactoring descriptor comment.
 	 * 
 	 * @param project
 	 *            the project name, or <code>null</code>
@@ -97,7 +97,7 @@ public final class JavaRefactoringDescriptorComment {
 	 *            the header of the comment (typically the unique description of
 	 *            the refactoring with fully qualified element names)
 	 */
-	public JavaRefactoringDescriptorComment(final String project, final Object object, final String header) {
+	public JDTRefactoringDescriptorComment(final String project, final Object object, final String header) {
 		Assert.isNotNull(object);
 		Assert.isNotNull(header);
 		fProject= project;

@@ -88,7 +88,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
@@ -197,7 +197,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 *            <code>true</code> to add the use supertype setting,
 	 *            <code>false</code> otherwise
 	 */
-	protected void addSuperTypeSettings(final JavaRefactoringDescriptorComment comment, final boolean addUseSupertype) {
+	protected void addSuperTypeSettings(final JDTRefactoringDescriptorComment comment, final boolean addUseSupertype) {
 		Assert.isNotNull(comment);
 		if (fReplace) {
 			if (addUseSupertype)

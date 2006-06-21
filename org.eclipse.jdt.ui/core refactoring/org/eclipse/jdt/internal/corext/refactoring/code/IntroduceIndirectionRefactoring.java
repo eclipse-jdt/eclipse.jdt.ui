@@ -85,7 +85,7 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -737,7 +737,7 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 		}
 		final String description= Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_descriptor_description_short, fTargetMethod.getElementName());
 		final String header= Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fTargetMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)});
-		final JavaRefactoringDescriptorComment comment= new JavaRefactoringDescriptorComment(project, this, header);
+		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_original_pattern, JavaElementLabels.getTextLabel(fTargetMethod, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_method_pattern, fIntermediaryMethodName));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_declaring_pattern, JavaElementLabels.getTextLabel(fIntermediaryClass, JavaElementLabels.ALL_FULLY_QUALIFIED)));

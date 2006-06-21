@@ -59,8 +59,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringContribution;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringContribution;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.binary.SourceCreationOperation;
@@ -395,7 +395,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 					final RefactoringDescriptor descriptor= proxies[index].requestDescriptor(new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 					if (descriptor != null) {
 						final int flags= descriptor.getFlags();
-						if ((flags & JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT) != 0)
+						if ((flags & JDTRefactoringDescriptor.JAR_SOURCE_ATTACHMENT) != 0)
 							status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(JarImportMessages.BinaryRefactoringHistoryWizard_error_missing_source_attachment, descriptor.getDescription())));
 					}
 				}
@@ -492,15 +492,15 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	protected Refactoring createRefactoring(final RefactoringDescriptor descriptor, final RefactoringStatus status) throws CoreException {
 		Assert.isNotNull(descriptor);
 		Refactoring refactoring= null;
-		if (descriptor instanceof JavaRefactoringDescriptor) {
-			final JavaRefactoringDescriptor javaDescriptor= (JavaRefactoringDescriptor) descriptor;
-			JavaRefactoringContribution contribution= javaDescriptor.getContribution();
+		if (descriptor instanceof JDTRefactoringDescriptor) {
+			final JDTRefactoringDescriptor javaDescriptor= (JDTRefactoringDescriptor) descriptor;
+			JDTRefactoringContribution contribution= javaDescriptor.getContribution();
 			if (contribution != null)
 				refactoring= contribution.createRefactoring(descriptor);
 			else {
 				final RefactoringContribution refactoringContribution= RefactoringCore.getRefactoringContribution(javaDescriptor.getID());
-				if (refactoringContribution instanceof JavaRefactoringContribution) {
-					contribution= (JavaRefactoringContribution) refactoringContribution;
+				if (refactoringContribution instanceof JDTRefactoringContribution) {
+					contribution= (JDTRefactoringContribution) refactoringContribution;
 					refactoring= contribution.createRefactoring(descriptor);
 				}
 			}
@@ -511,16 +511,16 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 					if (fJavaProject != null) {
 						final String name= fJavaProject.getElementName();
 						extended.setProject(name);
-						String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
+						String handle= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_INPUT);
 						if (handle != null && !"".equals(handle)) //$NON-NLS-1$
-							extended.setAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, getTransformedHandle(name, handle));
+							extended.setAttribute(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, getTransformedHandle(name, handle));
 						int count= 1;
-						String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
+						String attribute= JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 						while ((handle= extended.getAttribute(attribute)) != null) {
 							if (!"".equals(handle)) //$NON-NLS-1$
 								extended.setAttribute(attribute, getTransformedHandle(name, handle));
 							count++;
-							attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
+							attribute= JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 						}
 					}
 				}
@@ -624,7 +624,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 			if (target instanceof IPackageFragmentRoot) {
 				final IPackageFragmentRoot extended= (IPackageFragmentRoot) target;
 				String sourceIdentifier= null;
-				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(project, handle, false);
+				final IJavaElement element= JDTRefactoringDescriptor.handleToElement(project, handle, false);
 				if (element != null) {
 					final IPackageFragmentRoot root= (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 					if (root != null)
@@ -637,7 +637,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 					if (sourceIdentifier != null) {
 						final IJavaElement result= JavaCore.create(extended.getHandleIdentifier() + element.getHandleIdentifier().substring(sourceIdentifier.length()));
 						if (result != null)
-							return JavaRefactoringDescriptor.elementToHandle(project, result);
+							return JDTRefactoringDescriptor.elementToHandle(project, result);
 					}
 				}
 			}
