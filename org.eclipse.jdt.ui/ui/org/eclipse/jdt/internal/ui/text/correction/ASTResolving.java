@@ -219,7 +219,7 @@ public class ASTResolving {
 				String name= ((MemberValuePair) initializerParent).getName().getIdentifier();
 				IMethodBinding annotMember= findAnnotationMember((Annotation) initializerParent.getParent(), name);
 				if (annotMember != null) {
-					return getReducedDimensionBinding(annotMember.getReturnType(), dim, annotMember.getReturnType().getElementType());
+					return getReducedDimensionBinding(annotMember.getReturnType(), dim);
 				}
 			}
 			if (creationType != null) {
@@ -371,14 +371,12 @@ public class ASTResolving {
 		return null;
 	}
 
-	private static ITypeBinding getReducedDimensionBinding(ITypeBinding arrayBinding, int dimsToReduce, ITypeBinding def) {
-		if (dimsToReduce == 0) {
-			return arrayBinding;
+	private static ITypeBinding getReducedDimensionBinding(ITypeBinding arrayBinding, int dimsToReduce) {
+		while (dimsToReduce > 0) {
+			arrayBinding= arrayBinding.getComponentType();
+			dimsToReduce--;
 		}
-		if (arrayBinding.getDimensions() == dimsToReduce) {
-			return arrayBinding.getElementType();
-		}
-		return def; //TODO bug 120264 
+		return arrayBinding;
 	}
 
 	private static ITypeBinding getParameterTypeBinding(ASTNode node, List args, IMethodBinding binding) {
