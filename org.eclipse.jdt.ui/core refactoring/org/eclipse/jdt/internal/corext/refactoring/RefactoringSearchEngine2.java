@@ -223,6 +223,9 @@ public final class RefactoringSearchEngine2 {
 	/** The search status */
 	private RefactoringStatus fStatus= new RefactoringStatus();
 
+	/** The working copies */
+	private ICompilationUnit[] fWorkingCopies= {};
+	
 	/**
 	 * Creates a new refactoring search engine.
 	 */
@@ -472,7 +475,7 @@ public final class RefactoringSearchEngine2 {
 				if (fOwner != null)
 					engine= new SearchEngine(fOwner);
 				else
-					engine= new SearchEngine();
+					engine= new SearchEngine(fWorkingCopies);
 				engine.search(fPattern, SearchUtils.getDefaultSearchParticipants(), fScope, getCollector(), new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 			} catch (CoreException exception) {
 				throw new JavaModelException(exception);
@@ -499,7 +502,7 @@ public final class RefactoringSearchEngine2 {
 				if (fOwner != null)
 					engine= new SearchEngine(fOwner);
 				else
-					engine= new SearchEngine();
+					engine= new SearchEngine(fWorkingCopies);
 				engine.searchDeclarationsOfAccessedFields(element, getCollector(), new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 			} catch (CoreException exception) {
 				throw new JavaModelException(exception);
@@ -526,7 +529,7 @@ public final class RefactoringSearchEngine2 {
 				if (fOwner != null)
 					engine= new SearchEngine(fOwner);
 				else
-					engine= new SearchEngine();
+					engine= new SearchEngine(fWorkingCopies);
 				engine.searchDeclarationsOfSentMessages(element, getCollector(), new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 			} catch (CoreException exception) {
 				throw new JavaModelException(exception);
@@ -553,7 +556,7 @@ public final class RefactoringSearchEngine2 {
 				if (fOwner != null)
 					engine= new SearchEngine(fOwner);
 				else
-					engine= new SearchEngine();
+					engine= new SearchEngine(fWorkingCopies);
 				engine.searchDeclarationsOfReferencedTypes(element, getCollector(), new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 			} catch (CoreException exception) {
 				throw new JavaModelException(exception);
@@ -600,6 +603,19 @@ public final class RefactoringSearchEngine2 {
 	public final void setGranularity(final int granularity) {
 		Assert.isTrue(granularity == GRANULARITY_COMPILATION_UNIT || granularity == GRANULARITY_SEARCH_MATCH);
 		fGranularity= granularity;
+	}
+
+	/**
+	 * Sets the working copies to take precedence during the searches.
+	 * <p>
+	 * This method must be called before start searching. The default is to use no working copies
+	 * 
+	 * @param copies the working copies to use
+	 */
+	public final void setWorkingCopies(final ICompilationUnit[] copies) {
+		Assert.isNotNull(copies);
+		fWorkingCopies= new ICompilationUnit[copies.length];
+		System.arraycopy(copies, 0, fWorkingCopies, 0, copies.length);
 	}
 
 	/**
