@@ -334,12 +334,8 @@ public final class JarImportWizardPage extends WizardPage {
 		handleJarFileChanged();
 		if (isPageComplete())
 			handlePackageFragmentRootChanged();
-		if (fImportWizard && !fTreeViewer.getControl().isEnabled()) {
-			if (fFirstTime)
-				setMessage(JarImportMessages.JarImportWizardPage_no_jar_files, INFORMATION);
-			else
-				setErrorMessage(JarImportMessages.JarImportWizardPage_no_jar_files);
-		}
+		if (fImportWizard && !fTreeViewer.getControl().isEnabled())
+			setErrorMessage(JarImportMessages.JarImportWizardPage_no_jar_files);
 		fFirstTime= false;
 		getContainer().updateButtons();
 	}
@@ -351,15 +347,13 @@ public final class JarImportWizardPage extends WizardPage {
 		if (fLocationControl != null) {
 			final String path= fLocationControl.getText();
 			if ("".equals(path)) { //$NON-NLS-1$
-				if (!fFirstTime)
-					setErrorMessage(JarImportMessages.JarImportWizardPage_empty_location);
+				setErrorMessage(JarImportMessages.JarImportWizardPage_empty_location);
 				setPageComplete(false);
 				return;
 			} else {
 				final File file= new File(path);
 				if (!file.exists()) {
-					if (!fFirstTime)
-						setErrorMessage(JarImportMessages.JarImportWizardPage_invalid_location);
+					setErrorMessage(JarImportMessages.JarImportWizardPage_invalid_location);
 					setPageComplete(false);
 					return;
 				}
@@ -368,8 +362,7 @@ public final class JarImportWizardPage extends WizardPage {
 					try {
 						zip= new ZipFile(file, ZipFile.OPEN_READ);
 					} catch (IOException exception) {
-						if (!fFirstTime)
-							setErrorMessage(JarImportMessages.JarImportWizardPage_invalid_location);
+						setErrorMessage(JarImportMessages.JarImportWizardPage_invalid_location);
 						setPageComplete(false);
 						return;
 					}
@@ -392,14 +385,12 @@ public final class JarImportWizardPage extends WizardPage {
 						stream= zip.getInputStream(entry);
 						data.setRefactoringHistory(RefactoringCore.getHistoryService().readRefactoringHistory(stream, JDTRefactoringDescriptor.JAR_IMPORTABLE | JDTRefactoringDescriptor.JAR_REFACTORABLE));
 					} catch (IOException exception) {
-						if (!fFirstTime)
-							setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
+						setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
 						setPageComplete(false);
 						return;
 					} catch (CoreException exception) {
 						JavaPlugin.log(exception);
-						if (!fFirstTime)
-							setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
+						setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
 						setPageComplete(false);
 						return;
 					} finally {
@@ -490,6 +481,16 @@ public final class JarImportWizardPage extends WizardPage {
 	 */
 	public void performFinish() {
 		fLocationControl.saveHistory();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setErrorMessage(final String message) {
+		if (!fFirstTime)
+			super.setErrorMessage(message);
+		else
+			setMessage(message, NONE);
 	}
 
 	/**
