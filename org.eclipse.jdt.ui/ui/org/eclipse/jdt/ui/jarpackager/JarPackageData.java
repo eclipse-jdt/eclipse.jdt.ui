@@ -521,7 +521,7 @@ public class JarPackageData {
 	/**
 	 * Sets the packages which should be sealed.
 	 * The following entry will be added to the manifest file for each package:
-	 * Name: <name of the package>
+	 * Name: &lt;name of the package&gt;
 	 * Sealed: true
 	 * <p>
 	 * This should only be used if the JAR itself is not sealed.
@@ -536,7 +536,7 @@ public class JarPackageData {
 	/**
 	 * Gets the packages which should be sealed.
 	 * The following entry will be added to the manifest file for each package:
-	 * Name: <name of the package>
+	 * Name: &lt;name of the package&gt;
 	 * Sealed: true
 	 * <p>
 	 * This should only be used if the JAR itself is not sealed.
@@ -554,7 +554,7 @@ public class JarPackageData {
 	/**
 	 * Gets the packages which should explicitly be unsealed.
 	 * The following entry will be added to the manifest file for each package:
-	 * Name: <name of the package>
+	 * Name: &lt;name of the package&gt;
 	 * Sealed: false
 	 * <p>
 	 * This should only be used if the JAR itself is sealed.
@@ -572,7 +572,7 @@ public class JarPackageData {
 	/**
 	 * Set the packages which should explicitly be unsealed.
 	 * The following entry will be added to the manifest file for each package:
-	 * Name: <name of the package>
+	 * Name: &lt;name of the package&gt;
 	 * Sealed: false
 	 * <p>
 	 * This should only be used if the JAR itself is sealed.
@@ -998,7 +998,7 @@ public class JarPackageData {
 	/**
 	 * Sets the option to include directory entries into the jar.
 	 * 
-	 * @param includeDirectoryEntries <code>true<code> to include
+	 * @param includeDirectoryEntries <code>true</code> to include
 	 *  directory entries <code>false</code> otherwise
 	 *  
 	 *  @since 3.1

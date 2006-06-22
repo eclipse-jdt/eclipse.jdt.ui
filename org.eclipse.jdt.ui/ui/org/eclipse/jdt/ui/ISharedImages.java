@@ -21,10 +21,10 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  * Standard images provided by the Java UI plug-in. This class offers access to the 
  * standard images in two forms:
  * <ul>
- *   <li>Use <code>ISharedImages.getImage(IMG_OBJS_<it>FOO</it>)</code> 
+ *   <li>Use <code>ISharedImages.getImage(IMG_OBJS_<i>FOO</i>)</code> 
  *    to access the shared standard <code>Image</code> object (caller must not
  *    dispose of image).</li>
- *   <li>Use <code>ISharedImages.getImageDescriptor(IMG_OBJS_<it>FOO</it>)</code> 
+ *   <li>Use <code>ISharedImages.getImageDescriptor(IMG_OBJS_<i>FOO</i>)</code> 
  *    to access the standard <code>ImageDescriptor</code> object (caller is 
  *    responsible for disposing of any <code>Image</code> objects it creates using
  *    this descriptor).</li>

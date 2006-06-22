@@ -2099,7 +2099,7 @@ public class PreferenceConstants {
 	/**
 	 * A named preference that defines the hover named the 'default hover'.
 	 * Value is of type <code>String</code>: possible values are <code>
-	 * EDITOR_NO_HOVER_CONFIGURED_ID</code> or <code> the hover id of a hover
+	 * EDITOR_NO_HOVER_CONFIGURED_ID</code> or the hover id of a hover
 	 * contributed as <code>javaEditorTextHovers</code>.
 	 * </p>
 	 * @since 2.1
@@ -2644,7 +2644,7 @@ public class PreferenceConstants {
 	/**
 	 * A named preference that controls if code assist contains only visible proposals.
 	 * <p>
-	 * Value is of type <code>Boolean</code>. if <code>true<code> code assist only contains visible members. If 
+	 * Value is of type <code>Boolean</code>. if <code>true</code> code assist only contains visible members. If 
 	 * <code>false</code> all members are included.
 	 * </p>
 	 */
@@ -2902,7 +2902,7 @@ public class PreferenceConstants {
 	/**
 	 * A named preference that controls the layout of the Java Browsing views vertically. Boolean value.
 	 * <p>
-	 * Value is of type <code>Boolean</code>. If <code>true<code> the views are stacked vertical.
+	 * Value is of type <code>Boolean</code>. If <code>true</code> the views are stacked vertical.
 	 * If <code>false</code> they are stacked horizontal.
 	 * </p>
 	 */
@@ -2932,7 +2932,7 @@ public class PreferenceConstants {
 	/**
 	 * A named preference that controls whether annotation roll over is used or not.
 	 * <p>
-	 * Value is of type <code>Boolean</code>. If <code>true<code> the annotation ruler column
+	 * Value is of type <code>Boolean</code>. If <code>true</code> the annotation ruler column
 	 * uses a roll over to display multiple annotations
 	 * </p>
 	 * 

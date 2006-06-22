@@ -312,7 +312,7 @@ public class RenameSupport {
 	 * indicating that no new name is provided.
 	 * @param flags flags controlling additional parameters. Valid flags are
 	 * <code>UPDATE_REFERENCES</code>, <code>UPDATE_TEXTUAL_MATCHES</code>,
-	 * </code>UPDATE_GETTER_METHOD</code>, and </code>UPDATE_SETTER_METHOD</code>,
+	 * <code>UPDATE_GETTER_METHOD</code>, and <code>UPDATE_SETTER_METHOD</code>,
 	 * or their bitwise OR, or <code>NONE</code>.
 	 * @return the {@link RenameSupport}.
 	 * @throws CoreException if an unexpected error occurred while creating

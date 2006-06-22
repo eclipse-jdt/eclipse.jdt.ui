@@ -22,9 +22,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
- * A JavaImageDescriptor consists of a base image and several adornments. The adornments
+ * A {@link JavaElementImageDescriptor} consists of a base image and several adornments. The adornments
  * are computed according to the flags either passed during creation or set via the method
- * <code>setAdornments</code>. 
+ *{@link #setAdornments(int)}. 
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -78,10 +78,9 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	 * Creates a new JavaElementImageDescriptor.
 	 * 
 	 * @param baseImage an image descriptor used as the base image
-	 * @param flags flags indicating which adornments are to be rendered. See <code>setAdornments</code>
+	 * @param flags flags indicating which adornments are to be rendered. See {@link #setAdornments(int)}
 	 * 	for valid values.
 	 * @param size the size of the resulting image
-	 * @see #setAdornments(int)
 	 */
 	public JavaElementImageDescriptor(ImageDescriptor baseImage, int flags, Point size) {
 		fBaseImage= baseImage;
@@ -93,10 +92,10 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	}
 	
 	/**
-	 * Sets the descriptors adornments. Valid values are: <code>ABSTRACT</code>, <code>FINAL</code>,
-	 * <code>SYNCHRONIZED</code>, </code>STATIC<code>, </code>RUNNABLE<code>, </code>WARNING<code>, 
-	 * </code>ERROR<code>, </code>OVERRIDDES<code>, <code>IMPLEMENTS</code>, <code>CONSTRUCTOR</code>,
-	 * <code>DEPRECATED</code>,  or any combination of those.
+	 * Sets the descriptors adornments. Valid values are: {@link #ABSTRACT}, {@link #FINAL},
+	 * {@link #SYNCHRONIZED}, {@link #STATIC}, {@link #RUNNABLE}, {@link #WARNING}, 
+	 * {@link #ERROR}, {@link #OVERRIDES}, {@link #IMPLEMENTS}, {@link #CONSTRUCTOR},
+	 * {@link #DEPRECATED},  or any combination of those.
 	 * 
 	 * @param adornments the image descriptors adornments
 	 */
@@ -115,10 +114,9 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	}
 
 	/**
-	 * Sets the size of the image created by calling <code>createImage()</code>.
+	 * Sets the size of the image created by calling {@link #createImage()}.
 	 * 
-	 * @param size the size of the image returned from calling <code>createImage()</code>
-	 * @see ImageDescriptor#createImage()
+	 * @param size the size of the image returned from calling {@link #createImage()}
 	 */
 	public void setImageSize(Point size) {
 		Assert.isNotNull(size);
@@ -127,10 +125,9 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	}
 	
 	/**
-	 * Returns the size of the image created by calling <code>createImage()</code>.
+	 * Returns the size of the image created by calling {@link #createImage()}.
 	 * 
-	 * @return the size of the image created by calling <code>createImage()</code>
-	 * @see ImageDescriptor#createImage()
+	 * @return the size of the image created by calling {@link #createImage()}
 	 */
 	public Point getImageSize() {
 		return new Point(fSize.x, fSize.y);

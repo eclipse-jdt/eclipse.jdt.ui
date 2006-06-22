@@ -83,7 +83,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		 * 
 		 * @param eventSource the base label provider
 		 * @param changedResource the changed resources
-		 * @param isMarkerChange <code>true<code> if the change is a marker change; otherwise
+		 * @param isMarkerChange <code>true</code> if the change is a marker change; otherwise
 		 *  <code>false</code> 
 		 */
 		public ProblemsLabelChangedEvent(IBaseLabelProvider eventSource, IResource[] changedResource, boolean isMarkerChange) {

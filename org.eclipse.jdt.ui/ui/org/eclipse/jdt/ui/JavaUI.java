@@ -637,8 +637,8 @@ public final class JavaUI {
 	 * or class file. If there already is an open Java editor for the given element, it is returned.
 	 *
 	 * @param element the input element; either a compilation unit 
-	 *   (<code>ICompilationUnit</code>) or a class file (</code>IClassFile</code>)
-	 * @return the editor, or </code>null</code> if wrong element type or opening failed
+	 *   (<code>ICompilationUnit</code>) or a class file (<code>IClassFile</code>)
+	 * @return the editor, or <code>null</code> if wrong element type or opening failed
 	 * @exception PartInitException if the editor could not be initialized
 	 * @exception JavaModelException if this element does not exist or if an
 	 *		exception occurs while accessing its underlying resource

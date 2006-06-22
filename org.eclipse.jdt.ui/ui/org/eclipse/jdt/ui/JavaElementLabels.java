@@ -70,13 +70,13 @@ public class JavaElementLabels {
 	
 	/**
 	 * Method names contain type parameters prepended.
-	 * e.g. <code><A> foo(A index)</code>
+	 * e.g. <code>&lt;A&gt; foo(A index)</code>
 	 */
 	public final static long M_PRE_TYPE_PARAMETERS= 1L << 2;
 	
 	/**
-	 * Method names contain type parameters appended.
-	 * e.g. <code>foo(A index) <A></code>
+	 * Method names contain type parameters appended. 
+	 * e.g. <code>foo(A index) &lt;A&gt;</code>
 	 */
 	public final static long M_APP_TYPE_PARAMETERS= 1L << 3;
 	
@@ -267,7 +267,7 @@ public class JavaElementLabels {
 	 * Specified to use the resolved information of a IType, IMethod or IField. See {@link IType#isResolved()}.
 	 * If resolved information is available, types will be rendered with type parameters of the instantiated type.
 	 * Resolved method render with the parameter types of the method instance.
-	 * <code>Vector<String>.get(String)</code>
+	 * <code>Vector&lt;String&gt;.get(String)</code>
 	 */
 	public final static long USE_RESOLVED= 1L << 48;
 	
