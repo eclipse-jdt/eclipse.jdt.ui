@@ -381,7 +381,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 			return fRenameTypeProcessor.createChange(pm);
 		fRenameTypeProcessor= null;
 		final String newName= getNewElementName();
-		final IResource resource= ResourceUtil.getResource(fCu);
+		final IResource resource= fCu.getResource();
 		if (resource != null && resource.isLinked()) {
 			final Map arguments= new HashMap();
 			final IProject project= resource.getProject();

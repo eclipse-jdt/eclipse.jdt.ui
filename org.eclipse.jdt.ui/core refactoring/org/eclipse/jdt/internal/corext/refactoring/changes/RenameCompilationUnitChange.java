@@ -26,13 +26,12 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 public final class RenameCompilationUnitChange extends AbstractJavaElementRenameChange {
 
 	public RenameCompilationUnitChange(RefactoringDescriptor descriptor, ICompilationUnit unit, String newName, String comment) {
-		this(descriptor, ResourceUtil.getResource(unit).getFullPath(), unit.getElementName(), newName, comment, IResource.NULL_STAMP);
+		this(descriptor, unit.getResource().getFullPath(), unit.getElementName(), newName, comment, IResource.NULL_STAMP);
 		Assert.isTrue(!unit.isReadOnly(), "compilation unit must not be read-only"); //$NON-NLS-1$
 	}
 
@@ -41,10 +40,11 @@ public final class RenameCompilationUnitChange extends AbstractJavaElementRename
 	}
 
 	protected IPath createNewPath() {
-		if (getResourcePath().getFileExtension() != null)
-			return getResourcePath().removeFileExtension().removeLastSegments(1).append(getNewName());
+		final IPath path= getResourcePath();
+		if (path.getFileExtension() != null)
+			return path.removeFileExtension().removeLastSegments(1).append(getNewName());
 		else
-			return getResourcePath().removeLastSegments(1).append(getNewName());
+			return path.removeLastSegments(1).append(getNewName());
 	}
 
 	protected Change createUndoChange(long stampToRestore) throws JavaModelException {

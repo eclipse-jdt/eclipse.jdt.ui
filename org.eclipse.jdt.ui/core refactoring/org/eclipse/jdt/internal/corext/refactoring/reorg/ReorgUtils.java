@@ -48,7 +48,6 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 
@@ -279,25 +278,7 @@ public class ReorgUtils {
 		}
 		return (IWorkingSet[])result.toArray(new IWorkingSet[result.size()]);
 	}
-	
-	public static boolean isDeletedFromEditor(IJavaElement elem) {
-		if (! isInsideCompilationUnit(elem))
-			return false;
-		if (elem instanceof IMember && ((IMember)elem).isBinary())
-			return false;
-		ICompilationUnit cu= ReorgUtils.getCompilationUnit(elem);
-		if (cu == null)
-			return false;
-		ICompilationUnit wc= cu;
-		// TODO have to understand if this method is needed any longer. Since
-		// with the new working copy support a element is never deleted from
-		// the editor if we have a primary working copy.
-		if (cu.equals(wc))
-			return false;
-		IJavaElement wcElement= JavaModelUtil.findInCompilationUnit(wc, elem);
-		return wcElement == null || ! wcElement.exists();
-	}
-	
+
 	public static boolean hasSourceAvailable(IMember member) throws JavaModelException{
 		return ! member.isBinary() || 
 				(member.getSourceRange() != null && ! fgUnknownRange.equals(member.getSourceRange()));
@@ -531,7 +512,7 @@ public class ReorgUtils {
 			return false;
 		if (cuParent.equals(dest))	
 			return true;
-		IResource cuResource= ResourceUtil.getResource(cu);
+		IResource cuResource= cu.getResource();
 		IResource packageResource= ResourceUtil.getResource(dest);
 		return isParentInWorkspaceOrOnDisk(cuResource, packageResource);
 	}

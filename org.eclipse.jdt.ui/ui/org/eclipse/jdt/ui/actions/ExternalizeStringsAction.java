@@ -64,7 +64,6 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
-import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -511,7 +510,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			return new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT){ 
 				public String getText(Object element) {
 					NonNLSElement nlsel= (NonNLSElement)element;
-					String elementName= ResourceUtil.getResource(nlsel.cu).getFullPath().toString();
+					String elementName= nlsel.cu.getResource().getFullPath().toString();
 					return Messages.format(
 						ActionMessages.FindStringsToExternalizeAction_foundStrings, 
 						new Object[] {new Integer(nlsel.count), elementName} );

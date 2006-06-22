@@ -61,7 +61,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -194,7 +193,7 @@ public class Checks {
 	 */
 	public static RefactoringStatus checkCompilationUnitNewName(ICompilationUnit cu, String newName) {
 		String newCUName= JavaModelUtil.getRenamedCUName(cu, newName);
-		if (resourceExists(RenameResourceChange.renamedResourcePath(ResourceUtil.getResource(cu).getFullPath(), newCUName)))
+		if (resourceExists(RenameResourceChange.renamedResourcePath(cu.getResource().getFullPath(), newCUName)))
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.Checks_cu_name_used, newName));
 		else
 			return new RefactoringStatus();
@@ -532,7 +531,7 @@ public class Checks {
 	//---------------------
 	
 	public static RefactoringStatus checkIfCuBroken(IMember member) throws JavaModelException{
-		ICompilationUnit cu= (ICompilationUnit)JavaCore.create(ResourceUtil.getResource(member));
+		ICompilationUnit cu= (ICompilationUnit)JavaCore.create(member.getCompilationUnit().getResource());
 		if (cu == null)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.Checks_cu_not_created);	 
 		else if (! cu.isStructureKnown())
@@ -576,7 +575,7 @@ public class Checks {
 	
 	private static final String getFullPath(ICompilationUnit cu) {
 		Assert.isTrue(cu.exists());
-		return ResourceUtil.getResource(cu).getFullPath().toString();
+		return cu.getResource().getFullPath().toString();
 	}
 	
 	

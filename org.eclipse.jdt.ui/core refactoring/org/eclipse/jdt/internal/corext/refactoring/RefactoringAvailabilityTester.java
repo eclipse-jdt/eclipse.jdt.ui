@@ -242,8 +242,6 @@ public final class RefactoringAvailabilityTester {
 			return false;
 		if (element instanceof IMember && ((IMember) element).isBinary())
 			return false;
-		if (ReorgUtils.isDeletedFromEditor(element))
-			return false;
 		return true;
 	}
 

@@ -722,7 +722,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	}
 
 	private RefactoringStatus checkNewPathValidity() {
-		IContainer c= ResourceUtil.getResource(fType).getParent();
+		IContainer c= fType.getCompilationUnit().getResource().getParent();
 		
 		String notRename= RefactoringCoreMessages.RenameTypeRefactoring_will_not_rename; 
 		IStatus status= c.getWorkspace().validateName(getNewElementName(), IResource.FILE);
@@ -737,7 +737,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	}
 	
 	private String createNewPath(String newName) {
-		return ResourceUtil.getResource(fType).getFullPath().removeLastSegments(1).append(newName).toString();
+		return fType.getCompilationUnit().getResource().getFullPath().removeLastSegments(1).append(newName).toString();
 	}
 	
 	private RefactoringStatus checkTypesImportedInCu() throws CoreException {
@@ -747,7 +747,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			return null;	
 			
 		String msg= Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_imported, 
-											new Object[]{getNewElementName(), ResourceUtil.getResource(fType).getFullPath()});
+											new Object[]{getNewElementName(), fType.getCompilationUnit().getResource().getFullPath()});
 		IJavaElement grandParent= imp.getParent().getParent();
 		if (grandParent instanceof ICompilationUnit)
 			return RefactoringStatus.createErrorStatus(msg, JavaStatusContext.create(imp));
@@ -984,7 +984,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	
 	private static String getFullPath(ICompilationUnit cu) {
 		Assert.isTrue(cu.exists());
-		return ResourceUtil.getResource(cu).getFullPath().toString();
+		return cu.getResource().getFullPath().toString();
 	}
 	
 	//------------- Changes ---------------
@@ -1022,7 +1022,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			final DynamicValidationRefactoringChange result= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.RenameTypeProcessor_change_name);
 			result.addAll(fChangeManager.getAllChanges());
 			if (willRenameCU()) {
-				IResource resource= ResourceUtil.getResource(fType);
+				IResource resource= fType.getCompilationUnit().getResource();
 				if (resource != null && resource.isLinked()) {
 					String ext= resource.getFileExtension();
 					String renamedResourceName;
@@ -1030,7 +1030,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 						renamedResourceName= getNewElementName();
 					else
 						renamedResourceName= getNewElementName() + '.' + ext;
-					result.add(new RenameResourceChange(null, ResourceUtil.getResource(fType), renamedResourceName, comment));
+					result.add(new RenameResourceChange(null, fType.getCompilationUnit().getResource(), renamedResourceName, comment));
 				} else {
 					String renamedCUName= JavaModelUtil.getRenamedCUName(fType.getCompilationUnit(), getNewElementName());
 					result.add(new RenameCompilationUnitChange(null, fType.getCompilationUnit(), renamedCUName, comment));
@@ -1078,7 +1078,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	
 			pm.worked(1);
 			
-			IResource resource= ResourceUtil.getResource(fType);
+			IResource resource= fType.getCompilationUnit().getResource();
 			// if we have a linked resource then we don't use CU renaming 
 			// directly. So we have to update the code by ourselves.
 			if ((resource != null && resource.isLinked()) || !willRenameCU()) {
