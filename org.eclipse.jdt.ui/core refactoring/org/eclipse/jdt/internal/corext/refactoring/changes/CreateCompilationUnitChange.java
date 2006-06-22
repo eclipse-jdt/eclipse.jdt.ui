@@ -18,7 +18,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-public class CreateCompilationUnitChange extends CreateTextFileChange {
+public final class CreateCompilationUnitChange extends CreateTextFileChange {
 
 	private final ICompilationUnit fUnit;
 

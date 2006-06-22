@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
@@ -115,10 +116,9 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 					return super.getAdapter(adapter);
 				}
 
-// TODO: enable for scripting
-//				public ChangeDescriptor getDescriptor() {
-//					return fCopyPolicy.getDescriptor();
-//				}
+				public ChangeDescriptor getDescriptor() {
+					return fCopyPolicy.getDescriptor();
+				}
 
 				public Change perform(IProgressMonitor pm2) throws CoreException {
 					try {

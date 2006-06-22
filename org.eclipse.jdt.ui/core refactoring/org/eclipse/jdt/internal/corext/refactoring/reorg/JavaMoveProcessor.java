@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
@@ -49,55 +50,63 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 
 public final class JavaMoveProcessor extends MoveProcessor implements IScriptableRefactoring, ICommentProvider, IQualifiedNameUpdating, IReorgDestinationValidator {
 
-	private IReorgQueries fReorgQueries;
-	private IMovePolicy fMovePolicy;
-	private ICreateTargetQueries fCreateTargetQueries;
-	private boolean fWasCanceled;
+	public static final String IDENTIFIER= "org.eclipse.jdt.ui.MoveProcessor"; //$NON-NLS-1$
+
 	private String fComment;
 
-	public static final String IDENTIFIER= "org.eclipse.jdt.ui.MoveProcessor"; //$NON-NLS-1$
-	
+	private ICreateTargetQueries fCreateTargetQueries;
+
+	private IMovePolicy fMovePolicy;
+
+	private IReorgQueries fReorgQueries;
+
+	private boolean fWasCanceled;
+
 	public JavaMoveProcessor(IMovePolicy policy) {
 		fMovePolicy= policy;
 	}
-	
-	protected Object getDestination() {
-		IJavaElement je= fMovePolicy.getJavaElementDestination();
-		if (je != null)
-			return je;
-		return fMovePolicy.getResourceDestination();
-	}
-	
-	public Object[] getElements() {
-		List result= new ArrayList();
-		result.addAll(Arrays.asList(fMovePolicy.getJavaElements()));
-		result.addAll(Arrays.asList(fMovePolicy.getResources()));
-		return result.toArray();
+
+	public boolean canChildrenBeDestinations(IJavaElement javaElement) {
+		return fMovePolicy.canChildrenBeDestinations(javaElement);
 	}
 
-	public String getIdentifier() {
-		return IDENTIFIER;
+	public boolean canChildrenBeDestinations(IResource resource) {
+		return fMovePolicy.canChildrenBeDestinations(resource);
 	}
 
-	public boolean isApplicable() throws CoreException {
-		return fMovePolicy.canEnable();
-	}
-	
-	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants shared) throws CoreException {
-		return fMovePolicy.loadParticipants(status, this, getAffectedProjectNatures(), shared);
+	public boolean canElementBeDestination(IJavaElement javaElement) {
+		return fMovePolicy.canElementBeDestination(javaElement);
 	}
 
-	private String[] getAffectedProjectNatures() throws CoreException {
-		String[] jNatures= JavaProcessors.computeAffectedNaturs(fMovePolicy.getJavaElements());
-		String[] rNatures= ResourceProcessors.computeAffectedNatures(fMovePolicy.getResources());
-		Set result= new HashSet();
-		result.addAll(Arrays.asList(jNatures));
-		result.addAll(Arrays.asList(rNatures));
-		return (String[])result.toArray(new String[result.size()]);
+	public boolean canElementBeDestination(IResource resource) {
+		return fMovePolicy.canElementBeDestination(resource);
 	}
 
-	public boolean wasCanceled() {
-		return fWasCanceled;
+	public boolean canEnableComment() {
+		return true;
+	}
+
+	public boolean canEnableQualifiedNameUpdating() {
+		return fMovePolicy.canEnableQualifiedNameUpdating();
+	}
+
+	public boolean canUpdateQualifiedNames() {
+		return fMovePolicy.canUpdateQualifiedNames();
+	}
+
+	public boolean canUpdateReferences() {
+		return fMovePolicy.canUpdateReferences();
+	}
+
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
+		try {
+			Assert.isNotNull(fReorgQueries);
+			fWasCanceled= false;
+			return fMovePolicy.checkFinalConditions(pm, context, fReorgQueries);
+		} catch (OperationCanceledException e) {
+			fWasCanceled= true;
+			throw e;
+		}
 	}
 
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
@@ -113,60 +122,16 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 		}
 	}
 
-	public Object getCommonParentForInputElements(){
-		return new ParentChecker(fMovePolicy.getResources(), fMovePolicy.getJavaElements()).getCommonParent();
-	}
-	
-	public IJavaElement[] getJavaElements() {
-		return fMovePolicy.getJavaElements();
-	}
-	
-	public IResource[] getResources() {
-		return fMovePolicy.getResources();
-	}
-
-	public RefactoringStatus setDestination(IJavaElement destination) throws JavaModelException{
-		return fMovePolicy.setDestination(destination);
-	}
-
-	public RefactoringStatus setDestination(IResource destination) throws JavaModelException{
-		return fMovePolicy.setDestination(destination);
-	}
-	
-	public boolean canChildrenBeDestinations(IJavaElement javaElement) {
-		return fMovePolicy.canChildrenBeDestinations(javaElement);
-	}
-	public boolean canChildrenBeDestinations(IResource resource) {
-		return fMovePolicy.canChildrenBeDestinations(resource);
-	}
-	public boolean canElementBeDestination(IJavaElement javaElement) {
-		return fMovePolicy.canElementBeDestination(javaElement);
-	}
-	public boolean canElementBeDestination(IResource resource) {
-		return fMovePolicy.canElementBeDestination(resource);
-	}
-	
-	public void setReorgQueries(IReorgQueries queries){
-		Assert.isNotNull(queries);
-		fReorgQueries= queries;
-	}
-
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
-		try{
-			Assert.isNotNull(fReorgQueries);
-			fWasCanceled= false;
-			return fMovePolicy.checkFinalConditions(pm, context, fReorgQueries);
-		} catch (OperationCanceledException e) {
-			fWasCanceled= true;
-			throw e;
-		}
-	}
-
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		Assert.isTrue(fMovePolicy.getJavaElementDestination() == null || fMovePolicy.getResourceDestination() == null);
-		Assert.isTrue(fMovePolicy.getJavaElementDestination() != null || fMovePolicy.getResourceDestination() != null);		
+		Assert.isTrue(fMovePolicy.getJavaElementDestination() != null || fMovePolicy.getResourceDestination() != null);
 		try {
-			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.JavaMoveProcessor_change_name) { 
+			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.JavaMoveProcessor_change_name) {
+
+				public ChangeDescriptor getDescriptor() {
+					return fMovePolicy.getDescriptor();
+				}
+
 				public Change perform(IProgressMonitor pm2) throws CoreException {
 					Change change= super.perform(pm2);
 					Change[] changes= getChildren();
@@ -176,16 +141,20 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 					}
 					return change;
 				}
-// TODO: enable for scripting
-//				public ChangeDescriptor getDescriptor() {
-//					return fMovePolicy.getDescriptor();
-//				}
 			};
+			if (fCreateTargetQueries instanceof LoggedCreateTargetQueries) {
+				final LoggedCreateTargetQueries queries= (LoggedCreateTargetQueries) fCreateTargetQueries;
+				final CreateTargetExecutionLog log= queries.getCreateTargetExecutionLog();
+				final Object[] selected= log.getSelectedElements();
+				for (int index= 0; index < selected.length; index++) {
+					result.add(new LoggedCreateTargetChange(selected[index], queries));
+				}
+			}
 			Change change= fMovePolicy.createChange(pm);
-			if (change instanceof CompositeChange){
-				CompositeChange subComposite= (CompositeChange)change;
+			if (change instanceof CompositeChange) {
+				CompositeChange subComposite= (CompositeChange) change;
 				result.merge(subComposite);
-			} else{
+			} else {
 				result.add(change);
 			}
 			return result;
@@ -193,72 +162,78 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 			pm.done();
 		}
 	}
-	
-	public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
-		return fMovePolicy.postCreateChange(participantChanges, pm);
+
+	private String[] getAffectedProjectNatures() throws CoreException {
+		String[] jNatures= JavaProcessors.computeAffectedNaturs(fMovePolicy.getJavaElements());
+		String[] rNatures= ResourceProcessors.computeAffectedNatures(fMovePolicy.getResources());
+		Set result= new HashSet();
+		result.addAll(Arrays.asList(jNatures));
+		result.addAll(Arrays.asList(rNatures));
+		return (String[]) result.toArray(new String[result.size()]);
+	}
+
+	public String getComment() {
+		return fComment;
+	}
+
+	public Object getCommonParentForInputElements() {
+		return new ParentChecker(fMovePolicy.getResources(), fMovePolicy.getJavaElements()).getCommonParent();
+	}
+
+	public ICreateTargetQuery getCreateTargetQuery() {
+		return fMovePolicy.getCreateTargetQuery(fCreateTargetQueries);
+	}
+
+	protected Object getDestination() {
+		IJavaElement je= fMovePolicy.getJavaElementDestination();
+		if (je != null)
+			return je;
+		return fMovePolicy.getResourceDestination();
+	}
+
+	public Object[] getElements() {
+		List result= new ArrayList();
+		result.addAll(Arrays.asList(fMovePolicy.getJavaElements()));
+		result.addAll(Arrays.asList(fMovePolicy.getResources()));
+		return result.toArray();
+	}
+
+	public String getFilePatterns() {
+		return fMovePolicy.getFilePatterns();
+	}
+
+	public String getIdentifier() {
+		return IDENTIFIER;
+	}
+
+	public IJavaElement[] getJavaElements() {
+		return fMovePolicy.getJavaElements();
 	}
 
 	public String getProcessorName() {
-		return RefactoringCoreMessages.MoveRefactoring_0; 
+		return RefactoringCoreMessages.MoveRefactoring_0;
 	}
-	
-	public boolean canUpdateReferences(){
-		return fMovePolicy.canUpdateReferences();
+
+	public IResource[] getResources() {
+		return fMovePolicy.getResources();
 	}
-	
-	public void setUpdateReferences(boolean update){
-		fMovePolicy.setUpdateReferences(update);
+
+	public boolean getUpdateQualifiedNames() {
+		return fMovePolicy.getUpdateQualifiedNames();
 	}
-	
+
 	public boolean getUpdateReferences() {
 		if (!canUpdateReferences())
 			return false;
 		return fMovePolicy.getUpdateReferences();
 	}
-	
-	public boolean canEnableQualifiedNameUpdating() {
-		return fMovePolicy.canEnableQualifiedNameUpdating();
-	}
-	
-	public boolean canUpdateQualifiedNames() {
-		return fMovePolicy.canUpdateQualifiedNames();
-	}
-	
-	public String getFilePatterns() {
-		return fMovePolicy.getFilePatterns();
-	}
-	
-	public boolean getUpdateQualifiedNames() {
-		return fMovePolicy.getUpdateQualifiedNames();
-	}
-	
-	public void setFilePatterns(String patterns) {
-		fMovePolicy.setFilePatterns(patterns);
-	}
-	
-	public void setUpdateQualifiedNames(boolean update) {
-		fMovePolicy.setUpdateQualifiedNames(update);
-	}
 
 	public boolean hasAllInputSet() {
 		return fMovePolicy.hasAllInputSet();
 	}
+
 	public boolean hasDestinationSet() {
 		return fMovePolicy.getJavaElementDestination() != null || fMovePolicy.getResourceDestination() != null;
-	}
-	
-	public void setCreateTargetQueries(ICreateTargetQueries queries){
-		Assert.isNotNull(queries);
-		fCreateTargetQueries= queries;
-	}
-	/**
-	 * @return the create target queries, or <code>null</code> if creating new targets is not supported
-	 */
-	public ICreateTargetQuery getCreateTargetQuery() {
-		return fMovePolicy.getCreateTargetQuery(fCreateTargetQueries);
-	}
-	public boolean isTextualMove() {
-		return fMovePolicy.isTextualMove();
 	}
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
@@ -269,33 +244,68 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 			fMovePolicy= ReorgPolicyFactory.createMovePolicy(status, arguments);
 			if (fMovePolicy != null && !status.hasFatalError()) {
 				status.merge(fMovePolicy.initialize(arguments));
-				setCreateTargetQueries(new LoggedCreateTargetQueries(extended.getProject(), "test"));
-				
-				// TODO: implement
+				if (!status.hasFatalError()) {
+					final CreateTargetExecutionLog log= ReorgPolicyFactory.loadCreateTargetExecutionLog(status, extended);
+					if (log != null && !status.hasFatalError())
+						setCreateTargetQueries(new LoggedCreateTargetQueries(log));
+				}
 			}
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return status;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean canEnableComment() {
-		return true;
+	public boolean isApplicable() throws CoreException {
+		return fMovePolicy.canEnable();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getComment() {
-		return fComment;
+	public boolean isTextualMove() {
+		return fMovePolicy.isTextualMove();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants shared) throws CoreException {
+		return fMovePolicy.loadParticipants(status, this, getAffectedProjectNatures(), shared);
+	}
+
+	public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
+		return fMovePolicy.postCreateChange(participantChanges, pm);
+	}
+
 	public void setComment(String comment) {
 		fComment= comment;
+	}
+
+	public void setCreateTargetQueries(ICreateTargetQueries queries) {
+		Assert.isNotNull(queries);
+		fCreateTargetQueries= new MonitoringCreateTargetQueries(queries, fMovePolicy.getCreateTargetExecutionLog());
+	}
+
+	public RefactoringStatus setDestination(IJavaElement destination) throws JavaModelException {
+		return fMovePolicy.setDestination(destination);
+	}
+
+	public RefactoringStatus setDestination(IResource destination) throws JavaModelException {
+		return fMovePolicy.setDestination(destination);
+	}
+
+	public void setFilePatterns(String patterns) {
+		fMovePolicy.setFilePatterns(patterns);
+	}
+
+	public void setReorgQueries(IReorgQueries queries) {
+		Assert.isNotNull(queries);
+		fReorgQueries= queries;
+	}
+
+	public void setUpdateQualifiedNames(boolean update) {
+		fMovePolicy.setUpdateQualifiedNames(update);
+	}
+
+	public void setUpdateReferences(boolean update) {
+		fMovePolicy.setUpdateReferences(update);
+	}
+
+	public boolean wasCanceled() {
+		return fWasCanceled;
 	}
 }

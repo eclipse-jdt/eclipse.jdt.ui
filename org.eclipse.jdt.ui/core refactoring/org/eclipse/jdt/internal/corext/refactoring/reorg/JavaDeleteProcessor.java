@@ -60,9 +60,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
@@ -834,6 +834,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		setQueries(new NullReorgQueries());
+		final RefactoringStatus status= new RefactoringStatus();
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
 			final String subPackages= extended.getAttribute(ATTRIBUTE_DELETE_SUBPACKAGES);
@@ -867,7 +868,6 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ELEMENTS));
 			String handle= null;
-			final RefactoringStatus status= new RefactoringStatus();
 			List elements= new ArrayList();
 			for (int index= 0; index < resourceCount; index++) {
 				final String attribute= JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1);
@@ -875,7 +875,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 					final IResource resource= JDTRefactoringDescriptor.handleToResource(extended.getProject(), handle);
 					if (resource == null || !resource.exists())
-						return ScriptableRefactoring.createInputFatalStatus(resource, getRefactoring().getName(), IJavaRefactorings.DELETE);
+						status.merge(ScriptableRefactoring.createInputWarningStatus(resource, getRefactoring().getName(), IJavaRefactorings.DELETE));
 					else
 						elements.add(resource);
 				} else
@@ -899,10 +899,8 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 			fElements= new Object[fResources.length + fJavaElements.length];
 			System.arraycopy(fResources, 0, fElements, 0, fResources.length);
 			System.arraycopy(fJavaElements, 0, fElements, fResources.length, fJavaElements.length);
-			if (!status.isOK())
-				return status;
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
-		return new RefactoringStatus();
+		return status;
 	}
 }

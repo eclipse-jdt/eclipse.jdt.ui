@@ -35,7 +35,7 @@ public interface IReorgPolicy extends IReferenceUpdating, IQualifiedNameUpdating
 
 	public ChangeDescriptor getDescriptor();
 
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws CoreException;
+	public RefactoringStatus checkFinalConditions(IProgressMonitor monitor, CheckConditionsContext context, IReorgQueries queries) throws CoreException;
 	public RefactoringStatus setDestination(IResource resource) throws JavaModelException;
 	public RefactoringStatus setDestination(IJavaElement javaElement) throws JavaModelException;
 	
@@ -61,13 +61,14 @@ public interface IReorgPolicy extends IReferenceUpdating, IQualifiedNameUpdating
 	public String getPolicyId();
 
 	public static interface ICopyPolicy extends IReorgPolicy{
-		public Change createChange(IProgressMonitor pm, INewNameQueries copyQueries) throws JavaModelException;
+		public Change createChange(IProgressMonitor monitor, INewNameQueries queries) throws JavaModelException;
 		public ReorgExecutionLog getReorgExecutionLog();
 	}
 	public static interface IMovePolicy extends IReorgPolicy{
-		public Change createChange(IProgressMonitor pm) throws JavaModelException;
-		public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException;
+		public Change createChange(IProgressMonitor monitor) throws JavaModelException;
+		public Change postCreateChange(Change[] participantChanges, IProgressMonitor monitor) throws CoreException;
 		public ICreateTargetQuery getCreateTargetQuery(ICreateTargetQueries createQueries);
 		public boolean isTextualMove();
+		public CreateTargetExecutionLog getCreateTargetExecutionLog();
 	}
 }
