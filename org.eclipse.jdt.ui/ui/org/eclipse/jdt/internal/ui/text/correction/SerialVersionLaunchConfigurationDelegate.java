@@ -157,6 +157,10 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 			Assert.isNotNull(configuration);
 			Assert.isNotNull(launch);
 			Assert.isNotNull(monitor);
+			
+			fErrorMessage= null;
+			fSerialVersionID= null;
+			
 			monitor.beginTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_launching_vm, 40);
 			try {
 				monitor.worked(10);

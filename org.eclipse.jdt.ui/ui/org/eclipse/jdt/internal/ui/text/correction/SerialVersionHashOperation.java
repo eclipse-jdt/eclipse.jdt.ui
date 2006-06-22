@@ -39,7 +39,11 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
@@ -160,8 +164,8 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 
 	private final ICompilationUnit fCompilationUnit;
 	
-	public SerialVersionHashOperation(ICompilationUnit unit, SimpleName[] simpleNames) {
-		super(unit, simpleNames);
+	public SerialVersionHashOperation(ICompilationUnit unit, ASTNode[] nodes) {
+		super(unit, nodes);
 		fCompilationUnit= unit;
 	}
 
@@ -235,4 +239,26 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		return serialVersionID + LONG_SUFFIX;
 	}
 
+	/**
+	 * Returns the qualified type name of the class declaration.
+	 * 
+	 * @return the qualified type name of the class
+	 */
+	private String getQualifiedName(final ASTNode parent) {
+		ITypeBinding binding= null;
+		if (parent instanceof AbstractTypeDeclaration) {
+			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) parent;
+			binding= declaration.resolveBinding();
+		} else if (parent instanceof AnonymousClassDeclaration) {
+			final AnonymousClassDeclaration declaration= (AnonymousClassDeclaration) parent;
+			final ClassInstanceCreation creation= (ClassInstanceCreation) declaration.getParent();
+			binding= creation.resolveTypeBinding();
+		} else if (parent instanceof ParameterizedType) {
+			final ParameterizedType type= (ParameterizedType) parent;
+			binding= type.resolveBinding();
+		}
+		if (binding != null)
+			return binding.getBinaryName();
+		return null;
+	}
 }

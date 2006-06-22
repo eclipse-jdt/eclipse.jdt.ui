@@ -23,6 +23,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -114,9 +116,11 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 			public IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 				return null;
 			}
-			public void endCleanUp() throws CoreException {
+			public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
+				return new RefactoringStatus();
 			}
-			public void beginCleanUp(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
+			public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
+				return new RefactoringStatus();
 			}
 			public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
 				return 0;

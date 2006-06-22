@@ -14,12 +14,13 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -29,7 +30,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.PotentialProgrammingProblemsFix;
-import org.eclipse.jdt.internal.corext.fix.PotentialProgrammingProblemsFix.ISerialVersionFixContext;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
@@ -73,9 +73,6 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 
 	private static final int DEFAULT_FLAG= 0;
 	private static final String SECTION_NAME= "CleanUp_PotentialProgrammingProblems0"; //$NON-NLS-1$
-	private static final Random RANDOM_NUMBER_GENERATOR= new Random();
-
-	private ISerialVersionFixContext fContext;
 
 	public PotentialProgrammingProblemsCleanUp(int flag) {
 		super(flag);
@@ -95,7 +92,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 		return PotentialProgrammingProblemsFix.createCleanUp(compilationUnit,
 				isFlag(ADD_CALCULATED_SERIAL_VERSION_ID) || 
 				isFlag(ADD_DEFAULT_SERIAL_VERSION_ID) ||
-				isFlag(ADD_RANDOM_SERIAL_VERSION_ID), getContext());
+				isFlag(ADD_RANDOM_SERIAL_VERSION_ID));
 	}
 
 	/**
@@ -108,7 +105,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 		return PotentialProgrammingProblemsFix.createCleanUp(compilationUnit, problems, 
 				isFlag(ADD_CALCULATED_SERIAL_VERSION_ID) || 
 				isFlag(ADD_DEFAULT_SERIAL_VERSION_ID) ||
-				isFlag(ADD_RANDOM_SERIAL_VERSION_ID), getContext());
+				isFlag(ADD_RANDOM_SERIAL_VERSION_ID));
 	}
 
 	/**
@@ -173,38 +170,18 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void beginCleanUp(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
-		super.beginCleanUp(project, compilationUnits, monitor);
-		if (isFlag(ADD_CALCULATED_SERIAL_VERSION_ID))
-			fContext= PotentialProgrammingProblemsFix.createSerialVersionHashContext(project, compilationUnits, monitor);
+	public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
+		return PotentialProgrammingProblemsFix.checkPreConditions(project, compilationUnits, monitor,
+				isFlag(ADD_CALCULATED_SERIAL_VERSION_ID),
+				isFlag(ADD_DEFAULT_SERIAL_VERSION_ID),
+				isFlag(ADD_RANDOM_SERIAL_VERSION_ID));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void endCleanUp() throws CoreException {
-		super.endCleanUp();
-		fContext= null;
-	}
-	
-	private ISerialVersionFixContext getContext() {
-		if (isFlag(ADD_CALCULATED_SERIAL_VERSION_ID)) {
-			return fContext;
-		} else if (isFlag(ADD_DEFAULT_SERIAL_VERSION_ID)){
-			return new ISerialVersionFixContext() {
-				public long getSerialVersionId(String qualifiedName) throws CoreException {
-					return 1;
-				}
-			};
-		} else if (isFlag(ADD_RANDOM_SERIAL_VERSION_ID)) {
-			return new ISerialVersionFixContext() {
-				public long getSerialVersionId(String qualifiedName) throws CoreException {
-					return RANDOM_NUMBER_GENERATOR.nextLong();
-				}
-				
-			};
-		}
-		return null;
+	public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
+		return PotentialProgrammingProblemsFix.checkPostConditions(monitor);
 	}
 
 	/**

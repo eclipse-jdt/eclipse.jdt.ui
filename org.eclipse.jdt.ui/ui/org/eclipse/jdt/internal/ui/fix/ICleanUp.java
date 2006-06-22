@@ -17,6 +17,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -81,19 +83,23 @@ public interface ICleanUp {
 	public String[] getDescriptions();
 	
 	/**
-	 * After call to beginCleanUp clients will start creating fixes for <code>compilationUnits</code>
-	 * int <code>project</code>
+	 * After call to checkPreConditions clients will start creating fixes for <code>compilationUnits</code>
+	 * int <code>project</code> unless the result of checkPreConditions contains a fatal error
 	 * 
 	 * @param project The project to clean up
 	 * @param compilationUnits The compilation Units to clean up, all member of project
 	 * @param monitor the monitor to show progress
+	 * @return the result of the precondition check, not null
 	 */
-	public abstract void beginCleanUp(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException;
+	public abstract RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException;
 	
 	/**
 	 * Called when done cleaning up.
+	 * 
+	 * @param monitor the monitor to show progress
+	 * @return the result of the postcondition check, not null
 	 */
-	public abstract void endCleanUp() throws CoreException;
+	public abstract RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException;
 	
 	/**
 	 * True if <code>problem</code> in <code>CompilationUnit</code> can be fixed

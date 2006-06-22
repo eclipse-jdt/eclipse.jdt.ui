@@ -284,7 +284,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		}
 
 		private void cleanUpProject(IJavaProject project, ICompilationUnit[] compilationUnits, ICleanUp cleanUp, Hashtable problemLocations, CompositeChange result, IProgressMonitor monitor) throws CoreException {
-			cleanUp.beginCleanUp(project, compilationUnits, new SubProgressMonitor(monitor, 1));
+			cleanUp.checkPreConditions(project, compilationUnits, new SubProgressMonitor(monitor, 1));
 			for (int i= 0; i < compilationUnits.length; i++) {
 				ICompilationUnit cu= compilationUnits[i];
 				CompilationUnit root= getASTRoot(cu, new SubProgressMonitor(monitor, 1));
@@ -307,7 +307,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 				}
 
 			}
-			cleanUp.endCleanUp();	
+			cleanUp.checkPostConditions(null);	
 		}
 
 		/* (non-Javadoc)

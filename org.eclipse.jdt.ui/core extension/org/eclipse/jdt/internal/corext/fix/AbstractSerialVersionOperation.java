@@ -25,12 +25,10 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
@@ -87,28 +85,6 @@ public abstract class AbstractSerialVersionOperation extends AbstractLinkedFixRe
 	 * @param positionGroups the list of {@link PositionGroup}s
 	 */
 	protected abstract void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment, final List positionGroups);
-
-	/**
-	 * Returns the declaration node for the originally selected node.
-	 *
-	 * @return the declaration node
-	 */
-	protected ASTNode getDeclarationNode(ASTNode node) {
-
-		ASTNode parent= node.getParent();
-		if (!(parent instanceof AbstractTypeDeclaration)) {
-
-			parent= parent.getParent();
-			if (parent instanceof ParameterizedType || parent instanceof Type)
-				parent= parent.getParent();
-			if (parent instanceof ClassInstanceCreation) {
-
-				final ClassInstanceCreation creation= (ClassInstanceCreation) parent;
-				parent= creation.getAnonymousClassDeclaration();
-			}
-		}
-		return parent;
-	}
 	
 	/**
 	 * {@inheritDoc}
@@ -124,7 +100,7 @@ public abstract class AbstractSerialVersionOperation extends AbstractLinkedFixRe
 		final ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		VariableDeclarationFragment fragment= null;
 		for (int i= 0; i < fNodes.length; i++) {
-			final ASTNode node= getDeclarationNode(fNodes[i]);
+			final ASTNode node= fNodes[i];
 			
 			final AST ast= node.getAST();
 
@@ -174,26 +150,4 @@ public abstract class AbstractSerialVersionOperation extends AbstractLinkedFixRe
 		return rewrite.track(fragment);
 	}
 	
-	/**
-	 * Returns the qualified type name of the class declaration.
-	 * 
-	 * @return the qualified type name of the class
-	 */
-	protected String getQualifiedName(final ASTNode parent) {
-		ITypeBinding binding= null;
-		if (parent instanceof AbstractTypeDeclaration) {
-			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) parent;
-			binding= declaration.resolveBinding();
-		} else if (parent instanceof AnonymousClassDeclaration) {
-			final AnonymousClassDeclaration declaration= (AnonymousClassDeclaration) parent;
-			final ClassInstanceCreation creation= (ClassInstanceCreation) declaration.getParent();
-			binding= creation.resolveTypeBinding();
-		} else if (parent instanceof ParameterizedType) {
-			final ParameterizedType type= (ParameterizedType) parent;
-			binding= type.resolveBinding();
-		}
-		if (binding != null)
-			return binding.getBinaryName();
-		return null;
-	}
 }

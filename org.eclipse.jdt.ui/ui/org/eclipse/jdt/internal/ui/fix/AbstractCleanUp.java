@@ -15,6 +15,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -78,17 +80,21 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void beginCleanUp(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
+	public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
 		if (monitor != null)
 			monitor.done();
 		//Default do nothing
+		return new RefactoringStatus();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void endCleanUp() throws CoreException {
+	public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
+		if (monitor != null)
+			monitor.done();
 		//Default do nothing
+		return new RefactoringStatus();
 	}
 	
 }

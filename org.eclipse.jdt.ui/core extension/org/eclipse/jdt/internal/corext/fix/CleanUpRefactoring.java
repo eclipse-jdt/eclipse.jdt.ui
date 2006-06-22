@@ -529,9 +529,10 @@ public class CleanUpRefactoring extends Refactoring {
 			IJavaProject project= (IJavaProject)iter.next();
 			cuCount+= ((List)fProjects.get(project)).size();
 		}
+
+		RefactoringStatus result= new RefactoringStatus();
 		
 		pm.beginTask("", cuCount * 2 * fCleanUps.size() + 4 * fCleanUps.size()); //$NON-NLS-1$
-
 		try {
 			CompositeChange change= new DynamicValidationStateChange(getName());
 			for (Iterator projectIter= fProjects.keySet().iterator(); projectIter.hasNext();) {
@@ -542,7 +543,15 @@ public class CleanUpRefactoring extends Refactoring {
 				
 				ICleanUp[] cleanUps= (ICleanUp[])fCleanUps.toArray(new ICleanUp[fCleanUps.size()]);
 				
+				result.merge(checkPreConditions(project, cus, new SubProgressMonitor(pm, 3 * cleanUps.length)));
+				if (result.hasFatalError())
+					return result;
+				
 				Change[] changes= cleanUpProject(project, cus, cleanUps, pm);
+
+				result.merge(checkPostConditions(new SubProgressMonitor(pm, cleanUps.length)));
+				if (result.hasFatalError())
+					return result;
 				
 				for (int i= 0; i < changes.length; i++) {
 			        change.add(changes[i]);
@@ -550,7 +559,6 @@ public class CleanUpRefactoring extends Refactoring {
 			}
 			fChange= change;
 
-			RefactoringStatus result= new RefactoringStatus();
 			List files= new ArrayList();
 			findFilesToBeModified(change, files);
 			result.merge(Checks.validateModifiesFiles((IFile[])files.toArray(new IFile[files.size()]), getValidationContext()));
@@ -560,7 +568,7 @@ public class CleanUpRefactoring extends Refactoring {
 			pm.done();
 		}
 		
-		return new RefactoringStatus();
+		return result;
 	}
 
 	private void findFilesToBeModified(CompositeChange change, List result) throws JavaModelException {
@@ -578,8 +586,6 @@ public class CleanUpRefactoring extends Refactoring {
 	}
 	
 	private Change[] cleanUpProject(IJavaProject project, ICompilationUnit[] compilationUnits, ICleanUp[] cleanUps, IProgressMonitor monitor) throws CoreException {
-		initCleanUps(project, compilationUnits, new SubProgressMonitor(monitor, 4 * cleanUps.length));
-		
 		CleanUpFixpointIterator iter= new CleanUpFixpointIterator(project, compilationUnits, cleanUps);
 
 		SubProgressMonitor subMonitor= new SubProgressMonitor(monitor, 2 * compilationUnits.length * cleanUps.length);
@@ -590,29 +596,46 @@ public class CleanUpRefactoring extends Refactoring {
 				iter.next(subMonitor);
 			}
 		} finally {
-			endCleanUps();
 			subMonitor.done();			
 		}
 		return iter.getResult();
 	}
 
-	private void initCleanUps(IJavaProject javaProject, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
+	private RefactoringStatus checkPreConditions(IJavaProject javaProject, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
+		RefactoringStatus result= new RefactoringStatus();
+		
 		ICleanUp[] cleanUps= getCleanUps();
-		monitor.beginTask(Messages.format(FixMessages.CleanUpRefactoring_Initialize_message, javaProject.getElementName()), compilationUnits.length * cleanUps.length);
+		monitor.beginTask("", compilationUnits.length * cleanUps.length); //$NON-NLS-1$
+		monitor.subTask(Messages.format(FixMessages.CleanUpRefactoring_Initialize_message, javaProject.getElementName()));
 		try {
 			for (int j= 0; j < cleanUps.length; j++) {
-				cleanUps[j].beginCleanUp(javaProject, compilationUnits, new SubProgressMonitor(monitor, compilationUnits.length));
+				result.merge(cleanUps[j].checkPreConditions(javaProject, compilationUnits, new SubProgressMonitor(monitor, compilationUnits.length)));
+				if (result.hasFatalError())
+					return result;
 			}
 		} finally {
 			monitor.done();
 		}
+		
+		return result;
 	}
 	
-	private void endCleanUps() throws CoreException {
+	private RefactoringStatus checkPostConditions(SubProgressMonitor monitor) throws CoreException {
+		RefactoringStatus result= new RefactoringStatus();
+		
 		ICleanUp[] cleanUps= getCleanUps();
-		for (int j= 0; j < cleanUps.length; j++) {
-			cleanUps[j].endCleanUp();
+		monitor.beginTask("", cleanUps.length); //$NON-NLS-1$
+		monitor.subTask(FixMessages.CleanUpRefactoring_checkingPostConditions_message);
+		try {
+			for (int j= 0; j < cleanUps.length; j++) {
+				result.merge(cleanUps[j].checkPostConditions(new SubProgressMonitor(monitor, 1)));
+				if (result.hasFatalError())
+					return result;
+			}
+		} finally {
+			monitor.done();
 		}
+		return result;
 	}
 
 	private String getChangeName(ICompilationUnit compilationUnit) {
