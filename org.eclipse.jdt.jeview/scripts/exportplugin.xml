@@ -5,7 +5,7 @@
 		<tstamp/>
 		<property name="destdir" value="../../plugin-export" />
 		<property name="plugin"  value="org.eclipse.jdt.jeview" />
-		<property name="plugin_version"  value="_1.0.1" />
+		<property name="plugin_version"  value="_1.0.2" />
 		<property name="destjar"  value="${destdir}/${plugin}${plugin_version}.jar" />
 	</target>
 
