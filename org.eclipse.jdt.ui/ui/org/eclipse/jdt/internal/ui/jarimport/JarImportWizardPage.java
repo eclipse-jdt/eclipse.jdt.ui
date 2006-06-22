@@ -340,6 +340,7 @@ public final class JarImportWizardPage extends WizardPage {
 			else
 				setErrorMessage(JarImportMessages.JarImportWizardPage_no_jar_files);
 		}
+		fFirstTime= false;
 		getContainer().updateButtons();
 	}
 
@@ -352,13 +353,13 @@ public final class JarImportWizardPage extends WizardPage {
 			if ("".equals(path)) { //$NON-NLS-1$
 				if (!fFirstTime)
 					setErrorMessage(JarImportMessages.JarImportWizardPage_empty_location);
-				fFirstTime= false;
 				setPageComplete(false);
 				return;
 			} else {
 				final File file= new File(path);
 				if (!file.exists()) {
-					setErrorMessage(JarImportMessages.JarImportWizardPage_invalid_location);
+					if (!fFirstTime)
+						setErrorMessage(JarImportMessages.JarImportWizardPage_invalid_location);
 					setPageComplete(false);
 					return;
 				}
@@ -367,7 +368,8 @@ public final class JarImportWizardPage extends WizardPage {
 					try {
 						zip= new ZipFile(file, ZipFile.OPEN_READ);
 					} catch (IOException exception) {
-						setErrorMessage(JarImportMessages.JarImportWizardPage_invalid_location);
+						if (!fFirstTime)
+							setErrorMessage(JarImportMessages.JarImportWizardPage_invalid_location);
 						setPageComplete(false);
 						return;
 					}
@@ -390,12 +392,14 @@ public final class JarImportWizardPage extends WizardPage {
 						stream= zip.getInputStream(entry);
 						data.setRefactoringHistory(RefactoringCore.getHistoryService().readRefactoringHistory(stream, JDTRefactoringDescriptor.JAR_IMPORTABLE | JDTRefactoringDescriptor.JAR_REFACTORABLE));
 					} catch (IOException exception) {
-						setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
+						if (!fFirstTime)
+							setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
 						setPageComplete(false);
 						return;
 					} catch (CoreException exception) {
 						JavaPlugin.log(exception);
-						setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
+						if (!fFirstTime)
+							setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
 						setPageComplete(false);
 						return;
 					} finally {
