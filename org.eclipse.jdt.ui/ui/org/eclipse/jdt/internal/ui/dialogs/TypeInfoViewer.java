@@ -648,6 +648,7 @@ public class TypeInfoViewer {
 			monitor.setTaskName(JavaUIMessages.TypeInfoViewer_searchJob_taskName);
 			engine.searchAllTypeNames(
 				packPattern == null ? null : packPattern.toCharArray(), 
+				fFilter.getPackageFlags(),
 				fFilter.getNamePattern().toCharArray(), 
 				fFilter.getSearchFlags(), 
 				fElementKind, 
