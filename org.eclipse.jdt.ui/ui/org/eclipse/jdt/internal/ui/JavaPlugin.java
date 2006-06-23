@@ -715,10 +715,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	public ContextTypeRegistry getTemplateContextRegistry() {
 		if (fContextTypeRegistry == null) {
-			fContextTypeRegistry= new ContributionContextTypeRegistry();
-			
-			fContextTypeRegistry.addContextType(new JavaContextType());
-			fContextTypeRegistry.addContextType(new JavaDocContextType());
+			ContributionContextTypeRegistry registry= new ContributionContextTypeRegistry();
+			registry.addContextType(JavaContextType.NAME);
+			registry.addContextType(JavaDocContextType.NAME);
+
+			fContextTypeRegistry= registry;
 		}
 
 		return fContextTypeRegistry;

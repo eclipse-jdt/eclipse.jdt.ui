@@ -11,8 +11,8 @@
 package org.eclipse.jdt.internal.corext.template.java;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -106,12 +106,12 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		 */
 		public boolean isCollection() {
 			// Collection extends Iterable
-			if ((fType == UNKNOWN || fType == ITERABLE) && (fChecked & COLLECTION) == 0 && isImplementorOf("java.util.Collection")) //$NON-NLS-1$
+			if ((fType == UNKNOWN || fType == ITERABLE) && (fChecked & COLLECTION) == 0 && isSubtypeOf("java.util.Collection")) //$NON-NLS-1$
 				fType= COLLECTION;
 			fChecked |= COLLECTION;
 			return fType == COLLECTION;
 		}
-
+		
 		/**
 		 * Returns <code>true</code> if the receiver's type is a subclass of
 		 * <code>java.lang.Iterable</code>, <code>false</code> otherwise.
@@ -121,7 +121,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		 *         otherwise
 		 */
 		public boolean isIterable() {
-			if (fType == UNKNOWN && (fChecked & ITERABLE) == 0 && isImplementorOf("java.lang.Iterable")) //$NON-NLS-1$
+			if (fType == UNKNOWN && (fChecked & ITERABLE) == 0 && isSubtypeOf("java.lang.Iterable")) //$NON-NLS-1$
 				fType= ITERABLE;
 			fChecked |= ITERABLE;
 			return fType == ITERABLE || fType == COLLECTION; // Collection extends Iterable
@@ -131,17 +131,19 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		 * Returns <code>true</code> if the receiver's type is an implementor
 		 * of <code>interfaceName</code>.
 		 * 
-		 * @param interfaceName the fully qualified name of the interface
+		 * @param supertype the fully qualified name of the interface
 		 * @return <code>true</code> if the receiver's type implements the
 		 *         type named <code>interfaceName</code>
 		 */
-		private boolean isImplementorOf(String interfaceName) {
+		private boolean isSubtypeOf(String supertype) {
 			String implementorName= SignatureUtil.stripSignatureToFQN(signature);
 			if (implementorName.length() == 0)
 				return false;
 			
+			boolean qualified= supertype.indexOf('.') != -1;
+			
 			// try cheap test first
-			if (implementorName.equals(interfaceName))
+			if (implementorName.equals(supertype) || !qualified && Signature.getSimpleName(implementorName).equals(supertype))
 				return true;
 
 			if (fUnit == null)
@@ -150,21 +152,73 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 			IJavaProject project= fUnit.getJavaProject();
 
 			try {
-				IType implementor= project.findType(implementorName);
-				if (implementor == null)
+				IType sub= project.findType(implementorName);
+				if (sub == null)
 					return false;
+				
+				if (qualified) {
+					IType sup= project.findType(supertype);
+					if (sup == null)
+						return false;
+					ITypeHierarchy hierarchy= sub.newSupertypeHierarchy(null);
+					return hierarchy.contains(sup);
+				} else {
+					ITypeHierarchy hierarchy= sub.newSupertypeHierarchy(null);
+					IType[] allTypes= hierarchy.getAllTypes();
+					for (int i= 0; i < allTypes.length; i++) {
+						IType type= allTypes[i];
+						if (type.getElementName().equals(supertype))
+							return true;
+					}
+				}
 
-				IType interfaze= project.findType(interfaceName);
-				if (interfaze == null)
-					return false;
-
-				ITypeHierarchy hierarchy= implementor.newSupertypeHierarchy(null);
-				return hierarchy.contains(interfaze);
 			} catch (JavaModelException e) {
 				// ignore and return false
 			}			
 			
 			return false;
+		}
+		
+		private IType[] getSupertypes(String supertype) {
+			IType[] empty= new IType[0];
+			String implementorName= SignatureUtil.stripSignatureToFQN(signature);
+			if (implementorName.length() == 0)
+				return empty;
+			
+			boolean qualified= supertype.indexOf('.') != -1;
+
+			if (fUnit == null)
+				return empty;
+			
+			IJavaProject project= fUnit.getJavaProject();
+			
+			try {
+				IType sub= project.findType(implementorName);
+				if (sub == null)
+					return empty;
+				
+				if (qualified) {
+					IType sup= project.findType(supertype);
+					if (sup == null)
+						return empty;
+					return new IType[] {sup};
+				} else {
+					ITypeHierarchy hierarchy= sub.newSupertypeHierarchy(null);
+					IType[] allTypes= hierarchy.getAllTypes();
+					List matches= new ArrayList();
+					for (int i= 0; i < allTypes.length; i++) {
+						IType type= allTypes[i];
+						if (type.getElementName().equals(supertype))
+							matches.add(type);
+					}
+					return (IType[]) matches.toArray(new IType[matches.size()]);
+				}
+				
+			} catch (JavaModelException e) {
+				// ignore and return false
+			}			
+			
+			return empty;
 		}
 
 		/**
@@ -226,7 +280,33 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 			}
 			return names;
 		}
-		
+
+		/**
+		 * Returns the type arguments of the declared type of the variable. Returns
+		 * an empty array if it is not a parameterized type.
+		 * 
+		 * @param type the fully qualified type name of which to match a type argument  
+		 * @param index the index of the type parameter in the type
+		 * @return the type bounds for the specified type argument in this local variable
+		 * @since 3.3
+		 */
+		public String[] getTypeArgumentBoundSignatures(String type, int index) {
+			List all= new ArrayList();
+			IType[] supertypes= getSupertypes(type);
+			for (int i= 0; i < supertypes.length; i++) {
+				try {
+					TypeParameterResolver util= new TypeParameterResolver(this);
+					String[] result= util.computeBinding(supertypes[i].getFullyQualifiedName(), index);
+					all.addAll(Arrays.asList(result));
+				} catch (JavaModelException e) {
+				} catch (IndexOutOfBoundsException e) {
+				}
+			}
+			if (all.isEmpty())
+				return new String[] {Signature.createTypeSignature("java.lang.Object", true)}; //$NON-NLS-1$
+			return (String[]) all.toArray(new String[all.size()]);
+		}
+
 		/*
 		 * @see java.lang.Object#toString()
 		 */
@@ -248,7 +328,6 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 			}
 			return "LocalVariable [name=\"" + name + "\" signature=\"" + signature + "\" type=\"" + type + "\" member=\"" + getMemberTypeSignature() + "\"]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
-		
 	}
 	
 	/**
@@ -299,8 +378,9 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		 * @param index the index into the list of type parameters of
 		 *        <code>superType</code>
 		 * @throws JavaModelException if any java model operation fails
+		 * @throws IndexOutOfBoundsException if the index is not valid
 		 */
-		public String[] computeBinding(String superType, int index) throws JavaModelException {
+		public String[] computeBinding(String superType, int index) throws JavaModelException, IndexOutOfBoundsException {
 			IJavaProject project= fUnit.getJavaProject();
 			return computeBinding(project.findType(superType), index);
 		}
@@ -320,8 +400,9 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		 * @param index the index into the list of type parameters of
 		 *        <code>superType</code>
 		 * @throws JavaModelException if any java model operation fails
+		 * @throws IndexOutOfBoundsException if the index is not valid
 		 */
-		public String[] computeBinding(IType superType, int index) throws JavaModelException {
+		public String[] computeBinding(IType superType, int index) throws JavaModelException, IndexOutOfBoundsException {
 			initBounds();
 			computeTypeParameterBinding(superType, index);
 			return (String[]) fBounds.toArray(new String[fBounds.size()]);
@@ -345,10 +426,12 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		 * @param index the index into the list of type parameters of
 		 *        <code>superType</code>
 		 * @throws JavaModelException if any java model operation fails
+		 * @throws IndexOutOfBoundsException if the index is not valid
 		 */
-		private void computeTypeParameterBinding(final IType superType, final int index) throws JavaModelException {
+		private void computeTypeParameterBinding(final IType superType, final int index) throws JavaModelException, IndexOutOfBoundsException {
 			int nParameters= superType.getTypeParameters().length;
-			Assert.isTrue(nParameters > index);
+			if (nParameters <= index)
+				throw new IndexOutOfBoundsException();
 			
 			IType[] subTypes= fHierarchy.getSubtypes(superType);
 			
@@ -419,10 +502,12 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		 *        be resolved
 		 * @return the type argument signature of the type parameter at
 		 *         <code>index</code> in <code>signature</code>
+		 * @throws IndexOutOfBoundsException if the index is not valid
 		 */
-		private String findMatchingTypeArgument(String signature, int index, IType context) {
+		private String findMatchingTypeArgument(String signature, int index, IType context) throws IndexOutOfBoundsException {
 			String[] typeArguments= Signature.getTypeArguments(signature);
-			Assert.isTrue(typeArguments.length == 0 || typeArguments.length > index);
+			if (typeArguments.length > 0 && typeArguments.length <= index)
+				throw new IndexOutOfBoundsException();
 			if (typeArguments.length == 0) {
 				// raw binding - bound to Object
 				return OBJECT_SIGNATURE;
@@ -683,23 +768,6 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 	}
 
 	/**
-	 * Returns <code>true</code> if <code>name</code> is already used locally.
-	 * 
-	 * @param name the identifier to check
-	 * @return <code>true</code> if <code>name</code> is already used, <code>false</code> otherwise
-	 */
-	public boolean existsLocalName(String name) {
-		for (Iterator iterator = fLocalVariables.iterator(); iterator.hasNext();) {
-			LocalVariable localVariable = (LocalVariable) iterator.next();
-
-			if (localVariable.getName().equals(name))
-				return true;
-		}
-
-		return false;
-	}
-	
-	/**
 	 * Returns all local variable names.
 	 * 
 	 * @return all local variable names
@@ -733,22 +801,23 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 	}
 	
 	/**
-	 * Returns all local variables implementing
-	 * <code>java.util.Collection</code> in the order that they appear.
+	 * Returns all local variables implementing or extending
+	 * <code>clazz</code> in the order that they appear.
 	 * 
-	 * @return all local <code>Collection</code>s
+	 * @param clazz the fully qualified type name of the class to match
+	 * @return all local variables matching <code>clazz</code>
 	 */
-	public LocalVariable[] findLocalCollections() {
-		List collections= new ArrayList();
-
+	public LocalVariable[] findLocalVariables(String clazz) {
+		List matches= new ArrayList();
+		
 		for (ListIterator iterator= fLocalVariables.listIterator(fLocalVariables.size()); iterator.hasPrevious();) {
 			LocalVariable localVariable= (LocalVariable) iterator.previous();
-
-			if (localVariable.isCollection())
-				collections.add(localVariable);
+			
+			if (localVariable.isSubtypeOf(clazz))
+				matches.add(localVariable);
 		}
-
-		return (LocalVariable[]) collections.toArray(new LocalVariable[collections.size()]);
+		
+		return (LocalVariable[]) matches.toArray(new LocalVariable[matches.size()]);
 	}
 
 	/**

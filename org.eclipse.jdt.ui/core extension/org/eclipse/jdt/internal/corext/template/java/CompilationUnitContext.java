@@ -122,7 +122,7 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 	/**
 	 * @param multiVariableGuess The multiVariableGuess to set.
 	 */
-	public void setMultiVariableGuess(MultiVariableGuess multiVariableGuess) {
+	void setMultiVariableGuess(MultiVariableGuess multiVariableGuess) {
 		fMultiVariableGuess= multiVariableGuess;
 	}
 }

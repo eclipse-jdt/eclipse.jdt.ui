@@ -280,14 +280,14 @@ public class JavaFormatter {
 			// try to format and fall back to indenting
 			try {
 				format(document, (CompilationUnitContext) context);
+				return;
 			} catch (BadLocationException e) {
-				indent(document);
+				// ignore and indent
 			} catch (MalformedTreeException e) {
-				indent(document);
+				// ignore and indent
 			}
-		} else { 
-			indent(document);
 		}
+		indent(document);
 	}
 
 	private void convertLineDelimiters(IDocument document) throws BadLocationException {

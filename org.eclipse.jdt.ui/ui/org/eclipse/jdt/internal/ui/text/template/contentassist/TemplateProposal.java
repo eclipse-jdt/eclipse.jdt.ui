@@ -24,11 +24,14 @@ import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -42,6 +45,7 @@ import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.ProposalPosition;
+import org.eclipse.jface.text.source.LineRange;
 import org.eclipse.jface.text.templates.DocumentTemplateContext;
 import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.Template;
@@ -62,6 +66,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
+import org.eclipse.jdt.internal.ui.javaeditor.IndentUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -157,24 +162,33 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 		try {
 
 			fContext.setReadOnly(false);
+			int start;
+			IDocument document;
 			TemplateBuffer templateBuffer;
 			try {
-				templateBuffer= fContext.evaluate(fTemplate);
-			} catch (TemplateException e1) {
-				fSelectedRegion= fRegion;
-				return;
+				beginCompoundChange(viewer);
+
+				try {
+					// this may already modify the document (e.g. add imports)
+					templateBuffer= fContext.evaluate(fTemplate);
+				} catch (TemplateException e1) {
+					fSelectedRegion= fRegion;
+					return;
+				}
+
+				start= getReplaceOffset();
+				int end= getReplaceEndOffset();
+				end= Math.max(end, offset);
+
+				// insert template string
+				document= viewer.getDocument();
+				if (end > document.getLength())
+					end= offset;
+				String templateString= templateBuffer.getString();
+				document.replace(start, end - start, templateString);
+			} finally {
+				endCompoundChange(viewer);
 			}
-
-			int start= getReplaceOffset();
-			int end= getReplaceEndOffset();
-			end= Math.max(end, offset);
-
-			// insert template string
-			IDocument document= viewer.getDocument();
-			if (end > document.getLength())
-				end= offset;
-			String templateString= templateBuffer.getString();
-			document.replace(start, end - start, templateString);
 
 			// translate positions
 			LinkedModeModel model= new LinkedModeModel();
@@ -249,6 +263,22 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			fSelectedRegion= fRegion;
 		}
 
+	}
+
+	private void endCompoundChange(ITextViewer viewer) {
+		if (viewer instanceof ITextViewerExtension) {
+			ITextViewerExtension extension= (ITextViewerExtension) viewer;
+			IRewriteTarget target= extension.getRewriteTarget();
+			target.endCompoundChange();
+		}
+	}
+
+	private void beginCompoundChange(ITextViewer viewer) {
+		if (viewer instanceof ITextViewerExtension) {
+			ITextViewerExtension extension= (ITextViewerExtension) viewer;
+			IRewriteTarget target= extension.getRewriteTarget();
+			target.beginCompoundChange();
+		}
 	}
 
 	/**
@@ -363,7 +393,9 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 				return null;
 			}
 
-			return templateBuffer.getString();
+			IDocument document= new Document(templateBuffer.getString());
+			IndentUtil.indentLines(document, new LineRange(0, document.getNumberOfLines()), null, null);
+			return document.get();
 
 	    } catch (BadLocationException e) {
 			handleException(JavaPlugin.getActiveWorkbenchShell(), new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "", e))); //$NON-NLS-1$

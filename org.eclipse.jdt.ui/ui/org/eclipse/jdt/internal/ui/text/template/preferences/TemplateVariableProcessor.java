@@ -74,18 +74,32 @@ public class TemplateVariableProcessor implements IContentAssistProcessor {
 		int end= documentOffset;
 
 		String string= text.substring(start, end);
-		String prefix= (string.length() >= 2)
-			? string.substring(2)
-			: null;
-
+		int colon= string.indexOf(':');
+		boolean includeBrace= true;
 		int offset= start;
-		int length= end - start;
+		String prefix= string;
+		if (colon != -1) {
+			includeBrace= false;
+			offset= start + colon + 1;
+			prefix= string.substring(colon + 1);
+		} else {
+			int escape= string.indexOf("${"); //$NON-NLS-1$
+			if (escape != -1) {
+				offset= start + escape + 2;
+				includeBrace= false;
+				prefix= string.substring(escape + 2);
+			}
+		}
+		if (prefix.equals("$")) //$NON-NLS-1$
+			prefix= ""; //$NON-NLS-1$
+
+		int length= end - offset;
 
 		for (Iterator iterator= fContextType.resolvers(); iterator.hasNext(); ) {
 			TemplateVariableResolver variable= (TemplateVariableResolver) iterator.next();
 
-			if (prefix == null || variable.getType().startsWith(prefix))
-				proposals.add(new TemplateVariableProposal(variable, offset, length, viewer));
+			if (variable.getType().startsWith(prefix))
+				proposals.add(new TemplateVariableProposal(variable, offset, length, viewer, includeBrace));
 		}
 
 		Collections.sort(proposals, fgTemplateVariableProposalComparator);
@@ -101,6 +115,12 @@ public class TemplateVariableProcessor implements IContentAssistProcessor {
 
 		while ((start != 0) && Character.isUnicodeIdentifierPart(string.charAt(start - 1)))
 			start--;
+		
+		if (start >= 1 && string.charAt(start - 1) == ':') {
+			start--;
+			while ((start != 0) && Character.isUnicodeIdentifierPart(string.charAt(start - 1)))
+				start--;
+		}
 
 		if (start >= 2 && string.charAt(start - 1) == '{' && string.charAt(start - 2) == '$')
 			return start - 2;

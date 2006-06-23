@@ -4833,6 +4833,30 @@
       		file="templates/default-codetemplates.xml"
       		translations="$nl$/templates/default-templates.properties">
       </include>
+      <resolver
+            class="org.eclipse.jdt.internal.corext.template.java.VarResolver"
+            contextTypeId="java"
+            description="%templates.java.resolvers.Var.description"
+            name="%templates.java.resolvers.Var.name"
+            type="var"/>
+      <resolver
+            class="org.eclipse.jdt.internal.corext.template.java.NameResolver"
+            contextTypeId="java"
+            description="%templates.java.resolvers.Name.description"
+            name="%templates.java.resolvers.Name.name"
+            type="name"/>
+      <resolver
+            class="org.eclipse.jdt.internal.corext.template.java.ElementTypeResolver"
+            contextTypeId="java"
+            description="%templates.java.resolvers.ElementType.description"
+            name="%templates.java.resolvers.ElementType.name"
+            type="elementType"/>
+      <resolver
+            class="org.eclipse.jdt.internal.corext.template.java.TypeVariableResolver"
+            contextTypeId="java"
+            description="%templates.java.resolvers.TypeVariable.description"
+            name="%templates.java.resolvers.TypeVariable.name"
+            type="typevar"/>
    </extension>
 
 <!-- =========================================================================== -->

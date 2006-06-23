@@ -11,9 +11,18 @@
 package org.eclipse.jdt.internal.corext.template.java;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.widgets.Shell;
@@ -36,24 +45,41 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateTranslator;
 import org.eclipse.jface.text.templates.TemplateVariable;
+import org.eclipse.jface.text.templates.TemplateVariableType;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.LocalVariable;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.corext.util.TypeInfo;
+import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+import org.eclipse.jdt.internal.ui.text.correction.SimilarElementsRequestor;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariableGuess;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -63,6 +89,12 @@ public class JavaContext extends CompilationUnitContext {
 
 	/** A code completion requester for guessing local variable names. */
 	private CompilationUnitCompletion fCompletion;
+	/**
+	 * The list of used local names.
+	 * @since 3.3
+	 */
+	private Set fUsedNames= new HashSet();
+	private Map fVariables= new HashMap();
 	
 	/**
 	 * Creates a java template context.
@@ -113,16 +145,19 @@ public class JavaContext extends CompilationUnitContext {
 	 * @see TemplateContext#evaluate(Template template)
 	 */
 	public TemplateBuffer evaluate(Template template) throws BadLocationException, TemplateException {
-
+		clear();
+		
 		if (!canEvaluate(template))
 			throw new TemplateException(JavaTemplateMessages.Context_error_cannot_evaluate); 
 		
 		TemplateTranslator translator= new TemplateTranslator() {
-			/*
-			 * @see org.eclipse.jface.text.templates.TemplateTranslator#createVariable(java.lang.String, java.lang.String, int[])
-			 */
-			protected TemplateVariable createVariable(String type, String name, int[] offsets) {
-				return new MultiVariable(type, name, offsets);
+			protected TemplateVariable createVariable(TemplateVariableType type, String name, int[] offsets) {
+//				TemplateVariableResolver resolver= getContextType().getResolver(type.getName());
+//				return resolver.createVariable();
+				
+				MultiVariable variable= new JavaVariable(type, name, offsets);
+				fVariables.put(name, variable);
+				return variable;
 			}
 		};
 		TemplateBuffer buffer= translator.translate(template);
@@ -135,8 +170,14 @@ public class JavaContext extends CompilationUnitContext {
 		IJavaProject project= getCompilationUnit() != null ? getCompilationUnit().getJavaProject() : null;
 		JavaFormatter formatter= new JavaFormatter(TextUtilities.getDefaultLineDelimiter(getDocument()), getIndentation(), useCodeFormatter, project);
 		formatter.format(buffer, this);
+		
+		clear();
 
 		return buffer;
+	}
+
+	private void clear() {
+		fUsedNames.clear();
 	}
 	
 	/*
@@ -280,170 +321,77 @@ public class JavaContext extends CompilationUnitContext {
 	 * 
 	 * @return the names of local arrays
 	 */
-	public String[] getArrays() {
-		CompilationUnitCompletion completion= getCompletion();
-		LocalVariable[] localArrays= completion.findLocalArrays();
-				
-		String[] ret= new String[localArrays.length];
-		for (int i= 0; i < ret.length; i++) {
-			ret[i]= localArrays[i].getName();
-		}
-		return ret;
+	public LocalVariable[] getArrays() {
+		LocalVariable[] localArrays= getCompletion().findLocalArrays();
+		arrange(localArrays);
+		return localArrays;
 	}
 	
 	/**
-	 * Returns the names of the types of the local arrays grouped based on local
-	 * variables.
+	 * Sorts already used locals behind any that are not yet used.
 	 * 
-	 * @return the names of the types of the local arrays
+	 * @param variables the variables to sort
+	 * @since 3.3
 	 */
-	public String[][] getArrayTypes() {
-		// TODO propose super types?
-		CompilationUnitCompletion completion= getCompletion();
-		LocalVariable[] localArrays= completion.findLocalArrays();
-		
-		String[][] ret= new String[localArrays.length][];
-		
-		for (int i= 0; i < localArrays.length; i++) {
-			ret[i]= localArrays[i].getMemberTypeNames();
-		}
-		
-		return ret;
-	}
-	
-	/**
-	 * Returns proposals for a variable name of a local array element grouped
-	 * based on local array-typed variables.
-	 * 
-	 * @return proposals for a variable name
-	 */
-	public String[][] getArrayElements() {
-		ICompilationUnit cu= getCompilationUnit();
-		if (cu == null) {
-			return new String[0][];
-		}
-		
-		CompilationUnitCompletion completion= getCompletion();
-		LocalVariable[] localArrays= completion.findLocalArrays();
-
-		return suggestElementNames(localArrays, true);
-	}
-
-	/**
-	 * Returns an array index name. 'i', 'j', 'k' are tried until no name
-	 * collision with an existing local variable occurs. If all names collide,
-	 * <code>null</code> is returned.
-	 * 
-	 * @return a name for an index variable or <code>null</code>
-	 */	
-	public String getIndex() {
-		CompilationUnitCompletion completion= getCompletion();
-		String[] proposals= {"i", "j", "k"};  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		
-		for (int i= 0; i != proposals.length; i++) {
-			String proposal = proposals[i];
-
-			if (!completion.existsLocalName(proposal))
-				return proposal;
-		}
-
-		return null;
-	}
-	
-	/**
-	 * Returns the names of local collections.
-	 * 
-	 * @return the names of local collection
-	 */
-	public String[] getCollections() {
-		CompilationUnitCompletion completion= getCompletion();
-		
-		LocalVariable[] localCollections= completion.findLocalCollections();
-		String[] ret= new String[localCollections.length];
-		for (int i= 0; i < ret.length; i++) {
-			ret[i]= localCollections[i].getName();
-		}
-		
-		return ret;
-	}
-	
-	/**
-	 * Returns the names of local iterables.
-	 * 
-	 * @return the names of local iterables
-	 */
-	public String[] getIterables() {
-		CompilationUnitCompletion completion= getCompletion();
-		LocalVariable[] localCollections= completion.findLocalIterables();
-		String[] ret= new String[localCollections.length];
-		for (int i= 0; i < ret.length; i++) {
-			ret[i]= localCollections[i].getName();
-		}
-		
-		return ret;
-	}
-	
-	/**
-	 * Returns the names of the types of the local iterables grouped based on
-	 * local variables.
-	 * 
-	 * @return the names of the types of the local iterables
-	 */
-	public String[][] getIterableTypes() {
-		CompilationUnitCompletion completion= getCompletion();
-		LocalVariable[] iterables= completion.findLocalIterables();
-
-		String[][] ret= new String[iterables.length][];
-
-		for (int i= 0; i < iterables.length; i++) {
-			ret[i]= iterables[i].getMemberTypeNames();
-		}
-
-		return ret;
-	}
-	
-	/**
-	 * Returns proposals for a variable name of a local iterable element
-	 * grouped based on local array and collection variables.
-	 * 
-	 * @return proposals for a variable name
-	 */
-	public String[][] getIterableElements() {
-		ICompilationUnit cu= getCompilationUnit();
-		if (cu == null) {
-			return new String[0][];
-		}
-		
-		CompilationUnitCompletion completion= getCompletion();
-		LocalVariable[] iterables= completion.findLocalIterables();
-		
-		return suggestElementNames(iterables, false);
-	}
-
-	private String[][] suggestElementNames(LocalVariable[] iterables, boolean excludeIndex) throws IllegalArgumentException {
-		String[] excludes= computeExcludes(excludeIndex);
-		String[][] ret= new String[iterables.length][];
-		for (int i= 0; i < iterables.length; i++) {
-			ret[i]= suggestVariableName(iterables[i], excludes);
-		}
-		return ret;
-	}
-
-	private String[] computeExcludes(boolean excludeIndex) {
-		String[] excludes= getCompletion().getLocalVariableNames();
-		if (excludeIndex) {
-			String index= getIndex();
-			if (index != null) {
-				String[] allExcludes= new String[excludes.length + 1];
-				System.arraycopy(excludes, 0, allExcludes, 0, excludes.length);
-				allExcludes[excludes.length]= index;
-				excludes= allExcludes;
+	private void arrange(LocalVariable[] variables) {
+		Arrays.sort(variables, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				return rank((LocalVariable) o1) - rank((LocalVariable) o2);
 			}
+			
+			private int rank(LocalVariable l) {
+				return fUsedNames.contains(l.getName()) ? 1 : 0;
+			}
+		});
+	}
+
+	/**
+	 * Returns the names of local variables matching <code>type</code>.
+	 * 
+	 * @return the names of local variables matching <code>type</code>
+	 * @since 3.3
+	 */
+	public LocalVariable[] getLocalVariables(String type) {
+		LocalVariable[] localVariables= getCompletion().findLocalVariables(type);
+		arrange(localVariables);
+		return localVariables;
+	}
+	
+	/**
+	 * Returns the names of local iterables or arrays.
+	 * 
+	 * @return the names of local iterables or arrays
+	 */
+	public LocalVariable[] getIterables() {
+		LocalVariable[] iterables= getCompletion().findLocalIterables();
+		arrange(iterables);
+		return iterables;
+	}
+	
+	public void markAsUsed(String name) {
+		fUsedNames.add(name);
+	}
+
+	public String[] suggestVariableNames(String type) throws IllegalArgumentException {
+		String[] excludes= computeExcludes();
+		// TODO erasure, arrays, etc.
+		String[] result= suggestVariableName(type, excludes);
+		return result;
+	}
+	
+	private String[] computeExcludes() {
+		String[] excludes= getCompletion().getLocalVariableNames();
+		if (!fUsedNames.isEmpty()) {
+			String[] allExcludes= new String[fUsedNames.size() + excludes.length];
+			System.arraycopy(excludes, 0, allExcludes, 0, excludes.length);
+			System.arraycopy(fUsedNames.toArray(), 0, allExcludes, 0, fUsedNames.size());
+			excludes= allExcludes;
 		}
 		return excludes;
 	}
 
 	private String[] suggestVariableName(LocalVariable iterable, String[] excludes) throws IllegalArgumentException {
+		// TODO add this functionality for other name suggestion methods
 		IJavaProject project= getCompilationUnit().getJavaProject();
 		String memberTypeSig= iterable.getMemberTypeSignature();
 		int memberDimensions= Signature.getArrayCount(memberTypeSig);
@@ -458,33 +406,36 @@ public class JavaContext extends CompilationUnitContext {
 		return proposals;
 	}
 
-	/**
-	 * Returns an iterator name ('iter'). If 'iter' already exists as local
-	 * variable, <code>null</code> is returned.
-	 * 
-	 * @return an iterator name or <code>null</code>
-	 */
-	public String getIterator() {
-		CompilationUnitCompletion completion= getCompletion();		
-		String[] proposals= {"iter"}; //$NON-NLS-1$
+	private String[] suggestVariableName(String type, String[] excludes) throws IllegalArgumentException {
+		IJavaProject project= getCompilationUnit().getJavaProject();
+		int dim=0;
+		while (type.endsWith("[]")) //$NON-NLS-1$
+			dim++;
 		
-		for (int i= 0; i != proposals.length; i++) {
-			String proposal = proposals[i];
-
-			if (!completion.existsLocalName(proposal))
-				return proposal;
-		}
-
-		return null;
+		String elementType= type.substring(0, type.length() - dim * 2);
+		String[] proposals= NamingConventions.suggestLocalVariableNames(project, "", elementType, dim, excludes); //$NON-NLS-1$
+		return proposals;
 	}
-
-	public void addIteratorImport() {
-		ICompilationUnit cu= getCompilationUnit();
-		if (cu == null) {
-			return;
-		}
 	
+	public void addImport(String type) {
+		if (isReadOnly())
+			return;
+		
+		ICompilationUnit cu= getCompilationUnit();
+		if (cu == null)
+			return;
+
 		try {
+			boolean qualified= type.indexOf('.') != -1;
+			if (!qualified) {
+				IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { cu.getJavaProject() });
+				SimpleName nameNode= null;
+				TypeInfo[] matches= findAllTypes(type, searchScope, nameNode, null, cu);
+				if (matches.length != 1) // only add import if we have a single match
+					return;
+				type= matches[0].getFullyQualifiedName();
+			}
+			
 			Position position= new Position(getCompletionOffset(), getCompletionLength());
 			IDocument document= getDocument();
 			final String category= "__template_position_importer" + System.currentTimeMillis(); //$NON-NLS-1$
@@ -496,7 +447,13 @@ public class JavaContext extends CompilationUnitContext {
 			try {
 				
 				ImportRewrite rewrite= StubUtility.createImportRewrite(cu, true);
-				rewrite.addImport("java.util.Iterator"); //$NON-NLS-1$
+				CompilationUnit root= getASTRoot(cu);
+				ImportRewriteContext context;
+				if (root == null)
+					context= null;
+				else
+					context= new ContextSensitiveImportRewriteContext(root, getCompletionOffset(), rewrite);
+				rewrite.addImport(type, context);
 				JavaModelUtil.applyEdit(cu, rewrite.rewriteImports(null), false, null);
 				
 				setCompletionOffset(position.getOffset());
@@ -514,7 +471,83 @@ public class JavaContext extends CompilationUnitContext {
 			handleException(null, e);
 		} catch (BadPositionCategoryException e) {
 			handleException(null, e);
+		} catch (JavaModelException e) {
+			handleException(null, e);
 		}
+	}
+	
+	private CompilationUnit getASTRoot(ICompilationUnit compilationUnit) {
+		return JavaPlugin.getDefault().getASTProvider().getAST(compilationUnit, ASTProvider.WAIT_NO, new NullProgressMonitor());
+	}
+	
+	/*
+	 * Finds a type by the simple name. From AddImportsOperation
+	 */
+	private TypeInfo[] findAllTypes(String simpleTypeName, IJavaSearchScope searchScope, SimpleName nameNode, IProgressMonitor monitor, ICompilationUnit cu) throws JavaModelException {
+		boolean is50OrHigher= JavaModelUtil.is50OrHigher(cu.getJavaProject());
+		
+		int typeKinds= SimilarElementsRequestor.ALL_TYPES;
+		if (nameNode != null) {
+			typeKinds= ASTResolving.getPossibleTypeKinds(nameNode, is50OrHigher);
+		}
+		
+		ArrayList typeInfos= new ArrayList();
+		TypeInfoRequestor requestor= new TypeInfoRequestor(typeInfos);
+		new SearchEngine().searchAllTypeNames(null, simpleTypeName.toCharArray(), SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, getSearchForConstant(typeKinds), searchScope, requestor, IJavaSearchConstants.FORCE_IMMEDIATE_SEARCH, monitor);
+
+		ArrayList typeRefsFound= new ArrayList(typeInfos.size());
+		for (int i= 0, len= typeInfos.size(); i < len; i++) {
+			TypeInfo curr= (TypeInfo) typeInfos.get(i);
+			if (curr.getPackageName().length() > 0) { // do not suggest imports from the default package
+				if (isOfKind(curr, typeKinds, is50OrHigher) && isVisible(curr, cu)) {
+					typeRefsFound.add(curr);
+				}
+			}
+		}
+		return (TypeInfo[]) typeRefsFound.toArray(new TypeInfo[typeRefsFound.size()]);
+	}
+	
+	private int getSearchForConstant(int typeKinds) {
+		final int CLASSES= SimilarElementsRequestor.CLASSES;
+		final int INTERFACES= SimilarElementsRequestor.INTERFACES;
+		final int ENUMS= SimilarElementsRequestor.ENUMS;
+		final int ANNOTATIONS= SimilarElementsRequestor.ANNOTATIONS;
+
+		switch (typeKinds & (CLASSES | INTERFACES | ENUMS | ANNOTATIONS)) {
+			case CLASSES: return IJavaSearchConstants.CLASS;
+			case INTERFACES: return IJavaSearchConstants.INTERFACE;
+			case ENUMS: return IJavaSearchConstants.ENUM;
+			case ANNOTATIONS: return IJavaSearchConstants.ANNOTATION_TYPE;
+			case CLASSES | INTERFACES: return IJavaSearchConstants.CLASS_AND_INTERFACE;
+			case CLASSES | ENUMS: return IJavaSearchConstants.CLASS_AND_ENUM;
+			default: return IJavaSearchConstants.TYPE;
+		}
+	}
+	
+	private boolean isOfKind(TypeInfo curr, int typeKinds, boolean is50OrHigher) {
+		int flags= curr.getModifiers();
+		if (Flags.isAnnotation(flags)) {
+			return is50OrHigher && ((typeKinds & SimilarElementsRequestor.ANNOTATIONS) != 0);
+		}
+		if (Flags.isEnum(flags)) {
+			return is50OrHigher && ((typeKinds & SimilarElementsRequestor.ENUMS) != 0);
+		}
+		if (Flags.isInterface(flags)) {
+			return (typeKinds & SimilarElementsRequestor.INTERFACES) != 0;
+		}
+		return (typeKinds & SimilarElementsRequestor.CLASSES) != 0;
+	}
+
+	
+	private boolean isVisible(TypeInfo curr, ICompilationUnit cu) {
+		int flags= curr.getModifiers();
+		if (Flags.isPrivate(flags)) {
+			return false;
+		}
+		if (Flags.isPublic(flags) || Flags.isProtected(flags)) {
+			return true;
+		}
+		return curr.getPackageName().equals(cu.getParent().getElementName());
 	}
 	
 	/**
@@ -547,5 +580,29 @@ public class JavaContext extends CompilationUnitContext {
 		return buffer.getString();
 	}
 
-}
+	TemplateVariable getTemplateVariable(String name) {
+		TemplateVariable variable= (TemplateVariable) fVariables.get(name);
+		if (variable != null && !variable.isResolved())
+			getContextType().resolve(variable, this);
+		return variable;
+	}
 
+	/**
+	 * Adds a multi-variable guess dependency.
+	 * 
+	 * @param master the master variable - <code>slave</code> needs to be updated when
+	 *        <code>master</code> changes
+	 * @param slave the dependent variable
+	 * @since 3.3
+	 */
+	public void addDependency(MultiVariable master, MultiVariable slave) {
+		MultiVariableGuess guess= getMultiVariableGuess();
+		if (guess == null) {
+			guess= new MultiVariableGuess();
+			setMultiVariableGuess(guess);
+		}
+		
+		guess.addDependency(master, slave);
+	}
+
+}

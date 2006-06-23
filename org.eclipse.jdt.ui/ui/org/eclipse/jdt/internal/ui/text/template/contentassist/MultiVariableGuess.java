@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.template.contentassist;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -38,7 +40,7 @@ public class MultiVariableGuess {
 	/**
 	 * Implementation of the <code>ICompletionProposal</code> interface and extension.
 	 */
-	class Proposal implements ICompletionProposal, ICompletionProposalExtension2 {
+	private static class Proposal implements ICompletionProposal, ICompletionProposalExtension2 {
 
 		/** The string to be displayed in the completion proposal popup */
 		private String fDisplayString;
@@ -180,50 +182,34 @@ public class MultiVariableGuess {
 		}
 	}
 
-	private final List fSlaves= new ArrayList();
+	private final Map fDependencies= new HashMap();
+	private final Map fBackwardDeps= new HashMap();
+	private final Map fPositions= new HashMap();
 
-	private MultiVariable fMaster;
-
-	/**
-	 * @param mv
-	 */
-	public MultiVariableGuess(MultiVariable mv) {
-		fMaster= mv;
+	public MultiVariableGuess() {
 	}
 
-	/**
-	 * @param variable
-	 * @return
-	 */
-	public ICompletionProposal[] getProposals(MultiVariable variable, int offset, int length) {
-		if (variable.equals(fMaster)) {
-			String[] choices= variable.getValues();
+	public ICompletionProposal[] getProposals(final MultiVariable variable, int offset, int length) {
+		MultiVariable master= (MultiVariable) fBackwardDeps.get(variable);
+		Object[] choices;
+		if (master == null)
+			choices= variable.getChoices();
+		else
+			choices= variable.getChoices(master.getCurrentChoice());
+		
+		if (choices == null)
+			return null;
 
+		if (fDependencies.containsKey(variable)) {
 			ICompletionProposal[] ret= new ICompletionProposal[choices.length];
 			for (int i= 0; i < ret.length; i++) {
-				ret[i]= new Proposal(choices[i], offset, length, offset + length) {
-
-					/*
-					 * @see org.eclipse.jface.text.link.MultiVariableGuess.Proposal#apply(org.eclipse.jface.text.IDocument)
-					 */
+				final Object choice= choices[i];
+				ret[i]= new Proposal(variable.toString(choice), offset, length, offset + length) {
 					public void apply(IDocument document) {
 						super.apply(document);
-
-						try {
-							Object old= fMaster.getSet();
-							fMaster.setSet(fReplacementString);
-							if (!fReplacementString.equals(old)) {
-								for (Iterator it= fSlaves.iterator(); it.hasNext();) {
-									VariablePosition pos= (VariablePosition) it.next();
-									String[] values= pos.getVariable().getValues(fReplacementString);
-									if (values != null)
-										document.replace(pos.getOffset(), pos.getLength(), values[0]);
-								}
-							}
-						} catch (BadLocationException e) {
-							// ignore and continue
-						}
-
+						Object oldChoice= variable.getCurrentChoice();
+						variable.setCurrentChoice(choice);
+						updateSlaves(variable, document, oldChoice);
 					}
 				};
 			}
@@ -231,18 +217,36 @@ public class MultiVariableGuess {
 			return ret;
 
 		} else {
-
-			String[] choices= variable.getValues(fMaster.getSet());
-
-			if (choices == null || choices.length < 2)
+			if (choices.length < 2)
 				return null;
 
 			ICompletionProposal[] ret= new ICompletionProposal[choices.length];
-			for (int i= 0; i < ret.length; i++) {
-				ret[i]= new Proposal(choices[i], offset, length, offset + length);
-			}
+			for (int i= 0; i < ret.length; i++)
+				ret[i]= new Proposal(variable.toString(choices[i]), offset, length, offset + length);
 
 			return ret;
+		}
+	}
+	
+	private void updateSlaves(MultiVariable variable, IDocument document, Object oldChoice) {
+		Object choice= variable.getCurrentChoice();
+		if (!oldChoice.equals(choice)) {
+			Set slaves= (Set) fDependencies.get(variable);
+			for (Iterator it= slaves.iterator(); it.hasNext();) {
+				MultiVariable slave= (MultiVariable) it.next();
+				VariablePosition pos= (VariablePosition) fPositions.get(slave);
+
+				Object slavesOldChoice= slave.getCurrentChoice();
+				slave.setKey(choice); // resets the current choice
+				try {
+					document.replace(pos.getOffset(), pos.getLength(), slave.getDefaultValue());
+				} catch (BadLocationException x) {
+					// ignore and continue
+				}
+				// handle slaves recursively
+				if (fDependencies.containsKey(slave))
+					updateSlaves(slave, document, slavesOldChoice);
+			}
 		}
 	}
 
@@ -250,7 +254,31 @@ public class MultiVariableGuess {
 	 * @param position
 	 */
 	public void addSlave(VariablePosition position) {
-		fSlaves.add(position);
+		fPositions.put(position.getVariable(), position);
 	}
 
+	/**
+	 * @param master
+	 * @param slave
+	 * @since 3.3
+	 */
+	public void addDependency(MultiVariable master, MultiVariable slave) {
+		// check for cycles and multi-slaves
+		if (fBackwardDeps.containsKey(slave))
+			throw new IllegalArgumentException("slave can only serve one master"); //$NON-NLS-1$
+		Object parent= master;
+		while (parent != null) {
+			parent= fBackwardDeps.get(parent);
+			if (parent == slave)
+				throw new IllegalArgumentException("cycle detected"); //$NON-NLS-1$
+		}
+		
+		Set slaves= (Set) fDependencies.get(master);
+		if (slaves == null) {
+			slaves= new HashSet();
+			fDependencies.put(master, slaves);
+		}
+		fBackwardDeps.put(slave, master);
+		slaves.add(slave);
+	}
 }
