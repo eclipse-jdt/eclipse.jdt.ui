@@ -171,6 +171,9 @@ public class CodeTemplateContextType extends TemplateContextType {
 		addResolver(new Todo());
 		
 		if (CATCHBLOCK_CONTEXTTYPE.equals(contextName)) {
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingtype)); 
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingmethod)); 
+			
 			addResolver(new CodeTemplateVariableResolver(EXCEPTION_TYPE,  JavaTemplateMessages.CodeTemplateContextType_variable_description_exceptiontype)); 
 			addResolver(new CodeTemplateVariableResolver(EXCEPTION_VAR,  JavaTemplateMessages.CodeTemplateContextType_variable_description_exceptionvar)); 
 		} else if (METHODBODY_CONTEXTTYPE.equals(contextName)) {

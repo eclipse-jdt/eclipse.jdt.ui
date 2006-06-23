@@ -354,7 +354,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	}
 	
 	private Statement getCatchBody(String type, String name, String lineSeparator) throws CoreException {
-		String s= StubUtility.getCatchBodyContent(fCUnit, type, name, lineSeparator);
+		String s= StubUtility.getCatchBodyContent(fCUnit, type, name, fSelectedNodes[0], lineSeparator);
 		if (s == null) {
 			return null;
 		} else {

@@ -180,7 +180,6 @@ public class LocalCorrectionsSubProcessor {
 			
 			ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
 
-
 			AST ast= astRoot.getAST();
 			ListRewrite clausesRewrite= rewrite.getListRewrite(surroundingTry, TryStatement.CATCH_CLAUSES_PROPERTY);
 			for (int i= 0; i < uncaughtExceptions.length; i++) {
@@ -191,7 +190,7 @@ public class LocalCorrectionsSubProcessor {
 				var.setType(imports.addImport(excBinding, ast));
 				CatchClause newClause= ast.newCatchClause();
 				newClause.setException(var);
-				String catchBody = StubUtility.getCatchBodyContent(cu, excBinding.getName(), varName, String.valueOf('\n'));
+				String catchBody = StubUtility.getCatchBodyContent(cu, excBinding.getName(), varName, selectedNode, String.valueOf('\n'));
 				if (catchBody != null) {
 					ASTNode node= rewrite.createStringPlaceholder(catchBody, ASTNode.RETURN_STATEMENT);
 					newClause.getBody().statements().add(node);
