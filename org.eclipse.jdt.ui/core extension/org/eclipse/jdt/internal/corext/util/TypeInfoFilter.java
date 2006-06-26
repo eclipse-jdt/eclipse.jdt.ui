@@ -144,13 +144,36 @@ public class TypeInfoFilter {
 		if (index == -1) {
 			fNameMatcher= new PatternMatcher(text, true);
 		} else {
-			fPackageMatcher= new PatternMatcher(text.substring(0, index),
-				SearchPattern.R_EXACT_MATCH | SearchPattern.R_PATTERN_MATCH);
+			fPackageMatcher= new PatternMatcher(evaluatePackagePattern(text.substring(0, index)), true);
 			String name= text.substring(index + 1);
 			if (name.length() == 0)
 				name= "*"; //$NON-NLS-1$
 			fNameMatcher= new PatternMatcher(name, true);
 		}
+	}
+	
+	/*
+	 * Transforms o.e.j  to o*.e*.j*
+	 */
+	private String evaluatePackagePattern(String s) {
+		StringBuffer buf= new StringBuffer();
+		boolean hasWildCard= false;
+		for (int i= 0; i < s.length(); i++) {
+			char ch= s.charAt(i);
+			if (ch == '.') {
+				if (!hasWildCard) {
+					buf.append('*');
+				}
+				hasWildCard= false;
+			} else if (ch == '*' || ch =='?') {
+				hasWildCard= true;
+			}
+			buf.append(ch);
+		}
+		if (!hasWildCard) {
+			buf.append('*');
+		}
+		return buf.toString();
 	}
 
 	public String getText() {
@@ -180,6 +203,13 @@ public class TypeInfoFilter {
 
 	public int getSearchFlags() {
 		return fNameMatcher.getMatchKind();
+	}
+	
+	public int getPackageFlags() {
+		if (fPackageMatcher == null)
+			return SearchPattern.R_EXACT_MATCH;
+		
+		return fPackageMatcher.getMatchKind();
 	}
 
 	public boolean matchesRawNamePattern(TypeInfo type) {
