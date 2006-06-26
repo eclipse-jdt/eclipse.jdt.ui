@@ -238,7 +238,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		public String[] getMemberTypeSignatures() {
 			if (isArray()) {
 				return new String[] {Signature.createArraySignature(Signature.getElementType(signature), Signature.getArrayCount(signature) - 1)};
-			} else if (fType == ITERABLE || fType == COLLECTION) {
+			} else if (isIterable() || isCollection()) {
 				if (fMemberTypes == null) {
 					try {
 						TypeParameterResolver util= new TypeParameterResolver(this);
