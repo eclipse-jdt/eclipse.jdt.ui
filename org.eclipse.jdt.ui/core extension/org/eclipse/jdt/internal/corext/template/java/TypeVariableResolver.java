@@ -61,9 +61,9 @@ public class TypeVariableResolver extends TemplateVariableResolver {
 	}
 
 	private void resolve(MultiVariable mv, JavaVariable master, int index, JavaContext context) {
-		context.addDependency(master, mv);
 		Object[] choices= master.getChoices();
 		if (choices instanceof LocalVariable[]) {
+			context.addDependency(master, mv);
 			LocalVariable[] variables= (LocalVariable[]) choices;
 			String type= master.getParamType();
 			for (int i= 0; i < choices.length; i++) {
