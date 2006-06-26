@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -97,13 +98,13 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 			IJavaProject javaProject= field.getJavaProject();
 			if (javaProject != null)
 				project= javaProject.getElementName();
-			int flags= JDTRefactoringDescriptor.JAR_IMPORTABLE | JDTRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
+			int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE;
 			final IType declaring= field.getDeclaringType();
 			try {
 				if (!Flags.isPrivate(declaring.getFlags()))
 					flags|= RefactoringDescriptor.MULTI_CHANGE;
 				if (declaring.isAnonymous() || declaring.isLocal())
-					flags|= JDTRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+					flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 			} catch (JavaModelException exception) {
 				JavaPlugin.log(exception);
 			}

@@ -59,8 +59,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
@@ -383,7 +383,7 @@ public final class JarImportWizardPage extends WizardPage {
 					InputStream stream= null;
 					try {
 						stream= zip.getInputStream(entry);
-						data.setRefactoringHistory(RefactoringCore.getHistoryService().readRefactoringHistory(stream, JDTRefactoringDescriptor.JAR_IMPORTABLE | JDTRefactoringDescriptor.JAR_REFACTORABLE));
+						data.setRefactoringHistory(RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING));
 					} catch (IOException exception) {
 						setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
 						setPageComplete(false);

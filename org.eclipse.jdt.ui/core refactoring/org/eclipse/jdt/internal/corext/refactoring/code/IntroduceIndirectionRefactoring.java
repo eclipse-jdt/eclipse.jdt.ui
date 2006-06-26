@@ -72,6 +72,7 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
@@ -727,11 +728,11 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 		IJavaProject javaProject= fTargetMethod.getJavaProject();
 		if (javaProject != null)
 			project= javaProject.getElementName();
-		int flags= JDTRefactoringDescriptor.JAR_IMPORTABLE | JDTRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+		int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 		final IType declaring= fTargetMethod.getDeclaringType();
 		try {
 			if (declaring.isLocal() || declaring.isAnonymous())
-				flags|= JDTRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+				flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 		}

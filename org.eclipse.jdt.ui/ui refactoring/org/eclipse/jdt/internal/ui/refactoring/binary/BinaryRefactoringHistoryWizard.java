@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringContribution;
@@ -395,7 +396,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 					final RefactoringDescriptor descriptor= proxies[index].requestDescriptor(new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 					if (descriptor != null) {
 						final int flags= descriptor.getFlags();
-						if ((flags & JDTRefactoringDescriptor.JAR_SOURCE_ATTACHMENT) != 0)
+						if ((flags & JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT) != 0)
 							status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(JarImportMessages.BinaryRefactoringHistoryWizard_error_missing_source_attachment, descriptor.getDescription())));
 					}
 				}

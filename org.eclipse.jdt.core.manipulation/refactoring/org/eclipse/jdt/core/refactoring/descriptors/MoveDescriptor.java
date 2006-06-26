@@ -10,33 +10,32 @@
  *******************************************************************************/
 package org.eclipse.jdt.core.refactoring.descriptors;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.ltk.core.refactoring.RefactoringContribution;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 /**
- * Description
+ * Refactoring descriptor for the move refactoring.
+ * <p>
+ * An instance of this refactoring descriptor may be obtained by calling
+ * {@link RefactoringContribution#createDescriptor()} on a refactoring
+ * contribution requested by invoking
+ * {@link RefactoringCore#getRefactoringContribution(String)} with the
+ * appropriate refactoring id.
+ * </p>
+ * <p>
+ * Note: this class is not intended to be instantiated by clients.
+ * </p>
+ * 
+ * @since 3.3
  */
-public class MoveDescriptor extends RefactoringDescriptor {
+public final class MoveDescriptor extends JavaRefactoringDescriptor {
 
 	/**
-	 * @param id
-	 * @param project
-	 * @param description
-	 * @param comment
-	 * @param flags
+	 * Creates a new refactoring descriptor.
 	 */
-	protected MoveDescriptor(String id, String project, String description, String comment, int flags) {
-		super(id, project, description, comment, flags);
+	public MoveDescriptor() {
+		super(IJavaRefactorings.MOVE);
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Refactoring createRefactoring(RefactoringStatus status) throws CoreException {
-		return null;
-	}
-
 }

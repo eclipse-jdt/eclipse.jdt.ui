@@ -49,8 +49,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -114,7 +114,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 										InputStream stream= null;
 										try {
 											stream= zip.getInputStream(entry);
-											final RefactoringHistory existing= RefactoringCore.getHistoryService().readRefactoringHistory(stream, JDTRefactoringDescriptor.JAR_IMPORTABLE | JDTRefactoringDescriptor.JAR_REFACTORABLE);
+											final RefactoringHistory existing= RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING);
 											if (existing != null)
 												fHistoryDelta= incoming.removeAll(existing).getDescriptors();
 										} finally {

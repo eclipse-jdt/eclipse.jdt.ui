@@ -108,36 +108,6 @@ public class JDTRefactoringDescriptor extends RefactoringDescriptor {
 	 */
 	public static final int DEPRECATION_RESOLVING= 1 << 17;
 
-	/**
-	 * Constant describing the jar importable flag.
-	 * <p>
-	 * Clients should set this flag to indicate that the refactoring can be
-	 * imported from a JAR file. If this flag is set,
-	 * <code>JAR_REFACTORABLE</code> should be set as well.
-	 * </p>
-	 */
-	public static final int JAR_IMPORTABLE= 1 << 16;
-
-	/**
-	 * Constant describing the jar refactorable flag.
-	 * <p>
-	 * Clients should set this flag to indicate that the refactoring can be
-	 * performed on a JAR file. Refactorings which can run on binary targets,
-	 * but require a source attachment to work correctly, should set the
-	 * <code>JAR_SOURCE_ATTACHMENT</code> flag as well.
-	 * </p>
-	 */
-	public static final int JAR_REFACTORABLE= 1 << 19;
-
-	/**
-	 * Constant describing the jar source attachment flag.
-	 * <p>
-	 * Clients should set this flag to indicate that the refactoring can be
-	 * performed on a JAR file if and only if it contains a source attachment.
-	 * </p>
-	 */
-	public static final int JAR_SOURCE_ATTACHMENT= 1 << 18;
-
 	/** The version value 1.0 */
 	private static final String VALUE_VERSION_1_0= "1.0"; //$NON-NLS-1$
 

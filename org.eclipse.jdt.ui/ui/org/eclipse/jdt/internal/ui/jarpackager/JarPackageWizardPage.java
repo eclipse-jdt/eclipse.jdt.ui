@@ -71,8 +71,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
@@ -615,7 +615,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 				getContainer().run(false, true, new IRunnableWithProgress() {
 
 					public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						history[0]= service.getRefactoringHistory((IProject[]) set.toArray(new IProject[set.size()]), 0, Long.MAX_VALUE, JDTRefactoringDescriptor.JAR_IMPORTABLE, monitor);
+						history[0]= service.getRefactoringHistory((IProject[]) set.toArray(new IProject[set.size()]), 0, Long.MAX_VALUE, JavaRefactoringDescriptor.JAR_MIGRATION, monitor);
 					}
 				});
 			} catch (InvocationTargetException exception) {

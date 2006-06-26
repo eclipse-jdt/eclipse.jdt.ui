@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -207,10 +208,10 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 				IJavaProject project= null;
 				if (!fSubType.isBinary())
 					project= fSubType.getJavaProject();
-				int flags= JDTRefactoringDescriptor.JAR_IMPORTABLE | JDTRefactoringDescriptor.JAR_REFACTORABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+				int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 				try {
 					if (fSubType.isLocal() || fSubType.isAnonymous())
-						flags|= JDTRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+						flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 				} catch (JavaModelException exception) {
 					JavaPlugin.log(exception);
 				}
