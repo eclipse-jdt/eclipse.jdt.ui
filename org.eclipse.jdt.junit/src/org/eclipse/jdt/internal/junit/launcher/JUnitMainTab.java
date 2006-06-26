@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -593,9 +594,12 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		setEnableSingleTestGroup(isSingleTestMode);
 		setEnableContainerTestGroup(!isSingleTestMode);
 		if (!isSingleTestMode && fContainerText.getText().length() == 0) {
-			IJavaProject javaProject= getJavaModel().getJavaProject(fProjText.getText());
-			if (javaProject != null && javaProject.exists())
-				setContainerElement(javaProject);
+			String projText= fProjText.getText();
+			if (Path.EMPTY.isValidSegment(projText)) {
+				IJavaProject javaProject= getJavaModel().getJavaProject(projText);
+				if (javaProject != null && javaProject.exists())
+					setContainerElement(javaProject);
+			}
 		}
 		validatePage();
 		updateLaunchConfigurationDialog();
