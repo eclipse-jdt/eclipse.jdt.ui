@@ -393,6 +393,18 @@
             categoryId="org.eclipse.debug.ui.category.run"
             id="org.eclipse.jdt.junit.junitShortcut.debug">
       </command>
+      <command
+            name="%JUnitShortcut.description.rerunLast"
+            description="%JUnitShortcut.description.rerunLast"
+            categoryId="org.eclipse.debug.ui.category.run"
+            id="org.eclipse.jdt.junit.junitShortcut.rerunLast">
+      </command>
+      <command
+            name="%JUnitShortcut.description.rerunFailedFirst"
+            description="%JUnitShortcut.description.rerunFailedFirst"
+            categoryId="org.eclipse.debug.ui.category.run"
+            id="org.eclipse.jdt.junit.junitShortcut.rerunFailedFirst">
+      </command>       
    </extension>
    
    <extension
@@ -401,7 +413,6 @@
             sequence="M3+M2+D T"
             commandId="org.eclipse.jdt.junit.junitShortcut.debug"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-	  <!-- COMMAND+ALT+Q is "Hide/Show Dock" on carbon, so don't overwrite it -->
       <key
             sequence="M3+M2+X T"
             commandId="org.eclipse.jdt.junit.junitShortcut.run"

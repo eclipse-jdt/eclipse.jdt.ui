@@ -24,6 +24,11 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.IHandler;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -76,6 +81,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
+import org.eclipse.ui.handlers.IHandlerActivation;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
@@ -112,6 +119,9 @@ import org.eclipse.jdt.internal.junit.model.TestRunSession;
 public class TestRunnerViewPart extends ViewPart {
 
 	public static final String NAME= "org.eclipse.jdt.junit.ResultView"; //$NON-NLS-1$
+	
+	private static final String RERUN_LAST_COMMAND= "org.eclipse.jdt.junit.junitShortcut.rerunLast"; //$NON-NLS-1$
+	private static final String RERUN_FAILED_FIRST_COMMAND= "org.eclipse.jdt.junit.junitShortcut.rerunFailedFirst"; //$NON-NLS-1$
 
 	static final int REFRESH_INTERVAL= 200;
 	
@@ -165,7 +175,9 @@ public class TestRunnerViewPart extends ViewPart {
 	private JUnitCopyAction fCopyAction;
 	
 	private Action fRerunLastTestAction;
-	private Action fRerunLastFailedFirstAction;
+	private IHandlerActivation fRerunLastActivation;
+	private Action fRerunFailedFirstAction;
+	private IHandlerActivation fRerunFailedFirstActivation;
 	
 	private Action fFailuresOnlyFilterAction;
 	private ScrollLockAction fScrollLockAction;
@@ -581,6 +593,7 @@ public class TestRunnerViewPart extends ViewPart {
 			setToolTipText(JUnitMessages.TestRunnerViewPart_rerunaction_tooltip); 
 			JUnitPlugin.setLocalImageDescriptors(this, "relaunch.gif"); //$NON-NLS-1$
 			setEnabled(false);
+			setActionDefinitionId(RERUN_LAST_COMMAND);
 		}
 		
 		public void run(){
@@ -594,6 +607,7 @@ public class TestRunnerViewPart extends ViewPart {
 			setToolTipText(JUnitMessages.TestRunnerViewPart_rerunfailuresaction_tooltip);  
 			JUnitPlugin.setLocalImageDescriptors(this, "relaunchf.gif"); //$NON-NLS-1$
 			setEnabled(false);
+			setActionDefinitionId(RERUN_FAILED_FIRST_COMMAND);
 		}
 		
 		public void run(){
@@ -1078,7 +1092,7 @@ action enablement
 			stopUpdateJobs();
 			
 			fStopAction.setEnabled(false);
-			fRerunLastFailedFirstAction.setEnabled(false);
+			fRerunFailedFirstAction.setEnabled(false);
 			fRerunLastTestAction.setEnabled(false);
 			
 		} else {
@@ -1110,7 +1124,7 @@ action enablement
 
 	private void updateRerunFailedFirstAction() {
 		boolean state= isJUnit3() && hasErrorsOrFailures();
-	    fRerunLastFailedFirstAction.setEnabled(state);
+	    fRerunFailedFirstAction.setEnabled(state);
     }
 	
     private boolean isJUnit3() {
@@ -1153,6 +1167,9 @@ action enablement
 		if (fTestRunSessionListener != null)
 			JUnitPlugin.getModel().removeTestRunSessionListener(fTestRunSessionListener);
 		
+		IHandlerService handlerService= (IHandlerService) getSite().getWorkbenchWindow().getService(IHandlerService.class);
+		handlerService.deactivateHandler(fRerunLastActivation);
+		handlerService.deactivateHandler(fRerunFailedFirstActivation);
 		setActiveTestRunSession(null);
 		
 		if (fProgressImages != null)
@@ -1405,7 +1422,29 @@ action enablement
 		fStopAction.setEnabled(false);
 		
 		fRerunLastTestAction= new RerunLastAction();
-		fRerunLastFailedFirstAction= new RerunLastFailedFirstAction();
+		IHandlerService handlerService= (IHandlerService) getSite().getWorkbenchWindow().getService(IHandlerService.class);
+		IHandler handler = new AbstractHandler() {
+			public Object execute(ExecutionEvent event) throws ExecutionException {
+				fRerunLastTestAction.run();
+				return null;
+			}
+			public boolean isEnabled() {
+				return fRerunLastTestAction.isEnabled();
+			}
+		};
+        fRerunLastActivation= handlerService.activateHandler(RERUN_LAST_COMMAND, handler);
+
+		fRerunFailedFirstAction= new RerunLastFailedFirstAction();
+		handler = new AbstractHandler() {
+			public Object execute(ExecutionEvent event) throws ExecutionException {
+				fRerunFailedFirstAction.run();
+				return null;
+			}
+			public boolean isEnabled() {
+				return fRerunFailedFirstAction.isEnabled();
+			}
+		};
+		fRerunFailedFirstActivation= handlerService.activateHandler(RERUN_FAILED_FIRST_COMMAND, handler);
 		
 		fFailuresOnlyFilterAction= new FailuresOnlyFilterAction();
 		
@@ -1426,7 +1465,7 @@ action enablement
 		toolBar.add(fScrollLockAction);
 		toolBar.add(new Separator());
 		toolBar.add(fRerunLastTestAction);
-		toolBar.add(fRerunLastFailedFirstAction);
+		toolBar.add(fRerunFailedFirstAction);
 		toolBar.add(fStopAction);
 		toolBar.add(fViewHistory.createHistoryDropDownAction());
 		
