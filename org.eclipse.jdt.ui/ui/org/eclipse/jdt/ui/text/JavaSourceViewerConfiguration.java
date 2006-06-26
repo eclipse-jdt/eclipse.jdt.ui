@@ -294,11 +294,10 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * the individual bits and pieces.
 	 * <p>
 	 * Clients are not allowed to call this method if the new setup without
-	 * text tools is in use.
-	 * </p>
-	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String)
+	 * text tools is in use.</p>
 	 *
 	 * @return the preference store used to initialize this configuration
+	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String)
 	 * @since 2.0
 	 * @deprecated As of 3.0
 	 */
