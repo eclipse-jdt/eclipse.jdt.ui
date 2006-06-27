@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.text.template.contentassist;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.jface.text.Assert;
@@ -129,10 +128,6 @@ public class MultiVariable extends TemplateVariable {
 	}
 
 	public Object[][] getAllChoices() {
-		Object[][] all= new Object[fValueMap.size()][];
-		int i= 0;
-		for (Iterator it= fValueMap.values().iterator(); it.hasNext(); i++)
-			all[i]= (Object[]) it.next();
-		return all;
+		return (Object[][]) fValueMap.values().toArray(new Object[fValueMap.size()][]);
 	}
 }
