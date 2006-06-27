@@ -390,7 +390,7 @@ public class EditTemplateDialog extends StatusDialog {
 		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		SourceViewer viewer= new JavaSourceViewer(parent, null, null, false, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL, store);
-		TemplateEditorSourceViewerConfiguration configuration= new TemplateEditorSourceViewerConfiguration(tools.getColorManager(), store, null, fTemplateProcessor);
+		CodeTemplateSourceViewerConfiguration configuration= new CodeTemplateSourceViewerConfiguration(tools.getColorManager(), store, null, fTemplateProcessor);
 		viewer.configure(configuration);
 		viewer.setEditable(true);
 		viewer.setDocument(document, prefix.length(), document.getLength() - prefix.length());

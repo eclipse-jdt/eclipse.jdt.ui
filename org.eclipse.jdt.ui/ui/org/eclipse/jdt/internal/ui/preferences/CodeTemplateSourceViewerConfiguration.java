@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
 import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariableProcessor;
 
 
-public class TemplateEditorSourceViewerConfiguration extends SimpleJavaSourceViewerConfiguration {
+public class CodeTemplateSourceViewerConfiguration extends SimpleJavaSourceViewerConfiguration {
 
 	private static class TemplateVariableTextHover implements ITextHover {
 
@@ -100,7 +100,7 @@ public class TemplateEditorSourceViewerConfiguration extends SimpleJavaSourceVie
 	
 	private final TemplateVariableProcessor fProcessor;
 
-	public TemplateEditorSourceViewerConfiguration(IColorManager colorManager, IPreferenceStore store, ITextEditor editor, TemplateVariableProcessor processor) {
+	public CodeTemplateSourceViewerConfiguration(IColorManager colorManager, IPreferenceStore store, ITextEditor editor, TemplateVariableProcessor processor) {
 		super(colorManager, store, editor, IJavaPartitions.JAVA_PARTITIONING, false);
 		fProcessor= processor;
 	}
