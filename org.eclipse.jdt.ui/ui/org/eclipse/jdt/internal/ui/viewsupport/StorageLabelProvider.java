@@ -59,9 +59,13 @@ public class StorageLabelProvider extends LabelProvider {
 	 * @see ILabelProvider#getText
 	 */
 	public String getText(Object element) {
-		if (element instanceof IStorage)
+		if (element instanceof IStorage) {
+			IPath path= ((IStorage)element).getFullPath();
+			if (path != null) {
+				return path.toString();
+			}
 			return ((IStorage)element).getName();
-
+		}
 		return super.getText(element);
 	}
 
