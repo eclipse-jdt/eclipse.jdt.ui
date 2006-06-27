@@ -11,5 +11,11 @@
 <!--     IBM Corporation - initial API and implementation                   -->
 <!-- ====================================================================== -->
 <plugin>
+   <extension point="org.eclipse.jdt.core.compilationParticipant">
+   		<compilationParticipant id="auditParticipant"
+	         modifiesEnvironment="false"
+    	     createsProblems="true"
+        	 class="org.eclipse.jdt.internal.core.audits.AuditCompilationParticipant"/>
+   </extension>
 
 </plugin>
