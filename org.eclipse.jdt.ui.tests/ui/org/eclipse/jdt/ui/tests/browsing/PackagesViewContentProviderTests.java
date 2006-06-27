@@ -92,7 +92,6 @@ public class PackagesViewContentProviderTests extends TestCase {
 	private IPackageFragment fInternalPack4;
 	private IPackageFragment fInternalPack5;
 	private IPackageFragment fInternalPack10;
-	private IPackageFragment fInternalPackMetaInf;
 	private boolean fEnableAutoBuildAfterTesting;
 	
 	public PackagesViewContentProviderTests(String name) {
@@ -113,7 +112,7 @@ public class PackagesViewContentProviderTests extends TestCase {
 		defaultCp.add(fPackDefault2);
 		defaultCp.add(fInternalPackDefault);
 		
-		Object[] expectedChildren= new Object[]{fPack21, fPack12, cp, defaultCp, fInternalPackMetaInf};
+		Object[] expectedChildren= new Object[]{fPack21, fPack12, cp, defaultCp};
 		Object[] children= fProvider.getChildren(fJProject2);
 		assertTrue("Wrong children found for project", compareArrays(children, expectedChildren));//$NON-NLS-1$
 	}
@@ -320,7 +319,7 @@ public class PackagesViewContentProviderTests extends TestCase {
 		defaultCp.add(fPackDefault2);
 		defaultCp.add(fInternalPackDefault);
 		
-		Object[] expectedChildren= new Object[]{fPack21, fPack12, cp, defaultCp, fInternalPackMetaInf};
+		Object[] expectedChildren= new Object[]{fPack21, fPack12, cp, defaultCp};
 		
 		assertTrue("expected children of project with focus", compareArrays(children, expectedChildren));//$NON-NLS-1$
 		
@@ -436,7 +435,6 @@ public class PackagesViewContentProviderTests extends TestCase {
 		fInternalPack5= fInternalJarRoot.getPackageFragment("pack3.pack5");//$NON-NLS-1$
 		 fInternalJarRoot.getPackageFragment("pack3.pack5.pack6");//$NON-NLS-1$
 		fInternalPack10= fInternalJarRoot.getPackageFragment("pack3.pack4.pack10");//$NON-NLS-1$
-		fInternalPackMetaInf= fInternalJarRoot.getPackageFragment("META-INF");//$NON-NLS-1$
 		
 		//-----------------Set up source folder--------------------------
 
