@@ -67,6 +67,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.structure.HierarchyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
@@ -478,6 +479,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 
 	private void initializeTreeViewer(final IProgressMonitor pm) {
 		try {
+			pm.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, 2);
 			final PullUpRefactoringProcessor processor= getPullUpRefactoring().getPullUpProcessor();
 			final IMember[] matchingMethods= processor.getMatchingElements(new SubProgressMonitor(pm, 1), false);
 			final ITypeHierarchy hierarchy= processor.getDestinationTypeHierarchy(new SubProgressMonitor(pm, 1));
@@ -491,6 +493,8 @@ public class PullUpMethodPage extends UserInputWizardPage {
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.PullUpInputPage_pull_up1, RefactoringMessages.PullUpInputPage_exception);
 			fTreeViewer.setInput(null);
+		} finally {
+			pm.done();
 		}
 	}
 
