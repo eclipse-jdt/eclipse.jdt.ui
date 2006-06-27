@@ -95,7 +95,6 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 	private IPackageFragment fInternalPack5;
 	private IPackageFragment fInternalPack10;
 	private IPackageFragment fInternalPack6;
-	private IPackageFragment fInternalPackMetaInf;
 	private boolean fEnableAutoBuildAfterTesting;
 	private IPackageFragment fPack102;
 	
@@ -137,7 +136,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		cp10.add(fInternalPack10);
 
 		Object[] children= fProvider.getElements(fJProject2);
-		Object[] expectedChildren= new Object[] { defaultCp, cp3, cp4, cp5, cp6, cp10, fInternalPackMetaInf, fPack21, fPack12, fPack91, fPack81, fPack17 };
+		Object[] expectedChildren= new Object[] { defaultCp, cp3, cp4, cp5, cp6, cp10, fPack21, fPack12, fPack91, fPack81, fPack17 };
 		assertTrue("Wrong children founf for PackageFragment", compareArrays(children, expectedChildren)); //$NON-NLS-1$
 	}
 
@@ -387,7 +386,6 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		fInternalPack5= fInternalJarRoot.getPackageFragment("pack3.pack5");//$NON-NLS-1$
 		fInternalPack6= fInternalJarRoot.getPackageFragment("pack3.pack5.pack6");//$NON-NLS-1$
 		fInternalPack10= fInternalJarRoot.getPackageFragment("pack3.pack4.pack10");//$NON-NLS-1$
-		fInternalPackMetaInf= fInternalJarRoot.getPackageFragment("META-INF");//$NON-NLS-1$
 		
 		//-----------------Set up source folder--------------------------
 
