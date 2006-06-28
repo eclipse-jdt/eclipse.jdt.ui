@@ -23,7 +23,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Finds implementors of the selected element in the workspace.
@@ -75,7 +74,6 @@ public class FindImplementorsAction extends FindAction {
 			try {
 				return ((IType) element).isInterface();
 			} catch (JavaModelException ex) {
-				ExceptionHandler.log(ex, SearchMessages.Search_Error_javaElementAccess_message); 
 				return false;
 			}
 		// should not happen: handled by super.canOperateOn
