@@ -86,17 +86,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class EditorUtility {
 
 
-	public static boolean isEditorInput(Object element, IEditorPart editor) {
-		if (editor != null) {
-			try {
-				return editor.getEditorInput().equals(getEditorInput(element));
-			} catch (JavaModelException x) {
-				JavaPlugin.log(x.getStatus());
-			}
-		}
-		return false;
-	}
-
 	/**
 	 * Tests if a CU is currently shown in an editor
 	 * @return the IEditorPart if shown, null if element is not open in an editor
@@ -123,14 +112,14 @@ public class EditorUtility {
 	/**
 	 * Opens a Java editor for an element such as <code>IJavaElement</code>, <code>IFile</code>, or <code>IStorage</code>.
 	 * The editor is activated by default.
-	 * @return the IEditorPart or null if wrong element type or opening failed
+	 * @return the IEditorPart or null if wrong element type
 	 */
 	public static IEditorPart openInEditor(Object inputElement) throws JavaModelException, PartInitException {
 		return openInEditor(inputElement, true);
 	}
 
 	/**
-	 * Opens a Java editor for an element (IJavaElement, IFile, IStorage...)
+	 * Opens the editor currently associated with the given element (IJavaElement, IFile, IStorage...)
 	 * @return the IEditorPart or null if wrong element type or opening failed
 	 */
 	public static IEditorPart openInEditor(Object inputElement, boolean activate) throws JavaModelException, PartInitException {
@@ -138,20 +127,27 @@ public class EditorUtility {
 		if (inputElement instanceof IFile)
 			return openInEditor((IFile) inputElement, activate);
 
+		/*
+		 * Support to navigate inside non-primary working copy.
+		 * For now we only support to navigate inside the currently
+		 * active editor.
+		 * 
+		 * XXX: once we have FileStoreEditorInput as API,
+		 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=111887
+		 * we can fix this code by creating the correct editor input
+		 * in getEditorInput(Object)  
+		 */
 		if (inputElement instanceof IJavaElement) {
 			ICompilationUnit cu= (ICompilationUnit)((IJavaElement)inputElement).getAncestor(IJavaElement.COMPILATION_UNIT);
 			if (cu != null && !JavaModelUtil.isPrimary(cu)) {
-				/*
-				 * Support for non-primary working copy. 
-				 * Try to reveal it in the active editor.
-				 */
 				IWorkbenchPage page= JavaPlugin.getActivePage();
 				if (page != null) {
 					IEditorPart editor= page.getActiveEditor();
 					if (editor != null) {
 						IJavaElement editorCU= EditorUtility.getEditorInputJavaElement(editor, false);
-						if (editorCU == cu) {
-							EditorUtility.revealInEditor(editor, (IJavaElement)inputElement);
+						if (cu.equals(editorCU)) {
+							if (activate && page.getActivePart() != editor)
+								page.activate(editor);
 							return editor;
 						}
 					}
@@ -307,7 +303,7 @@ public class EditorUtility {
 					// Restore the action
 					((TextEditorAction)toggleAction).setEditor((ITextEditor)editorPart);
 				} else {
-					// Un-check
+					// Uncheck
 					toggleAction.run();
 					// Check
 					toggleAction.run();
@@ -316,10 +312,7 @@ public class EditorUtility {
 		}
 	}
 
-	/**
-	 *@deprecated	Made it public again for java debugger UI.
-	 */
-	public static String getEditorID(IEditorInput input, Object inputObject) {
+	private static String getEditorID(IEditorInput input, Object inputObject) {
 		IEditorDescriptor editorDescriptor;
 		try {
 			if (input instanceof IFileEditorInput)
