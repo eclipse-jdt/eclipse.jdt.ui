@@ -281,7 +281,7 @@ public class EditorUtility {
 	}
 
 	private static IEditorPart openInEditor(IEditorInput input, String editorID, boolean activate) throws PartInitException {
-		if (input != null) {
+		if (input != null && editorID != null) {
 			IWorkbenchPage p= JavaPlugin.getActivePage();
 			if (p != null) {
 				IEditorPart editorPart= p.openEditor(input, editorID, activate);
@@ -324,8 +324,12 @@ public class EditorUtility {
 		try {
 			if (input instanceof IFileEditorInput)
 				editorDescriptor= IDE.getEditorDescriptor(((IFileEditorInput)input).getFile());
-			else
-				editorDescriptor= IDE.getEditorDescriptor(input.getName());
+			else {
+				String name= input.getName();
+				if (name == null)
+					return null;
+				editorDescriptor= IDE.getEditorDescriptor(name);
+			}
 		} catch (PartInitException e) {
 			return null;
 		}
