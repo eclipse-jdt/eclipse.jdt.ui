@@ -14,11 +14,9 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.WorkbenchException;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -31,14 +29,14 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
 
 public class OpenTypeHierarchyUtil {
@@ -61,7 +59,7 @@ public class OpenTypeHierarchyUtil {
 		if (candidates.length > 1) {
 			String title= JavaUIMessages.OpenTypeHierarchyUtil_selectionDialog_title;  
 			String message= JavaUIMessages.OpenTypeHierarchyUtil_selectionDialog_message; 
-			input= OpenActionUtil.selectJavaElement(candidates, window.getShell(), title, message);			
+			input= SelectionConverter.selectJavaElement(candidates, window.getShell(), title, message);			
 		} else {
 			input= candidates[0];
 		}
@@ -127,18 +125,13 @@ public class OpenTypeHierarchyUtil {
 		part.setInputElement(input);
 		if (input instanceof IMember) {
 			if (page.getEditorReferences().length == 0) {
-				openEditor(input, false); // only open when the perspecive has been created
+				JavaUI.openInEditor(input, false, false); // only open when the perspecive has been created
 			}
 		}
 		return part;
 	}
 
-	private static void openEditor(Object input, boolean activate) throws PartInitException, JavaModelException {
-		IEditorPart part= EditorUtility.openInEditor(input, activate);
-		if (input instanceof IJavaElement)
-			EditorUtility.revealInEditor(part, (IJavaElement) input);
-	}
-	
+
 	/**
 	 * Converts the input to a possible input candidates
 	 */	

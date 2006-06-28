@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -47,6 +48,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.viewsupport.StorageLabelProvider;
 
 /**
  * <code>JavaElementLabels</code> provides helper methods to render names of Java elements.
@@ -379,6 +381,9 @@ public class JavaElementLabels {
 			IWorkbenchAdapter wbadapter= (IWorkbenchAdapter) ((IAdaptable)obj).getAdapter(IWorkbenchAdapter.class);
 			if (wbadapter != null) {
 				return wbadapter.getLabel(obj);
+			}
+			if (obj instanceof IStorage) {
+				return new StorageLabelProvider().getText(obj);
 			}
 		}
 		return ""; //$NON-NLS-1$

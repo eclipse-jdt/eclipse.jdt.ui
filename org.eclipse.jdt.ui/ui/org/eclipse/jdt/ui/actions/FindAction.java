@@ -46,7 +46,6 @@ import org.eclipse.jdt.ui.search.QuerySpecification;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
-import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
@@ -236,7 +235,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 			if (elements.length > 0 && canOperateOn(elements[0])) {
 				IJavaElement element= elements[0];
 				if (elements.length > 1)
-					element= OpenActionUtil.selectJavaElement(elements, getShell(), title, message);
+					element= SelectionConverter.selectJavaElement(elements, getShell(), title, message);
 				if (element != null)
 					run(element);
 			}

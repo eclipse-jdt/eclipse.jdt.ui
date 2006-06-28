@@ -46,7 +46,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
@@ -220,7 +220,7 @@ public class CallHierarchyUI {
         if (candidates.length > 1) {
             String title= CallHierarchyMessages.CallHierarchyUI_selectionDialog_title;  
             String message= CallHierarchyMessages.CallHierarchyUI_selectionDialog_message; 
-            input= OpenActionUtil.selectJavaElement(candidates, window.getShell(), title, message);         
+            input= SelectionConverter.selectJavaElement(candidates, window.getShell(), title, message);         
         } else {
             input= candidates[0];
         }

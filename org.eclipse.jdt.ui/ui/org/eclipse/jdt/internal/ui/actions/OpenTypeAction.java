@@ -19,7 +19,6 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ISelection;
 
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
@@ -27,12 +26,13 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog2;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class OpenTypeAction extends Action implements IWorkbenchWindowActionDelegate {
@@ -62,12 +62,9 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 		if (types != null && types.length > 0) {
 			IType type= (IType)types[0];
 			try {
-				IEditorPart part= EditorUtility.openInEditor(type, true);
-				EditorUtility.revealInEditor(part, type);
+				JavaUI.openInEditor(type, true, true);
 			} catch (CoreException x) {
-				String title= JavaUIMessages.OpenTypeAction_errorTitle; 
-				String message= JavaUIMessages.OpenTypeAction_errorMessage; 
-				ExceptionHandler.handle(x, title, message);
+				ExceptionHandler.handle(x, JavaUIMessages.OpenTypeAction_errorTitle, JavaUIMessages.OpenTypeAction_errorMessage);
 			}
 		}
 	}

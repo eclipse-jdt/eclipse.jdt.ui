@@ -59,6 +59,7 @@ import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension2;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
@@ -78,7 +79,7 @@ import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 /**
@@ -446,7 +447,9 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		if (selectedElement != null) {
 			try {
 				dispose();
-				OpenActionUtil.open(selectedElement, true);
+				IEditorPart part= EditorUtility.openInEditor(selectedElement, true);
+				if (part != null && selectedElement instanceof IJavaElement)
+					EditorUtility.revealInEditor(part, (IJavaElement) selectedElement);
 			} catch (CoreException ex) {
 				JavaPlugin.log(ex);
 			}

@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
-import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -107,9 +106,11 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 			
 			IJavaElement candidate= elements[0];
 			if (elements.length > 1) {
-				candidate= OpenActionUtil.selectJavaElement(elements, getShell(), getDialogTitle(), ActionMessages.ShowInNavigatorView_dialog_message);
+				candidate= SelectionConverter.selectJavaElement(elements, getShell(), getDialogTitle(), ActionMessages.ShowInNavigatorView_dialog_message);
 			}
-			run(getResource(candidate));
+			if (candidate != null) {
+				run(getResource(candidate));
+			}
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getDialogTitle(), ActionMessages.SelectionConverter_codeResolve_failed);
 		} catch (InterruptedException e) {

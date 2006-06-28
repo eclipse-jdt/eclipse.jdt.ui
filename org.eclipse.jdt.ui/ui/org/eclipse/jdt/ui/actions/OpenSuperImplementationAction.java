@@ -12,7 +12,6 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -32,13 +31,15 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
-import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * The action opens a Java editor on the selected method's super implementation.
@@ -157,12 +158,10 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 		try {
 			IMethod impl= findSuperImplementation(method);
 			if (impl != null) {
-				OpenActionUtil.open(impl);
+				JavaUI.openInEditor(impl, true, true);
 			}
 		} catch (CoreException e) {
-			JavaPlugin.log(e);
-			String message= ActionMessages.OpenSuperImplementationAction_error_message; 
-			ErrorDialog.openError(getShell(), getDialogTitle(), message, e.getStatus());
+			ExceptionHandler.handle(e, getDialogTitle(), ActionMessages.OpenSuperImplementationAction_error_message);
 		}
 	}
 	

@@ -41,7 +41,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
-import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -142,9 +141,11 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 				return;
 			IJavaElement candidate= elements[0];
 			if (elements.length > 1) {
-				candidate= OpenActionUtil.selectJavaElement(elements, getShell(), getDialogTitle(), ActionMessages.OpenExternalJavadocAction_select_element);
+				candidate= SelectionConverter.selectJavaElement(elements, getShell(), getDialogTitle(), ActionMessages.OpenExternalJavadocAction_select_element);
 			}
-			run(candidate);  
+			if (candidate != null) {
+				run(candidate);
+			}
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.OpenExternalJavadocAction_code_resolve_failed); 
 		} catch (InterruptedException e) {

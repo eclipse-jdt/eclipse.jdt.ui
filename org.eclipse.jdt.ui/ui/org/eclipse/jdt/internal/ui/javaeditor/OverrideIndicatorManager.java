@@ -15,10 +15,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.ISynchronizable;
 import org.eclipse.jface.text.Position;
@@ -26,11 +28,7 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
 
-import org.eclipse.ui.PartInitException;
-
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -43,9 +41,11 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Manages the override and overwrite indicators for
@@ -93,8 +93,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 		 * Opens and reveals the defining method.
 		 */
 		public void open() {
-			boolean hasLogEntry= false;
-			CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(fJavaElement, ASTProvider.WAIT_ACTIVE_ONLY, null);
+			CompilationUnit ast= ASTProvider.getASTProvider().getAST(fJavaElement, ASTProvider.WAIT_ACTIVE_ONLY, null);
 			if (ast != null) {
 				ASTNode node= ast.findDeclaringNode(fAstNodeKey);
 				if (node instanceof MethodDeclaration) {
@@ -104,25 +103,18 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 						if (definingMethodBinding != null) {
 							IJavaElement definingMethod= definingMethodBinding.getJavaElement();
 							if (definingMethod != null) {
-								OpenActionUtil.open(definingMethod, true);
+								JavaUI.openInEditor(definingMethod, true, true);
 								return;
 							}
 						}
-					} catch (JavaModelException ex) {
-						JavaPlugin.log(ex.getStatus());
-						hasLogEntry= true;
-					} catch (PartInitException ex) {
-						JavaPlugin.log(ex.getStatus());
-						hasLogEntry= true;
+					} catch (CoreException e) {
+						ExceptionHandler.handle(e, JavaEditorMessages.OverrideIndicatorManager_open_error_title, JavaEditorMessages.OverrideIndicatorManager_open_error_messageHasLogEntry);
+						return;
 					}
 				}
 			}
 			String title= JavaEditorMessages.OverrideIndicatorManager_open_error_title;
-			String message;
-			if (hasLogEntry)
-				message= JavaEditorMessages.OverrideIndicatorManager_open_error_messageHasLogEntry;
-			else
-				message= JavaEditorMessages.OverrideIndicatorManager_open_error_message;
+			String message= JavaEditorMessages.OverrideIndicatorManager_open_error_message;
 			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), title, message);
 		}
 	}

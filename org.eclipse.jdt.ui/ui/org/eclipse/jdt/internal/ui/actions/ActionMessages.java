@@ -32,14 +32,16 @@ public final class ActionMessages extends NLS {
 	public static String FindNLSProblemsAction_Name;
 	public static String FindNLSProblemsAction_NoPropertieFilesFoundErrorDescription;
 	public static String FindNLSProblemsAction_ToolTip;
+	public static String OpenAction_erro_message;
+	public static String OpenAction_error_no_editor_found;
+	public static String OpenAction_error_problem_opening_editor;
+	public static String OpenAction_multistatus_message;
 	public static String OpenWithMenu_label;
-	public static String QuickAssistProcessor_create_fix_name;
+
 	public static String RefactorMenu_label;
 	public static String SourceMenu_label;
 	public static String BuildPath_label;
 	public static String BuildAction_label;
-	public static String RebuildAction_label;
-	public static String SelectionConverter_codeResolveOrInput_failed;
 	public static String SelectionConverter_codeResolve_failed;
 	public static String OpenAction_label;
 	public static String OpenAction_tooltip;
@@ -48,8 +50,6 @@ public final class ActionMessages extends NLS {
 	public static String OpenAction_select_element;
 	public static String OpenAction_error_title;
 	public static String OpenAction_error_message;
-	public static String OpenAction_error_messageArgs;
-	public static String OpenAction_error_messageProblems;
 	public static String OpenAction_error_messageBadSelection;
 	public static String OpenSuperImplementationAction_label;
 	public static String OpenSuperImplementationAction_tooltip;
@@ -159,14 +159,12 @@ public final class ActionMessages extends NLS {
 	public static String SourceActionDialog_cursor;
 	public static String SourceActionDialog_after;
 	public static String SourceActionDialog_createMethodComment;
-	public static String SourceActionDialog_createMethodAnnotation;
 	public static String SourceActionDialog_no_entries;
 	public static String SourceActionDialog_createConstructorComment;
 	public static String AddUnimplementedConstructorsAction_label;
 	public static String AddUnimplementedConstructorsAction_description;
 	public static String AddUnimplementedConstructorsAction_tooltip;
 	public static String AddUnimplementedConstructorsAction_error_title;
-	public static String AddUnimplementedConstructorsAction_error_type_removed_in_editor;
 	public static String AddUnimplementedConstructorsAction_not_applicable;
 	public static String AddUnimplementedConstructorsAction_interface_not_applicable;
 	public static String AddUnimplementedConstructorsAction_enum_not_applicable;
@@ -271,7 +269,6 @@ public final class ActionMessages extends NLS {
 	public static String SortMembersAction_containsmarkers;
 	public static String SortMembersAction_no_members;
 	public static String SortMembersAction_dialog_title;
-	public static String OpenBrowserUtil_help_not_available;
 	public static String MemberFilterActionGroup_hide_fields_label;
 	public static String MemberFilterActionGroup_hide_fields_tooltip;
 	public static String MemberFilterActionGroup_hide_fields_description;
@@ -335,7 +332,6 @@ public final class ActionMessages extends NLS {
 	public static String AddDelegateMethodsAction_title;
 	public static String AddDelegateMethodsAction_message;
 	public static String AddDelegateMethodsAction_selectioninfo_more;
-	public static String AddDelegateMethodsOperation_monitor_message;
 	
 	public static String SurroundWithTemplateMenuAction_ConfigureTemplatesActionName;
 	public static String SurroundWithTemplateMenuAction_NoneApplicable;

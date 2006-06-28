@@ -15,16 +15,20 @@ import java.util.Iterator;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
@@ -36,6 +40,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -275,5 +281,29 @@ public class SelectionConverter {
 			}
 			return result;
 		}
+	}
+
+	/**
+	 * Shows a dialog for resolving an ambiguous java element.
+	 * Utility method that can be called by subclasses.
+	 */
+	public static IJavaElement selectJavaElement(IJavaElement[] elements, Shell shell, String title, String message) {
+		int nResults= elements.length;
+		if (nResults == 0)
+			return null;
+		if (nResults == 1)
+			return elements[0];
+		
+		int flags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_QUALIFIED | JavaElementLabelProvider.SHOW_ROOT;
+						
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(flags));
+		dialog.setTitle(title);
+		dialog.setMessage(message);
+		dialog.setElements(elements);
+		
+		if (dialog.open() == Window.OK) {
+			return (IJavaElement) dialog.getFirstResult();
+		}		
+		return null;
 	}
 }
