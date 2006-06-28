@@ -78,6 +78,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -88,7 +90,6 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
@@ -578,7 +579,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					if (object[index] instanceof IBinding[])
 						tuples.add(object[index]);
 				}
-				IEditorPart part= EditorUtility.openInEditor(type);
+				IEditorPart part= JavaUI.openInEditor(type);
 				IRewriteTarget target= (IRewriteTarget) part.getAdapter(IRewriteTarget.class);
 				try {
 					if (target != null)

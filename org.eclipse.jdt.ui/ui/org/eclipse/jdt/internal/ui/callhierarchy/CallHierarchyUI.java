@@ -96,8 +96,7 @@ public class CallHierarchyUI {
     public static void jumpToMember(IJavaElement element) {
         if (element != null) {
             try {
-                IEditorPart methodEditor = EditorUtility.openInEditor(element, true);
-                JavaUI.revealInEditor(methodEditor, element);
+                JavaUI.openInEditor(element, true, true);
             } catch (JavaModelException e) {
                 JavaPlugin.log(e);
             } catch (PartInitException e) {
@@ -108,9 +107,7 @@ public class CallHierarchyUI {
 
     public static void jumpToLocation(CallLocation callLocation) {
         try {
-            IEditorPart methodEditor = EditorUtility.openInEditor(callLocation.getMember(),
-                    false);
-
+            IEditorPart methodEditor = JavaUI.openInEditor(callLocation.getMember(), false, false);
             if (methodEditor instanceof ITextEditor) {
                 ITextEditor editor = (ITextEditor) methodEditor;
                 editor.selectAndReveal(callLocation.getStart(),
@@ -154,8 +151,7 @@ public class CallHierarchyUI {
 	
             boolean activateOnOpen = OpenStrategy.activateOnOpen();
 
-			IEditorPart methodEditor = EditorUtility.openInEditor(enclosingMember, activateOnOpen);
-
+			IEditorPart methodEditor = JavaUI.openInEditor(enclosingMember, activateOnOpen, false);
             if (methodEditor instanceof ITextEditor) {
                 ITextEditor editor = (ITextEditor) methodEditor;
 				editor.selectAndReveal(selectionStart, selectionLength);
@@ -229,19 +225,13 @@ public class CallHierarchyUI {
             
         return openInViewPart(window, input);
     }
-
-    private static void openEditor(Object input, boolean activate) throws PartInitException, JavaModelException {
-        IEditorPart part= EditorUtility.openInEditor(input, activate);
-        if (input instanceof IJavaElement)
-            EditorUtility.revealInEditor(part, (IJavaElement) input);
-    }
     
     private static CallHierarchyViewPart openInViewPart(IWorkbenchWindow window, IJavaElement input) {
         IWorkbenchPage page= window.getActivePage();
         try {
             CallHierarchyViewPart result= (CallHierarchyViewPart)page.showView(CallHierarchyViewPart.ID_CALL_HIERARCHY);
             result.setMethod((IMethod)input);
-            openEditor(input, false);
+            JavaUI.openInEditor(input, false, true);
             return result;
         } catch (CoreException e) {
             ExceptionHandler.handle(e, window.getShell(), 

@@ -633,21 +633,22 @@ public final class JavaUI {
 	}
 	
 	/**
-	 * Opens an editor on the given Java element. Valid elements are all Java elements that are {@link ISourceReference}.
- 	 * For elements inside a compilation unit or class file, the parent is opened in the editor is opened.
+	 * Opens an editor on the given Java element in the active page. Valid elements are all Java elements that are {@link ISourceReference}.
+ 	 * For elements inside a compilation unit or class file, the parent is opened in the editor is opened and the element revealed.
  	 * If there already is an open Java editor for the given element, it is returned.
 	 *
 	 * @param element the input element; either a compilation unit 
 	 *   (<code>ICompilationUnit</code>) or a class file (<code>IClassFile</code>) or source references inside.
+	 * @return returns the editor part of the opened editor or <code>null</code> if the element is of the wrong type or no page is active.
 	 * @exception PartInitException if the editor could not be initialized
 	 * @exception JavaModelException if this element does not exist or if an exception occurs while accessing its underlying resource
 	 */
 	public static IEditorPart openInEditor(IJavaElement element) throws JavaModelException, PartInitException {
-		return openInEditor(element, true, false);
+		return openInEditor(element, true, true);
 	}
 	
 	/**
-	 * Opens an editor on the given Java element. Valid elements are all Java elements that are {@link ISourceReference}.
+	 * Opens an editor on the given Java element in the active page. Valid elements are all Java elements that are {@link ISourceReference}.
  	 * For elements inside a compilation unit or class file, the parent is opened in the editor is opened.
  	 * If there already is an open Java editor for the given element, it is returned.
 	 *
@@ -655,6 +656,7 @@ public final class JavaUI {
 	 *   (<code>ICompilationUnit</code>) or a class file (<code>IClassFile</code>) or source references inside.
 	 * @param activate if set, the editor will be activated.
 	 * @param reveal if set, the element will be revealed.
+	 * @return returns the editor part of the opened editor or <code>null</code> if the element is not a {@link ISourceReference} or no page is active.
 	 * @exception PartInitException if the editor could not be initialized
 	 * @exception JavaModelException if this element does not exist or if an exception occurs while accessing its underlying resource
 	 * @since 3.3

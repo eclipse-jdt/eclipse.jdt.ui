@@ -126,7 +126,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			try {
 				IEditorPart part= EditorUtility.isOpenInEditor(fCompilationUnit);
 				if (part == null) {
-					part= EditorUtility.openInEditor(fCompilationUnit);
+					part= JavaUI.openInEditor(fCompilationUnit, true, false);
 					if (part instanceof ITextEditor) {
 						((ITextEditor) part).selectAndReveal(fOffset, fLength);
 					}

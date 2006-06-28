@@ -10,13 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javadocexport;
 
-import org.eclipse.debug.ui.console.IConsole;
-import org.eclipse.debug.ui.console.IConsoleLineTracker;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -24,13 +22,20 @@ import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.console.IHyperlink;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.ui.console.IHyperlink;
+
+import org.eclipse.debug.ui.console.IConsole;
+import org.eclipse.debug.ui.console.IConsoleLineTracker;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 public class JavadocConsoleLineTracker implements IConsoleLineTracker {
 	
@@ -65,8 +70,9 @@ public class JavadocConsoleLineTracker implements IConsoleLineTracker {
 				if (files.length > 0) {
 					for (int i = 0; i < files.length; i++) {
 						IFile curr= files[0];
-						IEditorPart part= EditorUtility.openInEditor(curr, true);
-						if (part != null) {
+						IJavaElement element= JavaCore.create(curr);
+						if (element != null && element.exists()) {
+							IEditorPart part= JavaUI.openInEditor(element, true, false);
 							if (part instanceof ITextEditor) {
 								revealLine((ITextEditor) part, fLineNumber);
 							}

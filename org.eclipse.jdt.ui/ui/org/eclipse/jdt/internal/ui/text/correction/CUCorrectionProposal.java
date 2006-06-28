@@ -228,7 +228,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 				}
 				part= EditorUtility.isOpenInEditor(unit);
 				if (part == null) {
-					part= EditorUtility.openInEditor(unit, true);
+					part= JavaUI.openInEditor(unit);
 					if (part != null) {
 						document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 					}

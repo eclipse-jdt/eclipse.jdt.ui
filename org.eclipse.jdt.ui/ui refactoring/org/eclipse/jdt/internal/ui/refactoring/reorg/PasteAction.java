@@ -100,12 +100,12 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
@@ -480,7 +480,7 @@ public class PasteAction extends SelectionDispatchAction{
 
 		private IEditorPart openCu(ICompilationUnit cu) {
 			try {
-				return EditorUtility.openInEditor(cu);
+				return JavaUI.openInEditor(cu, true, true);
 			} catch (PartInitException e) {
 				JavaPlugin.log(e);
 				return null;

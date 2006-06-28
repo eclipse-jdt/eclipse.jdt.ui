@@ -33,6 +33,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddJavaDocStubOperation;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -113,7 +115,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			}
 			
 			// open the editor, forces the creation of a working copy
-			IEditorPart editor= EditorUtility.openInEditor(cu);
+			IEditorPart editor= JavaUI.openInEditor(cu);
 			
 			if (ElementValidator.check(members, getShell(), getDialogTitle(), false))
 				run(cu, members);

@@ -72,6 +72,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -83,7 +84,6 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
@@ -536,7 +536,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
 			settings.createComments= dialog.getGenerateComment();
-			IEditorPart editor= EditorUtility.openInEditor(type);
+			IEditorPart editor= JavaUI.openInEditor(type, true, false);
 			IRewriteTarget target= editor != null ? (IRewriteTarget) editor.getAdapter(IRewriteTarget.class) : null;
 			if (target != null)
 				target.beginCompoundChange();

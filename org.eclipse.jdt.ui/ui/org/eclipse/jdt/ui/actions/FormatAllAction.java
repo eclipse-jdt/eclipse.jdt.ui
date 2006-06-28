@@ -75,7 +75,6 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
@@ -295,7 +294,7 @@ public class FormatAllAction extends SelectionDispatchAction {
 			final MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, message, null);
 			
 			if (cus.length == 1) {
-				EditorUtility.openInEditor(cus[0]);
+				JavaUI.openInEditor(cus[0]);
 			}
 			
 			PlatformUI.getWorkbench().getProgressService().run(true, true, new WorkbenchRunnableAdapter(new IWorkspaceRunnable() {

@@ -16,12 +16,6 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
@@ -30,7 +24,13 @@ import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 /**
  * Abstract Action for opening a Java editor.
@@ -63,7 +63,7 @@ public abstract class OpenEditorAction extends Action {
 					JUnitMessages.OpenEditorAction_error_cannotopen_title, JUnitMessages.OpenEditorAction_error_cannotopen_message); 
 				return;
 			} 
-			textEditor= (ITextEditor)EditorUtility.openInEditor(element, fActivate);			
+			textEditor= (ITextEditor) JavaUI.openInEditor(element, fActivate, false);		
 		} catch (CoreException e) {
 			ErrorDialog.openError(getShell(), JUnitMessages.OpenEditorAction_error_dialog_title, JUnitMessages.OpenEditorAction_error_dialog_message, e.getStatus()); 
 			return;

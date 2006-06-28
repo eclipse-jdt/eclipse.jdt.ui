@@ -43,7 +43,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.examples.AddTestMarkersAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
@@ -165,7 +164,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 		
 		createMarker(cu, 0, 0, 7);
 		
-		IEditorPart part= EditorUtility.openInEditor(cu);
+		IEditorPart part= JavaUI.openInEditor(cu);
 		
 		JavaEditor javaEditor= (JavaEditor) part;
 		ISourceViewer viewer= javaEditor.getViewer();
@@ -214,7 +213,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 		int markerPos= 8;
 		createMarker(cu, 0, markerPos, 5);
 		
-		IEditorPart part= EditorUtility.openInEditor(cu);
+		IEditorPart part= JavaUI.openInEditor(cu);
 		try {
 			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 			doc.replace(0, 0, "\n"); // insert new line

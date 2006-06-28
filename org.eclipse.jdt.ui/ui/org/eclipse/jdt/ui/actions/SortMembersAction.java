@@ -47,7 +47,6 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.dialogs.SortMembersMessageDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
@@ -145,7 +144,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 			}
 			
 			// open an editor and work on a working copy
-			IEditorPart editor= EditorUtility.openInEditor(cu);
+			IEditorPart editor= JavaUI.openInEditor(cu);
 			if (editor != null) {
 				run(shell, cu, editor, dialog.isNotSortingFieldsEnabled());
 			}

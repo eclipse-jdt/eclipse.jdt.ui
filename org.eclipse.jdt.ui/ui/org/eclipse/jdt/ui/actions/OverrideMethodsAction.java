@@ -43,6 +43,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsO
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -51,7 +53,6 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.OverrideMethodDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -221,7 +222,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		IMethodBinding[] methodToOverride= (IMethodBinding[]) methods.toArray(new IMethodBinding[methods.size()]);
 
 		
-		final IEditorPart editor= EditorUtility.openInEditor(type.getCompilationUnit());
+		final IEditorPart editor= JavaUI.openInEditor(type.getCompilationUnit());
 		final IRewriteTarget target= editor != null ? (IRewriteTarget) editor.getAdapter(IRewriteTarget.class) : null;
 		if (target != null)
 			target.beginCompoundChange();

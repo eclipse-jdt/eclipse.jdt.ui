@@ -12,10 +12,9 @@ package org.eclipse.jdt.ui.examples;
 
 import java.util.HashMap;
 
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -31,7 +30,9 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 /** In plugin.xml:
     <extension
@@ -79,7 +80,7 @@ public class AddTestMarkersAction extends Action implements IActionDelegate {
 	 */
 	public void run(IAction action) {
 		try {
-			EditorUtility.openInEditor(fCompilationUnit);
+			JavaUI.openInEditor(fCompilationUnit);
 			
 			IScanner scanner= ToolFactory.createScanner(true, false, false, true);
 			scanner.setSource(fCompilationUnit.getSource().toCharArray());

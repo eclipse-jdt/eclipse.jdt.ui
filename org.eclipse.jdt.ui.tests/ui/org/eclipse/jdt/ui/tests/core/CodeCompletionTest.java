@@ -50,7 +50,6 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.ExperimentalResultCollector;
 
@@ -272,7 +271,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		ICompilationUnit cu= pack1.createCompilationUnit("MyClass.java", contents, false, null);
 
-		IEditorPart part= EditorUtility.openInEditor(cu);
+		IEditorPart part= JavaUI.openInEditor(cu);
 		try {
 			String str= "//here";
 
@@ -385,7 +384,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	private JavaContentAssistInvocationContext createContext(int offset, ICompilationUnit cu) throws PartInitException, JavaModelException {
-		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu);
+		JavaEditor editor= (JavaEditor) JavaUI.openInEditor(cu);
 		ISourceViewer viewer= editor.getViewer();
 		return new JavaContentAssistInvocationContext(viewer, offset, editor);
 	}
@@ -407,7 +406,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
 
-		IEditorPart part= EditorUtility.openInEditor(cu);
+		IEditorPart part= JavaUI.openInEditor(cu);
 		try {
 			String str= "//here";
 
@@ -469,7 +468,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
 
-		IEditorPart part= EditorUtility.openInEditor(cu);
+		IEditorPart part= JavaUI.openInEditor(cu);
 		try {
 			String str= "//here";
 
@@ -1045,7 +1044,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
 
-		IEditorPart part= EditorUtility.openInEditor(cu);
+		IEditorPart part= JavaUI.openInEditor(cu);
 		try {
 			String str= "//here";
 

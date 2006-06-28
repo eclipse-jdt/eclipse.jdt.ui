@@ -80,6 +80,7 @@ import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -91,7 +92,6 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
@@ -504,7 +504,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		else
 			cu= getterSetterFields[0].getCompilationUnit();
 		// open the editor, forces the creation of a working copy
-		run(cu, type, getterFields, setterFields, getterSetterFields, EditorUtility.openInEditor(cu), unit, elementPosition);
+		run(cu, type, getterFields, setterFields, getterSetterFields, JavaUI.openInEditor(cu), unit, elementPosition);
 	}
 
 	// ---- Java Editor --------------------------------------------------------------

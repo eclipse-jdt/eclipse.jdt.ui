@@ -994,6 +994,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testUncaughtException3() throws Exception {
+		
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1214,7 +1215,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testUncaughtExceptionToSurroundingTry() throws Exception {
-
+	
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1232,7 +1233,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-
+	
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
@@ -1241,7 +1242,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
-
+	
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.io.IOException;\n");
@@ -1304,7 +1305,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String expected3= buf.toString();		
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });		
-	}	
+	}
 	
 	public void testUncaughtExceptionOnSuper1() throws Exception {
 

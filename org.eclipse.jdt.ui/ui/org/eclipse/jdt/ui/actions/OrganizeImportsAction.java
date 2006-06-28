@@ -471,7 +471,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
 			
 			if (fEditor == null && EditorUtility.isOpenInEditor(cu) == null) {
-				IEditorPart editor= EditorUtility.openInEditor(cu);
+				IEditorPart editor= JavaUI.openInEditor(cu);
 				if (editor instanceof JavaEditor) {
 					fEditor= (JavaEditor) editor;
 				}			
