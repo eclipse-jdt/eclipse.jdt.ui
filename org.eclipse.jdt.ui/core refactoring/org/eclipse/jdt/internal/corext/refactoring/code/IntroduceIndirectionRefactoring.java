@@ -937,7 +937,7 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 		RefactoringStatus status= new RefactoringStatus();
 
 		// If the method invocation utilizes type arguments, skip this
-		// call as the new target method may have additional parameteters
+		// call as the new target method may have additional parameters
 		if (originalInvocation.typeArguments().size() > 0)
 			return createWarningAboutCall(enclosing, originalInvocation, RefactoringCoreMessages.IntroduceIndirectionRefactoring_call_warning_type_arguments);
 
