@@ -61,7 +61,7 @@ public class StorageLabelProvider extends LabelProvider {
 	public String getText(Object element) {
 		if (element instanceof IStorage) {
 			IPath path= ((IStorage)element).getFullPath();
-			if (path != null && !path.isEmpty()) {
+			if (path != null && path.segmentCount() > 0) {
 				return path.toString();
 			}
 			return ((IStorage)element).getName();
