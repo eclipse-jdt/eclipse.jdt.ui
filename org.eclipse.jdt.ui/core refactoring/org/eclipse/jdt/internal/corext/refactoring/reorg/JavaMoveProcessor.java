@@ -142,12 +142,17 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 					return change;
 				}
 			};
-			if (fCreateTargetQueries instanceof LoggedCreateTargetQueries) {
-				final LoggedCreateTargetQueries queries= (LoggedCreateTargetQueries) fCreateTargetQueries;
-				final CreateTargetExecutionLog log= queries.getCreateTargetExecutionLog();
+			CreateTargetExecutionLog log= null;
+			if (fCreateTargetQueries instanceof MonitoringCreateTargetQueries) {
+				final MonitoringCreateTargetQueries queries= (MonitoringCreateTargetQueries) fCreateTargetQueries;
+				final ICreateTargetQueries delegate= queries.getDelegate();
+				if (delegate instanceof LoggedCreateTargetQueries)
+					log= queries.getCreateTargetExecutionLog();
+			}
+			if (log != null) {
 				final Object[] selected= log.getSelectedElements();
 				for (int index= 0; index < selected.length; index++) {
-					result.add(new LoggedCreateTargetChange(selected[index], queries));
+					result.add(new LoggedCreateTargetChange(selected[index], fCreateTargetQueries));
 				}
 			}
 			Change change= fMovePolicy.createChange(pm);
@@ -243,12 +248,12 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
 			fMovePolicy= ReorgPolicyFactory.createMovePolicy(status, arguments);
 			if (fMovePolicy != null && !status.hasFatalError()) {
-				status.merge(fMovePolicy.initialize(arguments));
-				if (!status.hasFatalError()) {
-					final CreateTargetExecutionLog log= ReorgPolicyFactory.loadCreateTargetExecutionLog(status, extended);
-					if (log != null && !status.hasFatalError())
-						setCreateTargetQueries(new LoggedCreateTargetQueries(log));
+				final CreateTargetExecutionLog log= ReorgPolicyFactory.loadCreateTargetExecutionLog(status, extended);
+				if (log != null && !status.hasFatalError()) {
+					fMovePolicy.setDestinationCheck(false);
+					fCreateTargetQueries= new MonitoringCreateTargetQueries(new LoggedCreateTargetQueries(log), log);
 				}
+				status.merge(fMovePolicy.initialize(arguments));
 			}
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);

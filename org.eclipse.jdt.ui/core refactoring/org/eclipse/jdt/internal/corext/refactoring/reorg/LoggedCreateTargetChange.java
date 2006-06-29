@@ -36,7 +36,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 public final class LoggedCreateTargetChange extends JDTChange {
 
 	/** The queries */
-	private final LoggedCreateTargetQueries fQueries;
+	private final ICreateTargetQueries fQueries;
 
 	/** The selection */
 	private Object fSelection;
@@ -49,7 +49,7 @@ public final class LoggedCreateTargetChange extends JDTChange {
 	 * @param queries
 	 *            the queries
 	 */
-	public LoggedCreateTargetChange(Object selection, LoggedCreateTargetQueries queries) {
+	public LoggedCreateTargetChange(Object selection, ICreateTargetQueries queries) {
 		fSelection= selection;
 		fQueries= queries;
 	}

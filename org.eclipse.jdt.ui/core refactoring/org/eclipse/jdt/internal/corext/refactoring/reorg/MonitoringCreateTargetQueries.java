@@ -17,9 +17,9 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
  */
 public final class MonitoringCreateTargetQueries implements ICreateTargetQueries {
 
-	private final CreateTargetExecutionLog fCreationLog;
-
 	private final ICreateTargetQueries fDelegate;
+
+	private final CreateTargetExecutionLog fLog;
 
 	/**
 	 * Creates a new monitoring create target queries.
@@ -31,7 +31,7 @@ public final class MonitoringCreateTargetQueries implements ICreateTargetQueries
 	 */
 	public MonitoringCreateTargetQueries(ICreateTargetQueries delegate, CreateTargetExecutionLog log) {
 		fDelegate= delegate;
-		fCreationLog= log;
+		fLog= log;
 	}
 
 	/**
@@ -42,7 +42,7 @@ public final class MonitoringCreateTargetQueries implements ICreateTargetQueries
 
 			public Object getCreatedTarget(Object selection) {
 				final Object target= fDelegate.createNewPackageQuery().getCreatedTarget(selection);
-				fCreationLog.markAsCreated(selection, target);
+				fLog.markAsCreated(selection, target);
 				return target;
 			}
 
@@ -50,5 +50,23 @@ public final class MonitoringCreateTargetQueries implements ICreateTargetQueries
 				return fDelegate.createNewPackageQuery().getNewButtonLabel();
 			}
 		};
+	}
+
+	/**
+	 * Returns the create target execution log.
+	 * 
+	 * @return the create target execution log
+	 */
+	public CreateTargetExecutionLog getCreateTargetExecutionLog() {
+		return fLog;
+	}
+
+	/**
+	 * Returns the delegate queries.
+	 * 
+	 * @return the delegate queries
+	 */
+	public ICreateTargetQueries getDelegate() {
+		return fDelegate;
 	}
 }

@@ -70,5 +70,6 @@ public interface IReorgPolicy extends IReferenceUpdating, IQualifiedNameUpdating
 		public ICreateTargetQuery getCreateTargetQuery(ICreateTargetQueries createQueries);
 		public boolean isTextualMove();
 		public CreateTargetExecutionLog getCreateTargetExecutionLog();
+		public void setDestinationCheck(boolean check);
 	}
 }

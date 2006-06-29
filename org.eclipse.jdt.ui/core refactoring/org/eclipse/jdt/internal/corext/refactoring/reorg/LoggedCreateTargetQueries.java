@@ -73,7 +73,8 @@ public final class LoggedCreateTargetQueries implements ICreateTargetQueries {
 						final IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
 						if (!root.exists())
 							createPackageFragmentRoot(root);
-						root.createPackageFragment(fragment.getElementName(), true, new NullProgressMonitor());
+						if (!fragment.exists())
+							root.createPackageFragment(fragment.getElementName(), true, new NullProgressMonitor());
 					} catch (CoreException exception) {
 						JavaPlugin.log(exception);
 						return null;

@@ -698,31 +698,6 @@ public final class ReorgPolicyFactory {
 			return null;
 		}
 
-		private static IPackageFragment getJavaDestinationAsPackageFragment(IJavaElement javaDest) {
-			if (javaDest == null || !javaDest.exists())
-				return null;
-			if (javaDest instanceof IPackageFragment)
-				return (IPackageFragment) javaDest;
-			if (javaDest instanceof IPackageFragmentRoot)
-				return ((IPackageFragmentRoot) javaDest).getPackageFragment(""); //$NON-NLS-1$
-			if (javaDest instanceof IJavaProject) {
-				try {
-					IPackageFragmentRoot root= ReorgUtils.getCorrespondingPackageFragmentRoot((IJavaProject) javaDest);
-					if (root != null)
-						return root.getPackageFragment(""); //$NON-NLS-1$
-				} catch (JavaModelException e) {
-					// fall through
-				}
-			}
-			return (IPackageFragment) javaDest.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
-		}
-
-		private static IPackageFragment getResourceDestinationAsPackageFragment(IResource resource) {
-			if (resource instanceof IFile)
-				return getJavaDestinationAsPackageFragment(JavaCore.create(resource.getParent()));
-			return null;
-		}
-
 		private ICompilationUnit[] fCus;
 
 		private IFile[] fFiles;
@@ -870,8 +845,33 @@ public final class ReorgPolicyFactory {
 			return fFolders;
 		}
 
+		private IPackageFragment getJavaDestinationAsPackageFragment(IJavaElement javaDest) {
+			if (javaDest == null || (fCheckDestination && !javaDest.exists()))
+				return null;
+			if (javaDest instanceof IPackageFragment)
+				return (IPackageFragment) javaDest;
+			if (javaDest instanceof IPackageFragmentRoot)
+				return ((IPackageFragmentRoot) javaDest).getPackageFragment(""); //$NON-NLS-1$
+			if (javaDest instanceof IJavaProject) {
+				try {
+					IPackageFragmentRoot root= ReorgUtils.getCorrespondingPackageFragmentRoot((IJavaProject) javaDest);
+					if (root != null)
+						return root.getPackageFragment(""); //$NON-NLS-1$
+				} catch (JavaModelException e) {
+					// fall through
+				}
+			}
+			return (IPackageFragment) javaDest.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+		}
+
 		public final IJavaElement[] getJavaElements() {
 			return fCus;
+		}
+
+		private IPackageFragment getResourceDestinationAsPackageFragment(IResource resource) {
+			if (resource instanceof IFile)
+				return getJavaDestinationAsPackageFragment(JavaCore.create(resource.getParent()));
+			return null;
 		}
 
 		public final IResource[] getResources() {
@@ -995,6 +995,8 @@ public final class ReorgPolicyFactory {
 
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			Assert.isNotNull(javaElement);
+			if (!fCheckDestination)
+				return new RefactoringStatus();
 			if (!javaElement.exists())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_doesnotexist0);
 			if (javaElement instanceof IJavaModel)
@@ -1431,6 +1433,10 @@ public final class ReorgPolicyFactory {
 			}
 		}
 
+		public void setDestinationCheck(boolean check) {
+			fCheckDestination= check;
+		}
+
 		public void setFilePatterns(String patterns) {
 			Assert.isNotNull(patterns);
 			fFilePatterns= patterns;
@@ -1612,6 +1618,10 @@ public final class ReorgPolicyFactory {
 			return null;
 		}
 
+		public void setDestinationCheck(boolean check) {
+			fCheckDestination= check;
+		}
+
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			RefactoringStatus superStatus= super.verifyDestination(javaElement);
 			if (superStatus.hasFatalError())
@@ -1737,6 +1747,10 @@ public final class ReorgPolicyFactory {
 
 		public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
 			return null;
+		}
+
+		public void setDestinationCheck(boolean check) {
+			fCheckDestination= check;
 		}
 
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
@@ -1887,6 +1901,10 @@ public final class ReorgPolicyFactory {
 
 		public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
 			return null;
+		}
+
+		public void setDestinationCheck(boolean check) {
+			fCheckDestination= check;
 		}
 
 		protected RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
@@ -2117,6 +2135,10 @@ public final class ReorgPolicyFactory {
 			return null;
 		}
 
+		public void setDestinationCheck(boolean check) {
+			fCheckDestination= check;
+		}
+
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_noMoving);
 		}
@@ -2279,6 +2301,8 @@ public final class ReorgPolicyFactory {
 
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			Assert.isNotNull(javaElement);
+			if (!fCheckDestination)
+				return new RefactoringStatus();
 			if (!javaElement.exists())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot1);
 			if (javaElement instanceof IJavaModel)
@@ -2465,6 +2489,8 @@ public final class ReorgPolicyFactory {
 
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			Assert.isNotNull(javaElement);
+			if (!fCheckDestination)
+				return new RefactoringStatus();
 			if (!javaElement.exists())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot1);
 			if (javaElement instanceof IJavaModel)
@@ -2483,6 +2509,8 @@ public final class ReorgPolicyFactory {
 	private static abstract class ReorgPolicy implements IReorgPolicy {
 
 		private static final String ATTRIBUTE_DESTINATION= "destination"; //$NON-NLS-1$
+
+		protected boolean fCheckDestination= true;
 
 		private IJavaElement fJavaElementDestination;
 
@@ -2638,7 +2666,7 @@ public final class ReorgPolicyFactory {
 				if (handle != null) {
 					final IJavaElement element= JDTRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 					if (element != null) {
-						if (!element.exists())
+						if (fCheckDestination && !element.exists())
 							return ScriptableRefactoring.createInputFatalStatus(element, getProcessorId(), getRefactoringId());
 						else {
 							try {
@@ -2650,7 +2678,7 @@ public final class ReorgPolicyFactory {
 						}
 					} else {
 						final IResource resource= JDTRefactoringDescriptor.handleToResource(extended.getProject(), handle);
-						if (resource == null || !resource.exists())
+						if (resource == null || (fCheckDestination && !resource.exists()))
 							return ScriptableRefactoring.createInputFatalStatus(resource, getProcessorId(), getRefactoringId());
 						else {
 							try {
@@ -3098,6 +3126,8 @@ public final class ReorgPolicyFactory {
 
 		private RefactoringStatus recursiveVerifyDestination(IJavaElement destination) throws JavaModelException {
 			Assert.isNotNull(destination);
+			if (!fCheckDestination)
+				return new RefactoringStatus();
 			if (!destination.exists())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_doesnotexist1);
 			if (destination instanceof IJavaModel)

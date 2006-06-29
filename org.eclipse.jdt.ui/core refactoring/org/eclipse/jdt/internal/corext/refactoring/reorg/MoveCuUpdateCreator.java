@@ -224,11 +224,13 @@ public class MoveCuUpdateCreator {
 		}
 	}
 	
-	private IType[] getDestinationPackageTypes() throws JavaModelException{
+	private IType[] getDestinationPackageTypes() throws JavaModelException {
 		List types= new ArrayList();
-		ICompilationUnit[] cus= fDestination.getCompilationUnits();
-		for (int i= 0; i < cus.length; i++) {
-			types.addAll(Arrays.asList(cus[i].getAllTypes()));
+		if (fDestination.exists()) {
+			ICompilationUnit[] cus= fDestination.getCompilationUnits();
+			for (int i= 0; i < cus.length; i++) {
+				types.addAll(Arrays.asList(cus[i].getAllTypes()));
+			}
 		}
 		return (IType[]) types.toArray(new IType[types.size()]);
 	}
