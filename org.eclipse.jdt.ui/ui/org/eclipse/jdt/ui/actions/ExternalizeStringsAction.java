@@ -166,7 +166,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 				PlatformUI.getWorkbench().getProgressService().run(true, true, createRunnable(selection));
 			} catch(InvocationTargetException e) {
 				ExceptionHandler.handle(e, getShell(), 
-					ActionMessages.FindStringsToExternalizeAction_dialog_title, 
+					ActionMessages.ExternalizeStringsAction_dialog_title, 
 					ActionMessages.FindStringsToExternalizeAction_error_message); 
 				return;
 			} catch(InterruptedException e) {
@@ -282,7 +282,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 
 	private void showResults() {
 		if (noStrings())
-			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.FindStringsToExternalizeAction_noStrings); 
+			MessageDialog.openInformation(getShell(), ActionMessages.ExternalizeStringsAction_dialog_title, ActionMessages.FindStringsToExternalizeAction_noStrings); 
 		else
 			new NonNLSListDialog(getShell(), fElements, countStrings()).open();
 	}
@@ -501,7 +501,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 				}
 			} catch (JavaModelException e) {
 				ExceptionHandler.handle(e, 
-					ActionMessages.FindStringsToExternalizeAction_dialog_title, 
+					ActionMessages.ExternalizeStringsAction_dialog_title, 
 					ActionMessages.FindStringsToExternalizeAction_error_message); 
 			}
 		}
@@ -539,10 +539,6 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			this.cu= cu;
 			this.count= count;
 		}
-	}
-	
-	private String getDialogTitle() {
-		return ActionMessages.FindStringsToExternalizeAction_dialog_title; 
 	}	
 
 }
