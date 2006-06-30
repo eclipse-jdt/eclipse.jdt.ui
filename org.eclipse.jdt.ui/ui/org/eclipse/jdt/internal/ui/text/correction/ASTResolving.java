@@ -813,26 +813,26 @@ public class ASTResolving {
 		ASTNode parent= node.getParent();
 		while (parent instanceof QualifiedName) {
 			if (node.getLocationInParent() == QualifiedName.QUALIFIER_PROPERTY) {
-				return SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES;
+				return SimilarElementsRequestor.REF_TYPES;
 			}
 			node= parent;
 			parent= parent.getParent();
-			mask= SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES;
+			mask= SimilarElementsRequestor.REF_TYPES;
 		}
 		while (parent instanceof Type) {
 			if (parent instanceof QualifiedType) {
 				if (node.getLocationInParent() == QualifiedType.QUALIFIER_PROPERTY) {
-					return mask & (SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES);
+					return mask & (SimilarElementsRequestor.REF_TYPES);
 				}
-				mask&= SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES;
+				mask&= SimilarElementsRequestor.REF_TYPES;
 			} else if (parent instanceof ParameterizedType) {
 				if (node.getLocationInParent() == ParameterizedType.TYPE_ARGUMENTS_PROPERTY) {
-					return mask & SimilarElementsRequestor.REF_TYPES;
+					return mask & SimilarElementsRequestor.REF_TYPES_AND_VAR;
 				}
 				mask&= SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES;
 			} else if (parent instanceof WildcardType) {
 				if (node.getLocationInParent() == WildcardType.BOUND_PROPERTY) {
-					return mask & SimilarElementsRequestor.REF_TYPES;
+					return mask & SimilarElementsRequestor.REF_TYPES_AND_VAR;
 				}
 			}
 			node= parent;
@@ -858,7 +858,7 @@ public class ASTResolving {
 				}
 				break;
 			case ASTNode.INSTANCEOF_EXPRESSION:
-				kind= SimilarElementsRequestor.REF_TYPES  & ~SimilarElementsRequestor.VARIABLES;
+				kind= SimilarElementsRequestor.REF_TYPES;
 				break;
 			case ASTNode.THROW_STATEMENT:
 				kind= SimilarElementsRequestor.CLASSES;
@@ -877,7 +877,7 @@ public class ASTResolving {
 				}
 				break;
 			case ASTNode.TAG_ELEMENT:
-				kind= SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES;
+				kind= SimilarElementsRequestor.REF_TYPES;
 				break;
 			case ASTNode.MARKER_ANNOTATION:
 			case ASTNode.SINGLE_MEMBER_ANNOTATION:
@@ -888,11 +888,11 @@ public class ASTResolving {
 				if (((TypeParameter) parent).typeBounds().indexOf(node) > 0) {
 					kind= SimilarElementsRequestor.INTERFACES;
 				} else {
-					kind= SimilarElementsRequestor.REF_TYPES;
+					kind= SimilarElementsRequestor.REF_TYPES_AND_VAR;
 				}
 				break;
 			case ASTNode.TYPE_LITERAL:
-				kind= SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES;
+				kind= SimilarElementsRequestor.REF_TYPES;
 				break;
 			default:
 		}

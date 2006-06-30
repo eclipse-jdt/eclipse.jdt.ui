@@ -37,8 +37,9 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 	public static final int VARIABLES= 1 << 5;
 	public static final int PRIMITIVETYPES= 1 << 6;
 	public static final int VOIDTYPE= 1 << 7;
-	public static final int REF_TYPES= CLASSES | INTERFACES | ENUMS | ANNOTATIONS | VARIABLES;
-	public static final int ALL_TYPES= PRIMITIVETYPES | REF_TYPES;
+	public static final int REF_TYPES= CLASSES | INTERFACES | ENUMS | ANNOTATIONS;
+	public static final int REF_TYPES_AND_VAR= REF_TYPES | VARIABLES;
+	public static final int ALL_TYPES= PRIMITIVETYPES | REF_TYPES_AND_VAR;
 
 	private static final String[] PRIM_TYPES= { "boolean", "byte", "char", "short", "int", "long", "float", "double" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 

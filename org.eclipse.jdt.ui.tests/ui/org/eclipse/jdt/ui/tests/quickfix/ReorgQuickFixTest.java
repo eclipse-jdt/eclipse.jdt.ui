@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectMainTypeNameProposal;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectPackageDeclarationProposal;
+import org.eclipse.jdt.internal.ui.text.correction.NewCUCompletionUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -887,9 +888,10 @@ public class ReorgQuickFixTest extends QuickFixTest {
 			
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 3);
+			assertNumberOfProposals(proposals, 6);
 			assertCorrectLabels(proposals);
 			
+			int nCreateCU= 0;
 			for (int i= 0; i < proposals.size(); i++) {
 				ChangeCorrectionProposal curr=  (ChangeCorrectionProposal) proposals.get(i);
 				if (curr.getChange() instanceof AddToClasspathChange) {
@@ -898,8 +900,11 @@ public class ReorgQuickFixTest extends QuickFixTest {
 					IClasspathEntry[] newClasspath= cu.getJavaProject().getRawClasspath();
 					assertEquals(prevClasspath.length + 1, newClasspath.length);
 					assertEquals(otherProject.getPath(), newClasspath[prevClasspath.length].getPath());
+				} else if (curr instanceof NewCUCompletionUsingWizardProposal) {
+					nCreateCU++;
 				}
 			}
+			assertEquals(3, nCreateCU);
 		} finally {
 			JavaProjectHelper.delete(otherProject);
 		}
@@ -923,9 +928,10 @@ public class ReorgQuickFixTest extends QuickFixTest {
 			
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 3);
+			assertNumberOfProposals(proposals, 6);
 			assertCorrectLabels(proposals);
 			
+			int nCreateCU= 0;
 			for (int i= 0; i < proposals.size(); i++) {
 				ChangeCorrectionProposal curr=  (ChangeCorrectionProposal) proposals.get(i);
 				if (curr.getChange() instanceof AddToClasspathChange) {
@@ -933,8 +939,11 @@ public class ReorgQuickFixTest extends QuickFixTest {
 					IClasspathEntry[] newClasspath= cu.getJavaProject().getRawClasspath();
 					assertEquals(prevClasspath.length + 1, newClasspath.length);
 					assertEquals(otherRoot.getPath(), newClasspath[prevClasspath.length].getPath());
+				} else if (curr instanceof NewCUCompletionUsingWizardProposal) {
+					nCreateCU++;
 				}
 			}
+			assertEquals(3, nCreateCU);
 		} finally {
 			JavaProjectHelper.delete(otherProject);
 		}
@@ -960,7 +969,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 			
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 4);
+			assertNumberOfProposals(proposals, 7);
 			assertCorrectLabels(proposals);
 		} finally {
 			JavaProjectHelper.delete(otherProject);
@@ -1011,9 +1020,10 @@ public class ReorgQuickFixTest extends QuickFixTest {
 			
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 3);
+			assertNumberOfProposals(proposals, 6);
 			assertCorrectLabels(proposals);
 			
+			int nCreateCU= 0;
 			for (int i= 0; i < proposals.size(); i++) {
 				ChangeCorrectionProposal curr=  (ChangeCorrectionProposal) proposals.get(i);
 				if (curr.getChange() instanceof AddToClasspathChange) {
@@ -1021,8 +1031,11 @@ public class ReorgQuickFixTest extends QuickFixTest {
 					IClasspathEntry[] newClasspath= cu.getJavaProject().getRawClasspath();
 					assertEquals(prevClasspath.length + 1, newClasspath.length);
 					assertEquals(containerPath, newClasspath[prevClasspath.length].getPath());
+				} else if (curr instanceof NewCUCompletionUsingWizardProposal) {
+					nCreateCU++;
 				}
 			}
+			assertEquals(3, nCreateCU);
 		} finally {
 			JavaProjectHelper.delete(otherProject);
 		}

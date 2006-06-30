@@ -200,17 +200,17 @@ public class UtilitiesTest extends QuickFixTest {
 				SimilarElementsRequestor.ALL_TYPES,
 				SimilarElementsRequestor.ALL_TYPES,
 				SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES, // X<String>
-				SimilarElementsRequestor.REF_TYPES,
-				SimilarElementsRequestor.REF_TYPES,
+				SimilarElementsRequestor.REF_TYPES_AND_VAR,
+				SimilarElementsRequestor.REF_TYPES_AND_VAR,
 				
-				SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES, // E<String>.X
+				SimilarElementsRequestor.REF_TYPES, // E<String>.X
 				SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES, //X<String>.A
 				SimilarElementsRequestor.CLASSES, //new X();
 				SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES, //new X() { };
 				SimilarElementsRequestor.ALL_TYPES,
 				
-				SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES,
-				SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES,		
+				SimilarElementsRequestor.REF_TYPES,
+				SimilarElementsRequestor.REF_TYPES,		
 		};
 		
 		CompilationUnit astRoot= getASTRoot(cu);

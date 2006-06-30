@@ -146,20 +146,20 @@ public class UnresolvedElementsSubProcessor {
 					}
 				} else if (parent instanceof SimpleType) {
 					suggestVariableProposals= false;
-					typeKind= SimilarElementsRequestor.REF_TYPES;
+					typeKind= SimilarElementsRequestor.REF_TYPES_AND_VAR;
 				} else if (parent instanceof QualifiedName) {
 					Name qualifier= ((QualifiedName) parent).getQualifier();
 					if (qualifier != node) {
 						binding= qualifier.resolveTypeBinding();
 					} else {
-						typeKind= SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES;
+						typeKind= SimilarElementsRequestor.REF_TYPES;
 					}
 					ASTNode outerParent= parent.getParent();
 					while (outerParent instanceof QualifiedName) {
 						outerParent= outerParent.getParent();
 					}
 					if (outerParent instanceof SimpleType) {
-						typeKind= SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES;
+						typeKind= SimilarElementsRequestor.REF_TYPES;
 						suggestVariableProposals= false;
 					}
 				} else if (locationInParent == SwitchCase.EXPRESSION_PROPERTY) {
@@ -179,11 +179,11 @@ public class UnresolvedElementsSubProcessor {
 					binding= qualifierBinding;
 				} else {
 					node= qualifierName.getQualifier();
-					typeKind= SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES;
+					typeKind= SimilarElementsRequestor.REF_TYPES;
 					suggestVariableProposals= node.isSimpleName();
 				}
 				if (selectedNode.getParent() instanceof SimpleType) {
-					typeKind= SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES;
+					typeKind= SimilarElementsRequestor.REF_TYPES;
 					suggestVariableProposals= false;
 				}
 				break;
@@ -667,7 +667,7 @@ public class UnresolvedElementsSubProcessor {
 		return name.length() == 1 && Character.isUpperCase(name.charAt(0));
 	}
 
-	private static void addNewTypeProposals(ICompilationUnit cu, Name refNode, int kind, int relevance, Collection proposals) throws JavaModelException {
+	public static void addNewTypeProposals(ICompilationUnit cu, Name refNode, int kind, int relevance, Collection proposals) throws JavaModelException {
 		Name node= refNode;
 		do {
 			String typeName= ASTNodes.getSimpleNameIdentifier(node);
