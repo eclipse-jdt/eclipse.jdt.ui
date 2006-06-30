@@ -265,6 +265,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.find.strings.to.externalize"</code>).
 	 * 
 	 * @since 3.0
+	 * @deprecated Use {@link IJavaEditorActionDefinitionIds#EXTERNALIZE_STRINGS} instead
 	 */
 	public static final String FIND_STRINGS_TO_EXTERNALIZE= "org.eclipse.jdt.ui.edit.text.java.find.strings.to.externalize"; //$NON-NLS-1$
 	

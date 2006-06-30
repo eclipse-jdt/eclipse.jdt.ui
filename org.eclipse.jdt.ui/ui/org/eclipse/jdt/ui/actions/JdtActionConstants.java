@@ -235,6 +235,8 @@ public class JdtActionConstants {
 	/**
 	 * Source menu: name of standard Find Strings to Externalize global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.FindStringsToExternalize"</code>).
+	 * 
+	 * @deprecated Use {@link JdtActionConstants#EXTERNALIZE_STRINGS} instead
 	 */
 	public static final String FIND_STRINGS_TO_EXTERNALIZE= "org.eclipse.jdt.ui.actions.FindStringsToExternalize"; //$NON-NLS-1$
 	

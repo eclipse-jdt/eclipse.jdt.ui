@@ -82,6 +82,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * </p>
  *
  * @since 2.0
+ * @deprecated use {@link ExternalizeStringsAction} instead
  */
 public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 
