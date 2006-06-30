@@ -260,7 +260,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	}
 
 	public static void initDefaults(IPreferenceStore store) {
-		store.setDefault(SRCBIN_FOLDERS_IN_NEWPROJ, false);
+		store.setDefault(SRCBIN_FOLDERS_IN_NEWPROJ, true);
 		store.setDefault(SRCBIN_SRCNAME, "src"); //$NON-NLS-1$
 		store.setDefault(SRCBIN_BINNAME, "bin"); //$NON-NLS-1$
 		
