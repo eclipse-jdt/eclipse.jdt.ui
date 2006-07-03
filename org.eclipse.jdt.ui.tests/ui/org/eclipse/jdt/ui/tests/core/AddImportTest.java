@@ -1179,8 +1179,28 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		String[] addedImports= assertImportQualifierAsExpected(cu, "pack1.E1.E2.E22", "pack1.E1.E2.E22", new String[0], 99, 99);
-		assertEqualStringsIgnoreOrder(addedImports, new String[0]);
+		String[] addedImports= assertImportQualifierAsExpected(cu, "pack1.E1.E2.E22", "E22", new String[0], 99, 99);
+		assertEqualStringsIgnoreOrder(addedImports, new String[] {"pack1.E1.E2.E22"});
+	}
+	
+	public void testAddImportContextSensitive_Bug139000() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        //<-insert\n");
+		buf.append("    }\n");
+		buf.append("    class E2<T> {\n");
+		buf.append("        public class E3 {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		String[] addedImports= assertImportQualifierAsExpected(cu, "pack1.E1.E2.E3", "E3", new String[0], 99, 99);
+		assertEqualStringsIgnoreOrder(addedImports, new String[] {"pack1.E1.E2.E3"});
 	}
 	
 	public void testAddImportContextSensitive10() throws Exception {

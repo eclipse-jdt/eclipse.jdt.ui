@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
@@ -32,7 +33,7 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
- * This {@link ImportRewriteContext} is aware of all the types visible in 
+ * This <code>ImportRewriteContext</code> is aware of all the types visible in 
  * <code>compilationUnit</code> at <code>position</code>.
  */
 public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
@@ -87,8 +88,13 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 				if (isSameType(binding, qualifier, name)) {
 					return RES_NAME_FOUND;
 				} else {
-					if (containsDeclaration(binding, qualifier, name))
-						return RES_NAME_CONFLICT;
+					ITypeBinding decl= containingDeclaration(binding, qualifier, name);
+					while (decl != null && !decl.equals(binding)) {
+						int modifiers= decl.getModifiers();
+						if (Modifier.isPrivate(modifiers))
+							return RES_NAME_CONFLICT;
+						decl= decl.getDeclaringClass();
+					}
 				}
 			}
 		}
@@ -144,19 +150,20 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 		return false;
 	}
 	
-	private boolean containsDeclaration(ITypeBinding binding, String qualifier, String name) {
+	private ITypeBinding containingDeclaration(ITypeBinding binding, String qualifier, String name) {
 		ITypeBinding[] declaredTypes= binding.getDeclaredTypes();
 		for (int i= 0; i < declaredTypes.length; i++) {
 			ITypeBinding childBinding= declaredTypes[i];
 			if (isSameType(childBinding, qualifier, name)) {
-				return true;
+				return childBinding;
 			} else {
-				if (containsDeclaration(childBinding, qualifier, name)) {
-					return true;
+				ITypeBinding result= containingDeclaration(childBinding, qualifier, name);
+				if (result != null) {
+					return result;
 				}
 			}
 		}
-		return false;
+		return null;
 	}
 
 	private boolean isConflicting(IBinding binding, String name) {
