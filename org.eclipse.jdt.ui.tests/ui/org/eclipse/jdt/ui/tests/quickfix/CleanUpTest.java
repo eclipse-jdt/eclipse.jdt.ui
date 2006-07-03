@@ -3023,6 +3023,48 @@ public class CleanUpTest extends QuickFixTest {
 
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
+	
+	public void testCodeStyle_Bug140565() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.*;\n");
+		buf.append("public class E1 {\n");
+		buf.append("        static class ClassA {static ClassB B;}\n");
+		buf.append("        static class ClassB {static ClassC C;}\n");
+		buf.append("        static class ClassC {static ClassD D;}\n");
+		buf.append("        static class ClassD {}\n");
+		buf.append("\n");
+		buf.append("        public void foo() {\n");
+		buf.append("                ClassA.B.C.D.toString();\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+
+		ICleanUp cleanUp1= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
+		ICleanUp cleanUp2= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_IMPORTS);
+		refactoring.addCleanUp(cleanUp1);
+		refactoring.addCleanUp(cleanUp2);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("        static class ClassA {static ClassB B;}\n");
+		buf.append("        static class ClassB {static ClassC C;}\n");
+		buf.append("        static class ClassC {static ClassD D;}\n");
+		buf.append("        static class ClassD {}\n");
+		buf.append("\n");
+		buf.append("        public void foo() {\n");
+		buf.append("                ClassB.C.D.toString();\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}		
 
 	public void testJava50ForLoop01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -3715,7 +3757,6 @@ public class CleanUpTest extends QuickFixTest {
 		
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
-	
 	
 	public void testSerialVersion01() throws Exception {
 		

@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.text.edits.TextEditGroup;
@@ -393,7 +395,7 @@ public class CodeStyleFix extends AbstractFix {
 		if (!isNonStaticAccess(problem))
 			return null;
 		
-		ToStaticAccessOperation operations[]= createNonStaticAccessResolveOperations(compilationUnit, problem);
+		ToStaticAccessOperation operations[]= createToStaticAccessOperations(compilationUnit, problem);
 		if (operations == null)
 			return null;
 
@@ -424,7 +426,7 @@ public class CodeStyleFix extends AbstractFix {
 		if (!isIndirectStaticAccess(problem))
 			return null;
 		
-		ToStaticAccessOperation operations[]= createNonStaticAccessResolveOperations(compilationUnit, problem);
+		ToStaticAccessOperation operations[]= createToStaticAccessOperations(compilationUnit, problem);
 		if (operations == null)
 			return null;
 
@@ -451,20 +453,12 @@ public class CodeStyleFix extends AbstractFix {
 			compilationUnit.accept(codeStyleVisitor);
 		}
 		
-		if (changeNonStaticAccessToStatic || changeIndirectStaticAccessToDirect) {
-			IProblem[] problems= compilationUnit.getProblems();
-			for (int i= 0; i < problems.length; i++) {
-				IProblemLocation problem= new ProblemLocation(problems[i]);
-				boolean isNonStaticAccess= changeNonStaticAccessToStatic && isNonStaticAccess(problem);
-				boolean isIndirectStaticAccess= changeIndirectStaticAccessToDirect && isIndirectStaticAccess(problem);
-				if (isNonStaticAccess || isIndirectStaticAccess) {
-					ToStaticAccessOperation[] nonStaticAccessInformation= createNonStaticAccessResolveOperations(compilationUnit, problem);
-					if (nonStaticAccessInformation != null) {
-						operations.add(nonStaticAccessInformation[0]);
-					}
-				}
-			}
-		}
+		IProblem[] problems= compilationUnit.getProblems();
+		IProblemLocation[] locations= new IProblemLocation[problems.length];
+		for (int i= 0; i < problems.length; i++) {
+	        locations[i]= new ProblemLocation(problems[i]);
+        }
+		addToStaticAccessOperations(compilationUnit, locations, changeNonStaticAccessToStatic, changeIndirectStaticAccessToDirect, operations);
 		
 		if (removeFieldQualifier || removeMethodQualifier) {
 			ThisQualifierVisitor visitor= new ThisQualifierVisitor(removeFieldQualifier, removeMethodQualifier, compilationUnit, operations);
@@ -498,25 +492,36 @@ public class CodeStyleFix extends AbstractFix {
 			}
 		}
 
-		if (changeNonStaticAccessToStatic || changeIndirectStaticAccessToDirect) {
-			for (int i= 0; i < problems.length; i++) {
-				IProblemLocation problem= problems[i];
-				boolean isNonStaticAccess= changeNonStaticAccessToStatic && isNonStaticAccess(problem);
-				boolean isIndirectStaticAccess= changeIndirectStaticAccessToDirect && isIndirectStaticAccess(problem);
-				if (isNonStaticAccess || isIndirectStaticAccess) {
-					ToStaticAccessOperation[] nonStaticAccessInformation= createNonStaticAccessResolveOperations(compilationUnit, problem);
-					if (nonStaticAccessInformation != null) {
-						operations.add(nonStaticAccessInformation[0]);
-					}
-				}
-			}
-		}
+		addToStaticAccessOperations(compilationUnit, problems, changeNonStaticAccessToStatic, changeIndirectStaticAccessToDirect, operations);
 
 		if (operations.isEmpty())
 			return null;
 		
 		IFixRewriteOperation[] operationsArray= (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]);
 		return new CodeStyleFix("", compilationUnit, operationsArray); //$NON-NLS-1$
+	}
+	
+	private static void addToStaticAccessOperations(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean changeNonStaticAccessToStatic, boolean changeIndirectStaticAccessToDirect, List result) {
+	    Hashtable nonStaticAccessOps= new Hashtable();
+		if (changeNonStaticAccessToStatic || changeIndirectStaticAccessToDirect) {
+			for (int i= 0; i < problems.length; i++) {
+				IProblemLocation problem= problems[i];
+				boolean isNonStaticAccess= changeNonStaticAccessToStatic && isNonStaticAccess(problem);
+				boolean isIndirectStaticAccess= changeIndirectStaticAccessToDirect && isIndirectStaticAccess(problem);
+				if (isNonStaticAccess || isIndirectStaticAccess) {
+					ToStaticAccessOperation[] nonStaticAccessInformation= createToStaticAccessOperations(compilationUnit, problem);
+					if (nonStaticAccessInformation != null) {
+						ToStaticAccessOperation op= nonStaticAccessInformation[0];
+						nonStaticAccessOps.put(op.fQualifier, op);
+					}
+				}
+			}
+		}
+		for (Iterator iter= nonStaticAccessOps.values().iterator(); iter.hasNext();) {
+			ToStaticAccessOperation op= (ToStaticAccessOperation)iter.next();
+			if (!nonStaticAccessOps.containsKey(op.fQualifier.getParent()))
+				result.add(op);
+		}
 	}
 
 	private static boolean isIndirectStaticAccess(IProblemLocation problem) {
@@ -529,7 +534,7 @@ public class CodeStyleFix extends AbstractFix {
 				|| problem.getProblemId() == IProblem.NonStaticAccessToStaticMethod);
 	}
 	
-	private static ToStaticAccessOperation[] createNonStaticAccessResolveOperations(CompilationUnit astRoot, IProblemLocation problem) {
+	private static ToStaticAccessOperation[] createToStaticAccessOperations(CompilationUnit astRoot, IProblemLocation problem) {
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (selectedNode == null) {
 			return null;
