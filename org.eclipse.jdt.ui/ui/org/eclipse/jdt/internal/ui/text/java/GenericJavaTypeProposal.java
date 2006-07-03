@@ -197,16 +197,23 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 					StringBuffer buffer= createParameterList(typeArgumentProposals, offsets, lengths);
 
 					// set the generic type as replacement string
+					boolean insertClosingParenthesis= trigger == '(' && autocloseBrackets();
+					if (insertClosingParenthesis)
+						updateReplacementWithParentheses(buffer);
 					super.setReplacementString(buffer.toString());
+
 					// add import & remove package, update replacement offset
 					super.apply(document, '\0', offset);
 
 					if (getTextViewer() != null) {
 						if (hasAmbiguousProposals(typeArgumentProposals)) {
 							adaptOffsets(offsets, buffer);
-							installLinkedMode(document, offsets, lengths, typeArgumentProposals);
+							installLinkedMode(document, offsets, lengths, typeArgumentProposals, insertClosingParenthesis);
 						} else {
-							fSelectedRegion= new Region(getReplacementOffset() + getReplacementString().length(), 0);
+							if (insertClosingParenthesis)
+								setUpLinkedMode(document, ')');
+							else
+								fSelectedRegion= new Region(getReplacementOffset() + getReplacementString().length(), 0);
 						}
 					}
 
@@ -612,7 +619,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 		 * No argument list if there were any special triggers (for example a period to qualify an
 		 * inner type).
 		 */
-		if (trigger != '\0' && trigger != '<')
+		if (trigger != '\0' && trigger != '<' && trigger != '(')
 			return false;
 		
 		/* No argument list if the completion is empty (already within the argument list). */
@@ -674,7 +681,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 		return buffer;
 	}
 
-	private void installLinkedMode(IDocument document, int[] offsets, int[] lengths, TypeArgumentProposal[] typeArgumentProposals) {
+	private void installLinkedMode(IDocument document, int[] offsets, int[] lengths, TypeArgumentProposal[] typeArgumentProposals, boolean withParentheses) {
 		int replacementOffset= getReplacementOffset();
 		String replacementString= getReplacementString();
 
@@ -683,9 +690,14 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 			for (int i= 0; i != offsets.length; i++) {
 				if (typeArgumentProposals[i].isAmbiguous()) {
 					LinkedPositionGroup group= new LinkedPositionGroup();
-					group.addPosition(new LinkedPosition(document, replacementOffset + offsets[i], lengths[i], LinkedPositionGroup.NO_STOP));
+					group.addPosition(new LinkedPosition(document, replacementOffset + offsets[i], lengths[i]));
 					model.addGroup(group);
 				}
+			}
+			if (withParentheses) {
+				LinkedPositionGroup group= new LinkedPositionGroup();
+				group.addPosition(new LinkedPosition(document, replacementOffset + getCursorPosition(), 0));
+				model.addGroup(group);
 			}
 
 			model.forceInstall();
@@ -695,7 +707,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 			}
 
 			LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());
-			ui.setExitPolicy(new ExitPolicy('>', document));
+			ui.setExitPolicy(new ExitPolicy(withParentheses ? ')' : '>', document));
 			ui.setExitPosition(getTextViewer(), replacementOffset + replacementString.length(), 0, Integer.MAX_VALUE);
 			ui.setDoContextInfo(true);
 			ui.enter();

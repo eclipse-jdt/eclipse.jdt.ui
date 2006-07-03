@@ -181,7 +181,9 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		try {
 			boolean insertClosingParenthesis= trigger == '(' && autocloseBrackets();
 			if (insertClosingParenthesis) {
-				updateReplacementWithParentheses();
+				StringBuffer replacement= new StringBuffer(getReplacementString());
+				updateReplacementWithParentheses(replacement);
+				setReplacementString(replacement.toString());
 				trigger= '\0';
 			}
 			
@@ -204,8 +206,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		}
 	}
 
-	private void updateReplacementWithParentheses() {
-		StringBuffer replacement= new StringBuffer(getReplacementString());
+	protected void updateReplacementWithParentheses(StringBuffer replacement) {
 		FormatterPrefs prefs= getFormatterPrefs();
 
 		if (prefs.beforeOpeningParen)
@@ -222,8 +223,6 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 			replacement.append(SPACE);
 		
 		replacement.append(RPAREN);
-		
-		setReplacementString(replacement.toString());
 	}
 
 	/**
