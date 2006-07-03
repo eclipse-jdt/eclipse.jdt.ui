@@ -46,9 +46,9 @@ public class TrayLabelProvider extends LabelProvider implements IColorProvider {
 	}
 	
 	public String getText(Object obj) {
-		if (obj instanceof DynamicBindingProperty && fViewerElement instanceof Binding) {
+		if (obj instanceof DynamicBindingProperty) {
 			DynamicBindingProperty dynamicBindingProperty= (DynamicBindingProperty) obj;
-			dynamicBindingProperty.setViewerElement((Binding) fViewerElement);
+			dynamicBindingProperty.setViewerElement(fViewerElement instanceof Binding ? (Binding) fViewerElement : null);
 			return dynamicBindingProperty.getLabel();
 		} else if (obj instanceof DynamicAttributeProperty) {
 			DynamicAttributeProperty dynamicAttributeProperty= (DynamicAttributeProperty) obj;
@@ -64,9 +64,9 @@ public class TrayLabelProvider extends LabelProvider implements IColorProvider {
 	}
 	
 	public Image getImage(Object obj) {
-		if (obj instanceof DynamicBindingProperty && fViewerElement instanceof Binding) {
+		if (obj instanceof DynamicBindingProperty) {
 			DynamicBindingProperty dynamicBindingProperty= (DynamicBindingProperty) obj;
-			dynamicBindingProperty.setViewerElement((Binding) fViewerElement);
+			dynamicBindingProperty.setViewerElement(fViewerElement instanceof Binding ? (Binding) fViewerElement : null);
 			return dynamicBindingProperty.getImage();
 		} else if (obj instanceof DynamicAttributeProperty) {
 			DynamicAttributeProperty dynamicAttributeProperty= (DynamicAttributeProperty) obj;
@@ -95,10 +95,11 @@ public class TrayLabelProvider extends LabelProvider implements IColorProvider {
 			return fBlue;
 			
 		} else if (element instanceof ExceptionAttribute) {
-			if (element instanceof DynamicBindingProperty && fViewerElement instanceof Binding)
-				((DynamicBindingProperty) element).setViewerElement((Binding) fViewerElement);
-			else if (element instanceof DynamicAttributeProperty)
+			if (element instanceof DynamicBindingProperty) {
+				((DynamicBindingProperty) element).setViewerElement(fViewerElement instanceof Binding ? (Binding) fViewerElement : null);
+			} else if (element instanceof DynamicAttributeProperty) {
 				((DynamicAttributeProperty) element).setViewerElement(fViewerElement);
+			}
 			
 			if (((ExceptionAttribute) element).getException() == null)
 //				return null; //Bug 75022: Does not work when label is updated (retains old color, doesn't get default)
