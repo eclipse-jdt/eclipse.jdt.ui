@@ -147,11 +147,23 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		private AddSourceFolderWizard fAddSourceFolderWizard;
 		private IJavaProject fSelectedProject;
 		private final boolean fIsLinked;
+		private final IPath fOutputLocation;
 		
-		public CreateSourceFolderAction(boolean isLinked) {
+		public CreateSourceFolderAction(boolean isLinked, IPath outputLocation) {
 			fIsLinked= isLinked;
+			fOutputLocation= outputLocation;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
+		protected IPath getOutputLocation(IJavaProject javaProject) {
+			if (fOutputLocation != null)
+				return fOutputLocation;
+			
+			return super.getOutputLocation(javaProject);
+		}
+		
 		/**
 		 * {@inheritDoc}
 		 */
@@ -181,9 +193,13 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     }
 		
     public static class CreateLocalSourceFolderAction extends CreateSourceFolderAction {
+    	
+    	public CreateLocalSourceFolderAction() {
+    		this(null);
+		}
 
-		public CreateLocalSourceFolderAction() {
-			super(false);
+		public CreateLocalSourceFolderAction(IPath outputLocation) {
+			super(false, outputLocation);
 			setText(ActionMessages.OpenNewSourceFolderWizardAction_text2); 
     		setDescription(ActionMessages.OpenNewSourceFolderWizardAction_description); 
     		setToolTipText(ActionMessages.OpenNewSourceFolderWizardAction_tooltip); 
@@ -195,7 +211,11 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     public static class CreateLinkedSourceFolderAction extends CreateSourceFolderAction {
     	
     	public CreateLinkedSourceFolderAction() {
-    		super(true);
+    		this(null);
+    	}
+    	
+    	public CreateLinkedSourceFolderAction(IPath outputLocation) {
+    		super(true, outputLocation);
 			setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_label); 
     		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_tooltip);
     		setImageDescriptor(JavaPluginImages.DESC_ELCL_ADD_LINKED_SOURCE_TO_BUILDPATH);

@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IResource;
 
@@ -27,11 +28,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.GenerateBuildPathActionGroup.CreateLocalSourceFolderAction;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 public class CreateFolderOperation extends ClasspathModifierOperation {
 	
 	private final IClasspathModifierListener fListener;
 	private final IClasspathInformationProvider fCPInformationProvider;
+	private final StringDialogField fOutputLocation;
 
     /**
      * Creates a new <code>AddFolderOperation</code>.
@@ -44,17 +47,18 @@ public class CreateFolderOperation extends ClasspathModifierOperation {
      * @see IClasspathInformationProvider
      * @see ClasspathModifier
      */
-	public CreateFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
+	public CreateFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider, StringDialogField outputLocation) {
 		super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_tooltip, IClasspathInformationProvider.CREATE_FOLDER);
 		fListener= listener;
 		fCPInformationProvider= informationProvider;
+		fOutputLocation= outputLocation;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-		CreateLocalSourceFolderAction action= new CreateLocalSourceFolderAction();
+		CreateLocalSourceFolderAction action= new CreateLocalSourceFolderAction(new Path(fOutputLocation.getText()).makeAbsolute());
 		action.selectionChanged(new StructuredSelection(fCPInformationProvider.getJavaProject()));
 		action.run();
 		IPackageFragmentRoot createdElement= (IPackageFragmentRoot)action.getCreatedElement();

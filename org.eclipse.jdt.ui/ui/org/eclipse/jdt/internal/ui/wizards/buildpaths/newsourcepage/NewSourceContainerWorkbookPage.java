@@ -175,7 +175,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         excomposite.setClient(fHintTextGroup.createControl(excomposite));
         fUseFolderOutputs.doFillIntoGrid(body, 1);
 		
-	    final DialogPackageExplorerActionGroup actionGroup= new DialogPackageExplorerActionGroup(fHintTextGroup, this);
+	    final DialogPackageExplorerActionGroup actionGroup= new DialogPackageExplorerActionGroup(fHintTextGroup, this, fOutputLocationField);
 		   
 		
         fUseFolderOutputs.setDialogFieldListener(new IDialogFieldListener() {

@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IResource;
 
@@ -29,6 +30,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.GenerateBuildPathActionGroup.CreateLinkedSourceFolderAction;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /**
  * Operation create a link to a source folder.
@@ -39,6 +41,7 @@ public class LinkedSourceFolderOperation extends ClasspathModifierOperation {
 
     private IClasspathModifierListener fListener;
 	private IClasspathInformationProvider fCPInformationProvider;
+	private final StringDialogField fOutputLocation;
 
 	/**
      * Constructor
@@ -51,10 +54,11 @@ public class LinkedSourceFolderOperation extends ClasspathModifierOperation {
      * @see IClasspathInformationProvider
      * @see ClasspathModifier
      */
-    public LinkedSourceFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
+    public LinkedSourceFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider, StringDialogField outputLocation) {
         super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_tooltip, IClasspathInformationProvider.CREATE_LINK); 
 		fListener= listener;
 		fCPInformationProvider= informationProvider;
+		fOutputLocation= outputLocation;
     }
     
     /**
@@ -66,7 +70,7 @@ public class LinkedSourceFolderOperation extends ClasspathModifierOperation {
      * @param monitor a progress monitor, can be <code>null</code>
      */
     public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-    	CreateLinkedSourceFolderAction action= new CreateLinkedSourceFolderAction();
+    	CreateLinkedSourceFolderAction action= new CreateLinkedSourceFolderAction(new Path(fOutputLocation.getText()).makeAbsolute());
 		action.selectionChanged(new StructuredSelection(fCPInformationProvider.getJavaProject()));
 		action.run();
 		IPackageFragmentRoot createdElement= (IPackageFragmentRoot)action.getCreatedElement();

@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.util.ViewerPane;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /**
  * Action group for the package explorer. Creates and manages a set 
@@ -184,9 +185,10 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * to the operations
      * @param listener a listener for the changes on classpath entries, that is 
      * the listener will be notified whenever a classpath entry changed.
+     * @param outputLocationField 
      * @see IClasspathModifierListener
      */
-    public DialogPackageExplorerActionGroup(IClasspathInformationProvider provider, IClasspathModifierListener listener) {
+    public DialogPackageExplorerActionGroup(IClasspathInformationProvider provider, IClasspathModifierListener listener, StringDialogField outputLocationField) {
         super();
         fLastType= UNDEFINED;
         fListeners= new ArrayList();
@@ -230,12 +232,12 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit.label"), //$NON-NLS-1$
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
                 IClasspathInformationProvider.EDIT);*/
-        op= new LinkedSourceFolderOperation(listener, provider);
+        op= new LinkedSourceFolderOperation(listener, provider, outputLocationField);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_ADD_LINKED_SOURCE_TO_BUILDPATH, JavaPluginImages.DESC_DLCL_ADD_LINKED_SOURCE_TO_BUILDPATH, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_label, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_tooltip, IAction.AS_PUSH_BUTTON), 
                 5);
-        op= new CreateFolderOperation(listener, provider);
+        op= new CreateFolderOperation(listener, provider, outputLocationField);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_OBJS_PACKFRAG_ROOT, null, 
         		NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_CreateSrcFolder_label, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_CreateSrcFolder_tooltip
         		, IAction.AS_PUSH_BUTTON), 6);
