@@ -105,6 +105,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * The invocation context of this completion proposal.
 	 */
 	protected final JavaContentAssistInvocationContext fInvocationContext;
+	protected int fContextInformationPosition;
 	
 	public LazyJavaCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
 		Assert.isNotNull(proposal);
@@ -423,5 +424,14 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 			fFormatterPrefs= new FormatterPrefs(cu == null ? null : cu.getJavaProject());
 		}
 		return fFormatterPrefs;
+	}
+
+	/**
+	 * Overrides the default context information position. Ignored if set to zero.
+	 * 
+	 * @param contextInformationPosition the replaced position.
+	 */
+	public void setContextInformationPosition(int contextInformationPosition) {
+		fContextInformationPosition= contextInformationPosition;
 	}
 }

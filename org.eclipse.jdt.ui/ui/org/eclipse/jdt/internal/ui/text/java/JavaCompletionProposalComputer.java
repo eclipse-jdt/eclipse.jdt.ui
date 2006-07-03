@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,7 +25,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -37,11 +35,9 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
-import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
-
-import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
 
 /**
  * Computes Java completion proposals and context infos.
@@ -107,51 +103,8 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 	public JavaCompletionProposalComputer() {
 	}
 
-	private boolean looksLikeMethod(JavaCodeReader reader) throws IOException {
-		int curr= reader.read();
-		while (curr != JavaCodeReader.EOF && Character.isWhitespace((char) curr))
-			curr= reader.read();
-
-		if (curr == JavaCodeReader.EOF)
-			return false;
-
-		return Character.isJavaIdentifierPart((char) curr) || Character.isJavaIdentifierStart((char) curr);
-	}
-
-	private int guessContextInformationPosition(ContentAssistInvocationContext context) {
-		int contextPosition= context.getInvocationOffset();
-
-		IDocument document= context.getDocument();
-
-		try {
-
-			JavaCodeReader reader= new JavaCodeReader();
-			reader.configureBackwardReader(document, contextPosition, true, true);
-
-			int nestingLevel= 0;
-
-			int curr= reader.read();
-			while (curr != JavaCodeReader.EOF) {
-
-				if (')' == (char) curr)
-					++ nestingLevel;
-
-				else if ('(' == (char) curr) {
-					-- nestingLevel;
-
-					if (nestingLevel < 0) {
-						int start= reader.getOffset();
-						if (looksLikeMethod(reader))
-							return start + 1;
-					}
-				}
-
-				curr= reader.read();
-			}
-		} catch (IOException e) {
-		}
-
-		return contextPosition;
+	protected int guessContextInformationPosition(ContentAssistInvocationContext context) {
+		return context.getInvocationOffset();
 	}
 
 	private List addContextInformations(JavaContentAssistInvocationContext context, int offset, IProgressMonitor monitor) {

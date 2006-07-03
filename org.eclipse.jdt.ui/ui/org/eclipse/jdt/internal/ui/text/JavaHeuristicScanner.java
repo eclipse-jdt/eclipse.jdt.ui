@@ -100,7 +100,7 @@ public final class JavaHeuristicScanner implements Symbols {
 	/**
 	 * Stops upon a non-whitespace character in the default partition.
 	 *
-	 * @see NonWhitespace
+	 * @see JavaHeuristicScanner.NonWhitespace
 	 */
 	private final class NonWhitespaceDefaultPartition extends NonWhitespace {
 		/*
@@ -146,7 +146,7 @@ public final class JavaHeuristicScanner implements Symbols {
 	/**
 	 * Stops upon a non-java identifier character in the default partition.
 	 *
-	 * @see NonJavaIdentifierPart
+	 * @see JavaHeuristicScanner.NonJavaIdentifierPart
 	 */
 	private final class NonJavaIdentifierPartDefaultPartition extends NonJavaIdentifierPart {
 		/*
@@ -514,13 +514,31 @@ public final class JavaHeuristicScanner implements Symbols {
 	 * @return the matching peer character position, or <code>NOT_FOUND</code>
 	 */
 	public int findClosingPeer(int start, final char openingPeer, final char closingPeer) {
+		return findClosingPeer(start, UNBOUND, openingPeer, closingPeer);
+	}
+
+	/**
+	 * Returns the position of the closing peer character (forward search). Any scopes introduced by opening peers
+	 * are skipped. All peers accounted for must reside in the default partition.
+	 *
+	 * <p>Note that <code>start</code> must not point to the opening peer, but to the first
+	 * character being searched.</p>
+	 *
+	 * @param start the start position
+	 * @param bound the bound
+	 * @param openingPeer the opening peer character (e.g. '{')
+	 * @param closingPeer the closing peer character (e.g. '}')
+	 * @return the matching peer character position, or <code>NOT_FOUND</code>
+	 */
+	public int findClosingPeer(int start, int bound, final char openingPeer, final char closingPeer) {
 		Assert.isLegal(start >= 0);
 
 		try {
+			CharacterMatch match= new CharacterMatch(new char[] {openingPeer, closingPeer});
 			int depth= 1;
 			start -= 1;
 			while (true) {
-				start= scanForward(start + 1, UNBOUND, new CharacterMatch(new char[] {openingPeer, closingPeer}));
+				start= scanForward(start + 1, bound, match);
 				if (start == NOT_FOUND)
 					return NOT_FOUND;
 
@@ -551,13 +569,31 @@ public final class JavaHeuristicScanner implements Symbols {
 	 * @return the matching peer character position, or <code>NOT_FOUND</code>
 	 */
 	public int findOpeningPeer(int start, char openingPeer, char closingPeer) {
+		return findOpeningPeer(start, UNBOUND, openingPeer, closingPeer);
+	}
+
+	/**
+	 * Returns the position of the opening peer character (backward search). Any scopes introduced by closing peers
+	 * are skipped. All peers accounted for must reside in the default partition.
+	 *
+	 * <p>Note that <code>start</code> must not point to the closing peer, but to the first
+	 * character being searched.</p>
+	 *
+	 * @param start the start position
+	 * @param bound the bound
+	 * @param openingPeer the opening peer character (e.g. '{')
+	 * @param closingPeer the closing peer character (e.g. '}')
+	 * @return the matching peer character position, or <code>NOT_FOUND</code>
+	 */
+	public int findOpeningPeer(int start, int bound, char openingPeer, char closingPeer) {
 		Assert.isLegal(start < fDocument.getLength());
 
 		try {
+			final CharacterMatch match= new CharacterMatch(new char[] {openingPeer, closingPeer});
 			int depth= 1;
 			start += 1;
 			while (true) {
-				start= scanBackward(start - 1, UNBOUND, new CharacterMatch(new char[] {openingPeer, closingPeer}));
+				start= scanBackward(start - 1, bound, match);
 				if (start == NOT_FOUND)
 					return NOT_FOUND;
 
@@ -876,6 +912,37 @@ public final class JavaHeuristicScanner implements Symbols {
 				token= previousToken(getPosition(), bound);
 			}
 			return token == Symbols.TokenNEW;
+		}
+		return false;
+	}
+
+	/**
+	 * Returns <code>true</code> if <code>identifier</code> is probably a
+	 * type variable or type name, <code>false</code> if it is rather not.
+	 * This is a heuristic.
+	 *
+	 * @param identifier the identifier to check
+	 * @return <code>true</code> if <code>identifier</code> is probably a
+	 *         type variable or type name, <code>false</code> if not
+	 * @since 3.2
+	 */
+	public static boolean isGenericStarter(CharSequence identifier) {
+		/* This heuristic allows any identifiers if they start with an upper
+		 * case. This will fail when a comparison is made with constants:
+		 *
+		 * if (MAX > foo)
+		 *
+		 * will try to find the matching '<' which will never come
+		 *
+		 * Also, it will fail on lower case types and type variables
+		 */
+		int length= identifier.length();
+		if (length > 0 && Character.isUpperCase(identifier.charAt(0))) {
+			for (int i= 0; i < length; i++) {
+				if (identifier.charAt(i) == '_')
+					return false;
+			}
+			return true;
 		}
 		return false;
 	}

@@ -35,7 +35,6 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	
 	private boolean fHasParameters;
 	private boolean fHasParametersComputed= false;
-	private int fContextInformationPosition;
 	private FormatterPrefs fFormatterPrefs;
 
 	public JavaMethodCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
@@ -178,15 +177,6 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		if (project != null)
 			return new MethodProposalInfo(project, fProposal);
 		return super.computeProposalInfo();
-	}
-	
-	/**
-	 * Overrides the default context information position. Ignored if set to zero.
-	 * 
-	 * @param contextInformationPosition the replaced position.
-	 */
-	public void setContextInformationPosition(int contextInformationPosition) {
-		fContextInformationPosition= contextInformationPosition;
 	}
 	
 	/*

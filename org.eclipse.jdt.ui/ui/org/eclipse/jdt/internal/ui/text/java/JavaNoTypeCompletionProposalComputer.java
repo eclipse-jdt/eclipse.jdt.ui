@@ -10,10 +10,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.jdt.core.CompletionProposal;
 
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+
+import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
+import org.eclipse.jdt.internal.ui.text.Symbols;
 
 /**
  * 
@@ -48,5 +54,29 @@ public class JavaNoTypeCompletionProposalComputer extends JavaCompletionProposal
 		
 		collector.setIgnored(CompletionProposal.TYPE_REF, true);
 		return collector;
+	}
+	
+	protected int guessContextInformationPosition(ContentAssistInvocationContext context) {
+		final int contextPosition= context.getInvocationOffset();
+		
+		IDocument document= context.getDocument();
+		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
+		int bound= Math.max(-1, contextPosition - 200);
+		
+		// try the innermost scope of parentheses that looks like a method call
+		int pos= contextPosition - 1;
+		do {
+			int paren= scanner.findOpeningPeer(pos, bound, '(', ')');
+			if (paren == JavaHeuristicScanner.NOT_FOUND)
+				break;
+			int token= scanner.previousToken(paren - 1, bound);
+			// next token must be a method name (identifier) or the closing angle of a
+			// constructor call of a parameterized type.
+			if (token == Symbols.TokenIDENT || token == Symbols.TokenGREATERTHAN)
+				return paren + 1;
+			pos= paren - 1;
+		} while (true);
+		
+		return super.guessContextInformationPosition(context);
 	}
 }

@@ -608,9 +608,19 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	 * @return <code>true</code> if arguments should be appended
 	 */
 	private boolean shouldAppendArguments(IDocument document, int offset, char trigger) {
+		/*
+		 * No argument list if there were any special triggers (for example a period to qualify an
+		 * inner type).
+		 */
 		if (trigger != '\0' && trigger != '<')
 			return false;
 		
+		/* No argument list if the completion is empty (already within the argument list). */
+		char[] completion= fProposal.getCompletion();
+		if (completion.length == 0)
+			return false;
+
+		/* No argument list if there already is a generic signature behind the name. */
 		try {
 			IRegion region= document.getLineInformationOfOffset(offset);
 			String line= document.get(region.getOffset(), region.getLength());
@@ -742,17 +752,13 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeContextInformation()
 	 */
 	protected IContextInformation computeContextInformation() {
-		// only return information if we're already computed
-		// -> avoids creating context information for invalid proposals
-		if (fTypeArgumentProposals != null) {
-			try {
-				if (hasParameters()) {
-					TypeArgumentProposal[] proposals= computeTypeArgumentProposals();
-					if (hasAmbiguousProposals(proposals))
-						return new ContextInformation(this);
-				}
-			} catch (JavaModelException e) {
+		try {
+			if (hasParameters()) {
+				TypeArgumentProposal[] proposals= computeTypeArgumentProposals();
+				if (hasAmbiguousProposals(proposals))
+					return new ContextInformation(this);
 			}
+		} catch (JavaModelException e) {
 		}
 		return super.computeContextInformation();
 	}

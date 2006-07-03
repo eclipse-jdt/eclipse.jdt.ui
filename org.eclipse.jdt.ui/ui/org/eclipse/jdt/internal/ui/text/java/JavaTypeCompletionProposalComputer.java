@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IJavaProject;
@@ -30,6 +31,8 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
+import org.eclipse.jdt.internal.ui.text.Symbols;
 
 /**
  * 
@@ -142,6 +145,37 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 			sourceVersion= JavaCore.getOption(JavaCore.COMPILER_SOURCE);
 
 		return sourceVersion != null && JavaCore.VERSION_1_5.compareTo(sourceVersion) <= 0;
+	}
+	
+	protected int guessContextInformationPosition(ContentAssistInvocationContext context) {
+		final int contextPosition= context.getInvocationOffset();
+		
+		IDocument document= context.getDocument();
+		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
+		int bound= Math.max(-1, contextPosition - 200);
+		
+		// try the innermost scope of angle brackets that looks like a generic type argument list
+		try {
+			int pos= contextPosition - 1;
+			do {
+				int angle= scanner.findOpeningPeer(pos, bound, '<', '>');
+				if (angle == JavaHeuristicScanner.NOT_FOUND)
+					break;
+				int token= scanner.previousToken(angle - 1, bound);
+				// next token must be a method name that is a generic type
+				if (token == Symbols.TokenIDENT) {
+					int off= scanner.getPosition() + 1;
+					int end= angle;
+					String ident= document.get(off, end - off).trim();
+					if (JavaHeuristicScanner.isGenericStarter(ident))
+						return angle + 1;
+				}
+				pos= angle - 1;
+			} while (true);
+		} catch (BadLocationException x) {
+		}
+		
+		return super.guessContextInformationPosition(context);
 	}
 
 }

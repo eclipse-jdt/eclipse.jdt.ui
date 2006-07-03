@@ -19,6 +19,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -364,5 +365,22 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		int baseRelevance= super.computeRelevance();
 		
 		return baseRelevance +  rhsBoost + recencyBoost;
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeContextInformation()
+	 * @since 3.3
+	 */
+	protected IContextInformation computeContextInformation() {
+		char[] signature= fProposal.getSignature();
+		char[][] typeParameters= Signature.getTypeArguments(signature);
+		if (typeParameters.length == 0)
+			return super.computeContextInformation();
+		
+		ProposalContextInformation contextInformation= new ProposalContextInformation(fProposal);
+		if (fContextInformationPosition != 0 && fProposal.getCompletion().length == 0)
+			contextInformation.setContextInformationPosition(fContextInformationPosition);
+		return contextInformation;
+
 	}
 }
