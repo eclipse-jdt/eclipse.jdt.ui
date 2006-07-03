@@ -190,6 +190,7 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
+import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -2534,6 +2535,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		// add annotation actions for roll-over expand hover
 		action= new JavaSelectMarkerRulerAction2(JavaEditorMessages.getBundleForConstructedKeys(), "Editor.RulerAnnotationSelection.", this); //$NON-NLS-1$
 		setAction("AnnotationAction", action); //$NON-NLS-1$
+		
+		action= new ShowInPackageViewAction(this);
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_IN_PACKAGE_VIEW);
+		setAction("ShowInPackageView", action); //$NON-NLS-1$
+		
 
 		// replace cut/copy paste actions with a version that implement 'add imports on paste'
 
