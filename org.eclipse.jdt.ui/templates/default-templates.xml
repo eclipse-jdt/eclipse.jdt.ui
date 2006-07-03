@@ -25,7 +25,7 @@
 }</template>
 
 <template name="for" description="%Templates.for_collection" id="org.eclipse.jdt.ui.templates.for_collection" context="java" enabled="true" autoinsert="false">for (Iterator ${iterator} = ${collection}.iterator(); ${iterator}.hasNext(); ) {
-	${type} ${element} = (${type}) ${iterator}.next();
+	${type:elem(collection)} ${name:name(type)} = (${type}) ${iterator}.next();
 	${cursor}
 }</template>
 
@@ -33,19 +33,19 @@
 	${cursor}
 }</template>
 
-<template name="while" description="%Templates.while_enumeration" id="org.eclipse.jdt.ui.templates.while_enumeration" context="java" enabled="true" autoinsert="false">while (${enumeration}.hasMoreElements()) {
-	${type} ${element} = (${type}) ${enumeration}.nextElement();
+<template name="while" description="%Templates.while_enumeration" id="org.eclipse.jdt.ui.templates.while_enumeration" context="java" enabled="true" autoinsert="false">while (${en:var(java.util.Enumeration)}.hasMoreElements()) {
+	${type:arg(en)} ${elem:name(type)} = (${type}) ${en}.nextElement();
 	${cursor}
 }</template>
 
-<template name="while" description="%Templates.while_iterator" id="org.eclipse.jdt.ui.templates.while_iterator" context="java" enabled="true" autoinsert="false">while (${iterator}.hasNext()) {
-	${type} ${element} = (${type}) ${iterator}.next();
+<template name="while" description="%Templates.while_iterator" id="org.eclipse.jdt.ui.templates.while_iterator" context="java" enabled="true" autoinsert="false">while (${it:var(java.util.Iterator)}.hasNext()) {
+	${type:arg(it)} ${elem:name(type)} = (${type}) ${it}.next();
 	${cursor}
 }</template>
 
 <template name="do" description="%Templates.do" id="org.eclipse.jdt.ui.templates.do" context="java" enabled="true" autoinsert="false">do {
 	${line_selection}${cursor}
-} while (${condition});</template>
+} while (${condition:var(boolean)});</template>
 
 <template name="switch" description="%Templates.switch" id="org.eclipse.jdt.ui.templates.switch" context="java" enabled="true" autoinsert="false">switch (${key}) {
 	case ${value}:
@@ -56,17 +56,17 @@
 		break;
 }</template>
 
-<template name="if" description="%Templates.if" id="org.eclipse.jdt.ui.templates.if" context="java" enabled="true" autoinsert="false">if (${condition}) {
+<template name="if" description="%Templates.if" id="org.eclipse.jdt.ui.templates.if" context="java" enabled="true" autoinsert="false">if (${condition:var(boolean)}) {
 	${line_selection}${cursor}
 }</template>
 
-<template name="ifelse" description="%Templates.ifelse" id="org.eclipse.jdt.ui.templates.ifelse" context="java" enabled="true" autoinsert="false">if (${condition}) {
+<template name="ifelse" description="%Templates.ifelse" id="org.eclipse.jdt.ui.templates.ifelse" context="java" enabled="true" autoinsert="false">if (${condition:var(boolean)}) {
 	${cursor}
 } else {
 	
 }</template>
 
-<template name="elseif" description="%Templates.elseif" id="org.eclipse.jdt.ui.templates.elseif" context="java" enabled="true" autoinsert="false">else if (${condition}) {
+<template name="elseif" description="%Templates.elseif" id="org.eclipse.jdt.ui.templates.elseif" context="java" enabled="true" autoinsert="false">else if (${condition:var(boolean)}) {
 	${cursor}
 }</template>
 
@@ -104,7 +104,7 @@
 	${cursor}
 }</template>
 
-<template name="instanceof" description="%Templates.instanceof" id="org.eclipse.jdt.ui.templates.instanceof" context="java" enabled="true" autoinsert="false">if (${name} instanceof ${type}) {
+<template name="instanceof" description="%Templates.instanceof" id="org.eclipse.jdt.ui.templates.instanceof" context="java" enabled="true" autoinsert="false">if (${name:var} instanceof ${type}) {
 	${type} ${new_name} = (${type})${name};
 	${cursor}
 }</template>
@@ -113,14 +113,14 @@
 
 <template name="new" description="%Templates.new" id="org.eclipse.jdt.ui.templates.new" context="java" enabled="true" autoinsert="false">${type} ${name} = new ${type}(${arguments});</template>
 
-<template name="lazy" description="%Templates.lazy" id="org.eclipse.jdt.ui.templates.lazy" context="java" enabled="true" autoinsert="false">if (${name} == null) {
+<template name="lazy" description="%Templates.lazy" id="org.eclipse.jdt.ui.templates.lazy" context="java" enabled="true" autoinsert="false">if (${name:var} == null) {
 	${name} = new ${type}(${arguments});
 	${cursor}
 }
 
 return ${name};</template>
 
-<template name="toarray" description="%Templates.toarray" id="org.eclipse.jdt.ui.templates.toarray" context="java" enabled="true" autoinsert="false">(${type}[]) ${collection}.toArray(new ${type}[${collection}.size()])</template>
+<template name="toarray" description="%Templates.toarray" id="org.eclipse.jdt.ui.templates.toarray" context="java" enabled="true" autoinsert="false">(${type:elem(collection)}[]) ${collection}.toArray(new ${type}[${collection}.size()])</template>
 
 <template name="sysout" description="%Templates.sysout" id="org.eclipse.jdt.ui.templates.sysout" context="java" enabled="true" autoinsert="true">System.out.println(${word_selection}${});${cursor}</template>
 
@@ -144,7 +144,7 @@ return ${name};</template>
 
 <template name="@author" description="%Templates.author" id="org.eclipse.jdt.ui.templates.author" context="javadoc" enabled="true" autoinsert="true">@author ${user}</template>
 
-<template name="while" description="%Templates.while_condition" id="org.eclipse.jdt.ui.templates.while_condition" context="java" enabled="true" autoinsert="false">while (${condition}) {
+<template name="while" description="%Templates.while_condition" id="org.eclipse.jdt.ui.templates.while_condition" context="java" enabled="true" autoinsert="false">while (${condition:var(boolean)}) {
 	${line_selection}${cursor}
 }</template>
 
@@ -154,7 +154,7 @@ return ${name};</template>
 
 <template name="nls" description="%Templates.non-nls" id="org.eclipse.jdt.ui.templates.non-nls" context="java" enabled="true" autoinsert="false">//$$NON-NLS-${N}$$</template>
 
-<template name="synchronized" description="%Templates.synchronized" id="org.eclipse.jdt.ui.templates.synchronized" context="java" enabled="true" autoinsert="false">synchronized (${mutex}) {
+<template name="synchronized" description="%Templates.synchronized" id="org.eclipse.jdt.ui.templates.synchronized" context="java" enabled="true" autoinsert="false">synchronized (${mutex:var}) {
 	${line_selection}
 }</template>
 
