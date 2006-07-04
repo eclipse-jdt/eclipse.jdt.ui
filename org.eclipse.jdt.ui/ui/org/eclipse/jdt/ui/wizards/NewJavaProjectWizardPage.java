@@ -102,6 +102,20 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 		fClasspathEntries= null;
 	}		
 	
+    /**
+     * {@inheritDoc}
+     */
+    public void dispose() {
+    	try {
+        	super.dispose();
+        } finally {
+        	if (fBuildPathsBlock != null) {
+        		fBuildPathsBlock.dispose();
+        		fBuildPathsBlock= null;
+        	}
+        }
+    }
+	
 	/**
 	 * Sets the default output location to be used for the new Java project.
 	 * This is the path of the folder (with the project) into which the Java builder 

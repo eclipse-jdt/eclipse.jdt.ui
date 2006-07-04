@@ -76,10 +76,14 @@ public class BuildPathDialog extends StatusDialog {
 	}
 
 	protected void buttonPressed(int buttonId) {
-		if (buttonId == IDialogConstants.OK_ID) {
-			configureBuildPath();
+		try {
+			if (buttonId == IDialogConstants.OK_ID) {
+				configureBuildPath();
+			}
+			super.buttonPressed(buttonId);
+		} finally {
+			fBlock.dispose();
 		}
-		super.buttonPressed(buttonId);
 	}
 
 	private void configureBuildPath() {

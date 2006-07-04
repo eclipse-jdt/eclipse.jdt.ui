@@ -124,6 +124,9 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 		fUseFolderOutputs.setSelection(useFolderOutputs);
     }
     
+    public void dispose() {
+    	fPackageExplorer.dispose();
+    }
      
     /**
      * Initializes controls and return composite containing
@@ -351,7 +354,6 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         }
         try {
 			fJavaProject.setRawClasspath(entries, null);
-            fPackageExplorer.refresh();
         } catch (JavaModelException e) {
             JavaPlugin.log(e);
         }

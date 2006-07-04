@@ -92,6 +92,20 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
         }
         return fBuildPathsBlock;
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void dispose() {
+    	try {
+        	super.dispose();
+        } finally {
+        	if (fBuildPathsBlock != null) {
+        		fBuildPathsBlock.dispose();
+        		fBuildPathsBlock= null;
+        	}
+        }
+    }
 	
 	/**
 	 * Clients can override this method to choose if the new source page is used. The new source page

@@ -11,11 +11,19 @@
 
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -50,11 +58,12 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaElementSorter;
-import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.filters.LibraryFilter;
 import org.eclipse.jdt.internal.ui.filters.OutputFolderFilter;
+import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -76,20 +85,20 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
      * A extended content provider for the package explorer which can additionally display
      * an output folder item.
      */
-    private final class PackageContentProvider extends StandardJavaElementContentProvider {
+    private final class PackageContentProvider extends PackageExplorerContentProvider {
         public PackageContentProvider() {
-            super();
+            super(false);
         }
         
         /**
          * Get the elements of the current project
          * 
          * @param element the element to get the children from, will
-         * not be used, instead the project childrens are returned directly
+         * not be used, instead the project children are returned directly
          * @return returns the children of the project
          */
         public Object[] getElements(Object element) {
-            if (fCurrJProject == null)
+            if (fCurrJProject == null || !fCurrJProject.exists())
                 return new Object[0];
             return new Object[] {fCurrJProject};
         }
@@ -262,8 +271,10 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
                 }
                 if (element instanceof IPackageFragmentRoot) {
                     IClasspathEntry cpe= ((IPackageFragmentRoot)element).getRawClasspathEntry();
-                    if (cpe == null || cpe.getEntryKind() == IClasspathEntry.CPE_CONTAINER)
+                    if (cpe == null || cpe.getEntryKind() == IClasspathEntry.CPE_CONTAINER || cpe.getEntryKind() == IClasspathEntry.CPE_LIBRARY || cpe.getEntryKind() == IClasspathEntry.CPE_VARIABLE)
                         return false;
+                } else if (element instanceof ClassPathContainer) {
+                	return false;
                 }
             } catch (JavaModelException e) {
                 JavaPlugin.log(e);
@@ -304,6 +315,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
      * @see #setInput(IJavaProject)
      */
     private IJavaProject fCurrJProject;
+	private PackageContentProvider fContentProvider;
     
     public DialogPackageExplorer() {
         fActionGroup= null;
@@ -392,10 +404,13 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
      * <code>fPackageViewer</code>
      */
     public void setContentProvider() {
-		PackageContentProvider contentProvider= new PackageContentProvider();
+    	if (fContentProvider != null) {
+    		fContentProvider.dispose();
+    	}
+		fContentProvider= new PackageContentProvider();
 		PackageLabelProvider labelProvider= new PackageLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS);
-		fPackageViewer.setContentProvider(contentProvider);
+		fPackageViewer.setContentProvider(fContentProvider);
 		fPackageViewer.setLabelProvider(new DecoratingJavaLabelProvider(labelProvider, false));
     }
     
@@ -405,41 +420,54 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
      * @param project the project to be displayed
      */
     public void setInput(IJavaProject project) {
+    	IJavaProject oldProject= fCurrJProject;
         fCurrJProject= project;
-        fPackageViewer.setInput(new Object());
-        IStructuredSelection selection= new StructuredSelection(project);
-        fPackageViewer.setSelection(selection);
-        fPackageViewer.expandToLevel(2);
-        fCurrentSelection= selection;
-        try {
-            if (fActionGroup != null)
-                fActionGroup.refresh(new DialogExplorerActionContext(fCurrentSelection, fCurrJProject));
-        } catch (JavaModelException e) {
-            JavaPlugin.log(e);
-        }
+    	if (fContentProvider != null)
+        	fContentProvider.inputChanged(fPackageViewer, oldProject, fCurrJProject);
+		fPackageViewer.setInput(new Object[0]);
+		
+        List selectedElements= new ArrayList();
+        selectedElements.add(fCurrJProject);
+        setSelection(selectedElements);
     }
     
-    /**
-     * Refresh the project tree
-     */
-    public void refresh() {
-        fPackageViewer.refresh(true);
+    public void dispose() {
+    	if (fContentProvider != null) {
+    		fContentProvider.dispose();
+    		fContentProvider= null;
+    	}
+    	if (fActionGroup != null) {
+    		fActionGroup.dispose();
+    		fActionGroup= null;
+    	}
+    	if (fPackageViewer != null) {
+    		fPackageViewer.removeSelectionChangedListener(this);
+    		fPackageViewer= null;
+    	}
     }
     
     /**
      * Set the selection and focus to the list of elements
      * @param elements the object to be selected and displayed
      */
-    public void setSelection(List elements) {
+    public void setSelection(final List elements) {
         if (elements == null || elements.size() == 0)
             return;
-        fPackageViewer.refresh();
-        IStructuredSelection selection= new StructuredSelection(elements);
-        fPackageViewer.setSelection(selection, true);
-        fPackageViewer.getTree().setFocus();
-        
-        if (elements.size() == 1 && elements.get(0) instanceof IJavaProject)
-            fPackageViewer.expandToLevel(elements.get(0), 1);
+		try {
+	        ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable() {
+	        	public void run(IProgressMonitor monitor) throws CoreException {
+	        		fPackageViewer.refresh();
+	                IStructuredSelection selection= new StructuredSelection(elements);
+	                fPackageViewer.setSelection(selection, true);
+	                fPackageViewer.getTree().setFocus();
+	                
+	                if (elements.size() == 1 && elements.get(0) instanceof IJavaProject)
+	                    fPackageViewer.expandToLevel(elements.get(0), 1);
+	            }
+	        }, ResourcesPlugin.getWorkspace().getRoot(), IWorkspace.AVOID_UPDATE, new NullProgressMonitor());
+        } catch (CoreException e) {
+	        JavaPlugin.log(e);
+        }
     }
     
     /**

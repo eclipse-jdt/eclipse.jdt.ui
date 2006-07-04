@@ -981,4 +981,11 @@ public class BuildPathsBlock {
 			}
 		}
 	}
+
+	public void dispose() {
+		if (fSourceContainerPage instanceof NewSourceContainerWorkbookPage) {
+			((NewSourceContainerWorkbookPage)fSourceContainerPage).dispose();
+			fSourceContainerPage= null;
+		}
+    }
 }
