@@ -148,7 +148,7 @@ public class VariableDeclarationFix extends AbstractFix {
 			if (toChange.size() == 0)
 				return false;
 			
-			ModifierChangeOperation op= new ModifierChangeOperation(declaration, toChange, Modifier.FINAL, 0);
+			ModifierChangeOperation op= new ModifierChangeOperation(declaration, toChange, Modifier.FINAL, Modifier.VOLATILE);
 			fResult.add(op);
 			return false;
 		}
@@ -309,18 +309,18 @@ public class VariableDeclarationFix extends AbstractFix {
 			return null;
 		
 		if (decl instanceof SingleVariableDeclaration) {
-			return new ModifierChangeOperation(decl, new ArrayList(), Modifier.FINAL, 0);
+			return new ModifierChangeOperation(decl, new ArrayList(), Modifier.FINAL, Modifier.VOLATILE);
 		} else if (decl instanceof VariableDeclarationExpression) {
-			return new ModifierChangeOperation(decl, new ArrayList(), Modifier.FINAL, 0);
+			return new ModifierChangeOperation(decl, new ArrayList(), Modifier.FINAL, Modifier.VOLATILE);
 		} else if (decl instanceof VariableDeclarationFragment){
 			VariableDeclarationFragment frag= (VariableDeclarationFragment)decl;
 			decl= decl.getParent();
 			if (decl instanceof FieldDeclaration || decl instanceof VariableDeclarationStatement) {
 				List list= new ArrayList();
 				list.add(frag);
-				return new ModifierChangeOperation(decl, list, Modifier.FINAL, 0);
+				return new ModifierChangeOperation(decl, list, Modifier.FINAL, Modifier.VOLATILE);
 			} else if (decl instanceof VariableDeclarationExpression) {
-				return new ModifierChangeOperation(decl, new ArrayList(), Modifier.FINAL, 0);
+				return new ModifierChangeOperation(decl, new ArrayList(), Modifier.FINAL, Modifier.VOLATILE);
 			}
 		}
 		
