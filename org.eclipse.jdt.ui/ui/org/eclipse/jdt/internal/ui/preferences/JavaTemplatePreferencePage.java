@@ -58,7 +58,7 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage implement
 	 */
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.TEMPLATE_PREFERENCE_PAGE);
 	}
 
 
