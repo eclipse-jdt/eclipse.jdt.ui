@@ -344,7 +344,7 @@ public class ListDialogField extends DialogField {
 			
 			fTableControl.setEnabled(isEnabled());
 			if (fSelectionWhenEnabled != null) {
-				postSetSelection(fSelectionWhenEnabled);
+				selectElements(fSelectionWhenEnabled);
 			}
 		}
 		return fTableControl;

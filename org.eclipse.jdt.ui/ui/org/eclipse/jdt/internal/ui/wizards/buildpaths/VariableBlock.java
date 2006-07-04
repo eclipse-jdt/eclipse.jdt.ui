@@ -432,5 +432,16 @@ public class VariableBlock {
 		
 		fHasChanges= false;
 	}
+	
+	public void setSelection(String elementName) {
+		for (int i= 0; i < fVariablesList.getSize(); i++) {
+			CPVariableElement elem= (CPVariableElement) fVariablesList.getElement(i);
+			if (elem.getName().equals(elementName)) {
+				fVariablesList.selectElements(new StructuredSelection(elem));
+				return;
+			}
+		}
+	}
+	
 
 }

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.util.Map;
+
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.swt.widgets.Composite;
@@ -33,6 +35,8 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 
 	public static final String ID= "org.eclipse.jdt.ui.preferences.ClasspathVariablesPreferencePage"; //$NON-NLS-1$
 
+	public static final String DATA_SELECT_VARIABLE= "ClasspathVariablesPreferencePage.select_var"; //$NON-NLS-1$
+	
 	private VariableBlock fVariableBlock;
 	private String fStoredSettings;
 	
@@ -126,6 +130,19 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 			buf.append('\0');
 		}
 		return buf.toString();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
+	 */
+	public void applyData(Object data) {
+		if (data instanceof Map) {
+			Object id= ((Map) data).get(DATA_SELECT_VARIABLE);
+			if (id instanceof String) {
+				fVariableBlock.setSelection((String) id);
+			}
+		}
+		super.applyData(data);
 	}
 
 }

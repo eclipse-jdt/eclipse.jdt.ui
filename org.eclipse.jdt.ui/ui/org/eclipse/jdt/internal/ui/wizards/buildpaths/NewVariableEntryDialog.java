@@ -12,7 +12,9 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -29,6 +31,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.StatusDialog;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
@@ -136,6 +139,8 @@ public class NewVariableEntryDialog extends StatusDialog {
 		fCanExtend= false;
 		fIsValidSelection= false;
 		fResultPaths= null;
+		
+		fVariablesList.selectFirstElement();
 	}
 	
 	private void initializeElements() {
@@ -297,8 +302,23 @@ public class NewVariableEntryDialog extends StatusDialog {
 		
 	protected final void configButtonPressed() {
 		String id= ClasspathVariablesPreferencePage.ID;
-		PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, null).open();
+		Map options= new HashMap();
+		List selected= fVariablesList.getSelectedElements();
+		if (!selected.isEmpty()) {
+			String varName= ((CPVariableElement) selected.get(0)).getName();
+			options.put(ClasspathVariablesPreferencePage.DATA_SELECT_VARIABLE, varName);
+		}
+		PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, options).open();
+		
+		List oldElements= fVariablesList.getElements();
 		initializeElements();
+		List newElements= fVariablesList.getElements();
+		newElements.removeAll(oldElements);
+		if (!newElements.isEmpty()) {
+			fVariablesList.selectElements(new StructuredSelection(newElements));
+		} else if (fVariablesList.getSelectedElements().isEmpty()) {
+			fVariablesList.selectFirstElement();
+		}
 	}	
 
 }
