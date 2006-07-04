@@ -757,7 +757,118 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 	
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });	
 	}
+	
+	
+	public void testVarInVarArgs1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("import java.util.Arrays;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Arrays.<Number>asList(x);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 4);
+
+		String[] expected= new String[4];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("import java.util.Arrays;\n");
+		buf.append("public class E {\n");
+		buf.append("    private Number x;\n");
+		buf.append("\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Arrays.<Number>asList(x);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("import java.util.Arrays;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static final Number x = null;\n");
+		buf.append("\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Arrays.<Number>asList(x);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("import java.util.Arrays;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Number x) {\n");
+		buf.append("        Arrays.<Number>asList(x);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("import java.util.Arrays;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Number x;\n");
+		buf.append("        Arrays.<Number>asList(x);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[3]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	public void testVarInVarArgs2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.util.Arrays;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(String name) {\n");
+		buf.append("        Arrays.<File>asList( new File(name), new XXX(name) );\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.util.Arrays;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(String name) {\n");
+		buf.append("        Arrays.<File>asList( new File(name), new File(name) );\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("import java.io.File;\n");
+		buf.append("\n");
+		buf.append("public class XXX extends File {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
 
 	public void testVarInForInitializer() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
