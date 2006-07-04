@@ -192,13 +192,17 @@ public class OpenAction extends SelectionDispatchAction {
 				element= getElementToOpen(element);
 				boolean activateOnOpen= fEditor != null ? true : OpenStrategy.activateOnOpen();
 				IEditorPart part= EditorUtility.openInEditor(element, activateOnOpen);
-				if (part == null) {
-					String message= Messages.format(ActionMessages.OpenAction_error_no_editor_found, new JavaUILabelProvider().getText(element));
-					status.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
-				} else {
-					if (element instanceof IJavaElement)
-						EditorUtility.revealInEditor(part, (IJavaElement)element);
-				}
+				
+				//TODO: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=149555
+				if (part != null && element instanceof IJavaElement)
+					EditorUtility.revealInEditor(part, (IJavaElement)element);
+//				if (part == null) {
+//					String message= Messages.format(ActionMessages.OpenAction_error_no_editor_found, new JavaUILabelProvider().getText(element));
+//					status.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
+//				} else {
+//					if (element instanceof IJavaElement)
+//						EditorUtility.revealInEditor(part, (IJavaElement)element);
+//				}
 			
 			} catch (CoreException e) {
 				String message= Messages.format(ActionMessages.OpenAction_error_problem_opening_editor, new String[] { new JavaUILabelProvider().getText(element), e.getStatus().getMessage() });
