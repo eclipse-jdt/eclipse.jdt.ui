@@ -639,7 +639,8 @@ public final class JavaUI {
 	 *
 	 * @param element the input element; either a compilation unit 
 	 *   (<code>ICompilationUnit</code>) or a class file (<code>IClassFile</code>) or source references inside.
-	 * @return returns the editor part of the opened editor or <code>null</code> if the element is of the wrong type or no page is active.
+	 * @return returns the editor part of the opened editor or <code>null</code> if the element is not a {@link ISourceReference}, no workbench page is active or the
+	 * file was opened in an external editor.
 	 * @exception PartInitException if the editor could not be initialized
 	 * @exception JavaModelException if this element does not exist or if an exception occurs while accessing its underlying resource
 	 */
@@ -656,7 +657,8 @@ public final class JavaUI {
 	 *   (<code>ICompilationUnit</code>) or a class file (<code>IClassFile</code>) or source references inside.
 	 * @param activate if set, the editor will be activated.
 	 * @param reveal if set, the element will be revealed.
-	 * @return returns the editor part of the opened editor or <code>null</code> if the element is not a {@link ISourceReference} or no page is active.
+	 * @return returns the editor part of the opened editor or <code>null</code> if the element is not a {@link ISourceReference}, no workbench page is active or the
+	 * file was opened in an external editor.
 	 * @exception PartInitException if the editor could not be initialized
 	 * @exception JavaModelException if this element does not exist or if an exception occurs while accessing its underlying resource
 	 * @since 3.3
