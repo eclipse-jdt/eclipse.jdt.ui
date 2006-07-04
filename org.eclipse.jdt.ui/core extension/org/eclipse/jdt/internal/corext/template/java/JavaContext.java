@@ -53,7 +53,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
@@ -388,22 +387,6 @@ public class JavaContext extends CompilationUnitContext {
 			excludes= allExcludes;
 		}
 		return excludes;
-	}
-
-	private String[] suggestVariableName(LocalVariable iterable, String[] excludes) throws IllegalArgumentException {
-		// TODO add this functionality for other name suggestion methods
-		IJavaProject project= getCompilationUnit().getJavaProject();
-		String memberTypeSig= iterable.getMemberTypeSignature();
-		int memberDimensions= Signature.getArrayCount(memberTypeSig);
-		String elementTypeSig= Signature.getElementType(memberTypeSig);
-		
-		String erasure= Signature.getTypeErasure(elementTypeSig);
-		String fullName= Signature.toString(erasure);
-		String memberPackage= Signature.getQualifier(fullName);
-		String memberTypeName= Signature.getSimpleName(fullName);
-
-		String[] proposals= NamingConventions.suggestLocalVariableNames(project, memberPackage, memberTypeName, memberDimensions, excludes);
-		return proposals;
 	}
 
 	private String[] suggestVariableName(String type, String[] excludes) throws IllegalArgumentException {
