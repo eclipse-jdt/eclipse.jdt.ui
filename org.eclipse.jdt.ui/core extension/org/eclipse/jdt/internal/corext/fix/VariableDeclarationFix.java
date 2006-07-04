@@ -254,12 +254,16 @@ public class VariableDeclarationFix extends AbstractFix {
 		compilationUnit.accept(finder);
 		List ops= new ArrayList();
 		VariableDeclarationFinder visitor= new VariableDeclarationFinder(true, true, true, compilationUnit, ops, writtenNames);
-		for (int i= 0; i < selectedNodes.length; i++) {
-			ASTNode selectedNode= selectedNodes[i];
-			if (selectedNode instanceof SimpleName) {
-				selectedNode= selectedNode.getParent();
+		if (selectedNodes.length == 1) {
+			if (selectedNodes[0] instanceof SimpleName) {
+				selectedNodes[0]= selectedNodes[0].getParent();
 			}
-			selectedNode.accept(visitor);
+			selectedNodes[0].accept(visitor);
+		} else {
+			for (int i= 0; i < selectedNodes.length; i++) {
+				ASTNode selectedNode= selectedNodes[i];
+				selectedNode.accept(visitor);
+			}
 		}
 		if (ops.size() == 0)
 			return null;
