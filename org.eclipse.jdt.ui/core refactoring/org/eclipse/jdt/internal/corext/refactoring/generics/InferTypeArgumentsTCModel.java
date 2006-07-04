@@ -522,13 +522,13 @@ public class InferTypeArgumentsTCModel {
 	public static boolean isAGenericType(TType type) {
 		return type.isGenericType()
 				|| type.isParameterizedType()
-				|| type.isRawType();
+				|| (type.isRawType() && type.getTypeDeclaration().isGenericType());
 	}
 
 	public static boolean isAGenericType(ITypeBinding type) {
 		return type.isGenericType()
 				|| type.isParameterizedType()
-				|| type.isRawType();
+				|| (type.isRawType() && type.getTypeDeclaration().isGenericType());
 	}
 
 	public CastVariable2 makeCastVariable(CastExpression castExpression, ConstraintVariable2 expressionCv) {

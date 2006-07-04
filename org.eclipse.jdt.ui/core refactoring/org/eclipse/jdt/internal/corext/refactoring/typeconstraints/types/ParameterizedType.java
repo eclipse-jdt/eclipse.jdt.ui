@@ -109,7 +109,7 @@ public final class ParameterizedType extends HierarchyType {
 	}
 
 	private boolean canAssignToRawType(RawType target) {
-		return fTypeDeclaration.isSubType(target.getGenericType());
+		return fTypeDeclaration.isSubType(target.getHierarchyType());
 	}
 	
 	private boolean canAssignToParameterizedType(ParameterizedType target) {

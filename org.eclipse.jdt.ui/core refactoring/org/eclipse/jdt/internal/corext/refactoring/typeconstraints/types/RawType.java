@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 public final class RawType extends HierarchyType {
 	
-	private GenericType fTypeDeclaration;
+	private HierarchyType fTypeDeclaration;
 	
 	protected RawType(TypeEnvironment environment) {
 		super(environment);
@@ -28,7 +28,7 @@ public final class RawType extends HierarchyType {
 		Assert.isTrue(binding.isRawType());
 		super.initialize(binding, javaElementType);
 		TypeEnvironment environment= getEnvironment();
-		fTypeDeclaration= (GenericType)environment.create(binding.getTypeDeclaration());
+		fTypeDeclaration= (HierarchyType)environment.create(binding.getTypeDeclaration());
 	}
 	
 	public int getKind() {
@@ -51,7 +51,7 @@ public final class RawType extends HierarchyType {
 		return fTypeDeclaration;
 	}
 	
-	/* package */ GenericType getGenericType() {
+	/*package*/ HierarchyType getHierarchyType() {
 		return fTypeDeclaration;
 	}
 	

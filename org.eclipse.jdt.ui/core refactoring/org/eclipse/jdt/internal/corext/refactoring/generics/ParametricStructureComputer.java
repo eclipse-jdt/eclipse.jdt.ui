@@ -261,7 +261,9 @@ public class ParametricStructureComputer {
 	}
 
 	private boolean isParametricType(TType type) {
-		return type.isParameterizedType() || type.isRawType() || type.isGenericType();
+		return type.isParameterizedType()
+				|| type.isGenericType()
+				|| (type.isRawType() && type.getTypeDeclaration().isGenericType()) ;
 	}
 
 	/**
