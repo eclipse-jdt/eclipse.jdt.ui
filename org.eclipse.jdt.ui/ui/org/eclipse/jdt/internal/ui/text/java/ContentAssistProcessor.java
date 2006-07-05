@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.action.LegacyActionTools;
 import org.eclipse.jface.bindings.TriggerSequence;
 import org.eclipse.jface.bindings.keys.KeySequence;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -450,7 +451,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 			String message= JavaTextMessages.ContentAssistProcessor_all_disabled_message;
 			// see PreferencePage#createControl for the 'defaults' label
 			final String restoreButtonLabel= JFaceResources.getString("defaults"); //$NON-NLS-1$
-			final String linkMessage= Messages.format(JavaTextMessages.ContentAssistProcessor_all_disabled_preference_link, restoreButtonLabel);
+			final String linkMessage= Messages.format(JavaTextMessages.ContentAssistProcessor_all_disabled_preference_link, LegacyActionTools.removeMnemonics(restoreButtonLabel));
 			final int restoreId= IDialogConstants.CLIENT_ID + 10;
 			final OptionalMessageDialog dialog= new OptionalMessageDialog(PREF_WARN_ABOUT_EMPTY_ASSIST_CATEGORY, shell, title, null /* default image */, message, MessageDialog.WARNING, new String[] { restoreButtonLabel, IDialogConstants.CLOSE_LABEL }, 1) {
 				/*
