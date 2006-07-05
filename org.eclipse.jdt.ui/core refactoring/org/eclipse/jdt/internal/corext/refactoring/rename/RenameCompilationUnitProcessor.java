@@ -61,16 +61,14 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 public class RenameCompilationUnitProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating, ISimilarDeclarationUpdating, IResourceMapper, IJavaElementMapper {
 	
 	private static final String ID_RENAME_COMPILATION_UNIT= "org.eclipse.jdt.ui.rename.compilationunit"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 	
-	private RenameTypeProcessor fRenameTypeProcessor;
-	private boolean fWillRenameType;
+	private RenameTypeProcessor fRenameTypeProcessor= null;
+	private boolean fWillRenameType= false;
 	private ICompilationUnit fCu;
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameCompilationUnitProcessor"; //$NON-NLS-1$
@@ -430,23 +428,20 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			final String path= generic.getAttribute(ATTRIBUTE_PATH);
+			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+			final String path= extended.getAttribute(ATTRIBUTE_PATH);
 			if (path != null) {
 				final IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(path));
 				if (resource == null || !resource.exists())
 					return ScriptableRefactoring.createInputFatalStatus(resource, getRefactoring().getName(), ID_RENAME_COMPILATION_UNIT);
 				else {
 					fCu= (ICompilationUnit) JavaCore.create(resource);
-					try {
-						computeRenameTypeRefactoring();
-					} catch (CoreException exception) {
-						JavaPlugin.log(exception);
-					}
+					if (fCu == null || !fCu.exists())
+						return ScriptableRefactoring.createInputFatalStatus(resource, getRefactoring().getName(), ID_RENAME_COMPILATION_UNIT);
 				}
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PATH));
-			final String name= generic.getAttribute(ATTRIBUTE_NAME);
+			final String name= extended.getAttribute(ATTRIBUTE_NAME);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				setNewElementName(name);
 			else
