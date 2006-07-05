@@ -13,9 +13,10 @@ package org.eclipse.jdt.ui.actions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -298,6 +299,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			dialog.setInitialSelections(preselected);
 			dialog.setExpandedElements(preselected);
 		}
+		final Set keySet= new LinkedHashSet(entries.keySet());
 		int dialogResult= dialog.open();
 		if (dialogResult == Window.OK) {
 			Object[] result= dialog.getResult();
@@ -312,13 +314,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			fGenerateComment= dialog.getGenerateComment();
 			IField[] getterFields, setterFields, getterSetterFields;
 			if (fSort) {
-				getterFields= getGetterFields(result);
-				setterFields= getSetterFields(result);
+				getterFields= getGetterFields(result, keySet);
+				setterFields= getSetterFields(result, keySet);
 				getterSetterFields= new IField[0];
 			} else {
-				getterFields= getGetterOnlyFields(result);
-				setterFields= getSetterOnlyFields(result);
-				getterSetterFields= getGetterSetterFields(result);
+				getterFields= getGetterOnlyFields(result, keySet);
+				setterFields= getSetterOnlyFields(result, keySet);
+				getterSetterFields= getGetterSetterFields(result, keySet);
 			}
 			generate(type, getterFields, setterFields, getterSetterFields, new RefactoringASTParser(AST.JLS3).parse(type.getCompilationUnit(), true), dialog.getElementPosition());
 		}
@@ -389,8 +391,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	}
 
 	// returns a list of fields with setter entries checked
-	private static IField[] getSetterFields(Object[] result) {
-		Collection list= new ArrayList(0);
+	private static IField[] getSetterFields(Object[] result, Set set) {
+		List list= new ArrayList(0);
 		Object each= null;
 		GetterSetterEntry entry= null;
 		for (int i= 0; i < result.length; i++) {
@@ -402,12 +404,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				}
 			}
 		}
+		list= reorderFields(list, set);
 		return (IField[]) list.toArray(new IField[list.size()]);
 	}
 
 	// returns a list of fields with getter entries checked
-	private static IField[] getGetterFields(Object[] result) {
-		Collection list= new ArrayList(0);
+	private static IField[] getGetterFields(Object[] result, Set set) {
+		List list= new ArrayList(0);
 		Object each= null;
 		GetterSetterEntry entry= null;
 		for (int i= 0; i < result.length; i++) {
@@ -419,12 +422,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				}
 			}
 		}
+		list= reorderFields(list, set);
 		return (IField[]) list.toArray(new IField[list.size()]);
 	}
 
 	// returns a list of fields with only getter entries checked
-	private static IField[] getGetterOnlyFields(Object[] result) {
-		Collection list= new ArrayList(0);
+	private static IField[] getGetterOnlyFields(Object[] result, Set set) {
+		List list= new ArrayList(0);
 		Object each= null;
 		GetterSetterEntry entry= null;
 		boolean getterSet= false;
@@ -443,12 +447,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			} else
 				getterSet= false;
 		}
+		list= reorderFields(list, set);
 		return (IField[]) list.toArray(new IField[list.size()]);
 	}
 
 	// returns a list of fields with only setter entries checked
-	private static IField[] getSetterOnlyFields(Object[] result) {
-		Collection list= new ArrayList(0);
+	private static IField[] getSetterOnlyFields(Object[] result, Set set) {
+		List list= new ArrayList(0);
 		Object each= null;
 		GetterSetterEntry entry= null;
 		boolean getterSet= false;
@@ -466,12 +471,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			} else
 				getterSet= false;
 		}
+		list= reorderFields(list, set);
 		return (IField[]) list.toArray(new IField[list.size()]);
 	}
 
 	// returns a list of fields with both entries checked
-	private static IField[] getGetterSetterFields(Object[] result) {
-		Collection list= new ArrayList(0);
+	private static IField[] getGetterSetterFields(Object[] result, Set set) {
+		List list= new ArrayList(0);
 		Object each= null;
 		GetterSetterEntry entry= null;
 		boolean getterSet= false;
@@ -489,8 +495,19 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			} else
 				getterSet= false;
 		}
+		list= reorderFields(list, set);
 		return (IField[]) list.toArray(new IField[list.size()]);
 	}
+
+    private static List reorderFields(List collection, Set set) {
+    	final List list= new ArrayList(collection.size());
+    	for (final Iterator iterator= set.iterator(); iterator.hasNext();) {
+	        final IField field= (IField) iterator.next();
+	        if (collection.contains(field))
+	        	list.add(field);
+        }
+    	return list;
+    }
 
 	private void generate(IType type, IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, CompilationUnit unit, IJavaElement elementPosition) throws CoreException {
 		if (getterFields.length == 0 && setterFields.length == 0 && getterSetterFields.length == 0)
@@ -740,7 +757,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	 */
 	private Map createGetterSetterMapping(IType type) throws JavaModelException {
 		IField[] fields= type.getFields();
-		Map result= new HashMap();
+		Map result= new LinkedHashMap();
 		for (int i= 0; i < fields.length; i++) {
 			if (!JdtFlags.isEnum(fields[i])) {
 				List l= new ArrayList(2);
