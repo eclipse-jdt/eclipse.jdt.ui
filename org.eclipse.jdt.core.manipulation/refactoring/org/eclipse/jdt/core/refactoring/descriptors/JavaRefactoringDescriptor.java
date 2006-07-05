@@ -298,7 +298,6 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 		final String id= getID();
 		final RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(id);
 		if (contribution != null) {
-
 			final RefactoringDescriptor descriptor= contribution.createDescriptor(id, getProject(), getDescription(), getComment(), fArguments, getFlags());
 			if (descriptor != null) {
 				refactoring= descriptor.createRefactoring(status);
