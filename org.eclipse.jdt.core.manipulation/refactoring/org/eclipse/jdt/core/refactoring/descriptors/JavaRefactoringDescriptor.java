@@ -15,14 +15,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.WorkingCopyOwner;
+
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.DescriptorMessages;
 
@@ -39,6 +52,56 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.DescriptorMessages;
  * @since 3.3
  */
 public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
+
+	/**
+	 * Predefined argument called <code>element&lt;Number&gt;</code>.
+	 * <p>
+	 * This argument should be used to describe the elements being refactored.
+	 * The value of this argument does not necessarily have to uniquely identify
+	 * the elements. However, it must be possible to uniquely identify the
+	 * elements using the value of this argument in conjunction with the values
+	 * of the other user-defined attributes.
+	 * </p>
+	 * <p>
+	 * The element arguments are simply distinguished by appending a number to
+	 * the argument name, e.g. element1. The indices of this argument are non
+	 * zero-based.
+	 * </p>
+	 */
+	protected static final String ATTRIBUTE_ELEMENT= "element"; //$NON-NLS-1$
+
+	/**
+	 * Predefined argument called <code>input</code>.
+	 * <p>
+	 * This argument should be used to describe the element being refactored.
+	 * The value of this argument does not necessarily have to uniquely identify
+	 * the input element. However, it must be possible to uniquely identify the
+	 * input element using the value of this argument in conjunction with the
+	 * values of the other user-defined attributes.
+	 * </p>
+	 */
+	protected static final String ATTRIBUTE_INPUT= "input"; //$NON-NLS-1$
+
+	/**
+	 * Predefined argument called <code>name</code>.
+	 * <p>
+	 * This argument should be used to name the element being refactored. The
+	 * value of this argument may be shown in the user interface.
+	 * </p>
+	 */
+	protected static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
+
+	/**
+	 * Predefined argument called <code>selection</code>.
+	 * <p>
+	 * This argument should be used to describe user input selections within a
+	 * text file. The value of this argument has the format "offset length".
+	 * </p>
+	 */
+	protected static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
+
+	/** The version attribute */
+	protected static final String ATTRIBUTE_VERSION= "version"; //$NON-NLS-1$
 
 	/**
 	 * Constant describing the jar migration flag (value: <code>65536</code>).
@@ -81,8 +144,140 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 */
 	public static final int JAR_SOURCE_ATTACHMENT= 1 << 18;
 
+	/** The version value <code>1.0</code> */
+	protected static final String VALUE_VERSION_1_0= "1.0"; //$NON-NLS-1$
+
+	/**
+	 * Converts the specified element to an input handle.
+	 * 
+	 * @param project
+	 *            the project, or <code>null</code> for the workspace
+	 * @param element
+	 *            the element
+	 * @return a corresponding input handle
+	 */
+	protected static String elementToHandle(final String project, final IJavaElement element) {
+		final String handle= element.getHandleIdentifier();
+		if (project != null && !(element instanceof IJavaProject)) {
+			final String id= element.getJavaProject().getHandleIdentifier();
+			return handle.substring(id.length());
+		}
+		return handle;
+	}
+
+	/**
+	 * Converts an input handle back to the corresponding java element.
+	 * 
+	 * @param project
+	 *            the project, or <code>null</code> for the workspace
+	 * @param handle
+	 *            the input handle
+	 * @return the corresponding java element, or <code>null</code> if no such
+	 *         element exists
+	 */
+	protected static IJavaElement handleToElement(final String project, final String handle) {
+		return handleToElement(project, handle, true);
+	}
+
+	/**
+	 * Converts an input handle back to the corresponding java element.
+	 * 
+	 * @param project
+	 *            the project, or <code>null</code> for the workspace
+	 * @param handle
+	 *            the input handle
+	 * @param check
+	 *            <code>true</code> to check for existence of the element,
+	 *            <code>false</code> otherwise
+	 * @return the corresponding java element, or <code>null</code> if no such
+	 *         element exists
+	 */
+	protected static IJavaElement handleToElement(final String project, final String handle, final boolean check) {
+		return handleToElement(null, project, handle, check);
+	}
+
+	/**
+	 * Converts an input handle back to the corresponding java element.
+	 * 
+	 * @param owner
+	 *            the working copy owner
+	 * @param project
+	 *            the project, or <code>null</code> for the workspace
+	 * @param handle
+	 *            the input handle
+	 * @param check
+	 *            <code>true</code> to check for existence of the element,
+	 *            <code>false</code> otherwise
+	 * @return the corresponding java element, or <code>null</code> if no such
+	 *         element exists
+	 */
+	protected static IJavaElement handleToElement(final WorkingCopyOwner owner, final String project, final String handle, final boolean check) {
+		IJavaElement element= null;
+		if (owner != null)
+			element= JavaCore.create(handle, owner);
+		else
+			element= JavaCore.create(handle);
+		if (element == null && project != null) {
+			final IJavaProject javaProject= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProject(project);
+			final String identifier= javaProject.getHandleIdentifier();
+			if (owner != null)
+				element= JavaCore.create(identifier + handle, owner);
+			else
+				element= JavaCore.create(identifier + handle);
+		}
+		if (check && element instanceof IMethod) {
+			final IMethod method= (IMethod) element;
+			final IMethod[] methods= method.getDeclaringType().findMethods(method);
+			if (methods != null && methods.length > 0)
+				element= methods[0];
+		}
+		if (element != null && (!check || element.exists()))
+			return element;
+		return null;
+	}
+
+	/**
+	 * Converts an input handle with the given prefix back to the corresponding
+	 * resource.
+	 * 
+	 * @param project
+	 *            the project, or <code>null</code> for the workspace
+	 * @param handle
+	 *            the input handle
+	 * 
+	 * @return the corresponding resource, or <code>null</code> if no such
+	 *         resource exists
+	 */
+	protected static IResource handleToResource(final String project, final String handle) {
+		final IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+		if ("".equals(handle)) //$NON-NLS-1$
+			return null;
+		final IPath path= Path.fromPortableString(handle);
+		if (path == null)
+			return null;
+		if (project != null && !"".equals(project)) //$NON-NLS-1$
+			return root.getProject(project).findMember(path);
+		return root.findMember(path);
+	}
+
+	/**
+	 * Converts the specified resource to an input handle.
+	 * 
+	 * @param project
+	 *            the project, or <code>null</code> for the workspace
+	 * @param resource
+	 *            the resource
+	 * 
+	 * @return the input handle
+	 */
+	protected static String resourceToHandle(final String project, final IResource resource) {
+		if (project != null && !"".equals(project)) //$NON-NLS-1$
+			return resource.getProjectRelativePath().toPortableString();
+		return resource.getFullPath().toPortableString();
+	}
+
 	/** The argument map */
-	final Map fArguments= new HashMap();
+	protected final Map fArguments= new HashMap();
 
 	/**
 	 * Creates a new java refactoring descriptor.
@@ -90,14 +285,15 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * @param id
 	 *            the unique id of the refactoring
 	 */
-	JavaRefactoringDescriptor(final String id) {
+	protected JavaRefactoringDescriptor(final String id) {
 		super(id, null, DescriptorMessages.JavaRefactoringDescriptor_not_available, null, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+		fArguments.put(ATTRIBUTE_VERSION, VALUE_VERSION_1_0);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public final Refactoring createRefactoring(final RefactoringStatus status) throws CoreException {
+	public Refactoring createRefactoring(final RefactoringStatus status) throws CoreException {
 		Refactoring refactoring= null;
 		final String id= getID();
 		final RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(id);
@@ -110,6 +306,23 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 				JavaManipulationPlugin.log(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), 0, MessageFormat.format(DescriptorMessages.JavaRefactoringDescriptor_no_resulting_descriptor, new Object[] { id}), null));
 		}
 		return refactoring;
+	}
+
+	/**
+	 * Returns the argument map of this refactoring descriptor.
+	 * <p>
+	 * The returned map is a copy of the argument map. Modifying the result does
+	 * not change the refactoring descriptor itself.
+	 * </p>
+	 * <p>
+	 * Note: This API must not be extended or reimplemented and should not be
+	 * called from outside the refactoring framework.
+	 * </p>
+	 * 
+	 * @return the argument map
+	 */
+	protected Map getArguments() {
+		return new HashMap(fArguments);
 	}
 
 	/**

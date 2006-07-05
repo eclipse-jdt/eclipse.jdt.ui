@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,15 +26,14 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -45,7 +43,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
  * 
  * @since 3.2
  */
-public class JDTRefactoringDescriptor extends RefactoringDescriptor {
+public class JDTRefactoringDescriptor extends JavaRefactoringDescriptor {
 
 	/**
 	 * Predefined argument called <code>element&lt;Number&gt;</code>.
@@ -94,9 +92,6 @@ public class JDTRefactoringDescriptor extends RefactoringDescriptor {
 	 */
 	public static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
 
-	/** The version attribute */
-	private static final String ATTRIBUTE_VERSION= "version"; //$NON-NLS-1$
-
 	/**
 	 * Constant describing the deprecation resolving flag.
 	 * <p>
@@ -107,9 +102,6 @@ public class JDTRefactoringDescriptor extends RefactoringDescriptor {
 	 * </p>
 	 */
 	public static final int DEPRECATION_RESOLVING= 1 << 17;
-
-	/** The version value 1.0 */
-	private static final String VALUE_VERSION_1_0= "1.0"; //$NON-NLS-1$
 
 	/**
 	 * Converts the specified element to an input handle.
@@ -240,37 +232,6 @@ public class JDTRefactoringDescriptor extends RefactoringDescriptor {
 		return resource.getFullPath().toPortableString();
 	}
 
-	/** The map of arguments (element type: &lt;String, String&gt;) */
-	private final Map fArguments;
-
-	/** The refactoring contribution, or <code>null</code> */
-	private JDTRefactoringContribution fContribution;
-
-	/**
-	 * Creates a new JDT refactoring descriptor.
-	 * 
-	 * @param contribution
-	 *            the refactoring contribution, or <code>null</code>
-	 * @param id
-	 *            the unique id of the refactoring
-	 * @param project
-	 *            the project name, or <code>null</code>
-	 * @param description
-	 *            the description
-	 * @param comment
-	 *            the comment, or <code>null</code>
-	 * @param arguments
-	 *            the argument map
-	 * @param flags
-	 *            the flags
-	 */
-	public JDTRefactoringDescriptor(final JDTRefactoringContribution contribution, final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
-		super(id, project, description, comment, flags);
-		Assert.isNotNull(arguments);
-		fContribution= contribution;
-		fArguments= arguments;
-	}
-
 	/**
 	 * Creates a new JDT refactoring descriptor.
 	 * 
@@ -288,7 +249,13 @@ public class JDTRefactoringDescriptor extends RefactoringDescriptor {
 	 *            the flags
 	 */
 	public JDTRefactoringDescriptor(final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
-		this(null, id, project, description, comment, arguments, flags);
+		super(id);
+		Assert.isNotNull(arguments);
+		fArguments.putAll(arguments);
+		setProject(project);
+		setDescription(description);
+		setComment(comment);
+		setFlags(flags);
 	}
 
 	/**
@@ -296,7 +263,7 @@ public class JDTRefactoringDescriptor extends RefactoringDescriptor {
 	 * 
 	 * @return the refactoring arguments
 	 */
-	public RefactoringArguments createArguments() {
+	public JavaRefactoringArguments createArguments() {
 		final JavaRefactoringArguments arguments= new JavaRefactoringArguments(getProject());
 		for (final Iterator iterator= getArguments().entrySet().iterator(); iterator.hasNext();) {
 			final Map.Entry entry= (Entry) iterator.next();
@@ -313,19 +280,19 @@ public class JDTRefactoringDescriptor extends RefactoringDescriptor {
 	 */
 	public Refactoring createRefactoring(final RefactoringStatus status) throws CoreException {
 		Refactoring refactoring= null;
-		if (fContribution != null)
-			refactoring= fContribution.createRefactoring(this);
-		else {
-			final RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(getID());
-			if (contribution instanceof JDTRefactoringContribution) {
-				fContribution= (JDTRefactoringContribution) contribution;
-				refactoring= fContribution.createRefactoring(this);
-			}
+		final RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(getID());
+		if (contribution instanceof JDTRefactoringContribution) {
+			final JDTRefactoringContribution extended= (JDTRefactoringContribution) contribution;
+			refactoring= extended.createRefactoring(this);
 		}
 		if (refactoring != null) {
-			if (refactoring instanceof IScriptableRefactoring)
-				status.merge(((IScriptableRefactoring) refactoring).initialize(createArguments()));
-			else
+			if (refactoring instanceof IScriptableRefactoring) {
+				final JavaRefactoringArguments arguments= createArguments();
+				if (arguments != null)
+					status.merge(((IScriptableRefactoring) refactoring).initialize(arguments));
+				else
+					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments));
+			} else
 				status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_initialization_error, getID())));
 		}
 		return refactoring;
@@ -344,23 +311,10 @@ public class JDTRefactoringDescriptor extends RefactoringDescriptor {
 	}
 
 	/**
-	 * Returns the argument map
-	 * 
-	 * @return the argument map.
+	 * {@inheritDoc}
 	 */
 	public Map getArguments() {
-		final Map map= new HashMap(fArguments);
-		map.put(ATTRIBUTE_VERSION, VALUE_VERSION_1_0);
-		return map;
-	}
-
-	/**
-	 * Returns the refactoring contribution.
-	 * 
-	 * @return the refactoring contribution, or <code>null</code>
-	 */
-	public JDTRefactoringContribution getContribution() {
-		return fContribution;
+		return super.getArguments();
 	}
 
 	/**

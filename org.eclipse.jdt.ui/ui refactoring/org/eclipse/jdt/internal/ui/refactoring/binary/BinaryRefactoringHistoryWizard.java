@@ -59,9 +59,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringContribution;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.binary.SourceCreationOperation;
@@ -495,15 +495,10 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 		Refactoring refactoring= null;
 		if (descriptor instanceof JDTRefactoringDescriptor) {
 			final JDTRefactoringDescriptor javaDescriptor= (JDTRefactoringDescriptor) descriptor;
-			JDTRefactoringContribution contribution= javaDescriptor.getContribution();
-			if (contribution != null)
-				refactoring= contribution.createRefactoring(descriptor);
-			else {
-				final RefactoringContribution refactoringContribution= RefactoringCore.getRefactoringContribution(javaDescriptor.getID());
-				if (refactoringContribution instanceof JDTRefactoringContribution) {
-					contribution= (JDTRefactoringContribution) refactoringContribution;
-					refactoring= contribution.createRefactoring(descriptor);
-				}
+			final RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(javaDescriptor.getID());
+			if (contribution instanceof JDTRefactoringContribution) {
+				final JDTRefactoringContribution extended= (JDTRefactoringContribution) contribution;
+				refactoring= extended.createRefactoring(descriptor);
 			}
 			if (refactoring != null) {
 				final RefactoringArguments arguments= javaDescriptor.createArguments();
@@ -524,7 +519,8 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 							attribute= JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 						}
 					}
-				}
+				} else
+					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments));
 				if (refactoring instanceof IScriptableRefactoring) {
 					fCurrentRefactoring= (IScriptableRefactoring) refactoring;
 					fCurrentArguments= arguments;

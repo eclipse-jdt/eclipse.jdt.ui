@@ -48,7 +48,7 @@ public final class JDTCopyRefactoringDescriptor extends JDTRefactoringDescriptor
 	 *            the flags
 	 */
 	public JDTCopyRefactoringDescriptor(final ReorgExecutionLog log, final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
-		super(null, id, project, description, comment, arguments, flags);
+		super(id, project, description, comment, arguments, flags);
 		Assert.isNotNull(log);
 		fLog= log;
 	}

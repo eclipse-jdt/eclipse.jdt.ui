@@ -12,25 +12,25 @@ package org.eclipse.jdt.internal.corext.refactoring;
 
 import java.util.Map;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+
+import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 
 /**
  * Partial implementation of a JDT refactoring contribution.
  * 
  * @since 3.2
  */
-public abstract class JDTRefactoringContribution extends RefactoringContribution {
+public abstract class JDTRefactoringContribution extends JavaRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public final RefactoringDescriptor createDescriptor(final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
-		return new JDTRefactoringDescriptor(this, id, project, description, comment, arguments, flags);
+		return new JDTRefactoringDescriptor(id, project, description, comment, arguments, flags);
 	}
 
 	/**
@@ -43,14 +43,4 @@ public abstract class JDTRefactoringContribution extends RefactoringContribution
 	 *             if an error occurs while creating the refactoring
 	 */
 	public abstract Refactoring createRefactoring(RefactoringDescriptor descriptor) throws CoreException;
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public final Map retrieveArgumentMap(final RefactoringDescriptor descriptor) {
-		Assert.isNotNull(descriptor);
-		if (descriptor instanceof JDTRefactoringDescriptor)
-			return ((JDTRefactoringDescriptor) descriptor).getArguments();
-		return super.retrieveArgumentMap(descriptor);
-	}
 }
