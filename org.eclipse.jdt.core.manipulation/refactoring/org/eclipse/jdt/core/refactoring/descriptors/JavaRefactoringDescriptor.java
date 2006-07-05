@@ -165,6 +165,10 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * @see RefactoringDescriptor#STRUCTURAL_CHANGE
 	 * @see RefactoringDescriptor#BREAKING_CHANGE
 	 * @see RefactoringDescriptor#MULTI_CHANGE
+	 * 
+	 * @see #JAR_MIGRATION
+	 * @see #JAR_REFACTORING
+	 * @see #JAR_SOURCE_ATTACHMENT
 	 */
 	public final void setFlags(final int flags) {
 		super.setFlags(flags);
@@ -173,7 +177,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	/**
 	 * Sets the project name of this refactoring.
 	 * <p>
-	 * The default is to associated the refactoring with the workspace.
+	 * The default is to associate the refactoring with the workspace.
 	 * Subclasses should call this method with the project name associated with
 	 * the refactoring's input elements, if available.
 	 * </p>
