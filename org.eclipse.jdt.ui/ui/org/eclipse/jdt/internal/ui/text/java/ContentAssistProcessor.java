@@ -22,9 +22,26 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.action.LegacyActionTools;
 import org.eclipse.jface.bindings.TriggerSequence;
 import org.eclipse.jface.bindings.keys.KeySequence;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.JFaceResources;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ContentAssistEvent;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
@@ -37,14 +54,19 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 
 /**
  * A content assist processor that aggregates the proposals of the
@@ -66,6 +88,14 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
  */
 public class ContentAssistProcessor implements IContentAssistProcessor {
 	private static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ResultCollector"));  //$NON-NLS-1$//$NON-NLS-2$
+
+	/**
+	 * Dialog settings key for the "all categories are disabled" warning dialog. See
+	 * {@link OptionalMessageDialog}.
+	 * 
+	 * @since 3.3
+	 */
+	private static final String PREF_WARN_ABOUT_EMPTY_ASSIST_CATEGORY= "EmptyDefaultAssistCategory"; //$NON-NLS-1$
 
 	private static final Comparator ORDER_COMPARATOR= new Comparator() {
 
@@ -105,7 +135,11 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 			public void assistSessionStarted(ContentAssistEvent event) {
 				if (event.processor != ContentAssistProcessor.this)
 					return;
-				
+
+				fIterationGesture= getIterationGesture();
+				KeySequence binding= getIterationBinding();
+
+				// this may show the warning dialog if all categories are disabled
 				fCategoryIteration= getCategoryIteration();
 				for (Iterator it= fCategories.iterator(); it.hasNext();) {
 					CompletionProposalCategory cat= (CompletionProposalCategory) it.next();
@@ -113,7 +147,6 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 				}
 				
 				fRepetition= 0;
-				fIterationGesture= getIterationGesture();
 				if (event.assistant instanceof IContentAssistantExtension2) {
 					IContentAssistantExtension2 extension= (IContentAssistantExtension2) event.assistant;
 
@@ -127,7 +160,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 						extension.setShowEmptyList(true);
 						if (extension instanceof IContentAssistantExtension3) {
 							IContentAssistantExtension3 ext3= (IContentAssistantExtension3) extension;
-							((ContentAssistant) ext3).setRepeatedInvocationTrigger(getIterationBinding());
+							((ContentAssistant) ext3).setRepeatedInvocationTrigger(binding);
 						}
 					}
 				
@@ -385,6 +418,17 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 
 	private List getDefaultCategories() {
 		// default mix - enable all included computers
+		List included= getDefaultCategoriesUnchecked();
+
+		if ((IJavaPartitions.JAVA_DOC.equals(fPartition) || IDocument.DEFAULT_CONTENT_TYPE.equals(fPartition)) && included.isEmpty() && !fCategories.isEmpty())
+			if (informUserAboutEmptyDefaultCategory())
+				// preferences were restored - recompute the default categories
+				included= getDefaultCategoriesUnchecked();
+
+		return included;
+	}
+
+	private List getDefaultCategoriesUnchecked() {
 		List included= new ArrayList();
 		for (Iterator it= fCategories.iterator(); it.hasNext();) {
 			CompletionProposalCategory category= (CompletionProposalCategory) it.next();
@@ -392,6 +436,87 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 				included.add(category);
 		}
 		return included;
+	}
+
+	/**
+	 * Informs the user about the fact that there are no enabled categories in the default content
+	 * assist set and shows a link to the preferences.
+	 * 
+	 * @since 3.3
+	 */
+	private boolean informUserAboutEmptyDefaultCategory() {
+		if (OptionalMessageDialog.isDialogEnabled(PREF_WARN_ABOUT_EMPTY_ASSIST_CATEGORY)) {
+			final Shell shell= JavaPlugin.getActiveWorkbenchShell();
+			String title= JavaTextMessages.ContentAssistProcessor_all_disabled_title;
+			String message= JavaTextMessages.ContentAssistProcessor_all_disabled_message;
+			// see PreferencePage#createControl for the 'defaults' label
+			final String restoreButtonLabel= JFaceResources.getString("defaults"); //$NON-NLS-1$
+			final String linkMessage= Messages.format(JavaTextMessages.ContentAssistProcessor_all_disabled_preference_link, LegacyActionTools.removeMnemonics(restoreButtonLabel));
+			final int restoreId= IDialogConstants.CLIENT_ID + 10;
+			final int settingsId= IDialogConstants.CLIENT_ID + 11;
+			final OptionalMessageDialog dialog= new OptionalMessageDialog(PREF_WARN_ABOUT_EMPTY_ASSIST_CATEGORY, shell, title, null /* default image */, message, MessageDialog.WARNING, new String[] { restoreButtonLabel, IDialogConstants.CLOSE_LABEL }, 1) {
+				/*
+				 * @see org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog#createCustomArea(org.eclipse.swt.widgets.Composite)
+				 */
+				protected Control createCustomArea(Composite composite) {
+					// wrap link and checkbox in one composite without space
+					Composite parent= new Composite(composite, SWT.NONE);
+					GridLayout layout= new GridLayout();
+					layout.marginHeight= 0;
+					layout.marginWidth= 0;
+					layout.verticalSpacing= 0;
+					parent.setLayout(layout);
+					
+					Composite linkComposite= new Composite(parent, SWT.NONE);
+					layout= new GridLayout();
+					layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
+					layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
+					layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
+					linkComposite.setLayout(layout);
+
+	        		Link link= new Link(linkComposite, SWT.NONE);
+	        		link.setText(linkMessage);
+	        		link.addSelectionListener(new SelectionAdapter() {
+	        			public void widgetSelected(SelectionEvent e) {
+	        				setReturnCode(settingsId);
+	        				close();
+	        			}
+	        		});
+	        		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+	        		gridData.widthHint= this.getMinimumMessageWidth();
+					link.setLayoutData(gridData);
+
+					// create checkbox and "don't show this message" prompt
+					super.createCustomArea(parent);
+					
+					return parent;
+	        	}
+				
+				/*
+				 * @see org.eclipse.jface.dialogs.MessageDialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
+				 */
+				protected void createButtonsForButtonBar(Composite parent) {
+			        Button[] buttons= new Button[2];
+					buttons[0]= createButton(parent, restoreId, restoreButtonLabel, false);
+			        buttons[1]= createButton(parent, IDialogConstants.CLOSE_ID, IDialogConstants.CLOSE_LABEL, true);
+			        setButtons(buttons);
+				}
+	        };
+	        int returnValue= dialog.open();
+	        if (restoreId == returnValue || settingsId == returnValue) {
+	        	if (restoreId == returnValue) {
+	        		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+	        		store.setToDefault(PreferenceConstants.CODEASSIST_CATEGORY_ORDER);
+	        		store.setToDefault(PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES);
+	        	}
+	        	if (settingsId == returnValue)
+					PreferencesUtil.createPreferenceDialogOn(shell, "org.eclipse.jdt.ui.preferences.CodeAssistPreferenceAdvanced", null, null).open(); //$NON-NLS-1$
+	        	CompletionProposalComputerRegistry registry= CompletionProposalComputerRegistry.getDefault();
+	        	registry.reload();
+	        	return true;
+	        }
+		}
+		return false;
 	}
 
 	private List getSeparateCategories() {
