@@ -19,6 +19,7 @@ import java.util.List;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -730,7 +731,10 @@ public final class StubUtility2 {
 		IMethodBinding[] typeMethods= binding.getDeclaredMethods();
 		for (int index= 0; index < typeMethods.length; index++) {
 			final int modifiers= typeMethods[index].getModifiers();
-			if (!typeMethods[index].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isFinal((modifiers)) && (isInterface || Modifier.isPublic(modifiers))) {
+			if (!typeMethods[index].isConstructor() && !Modifier.isStatic(modifiers) && (isInterface || Modifier.isPublic(modifiers))) {
+				IMethodBinding result= Bindings.findOverriddenMethodInHierarchy(hierarchy, typeMethods[index]);
+				if (result != null && Flags.isFinal(result.getModifiers()))
+					continue;
 				ITypeBinding[] parameterBindings= typeMethods[index].getParameterTypes();
 				boolean upper= false;
 				for (int offset= 0; offset < parameterBindings.length; offset++) {
@@ -900,7 +904,7 @@ public final class StubUtility2 {
 			while (superType.getSuperclass() != null)
 				superType= superType.getSuperclass();
 			IMethodBinding method= Bindings.findMethodInType(superType, "Object", new ITypeBinding[0]); //$NON-NLS-1$
-			if ((proposeDefault || (!accountExisting || existingConstructors.isEmpty())) && (!accountExisting || !Bindings.containsSignatureEquivalentConstructor(methods, method)))
+			if ((proposeDefault || (!accountExisting || (existingConstructors == null || existingConstructors.isEmpty()))) && (!accountExisting || !Bindings.containsSignatureEquivalentConstructor(methods, method)))
 				constructorMethods.add(method);
 		}
 		return (IMethodBinding[]) constructorMethods.toArray(new IMethodBinding[constructorMethods.size()]);

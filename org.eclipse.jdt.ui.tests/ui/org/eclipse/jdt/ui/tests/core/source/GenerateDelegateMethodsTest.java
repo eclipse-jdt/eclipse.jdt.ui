@@ -714,5 +714,61 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 				"}\r\n" + 
 				"", a.getSource());
 	}
-	
+
+	/**
+	 * Test delegate generation in secondary types with final methods
+	 * 
+	 * @throws Exception
+	 */
+	public void test11() throws Exception {
+		
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + 
+				"\r\n" + 
+				"public class A {\r\n" + 
+				"	public void foo() {\r\n" + 
+				"	}\r\n" + 
+				"	public final void bar() {\r\n" + 
+				"	}\r\n" + 
+				"}\r\n" + 
+				"\r\n" + 
+				"class SecondardClass {\r\n" + 
+				"	A someField;\r\n" + 
+				"}\r\n" + 
+				"", true, null);
+		
+		IType secondaryType= (IType)a.getElementAt(110);
+		IField someField= secondaryType.getField("someField");
+		IMethod firstMethod= a.getType("A").getMethod("foo", new String[0]);
+		IMethod secondMethod= a.getType("A").getMethod("bar", new String[0]);
+		
+		runOperation(secondaryType, new IField[] { someField, someField }, new IMethod[] { firstMethod, secondMethod });
+		
+		compareSource("package p;\r\n" + 
+				"\r\n" + 
+				"public class A {\r\n" + 
+				"	public void foo() {\r\n" + 
+				"	}\r\n" + 
+				"	public final void bar() {\r\n" + 
+				"	}\r\n" + 
+				"}\r\n" + 
+				"\r\n" + 
+				"class SecondardClass {\r\n" + 
+				"	A someField;\r\n" + 
+				"\r\n" + 
+				"	/* (non-Javadoc)\r\n" + 
+				"	 * @see p.A#foo()\r\n" + 
+				"	 */\r\n" + 
+				"	public void foo() {\r\n" + 
+				"		someField.foo();\r\n" + 
+				"	}\r\n" + 
+				"\r\n" + 
+				"	/* (non-Javadoc)\r\n" + 
+				"	 * @see p.A#bar()\r\n" + 
+				"	 */\r\n" + 
+				"	public final void bar() {\r\n" + 
+				"		someField.bar();\r\n" + 
+				"	}\r\n" + 
+				"}\r\n" + 
+				"", a.getSource());
+	}
 }
