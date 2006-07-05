@@ -320,6 +320,16 @@ public interface IJavaRefactorings {
 	public static final String PUSH_DOWN= "org.eclipse.jdt.ui.push.down"; //$NON-NLS-1$
 
 	/**
+	 * Refactoring id of the 'Rename Compilation Unit' refactoring (value:
+	 * <code>org.eclipse.jdt.ui.rename.compilationunit</code>).
+	 * <p>
+	 * Clients may safely cast the obtained refactoring descriptor to
+	 * {@link RenameJavaElementDescriptor}.
+	 * </p>
+	 */
+	public static final String RENAME_COMPILATION_UNIT= "org.eclipse.jdt.ui.rename.compilationunit"; //$NON-NLS-1$
+
+	/**
 	 * Refactoring id of the 'Rename Field' refactoring (value:
 	 * <code>org.eclipse.jdt.ui.rename.field</code>).
 	 * <p>
