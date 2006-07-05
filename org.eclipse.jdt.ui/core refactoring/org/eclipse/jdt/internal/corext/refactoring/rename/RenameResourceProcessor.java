@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -35,10 +32,11 @@ import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+import org.eclipse.jdt.core.refactoring.descriptors.RenameResourceDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -53,16 +51,21 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 
 public class RenameResourceProcessor extends RenameProcessor implements IScriptableRefactoring, ICommentProvider, INameUpdating {
 
-	private IResource fResource;
-	private String fNewElementName;
-	private String fComment;
-	private RenameModifications fRenameModifications;
-		
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameResourceProcessor"; //$NON-NLS-1$
-	
+
+	private String fComment;
+
+	private String fNewElementName;
+
+	private RenameModifications fRenameModifications;
+
+	private IResource fResource;
+
 	/**
 	 * Creates a new rename resource processor.
-	 * @param resource the resource, or <code>null</code> if invoked by scripting
+	 * 
+	 * @param resource
+	 *            the resource, or <code>null</code> if invoked by scripting
 	 */
 	public RenameResourceProcessor(IResource resource) {
 		fResource= resource;
@@ -71,124 +74,109 @@ public class RenameResourceProcessor extends RenameProcessor implements IScripta
 		}
 	}
 
-	//---- INameUpdating ---------------------------------------------------
-	
-	public void setNewElementName(String newName) {
-		Assert.isNotNull(newName);
-		fNewElementName= newName;
-	}
-
-	public String getNewElementName() {
-		return fNewElementName;
-	}
-	
-	//---- IRenameProcessor methods ---------------------------------------
-		
-	public String getIdentifier() {
-		return IDENTIFIER;
-	}
-	
-	public boolean isApplicable() throws JavaModelException {
-		return RefactoringAvailabilityTester.isRenameAvailable(fResource);
-	}
-	
-	public String getProcessorName() {
-		return RefactoringCoreMessages.RenameResourceProcessor_name;
-	}
-	
-	public Object[] getElements() {
-		return new Object[] {fResource};
-	}
-	
-	public String getCurrentElementName() {
-		return fResource.getName();
-	}
-	
-	public String[] getAffectedProjectNatures() throws CoreException {
-		return ResourceProcessors.computeAffectedNatures(fResource);
-	}
-
-	public Object getNewElement() {
-		return ResourcesPlugin.getWorkspace().getRoot().findMember(createNewPath(getNewElementName()));
-	}
-
-	public boolean getUpdateReferences() {
+	public boolean canEnableComment() {
 		return true;
 	}
-	
-	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants shared) throws CoreException {
-		return fRenameModifications.loadParticipants(status, this, getAffectedProjectNatures(), shared);
+
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws JavaModelException {
+		pm.beginTask("", 1); //$NON-NLS-1$
+		try {
+			fRenameModifications= new RenameModifications();
+			fRenameModifications.rename(fResource, new RenameArguments(getNewElementName(), getUpdateReferences()));
+
+			ResourceChangeChecker checker= (ResourceChangeChecker) context.getChecker(ResourceChangeChecker.class);
+			IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
+			fRenameModifications.buildDelta(deltaFactory);
+
+			return new RefactoringStatus();
+		} finally {
+			pm.done();
+		}
 	}
-	
-	//--- Condition checking --------------------------------------------
 
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		return RefactoringStatus.create(Resources.checkInSync(fResource));
 	}
-	
-	/* non java-doc
-	 * @see IRenameRefactoring#checkNewName()
-	 */
+
 	public RefactoringStatus checkNewElementName(String newName) throws JavaModelException {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		IContainer c= fResource.getParent();
 		if (c == null)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameResourceRefactoring_Internal_Error); 
-						
-		if (c.findMember(newName) != null)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameResourceRefactoring_alread_exists); 
-			
-		if (!c.getFullPath().isValidSegment(newName))
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameResourceRefactoring_invalidName); 
-	
-		RefactoringStatus result= RefactoringStatus.create(c.getWorkspace().validateName(newName, fResource.getType()));
-		if (! result.hasFatalError())
-			result.merge(RefactoringStatus.create(c.getWorkspace().validatePath(createNewPath(newName), fResource.getType())));		
-		return result;		
-	}
-	
-	/* non java-doc
-	 * @see Refactoring#checkInput(IProgressMonitor)
-	 */
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws JavaModelException {
-		pm.beginTask("", 1); //$NON-NLS-1$
-		try{
-			fRenameModifications= new RenameModifications();
-			fRenameModifications.rename(fResource, new RenameArguments(getNewElementName(), getUpdateReferences()));
-			
-			ResourceChangeChecker checker= (ResourceChangeChecker) context.getChecker(ResourceChangeChecker.class);
-			IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
-			fRenameModifications.buildDelta(deltaFactory);
-			
-			return new RefactoringStatus();
-		} finally{
-			pm.done();
-		}	
-	}
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameResourceRefactoring_Internal_Error);
 
-	private String createNewPath(String newName){
-		return fResource.getFullPath().removeLastSegments(1).append(newName).toString();
+		if (c.findMember(newName) != null)
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameResourceRefactoring_alread_exists);
+
+		if (!c.getFullPath().isValidSegment(newName))
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameResourceRefactoring_invalidName);
+
+		RefactoringStatus result= RefactoringStatus.create(c.getWorkspace().validateName(newName, fResource.getType()));
+		if (!result.hasFatalError())
+			result.merge(RefactoringStatus.create(c.getWorkspace().validatePath(createNewPath(newName), fResource.getType())));
+		return result;
 	}
-		
-	//--- changes 
 
 	public Change createChange(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try {
-			final Map arguments= new HashMap();
 			String project= null;
 			if (fResource.getType() != IResource.PROJECT)
 				project= fResource.getProject().getName();
 			final String header= Messages.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { fResource.getFullPath().toString(), getNewElementName()});
 			final String description= Messages.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description_short, fResource.getName());
 			final String comment= new JDTRefactoringDescriptorComment(project, this, header).asString();
-			final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(IJavaRefactorings.RENAME_RESOURCE, project, description, comment, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE);
-			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, JDTRefactoringDescriptor.resourceToHandle(project, fResource));
-			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
+			final int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE;
+			final RenameResourceDescriptor descriptor= new RenameResourceDescriptor();
+			descriptor.setProject(project);
+			descriptor.setDescription(description);
+			descriptor.setComment(comment);
+			descriptor.setFlags(flags);
+			descriptor.setResource(fResource);
+			descriptor.setNewName(getNewElementName());
 			return new DynamicValidationStateChange(new RenameResourceChange(descriptor, fResource, getNewElementName(), comment));
 		} finally {
 			pm.done();
 		}
+	}
+
+	private String createNewPath(String newName) {
+		return fResource.getFullPath().removeLastSegments(1).append(newName).toString();
+	}
+
+	public String[] getAffectedProjectNatures() throws CoreException {
+		return ResourceProcessors.computeAffectedNatures(fResource);
+	}
+
+	public String getComment() {
+		return fComment;
+	}
+
+	public String getCurrentElementName() {
+		return fResource.getName();
+	}
+
+	public Object[] getElements() {
+		return new Object[] { fResource};
+	}
+
+	public String getIdentifier() {
+		return IDENTIFIER;
+	}
+
+	public Object getNewElement() {
+		return ResourcesPlugin.getWorkspace().getRoot().findMember(createNewPath(getNewElementName()));
+	}
+
+	public String getNewElementName() {
+		return fNewElementName;
+	}
+
+	public String getProcessorName() {
+		return RefactoringCoreMessages.RenameResourceProcessor_name;
+	}
+
+	public boolean getUpdateReferences() {
+		return true;
 	}
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
@@ -211,15 +199,20 @@ public class RenameResourceProcessor extends RenameProcessor implements IScripta
 		return new RefactoringStatus();
 	}
 
-	public boolean canEnableComment() {
-		return true;
+	public boolean isApplicable() throws JavaModelException {
+		return RefactoringAvailabilityTester.isRenameAvailable(fResource);
 	}
 
-	public String getComment() {
-		return fComment;
+	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants shared) throws CoreException {
+		return fRenameModifications.loadParticipants(status, this, getAffectedProjectNatures(), shared);
 	}
 
 	public void setComment(final String comment) {
 		fComment= comment;
+	}
+
+	public void setNewElementName(String newName) {
+		Assert.isNotNull(newName);
+		fNewElementName= newName;
 	}
 }
