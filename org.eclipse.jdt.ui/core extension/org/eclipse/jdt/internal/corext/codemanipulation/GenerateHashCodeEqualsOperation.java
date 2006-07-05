@@ -162,7 +162,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 	private static final String VARIABLE_NAME_DOUBLE_TEMPORARY= "temp"; //$NON-NLS-1$
 
-	private static final String VARIABLE_NAME_PRIME= "PRIME"; //$NON-NLS-1$
+	private static final String VARIABLE_NAME_PRIME= "prime"; //$NON-NLS-1$
 
 	private static final String VARIABLE_NAME_RESULT= "result"; //$NON-NLS-1$
 

@@ -131,16 +131,16 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	@Override\r\n" + 
 				"	public int hashCode() {\r\n" + 
-				"		final int PRIME = 31;\r\n" + 
+				"		final int prime = 31;\r\n" + 
 				"		int result = 1;\r\n" + 
-				"		result = PRIME * result + (aBool ? 1231 : 1237);\r\n" + 
-				"		result = PRIME * result + aChar;\r\n" + 
-				"		result = PRIME * result + anInt;\r\n" + 
+				"		result = prime * result + (aBool ? 1231 : 1237);\r\n" + 
+				"		result = prime * result + aChar;\r\n" + 
+				"		result = prime * result + anInt;\r\n" + 
 				"		long temp;\r\n" + 
 				"		temp = Double.doubleToLongBits(aDouble);\r\n" + 
-				"		result = PRIME * result + (int) (temp ^ (temp >>> 32));\r\n" + 
-				"		result = PRIME * result + Float.floatToIntBits(aFloat);\r\n" + 
-				"		result = PRIME * result + (int) (aLong ^ (aLong >>> 32));\r\n" + 
+				"		result = prime * result + (int) (temp ^ (temp >>> 32));\r\n" + 
+				"		result = prime * result + Float.floatToIntBits(aFloat);\r\n" + 
+				"		result = prime * result + (int) (aLong ^ (aLong >>> 32));\r\n" + 
 				"		return result;\r\n" + 
 				"	}\r\n" + 
 				"	/* (non-Javadoc)\r\n" + 
@@ -215,9 +215,9 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	@Override\r\n" + 
 				"	public int hashCode() {\r\n" + 
-				"		final int PRIME = 31;\r\n" + 
+				"		final int prime = 31;\r\n" + 
 				"		int result = 1;\r\n" + 
-				"		result = PRIME * result + (aBool ? 1231 : 1237);\r\n" + 
+				"		result = prime * result + (aBool ? 1231 : 1237);\r\n" + 
 				"		return result;\r\n" + 
 				"	}\r\n" + 
 				"\r\n" + 
@@ -282,10 +282,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	@Override\r\n" + 
 				"	public int hashCode() {\r\n" + 
-				"		final int PRIME = 31;\r\n" + 
+				"		final int prime = 31;\r\n" + 
 				"		int result = 1;\r\n" + 
-				"		result = PRIME * result + ((anA == null) ? 0 : anA.hashCode());\r\n" + 
-				"		result = PRIME * result + ((aB == null) ? 0 : aB.hashCode());\r\n" + 
+				"		result = prime * result + ((anA == null) ? 0 : anA.hashCode());\r\n" + 
+				"		result = prime * result + ((aB == null) ? 0 : aB.hashCode());\r\n" + 
 				"		return result;\r\n" + 
 				"	}\r\n" + 
 				"	/* (non-Javadoc)\r\n" + 
@@ -357,10 +357,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	@Override\r\n" + 
 				"	public int hashCode() {\r\n" + 
-				"		final int PRIME = 31;\r\n" + 
+				"		final int prime = 31;\r\n" + 
 				"		int result = 1;\r\n" + 
-				"		result = PRIME * result + ((anA == null) ? 0 : anA.hashCode());\r\n" + 
-				"		result = PRIME * result + ((aB == null) ? 0 : aB.hashCode());\r\n" + 
+				"		result = prime * result + ((anA == null) ? 0 : anA.hashCode());\r\n" + 
+				"		result = prime * result + ((aB == null) ? 0 : aB.hashCode());\r\n" + 
 				"		return result;\r\n" + 
 				"	}\r\n" + 
 				"	/* (non-Javadoc)\r\n" + 
@@ -427,10 +427,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	@Override\r\n" + 
 				"	public int hashCode() {\r\n" + 
-				"		final int PRIME = 31;\r\n" + 
+				"		final int prime = 31;\r\n" + 
 				"		int result = 1;\r\n" + 
-				"		result = PRIME * result + Arrays.hashCode(someAs);\r\n" + 
-				"		result = PRIME * result + Arrays.hashCode(someInts);\r\n" + 
+				"		result = prime * result + Arrays.hashCode(someAs);\r\n" + 
+				"		result = prime * result + Arrays.hashCode(someInts);\r\n" + 
 				"		return result;\r\n" + 
 				"	}\r\n" + 
 				"	/* (non-Javadoc)\r\n" + 
@@ -492,9 +492,9 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	@Override\r\n" + 
 				"	public int hashCode() {\r\n" + 
-				"		final int PRIME = 31;\r\n" + 
+				"		final int prime = 31;\r\n" + 
 				"		int result = 1;\r\n" + 
-				"		result = PRIME * result + someInt;\r\n" + 
+				"		result = prime * result + someInt;\r\n" + 
 				"		return result;\r\n" + 
 				"	}\r\n" + 
 				"	/* (non-Javadoc)\r\n" + 
@@ -559,11 +559,11 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	@Override\r\n" + 
 				"	public int hashCode() {\r\n" + 
-				"		final int PRIME = 31;\r\n" + 
+				"		final int prime = 31;\r\n" + 
 				"		int result = 1;\r\n" + 
-				"		result = PRIME * result + ((intList == null) ? 0 : intList.hashCode());\r\n" + 
-				"		result = PRIME * result + ((intBoolHashMap == null) ? 0 : intBoolHashMap.hashCode());\r\n" + 
-				"		result = PRIME * result + ((someEnum == null) ? 0 : someEnum.hashCode());\r\n" + 
+				"		result = prime * result + ((intList == null) ? 0 : intList.hashCode());\r\n" + 
+				"		result = prime * result + ((intBoolHashMap == null) ? 0 : intBoolHashMap.hashCode());\r\n" + 
+				"		result = prime * result + ((someEnum == null) ? 0 : someEnum.hashCode());\r\n" + 
 				"		return result;\r\n" + 
 				"	}\r\n" + 
 				"	/* (non-Javadoc)\r\n" + 
@@ -630,13 +630,13 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	@Override\r\n" + 
 				"	public int hashCode() {\r\n" + 
-				"		final int PRIME = 31;\r\n" + 
+				"		final int prime = 31;\r\n" + 
 				"		int result = 1;\r\n" + 
 				"		long temp;\r\n" + 
 				"		temp = Double.doubleToLongBits(d1);\r\n" + 
-				"		result = PRIME * result + (int) (temp ^ (temp >>> 32));\r\n" + 
+				"		result = prime * result + (int) (temp ^ (temp >>> 32));\r\n" + 
 				"		temp = Double.doubleToLongBits(d2);\r\n" + 
-				"		result = PRIME * result + (int) (temp ^ (temp >>> 32));\r\n" + 
+				"		result = prime * result + (int) (temp ^ (temp >>> 32));\r\n" + 
 				"		return result;\r\n" + 
 				"	}\r\n" + 
 				"	/* (non-Javadoc)\r\n" + 
@@ -694,15 +694,15 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	@Override\r\n" + 
 				"	public int hashCode() {\r\n" + 
-				"		final int PRIME = 31;\r\n" + 
+				"		final int prime = 31;\r\n" + 
 				"		int result = 1;\r\n" + 
 				"		long temp;\r\n" + 
 				"		temp = Double.doubleToLongBits(this.temp);\r\n" + 
-				"		result = PRIME * result + (int) (temp ^ (temp >>> 32));\r\n" + 
-				"		result = PRIME * result + (this.result ? 1231 : 1237);\r\n" + 
-				"		result = PRIME * result + ((obj == null) ? 0 : obj.hashCode());\r\n" + 
+				"		result = prime * result + (int) (temp ^ (temp >>> 32));\r\n" + 
+				"		result = prime * result + (this.result ? 1231 : 1237);\r\n" + 
+				"		result = prime * result + ((obj == null) ? 0 : obj.hashCode());\r\n" + 
 				"		temp = Double.doubleToLongBits(someOther);\r\n" + 
-				"		result = PRIME * result + (int) (temp ^ (temp >>> 32));\r\n" + 
+				"		result = prime * result + (int) (temp ^ (temp >>> 32));\r\n" + 
 				"		return result;\r\n" + 
 				"	}\r\n" + 
 				"	/* (non-Javadoc)\r\n" + 
@@ -775,16 +775,16 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	@Override\r\n" + 
 				"	public int hashCode() {\r\n" + 
-				"		final int PRIME = 31;\r\n" + 
+				"		final int prime = 31;\r\n" + 
 				"		int result = 1;\r\n" + 
-				"		result = PRIME * result + (aBool ? 1231 : 1237);\r\n" + 
-				"		result = PRIME * result + aChar;\r\n" + 
-				"		result = PRIME * result + anInt;\r\n" + 
+				"		result = prime * result + (aBool ? 1231 : 1237);\r\n" + 
+				"		result = prime * result + aChar;\r\n" + 
+				"		result = prime * result + anInt;\r\n" + 
 				"		long temp;\r\n" + 
 				"		temp = Double.doubleToLongBits(aDouble);\r\n" + 
-				"		result = PRIME * result + (int) (temp ^ (temp >>> 32));\r\n" + 
-				"		result = PRIME * result + Float.floatToIntBits(aFloat);\r\n" + 
-				"		result = PRIME * result + (int) (aLong ^ (aLong >>> 32));\r\n" + 
+				"		result = prime * result + (int) (temp ^ (temp >>> 32));\r\n" + 
+				"		result = prime * result + Float.floatToIntBits(aFloat);\r\n" + 
+				"		result = prime * result + (int) (aLong ^ (aLong >>> 32));\r\n" + 
 				"		return result;\r\n" + 
 				"	}\r\n" + 
 				"	/* (non-Javadoc)\r\n" + 
@@ -859,9 +859,9 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	@Override\r\n" + 
 				"	public int hashCode() {\r\n" + 
-				"		final int PRIME = 31;\r\n" + 
+				"		final int prime = 31;\r\n" + 
 				"		int result = 1;\r\n" + 
-				"		result = PRIME * result + (aBool ? 1231 : 1237);\r\n" + 
+				"		result = prime * result + (aBool ? 1231 : 1237);\r\n" + 
 				"		return result;\r\n" + 
 				"	}\r\n" + 
 				"\r\n" + 
@@ -926,10 +926,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	@Override\r\n" + 
 				"	public int hashCode() {\r\n" + 
-				"		final int PRIME = 31;\r\n" + 
+				"		final int prime = 31;\r\n" + 
 				"		int result = 1;\r\n" + 
-				"		result = PRIME * result + ((anA == null) ? 0 : anA.hashCode());\r\n" + 
-				"		result = PRIME * result + ((aB == null) ? 0 : aB.hashCode());\r\n" + 
+				"		result = prime * result + ((anA == null) ? 0 : anA.hashCode());\r\n" + 
+				"		result = prime * result + ((aB == null) ? 0 : aB.hashCode());\r\n" + 
 				"		return result;\r\n" + 
 				"	}\r\n" + 
 				"	/* (non-Javadoc)\r\n" + 
