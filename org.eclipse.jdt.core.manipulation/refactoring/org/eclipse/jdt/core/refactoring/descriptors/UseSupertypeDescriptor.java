@@ -28,6 +28,11 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
  * appropriate refactoring id.
  * </p>
  * <p>
+ * Clients must first set the basic refactoring descriptor attributes such as
+ * the project name, the description, the comment and the flags before setting
+ * any other attributes.
+ * </p>
+ * <p>
  * Note: this class is not intended to be instantiated by clients.
  * </p>
  * 
