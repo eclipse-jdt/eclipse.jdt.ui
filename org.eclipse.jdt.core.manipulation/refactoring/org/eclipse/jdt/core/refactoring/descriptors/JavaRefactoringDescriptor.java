@@ -339,7 +339,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * 
 	 * @see #getComment()
 	 */
-	public final void setComment(final String comment) {
+	public void setComment(final String comment) {
 		super.setComment(comment);
 	}
 
@@ -355,7 +355,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * 
 	 * @see #getDescription()
 	 */
-	public final void setDescription(final String description) {
+	public void setDescription(final String description) {
 		super.setDescription(description);
 	}
 
@@ -383,7 +383,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * @see #JAR_REFACTORING
 	 * @see #JAR_SOURCE_ATTACHMENT
 	 */
-	public final void setFlags(final int flags) {
+	public void setFlags(final int flags) {
 		super.setFlags(flags);
 	}
 
@@ -401,7 +401,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * 
 	 * @see #getProject()
 	 */
-	public final void setProject(final String project) {
+	public void setProject(final String project) {
 		super.setProject(project);
 	}
 }
