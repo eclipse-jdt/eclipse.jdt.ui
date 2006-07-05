@@ -120,8 +120,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor implements IScriptableRefactoring, ICommentProvider {
 
+	// TODO: remove
 	protected static final String ATTRIBUTE_INSTANCEOF= "instanceof"; //$NON-NLS-1$
 
+	// TODO: remove
 	protected static final String ATTRIBUTE_REPLACE= "replace"; //$NON-NLS-1$
 
 	/** The super type group category set */

@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.core.refactoring.descriptors;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 /**
@@ -32,10 +35,55 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
  */
 public final class UseSupertypeDescriptor extends JavaRefactoringDescriptor {
 
+	/** The instanceof attribute */
+	private static final String ATTRIBUTE_INSTANCEOF= "instanceof"; //$NON-NLS-1$
+
 	/**
 	 * Creates a new refactoring descriptor.
 	 */
 	public UseSupertypeDescriptor() {
 		super(IJavaRefactorings.USE_SUPER_TYPE);
+	}
+
+	/**
+	 * Determines whether 'instanceof' statements are considered as candidates
+	 * to replace the subtype occurrence by one of its supertypes.
+	 * 
+	 * @param replace
+	 *            <code>true</code> to replace subtype occurrences in
+	 *            'instanceof' statements, <code>false</code> otherwise
+	 */
+	public void setReplaceInstanceof(final boolean replace) {
+		fArguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(replace).toString());
+	}
+
+	/**
+	 * Sets the subtype of the refactoring.
+	 * <p>
+	 * Occurrences of the subtype are replaced by the supertype set by
+	 * {@link #setSupertype(IType)} where possible.
+	 * </p>
+	 * 
+	 * @param type
+	 *            the subtype to set
+	 */
+	public void setSubtype(final IType type) {
+		Assert.isNotNull(type);
+		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, elementToHandle(getProject(), type));
+	}
+
+	/**
+	 * Sets the supertype of the refactoring.
+	 * <p>
+	 * Occurrences of the subtype set by {@link #setSubtype(IType)} are replaced
+	 * by the supertype where possible.
+	 * </p>
+	 * 
+	 * @param type
+	 *            the supertype to set
+	 */
+	public void setSupertype(final IType type) {
+		Assert.isNotNull(type);
+		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, elementToHandle(getProject(), type));
 	}
 }

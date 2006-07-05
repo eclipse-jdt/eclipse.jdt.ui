@@ -11,10 +11,8 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
@@ -49,12 +47,13 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
+import org.eclipse.jdt.core.refactoring.descriptors.UseSupertypeDescriptor;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
@@ -204,7 +203,6 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 			final TextEditBasedChange[] changes= fChangeManager.getAllChanges();
 			if (changes != null && changes.length != 0) {
 				fChanges= changes.length;
-				final Map arguments= new HashMap();
 				IJavaProject project= null;
 				if (!fSubType.isBinary())
 					project= fSubType.getJavaProject();
@@ -221,10 +219,14 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 				final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(name, this, header);
 				comment.addSetting(Messages.format(RefactoringCoreMessages.UseSuperTypeProcessor_refactored_element_pattern, JavaElementLabels.getElementLabel(fSuperType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 				addSuperTypeSettings(comment, false);
-				final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(IJavaRefactorings.USE_SUPER_TYPE, name, description, comment.asString(), arguments, flags);
-				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSubType));
-				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(fSuperType));
-				arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
+				final UseSupertypeDescriptor descriptor= new UseSupertypeDescriptor();
+				descriptor.setProject(name);
+				descriptor.setDescription(description);
+				descriptor.setComment(comment.asString());
+				descriptor.setFlags(flags);
+				descriptor.setSubtype(getSubType());
+				descriptor.setSupertype(getSuperType());
+				descriptor.setReplaceInstanceof(fInstanceOf);
 				return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.UseSupertypeWherePossibleRefactoring_name, fChangeManager.getAllChanges());
 			}
 			monitor.worked(1);
