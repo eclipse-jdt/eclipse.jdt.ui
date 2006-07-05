@@ -224,7 +224,8 @@ public class TestSearchEngine {
 		if (testCaseType == null)
 			return found;
 
-		IType[] subtypes= javaProject.newTypeHierarchy(testCaseType, getRegion(element), pm).getAllSubtypes(testCaseType);
+		IRegion region= getRegion(element);
+		IType[] subtypes= javaProject.newTypeHierarchy(testCaseType, region, pm).getAllSubtypes(testCaseType);
 
 		if (subtypes == null)
 			throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JUnitPlugin.PLUGIN_ID,
@@ -232,8 +233,10 @@ public class TestSearchEngine {
 
 		for (int i= 0; i < subtypes.length; i++) {
 			try {
-				if (hasValidModifiers(subtypes[i]))
-					found.add(subtypes[i]);
+				IType type= subtypes[i];
+				if (hasValidModifiers(type) && region.contains(type)) {
+					found.add(type);
+				}
 			} catch (JavaModelException e) {
 				JUnitPlugin.log(e.getStatus());
 			}

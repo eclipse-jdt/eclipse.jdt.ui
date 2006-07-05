@@ -135,6 +135,23 @@ public class TestTestSearchEngine extends TestCase {
 			}, result);
 	}
 	
+	public void testTwoPackageFragmentRootsSearchingInOneNoSupertype() throws Exception {
+		// regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=139961
+		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
+		createCompilationUnit(p, 1);
+		
+		IPackageFragmentRoot root2= JavaProjectHelper.addSourceContainer(fProject, "tests");
+		IPackageFragment r= root2.createPackageFragment("r", true, null);
+		ICompilationUnit testSub= r.createCompilationUnit(
+				"TestSub.java", 
+				"package r; import p.Test1; public class TestSub extends Test1 { }",
+				true,
+				null);
+		
+		IType[] result= TestSearchEngine.findTests(new Object[] {root2});
+		assertEquals("Test case not found", new IType[] { testSub.getType("TestSub") }, result);
+	}
+	
 	public void testProject() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		ICompilationUnit test1= createCompilationUnit(p, 1);
