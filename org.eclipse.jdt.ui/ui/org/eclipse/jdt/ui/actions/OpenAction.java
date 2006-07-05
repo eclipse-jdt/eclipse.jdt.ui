@@ -29,6 +29,7 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
@@ -193,7 +194,10 @@ public class OpenAction extends SelectionDispatchAction {
 				boolean activateOnOpen= fEditor != null ? true : OpenStrategy.activateOnOpen();
 				IEditorPart part= EditorUtility.openInEditor(element, activateOnOpen);
 				if (part != null && element instanceof IJavaElement)
-					JavaUI.revealInEditor(part, (IJavaElement)element);	
+					JavaUI.revealInEditor(part, (IJavaElement)element);
+			} catch (PartInitException e) {
+				String message= Messages.format(ActionMessages.OpenAction_error_problem_opening_editor, new String[] { new JavaUILabelProvider().getText(element), e.getStatus().getMessage() });
+				status.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
 			} catch (CoreException e) {
 				String message= Messages.format(ActionMessages.OpenAction_error_problem_opening_editor, new String[] { new JavaUILabelProvider().getText(element), e.getStatus().getMessage() });
 				status.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
@@ -202,7 +206,7 @@ public class OpenAction extends SelectionDispatchAction {
 		}
 		if (!status.isOK()) {
 			IStatus[] children= status.getChildren();
-			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.OpenAction_erro_message, children.length == 1 ? children[0] : status);
+			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.OpenAction_error_message, children.length == 1 ? children[0] : status);
 		}
 	}
 	
