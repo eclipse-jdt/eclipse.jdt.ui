@@ -723,7 +723,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 			}
 			public boolean visit(MethodInvocation methodCall){
 				ITypeBinding typeBinding= methodCall.resolveTypeBinding();
-				if (typeBinding.isArray()){
+				if (typeBinding != null && typeBinding.isArray()){
 					fCollectionIsMethodCall= true;
 					fMethodInvocation= methodCall;
 					fOldCollectionTypeBinding= typeBinding;

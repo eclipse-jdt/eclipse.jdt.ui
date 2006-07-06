@@ -1162,7 +1162,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 	
-	public void testBug148419() throws Exception {
+	public void testBug149797() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -1171,6 +1171,27 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    public void foo() {\n");
 		buf.append("        for (int i = 0; i < this.ints.length; i++) {\n");
 		buf.append("            this.ints[i]= 0;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		List proposals= fetchConvertingProposal(buf, cu);
+
+		assertNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+	}
+	
+	public void testBug() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int ba r() {return 0;}\n");
+		buf.append("    public void foo(int[] ints) {\n");
+		buf.append("        for (int i = 0, max = ints.length, b= bar(); i < max; i++) {\n");
+		buf.append("            System.out.println(ints[i] + b);\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
