@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -259,12 +260,17 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 
 	private void checkThatArrayIsNotAssigned(final List writeAccesses, Expression expression) {
 		ArrayAccess arrayAccess= (ArrayAccess)expression;
-		if (arrayAccess.getArray() instanceof Name) {
-			Name arrayName= (Name)arrayAccess.getArray();
-			IBinding binding= arrayName.resolveBinding();
-			if (binding == fOldCollectionBinding)
-				writeAccesses.add(arrayAccess);
+		Expression array= arrayAccess.getArray();
+		IBinding binding= null;
+		if (array instanceof Name) {
+			binding= ((Name)array).resolveBinding();
+		} else if (array instanceof FieldAccess) {
+			binding= ((FieldAccess)array).resolveFieldBinding();
+		} else if (array instanceof SuperFieldAccess) {
+			binding= ((SuperFieldAccess)array).resolveFieldBinding();
 		}
+		if (binding == fOldCollectionBinding)
+			writeAccesses.add(arrayAccess);
 	}
 
 	private boolean isAccessToADifferentArray(ArrayAccess arrayAccess) {
