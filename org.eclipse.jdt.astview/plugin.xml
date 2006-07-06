@@ -6,7 +6,7 @@
          point="org.eclipse.ui.views">
       <view
             name="ASTView"
-            icon="icons/view.gif"
+            icon="$nl$/icons/view.gif"
             category="org.eclipse.jdt.ui.java"
             class="org.eclipse.jdt.astview.views.ASTView"
             id="org.eclipse.jdt.astview.views.ASTView">
