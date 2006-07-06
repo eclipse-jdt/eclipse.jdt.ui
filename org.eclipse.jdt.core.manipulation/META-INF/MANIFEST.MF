@@ -14,5 +14,6 @@ Eclipse-LazyStart: true
 Export-Package: org.eclipse.jdt.core.manipulation,
  org.eclipse.jdt.core.refactoring,
  org.eclipse.jdt.core.refactoring.descriptors,
- org.eclipse.jdt.internal.core.manipulation;x-internal:=true
+ org.eclipse.jdt.internal.core.manipulation;x-internal:=true,
+ org.eclipse.jdt.internal.core.refactoring.descriptors;x-internal:=true
 Bundle-RequiredExecutionEnvironment: J2SE-1.4
