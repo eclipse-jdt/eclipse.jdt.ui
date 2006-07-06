@@ -18,4 +18,3 @@ Export-Package: junit.extensions;version="4.1.0",
  org.junit.runner.manipulation;version="4.1.0",
  org.junit.runner.notification;version="4.1.0",
  org.junit.runners;version="4.1.0"
-Eclipse-LazyStart: true

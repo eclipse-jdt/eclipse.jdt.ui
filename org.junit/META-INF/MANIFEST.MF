@@ -14,5 +14,4 @@ Export-Package:
  junit.swingui;version="3.8.1",
  junit.swingui.icons;version="3.8.1",
  junit.textui;version="3.8.1"
-Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.3
