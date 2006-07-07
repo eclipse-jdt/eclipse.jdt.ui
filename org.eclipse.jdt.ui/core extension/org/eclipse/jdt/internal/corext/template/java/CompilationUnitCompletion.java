@@ -244,7 +244,12 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 						TypeParameterResolver util= new TypeParameterResolver(this);
 						fMemberTypes= util.computeBinding("java.lang.Iterable", 0); //$NON-NLS-1$
 					} catch (JavaModelException e) {
-						fMemberTypes= new String[0];
+						try {
+							TypeParameterResolver util= new TypeParameterResolver(this);
+							fMemberTypes= util.computeBinding("java.util.Collection", 0); //$NON-NLS-1$
+						} catch (JavaModelException x) {
+							fMemberTypes= new String[0];
+						}
 					}
 				}
 				if (fMemberTypes.length > 0)
@@ -382,7 +387,10 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		 */
 		public String[] computeBinding(String superType, int index) throws JavaModelException, IndexOutOfBoundsException {
 			IJavaProject project= fUnit.getJavaProject();
-			return computeBinding(project.findType(superType), index);
+			IType type= project.findType(superType);
+			if (type == null)
+				throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "No such type", null))); //$NON-NLS-1$
+			return computeBinding(type, index);
 		}
 
 		/**
