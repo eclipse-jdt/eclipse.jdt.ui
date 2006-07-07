@@ -234,6 +234,7 @@ public class Binding extends ASTAttribute {
 			} catch (RuntimeException e) {
 				String label= ">java element: " + e.getClass().getName() + " for \"" + fBinding.getKey() + "\"";  //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 				res.add(new Error(this, label, e));
+				ASTViewPlugin.log("Exception thrown in IBinding#getJavaElement() for \"" + fBinding.getKey() + "\"", e);
 			}
 			return res.toArray();
 		}
