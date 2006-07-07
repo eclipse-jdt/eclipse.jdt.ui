@@ -58,7 +58,7 @@ public class ControlStatementsFix extends AbstractFix {
 				boolean removeUnnecessaryBlocks,
 				boolean removeUnnecessaryBlocksOnlyWhenReturnOrThrow,
 				boolean findForLoopsToConvert,
-				List resultingCollection) throws CoreException {
+				List resultingCollection) {
 			
 			fFindControlStatementsWithoutBlock= findControlStatementsWithoutBlock;
 			fRemoveUnnecessaryBlocks= removeUnnecessaryBlocks;
@@ -79,9 +79,9 @@ public class ControlStatementsFix extends AbstractFix {
 					fResult.add(new AddBlockOperation(DoStatement.BODY_PROPERTY, doBody, node));
 				}
 			} else if (fRemoveUnnecessaryBlocks || fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
-				RemoveBlockOperation op= createRemoveBlockOperation(node, DoStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow);
-				if (op != null)
-					fResult.add(op);
+				if (RemoveBlockOperation.satisfiesPrecondition(node, DoStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
+					fResult.add(new RemoveBlockOperation(node, DoStatement.BODY_PROPERTY));
+				}
 			}
 			return super.visit(node);
 		}
@@ -120,9 +120,9 @@ public class ControlStatementsFix extends AbstractFix {
 							fResult.add(new AddBlockOperation(ForStatement.BODY_PROPERTY, forBody, node));
 						}
 					} else if (fRemoveUnnecessaryBlocks || fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
-						RemoveBlockOperation op= createRemoveBlockOperation(node, ForStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow);
-						if (op != null)
-							fResult.add(op);
+						if (RemoveBlockOperation.satisfiesPrecondition(node, ForStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
+							fResult.add(new RemoveBlockOperation(node, ForStatement.BODY_PROPERTY));
+						}
 					}
 				}
 			} else if (fFindControlStatementsWithoutBlock) {
@@ -131,9 +131,9 @@ public class ControlStatementsFix extends AbstractFix {
 					fResult.add(new AddBlockOperation(ForStatement.BODY_PROPERTY, forBody, node));
 				}
 			} else if (fRemoveUnnecessaryBlocks || fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
-				RemoveBlockOperation op= createRemoveBlockOperation(node, ForStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow);
-				if (op != null)
-					fResult.add(op);
+				if (RemoveBlockOperation.satisfiesPrecondition(node, ForStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
+					fResult.add(new RemoveBlockOperation(node, ForStatement.BODY_PROPERTY));
+				}
 			}
 			return super.visit(node);
 		}
@@ -148,9 +148,9 @@ public class ControlStatementsFix extends AbstractFix {
 					fResult.add(new AddBlockOperation(EnhancedForStatement.BODY_PROPERTY, forBody, node));
 				}
 			} else if (fRemoveUnnecessaryBlocks || fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
-				RemoveBlockOperation op= createRemoveBlockOperation(node, EnhancedForStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow);
-				if (op != null)
-					fResult.add(op);
+				if (RemoveBlockOperation.satisfiesPrecondition(node, EnhancedForStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
+					fResult.add(new RemoveBlockOperation(node, EnhancedForStatement.BODY_PROPERTY));
+				}
 			}
 			return super.visit(node);
 		}
@@ -196,13 +196,13 @@ public class ControlStatementsFix extends AbstractFix {
 					fResult.add(new AddBlockOperation(IfStatement.ELSE_STATEMENT_PROPERTY, elseStatement, statement));
 				}
 			} else if (fRemoveUnnecessaryBlocks || fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
-				RemoveBlockOperation op= createRemoveBlockOperation(statement, IfStatement.THEN_STATEMENT_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow);
-				if (op != null)
-					fResult.add(op);
+				if (RemoveBlockOperation.satisfiesPrecondition(statement, IfStatement.THEN_STATEMENT_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
+					fResult.add(new RemoveBlockOperation(statement, IfStatement.THEN_STATEMENT_PROPERTY));
+				}
 				if (!(statement.getElseStatement() instanceof IfStatement)) {
-					op= createRemoveBlockOperation(statement, IfStatement.ELSE_STATEMENT_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow);
-					if (op != null)
-						fResult.add(op);
+					if (RemoveBlockOperation.satisfiesPrecondition(statement, IfStatement.ELSE_STATEMENT_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
+						fResult.add(new RemoveBlockOperation(statement, IfStatement.ELSE_STATEMENT_PROPERTY));
+					}	
 				}
 			}
 			return super.visit(statement);
@@ -218,13 +218,47 @@ public class ControlStatementsFix extends AbstractFix {
 					fResult.add(new AddBlockOperation(WhileStatement.BODY_PROPERTY, whileBody, node));
 				}
 			} else if (fRemoveUnnecessaryBlocks || fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
-				RemoveBlockOperation op= createRemoveBlockOperation(node, WhileStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow);
-				if (op != null)
-					fResult.add(op);
+				if (RemoveBlockOperation.satisfiesPrecondition(node, WhileStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow))
+					fResult.add(new RemoveBlockOperation(node, WhileStatement.BODY_PROPERTY));
 			}
 			return super.visit(node);
 		}
 
+	}
+	
+	private static class IfElseIterator {
+		
+		private IfStatement fCursor;
+		
+		public IfElseIterator(IfStatement item) {
+			fCursor= findStart(item);
+		}
+		
+		public IfStatement next() {
+			if (!hasNext())
+				return null;
+			
+			IfStatement result= fCursor;
+			
+			if (fCursor.getElseStatement() instanceof IfStatement) {
+				fCursor= (IfStatement)fCursor.getElseStatement();
+			} else {
+				fCursor= null;
+			}
+			
+			return result;
+		}
+		
+		public boolean hasNext() {
+			return fCursor != null;
+		}
+
+		private IfStatement findStart(IfStatement item) {
+            while (item.getParent() instanceof IfStatement) {
+            	item= (IfStatement)item.getParent();
+            }
+            return item;
+        }
 	}
 	
 	private static final class AddBlockOperation extends AbstractFixRewriteOperation {
@@ -265,13 +299,11 @@ public class ControlStatementsFix extends AbstractFix {
 	
 	private static class RemoveBlockOperation extends AbstractFixRewriteOperation {
 
-		private final Block fBlock;
 		private final Statement fStatement;
 		private final ChildPropertyDescriptor fChild;
 
-		public RemoveBlockOperation(Block block, Statement statement, ChildPropertyDescriptor child) {
-			fBlock= block;
-			fStatement= statement;
+		public RemoveBlockOperation(Statement controlStatement, ChildPropertyDescriptor child) {
+			fStatement= controlStatement;
 			fChild= child;
 		}
 
@@ -280,12 +312,55 @@ public class ControlStatementsFix extends AbstractFix {
 		 */
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			Statement moveTarget= (Statement)rewrite.createMoveTarget((ASTNode)fBlock.statements().get(0));
+
+			Block block= (Block)fStatement.getStructuralProperty(fChild);
+			Statement moveTarget= (Statement)rewrite.createMoveTarget((ASTNode)block.statements().get(0));
 			
 			TextEditGroup group= createTextEditGroup(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription);
 			textEditGroups.add(group);
 			rewrite.set(fStatement, fChild, moveTarget, group);
 		}
+
+		//Can the block around child with childDescriptor of controlStatement be removed?
+        private static boolean satisfiesPrecondition(Statement controlStatement, ChildPropertyDescriptor childDescriptor, boolean onlyReturnAndThrows) {
+        	Object child= controlStatement.getStructuralProperty(childDescriptor);
+        	
+        	if (!(child instanceof Block))
+        		return false;
+        	
+        	Block block= (Block)child;
+        	List list= block.statements();
+        	if (list.size() != 1)
+        		return false;
+        	
+        	ASTNode singleStatement= (ASTNode)list.get(0);
+        	
+        	if (onlyReturnAndThrows)
+        		if (!(singleStatement instanceof ReturnStatement) && !(singleStatement instanceof ThrowStatement))
+        			return false;
+        	
+        	if (controlStatement instanceof IfStatement) {
+        		// if (true) {
+        		// 	if (false)
+        		//   ;
+        		// } else
+        		//   ;
+        		
+        		if (((IfStatement)controlStatement).getThenStatement() != child)
+        			return true;//can always remove blocks in else part
+        		
+        		if (!(singleStatement instanceof IfStatement))
+        			return true;//can always remove if single statement is not an if statement
+        		
+        		IfStatement ifStatement= (IfStatement)controlStatement;
+        		if (ifStatement.getElseStatement() == null)
+        			return true;//can always remove if no else part
+        		
+        		return false;
+        	} else {
+        		return true;
+        	}
+        }
 
 	}
 
@@ -304,7 +379,7 @@ public class ControlStatementsFix extends AbstractFix {
 
 		return new ControlStatementsFix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new ILinkedFixRewriteOperation[] {loopConverter});
 	}
-	
+		
 	public static IFix[] createRemoveBlockFix(CompilationUnit compilationUnit, ASTNode node) {
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (statement == null) {
@@ -324,120 +399,58 @@ public class ControlStatementsFix extends AbstractFix {
 		}
 		
 		if (statement instanceof IfStatement) {
-			IFixRewriteOperation[] allConvert= getAllConverts(((IfStatement)statement));
+			List result= new ArrayList();
 			
-			String label1= FixMessages.ControlStatementsFix_removeIfBlock_proposalDescription;
-			RemoveBlockOperation op1= createRemoveBlockOperation (statement, IfStatement.THEN_STATEMENT_PROPERTY, false);
-			String label2= FixMessages.ControlStatementsFix_removeElseBlock_proposalDescription;
-			RemoveBlockOperation op2= createRemoveBlockOperation(statement, IfStatement.ELSE_STATEMENT_PROPERTY, false);
-			if (op1 != null && op2 != null) {
-				return new IFix[] {
-						new ControlStatementsFix(label1, compilationUnit, new IFixRewriteOperation[] {op1}),
-						new ControlStatementsFix(label2, compilationUnit, new IFixRewriteOperation[] {op2}),
-						new ControlStatementsFix(FixMessages.ControlStatementsFix_removeIfElseBlock_proposalDescription, compilationUnit, allConvert)
-				};
-			} else if (op1 != null) {
-				if (allConvert.length == 1) {
-					return new IFix[] {new ControlStatementsFix(label1, compilationUnit, new IFixRewriteOperation[] {op1})};
-				} else {
-					return new IFix[] {
-							new ControlStatementsFix(label1, compilationUnit, new IFixRewriteOperation[] {op1}),
-							new ControlStatementsFix(FixMessages.ControlStatementsFix_removeIfElseBlock_proposalDescription, compilationUnit, allConvert)
-							};
-				}
-			} else if (op2 != null) {
-				if (allConvert.length == 1) {
-					return new IFix[] {new ControlStatementsFix(label2, compilationUnit, new IFixRewriteOperation[] {op2})};
-				} else {
-					return new IFix[] {
-							new ControlStatementsFix(label2, compilationUnit, new IFixRewriteOperation[] {op2}),
-							new ControlStatementsFix(FixMessages.ControlStatementsFix_removeIfElseBlock_proposalDescription, compilationUnit, allConvert)
-							};
-					
-				}
+			List removeAllList= new ArrayList();
+			
+			IfElseIterator iter= new IfElseIterator((IfStatement)statement);
+			IfStatement item= null;
+			while (iter.hasNext()) {
+				item= iter.next();
+				if (RemoveBlockOperation.satisfiesPrecondition(item, IfStatement.THEN_STATEMENT_PROPERTY, false)) {
+            		RemoveBlockOperation op= new RemoveBlockOperation(item, IfStatement.THEN_STATEMENT_PROPERTY);
+					removeAllList.add(op);
+					if (item == statement)
+						result.add(new ControlStatementsFix(FixMessages.ControlStatementsFix_removeIfBlock_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op}));
+            	}
 			}
+			
+			if (RemoveBlockOperation.satisfiesPrecondition(item, IfStatement.ELSE_STATEMENT_PROPERTY, false)) {
+            	RemoveBlockOperation op= new RemoveBlockOperation(item, IfStatement.ELSE_STATEMENT_PROPERTY);
+				removeAllList.add(op);
+				if (item == statement)
+					result.add(new ControlStatementsFix(FixMessages.ControlStatementsFix_removeElseBlock_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op}));
+            }
+            
+			if (removeAllList.size() > 1) {
+				IFixRewriteOperation[] allConvert= (IFixRewriteOperation[])removeAllList.toArray(new IFixRewriteOperation[removeAllList.size()]);
+				result.add(new ControlStatementsFix(FixMessages.ControlStatementsFix_removeIfElseBlock_proposalDescription, compilationUnit, allConvert));
+            }
+            
+            return (IFix[])result.toArray(new IFix[result.size()]);
 		} else if (statement instanceof WhileStatement) {
-			RemoveBlockOperation op= createRemoveBlockOperation(statement, WhileStatement.BODY_PROPERTY, false);
-			if (op != null) {
+			if (RemoveBlockOperation.satisfiesPrecondition(statement, WhileStatement.BODY_PROPERTY, false)) {
+				RemoveBlockOperation op= new RemoveBlockOperation(statement, WhileStatement.BODY_PROPERTY);
 				return new IFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op})};
 			}
 		} else if (statement instanceof ForStatement) {
-			RemoveBlockOperation op= createRemoveBlockOperation(statement, ForStatement.BODY_PROPERTY, false);
-			if (op != null) {
+			if (RemoveBlockOperation.satisfiesPrecondition(statement, ForStatement.BODY_PROPERTY, false)) {
+				RemoveBlockOperation op= new RemoveBlockOperation(statement, ForStatement.BODY_PROPERTY);
 				return new IFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op})};
 			}
 		} else if (statement instanceof EnhancedForStatement) {
-			RemoveBlockOperation op= createRemoveBlockOperation(statement, EnhancedForStatement.BODY_PROPERTY, false);
-			if (op != null) {
+			if (RemoveBlockOperation.satisfiesPrecondition(statement, EnhancedForStatement.BODY_PROPERTY, false)) {
+				RemoveBlockOperation op= new RemoveBlockOperation(statement, EnhancedForStatement.BODY_PROPERTY);
 				return new IFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op})};
 			}
 		} else if (statement instanceof DoStatement) {
-			RemoveBlockOperation op= createRemoveBlockOperation(statement, DoStatement.BODY_PROPERTY, false);
-			if (op != null) {
+			if (RemoveBlockOperation.satisfiesPrecondition(statement, DoStatement.BODY_PROPERTY, false)) {
+				RemoveBlockOperation op= new RemoveBlockOperation(statement, DoStatement.BODY_PROPERTY);
 				return new IFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op})};
 			}
 		}
 		
 		return null;
-	}
-	
-	private static IFixRewriteOperation[] getAllConverts(IfStatement statement) {
-		IfStatement start= statement;
-		while (start.getParent() instanceof IfStatement) {
-			start= (IfStatement)start.getParent();
-		}
-		List result= new ArrayList();
-		RemoveBlockOperation op= createRemoveBlockOperation(start, IfStatement.THEN_STATEMENT_PROPERTY, false);
-		if (op != null) {
-			result.add(op);
-		}
-		while (start.getElseStatement() instanceof IfStatement) {
-			start= (IfStatement)start.getElseStatement();
-			op= createRemoveBlockOperation(start, IfStatement.THEN_STATEMENT_PROPERTY, false);
-			if (op != null) {
-				result.add(op);
-			}
-		}
-		op= createRemoveBlockOperation(start, IfStatement.ELSE_STATEMENT_PROPERTY, false);
-		if (op != null) {
-			result.add(op);
-		}
-		
-		return (IFixRewriteOperation[])result.toArray(new IFixRewriteOperation[result.size()]);
-	}
-
-	private static RemoveBlockOperation createRemoveBlockOperation(Statement statement, ChildPropertyDescriptor child, boolean onlyReturnAndThrows) {
-		ASTNode node= (ASTNode)statement.getStructuralProperty(child);
-		
-		if (node instanceof Block) {
-			Block block= (Block)node;
-			List statements= block.statements();
-			if (statements.size() == 1) {
-				if (statement instanceof IfStatement && IfStatement.THEN_STATEMENT_PROPERTY == child) {
-					if (!canRemoveBlockArroundThen((IfStatement)statement, (ASTNode)statements.get(0)))
-						return null;
-				}
-				if (onlyReturnAndThrows) {
-					ASTNode stmt= (ASTNode)statements.get(0);
-					if (stmt instanceof ReturnStatement || stmt instanceof ThrowStatement) {
-						return new RemoveBlockOperation(block, statement, child);
-					}
-				} else {
-					return new RemoveBlockOperation(block, statement, child);
-				}
-			}
-		}
-		return null;
-	}
-
-	private static boolean canRemoveBlockArroundThen(IfStatement statement, ASTNode thenStatement) {
-		if (statement.getElseStatement() == null)
-			return true;
-		
-		if (!(thenStatement instanceof IfStatement))
-			return true;
-
-		return false;
 	}
 
 	public static IFix createCleanUp(CompilationUnit compilationUnit, 
@@ -458,8 +471,7 @@ public class ControlStatementsFix extends AbstractFix {
 		
 		IFixRewriteOperation[] ops= (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]);
 		return new ControlStatementsFix("", compilationUnit, ops); //$NON-NLS-1$
-	}
-	
+	}	
 
 	protected ControlStatementsFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations) {
 		super(name, compilationUnit, fixRewriteOperations);
