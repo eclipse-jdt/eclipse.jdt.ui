@@ -334,6 +334,7 @@ public class PotentialProgrammingProblemsFix extends AbstractFix {
 	                return true;
                 }
 			};
+			return fCurrentContext.initialize(monitor);
 		} else if (randomId) {
 			fCurrentContext= new ISerialVersionFixContext() {
 				private Random rng;
@@ -348,11 +349,13 @@ public class PotentialProgrammingProblemsFix extends AbstractFix {
 	                return true;
                 }
 			};
-		} else {
+			return fCurrentContext.initialize(monitor);
+		} else if (calculatedId) {
 			fCurrentContext= new SerialVersionHashContext(project, compilationUnits);
+			return fCurrentContext.initialize(monitor);
+		} else {
+			return new RefactoringStatus();
 		}
-		
-	    return fCurrentContext.initialize(monitor);
     }
 	
 	public static RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
