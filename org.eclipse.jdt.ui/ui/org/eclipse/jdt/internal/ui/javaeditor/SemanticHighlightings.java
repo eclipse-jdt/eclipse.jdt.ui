@@ -406,40 +406,41 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
 		public boolean consumes(SemanticToken token) {
-			SimpleName node= token.getNode();
-			if (isAutoUnBoxing(node))
+			return isAutoUnBoxing(token.getNode());
+		}
+
+		private boolean isAutoUnBoxing(Expression node) {
+			if (isAutoUnBoxingExpression(node))
 				return true;
-			if (node != null) {
-				// special cases: the autoboxing conversions happens at a 
-				// location that is not mapped directly to a simple name
-				// or a literal, but can still be mapped somehow
-				// A) expressions
-				StructuralPropertyDescriptor desc= node.getLocationInParent();
-				if (desc == ArrayAccess.ARRAY_PROPERTY 
-						|| desc == InfixExpression.LEFT_OPERAND_PROPERTY 
-						|| desc == InfixExpression.RIGHT_OPERAND_PROPERTY
-						|| desc == ConditionalExpression.THEN_EXPRESSION_PROPERTY
-						|| desc == PrefixExpression.OPERAND_PROPERTY
-						|| desc == CastExpression.EXPRESSION_PROPERTY
-						|| desc == ConditionalExpression.ELSE_EXPRESSION_PROPERTY) {
-					ASTNode parent= node.getParent();
+			// special cases: the autoboxing conversions happens at a 
+			// location that is not mapped directly to a simple name
+			// or a literal, but can still be mapped somehow
+			// A) expressions
+			StructuralPropertyDescriptor desc= node.getLocationInParent();
+			if (desc == ArrayAccess.ARRAY_PROPERTY 
+					|| desc == InfixExpression.LEFT_OPERAND_PROPERTY 
+					|| desc == InfixExpression.RIGHT_OPERAND_PROPERTY
+					|| desc == ConditionalExpression.THEN_EXPRESSION_PROPERTY
+					|| desc == PrefixExpression.OPERAND_PROPERTY
+					|| desc == CastExpression.EXPRESSION_PROPERTY
+					|| desc == ConditionalExpression.ELSE_EXPRESSION_PROPERTY) {
+				ASTNode parent= node.getParent();
+				if (parent instanceof Expression)
+					return isAutoUnBoxingExpression((Expression) parent);
+			}
+			// B) constructor invocations
+			if (desc == SimpleType.NAME_PROPERTY || desc == QualifiedType.NAME_PROPERTY) {
+				ASTNode parent= node.getParent();
+				if (parent != null && parent.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY) {
+					parent= parent.getParent();
 					if (parent instanceof Expression)
-						return isAutoUnBoxing((Expression) parent);
-				}
-				// B) constructor invocations
-				if (desc == SimpleType.NAME_PROPERTY || desc == QualifiedType.NAME_PROPERTY) {
-					ASTNode parent= node.getParent();
-					if (parent != null && parent.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY) {
-						parent= parent.getParent();
-						if (parent instanceof Expression)
-							return isAutoUnBoxing((Expression) parent);
-					}
+						return isAutoUnBoxingExpression((Expression) parent);
 				}
 			}
 			return false;
 		}
 		
-		private boolean isAutoUnBoxing(Expression expression) {
+		private boolean isAutoUnBoxingExpression(Expression expression) {
 			return expression.resolveBoxing() || expression.resolveUnboxing();
 		}
 	}
@@ -685,9 +686,11 @@ public class SemanticHighlightings {
 				return false;
 
 			// filter out annotation value references
-			ITypeBinding declaringType= ((IMethodBinding)binding).getDeclaringClass();
-			if (declaringType.isAnnotation())
-				return false;
+			if (binding != null) {
+				ITypeBinding declaringType= ((IMethodBinding)binding).getDeclaringClass();
+				if (declaringType.isAnnotation())
+					return false;
+			}
 
 			return true;
 		}

@@ -62,8 +62,9 @@ public class AutoboxingSemanticHighlightingTest extends AbstractSemanticHighligh
 			createPosition(43, 28, 5),
 			createPosition(45, 12, 4),
 			createPosition(46, 12, 4),
-			createPosition(48, 14, 3),
-			createPosition(50, 21, 6),
+			createPosition(47, 15, 2),
+			createPosition(49, 14, 3),
+			createPosition(51, 21, 6),
 		};
 
 		Position[] actual= getSemanticHighlightingPositions();

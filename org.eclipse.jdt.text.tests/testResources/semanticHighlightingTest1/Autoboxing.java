@@ -45,6 +45,7 @@ class Autoboxing {
 
         i= -bigI; // prefix expr
         i= ~bigI;
+        bigI= -42;
 
         bigI= foo(); // method return value
 
