@@ -277,7 +277,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	}
 
 	/** The argument map */
-	protected final Map fArguments= new HashMap();
+	protected final Map fArguments;
 
 	/**
 	 * Creates a new java refactoring descriptor.
@@ -286,7 +286,20 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 *            the unique id of the refactoring
 	 */
 	protected JavaRefactoringDescriptor(final String id) {
+		this(id, new HashMap());
+	}
+
+	/**
+	 * Creates a new java refactoring descriptor.
+	 * 
+	 * @param id
+	 *            the unique id of the refactoring
+	 * @param arguments
+	 *            the argument map to use
+	 */
+	protected JavaRefactoringDescriptor(final String id, final Map arguments) {
 		super(id, null, DescriptorMessages.JavaRefactoringDescriptor_not_available, null, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+		fArguments= arguments;
 		fArguments.put(ATTRIBUTE_VERSION, VALUE_VERSION_1_0);
 	}
 

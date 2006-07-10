@@ -249,9 +249,7 @@ public class JDTRefactoringDescriptor extends JavaRefactoringDescriptor {
 	 *            the flags
 	 */
 	public JDTRefactoringDescriptor(final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
-		super(id);
-		Assert.isNotNull(arguments);
-		fArguments.putAll(arguments);
+		super(id, arguments);
 		setProject(project);
 		setDescription(description);
 		setComment(comment);
