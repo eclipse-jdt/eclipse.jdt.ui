@@ -51,7 +51,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -116,7 +115,6 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 
-import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPageLayout;
@@ -133,7 +131,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.operations.NonLocalUndoUserApprover;
-import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
@@ -1976,18 +1973,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	public void synchronizeOutlinePageSelection() {
 		synchronizeOutlinePage(computeHighlightRangeSourceReference());
-	}
-
-
-	/*
-	 * Get the desktop's StatusLineManager
-	 */
-	protected IStatusLineManager getStatusLineManager() {
-		IEditorActionBarContributor contributor= getEditorSite().getActionBarContributor();
-		if (contributor instanceof EditorActionBarContributor) {
-			return ((EditorActionBarContributor) contributor).getActionBars().getStatusLineManager();
-		}
-		return null;
 	}
 
 	/*

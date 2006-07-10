@@ -12,8 +12,9 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
-import java.lang.reflect.InvocationTargetException;
 import com.ibm.icu.text.Collator;
+
+import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
 
 import org.eclipse.core.runtime.IStatus;
@@ -37,11 +38,9 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.FilteredList;
-import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.progress.IProgressService;
 import org.eclipse.ui.texteditor.IUpdate;
 
@@ -244,13 +243,8 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		}
 	}
 
-
 	private IStatusLineManager getStatusLineManager() {
-		IEditorActionBarContributor contributor= fEditor.getEditorSite().getActionBarContributor();
-		if (contributor instanceof EditorActionBarContributor) {
-			return ((EditorActionBarContributor) contributor).getActionBars().getStatusLineManager();
-		}
-		return null;
+		return fEditor.getEditorSite().getActionBars().getStatusLineManager();
 	}
 
 	/**

@@ -50,13 +50,11 @@ import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.progress.IProgressService;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -586,11 +584,8 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	}
 	
 	private void setStatusBarMessage(String message) {
-		IEditorActionBarContributor contributor= fEditor.getEditorSite().getActionBarContributor();
-		if (contributor instanceof EditorActionBarContributor) {
-			IStatusLineManager manager= ((EditorActionBarContributor) contributor).getActionBars().getStatusLineManager();
-			manager.setMessage(message);
-		}
+		IStatusLineManager manager= fEditor.getEditorSite().getActionBars().getStatusLineManager();
+		manager.setMessage(message);
 	}
 	
 	private IEditingSupport createViewerHelper() {
