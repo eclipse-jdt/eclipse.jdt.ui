@@ -4293,6 +4293,48 @@ public class CleanUpTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 	
+	public void testRemoveBlockBug149990() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (false) {\n");
+		buf.append("            while (true) {\n");
+		buf.append("                if (false) {\n");
+		buf.append("                    ;\n");
+		buf.append("                }\n");
+		buf.append("            }\n");
+		buf.append("        } else\n");
+		buf.append("            ;\n");
+		buf.append("    }\n");
+		buf.append("}");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS);
+		refactoring.addCleanUp(cleanUp1);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (false) {\n");
+		buf.append("            while (true)\n");
+		buf.append("                if (false)\n");
+		buf.append("                    ;\n");
+		buf.append("        } else\n");
+		buf.append("            ;\n");
+		buf.append("    }\n");
+		buf.append("}");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
 	public void testUnnecessaryCodeBug127704_1() throws Exception {
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

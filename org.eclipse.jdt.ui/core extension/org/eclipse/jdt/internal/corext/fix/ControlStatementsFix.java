@@ -79,7 +79,7 @@ public class ControlStatementsFix extends AbstractFix {
 					fResult.add(new AddBlockOperation(DoStatement.BODY_PROPERTY, doBody, node));
 				}
 			} else if (fRemoveUnnecessaryBlocks || fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
-				if (RemoveBlockOperation.satisfiesPrecondition(node, DoStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
+				if (RemoveBlockOperation.satisfiesCleanUpPrecondition(node, DoStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
 					fResult.add(new RemoveBlockOperation(node, DoStatement.BODY_PROPERTY));
 				}
 			}
@@ -120,7 +120,7 @@ public class ControlStatementsFix extends AbstractFix {
 							fResult.add(new AddBlockOperation(ForStatement.BODY_PROPERTY, forBody, node));
 						}
 					} else if (fRemoveUnnecessaryBlocks || fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
-						if (RemoveBlockOperation.satisfiesPrecondition(node, ForStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
+						if (RemoveBlockOperation.satisfiesCleanUpPrecondition(node, ForStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
 							fResult.add(new RemoveBlockOperation(node, ForStatement.BODY_PROPERTY));
 						}
 					}
@@ -131,7 +131,7 @@ public class ControlStatementsFix extends AbstractFix {
 					fResult.add(new AddBlockOperation(ForStatement.BODY_PROPERTY, forBody, node));
 				}
 			} else if (fRemoveUnnecessaryBlocks || fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
-				if (RemoveBlockOperation.satisfiesPrecondition(node, ForStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
+				if (RemoveBlockOperation.satisfiesCleanUpPrecondition(node, ForStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
 					fResult.add(new RemoveBlockOperation(node, ForStatement.BODY_PROPERTY));
 				}
 			}
@@ -148,7 +148,7 @@ public class ControlStatementsFix extends AbstractFix {
 					fResult.add(new AddBlockOperation(EnhancedForStatement.BODY_PROPERTY, forBody, node));
 				}
 			} else if (fRemoveUnnecessaryBlocks || fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
-				if (RemoveBlockOperation.satisfiesPrecondition(node, EnhancedForStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
+				if (RemoveBlockOperation.satisfiesCleanUpPrecondition(node, EnhancedForStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
 					fResult.add(new RemoveBlockOperation(node, EnhancedForStatement.BODY_PROPERTY));
 				}
 			}
@@ -196,11 +196,11 @@ public class ControlStatementsFix extends AbstractFix {
 					fResult.add(new AddBlockOperation(IfStatement.ELSE_STATEMENT_PROPERTY, elseStatement, statement));
 				}
 			} else if (fRemoveUnnecessaryBlocks || fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
-				if (RemoveBlockOperation.satisfiesPrecondition(statement, IfStatement.THEN_STATEMENT_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
+				if (RemoveBlockOperation.satisfiesCleanUpPrecondition(statement, IfStatement.THEN_STATEMENT_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
 					fResult.add(new RemoveBlockOperation(statement, IfStatement.THEN_STATEMENT_PROPERTY));
 				}
 				if (!(statement.getElseStatement() instanceof IfStatement)) {
-					if (RemoveBlockOperation.satisfiesPrecondition(statement, IfStatement.ELSE_STATEMENT_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
+					if (RemoveBlockOperation.satisfiesCleanUpPrecondition(statement, IfStatement.ELSE_STATEMENT_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
 						fResult.add(new RemoveBlockOperation(statement, IfStatement.ELSE_STATEMENT_PROPERTY));
 					}	
 				}
@@ -218,7 +218,7 @@ public class ControlStatementsFix extends AbstractFix {
 					fResult.add(new AddBlockOperation(WhileStatement.BODY_PROPERTY, whileBody, node));
 				}
 			} else if (fRemoveUnnecessaryBlocks || fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
-				if (RemoveBlockOperation.satisfiesPrecondition(node, WhileStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow))
+				if (RemoveBlockOperation.satisfiesCleanUpPrecondition(node, WhileStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow))
 					fResult.add(new RemoveBlockOperation(node, WhileStatement.BODY_PROPERTY));
 			}
 			return super.visit(node);
@@ -320,9 +320,17 @@ public class ControlStatementsFix extends AbstractFix {
 			textEditGroups.add(group);
 			rewrite.set(fStatement, fChild, moveTarget, group);
 		}
+		
+		public static boolean satisfiesCleanUpPrecondition(Statement controlStatement, ChildPropertyDescriptor childDescriptor, boolean onlyReturnAndThrows) {
+			return satisfiesPrecondition(controlStatement, childDescriptor, onlyReturnAndThrows, true);
+		}
+		
+		public static boolean satisfiesQuickAssistPrecondition(Statement controlStatement, ChildPropertyDescriptor childDescriptor) {
+			return satisfiesPrecondition(controlStatement, childDescriptor, false, false);
+		}
 
 		//Can the block around child with childDescriptor of controlStatement be removed?
-        private static boolean satisfiesPrecondition(Statement controlStatement, ChildPropertyDescriptor childDescriptor, boolean onlyReturnAndThrows) {
+        private static boolean satisfiesPrecondition(Statement controlStatement, ChildPropertyDescriptor childDescriptor, boolean onlyReturnAndThrows, boolean cleanUpCheck) {
         	Object child= controlStatement.getStructuralProperty(childDescriptor);
         	
         	if (!(child instanceof Block))
@@ -341,25 +349,92 @@ public class ControlStatementsFix extends AbstractFix {
         	
         	if (controlStatement instanceof IfStatement) {
         		// if (true) {
-        		// 	if (false)
-        		//   ;
+        		//  while (true) 
+        		// 	 if (false)
+        		//    ;
         		// } else
         		//   ;
         		
         		if (((IfStatement)controlStatement).getThenStatement() != child)
         			return true;//can always remove blocks in else part
         		
-        		if (!(singleStatement instanceof IfStatement))
-        			return true;//can always remove if single statement is not an if statement
-        		
         		IfStatement ifStatement= (IfStatement)controlStatement;
         		if (ifStatement.getElseStatement() == null)
         			return true;//can always remove if no else part
         		
-        		return false;
+        		return !hasUnblockedIf((Statement)singleStatement, onlyReturnAndThrows, cleanUpCheck);
         	} else {
-        		return true;
+        		//if (true)
+        		// while (true) {
+        		//  if (false)
+        		//   ;
+        		// }
+        		//else
+        		// ;
+        		if (!hasUnblockedIf((Statement)singleStatement, onlyReturnAndThrows, cleanUpCheck))
+        			return true;
+        		
+        		ASTNode currentChild= controlStatement;
+        		ASTNode parent= currentChild.getParent();
+        		while (true) {
+        			Statement body= null;
+        			if (parent instanceof IfStatement) {
+        				body= ((IfStatement)parent).getThenStatement();
+        				if (body == currentChild && ((IfStatement)parent).getElseStatement() != null)//->currentChild is an unblocked then part
+        					return false;
+        			} else if (parent instanceof WhileStatement) {
+        				body= ((WhileStatement)parent).getBody();
+        			} else if (parent instanceof DoStatement) {
+        				body= ((DoStatement)parent).getBody();
+        			} else if (parent instanceof ForStatement) {
+        				body= ((ForStatement)parent).getBody();
+        			} else if (parent instanceof EnhancedForStatement) {
+        				body= ((EnhancedForStatement)parent).getBody();
+        			} else {
+        				return true;
+        			}
+        			if (body != currentChild)//->parents child is a block
+        				return true;
+        			
+        			currentChild= parent;
+        			parent= currentChild.getParent();
+        		}
         	}
+        }
+
+		private static boolean hasUnblockedIf(Statement p, boolean onlyReturnAndThrows, boolean cleanUpCheck) {
+	        while (true) {
+	        	if (p instanceof IfStatement) {
+	        		return true;
+	        	} else {
+
+	        		ChildPropertyDescriptor childD= null;
+	        		if (p instanceof WhileStatement) {
+	        			childD= WhileStatement.BODY_PROPERTY;
+	        		} else if (p instanceof ForStatement) {
+	        			childD= ForStatement.BODY_PROPERTY;
+	        		} else if (p instanceof EnhancedForStatement) {
+	        			childD= EnhancedForStatement.BODY_PROPERTY;
+	        		} else if (p instanceof DoStatement) {
+	        			childD= DoStatement.BODY_PROPERTY;
+	        		} else {
+	        			return false;
+	        		}
+	        		Statement body= (Statement)p.getStructuralProperty(childD);
+	        		if (body instanceof Block) {
+	        			if (!cleanUpCheck) {
+	        				return false;
+	        			} else {
+	        				if (!satisfiesPrecondition(p, childD, onlyReturnAndThrows, cleanUpCheck))
+	        					return false;
+	        				
+	        				p= (Statement)((Block)body).statements().get(0);
+	        			}
+	        		} else {
+	        			p= body;
+	        		}
+	        	}
+	        }
         }
 
 	}
@@ -407,7 +482,7 @@ public class ControlStatementsFix extends AbstractFix {
 			IfStatement item= null;
 			while (iter.hasNext()) {
 				item= iter.next();
-				if (RemoveBlockOperation.satisfiesPrecondition(item, IfStatement.THEN_STATEMENT_PROPERTY, false)) {
+				if (RemoveBlockOperation.satisfiesQuickAssistPrecondition(item, IfStatement.THEN_STATEMENT_PROPERTY)) {
             		RemoveBlockOperation op= new RemoveBlockOperation(item, IfStatement.THEN_STATEMENT_PROPERTY);
 					removeAllList.add(op);
 					if (item == statement)
@@ -415,7 +490,7 @@ public class ControlStatementsFix extends AbstractFix {
             	}
 			}
 			
-			if (RemoveBlockOperation.satisfiesPrecondition(item, IfStatement.ELSE_STATEMENT_PROPERTY, false)) {
+			if (RemoveBlockOperation.satisfiesQuickAssistPrecondition(item, IfStatement.ELSE_STATEMENT_PROPERTY)) {
             	RemoveBlockOperation op= new RemoveBlockOperation(item, IfStatement.ELSE_STATEMENT_PROPERTY);
 				removeAllList.add(op);
 				if (item == statement)
@@ -429,22 +504,22 @@ public class ControlStatementsFix extends AbstractFix {
             
             return (IFix[])result.toArray(new IFix[result.size()]);
 		} else if (statement instanceof WhileStatement) {
-			if (RemoveBlockOperation.satisfiesPrecondition(statement, WhileStatement.BODY_PROPERTY, false)) {
+			if (RemoveBlockOperation.satisfiesQuickAssistPrecondition(statement, WhileStatement.BODY_PROPERTY)) {
 				RemoveBlockOperation op= new RemoveBlockOperation(statement, WhileStatement.BODY_PROPERTY);
 				return new IFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op})};
 			}
 		} else if (statement instanceof ForStatement) {
-			if (RemoveBlockOperation.satisfiesPrecondition(statement, ForStatement.BODY_PROPERTY, false)) {
+			if (RemoveBlockOperation.satisfiesQuickAssistPrecondition(statement, ForStatement.BODY_PROPERTY)) {
 				RemoveBlockOperation op= new RemoveBlockOperation(statement, ForStatement.BODY_PROPERTY);
 				return new IFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op})};
 			}
 		} else if (statement instanceof EnhancedForStatement) {
-			if (RemoveBlockOperation.satisfiesPrecondition(statement, EnhancedForStatement.BODY_PROPERTY, false)) {
+			if (RemoveBlockOperation.satisfiesQuickAssistPrecondition(statement, EnhancedForStatement.BODY_PROPERTY)) {
 				RemoveBlockOperation op= new RemoveBlockOperation(statement, EnhancedForStatement.BODY_PROPERTY);
 				return new IFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op})};
 			}
 		} else if (statement instanceof DoStatement) {
-			if (RemoveBlockOperation.satisfiesPrecondition(statement, DoStatement.BODY_PROPERTY, false)) {
+			if (RemoveBlockOperation.satisfiesQuickAssistPrecondition(statement, DoStatement.BODY_PROPERTY)) {
 				RemoveBlockOperation op= new RemoveBlockOperation(statement, DoStatement.BODY_PROPERTY);
 				return new IFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op})};
 			}
