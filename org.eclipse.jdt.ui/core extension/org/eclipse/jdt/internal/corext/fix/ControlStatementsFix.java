@@ -254,7 +254,7 @@ public class ControlStatementsFix extends AbstractFix {
 		}
 
 		private IfStatement findStart(IfStatement item) {
-            while (item.getParent() instanceof IfStatement) {
+            while (item.getLocationInParent() == IfStatement.ELSE_STATEMENT_PROPERTY) {
             	item= (IfStatement)item.getParent();
             }
             return item;
