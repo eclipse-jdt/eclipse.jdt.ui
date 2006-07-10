@@ -12,12 +12,16 @@ package org.eclipse.jdt.core.refactoring.descriptors;
 
 import org.eclipse.core.runtime.Assert;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+
+import org.eclipse.jdt.internal.core.refactoring.descriptors.DescriptorMessages;
 
 /**
  * Refactoring descriptor for the rename resource refactoring.
@@ -31,7 +35,7 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
  * <p>
  * Clients must first set the basic refactoring descriptor attributes such as
  * the project name, the description, the comment and the flags before setting
- * any other attributes.
+ * any other attributes. Other arguments may be set in no particular order.
  * </p>
  * <p>
  * Note: this class is not intended to be instantiated by clients.
@@ -41,11 +45,26 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
  */
 public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 
+	/** The name attribute */
+	private String fName= null;
+
+	/** The resource attribute */
+	private IResource fResource= null;
+
 	/**
 	 * Creates a new refactoring descriptor.
 	 */
 	public RenameResourceDescriptor() {
 		super(IJavaRefactorings.RENAME_RESOURCE);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void populateArgumentMap() {
+		super.populateArgumentMap();
+		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, resourceToHandle(getProject(), fResource));
+		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fName);
 	}
 
 	/**
@@ -57,7 +76,7 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	public void setNewName(final String name) {
 		Assert.isNotNull(name);
 		Assert.isLegal(!"".equals(name), "Name must not be empty"); //$NON-NLS-1$//$NON-NLS-2$
-		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, name);
+		fName= name;
 	}
 
 	/**
@@ -92,9 +111,21 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 */
 	public void setResource(final IResource resource) {
 		Assert.isNotNull(resource);
-		final String project= getProject();
-		if (resource.getType() == IResource.PROJECT && project != null)
-			throw new IllegalArgumentException("Project name must be null"); //$NON-NLS-1$
-		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, resourceToHandle(project, resource));
+		fResource= resource;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public RefactoringStatus validateDescriptor() {
+		RefactoringStatus status= super.validateDescriptor();
+		if (fResource == null)
+			status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameResourceDescriptor_no_resource));
+		if (fName == null || "".equals(fName)) //$NON-NLS-1$
+			status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameResourceDescriptor_no_new_name));
+		String project= getProject();
+		if (fResource instanceof IProject && (project == null || "".equals(project))) //$NON-NLS-1$
+			status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameResourceDescriptor_project_constraint));
+		return status;
 	}
 }

@@ -14,9 +14,12 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+
+import org.eclipse.jdt.internal.core.refactoring.descriptors.DescriptorMessages;
 
 /**
  * Refactoring descriptor for the use supertype refactoring.
@@ -26,11 +29,6 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
  * contribution requested by invoking
  * {@link RefactoringCore#getRefactoringContribution(String)} with the
  * appropriate refactoring id.
- * </p>
- * <p>
- * Clients must first set the basic refactoring descriptor attributes such as
- * the project name, the description, the comment and the flags before setting
- * any other attributes.
  * </p>
  * <p>
  * Note: this class is not intended to be instantiated by clients.
@@ -43,6 +41,15 @@ public final class UseSupertypeDescriptor extends JavaRefactoringDescriptor {
 	/** The instanceof attribute */
 	private static final String ATTRIBUTE_INSTANCEOF= "instanceof"; //$NON-NLS-1$
 
+	/** The instanceof attribute */
+	private boolean fInstanceof= false;
+
+	/** The subtype attribute */
+	private IType fSubType= null;
+
+	/** The supertype attribute */
+	private IType fSupertype= null;
+
 	/**
 	 * Creates a new refactoring descriptor.
 	 */
@@ -51,15 +58,28 @@ public final class UseSupertypeDescriptor extends JavaRefactoringDescriptor {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	protected void populateArgumentMap() {
+		super.populateArgumentMap();
+		fArguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceof).toString());
+		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, elementToHandle(getProject(), fSubType));
+		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, elementToHandle(getProject(), fSupertype));
+	}
+
+	/**
 	 * Determines whether 'instanceof' statements are considered as candidates
 	 * to replace the subtype occurrence by one of its supertypes.
+	 * <p>
+	 * The default is to not replace the subtype occurrence.
+	 * </p>
 	 * 
 	 * @param replace
 	 *            <code>true</code> to replace subtype occurrences in
 	 *            'instanceof' statements, <code>false</code> otherwise
 	 */
 	public void setReplaceInstanceof(final boolean replace) {
-		fArguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(replace).toString());
+		fInstanceof= replace;
 	}
 
 	/**
@@ -74,7 +94,7 @@ public final class UseSupertypeDescriptor extends JavaRefactoringDescriptor {
 	 */
 	public void setSubtype(final IType type) {
 		Assert.isNotNull(type);
-		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, elementToHandle(getProject(), type));
+		fSubType= type;
 	}
 
 	/**
@@ -89,6 +109,18 @@ public final class UseSupertypeDescriptor extends JavaRefactoringDescriptor {
 	 */
 	public void setSupertype(final IType type) {
 		Assert.isNotNull(type);
-		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, elementToHandle(getProject(), type));
+		fSupertype= type;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public RefactoringStatus validateDescriptor() {
+		RefactoringStatus status= super.validateDescriptor();
+		if (fSubType == null)
+			status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.UseSupertypeDescriptor_no_subtype));
+		if (fSupertype == null)
+			status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.UseSupertypeDescriptor_no_supertype));
+		return status;
 	}
 }

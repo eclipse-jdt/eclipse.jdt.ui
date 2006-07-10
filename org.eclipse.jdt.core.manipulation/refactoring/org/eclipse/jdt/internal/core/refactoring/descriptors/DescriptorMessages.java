@@ -16,9 +16,33 @@ public class DescriptorMessages extends NLS {
 
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.core.refactoring.descriptors.DescriptorMessages"; //$NON-NLS-1$
 
+	public static String JavaRefactoringDescriptor_no_description;
+
 	public static String JavaRefactoringDescriptor_no_resulting_descriptor;
 
 	public static String JavaRefactoringDescriptor_not_available;
+
+	public static String RenameJavaElementDescriptor_accessor_constraint;
+
+	public static String RenameJavaElementDescriptor_delegate_constraint;
+
+	public static String RenameJavaElementDescriptor_deprecation_constraint;
+
+	public static String RenameJavaElementDescriptor_no_java_element;
+
+	public static String RenameJavaElementDescriptor_reference_constraint;
+
+	public static String RenameJavaElementDescriptor_textual_constraint;
+
+	public static String RenameResourceDescriptor_no_new_name;
+
+	public static String RenameResourceDescriptor_no_resource;
+
+	public static String RenameResourceDescriptor_project_constraint;
+
+	public static String UseSupertypeDescriptor_no_subtype;
+
+	public static String UseSupertypeDescriptor_no_supertype;
 
 	static {
 		// initialize resource bundle

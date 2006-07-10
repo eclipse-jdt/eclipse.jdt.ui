@@ -14,6 +14,7 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -307,6 +308,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * {@inheritDoc}
 	 */
 	public Refactoring createRefactoring(final RefactoringStatus status) throws CoreException {
+		populateArgumentMap();
 		Refactoring refactoring= null;
 		final String id= getID();
 		final RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(id);
@@ -334,7 +336,16 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * @return the argument map
 	 */
 	protected Map getArguments() {
+		populateArgumentMap();
 		return new HashMap(fArguments);
+	}
+
+	/**
+	 * Populates the refactoring descriptor argument map based on the specified
+	 * arguments.
+	 */
+	protected void populateArgumentMap() {
+		Assert.isTrue(!validateDescriptor().hasFatalError(), "Validation returns a fatal error status."); //$NON-NLS-1$
 	}
 
 	/**
@@ -415,5 +426,26 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 */
 	public void setProject(final String project) {
 		super.setProject(project);
+	}
+
+	/**
+	 * Validates the refactoring descriptor with respect to the constraints
+	 * imposed by specific refactorings.
+	 * <p>
+	 * Clients must call this method to verify that all arguments have been
+	 * correctly set and that they satisfy the constraints imposed by specific
+	 * refactorings. Returning a refactoring status of severity
+	 * {@link RefactoringStatus#FATAL} indicates that the refactoring descriptor
+	 * cannot be used to create a refactoring instance.
+	 * </p>
+	 * 
+	 * @return a refactoring status describing the outcome of the validation
+	 */
+	public RefactoringStatus validateDescriptor() {
+		RefactoringStatus status= new RefactoringStatus();
+		String description= getDescription();
+		if (description == null || "".equals(description)) //$NON-NLS-1$
+			status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.JavaRefactoringDescriptor_no_description));
+		return status;
 	}
 }
