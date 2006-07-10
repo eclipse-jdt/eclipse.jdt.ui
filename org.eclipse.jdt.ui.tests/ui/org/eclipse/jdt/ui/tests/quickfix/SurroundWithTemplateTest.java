@@ -154,7 +154,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("            public void run() {\n");
 		expected1.append("                System.out.println(1);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
 		expected1.append("\n");
@@ -209,7 +209,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("                k++;\n");
 		expected1.append("                System.out.println(k);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("        System.out.println(i);\n");
 		expected1.append("        System.out.println(j);\n");
 		expected1.append("    }\n");
@@ -271,7 +271,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("                System.out.println(i);\n");
 		expected1.append("                System.out.println(h);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("        i++;\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
@@ -316,7 +316,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("                    System.out.println(j);\n");
 		expected1.append("                    j--;\n");
 		expected1.append("                }\n");
-		expected1.append("            };            \n");
+		expected1.append("            };\n");
 		expected1.append("        }\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
@@ -355,7 +355,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("            public void run() {\n");
 		expected1.append("                i = 10;\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("        System.out.println(i);\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
@@ -398,7 +398,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("                i = 10;\n");
 		expected1.append("                System.out.println(i);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("        System.out.println(i);\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
@@ -438,7 +438,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("            public void run() {\n");
 		expected1.append("                System.out.println(i);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
 		expected1.append("\n");
@@ -489,7 +489,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("                int i = 10;\n");
 		expected1.append("                System.out.println(i);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
 		expected1.append("\n");
@@ -530,7 +530,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("                i = 10;\n");
 		expected1.append("                System.out.println(i);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("        System.out.println(i);\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
@@ -574,7 +574,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("                int i = 10;\n");
 		expected1.append("                System.out.println(10);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("        j = 10;\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
@@ -615,7 +615,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("            public void run() {\n");
 		expected1.append("                System.out.println(i);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("        System.out.println(i);\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
@@ -654,7 +654,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("                System.out.println(i);\n");
 		expected1.append("                System.out.println(s);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
@@ -695,7 +695,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("                System.out.println(i);\n");
 		expected1.append("                System.out.println(s);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("        s = \"\";\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
@@ -735,7 +735,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("            public void run() {\n");
 		expected1.append("                System.out.println(i);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("        System.out.println(j);\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
@@ -777,7 +777,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("            public void run() {\n");
 		expected1.append("                System.out.println(i);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("        j = 10;\n");
 		expected1.append("        j++;\n");
 		expected1.append("        System.out.println(j);\n");
@@ -820,7 +820,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("                int i = 10;\n");
 		expected1.append("                System.out.println(i);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("        System.out.println(j);\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
@@ -860,7 +860,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("            public void run() {\n");
 		expected1.append("                System.out.println(i);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("        System.out.println(j);\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
@@ -901,7 +901,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("                System.out.println(i);\n");
 		expected1.append("                System.out.println(j);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
@@ -942,7 +942,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("            public void run() {\n");
 		expected1.append("                System.out.println(k);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("        System.out.println(i);\n");
 		expected1.append("        System.out.println(j);\n");
 		expected1.append("    }\n");
@@ -985,7 +985,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("                System.out.println(i);\n");
 		expected1.append("                System.out.println(j);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
@@ -1025,7 +1025,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("                public void run() {\n");
 		expected1.append("                    j = 10;\n");
 		expected1.append("                }\n");
-		expected1.append("            };            \n");
+		expected1.append("            };\n");
 		expected1.append("            System.out.println(j);\n");
 		expected1.append("        }\n");
 		expected1.append("    }\n");
@@ -1076,7 +1076,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("                        j--;\n");
 		expected1.append("                    }\n");
 		expected1.append("                }\n");
-		expected1.append("            };            \n");
+		expected1.append("            };\n");
 		expected1.append("        }\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
@@ -1118,7 +1118,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("                int k = 10;\n");
 		expected1.append("                System.out.println(i);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
@@ -1162,7 +1162,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("                    System.out.println(v);\n");
 		expected1.append("                    System.out.println(k);\n");
 		expected1.append("                }\n");
-		expected1.append("            };            \n");
+		expected1.append("            };\n");
 		expected1.append("        }\n");
 		expected1.append("        k++;\n");
 		expected1.append("    }\n");
@@ -1305,7 +1305,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("            public void run() {\n");
 		expected1.append("                System.out.println(s);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("        c = \"\";\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
@@ -1349,7 +1349,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("                int k;\n");
 		expected1.append("                System.out.println(i);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("        System.out.println(j);\n");
 		expected1.append("        System.out.println(v);\n");
 		expected1.append("    }\n");
@@ -1397,7 +1397,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("                System.out.println(s);\n");
 		expected1.append("                System.out.println(k);\n");
 		expected1.append("            }\n");
-		expected1.append("        };        \n");
+		expected1.append("        };\n");
 		expected1.append("        k=\"\";\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
@@ -1435,7 +1435,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("                public void run() {\n");
 		expected1.append("                    System.out.println(1);\n");
 		expected1.append("                }\n");
-		expected1.append("            };            \n");
+		expected1.append("            };\n");
 		expected1.append("        }\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
@@ -1474,7 +1474,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("                public void run() {\n");
 		buf.append("                    System.out.println(i);\n");
 		buf.append("                }\n");
-		buf.append("            };            \n");
+		buf.append("            };\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -1510,7 +1510,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("            public void run() {\n");
 		buf.append("                System.out.println(E.this);\n");
 		buf.append("            }\n");
-		buf.append("        };        \n");
+		buf.append("        };\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});	

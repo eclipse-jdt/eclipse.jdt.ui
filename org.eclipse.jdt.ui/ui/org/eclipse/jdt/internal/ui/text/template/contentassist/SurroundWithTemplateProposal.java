@@ -252,23 +252,21 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		Map options= fCompilationUnit.getJavaProject().getOptions(true);
 		MultiTextEdit allEdits= (MultiTextEdit)surroundWith.getRewrite().rewriteAST(document, options);
 		removeBlockStartAndEnd(allEdits);
-		MultiTextEdit blockFreeEdits= (MultiTextEdit)allEdits.copy();
-		removeBlock(blockFreeEdits);
+		MultiTextEdit allEditsCopy= (MultiTextEdit)allEdits.copy();
 		
 		String newSelection= calculateNewSelection(document, surroundWith.getNewBodyPosition(), allEdits);
 		
 		//Change the document such that it contains the new variable declarations (i.e. with final keyword)
-		blockFreeEdits.apply(document);
+		allEditsCopy.apply(document);
 		
 		//The document may have changed and we need a new context
 		
-		//Find position for template insertion in new document (no leading indentation)
-		int replaceOffset= surroundWith.getNewBodyPosition().getStartPosition();
-		int offset= document.getLineOffset(document.getLineOfOffset(replaceOffset));
+		//Find position for template insertion in new document
+		int offset= surroundWith.getNewBodyPosition().getStartPosition();
 		
 		//Create the new context
 		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(JavaContextType.NAME);
-		CompilationUnitContext context= contextType.createContext(document, offset, replaceOffset - offset, fCompilationUnit);
+		CompilationUnitContext context= contextType.createContext(document, offset, newSelection.length(), fCompilationUnit);
 		context.setVariable("selection", newSelection); //$NON-NLS-1$
 		context.setForceEvaluation(true);
 		return context;
@@ -298,20 +296,6 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 			}
 		}
 		edits.removeChild(i - 2);
-	}
-	
-	private void removeBlock(MultiTextEdit edits) {
-		TextEdit[] children= edits.getChildren();
-		int i= 0;
-		while (!(children[i] instanceof RangeMarker)) {
-			i++;
-		}
-		i++;
-		int pos= i;
-		while (!(children[i] instanceof RangeMarker)) {
-			edits.removeChild(pos);
-			i++;
-		}
 	}
 	
 	private String calculateNewSelection(IDocument document, ITrackedNodePosition position, MultiTextEdit edits) throws BadLocationException {

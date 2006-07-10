@@ -1799,7 +1799,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("    public void foo() {\n");
 		buf.append("        do {\n");
 		buf.append("            System.out.println(1);\n");
-		buf.append("        } while (condition);        \n");
+		buf.append("        } while (condition);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[0]= buf.toString();
@@ -1810,7 +1810,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("    public void foo() {\n");
 		buf.append("        for (int i = 0; i < array.length; i++) {\n");
 		buf.append("            System.out.println(1);\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[1]= buf.toString();
@@ -1821,7 +1821,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("    public void foo() {\n");
 		buf.append("        if (condition) {\n");
 		buf.append("            System.out.println(1);\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[2]= buf.toString();
@@ -1834,7 +1834,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("            public void run() {\n");
 		buf.append("                System.out.println(1);\n");
 		buf.append("            }\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[3]= buf.toString();
@@ -1845,7 +1845,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("    public void foo() {\n");
 		buf.append("        synchronized (mutex) {\n");
 		buf.append("            System.out.println(1);\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[4]= buf.toString();
@@ -1858,7 +1858,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("            System.out.println(1);\n");
 		buf.append("        } catch (Exception e) {\n");
 		buf.append("            // TODO: handle exception\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[5]= buf.toString();
@@ -1869,7 +1869,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("    public void foo() {\n");
 		buf.append("        while (condition) {\n");
 		buf.append("            System.out.println(1);\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[6]= buf.toString();
@@ -1908,7 +1908,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        int i= 10;\n");
 		buf.append("        do {\n");
 		buf.append("            System.out.println(i);\n");
-		buf.append("        } while (condition);        \n");
+		buf.append("        } while (condition);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[0]= buf.toString();
@@ -1920,7 +1920,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        int i= 10;\n");
 		buf.append("        for (int j = 0; j < array.length; j++) {\n");
 		buf.append("            System.out.println(i);\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[1]= buf.toString();
@@ -1932,7 +1932,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        int i= 10;\n");
 		buf.append("        if (condition) {\n");
 		buf.append("            System.out.println(i);\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[2]= buf.toString();
@@ -1946,7 +1946,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("            public void run() {\n");
 		buf.append("                System.out.println(i);\n");
 		buf.append("            }\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[3]= buf.toString();
@@ -1958,7 +1958,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        int i= 10;\n");
 		buf.append("        synchronized (mutex) {\n");
 		buf.append("            System.out.println(i);\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[4]= buf.toString();
@@ -1972,7 +1972,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("            System.out.println(i);\n");
 		buf.append("        } catch (Exception e) {\n");
 		buf.append("            // TODO: handle exception\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[5]= buf.toString();
@@ -1984,7 +1984,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        int i= 10;\n");
 		buf.append("        while (condition) {\n");
 		buf.append("            System.out.println(i);\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[6]= buf.toString();
@@ -2025,7 +2025,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        do {\n");
 		buf.append("            i = 10;\n");
 		buf.append("            System.out.println(i);\n");
-		buf.append("        } while (condition);        \n");
+		buf.append("        } while (condition);\n");
 		buf.append("        System.out.println(i);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -2039,7 +2039,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        for (int j = 0; j < array.length; j++) {\n");
 		buf.append("            i = 10;\n");
 		buf.append("            System.out.println(i);\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("        System.out.println(i);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -2053,7 +2053,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        if (condition) {\n");
 		buf.append("            i = 10;\n");
 		buf.append("            System.out.println(i);\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("        System.out.println(i);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -2069,7 +2069,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("                i = 10;\n");
 		buf.append("                System.out.println(i);\n");
 		buf.append("            }\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("        System.out.println(i);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -2083,7 +2083,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        synchronized (mutex) {\n");
 		buf.append("            i = 10;\n");
 		buf.append("            System.out.println(i);\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("        System.out.println(i);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -2099,7 +2099,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("            System.out.println(i);\n");
 		buf.append("        } catch (Exception e) {\n");
 		buf.append("            // TODO: handle exception\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("        System.out.println(i);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -2113,7 +2113,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        while (condition) {\n");
 		buf.append("            i = 10;\n");
 		buf.append("            System.out.println(i);\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("        System.out.println(i);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -2154,7 +2154,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        int i= 10;\n");
 		buf.append("        do {\n");
 		buf.append("            System.out.println(i);\n");
-		buf.append("        } while (condition);        \n");
+		buf.append("        } while (condition);\n");
 		buf.append("        System.out.println(i);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -2167,7 +2167,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        int i= 10;\n");
 		buf.append("        for (int j = 0; j < array.length; j++) {\n");
 		buf.append("            System.out.println(i);\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("        System.out.println(i);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -2180,7 +2180,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        int i= 10;\n");
 		buf.append("        if (condition) {\n");
 		buf.append("            System.out.println(i);\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("        System.out.println(i);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -2195,7 +2195,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("            public void run() {\n");
 		buf.append("                System.out.println(i);\n");
 		buf.append("            }\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("        System.out.println(i);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -2208,7 +2208,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        int i= 10;\n");
 		buf.append("        synchronized (mutex) {\n");
 		buf.append("            System.out.println(i);\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("        System.out.println(i);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -2223,7 +2223,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("            System.out.println(i);\n");
 		buf.append("        } catch (Exception e) {\n");
 		buf.append("            // TODO: handle exception\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("        System.out.println(i);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -2236,7 +2236,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        int i= 10;\n");
 		buf.append("        while (condition) {\n");
 		buf.append("            System.out.println(i);\n");
-		buf.append("        }        \n");
+		buf.append("        }\n");
 		buf.append("        System.out.println(i);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
