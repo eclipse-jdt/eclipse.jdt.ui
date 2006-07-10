@@ -388,6 +388,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String DeleteSourceManipulationChange_1;
 
+	public static String DynamicValidationRefactoringChange_fatal_error;
+
 	public static String DynamicValidationStateChange_workspace_changed;
 
 	public static String ExtractConstantRefactoring_another_variable;

@@ -17,6 +17,10 @@ import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 
+import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
+
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
 /**
  * Dynamic validation state change with support for refactoring descriptors.
  * 
@@ -35,7 +39,7 @@ public final class DynamicValidationRefactoringChange extends DynamicValidationS
 	 * @param name
 	 *            the name of the change
 	 */
-	public DynamicValidationRefactoringChange(final RefactoringDescriptor descriptor, final String name) {
+	public DynamicValidationRefactoringChange(final JavaRefactoringDescriptor descriptor, final String name) {
 		super(name);
 		Assert.isNotNull(descriptor);
 		fDescriptor= descriptor;
@@ -51,9 +55,10 @@ public final class DynamicValidationRefactoringChange extends DynamicValidationS
 	 * @param changes
 	 *            the changes
 	 */
-	public DynamicValidationRefactoringChange(final RefactoringDescriptor descriptor, final String name, final Change[] changes) {
+	public DynamicValidationRefactoringChange(final JavaRefactoringDescriptor descriptor, final String name, final Change[] changes) {
 		super(name, changes);
 		Assert.isNotNull(descriptor);
+		Assert.isTrue(!descriptor.validateDescriptor().hasFatalError(), RefactoringCoreMessages.DynamicValidationRefactoringChange_fatal_error);
 		fDescriptor= descriptor;
 	}
 
