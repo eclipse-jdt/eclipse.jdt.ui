@@ -33,7 +33,9 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.Template;
@@ -214,6 +216,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 	 */
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 		try {
+			setRedraw(viewer, false);
 			IDocument document= viewer.getDocument();
 			CompilationUnitContext context= createNewContext(document);
 			
@@ -232,9 +235,19 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 			handleException(viewer, e, fRegion);
 		} catch (CoreException e) {
 			handleException(viewer, e, fRegion);
+		} finally {
+			setRedraw(viewer, true);
 		}
 	}
 	
+	private void setRedraw(ITextViewer viewer, boolean redraw) {
+		if (viewer instanceof ITextViewerExtension) {
+			ITextViewerExtension extension= (ITextViewerExtension) viewer;
+			IRewriteTarget target= extension.getRewriteTarget();
+			target.setRedraw(redraw);
+		}
+    }
+
 	public Point getSelection(IDocument document) {
 		if (fSelectedRegion != null) {
 			return new Point(fSelectedRegion.getOffset(), fSelectedRegion.getLength());
