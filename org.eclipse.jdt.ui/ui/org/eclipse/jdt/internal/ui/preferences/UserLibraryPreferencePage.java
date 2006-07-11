@@ -990,6 +990,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			if (dialog.open() == Window.OK) {
 				selElement.setAttribute(CPListElement.ACCESSRULES, dialog.getAccessRules());
 				fLibraryList.refresh(elem);
+				fLibraryList.expandElement(elem, 2);
 			}
 		} else if (key.equals(CPListElement.NATIVE_LIB_PATH)) {
 			NativeLibrariesDialog dialog= new NativeLibrariesDialog(getShell(), selElement);
@@ -1057,6 +1058,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				CPListElement elem= (CPListElement) curr;				
 				editArchiveElement(elem, (CPUserLibraryElement) elem.getParentContainer());
 			}
+			doSelectionChanged(fLibraryList);
 		}
 	}
 
@@ -1086,6 +1088,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			}
 			fLibraryList.refresh(parent);
 			fLibraryList.selectElements(new StructuredSelection(Arrays.asList(elements)));
+			fLibraryList.expandElement(parent, 2);
 		}
 	}
 
@@ -1106,7 +1109,12 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				}
 			} else if (curr instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) curr;
-				attrib.getParent().setAttribute(attrib.getKey(), null);
+				Object value= null;
+				String key= attrib.getKey();
+				if (key.equals(CPListElement.ACCESSRULES)) {
+					value= new IAccessRule[0];
+				}
+				attrib.getParent().setAttribute(key, value);
 				fLibraryList.refresh(attrib);
 			}
 		}
@@ -1116,6 +1124,8 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			} else {
 				fLibraryList.selectFirstElement();	
 			}
+		} else {
+			doSelectionChanged(fLibraryList);
 		}
 	}
 
@@ -1162,14 +1172,42 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	}
 
 	private boolean canEdit(List list) {
-		if (list.size() == 1) {
-			return true;
-		}
-		return false;
+		if (list.size() != 1)
+			return false;
+		
+		Object firstElement= list.get(0);
+		if (firstElement instanceof IAccessRule)
+			return false;
+			
+		return true;
 	}
 
 	private boolean canRemove(List list) { 
-		return !list.isEmpty();
+		if (list.size() == 0) {
+			return false;
+		}
+		for (int i= 0; i < list.size(); i++) {
+			Object elem= list.get(i);
+			if (elem instanceof CPListElementAttribute) {
+				CPListElementAttribute attrib= (CPListElementAttribute) elem;
+				if (attrib.isInNonModifiableContainer()) {
+					return false;
+				}
+				if (attrib.getKey().equals(CPListElement.ACCESSRULES)) {
+					return ((IAccessRule[]) attrib.getValue()).length > 0;
+				}
+				if (attrib.getValue() == null) {
+					return false;
+				}
+			} else if (elem instanceof CPListElement) {
+				return true;
+			} else if (elem instanceof CPUserLibraryElement) {
+				return true;
+			} else { // unknown element
+				return false;
+			}
+		}		
+		return true;
 	}
 	
 	private CPUserLibraryElement getCommonParent(List list) {
