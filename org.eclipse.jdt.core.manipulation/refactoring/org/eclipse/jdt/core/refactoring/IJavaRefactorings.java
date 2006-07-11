@@ -330,6 +330,16 @@ public interface IJavaRefactorings {
 	public static final String RENAME_COMPILATION_UNIT= "org.eclipse.jdt.ui.rename.compilationunit"; //$NON-NLS-1$
 
 	/**
+	 * Refactoring id of the 'Rename Enum Constant' refactoring (value:
+	 * <code>org.eclipse.jdt.ui.rename.enum.constant</code>).
+	 * <p>
+	 * Clients may safely cast the obtained refactoring descriptor to
+	 * {@link RenameJavaElementDescriptor}.
+	 * </p>
+	 */
+	public static final String RENAME_ENUM_CONSTANT= "org.eclipse.jdt.ui.rename.enum.constant"; //$NON-NLS-1$
+
+	/**
 	 * Refactoring id of the 'Rename Field' refactoring (value:
 	 * <code>org.eclipse.jdt.ui.rename.field</code>).
 	 * <p>
