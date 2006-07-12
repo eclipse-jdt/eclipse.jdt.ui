@@ -13,13 +13,15 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.refactoring.descriptors.UseSupertypeDescriptor;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeRefactoring;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -60,24 +62,27 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 		return getType(createCUfromTestFile(pack, className), className);
 	}
 
-	private void validatePassingTest(String className, String[] cuNames, String superTypeFullName, boolean updateInstanceOf) throws Exception {
-		IType clas= getClassFromTestFile(getPackageP(), className);
-				
-		UseSuperTypeRefactoring ref= new UseSuperTypeRefactoring(new UseSuperTypeProcessor(clas));
-		UseSuperTypeProcessor processor= ref.getUseSuperTypeProcessor();
-		processor.setInstanceOf(updateInstanceOf);
-			
-		ICompilationUnit[] cus= new ICompilationUnit[cuNames.length];
+	private void validatePassingTest(String className, String[] cuNames, String superTypeFullName, boolean replaceInstanceOf) throws Exception {
+		final IType subType= getClassFromTestFile(getPackageP(), className);
+		final ICompilationUnit[] units= new ICompilationUnit[cuNames.length];
 		for (int i= 0; i < cuNames.length; i++) {
-			cus[i]= createCUfromTestFile(clas.getPackageFragment(), cuNames[i]);			
+			units[i]= createCUfromTestFile(subType.getPackageFragment(), cuNames[i]);			
 		}
-		processor.setSuperType(JavaModelUtil.findType(clas.getJavaProject(), superTypeFullName));
-		assertEquals("was supposed to pass", null, performRefactoring(ref));
+		final IType superType= JavaModelUtil.findType(subType.getJavaProject(), superTypeFullName);
+		final UseSupertypeDescriptor descriptor= new UseSupertypeDescriptor();
+		descriptor.setSubtype(subType);
+		descriptor.setSupertype(superType);
+		descriptor.setReplaceInstanceof(replaceInstanceOf);
+		final RefactoringStatus status= new RefactoringStatus();
+		final Refactoring refactoring= descriptor.createRefactoring(status);
+		assertTrue("status should be ok", status.isOK());
+		assertNotNull("refactoring should not be null", refactoring);
+		assertEquals("was supposed to pass", null, performRefactoring(refactoring));
 
-		for (int i= 0; i < cus.length; i++) {
+		for (int i= 0; i < units.length; i++) {
 			String expected= getFileContents(getOutputTestFileName(cuNames[i]));
-			String actual= cus[i].getSource();
-			String message= "incorrect changes in " + cus[i].getElementName();
+			String actual= units[i].getSource();
+			String message= "incorrect changes in " + units[i].getElementName();
 			assertEqualLines(message, expected, actual);
 		}
 	}
