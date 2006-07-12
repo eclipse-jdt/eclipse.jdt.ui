@@ -65,7 +65,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
@@ -369,15 +368,8 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		for (int index= 0; index < children.length; index++) {
 			if (children[index] instanceof IPackageFragment) {
 				final IPackageFragment fragment= (IPackageFragment) children[index];
-				try {
-					if (!fragment.hasChildren())
-						continue;
-					if (fragment.isDefaultPackage() && getChildren(fragment).length == 0)
-					    // Don't add the default package unless it has children
-						continue;
-				} catch (final JavaModelException exception) {
-					JavaPlugin.log(exception);
-				}
+				if (getChildren(fragment).length == 0)
+					continue;
 			}
 			// We need to check whether a folder has non-fragment children (bug 138767)
 			if (children[index] instanceof IFolder) {

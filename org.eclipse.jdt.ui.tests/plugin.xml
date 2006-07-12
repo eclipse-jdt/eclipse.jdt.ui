@@ -33,6 +33,9 @@
 	  <import plugin="org.eclipse.debug.ui"/>
 	  <import plugin="org.eclipse.debug.core"/>
 	  <import plugin="org.eclipse.jdt.junit"/>
+   <import plugin="org.eclipse.team.ui"/>
+   <import plugin="org.eclipse.ui.navigator"/>
+   <import plugin="org.eclipse.team.core"/>
    </requires>
 
 
@@ -79,6 +82,11 @@
             name="MockPluginView"
             class="org.eclipse.jdt.ui.tests.browsing.MockPluginView"
             id="org.eclipse.jdt.ui.tests.browsing.MockPluginView">
+      </view>
+      <view
+            name="MockPluginView"
+            class="org.eclipse.jdt.ui.tests.model.MockPluginView"
+            id="org.eclipse.jdt.ui.tests.model.MockPluginView">
       </view>
       <view
             allowMultiple="true"
