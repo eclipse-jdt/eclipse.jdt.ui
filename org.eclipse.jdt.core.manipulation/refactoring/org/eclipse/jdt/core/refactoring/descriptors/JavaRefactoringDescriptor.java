@@ -93,6 +93,15 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	protected static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 
 	/**
+	 * Predefined argument called <code>references</code>.
+	 * <p>
+	 * This argument should be used to describe whether references to the
+	 * elements being refactored should be updated as well.
+	 * </p>
+	 */
+	protected static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
+
+	/**
 	 * Predefined argument called <code>selection</code>.
 	 * <p>
 	 * This argument should be used to describe user input selections within a
@@ -430,7 +439,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 
 	/**
 	 * Validates the refactoring descriptor with respect to the constraints
-	 * imposed by specific refactorings.
+	 * imposed by the represented refactoring.
 	 * <p>
 	 * Clients must call this method to verify that all arguments have been
 	 * correctly set and that they satisfy the constraints imposed by specific
