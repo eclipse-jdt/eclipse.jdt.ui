@@ -48,8 +48,14 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	/** The deprecate attribute */
 	private static final String ATTRIBUTE_DEPRECATE= "deprecate"; //$NON-NLS-1$
 
-	/** The references attribute */
-	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
+	/** The match strategy attribute */
+	private static final String ATTRIBUTE_MATCH_STRATEGY= "matchStrategy"; //$NON-NLS-1$
+
+	/** The patterns attribute */
+	private static final String ATTRIBUTE_PATTERNS= "patterns"; //$NON-NLS-1$
+
+	/** The qualified attribute */
+	private static final String ATTRIBUTE_QUALIFIED= "qualified"; //$NON-NLS-1$
 
 	/** The rename getter attribute */
 	private static final String ATTRIBUTE_RENAME_GETTER= "getter"; //$NON-NLS-1$
@@ -57,8 +63,29 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	/** The rename setter attribute */
 	private static final String ATTRIBUTE_RENAME_SETTER= "setter"; //$NON-NLS-1$
 
+	/** The similar declarations attribute */
+	private static final String ATTRIBUTE_SIMILAR_DECLARATIONS= "similarDeclarations"; //$NON-NLS-1$
+
 	/** The textual matches attribute */
 	private static final String ATTRIBUTE_TEXTUAL_MATCHES= "textual"; //$NON-NLS-1$
+
+	/**
+	 * Similar declaration updating strategy which finds exact names and
+	 * embedded names as well (value: <code>2</code>).
+	 */
+	public static final int STRATEGY_EMBEDDED= 2;
+
+	/**
+	 * Similar declaration updating strategy which finds exact names only
+	 * (value: <code>1</code>).
+	 */
+	public static final int STRATEGY_EXACT= 1;
+
+	/**
+	 * Similar declaration updating strategy which finds exact names, embedded
+	 * names and name suffixes (value: <code>3</code>).
+	 */
+	public static final int STRATEGY_SUFFIX= 3;
 
 	/** The delegate attribute */
 	private boolean fDelegate= false;
@@ -69,8 +96,17 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	/** The java element attribute */
 	private IJavaElement fJavaElement= null;
 
+	/** The match strategy */
+	private int fMatchStrategy= STRATEGY_EXACT;
+
 	/** The name attribute */
 	private String fName= null;
+
+	/** The patterns attribute */
+	private String fPatterns= null;
+
+	/** The qualified attribute */
+	private boolean fQualified= false;
 
 	/** The references attribute */
 	private boolean fReferences= false;
@@ -80,6 +116,9 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 
 	/** The rename setter attribute */
 	private boolean fRenameSetter= false;
+
+	/** The similar declarations attribute */
+	private boolean fSimilarDeclarations= false;
 
 	/** The textual attribute */
 	private boolean fTextual= false;
@@ -103,7 +142,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, elementToHandle(getProject(), fJavaElement));
 		final int type= fJavaElement.getElementType();
 		if (type != IJavaElement.PACKAGE_FRAGMENT_ROOT)
-			fArguments.put(ATTRIBUTE_REFERENCES, Boolean.toString(fReferences));
+			fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_REFERENCES, Boolean.toString(fReferences));
 		if (type == IJavaElement.FIELD) {
 			fArguments.put(ATTRIBUTE_RENAME_GETTER, Boolean.toString(fRenameGetter));
 			fArguments.put(ATTRIBUTE_RENAME_SETTER, Boolean.toString(fRenameSetter));
@@ -124,6 +163,22 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 			default:
 				break;
 		}
+		switch (type) {
+			case IJavaElement.PACKAGE_FRAGMENT:
+			case IJavaElement.TYPE:
+				fArguments.put(ATTRIBUTE_QUALIFIED, Boolean.toString(fQualified));
+				if (fPatterns != null && !"".equals(fPatterns)) //$NON-NLS-1$
+					fArguments.put(ATTRIBUTE_PATTERNS, fPatterns);
+			default:
+				break;
+		}
+		switch (type) {
+			case IJavaElement.TYPE:
+				fArguments.put(ATTRIBUTE_SIMILAR_DECLARATIONS, Boolean.toString(fSimilarDeclarations));
+				fArguments.put(ATTRIBUTE_MATCH_STRATEGY, Integer.toString(fMatchStrategy));
+			default:
+				break;
+		}
 	}
 
 	/**
@@ -141,6 +196,32 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 */
 	public void setDeprecateDelegate(final boolean deprecate) {
 		fDeprecate= deprecate;
+	}
+
+	/**
+	 * Sets the file name patterns to use during qualified name updating.
+	 * <p>
+	 * The syntax of the file name patterns is a sequence of individual name
+	 * patterns, separated by comma. Additionally, wildcard characters '*' (any
+	 * string) and '?' (any character) may be used.
+	 * </p>
+	 * <p>
+	 * Note: If file name patterns are set, qualified name updating must be
+	 * enabled by calling {@link #setUpdateQualifiedNames(boolean)}.
+	 * </p>
+	 * <p>
+	 * Note: Qualified name updating is applicable to the Java elements
+	 * {@link IPackageFragment} and {@link IType}. The default is to use no
+	 * file name patterns.
+	 * </p>
+	 * 
+	 * @param patterns
+	 *            the non-empty file name patterns string
+	 */
+	public void setFileNamePatterns(final String patterns) {
+		Assert.isNotNull(patterns);
+		Assert.isLegal(!"".equals(patterns), "Pattern must not be empty"); //$NON-NLS-1$ //$NON-NLS-2$
+		fPatterns= patterns;
 	}
 
 	/**
@@ -174,6 +255,27 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 */
 	public void setKeepOriginal(final boolean delegate) {
 		fDelegate= delegate;
+	}
+
+	/**
+	 * Determines which strategy should be used during similar declaration
+	 * updating.
+	 * <p>
+	 * Valid arguments are {@link #STRATEGY_EXACT}, {@link #STRATEGY_EMBEDDED}
+	 * or {@link #STRATEGY_SUFFIX}.
+	 * </p>
+	 * <p>
+	 * Note: Similar declaration updating is applicable to Java elements of type
+	 * {@link IType}. The default is to use the {@link #STRATEGY_EXACT} match
+	 * strategy.
+	 * </p>
+	 * 
+	 * @param strategy
+	 *            the match strategy to use
+	 */
+	public void setMatchStrategy(final int strategy) {
+		Assert.isLegal(strategy == STRATEGY_EXACT || strategy == STRATEGY_EMBEDDED || strategy == STRATEGY_SUFFIX, "Wrong match strategy argument"); //$NON-NLS-1$
+		fMatchStrategy= strategy;
 	}
 
 	/**
@@ -242,6 +344,22 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	}
 
 	/**
+	 * Determines whether qualified names of the Java element should be renamed.
+	 * <p>
+	 * Note: Qualified name updating is applicable to the Java elements
+	 * {@link IPackageFragment} and {@link IType}. The default is to not rename
+	 * qualified names.
+	 * </p>
+	 * 
+	 * @param update
+	 *            <code>true</code> to update qualified names,
+	 *            <code>false</code> otherwise
+	 */
+	public void setUpdateQualifiedNames(final boolean update) {
+		fQualified= update;
+	}
+
+	/**
 	 * Determines whether references to the Java element should be renamed.
 	 * <p>
 	 * Note: Reference updating is applicable to all Java element types except
@@ -254,6 +372,22 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 */
 	public void setUpdateReferences(final boolean update) {
 		fReferences= update;
+	}
+
+	/**
+	 * Determines whether similar declarations of the Java element should be
+	 * updated.
+	 * <p>
+	 * Note: Similar declaration updating is applicable to Java elements of type
+	 * {@link IType}. The default is to not update similar declarations.
+	 * </p>
+	 * 
+	 * @param update
+	 *            <code>true</code> to update similar declarations,
+	 *            <code>false</code> otherwise
+	 */
+	public void setUpdateSimilarDeclarations(final boolean update) {
+		fSimilarDeclarations= update;
 	}
 
 	/**
@@ -284,6 +418,8 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 			status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_no_java_element));
 		else {
 			final int type= fJavaElement.getElementType();
+			if (type == IJavaElement.JAVA_PROJECT && getProject() != null)
+				status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_project_constraint));
 			if (type == IJavaElement.PACKAGE_FRAGMENT_ROOT && fReferences)
 				status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_reference_constraint));
 			if (fTextual) {
@@ -317,6 +453,28 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 			if (fRenameGetter || fRenameSetter) {
 				if (type != IJavaElement.FIELD)
 					status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_accessor_constraint));
+			}
+			if (fQualified || fPatterns != null) {
+				switch (type) {
+					case IJavaElement.PACKAGE_FRAGMENT:
+					case IJavaElement.TYPE: {
+						if (!(fPatterns == null || !"".equals(fPatterns))) //$NON-NLS-1$
+							status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_patterns_constraint));
+						if (!(!fQualified || (fPatterns != null && !"".equals(fPatterns)))) //$NON-NLS-1$
+							status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_patterns_qualified_constraint));
+						break;
+					}
+					default:
+						status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_qualified_constraint));
+				}
+			}
+			if (fSimilarDeclarations) {
+				switch (type) {
+					case IJavaElement.TYPE:
+						break;
+					default:
+						status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_similar_constraint));
+				}
 			}
 		}
 		return status;

@@ -30,9 +30,23 @@ public class DescriptorMessages extends NLS {
 
 	public static String RenameJavaElementDescriptor_no_java_element;
 
+	public static String RenameJavaElementDescriptor_patterns_constraint;
+
+	public static String RenameJavaElementDescriptor_patterns_qualified_constraint;
+
+	public static String RenameJavaElementDescriptor_project_constraint;
+
+	public static String RenameJavaElementDescriptor_qualified_constraint;
+
 	public static String RenameJavaElementDescriptor_reference_constraint;
 
+	public static String RenameJavaElementDescriptor_similar_constraint;
+
 	public static String RenameJavaElementDescriptor_textual_constraint;
+
+	public static String RenameLocalVariableDescriptor_no_compilation_unit;
+
+	public static String RenameLocalVariableDescriptor_no_selection;
 
 	public static String RenameResourceDescriptor_no_new_name;
 
