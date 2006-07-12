@@ -250,6 +250,8 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 						} catch (JavaModelException x) {
 							fMemberTypes= new String[0];
 						}
+					} catch (IndexOutOfBoundsException e) {
+						fMemberTypes= new String[0];
 					}
 				}
 				if (fMemberTypes.length > 0)
