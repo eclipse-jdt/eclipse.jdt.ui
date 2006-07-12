@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.eclipse.text.edits.MultiTextEdit;
@@ -48,6 +46,7 @@ import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+import org.eclipse.jdt.core.refactoring.descriptors.RenameLocalVariableDescriptor;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -73,8 +72,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class RenameLocalVariableProcessor extends JavaRenameProcessor implements IReferenceUpdating {
-
-	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 
 	private ILocalVariable fLocalVariable;
 	private ICompilationUnit fCu;
@@ -348,13 +345,13 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	private TextEdit createRenameEdit(int offset) {
 		return new ReplaceEdit(offset, fCurrentName.length(), fNewName);
 	}
-	
+
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
+			monitor.beginTask(RefactoringCoreMessages.RenameTypeProcessor_creating_changes, 1);
 			Change change= fChange;
 			if (change != null) {
 				final ISourceRange range= fLocalVariable.getNameRange();
-				final Map arguments= new HashMap();
 				String project= null;
 				IJavaProject javaProject= fCu.getJavaProject();
 				if (javaProject != null)
@@ -362,11 +359,15 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 				final String header= Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, JavaElementLabels.getElementLabel(fLocalVariable.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), fNewName});
 				final String description= Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description_short, fCurrentName);
 				final String comment= new JDTRefactoringDescriptorComment(project, this, header).asString();
-				final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(IJavaRefactorings.RENAME_LOCAL_VARIABLE, project, description, comment, arguments, RefactoringDescriptor.NONE);
-				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
-				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
-				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(range.getOffset()).toString() + " " + new Integer(range.getLength()).toString()); //$NON-NLS-1$
-				arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+				final RenameLocalVariableDescriptor descriptor= new RenameLocalVariableDescriptor();
+				descriptor.setProject(project);
+				descriptor.setDescription(description);
+				descriptor.setComment(comment);
+				descriptor.setFlags(RefactoringDescriptor.NONE);
+				descriptor.setCompilationUnit(fCu);
+				descriptor.setNewName(getNewElementName());
+				descriptor.setSelection(range);
+				descriptor.setUpdateReferences(fUpdateReferences);
 				final RefactoringDescriptorChange result= new RefactoringDescriptorChange(descriptor, RefactoringCoreMessages.RenameTempRefactoring_rename, new Change[] { change});
 				result.markAsSynthetic();
 				change= result;
@@ -424,11 +425,11 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 				} else
 					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_SELECTION));
 			}
-			final String references= extended.getAttribute(ATTRIBUTE_REFERENCES);
+			final String references= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES);
 			if (references != null) {
 				fUpdateReferences= Boolean.valueOf(references).booleanValue();
 			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REFERENCES));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES));
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();

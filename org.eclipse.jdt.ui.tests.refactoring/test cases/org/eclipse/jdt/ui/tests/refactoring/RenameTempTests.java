@@ -13,19 +13,19 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.refactoring.descriptors.RenameLocalVariableDescriptor;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameLocalVariableProcessor;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameTempTests extends RefactoringTest{
 	private static final boolean BUG_checkDeclInNestedClass= true;
@@ -77,20 +77,26 @@ public class RenameTempTests extends RefactoringTest{
 		return new SourceRange(offset, end - offset);
 	}
 
-	private void helper1(String newName, boolean updateReferences, ISourceRange selection, ICompilationUnit cu) throws Exception{
+	private void helper1(String newName, boolean updateReferences, ISourceRange selection, ICompilationUnit cu) throws Exception {
 		IJavaElement[] elements= cu.codeSelect(selection.getOffset(), selection.getLength());
 		assertEquals(1, elements.length);
 		assertTrue(elements[0].getClass().toString(), elements[0] instanceof ILocalVariable);
-		
-		RenameLocalVariableProcessor processor= new RenameLocalVariableProcessor((ILocalVariable) elements[0]);
-		RenameRefactoring refactoring= new RenameRefactoring(processor);
-		processor.setUpdateReferences(updateReferences);
-		processor.setNewElementName(newName);
-		
+
+		final RenameLocalVariableDescriptor descriptor= new RenameLocalVariableDescriptor();
+		descriptor.setCompilationUnit(cu);
+		descriptor.setNewName(newName);
+		descriptor.setUpdateReferences(updateReferences);
+		descriptor.setSelection(selection);
+
+		final RefactoringStatus status= new RefactoringStatus();
+		final Refactoring refactoring= descriptor.createRefactoring(status);
+		assertTrue("status should be ok", status.isOK());
+		assertNotNull("refactoring should not be null", refactoring);
+
 		RefactoringStatus result= performRefactoring(refactoring);
 		assertEquals("precondition was supposed to pass", null, result);
-		
-		IPackageFragment pack= (IPackageFragment)cu.getParent();
+
+		IPackageFragment pack= (IPackageFragment) cu.getParent();
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
@@ -123,12 +129,18 @@ public class RenameTempTests extends RefactoringTest{
 		IJavaElement[] elements= cu.codeSelect(selection.getOffset(), selection.getLength());
 		assertEquals(1, elements.length);
 		assertTrue(elements[0].getClass().toString(), elements[0] instanceof ILocalVariable);
-		
-		RenameLocalVariableProcessor processor= new RenameLocalVariableProcessor((ILocalVariable) elements[0]);
-		RenameRefactoring refactoring= new RenameRefactoring(processor);
-		processor.setUpdateReferences(updateReferences);
-		processor.setNewElementName(newName);
-		
+
+		final RenameLocalVariableDescriptor descriptor= new RenameLocalVariableDescriptor();
+		descriptor.setCompilationUnit(cu);
+		descriptor.setNewName(newName);
+		descriptor.setUpdateReferences(updateReferences);
+		descriptor.setSelection(selection);
+
+		final RefactoringStatus status= new RefactoringStatus();
+		final Refactoring refactoring= descriptor.createRefactoring(status);
+		assertTrue("status should be ok", status.isOK());
+		assertNotNull("refactoring should not be null", refactoring);
+
 		RefactoringStatus result= performRefactoring(refactoring);
 		assertNotNull("precondition was supposed to fail", result);
 	}

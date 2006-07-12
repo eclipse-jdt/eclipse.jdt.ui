@@ -136,10 +136,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 
-	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
-
-	// User selections:
-
 	/**
 	 * The compilation unit in which the user invoked this refactoring (if any)
 	 */
@@ -748,7 +744,7 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 		arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fTargetMethod));
 		arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_NAME, fIntermediaryMethodName);
 		arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(fIntermediaryClass));
-		arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+		arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 		return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.IntroduceIndirectionRefactoring_introduce_indirection, fTextChangeManager.getAllChanges());
 	}
 
@@ -1328,11 +1324,11 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 					fIntermediaryClass= (IType) element;
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1));
-			final String references= extended.getAttribute(ATTRIBUTE_REFERENCES);
+			final String references= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES);
 			if (references != null) {
 				fUpdateReferences= Boolean.valueOf(references).booleanValue();
 			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REFERENCES));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES));
 			final String name= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_NAME);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				return setIntermediaryMethodName(name);

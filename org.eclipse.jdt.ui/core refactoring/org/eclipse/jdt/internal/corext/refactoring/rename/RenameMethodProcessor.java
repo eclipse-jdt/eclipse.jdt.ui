@@ -96,7 +96,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating, IDelegateUpdating {
 
-	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DELEGATE= "delegate"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DEPRECATE= "deprecate"; //$NON-NLS-1$
 
@@ -711,7 +710,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(IJavaRefactorings.RENAME_METHOD, project, description, comment, arguments, flags);
 			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fMethod));
 			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
-			arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 			arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
 			arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
 			return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.RenameMethodProcessor_change_name, (Change[]) list.toArray(new Change[list.size()]));
@@ -847,11 +846,11 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				setNewElementName(name);
 			else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_NAME));
-			final String references= extended.getAttribute(ATTRIBUTE_REFERENCES);
+			final String references= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES);
 			if (references != null) {
 				fUpdateReferences= Boolean.valueOf(references).booleanValue();
 			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REFERENCES));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES));
 			final String delegate= extended.getAttribute(ATTRIBUTE_DELEGATE);
 			if (delegate != null) {
 				fDelegateUpdating= Boolean.valueOf(delegate).booleanValue();

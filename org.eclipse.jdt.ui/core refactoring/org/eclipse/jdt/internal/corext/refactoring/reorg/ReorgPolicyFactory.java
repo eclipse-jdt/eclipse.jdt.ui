@@ -1372,7 +1372,7 @@ public final class ReorgPolicyFactory {
 			arguments.putAll(super.getRefactoringArguments(project));
 			if (fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
-			arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 			arguments.put(ATTRIBUTE_QUALIFIED, Boolean.valueOf(fUpdateQualifiedNames).toString());
 			return arguments;
 		}
@@ -1406,11 +1406,11 @@ public final class ReorgPolicyFactory {
 					fFilePatterns= patterns;
 				else
 					fFilePatterns= ""; //$NON-NLS-1$
-				final String references= extended.getAttribute(ATTRIBUTE_REFERENCES);
+				final String references= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES);
 				if (references != null) {
 					fUpdateReferences= Boolean.valueOf(references).booleanValue();
 				} else
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REFERENCES));
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES));
 				final String qualified= extended.getAttribute(ATTRIBUTE_QUALIFIED);
 				if (qualified != null) {
 					fUpdateQualifiedNames= Boolean.valueOf(qualified).booleanValue();
@@ -3198,8 +3198,6 @@ public final class ReorgPolicyFactory {
 	private static final String ATTRIBUTE_POLICY= "policy"; //$NON-NLS-1$
 
 	private static final String ATTRIBUTE_QUALIFIED= "qualified"; //$NON-NLS-1$
-
-	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 
 	private static final String ATTRIBUTE_ROOTS= "roots"; //$NON-NLS-1$
 

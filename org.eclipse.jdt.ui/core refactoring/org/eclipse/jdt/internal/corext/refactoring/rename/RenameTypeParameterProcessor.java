@@ -165,7 +165,6 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 		}
 	}
 
-	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_PARAMETER= "parameter"; //$NON-NLS-1$
 
 	/** The identifier of this processor */
@@ -279,7 +278,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fTypeParameter.getDeclaringMember()));
 				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
 				arguments.put(ATTRIBUTE_PARAMETER, fTypeParameter.getElementName());
-				arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 				final RefactoringDescriptorChange result= new RefactoringDescriptorChange(descriptor, RefactoringCoreMessages.RenameTypeParameterProcessor_change_name, new Change[] { change});
 				result.markAsSynthetic();
 				change= result;
@@ -396,11 +395,11 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 				setNewElementName(name);
 			else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_NAME));
-			final String references= extended.getAttribute(ATTRIBUTE_REFERENCES);
+			final String references= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES);
 			if (references != null) {
 				fUpdateReferences= Boolean.valueOf(references).booleanValue();
 			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REFERENCES));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES));
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();

@@ -123,11 +123,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpdating, IReferenceUpdating, IQualifiedNameUpdating, ISimilarDeclarationUpdating, IResourceMapper, IJavaElementMapper {
 
 	private static final String ATTRIBUTE_QUALIFIED= "qualified"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_TEXTUAL_MATCHES= "textual"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_PATTERNS= "patterns"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_SIMILAR_DECLARATIONS= "similarDeclarations"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_SIMILAR_DECLARATIONS_MATCHING_STRATEGY= "matchStrategy"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_MATCHING_STRATEGY= "matchStrategy"; //$NON-NLS-1$
 	
     private static final GroupCategorySet CATEGORY_TYPE_RENAME= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.refactoring.rename.renameType.type", RefactoringCoreMessages.RenameTypeProcessor_changeCategory_type, RefactoringCoreMessages.RenameTypeProcessor_changeCategory_type_description)); //$NON-NLS-1$
     private static final GroupCategorySet CATEGORY_METHOD_RENAME= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.refactoring.rename.renameType.method", RefactoringCoreMessages.RenameTypeProcessor_changeCategory_method, RefactoringCoreMessages.RenameTypeProcessor_changeCategory_method_description)); //$NON-NLS-1$
@@ -1015,11 +1014,11 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
 			if (fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
-			arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 			arguments.put(ATTRIBUTE_QUALIFIED, Boolean.valueOf(fUpdateQualifiedNames).toString());
 			arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
 			arguments.put(ATTRIBUTE_SIMILAR_DECLARATIONS, Boolean.valueOf(fUpdateSimilarElements).toString());
-			arguments.put(ATTRIBUTE_SIMILAR_DECLARATIONS_MATCHING_STRATEGY, Integer.toString(fRenamingStrategy));
+			arguments.put(ATTRIBUTE_MATCHING_STRATEGY, Integer.toString(fRenamingStrategy));
 			final DynamicValidationRefactoringChange result= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.RenameTypeProcessor_change_name);
 			result.addAll(fChangeManager.getAllChanges());
 			if (willRenameCU()) {
@@ -1178,11 +1177,11 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			final String patterns= extended.getAttribute(ATTRIBUTE_PATTERNS);
 			if (patterns != null && !"".equals(patterns)) //$NON-NLS-1$
 				fFilePatterns= patterns;
-			final String references= extended.getAttribute(ATTRIBUTE_REFERENCES);
+			final String references= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES);
 			if (references != null) {
 				fUpdateReferences= Boolean.valueOf(references).booleanValue();
 			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REFERENCES));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES));
 			final String matches= extended.getAttribute(ATTRIBUTE_TEXTUAL_MATCHES);
 			if (matches != null) {
 				fUpdateTextualMatches= Boolean.valueOf(matches).booleanValue();
@@ -1198,7 +1197,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				fUpdateSimilarElements= Boolean.valueOf(similarDeclarations).booleanValue();
 			else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SIMILAR_DECLARATIONS));
-			final String similarDeclarationsMatchingStrategy= extended.getAttribute(ATTRIBUTE_SIMILAR_DECLARATIONS_MATCHING_STRATEGY);
+			final String similarDeclarationsMatchingStrategy= extended.getAttribute(ATTRIBUTE_MATCHING_STRATEGY);
 			if (similarDeclarationsMatchingStrategy != null) {
 				try {
 					fRenamingStrategy= Integer.valueOf(similarDeclarationsMatchingStrategy).intValue();
@@ -1206,7 +1205,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] {similarDeclarationsMatchingStrategy, ATTRIBUTE_QUALIFIED}));
 				}
 			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SIMILAR_DECLARATIONS_MATCHING_STRATEGY));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_MATCHING_STRATEGY));
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();

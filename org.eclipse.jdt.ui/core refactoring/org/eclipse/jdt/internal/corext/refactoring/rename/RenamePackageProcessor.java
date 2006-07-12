@@ -93,7 +93,6 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 public class RenamePackageProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating {
 	
 	private static final String ATTRIBUTE_QUALIFIED= "qualified"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_TEXTUAL_MATCHES= "textual"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_PATTERNS= "patterns"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_HIERARCHICAL= "hierarchical"; //$NON-NLS-1$
@@ -442,7 +441,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
 			if (fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
-			arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 			arguments.put(ATTRIBUTE_QUALIFIED, Boolean.valueOf(fUpdateQualifiedNames).toString());
 			arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
 			arguments.put(ATTRIBUTE_HIERARCHICAL, Boolean.valueOf(fRenameSubpackages).toString());
@@ -927,11 +926,11 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 				fFilePatterns= patterns;
 			else
 				fFilePatterns= ""; //$NON-NLS-1$
-			final String references= extended.getAttribute(ATTRIBUTE_REFERENCES);
+			final String references= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES);
 			if (references != null) {
 				fUpdateReferences= Boolean.valueOf(references).booleanValue();
 			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REFERENCES));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES));
 			final String matches= extended.getAttribute(ATTRIBUTE_TEXTUAL_MATCHES);
 			if (matches != null) {
 				fUpdateTextualMatches= Boolean.valueOf(matches).booleanValue();
