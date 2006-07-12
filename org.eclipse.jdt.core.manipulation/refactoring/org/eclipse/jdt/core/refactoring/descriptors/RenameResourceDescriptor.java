@@ -118,8 +118,7 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 			status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameResourceDescriptor_no_resource));
 		if (fName == null || "".equals(fName)) //$NON-NLS-1$
 			status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameResourceDescriptor_no_new_name));
-		String project= getProject();
-		if (fResource instanceof IProject && (project == null || "".equals(project))) //$NON-NLS-1$
+		if (fResource instanceof IProject && getProject() != null)
 			status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameResourceDescriptor_project_constraint));
 		return status;
 	}
