@@ -4861,6 +4861,82 @@ public class CleanUpTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 	
+	public void testRemoveQualifierBug150481_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public class Inner extends E {\n");
+		buf.append("        public void test() {\n");
+		buf.append("            E.this.foo();\n");
+		buf.append("            this.foo();\n");
+		buf.append("            foo();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {}\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.REMOVE_THIS_METHOD_QUALIFIER);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public class Inner extends E {\n");
+		buf.append("        public void test() {\n");
+		buf.append("            E.this.foo();\n");
+		buf.append("            foo();\n");
+		buf.append("            foo();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {}\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testRemoveQualifierBug150481_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public class Inner {\n");
+		buf.append("        public void test() {\n");
+		buf.append("            E.this.foo();\n");
+		buf.append("            foo();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {}\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.REMOVE_THIS_METHOD_QUALIFIER);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public class Inner {\n");
+		buf.append("        public void test() {\n");
+		buf.append("            foo();\n");
+		buf.append("            foo();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {}\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
 	public void testAddFinal01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();

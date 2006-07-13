@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -271,8 +272,29 @@ public class CodeStyleFix extends AbstractFix {
 				return true;
 			
 			final SimpleName name= node.getName();
+			if (name.resolveBinding() == null)
+				return true;
+			
 			if (hasConflict(expression.getStartPosition(), name, ScopeAnalyzer.METHODS))
 				return true;
+			
+			Name qualifier= ((ThisExpression)expression).getQualifier();
+			if (qualifier != null) {
+				ITypeBinding declaringClass= ((IMethodBinding)name.resolveBinding()).getDeclaringClass();
+				if (declaringClass == null)
+					return true;
+				
+				ITypeBinding caller= getDeclaringType(node);
+				if (caller == null)
+					return true;
+				
+				ITypeBinding callee= (ITypeBinding)qualifier.resolveBinding();
+				if (callee == null)
+					return true;
+				
+				if (callee.isAssignmentCompatible(declaringClass) && caller.isAssignmentCompatible(declaringClass))
+					return true;
+			}
 			
 			fOperations.add(new AbstractFixRewriteOperation() {
 				public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
@@ -287,6 +309,17 @@ public class CodeStyleFix extends AbstractFix {
 			return super.visit(node);
 		}
 		
+		private ITypeBinding getDeclaringType(MethodInvocation node) {
+			ASTNode p= node;
+			while (p != null) {
+				p= p.getParent();
+				if (p instanceof AbstractTypeDeclaration) {
+					return ((AbstractTypeDeclaration)p).resolveBinding();
+				}
+			}
+			return null;
+        }
+
 		private boolean hasConflict(int startPosition, SimpleName name, int flag) {
 			ScopeAnalyzer analyzer= new ScopeAnalyzer(fCompilationUnit);
 			IBinding[] declarationsInScope= analyzer.getDeclarationsInScope(startPosition, flag);
