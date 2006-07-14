@@ -22,6 +22,8 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.DescriptorMessages;
 
@@ -53,6 +55,9 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 
 	/** The match strategy attribute */
 	private static final String ATTRIBUTE_MATCH_STRATEGY= "matchStrategy"; //$NON-NLS-1$
+
+	/** The parameter attribute */
+	private static final String ATTRIBUTE_PARAMETER= "parameter"; //$NON-NLS-1$
 
 	/** The patterns attribute */
 	private static final String ATTRIBUTE_PATTERNS= "patterns"; //$NON-NLS-1$
@@ -145,7 +150,12 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
 		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fName);
-		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, elementToHandle(getProject(), fJavaElement));
+		if (getID().equals(IJavaRefactorings.RENAME_TYPE_PARAMETER)) {
+			final ITypeParameter parameter= (ITypeParameter) fJavaElement;
+			fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, elementToHandle(getProject(), parameter.getDeclaringMember()));
+			fArguments.put(ATTRIBUTE_PARAMETER, parameter.getElementName());
+		} else
+			fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, elementToHandle(getProject(), fJavaElement));
 		final int type= fJavaElement.getElementType();
 		if (type != IJavaElement.PACKAGE_FRAGMENT_ROOT)
 			fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_REFERENCES, Boolean.toString(fReferences));
@@ -359,7 +369,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * Determines whether other Java elements in the hierarchy of the input
 	 * element should be renamed as well.
 	 * <p>
-	 * Note: Hierarchical updating is currently applicable to Java elements of
+	 * Note: Hierarchical updating is currently applicable for Java elements of
 	 * type {@link IPackageFragment}. The default is to not update Java
 	 * elements hierarchically.
 	 * </p>
