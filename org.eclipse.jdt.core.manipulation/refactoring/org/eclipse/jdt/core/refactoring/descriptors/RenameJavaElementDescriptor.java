@@ -48,6 +48,9 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	/** The deprecate attribute */
 	private static final String ATTRIBUTE_DEPRECATE= "deprecate"; //$NON-NLS-1$
 
+	/** The hierarchical attribute */
+	private static final String ATTRIBUTE_HIERARCHICAL= "hierarchical"; //$NON-NLS-1$
+
 	/** The match strategy attribute */
 	private static final String ATTRIBUTE_MATCH_STRATEGY= "matchStrategy"; //$NON-NLS-1$
 
@@ -92,6 +95,9 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 
 	/** The deprecate attribute */
 	private boolean fDeprecate= false;
+
+	/** The hierarchical attribute */
+	private boolean fHierarchical= false;
 
 	/** The java element attribute */
 	private IJavaElement fJavaElement= null;
@@ -176,6 +182,12 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 			case IJavaElement.TYPE:
 				fArguments.put(ATTRIBUTE_SIMILAR_DECLARATIONS, Boolean.toString(fSimilarDeclarations));
 				fArguments.put(ATTRIBUTE_MATCH_STRATEGY, Integer.toString(fMatchStrategy));
+			default:
+				break;
+		}
+		switch (type) {
+			case IJavaElement.PACKAGE_FRAGMENT:
+				fArguments.put(ATTRIBUTE_HIERARCHICAL, Boolean.toString(fHierarchical));
 			default:
 				break;
 		}
@@ -344,6 +356,23 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	}
 
 	/**
+	 * Determines whether other Java elements in the hierarchy of the input
+	 * element should be renamed as well.
+	 * <p>
+	 * Note: Hierarchical updating is currently applicable to Java elements of
+	 * type {@link IPackageFragment}. The default is to not update Java
+	 * elements hierarchically.
+	 * </p>
+	 * 
+	 * @param update
+	 *            <code>true</code> to update hierarchically,
+	 *            <code>false</code> otherwise
+	 */
+	public void setUpdateHierarchy(final boolean update) {
+		fHierarchical= update;
+	}
+
+	/**
 	 * Determines whether qualified names of the Java element should be renamed.
 	 * <p>
 	 * Note: Qualified name updating is applicable to the Java elements
@@ -474,6 +503,14 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 						break;
 					default:
 						status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_similar_constraint));
+				}
+			}
+			if (fHierarchical) {
+				switch (type) {
+					case IJavaElement.PACKAGE_FRAGMENT:
+						break;
+					default:
+						status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_hierarchical_constraint));
 				}
 			}
 		}

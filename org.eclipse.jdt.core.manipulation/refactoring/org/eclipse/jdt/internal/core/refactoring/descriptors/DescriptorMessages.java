@@ -28,6 +28,8 @@ public class DescriptorMessages extends NLS {
 
 	public static String RenameJavaElementDescriptor_deprecation_constraint;
 
+	public static String RenameJavaElementDescriptor_hierarchical_constraint;
+
 	public static String RenameJavaElementDescriptor_no_java_element;
 
 	public static String RenameJavaElementDescriptor_patterns_constraint;
