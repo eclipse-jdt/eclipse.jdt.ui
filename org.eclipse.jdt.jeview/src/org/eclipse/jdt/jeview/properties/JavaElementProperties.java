@@ -154,7 +154,7 @@ public class JavaElementProperties implements IPropertySource {
 		
 		addProperty(new Property(IImportDeclaration.class, "flags") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
-				return getFlagsString(((IImportDeclaration) element).getFlags());
+				return getFlagsString(((IImportDeclaration) element).getFlags(), IImportDeclaration.class);
 			}
 		});
 		addProperty(new Property(IImportDeclaration.class, "isOnDemand") {
@@ -202,7 +202,7 @@ public class JavaElementProperties implements IPropertySource {
 		});
 		addProperty(new Property(IMember.class, "flags") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
-				return getFlagsString(((IMember) element).getFlags());
+				return getFlagsString(((IMember) element).getFlags(), element.getClass());
 			}
 		});
 		addProperty(new Property(IMember.class, "isBinary") {
@@ -544,7 +544,7 @@ public class JavaElementProperties implements IPropertySource {
 		return range == null ? "null" : range.getOffset() + " + " + range.getLength();
 	}
 
-	static String getFlagsString(int flags) {
+	static String getFlagsString(int flags, Class<? extends IJavaElement> clazz) {
 		StringBuffer sb = new StringBuffer().append("0x").append(Integer.toHexString(flags)).append(" (");
 		int prologLen= sb.length();
 		int rest= flags;
@@ -554,9 +554,15 @@ public class JavaElementProperties implements IPropertySource {
 		rest&= ~ appendFlag(sb, flags, Flags.AccProtected, "protected ");
 		rest&= ~ appendFlag(sb, flags, Flags.AccStatic, "static ");
 		rest&= ~ appendFlag(sb, flags, Flags.AccFinal, "final ");
-		rest&= ~ appendFlag(sb, flags, Flags.AccSynchronized, "synchronized/super ");
-		rest&= ~ appendFlag(sb, flags, Flags.AccVolatile, "volatile/bridge ");
-		rest&= ~ appendFlag(sb, flags, Flags.AccTransient, "transient/varargs ");
+		if (IMethod.class.isAssignableFrom(clazz)) {
+			rest&= ~ appendFlag(sb, flags, Flags.AccSynchronized, "synchronized ");
+			rest&= ~ appendFlag(sb, flags, Flags.AccBridge, "bridge ");
+			rest&= ~ appendFlag(sb, flags, Flags.AccVarargs, "varargs ");
+		} else {
+			rest&= ~ appendFlag(sb, flags, Flags.AccSuper, "super ");
+			rest&= ~ appendFlag(sb, flags, Flags.AccVolatile, "volatile ");
+			rest&= ~ appendFlag(sb, flags, Flags.AccTransient, "transient ");
+		}
 		rest&= ~ appendFlag(sb, flags, Flags.AccNative, "native ");
 		rest&= ~ appendFlag(sb, flags, Flags.AccInterface, "interface ");
 		rest&= ~ appendFlag(sb, flags, Flags.AccAbstract, "abstract ");
