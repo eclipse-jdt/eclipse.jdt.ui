@@ -14,6 +14,7 @@ import java.util.StringTokenizer;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
@@ -21,6 +22,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
+
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.ui.search.PatternQuerySpecification;
@@ -86,8 +89,15 @@ abstract class MatchFilter {
 	private static final MatchFilter JAVADOC_FILTER= new JavadocFilter(); 
 	private static final MatchFilter READ_FILTER= new ReadFilter(); 
 	private static final MatchFilter WRITE_FILTER= new WriteFilter(); 
+	
 	private static final MatchFilter INEXACT_FILTER= new InexactMatchFilter(); 
 	private static final MatchFilter ERASURE_FILTER= new ErasureMatchFilter(); 
+	
+	private static final MatchFilter NON_PUBLIC_FILTER= new NonPublicFilter();
+	private static final MatchFilter STATIC_FILTER= new StaticFilter();
+	private static final MatchFilter NON_STATIC_FILTER= new NonStaticFilter();
+	private static final MatchFilter DEPRECATED_FILTER= new DeprecatedFilter();
+	private static final MatchFilter NON_DEPRECATED_FILTER= new NonDeprecatedFilter();
 	
 	private static final MatchFilter[] ALL_FILTERS= new MatchFilter[] {
 			POTENTIAL_FILTER,
@@ -95,8 +105,15 @@ abstract class MatchFilter {
 			JAVADOC_FILTER,
 			READ_FILTER,
 			WRITE_FILTER,
+			
 			INEXACT_FILTER,
-			ERASURE_FILTER
+			ERASURE_FILTER,
+			
+			NON_PUBLIC_FILTER,
+			STATIC_FILTER,
+			NON_STATIC_FILTER,
+			DEPRECATED_FILTER,
+			NON_DEPRECATED_FILTER
 	};
 		
 	public static MatchFilter[] allFilters() {
@@ -304,3 +321,138 @@ class InexactMatchFilter extends GenericTypeFilter {
 	}
 }
 
+abstract class ModifierFilter extends MatchFilter {
+	public boolean isApplicable(JavaSearchQuery query) {
+		return true;
+	}
+}
+
+class NonPublicFilter extends ModifierFilter {
+	public boolean filters(JavaElementMatch match) {
+		Object element= match.getElement();
+		if (element instanceof IMember) {
+			try {
+				return ! JdtFlags.isPublic((IMember) element);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+		}
+		return false;
+	}
+	public String getName() {
+		return SearchMessages.MatchFilter_NonPublicFilter_name;
+	}
+	public String getActionLabel() {
+		return SearchMessages.MatchFilter_NonPublicFilter_actionLabel;
+	}
+	public String getDescription() {
+		return SearchMessages.MatchFilter_NonPublicFilter_description;
+	}
+	public String getID() {
+		return "filter_non_public"; //$NON-NLS-1$
+	}
+}
+
+class StaticFilter extends ModifierFilter {
+	public boolean filters(JavaElementMatch match) {
+		Object element= match.getElement();
+		if (element instanceof IMember) {
+			try {
+				return JdtFlags.isStatic((IMember) element);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+		}
+		return false;
+	}
+	public String getName() {
+		return SearchMessages.MatchFilter_StaticFilter_name;
+	}
+	public String getActionLabel() {
+		return SearchMessages.MatchFilter_StaticFilter_actionLabel;
+	}
+	public String getDescription() {
+		return SearchMessages.MatchFilter_StaticFilter_description;
+	}
+	public String getID() {
+		return 	"filter_static"; //$NON-NLS-1$
+	}
+}
+
+class NonStaticFilter extends ModifierFilter {
+	public boolean filters(JavaElementMatch match) {
+		Object element= match.getElement();
+		if (element instanceof IMember) {
+			try {
+				return ! JdtFlags.isStatic((IMember) element);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+		}
+		return false;
+	}
+	public String getName() {
+		return SearchMessages.MatchFilter_NonStaticFilter_name;
+	}
+	public String getActionLabel() {
+		return SearchMessages.MatchFilter_NonStaticFilter_actionLabel;
+	}
+	public String getDescription() {
+		return SearchMessages.MatchFilter_NonStaticFilter_description;
+	}
+	public String getID() {
+		return 	"filter_non_static"; //$NON-NLS-1$
+	}
+}
+
+class DeprecatedFilter extends ModifierFilter {
+	public boolean filters(JavaElementMatch match) {
+		Object element= match.getElement();
+		if (element instanceof IMember) {
+			try {
+				return JdtFlags.isDeprecated((IMember) element);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+		}
+		return false;
+	}
+	public String getName() {
+		return SearchMessages.MatchFilter_DeprecatedFilter_name;
+	}
+	public String getActionLabel() {
+		return SearchMessages.MatchFilter_DeprecatedFilter_actionLabel;
+	}
+	public String getDescription() {
+		return SearchMessages.MatchFilter_DeprecatedFilter_description;
+	}
+	public String getID() {
+		return 	"filter_deprecated"; //$NON-NLS-1$
+	}
+}
+
+class NonDeprecatedFilter extends ModifierFilter {
+	public boolean filters(JavaElementMatch match) {
+		Object element= match.getElement();
+		if (element instanceof IMember) {
+			try {
+				return ! JdtFlags.isDeprecated((IMember) element);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+		}
+		return false;
+	}
+	public String getName() {
+		return SearchMessages.MatchFilter_NonDeprecatedFilter_name;
+	}
+	public String getActionLabel() {
+		return SearchMessages.MatchFilter_NonDeprecatedFilter_actionLabel;
+	}
+	public String getDescription() {
+		return SearchMessages.MatchFilter_NonDeprecatedFilter_description;
+	}
+	public String getID() {
+		return 	"filter_non_deprecated"; //$NON-NLS-1$
+	}
+}
