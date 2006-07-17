@@ -12,35 +12,22 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -59,11 +46,9 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.OutputLocationDialog;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderValidator;
 
-public class EditOutputFolderAction extends Action implements ISelectionChangedListener {
+//SelectedElements iff enabled: (IPackageFragmentRoot || IJavaProject || CPListElementAttribute) && size == 1
+public class EditOutputFolderAction extends BuildpathModifierAction {
 
-	private final IWorkbenchSite fSite;
-	private IJavaProject fJavaProject;
-	private CPListElement fSelectedElement;
 	private final IRunnableContext fContext;
 	private final IClasspathModifierListener fListener;
 
@@ -72,12 +57,13 @@ public class EditOutputFolderAction extends Action implements ISelectionChangedL
 	}
 
 	public EditOutputFolderAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_label, JavaPluginImages.DESC_ELCL_CONFIGURE_OUTPUT_FOLDER);
+		super(site);
 		
-		fSite= site;
 		fContext= context;
 		fListener= listener;
 		
+		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_label);
+		setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_OUTPUT_FOLDER);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip);
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_OUTPUT_FOLDER);
 	}
@@ -89,10 +75,34 @@ public class EditOutputFolderAction extends Action implements ISelectionChangedL
 		try {
 
 			final Shell shell= getShell();
+			
+			final IJavaProject javaProject;
+			CPListElement cpElement= null;
+			Object firstElement= getSelectedElements().get(0);
+			if (firstElement instanceof IJavaProject) {
+				javaProject= (IJavaProject)firstElement;
+				
+				final IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(javaProject.getPath(), javaProject, IClasspathEntry.CPE_SOURCE);
+				cpElement= CPListElement.createFromExisting(entry, javaProject);
+			} else if (firstElement instanceof IPackageFragmentRoot) {
+				IPackageFragmentRoot root= (IPackageFragmentRoot)firstElement;
+				
+				javaProject= root.getJavaProject();
+								
+				final IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(root.getPath(), javaProject, IClasspathEntry.CPE_SOURCE);
+				cpElement= CPListElement.createFromExisting(entry, javaProject);
+			} else if (firstElement instanceof CPListElementAttribute) {
+				CPListElementAttribute attribute= (CPListElementAttribute)firstElement;
 
-			final List classpathEntries= ClasspathModifier.getExistingEntries(fJavaProject);
+				cpElement= attribute.getParent();
+				javaProject= cpElement.getJavaProject();
+			} else {
+				return;
+			}
 
-			final CPListElement element= ClasspathModifier.getClasspathEntry(classpathEntries, fSelectedElement);
+			final List classpathEntries= ClasspathModifier.getExistingEntries(javaProject);
+
+			final CPListElement element= ClasspathModifier.getClasspathEntry(classpathEntries, cpElement);
 			final int index= classpathEntries.indexOf(element);
 
 			final OutputLocationDialog dialog= new OutputLocationDialog(shell, element, classpathEntries);
@@ -102,17 +112,17 @@ public class EditOutputFolderAction extends Action implements ISelectionChangedL
 			classpathEntries.add(index, element);
 
 			final boolean removeProjectFromClasspath;
-			final IPath defaultOutputLocation= fJavaProject.getOutputLocation().makeRelative();
+			final IPath defaultOutputLocation= javaProject.getOutputLocation().makeRelative();
 			final IPath newDefaultOutputLocation;
 			if (defaultOutputLocation.segmentCount() == 1) {
 				//Project folder is output location
-				final OutputFolderValidator outputFolderValidator= new OutputFolderValidator(null, fJavaProject) {
+				final OutputFolderValidator outputFolderValidator= new OutputFolderValidator(null, javaProject) {
 					public boolean validate(IPath outputLocation) {
 						return true;
 					}
 				};
 				final OutputFolderQuery outputFolderQuery= ClasspathModifierQueries.getDefaultFolderQuery(shell, defaultOutputLocation);
-				if (outputFolderQuery.doQuery(true, outputFolderValidator, fJavaProject)) {
+				if (outputFolderQuery.doQuery(true, outputFolderValidator, javaProject)) {
 					newDefaultOutputLocation= outputFolderQuery.getOutputLocation();
 					removeProjectFromClasspath= outputFolderQuery.removeProjectFromClasspath();
 				} else {
@@ -127,7 +137,7 @@ public class EditOutputFolderAction extends Action implements ISelectionChangedL
 				final IRunnableWithProgress runnable= new IRunnableWithProgress() {
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						try {
-							setOutputLocation(element, dialog.getOutputLocation(), classpathEntries, newDefaultOutputLocation, removeProjectFromClasspath, monitor);
+							setOutputLocation(element, dialog.getOutputLocation(), classpathEntries, newDefaultOutputLocation, removeProjectFromClasspath, javaProject, monitor);
 						} catch (CoreException e) {
 							throw new InvocationTargetException(e);
 						}
@@ -136,7 +146,7 @@ public class EditOutputFolderAction extends Action implements ISelectionChangedL
 				fContext.run(false, false, runnable);
 			} catch (final InvocationTargetException e) {
 				if (e.getCause() instanceof CoreException) {
-					showExceptionDialog((CoreException)e.getCause());
+					showExceptionDialog((CoreException)e.getCause(), NewWizardMessages.EditOutputFolderAction_ErrorDescription);
 				} else {
 					JavaPlugin.log(e);
 				}
@@ -144,48 +154,39 @@ public class EditOutputFolderAction extends Action implements ISelectionChangedL
 			}
 			
 		} catch (final CoreException e) {
-			showExceptionDialog(e);
+			showExceptionDialog(e, NewWizardMessages.EditOutputFolderAction_ErrorDescription);
 		}
 	}
 
-	private void setOutputLocation(final CPListElement entry, final IPath outputLocation, final List existingEntries, final IPath defaultOutputLocation, final boolean removeProjectFromClasspath, final IProgressMonitor monitor) throws CoreException, InterruptedException {
+	private void setOutputLocation(final CPListElement entry, final IPath outputLocation, final List existingEntries, final IPath defaultOutputLocation, final boolean removeProjectFromClasspath, final IJavaProject javaProject, final IProgressMonitor monitor) throws CoreException, InterruptedException {
 		try {
 			monitor.beginTask(NewWizardMessages.EditOutputFolderAction_ProgressMonitorDescription, 4);
-			if (!defaultOutputLocation.equals(fJavaProject.getOutputLocation().makeRelative())) {
-				fJavaProject.setOutputLocation(defaultOutputLocation, new SubProgressMonitor(monitor, 1));
+			if (!defaultOutputLocation.equals(javaProject.getOutputLocation().makeRelative())) {
+				javaProject.setOutputLocation(defaultOutputLocation, new SubProgressMonitor(monitor, 1));
 			} else {
 				monitor.worked(1);
 			}
 			
 			if (removeProjectFromClasspath) {
-				ClasspathModifier.removeFromClasspath(fJavaProject, existingEntries, new SubProgressMonitor(monitor, 1));
+				ClasspathModifier.removeFromClasspath(javaProject, existingEntries, new SubProgressMonitor(monitor, 1));
 			} else {
 				monitor.worked(1);
 			}
 	
 			if (outputLocation != null) {
-				ClasspathModifier.exclude(outputLocation, existingEntries, new ArrayList(), fJavaProject, new SubProgressMonitor(monitor, 1));
+				ClasspathModifier.exclude(outputLocation, existingEntries, new ArrayList(), javaProject, new SubProgressMonitor(monitor, 1));
 				entry.setAttribute(CPListElement.OUTPUT, outputLocation);
 			} else {
 				monitor.worked(1);
 			}
 			
-			ClasspathModifier.commitClassPath(existingEntries, fJavaProject, fListener, new SubProgressMonitor(monitor, 1));
+			ClasspathModifier.commitClassPath(existingEntries, javaProject, fListener, new SubProgressMonitor(monitor, 1));
 		} finally {
 			monitor.done();
 		}
 	}
 
-	public void selectionChanged(final SelectionChangedEvent event) {
-		final ISelection selection = event.getSelection();
-		if (selection instanceof IStructuredSelection) {
-			setEnabled(canHandle((IStructuredSelection) selection));
-		} else {
-			setEnabled(canHandle(StructuredSelection.EMPTY));
-		}
-	}
-
-	public boolean canHandle(final IStructuredSelection elements) {
+	protected boolean canHandle(final IStructuredSelection elements) {
 		if (elements.size() != 1)
 			return false;
 
@@ -193,35 +194,30 @@ public class EditOutputFolderAction extends Action implements ISelectionChangedL
 		try {
 			if (element instanceof IPackageFragmentRoot) {
 				final IPackageFragmentRoot root= (IPackageFragmentRoot)element;
-				fJavaProject= root.getJavaProject();
-				if (fJavaProject == null)
+				if (root.getKind() != IPackageFragmentRoot.K_SOURCE)
+					return false;
+					
+				IJavaProject javaProject= root.getJavaProject();
+				if (javaProject == null)
 					return false;
 				
-				final IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(root.getPath(), fJavaProject, IClasspathEntry.CPE_SOURCE);
+				final IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(root.getPath(), javaProject, IClasspathEntry.CPE_SOURCE);
 				if (entry == null)
 					return false;
 				
-				fSelectedElement= CPListElement.createFromExisting(entry, fJavaProject);
-				
-				return root.getKind() == IPackageFragmentRoot.K_SOURCE;
+				return true;
 			} else if (element instanceof IJavaProject) {
-				IJavaProject project= (IJavaProject)element;	
-				if (ClasspathModifier.isSourceFolder(project)) {
-					fJavaProject= project;
-					
-					final IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(project.getPath(), fJavaProject, IClasspathEntry.CPE_SOURCE);
-					fSelectedElement= CPListElement.createFromExisting(entry, fJavaProject);
-					
-					return true;
-				}
+				IJavaProject project= (IJavaProject)element;
+				if (!(ClasspathModifier.isSourceFolder(project)))
+					return false;
+				
+				return true;
 			} else if (element instanceof CPListElementAttribute) {
 				CPListElementAttribute attribute= (CPListElementAttribute)element;
+				if (attribute.getKey() != CPListElement.OUTPUT)
+					return false;
 				
-				fJavaProject= attribute.getParent().getJavaProject();
-				fSelectedElement= attribute.getParent();
-				
-				if (attribute.getKey() == CPListElement.OUTPUT)
-					return true;
+				return true;
 			}
 
 		} catch (final JavaModelException e) {
@@ -229,74 +225,4 @@ public class EditOutputFolderAction extends Action implements ISelectionChangedL
 		}
 		return false;
 	}
-
-	private void showExceptionDialog(final CoreException exception) {
-		showError(exception, getShell(), NewWizardMessages.EditOutputFolderAction_ErrorDescription, exception.getMessage());
-	}
-
-	private void showError(CoreException e, Shell shell, String title, String message) {
-		IStatus status= e.getStatus();
-		if (status != null) {
-			ErrorDialog.openError(shell, message, title, status);
-		} else {
-			MessageDialog.openError(shell, title, message);
-		}
-	}
-	
-	private Shell getShell() {
-		if (fSite == null)
-			return JavaPlugin.getActiveWorkbenchShell();
-		
-	    return fSite.getShell() != null ? fSite.getShell() : JavaPlugin.getActiveWorkbenchShell();
-    }
-	
-	protected void selectAndReveal(final ISelection selection) {
-		// validate the input
-		IWorkbenchPage page= fSite.getPage();
-		if (page == null)
-			return;
-
-		// get all the view and editor parts
-		List parts= new ArrayList();
-		IWorkbenchPartReference refs[]= page.getViewReferences();
-		for (int i= 0; i < refs.length; i++) {
-			IWorkbenchPart part= refs[i].getPart(false);
-			if (part != null)
-				parts.add(part);
-		}
-		refs= page.getEditorReferences();
-		for (int i= 0; i < refs.length; i++) {
-			if (refs[i].getPart(false) != null)
-				parts.add(refs[i].getPart(false));
-		}
-
-		Iterator itr= parts.iterator();
-		while (itr.hasNext()) {
-			IWorkbenchPart part= (IWorkbenchPart) itr.next();
-
-			// get the part's ISetSelectionTarget implementation
-			ISetSelectionTarget target= null;
-			if (part instanceof ISetSelectionTarget)
-				target= (ISetSelectionTarget) part;
-			else
-				target= (ISetSelectionTarget) part.getAdapter(ISetSelectionTarget.class);
-
-			if (target != null) {
-				// select and reveal resource
-				final ISetSelectionTarget finalTarget= target;
-				page.getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						finalTarget.selectReveal(selection);
-					}
-				});
-			}
-		}
-	}
-	
-	protected List getSelectedElements() {
-		ArrayList result= new ArrayList();
-		result.add(fSelectedElement);
-		return result;
-	}
-
 }

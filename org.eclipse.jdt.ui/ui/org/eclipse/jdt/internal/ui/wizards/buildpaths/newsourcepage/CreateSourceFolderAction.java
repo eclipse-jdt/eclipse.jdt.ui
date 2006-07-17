@@ -10,10 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
@@ -21,22 +17,14 @@ import org.eclipse.core.resources.IProject;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -46,7 +34,6 @@ import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathMod
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -55,10 +42,9 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.AddSourceFolderWizard;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
-public class CreateSourceFolderAction extends Action implements ISelectionChangedListener {
+//SelectedElements iff enabled: IJavaProject && size==1
+public class CreateSourceFolderAction extends BuildpathModifierAction {
 	
-	private IJavaProject fSelectedProject;
-	private final IWorkbenchSite fSite;
 	private final IClasspathModifierListener fListener;
 
 	public CreateSourceFolderAction(IWorkbenchSite site) {
@@ -66,8 +52,8 @@ public class CreateSourceFolderAction extends Action implements ISelectionChange
 	}
 	
 	public CreateSourceFolderAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
+		super(site);
 		
-		fSite= site;
 		fListener= listener;
 		
 		setText(ActionMessages.OpenNewSourceFolderWizardAction_text2); 
@@ -85,8 +71,14 @@ public class CreateSourceFolderAction extends Action implements ISelectionChange
 		Shell shell= getShell();
 	
 		try {
-			AddSourceFolderWizard wizard= createWizard();
-			wizard.init(PlatformUI.getWorkbench(), new StructuredSelection(fSelectedProject));
+			IJavaProject javaProject= (IJavaProject)getSelectedElements().get(0);
+			
+            CPListElement newEntrie= new CPListElement(javaProject, IClasspathEntry.CPE_SOURCE);
+            CPListElement[] existing= CPListElement.createFromExisting(javaProject);
+            boolean isProjectSrcFolder= CPListElement.isProjectSourceFolder(existing, javaProject);
+			
+            AddSourceFolderWizard wizard= new AddSourceFolderWizard(existing, newEntrie, getOutputLocation(javaProject), false, false, false, isProjectSrcFolder, isProjectSrcFolder);
+			wizard.init(PlatformUI.getWorkbench(), new StructuredSelection(javaProject));
 			
 			WizardDialog dialog= new WizardDialog(shell, wizard);
 			if (shell != null) {
@@ -109,13 +101,6 @@ public class CreateSourceFolderAction extends Action implements ISelectionChange
 			ExceptionHandler.handle(e, shell, title, message);
 		}
 	}
-	
-	private Shell getShell() {
-		if (fSite == null)
-			return JavaPlugin.getActiveWorkbenchShell();
-		
-	    return fSite.getShell() != null ? fSite.getShell() : JavaPlugin.getActiveWorkbenchShell();
-    }
 
     private IPath getOutputLocation(IJavaProject javaProject) {
     	try {
@@ -127,75 +112,13 @@ public class CreateSourceFolderAction extends Action implements ISelectionChange
 		}
     }
 
-    private AddSourceFolderWizard createWizard() throws CoreException {
-    	CPListElement newEntrie= new CPListElement(fSelectedProject, IClasspathEntry.CPE_SOURCE);
-    	CPListElement[] existing= CPListElement.createFromExisting(fSelectedProject);
-    	boolean isProjectSrcFolder= CPListElement.isProjectSourceFolder(existing, fSelectedProject);
-    	return new AddSourceFolderWizard(existing, newEntrie, getOutputLocation(fSelectedProject), false, false, false, isProjectSrcFolder, isProjectSrcFolder);
-    }
-    
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public void selectionChanged(SelectionChangedEvent event) {
-        ISelection selection = event.getSelection();
-        if (selection instanceof IStructuredSelection) {
-			setEnabled(canHandle((IStructuredSelection) selection));
-        } else {
-			setEnabled(canHandle(StructuredSelection.EMPTY));
-        }
-	}
-	
-    private boolean canHandle(IStructuredSelection selection) {
-    	if (selection.size() == 1 && selection.getFirstElement() instanceof IJavaProject) {
-    		fSelectedProject= (IJavaProject)selection.getFirstElement();
-    		return true;
-    	}
-    	return false;
-    }
-	
-	protected void selectAndReveal(final ISelection selection) {
-		// validate the input
-		IWorkbenchPage page= fSite.getPage();
-		if (page == null)
-			return;
-
-		// get all the view and editor parts
-		List parts= new ArrayList();
-		IWorkbenchPartReference refs[]= page.getViewReferences();
-		for (int i= 0; i < refs.length; i++) {
-			IWorkbenchPart part= refs[i].getPart(false);
-			if (part != null)
-				parts.add(part);
-		}
-		refs= page.getEditorReferences();
-		for (int i= 0; i < refs.length; i++) {
-			if (refs[i].getPart(false) != null)
-				parts.add(refs[i].getPart(false));
-		}
-
-		Iterator itr= parts.iterator();
-		while (itr.hasNext()) {
-			IWorkbenchPart part= (IWorkbenchPart) itr.next();
-
-			// get the part's ISetSelectionTarget implementation
-			ISetSelectionTarget target= null;
-			if (part instanceof ISetSelectionTarget)
-				target= (ISetSelectionTarget) part;
-			else
-				target= (ISetSelectionTarget) part.getAdapter(ISetSelectionTarget.class);
-
-			if (target != null) {
-				// select and reveal resource
-				final ISetSelectionTarget finalTarget= target;
-				page.getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						finalTarget.selectReveal(selection);
-					}
-				});
-			}
-		}
-	}
-	
+    protected boolean canHandle(IStructuredSelection selection) {
+    	if (selection.size() != 1)
+    		return false;
+    		
+    	if (!(selection.getFirstElement() instanceof IJavaProject))
+    		return false;
+    	
+    	return true;
+    }	
 }

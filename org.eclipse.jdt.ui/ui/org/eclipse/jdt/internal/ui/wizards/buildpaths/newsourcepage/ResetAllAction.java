@@ -17,16 +17,11 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -43,7 +38,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
 //TODO: Use global history
-public class ResetAllAction extends Action implements IClasspathModifierAction {
+public class ResetAllAction extends BuildpathModifierAction implements IClasspathModifierAction {
 	
 	private final IClasspathModifierListener fListener;
 	private final HintTextGroup fProvider;
@@ -52,9 +47,9 @@ public class ResetAllAction extends Action implements IClasspathModifierAction {
 	private List fEntries;
 	private IPath fOutputLocation;
 
-	public ResetAllAction(IJavaProject javaProject, IClasspathModifierListener listener, HintTextGroup provider, IRunnableContext context) {
+	public ResetAllAction(IClasspathModifierListener listener, HintTextGroup provider, IRunnableContext context) {
+		super(null);
 		
-		fJavaProject= javaProject;
 		fListener= listener;
 		fProvider= provider;
 		fContext= context;
@@ -72,7 +67,7 @@ public class ResetAllAction extends Action implements IClasspathModifierAction {
 		
 		fEntries= ClasspathModifier.getExistingEntries(javaProject);
 		fOutputLocation= fJavaProject.getOutputLocation();
-		setEnabled(true);
+		setEnabled(canHandle(null));
     }
 	
 	/**
@@ -96,7 +91,7 @@ public class ResetAllAction extends Action implements IClasspathModifierAction {
 	                    
 	            		selectAndReveal(new StructuredSelection(fJavaProject));
 	                } catch (JavaModelException e) {
-	                    showExceptionDialog(e);
+	                    showExceptionDialog(e, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_tooltip);
 	                } finally {
 	                	monitor.done();
 	                }
@@ -105,13 +100,25 @@ public class ResetAllAction extends Action implements IClasspathModifierAction {
 	        fContext.run(false, false, runnable);
         } catch (InvocationTargetException e) {
 			if (e.getCause() instanceof CoreException) {
-				showExceptionDialog((CoreException)e.getCause());
+				showExceptionDialog((CoreException)e.getCause(), NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_tooltip);
 			} else {
 				JavaPlugin.log(e);
 			}
         } catch (InterruptedException e) {
         }
 	}
+	
+
+	/**
+     * {@inheritDoc}
+     */
+    protected boolean canHandle(IStructuredSelection elements) {
+    	if (fJavaProject == null)
+    		return false;
+    	
+	    return true;
+    }
+
 	
 	//TODO: Remove, action should be disabled if not hasChange
 	private boolean hasChange(IJavaProject project) throws JavaModelException {
@@ -131,23 +138,6 @@ public class ResetAllAction extends Action implements IClasspathModifierAction {
         }
         return false;
 	}
-	
-	private void showExceptionDialog(CoreException exception) {
-		showError(exception, getShell(), NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_tooltip, exception.getMessage());
-	}
-
-	private void showError(CoreException e, Shell shell, String title, String message) {
-		IStatus status= e.getStatus();
-		if (status != null) {
-			ErrorDialog.openError(shell, message, title, status);
-		} else {
-			MessageDialog.openError(shell, title, message);
-		}
-	}
-	
-	private Shell getShell() {
-		return JavaPlugin.getActiveWorkbenchShell();
-    }
 
 	protected void selectAndReveal(ISelection selection) {
         fProvider.handleResetAll();	

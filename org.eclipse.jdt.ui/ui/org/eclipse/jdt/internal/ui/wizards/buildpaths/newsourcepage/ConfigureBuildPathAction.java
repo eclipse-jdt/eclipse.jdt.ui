@@ -15,14 +15,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -38,75 +31,59 @@ import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
-/**
- * 
- */
-public class ConfigureBuildPathAction extends Action implements ISelectionChangedListener {
-
-	private final IWorkbenchSite fSite;
-	private IProject fProject;
+//SelectedElements iff enabled: (IJavaElement || ClassPathContainer || IAdaptable) && size == 1
+public class ConfigureBuildPathAction extends BuildpathModifierAction {
 
 	public ConfigureBuildPathAction(IWorkbenchSite site) {
-		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_label, JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH);
+		super(site);
+		
+		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_label);
+		setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_tooltip);
-		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH);		
-		fSite= site;
-	}
-	
-	private Shell getShell() {
-		return fSite.getShell();
+		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH);
 	}
 	
 	public void run() {
-		if (fProject != null) {
-			PreferencesUtil.createPropertyDialogOn(getShell(), fProject, BuildPathsPropertyPage.PROP_ID, null, null).open();
-		}
-	}
-	
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public void selectionChanged(final SelectionChangedEvent event) {
-		final ISelection selection = event.getSelection();
-		if (selection instanceof IStructuredSelection) {
-			setEnabled(canHandle((IStructuredSelection) selection));
+		IProject project= null;
+		Object firstElement= getSelectedElements().get(0);
+		if (firstElement instanceof IJavaElement) {
+			IJavaElement element= (IJavaElement)firstElement;
+			project= element.getJavaProject().getProject();
+		} else if (firstElement instanceof ClassPathContainer) {
+			project= ((ClassPathContainer)firstElement).getJavaProject().getProject();
 		} else {
-			setEnabled(canHandle(StructuredSelection.EMPTY));
+			project= ((IResource) ((IAdaptable) firstElement).getAdapter(IResource.class)).getProject();
 		}
+		PreferencesUtil.createPropertyDialogOn(getShell(), project, BuildPathsPropertyPage.PROP_ID, null, null).open();
 	}
 
-	private boolean canHandle(IStructuredSelection elements) {
+	protected boolean canHandle(IStructuredSelection elements) {
 		if (elements.size() != 1)
 			return false;
 	
 		Object firstElement= elements.getFirstElement();
-		fProject= getProjectFromSelectedElement(firstElement);
-		return fProject != null;
-	}
-
-
-	private IProject getProjectFromSelectedElement(Object firstElement) {
+		
 		if (firstElement instanceof IJavaElement) {
 			IJavaElement element= (IJavaElement) firstElement;
 			IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
 			if (root != null && root != element && root.isArchive()) {
-				return null;
+				return false;
 			}
 			IJavaProject project= element.getJavaProject();
-			if (project != null) {
-				return project.getProject();
-			}
-			return null;
+			if (project == null)
+				return false;
+			
+			return project.getProject() != null;
 		} else if (firstElement instanceof ClassPathContainer) {
-			return ((ClassPathContainer) firstElement).getJavaProject().getProject();
+			return ((ClassPathContainer) firstElement).getJavaProject().getProject() != null;
 		} else if (firstElement instanceof IAdaptable) {
 			IResource res= (IResource) ((IAdaptable) firstElement).getAdapter(IResource.class);
-			if (res != null) {
-				return res.getProject();
-			}
+			if (res == null)
+				return false;
+			
+			return res.getProject() != null;
 		}
-		return null;
+		return false;
 	}
 
 }

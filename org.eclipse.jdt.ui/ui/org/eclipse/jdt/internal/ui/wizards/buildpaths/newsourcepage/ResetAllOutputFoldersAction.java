@@ -12,33 +12,19 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
@@ -54,9 +40,8 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 
-public class ResetAllOutputFoldersAction extends Action implements ISelectionChangedListener {
+public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
 	
-	private final IWorkbenchSite fSite;
 	private final IClasspathModifierListener fListener;
 	private final IRunnableContext fContext;
 	private final IJavaProject fJavaProject;
@@ -66,13 +51,13 @@ public class ResetAllOutputFoldersAction extends Action implements ISelectionCha
 //	}
 
 	public ResetAllOutputFoldersAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener, IJavaProject javaProject) {
-		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
+		super(site);
 		
 		fContext= context;
 		fListener= listener;
-		fSite= site;
 		fJavaProject= javaProject;
 		
+		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
     }
 
@@ -94,7 +79,7 @@ public class ResetAllOutputFoldersAction extends Action implements ISelectionCha
 	        fContext.run(false, false, runnable);
         } catch (InvocationTargetException e) {
         	if (e.getCause() instanceof CoreException) {
-				showExceptionDialog((CoreException)e.getCause());
+				showExceptionDialog((CoreException)e.getCause(), NewWizardMessages.RemoveFromBuildpathAction_ErrorTitle);
 			} else {
 				JavaPlugin.log(e);
 			}
@@ -157,81 +142,8 @@ public class ResetAllOutputFoldersAction extends Action implements ISelectionCha
         	monitor.done();
         }
     }
-
-	public void selectionChanged(final SelectionChangedEvent event) {
-		final ISelection selection = event.getSelection();
-		if (selection instanceof IStructuredSelection) {
-			setEnabled(canHandle((IStructuredSelection) selection));
-		} else {
-			setEnabled(canHandle(StructuredSelection.EMPTY));
-		}
-	}
 	
-	private boolean canHandle(IStructuredSelection elements) {
+	protected boolean canHandle(IStructuredSelection elements) {
 		return true;
 	}
-
-	private void showExceptionDialog(CoreException exception) {
-		showError(exception, getShell(), NewWizardMessages.RemoveFromBuildpathAction_ErrorTitle, exception.getMessage());
-	}
-
-	private void showError(CoreException e, Shell shell, String title, String message) {
-		IStatus status= e.getStatus();
-		if (status != null) {
-			ErrorDialog.openError(shell, message, title, status);
-		} else {
-			MessageDialog.openError(shell, title, message);
-		}
-	}
-	
-	private Shell getShell() {
-		if (fSite == null)
-			return JavaPlugin.getActiveWorkbenchShell();
-		
-	    return fSite.getShell() != null ? fSite.getShell() : JavaPlugin.getActiveWorkbenchShell();
-    }
-	
-	protected void selectAndReveal(final ISelection selection) {
-		// validate the input
-		IWorkbenchPage page= fSite.getPage();
-		if (page == null)
-			return;
-
-		// get all the view and editor parts
-		List parts= new ArrayList();
-		IWorkbenchPartReference refs[]= page.getViewReferences();
-		for (int i= 0; i < refs.length; i++) {
-			IWorkbenchPart part= refs[i].getPart(false);
-			if (part != null)
-				parts.add(part);
-		}
-		refs= page.getEditorReferences();
-		for (int i= 0; i < refs.length; i++) {
-			if (refs[i].getPart(false) != null)
-				parts.add(refs[i].getPart(false));
-		}
-
-		Iterator itr= parts.iterator();
-		while (itr.hasNext()) {
-			IWorkbenchPart part= (IWorkbenchPart) itr.next();
-
-			// get the part's ISetSelectionTarget implementation
-			ISetSelectionTarget target= null;
-			if (part instanceof ISetSelectionTarget)
-				target= (ISetSelectionTarget) part;
-			else
-				target= (ISetSelectionTarget) part.getAdapter(ISetSelectionTarget.class);
-
-			if (target != null) {
-				// select and reveal resource
-				final ISetSelectionTarget finalTarget= target;
-				page.getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						finalTarget.selectReveal(selection);
-					}
-				});
-			}
-		}
-	}
-
 }

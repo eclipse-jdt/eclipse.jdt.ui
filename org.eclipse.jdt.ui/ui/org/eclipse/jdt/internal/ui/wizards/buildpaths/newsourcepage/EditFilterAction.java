@@ -10,10 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
@@ -21,22 +17,14 @@ import org.eclipse.core.resources.IProject;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
@@ -49,7 +37,6 @@ import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathMod
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
@@ -57,11 +44,9 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.EditFilterWizard;
 
-public class EditFilterAction extends Action implements ISelectionChangedListener {
+//SelectedElements iff enabled: (IJavaProject || IPackageFragmentRoot) && size == 1
+public class EditFilterAction extends BuildpathModifierAction {
 	
-	private IJavaProject fSelectedProject;
-	private IJavaElement fSelectedElement;
-	private IWorkbenchSite fSite;
 	private IClasspathModifierListener fListener;
 	
 	public EditFilterAction(IWorkbenchSite site) {
@@ -69,11 +54,12 @@ public class EditFilterAction extends Action implements ISelectionChangedListene
 	}
 	
 	protected EditFilterAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_label, JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH_FILTERS);
+		super(site);
 		
-		fSite= site;
 		fListener= listener;
-		
+	
+		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_label);
+		setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH_FILTERS);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_tooltip); 
 		setDescription(NewWizardMessages.PackageExplorerActionGroup_FormText_Edit);
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH_FILTERS);
@@ -87,7 +73,7 @@ public class EditFilterAction extends Action implements ISelectionChangedListene
 	
 		try {
 			EditFilterWizard wizard= createWizard();
-			wizard.init(PlatformUI.getWorkbench(), new StructuredSelection(fSelectedElement));
+			wizard.init(PlatformUI.getWorkbench(), new StructuredSelection(getSelectedElements().get(0)));
 			
 			WizardDialog dialog= new WizardDialog(shell, wizard);
 			if (shell != null) {
@@ -111,17 +97,17 @@ public class EditFilterAction extends Action implements ISelectionChangedListene
 		}
 	}
 	
-	private Shell getShell() {
-		if (fSite == null)
-			return JavaPlugin.getActiveWorkbenchShell();
-		
-	    return fSite.getShell() != null ? fSite.getShell() : JavaPlugin.getActiveWorkbenchShell();
-    }
-	
 	private EditFilterWizard createWizard() throws CoreException {
-		CPListElement[] existingEntries= CPListElement.createFromExisting(fSelectedProject);
-		CPListElement elementToEdit= findElement(fSelectedElement, existingEntries);
-		return new EditFilterWizard(existingEntries, elementToEdit, getOutputLocation(fSelectedProject));
+		IJavaProject javaProject= null;
+		Object firstElement= getSelectedElements().get(0);
+		if (firstElement instanceof IJavaProject) {
+			javaProject= (IJavaProject)firstElement;
+		} else {
+			javaProject= ((IPackageFragmentRoot)firstElement).getJavaProject();
+		}
+		CPListElement[] existingEntries= CPListElement.createFromExisting(javaProject);
+		CPListElement elementToEdit= findElement((IJavaElement)firstElement, existingEntries);
+		return new EditFilterWizard(existingEntries, elementToEdit, getOutputLocation(javaProject));
 	}
 	
 	private IPath getOutputLocation(IJavaProject javaProject) {
@@ -132,18 +118,6 @@ public class EditFilterAction extends Action implements ISelectionChangedListene
 			IPath projPath= project.getFullPath();
 			return projPath.append(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME));
 		}
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public void selectionChanged(SelectionChangedEvent event) {
-        ISelection selection = event.getSelection();
-        if (selection instanceof IStructuredSelection) {
-			setEnabled(canHandle((IStructuredSelection) selection));
-        } else {
-			setEnabled(canHandle(StructuredSelection.EMPTY));
-        }
 	}
 	
 	private static CPListElement findElement(IJavaElement element, CPListElement[] elements) {
@@ -157,75 +131,23 @@ public class EditFilterAction extends Action implements ISelectionChangedListene
 		return null;
 	}
 
-	public boolean canHandle(IStructuredSelection selection) {
+	protected boolean canHandle(IStructuredSelection selection) {
 		if (selection.size() != 1)
 			return false;
 		
 		try {
 			Object element= selection.getFirstElement();
 			if (element instanceof IJavaProject) {
-				IJavaProject project= (IJavaProject)element;	
-				if (ClasspathModifier.isSourceFolder(project)) {
-					fSelectedProject= project;
-					fSelectedElement= (IJavaElement)element;
-					return true;
-				}
+				return ClasspathModifier.isSourceFolder((IJavaProject)element);
 			} else if (element instanceof IPackageFragmentRoot) {
 				IPackageFragmentRoot packageFragmentRoot= ((IPackageFragmentRoot) element);
-				IJavaProject project= packageFragmentRoot.getJavaProject();
-				if (packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE && project != null) {
-					fSelectedProject= project;
-					fSelectedElement= (IJavaElement)element;
-					return true;
-				}
+				if (packageFragmentRoot.getKind() != IPackageFragmentRoot.K_SOURCE)
+					return false;
+				
+				return packageFragmentRoot.getJavaProject() != null;
 			}
 		} catch (JavaModelException e) {
-			return false;
 		}
 		return false;
 	}
-	
-	protected void selectAndReveal(final ISelection selection) {
-		// validate the input
-		IWorkbenchPage page= fSite.getPage();
-		if (page == null)
-			return;
-
-		// get all the view and editor parts
-		List parts= new ArrayList();
-		IWorkbenchPartReference refs[]= page.getViewReferences();
-		for (int i= 0; i < refs.length; i++) {
-			IWorkbenchPart part= refs[i].getPart(false);
-			if (part != null)
-				parts.add(part);
-		}
-		refs= page.getEditorReferences();
-		for (int i= 0; i < refs.length; i++) {
-			if (refs[i].getPart(false) != null)
-				parts.add(refs[i].getPart(false));
-		}
-
-		Iterator itr= parts.iterator();
-		while (itr.hasNext()) {
-			IWorkbenchPart part= (IWorkbenchPart) itr.next();
-
-			// get the part's ISetSelectionTarget implementation
-			ISetSelectionTarget target= null;
-			if (part instanceof ISetSelectionTarget)
-				target= (ISetSelectionTarget) part;
-			else
-				target= (ISetSelectionTarget) part.getAdapter(ISetSelectionTarget.class);
-
-			if (target != null) {
-				// select and reveal resource
-				final ISetSelectionTarget finalTarget= target;
-				page.getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						finalTarget.selectReveal(selection);
-					}
-				});
-			}
-		}
-	}
-	
 }

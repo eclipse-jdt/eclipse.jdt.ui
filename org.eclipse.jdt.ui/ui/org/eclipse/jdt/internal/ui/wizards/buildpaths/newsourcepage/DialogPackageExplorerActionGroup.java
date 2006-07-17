@@ -225,7 +225,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         selectionProvider.addSelectionChangedListener(createSourceFolderAction);
         fActions[6]= createSourceFolderAction;
 
-        ResetAllAction resetAllAction= new ResetAllAction(provider.getJavaProject(), listener, provider, context);
+        ResetAllAction resetAllAction= new ResetAllAction(listener, provider, context);
         fActions[7]= resetAllAction;
         
         //options:
@@ -282,6 +282,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         ClasspathModifierDropDownAction action= (ClasspathModifierDropDownAction)getAction(IClasspathInformationProvider.EDIT_FILTERS);
         EditOutputFolderAction2 outputFolderAction= (EditOutputFolderAction2)action.getActions()[1];
         outputFolderAction.showOutputFolders(showOutputFolders);
+        outputFolderAction.selectionChanged(new SelectionChangedEvent(fSelectionProvider, fSelectionProvider.getSelection()));
     }
     
     /**

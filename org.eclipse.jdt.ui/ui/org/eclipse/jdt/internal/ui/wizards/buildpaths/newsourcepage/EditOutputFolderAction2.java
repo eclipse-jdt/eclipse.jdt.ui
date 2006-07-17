@@ -78,7 +78,6 @@ public class EditOutputFolderAction2 extends EditOutputFolderAction implements I
 
 	public void showOutputFolders(boolean showOutputFolders) {
 		fShowOutputFolders= showOutputFolders;
-		setEnabled(canHandle(new StructuredSelection(getSelectedElements())));
     }
 
 }

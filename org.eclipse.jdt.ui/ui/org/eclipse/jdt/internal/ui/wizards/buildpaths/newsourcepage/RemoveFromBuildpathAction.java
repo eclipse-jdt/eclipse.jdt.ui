@@ -17,7 +17,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFolder;
@@ -25,25 +24,15 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -60,10 +49,9 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IRemoveLinkedFolderQuery;
 
-public class RemoveFromBuildpathAction extends Action implements ISelectionChangedListener {
+//SelectedElements iff enabled: IPackageFramgentRoot || IJavaProject || ClassPathContainer
+public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 
-	private final IWorkbenchSite fSite;
-	private final List fSelectedElements; //IPackageFramgentRoot || IJavaProject || ClassPathContainer iff isEnabled()
 	private final IClasspathModifierListener fListener;
 	private final IRunnableContext fContext;
 
@@ -72,13 +60,13 @@ public class RemoveFromBuildpathAction extends Action implements ISelectionChang
 	}
 
 	public RemoveFromBuildpathAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener, ImageDescriptor image) {
-		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_label, image);
+		super(site);
 		
 		fContext= context;
 		fListener= listener;
-		fSite= site;
-		fSelectedElements= new ArrayList();
-		
+
+		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_label);
+		setImageDescriptor(image);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip);
     }
 
@@ -89,7 +77,7 @@ public class RemoveFromBuildpathAction extends Action implements ISelectionChang
 		try {
 
 			final IJavaProject project;
-			Object object= fSelectedElements.get(0);
+			Object object= getSelectedElements().get(0);
 			if (object instanceof IJavaProject) {
 				project= (IJavaProject)object;
 			} else if (object instanceof IPackageFragmentRoot) {
@@ -124,10 +112,10 @@ public class RemoveFromBuildpathAction extends Action implements ISelectionChang
 			fContext.run(false, false, runnable);
 			
 		} catch (CoreException e) {
-			showExceptionDialog(e);
+			showExceptionDialog(e, NewWizardMessages.RemoveFromBuildpathAction_ErrorTitle);
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof CoreException) {
-				showExceptionDialog((CoreException)e.getCause());
+				showExceptionDialog((CoreException)e.getCause(), NewWizardMessages.RemoveFromBuildpathAction_ErrorTitle);
 			} else {
 				JavaPlugin.log(e);
 			}
@@ -181,7 +169,7 @@ public class RemoveFromBuildpathAction extends Action implements ISelectionChang
 	
 	private void queryToRemoveLinkedFolders(final List elementsToRemove, final List foldersToDelete) throws JavaModelException {
 		final Shell shell= getShell();
-		for (Iterator iter= fSelectedElements.iterator(); iter.hasNext();) {
+		for (Iterator iter= getSelectedElements().iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IPackageFragmentRoot) {
 				IFolder folder= getLinkedSourceFolder((IPackageFragmentRoot)element);
@@ -222,24 +210,13 @@ public class RemoveFromBuildpathAction extends Action implements ISelectionChang
 		return folder;
 	}
 
-	public void selectionChanged(final SelectionChangedEvent event) {
-		final ISelection selection = event.getSelection();
-		if (selection instanceof IStructuredSelection) {
-			setEnabled(canHandle((IStructuredSelection) selection));
-		} else {
-			setEnabled(canHandle(StructuredSelection.EMPTY));
-		}
-	}
-
-	private boolean canHandle(IStructuredSelection elements) {
+	protected boolean canHandle(IStructuredSelection elements) {
 		if (elements.size() == 0)
 			return false;
 
 		try {
-			fSelectedElements.clear();
 			for (Iterator iter= elements.iterator(); iter.hasNext();) {
 				Object element= iter.next();
-				fSelectedElements.add(element);
 				if (!(element instanceof IPackageFragmentRoot || element instanceof IJavaProject || element instanceof ClassPathContainer))
 					return false;
 
@@ -260,72 +237,4 @@ public class RemoveFromBuildpathAction extends Action implements ISelectionChang
 		}
 		return false;
 	}
-
-	private void showExceptionDialog(CoreException exception) {
-		showError(exception, getShell(), NewWizardMessages.RemoveFromBuildpathAction_ErrorTitle, exception.getMessage());
-	}
-
-	private void showError(CoreException e, Shell shell, String title, String message) {
-		IStatus status= e.getStatus();
-		if (status != null) {
-			ErrorDialog.openError(shell, message, title, status);
-		} else {
-			MessageDialog.openError(shell, title, message);
-		}
-	}
-	
-	private Shell getShell() {
-		if (fSite == null)
-			return JavaPlugin.getActiveWorkbenchShell();
-		
-	    return fSite.getShell() != null ? fSite.getShell() : JavaPlugin.getActiveWorkbenchShell();
-    }
-	
-	protected void selectAndReveal(final ISelection selection) {
-		// validate the input
-		IWorkbenchPage page= fSite.getPage();
-		if (page == null)
-			return;
-
-		// get all the view and editor parts
-		List parts= new ArrayList();
-		IWorkbenchPartReference refs[]= page.getViewReferences();
-		for (int i= 0; i < refs.length; i++) {
-			IWorkbenchPart part= refs[i].getPart(false);
-			if (part != null)
-				parts.add(part);
-		}
-		refs= page.getEditorReferences();
-		for (int i= 0; i < refs.length; i++) {
-			if (refs[i].getPart(false) != null)
-				parts.add(refs[i].getPart(false));
-		}
-
-		Iterator itr= parts.iterator();
-		while (itr.hasNext()) {
-			IWorkbenchPart part= (IWorkbenchPart) itr.next();
-
-			// get the part's ISetSelectionTarget implementation
-			ISetSelectionTarget target= null;
-			if (part instanceof ISetSelectionTarget)
-				target= (ISetSelectionTarget) part;
-			else
-				target= (ISetSelectionTarget) part.getAdapter(ISetSelectionTarget.class);
-
-			if (target != null) {
-				// select and reveal resource
-				final ISetSelectionTarget finalTarget= target;
-				page.getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						finalTarget.selectReveal(selection);
-					}
-				});
-			}
-		}
-	}
-	
-	protected List getSelectedElements() {
-		return fSelectedElements;
-	}
-
 }

@@ -17,29 +17,16 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
@@ -56,10 +43,9 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 
 //Warning: This is unused and untested code. Images and descriptions are missing too.
-public class ResetAction extends Action implements ISelectionChangedListener {
+//SelectedElements iff enabled: IJavaProject || IPackageFragmentRoot || CPListElementAttribute
+public class ResetAction extends BuildpathModifierAction {
 
-	private final IWorkbenchSite fSite;
-	private List fSelectedElements;
 	private final IClasspathModifierListener fListener;
 	private final IRunnableContext fContext;
 
@@ -68,13 +54,12 @@ public class ResetAction extends Action implements ISelectionChangedListener {
 	}
 
 	public ResetAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
+		super(site);
 		
 		fContext= context;
 		fListener= listener;
-		fSite= site;
-		fSelectedElements= new ArrayList();
-		
+
+		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
     }
 
@@ -85,7 +70,7 @@ public class ResetAction extends Action implements ISelectionChangedListener {
 		final IRunnableWithProgress runnable= new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
-					Object firstElement= fSelectedElements.get(0);
+					Object firstElement= getSelectedElements().get(0);
 					IJavaProject project= null;
 					if (firstElement instanceof IJavaProject) {
 						project= (IJavaProject)firstElement;
@@ -95,7 +80,7 @@ public class ResetAction extends Action implements ISelectionChangedListener {
 						project= ((CPListElementAttribute)firstElement).getParent().getJavaProject();
 					}
 					
-					List result= reset(fSelectedElements, project, monitor);
+					List result= reset(getSelectedElements(), project, monitor);
 					selectAndReveal(new StructuredSelection(result));					
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
@@ -106,7 +91,7 @@ public class ResetAction extends Action implements ISelectionChangedListener {
 	        fContext.run(false, false, runnable);
         } catch (InvocationTargetException e) {
         	if (e.getCause() instanceof CoreException) {
-				showExceptionDialog((CoreException)e.getCause());
+				showExceptionDialog((CoreException)e.getCause(), ""); //$NON-NLS-1$
 			} else {
 				JavaPlugin.log(e);
 			}
@@ -147,24 +132,21 @@ public class ResetAction extends Action implements ISelectionChangedListener {
         	monitor.done();
         }
     }
-
-	public void selectionChanged(final SelectionChangedEvent event) {
-		final ISelection selection = event.getSelection();
-		if (selection instanceof IStructuredSelection) {
-			setEnabled(canHandle((IStructuredSelection) selection));
-		} else {
-			setEnabled(canHandle(StructuredSelection.EMPTY));
-		}
-	}
 	
-	private boolean canHandle(IStructuredSelection elements) {
+	protected boolean canHandle(IStructuredSelection elements) {
 		try {
-	        fSelectedElements= elements.toList();
-	        for (Iterator iterator= fSelectedElements.iterator(); iterator.hasNext();) {
+	        for (Iterator iterator= elements.iterator(); iterator.hasNext();) {
 	            Object element= iterator.next();
 	            if (element instanceof IJavaProject) {
-	        		if (isValidProject((IJavaProject)element))
-	        			return true;
+	            	IJavaProject project= (IJavaProject)element;
+	            	if (!project.isOnClasspath(project))
+	            		return false;
+	            	
+	            	IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(project.getPath(), project, IClasspathEntry.CPE_SOURCE);
+	                if (entry.getInclusionPatterns().length == 0 && entry.getExclusionPatterns().length == 0)
+	                    return false;
+	            	
+	        		return true;
 	            } else if (element instanceof IPackageFragmentRoot) {
 	            	if (ClasspathModifier.filtersSet((IPackageFragmentRoot)element))
 	            		return true;
@@ -180,77 +162,4 @@ public class ResetAction extends Action implements ISelectionChangedListener {
         }
 		return false;
 	}
-
-	private boolean isValidProject(IJavaProject project) throws JavaModelException {
-        if (project.isOnClasspath(project)) {
-            IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(project.getPath(), project, IClasspathEntry.CPE_SOURCE);
-            if (entry.getInclusionPatterns().length != 0 || entry.getExclusionPatterns().length != 0)
-                return true;
-        }
-        return false;
-    }
-
-	private void showExceptionDialog(CoreException exception) {
-		showError(exception, getShell(), NewWizardMessages.RemoveFromBuildpathAction_ErrorTitle, exception.getMessage());
-	}
-
-	private void showError(CoreException e, Shell shell, String title, String message) {
-		IStatus status= e.getStatus();
-		if (status != null) {
-			ErrorDialog.openError(shell, message, title, status);
-		} else {
-			MessageDialog.openError(shell, title, message);
-		}
-	}
-	
-	private Shell getShell() {
-		if (fSite == null)
-			return JavaPlugin.getActiveWorkbenchShell();
-		
-	    return fSite.getShell() != null ? fSite.getShell() : JavaPlugin.getActiveWorkbenchShell();
-    }
-	
-	protected void selectAndReveal(final ISelection selection) {
-		// validate the input
-		IWorkbenchPage page= fSite.getPage();
-		if (page == null)
-			return;
-
-		// get all the view and editor parts
-		List parts= new ArrayList();
-		IWorkbenchPartReference refs[]= page.getViewReferences();
-		for (int i= 0; i < refs.length; i++) {
-			IWorkbenchPart part= refs[i].getPart(false);
-			if (part != null)
-				parts.add(part);
-		}
-		refs= page.getEditorReferences();
-		for (int i= 0; i < refs.length; i++) {
-			if (refs[i].getPart(false) != null)
-				parts.add(refs[i].getPart(false));
-		}
-
-		Iterator itr= parts.iterator();
-		while (itr.hasNext()) {
-			IWorkbenchPart part= (IWorkbenchPart) itr.next();
-
-			// get the part's ISetSelectionTarget implementation
-			ISetSelectionTarget target= null;
-			if (part instanceof ISetSelectionTarget)
-				target= (ISetSelectionTarget) part;
-			else
-				target= (ISetSelectionTarget) part.getAdapter(ISetSelectionTarget.class);
-
-			if (target != null) {
-				// select and reveal resource
-				final ISetSelectionTarget finalTarget= target;
-				page.getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						finalTarget.selectReveal(selection);
-					}
-				});
-			}
-		}
-	}
-
 }

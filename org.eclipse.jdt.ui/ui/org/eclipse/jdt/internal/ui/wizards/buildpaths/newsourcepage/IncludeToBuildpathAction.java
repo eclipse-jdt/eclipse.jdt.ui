@@ -11,37 +11,23 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -56,10 +42,9 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
-public class IncludeToBuildpathAction extends Action implements ISelectionChangedListener {
+//SelectedElements iff enabled: IResource
+public class IncludeToBuildpathAction extends BuildpathModifierAction {
 
-	private final IWorkbenchSite fSite;
-	private final List fSelectedElements; //IResources
 	private final IClasspathModifierListener fListener;
 	private final IRunnableContext fContext;
 
@@ -68,13 +53,13 @@ public class IncludeToBuildpathAction extends Action implements ISelectionChange
 	}
 	
 	public IncludeToBuildpathAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_label, JavaPluginImages.DESC_ELCL_INCLUDE_ON_BUILDPATH);
+		super(site);
 		
-		fSite= site;
 		fContext= context;
 		fListener= listener;
-		fSelectedElements= new ArrayList();
 		
+		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_label);
+		setImageDescriptor(JavaPluginImages.DESC_ELCL_INCLUDE_ON_BUILDPATH);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_tooltip);
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_INCLUDE_ON_BUILDPATH);
 	}
@@ -83,14 +68,14 @@ public class IncludeToBuildpathAction extends Action implements ISelectionChange
 	 * {@inheritDoc}
 	 */
 	public void run() {
-		IResource resource= (IResource)fSelectedElements.get(0);
+		IResource resource= (IResource)getSelectedElements().get(0);
 		final IJavaProject project= JavaCore.create(resource.getProject());
 
 		try {
 			final IRunnableWithProgress runnable= new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
-						List result= unExclude(fSelectedElements, project, monitor);
+						List result= unExclude(getSelectedElements(), project, monitor);
 						selectAndReveal(new StructuredSelection(result));
 					} catch (CoreException e) {
 						throw new InvocationTargetException(e);
@@ -100,7 +85,7 @@ public class IncludeToBuildpathAction extends Action implements ISelectionChange
 			fContext.run(false, false, runnable);
 		} catch (final InvocationTargetException e) {
 			if (e.getCause() instanceof CoreException) {
-				showExceptionDialog((CoreException)e.getCause());
+				showExceptionDialog((CoreException)e.getCause(), NewWizardMessages.IncludeToBuildpathAction_ErrorTitle);
 			} else {
 				JavaPlugin.log(e);
 			}
@@ -132,27 +117,13 @@ public class IncludeToBuildpathAction extends Action implements ISelectionChange
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void selectionChanged(final SelectionChangedEvent event) {
-		final ISelection selection = event.getSelection();
-		if (selection instanceof IStructuredSelection) {
-			setEnabled(canHandle((IStructuredSelection) selection));
-		} else {
-			setEnabled(canHandle(StructuredSelection.EMPTY));
-		}
-	}
-
-	private boolean canHandle(IStructuredSelection elements) {
+	protected boolean canHandle(IStructuredSelection elements) {
 		if (elements.size() == 0)
 			return false;
 
 		try {
-			fSelectedElements.clear();
 			for (Iterator iter= elements.iterator(); iter.hasNext();) {
 				Object element= iter.next();
-				fSelectedElements.add(element);
 				if (element instanceof IResource) {
 					IResource resource= (IResource)element;
 					IJavaProject project= JavaCore.create(resource.getProject());
@@ -170,72 +141,4 @@ public class IncludeToBuildpathAction extends Action implements ISelectionChange
 		}
 		return false;
 	}
-
-	private void showExceptionDialog(CoreException exception) {
-		showError(exception, getShell(), NewWizardMessages.IncludeToBuildpathAction_ErrorTitle, exception.getMessage());
-	}
-
-	private void showError(CoreException e, Shell shell, String title, String message) {
-		IStatus status= e.getStatus();
-		if (status != null) {
-			ErrorDialog.openError(shell, message, title, status);
-		} else {
-			MessageDialog.openError(shell, title, message);
-		}
-	}
-	
-	private Shell getShell() {
-		if (fSite == null)
-			return JavaPlugin.getActiveWorkbenchShell();
-		
-	    return fSite.getShell() != null ? fSite.getShell() : JavaPlugin.getActiveWorkbenchShell();
-    }
-	
-	protected void selectAndReveal(final ISelection selection) {
-		// validate the input
-		IWorkbenchPage page= fSite.getPage();
-		if (page == null)
-			return;
-
-		// get all the view and editor parts
-		List parts= new ArrayList();
-		IWorkbenchPartReference refs[]= page.getViewReferences();
-		for (int i= 0; i < refs.length; i++) {
-			IWorkbenchPart part= refs[i].getPart(false);
-			if (part != null)
-				parts.add(part);
-		}
-		refs= page.getEditorReferences();
-		for (int i= 0; i < refs.length; i++) {
-			if (refs[i].getPart(false) != null)
-				parts.add(refs[i].getPart(false));
-		}
-
-		Iterator itr= parts.iterator();
-		while (itr.hasNext()) {
-			IWorkbenchPart part= (IWorkbenchPart) itr.next();
-
-			// get the part's ISetSelectionTarget implementation
-			ISetSelectionTarget target= null;
-			if (part instanceof ISetSelectionTarget)
-				target= (ISetSelectionTarget) part;
-			else
-				target= (ISetSelectionTarget) part.getAdapter(ISetSelectionTarget.class);
-
-			if (target != null) {
-				// select and reveal resource
-				final ISetSelectionTarget finalTarget= target;
-				page.getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						finalTarget.selectReveal(selection);
-					}
-				});
-			}
-		}
-	}
-	
-	protected List getSelectedElements() {
-		return fSelectedElements;
-	}
-
 }
