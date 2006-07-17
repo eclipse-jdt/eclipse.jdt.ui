@@ -34,8 +34,12 @@ import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeNameRequestor;
 
-import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILightweightLabelDecorator {
@@ -136,12 +140,7 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 	 */
 	public void decorate(Object element, IDecoration decoration) {
 		try {
-			IType type= getMainType(element);
-	
-			if (type == null)
-				return;
-			
-			ImageDescriptor overlay= getOverlay(type);
+			ImageDescriptor overlay= getOverlay(element);
 			if (overlay == null)
 				return;
 			
@@ -151,27 +150,66 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 		}
 	}
 	
-	private IType getMainType(Object element) throws JavaModelException {
-		if (element instanceof ICompilationUnit)
-			return JavaElementUtil.getMainType((ICompilationUnit)element);
-		
-		if (element instanceof IClassFile)
-			return ((IClassFile)element).getType();
-		
+	private ImageDescriptor getOverlay(Object element) throws JavaModelException {
+		if (element instanceof ICompilationUnit) {
+			ICompilationUnit unit= (ICompilationUnit) element;
+			if (unit.isOpen()) {
+				IType mainType= unit.findPrimaryType();
+				if (mainType != null) {
+					return getOverlayFromFlags(mainType.getFlags());
+				}
+			}
+			return getOverlayWithSearchEngine(unit);
+		} else if (element instanceof IClassFile) {
+			IClassFile classFile= (IClassFile) element;
+			if (classFile.isOpen()) {
+				return getOverlayFromFlags(classFile.getType().getFlags());
+			}
+			return getOverlayWithSearchEngine(classFile);
+		}
 		return null;
 	}
-
-	private ImageDescriptor getOverlay(IType type) throws JavaModelException {
-		if (type.isAnnotation()) {
-			return JavaPluginImages.DESC_OVR_ANNOTATION;
-		} else if (type.isInterface()) {
-			return JavaPluginImages.DESC_OVR_INTERFACE;
-		} else if (type.isEnum()) {
-			return JavaPluginImages.DESC_OVR_ENUM;
-		} else if (type.isClass()) {
-			if (Flags.isAbstract(type.getFlags())) {
-				return JavaPluginImages.DESC_OVR_ABSTRACT_CLASS;
+	
+	private ImageDescriptor getOverlayWithSearchEngine(IJavaElement element) {
+		SearchEngine engine= new SearchEngine();
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element });
+		
+		class Result extends RuntimeException {
+			private static final long serialVersionUID= 1L;
+			int modifiers;
+			public Result(int modifiers) {
+				this.modifiers= modifiers;
 			}
+		}
+		
+		TypeNameRequestor requestor= new TypeNameRequestor() {
+			public void acceptType(int modifiers, char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
+				if (enclosingTypeNames.length == 0 && Flags.isPublic(modifiers)) {
+					throw new Result(modifiers);
+				}
+			}
+		};
+		
+		try {
+			engine.searchAllTypeNames(null, null, SearchPattern.R_EXACT_MATCH, IJavaSearchConstants.TYPE, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH , null);
+		} catch (Result e) {
+			return getOverlayFromFlags(e.modifiers);
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+		return null;
+
+	}
+
+	private ImageDescriptor getOverlayFromFlags(int flags)  {
+		if (Flags.isAnnotation(flags)) {
+			return JavaPluginImages.DESC_OVR_ANNOTATION;
+		} else if (Flags.isEnum(flags)) {
+			return JavaPluginImages.DESC_OVR_ENUM;
+		} else if (Flags.isInterface(flags)) {
+			return JavaPluginImages.DESC_OVR_INTERFACE;
+		} else if (/* is class */ Flags.isAbstract(flags)) {
+			return JavaPluginImages.DESC_OVR_ABSTRACT_CLASS;
 		}
 		return null;
 	}
