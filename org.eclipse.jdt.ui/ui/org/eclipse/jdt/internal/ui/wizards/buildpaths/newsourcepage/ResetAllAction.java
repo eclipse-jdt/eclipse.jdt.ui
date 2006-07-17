@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
 //TODO: Use global history
-public class ResetAllAction extends BuildpathModifierAction implements IClasspathModifierAction {
+public class ResetAllAction extends BuildpathModifierAction {
 	
 	private final IClasspathModifierListener fListener;
 	private final HintTextGroup fProvider;

@@ -29,7 +29,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -156,7 +155,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     /** Elements that represent classpath container (= libraries) */
     public static final int CONTAINER= 0x14;
     
-    private IClasspathModifierAction[] fActions;
+    private BuildpathModifierAction[] fActions;
     private int fLastType;
     private List fListeners;
     private static final int fContextSensitiveActions= 5;
@@ -182,7 +181,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
 		
         fLastType= UNDEFINED;
         fListeners= new ArrayList();
-        fActions= new IClasspathModifierAction[8];
+        fActions= new BuildpathModifierAction[8];
         
         if (context == null)
         	context= PlatformUI.getWorkbench().getProgressService();
@@ -237,13 +236,13 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         //ResetAllOutputFoldersAction
     }
     
-    public IClasspathModifierAction[] getActions() {
+    public BuildpathModifierAction[] getActions() {
     	List result= new ArrayList();
     	for (int i= 0; i < fActions.length; i++) {
-			IClasspathModifierAction action= fActions[i];
+			BuildpathModifierAction action= fActions[i];
 			if (action instanceof ClasspathModifierDropDownAction) {
 				ClasspathModifierDropDownAction dropDownAction= (ClasspathModifierDropDownAction)action;
-				IClasspathModifierAction[] actions= dropDownAction.getActions();
+				BuildpathModifierAction[] actions= dropDownAction.getActions();
 				for (int j= 0; j < actions.length; j++) {
 					result.add(actions[j]);
 				}
@@ -251,7 +250,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
 				result.add(action);
 			}
 		}
-    	return (IClasspathModifierAction[])result.toArray(new IClasspathModifierAction[result.size()]);
+    	return (BuildpathModifierAction[])result.toArray(new BuildpathModifierAction[result.size()]);
     }
     
     /**
@@ -311,7 +310,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * @throws JavaModelException 
      * 
      * @see #setContext(DialogExplorerActionContext)
-     * @see #informListeners(String[], IClasspathModifierAction[])
+     * @see #informListeners(String[], BuildpathModifierAction[])
      */
     public void refresh(DialogExplorerActionContext context) throws JavaModelException {
         super.setContext(context);
@@ -434,13 +433,13 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     private void internalSetContext(List selectedElements, IJavaProject project, int type) throws JavaModelException {
         fLastType= type;
         List availableActions= getAvailableActions(selectedElements, project);
-        IClasspathModifierAction[] actions= new IClasspathModifierAction[availableActions.size()];
+        BuildpathModifierAction[] actions= new BuildpathModifierAction[availableActions.size()];
         String[] descriptions= new String[availableActions.size()];
         if (availableActions.size() > 0) {
             for(int i= 0; i < availableActions.size(); i++) {
-                IClasspathModifierAction action= (IClasspathModifierAction)availableActions.get(i);
+                BuildpathModifierAction action= (BuildpathModifierAction)availableActions.get(i);
                 actions[i]= action;
-                descriptions[i]= ((BuildpathModifierAction)action).getDetailedDescription();
+                descriptions[i]= action.getDetailedDescription();
             }
         } else
             descriptions= noAction(type);
@@ -483,7 +482,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * the action at position 'i'
      * @param actions an array of available actions
      */
-    private void informListeners(String[] descriptions, IClasspathModifierAction[] actions) {
+    private void informListeners(String[] descriptions, BuildpathModifierAction[] actions) {
         Iterator iterator= fListeners.iterator();
         PackageExplorerActionEvent event= new PackageExplorerActionEvent(descriptions, actions);
         while(iterator.hasNext()) {
@@ -649,7 +648,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         for(int i= 0; i < fActions.length; i++) {
             if(fActions[i] instanceof ClasspathModifierDropDownAction) {
                 if(changeEnableState(fActions[i], selectedElements)) {
-                    IClasspathModifierAction[] dropDownActions= ((ClasspathModifierDropDownAction)fActions[i]).getActions();
+                    BuildpathModifierAction[] dropDownActions= ((ClasspathModifierDropDownAction)fActions[i]).getActions();
                     for(int j= 0; j < dropDownActions.length; j++) {
                         if(changeEnableState(dropDownActions[j], selectedElements))
                             actions.add(dropDownActions[j]);
@@ -670,15 +669,14 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * @return <code>true</code> if the action is valid (= enabled), <code>false</code> otherwise
      * @throws JavaModelException
      */
-    private boolean changeEnableState(IClasspathModifierAction action, List selectedElements) throws JavaModelException {	
+    private boolean changeEnableState(BuildpathModifierAction action, List selectedElements) throws JavaModelException {	
 		//TODO: change information flow 
 		//is: DialogPackageExplorer->DialogPackageExplorerActionGroup->ClasspathModifierAction
 		//                           DialogPackageExplorerActionGroup<-
 		//                           DialogPackageExplorerActionGroup->HintTextGroup
 		//should: DialogPackageExplorer->ClasspathModifierAction->HintTextGroup
-		if (action instanceof ISelectionChangedListener)
-			((ISelectionChangedListener)action).selectionChanged(new SelectionChangedEvent(fSelectionProvider, new StructuredSelection(selectedElements)));
-		
+    	
+		action.selectionChanged(new SelectionChangedEvent(fSelectionProvider, new StructuredSelection(selectedElements)));
 		return action.isEnabled();
     }
     
@@ -688,7 +686,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * @param menu the menu to be filled up with actions
      */
     public void fillContextMenu(IMenuManager menu) {
-    	IClasspathModifierAction[] actions2= getActions();
+    	BuildpathModifierAction[] actions2= getActions();
     	for (int i= 0; i < actions2.length; i++) {
     		IAction action= actions2[i];
             if (action instanceof ClasspathModifierDropDownAction) {

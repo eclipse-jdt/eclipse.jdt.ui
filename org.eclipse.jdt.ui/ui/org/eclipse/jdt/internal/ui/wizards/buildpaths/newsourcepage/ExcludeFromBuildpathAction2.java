@@ -16,7 +16,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
-public class ExcludeFromBuildpathAction2 extends ExcludeFromBuildpathAction implements IClasspathModifierAction {
+public class ExcludeFromBuildpathAction2 extends ExcludeFromBuildpathAction {
 
 	private final HintTextGroup fProvider;
 

@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -58,19 +59,24 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 	public static final int ADD_SEL_LIB_TO_BP= 15;
 	public static final int CONFIGURE_BUILD_PATH= 16;
 	public static final int RESET_ALL_OUTPUT_FOLDERS= 17;
+	public static final int DROP_DOWN_ACTION= 18;
 
 	private final IWorkbenchSite fSite;
 	private final List fSelectedElements;
 
 	public BuildpathModifierAction(IWorkbenchSite site, int id) {
-		super();
+		this(site, id, IAction.AS_PUSH_BUTTON);
+    }
+	
+	public BuildpathModifierAction(IWorkbenchSite site, int id, int style) {
+		super("", style); //$NON-NLS-1$
 		
 		fSite= site;
 		fSelectedElements= new ArrayList();
 		
 		setId(Integer.toString(id));
     }
-	
+
 	/**
 	 * A detailed description usable for a {@link FormText} 
 	 * depending on the current selection, or <code>null</code>

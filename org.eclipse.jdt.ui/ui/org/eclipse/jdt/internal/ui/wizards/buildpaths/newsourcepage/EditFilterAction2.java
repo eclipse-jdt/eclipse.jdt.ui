@@ -16,7 +16,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
-public class EditFilterAction2 extends EditFilterAction implements IClasspathModifierAction {
+public class EditFilterAction2 extends EditFilterAction {
 	
 	private final HintTextGroup fProvider;
 

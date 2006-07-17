@@ -152,7 +152,7 @@ public final class HintTextGroup implements IPackageExplorerActionListener {
         fOldOutputLocation= fOutputLocationField.getText();
         
         try {
-        	IClasspathModifierAction[] actions= fActionGroup.getActions();
+        	BuildpathModifierAction[] actions= fActionGroup.getActions();
 			for (int i= 0; i < actions.length; i++) {
 	            if (actions[i] instanceof ResetAllAction) {
 	            	((ResetAllAction)actions[i]).setBreakPoint(fCurrJProject);
@@ -220,7 +220,7 @@ public final class HintTextGroup implements IPackageExplorerActionListener {
      * @param action the action to be executed if the hyperlink is activated
      * @param context the runnable context under which the action is executed
      */
-    private void createLabel(Composite parent, String text, final IClasspathModifierAction action, final IRunnableContext context) {
+    private void createLabel(Composite parent, String text, final BuildpathModifierAction action, final IRunnableContext context) {
         FormText formText= createFormText(parent, text);
         Image image= (Image)fImageMap.get(action.getId());
         if (image == null) {
@@ -474,7 +474,7 @@ public final class HintTextGroup implements IPackageExplorerActionListener {
         fTopComposite.setData(childComposite);
         
         // Display available actions
-        IClasspathModifierAction[] actions= event.getEnabledActions();
+        BuildpathModifierAction[] actions= event.getEnabledActions();
         String[] descriptionText= event.getEnabledActionsText();
         if (noContextHelpAvailable(actions)) {
             String noAction= fActionGroup.getNoActionDescription();
@@ -512,7 +512,7 @@ public final class HintTextGroup implements IPackageExplorerActionListener {
      * @return <code>true</code> if there is at least one action that allows context 
      * sensitive operations, <code>false</code> otherwise.
      */
-    private boolean noContextHelpAvailable(IClasspathModifierAction[] actions) {
+    private boolean noContextHelpAvailable(BuildpathModifierAction[] actions) {
         if (actions.length == 0)
             return true;
         if (actions.length == 1) {

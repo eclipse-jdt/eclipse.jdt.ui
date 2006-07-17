@@ -18,11 +18,10 @@ import java.util.List;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuCreator;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 /**
@@ -33,7 +32,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
  * first valid action in the list.
  */
 //TODO: Fix (action is changed but not description/image/...)
-public class ClasspathModifierDropDownAction extends Action implements IClasspathModifierAction , IMenuCreator, ISelectionChangedListener {
+public class ClasspathModifierDropDownAction extends BuildpathModifierAction implements IMenuCreator {
     
     /** The menu to be populated with items*/
     private Menu fMenu;
@@ -52,8 +51,8 @@ public class ClasspathModifierDropDownAction extends Action implements IClasspat
      * @param text a label text for the action
      * @param toolTipText the tooltip text for the drop down menu
      */
-    public ClasspathModifierDropDownAction(IClasspathModifierAction action, String text, String toolTipText) {
-        super(text, IAction.AS_DROP_DOWN_MENU);
+    public ClasspathModifierDropDownAction(BuildpathModifierAction action, String text, String toolTipText) {
+        super(null, BuildpathModifierAction.DROP_DOWN_ACTION, IAction.AS_DROP_DOWN_MENU);
         
         fActions= new ArrayList();
         fActions.add(action);
@@ -61,6 +60,7 @@ public class ClasspathModifierDropDownAction extends Action implements IClasspat
         
         setImageDescriptor(action.getImageDescriptor());
         setDisabledImageDescriptor(action.getDisabledImageDescriptor());
+        setText(text);
         setToolTipText(toolTipText);
     }
     
@@ -68,7 +68,7 @@ public class ClasspathModifierDropDownAction extends Action implements IClasspat
      * Runs the first action of the list of managed actions that is valid.
      */
     public void run() {
-        IClasspathModifierAction action= (IClasspathModifierAction)fActions.get(fIndex);
+        BuildpathModifierAction action= (BuildpathModifierAction)fActions.get(fIndex);
         action.run();
     }
 
@@ -95,7 +95,7 @@ public class ClasspathModifierDropDownAction extends Action implements IClasspat
      * 
      * @param action the action to be added
      */
-    public void addAction(IClasspathModifierAction action) {
+    public void addAction(BuildpathModifierAction action) {
         fActions.add(action);
     }
     
@@ -105,7 +105,7 @@ public class ClasspathModifierDropDownAction extends Action implements IClasspat
      * 
      * @param actions an array of actions to be added
      */
-    public void addActions(IClasspathModifierAction[] actions) {
+    public void addActions(BuildpathModifierAction[] actions) {
         for(int i= 0; i < actions.length; i++) {
             addAction(actions[i]);
         }
@@ -116,7 +116,7 @@ public class ClasspathModifierDropDownAction extends Action implements IClasspat
      *  
      * @param action the action to be removed
      */
-    public void removeAction(IClasspathModifierAction action) {
+    public void removeAction(BuildpathModifierAction action) {
         fActions.remove(action);
     }
     
@@ -125,8 +125,8 @@ public class ClasspathModifierDropDownAction extends Action implements IClasspat
      * 
      * @return an array of actions
      */
-    public IClasspathModifierAction[] getActions() {
-        return (IClasspathModifierAction[])fActions.toArray(new IClasspathModifierAction[fActions.size()]);
+    public BuildpathModifierAction[] getActions() {
+        return (BuildpathModifierAction[])fActions.toArray(new BuildpathModifierAction[fActions.size()]);
     }
     
     /**
@@ -164,14 +164,12 @@ public class ClasspathModifierDropDownAction extends Action implements IClasspat
      */
     public void selectionChanged(SelectionChangedEvent event) {
     	for (Iterator iterator= fActions.iterator(); iterator.hasNext();) {
-	        IClasspathModifierAction action= (IClasspathModifierAction)iterator.next();
-	        if (action instanceof ISelectionChangedListener) {
-	        	((ISelectionChangedListener)action).selectionChanged(event);
-	        }
+	        BuildpathModifierAction action= (BuildpathModifierAction)iterator.next();
+	        action.selectionChanged(event);
         }
     	int i= 0;
     	for (Iterator iterator= fActions.iterator(); iterator.hasNext();) {
-	        IClasspathModifierAction action= (IClasspathModifierAction)iterator.next();
+	        BuildpathModifierAction action= (BuildpathModifierAction)iterator.next();
 	        if (action.isEnabled()) {
 	        	setEnabled(true);
 	        	fIndex= i;
@@ -180,5 +178,19 @@ public class ClasspathModifierDropDownAction extends Action implements IClasspat
 	        i++;
         }
     	setEnabled(false);
+    }
+
+	/**
+     * {@inheritDoc}
+     */
+    protected boolean canHandle(IStructuredSelection elements) {
+	    return false;
+    }
+
+	/**
+     * {@inheritDoc}
+     */
+    public String getDetailedDescription() {
+	    return null;
     }
 }

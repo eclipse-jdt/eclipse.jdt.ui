@@ -18,7 +18,7 @@ import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathMod
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
-public class RemoveFromBuildpathAction2 extends RemoveFromBuildpathAction implements IClasspathModifierAction {
+public class RemoveFromBuildpathAction2 extends RemoveFromBuildpathAction {
 
 	private final HintTextGroup fProvider;
 

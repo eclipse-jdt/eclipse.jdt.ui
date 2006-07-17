@@ -16,7 +16,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 //Warning: This is unused and untested code!
-public class ResetAction2 extends ResetAction implements IClasspathModifierAction {
+public class ResetAction2 extends ResetAction {
 
 	private final HintTextGroup fInformationProvider;
 

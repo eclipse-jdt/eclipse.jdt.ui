@@ -16,7 +16,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 
-public class EditOutputFolderAction2 extends EditOutputFolderAction implements IClasspathModifierAction {
+public class EditOutputFolderAction2 extends EditOutputFolderAction {
 	
 	private final HintTextGroup fProvider;
 	private boolean fShowOutputFolders;

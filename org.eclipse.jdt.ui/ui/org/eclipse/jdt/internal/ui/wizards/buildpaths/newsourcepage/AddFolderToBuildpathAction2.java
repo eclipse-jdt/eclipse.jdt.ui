@@ -16,7 +16,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
-public class AddFolderToBuildpathAction2 extends AddFolderToBuildpathAction implements IClasspathModifierAction {
+public class AddFolderToBuildpathAction2 extends AddFolderToBuildpathAction {
 
 	private final HintTextGroup fInformationProvider;
 

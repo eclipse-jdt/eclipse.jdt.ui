@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
-public class ResetAllOutputFoldersAction2 extends ResetAllOutputFoldersAction implements IClasspathModifierAction {
+public class ResetAllOutputFoldersAction2 extends ResetAllOutputFoldersAction {
 
 	private final HintTextGroup fInformationProvider;
 
