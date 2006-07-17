@@ -36,6 +36,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -57,6 +58,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
+import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -72,12 +74,22 @@ public class AddFolderToBuildpathAction extends Action implements ISelectionChan
 
 	private final IWorkbenchSite fSite;
 	private final List fSelectedElements; //IJavaProject || IPackageFrament || IFolder
+	private final IRunnableContext fContext;
+	private final IClasspathModifierListener fListener;
 
 	public AddFolderToBuildpathAction(IWorkbenchSite site) {
-		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_label, JavaPluginImages.DESC_OBJS_PACKFRAG_ROOT);
-		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_tooltip);
+		this(site, PlatformUI.getWorkbench().getProgressService(), null);
+	}
+	
+	protected AddFolderToBuildpathAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
+		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_label, JavaPluginImages.DESC_ELCL_ADD_AS_SOURCE_FOLDER);
+		
 		fSite= site;
+		fContext= context;
+		fListener= listener;
 		fSelectedElements= new ArrayList();
+		
+		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_tooltip);
 	}
 
 	/**
@@ -99,7 +111,7 @@ public class AddFolderToBuildpathAction extends Action implements ISelectionChan
 					return;
 			}
 
-			final Shell shell= fSite.getShell() != null ? fSite.getShell() : JavaPlugin.getActiveWorkbenchShell();
+			final Shell shell= getShell();
 
 			final boolean removeProjectFromClasspath;
 			IPath outputLocation= project.getOutputLocation();
@@ -151,7 +163,7 @@ public class AddFolderToBuildpathAction extends Action implements ISelectionChan
 						}
 					}
 				};
-				PlatformUI.getWorkbench().getProgressService().run(true, false, runnable);
+				fContext.run(false, false, runnable);
 			} catch (final InvocationTargetException e) {
 				if (e.getCause() instanceof CoreException) {
 					showExceptionDialog((CoreException)e.getCause());
@@ -164,6 +176,13 @@ public class AddFolderToBuildpathAction extends Action implements ISelectionChan
 			showExceptionDialog(e);
 		}
 	}
+
+	private Shell getShell() {
+		if (fSite == null)
+			return JavaPlugin.getActiveWorkbenchShell();
+		
+	    return fSite.getShell() != null ? fSite.getShell() : JavaPlugin.getActiveWorkbenchShell();
+    }
 
 	private List addToClasspath(List elements, IJavaProject project, IPath outputLocation, boolean removeProjectFromClasspath, boolean removeOldClassFiles, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		if (!project.getProject().hasNature(JavaCore.NATURE_ID)) {
@@ -212,7 +231,7 @@ public class AddFolderToBuildpathAction extends Action implements ISelectionChan
 
 			ClasspathModifier.setNewEntry(existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
 
-			ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(monitor, 1));
+			ClasspathModifier.commitClassPath(existingEntries, project, fListener, new SubProgressMonitor(monitor, 1));
 
 			List result= new ArrayList();
 			for (int i= 0; i < newEntries.size(); i++) {
@@ -276,7 +295,7 @@ public class AddFolderToBuildpathAction extends Action implements ISelectionChan
 	}
 
 	private void showExceptionDialog(CoreException exception) {
-		showError(exception, fSite.getShell(), NewWizardMessages.AddSourceFolderToBuildpathAction_ErrorTitle, exception.getMessage());
+		showError(exception, getShell(), NewWizardMessages.AddSourceFolderToBuildpathAction_ErrorTitle, exception.getMessage());
 	}
 
 	private void showError(CoreException e, Shell shell, String title, String message) {
@@ -288,7 +307,7 @@ public class AddFolderToBuildpathAction extends Action implements ISelectionChan
 		}
 	}
 	
-	private void selectAndReveal(final ISelection selection) {
+	protected void selectAndReveal(final ISelection selection) {
 		// validate the input
 		IWorkbenchPage page= fSite.getPage();
 		if (page == null)
@@ -330,5 +349,8 @@ public class AddFolderToBuildpathAction extends Action implements ISelectionChan
 			}
 		}
 	}
-
+	
+	protected List getSelectedElements() {
+		return fSelectedElements;
+	}
 }

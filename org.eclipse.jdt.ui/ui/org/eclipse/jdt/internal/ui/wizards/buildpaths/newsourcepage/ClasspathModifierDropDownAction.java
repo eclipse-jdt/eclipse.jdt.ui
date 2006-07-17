@@ -12,16 +12,18 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuCreator;
-
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 /**
  * Drop down action for toolbars containing <code>ClasspathModifierAction</code>s.
@@ -30,7 +32,8 @@ import org.eclipse.jdt.core.JavaModelException;
  * itself will also be valid and invocing run will delegate the call to the 
  * first valid action in the list.
  */
-public class ClasspathModifierDropDownAction extends ClasspathModifierAction implements IMenuCreator {
+//TODO: Fix (action is changed but not description/image/...)
+public class ClasspathModifierDropDownAction extends Action implements IClasspathModifierAction , IMenuCreator, ISelectionChangedListener {
     
     /** The menu to be populated with items*/
     private Menu fMenu;
@@ -49,19 +52,23 @@ public class ClasspathModifierDropDownAction extends ClasspathModifierAction imp
      * @param text a label text for the action
      * @param toolTipText the tooltip text for the drop down menu
      */
-    public ClasspathModifierDropDownAction(ClasspathModifierAction action, String text, String toolTipText) {
-        super(action.getOperation(), action.getImageDescriptor(), action.getDisabledImageDescriptor(), 
-                text, toolTipText, IAction.AS_DROP_DOWN_MENU);
+    public ClasspathModifierDropDownAction(IClasspathModifierAction action, String text, String toolTipText) {
+        super(text, IAction.AS_DROP_DOWN_MENU);
+        
         fActions= new ArrayList();
         fActions.add(action);
         fIndex= 0;
+        
+        setImageDescriptor(action.getImageDescriptor());
+        setDisabledImageDescriptor(action.getDisabledImageDescriptor());
+        setToolTipText(toolTipText);
     }
     
     /**
      * Runs the first action of the list of managed actions that is valid.
      */
     public void run() {
-        ClasspathModifierAction action= (ClasspathModifierAction)fActions.get(fIndex);
+        IClasspathModifierAction action= (IClasspathModifierAction)fActions.get(fIndex);
         action.run();
     }
 
@@ -88,7 +95,7 @@ public class ClasspathModifierDropDownAction extends ClasspathModifierAction imp
      * 
      * @param action the action to be added
      */
-    public void addAction(ClasspathModifierAction action) {
+    public void addAction(IClasspathModifierAction action) {
         fActions.add(action);
     }
     
@@ -98,7 +105,7 @@ public class ClasspathModifierDropDownAction extends ClasspathModifierAction imp
      * 
      * @param actions an array of actions to be added
      */
-    public void addActions(ClasspathModifierAction[] actions) {
+    public void addActions(IClasspathModifierAction[] actions) {
         for(int i= 0; i < actions.length; i++) {
             addAction(actions[i]);
         }
@@ -109,7 +116,7 @@ public class ClasspathModifierDropDownAction extends ClasspathModifierAction imp
      *  
      * @param action the action to be removed
      */
-    public void removeAction(ClasspathModifierAction action) {
+    public void removeAction(IClasspathModifierAction action) {
         fActions.remove(action);
     }
     
@@ -118,8 +125,8 @@ public class ClasspathModifierDropDownAction extends ClasspathModifierAction imp
      * 
      * @return an array of actions
      */
-    public ClasspathModifierAction[] getActions() {
-        return (ClasspathModifierAction[])fActions.toArray(new ClasspathModifierAction[fActions.size()]);
+    public IClasspathModifierAction[] getActions() {
+        return (IClasspathModifierAction[])fActions.toArray(new IClasspathModifierAction[fActions.size()]);
     }
     
     /**
@@ -152,22 +159,51 @@ public class ClasspathModifierDropDownAction extends ClasspathModifierAction imp
         }
     }
     
-    /**
-     * Check all managed actions to find out if at least one is valid. 
-     * The first valid action that is found will be used when calling 
-     * <code>run()</code>.
-     * 
-     * @return <code>true</code> if at least one of the managed actions is valid, 
-     * <code>false</code> otherwise.
+	/**
+     * {@inheritDoc}
      */
-    public boolean isValid(List selectedElements, int[] types) throws JavaModelException {
-        for(int i= 0; i < fActions.size(); i++) {
-            ClasspathModifierAction action= (ClasspathModifierAction)fActions.get(i);
-            if(action.isValid(selectedElements, types)) {
-                fIndex= i;
-                return true;
-            }
+    public String getDescription(int type) {
+	    return getFirstAction().getDescription(type);
+    }
+
+	/**
+     * {@inheritDoc}
+     */
+    public String getName() {
+	    return getFirstAction().getName();
+    }
+
+	/**
+     * {@inheritDoc}
+     */
+    public int getTypeId() {
+	    return getFirstAction().getTypeId();
+    }
+    
+    private IClasspathModifierAction getFirstAction() {
+	    return (IClasspathModifierAction)fActions.get(0);
+    }
+
+	/**
+     * {@inheritDoc}
+     */
+    public void selectionChanged(SelectionChangedEvent event) {
+    	for (Iterator iterator= fActions.iterator(); iterator.hasNext();) {
+	        IClasspathModifierAction action= (IClasspathModifierAction)iterator.next();
+	        if (action instanceof ISelectionChangedListener) {
+	        	((ISelectionChangedListener)action).selectionChanged(event);
+	        }
         }
-        return false;
+    	int i= 0;
+    	for (Iterator iterator= fActions.iterator(); iterator.hasNext();) {
+	        IClasspathModifierAction action= (IClasspathModifierAction)iterator.next();
+	        if (action.isEnabled()) {
+	        	setEnabled(true);
+	        	fIndex= i;
+	        	return;
+	        }
+	        i++;
+        }
+    	setEnabled(false);
     }
 }

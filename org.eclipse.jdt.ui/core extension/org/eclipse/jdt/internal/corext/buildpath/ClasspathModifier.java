@@ -272,7 +272,6 @@ public class ClasspathModifier {
 	 * archives or an empty list if no element was added.
 	 * @throws CoreException
 	 * 
-	 * @see IAddArchivesQuery
 	 */
 	protected List addExternalJars(IAddArchivesQuery query, IJavaProject project, IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
@@ -319,7 +318,6 @@ public class ClasspathModifier {
 	 * archives or an empty list if no element was added.
 	 * @throws CoreException
 	 * 
-	 * @see IAddArchivesQuery
 	 */
 	protected List addLibraries(IAddLibrariesQuery query, IJavaProject project, IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
@@ -452,7 +450,6 @@ public class ClasspathModifier {
 			}
 
 			updateClasspath(existingEntries, project, new SubProgressMonitor(monitor, 1));
-			fireEvent(existingEntries);
 			if (archiveRemoved && resultElements.size() == 0)
 				resultElements.add(project);
 			return resultElements;
@@ -822,7 +819,6 @@ public class ClasspathModifier {
 			}
 
 			updateClasspath(entries, project, null);
-			fireEvent(entries);
 			return result;
 		} finally {
 			monitor.done();
@@ -1075,7 +1071,7 @@ public class ClasspathModifier {
 		return false;
 	}
 	
-	protected static String escapeSpecialChars(String value) {
+	public static String escapeSpecialChars(String value) {
 		StringBuffer buf = new StringBuffer();
 		for (int i = 0; i < value.length(); i++) {
 			char c = value.charAt(i);
@@ -1563,7 +1559,7 @@ public class ClasspathModifier {
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @throws JavaModelException
 	 */
-	private void resetFilters(IJavaElement element, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	public static void resetFilters(IJavaElement element, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -1651,7 +1647,7 @@ public class ClasspathModifier {
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @throws JavaModelException in case that validation for the new entries fails
 	 */
-	private void updateClasspath(List newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	protected void updateClasspath(List newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -1669,7 +1665,7 @@ public class ClasspathModifier {
 		}
 	}
 	
-	public static void commitClassPath(List newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	public static void commitClassPath(List newEntries, IJavaProject project, IClasspathModifierListener listener, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -1681,6 +1677,10 @@ public class ClasspathModifier {
 				throw new JavaModelException(status);
 
 			project.setRawClasspath(entries, outputLocation, new SubProgressMonitor(monitor, 2));
+			
+			//TODO: Remove after first refactoring step
+			if (listener != null)
+				listener.classpathEntryChanged(newEntries);
 		} finally {
 			monitor.done();
 		}
@@ -1833,7 +1833,7 @@ public class ClasspathModifier {
 	 * of <code>path</code> and which are on the build path
 	 * @throws JavaModelException
 	 */
-	private List getFoldersOnCP(IPath path, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	private static List getFoldersOnCP(IPath path, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		List srcFolders= new ArrayList();

@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -51,6 +52,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
+import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -65,12 +67,20 @@ public class AddLibraryToBuildpathAction extends Action implements ISelectionCha
 
 	private IJavaProject fSelectedProject;
 	private final IWorkbenchSite fSite;
+	private final IClasspathModifierListener fListener;
 
 	public AddLibraryToBuildpathAction(IWorkbenchSite site) {
-		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_label, JavaPluginImages.DESC_OBJS_LIBRARY);
-		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_tooltip);
-		fSite= site;
+		this(site, null, null);
 	}
+
+	public AddLibraryToBuildpathAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
+		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_label, JavaPluginImages.DESC_OBJS_LIBRARY);
+
+		fSite= site;
+		fListener= listener;
+		
+		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_tooltip);
+    }
 
 	/**
 	 * {@inheritDoc}
@@ -78,7 +88,7 @@ public class AddLibraryToBuildpathAction extends Action implements ISelectionCha
 	public void run() {
 		final IJavaProject project= fSelectedProject;
 
-		Shell shell= fSite.getShell();
+		Shell shell= getShell();
 		if (shell == null) {
 			shell= JavaPlugin.getActiveWorkbenchShell();
 		}
@@ -149,7 +159,7 @@ public class AddLibraryToBuildpathAction extends Action implements ISelectionCha
 						if (pm.isCanceled())
 							throw new InterruptedException();
 
-						ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(pm, 1));
+						ClasspathModifier.commitClassPath(existingEntries, project, fListener, new SubProgressMonitor(pm, 1));
 						if (pm.isCanceled())
 							throw new InterruptedException();
 
@@ -186,16 +196,23 @@ public class AddLibraryToBuildpathAction extends Action implements ISelectionCha
 		}
 	}
 
-	public boolean canHandle(IStructuredSelection selection) {
+	private boolean canHandle(IStructuredSelection selection) {
 		if (selection.size() == 1 && selection.getFirstElement() instanceof IJavaProject) {
 			fSelectedProject= (IJavaProject)selection.getFirstElement();
 			return true;
 		}
 		return false;
 	}
+	
+	private Shell getShell() {
+		if (fSite == null)
+			return JavaPlugin.getActiveWorkbenchShell();
+		
+	    return fSite.getShell() != null ? fSite.getShell() : JavaPlugin.getActiveWorkbenchShell();
+    }
 
 	private void showExceptionDialog(CoreException exception) {
-		showError(exception, fSite.getShell(), NewWizardMessages.AddLibraryToBuildpathAction_ErrorTitle, exception.getMessage());
+		showError(exception, getShell(), NewWizardMessages.AddLibraryToBuildpathAction_ErrorTitle, exception.getMessage());
 	}
 
 	private void showError(CoreException e, Shell shell, String title, String message) {
@@ -207,7 +224,7 @@ public class AddLibraryToBuildpathAction extends Action implements ISelectionCha
 		}
 	}	
 
-	private void selectAndReveal(final ISelection selection) {
+	protected void selectAndReveal(final ISelection selection) {
 		// validate the input
 		IWorkbenchPage page= fSite.getPage();
 		if (page == null)

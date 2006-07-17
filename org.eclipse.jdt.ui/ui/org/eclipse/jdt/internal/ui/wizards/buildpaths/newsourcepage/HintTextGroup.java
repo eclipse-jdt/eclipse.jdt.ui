@@ -11,7 +11,6 @@
 
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,6 +45,7 @@ import org.eclipse.ui.forms.widgets.TableWrapLayout;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
@@ -161,6 +161,12 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
     public void setJavaProject(IJavaProject jProject) {
         fCurrJProject= jProject;
         fOldOutputLocation= fOutputLocationField.getText();
+        
+        try {
+	        ((ResetAllAction)fActionGroup.getAction(IClasspathInformationProvider.RESET_ALL)).setBreakPoint(fCurrJProject);
+        } catch (JavaModelException e) {
+	     	JavaPlugin.log(e);
+        }
     }
     
     /**
@@ -219,7 +225,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * @param action the action to be executed if the hyperlink is activated
      * @param context the runnable context under which the action is executed
      */
-    private void createLabel(Composite parent, String text, final ClasspathModifierAction action, final IRunnableContext context) {
+    private void createLabel(Composite parent, String text, final IClasspathModifierAction action, final IRunnableContext context) {
         FormText formText= createFormText(parent, text);
         Image image= (Image)fImageMap.get(action.getId());
         if (image == null) {
@@ -230,13 +236,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
         formText.addHyperlinkListener(new HyperlinkAdapter() {
 
             public void linkActivated(HyperlinkEvent e) {
-                try {
-                    context.run(false, false, action.getOperation());
-                } catch (InvocationTargetException err) {
-                    ExceptionHandler.handle(err, getShell(), Messages.format(NewWizardMessages.HintTextGroup_Exception_Title, action.getName()), err.getMessage()); 
-                } catch (InterruptedException err) {
-                    // Cancel pressed
-                }
+                action.run();
             }
             
         });
@@ -250,7 +250,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * @see IClasspathInformationProvider#getSelection()
      */
     public IStructuredSelection getSelection() {
-        return fPackageExplorer.getSelection();
+        return (IStructuredSelection)fPackageExplorer.getSelection();
     }
     
     /**
@@ -318,7 +318,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * @see DialogPackageExplorer#setSelection(List)
      * @see DialogPackageExplorerActionGroup#refresh(DialogExplorerActionContext)
      */
-    private void defaultHandle(List result, boolean forceRebuild) {
+    void defaultHandle(List result, boolean forceRebuild) {
         try {
             fPackageExplorer.setSelection(result);
             if (forceRebuild) {
@@ -346,9 +346,13 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * <code>fPackageExplorer</code>, or an empty list if creation was 
      * aborted
      */
-    private void handleFolderCreation(List result) {
+    void handleFolderCreation(List result) {
         if (result.size() == 1) {
-            fNewFolders.add(result.get(0));
+            try {
+	            fNewFolders.add(((IPackageFragmentRoot)result.get(0)).getCorrespondingResource());
+            } catch (JavaModelException e) {
+	            JavaPlugin.log(e);
+            }
             fPackageExplorer.setSelection(result);
             setOutputLocationFieldText(getOldOutputLocation());
         }
@@ -365,10 +369,11 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * @param result the result list of object to be selected by the 
      * <code>fPackageExplorer</code>
      */
-    private void handleAddToCP(List result) {
+    public void handleAddToCP(List result) {
         try {
             if (containsJavaProject(result)) {
                 fPackageExplorer.setSelection(result);
+                //TODO: Why? Test case: Given: Project with src folder 1. Add Project as source folder, no refresh without the following
                 fActionGroup.refresh(new DialogExplorerActionContext(result, fCurrJProject));
             }
             else
@@ -388,7 +393,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * @param forceRebuild <code>true</code> if the hint text group must 
      * be rebuilt, <code>false</code> otherwise.
      */
-    private void handleRemoveFromBP(List result, boolean forceRebuild) {
+    void handleRemoveFromBP(List result, boolean forceRebuild) {
         fPackageExplorer.setSelection(result);
         try {
             if (forceRebuild || containsJavaProject(result)) {
@@ -409,7 +414,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * @param result a list containing only one element of type 
      * <code>CPListElementAttribute</code> which can be <code>null</code>
      */
-    private void handleEditOutputFolder(List result) {
+    void handleEditOutputFolder(List result) {
         if(result.size() == 0)
             return;
         CPListElementAttribute attribute= (CPListElementAttribute)result.get(0);
@@ -431,7 +436,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * needs to be updated and the selection should 
      * be set to the Java project root itself.
      */
-    private void handleResetAll() {
+    void handleResetAll() {
         List list= new ArrayList();
         list.add(fCurrJProject);
         setSelection(list);
@@ -531,7 +536,6 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
 	/**
 	 * Get a query to create a linked source folder.
 	 * 
-	 * @see IRemoveLinkedFolderQuery
 	 * @see org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider
 	 */
 	public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
@@ -618,7 +622,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
         fTopComposite.setData(childComposite);
         
         // Display available actions
-        ClasspathModifierAction[] actions= event.getEnabledActions();
+        IClasspathModifierAction[] actions= event.getEnabledActions();
         String[] descriptionText= event.getEnabledActionsText();
         if (noContextHelpAvailable(actions)) {
             String noAction= fActionGroup.getNoActionDescription();
@@ -656,7 +660,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * @return <code>true</code> if there is at least one action that allows context 
      * sensitive operations, <code>false</code> otherwise.
      */
-    private boolean noContextHelpAvailable(ClasspathModifierAction[] actions) {
+    private boolean noContextHelpAvailable(IClasspathModifierAction[] actions) {
         if (actions.length == 0)
             return true;
         if (actions.length == 1) {

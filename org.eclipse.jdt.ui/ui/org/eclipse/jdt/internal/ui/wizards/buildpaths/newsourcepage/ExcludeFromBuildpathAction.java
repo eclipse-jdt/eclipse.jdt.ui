@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -50,6 +51,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
+import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -60,13 +62,23 @@ public class ExcludeFromBuildpathAction extends Action implements ISelectionChan
 
 	private final IWorkbenchSite fSite;
 	private final List fSelectedElements; //IPackageFragment || ICompilationUnit iff isEnabled()
+	private final IRunnableContext fContext;
+	private final IClasspathModifierListener fListener;
 	
 	public ExcludeFromBuildpathAction(IWorkbenchSite site) {
+		this(site, PlatformUI.getWorkbench().getProgressService(), null);
+	}
+	
+	public ExcludeFromBuildpathAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
 		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_label, JavaPluginImages.DESC_ELCL_EXCLUDE_FROM_BUILDPATH);
+		
+		fSite= site;
+		fContext= context;
+		fListener= listener;
+		fSelectedElements= new ArrayList();
+		
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_tooltip);
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_EXCLUDE_FROM_BUILDPATH);
-		fSite= site;
-		fSelectedElements= new ArrayList();
 	}
 	
 	/**
@@ -92,7 +104,7 @@ public class ExcludeFromBuildpathAction extends Action implements ISelectionChan
 					}
 				}
 			};
-			PlatformUI.getWorkbench().getProgressService().run(true, false, runnable);
+			fContext.run(false, false, runnable);
 		} catch (final InvocationTargetException e) {
 			if (e.getCause() instanceof CoreException) {
 				showExceptionDialog((CoreException)e.getCause());
@@ -122,7 +134,7 @@ public class ExcludeFromBuildpathAction extends Action implements ISelectionChan
 				}
 			}
 
-			ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(monitor, 4));
+			ClasspathModifier.commitClassPath(existingEntries, project, fListener, new SubProgressMonitor(monitor, 4));
 			return resources;
 		} finally {
 			monitor.done();
@@ -165,8 +177,15 @@ public class ExcludeFromBuildpathAction extends Action implements ISelectionChan
 	}
 	
 	private void showExceptionDialog(CoreException exception) {
-		showError(exception, fSite.getShell(), NewWizardMessages.ExcludeFromBuildathAction_ErrorTitle, exception.getMessage());
+		showError(exception, getShell(), NewWizardMessages.ExcludeFromBuildathAction_ErrorTitle, exception.getMessage());
 	}
+	
+	private Shell getShell() {
+		if (fSite == null)
+			return JavaPlugin.getActiveWorkbenchShell();
+		
+	    return fSite.getShell() != null ? fSite.getShell() : JavaPlugin.getActiveWorkbenchShell();
+    }
 	
 	private void showError(CoreException e, Shell shell, String title, String message) {
 		IStatus status= e.getStatus();
@@ -177,7 +196,7 @@ public class ExcludeFromBuildpathAction extends Action implements ISelectionChan
 		}
 	}
 	
-	private void selectAndReveal(final ISelection selection) {
+	protected void selectAndReveal(final ISelection selection) {
 		// validate the input
 		IWorkbenchPage page= fSite.getPage();
 		if (page == null)
@@ -218,6 +237,10 @@ public class ExcludeFromBuildpathAction extends Action implements ISelectionChan
 				});
 			}
 		}
+	}
+	
+	protected List getSelectedElements() {
+		return fSelectedElements;
 	}
 
 }

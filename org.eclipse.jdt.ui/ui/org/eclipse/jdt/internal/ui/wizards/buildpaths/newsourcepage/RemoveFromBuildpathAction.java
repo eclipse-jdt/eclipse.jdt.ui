@@ -28,7 +28,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -49,6 +51,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
+import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -60,14 +63,24 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 public class RemoveFromBuildpathAction extends Action implements ISelectionChangedListener {
 
 	private final IWorkbenchSite fSite;
-	private List fSelectedElements; //IPackageFramgentRoot || IJavaProject || ClassPathContainer iff isEnabled()
+	private final List fSelectedElements; //IPackageFramgentRoot || IJavaProject || ClassPathContainer iff isEnabled()
+	private final IClasspathModifierListener fListener;
+	private final IRunnableContext fContext;
 
 	public RemoveFromBuildpathAction(IWorkbenchSite site) {
-		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_label, JavaPluginImages.DESC_ELCL_REMOVE_FROM_BP);
-		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip);
+		this(site, PlatformUI.getWorkbench().getProgressService(), null, JavaPluginImages.DESC_ELCL_REMOVE_FROM_BP);
+	}
+
+	public RemoveFromBuildpathAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener, ImageDescriptor image) {
+		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_label, image);
+		
+		fContext= context;
+		fListener= listener;
 		fSite= site;
 		fSelectedElements= new ArrayList();
-	}
+		
+		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip);
+    }
 
 	/**
 	 * {@inheritDoc}
@@ -108,7 +121,7 @@ public class RemoveFromBuildpathAction extends Action implements ISelectionChang
 					}
 				}
 			};
-			PlatformUI.getWorkbench().getProgressService().run(true, false, runnable);
+			fContext.run(false, false, runnable);
 			
 		} catch (CoreException e) {
 			showExceptionDialog(e);
@@ -158,7 +171,7 @@ public class RemoveFromBuildpathAction extends Action implements ISelectionChang
 				}
 			}
 
-			ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(monitor, 1));
+			ClasspathModifier.commitClassPath(existingEntries, project, fListener, new SubProgressMonitor(monitor, 1));
 
 			return result;
 		} finally {
@@ -167,7 +180,7 @@ public class RemoveFromBuildpathAction extends Action implements ISelectionChang
 	}
 	
 	private void queryToRemoveLinkedFolders(final List elementsToRemove, final List foldersToDelete) throws JavaModelException {
-		final Shell shell= fSite.getShell() != null ? fSite.getShell() : JavaPlugin.getActiveWorkbenchShell();
+		final Shell shell= getShell();
 		for (Iterator iter= fSelectedElements.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IPackageFragmentRoot) {
@@ -249,7 +262,7 @@ public class RemoveFromBuildpathAction extends Action implements ISelectionChang
 	}
 
 	private void showExceptionDialog(CoreException exception) {
-		showError(exception, fSite.getShell(), NewWizardMessages.RemoveFromBuildpathAction_ErrorTitle, exception.getMessage());
+		showError(exception, getShell(), NewWizardMessages.RemoveFromBuildpathAction_ErrorTitle, exception.getMessage());
 	}
 
 	private void showError(CoreException e, Shell shell, String title, String message) {
@@ -261,7 +274,14 @@ public class RemoveFromBuildpathAction extends Action implements ISelectionChang
 		}
 	}
 	
-	private void selectAndReveal(final ISelection selection) {
+	private Shell getShell() {
+		if (fSite == null)
+			return JavaPlugin.getActiveWorkbenchShell();
+		
+	    return fSite.getShell() != null ? fSite.getShell() : JavaPlugin.getActiveWorkbenchShell();
+    }
+	
+	protected void selectAndReveal(final ISelection selection) {
 		// validate the input
 		IWorkbenchPage page= fSite.getPage();
 		if (page == null)
@@ -302,6 +322,10 @@ public class RemoveFromBuildpathAction extends Action implements ISelectionChang
 				});
 			}
 		}
+	}
+	
+	protected List getSelectedElements() {
+		return fSelectedElements;
 	}
 
 }

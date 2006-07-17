@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -46,6 +47,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
+import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
@@ -58,11 +60,21 @@ public class AddArchiveToBuildpathAction extends Action implements ISelectionCha
 
 	private final IWorkbenchSite fSite;
 	private IJavaProject fJavaProject;
+	private final IRunnableContext fContext;
+	private final IClasspathModifierListener fListener;
 
 	public AddArchiveToBuildpathAction(IWorkbenchSite site) {
+		this(site, PlatformUI.getWorkbench().getProgressService(), null);
+	}
+	
+	public AddArchiveToBuildpathAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
 		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddJarCP_label, JavaPluginImages.DESC_OBJS_EXTJAR);
-		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddJarCP_tooltip);
+		
 		fSite= site;
+		fContext= context;
+		fListener= listener;
+
+		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddJarCP_tooltip);
 	}
 
 	/**
@@ -70,7 +82,7 @@ public class AddArchiveToBuildpathAction extends Action implements ISelectionCha
 	 */
 	public void run() {
 
-		final Shell shell= fSite.getShell() != null ? fSite.getShell() : JavaPlugin.getActiveWorkbenchShell();
+		final Shell shell= getShell();
 		final IPath[] selected= BuildPathDialogAccess.chooseExternalJAREntries(shell);
 
 		try {
@@ -85,7 +97,7 @@ public class AddArchiveToBuildpathAction extends Action implements ISelectionCha
 					}
 				}
 			};
-			PlatformUI.getWorkbench().getProgressService().run(true, false, runnable);
+			fContext.run(false, false, runnable);
 		} catch (final InvocationTargetException e) {
 			if (e.getCause() instanceof CoreException) {
 				showExceptionDialog((CoreException)e.getCause());
@@ -110,7 +122,7 @@ public class AddArchiveToBuildpathAction extends Action implements ISelectionCha
 
 				List existingEntries= ClasspathModifier.getExistingEntries(project);
 				ClasspathModifier.setNewEntry(existingEntries, addedEntries, project, new SubProgressMonitor(monitor, 1));
-				ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(monitor, 1));
+				ClasspathModifier.commitClassPath(existingEntries, project, fListener, new SubProgressMonitor(monitor, 1));
 
 				List result= new ArrayList(addedEntries.size());
 				for (int i= 0; i < addedEntries.size(); i++) {
@@ -154,7 +166,7 @@ public class AddArchiveToBuildpathAction extends Action implements ISelectionCha
 	}
 
 	private void showExceptionDialog(CoreException exception) {
-		showError(exception, fSite.getShell(), NewWizardMessages.AddArchiveToBuildpathAction_ErrorTitle, exception.getMessage());
+		showError(exception, getShell(), NewWizardMessages.AddArchiveToBuildpathAction_ErrorTitle, exception.getMessage());
 	}
 	
 	private void showError(CoreException e, Shell shell, String title, String message) {
@@ -166,7 +178,14 @@ public class AddArchiveToBuildpathAction extends Action implements ISelectionCha
 		}
 	}
 	
-	private void selectAndReveal(final ISelection selection) {
+	private Shell getShell() {
+		if (fSite == null)
+			return JavaPlugin.getActiveWorkbenchShell();
+		
+	    return fSite.getShell() != null ? fSite.getShell() : JavaPlugin.getActiveWorkbenchShell();
+    }
+	
+	protected void selectAndReveal(final ISelection selection) {
 		// validate the input
 		IWorkbenchPage page= fSite.getPage();
 		if (page == null)

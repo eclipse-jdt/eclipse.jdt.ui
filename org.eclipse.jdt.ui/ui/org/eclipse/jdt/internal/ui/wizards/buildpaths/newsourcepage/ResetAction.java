@@ -21,8 +21,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
@@ -43,98 +41,113 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 
-public class IncludeToBuildpathAction extends Action implements ISelectionChangedListener {
+//Warning: This is unused and untested code. Images and descriptions are missing too.
+public class ResetAction extends Action implements ISelectionChangedListener {
 
 	private final IWorkbenchSite fSite;
-	private final List fSelectedElements; //IResources
+	private List fSelectedElements;
 	private final IClasspathModifierListener fListener;
 	private final IRunnableContext fContext;
 
-	public IncludeToBuildpathAction(IWorkbenchSite site) {
+	public ResetAction(IWorkbenchSite site) {
 		this(site, PlatformUI.getWorkbench().getProgressService(), null);
 	}
-	
-	public IncludeToBuildpathAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_label, JavaPluginImages.DESC_ELCL_INCLUDE_ON_BUILDPATH);
+
+	public ResetAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
+		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
 		
-		fSite= site;
 		fContext= context;
 		fListener= listener;
+		fSite= site;
 		fSelectedElements= new ArrayList();
 		
-		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_tooltip);
-		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_INCLUDE_ON_BUILDPATH);
-	}
+		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
+    }
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void run() {
-		IResource resource= (IResource)fSelectedElements.get(0);
-		final IJavaProject project= JavaCore.create(resource.getProject());
-
-		try {
-			final IRunnableWithProgress runnable= new IRunnableWithProgress() {
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-						List result= unExclude(fSelectedElements, project, monitor);
-						selectAndReveal(new StructuredSelection(result));
-					} catch (CoreException e) {
-						throw new InvocationTargetException(e);
+		final IRunnableWithProgress runnable= new IRunnableWithProgress() {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+				try {
+					Object firstElement= fSelectedElements.get(0);
+					IJavaProject project= null;
+					if (firstElement instanceof IJavaProject) {
+						project= (IJavaProject)firstElement;
+					} else if (firstElement instanceof IPackageFragmentRoot) {
+						project= ((IPackageFragmentRoot)firstElement).getJavaProject();
+					} else {
+						project= ((CPListElementAttribute)firstElement).getParent().getJavaProject();
 					}
+					
+					List result= reset(fSelectedElements, project, monitor);
+					selectAndReveal(new StructuredSelection(result));					
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
 				}
-			};
-			fContext.run(false, false, runnable);
-		} catch (final InvocationTargetException e) {
-			if (e.getCause() instanceof CoreException) {
+			}
+		};
+		try {
+	        fContext.run(false, false, runnable);
+        } catch (InvocationTargetException e) {
+        	if (e.getCause() instanceof CoreException) {
 				showExceptionDialog((CoreException)e.getCause());
 			} else {
 				JavaPlugin.log(e);
 			}
-		} catch (final InterruptedException e) {
-		}
+        } catch (InterruptedException e) {
+        }
 	}
+	
+	private List reset(List selection, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	    if (monitor == null)
+        	monitor= new NullProgressMonitor();
+        try {
+        	monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Resetting, selection.size()); 
+        	List entries= ClasspathModifier.getExistingEntries(project);
+        	List result= new ArrayList();
+        	for (int i= 0; i < selection.size(); i++) {
+        		Object element= selection.get(i);
+        		if (element instanceof IJavaElement) {
+        			IJavaElement javaElement= (IJavaElement) element;
+        			IPackageFragmentRoot root;
+        			if (element instanceof IJavaProject)
+        				root= project.getPackageFragmentRoot(project.getResource());
+        			else
+        				root= (IPackageFragmentRoot) element;
+        			CPListElement entry= ClasspathModifier.getClasspathEntry(entries, root);
+        			ClasspathModifier.resetFilters(javaElement, entry, project, new SubProgressMonitor(monitor, 1));
+        			result.add(javaElement);
+        		} else {
+        			CPListElement selElement= ((CPListElementAttribute) element).getParent();
+        			CPListElement entry= ClasspathModifier.getClasspathEntry(entries, selElement);
+        			CPListElementAttribute outputFolder= ClasspathModifier.resetOutputFolder(entry, project);
+        			result.add(outputFolder);
+        		}
+        	}
+        
+        	ClasspathModifier.commitClassPath(entries, project, fListener, null);
+        	return result;
+        } finally {
+        	monitor.done();
+        }
+    }
 
-	protected List unExclude(List elements, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
-		if (monitor == null)
-			monitor= new NullProgressMonitor();
-		try {
-			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Including, 2 * elements.size()); 
-
-			List entries= ClasspathModifier.getExistingEntries(project);
-			for (int i= 0; i < elements.size(); i++) {
-				IResource resource= (IResource) elements.get(i);
-				IPackageFragmentRoot root= ClasspathModifier.getFragmentRoot(resource, project, new SubProgressMonitor(monitor, 1));
-				if (root != null) {
-					CPListElement entry= ClasspathModifier.getClasspathEntry(entries, root);
-					ClasspathModifier.unExclude(resource, entry, project, new SubProgressMonitor(monitor, 1));
-				}
-			}
-
-			ClasspathModifier.commitClassPath(entries, project, fListener, new SubProgressMonitor(monitor, 4));
-			List resultElements= ClasspathModifier.getCorrespondingElements(elements, project);
-			return resultElements;
-		} finally {
-			monitor.done();
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void selectionChanged(final SelectionChangedEvent event) {
 		final ISelection selection = event.getSelection();
 		if (selection instanceof IStructuredSelection) {
@@ -143,36 +156,42 @@ public class IncludeToBuildpathAction extends Action implements ISelectionChange
 			setEnabled(canHandle(StructuredSelection.EMPTY));
 		}
 	}
-
+	
 	private boolean canHandle(IStructuredSelection elements) {
-		if (elements.size() == 0)
-			return false;
-
 		try {
-			fSelectedElements.clear();
-			for (Iterator iter= elements.iterator(); iter.hasNext();) {
-				Object element= iter.next();
-				fSelectedElements.add(element);
-				if (element instanceof IResource) {
-					IResource resource= (IResource)element;
-					IJavaProject project= JavaCore.create(resource.getProject());
-					if (project == null || !project.exists())
-						return false;
-
-					if (!ClasspathModifier.isExcluded(resource, project))
-						return false;
-				} else {
-					return false;
-				}
-			}
-			return true;
-		} catch (CoreException e) {
-		}
+	        fSelectedElements= elements.toList();
+	        for (Iterator iterator= fSelectedElements.iterator(); iterator.hasNext();) {
+	            Object element= iterator.next();
+	            if (element instanceof IJavaProject) {
+	        		if (isValidProject((IJavaProject)element))
+	        			return true;
+	            } else if (element instanceof IPackageFragmentRoot) {
+	            	if (ClasspathModifier.filtersSet((IPackageFragmentRoot)element))
+	            		return true;
+	            } else if (element instanceof CPListElementAttribute) {
+	            	if (!ClasspathModifier.isDefaultOutputFolder((CPListElementAttribute)element))
+	            		return true;
+	            } else {
+	            	return false;
+	            }
+	        }
+        } catch (JavaModelException e) {
+	        return false;
+        }
 		return false;
 	}
 
+	private boolean isValidProject(IJavaProject project) throws JavaModelException {
+        if (project.isOnClasspath(project)) {
+            IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(project.getPath(), project, IClasspathEntry.CPE_SOURCE);
+            if (entry.getInclusionPatterns().length != 0 || entry.getExclusionPatterns().length != 0)
+                return true;
+        }
+        return false;
+    }
+
 	private void showExceptionDialog(CoreException exception) {
-		showError(exception, getShell(), NewWizardMessages.IncludeToBuildpathAction_ErrorTitle, exception.getMessage());
+		showError(exception, getShell(), NewWizardMessages.RemoveFromBuildpathAction_ErrorTitle, exception.getMessage());
 	}
 
 	private void showError(CoreException e, Shell shell, String title, String message) {
@@ -232,10 +251,6 @@ public class IncludeToBuildpathAction extends Action implements ISelectionChange
 				});
 			}
 		}
-	}
-	
-	protected List getSelectedElements() {
-		return fSelectedElements;
 	}
 
 }

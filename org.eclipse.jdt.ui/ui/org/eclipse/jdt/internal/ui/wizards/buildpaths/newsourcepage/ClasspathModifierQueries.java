@@ -119,7 +119,6 @@ public class ClasspathModifierQueries {
          * @return an output folder query which will be needed 
          * when adding the folder to the build path
          * 
-         * @see OutputFolderQuery
          */
         public OutputFolderQuery getOutputFolderQuery();
     }
@@ -294,7 +293,6 @@ public class ClasspathModifierQueries {
          * @return query giving information about output and source folders
          * @throws JavaModelException
          * 
-         * @see OutputFolderQuery
          */
         public OutputFolderQuery getOutputFolderQuery(IPath outputLocation) throws JavaModelException;
     }
@@ -400,7 +398,6 @@ public class ClasspathModifierQueries {
      * @return an <code>IOutputFolderQuery</code> that can be executed
      * 
      * @see OutputFolderQuery
-     * @see org.eclipse.jdt.internal.corext.buildpath.AddSelectedSourceFolderOperation
      */
     public static OutputFolderQuery getDefaultFolderQuery(final Shell shell, IPath outputLocation) {
 		
@@ -477,7 +474,6 @@ public class ClasspathModifierQueries {
      * @return an <code>IInclusionExclusionQuery</code> that can be executed
      * 
      * @see ClasspathModifierQueries.IInclusionExclusionQuery
-     * @see org.eclipse.jdt.internal.corext.buildpath.EditFiltersOperation
      */
 	public static IInclusionExclusionQuery getDefaultInclusionExclusionQuery(final Shell shell) {
 		return new IInclusionExclusionQuery() {
@@ -521,8 +517,6 @@ public class ClasspathModifierQueries {
      * @return an <code>IOutputLocationQuery</code> that can be executed
      * 
      * @see ClasspathModifierQueries.IOutputLocationQuery
-     * @see org.eclipse.jdt.internal.corext.buildpath.CreateOutputFolderOperation
-     * @see org.eclipse.jdt.internal.corext.buildpath.EditFiltersOperation
      */
     public static IOutputLocationQuery getDefaultOutputLocationQuery(final Shell shell, final IPath projectOutputLocation, final List classpathList) {
         return new IOutputLocationQuery() {

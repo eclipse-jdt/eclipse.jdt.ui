@@ -11,7 +11,7 @@
 
 package org.eclipse.jdt.internal.corext.buildpath;
 
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierAction;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.IClasspathModifierAction;
 
 
 /**
@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 public class PackageExplorerActionEvent {
     
     private String[] fEnabledActionsDescriptions;
-    private ClasspathModifierAction[] fEnabledActions;
+    private IClasspathModifierAction[] fEnabledActions;
     
     /**
      * Create a package explorer action event containing actions 
@@ -38,7 +38,7 @@ public class PackageExplorerActionEvent {
      * position 'i'.
      * @param enabledActions an array of actions
      */
-    public PackageExplorerActionEvent(String[] enabledActionsDescriptions, ClasspathModifierAction[] enabledActions) {
+    public PackageExplorerActionEvent(String[] enabledActionsDescriptions, IClasspathModifierAction[] enabledActions) {
         fEnabledActionsDescriptions= enabledActionsDescriptions;
         fEnabledActions= enabledActions;
     }
@@ -53,7 +53,7 @@ public class PackageExplorerActionEvent {
      * 
      * @see #getEnabledActionsText()
      */
-    public ClasspathModifierAction[] getEnabledActions() {
+    public IClasspathModifierAction[] getEnabledActions() {
         return fEnabledActions;
     }
     

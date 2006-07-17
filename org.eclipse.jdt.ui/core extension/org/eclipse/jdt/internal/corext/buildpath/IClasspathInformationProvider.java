@@ -40,16 +40,6 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
  * information about the current state and to callback on 
  * the provider if the result of an operation needs to be handled.
  * 
- * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation
- * @see org.eclipse.jdt.internal.corext.buildpath.CreateFolderOperation
- * @see org.eclipse.jdt.internal.corext.buildpath.AddSelectedSourceFolderOperation
- * @see org.eclipse.jdt.internal.corext.buildpath.RemoveFromClasspathOperation
- * @see org.eclipse.jdt.internal.corext.buildpath.IncludeOperation
- * @see org.eclipse.jdt.internal.corext.buildpath.UnincludeOperation
- * @see org.eclipse.jdt.internal.corext.buildpath.ExcludeOperation
- * @see org.eclipse.jdt.internal.corext.buildpath.UnexcludeOperation
- * @see org.eclipse.jdt.internal.corext.buildpath.EditFiltersOperation
- * @see org.eclipse.jdt.internal.corext.buildpath.ResetOperation
  */
 public interface IClasspathInformationProvider {
     public static final int ADD_SEL_SF_TO_BP= 0x00;

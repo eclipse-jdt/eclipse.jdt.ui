@@ -11,7 +11,6 @@
 
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,9 +37,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.ResetAllOutputFoldersOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.ScrolledPageContent;
@@ -71,6 +68,8 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 	
 	private IJavaProject fJavaProject;
 
+	private final IRunnableContext fContext;
+
 
     /**
      * Constructor of the <code>NewSourceContainerWorkbookPage</code> which consists of 
@@ -85,6 +84,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     public NewSourceContainerWorkbookPage(ListDialogField classPathList, StringDialogField outputLocationField, IRunnableContext context) {
         fClassPathList= classPathList;
 		fOutputLocationField= outputLocationField;
+		fContext= context;
     
         fUseFolderOutputs= new SelectionButtonDialogField(SWT.CHECK);
         fUseFolderOutputs.setSelection(false);
@@ -178,20 +178,15 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         excomposite.setClient(fHintTextGroup.createControl(excomposite));
         fUseFolderOutputs.doFillIntoGrid(body, 1);
 		
-	    final DialogPackageExplorerActionGroup actionGroup= new DialogPackageExplorerActionGroup(fHintTextGroup, this, fOutputLocationField);
+	    final DialogPackageExplorerActionGroup actionGroup= new DialogPackageExplorerActionGroup(fHintTextGroup, this, fOutputLocationField, fContext, fPackageExplorer);
 		   
 		
         fUseFolderOutputs.setDialogFieldListener(new IDialogFieldListener() {
             public void dialogFieldChanged(DialogField field) {
                 boolean isUseFolders= fUseFolderOutputs.isSelected();
                 if (isUseFolders) {
-                    ResetAllOutputFoldersOperation op= new ResetAllOutputFoldersOperation(NewSourceContainerWorkbookPage.this, fHintTextGroup);
-                    try {
-                        op.run(null);
-                    } catch (InvocationTargetException e) {
-                        ExceptionHandler.handle(e, getShell(),
-                                Messages.format(NewWizardMessages.NewSourceContainerWorkbookPage_Exception_Title, op.getName()), e.getMessage()); 
-                    }
+                	ResetAllOutputFoldersAction2 action= new ResetAllOutputFoldersAction2(NewSourceContainerWorkbookPage.this, fHintTextGroup, fContext);
+                	action.run();
                 }
 				fPackageExplorer.showOutputFolders(isUseFolders);
                 try {

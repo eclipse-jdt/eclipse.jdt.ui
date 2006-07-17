@@ -40,7 +40,9 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -80,7 +82,7 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
  * elements that are not shown usually in the package explorer of the
  * workspace.
  */
-public class DialogPackageExplorer implements IMenuListener, ISelectionChangedListener {
+public class DialogPackageExplorer implements IMenuListener, ISelectionChangedListener, ISelectionProvider {
     /**
      * A extended content provider for the package explorer which can additionally display
      * an output folder item.
@@ -337,9 +339,9 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
                 	if (element instanceof CPListElementAttribute) {
 						CPListElementAttribute attribute= (CPListElementAttribute)element;
                 		if (attribute.getKey().equals(CPListElement.OUTPUT)) {
-                			ClasspathModifierAction[] actions= fActionGroup.getActions();
+                			IClasspathModifierAction[] actions= fActionGroup.getActions();
                 			for (int i= 0; i < actions.length; i++) {
-								if (actions[i].getOperation().getTypeId() == IClasspathInformationProvider.EDIT_OUTPUT) {
+								if (actions[i].getTypeId() == IClasspathInformationProvider.EDIT_OUTPUT) {
 									actions[i].run();
 									return;
 								}
@@ -476,7 +478,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
      * 
      * @return the current selection
      */
-    public IStructuredSelection getSelection() {
+    public ISelection getSelection() {
         return fCurrentSelection;
     }
     
@@ -528,5 +530,26 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
         } catch (JavaModelException e) {
             JavaPlugin.log(e);
         }
+    }
+
+	/**
+     * {@inheritDoc}
+     */
+    public void addSelectionChangedListener(ISelectionChangedListener listener) {
+    	fPackageViewer.addSelectionChangedListener(listener);
+    }
+
+	/**
+     * {@inheritDoc}
+     */
+    public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+    	fPackageViewer.removeSelectionChangedListener(listener);
+    }
+
+	/**
+     * {@inheritDoc}
+     */
+    public void setSelection(ISelection selection) {
+    	setSelection(((StructuredSelection)selection).toList());
     }
 }

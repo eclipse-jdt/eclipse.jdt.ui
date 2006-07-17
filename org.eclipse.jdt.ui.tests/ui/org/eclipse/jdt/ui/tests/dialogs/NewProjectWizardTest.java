@@ -43,21 +43,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.buildpath.AddLibraryOperation;
-import org.eclipse.jdt.internal.corext.buildpath.AddSelectedLibraryOperation;
-import org.eclipse.jdt.internal.corext.buildpath.AddSelectedSourceFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation;
-import org.eclipse.jdt.internal.corext.buildpath.CreateOutputFolderOperation;
-import org.eclipse.jdt.internal.corext.buildpath.EditFiltersOperation;
-import org.eclipse.jdt.internal.corext.buildpath.EditOutputFolderOperation;
-import org.eclipse.jdt.internal.corext.buildpath.ExcludeOperation;
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
-import org.eclipse.jdt.internal.corext.buildpath.IncludeOperation;
-import org.eclipse.jdt.internal.corext.buildpath.RemoveFromClasspathOperation;
-import org.eclipse.jdt.internal.corext.buildpath.ResetOperation;
-import org.eclipse.jdt.internal.corext.buildpath.UnexcludeOperation;
-import org.eclipse.jdt.internal.corext.buildpath.UnincludeOperation;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -1092,23 +1079,23 @@ public class NewProjectWizardTest extends TestCase {
 			}
         };
         
-        ClasspathModifierOperation op= null;
-        switch(type) {
-            case IClasspathInformationProvider.ADD_SEL_SF_TO_BP: op= new AddSelectedSourceFolderOperation(null, provider); break;
-            case IClasspathInformationProvider.ADD_SEL_LIB_TO_BP: op= new AddSelectedLibraryOperation(null, provider); break;
-            case IClasspathInformationProvider.REMOVE_FROM_BP: op= new RemoveFromClasspathOperation(null, provider); break;
-            case IClasspathInformationProvider.INCLUDE: op= new IncludeOperation(null, provider); break;
-            case IClasspathInformationProvider.UNINCLUDE: op= new UnincludeOperation(null, provider); break;
-            case IClasspathInformationProvider.EXCLUDE: op= new ExcludeOperation(null, provider); break;
-            case IClasspathInformationProvider.UNEXCLUDE: op= new UnexcludeOperation(null, provider); break;
-            case IClasspathInformationProvider.EDIT_FILTERS: op= new EditFiltersOperation(null, provider); break;
-            case IClasspathInformationProvider.EDIT_OUTPUT: op= new EditOutputFolderOperation(null, provider); break;
-            case IClasspathInformationProvider.RESET: op= new ResetOperation(null, provider); break;
-            case IClasspathInformationProvider.CREATE_OUTPUT: op= new CreateOutputFolderOperation(null, provider); break;
-            case IClasspathInformationProvider.ADD_LIB_TO_BP: op= new AddLibraryOperation(null, provider); break;
-        }
-        
-        op.run(null);
+//        ClasspathModifierOperation op= null;
+//        switch(type) {
+//            case IClasspathInformationProvider.ADD_SEL_SF_TO_BP: op= new AddSelectedSourceFolderOperation(null, provider); break;
+//            case IClasspathInformationProvider.ADD_SEL_LIB_TO_BP: op= new AddSelectedLibraryOperation(null, provider); break;
+//            case IClasspathInformationProvider.REMOVE_FROM_BP: op= new RemoveFromClasspathOperation(null, provider); break;
+//            case IClasspathInformationProvider.INCLUDE: op= new IncludeOperation(null, provider); break;
+//            case IClasspathInformationProvider.UNINCLUDE: op= new UnincludeOperation(null, provider); break;
+//            case IClasspathInformationProvider.EXCLUDE: op= new ExcludeOperation(null, provider); break;
+//            case IClasspathInformationProvider.UNEXCLUDE: op= new UnexcludeOperation(null, provider); break;
+//            case IClasspathInformationProvider.EDIT_FILTERS: op= new EditFiltersOperation(null, provider); break;
+//            case IClasspathInformationProvider.EDIT_OUTPUT: op= new EditOutputFolderOperation(null, provider); break;
+//            case IClasspathInformationProvider.RESET: op= new ResetOperation(null, provider); break;
+//            case IClasspathInformationProvider.CREATE_OUTPUT: op= new CreateOutputFolderOperation(null, provider); break;
+//            case IClasspathInformationProvider.ADD_LIB_TO_BP: op= new AddLibraryOperation(null, provider); break;
+//        }
+//        
+//        op.run(null);
         
         return returnValue[0];
     }

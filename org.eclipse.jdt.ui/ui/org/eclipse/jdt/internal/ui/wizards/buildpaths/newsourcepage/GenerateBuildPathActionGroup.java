@@ -14,10 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -29,11 +26,8 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchSite;
@@ -43,26 +37,15 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IUpdate;
 
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.actions.AbstractOpenWizardAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.JarImportWizardAction;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.AddSourceFolderWizard;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.EditFilterWizard;
 
 /**
  * Action group that adds the source and generate actions to a part's context
@@ -113,187 +96,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		}
 	}
 	private Action fNoActionAvailable= new NoActionAvailable();
-	   
-    private static abstract class OpenBuildPathWizardAction extends AbstractOpenWizardAction implements ISelectionChangedListener {
-    	
-    	protected IPath getOutputLocation(IJavaProject javaProject) {
-    		try {
-    			return javaProject.getOutputLocation();		
-    		} catch (CoreException e) {
-    			IProject project= javaProject.getProject();
-    			IPath projPath= project.getFullPath();
-    			return projPath.append(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME));
-    		}
-    	}
-    	
-		/**
-		 * {@inheritDoc}
-		 */
-		public void selectionChanged(SelectionChangedEvent event) {
-            ISelection selection = event.getSelection();
-            if (selection instanceof IStructuredSelection) {
-    			setEnabled(selectionChanged((IStructuredSelection) selection));
-            } else {
-    			setEnabled(selectionChanged(StructuredSelection.EMPTY));
-            }
-		}
-
-		//Needs to be public for the operation, will be protected later.
-		public abstract boolean selectionChanged(IStructuredSelection selection);
-    }
-    
-    private abstract static class CreateSourceFolderAction extends OpenBuildPathWizardAction {
-
-		private AddSourceFolderWizard fAddSourceFolderWizard;
-		private IJavaProject fSelectedProject;
-		private final boolean fIsLinked;
-		private final IPath fOutputLocation;
-		
-		public CreateSourceFolderAction(boolean isLinked, IPath outputLocation) {
-			fIsLinked= isLinked;
-			fOutputLocation= outputLocation;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		protected IPath getOutputLocation(IJavaProject javaProject) {
-			if (fOutputLocation != null)
-				return fOutputLocation;
-			
-			return super.getOutputLocation(javaProject);
-		}
-		
-		/**
-		 * {@inheritDoc}
-		 */
-		protected INewWizard createWizard() throws CoreException {
-			CPListElement newEntrie= new CPListElement(fSelectedProject, IClasspathEntry.CPE_SOURCE);
-			CPListElement[] existing= CPListElement.createFromExisting(fSelectedProject);
-			boolean isProjectSrcFolder= CPListElement.isProjectSourceFolder(existing, fSelectedProject);
-			fAddSourceFolderWizard= new AddSourceFolderWizard(existing, newEntrie, getOutputLocation(fSelectedProject), fIsLinked, false, false, isProjectSrcFolder, isProjectSrcFolder);
-			return fAddSourceFolderWizard;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean selectionChanged(IStructuredSelection selection) {
-			if (selection.size() == 1 && selection.getFirstElement() instanceof IJavaProject) {
-				fSelectedProject= (IJavaProject)selection.getFirstElement();
-				return true;
-			}
-			return false;
-		}
-
-		public List getCPListElements() {
-			return fAddSourceFolderWizard.getExistingEntries();
-		}
-    	
-    }
-		
-    public static class CreateLocalSourceFolderAction extends CreateSourceFolderAction {
-    	
-    	public CreateLocalSourceFolderAction() {
-    		this(null);
-		}
-
-		public CreateLocalSourceFolderAction(IPath outputLocation) {
-			super(false, outputLocation);
-			setText(ActionMessages.OpenNewSourceFolderWizardAction_text2); 
-    		setDescription(ActionMessages.OpenNewSourceFolderWizardAction_description); 
-    		setToolTipText(ActionMessages.OpenNewSourceFolderWizardAction_tooltip); 
-    		setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPACKROOT);
-    		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_SOURCEFOLDER_WIZARD_ACTION);
-    	}
-    }
-    
-    public static class CreateLinkedSourceFolderAction extends CreateSourceFolderAction {
-    	
-    	public CreateLinkedSourceFolderAction() {
-    		this(null);
-    	}
-    	
-    	public CreateLinkedSourceFolderAction(IPath outputLocation) {
-    		super(true, outputLocation);
-			setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_label); 
-    		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_tooltip);
-    		setImageDescriptor(JavaPluginImages.DESC_ELCL_ADD_LINKED_SOURCE_TO_BUILDPATH);
-    		setDescription(NewWizardMessages.PackageExplorerActionGroup_FormText_createLinkedFolder);
-    	}
-    }
-    
-    public static class EditFilterAction extends OpenBuildPathWizardAction {
-    	
-    	private IJavaProject fSelectedProject;
-    	private IJavaElement fSelectedElement;
-		private EditFilterWizard fEditFilterWizard;
-    	
-		public EditFilterAction() {
-    		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_label); 
-    		setDescription(NewWizardMessages.PackageExplorerActionGroup_FormText_Edit);
-    		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_tooltip); 
-    		setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH_FILTERS);
-    		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH_FILTERS);
-    	}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		protected INewWizard createWizard() throws CoreException {
-			CPListElement[] existingEntries= CPListElement.createFromExisting(fSelectedProject);
-			CPListElement elementToEdit= findElement(fSelectedElement, existingEntries);
-			fEditFilterWizard= new EditFilterWizard(existingEntries, elementToEdit, getOutputLocation(fSelectedProject));
-			return fEditFilterWizard;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean selectionChanged(IStructuredSelection selection) {
-			if (selection.size() != 1)
-				return false;
-			
-			try {
-				Object element= selection.getFirstElement();
-				if (element instanceof IJavaProject) {
-					IJavaProject project= (IJavaProject)element;	
-					if (ClasspathModifier.isSourceFolder(project)) {
-						fSelectedProject= project;
-						fSelectedElement= (IJavaElement)element;
-						return true;
-					}
-				} else if (element instanceof IPackageFragmentRoot) {
-					IPackageFragmentRoot packageFragmentRoot= ((IPackageFragmentRoot) element);
-					IJavaProject project= packageFragmentRoot.getJavaProject();
-					if (packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE && project != null) {
-						fSelectedProject= project;
-						fSelectedElement= (IJavaElement)element;
-						return true;
-					}
-				}
-			} catch (JavaModelException e) {
-				return false;
-			}
-			return false;
-		}
-
-		private static CPListElement findElement(IJavaElement element, CPListElement[] elements) {
-			IPath path= element.getPath();
-    		for (int i= 0; i < elements.length; i++) {
-				CPListElement cur= elements[i];
-				if (cur.getEntryKind() == IClasspathEntry.CPE_SOURCE && cur.getPath().equals(path)) {
-					return cur;
-				}
-			}
-    		return null;
-		}
-
-		public List getCPListElements() {
-			return fEditFilterWizard.getExistingEntries();
-		}
-    }
-
+	   		
     private class UpdateJarFileAction extends JarImportWizardAction implements IUpdate {
 
 		public UpdateJarFileAction() {
@@ -346,10 +149,10 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
         fSite= site;
         fActions= new ArrayList();
         
-		final CreateLinkedSourceFolderAction addLinkedSourceFolderAction= new CreateLinkedSourceFolderAction();
+		final CreateLinkedSourceFolderAction addLinkedSourceFolderAction= new CreateLinkedSourceFolderAction(site);
 		fActions.add(addLinkedSourceFolderAction);
         
-        final CreateLocalSourceFolderAction addSourceFolderAction= new CreateLocalSourceFolderAction();
+        final CreateSourceFolderAction addSourceFolderAction= new CreateSourceFolderAction(site);
         fActions.add(addSourceFolderAction);
         
 		final AddFolderToBuildpathAction addFolder= new AddFolderToBuildpathAction(site);
@@ -376,7 +179,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		final IncludeToBuildpathAction include= new IncludeToBuildpathAction(site);
 		fActions.add(include);		
 
-		final EditFilterAction editFilterAction= new EditFilterAction();
+		final EditFilterAction editFilterAction= new EditFilterAction(site);
 		fActions.add(editFilterAction);
 			
 		final EditOutputFolderAction editOutput= new EditOutputFolderAction(site);

@@ -36,18 +36,14 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.buildpath.AddSelectedLibraryOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.ExcludeOperation;
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.IPackageExplorerActionListener;
 import org.eclipse.jdt.internal.corext.buildpath.PackageExplorerActionEvent;
-import org.eclipse.jdt.internal.corext.buildpath.RemoveFromClasspathOperation;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierAction;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
@@ -105,7 +101,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     protected void setUp() throws Exception {
         fProject= createProject();
         fSelection= new ArrayList();
-        fActionGroup= new DialogPackageExplorerActionGroup(this, null, null);
+        fActionGroup= new DialogPackageExplorerActionGroup(null, null, null, null, null);
         assertFalse(fProject.isOnClasspath(fProject.getUnderlyingResource()));
     }
 
@@ -992,58 +988,58 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         // should have the option to be removed and the reset all operation additionally becomes 
         // available as we changed the project.
         final IPackageFragmentRoot[] addedZipArchive= {null};
-        AddSelectedLibraryOperation operation= new AddSelectedLibraryOperation(null, new IClasspathInformationProvider() {
-
-            public void handleResult(List resultElements, CoreException exception, int operationType) {
-                addedZipArchive[0]= (IPackageFragmentRoot)resultElements.get(0);
-            }
-
-            public IStructuredSelection getSelection() {
-                List list= new ArrayList();
-                list.add(fItems[ZIP]); 
-                return new StructuredSelection(list);
-            }
-
-            public IJavaProject getJavaProject() {
-                return fProject;
-            }
-
-            public OutputFolderQuery getOutputFolderQuery() throws JavaModelException {
-                return null;
-            }
-
-            public IInclusionExclusionQuery getInclusionExclusionQuery() throws JavaModelException {
-                return null;
-            }
-
-            public IOutputLocationQuery getOutputLocationQuery() throws JavaModelException {
-                return null;
-            }
-
-            public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
-                return null;
-            }
-            
-            public IAddArchivesQuery getExternalArchivesQuery() throws JavaModelException {
-                return null;
-            }
-
-            public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException {
-                return null;
-            }
-
-            public void deleteCreatedResources() {
-            }
-
-			public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
-				return null;
-			}
-
-			public ICreateFolderQuery getCreateFolderQuery() throws JavaModelException {
-				return null;
-			}
-        });
-        operation.run(null);
+//        AddSelectedLibraryOperation operation= new AddSelectedLibraryOperation(null, new IClasspathInformationProvider() {
+//
+//            public void handleResult(List resultElements, CoreException exception, int operationType) {
+//                addedZipArchive[0]= (IPackageFragmentRoot)resultElements.get(0);
+//            }
+//
+//            public IStructuredSelection getSelection() {
+//                List list= new ArrayList();
+//                list.add(fItems[ZIP]); 
+//                return new StructuredSelection(list);
+//            }
+//
+//            public IJavaProject getJavaProject() {
+//                return fProject;
+//            }
+//
+//            public OutputFolderQuery getOutputFolderQuery() throws JavaModelException {
+//                return null;
+//            }
+//
+//            public IInclusionExclusionQuery getInclusionExclusionQuery() throws JavaModelException {
+//                return null;
+//            }
+//
+//            public IOutputLocationQuery getOutputLocationQuery() throws JavaModelException {
+//                return null;
+//            }
+//
+//            public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
+//                return null;
+//            }
+//            
+//            public IAddArchivesQuery getExternalArchivesQuery() throws JavaModelException {
+//                return null;
+//            }
+//
+//            public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException {
+//                return null;
+//            }
+//
+//            public void deleteCreatedResources() {
+//            }
+//
+//			public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
+//				return null;
+//			}
+//
+//			public ICreateFolderQuery getCreateFolderQuery() throws JavaModelException {
+//				return null;
+//			}
+//        });
+//        operation.run(null);
         
         fSelection.add(addedZipArchive[0]);
         fSelection.add(fItems[JAR]);
@@ -1095,118 +1091,118 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         ICompilationUnit cuA= createICompilationUnit("A", pack1);
         final IResource excludedElements[]= {null, null}; 
         final ICompilationUnit cuB= createICompilationUnit("B", pack1);
-        ExcludeOperation op= new ExcludeOperation(null, new IClasspathInformationProvider() {
-
-            public void handleResult(List resultElements, CoreException exception, int operationType) {
-                excludedElements[0]= (IFile)resultElements.get(0);
-                excludedElements[1]= (IFolder)resultElements.get(1);
-            }
-
-            public IStructuredSelection getSelection() {
-                List list= new ArrayList();
-                list.add(cuB); // exclude compilation unit B
-                list.add(pack2); // exclude pack2
-                return new StructuredSelection(list);
-            }
-
-            public IJavaProject getJavaProject() {
-                return fProject;
-            }
-
-            public OutputFolderQuery getOutputFolderQuery() throws JavaModelException {
-                return null;
-            }
-
-            public IInclusionExclusionQuery getInclusionExclusionQuery() throws JavaModelException {
-                return null;
-            }
-
-            public IOutputLocationQuery getOutputLocationQuery() throws JavaModelException {
-                return null;
-            }
-
-            public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
-                return null;
-            }
-            
-            public IAddArchivesQuery getExternalArchivesQuery() throws JavaModelException {
-                return null;
-            }
-
-            public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException {
-                return null;
-            }
-
-            public void deleteCreatedResources() {
-            }
-
-			public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
-				return null;
-			}
-
-			public ICreateFolderQuery getCreateFolderQuery() throws JavaModelException {
-				return null;
-			}
-            
-        });
-        op.run(null);
+//        ExcludeOperation op= new ExcludeOperation(null, new IClasspathInformationProvider() {
+//
+//            public void handleResult(List resultElements, CoreException exception, int operationType) {
+//                excludedElements[0]= (IFile)resultElements.get(0);
+//                excludedElements[1]= (IFolder)resultElements.get(1);
+//            }
+//
+//            public IStructuredSelection getSelection() {
+//                List list= new ArrayList();
+//                list.add(cuB); // exclude compilation unit B
+//                list.add(pack2); // exclude pack2
+//                return new StructuredSelection(list);
+//            }
+//
+//            public IJavaProject getJavaProject() {
+//                return fProject;
+//            }
+//
+//            public OutputFolderQuery getOutputFolderQuery() throws JavaModelException {
+//                return null;
+//            }
+//
+//            public IInclusionExclusionQuery getInclusionExclusionQuery() throws JavaModelException {
+//                return null;
+//            }
+//
+//            public IOutputLocationQuery getOutputLocationQuery() throws JavaModelException {
+//                return null;
+//            }
+//
+//            public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
+//                return null;
+//            }
+//            
+//            public IAddArchivesQuery getExternalArchivesQuery() throws JavaModelException {
+//                return null;
+//            }
+//
+//            public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException {
+//                return null;
+//            }
+//
+//            public void deleteCreatedResources() {
+//            }
+//
+//			public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
+//				return null;
+//			}
+//
+//			public ICreateFolderQuery getCreateFolderQuery() throws JavaModelException {
+//				return null;
+//			}
+//            
+//        });
+//        op.run(null);
         IFile file= fProject.getProject().getFile(filePath);
         file.create(null, false, null);
         
         final IFile[] removedZipFile= {null};
-        RemoveFromClasspathOperation operation= new RemoveFromClasspathOperation(null, new IClasspathInformationProvider() {
-
-            public void handleResult(List resultElements, CoreException exception, int operationType) {
-                removedZipFile[0]= (IFile)resultElements.get(0);
-            }
-
-            public IStructuredSelection getSelection() {
-                List list= new ArrayList();
-                list.add(zipRoot); 
-                return new StructuredSelection(list);
-            }
-
-            public IJavaProject getJavaProject() {
-                return fProject;
-            }
-
-            public OutputFolderQuery getOutputFolderQuery() throws JavaModelException {
-                return null;
-            }
-
-            public IInclusionExclusionQuery getInclusionExclusionQuery() throws JavaModelException {
-                return null;
-            }
-
-            public IOutputLocationQuery getOutputLocationQuery() throws JavaModelException {
-                return null;
-            }
-
-            public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
-                return null;
-            }
-            
-            public IAddArchivesQuery getExternalArchivesQuery() throws JavaModelException {
-                return null;
-            }
-
-            public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException {
-                return null;
-            }
-
-            public void deleteCreatedResources() {
-            }
-
-			public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
-				return null;
-			}
-
-			public ICreateFolderQuery getCreateFolderQuery() throws JavaModelException {
-				return null;
-			}
-            
-        });
-        operation.run(null);
+//        RemoveFromClasspathOperation operation= new RemoveFromClasspathOperation(null, new IClasspathInformationProvider() {
+//
+//            public void handleResult(List resultElements, CoreException exception, int operationType) {
+//                removedZipFile[0]= (IFile)resultElements.get(0);
+//            }
+//
+//            public IStructuredSelection getSelection() {
+//                List list= new ArrayList();
+//                list.add(zipRoot); 
+//                return new StructuredSelection(list);
+//            }
+//
+//            public IJavaProject getJavaProject() {
+//                return fProject;
+//            }
+//
+//            public OutputFolderQuery getOutputFolderQuery() throws JavaModelException {
+//                return null;
+//            }
+//
+//            public IInclusionExclusionQuery getInclusionExclusionQuery() throws JavaModelException {
+//                return null;
+//            }
+//
+//            public IOutputLocationQuery getOutputLocationQuery() throws JavaModelException {
+//                return null;
+//            }
+//
+//            public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
+//                return null;
+//            }
+//            
+//            public IAddArchivesQuery getExternalArchivesQuery() throws JavaModelException {
+//                return null;
+//            }
+//
+//            public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException {
+//                return null;
+//            }
+//
+//            public void deleteCreatedResources() {
+//            }
+//
+//			public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
+//				return null;
+//			}
+//
+//			public ICreateFolderQuery getCreateFolderQuery() throws JavaModelException {
+//				return null;
+//			}
+//            
+//        });
+//        operation.run(null);
         removedZipFile[0].create(null, false, null); // create the zip file
         
         fItems= new Object[11];
@@ -1225,9 +1221,9 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         return fProject;
     }
     
-    protected int getID(ClasspathModifierAction action) {
-        return Integer.parseInt(action.getId());
-    }
+//    protected int getID(ClasspathModifierAction action) {
+//        return Integer.parseInt(action.getId());
+//    }
     
     protected void addToSelection(int[] indices) {
         for (int i= 0; i < indices.length; i++) {
@@ -1246,13 +1242,13 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     protected void addListener(final int[] expectedValues) {
         fListener= new IPackageExplorerActionListener() {
             public void handlePackageExplorerActionEvent(PackageExplorerActionEvent event) {
-                ClasspathModifierAction[] actions= event.getEnabledActions();
-                if (actions.length != expectedValues.length) {
-                	assertTrue(false);
-                }
-                for(int i= 0; i < actions.length; i++) {
-                    assertTrue(getID(actions[i]) == expectedValues[i]);
-                }
+//                ClasspathModifierAction[] actions= event.getEnabledActions();
+//                if (actions.length != expectedValues.length) {
+//                	assertTrue(false);
+//                }
+//                for(int i= 0; i < actions.length; i++) {
+//                    assertTrue(getID(actions[i]) == expectedValues[i]);
+//                }
             }
         };
         fActionGroup.addListener(fListener);
