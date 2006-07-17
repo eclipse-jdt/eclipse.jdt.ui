@@ -14,6 +14,8 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.jdt.core.IJavaProject;
+
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
@@ -23,8 +25,8 @@ public class ResetAllOutputFoldersAction2 extends ResetAllOutputFoldersAction im
 
 	private final HintTextGroup fInformationProvider;
 
-	public ResetAllOutputFoldersAction2(IClasspathModifierListener listener, HintTextGroup provider, IRunnableContext context) {
-		super(null, context, listener, provider.getJavaProject());
+	public ResetAllOutputFoldersAction2(IClasspathModifierListener listener, HintTextGroup provider, IRunnableContext context, IJavaProject javaProject) {
+		super(null, context, listener, javaProject);
 				
 		fInformationProvider= provider;
 	}
@@ -41,13 +43,6 @@ public class ResetAllOutputFoldersAction2 extends ResetAllOutputFoldersAction im
 	 */
 	public String getDescription(int type) {
 		return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_ResetAllOutputFolders;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getName() {
-		return NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip;
 	}
 
 	/**

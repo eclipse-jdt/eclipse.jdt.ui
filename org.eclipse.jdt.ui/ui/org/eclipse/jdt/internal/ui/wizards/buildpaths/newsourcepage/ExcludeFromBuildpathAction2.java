@@ -60,13 +60,6 @@ public class ExcludeFromBuildpathAction2 extends ExcludeFromBuildpathAction impl
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getName() {
-		return NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_tooltip;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public int getTypeId() {
 		return IClasspathInformationProvider.EXCLUDE;
 	}

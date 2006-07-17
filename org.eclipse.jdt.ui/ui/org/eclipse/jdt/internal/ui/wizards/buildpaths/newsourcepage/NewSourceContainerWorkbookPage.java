@@ -26,6 +26,7 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -185,7 +186,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
             public void dialogFieldChanged(DialogField field) {
                 boolean isUseFolders= fUseFolderOutputs.isSelected();
                 if (isUseFolders) {
-                	ResetAllOutputFoldersAction2 action= new ResetAllOutputFoldersAction2(NewSourceContainerWorkbookPage.this, fHintTextGroup, fContext);
+                	ResetAllOutputFoldersAction2 action= new ResetAllOutputFoldersAction2(NewSourceContainerWorkbookPage.this, fHintTextGroup, fContext, fJavaProject);
                 	action.run();
                 }
 				fPackageExplorer.showOutputFolders(isUseFolders);
@@ -287,9 +288,9 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     public List getSelection() {
         List selectedList= new ArrayList();
         
-        IJavaProject project= fHintTextGroup.getJavaProject();
+        IJavaProject project= fJavaProject;
         try {
-            List list= fHintTextGroup.getSelection().toList();
+            List list= ((StructuredSelection)fPackageExplorer.getSelection()).toList();
             List existingEntries= ClasspathModifier.getExistingEntries(project);
         
             for(int i= 0; i < list.size(); i++) {

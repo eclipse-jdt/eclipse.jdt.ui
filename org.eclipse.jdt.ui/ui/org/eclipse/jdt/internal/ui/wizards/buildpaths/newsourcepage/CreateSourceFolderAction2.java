@@ -46,13 +46,6 @@ public class CreateSourceFolderAction2 extends CreateSourceFolderAction implemen
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getName() {
-		return NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_tooltip;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public int getTypeId() {
 		return IClasspathInformationProvider.CREATE_FOLDER;
 	}

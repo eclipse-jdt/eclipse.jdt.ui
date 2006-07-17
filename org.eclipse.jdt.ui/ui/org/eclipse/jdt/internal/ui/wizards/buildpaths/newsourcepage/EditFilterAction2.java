@@ -52,13 +52,6 @@ public class EditFilterAction2 extends EditFilterAction implements IClasspathMod
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getName() {
-		return NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_tooltip;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public int getTypeId() {
 		return IClasspathInformationProvider.EDIT_FILTERS;
 	}

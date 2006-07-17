@@ -58,13 +58,6 @@ public class IncludeToBuildpathAction2 extends IncludeToBuildpathAction implemen
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getName() {
-		return NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_tooltip;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public int getTypeId() {
 		return IClasspathInformationProvider.UNEXCLUDE;
 	}

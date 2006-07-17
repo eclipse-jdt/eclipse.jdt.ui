@@ -44,13 +44,6 @@ public class EditOutputFolderAction2 extends EditOutputFolderAction implements I
 	public String getDescription(int type) {
 		return NewWizardMessages.PackageExplorerActionGroup_FormText_EditOutputFolder;
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getName() {
-		return NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip;
-	}
 	
 	/**
 	 * {@inheritDoc}

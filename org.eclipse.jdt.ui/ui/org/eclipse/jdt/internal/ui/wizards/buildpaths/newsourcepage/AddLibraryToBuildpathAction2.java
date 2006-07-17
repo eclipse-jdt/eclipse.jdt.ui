@@ -47,13 +47,6 @@ public class AddLibraryToBuildpathAction2 extends AddLibraryToBuildpathAction im
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getName() {
-		return NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_tooltip;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public int getTypeId() {
 		return IClasspathInformationProvider.ADD_LIB_TO_BP;
 	}

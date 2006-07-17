@@ -34,7 +34,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -48,7 +47,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.IPackageExplorerActionListener;
 import org.eclipse.jdt.internal.corext.buildpath.PackageExplorerActionEvent;
@@ -60,14 +58,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ICreateFolderQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IRemoveLinkedFolderQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup.DialogExplorerActionContext;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
@@ -81,7 +71,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
  * If selection changes, then the <code>HintTextGroup</code> will be 
  * notified through the <code>IPackageExplorerActionListener</code> interface. 
  */
-public final class HintTextGroup implements IClasspathInformationProvider, IPackageExplorerActionListener {
+public final class HintTextGroup implements IPackageExplorerActionListener {
 	
 	/**
 	 * Order of actions in the group. First is first.
@@ -241,68 +231,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
             
         });
     }
-    
-    /**
-     * Returns the current selection which is a list of 
-     * elements in a tree.
-     * 
-     * @return the current selection
-     * @see IClasspathInformationProvider#getSelection()
-     */
-    public IStructuredSelection getSelection() {
-        return (IStructuredSelection)fPackageExplorer.getSelection();
-    }
-    
-    /**
-     * Set the selection for the <code>DialogPackageExplorer</code>
-     * 
-     * @param elements a list of elements to be selected
-     * 
-     * @see DialogPackageExplorer#setSelection(List)
-     */
-    public void setSelection(List elements) {
-        fPackageExplorer.setSelection(elements);
-    }
-    
-    /**
-     * Returns the Java project.
-     * 
-     * @see IClasspathInformationProvider#getJavaProject()
-     */
-    public IJavaProject getJavaProject() {
-        return fCurrJProject;
-    }
-    
-    /**
-     * Handle the result of an action. Note that first, the exception has to be 
-     * checked and computation can only continue if the exception is <code>null</code>.
-     * 
-     * @see IClasspathInformationProvider#handleResult(List, CoreException, int)
-     */
-    public void handleResult(List resultElements, CoreException exception, int actionType) {
-        if (exception != null) {
-            ExceptionHandler.handle(exception, getShell(), Messages.format(NewWizardMessages.HintTextGroup_Exception_Title_refresh, fActionGroup.getAction(actionType).getName()), exception.getLocalizedMessage()); 
-            return;
-        }
         
-        switch(actionType) {
-            case CREATE_FOLDER: handleFolderCreation(resultElements); break;
-            case CREATE_LINK: handleFolderCreation(resultElements); break;
-            case EDIT_FILTERS: defaultHandle(resultElements, false); break;
-            case ADD_SEL_SF_TO_BP: case ADD_SEL_LIB_TO_BP: case ADD_JAR_TO_BP: case ADD_LIB_TO_BP:	
-            	handleAddToCP(resultElements); break;
-            case REMOVE_FROM_BP: handleRemoveFromBP(resultElements, false); break;
-            case INCLUDE: defaultHandle(resultElements, true); break;
-            case EXCLUDE: defaultHandle(resultElements, false); break;
-            case UNINCLUDE: defaultHandle(resultElements, false); break;
-            case UNEXCLUDE: defaultHandle(resultElements, true); break;
-            case RESET: defaultHandle(resultElements, false); break;
-            case EDIT_OUTPUT: handleEditOutputFolder(resultElements); break;
-            case RESET_ALL: handleResetAll(); break;
-            default: break;
-        }
-    }
-    
     /**
      * Default result handle. This includes:
      * <li>Set the selection of the <code>fPackageExplorer</code>
@@ -439,7 +368,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
     void handleResetAll() {
         List list= new ArrayList();
         list.add(fCurrJProject);
-        setSelection(list);
+        fPackageExplorer.setSelection(list);
     }
     
     /**
@@ -479,89 +408,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
             ExceptionHandler.handle(exception, getShell(), NewWizardMessages.HintTextGroup_Exception_Title_output, exception.getMessage()); 
         }
     }
-    
-    /**
-     * Return an <code>IOutputFolderQuery</code>.
-     * 
-     * @see ClasspathModifierQueries#getDefaultFolderQuery(Shell, IPath)
-     * @see IClasspathInformationProvider#getOutputFolderQuery()
-     */
-    public OutputFolderQuery getOutputFolderQuery() {
-        return ClasspathModifierQueries.getDefaultFolderQuery(getShell(), new Path(fOutputLocationField.getText()));
-
-    }
-
-    /**
-     * Return an <code>IInclusionExclusionQuery</code>.
-     * 
-     * @see ClasspathModifierQueries#getDefaultInclusionExclusionQuery(Shell)
-     * @see IClasspathInformationProvider#getInclusionExclusionQuery()
-     */
-    public IInclusionExclusionQuery getInclusionExclusionQuery() {
-        return ClasspathModifierQueries.getDefaultInclusionExclusionQuery(getShell());
-    }
-
-    /**
-     * Return an <code>IOutputLocationQuery</code>.
-     * @throws JavaModelException 
-     * 
-     * @see ClasspathModifierQueries#getDefaultOutputLocationQuery(Shell, IPath, List)
-     * @see IClasspathInformationProvider#getOutputLocationQuery()
-     */
-    public IOutputLocationQuery getOutputLocationQuery() throws JavaModelException {
-        List classpathEntries= ClasspathModifier.getExistingEntries(fCurrJProject);
-        return ClasspathModifierQueries.getDefaultOutputLocationQuery(getShell(), new Path(fOutputLocationField.getText()), classpathEntries);
-    }
-
-    /**
-     * Return an <code>ILinkToQuery</code>.
-     * 
-     * @see ClasspathModifierQueries#getDefaultLinkQuery(Shell, IJavaProject, IPath)
-     * @see IClasspathInformationProvider#getLinkFolderQuery()
-     */
-    public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
-        return ClasspathModifierQueries.getDefaultLinkQuery(getShell(), fCurrJProject, new Path(fOutputLocationField.getText()));
-    }
-    
-    /**
-     * Return an <code>IFolderCreationQuery</code>.
-     * 
-     * @see ClasspathModifierQueries#getDefaultCreateFolderQuery(Shell, IJavaProject)
-     * @see IClasspathInformationProvider#getCreateFolderQuery()
-     */
-	public ICreateFolderQuery getCreateFolderQuery() throws JavaModelException {
-		return ClasspathModifierQueries.getDefaultCreateFolderQuery(getShell(), fCurrJProject);
-	}
-
-	/**
-	 * Get a query to create a linked source folder.
-	 * 
-	 * @see org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider
-	 */
-	public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
-		return ClasspathModifierQueries.getDefaultRemoveLinkedFolderQuery(getShell());
-	}
-
-    /**
-     * Return an <code>IAddArchivesQuery</code>.
-     * 
-     * @see ClasspathModifierQueries#getDefaultArchivesQuery(Shell)
-     * @see IClasspathInformationProvider#getExternalArchivesQuery()
-     */
-    public IAddArchivesQuery getExternalArchivesQuery() throws JavaModelException {
-        return ClasspathModifierQueries.getDefaultArchivesQuery(getShell());
-    }
-    
-    /**
-     * Return an <code>IAddLibrariesQuery</code>.
-     * 
-     * @see ClasspathModifierQueries#getDefaultLibrariesQuery(Shell)
-     * @see IClasspathInformationProvider#getLibrariesQuery()
-     */
-    public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException {
-        return ClasspathModifierQueries.getDefaultLibrariesQuery(getShell());
-    }
-    
+        
     /**
      * Delete all newly created folders and files.
      * Resources that existed before will not be 

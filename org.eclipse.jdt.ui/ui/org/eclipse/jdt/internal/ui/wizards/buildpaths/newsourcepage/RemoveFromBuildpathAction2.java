@@ -59,13 +59,6 @@ public class RemoveFromBuildpathAction2 extends RemoveFromBuildpathAction implem
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getName() {
-		return NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public String getId() {
 	    return Integer.toString(getTypeId());
 	}

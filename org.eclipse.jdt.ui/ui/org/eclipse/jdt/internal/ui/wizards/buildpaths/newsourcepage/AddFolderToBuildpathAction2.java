@@ -77,15 +77,6 @@ public class AddFolderToBuildpathAction2 extends AddFolderToBuildpathAction impl
     public String getId() {
         return Integer.toString(getTypeId());
     }
-    
-    /**
-     * Get the action's name.
-     * 
-     * @return a human readable name for the operation/action executed
-     */
-    public String getName() {
-        return NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_tooltip;
-    }
 
     /**
      * {@inheritDoc}

@@ -46,13 +46,6 @@ public class AddArchiveToBuildpathAction2 extends AddArchiveToBuildpathAction im
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getName() {
-		return NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddJarCP_tooltip;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public int getTypeId() {
 		return IClasspathInformationProvider.ADD_LIB_TO_BP;
 	}

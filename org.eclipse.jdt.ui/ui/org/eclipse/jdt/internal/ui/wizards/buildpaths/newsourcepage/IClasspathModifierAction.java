@@ -37,11 +37,4 @@ public interface IClasspathModifierAction extends IAction {
 
 	public int getTypeId();
 
-	/**
-	 * Get the action's name.
-	 * 
-	 * @return a human readable name for the operation/action executed
-	 */
-	public String getName();
-
 }

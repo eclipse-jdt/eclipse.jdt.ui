@@ -153,13 +153,6 @@ public class ResetAllAction extends BuildpathModifierAction implements IClasspat
 	/**
      * {@inheritDoc}
      */
-    public String getName() {
-	    return NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip;
-    }
-
-	/**
-     * {@inheritDoc}
-     */
     public int getTypeId() {
 	    return IClasspathInformationProvider.RESET_ALL;
     }

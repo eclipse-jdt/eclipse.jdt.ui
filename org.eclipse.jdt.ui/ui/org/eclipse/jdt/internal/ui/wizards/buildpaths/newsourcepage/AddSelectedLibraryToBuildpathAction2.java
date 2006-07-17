@@ -56,13 +56,6 @@ public class AddSelectedLibraryToBuildpathAction2 extends AddSelectedLibraryToBu
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getName() {
-		return NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_tooltip;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public int getTypeId() {
 		return IClasspathInformationProvider.ADD_SEL_LIB_TO_BP;
 	}

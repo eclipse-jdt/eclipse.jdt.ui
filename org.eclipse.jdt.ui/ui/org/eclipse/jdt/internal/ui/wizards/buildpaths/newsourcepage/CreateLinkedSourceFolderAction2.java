@@ -45,13 +45,6 @@ public class CreateLinkedSourceFolderAction2 extends CreateLinkedSourceFolderAct
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getName() {
-		return NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_tooltip;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public int getTypeId() {
 		return IClasspathInformationProvider.CREATE_LINK;
 	}
