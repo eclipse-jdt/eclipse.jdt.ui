@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.search.FieldReferenceMatch;
+import org.eclipse.jdt.core.search.LocalVariableReferenceMatch;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchRequestor;
@@ -35,9 +36,13 @@ public class NewSearchResultCollector extends SearchRequestor {
 			boolean isWriteAccess= false;
 			boolean isReadAccess= false;
 			if (match instanceof FieldReferenceMatch) {
-				FieldReferenceMatch fieldRef= ((FieldReferenceMatch)match);
+				FieldReferenceMatch fieldRef= ((FieldReferenceMatch) match);
 				isWriteAccess= fieldRef.isWriteAccess();
 				isReadAccess= fieldRef.isReadAccess();
+			} else if (match instanceof LocalVariableReferenceMatch) {
+				LocalVariableReferenceMatch localVarRef= ((LocalVariableReferenceMatch) match);
+				isWriteAccess= localVarRef.isWriteAccess();
+				isReadAccess= localVarRef.isReadAccess();
 			}
 			fSearch.addMatch(new JavaElementMatch(enclosingElement, match.getRule(), match.getOffset(), match.getLength(), match.getAccuracy(), isReadAccess, isWriteAccess, match.isInsideDocComment()));
 		}
@@ -54,6 +59,5 @@ public class NewSearchResultCollector extends SearchRequestor {
 
 	public void exitParticipant(SearchParticipant participant) {
 	}
-
 
 }

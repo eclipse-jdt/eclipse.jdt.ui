@@ -14,6 +14,8 @@ import java.util.StringTokenizer;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -191,12 +193,13 @@ class ImportFilter extends MatchFilter {
 	}
 }
 
-abstract class FieldFilter extends MatchFilter {
+abstract class VariableFilter extends MatchFilter {
 	public boolean isApplicable(JavaSearchQuery query) {
 		QuerySpecification spec= query.getSpecification();
 		if (spec instanceof ElementQuerySpecification) {
 			ElementQuerySpecification elementSpec= (ElementQuerySpecification) spec;
-			return elementSpec.getElement() instanceof IField;
+			IJavaElement element= elementSpec.getElement();
+			return element instanceof IField || element instanceof ILocalVariable;
 		} else if (spec instanceof PatternQuerySpecification) {
 			PatternQuerySpecification patternSpec= (PatternQuerySpecification) spec;
 			return patternSpec.getSearchFor() == IJavaSearchConstants.FIELD;
@@ -206,7 +209,7 @@ abstract class FieldFilter extends MatchFilter {
 
 }
 
-class WriteFilter extends FieldFilter {
+class WriteFilter extends VariableFilter {
 	public boolean filters(JavaElementMatch match) {
 		return match.isWriteAccess() && !match.isReadAccess();
 	}
@@ -224,7 +227,7 @@ class WriteFilter extends FieldFilter {
 	}
 }
 
-class ReadFilter extends FieldFilter {
+class ReadFilter extends VariableFilter {
 	public boolean filters(JavaElementMatch match) {
 		return match.isReadAccess() && !match.isWriteAccess();
 	}
