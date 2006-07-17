@@ -231,7 +231,6 @@ public class CallHierarchyUI {
         try {
             CallHierarchyViewPart result= (CallHierarchyViewPart)page.showView(CallHierarchyViewPart.ID_CALL_HIERARCHY);
             result.setMethod((IMethod)input);
-            JavaUI.openInEditor(input, false, true);
             return result;
         } catch (CoreException e) {
             ExceptionHandler.handle(e, window.getShell(), 
