@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
@@ -266,9 +267,12 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 					if (ClasspathModifier.isSourceFolder((IJavaProject)element))
 						return false;
 				} else if (element instanceof IPackageFragment) {
-					int type= DialogPackageExplorerActionGroup.getType(element, ((IPackageFragment)element).getJavaProject());
-					if (type != DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT && type != DialogPackageExplorerActionGroup.INCLUDED_FOLDER)
-						return false;
+					IPackageFragment fragment= (IPackageFragment)element;
+					if (ClasspathModifier.isDefaultFragment(fragment))
+	                    return false;
+	                
+	                if (((IPackageFragmentRoot)fragment.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT)).isArchive())
+	                    return false;
 				} else if (element instanceof IFolder) {
 					IProject project= ((IFolder)element).getProject();
 					IJavaProject javaProject= JavaCore.create(project);

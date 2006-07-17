@@ -152,22 +152,22 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 	protected boolean canHandle(IStructuredSelection elements) {
         if (elements.size() == 0)
             return false;
-        try {
-	        for (Iterator iter= elements.iterator(); iter.hasNext();) {
-				Object element= iter.next();
-				if (element instanceof IPackageFragment) {
-					int type= DialogPackageExplorerActionGroup.getType(element, ((IPackageFragment)element).getJavaProject());
-					if (type != DialogPackageExplorerActionGroup.INCLUDED_FOLDER && type != DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT)
-						return false;
-				} else if (element instanceof ICompilationUnit) {
-				} else {
-					return false;
-				}	
-			}
-			return true;
-        } catch (CoreException e) {
-        }
-    	return false;
+        
+        for (Iterator iter= elements.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			if (element instanceof IPackageFragment) {
+				IPackageFragment fragment= (IPackageFragment)element;
+				if (ClasspathModifier.isDefaultFragment(fragment))
+                    return false;
+                
+                if (((IPackageFragmentRoot)fragment.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT)).isArchive())
+                    return false;
+			} else if (element instanceof ICompilationUnit) {
+			} else {
+				return false;
+			}	
+		}
+		return true;
 	}
 
 }
