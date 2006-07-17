@@ -57,7 +57,7 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 	}
 	
 	public ExcludeFromBuildpathAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(site);
+		super(site, BuildpathModifierAction.EXCLUDE);
 		
 		fContext= context;
 		fListener= listener;

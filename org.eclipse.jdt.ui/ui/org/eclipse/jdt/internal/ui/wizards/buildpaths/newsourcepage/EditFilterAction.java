@@ -54,7 +54,7 @@ public class EditFilterAction extends BuildpathModifierAction {
 	}
 	
 	protected EditFilterAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(site);
+		super(site, BuildpathModifierAction.EDIT_FILTERS);
 		
 		fListener= listener;
 	

@@ -12,18 +12,4 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import org.eclipse.jface.action.IAction;
 
-public interface IClasspathModifierAction extends IAction {
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.action.Action#run()
-	 */
-	public void run();
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.action.Action#getId()
-	 */
-	public String getId();
-
-	public int getTypeId();
-
-}
+public interface IClasspathModifierAction extends IAction {}

@@ -162,17 +162,6 @@ public class ClasspathModifierDropDownAction extends Action implements IClasspat
 	/**
      * {@inheritDoc}
      */
-    public int getTypeId() {
-	    return getFirstAction().getTypeId();
-    }
-    
-    private IClasspathModifierAction getFirstAction() {
-	    return (IClasspathModifierAction)fActions.get(0);
-    }
-
-	/**
-     * {@inheritDoc}
-     */
     public void selectionChanged(SelectionChangedEvent event) {
     	for (Iterator iterator= fActions.iterator(); iterator.hasNext();) {
 	        IClasspathModifierAction action= (IClasspathModifierAction)iterator.next();

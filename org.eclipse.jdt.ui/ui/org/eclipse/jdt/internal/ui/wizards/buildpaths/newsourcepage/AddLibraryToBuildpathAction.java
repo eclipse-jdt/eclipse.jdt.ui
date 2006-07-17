@@ -62,7 +62,7 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 	}
 
 	public AddLibraryToBuildpathAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(site);
+		super(site, BuildpathModifierAction.ADD_LIB_TO_BP);
 
 		fListener= listener;
 

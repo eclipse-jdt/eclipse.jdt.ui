@@ -14,7 +14,6 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 public class ExcludeFromBuildpathAction2 extends ExcludeFromBuildpathAction implements IClasspathModifierAction {
@@ -33,19 +32,4 @@ public class ExcludeFromBuildpathAction2 extends ExcludeFromBuildpathAction impl
 	protected void selectAndReveal(ISelection selection) {
 	    fProvider.defaultHandle(((StructuredSelection)selection).toList(), false);
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public int getTypeId() {
-		return IClasspathInformationProvider.EXCLUDE;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getId() {
-	    return Integer.toString(getTypeId());
-	}
-
 }

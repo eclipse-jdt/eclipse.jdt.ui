@@ -62,7 +62,7 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 	}
 
 	public RemoveFromBuildpathAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener, ImageDescriptor image) {
-		super(site);
+		super(site, BuildpathModifierAction.REMOVE_FROM_BP);
 		
 		fContext= context;
 		fListener= listener;

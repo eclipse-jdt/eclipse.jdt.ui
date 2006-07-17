@@ -14,7 +14,6 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 public class CreateSourceFolderAction2 extends CreateSourceFolderAction implements IClasspathModifierAction {
@@ -33,19 +32,4 @@ public class CreateSourceFolderAction2 extends CreateSourceFolderAction implemen
 	protected void selectAndReveal(ISelection selection) {
 	    fProvider.handleFolderCreation(((StructuredSelection)selection).toList());
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public int getTypeId() {
-		return IClasspathInformationProvider.CREATE_FOLDER;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getId() {
-	    return Integer.toString(getTypeId());
-	}
-
 }

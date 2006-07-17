@@ -47,7 +47,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.IPackageExplorerActionListener;
 import org.eclipse.jdt.internal.corext.buildpath.PackageExplorerActionEvent;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -78,20 +77,20 @@ public final class HintTextGroup implements IPackageExplorerActionListener {
 	 * Only actions in ACTION_ORDER are part of the group.
 	 */
 	private final static int[] ACTION_ORDER= {
-		IClasspathInformationProvider.CREATE_FOLDER,
-		IClasspathInformationProvider.CREATE_LINK,
-		IClasspathInformationProvider.EDIT_FILTERS,
-		IClasspathInformationProvider.EXCLUDE,
-		IClasspathInformationProvider.INCLUDE,
-		IClasspathInformationProvider.UNEXCLUDE,
-		IClasspathInformationProvider.UNINCLUDE,
-		IClasspathInformationProvider.EDIT_OUTPUT,
-		IClasspathInformationProvider.CREATE_OUTPUT,
-		IClasspathInformationProvider.ADD_SEL_SF_TO_BP,
-		IClasspathInformationProvider.REMOVE_FROM_BP,
-		IClasspathInformationProvider.ADD_SEL_LIB_TO_BP,
-		IClasspathInformationProvider.ADD_LIB_TO_BP,
-		IClasspathInformationProvider.ADD_JAR_TO_BP
+		BuildpathModifierAction.CREATE_FOLDER,
+		BuildpathModifierAction.CREATE_LINK,
+		BuildpathModifierAction.EDIT_FILTERS,
+		BuildpathModifierAction.EXCLUDE,
+		BuildpathModifierAction.INCLUDE,
+		BuildpathModifierAction.UNEXCLUDE,
+		BuildpathModifierAction.UNINCLUDE,
+		BuildpathModifierAction.EDIT_OUTPUT,
+		BuildpathModifierAction.CREATE_OUTPUT,
+		BuildpathModifierAction.ADD_SEL_SF_TO_BP,
+		BuildpathModifierAction.REMOVE_FROM_BP,
+		BuildpathModifierAction.ADD_SEL_LIB_TO_BP,
+		BuildpathModifierAction.ADD_LIB_TO_BP,
+		BuildpathModifierAction.ADD_JAR_TO_BP
 	};
     
     private StringDialogField fOutputLocationField;
@@ -153,7 +152,13 @@ public final class HintTextGroup implements IPackageExplorerActionListener {
         fOldOutputLocation= fOutputLocationField.getText();
         
         try {
-	        ((ResetAllAction)fActionGroup.getAction(IClasspathInformationProvider.RESET_ALL)).setBreakPoint(fCurrJProject);
+        	IClasspathModifierAction[] actions= fActionGroup.getActions();
+			for (int i= 0; i < actions.length; i++) {
+	            if (actions[i] instanceof ResetAllAction) {
+	            	((ResetAllAction)actions[i]).setBreakPoint(fCurrJProject);
+	            	return;
+	            }
+            }
         } catch (JavaModelException e) {
 	     	JavaPlugin.log(e);
         }
@@ -512,14 +517,14 @@ public final class HintTextGroup implements IPackageExplorerActionListener {
             return true;
         if (actions.length == 1) {
             int id= Integer.parseInt(actions[0].getId());
-            if (id == IClasspathInformationProvider.CREATE_LINK)
+            if (id == BuildpathModifierAction.CREATE_LINK)
                 return true;
         }
         if (actions.length == 2) {
             int idLink= Integer.parseInt(actions[0].getId());
             int idReset= Integer.parseInt(actions[1].getId());
-            if (idReset == IClasspathInformationProvider.RESET_ALL && 
-                idLink == IClasspathInformationProvider.CREATE_LINK)
+            if (idReset == BuildpathModifierAction.RESET_ALL && 
+                idLink == BuildpathModifierAction.CREATE_LINK)
                 return true;
         }
         return false;

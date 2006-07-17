@@ -57,7 +57,7 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 	}
 
 	public EditOutputFolderAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(site);
+		super(site, BuildpathModifierAction.EDIT_OUTPUT);
 		
 		fContext= context;
 		fListener= listener;

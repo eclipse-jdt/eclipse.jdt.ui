@@ -51,7 +51,7 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
 //	}
 
 	public ResetAllOutputFoldersAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener, IJavaProject javaProject) {
-		super(site);
+		super(site, BuildpathModifierAction.RESET_ALL_OUTPUT_FOLDERS);
 		
 		fContext= context;
 		fListener= listener;

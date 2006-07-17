@@ -56,7 +56,7 @@ public class IncludeToBuildpathAction extends BuildpathModifierAction {
 	}
 	
 	public IncludeToBuildpathAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(site);
+		super(site, BuildpathModifierAction.INCLUDE);
 		
 		fContext= context;
 		fListener= listener;

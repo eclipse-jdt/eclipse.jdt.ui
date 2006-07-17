@@ -15,7 +15,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 
 public class EditOutputFolderAction2 extends EditOutputFolderAction implements IClasspathModifierAction {
 	
@@ -34,20 +33,6 @@ public class EditOutputFolderAction2 extends EditOutputFolderAction implements I
 	 */
 	protected void selectAndReveal(ISelection selection) {
 		fProvider.handleEditOutputFolder(((StructuredSelection)selection).toList());	 
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public int getTypeId() {
-		return IClasspathInformationProvider.EDIT_OUTPUT;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getId() {
-	 	return Integer.toString(getTypeId());
 	}
 	
 	/**

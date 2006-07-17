@@ -55,7 +55,7 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
 	}
 	
 	public AddArchiveToBuildpathAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(site);
+		super(site, BuildpathModifierAction.ADD_LIB_TO_BP);
 		
 		fContext= context;
 		fListener= listener;

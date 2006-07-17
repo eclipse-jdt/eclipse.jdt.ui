@@ -71,7 +71,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 	}
 	
 	protected AddFolderToBuildpathAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(site);
+		super(site, BuildpathModifierAction.ADD_SEL_SF_TO_BP);
 		
 		fContext= context;
 		fListener= listener;

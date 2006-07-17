@@ -42,23 +42,6 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
  * 
  */
 public interface IClasspathInformationProvider {
-    public static final int ADD_SEL_SF_TO_BP= 0x00;
-    public static final int REMOVE_FROM_BP= 0x01;
-    public static final int EXCLUDE= 0x02;
-    public static final int UNEXCLUDE= 0x03;
-    public static final int EDIT_FILTERS= 0x04;
-    public static final int CREATE_LINK= 0x05;
-    public static final int RESET_ALL= 0x06;
-    public static final int EDIT_OUTPUT= 0x07;
-    public static final int CREATE_OUTPUT= 0x08;
-    public static final int RESET= 0x09;
-    public static final int INCLUDE= 0xA;
-    public static final int UNINCLUDE= 0xB;
-    public static final int CREATE_FOLDER= 0xC;
-    public static final int ADD_JAR_TO_BP= 0xD;
-    public static final int ADD_LIB_TO_BP= 0xE;
-    public static final int ADD_SEL_LIB_TO_BP= 0xF;
-    
     /**
      * Method to invoce the <code>IClasspathInformationProvider</code> to 
      * process the result of the corresponding operation. Normally, operations 

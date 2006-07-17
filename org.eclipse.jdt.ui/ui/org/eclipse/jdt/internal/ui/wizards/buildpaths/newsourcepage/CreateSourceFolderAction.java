@@ -52,7 +52,7 @@ public class CreateSourceFolderAction extends BuildpathModifierAction {
 	}
 	
 	public CreateSourceFolderAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(site);
+		super(site, BuildpathModifierAction.CREATE_FOLDER);
 		
 		fListener= listener;
 		

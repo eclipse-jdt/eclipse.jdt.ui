@@ -14,7 +14,6 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -37,19 +36,4 @@ public class RemoveFromBuildpathAction2 extends RemoveFromBuildpathAction implem
 	protected void selectAndReveal(ISelection selection) {
 	    fProvider.handleRemoveFromBP(((StructuredSelection)selection).toList(), false);
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getId() {
-	    return Integer.toString(getTypeId());
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public int getTypeId() {
-		return IClasspathInformationProvider.REMOVE_FROM_BP;
-	}
-
 }

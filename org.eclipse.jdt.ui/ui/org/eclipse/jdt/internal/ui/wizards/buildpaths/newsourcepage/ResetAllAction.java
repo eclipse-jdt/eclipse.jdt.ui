@@ -29,7 +29,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -48,7 +47,7 @@ public class ResetAllAction extends BuildpathModifierAction implements IClasspat
 	private IPath fOutputLocation;
 
 	public ResetAllAction(IClasspathModifierListener listener, HintTextGroup provider, IRunnableContext context) {
-		super(null);
+		super(null, BuildpathModifierAction.RESET_ALL);
 		
 		fListener= listener;
 		fProvider= provider;
@@ -148,19 +147,4 @@ public class ResetAllAction extends BuildpathModifierAction implements IClasspat
 	protected void selectAndReveal(ISelection selection) {
         fProvider.handleResetAll();	
 	}
-
-	/**
-     * {@inheritDoc}
-     */
-    public int getTypeId() {
-	    return IClasspathInformationProvider.RESET_ALL;
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public String getId() {
-     	return Integer.toString(getTypeId());
-    }
-
 }

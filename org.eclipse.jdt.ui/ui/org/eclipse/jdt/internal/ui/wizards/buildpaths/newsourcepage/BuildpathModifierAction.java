@@ -39,15 +39,36 @@ import org.eclipse.ui.forms.widgets.FormText;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public abstract class BuildpathModifierAction extends Action implements ISelectionChangedListener {
+	
+	public static final int ADD_SEL_SF_TO_BP= 0;
+	public static final int REMOVE_FROM_BP= 1;
+	public static final int EXCLUDE= 2;
+	public static final int UNEXCLUDE= 3;
+	public static final int EDIT_FILTERS= 4;
+	public static final int CREATE_LINK= 5;
+	public static final int RESET_ALL= 6;
+	public static final int EDIT_OUTPUT= 7;
+	public static final int CREATE_OUTPUT= 8;
+	public static final int RESET= 9;
+	public static final int INCLUDE= 10;
+	public static final int UNINCLUDE= 11;
+	public static final int CREATE_FOLDER= 12;
+	public static final int ADD_JAR_TO_BP= 13;
+	public static final int ADD_LIB_TO_BP= 14;
+	public static final int ADD_SEL_LIB_TO_BP= 15;
+	public static final int CONFIGURE_BUILD_PATH= 16;
+	public static final int RESET_ALL_OUTPUT_FOLDERS= 17;
 
 	private final IWorkbenchSite fSite;
 	private final List fSelectedElements;
 
-	public BuildpathModifierAction(IWorkbenchSite site) {
+	public BuildpathModifierAction(IWorkbenchSite site, int id) {
 		super();
 		
 		fSite= site;
 		fSelectedElements= new ArrayList();
+		
+		setId(Integer.toString(id));
     }
 	
 	/**

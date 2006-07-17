@@ -14,7 +14,6 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 //Warning: This is unused and untested code!
@@ -34,19 +33,4 @@ public class AddLibraryToBuildpathAction2 extends AddLibraryToBuildpathAction im
 	protected void selectAndReveal(ISelection selection) {
 	    fInformationProvider.handleAddToCP(((StructuredSelection)selection).toList());
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public int getTypeId() {
-		return IClasspathInformationProvider.ADD_LIB_TO_BP;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getId() {
-	    return Integer.toString(getTypeId());
-	}
-
 }

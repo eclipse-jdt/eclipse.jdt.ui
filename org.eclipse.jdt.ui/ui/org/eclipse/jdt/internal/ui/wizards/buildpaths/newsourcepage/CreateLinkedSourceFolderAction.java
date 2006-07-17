@@ -50,7 +50,7 @@ public class CreateLinkedSourceFolderAction extends BuildpathModifierAction {
 	}
 	
 	public CreateLinkedSourceFolderAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(site);
+		super(site, BuildpathModifierAction.CREATE_LINK);
 		
 		fListener= listener;
 		

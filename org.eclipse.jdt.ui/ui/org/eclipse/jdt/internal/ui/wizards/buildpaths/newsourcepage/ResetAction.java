@@ -54,7 +54,7 @@ public class ResetAction extends BuildpathModifierAction {
 	}
 
 	public ResetAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(site);
+		super(site, BuildpathModifierAction.RESET);
 		
 		fContext= context;
 		fListener= listener;

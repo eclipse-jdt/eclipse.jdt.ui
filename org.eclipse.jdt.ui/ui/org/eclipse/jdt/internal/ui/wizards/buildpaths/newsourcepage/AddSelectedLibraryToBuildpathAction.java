@@ -56,7 +56,7 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 	}
 	
 	public AddSelectedLibraryToBuildpathAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(site);
+		super(site, BuildpathModifierAction.ADD_SEL_LIB_TO_BP);
 		
 		fContext= context;
 		fListener= listener;

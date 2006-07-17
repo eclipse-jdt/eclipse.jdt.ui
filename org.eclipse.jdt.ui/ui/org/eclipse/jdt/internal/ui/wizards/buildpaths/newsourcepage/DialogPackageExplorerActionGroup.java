@@ -48,7 +48,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.IPackageExplorerActionListener;
 import org.eclipse.jdt.internal.corext.buildpath.PackageExplorerActionEvent;
 
@@ -162,6 +161,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     private List fListeners;
     private static final int fContextSensitiveActions= 5;
 	private final ISelectionProvider fSelectionProvider;
+	
+	private final EditOutputFolderAction2 fEditOutputFolderAction;
     
     /**
      * Constructor which creates the operations and based on this 
@@ -207,14 +208,14 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
 			EditFilterAction2 editFilterAction= new EditFilterAction2(listener, provider, context);
 			selectionProvider.addSelectionChangedListener(editFilterAction);
 	
-	        EditOutputFolderAction2 editOutputFolderAction= new EditOutputFolderAction2(listener, provider, context);
-	        selectionProvider.addSelectionChangedListener(editOutputFolderAction);
+	        fEditOutputFolderAction= new EditOutputFolderAction2(listener, provider, context);
+			selectionProvider.addSelectionChangedListener(fEditOutputFolderAction);
         
         ClasspathModifierDropDownAction dropDown= new ClasspathModifierDropDownAction(editFilterAction, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Configure_label, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Configure_tooltip); 
         selectionProvider.addSelectionChangedListener(dropDown); 
-        dropDown.addAction(editOutputFolderAction);
+        dropDown.addAction(fEditOutputFolderAction);
         fActions[4]= dropDown;
         
         CreateLinkedSourceFolderAction2 createLinkedSourceFolderAction= new CreateLinkedSourceFolderAction2(listener, provider, context);
@@ -234,23 +235,6 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         //AddSelectedLibraryToBuildpathAction
         //ResetAction
         //ResetAllOutputFoldersAction
-    }
-    
-	/**
-     * Get an action of the specified type
-     * 
-     * @param type the type of the desired action, must be a
-     * constant of <code>IClasspathInformationProvider</code>
-     * @return the requested action
-     * 
-     * @see IClasspathInformationProvider
-     */
-    public IClasspathModifierAction getAction(int type) {
-    	for (int i= 0; i < fActions.length; i++) {
-			if (fActions[i].getTypeId() == type)
-				return fActions[i];
-		}
-    	throw new ArrayIndexOutOfBoundsException();
     }
     
     public IClasspathModifierAction[] getActions() {
@@ -279,10 +263,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * folders should be shown, <code>false</code> otherwise.
      */
     public void showOutputFolders(boolean showOutputFolders) {
-        ClasspathModifierDropDownAction action= (ClasspathModifierDropDownAction)getAction(IClasspathInformationProvider.EDIT_FILTERS);
-        EditOutputFolderAction2 outputFolderAction= (EditOutputFolderAction2)action.getActions()[1];
-        outputFolderAction.showOutputFolders(showOutputFolders);
-        outputFolderAction.selectionChanged(new SelectionChangedEvent(fSelectionProvider, fSelectionProvider.getSelection()));
+        fEditOutputFolderAction.showOutputFolders(showOutputFolders);
+        fEditOutputFolderAction.selectionChanged(new SelectionChangedEvent(fSelectionProvider, fSelectionProvider.getSelection()));
     }
     
     /**
@@ -705,9 +687,10 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * 
      * @param menu the menu to be filled up with actions
      */
-    public void fillContextMenu(IMenuManager menu) {        
-        for (int i= 0; i < fContextSensitiveActions; i++) {
-            IAction action= getAction(i);
+    public void fillContextMenu(IMenuManager menu) {
+    	IClasspathModifierAction[] actions2= getActions();
+    	for (int i= 0; i < actions2.length; i++) {
+    		IAction action= actions2[i];
             if (action instanceof ClasspathModifierDropDownAction) {
                 if (action.isEnabled()) {
                     IAction[] actions= ((ClasspathModifierDropDownAction)action).getActions();

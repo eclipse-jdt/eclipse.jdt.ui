@@ -14,7 +14,6 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 public class AddFolderToBuildpathAction2 extends AddFolderToBuildpathAction implements IClasspathModifierAction {
@@ -33,19 +32,4 @@ public class AddFolderToBuildpathAction2 extends AddFolderToBuildpathAction impl
 	protected void selectAndReveal(ISelection selection) {
 		fInformationProvider.handleAddToCP(((StructuredSelection)selection).toList());
 	}
-     
-    
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.action.Action#getId()
-     */
-    public String getId() {
-        return Integer.toString(getTypeId());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public int getTypeId() {
-        return IClasspathInformationProvider.ADD_SEL_SF_TO_BP;
-    }
 }

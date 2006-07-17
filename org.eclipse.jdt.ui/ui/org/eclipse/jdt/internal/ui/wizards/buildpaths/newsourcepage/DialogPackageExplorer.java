@@ -55,7 +55,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -341,7 +340,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
                 		if (attribute.getKey().equals(CPListElement.OUTPUT)) {
                 			IClasspathModifierAction[] actions= fActionGroup.getActions();
                 			for (int i= 0; i < actions.length; i++) {
-								if (actions[i].getTypeId() == IClasspathInformationProvider.EDIT_OUTPUT) {
+								if (actions[i] instanceof EditOutputFolderAction) {
 									actions[i].run();
 									return;
 								}

@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.corext.buildpath.PackageExplorerActionEvent;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.BuildpathModifierAction;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
@@ -114,7 +115,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testProjectWithOthers() throws JavaModelException {
         addToSelection(new int[] {PROJ});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {ADD_SEL_SF_TO_BP, CREATE_LINK});
+        addListener(new int[] {BuildpathModifierAction.ADD_SEL_SF_TO_BP, BuildpathModifierAction.CREATE_LINK});
         fActionGroup.setContext(context);
         reset();
         
@@ -126,13 +127,13 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         
         addToSelection(new int[] {PROJ, NF});
         context= createContext();
-        addListener(new int[] {ADD_SEL_SF_TO_BP});
+        addListener(new int[] {BuildpathModifierAction.ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PROJ, PACK});
         context= createContext();
-        addListener(new int[] {ADD_SEL_SF_TO_BP});
+        addListener(new int[] {BuildpathModifierAction.ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
@@ -156,7 +157,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         
         addToSelection(new int[] {PROJ, EXCLUDED_PACK});
         context= createContext();
-        addListener(new int[] {ADD_SEL_SF_TO_BP});
+        addListener(new int[] {BuildpathModifierAction.ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
@@ -210,7 +211,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         
         addToSelection(new int[] {PROJ, PACK, NF});
         context= createContext();
-        addListener(new int[] {ADD_SEL_SF_TO_BP});
+        addListener(new int[] {BuildpathModifierAction.ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
@@ -222,7 +223,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK});
         context= createContext();
-        addListener(new int[] {ADD_SEL_SF_TO_BP});
+        addListener(new int[] {BuildpathModifierAction.ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
@@ -374,7 +375,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testSrcWithOthers() throws JavaModelException {
         addToSelection(new int[] {SRC});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {REMOVE_FROM_BP, EDIT_FILTERS});
+        addListener(new int[] {BuildpathModifierAction.REMOVE_FROM_BP, BuildpathModifierAction.EDIT_FILTERS});
         fActionGroup.setContext(context);
         reset();
         
@@ -428,7 +429,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         
         addToSelection(new int[] {SRC, JAR});
         context= createContext();
-        addListener(new int[] {REMOVE_FROM_BP});
+        addListener(new int[] {BuildpathModifierAction.REMOVE_FROM_BP});
         fActionGroup.setContext(context);
         reset();
         
@@ -460,13 +461,13 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testNormalFolderWithOthers() throws JavaModelException {
         addToSelection(new int[] {NF});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {ADD_SEL_SF_TO_BP});
+        addListener(new int[] {BuildpathModifierAction.ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {NF, PACK});
         context= createContext();
-        addListener(new int[] {ADD_SEL_SF_TO_BP});
+        addListener(new int[] {BuildpathModifierAction.ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
@@ -490,7 +491,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         
         addToSelection(new int[] {NF, EXCLUDED_PACK});
         context= createContext();
-        addListener(new int[] {ADD_SEL_SF_TO_BP});
+        addListener(new int[] {BuildpathModifierAction.ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
@@ -526,7 +527,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         
         addToSelection(new int[] {NF, PACK, EXCLUDED_PACK});
         context= createContext();
-        addListener(new int[] {ADD_SEL_SF_TO_BP});
+        addListener(new int[] {BuildpathModifierAction.ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
@@ -594,13 +595,13 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testPackageWithOthers() throws JavaModelException {
         addToSelection(new int[] {PACK});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {ADD_SEL_SF_TO_BP, EXCLUDE});
+        addListener(new int[] {BuildpathModifierAction.ADD_SEL_SF_TO_BP, BuildpathModifierAction.EXCLUDE});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {PACK, CU});
         context= createContext();
-        addListener(new int[] {EXCLUDE});
+        addListener(new int[] {BuildpathModifierAction.EXCLUDE});
         fActionGroup.setContext(context);
         reset();
         
@@ -618,7 +619,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         
         addToSelection(new int[] {PACK, EXCLUDED_PACK});
         context= createContext();
-        addListener(new int[] {ADD_SEL_SF_TO_BP});
+        addListener(new int[] {BuildpathModifierAction.ADD_SEL_SF_TO_BP});
         fActionGroup.setContext(context);
         reset();
         
@@ -704,13 +705,13 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testCUWithOthers() throws JavaModelException {
         addToSelection(new int[] {CU});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {EXCLUDE});
+        addListener(new int[] {BuildpathModifierAction.EXCLUDE});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {CU, PACK});
         context= createContext();
-        addListener(new int[] {EXCLUDE});
+        addListener(new int[] {BuildpathModifierAction.EXCLUDE});
         fActionGroup.setContext(context);
         reset();
         
@@ -790,13 +791,13 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testExcludedFileWithOthers() throws JavaModelException {
         addToSelection(new int[] {EXCLUDED_FILE});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {UNEXCLUDE});
+        addListener(new int[] {BuildpathModifierAction.UNEXCLUDE});
         fActionGroup.setContext(context);
         reset();
         
         addToSelection(new int[] {EXCLUDED_FILE, EXCLUDED_PACK});
         context= createContext();
-        addListener(new int[] {UNEXCLUDE});
+        addListener(new int[] {BuildpathModifierAction.UNEXCLUDE});
         fActionGroup.setContext(context);
         reset();
         
@@ -808,7 +809,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         
         addToSelection(new int[] {EXCLUDED_FILE, EXCLUDED_PACK});
         context= createContext();
-        addListener(new int[] {UNEXCLUDE});
+        addListener(new int[] {BuildpathModifierAction.UNEXCLUDE});
         fActionGroup.setContext(context);
         reset();
         
@@ -890,7 +891,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testExcludedPackWithOthers() throws JavaModelException {
         addToSelection(new int[] {EXCLUDED_PACK});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {ADD_SEL_SF_TO_BP, UNEXCLUDE});
+        addListener(new int[] {BuildpathModifierAction.ADD_SEL_SF_TO_BP, BuildpathModifierAction.UNEXCLUDE});
         fActionGroup.setContext(context);
         reset();
         
@@ -966,7 +967,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testDefaultJARWithOthers() throws JavaModelException {
         addToSelection(new int[] {JAR});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {REMOVE_FROM_BP});
+        addListener(new int[] {BuildpathModifierAction.REMOVE_FROM_BP});
         fActionGroup.setContext(context);
         reset();
         
@@ -1044,7 +1045,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         fSelection.add(addedZipArchive[0]);
         fSelection.add(fItems[JAR]);
         context= createContext();
-        addListener(new int[] {REMOVE_FROM_BP, RESET_ALL});
+        addListener(new int[] {BuildpathModifierAction.REMOVE_FROM_BP, BuildpathModifierAction.RESET_ALL});
         fActionGroup.setContext(context);
         reset();
     }
