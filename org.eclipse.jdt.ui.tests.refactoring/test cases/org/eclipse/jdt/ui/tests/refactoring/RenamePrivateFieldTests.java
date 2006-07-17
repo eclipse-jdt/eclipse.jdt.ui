@@ -19,16 +19,19 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
+
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 
 public class RenamePrivateFieldTests extends RefactoringTest {
 
@@ -75,15 +78,16 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		return "f";
 	}
 	
-	private void helper1_0(String fieldName, String newFieldName, String typeName,
-							boolean renameGetter, boolean renameSetter) throws Exception{
+	private void helper1_0(String fieldName, String newFieldName, String typeName, boolean renameGetter, boolean renameSetter) throws Exception{
 		IType declaringType= getType(createCUfromTestFile(getPackageP(), "A"), typeName);
-		RenameFieldProcessor processor= new RenameFieldProcessor(declaringType.getField(fieldName));
-		RenameRefactoring refactoring= new RenameRefactoring(processor);
-		processor.setNewElementName(newFieldName);
-		processor.setRenameGetter(renameGetter);
-		processor.setRenameSetter(renameSetter);
-		RefactoringStatus result= performRefactoring(refactoring);
+		IField field= declaringType.getField(fieldName);
+		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_FIELD);
+		descriptor.setJavaElement(field);
+		descriptor.setNewName(newFieldName);
+		descriptor.setUpdateReferences(true);
+		descriptor.setRenameGetters(renameGetter);
+		descriptor.setRenameSetters(renameSetter);
+		RefactoringStatus result= performRefactoring(descriptor);
 		assertNotNull("precondition was supposed to fail", result);
 	}
 	
@@ -94,9 +98,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	private void helper1() throws Exception{
 		helper1_0("f", "g");
 	}
-	
-	//--
-		
+
 	private void helper2(String fieldName, String newFieldName, boolean updateReferences, boolean updateTextualMatches,
 											boolean renameGetter, boolean renameSetter,
 											boolean expectedGetterRenameEnabled, boolean expectedSetterRenameEnabled) throws Exception{
@@ -104,15 +106,19 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 		IField field= classA.getField(fieldName);
-		RenameFieldProcessor processor= new RenameFieldProcessor(field);
-		RenameRefactoring refactoring= new RenameRefactoring(processor);
-		processor.setUpdateReferences(updateReferences);
-		processor.setUpdateTextualMatches(updateTextualMatches);
+		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_FIELD);
+		descriptor.setJavaElement(field);
+		descriptor.setNewName(newFieldName);
+		descriptor.setUpdateReferences(updateReferences);
+		descriptor.setUpdateTextualOccurrences(updateTextualMatches);
+		descriptor.setRenameGetters(renameGetter);
+		descriptor.setRenameSetters(renameSetter);
+		
+		RenameRefactoring refactoring= (RenameRefactoring) createRefactoring(descriptor);
+		RenameFieldProcessor processor= (RenameFieldProcessor) refactoring.getProcessor();
 		assertEquals("getter rename enabled", expectedGetterRenameEnabled, processor.canEnableGetterRenaming() == null);
 		assertEquals("setter rename enabled", expectedSetterRenameEnabled, processor.canEnableSetterRenaming() == null);
-		processor.setRenameGetter(renameGetter);
-		processor.setRenameSetter(renameSetter);
-		processor.setNewElementName(newFieldName);
+
 		String newGetterName= processor.getNewGetterName();
 		String newSetterName= processor.getNewSetterName();
 

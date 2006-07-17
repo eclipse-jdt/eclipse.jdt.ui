@@ -95,19 +95,6 @@ public class RenameTypeTests extends RefactoringTest {
 			DebugUtils.dump("result: " + result);
 	}
 
-	private RefactoringStatus performRefactoring(RefactoringDescriptor descriptor) throws Exception {
-		Refactoring refactoring= createRefactoring(descriptor);
-		return performRefactoring(refactoring);
-	}
-
-    private Refactoring createRefactoring(RefactoringDescriptor descriptor) throws CoreException {
-	    RefactoringStatus status= new RefactoringStatus();
-		Refactoring refactoring= descriptor.createRefactoring(status);
-		assertNotNull("refactoring should not be null", refactoring);
-		assertTrue("status should be ok", status.isOK());
-	    return refactoring;
-    }
-
 	private void helper1() throws Exception{
 		helper1_0("A", "B");
 	}

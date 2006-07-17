@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -35,19 +32,19 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
-import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameSourceFolderChange;
 import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-public class RenameSourceFolderProcessor extends JavaRenameProcessor {
+public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 	
 	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
@@ -159,22 +156,25 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 		return true;
 	}
 
-	public Change createChange(IProgressMonitor pm) throws CoreException {
-		pm.beginTask("", 1); //$NON-NLS-1$
+	public Change createChange(IProgressMonitor monitor) throws CoreException {
+		monitor.beginTask(RefactoringCoreMessages.RenameTypeRefactoring_creating_change, 1);
 		try {
-			final Map arguments= new HashMap();
 			final IResource resource= fSourceFolder.getResource();
 			final String project= resource.getProject().getName();
 			final String newName= getNewElementName();
 			final String description= Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_descriptor_description_short, fSourceFolder.getElementName());
 			final String header= Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_descriptor_description, new String[] { resource.getFullPath().toString(), newName});
 			final String comment= new JDTRefactoringDescriptorComment(project, this, header).asString();
-			final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(IJavaRefactorings.RENAME_SOURCE_FOLDER, project, description, comment, arguments, RefactoringDescriptor.NONE);
-			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(JavaCore.create(resource)));
-			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_NAME, newName);
-			return new DynamicValidationStateChange(new RenameSourceFolderChange(descriptor, fSourceFolder, newName, comment));
+			final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_SOURCE_FOLDER);
+			descriptor.setProject(project);
+			descriptor.setDescription(description);
+			descriptor.setComment(comment);
+			descriptor.setFlags(RefactoringDescriptor.NONE);
+			descriptor.setJavaElement(fSourceFolder);
+			descriptor.setNewName(newName);
+			return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.RenameSourceFolderRefactoring_rename, new Change[] { new RenameSourceFolderChange(fSourceFolder, newName)});
 		} finally {
-			pm.done();
+			monitor.done();
 		}
 	}
 

@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComme
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
@@ -56,7 +57,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-public class RenameCompilationUnitProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating, ISimilarDeclarationUpdating, IResourceMapper, IJavaElementMapper {
+public final class RenameCompilationUnitProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating, ISimilarDeclarationUpdating, IResourceMapper, IJavaElementMapper {
 	
 	private RenameTypeProcessor fRenameTypeProcessor= null;
 	private boolean fWillRenameType= false;
@@ -409,7 +410,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		descriptor.setFlags(flags);
 		descriptor.setJavaElement(fCu);
 		descriptor.setNewName(newName);
-		return new DynamicValidationStateChange(new RenameCompilationUnitChange(descriptor, fCu, newName, comment));
+		return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.RenameCompilationUnitRefactoring_name, new Change[] { new RenameCompilationUnitChange(fCu, newName)});
 	}
 	
 	/**

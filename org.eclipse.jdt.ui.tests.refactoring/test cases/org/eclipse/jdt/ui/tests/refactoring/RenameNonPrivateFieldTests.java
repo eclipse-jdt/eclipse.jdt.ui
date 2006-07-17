@@ -19,20 +19,21 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameEnumConstProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameNonPrivateFieldTests extends RefactoringTest{
 	
@@ -88,10 +89,12 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	
 	private void helper1_0(String fieldName, String newFieldName) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
-		RenameFieldProcessor processor= new RenameFieldProcessor(classA.getField(fieldName));
-		RenameRefactoring refactoring= new RenameRefactoring(processor);
-		processor.setNewElementName(newFieldName);
-		RefactoringStatus result= performRefactoring(refactoring);
+		IField field= classA.getField(fieldName);
+		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_FIELD);
+		descriptor.setJavaElement(field);
+		descriptor.setUpdateReferences(true);
+		descriptor.setNewName(newFieldName);
+		RefactoringStatus result= performRefactoring(descriptor);
 		assertNotNull("precondition was supposed to fail", result);
 	}
 	
@@ -114,15 +117,21 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 		IField field= classA.getField(fieldName);
-		RenameFieldProcessor processor= JdtFlags.isEnum(field) ? new RenameEnumConstProcessor(field) : new RenameFieldProcessor(field);
-		RenameRefactoring refactoring= new RenameRefactoring(processor);
-		processor.setNewElementName(newFieldName);
-		
-		processor.setUpdateReferences(fUpdateReferences);
-		processor.setUpdateTextualMatches(fUpdateTextualMatches);
-		processor.setRenameGetter(fRenameGetter);
-		processor.setRenameSetter(fRenameSetter);
-		processor.setDelegateUpdating(createDelegates);
+		boolean isEnum= JdtFlags.isEnum(field);
+		String id= isEnum ? IJavaRefactorings.RENAME_ENUM_CONSTANT : IJavaRefactorings.RENAME_FIELD;
+		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(id);
+		descriptor.setJavaElement(field);
+		descriptor.setNewName(newFieldName);
+		descriptor.setUpdateReferences(fUpdateReferences);
+		descriptor.setUpdateTextualOccurrences(fUpdateTextualMatches);
+		if (!isEnum) {
+			descriptor.setRenameGetters(fRenameGetter);
+			descriptor.setRenameSetters(fRenameSetter);
+			descriptor.setKeepOriginal(createDelegates);
+			descriptor.setDeprecateDelegate(true);
+		}
+		RenameRefactoring refactoring= (RenameRefactoring) createRefactoring(descriptor);
+		RenameFieldProcessor processor= (RenameFieldProcessor) refactoring.getProcessor();
 		
 		int numbers= 1;
 		List elements= new ArrayList();

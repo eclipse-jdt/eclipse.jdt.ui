@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -46,6 +43,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -57,7 +55,7 @@ import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.changes.RefactoringDescriptorChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
@@ -266,7 +264,6 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 		try {
 			Change change= fChange;
 			if (change != null) {
-				final Map arguments= new HashMap();
 				String project= null;
 				IJavaProject javaProject= fTypeParameter.getJavaProject();
 				if (javaProject != null)
@@ -274,14 +271,15 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 				final String description= Messages.format(RefactoringCoreMessages.RenameTypeParameterProcessor_descriptor_description_short, fTypeParameter.getElementName());
 				final String header= Messages.format(RefactoringCoreMessages.RenameTypeParameterProcessor_descriptor_description, new String[] { fTypeParameter.getElementName(), JavaElementLabels.getElementLabel(fTypeParameter.getDeclaringMember(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()});
 				final String comment= new JDTRefactoringDescriptorComment(project, this, header).asString();
-				final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(IJavaRefactorings.RENAME_TYPE_PARAMETER, project, description, comment, arguments, RefactoringDescriptor.NONE);
-				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fTypeParameter.getDeclaringMember()));
-				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
-				arguments.put(ATTRIBUTE_PARAMETER, fTypeParameter.getElementName());
-				arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
-				final RefactoringDescriptorChange result= new RefactoringDescriptorChange(descriptor, RefactoringCoreMessages.RenameTypeParameterProcessor_change_name, new Change[] { change});
-				result.markAsSynthetic();
-				change= result;
+				final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_TYPE_PARAMETER);
+				descriptor.setProject(project);
+				descriptor.setDescription(description);
+				descriptor.setComment(comment);
+				descriptor.setFlags(RefactoringDescriptor.NONE);
+				descriptor.setJavaElement(fTypeParameter);
+				descriptor.setNewName(getNewElementName());
+				descriptor.setUpdateReferences(fUpdateReferences);
+				change= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.RenameTypeParameterProcessor_change_name, new Change[] { change});
 			}
 			return change;
 		} finally {

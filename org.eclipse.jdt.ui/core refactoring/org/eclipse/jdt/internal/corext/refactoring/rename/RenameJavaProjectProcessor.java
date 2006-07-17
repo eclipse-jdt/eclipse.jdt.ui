@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComme
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameJavaProjectChange;
 import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-public class RenameJavaProjectProcessor extends JavaRenameProcessor implements IReferenceUpdating {
+public final class RenameJavaProjectProcessor extends JavaRenameProcessor implements IReferenceUpdating {
 
 	private IJavaProject fProject;
 	private boolean fUpdateReferences;
@@ -192,7 +192,7 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 			descriptor.setJavaElement(fProject);
 			descriptor.setNewName(getNewElementName());
 			descriptor.setUpdateReferences(fUpdateReferences);
-			return new DynamicValidationStateChange(new RenameJavaProjectChange(descriptor, fProject, getNewElementName(), comment, fUpdateReferences));
+			return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.RenameJavaProjectRefactoring_rename, new Change[] { new RenameJavaProjectChange(fProject, getNewElementName(), fUpdateReferences)});
 		} finally {
 			monitor.done();
 		}

@@ -53,7 +53,7 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 			
 			assertTrue("old folder should exist here", oldRoot.exists());
 			
-			RenameSourceFolderChange change= new RenameSourceFolderChange(null, oldRoot, newName, null);
+			RenameSourceFolderChange change= new RenameSourceFolderChange(oldRoot, newName);
 			change.initializeValidationData(new NullProgressMonitor());
 			performChange(change);
 			
@@ -82,7 +82,7 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 			assertTrue("old folder should exist here", oldRoot1.exists());
 			assertTrue("old folder 2 should exist here", oldRoot2.exists());
 			
-			RenameSourceFolderChange change= new RenameSourceFolderChange(null, oldRoot1, newName1, null);
+			RenameSourceFolderChange change= new RenameSourceFolderChange(oldRoot1, newName1);
 			change.initializeValidationData(new NullProgressMonitor());
 			performChange(change);
 			
@@ -111,7 +111,7 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 			JavaProjectHelper.addToClasspath(project, JavaCore.newSourceEntry(projectPath, exclusion));
 			IPackageFragmentRoot src= JavaProjectHelper.addSourceContainer(project, "src");
 			
-			RenameSourceFolderChange change= new RenameSourceFolderChange(null, src, "src2", null);
+			RenameSourceFolderChange change= new RenameSourceFolderChange(src, "src2");
 			change.initializeValidationData(new NullProgressMonitor());
 			performChange(change);
 			

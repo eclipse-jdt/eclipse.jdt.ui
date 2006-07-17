@@ -12,11 +12,9 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.text.edits.ReplaceEdit;
@@ -54,6 +52,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
+import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.MethodDeclarationMatch;
@@ -64,9 +63,9 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -677,15 +676,12 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			result.addAll(Arrays.asList(foundInImplementingClasses));
 		return (IMethod[]) result.toArray(new IMethod[result.size()]);	
 	}
-				
-	//-------- changes -----
 
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
 			final TextChange[] changes= fChangeManager.getAllChanges();
 			final List list= new ArrayList(changes.length);
 			list.addAll(Arrays.asList(changes));
-			final Map arguments= new HashMap();
 			String project= null;
 			IJavaProject javaProject= fMethod.getJavaProject();
 			if (javaProject != null)
@@ -707,12 +703,16 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			final String description= Messages.format(RefactoringCoreMessages.RenameMethodProcessor_descriptor_description_short, fMethod.getElementName());
 			final String header= Messages.format(RefactoringCoreMessages.RenameMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()});
 			final String comment= new JDTRefactoringDescriptorComment(project, this, header).asString();
-			final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(IJavaRefactorings.RENAME_METHOD, project, description, comment, arguments, flags);
-			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fMethod));
-			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
-			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
-			arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
-			arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
+			final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
+			descriptor.setProject(project);
+			descriptor.setDescription(description);
+			descriptor.setComment(comment);
+			descriptor.setFlags(flags);
+			descriptor.setJavaElement(fMethod);
+			descriptor.setNewName(getNewElementName());
+			descriptor.setUpdateReferences(fUpdateReferences);
+			descriptor.setKeepOriginal(fDelegateUpdating);
+			descriptor.setDeprecateDelegate(fDelegateDeprecation);
 			return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.RenameMethodProcessor_change_name, (Change[]) list.toArray(new Change[list.size()]));
 		} finally {
 			monitor.done();

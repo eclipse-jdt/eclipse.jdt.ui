@@ -21,7 +21,6 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -37,13 +36,13 @@ public final class RenameJavaProjectChange extends AbstractJavaElementRenameChan
 
 	private boolean fUpdateReferences;
 
-	public RenameJavaProjectChange(RefactoringDescriptor descriptor, IJavaProject project, String newName, String comment, boolean updateReferences) {
-		this(descriptor, project.getPath(), project.getElementName(), newName, comment, IResource.NULL_STAMP, updateReferences);
+	public RenameJavaProjectChange(IJavaProject project, String newName, boolean updateReferences) {
+		this(project.getPath(), project.getElementName(), newName, IResource.NULL_STAMP, updateReferences);
 		Assert.isTrue(!project.isReadOnly(), "should not be read only"); //$NON-NLS-1$
 	}
 
-	private RenameJavaProjectChange(RefactoringDescriptor descriptor, IPath resourcePath, String oldName, String newName, String comment, long stampToRestore, boolean updateReferences) {
-		super(descriptor, resourcePath, oldName, newName, comment);
+	private RenameJavaProjectChange(IPath resourcePath, String oldName, String newName, long stampToRestore, boolean updateReferences) {
+		super(resourcePath, oldName, newName);
 		fUpdateReferences= updateReferences;
 	}
 
@@ -56,7 +55,7 @@ public final class RenameJavaProjectChange extends AbstractJavaElementRenameChan
 	}
 
 	protected Change createUndoChange(long stampToRestore) throws JavaModelException {
-		return new RenameJavaProjectChange(null, createNewPath(), getNewName(), getOldName(), getComment(), stampToRestore, fUpdateReferences);
+		return new RenameJavaProjectChange(createNewPath(), getNewName(), getOldName(), stampToRestore, fUpdateReferences);
 	}
 
 	protected void doRename(IProgressMonitor pm) throws CoreException {

@@ -64,6 +64,7 @@ import org.eclipse.ltk.core.refactoring.IUndoManager;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public abstract class RefactoringTest extends TestCase {
@@ -220,6 +221,19 @@ public abstract class RefactoringTest extends TestCase {
 	protected IPackageFragment getPackageP() {
 		return fPackageP;
 	}
+
+	protected final RefactoringStatus performRefactoring(RefactoringDescriptor descriptor) throws Exception {
+		Refactoring refactoring= createRefactoring(descriptor);
+		return performRefactoring(refactoring);
+	}
+
+    protected final Refactoring createRefactoring(RefactoringDescriptor descriptor) throws CoreException {
+	    RefactoringStatus status= new RefactoringStatus();
+		Refactoring refactoring= descriptor.createRefactoring(status);
+		assertNotNull("refactoring should not be null", refactoring);
+		assertTrue("status should be ok", status.isOK());
+	    return refactoring;
+    }
 
 	protected final RefactoringStatus performRefactoring(Refactoring ref) throws Exception {
 		return performRefactoring(ref, true);

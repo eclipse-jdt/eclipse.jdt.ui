@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -30,13 +29,13 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 public final class RenameCompilationUnitChange extends AbstractJavaElementRenameChange {
 
-	public RenameCompilationUnitChange(RefactoringDescriptor descriptor, ICompilationUnit unit, String newName, String comment) {
-		this(descriptor, unit.getResource().getFullPath(), unit.getElementName(), newName, comment, IResource.NULL_STAMP);
+	public RenameCompilationUnitChange(ICompilationUnit unit, String newName) {
+		this(unit.getResource().getFullPath(), unit.getElementName(), newName, IResource.NULL_STAMP);
 		Assert.isTrue(!unit.isReadOnly(), "compilation unit must not be read-only"); //$NON-NLS-1$
 	}
 
-	private RenameCompilationUnitChange(RefactoringDescriptor descriptor, IPath resourcePath, String oldName, String newName, String comment, long stampToRestore) {
-		super(descriptor, resourcePath, oldName, newName, comment, stampToRestore);
+	private RenameCompilationUnitChange(IPath resourcePath, String oldName, String newName, long stampToRestore) {
+		super(resourcePath, oldName, newName, stampToRestore);
 	}
 
 	protected IPath createNewPath() {
@@ -48,7 +47,7 @@ public final class RenameCompilationUnitChange extends AbstractJavaElementRename
 	}
 
 	protected Change createUndoChange(long stampToRestore) throws JavaModelException {
-		return new RenameCompilationUnitChange(null, createNewPath(), getNewName(), getOldName(), getComment(), stampToRestore);
+		return new RenameCompilationUnitChange(createNewPath(), getNewName(), getOldName(), stampToRestore);
 	}
 
 	protected void doRename(IProgressMonitor pm) throws CoreException {

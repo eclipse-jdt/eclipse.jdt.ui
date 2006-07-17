@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -58,14 +57,14 @@ public final class RenameSourceFolderChange extends AbstractJavaElementRenameCha
 		return result;
 	}
 
-	public RenameSourceFolderChange(RefactoringDescriptor descriptor, IPackageFragmentRoot sourceFolder, String newName, String comment) {
-		this(descriptor, sourceFolder.getPath(), sourceFolder.getElementName(), newName, comment, IResource.NULL_STAMP);
+	public RenameSourceFolderChange(IPackageFragmentRoot sourceFolder, String newName) {
+		this(sourceFolder.getPath(), sourceFolder.getElementName(), newName, IResource.NULL_STAMP);
 		Assert.isTrue(!sourceFolder.isReadOnly(), "should not be read only"); //$NON-NLS-1$
 		Assert.isTrue(!sourceFolder.isArchive(), "should not be an archive"); //$NON-NLS-1$
 	}
 
-	private RenameSourceFolderChange(RefactoringDescriptor descriptor, IPath resourcePath, String oldName, String newName, String comment, long stampToRestore) {
-		super(descriptor, resourcePath, oldName, newName, comment);
+	private RenameSourceFolderChange(IPath resourcePath, String oldName, String newName, long stampToRestore) {
+		super(resourcePath, oldName, newName);
 	}
 
 	protected IPath createNewPath() {
@@ -73,7 +72,7 @@ public final class RenameSourceFolderChange extends AbstractJavaElementRenameCha
 	}
 
 	protected Change createUndoChange(long stampToRestore) {
-		return new RenameSourceFolderChange(null, createNewPath(), getNewName(), getOldName(), getComment(), stampToRestore);
+		return new RenameSourceFolderChange(createNewPath(), getNewName(), getOldName(), stampToRestore);
 	}
 
 	protected void doRename(IProgressMonitor pm) throws CoreException {

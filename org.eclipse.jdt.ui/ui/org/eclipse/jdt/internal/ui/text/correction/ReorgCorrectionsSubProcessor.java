@@ -123,7 +123,7 @@ public class ReorgCorrectionsSubProcessor {
 		String newCUName= JavaModelUtil.getRenamedCUName(cu, currTypeName);
 		ICompilationUnit newCU= ((IPackageFragment) (cu.getParent())).getCompilationUnit(newCUName);
 		if (!newCU.exists() && !isLinked && !JavaConventions.validateCompilationUnitName(newCUName).matches(IStatus.ERROR)) {
-			RenameCompilationUnitChange change= new RenameCompilationUnitChange(null, cu, newCUName, null);
+			RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);
 
 			// rename CU
 			String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renamecu_description, newCUName);

@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -52,6 +51,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
+import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -61,9 +61,9 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -425,7 +425,6 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.RenamePackageRefactoring_creating_change, 1);
-			final Map arguments= new HashMap();
 			String project= null;
 			IJavaProject javaProject= fPackage.getJavaProject();
 			if (javaProject != null)
@@ -436,18 +435,22 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			if (fRenameSubpackages)
 				comment.addSetting(RefactoringCoreMessages.RenamePackageProcessor_rename_subpackages);
-			final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(IJavaRefactorings.RENAME_PACKAGE, project, description, comment.asString(), arguments, flags);
-			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fPackage));
-			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
-			if (fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
-				arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
-			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
-			arguments.put(ATTRIBUTE_QUALIFIED, Boolean.valueOf(fUpdateQualifiedNames).toString());
-			arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
-			arguments.put(ATTRIBUTE_HIERARCHICAL, Boolean.valueOf(fRenameSubpackages).toString());
+			final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
+			descriptor.setProject(project);
+			descriptor.setDescription(description);
+			descriptor.setComment(comment.asString());
+			descriptor.setFlags(flags);
+			descriptor.setJavaElement(fPackage);
+			descriptor.setNewName(getNewElementName());
+			descriptor.setUpdateReferences(fUpdateReferences);
+			descriptor.setUpdateTextualOccurrences(fUpdateTextualMatches);
+			descriptor.setUpdateQualifiedNames(fUpdateQualifiedNames);
+			if (fUpdateQualifiedNames && fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
+				descriptor.setFileNamePatterns(fFilePatterns);
+			descriptor.setUpdateHierarchy(fRenameSubpackages);
 			final DynamicValidationRefactoringChange result= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.RenamePackageRefactoring_change_name);
 			result.addAll(fChangeManager.getAllChanges());
-			result.add(new RenamePackageChange(null, fPackage, getNewElementName(), comment.asString(), fRenameSubpackages));
+			result.add(new RenamePackageChange( fPackage, getNewElementName(),  fRenameSubpackages));
 			monitor.worked(1);
 			return result;
 		} finally {

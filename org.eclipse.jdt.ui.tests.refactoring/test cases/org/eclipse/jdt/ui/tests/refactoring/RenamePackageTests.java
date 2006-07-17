@@ -47,16 +47,16 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -104,11 +104,12 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 	
 	// -------------
-	private RenameRefactoring createRefactoring(IPackageFragment pack, String newName) throws CoreException {
-		RenamePackageProcessor processor= new RenamePackageProcessor(pack);
-		RenameRefactoring result= new RenameRefactoring(processor);
-		processor.setNewElementName(newName);
-		return result;
+	private RenameJavaElementDescriptor createRefactoringDescriptor(IPackageFragment pack, String newName) throws CoreException {
+		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
+		descriptor.setJavaElement(pack);
+		descriptor.setNewName(newName);
+		descriptor.setUpdateReferences(true);
+		return descriptor;
 	}
 
 	/* non java-doc
@@ -125,8 +126,7 @@ public class RenamePackageTests extends RefactoringTest {
 				}	
 			}
 			IPackageFragment thisPackage= packages[0];
-			Refactoring ref= createRefactoring(thisPackage, newPackageName);
-			RefactoringStatus result= performRefactoring(ref);
+			RefactoringStatus result= performRefactoring(createRefactoringDescriptor(thisPackage, newPackageName));
 			assertNotNull("precondition was supposed to fail", result);
 			if (fIsVerbose)
 				DebugUtils.dump("" + result);
@@ -151,8 +151,7 @@ public class RenamePackageTests extends RefactoringTest {
 				packages[i]= getRoot().createPackageFragment(packageNames[i], true, null);
 			}
 			IPackageFragment thisPackage= packages[0];
-			Refactoring ref= createRefactoring(thisPackage, newPackageName);
-			RefactoringStatus result= performRefactoring(ref);
+			RefactoringStatus result= performRefactoring(createRefactoringDescriptor(thisPackage, newPackageName));
 			assertNotNull("precondition was supposed to fail", result);
 			if (fIsVerbose)
 				DebugUtils.dump("" + result);
@@ -220,12 +219,11 @@ public class RenamePackageTests extends RefactoringTest {
 				}
 				moveHandles= ParticipantTesting.createHandles(movedObjects.toArray());
 			}
-			RenameRefactoring ref= createRefactoring(thisPackage, newPackageName);
-			RenamePackageProcessor processor= (RenamePackageProcessor) ref.getProcessor();
-			processor.setUpdateReferences(fUpdateReferences);
-			processor.setUpdateTextualMatches(fUpdateTextualMatches);
-			setFilePatterns(processor);
-			RefactoringStatus result= performRefactoring(ref);
+			RenameJavaElementDescriptor descriptor= createRefactoringDescriptor(thisPackage, newPackageName);
+			descriptor.setUpdateReferences(fUpdateReferences);
+			descriptor.setUpdateTextualOccurrences(fUpdateTextualMatches);
+			setFilePatterns(descriptor);
+			RefactoringStatus result= performRefactoring(descriptor);
 			assertEquals("preconditions were supposed to pass", null, result);
 			
 			if (isRename) {
@@ -311,13 +309,12 @@ public class RenamePackageTests extends RefactoringTest {
 		
 		public void execute() throws Exception {
 			IPackageFragment thisPackage= fPackages[0];
-			RenameRefactoring ref= createRefactoring(thisPackage, fNewPackageName);
-			RenamePackageProcessor processor= (RenamePackageProcessor) ref.getProcessor();
-			processor.setUpdateReferences(fUpdateReferences);
-			processor.setUpdateTextualMatches(fUpdateTextualMatches);
-			setFilePatterns(processor);
-			processor.setRenameSubpackages(fRenameSubpackages);
-			RefactoringStatus result= performRefactoring(ref);
+			RenameJavaElementDescriptor descriptor= createRefactoringDescriptor(thisPackage, fNewPackageName);
+			descriptor.setUpdateReferences(fUpdateReferences);
+			descriptor.setUpdateTextualOccurrences(fUpdateTextualMatches);
+			setFilePatterns(descriptor);
+			descriptor.setUpdateHierarchy(fRenameSubpackages);
+			RefactoringStatus result= performRefactoring(descriptor);
 			assertEquals("preconditions were supposed to pass", null, result);
 			
 			assertTrue("package not renamed: " + fPackageNames[0], ! getRoot().getPackageFragment(fPackageNames[0]).exists());
@@ -375,12 +372,12 @@ public class RenamePackageTests extends RefactoringTest {
 			}
 		}
 		
-		RenameRefactoring ref= createRefactoring(thisPackage, newPackageName);
-		RenamePackageProcessor processor= (RenamePackageProcessor) ref.getProcessor();
-		processor.setUpdateReferences(fUpdateReferences);
-		processor.setUpdateTextualMatches(fUpdateTextualMatches);
-		setFilePatterns(processor);
-		RefactoringStatus result= performRefactoring(ref);
+		RenameJavaElementDescriptor descriptor= createRefactoringDescriptor(thisPackage, newPackageName);
+		descriptor.setUpdateReferences(fUpdateReferences);
+		descriptor.setUpdateTextualOccurrences(fUpdateTextualMatches);
+		setFilePatterns(descriptor);
+		descriptor.setUpdateHierarchy(fRenameSubpackages);
+		RefactoringStatus result= performRefactoring(descriptor);
 		assertEquals("preconditions were supposed to pass", null, result);
 		
 		assertTrue("package not renamed", ! roots[0].getPackageFragment(packageNames[0][0]).exists());
@@ -458,10 +455,10 @@ public class RenamePackageTests extends RefactoringTest {
 			JavaProjectHelper.removeSourceContainer(getRoot().getJavaProject(), rootNames[r]);
 	}
 	
-	private void setFilePatterns(RenamePackageProcessor processor) {
-		processor.setUpdateQualifiedNames(fQualifiedNamesFilePatterns != null);
+	private void setFilePatterns(RenameJavaElementDescriptor descriptor) {
+		descriptor.setUpdateQualifiedNames(fQualifiedNamesFilePatterns != null);
 		if (fQualifiedNamesFilePatterns != null)
-			processor.setFilePatterns(fQualifiedNamesFilePatterns);
+			descriptor.setFileNamePatterns(fQualifiedNamesFilePatterns);
 	}
 
 	// ---------- tests -------------	
@@ -573,12 +570,12 @@ public class RenamePackageTests extends RefactoringTest {
 		renameHandles[packageNames.length]= ParticipantTesting.createHandles(thisPackage.getResource())[0];
 		
 		// --- execute:
-		RenameRefactoring ref= createRefactoring(thisPackage, "jdiverge");
-		RenamePackageProcessor processor= (RenamePackageProcessor) ref.getProcessor();
-		processor.setUpdateReferences(fUpdateReferences);
-		processor.setUpdateTextualMatches(fUpdateTextualMatches);
-		setFilePatterns(processor);
-		processor.setRenameSubpackages(fRenameSubpackages);
+		RenameJavaElementDescriptor descriptor= createRefactoringDescriptor(thisPackage, "jdiverge");
+		descriptor.setUpdateReferences(fUpdateReferences);
+		descriptor.setUpdateTextualOccurrences(fUpdateTextualMatches);
+		setFilePatterns(descriptor);
+		descriptor.setUpdateHierarchy(fRenameSubpackages);
+		Refactoring ref= createRefactoring(descriptor);
 
 		performDummySearch();
 		IUndoManager undoManager= getUndoManager();
@@ -765,8 +762,7 @@ public class RenamePackageTests extends RefactoringTest {
 		final ResourceAttributes attributes= resource.getResourceAttributes();
 		if (attributes != null)
 			attributes.setReadOnly(true);
-		RenameRefactoring ref= createRefactoring(thisPackage, newPackageName);
-		RefactoringStatus result= performRefactoring(ref);
+		RefactoringStatus result= performRefactoring(createRefactoringDescriptor(thisPackage, newPackageName));
 		assertEquals("preconditions were supposed to pass", null, result);
 		
 		assertTrue("package not renamed", ! getRoot().getPackageFragment(packageNames[0]).exists());

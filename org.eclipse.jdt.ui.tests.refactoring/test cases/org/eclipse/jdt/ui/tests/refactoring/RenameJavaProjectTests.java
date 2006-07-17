@@ -24,8 +24,8 @@ import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProcessor;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -69,11 +69,15 @@ public class RenameJavaProjectTests extends RefactoringTest {
 
 			ParticipantTesting.reset();
 			String[] handles= ParticipantTesting.createHandles(p1, p1.getResource());
-			RenameJavaProjectProcessor processor= new RenameJavaProjectProcessor(p1);
-			RenameRefactoring ref= new RenameRefactoring(processor);
-			assertTrue(ref.isApplicable());
-			processor.setNewElementName(newProjectName);
 			
+			RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_JAVA_PROJECT);
+			descriptor.setJavaElement(p1);
+			descriptor.setUpdateReferences(true);
+			descriptor.setNewName(newProjectName);
+			
+			RenameRefactoring ref= (RenameRefactoring) createRefactoring(descriptor);
+			assertTrue(ref.isApplicable());
+
 			RefactoringStatus result= performRefactoring(ref);
 			
 			assertEquals("not expected to fail", null, result);
@@ -157,11 +161,15 @@ public class RenameJavaProjectTests extends RefactoringTest {
 
 			ParticipantTesting.reset();
 			String[] handles= ParticipantTesting.createHandles(p1, p1.getResource());
-			RenameJavaProjectProcessor processor= new RenameJavaProjectProcessor(p1);
-			RenameRefactoring ref= new RenameRefactoring(processor);
-			assertTrue(ref.isApplicable());
-			processor.setNewElementName(newProjectName);
 			
+			RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_JAVA_PROJECT);
+			descriptor.setJavaElement(p1);
+			descriptor.setUpdateReferences(true);
+			descriptor.setNewName(newProjectName);
+			
+			RenameRefactoring ref= (RenameRefactoring) createRefactoring(descriptor);
+			assertTrue(ref.isApplicable());
+
 			RefactoringStatus result= performRefactoring(ref);
 			
 			assertEquals("not expected to fail", null, result);

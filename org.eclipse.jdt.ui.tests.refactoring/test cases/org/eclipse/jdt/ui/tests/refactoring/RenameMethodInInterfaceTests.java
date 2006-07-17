@@ -15,16 +15,19 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
+
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 
 public class RenameMethodInInterfaceTests extends RefactoringTest {
 	
@@ -59,10 +62,14 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType interfaceI= getType(cu, "I");
-		RenameMethodProcessor processor= new RenameVirtualMethodProcessor(interfaceI.getMethod(methodName, signatures));
-		RenameRefactoring ref= new RenameRefactoring(processor);
-		processor.setNewElementName(newMethodName);
-		RefactoringStatus result= performRefactoring(ref);
+		IMethod method= interfaceI.getMethod(methodName, signatures);
+		
+		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
+		descriptor.setJavaElement(method);
+		descriptor.setUpdateReferences(true);
+		descriptor.setNewName(newMethodName);
+
+		RefactoringStatus result= performRefactoring(descriptor);
 		assertNotNull("precondition was supposed to fail", result);
 	}
 	
@@ -73,12 +80,16 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass, boolean updateReferences, boolean createDelegate) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType interfaceI= getType(cu, "I");
-		RenameMethodProcessor processor= new RenameVirtualMethodProcessor(interfaceI.getMethod(methodName, signatures));
-		RenameRefactoring ref= new RenameRefactoring(processor);
-		processor.setUpdateReferences(updateReferences);
-		processor.setNewElementName(newMethodName);
-		processor.setDelegateUpdating(createDelegate);
-		assertEquals("was supposed to pass", null, performRefactoring(ref));
+		IMethod method= interfaceI.getMethod(methodName, signatures);
+		
+		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
+		descriptor.setJavaElement(method);
+		descriptor.setUpdateReferences(updateReferences);
+		descriptor.setNewName(newMethodName);
+		descriptor.setKeepOriginal(createDelegate);
+		descriptor.setDeprecateDelegate(true);
+
+		assertEquals("was supposed to pass", null, performRefactoring(descriptor));
 		if (!shouldPass){
 			assertTrue("incorrect renaming because of a java model bug", ! getFileContents(getOutputTestFileName("A")).equals(cu.getSource()));
 			return;

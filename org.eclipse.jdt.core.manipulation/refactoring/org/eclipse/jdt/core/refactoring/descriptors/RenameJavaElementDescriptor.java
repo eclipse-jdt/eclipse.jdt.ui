@@ -142,6 +142,41 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 */
 	public RenameJavaElementDescriptor(final String id) {
 		super(id);
+		Assert.isLegal(checkId(id), "Refactoring id is not a rename refactoring id"); //$NON-NLS-1$
+	}
+
+	/**
+	 * Checks whether the refactoring id is valid.
+	 * 
+	 * @param id
+	 *            the refactoring id
+	 * @return the outcome of the validation
+	 */
+	private boolean checkId(final String id) {
+		Assert.isNotNull(id);
+		if (id.equals(IJavaRefactorings.RENAME_COMPILATION_UNIT))
+			return true;
+		else if (id.equals(IJavaRefactorings.RENAME_ENUM_CONSTANT))
+			return true;
+		else if (id.equals(IJavaRefactorings.RENAME_FIELD))
+			return true;
+		else if (id.equals(IJavaRefactorings.RENAME_JAVA_PROJECT))
+			return true;
+		else if (id.equals(IJavaRefactorings.RENAME_LOCAL_VARIABLE))
+			return true;
+		else if (id.equals(IJavaRefactorings.RENAME_METHOD))
+			return true;
+		else if (id.equals(IJavaRefactorings.RENAME_PACKAGE))
+			return true;
+		else if (id.equals(IJavaRefactorings.RENAME_RESOURCE))
+			return true;
+		else if (id.equals(IJavaRefactorings.RENAME_SOURCE_FOLDER))
+			return true;
+		else if (id.equals(IJavaRefactorings.RENAME_TYPE))
+			return true;
+		else if (id.equals(IJavaRefactorings.RENAME_TYPE_PARAMETER))
+			return true;
+		return false;
 	}
 
 	/**
