@@ -12,20 +12,17 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 
 public class EditOutputFolderAction2 extends EditOutputFolderAction {
 	
 	private final HintTextGroup fProvider;
-	private boolean fShowOutputFolders;
 
 	public EditOutputFolderAction2(NewSourceContainerWorkbookPage listener, HintTextGroup provider, IRunnableContext context) {
 		super(null, context, listener);
 		
 		fProvider= provider;
-		fShowOutputFolders= false;
     }
 
 	/**
@@ -34,19 +31,4 @@ public class EditOutputFolderAction2 extends EditOutputFolderAction {
 	protected void selectAndReveal(ISelection selection) {
 		fProvider.handleEditOutputFolder(((StructuredSelection)selection).toList());	 
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean canHandle(IStructuredSelection elements) {
-		if (!fShowOutputFolders)
-			return false;
-		
-	    return super.canHandle(elements);
-	}
-
-	public void showOutputFolders(boolean showOutputFolders) {
-		fShowOutputFolders= showOutputFolders;
-    }
-
 }

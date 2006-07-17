@@ -23,7 +23,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.ToolBar;
 
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
@@ -155,13 +154,20 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     /** Elements that represent classpath container (= libraries) */
     public static final int CONTAINER= 0x14;
     
-    private BuildpathModifierAction[] fActions;
     private int fLastType;
     private List fListeners;
-    private static final int fContextSensitiveActions= 5;
 	private final ISelectionProvider fSelectionProvider;
 	
-	private final EditOutputFolderAction2 fEditOutputFolderAction;
+	private final AddFolderToBuildpathAction fAddFolderToBuildpathAction;
+	private final RemoveFromBuildpathAction fRemoveFromBuildpathAction;
+	private final ExcludeFromBuildpathAction fExcludeFromBuildpathAction;
+	private final IncludeToBuildpathAction fIncludeToBuildpathAction;
+	private final EditFilterAction fEditFilterAction;
+	private final EditOutputFolderAction fEditOutputFolderAction;
+	private final ClasspathModifierDropDownAction fDropDownAction;
+	private final CreateLinkedSourceFolderAction fCreateLinkedSourceFolderAction;
+	private final CreateSourceFolderAction fCreateSourceFolderAction;
+	private final ResetAllAction fResetAllAction;
     
     /**
      * Constructor which creates the operations and based on this 
@@ -181,52 +187,43 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
 		
         fLastType= UNDEFINED;
         fListeners= new ArrayList();
-        fActions= new BuildpathModifierAction[8];
         
         if (context == null)
         	context= PlatformUI.getWorkbench().getProgressService();
         
-        AddFolderToBuildpathAction2 addFolderToBuildpathAction= new AddFolderToBuildpathAction2(listener, provider, context);
-        selectionProvider.addSelectionChangedListener(addFolderToBuildpathAction);
-		fActions[0]= addFolderToBuildpathAction;
+        fAddFolderToBuildpathAction= new AddFolderToBuildpathAction2(listener, provider, context);
+		selectionProvider.addSelectionChangedListener(fAddFolderToBuildpathAction);
 		
-		RemoveFromBuildpathAction2 removeFromBuildpathAction= new RemoveFromBuildpathAction2(listener, provider, context);
-		selectionProvider.addSelectionChangedListener(removeFromBuildpathAction);
-		fActions[1]= removeFromBuildpathAction;
+		fRemoveFromBuildpathAction= new RemoveFromBuildpathAction2(listener, provider, context);
+		selectionProvider.addSelectionChangedListener(fRemoveFromBuildpathAction);
         
-		//TODO: Remove! is only enabled for IPackageFragment which are never shown in DialogPackageExplorer
-		ExcludeFromBuildpathAction2 excludeFromBuildpathAction= new ExcludeFromBuildpathAction2(listener, provider, context);
-		selectionProvider.addSelectionChangedListener(excludeFromBuildpathAction);
-		fActions[2]= excludeFromBuildpathAction;
+		//TODO Remove, never enabled
+		fExcludeFromBuildpathAction= new ExcludeFromBuildpathAction2(listener, provider, context);
+		selectionProvider.addSelectionChangedListener(fExcludeFromBuildpathAction);
 		
-		//TODO: Remove! is only enabled for IPackageFragment which are never shown in DialogPackageExplorer
-		IncludeToBuildpathAction2 includeToBuildpathAction= new IncludeToBuildpathAction2(listener, provider, context);
-		selectionProvider.addSelectionChangedListener(includeToBuildpathAction);
-		fActions[3]= includeToBuildpathAction;
+		//TODO Remove, never enabled
+		fIncludeToBuildpathAction= new IncludeToBuildpathAction2(listener, provider, context);
+		selectionProvider.addSelectionChangedListener(fIncludeToBuildpathAction);
 		
-			EditFilterAction2 editFilterAction= new EditFilterAction2(listener, provider, context);
-			selectionProvider.addSelectionChangedListener(editFilterAction);
+			fEditFilterAction= new EditFilterAction2(listener, provider, context);
+			selectionProvider.addSelectionChangedListener(fEditFilterAction);
 	
 	        fEditOutputFolderAction= new EditOutputFolderAction2(listener, provider, context);
 			selectionProvider.addSelectionChangedListener(fEditOutputFolderAction);
         
-        ClasspathModifierDropDownAction dropDown= new ClasspathModifierDropDownAction(editFilterAction, 
-                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Configure_label, 
-                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Configure_tooltip); 
-        selectionProvider.addSelectionChangedListener(dropDown); 
-        dropDown.addAction(fEditOutputFolderAction);
-        fActions[4]= dropDown;
+        fDropDownAction= new ClasspathModifierDropDownAction(fEditFilterAction, 
+                        NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Configure_label, 
+                        NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Configure_tooltip);
+		selectionProvider.addSelectionChangedListener(fDropDownAction); 
+        fDropDownAction.addAction(fEditOutputFolderAction);
         
-        CreateLinkedSourceFolderAction2 createLinkedSourceFolderAction= new CreateLinkedSourceFolderAction2(listener, provider, context);
-        selectionProvider.addSelectionChangedListener(createLinkedSourceFolderAction);
-        fActions[5]= createLinkedSourceFolderAction;
+        fCreateLinkedSourceFolderAction= new CreateLinkedSourceFolderAction2(listener, provider, context);
+		selectionProvider.addSelectionChangedListener(fCreateLinkedSourceFolderAction);
         
-        CreateSourceFolderAction2 createSourceFolderAction= new CreateSourceFolderAction2(listener, provider, context);
-        selectionProvider.addSelectionChangedListener(createSourceFolderAction);
-        fActions[6]= createSourceFolderAction;
+        fCreateSourceFolderAction= new CreateSourceFolderAction2(listener, provider, context);
+		selectionProvider.addSelectionChangedListener(fCreateSourceFolderAction);
 
-        ResetAllAction resetAllAction= new ResetAllAction(listener, provider, context);
-        fActions[7]= resetAllAction;
+        fResetAllAction= new ResetAllAction(listener, provider, context);
         
         //options:
         //AddArchiveToBuildpathAction
@@ -234,23 +231,6 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         //AddSelectedLibraryToBuildpathAction
         //ResetAction
         //ResetAllOutputFoldersAction
-    }
-    
-    public BuildpathModifierAction[] getActions() {
-    	List result= new ArrayList();
-    	for (int i= 0; i < fActions.length; i++) {
-			BuildpathModifierAction action= fActions[i];
-			if (action instanceof ClasspathModifierDropDownAction) {
-				ClasspathModifierDropDownAction dropDownAction= (ClasspathModifierDropDownAction)action;
-				BuildpathModifierAction[] actions= dropDownAction.getActions();
-				for (int j= 0; j < actions.length; j++) {
-					result.add(actions[j]);
-				}
-			} else {
-				result.add(action);
-			}
-		}
-    	return (BuildpathModifierAction[])result.toArray(new BuildpathModifierAction[result.size()]);
     }
     
     /**
@@ -276,11 +256,15 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      */
     public ToolBarManager createLeftToolBarManager(ViewerPane pane) {
         ToolBarManager tbm= pane.getToolBarManager();
-        for (int i= 0; i < fContextSensitiveActions; i++) {
-            tbm.add(fActions[i]);
-            if (i == 1 || i == 3)
-                tbm.add(new Separator());
-        }
+        
+        tbm.add(fAddFolderToBuildpathAction);
+        tbm.add(fRemoveFromBuildpathAction);
+        tbm.add(new Separator());
+        tbm.add(fExcludeFromBuildpathAction);
+        tbm.add(fIncludeToBuildpathAction);
+        tbm.add(new Separator());
+        tbm.add(fDropDownAction);
+        
         tbm.update(true);
         return tbm;
     }
@@ -296,10 +280,11 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         ToolBar tb= new ToolBar(pane, SWT.FLAT);
         pane.setTopRight(tb);
         ToolBarManager tbm= new ToolBarManager(tb);
-        for (int i= fContextSensitiveActions; i < fActions.length; i++) {
-        	tbm.add(fActions[i]);
-        }
-        tbm.add(new HelpAction());
+        
+        tbm.add(fCreateLinkedSourceFolderAction);
+        tbm.add(fCreateSourceFolderAction);
+        tbm.add(fResetAllAction);
+        
         tbm.update(true);
         return tbm;
     }
@@ -435,14 +420,11 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         List availableActions= getAvailableActions(selectedElements, project);
         BuildpathModifierAction[] actions= new BuildpathModifierAction[availableActions.size()];
         String[] descriptions= new String[availableActions.size()];
-        if (availableActions.size() > 0) {
-            for(int i= 0; i < availableActions.size(); i++) {
-                BuildpathModifierAction action= (BuildpathModifierAction)availableActions.get(i);
-                actions[i]= action;
-                descriptions[i]= action.getDetailedDescription();
-            }
-        } else
-            descriptions= noAction(type);
+        for(int i= 0; i < availableActions.size(); i++) {
+            BuildpathModifierAction action= (BuildpathModifierAction)availableActions.get(i);
+            actions[i]= action;
+            descriptions[i]= action.getDetailedDescription();
+        }
 
         informListeners(descriptions, actions);
     }
@@ -644,40 +626,43 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
 			return new ArrayList();
 		}
 		
-        List actions= new ArrayList();
-        for(int i= 0; i < fActions.length; i++) {
-            if(fActions[i] instanceof ClasspathModifierDropDownAction) {
-                if(changeEnableState(fActions[i], selectedElements)) {
-                    BuildpathModifierAction[] dropDownActions= ((ClasspathModifierDropDownAction)fActions[i]).getActions();
-                    for(int j= 0; j < dropDownActions.length; j++) {
-                        if(changeEnableState(dropDownActions[j], selectedElements))
-                            actions.add(dropDownActions[j]);
-                    }
-                }
-            } else if(changeEnableState(fActions[i], selectedElements)) {
-                actions.add(fActions[i]);
-            }
-        }
-        return actions;
-    }
-    
-    /**
-     * Changes the enabled state of an action if necessary.
-     * 
-     * @param action the action to change it's state for
-     * @param selectedElements a list of selected elements 
-     * @return <code>true</code> if the action is valid (= enabled), <code>false</code> otherwise
-     * @throws JavaModelException
-     */
-    private boolean changeEnableState(BuildpathModifierAction action, List selectedElements) throws JavaModelException {	
-		//TODO: change information flow 
-		//is: DialogPackageExplorer->DialogPackageExplorerActionGroup->ClasspathModifierAction
-		//                           DialogPackageExplorerActionGroup<-
-		//                           DialogPackageExplorerActionGroup->HintTextGroup
-		//should: DialogPackageExplorer->ClasspathModifierAction->HintTextGroup
+		SelectionChangedEvent changedEvent= new SelectionChangedEvent(fSelectionProvider, new StructuredSelection(selectedElements));
+		
+		List actions= new ArrayList();
+		
+		fAddFolderToBuildpathAction.selectionChanged(changedEvent);
+		if (fAddFolderToBuildpathAction.isEnabled())
+    		actions.add(fAddFolderToBuildpathAction);
     	
-		action.selectionChanged(new SelectionChangedEvent(fSelectionProvider, new StructuredSelection(selectedElements)));
-		return action.isEnabled();
+		fRemoveFromBuildpathAction.selectionChanged(changedEvent);
+    	if (fRemoveFromBuildpathAction.isEnabled())
+    		actions.add(fRemoveFromBuildpathAction);
+    	
+    	fExcludeFromBuildpathAction.selectionChanged(changedEvent);
+    	if (fExcludeFromBuildpathAction.isEnabled())
+    		actions.add(fExcludeFromBuildpathAction);
+    		
+    	fIncludeToBuildpathAction.selectionChanged(changedEvent);
+    	if (fIncludeToBuildpathAction.isEnabled())
+    		actions.add(fIncludeToBuildpathAction);
+    	
+    	fEditFilterAction.selectionChanged(changedEvent);
+    	if (fEditFilterAction.isEnabled())
+    		actions.add(fEditFilterAction);
+    	
+    	fEditOutputFolderAction.selectionChanged(changedEvent);
+    	if (fEditOutputFolderAction.isEnabled())
+    		actions.add(fEditOutputFolderAction);
+    	
+    	fCreateLinkedSourceFolderAction.selectionChanged(changedEvent);
+    	if (fCreateLinkedSourceFolderAction.isEnabled())
+    		actions.add(fCreateLinkedSourceFolderAction);
+    	
+    	fCreateSourceFolderAction.selectionChanged(changedEvent);
+    	if (fCreateSourceFolderAction.isEnabled())
+    		actions.add(fCreateSourceFolderAction);
+    
+	    return actions;
     }
     
     /**
@@ -686,21 +671,31 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * @param menu the menu to be filled up with actions
      */
     public void fillContextMenu(IMenuManager menu) {
-    	BuildpathModifierAction[] actions2= getActions();
-    	for (int i= 0; i < actions2.length; i++) {
-    		IAction action= actions2[i];
-            if (action instanceof ClasspathModifierDropDownAction) {
-                if (action.isEnabled()) {
-                    IAction[] actions= ((ClasspathModifierDropDownAction)action).getActions();
-                    for(int j= 0; j < actions.length; j++) {
-                        if(actions[j].isEnabled())
-                            menu.add(actions[j]);
-                    }
-                }
-            }
-            else if (action.isEnabled())
-                menu.add(action);
-        }
+    	
+    	if (fAddFolderToBuildpathAction.isEnabled())
+    		menu.add(fAddFolderToBuildpathAction);
+    	
+    	if (fRemoveFromBuildpathAction.isEnabled())
+    		menu.add(fRemoveFromBuildpathAction);
+    	
+    	if (fExcludeFromBuildpathAction.isEnabled())
+    		menu.add(fExcludeFromBuildpathAction);
+    		
+    	if (fIncludeToBuildpathAction.isEnabled())
+    		menu.add(fIncludeToBuildpathAction);
+    	
+    	if (fEditFilterAction.isEnabled())
+    		menu.add(fEditFilterAction);
+    	
+    	if (fEditOutputFolderAction.isEnabled())
+    		menu.add(fEditOutputFolderAction);
+    	
+    	if (fCreateLinkedSourceFolderAction.isEnabled())
+    		menu.add(fCreateLinkedSourceFolderAction);
+    	
+    	if (fCreateSourceFolderAction.isEnabled())
+    		menu.add(fCreateSourceFolderAction);
+    	
         super.fillContextMenu(menu);
     }
     
@@ -731,5 +726,13 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     public void dispose() {
         fListeners.clear();
         super.dispose();
+    }
+
+	public ResetAllAction getResetAllAction() {
+	    return fResetAllAction;
+    }
+
+	public EditOutputFolderAction getEditOutputFolderAction() {
+	    return fEditOutputFolderAction;
     }
 }

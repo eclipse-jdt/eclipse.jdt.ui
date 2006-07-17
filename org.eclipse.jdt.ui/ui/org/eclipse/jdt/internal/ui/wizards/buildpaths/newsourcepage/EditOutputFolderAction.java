@@ -51,9 +51,12 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 
 	private final IRunnableContext fContext;
 	private final IClasspathModifierListener fListener;
+	private boolean fShowOutputFolders;
 
 	public EditOutputFolderAction(final IWorkbenchSite site) {
 		this(site, PlatformUI.getWorkbench().getProgressService(), null);
+		
+		fShowOutputFolders= true;
 	}
 
 	public EditOutputFolderAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
@@ -61,6 +64,7 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 		
 		fContext= context;
 		fListener= listener;
+		fShowOutputFolders= false;
 		
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_label);
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_OUTPUT_FOLDER);
@@ -74,6 +78,11 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 	public String getDetailedDescription() {
 	    return NewWizardMessages.PackageExplorerActionGroup_FormText_EditOutputFolder;
 	}
+	
+
+	public void showOutputFolders(boolean showOutputFolders) {
+		fShowOutputFolders= showOutputFolders;
+    }
 
 	/**
 	 * {@inheritDoc}
@@ -194,6 +203,9 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 	}
 
 	protected boolean canHandle(final IStructuredSelection elements) {
+		if (!fShowOutputFolders)
+			return false;
+		
 		if (elements.size() != 1)
 			return false;
 

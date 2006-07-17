@@ -152,13 +152,7 @@ public final class HintTextGroup implements IPackageExplorerActionListener {
         fOldOutputLocation= fOutputLocationField.getText();
         
         try {
-        	BuildpathModifierAction[] actions= fActionGroup.getActions();
-			for (int i= 0; i < actions.length; i++) {
-	            if (actions[i] instanceof ResetAllAction) {
-	            	((ResetAllAction)actions[i]).setBreakPoint(fCurrJProject);
-	            	return;
-	            }
-            }
+			fActionGroup.getResetAllAction().setBreakPoint(fCurrJProject);        	
         } catch (JavaModelException e) {
 	     	JavaPlugin.log(e);
         }

@@ -338,13 +338,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
                 	if (element instanceof CPListElementAttribute) {
 						CPListElementAttribute attribute= (CPListElementAttribute)element;
                 		if (attribute.getKey().equals(CPListElement.OUTPUT)) {
-                			BuildpathModifierAction[] actions= fActionGroup.getActions();
-                			for (int i= 0; i < actions.length; i++) {
-								if (actions[i] instanceof EditOutputFolderAction) {
-									actions[i].run();
-									return;
-								}
-							}
+                			fActionGroup.getEditOutputFolderAction().run();
                 		}
                 	}
                 }
