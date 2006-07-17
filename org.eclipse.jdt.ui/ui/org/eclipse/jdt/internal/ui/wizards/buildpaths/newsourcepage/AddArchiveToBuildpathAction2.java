@@ -16,8 +16,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
-
-import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 //Warning: This is unused and untested code!
 public class AddArchiveToBuildpathAction2 extends AddArchiveToBuildpathAction implements IClasspathModifierAction {
 
@@ -34,13 +32,6 @@ public class AddArchiveToBuildpathAction2 extends AddArchiveToBuildpathAction im
 	 */
 	protected void selectAndReveal(ISelection selection) {
 	    fInformationProvider.handleAddToCP(((StructuredSelection)selection).toList());
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getDescription(int type) {
-		return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath_archives;
 	}
 
 	/**

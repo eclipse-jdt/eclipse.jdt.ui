@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -65,6 +66,27 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_EXCLUDE_FROM_BUILDPATH);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_tooltip);
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_EXCLUDE_FROM_BUILDPATH);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDetailedDescription() {
+		if (!isEnabled())
+			return null;
+		
+		if (getSelectedElements().size() != 1)
+			return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Exclude;
+			
+		IJavaElement elem= (IJavaElement) getSelectedElements().get(0);
+        String name= ClasspathModifier.escapeSpecialChars(elem.getElementName());
+        if (elem instanceof IPackageFragment) {
+        	return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ExcludePackage, name);
+        } else if (elem instanceof ICompilationUnit) {
+        	return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ExcludeFile, name); 
+        }
+        
+        return null;
 	}
 	
 	/**

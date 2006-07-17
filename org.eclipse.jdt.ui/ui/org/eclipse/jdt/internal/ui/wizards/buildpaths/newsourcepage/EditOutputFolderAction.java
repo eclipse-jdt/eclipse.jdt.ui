@@ -67,6 +67,13 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip);
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_OUTPUT_FOLDER);
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDetailedDescription() {
+	    return NewWizardMessages.PackageExplorerActionGroup_FormText_EditOutputFolder;
+	}
 
 	/**
 	 * {@inheritDoc}

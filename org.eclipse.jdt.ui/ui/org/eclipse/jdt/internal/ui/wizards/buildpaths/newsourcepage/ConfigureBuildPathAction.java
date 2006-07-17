@@ -43,6 +43,13 @@ public class ConfigureBuildPathAction extends BuildpathModifierAction {
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDetailedDescription() {
+	    return null;
+	}
+	
 	public void run() {
 		IProject project= null;
 		Object firstElement= getSelectedElements().get(0);

@@ -61,6 +61,12 @@ public class ResetAllAction extends BuildpathModifierAction implements IClasspat
 		setEnabled(false);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDetailedDescription() {
+		return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_ResetAll;
+	}
 
 	public void setBreakPoint(IJavaProject javaProject) throws JavaModelException {
 		fJavaProject= javaProject;
@@ -142,13 +148,6 @@ public class ResetAllAction extends BuildpathModifierAction implements IClasspat
 	protected void selectAndReveal(ISelection selection) {
         fProvider.handleResetAll();	
 	}
-
-	/**
-     * {@inheritDoc}
-     */
-    public String getDescription(int type) {
-    	return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_ResetAll;
-    }
 
 	/**
      * {@inheritDoc}

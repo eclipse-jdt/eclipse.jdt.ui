@@ -10,18 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
-import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 public class IncludeToBuildpathAction2 extends IncludeToBuildpathAction implements IClasspathModifierAction {
 
@@ -38,21 +32,6 @@ public class IncludeToBuildpathAction2 extends IncludeToBuildpathAction implemen
 	 */
 	protected void selectAndReveal(ISelection selection) {
 	    fProvider.defaultHandle(((StructuredSelection)selection).toList(), true);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getDescription(int type) {
-		IResource resource= (IResource) getSelectedElements().get(0);
-        String name= ClasspathModifier.escapeSpecialChars(resource.getName());
-		
-		if (type == DialogPackageExplorerActionGroup.FOLDER)
-			return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_UnexcludeFolder, name); 
-		if (type == DialogPackageExplorerActionGroup.EXCLUDED_FILE)
-			return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_UnexcludeFile, name);
-		
-		return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Unexclude, name);
 	}
 
 	/**

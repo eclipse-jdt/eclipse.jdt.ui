@@ -64,6 +64,13 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_EXTJAR);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddJarCP_tooltip);
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDetailedDescription() {
+		return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath_archives;
+	}
 
 	/**
 	 * {@inheritDoc}

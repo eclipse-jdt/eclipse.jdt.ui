@@ -19,8 +19,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
-import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
-
 public class ResetAllOutputFoldersAction2 extends ResetAllOutputFoldersAction implements IClasspathModifierAction {
 
 	private final HintTextGroup fInformationProvider;
@@ -36,13 +34,6 @@ public class ResetAllOutputFoldersAction2 extends ResetAllOutputFoldersAction im
 	 */
 	protected void selectAndReveal(ISelection selection) {
 	    fInformationProvider.defaultHandle(((StructuredSelection)selection).toList(), false);
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getDescription(int type) {
-		return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_ResetAllOutputFolders;
 	}
 
 	/**

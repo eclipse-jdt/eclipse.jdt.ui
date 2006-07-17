@@ -35,12 +35,14 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -69,6 +71,31 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 		setImageDescriptor(image);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip);
     }
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDetailedDescription() {
+		if (!isEnabled())
+			return null;
+		
+		if (getSelectedElements().size() != 1)
+			return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_FromBuildpath; 
+		
+		Object elem= getSelectedElements().get(0);
+        
+        if (elem instanceof IJavaProject) {
+            String name= ClasspathModifier.escapeSpecialChars(((IJavaElement)elem).getElementName());
+        	return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ProjectFromBuildpath, name);
+        } else if (elem instanceof IPackageFragmentRoot) {
+            String name= ClasspathModifier.escapeSpecialChars(((IJavaElement)elem).getElementName());
+        	return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_fromBuildpath, name);
+        } else if (elem instanceof ClassPathContainer) {
+        	return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_FromBuildpath;
+        }
+        
+        return null;
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -217,8 +244,6 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 		try {
 			for (Iterator iter= elements.iterator(); iter.hasNext();) {
 				Object element= iter.next();
-				if (!(element instanceof IPackageFragmentRoot || element instanceof IJavaProject || element instanceof ClassPathContainer))
-					return false;
 
 				if (element instanceof IJavaProject) {
 					IJavaProject project= (IJavaProject)element;
@@ -230,6 +255,9 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 					if (entry != null && entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 						return false;
 					}
+				} else if (element instanceof ClassPathContainer) {
+				} else {
+					return false;
 				}
 			}
 			return true;

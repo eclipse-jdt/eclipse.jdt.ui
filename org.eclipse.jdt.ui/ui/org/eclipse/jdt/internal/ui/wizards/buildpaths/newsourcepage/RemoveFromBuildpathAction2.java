@@ -14,15 +14,10 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.jdt.core.IJavaElement;
-
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 public class RemoveFromBuildpathAction2 extends RemoveFromBuildpathAction implements IClasspathModifierAction {
 
@@ -41,19 +36,6 @@ public class RemoveFromBuildpathAction2 extends RemoveFromBuildpathAction implem
 	 */
 	protected void selectAndReveal(ISelection selection) {
 	    fProvider.handleRemoveFromBP(((StructuredSelection)selection).toList(), false);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getDescription(int type) {
-		IJavaElement elem= (IJavaElement)getSelectedElements().get(0);
-        String name= ClasspathModifier.escapeSpecialChars(elem.getElementName());
-        if (type == DialogPackageExplorerActionGroup.JAVA_PROJECT)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ProjectFromBuildpath, name); 
-        if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT_ROOT || type == DialogPackageExplorerActionGroup.MODIFIED_FRAGMENT_ROOT)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_fromBuildpath, name); 
-        return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_FromBuildpath;
 	}
 
 	/**

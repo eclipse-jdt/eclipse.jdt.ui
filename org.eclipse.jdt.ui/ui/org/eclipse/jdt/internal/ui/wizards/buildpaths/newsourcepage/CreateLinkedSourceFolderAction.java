@@ -60,6 +60,13 @@ public class CreateLinkedSourceFolderAction extends BuildpathModifierAction {
 		setDescription(NewWizardMessages.PackageExplorerActionGroup_FormText_createLinkedFolder);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDetailedDescription() {
+		return NewWizardMessages.PackageExplorerActionGroup_FormText_createLinkedFolder;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.action.Action#run()
 	 */

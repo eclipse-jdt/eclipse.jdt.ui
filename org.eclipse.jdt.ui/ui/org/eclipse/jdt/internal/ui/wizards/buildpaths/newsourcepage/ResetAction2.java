@@ -16,8 +16,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
-
-import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 //Warning: This is unused and untested code!
 public class ResetAction2 extends ResetAction implements IClasspathModifierAction {
 
@@ -34,19 +32,6 @@ public class ResetAction2 extends ResetAction implements IClasspathModifierActio
 	 */
 	protected void selectAndReveal(ISelection selection) {
 	    fInformationProvider.defaultHandle(((StructuredSelection)selection).toList(), false);
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getDescription(int type) {
-		if (type == DialogPackageExplorerActionGroup.OUTPUT ||
-                type == (DialogPackageExplorerActionGroup.OUTPUT | DialogPackageExplorerActionGroup.MULTI))
-            return NewWizardMessages.PackageExplorerActionGroup_FormText_SetOutputToDefault;  
-        if (type == DialogPackageExplorerActionGroup.MODIFIED_FRAGMENT_ROOT || 
-                type == (DialogPackageExplorerActionGroup.MODIFIED_FRAGMENT_ROOT | DialogPackageExplorerActionGroup.MULTI))
-            return NewWizardMessages.PackageExplorerActionGroup_FormText_ResetFilters; 
-        return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Reset;
 	}
 
 	/**

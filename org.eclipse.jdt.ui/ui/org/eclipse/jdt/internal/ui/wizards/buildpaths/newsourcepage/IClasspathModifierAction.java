@@ -19,17 +19,6 @@ public interface IClasspathModifierAction extends IAction {
 	 */
 	public void run();
 
-	/**
-	 * Get the description suitable to the provided type
-	 * 
-	 * @param type the type of the selected element(s), must be a constant of 
-	 * <code>DialogPackageActionGroup</code>.
-	 * @return a short description of the operation.
-	 * 
-	 * @see DialogPackageExplorerActionGroup
-	 */
-	public String getDescription(int type);
-
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.action.Action#getId()
 	 */

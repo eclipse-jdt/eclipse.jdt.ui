@@ -60,6 +60,13 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
     }
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDetailedDescription() {
+		return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_ResetAllOutputFolders;
+	}
 
 	/**
 	 * {@inheritDoc}

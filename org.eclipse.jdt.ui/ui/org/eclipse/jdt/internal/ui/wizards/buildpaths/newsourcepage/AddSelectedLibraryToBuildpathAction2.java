@@ -10,18 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
-import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 //Warning: This is unused and untested code!
 public class AddSelectedLibraryToBuildpathAction2 extends AddSelectedLibraryToBuildpathAction implements IClasspathModifierAction {
@@ -39,18 +33,6 @@ public class AddSelectedLibraryToBuildpathAction2 extends AddSelectedLibraryToBu
 	 */
 	protected void selectAndReveal(ISelection selection) {
 	    fInformationProvider.handleAddToCP(((StructuredSelection)selection).toList());
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getDescription(int type) {
-		Object obj= getSelectedElements().get(0);
-        String name= ClasspathModifier.escapeSpecialChars(((IFile) obj).getName());
-        
-        if (type == DialogPackageExplorerActionGroup.ARCHIVE)
-            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ArchiveToBuildpath, name); 
-        return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath; 
 	}
 
 	/**

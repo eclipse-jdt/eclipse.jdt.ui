@@ -158,13 +158,6 @@ public class ClasspathModifierDropDownAction extends Action implements IClasspat
             fMenu = null;
         }
     }
-    
-	/**
-     * {@inheritDoc}
-     */
-    public String getDescription(int type) {
-	    return getFirstAction().getDescription(type);
-    }
 
 	/**
      * {@inheritDoc}

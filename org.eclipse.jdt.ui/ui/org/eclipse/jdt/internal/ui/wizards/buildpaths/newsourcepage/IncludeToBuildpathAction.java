@@ -19,6 +19,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.operation.IRunnableContext;
@@ -36,6 +38,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -64,6 +67,28 @@ public class IncludeToBuildpathAction extends BuildpathModifierAction {
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_INCLUDE_ON_BUILDPATH);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDetailedDescription() {
+		if (!isEnabled())
+			return null;
+		
+		if (getSelectedElements().size() != 1)
+			return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Unexclude;
+		
+		IResource resource= (IResource) getSelectedElements().get(0);
+        String name= ClasspathModifier.escapeSpecialChars(resource.getName());
+		
+        if (resource instanceof IContainer) {
+        	return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_UnexcludeFolder, name);
+        } else if (resource instanceof IFile) {
+        	return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_UnexcludeFile, name);
+        }
+        
+        return null;
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */

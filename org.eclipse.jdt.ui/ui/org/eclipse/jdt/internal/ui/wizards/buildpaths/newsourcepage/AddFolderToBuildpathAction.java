@@ -80,6 +80,28 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_ADD_AS_SOURCE_FOLDER);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_tooltip);
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDetailedDescription() {
+		if (!isEnabled())
+			return null;
+		
+		if (getSelectedElements().size() != 1)
+			return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath;
+		
+		Object obj= getSelectedElements().get(0);
+		if (obj instanceof IJavaProject) {
+			return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ProjectToBuildpath, ((IJavaProject)obj).getElementName());
+		} else if (obj instanceof IPackageFragment) {
+			return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_PackageToBuildpath, ((IPackageFragment)obj).getElementName());
+		} else if (obj instanceof IResource) {
+			return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_FolderToBuildpath, ((IResource)obj).getName());
+		}
+		
+		return null;
+	}
 
 	/**
 	 * {@inheritDoc}

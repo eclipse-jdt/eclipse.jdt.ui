@@ -625,7 +625,6 @@ public final class NewWizardMessages extends NLS {
 	public static String PackageExplorerActionGroup_FormText_Default_Include;
 	public static String PackageExplorerActionGroup_FormText_Default_Exclude;
 	public static String PackageExplorerActionGroup_FormText_Default_CreateOutput;
-	public static String PackageExplorerActionGroup_FormText_Default_Edit;
 	public static String PackageExplorerActionGroup_FormText_Default_toBuildpath;
 	public static String PackageExplorerActionGroup_FormText_Default_toBuildpath_archives;
 	public static String PackageExplorerActionGroup_FormText_Default_toBuildpath_library;

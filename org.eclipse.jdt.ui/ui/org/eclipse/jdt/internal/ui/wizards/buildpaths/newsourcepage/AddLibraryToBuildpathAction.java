@@ -70,6 +70,13 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_LIBRARY);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_tooltip);
     }
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDetailedDescription() {
+	    return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath_library;
+	}
 
 	/**
 	 * {@inheritDoc}

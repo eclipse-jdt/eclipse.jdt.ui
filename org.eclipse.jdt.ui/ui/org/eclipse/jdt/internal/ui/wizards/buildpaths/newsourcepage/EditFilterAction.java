@@ -65,6 +65,17 @@ public class EditFilterAction extends BuildpathModifierAction {
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH_FILTERS);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDetailedDescription() {
+		if (!isEnabled())
+			return null;
+		
+
+		return NewWizardMessages.PackageExplorerActionGroup_FormText_Edit;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.action.Action#run()
 	 */

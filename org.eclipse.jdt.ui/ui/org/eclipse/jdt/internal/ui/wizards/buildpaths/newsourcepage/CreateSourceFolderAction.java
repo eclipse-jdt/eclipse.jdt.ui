@@ -64,6 +64,13 @@ public class CreateSourceFolderAction extends BuildpathModifierAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_SOURCEFOLDER_WIZARD_ACTION);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDetailedDescription() {
+	    return NewWizardMessages.PackageExplorerActionGroup_FormText_createNewSourceFolder;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.action.Action#run()
 	 */

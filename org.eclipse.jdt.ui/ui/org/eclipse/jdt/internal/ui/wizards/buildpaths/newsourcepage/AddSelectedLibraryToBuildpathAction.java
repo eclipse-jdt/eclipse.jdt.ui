@@ -34,9 +34,11 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -63,6 +65,28 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_EXTJAR);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_tooltip);
     }
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDetailedDescription() {
+		if (!isEnabled())
+			return null;
+		
+		IFile file= (IFile)getSelectedElements().get(0);
+        IJavaProject project= JavaCore.create(file.getProject());
+        
+        try {
+	        if (ClasspathModifier.isArchive(file, project)) {
+	            String name= ClasspathModifier.escapeSpecialChars(file.getName());
+	            return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ArchiveToBuildpath, name);
+	        }
+        } catch (JavaModelException e) {
+	        JavaPlugin.log(e);
+        }
+        
+        return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath;
+	}
 
 	/**
 	 * {@inheritDoc}

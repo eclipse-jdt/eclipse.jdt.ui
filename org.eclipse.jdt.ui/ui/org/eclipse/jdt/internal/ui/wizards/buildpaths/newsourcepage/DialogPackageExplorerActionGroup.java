@@ -458,7 +458,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
             for(int i= 0; i < availableActions.size(); i++) {
                 IClasspathModifierAction action= (IClasspathModifierAction)availableActions.get(i);
                 actions[i]= action;
-                descriptions[i]= action.getDescription(type);
+                descriptions[i]= ((BuildpathModifierAction)action).getDetailedDescription();
             }
         } else
             descriptions= noAction(type);

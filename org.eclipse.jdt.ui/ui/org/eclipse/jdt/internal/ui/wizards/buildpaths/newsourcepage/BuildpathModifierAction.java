@@ -34,6 +34,8 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
+import org.eclipse.ui.forms.widgets.FormText;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public abstract class BuildpathModifierAction extends Action implements ISelectionChangedListener {
@@ -47,6 +49,15 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 		fSite= site;
 		fSelectedElements= new ArrayList();
     }
+	
+	/**
+	 * A detailed description usable for a {@link FormText} 
+	 * depending on the current selection, or <code>null</code>
+	 * if <code>!enabled()</code>
+	 * 
+	 * @return A detailed description or null if <code>!enabled()</code>
+	 */
+	public abstract String getDetailedDescription();
 	
 	/**
 	 * {@inheritDoc}

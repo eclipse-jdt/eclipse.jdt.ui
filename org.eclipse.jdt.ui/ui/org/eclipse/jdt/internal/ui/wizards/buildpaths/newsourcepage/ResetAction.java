@@ -62,6 +62,32 @@ public class ResetAction extends BuildpathModifierAction {
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
     }
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDetailedDescription() {
+		if (!isEnabled())
+			return null;
+		
+		Iterator iterator= getSelectedElements().iterator();
+		Object p= iterator.next();
+		while (iterator.hasNext()) {
+			Object q= iterator.next();
+			if (
+					(p instanceof CPListElementAttribute && !(q instanceof CPListElementAttribute)) ||
+					(q instanceof CPListElementAttribute && !(p instanceof CPListElementAttribute))
+			) {
+				return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Reset;
+			}
+			p= q;
+		}
+		if (p instanceof CPListElementAttribute) {
+            return NewWizardMessages.PackageExplorerActionGroup_FormText_SetOutputToDefault;
+		} else {
+            return NewWizardMessages.PackageExplorerActionGroup_FormText_ResetFilters;
+		}
+	}
 
 	/**
 	 * {@inheritDoc}
