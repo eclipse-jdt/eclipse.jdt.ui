@@ -150,12 +150,6 @@ public final class HintTextGroup implements IPackageExplorerActionListener {
     public void setJavaProject(IJavaProject jProject) {
         fCurrJProject= jProject;
         fOldOutputLocation= fOutputLocationField.getText();
-        
-        try {
-			fActionGroup.getResetAllAction().setBreakPoint(fCurrJProject);        	
-        } catch (JavaModelException e) {
-	     	JavaPlugin.log(e);
-        }
     }
     
     /**

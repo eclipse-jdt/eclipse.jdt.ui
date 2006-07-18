@@ -167,7 +167,6 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
 	private final ClasspathModifierDropDownAction fDropDownAction;
 	private final CreateLinkedSourceFolderAction fCreateLinkedSourceFolderAction;
 	private final CreateSourceFolderAction fCreateSourceFolderAction;
-	private final ResetAllAction fResetAllAction;
     
     /**
      * Constructor which creates the operations and based on this 
@@ -223,7 +222,6 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         fCreateSourceFolderAction= new CreateSourceFolderAction2(listener, provider, context);
 		selectionProvider.addSelectionChangedListener(fCreateSourceFolderAction);
 
-        fResetAllAction= new ResetAllAction(listener, provider, context);
         
         //options:
         //AddArchiveToBuildpathAction
@@ -283,7 +281,6 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         
         tbm.add(fCreateLinkedSourceFolderAction);
         tbm.add(fCreateSourceFolderAction);
-        tbm.add(fResetAllAction);
         
         tbm.update(true);
         return tbm;
@@ -726,10 +723,6 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     public void dispose() {
         fListeners.clear();
         super.dispose();
-    }
-
-	public ResetAllAction getResetAllAction() {
-	    return fResetAllAction;
     }
 
 	public EditOutputFolderAction getEditOutputFolderAction() {
