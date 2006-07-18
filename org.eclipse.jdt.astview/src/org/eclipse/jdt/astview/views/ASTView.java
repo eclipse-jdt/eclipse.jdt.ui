@@ -174,6 +174,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		public static final int USE_PARSER= 1;
 		public static final int USE_RECONCILE= 2;
 		public static final int USE_CACHE= 3;
+		public static final int USE_FOCAL= 4;
 		
 		private int fInputKind;
 
@@ -532,7 +533,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		}
 		
 		try {
-			CompilationUnit root= createAST(input, astLevel);
+			CompilationUnit root= createAST(input, astLevel, offset);
 			resetView(root);
 			if (root == null) {
 				setContentDescription("AST could not be created."); //$NON-NLS-1$
@@ -571,23 +572,32 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fPreviousDouble= null; // avoid leaking AST
 	}
 	
-	private CompilationUnit createAST(IOpenable input, int astLevel) throws JavaModelException, CoreException {
+	private CompilationUnit createAST(IOpenable input, int astLevel, int offset) throws JavaModelException, CoreException {
 		long startTime;
 		long endTime;
 		CompilationUnit root;
 		
-		if (input instanceof ICompilationUnit && (getCurrentInputKind() == ASTInputKindAction.USE_RECONCILE)) {
-			ICompilationUnit wc= ((ICompilationUnit) input).getWorkingCopy(
-					new WorkingCopyOwner() {/*useless subclass*/},
-					new IProblemRequestor() { //strange: don't get bindings when supplying null as problemRequestor
-						public void acceptProblem(IProblem problem) {/*not interested*/}
-						public void beginReporting() {/*not interested*/}
-						public void endReporting() {/*not interested*/}
-						public boolean isActive() {
-							return true;
-						}
-					},
-					null);
+		if ((input instanceof ICompilationUnit || input instanceof IClassFile) && (getCurrentInputKind() == ASTInputKindAction.USE_RECONCILE)) {
+			IProblemRequestor problemRequestor= new IProblemRequestor() { //strange: don't get bindings when supplying null as problemRequestor
+				public void acceptProblem(IProblem problem) {/*not interested*/}
+				public void beginReporting() {/*not interested*/}
+				public void endReporting() {/*not interested*/}
+				public boolean isActive() {
+					return true;
+				}
+			};
+			ICompilationUnit wc;
+			if (input instanceof ICompilationUnit) {
+				wc= ((ICompilationUnit) input).getWorkingCopy(
+						new WorkingCopyOwner() {/*useless subclass*/},
+						problemRequestor,
+						null);
+			} else {
+				wc= ((IClassFile) input).becomeWorkingCopy(
+						problemRequestor,
+						new WorkingCopyOwner() {/*useless subclass*/},
+						null);
+			}
 			try {
 				//make inconsistent (otherwise, no AST is generated):
 //				IBuffer buffer= wc.getBuffer();
@@ -616,7 +626,9 @@ public class ASTView extends ViewPart implements IShowInSource {
 				parser.setSource((IClassFile) input);
 			}
 			parser.setStatementsRecovery(fStatementsRecovery);
-			
+			if (getCurrentInputKind() == ASTInputKindAction.USE_FOCAL) {
+				parser.setFocalPosition(offset);
+			}
 			startTime= System.currentTimeMillis();
 			root= (CompilationUnit) parser.createAST(null);
 			endTime= System.currentTimeMillis();
@@ -882,9 +894,10 @@ public class ASTView extends ViewPart implements IShowInSource {
 		ASTViewImages.setImageDescriptors(fClearAction, ASTViewImages.CLEAR);
 				
 		fASTInputKindActions= new ASTInputKindAction[] {
-				new ASTInputKindAction("Use ASTParser.createAST", ASTInputKindAction.USE_PARSER), //$NON-NLS-1$
-				new ASTInputKindAction("Use ICompilationUnit.reconcile", ASTInputKindAction.USE_RECONCILE), //$NON-NLS-1$
-				new ASTInputKindAction("Use ASTProvider.getAST", ASTInputKindAction.USE_CACHE) //$NON-NLS-1$
+				new ASTInputKindAction("Use ASTParser.&createAST", ASTInputKindAction.USE_PARSER), //$NON-NLS-1$
+				new ASTInputKindAction("Use ASTParser with &focal position", ASTInputKindAction.USE_FOCAL), //$NON-NLS-1$
+				new ASTInputKindAction("Use ICompilationUnit.&reconcile", ASTInputKindAction.USE_RECONCILE), //$NON-NLS-1$
+				new ASTInputKindAction("Use ASTProvider.&getAST", ASTInputKindAction.USE_CACHE) //$NON-NLS-1$
 		};
 		
 		fCreateBindingsAction = new Action("&Create Bindings", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
