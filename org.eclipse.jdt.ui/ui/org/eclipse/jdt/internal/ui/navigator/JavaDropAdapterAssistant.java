@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2004 IBM Corporation and others.
+ * Copyright (c) 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,8 +57,7 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 	private JavaCopyProcessor fCopyProcessor;
 	private int fCanCopyElements; 
 
-	public IStatus handleDrop(CommonDropAdapter dropAdapter,
-			DropTargetEvent dropTargetEvent, Object target) { 
+	public IStatus handleDrop(CommonDropAdapter dropAdapter, DropTargetEvent dropTargetEvent, Object target) { 
 		if (LocalSelectionTransfer.getInstance().isSupportedType(dropAdapter.getCurrentTransfer())) {
 			try {
 
@@ -88,7 +87,7 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 			try {
 
 				final Object data = FileTransfer.getInstance().nativeToJava(dropAdapter.getCurrentTransfer());
-				if (data == null || !(data instanceof String[]))
+				if (!(data instanceof String[]))
 					return Status.CANCEL_STATUS;
 
 				final IContainer targetContainer = getActualTarget(target);
@@ -108,29 +107,28 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 		return Status.CANCEL_STATUS;
 	}
 
-	public IStatus validateDrop(Object target, int operation,
-			TransferData transferType) { 
+	public IStatus validateDrop(Object target, int operation, TransferData transferType) { 
 		IStatus result = Status.OK_STATUS;
 		if (LocalSelectionTransfer.getInstance().isSupportedType(transferType)) {
 			initializeSelection();
 			try {
 				switch (operation) {
 					case DND.DROP_DEFAULT :
-						if(handleValidateDefault(target) != DND.DROP_NONE) {
+						if (handleValidateDefault(target) != DND.DROP_NONE) {
 							result = Status.OK_STATUS;
 						} else {
 							result = Status.CANCEL_STATUS;
 						}
 						break;
 					case DND.DROP_COPY :
-						if(handleValidateCopy(target) != DND.DROP_NONE) {
+						if (handleValidateCopy(target) != DND.DROP_NONE) {
 							result = Status.OK_STATUS;
 						} else {
 							result = Status.CANCEL_STATUS;
 						}
 						break;
 					case DND.DROP_MOVE :
-						if(handleValidateMove(target) != DND.DROP_NONE) {
+						if (handleValidateMove(target) != DND.DROP_NONE) {
 							result = Status.OK_STATUS;
 						} else {
 							result = Status.CANCEL_STATUS;
@@ -150,8 +148,6 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 		return super.isSupportedType(transferType) || FileTransfer.getInstance().isSupportedType(transferType);
 	}
 	
-	
-
 	private IContainer getActualTarget(Object dropTarget) throws JavaModelException {
 		if (dropTarget instanceof IContainer)
 			return (IContainer) dropTarget;
