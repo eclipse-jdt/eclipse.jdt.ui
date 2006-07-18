@@ -243,7 +243,7 @@ public class TestViewer {
 			}
 
 		}
-		if (fTestRunSession != null && fTestRunSession.getFailureCount() > 0) {
+		if (fTestRunSession != null && fTestRunSession.getFailureCount() + fTestRunSession.getErrorCount() > 0) {
 			if (fLayoutMode != TestRunnerViewPart.LAYOUT_HIERARCHICAL)
 				manager.add(new Separator());
 			manager.add(new CopyFailureListAction(fTestRunnerPart, fClipboard));
