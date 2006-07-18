@@ -437,7 +437,9 @@ public class UnusedCodeFix extends AbstractFix {
 			IProblemLocation problem= problems[i];
 			int id= problem.getProblemId();
 			
-			if (removeUnusedImports && id == IProblem.UnusedImport) {
+			if (removeUnusedImports && (id == IProblem.UnusedImport || id == IProblem.DuplicateImport || id == IProblem.ConflictingImport ||
+				    id == IProblem.CannotImportPackage || id == IProblem.ImportNotFound)) 
+			{
 				ImportDeclaration node= UnusedCodeFix.getImportDeclaration(problem, compilationUnit);
 				if (node != null) {
 					result.add(new RemoveImportOperation(node));
