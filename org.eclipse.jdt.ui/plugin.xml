@@ -5212,6 +5212,8 @@
 		</viewerContentBinding>
 	</extension>
 	
+
+	
 	<extension
 			point="org.eclipse.ui.navigator.navigatorContent">
 		<navigatorContent
@@ -5428,7 +5430,16 @@
 				        </or>
 				     </enablement>
 			 </commonWizard>
-		   
+  			<dropAssistant
+    			class="org.eclipse.jdt.internal.ui.navigator.JavaDropAdapterAssistant"
+   				id="org.eclipse.jdt.ui.dropAssistant">
+ 				<possibleDropTargets>
+    				<or>
+       					<instanceof value="org.eclipse.core.resources.IResource"/>
+       					<instanceof value="org.eclipse.jdt.core.IJavaElement"/>
+    				</or>
+ 				</possibleDropTargets>
+ 			</dropAssistant>		   
 		</navigatorContent>
   		<commonFilter
 		        activeByDefault="false"
