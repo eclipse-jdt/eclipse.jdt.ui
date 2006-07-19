@@ -2117,13 +2117,23 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 						length= range.getLength();
 					}
 				} else if (reference instanceof IImportDeclaration) {
-					String name= ((IImportDeclaration) reference).getElementName();
-					if (name != null && name.length() > 0) {
-						String content= reference.getSource();
-						if (content != null) {
-							offset= range.getOffset() + content.indexOf(name);
-							length= name.length();
-						}
+					String content= reference.getSource();
+					if (content == null) {
+						int start= content.indexOf("import") + 6; //$NON-NLS-1$
+						while (start < content.length() && content.charAt(start) == ' ')
+							start++;
+						
+						int end= content.indexOf(';');
+						do {
+							end--;
+						} while (end >= 0 && content.charAt(end) == ' ');
+						
+						offset= range.getOffset() + start;
+						length= end - start + 1;
+					} else {
+						// fallback
+						offset= range.getOffset();
+						length= range.getLength();
 					}
 				} else if (reference instanceof IPackageDeclaration) {
 					String name= ((IPackageDeclaration) reference).getElementName();
