@@ -16,6 +16,8 @@ import org.eclipse.jface.action.Action;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -24,9 +26,9 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  */
 public class EnableMemberFilterAction extends Action {
 
-	private TypeHierarchyViewPart fView;	
+	private ITypeHierarchyViewPart fView;	
 	
-	public EnableMemberFilterAction(TypeHierarchyViewPart v, boolean initValue) {
+	public EnableMemberFilterAction(ITypeHierarchyViewPart v, boolean initValue) {
 		super(TypeHierarchyMessages.EnableMemberFilterAction_label); 
 		setDescription(TypeHierarchyMessages.EnableMemberFilterAction_description); 
 		setToolTipText(TypeHierarchyMessages.EnableMemberFilterAction_tooltip); 
@@ -46,7 +48,7 @@ public class EnableMemberFilterAction extends Action {
 	public void run() {
 		BusyIndicator.showWhile(fView.getSite().getShell().getDisplay(), new Runnable() {
 			public void run() {
-				fView.enableMemberFilter(isChecked());
+				fView.showMembersInHierarchy(isChecked());
 			}
 		});
 	}

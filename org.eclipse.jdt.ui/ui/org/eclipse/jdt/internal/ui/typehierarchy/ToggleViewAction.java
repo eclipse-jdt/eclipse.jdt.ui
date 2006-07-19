@@ -15,6 +15,8 @@ import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -23,25 +25,25 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  */
 public class ToggleViewAction extends Action {
 	
-	private TypeHierarchyViewPart fViewPart;
+	private ITypeHierarchyViewPart fViewPart;
 	private int fViewerIndex;
 		
-	public ToggleViewAction(TypeHierarchyViewPart v, int viewerIndex) {
+	public ToggleViewAction(ITypeHierarchyViewPart v, int viewerIndex) {
 		super("", AS_RADIO_BUTTON); //$NON-NLS-1$
 		String contextHelpId= null;
-		if (viewerIndex == TypeHierarchyViewPart.VIEW_ID_SUPER) {
+		if (viewerIndex == ITypeHierarchyViewPart.HIERARCHY_MODE_SUPERTYPES) {
 			setText(TypeHierarchyMessages.ToggleViewAction_supertypes_label); 
 			contextHelpId= IJavaHelpContextIds.SHOW_SUPERTYPES;
 			setDescription(TypeHierarchyMessages.ToggleViewAction_supertypes_description); 
 			setToolTipText(TypeHierarchyMessages.ToggleViewAction_supertypes_tooltip); 
 			JavaPluginImages.setLocalImageDescriptors(this, "super_co.gif"); //$NON-NLS-1$
-		} else if (viewerIndex == TypeHierarchyViewPart.VIEW_ID_SUB) {
+		} else if (viewerIndex == ITypeHierarchyViewPart.HIERARCHY_MODE_SUBTYPES) {
 			setText(TypeHierarchyMessages.ToggleViewAction_subtypes_label); 
 			contextHelpId= IJavaHelpContextIds.SHOW_SUBTYPES;
 			setDescription(TypeHierarchyMessages.ToggleViewAction_subtypes_description); 
 			setToolTipText(TypeHierarchyMessages.ToggleViewAction_subtypes_tooltip); 
 			JavaPluginImages.setLocalImageDescriptors(this, "sub_co.gif"); //$NON-NLS-1$
-		} else if (viewerIndex == TypeHierarchyViewPart.VIEW_ID_TYPE) {
+		} else if (viewerIndex == ITypeHierarchyViewPart.HIERARCHY_MODE_CLASSIC) {
 			setText(TypeHierarchyMessages.ToggleViewAction_vajhierarchy_label); 
 			contextHelpId= IJavaHelpContextIds.SHOW_HIERARCHY;
 			setDescription(TypeHierarchyMessages.ToggleViewAction_vajhierarchy_description); 
@@ -65,6 +67,6 @@ public class ToggleViewAction extends Action {
 	 * @see Action#actionPerformed
 	 */	
 	public void run() {
-		fViewPart.setView(fViewerIndex);
+		fViewPart.setHierarchyMode(fViewerIndex);
 	}		
 }

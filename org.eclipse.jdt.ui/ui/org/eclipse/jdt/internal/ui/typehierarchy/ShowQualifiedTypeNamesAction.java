@@ -10,11 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.swt.custom.BusyIndicator;
 
 import org.eclipse.jface.action.Action;
+
+import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -24,9 +26,9 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  */
 public class ShowQualifiedTypeNamesAction extends Action {
 
-	private TypeHierarchyViewPart fView;	
+	private ITypeHierarchyViewPart fView;	
 	
-	public ShowQualifiedTypeNamesAction(TypeHierarchyViewPart v, boolean initValue) {
+	public ShowQualifiedTypeNamesAction(ITypeHierarchyViewPart v, boolean initValue) {
 		super(TypeHierarchyMessages.ShowQualifiedTypeNamesAction_label); 
 		setDescription(TypeHierarchyMessages.ShowQualifiedTypeNamesAction_description); 
 		setToolTipText(TypeHierarchyMessages.ShowQualifiedTypeNamesAction_tooltip); 

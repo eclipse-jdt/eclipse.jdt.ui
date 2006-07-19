@@ -21,6 +21,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 
@@ -29,9 +31,9 @@ import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
  */
 public class FocusOnTypeAction extends Action {
 			
-	private TypeHierarchyViewPart fViewPart;
+	private ITypeHierarchyViewPart fViewPart;
 	
-	public FocusOnTypeAction(TypeHierarchyViewPart part) {
+	public FocusOnTypeAction(ITypeHierarchyViewPart part) {
 		super(TypeHierarchyMessages.FocusOnTypeAction_label); 
 		setDescription(TypeHierarchyMessages.FocusOnTypeAction_description); 
 		setToolTipText(TypeHierarchyMessages.FocusOnTypeAction_tooltip); 

@@ -10,17 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import org.eclipse.jdt.core.IType;
-
-import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.ui.JavaElementLabels;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.jdt.core.IType;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
@@ -30,9 +31,9 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
  */
 public class FocusOnSelectionAction extends Action {
 		
-	private TypeHierarchyViewPart fViewPart;
+	private ITypeHierarchyViewPart fViewPart;
 	
-	public FocusOnSelectionAction(TypeHierarchyViewPart part) {
+	public FocusOnSelectionAction(ITypeHierarchyViewPart part) {
 		super(TypeHierarchyMessages.FocusOnSelectionAction_label); 
 		setDescription(TypeHierarchyMessages.FocusOnSelectionAction_description); 
 		setToolTipText(TypeHierarchyMessages.FocusOnSelectionAction_tooltip); 

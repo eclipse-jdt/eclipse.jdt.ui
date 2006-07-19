@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
+
 import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
 
 
@@ -21,12 +23,12 @@ import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
  */
 public class ToggleLinkingAction extends AbstractToggleLinkingAction {
 	
-	TypeHierarchyViewPart fHierarchyViewPart;
+	private ITypeHierarchyViewPart fHierarchyViewPart;
 	
 	/**
 	 * Constructs a new action.
 	 */
-	public ToggleLinkingAction(TypeHierarchyViewPart part) {
+	public ToggleLinkingAction(ITypeHierarchyViewPart part) {
 		setChecked(part.isLinkingEnabled());
 		fHierarchyViewPart= part;
 	}

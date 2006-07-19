@@ -15,6 +15,8 @@ import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -23,27 +25,27 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  */
 public class ToggleOrientationAction extends Action {
 
-	private TypeHierarchyViewPart fView;	
+	private ITypeHierarchyViewPart fView;	
 	private int fActionOrientation;
 	
-	public ToggleOrientationAction(TypeHierarchyViewPart v, int orientation) {
+	public ToggleOrientationAction(ITypeHierarchyViewPart v, int orientation) {
 		super("", AS_RADIO_BUTTON); //$NON-NLS-1$
-		if (orientation == TypeHierarchyViewPart.VIEW_ORIENTATION_HORIZONTAL) {
+		if (orientation == ITypeHierarchyViewPart.VIEW_LAYOUT_HORIZONTAL) {
 			setText(TypeHierarchyMessages.ToggleOrientationAction_horizontal_label); 
 			setDescription(TypeHierarchyMessages.ToggleOrientationAction_horizontal_description); 
 			setToolTipText(TypeHierarchyMessages.ToggleOrientationAction_horizontal_tooltip); 
 			JavaPluginImages.setLocalImageDescriptors(this, "th_horizontal.gif"); //$NON-NLS-1$
-		} else if (orientation == TypeHierarchyViewPart.VIEW_ORIENTATION_VERTICAL) {
+		} else if (orientation == ITypeHierarchyViewPart.VIEW_LAYOUT_VERTICAL) {
 			setText(TypeHierarchyMessages.ToggleOrientationAction_vertical_label); 
 			setDescription(TypeHierarchyMessages.ToggleOrientationAction_vertical_description); 
 			setToolTipText(TypeHierarchyMessages.ToggleOrientationAction_vertical_tooltip); 
 			JavaPluginImages.setLocalImageDescriptors(this, "th_vertical.gif"); //$NON-NLS-1$
-		} else if (orientation == TypeHierarchyViewPart.VIEW_ORIENTATION_AUTOMATIC) {
+		} else if (orientation == ITypeHierarchyViewPart.VIEW_LAYOUT_AUTOMATIC) {
 			setText(TypeHierarchyMessages.ToggleOrientationAction_automatic_label); 
 			setDescription(TypeHierarchyMessages.ToggleOrientationAction_automatic_description); 
 			setToolTipText(TypeHierarchyMessages.ToggleOrientationAction_automatic_tooltip); 
 			JavaPluginImages.setLocalImageDescriptors(this, "th_automatic.gif"); //$NON-NLS-1$
-		} else if (orientation == TypeHierarchyViewPart.VIEW_ORIENTATION_SINGLE) {
+		} else if (orientation == ITypeHierarchyViewPart.VIEW_LAYOUT_SINGLE) {
 			setText(TypeHierarchyMessages.ToggleOrientationAction_single_label); 
 			setDescription(TypeHierarchyMessages.ToggleOrientationAction_single_description); 
 			setToolTipText(TypeHierarchyMessages.ToggleOrientationAction_single_tooltip); 
@@ -65,8 +67,7 @@ public class ToggleOrientationAction extends Action {
 	 */		
 	public void run() {
 		if (isChecked()) {
-			fView.fOrientation= fActionOrientation; 
-			fView.computeOrientation();
+			fView.setViewLayout(fActionOrientation);
 		}
 	}
 	
