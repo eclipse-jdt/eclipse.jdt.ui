@@ -22,13 +22,11 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.util.ViewerPane;
-import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /**
@@ -37,7 +35,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
  */
 public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
 	
-	private ISelectionProvider fSelectionProvider;
+	private DialogPackageExplorer fDialogPackageExplorer;
 	
 	private final AddFolderToBuildpathAction fAddFolderToBuildpathAction;
 	private final RemoveFromBuildpathAction fRemoveFromBuildpathAction;
@@ -60,43 +58,42 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * @param outputLocationField 
      * @param context 
      */
-    public DialogPackageExplorerActionGroup(HintTextGroup provider, NewSourceContainerWorkbookPage listener, StringDialogField outputLocationField, IRunnableContext context, ISelectionProvider selectionProvider) {
+    public DialogPackageExplorerActionGroup(HintTextGroup provider, NewSourceContainerWorkbookPage listener, StringDialogField outputLocationField, IRunnableContext context, DialogPackageExplorer dialogPackageExplorer) {
         super();
 		
-        fSelectionProvider= selectionProvider;
+        fDialogPackageExplorer= dialogPackageExplorer;
         
         if (context == null)
         	context= PlatformUI.getWorkbench().getProgressService();
         
         fAddFolderToBuildpathAction= new AddFolderToBuildpathAction2(listener, provider, context);
-		selectionProvider.addSelectionChangedListener(fAddFolderToBuildpathAction);
+		fDialogPackageExplorer.addSelectionChangedListener(fAddFolderToBuildpathAction);
 		
 		fRemoveFromBuildpathAction= new RemoveFromBuildpathAction2(listener, provider, context);
-		selectionProvider.addSelectionChangedListener(fRemoveFromBuildpathAction);
+		fDialogPackageExplorer.addSelectionChangedListener(fRemoveFromBuildpathAction);
         
 		fExcludeFromBuildpathAction= new ExcludeFromBuildpathAction2(listener, provider, context);
-		selectionProvider.addSelectionChangedListener(fExcludeFromBuildpathAction);
+		fDialogPackageExplorer.addSelectionChangedListener(fExcludeFromBuildpathAction);
 		
 		fIncludeToBuildpathAction= new IncludeToBuildpathAction2(listener, provider, context);
-		selectionProvider.addSelectionChangedListener(fIncludeToBuildpathAction);
+		fDialogPackageExplorer.addSelectionChangedListener(fIncludeToBuildpathAction);
 		
 			fEditFilterAction= new EditFilterAction2(listener, provider, context);
-			selectionProvider.addSelectionChangedListener(fEditFilterAction);
+			fDialogPackageExplorer.addSelectionChangedListener(fEditFilterAction);
 	
 	        fEditOutputFolderAction= new EditOutputFolderAction2(listener, provider, context);
-			selectionProvider.addSelectionChangedListener(fEditOutputFolderAction);
+			fDialogPackageExplorer.addSelectionChangedListener(fEditOutputFolderAction);
         
-        fDropDownAction= new ClasspathModifierDropDownAction(fEditFilterAction, 
-                        NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Configure_label, 
-                        NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Configure_tooltip);
-		selectionProvider.addSelectionChangedListener(fDropDownAction); 
+        fDropDownAction= new ClasspathModifierDropDownAction();
+		fDropDownAction.addAction(fEditFilterAction);
         fDropDownAction.addAction(fEditOutputFolderAction);
+		fDialogPackageExplorer.addPostSelectionChangedListener(fDropDownAction);
         
         fCreateLinkedSourceFolderAction= new CreateLinkedSourceFolderAction2(listener, provider, context);
-		selectionProvider.addSelectionChangedListener(fCreateLinkedSourceFolderAction);
+		fDialogPackageExplorer.addSelectionChangedListener(fCreateLinkedSourceFolderAction);
         
         fCreateSourceFolderAction= new CreateSourceFolderAction2(listener, provider, context);
-		selectionProvider.addSelectionChangedListener(fCreateSourceFolderAction);
+		fDialogPackageExplorer.addSelectionChangedListener(fCreateSourceFolderAction);
 
         
         //options:
@@ -113,16 +110,16 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     public void dispose() {
         super.dispose();
         
-        fSelectionProvider.removeSelectionChangedListener(fAddFolderToBuildpathAction);
-        fSelectionProvider.removeSelectionChangedListener(fRemoveFromBuildpathAction);
-        fSelectionProvider.removeSelectionChangedListener(fExcludeFromBuildpathAction);
-		fSelectionProvider.removeSelectionChangedListener(fIncludeToBuildpathAction);
-		fSelectionProvider.removeSelectionChangedListener(fEditFilterAction);
-		fSelectionProvider.removeSelectionChangedListener(fEditOutputFolderAction);
-		fSelectionProvider.removeSelectionChangedListener(fDropDownAction);
-        fSelectionProvider.removeSelectionChangedListener(fCreateLinkedSourceFolderAction);
-        fSelectionProvider.removeSelectionChangedListener(fCreateSourceFolderAction);
-        fSelectionProvider= null;
+        fDialogPackageExplorer.removeSelectionChangedListener(fAddFolderToBuildpathAction);
+        fDialogPackageExplorer.removeSelectionChangedListener(fRemoveFromBuildpathAction);
+        fDialogPackageExplorer.removeSelectionChangedListener(fExcludeFromBuildpathAction);
+		fDialogPackageExplorer.removeSelectionChangedListener(fIncludeToBuildpathAction);
+		fDialogPackageExplorer.removeSelectionChangedListener(fEditFilterAction);
+		fDialogPackageExplorer.removeSelectionChangedListener(fEditOutputFolderAction);
+		fDialogPackageExplorer.removePostSelectionChangedListener(fDropDownAction);
+        fDialogPackageExplorer.removeSelectionChangedListener(fCreateLinkedSourceFolderAction);
+        fDialogPackageExplorer.removeSelectionChangedListener(fCreateSourceFolderAction);
+        fDialogPackageExplorer= null;
     }
         
     /**

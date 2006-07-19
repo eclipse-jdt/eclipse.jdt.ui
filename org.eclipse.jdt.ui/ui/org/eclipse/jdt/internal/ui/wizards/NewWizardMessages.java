@@ -527,8 +527,6 @@ public final class NewWizardMessages extends NLS {
 	public static String NewSourceContainerWorkbookPage_ToolBar_CreateFolder_tooltip;
 	public static String NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_tooltip;
 	public static String NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_label;
-	public static String NewSourceContainerWorkbookPage_ToolBar_Configure_tooltip;
-	public static String NewSourceContainerWorkbookPage_ToolBar_Configure_label;
 	public static String NewSourceContainerWorkbookPage_ToolBar_Edit_tooltip;
 	public static String NewSourceContainerWorkbookPage_ToolBar_Edit_label;
 	public static String NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip;

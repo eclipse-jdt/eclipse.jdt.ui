@@ -22,54 +22,55 @@ import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 /**
- * Drop down action for toolbars containing <code>ClasspathModifierAction</code>s.
- * The drop down action manages a list of actions that are displayed when invocing 
+ * Drop down action for toolbars containing <code>BuildpathModifierAction</code>s.
+ * The drop down action manages a list of actions that are displayed when invoking 
  * the drop down. If there is at least one valid action, then the drop down action 
- * itself will also be valid and invocing run will delegate the call to the 
+ * itself will also be valid and invoking run will delegate the call to the 
  * first valid action in the list.
  */
-//TODO: Fix (action is changed but not description/image/...)
 public class ClasspathModifierDropDownAction extends BuildpathModifierAction implements IMenuCreator {
     
-    /** The menu to be populated with items*/
+	/** The menu to be populated with items*/
     private Menu fMenu;
-    /** A list of actions that will be used as 
-     * drop down items*/
-    protected List fActions;
-    /** Index of the action that can be executed when clicking directly on the dropdown button.*/
-    private int fIndex;
+    private List fActions;
+    //The action to execute on run iff enabled
+	private BuildpathModifierAction fFirstValidAction;
     
     /**
      * Create a drop down action using the same descriptors as the provided action, but it's on 
      * tool tip text. The action will automatically be put in the list of actions that are 
      * managed by this drop down menu.
-     * 
-     * @param action an action to be added to the dropdown menu
-     * @param text a label text for the action
-     * @param toolTipText the tooltip text for the drop down menu
      */
-    public ClasspathModifierDropDownAction(BuildpathModifierAction action, String text, String toolTipText) {
+    public ClasspathModifierDropDownAction() {
         super(null, BuildpathModifierAction.DROP_DOWN_ACTION, IAction.AS_DROP_DOWN_MENU);
         
         fActions= new ArrayList();
-        fActions.add(action);
-        fIndex= 0;
+        fFirstValidAction= null;
         
-        setImageDescriptor(action.getImageDescriptor());
-        setDisabledImageDescriptor(action.getDisabledImageDescriptor());
-        setText(text);
-        setToolTipText(toolTipText);
+        setText(""); //$NON-NLS-1$
+        setToolTipText(""); //$NON-NLS-1$
     }
     
+	/**
+     * {@inheritDoc}
+     */
+    public String getDetailedDescription() {
+    	if (fFirstValidAction != null) {
+    		return fFirstValidAction.getDetailedDescription();
+    	} else if (fActions.size() > 0) {
+    		return ((BuildpathModifierAction)fActions.get(0)).getDetailedDescription();
+    	} else {
+    		return ""; //$NON-NLS-1$
+    	}
+    }
+        
     /**
      * Runs the first action of the list of managed actions that is valid.
      */
     public void run() {
-        BuildpathModifierAction action= (BuildpathModifierAction)fActions.get(fIndex);
-        action.run();
+    	fFirstValidAction.run();
     }
 
     public IMenuCreator getMenuCreator() {
@@ -97,18 +98,7 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
      */
     public void addAction(BuildpathModifierAction action) {
         fActions.add(action);
-    }
-    
-    /**
-     * Add dynamically an array of actions to the 
-     * drop down menu.
-     * 
-     * @param actions an array of actions to be added
-     */
-    public void addActions(BuildpathModifierAction[] actions) {
-        for(int i= 0; i < actions.length; i++) {
-            addAction(actions[i]);
-        }
+        update();
     }
     
     /**
@@ -118,15 +108,7 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
      */
     public void removeAction(BuildpathModifierAction action) {
         fActions.remove(action);
-    }
-    
-    /**
-     * Get all actions within this drop down menu.
-     * 
-     * @return an array of actions
-     */
-    public BuildpathModifierAction[] getActions() {
-        return (BuildpathModifierAction[])fActions.toArray(new BuildpathModifierAction[fActions.size()]);
+        update();
     }
     
     /**
@@ -162,35 +144,36 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
 	/**
      * {@inheritDoc}
      */
-    public void selectionChanged(SelectionChangedEvent event) {
-    	for (Iterator iterator= fActions.iterator(); iterator.hasNext();) {
-	        BuildpathModifierAction action= (BuildpathModifierAction)iterator.next();
-	        action.selectionChanged(event);
-        }
-    	int i= 0;
-    	for (Iterator iterator= fActions.iterator(); iterator.hasNext();) {
+    protected boolean canHandle(IStructuredSelection elements) {
+    	update();
+    	return fFirstValidAction != null;
+    }
+
+	private void update() {
+		for (Iterator iterator= fActions.iterator(); iterator.hasNext();) {
 	        BuildpathModifierAction action= (BuildpathModifierAction)iterator.next();
 	        if (action.isEnabled()) {
-	        	setEnabled(true);
-	        	fIndex= i;
+	        	if (action != fFirstValidAction) {
+	        		updateButton(action);
+	        	}
+	        	fFirstValidAction= action;
 	        	return;
 	        }
-	        i++;
         }
-    	setEnabled(false);
+		if (fFirstValidAction != null) {
+			if (fActions.size() > 0) {
+				updateButton((BuildpathModifierAction)fActions.get(0));
+			} else {
+				updateButton(this);
+			}
+		}
+    	fFirstValidAction= null;
     }
 
-	/**
-     * {@inheritDoc}
-     */
-    protected boolean canHandle(IStructuredSelection elements) {
-	    return false;
-    }
-
-	/**
-     * {@inheritDoc}
-     */
-    public String getDetailedDescription() {
-	    return null;
+	private void updateButton(BuildpathModifierAction action) {
+		setImageDescriptor(action.getImageDescriptor());
+		setDisabledImageDescriptor(action.getDisabledImageDescriptor());
+		setText(action.getText());
+		setToolTipText(action.getToolTipText());
     }
 }
