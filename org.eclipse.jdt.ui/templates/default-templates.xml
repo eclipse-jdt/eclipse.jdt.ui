@@ -152,6 +152,11 @@ return ${name};</template>
 	${cursor} 
 }</template>
 
+<template name="Test" description="%Templates.test_junit4" id="org.eclipse.jdt.ui.templates.test_junit4" context="java" enabled="true" autoinsert="false">@Test
+public void ${testname}() throws Exception {
+	${cursor} 
+}</template>
+
 <template name="nls" description="%Templates.non-nls" id="org.eclipse.jdt.ui.templates.non-nls" context="java" enabled="true" autoinsert="false">//$$NON-NLS-${N}$$</template>
 
 <template name="synchronized" description="%Templates.synchronized" id="org.eclipse.jdt.ui.templates.synchronized" context="java" enabled="true" autoinsert="false">synchronized (${mutex:var}) {
