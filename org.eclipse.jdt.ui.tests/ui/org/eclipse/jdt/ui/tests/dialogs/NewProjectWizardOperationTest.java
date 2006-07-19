@@ -25,8 +25,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.ui.actions.ActionContext;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -37,9 +40,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
-import org.eclipse.jdt.internal.corext.buildpath.IPackageExplorerActionListener;
-import org.eclipse.jdt.internal.corext.buildpath.PackageExplorerActionEvent;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -54,13 +54,60 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IRemoveLinkedFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup.DialogExplorerActionContext;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 /**
  */
 public class NewProjectWizardOperationTest extends TestCase implements IClasspathInformationProvider {
+	
+	public static class DialogExplorerActionContext extends ActionContext {
+		private IJavaProject fJavaProject;
+		private List fSelectedElements;
+
+		/**
+		 * Constructor to create an action context for the dialog package explorer.
+		 * 
+		 * For reasons of completeness, the selection of the super class 
+		 * <code>ActionContext</code> is also set, but is not intendet to be used.
+		 * 
+		 * @param selection the current selection
+		 * @param jProject the element's Java project
+		 */
+		public DialogExplorerActionContext(ISelection selection, IJavaProject jProject) {
+			super(null);
+			fJavaProject= jProject;
+			fSelectedElements= ((IStructuredSelection)selection).toList();
+			IStructuredSelection structuredSelection= new StructuredSelection(new Object[] {fSelectedElements, jProject});
+			super.setSelection(structuredSelection);
+		}
+
+		/**
+		 * Constructor to create an action context for the dialog package explorer.
+		 * 
+		 * For reasons of completeness, the selection of the super class 
+		 * <code>ActionContext</code> is also set, but is not intendet to be used.
+		 * 
+		 * @param selectedElements a list of currently selected elements
+		 * @param jProject the element's Java project
+		 */
+		public DialogExplorerActionContext(List selectedElements, IJavaProject jProject) {
+			super(null);
+			fJavaProject= jProject;
+			fSelectedElements= selectedElements;
+			IStructuredSelection structuredSelection= new StructuredSelection(new Object[] {fSelectedElements, jProject});
+			super.setSelection(structuredSelection);
+		}
+
+		public IJavaProject getJavaProject() {
+			return fJavaProject;
+		}
+
+		public List getSelectedElements() {
+			return fSelectedElements;
+		}
+	}
+
     
     public static final Class THIS= NewProjectWizardOperationTest.class;
     protected IJavaProject fProject;
@@ -1241,8 +1288,8 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     }
     
     protected void addListener(final int[] expectedValues) {
-        fListener= new IPackageExplorerActionListener() {
-            public void handlePackageExplorerActionEvent(PackageExplorerActionEvent event) {
+//        fListener= new IPackageExplorerActionListener() {
+//            public void handlePackageExplorerActionEvent(PackageExplorerActionEvent event) {
 //                ClasspathModifierAction[] actions= event.getEnabledActions();
 //                if (actions.length != expectedValues.length) {
 //                	assertTrue(false);
@@ -1250,14 +1297,14 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
 //                for(int i= 0; i < actions.length; i++) {
 //                    assertTrue(getID(actions[i]) == expectedValues[i]);
 //                }
-            }
-        };
-        fActionGroup.addListener(fListener);
+//            }
+//        };
+//        fActionGroup.addListener(fListener);
     }
     
     protected void reset() {
         fSelection.clear();
-        fActionGroup.removeListener(fListener);
+//        fActionGroup.removeListener(fListener);
     }
     
     protected ICompilationUnit createICompilationUnit(String className, IPackageFragment fragment) throws JavaModelException {

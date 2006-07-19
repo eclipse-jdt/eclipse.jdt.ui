@@ -44,7 +44,6 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 

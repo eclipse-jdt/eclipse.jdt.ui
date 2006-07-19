@@ -40,11 +40,11 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IPostSelectionProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -72,7 +72,6 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListLabelProvider;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup.DialogExplorerActionContext;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
 
 /**
@@ -81,7 +80,7 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
  * elements that are not shown usually in the package explorer of the
  * workspace.
  */
-public class DialogPackageExplorer implements IMenuListener, ISelectionChangedListener, ISelectionProvider {
+public class DialogPackageExplorer implements IMenuListener, ISelectionProvider, IPostSelectionProvider {
     /**
      * A extended content provider for the package explorer which can additionally display
      * an output folder item.
@@ -116,7 +115,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
         public Object[] getChildren(Object element) {
             Object[] children= super.getChildren(element);
             if (((element instanceof IPackageFragmentRoot && !((IPackageFragmentRoot)element).isArchive()) || 
-                    (element instanceof IJavaProject && fCurrJProject.isOnClasspath(fCurrJProject))) && isSelected()) {
+                    (element instanceof IJavaProject && fCurrJProject.isOnClasspath(fCurrJProject))) && fShowOutputFolders) {
                 try {
                     IClasspathEntry entry;
                     if (element instanceof IPackageFragmentRoot)
@@ -303,7 +302,6 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
      * that a IPackageFragmentRoot is selected.
      * 
      * @see #showOutputFolders(boolean)
-     * @see #isSelected()
      */
     private boolean fShowOutputFolders= false;
     
@@ -344,7 +342,6 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
                 }
             }
         });
-        fPackageViewer.addSelectionChangedListener(this);
         
         MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
         menuMgr.setRemoveAllWhenShown(true);
@@ -374,12 +371,6 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
      */
     public void setActionGroup(final DialogPackageExplorerActionGroup actionGroup) {
         fActionGroup= actionGroup;
-        fPackageViewer.getControl().addDisposeListener(new DisposeListener() {
-            public void widgetDisposed(DisposeEvent e) {
-                if (actionGroup != null)
-                    actionGroup.dispose();
-            }
-        });
     }
     
     /**
@@ -435,10 +426,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
     		fActionGroup.dispose();
     		fActionGroup= null;
     	}
-    	if (fPackageViewer != null) {
-    		fPackageViewer.removeSelectionChangedListener(this);
-    		fPackageViewer= null;
-    	}
+    	fPackageViewer= null;
     }
     
     /**
@@ -451,7 +439,6 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
 		try {
 	        ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable() {
 	        	public void run(IProgressMonitor monitor) throws CoreException {
-	        		fPackageViewer.refresh();
 	                IStructuredSelection selection= new StructuredSelection(elements);
 	                fPackageViewer.setSelection(selection, true);
 	                fPackageViewer.getTree().setFocus();
@@ -485,16 +472,6 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
     }
     
     /**
-     * Flag to indicate whether output folders
-     * can be created or not. This is used to
-     * set the content correctly in the case
-     * that a IPackageFragmentRoot is selected.
-     */
-    private boolean isSelected() {
-        return fShowOutputFolders;
-    }
-    
-    /**
      * Method that is called whenever setting of 
      * output folders is allowed or forbidden (for example 
      * on changing a checkbox with this setting):
@@ -504,25 +481,8 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
      */
     public void showOutputFolders(boolean showOutputFolders) {
         fShowOutputFolders= showOutputFolders;
-        fActionGroup.showOutputFolders(showOutputFolders);
+        fActionGroup.getEditOutputFolderAction().showOutputFolders(showOutputFolders);
         fPackageViewer.refresh();
-    }
-
-    /**
-     * Inform the <code>fActionGroup</code> about the selection change and store the 
-     * latest selection.
-     * 
-     * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
-     * @see DialogPackageExplorerActionGroup#setContext(DialogExplorerActionContext)
-     */
-    public void selectionChanged(SelectionChangedEvent event) {
-        fCurrentSelection= (IStructuredSelection)event.getSelection();
-        try {
-            if (fActionGroup != null)
-                fActionGroup.setContext(new DialogExplorerActionContext(fCurrentSelection, fCurrJProject));
-        } catch (JavaModelException e) {
-            JavaPlugin.log(e);
-        }
     }
 
 	/**
@@ -544,5 +504,19 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
      */
     public void setSelection(ISelection selection) {
     	setSelection(((StructuredSelection)selection).toList());
+    }
+
+	/**
+     * {@inheritDoc}
+     */
+    public void addPostSelectionChangedListener(ISelectionChangedListener listener) {
+    	fPackageViewer.addPostSelectionChangedListener(listener);
+    }
+
+	/**
+     * {@inheritDoc}
+     */
+    public void removePostSelectionChangedListener(ISelectionChangedListener listener) {
+    	fPackageViewer.removePostSelectionChangedListener(listener);
     }
 }

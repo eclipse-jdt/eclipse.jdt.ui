@@ -20,12 +20,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.forms.events.ExpansionAdapter;
@@ -42,14 +40,12 @@ import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathMod
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.ScrolledPageContent;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.ViewerPane;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup.DialogExplorerActionContext;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
@@ -126,6 +122,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     }
     
     public void dispose() {
+    	fHintTextGroup.dispose();
     	fPackageExplorer.dispose();
     }
      
@@ -190,13 +187,6 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
                 	action.run();
                 }
 				fPackageExplorer.showOutputFolders(isUseFolders);
-                try {
-                    ISelection selection= fPackageExplorer.getSelection();
-                    actionGroup.refresh(new DialogExplorerActionContext(selection, fJavaProject));
-                } catch (JavaModelException e) {
-                    ExceptionHandler.handle(e, getShell(),
-                            NewWizardMessages.NewSourceContainerWorkbookPage_Exception_refresh, e.getMessage()); 
-                }
             }
         });
         
@@ -218,7 +208,6 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         
         fHintTextGroup.setActionGroup(actionGroup);
         fPackageExplorer.setActionGroup(actionGroup);
-        actionGroup.addListener(fHintTextGroup);
         
 		sashForm.setWeights(new int[] {60, 40});
 		adjustSashForm(sashWeight, sashForm, excomposite.isExpanded());
@@ -273,15 +262,6 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
        return null;
    }
     
-    /**
-     * Get the active shell.
-     * 
-     * @return the active shell
-     */
-    private Shell getShell() {
-        return JavaPlugin.getActiveWorkbenchShell();
-    }
-
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#getSelection()
      */

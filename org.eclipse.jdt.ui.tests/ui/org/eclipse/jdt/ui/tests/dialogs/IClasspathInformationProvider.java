@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.corext.buildpath;
+package org.eclipse.jdt.ui.tests.dialogs;
 
 import java.util.List;
 

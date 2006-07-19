@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -34,6 +35,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -47,8 +52,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.buildpath.IPackageExplorerActionListener;
-import org.eclipse.jdt.internal.corext.buildpath.PackageExplorerActionEvent;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -57,7 +60,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup.DialogExplorerActionContext;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
@@ -70,29 +72,8 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
  * If selection changes, then the <code>HintTextGroup</code> will be 
  * notified through the <code>IPackageExplorerActionListener</code> interface. 
  */
-public final class HintTextGroup implements IPackageExplorerActionListener {
-	
-	/**
-	 * Order of actions in the group. First is first.
-	 * Only actions in ACTION_ORDER are part of the group.
-	 */
-	private final static int[] ACTION_ORDER= {
-		BuildpathModifierAction.CREATE_FOLDER,
-		BuildpathModifierAction.CREATE_LINK,
-		BuildpathModifierAction.EDIT_FILTERS,
-		BuildpathModifierAction.EXCLUDE,
-		BuildpathModifierAction.INCLUDE,
-		BuildpathModifierAction.UNEXCLUDE,
-		BuildpathModifierAction.UNINCLUDE,
-		BuildpathModifierAction.EDIT_OUTPUT,
-		BuildpathModifierAction.CREATE_OUTPUT,
-		BuildpathModifierAction.ADD_SEL_SF_TO_BP,
-		BuildpathModifierAction.REMOVE_FROM_BP,
-		BuildpathModifierAction.ADD_SEL_LIB_TO_BP,
-		BuildpathModifierAction.ADD_LIB_TO_BP,
-		BuildpathModifierAction.ADD_JAR_TO_BP
-	};
-    
+public final class HintTextGroup implements ISelectionChangedListener {
+	    
     private StringDialogField fOutputLocationField;
     private Composite fTopComposite;
     private DialogPackageExplorerActionGroup fActionGroup;
@@ -135,7 +116,15 @@ public final class HintTextGroup implements IPackageExplorerActionListener {
                 }
             }
         });
+        
+        fPackageExplorer.addPostSelectionChangedListener(this);
+        
         return fTopComposite;
+    }
+    
+	public void dispose() {
+		fPackageExplorer.removePostSelectionChangedListener(this);
+		fPackageExplorer= null;
     }
     
     private Shell getShell() {
@@ -238,17 +227,9 @@ public final class HintTextGroup implements IPackageExplorerActionListener {
      * false</code> otherwise
      * 
      * @see DialogPackageExplorer#setSelection(List)
-     * @see DialogPackageExplorerActionGroup#refresh(DialogExplorerActionContext)
      */
     void defaultHandle(List result, boolean forceRebuild) {
-        try {
-            fPackageExplorer.setSelection(result);
-            if (forceRebuild) {
-                fActionGroup.refresh(new DialogExplorerActionContext(result, fCurrJProject));
-            }
-        } catch (JavaModelException e) {
-            ExceptionHandler.handle(e, getShell(), NewWizardMessages.HintTextGroup_Exception_Title_refresh, e.getLocalizedMessage()); 
-        }
+        fPackageExplorer.setSelection(result);
     }
     
     /**
@@ -292,18 +273,8 @@ public final class HintTextGroup implements IPackageExplorerActionListener {
      * <code>fPackageExplorer</code>
      */
     public void handleAddToCP(List result) {
-        try {
-            if (containsJavaProject(result)) {
-                fPackageExplorer.setSelection(result);
-                //TODO: Why? Test case: Given: Project with src folder 1. Add Project as source folder, no refresh without the following
-                fActionGroup.refresh(new DialogExplorerActionContext(result, fCurrJProject));
-            }
-            else
-                fPackageExplorer.setSelection(result);
-            setOutputLocationFieldText(getOldOutputLocation());
-        } catch (JavaModelException e) {
-            ExceptionHandler.handle(e, getShell(), NewWizardMessages.HintTextGroup_Exception_Title_refresh, e.getLocalizedMessage()); 
-        }
+    	fPackageExplorer.setSelection(result);
+    	setOutputLocationFieldText(getOldOutputLocation());
     }
     
     /**
@@ -317,13 +288,6 @@ public final class HintTextGroup implements IPackageExplorerActionListener {
      */
     void handleRemoveFromBP(List result, boolean forceRebuild) {
         fPackageExplorer.setSelection(result);
-        try {
-            if (forceRebuild || containsJavaProject(result)) {
-                fActionGroup.refresh(new DialogExplorerActionContext(result, fCurrJProject));
-            }
-        } catch (JavaModelException e) {
-            ExceptionHandler.handle(e, getShell(), NewWizardMessages.HintTextGroup_Exception_Title_refresh, e.getLocalizedMessage()); 
-        }
     }
     
     /**
@@ -362,22 +326,6 @@ public final class HintTextGroup implements IPackageExplorerActionListener {
         List list= new ArrayList();
         list.add(fCurrJProject);
         fPackageExplorer.setSelection(list);
-    }
-    
-    /**
-     * Find out whether the list contains one element of 
-     * type <code>IJavaProject</code>
-     * 
-     * @param elements the list to be examined
-     * @return <code>true</code> if the list contains one element of 
-     * type <code>IJavaProject</code>, <code>false</code> otherwise
-     */
-    private boolean containsJavaProject(List elements) {
-        for(int i= 0; i < elements.size(); i++) {
-            if (elements.get(i) instanceof IJavaProject)
-                return true;
-        }
-        return false;
     }
     
     private IPath getOldOutputLocation() {
@@ -429,19 +377,26 @@ public final class HintTextGroup implements IPackageExplorerActionListener {
         fOutputLocationField.setText(fOldOutputLocation);
         fNewFolders= new ArrayList();
     }
-
-    /**
-     * Handle the package explorer action event.
-     * This includes:
-     * <li>Disposing the old composite which contained the labels with the links</li>
-     * <li>Create a new composite</li>
-     * <li>Create new labels with the new actions as child of the new composite. The 
-     * information which lables have to be created is contained in the event.
-     * 
-     * @see PackageExplorerActionEvent
-     * @see IPackageExplorerActionListener#handlePackageExplorerActionEvent(PackageExplorerActionEvent)
+    
+	/**
+     * {@inheritDoc}
      */
-    public void handlePackageExplorerActionEvent(PackageExplorerActionEvent event) {
+    public void selectionChanged(SelectionChangedEvent event) {
+    	if (event.getSelection() instanceof StructuredSelection) {
+    		handlePostSelectionChange((StructuredSelection)event.getSelection());
+    	} else {
+    		handlePostSelectionChange(StructuredSelection.EMPTY);
+    	}
+ 	}
+
+    private void handlePostSelectionChange(StructuredSelection selection) {
+    	
+    	BuildpathModifierAction[] actions= fActionGroup.getHintTextGroupActions();
+    	String[] descriptions= new String[actions.length];
+    	for (int i= 0; i < actions.length; i++) {
+	        descriptions[i]= actions[i].getDetailedDescription();
+        }
+    	
         // Get the child composite of the top composite
         Composite childComposite= (Composite)fTopComposite.getData();
         
@@ -461,29 +416,38 @@ public final class HintTextGroup implements IPackageExplorerActionListener {
         childComposite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL));
         fTopComposite.setData(childComposite);
         
-        // Display available actions
-        BuildpathModifierAction[] actions= event.getEnabledActions();
-        String[] descriptionText= event.getEnabledActionsText();
         if (noContextHelpAvailable(actions)) {
-            String noAction= fActionGroup.getNoActionDescription();
+            String noAction= noAction(selection);
             createFormText(childComposite, Messages.format(NewWizardMessages.HintTextGroup_NoAction, noAction)); 
             fTopComposite.layout(true);
             return;
         }
         
-        for (int j= 0; j < ACTION_ORDER.length; j++) {
-			for (int i= 0; i < actions.length; i++) {
-	            int id= Integer.parseInt(actions[i].getId());
-	            if (id == ACTION_ORDER[j]) {
-	            	createLabel(childComposite, descriptionText[i], actions[i], fRunnableContext);
-	            	break;
-	            }
-			}
-		}
+        for (int i= 0; i < actions.length; i++) {
+        	createLabel(childComposite, descriptions[i], actions[i], fRunnableContext);
+        }
         
         fTopComposite.layout(true);
     }
     
+    private String noAction(ISelection selection) {
+    	if (selection instanceof StructuredSelection) {
+    		return noAction(((StructuredSelection)selection).toList());
+    	} else {
+    		return noAction(Collections.EMPTY_LIST);
+    	}
+    }
+
+	private String noAction(List selectedElements) {
+		if (selectedElements.size() == 0)
+			return NewWizardMessages.PackageExplorerActionGroup_NoAction_NullSelection;
+		
+		if (selectedElements.size() == 1)
+			return NewWizardMessages.PackageExplorerActionGroup_NoAction_NoReason;
+		
+		return NewWizardMessages.PackageExplorerActionGroup_NoAction_MultiSelection;
+    }
+	    
     /**
      * Check if for the current type of selection, no context specific actions can 
      * be applied. Note: this does not mean, that there are NO actions available at all.<p>

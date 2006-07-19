@@ -9,9 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.corext.buildpath;
+package org.eclipse.jdt.ui.tests.dialogs;
 
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
+
 
 /**
  * Interface for listeners of <code>PackageExplorerActionEvent</code>.
@@ -25,7 +25,6 @@ public interface IPackageExplorerActionListener {
      * @param event event to be processed
      * 
      * @see PackageExplorerActionEvent
-     * @see DialogPackageExplorerActionGroup#addListener(IPackageExplorerActionListener)
      */
     public void handlePackageExplorerActionEvent(PackageExplorerActionEvent event);
     
