@@ -44,12 +44,12 @@ import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.JavaWorkbenchAdapter;
 
 /**
  * Default strategy of the Java plugin for the construction of Java element icons.
  */
 public class JavaElementImageProvider {
-	
 
 	/**
 	 * Flags for the JavaImageLabelProvider:
@@ -279,9 +279,14 @@ public class JavaElementImageProvider {
 					return JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE;
 					
 				default:
-					// ignore. Must be a new, yet unknown element
+					// ignore. Must be a new, yet unknown Java element
+					// give an advanced IWorkbenchAdapter the chance
+					IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter) element.getAdapter(IWorkbenchAdapter.class);
+					if (wbAdapter != null && !(wbAdapter instanceof JavaWorkbenchAdapter)) { // avoid recursion
+						return ((JavaWorkbenchAdapter) wbAdapter).getImageDescriptor(element);
+					}
+					return JavaPluginImages.DESC_OBJS_GHOST;
 			}
-			return JavaPluginImages.DESC_OBJS_GHOST;
 		
 		} catch (JavaModelException e) {
 			if (e.isDoesNotExist())
