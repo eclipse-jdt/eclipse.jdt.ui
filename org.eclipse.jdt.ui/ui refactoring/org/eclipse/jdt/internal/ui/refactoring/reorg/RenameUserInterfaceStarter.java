@@ -150,7 +150,11 @@ public class RenameUserInterfaceStarter extends UserInterfaceStarter {
 		SelectionState state= elements.length == 1 ? new SelectionState(elements[0]) : null;
 		super.activate(refactoring, parent, save);
 		INameUpdating nameUpdating= (INameUpdating)refactoring.getAdapter(INameUpdating.class);
-		if (nameUpdating != null && state != null)
-			state.restore(nameUpdating.getNewElement());
+		if (nameUpdating != null && state != null) {
+			Object newElement= nameUpdating.getNewElement();
+			if (newElement != null) {
+				state.restore(newElement);
+			}			
+		}
 	}
 }
