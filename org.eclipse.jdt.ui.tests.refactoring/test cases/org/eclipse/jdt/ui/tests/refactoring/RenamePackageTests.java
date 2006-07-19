@@ -543,6 +543,28 @@ public class RenamePackageTests extends RefactoringTest {
 		});
 	}
 	
+	public void testHierarchicalDisabledImport() throws Exception {
+		fRenameSubpackages= true;
+		fUpdateTextualMatches= true;
+		
+		PackageRename rename= new PackageRename(new String[]{"my", "my.pack"}, new String[][]{{},{"C"}}, "your");
+		IPackageFragment thisPackage= rename.fPackages[0];
+		
+		ParticipantTesting.reset();
+		
+		List toRename= new ArrayList(Arrays.asList(JavaElementUtil.getPackageAndSubpackages(thisPackage)));
+		toRename.add(thisPackage.getResource());
+		String[] renameHandles= ParticipantTesting.createHandles(toRename.toArray());
+		
+		rename.execute();
+		
+		ParticipantTesting.testRename(renameHandles, new RenameArguments[] {
+				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[0]), true),
+				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[1]), true),
+				new RenameArguments("your", true)
+		});
+	}
+	
 	public void testHierarchicalJUnit() throws Exception {
 		fRenameSubpackages= true;
 		

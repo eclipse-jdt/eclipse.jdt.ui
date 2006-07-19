@@ -16,8 +16,6 @@ import java.util.Set;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportContainer;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -54,7 +52,6 @@ public class RefactoringScanner {
 	private final String fQualifier;
 	
 	private IScanner fScanner;
-	private ISourceRange fNoFlyZone; // don't scan in ImportContainer (sometimes edited by ImportStructure)
 	private Set fMatches; //Set<TextMatch>
 
 	
@@ -71,11 +68,11 @@ public class RefactoringScanner {
 		fScanner= ToolFactory.createScanner(true, true, false, true);
 		fScanner.setSource(chars);
 
-		IImportContainer importContainer= cu.getImportContainer();
-		if (importContainer.exists())
-			fNoFlyZone= importContainer.getSourceRange();
-		else
-			fNoFlyZone= null;
+//		IImportContainer importContainer= cu.getImportContainer();
+//		if (importContainer.exists())
+//			fNoFlyZone= importContainer.getSourceRange();
+//		else
+//			fNoFlyZone= null;
 		
 		doScan();
 		fScanner= null;
@@ -188,10 +185,6 @@ public class RefactoringScanner {
 	}
 
 	private void addMatch(int matchStart, int matchCode) {
-		if (fNoFlyZone != null 
-				&& fNoFlyZone.getOffset() <= matchStart
-				&& matchStart < fNoFlyZone.getOffset() + fNoFlyZone.getLength())
-			return;
 		fMatches.add(new TextMatch(matchStart, matchCode == MATCH_QUALIFIED));		
 	}
 

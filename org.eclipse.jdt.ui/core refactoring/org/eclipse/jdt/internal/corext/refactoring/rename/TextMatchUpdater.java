@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.ReplaceEdit;
 
 import org.eclipse.core.runtime.Assert;
@@ -193,7 +194,11 @@ class TextMatchUpdater {
 				continue;
 			int matchStart= match.getStartPosition();
 			ReplaceEdit edit= new ReplaceEdit(matchStart, fCurrentNameLength, fNewName);
-			TextChangeCompatibility.addTextEdit(fManager.get(cu), TEXT_EDIT_LABEL, edit, TEXTUAL_MATCHES);
+			try {
+				TextChangeCompatibility.addTextEdit(fManager.get(cu), TEXT_EDIT_LABEL, edit, TEXTUAL_MATCHES);
+			} catch (MalformedTreeException e) {
+				// conflicting update -> omit text match
+			}
 		}
 	}
 }

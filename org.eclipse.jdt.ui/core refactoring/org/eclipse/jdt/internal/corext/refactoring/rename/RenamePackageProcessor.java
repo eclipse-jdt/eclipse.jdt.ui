@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
@@ -89,6 +90,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class RenamePackageProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating {
 	
@@ -265,7 +268,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	
 	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		try{
-			pm.beginTask("", 23 + (fUpdateQualifiedNames ? 10 : 0)); //$NON-NLS-1$
+			pm.beginTask("", 23 + (fUpdateQualifiedNames ? 10 : 0) + (fUpdateTextualMatches ? 10 : 0)); //$NON-NLS-1$
 			pm.setTaskName(RefactoringCoreMessages.RenamePackageRefactoring_checking); 
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkNewElementName(getNewElementName()));
@@ -302,6 +305,11 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 			
 			fImportsManager.rewriteImports(fChangeManager, new SubProgressMonitor(pm, 3));
 			
+			if (fUpdateTextualMatches) {
+				pm.subTask(RefactoringCoreMessages.RenamePackageRefactoring_searching_text); 
+				TextMatchUpdater.perform(new SubProgressMonitor(pm, 10), RefactoringScopeFactory.create(fPackage), this, fChangeManager, new SearchResultGroup[0]);
+			}
+
 			if (fUpdateQualifiedNames)
 				computeQualifiedNameMatches(new SubProgressMonitor(pm, 10));
 			
@@ -515,7 +523,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		}
 	
 		void doRename(IProgressMonitor pm, RefactoringStatus result) throws CoreException {
-			pm.beginTask("", 16 + (fProcessor.getUpdateTextualMatches() ? 10 : 0)); //$NON-NLS-1$
+			pm.beginTask("", 16); //$NON-NLS-1$
 			if (fProcessor.getUpdateReferences()){
 				pm.setTaskName(RefactoringCoreMessages.RenamePackageRefactoring_searching);	 
 				fOccurrences= getReferences(new SubProgressMonitor(pm, 4), result);	
@@ -536,11 +544,6 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 				addReferenceUpdates(new SubProgressMonitor(pm, 3));
 			else
 				pm.worked(3);
-			
-			if (fProcessor.getUpdateTextualMatches() && fPackage.equals(fProcessor.getPackage())) {
-				pm.subTask(RefactoringCoreMessages.RenamePackageRefactoring_searching_text); 
-				addTextMatches(new SubProgressMonitor(pm, 10));
-			}
 			
 			pm.done();
 		}
@@ -617,12 +620,6 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 			return new ReplaceEdit(searchResult.getOffset(), searchResult.getLength(), getNewPackageName());
 		}
 		
-		private void addTextMatches(IProgressMonitor pm) throws CoreException {
-			//TODO: check what TextMatchUpdater does with fProcessor
-			//fOccurrences is enough; the others are only import statements
-			TextMatchUpdater.perform(pm, RefactoringScopeFactory.create(fPackage), fProcessor, fTextChangeManager, fOccurrences);
-		}
-	
 		private RefactoringStatus analyzeAffectedCompilationUnits() throws CoreException {
 			//TODO: also for both fReferencesTo...; only check each CU once!
 			RefactoringStatus result= new RefactoringStatus();
@@ -901,7 +898,12 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 				if (importRewrite.hasRecordedChanges()) {
 					TextEdit importEdit= importRewrite.rewriteImports(pm);
 					String name= RefactoringCoreMessages.RenamePackageRefactoring_update_imports; 
-					TextChangeCompatibility.addTextEdit(changeManager.get(cu), name, importEdit);
+					try {
+						TextChangeCompatibility.addTextEdit(changeManager.get(cu), name, importEdit);
+					} catch (MalformedTreeException e) {
+						JavaPlugin.logErrorMessage("MalformedTreeException while processing cu " + cu); //$NON-NLS-1$
+						throw e;
+					}
 				}
 			}
 		}
