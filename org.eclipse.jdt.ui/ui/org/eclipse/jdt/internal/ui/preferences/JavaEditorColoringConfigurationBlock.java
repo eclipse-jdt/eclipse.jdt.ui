@@ -305,6 +305,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			{ PreferencesMessages.JavaEditorPreferencePage_keywords, PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR }, 
 			{ PreferencesMessages.JavaEditorPreferencePage_returnKeyword, PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_COLOR }, 
 			{ PreferencesMessages.JavaEditorPreferencePage_operators, PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR }, 
+			{ PreferencesMessages.JavaEditorPreferencePage_brackets, PreferenceConstants.EDITOR_JAVA_BRACKET_COLOR },
 			{ PreferencesMessages.JavaEditorPreferencePage_strings, PreferenceConstants.EDITOR_STRING_COLOR }, 
 			{ PreferencesMessages.JavaEditorPreferencePage_others, PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR }, 
 	};

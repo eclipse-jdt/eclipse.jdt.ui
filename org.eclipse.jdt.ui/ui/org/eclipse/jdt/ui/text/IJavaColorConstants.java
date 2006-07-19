@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,12 +67,19 @@ public interface IJavaColorConstants {
 	 */
 	String JAVA_KEYWORD_RETURN= "java_keyword_return"; //$NON-NLS-1$
 
-	/** The color key for operators and brackets in Java code
+	/** The color key for operators in Java code
 	 * (value <code>"java_operator"</code>).
 	 *
 	 * @since 3.0
 	 */
 	String JAVA_OPERATOR= "java_operator"; //$NON-NLS-1$
+
+	/** The color key for brackets in Java code
+	 * (value <code>"java_bracket"</code>).
+	 *
+	 * @since 3.3
+	 */
+	String JAVA_BRACKET= "java_bracket"; //$NON-NLS-1$
 
 	/**
 	 * The color key for everything in Java code for which no other color is specified

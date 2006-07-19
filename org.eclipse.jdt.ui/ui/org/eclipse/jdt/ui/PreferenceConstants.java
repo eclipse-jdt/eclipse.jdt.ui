@@ -1533,7 +1533,7 @@ public class PreferenceConstants {
 	public final static String EDITOR_JAVA_KEYWORD_RETURN_UNDERLINE= IJavaColorConstants.JAVA_KEYWORD_RETURN + EDITOR_UNDERLINE_SUFFIX;
 	
 	/**
-	 * A named preference that holds the color used to render operators and brackets.
+	 * A named preference that holds the color used to render operators.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
 	 * using class <code>PreferenceConverter</code>
@@ -1546,7 +1546,7 @@ public class PreferenceConstants {
 	public final static String EDITOR_JAVA_OPERATOR_COLOR= IJavaColorConstants.JAVA_OPERATOR;	
  
 	/**
-	 * A named preference that controls whether operators and brackets are rendered in bold.
+	 * A named preference that controls whether operators are rendered in bold.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -1556,7 +1556,7 @@ public class PreferenceConstants {
 	public final static String EDITOR_JAVA_OPERATOR_BOLD= IJavaColorConstants.JAVA_OPERATOR + EDITOR_BOLD_SUFFIX;
 	
 	/**
-	 * A named preference that controls whether operators and brackets are rendered in italic.
+	 * A named preference that controls whether operators are rendered in italic.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -1566,7 +1566,7 @@ public class PreferenceConstants {
 	public final static String EDITOR_JAVA_OPERATOR_ITALIC= IJavaColorConstants.JAVA_OPERATOR + EDITOR_ITALIC_SUFFIX;
 	
 	/**
-	 * A named preference that controls whether operators and brackets are rendered in strikethrough.
+	 * A named preference that controls whether operators are rendered in strikethrough.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -1576,7 +1576,7 @@ public class PreferenceConstants {
 	public final static String EDITOR_JAVA_OPERATOR_STRIKETHROUGH= IJavaColorConstants.JAVA_OPERATOR + EDITOR_STRIKETHROUGH_SUFFIX;
 	
 	/**
-	 * A named preference that controls whether operators and brackets are rendered in underline.
+	 * A named preference that controls whether operators are rendered in underline.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -1585,6 +1585,59 @@ public class PreferenceConstants {
 	 */
 	public final static String EDITOR_JAVA_OPERATOR_UNDERLINE= IJavaColorConstants.JAVA_OPERATOR + EDITOR_UNDERLINE_SUFFIX;
 	
+	/**
+	 * A named preference that holds the color used to render brackets.
+	 * <p>
+	 * Value is of type <code>String</code>. A RGB color value encoded as a string
+	 * using class <code>PreferenceConverter</code>
+	 * </p>
+	 *
+	 * @see org.eclipse.jface.resource.StringConverter
+	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @since 3.3
+	 */
+	public final static String EDITOR_JAVA_BRACKET_COLOR= IJavaColorConstants.JAVA_BRACKET;
+
+	/**
+	 * A named preference that controls whether brackets are rendered in bold.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.3
+	 */
+	public final static String EDITOR_JAVA_BRACKET_BOLD= IJavaColorConstants.JAVA_BRACKET + EDITOR_BOLD_SUFFIX;
+
+	/**
+	 * A named preference that controls whether brackets are rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.3
+	 */
+	public final static String EDITOR_JAVA_BRACKET_ITALIC= IJavaColorConstants.JAVA_BRACKET + EDITOR_ITALIC_SUFFIX;
+
+	/**
+	 * A named preference that controls whether brackets are rendered in strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.3
+	 */
+	public final static String EDITOR_JAVA_BRACKET_STRIKETHROUGH= IJavaColorConstants.JAVA_BRACKET + EDITOR_STRIKETHROUGH_SUFFIX;
+
+	/**
+	 * A named preference that controls whether brackets are rendered in underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.3
+	 */
+	public final static String EDITOR_JAVA_BRACKET_UNDERLINE= IJavaColorConstants.JAVA_BRACKET + EDITOR_UNDERLINE_SUFFIX;
+
 	/**
 	 * A named preference that holds the color used to render annotations.
 	 * <p>
@@ -3475,6 +3528,10 @@ public class PreferenceConstants {
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR, new RGB(0, 0, 0));
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_OPERATOR_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_OPERATOR_ITALIC, false);
+
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVA_BRACKET_COLOR, new RGB(0, 0, 0));
+		store.setDefault(PreferenceConstants.EDITOR_JAVA_BRACKET_BOLD, false);
+		store.setDefault(PreferenceConstants.EDITOR_JAVA_BRACKET_ITALIC, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_TASK_TAG_COLOR, new RGB(127, 159, 191));
 		store.setDefault(PreferenceConstants.EDITOR_TASK_TAG_BOLD, true);

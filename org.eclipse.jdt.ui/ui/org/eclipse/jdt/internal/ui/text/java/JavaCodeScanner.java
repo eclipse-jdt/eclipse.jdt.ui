@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Philippe Ombredanne <pombredanne@nexb.com> - https://bugs.eclipse.org/bugs/show_bug.cgi?id=150989
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.text.java;
@@ -53,10 +54,10 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	 *
 	 * @since 3.0
 	 */
-	protected class OperatorRule implements IRule {
+	private static final class OperatorRule implements IRule {
 
 		/** Java operators */
-		private final char[] JAVA_OPERATORS= { ';', '(', ')', '{', '}', '.', '=', '/', '\\', '+', '-', '*', '[', ']', '<', '>', ':', '?', '!', ',', '|', '&', '^', '%', '~'};
+		private final char[] JAVA_OPERATORS= { ';', '.', '=', '/', '\\', '+', '-', '*', '<', '>', ':', '?', '!', ',', '|', '&', '^', '%', '~'};
 		/** Token to return for this rule */
 		private final IToken fToken;
 
@@ -101,6 +102,61 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			}
 		}
 	}
+
+	/**
+	 * Rule to detect java brackets.
+	 *
+	 * @since 3.3
+	 */
+	private static final class BracketRule implements IRule {
+
+		/** Java brackets */
+		private final char[] JAVA_BRACKETS= { '(', ')', '{', '}', '[', ']' };
+		/** Token to return for this rule */
+		private final IToken fToken;
+
+		/**
+		 * Creates a new bracket rule.
+		 *
+		 * @param token Token to use for this rule
+		 */
+		public BracketRule(IToken token) {
+			fToken= token;
+		}
+
+		/**
+		 * Is this character a bracket character?
+		 *
+		 * @param character Character to determine whether it is a bracket character
+		 * @return <code>true</code> iff the character is a bracket, <code>false</code> otherwise.
+		 */
+		public boolean isBracket(char character) {
+			for (int index= 0; index < JAVA_BRACKETS.length; index++) {
+				if (JAVA_BRACKETS[index] == character)
+					return true;
+			}
+			return false;
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.rules.IRule#evaluate(org.eclipse.jface.text.rules.ICharacterScanner)
+		 */
+		public IToken evaluate(ICharacterScanner scanner) {
+
+			int character= scanner.read();
+			if (isBracket((char) character)) {
+				do {
+					character= scanner.read();
+				} while (isBracket((char) character));
+				scanner.unread();
+				return fToken;
+			} else {
+				scanner.unread();
+				return Token.UNDEFINED;
+			}
+		}
+	}
+
 
 	private static class VersionedWordMatcher extends CombinedWordRule.WordMatcher implements ISourceVersionDependent {
 
@@ -342,6 +398,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		IJavaColorConstants.JAVA_DEFAULT,
 		IJavaColorConstants.JAVA_KEYWORD_RETURN,
 		IJavaColorConstants.JAVA_OPERATOR,
+		IJavaColorConstants.JAVA_BRACKET,
 		ANNOTATION_COLOR_KEY,
 	};
 
@@ -412,9 +469,13 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		combinedWordRule.addWordMatcher(j15Matcher);
 		fVersionDependentRules.add(j15Matcher);
 
-		// Add rule for operators and brackets
+		// Add rule for operators
 		token= getToken(IJavaColorConstants.JAVA_OPERATOR);
 		rules.add(new OperatorRule(token));
+
+		// Add rule for brackets
+		token= getToken(IJavaColorConstants.JAVA_BRACKET);
+		rules.add(new BracketRule(token));
 
 		// Add word rule for keyword 'return'.
 		CombinedWordRule.WordMatcher returnWordRule= new CombinedWordRule.WordMatcher();
