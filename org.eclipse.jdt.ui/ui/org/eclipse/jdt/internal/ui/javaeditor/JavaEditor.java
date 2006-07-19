@@ -2118,7 +2118,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					}
 				} else if (reference instanceof IImportDeclaration) {
 					String content= reference.getSource();
-					if (content == null) {
+					if (content != null) {
 						int start= content.indexOf("import") + 6; //$NON-NLS-1$
 						while (start < content.length() && content.charAt(start) == ' ')
 							start++;
