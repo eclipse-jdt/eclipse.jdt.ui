@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
@@ -29,7 +30,7 @@ import org.eclipse.ltk.core.refactoring.TextEditChangeGroup;
  */
 public class TextChangeCompatibility {
 
-	public static void addTextEdit(TextChange change, String name, TextEdit edit) {
+	public static void addTextEdit(TextChange change, String name, TextEdit edit) throws MalformedTreeException {
 		Assert.isNotNull(change);
 		Assert.isNotNull(name);
 		Assert.isNotNull(edit);
@@ -42,7 +43,7 @@ public class TextChangeCompatibility {
 		change.addTextEditGroup(new TextEditGroup(name, edit));
 	}
 	
-	public static void addTextEdit(TextChange change, String name, TextEdit edit, GroupCategorySet groupCategories) {
+	public static void addTextEdit(TextChange change, String name, TextEdit edit, GroupCategorySet groupCategories) throws MalformedTreeException {
 		Assert.isNotNull(change);
 		Assert.isNotNull(name);
 		Assert.isNotNull(edit);
@@ -57,22 +58,7 @@ public class TextChangeCompatibility {
 			new CategorizedTextEditGroup(name, edit, groupCategories)));
 	}
 	
-	public static void addTextEdit(TextChange change, String name, TextEdit[] edits) {
-		Assert.isNotNull(change);
-		Assert.isNotNull(name);
-		Assert.isNotNull(edits);
-		TextEdit root= change.getEdit();
-		if (root == null) {
-			root= new MultiTextEdit();
-			change.setEdit(root);
-		}
-		for (int i= 0; i < edits.length; i++) {
-			insert(root, edits[i]);
-		}
-		change.addTextEditGroup(new TextEditGroup(name, edits));
-	}
-	
-	public static void insert(TextEdit parent, TextEdit edit) {
+	public static void insert(TextEdit parent, TextEdit edit) throws MalformedTreeException {
 		if (!parent.hasChildren()) {
 			parent.addChild(edit);
 			return;
