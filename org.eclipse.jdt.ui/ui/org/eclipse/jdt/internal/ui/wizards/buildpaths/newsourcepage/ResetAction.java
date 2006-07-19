@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
@@ -50,11 +51,15 @@ public class ResetAction extends BuildpathModifierAction {
 	private final IRunnableContext fContext;
 
 	public ResetAction(IWorkbenchSite site) {
-		this(site, PlatformUI.getWorkbench().getProgressService(), null);
+		this(site, null, PlatformUI.getWorkbench().getProgressService(), null);
 	}
+	
+	public ResetAction(IClasspathModifierListener listener, IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context, listener);
+    }
 
-	public ResetAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(site, BuildpathModifierAction.RESET);
+	public ResetAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener) {
+		super(site, selectionTarget, BuildpathModifierAction.RESET);
 		
 		fContext= context;
 		fListener= listener;

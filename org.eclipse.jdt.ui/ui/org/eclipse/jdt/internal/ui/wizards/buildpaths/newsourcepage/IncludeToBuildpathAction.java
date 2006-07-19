@@ -30,6 +30,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -52,11 +53,15 @@ public class IncludeToBuildpathAction extends BuildpathModifierAction {
 	private final IRunnableContext fContext;
 
 	public IncludeToBuildpathAction(IWorkbenchSite site) {
-		this(site, PlatformUI.getWorkbench().getProgressService(), null);
+		this(site, null, PlatformUI.getWorkbench().getProgressService(), null);
 	}
 	
-	public IncludeToBuildpathAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(site, BuildpathModifierAction.INCLUDE);
+	public IncludeToBuildpathAction(IClasspathModifierListener listener, IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context, listener);
+    }
+	
+	private IncludeToBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener) {
+		super(site, selectionTarget, BuildpathModifierAction.INCLUDE);
 		
 		fContext= context;
 		fListener= listener;

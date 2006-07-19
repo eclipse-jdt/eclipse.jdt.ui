@@ -35,6 +35,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -58,11 +59,15 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 	private final IClasspathModifierListener fListener;
 
 	public AddLibraryToBuildpathAction(IWorkbenchSite site) {
-		this(site, PlatformUI.getWorkbench().getProgressService(), null);
+		this(site, null, PlatformUI.getWorkbench().getProgressService(), null);
 	}
+	
+	public AddLibraryToBuildpathAction(IClasspathModifierListener listener, IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context, listener);
+    }
 
-	public AddLibraryToBuildpathAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(site, BuildpathModifierAction.ADD_LIB_TO_BP);
+	private AddLibraryToBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener) {
+		super(site, selectionTarget, BuildpathModifierAction.ADD_LIB_TO_BP);
 
 		fListener= listener;
 

@@ -63,15 +63,17 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 
 	private final IWorkbenchSite fSite;
 	private final List fSelectedElements;
+	private final ISetSelectionTarget fSelectionTarget;
 
-	public BuildpathModifierAction(IWorkbenchSite site, int id) {
-		this(site, id, IAction.AS_PUSH_BUTTON);
+	public BuildpathModifierAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, int id) {
+		this(site, selectionTarget, id, IAction.AS_PUSH_BUTTON);
     }
 	
-	public BuildpathModifierAction(IWorkbenchSite site, int id, int style) {
+	public BuildpathModifierAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, int id, int style) {
 		super("", style); //$NON-NLS-1$
 		
 		fSite= site;
+		fSelectionTarget= selectionTarget;
 		fSelectedElements= new ArrayList();
 		
 		setId(Integer.toString(id));
@@ -128,6 +130,12 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 	}
 	
 	protected void selectAndReveal(final ISelection selection) {
+		if (fSelectionTarget != null)
+			fSelectionTarget.selectReveal(selection);
+		
+		if (fSite == null)
+			return;
+			
 		// validate the input
 		IWorkbenchPage page= fSite.getPage();
 		if (page == null)

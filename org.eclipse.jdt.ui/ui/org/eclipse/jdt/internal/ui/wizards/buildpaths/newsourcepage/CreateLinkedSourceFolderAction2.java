@@ -14,14 +14,16 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.ui.part.ISetSelectionTarget;
+
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 public class CreateLinkedSourceFolderAction2 extends CreateLinkedSourceFolderAction {
 	
 	private final HintTextGroup fProvider;
 
-	public CreateLinkedSourceFolderAction2(IClasspathModifierListener listener, HintTextGroup provider, IRunnableContext context) {
-		super(null, context, listener);
+	public CreateLinkedSourceFolderAction2(IClasspathModifierListener listener, HintTextGroup provider, IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		super(listener, context, selectionTarget);
 		fProvider= provider;
     }
 
@@ -30,5 +32,7 @@ public class CreateLinkedSourceFolderAction2 extends CreateLinkedSourceFolderAct
 	 */
 	protected void selectAndReveal(ISelection selection) {
 	    fProvider.handleFolderCreation(((StructuredSelection)selection).toList());
+	    
+	    super.selectAndReveal(selection);
 	}
 }

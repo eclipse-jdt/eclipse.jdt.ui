@@ -34,7 +34,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -60,7 +59,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /**
@@ -77,16 +75,12 @@ public final class HintTextGroup implements ISelectionChangedListener {
     private StringDialogField fOutputLocationField;
     private Composite fTopComposite;
     private DialogPackageExplorerActionGroup fActionGroup;
-    private DialogPackageExplorer fPackageExplorer;
-    private IRunnableContext fRunnableContext;
     private IJavaProject fCurrJProject;
     private List fNewFolders;
     private String fOldOutputLocation;
     private HashMap fImageMap;
     
-    public HintTextGroup(DialogPackageExplorer packageExplorer, StringDialogField outputLocationField, SelectionButtonDialogField useFolderOutputs, IRunnableContext runnableContext) {
-        fPackageExplorer= packageExplorer;
-        fRunnableContext= runnableContext;
+    public HintTextGroup(StringDialogField outputLocationField) {
         fCurrJProject= null;
         fNewFolders= new ArrayList();
         fImageMap= new HashMap();
@@ -116,15 +110,7 @@ public final class HintTextGroup implements ISelectionChangedListener {
                 }
             }
         });
-        
-        fPackageExplorer.addPostSelectionChangedListener(this);
-        
         return fTopComposite;
-    }
-    
-	public void dispose() {
-		fPackageExplorer.removePostSelectionChangedListener(this);
-		fPackageExplorer= null;
     }
     
     private Shell getShell() {
@@ -195,9 +181,8 @@ public final class HintTextGroup implements ISelectionChangedListener {
      * @param parent the parent widget of the label
      * @param text the text of the label
      * @param action the action to be executed if the hyperlink is activated
-     * @param context the runnable context under which the action is executed
      */
-    private void createLabel(Composite parent, String text, final BuildpathModifierAction action, final IRunnableContext context) {
+    private void createLabel(Composite parent, String text, final BuildpathModifierAction action) {
         FormText formText= createFormText(parent, text);
         Image image= (Image)fImageMap.get(action.getId());
         if (image == null) {
@@ -212,24 +197,6 @@ public final class HintTextGroup implements ISelectionChangedListener {
             }
             
         });
-    }
-        
-    /**
-     * Default result handle. This includes:
-     * <li>Set the selection of the <code>fPackageExplorer</code>
-     * to the result object</li>
-     * <li>Force the hint text to be rebuilt if necessary</li>
-     *  
-     * @param result the result list of object to be selected by the 
-     * <code>fPackageExplorer</code>
-     * @param forceRebuild <code>true</code> if the area containing 
-     * the links and their descriptions should be rebuilt, <code>
-     * false</code> otherwise
-     * 
-     * @see DialogPackageExplorer#setSelection(List)
-     */
-    void defaultHandle(List result, boolean forceRebuild) {
-        fPackageExplorer.setSelection(result);
     }
     
     /**
@@ -256,7 +223,6 @@ public final class HintTextGroup implements ISelectionChangedListener {
             } catch (JavaModelException e) {
 	            JavaPlugin.log(e);
             }
-            fPackageExplorer.setSelection(result);
             setOutputLocationFieldText(getOldOutputLocation());
         }
     }
@@ -273,21 +239,7 @@ public final class HintTextGroup implements ISelectionChangedListener {
      * <code>fPackageExplorer</code>
      */
     public void handleAddToCP(List result) {
-    	fPackageExplorer.setSelection(result);
     	setOutputLocationFieldText(getOldOutputLocation());
-    }
-    
-    /**
-     * Handle removing from classpath. The goup area is rebuilt if 
-     * either <code>forceRebuild</code> is <code>true</code> or 
-     * the result contains one element of type <code>IJavaProject</code>.
-     * 
-     * @param result the result to be selected in the explorer
-     * @param forceRebuild <code>true</code> if the hint text group must 
-     * be rebuilt, <code>false</code> otherwise.
-     */
-    void handleRemoveFromBP(List result, boolean forceRebuild) {
-        fPackageExplorer.setSelection(result);
     }
     
     /**
@@ -305,7 +257,6 @@ public final class HintTextGroup implements ISelectionChangedListener {
             return;
         CPListElementAttribute attribute= (CPListElementAttribute)result.get(0);
         if (attribute != null) {
-            fPackageExplorer.setSelection(result);
             IPath path= (IPath)attribute.getValue();
             if (path != null) {
                 IFolder folder= fCurrJProject.getProject().getWorkspace().getRoot().getFolder(path);
@@ -314,18 +265,6 @@ public final class HintTextGroup implements ISelectionChangedListener {
             }
             setOutputLocationFieldText(getOldOutputLocation());
         }
-    }
-
-    /**
-     * Handle resetting of the Java project to the original 
-     * state. This only means that the package explorer 
-     * needs to be updated and the selection should 
-     * be set to the Java project root itself.
-     */
-    void handleResetAll() {
-        List list= new ArrayList();
-        list.add(fCurrJProject);
-        fPackageExplorer.setSelection(list);
     }
     
     private IPath getOldOutputLocation() {
@@ -424,7 +363,7 @@ public final class HintTextGroup implements ISelectionChangedListener {
         }
         
         for (int i= 0; i < actions.length; i++) {
-        	createLabel(childComposite, descriptions[i], actions[i], fRunnableContext);
+        	createLabel(childComposite, descriptions[i], actions[i]);
         }
         
         fTopComposite.layout(true);

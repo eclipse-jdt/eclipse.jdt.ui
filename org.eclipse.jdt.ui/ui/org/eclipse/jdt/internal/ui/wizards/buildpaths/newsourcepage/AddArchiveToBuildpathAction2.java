@@ -14,15 +14,17 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.ui.part.ISetSelectionTarget;
+
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 //Warning: This is unused and untested code!
 public class AddArchiveToBuildpathAction2 extends AddArchiveToBuildpathAction {
 
 	private final HintTextGroup fInformationProvider;
 
-	public AddArchiveToBuildpathAction2(IClasspathModifierListener listener, HintTextGroup provider, IRunnableContext context) {
-		super(null, context, listener);
-				
+	public AddArchiveToBuildpathAction2(IClasspathModifierListener listener, HintTextGroup provider, IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		super(listener, context, selectionTarget);
+		
 		fInformationProvider= provider;
     }
 
@@ -31,5 +33,7 @@ public class AddArchiveToBuildpathAction2 extends AddArchiveToBuildpathAction {
 	 */
 	protected void selectAndReveal(ISelection selection) {
 	    fInformationProvider.handleAddToCP(((StructuredSelection)selection).toList());
+	    
+	    super.selectAndReveal(selection);
 	}
 }

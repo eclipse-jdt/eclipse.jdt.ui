@@ -25,9 +25,10 @@ import org.eclipse.jface.operation.IRunnableContext;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
+
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.util.ViewerPane;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /**
  * Action group for the dialog package explorer shown on the second page
@@ -55,10 +56,9 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * to the operations
      * @param listener a listener for the changes on classpath entries, that is 
      * the listener will be notified whenever a classpath entry changed.
-     * @param outputLocationField 
      * @param context 
      */
-    public DialogPackageExplorerActionGroup(HintTextGroup provider, NewSourceContainerWorkbookPage listener, StringDialogField outputLocationField, IRunnableContext context, DialogPackageExplorer dialogPackageExplorer) {
+    public DialogPackageExplorerActionGroup(HintTextGroup provider, IClasspathModifierListener listener, IRunnableContext context, DialogPackageExplorer dialogPackageExplorer) {
         super();
 		
         fDialogPackageExplorer= dialogPackageExplorer;
@@ -66,22 +66,22 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         if (context == null)
         	context= PlatformUI.getWorkbench().getProgressService();
         
-        fAddFolderToBuildpathAction= new AddFolderToBuildpathAction2(listener, provider, context);
+        fAddFolderToBuildpathAction= new AddFolderToBuildpathAction2(listener, provider, context, fDialogPackageExplorer);
 		fDialogPackageExplorer.addSelectionChangedListener(fAddFolderToBuildpathAction);
 		
-		fRemoveFromBuildpathAction= new RemoveFromBuildpathAction2(listener, provider, context);
+		fRemoveFromBuildpathAction= new RemoveFromBuildpathAction(listener, context, fDialogPackageExplorer);
 		fDialogPackageExplorer.addSelectionChangedListener(fRemoveFromBuildpathAction);
         
-		fExcludeFromBuildpathAction= new ExcludeFromBuildpathAction2(listener, provider, context);
+		fExcludeFromBuildpathAction= new ExcludeFromBuildpathAction(listener, context, fDialogPackageExplorer);
 		fDialogPackageExplorer.addSelectionChangedListener(fExcludeFromBuildpathAction);
 		
-		fIncludeToBuildpathAction= new IncludeToBuildpathAction2(listener, provider, context);
+		fIncludeToBuildpathAction= new IncludeToBuildpathAction(listener, context, fDialogPackageExplorer);
 		fDialogPackageExplorer.addSelectionChangedListener(fIncludeToBuildpathAction);
 		
-			fEditFilterAction= new EditFilterAction2(listener, provider, context);
+			fEditFilterAction= new EditFilterAction(listener, context, fDialogPackageExplorer);
 			fDialogPackageExplorer.addSelectionChangedListener(fEditFilterAction);
 	
-	        fEditOutputFolderAction= new EditOutputFolderAction2(listener, provider, context);
+	        fEditOutputFolderAction= new EditOutputFolderAction2(listener, provider, context, fDialogPackageExplorer);
 			fDialogPackageExplorer.addSelectionChangedListener(fEditOutputFolderAction);
         
         fDropDownAction= new ClasspathModifierDropDownAction();
@@ -89,10 +89,10 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         fDropDownAction.addAction(fEditOutputFolderAction);
 		fDialogPackageExplorer.addPostSelectionChangedListener(fDropDownAction);
         
-        fCreateLinkedSourceFolderAction= new CreateLinkedSourceFolderAction2(listener, provider, context);
+        fCreateLinkedSourceFolderAction= new CreateLinkedSourceFolderAction2(listener, provider, context, fDialogPackageExplorer);
 		fDialogPackageExplorer.addSelectionChangedListener(fCreateLinkedSourceFolderAction);
         
-        fCreateSourceFolderAction= new CreateSourceFolderAction2(listener, provider, context);
+        fCreateSourceFolderAction= new CreateSourceFolderAction2(listener, provider, context, fDialogPackageExplorer);
 		fDialogPackageExplorer.addSelectionChangedListener(fCreateSourceFolderAction);
 
         

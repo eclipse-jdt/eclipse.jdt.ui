@@ -25,6 +25,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -46,11 +47,15 @@ public class CreateLinkedSourceFolderAction extends BuildpathModifierAction {
 	private final IClasspathModifierListener fListener;
 
 	public CreateLinkedSourceFolderAction(IWorkbenchSite site) {
-		this(site, PlatformUI.getWorkbench().getProgressService(), null);
+		this(site, null, PlatformUI.getWorkbench().getProgressService(), null);
 	}
 	
-	public CreateLinkedSourceFolderAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(site, BuildpathModifierAction.CREATE_LINK);
+	public CreateLinkedSourceFolderAction(IClasspathModifierListener listener, IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context, listener);
+    }
+	
+	private CreateLinkedSourceFolderAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener) {
+		super(site, selectionTarget, BuildpathModifierAction.CREATE_LINK);
 		
 		fListener= listener;
 		

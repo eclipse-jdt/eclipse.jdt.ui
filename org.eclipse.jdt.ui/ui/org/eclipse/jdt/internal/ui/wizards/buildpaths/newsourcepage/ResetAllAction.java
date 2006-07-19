@@ -20,9 +20,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -46,8 +47,8 @@ public class ResetAllAction extends BuildpathModifierAction {
 	private List fEntries;
 	private IPath fOutputLocation;
 
-	public ResetAllAction(IClasspathModifierListener listener, HintTextGroup provider, IRunnableContext context) {
-		super(null, BuildpathModifierAction.RESET_ALL);
+	public ResetAllAction(IClasspathModifierListener listener, HintTextGroup provider, IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		super(null, selectionTarget, BuildpathModifierAction.RESET_ALL);
 		
 		fListener= listener;
 		fProvider= provider;
@@ -142,9 +143,5 @@ public class ResetAllAction extends BuildpathModifierAction {
 	        i++;
         }
         return false;
-	}
-
-	protected void selectAndReveal(ISelection selection) {
-        fProvider.handleResetAll();	
 	}
 }

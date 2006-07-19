@@ -26,13 +26,13 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
@@ -58,17 +58,25 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 	private final IRunnableContext fContext;
 
 	public RemoveFromBuildpathAction(IWorkbenchSite site) {
-		this(site, PlatformUI.getWorkbench().getProgressService(), null, JavaPluginImages.DESC_ELCL_REMOVE_FROM_BP);
+		this(site, null, PlatformUI.getWorkbench().getProgressService(), null);
+		
+		setImageDescriptor(JavaPluginImages.DESC_ELCL_REMOVE_FROM_BP);
 	}
+	
+	public RemoveFromBuildpathAction(IClasspathModifierListener listener, IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context, listener);
+		
+		setImageDescriptor(JavaPluginImages.DESC_ELCL_REMOVE_AS_SOURCE_FOLDER);
+		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_REMOVE_AS_SOURCE_FOLDER);
+    }
 
-	public RemoveFromBuildpathAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener, ImageDescriptor image) {
-		super(site, BuildpathModifierAction.REMOVE_FROM_BP);
+	public RemoveFromBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener) {
+		super(site, selectionTarget, BuildpathModifierAction.REMOVE_FROM_BP);
 		
 		fContext= context;
 		fListener= listener;
 
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_label);
-		setImageDescriptor(image);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip);
     }
 	

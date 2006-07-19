@@ -88,8 +88,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         fUseFolderOutputs.setLabelText(NewWizardMessages.SourceContainerWorkbookPage_folders_check); 
         
 		fPackageExplorer= new DialogPackageExplorer();
-		fHintTextGroup= new HintTextGroup(fPackageExplorer, outputLocationField, fUseFolderOutputs, context);
-
+		fHintTextGroup= new HintTextGroup(outputLocationField);
      }
     
     /**
@@ -119,10 +118,12 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 			}
 		}
 		fUseFolderOutputs.setSelection(useFolderOutputs);
+		
+		fPackageExplorer.addPostSelectionChangedListener(fHintTextGroup);
     }
     
     public void dispose() {
-    	fHintTextGroup.dispose();
+    	fPackageExplorer.removePostSelectionChangedListener(fHintTextGroup);
     	fPackageExplorer.dispose();
     }
      
@@ -176,14 +177,14 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         excomposite.setClient(fHintTextGroup.createControl(excomposite));
         fUseFolderOutputs.doFillIntoGrid(body, 1);
 		
-	    final DialogPackageExplorerActionGroup actionGroup= new DialogPackageExplorerActionGroup(fHintTextGroup, this, fOutputLocationField, fContext, fPackageExplorer);
+	    final DialogPackageExplorerActionGroup actionGroup= new DialogPackageExplorerActionGroup(fHintTextGroup, this, fContext, fPackageExplorer);
 		   
 		
         fUseFolderOutputs.setDialogFieldListener(new IDialogFieldListener() {
             public void dialogFieldChanged(DialogField field) {
                 boolean isUseFolders= fUseFolderOutputs.isSelected();
                 if (isUseFolders) {
-                	ResetAllOutputFoldersAction2 action= new ResetAllOutputFoldersAction2(NewSourceContainerWorkbookPage.this, fHintTextGroup, fContext, fJavaProject);
+                	ResetAllOutputFoldersAction action= new ResetAllOutputFoldersAction(NewSourceContainerWorkbookPage.this, fContext, fJavaProject, fPackageExplorer);
                 	action.run();
                 }
 				fPackageExplorer.showOutputFolders(isUseFolders);

@@ -49,6 +49,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
+import org.eclipse.ui.part.ISetSelectionTarget;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -80,7 +82,7 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
  * elements that are not shown usually in the package explorer of the
  * workspace.
  */
-public class DialogPackageExplorer implements IMenuListener, ISelectionProvider, IPostSelectionProvider {
+public class DialogPackageExplorer implements IMenuListener, ISelectionProvider, IPostSelectionProvider, ISetSelectionTarget {
     /**
      * A extended content provider for the package explorer which can additionally display
      * an output folder item.
@@ -439,6 +441,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
 		try {
 	        ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable() {
 	        	public void run(IProgressMonitor monitor) throws CoreException {
+	        		fPackageViewer.refresh();
 	                IStructuredSelection selection= new StructuredSelection(elements);
 	                fPackageViewer.setSelection(selection, true);
 	                fPackageViewer.getTree().setFocus();
@@ -518,5 +521,12 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
      */
     public void removePostSelectionChangedListener(ISelectionChangedListener listener) {
     	fPackageViewer.removePostSelectionChangedListener(listener);
+    }
+
+	/**
+     * {@inheritDoc}
+     */
+    public void selectReveal(ISelection selection) {
+    	setSelection(selection);
     }
 }

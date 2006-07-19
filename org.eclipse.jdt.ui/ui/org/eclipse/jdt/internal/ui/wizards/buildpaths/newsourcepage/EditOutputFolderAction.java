@@ -28,6 +28,7 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -54,13 +55,17 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 	private boolean fShowOutputFolders;
 
 	public EditOutputFolderAction(final IWorkbenchSite site) {
-		this(site, PlatformUI.getWorkbench().getProgressService(), null);
+		this(site, null, PlatformUI.getWorkbench().getProgressService(), null);
 		
 		fShowOutputFolders= true;
 	}
+	
+	public EditOutputFolderAction(IClasspathModifierListener listener, IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context, listener);
+    }
 
-	public EditOutputFolderAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(site, BuildpathModifierAction.EDIT_OUTPUT);
+	private EditOutputFolderAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener) {
+		super(site, selectionTarget, BuildpathModifierAction.EDIT_OUTPUT);
 		
 		fContext= context;
 		fListener= listener;

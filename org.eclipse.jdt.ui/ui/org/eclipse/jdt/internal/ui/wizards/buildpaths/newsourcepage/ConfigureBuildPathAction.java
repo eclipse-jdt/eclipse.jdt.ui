@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 public class ConfigureBuildPathAction extends BuildpathModifierAction {
 
 	public ConfigureBuildPathAction(IWorkbenchSite site) {
-		super(site, BuildpathModifierAction.CONFIGURE_BUILD_PATH);
+		super(site, null, BuildpathModifierAction.CONFIGURE_BUILD_PATH);
 		
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_label);
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH);

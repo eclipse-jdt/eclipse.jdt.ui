@@ -44,7 +44,7 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
      * managed by this drop down menu.
      */
     public ClasspathModifierDropDownAction() {
-        super(null, BuildpathModifierAction.DROP_DOWN_ACTION, IAction.AS_DROP_DOWN_MENU);
+        super(null, null, BuildpathModifierAction.DROP_DOWN_ACTION, IAction.AS_DROP_DOWN_MENU);
         
         fActions= new ArrayList();
         fFirstValidAction= null;

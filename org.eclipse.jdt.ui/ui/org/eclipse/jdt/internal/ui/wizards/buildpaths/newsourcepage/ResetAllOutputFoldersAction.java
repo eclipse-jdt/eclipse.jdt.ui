@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
@@ -49,9 +50,13 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
 //	public ResetAllOutputFoldersAction(IWorkbenchSite site) {
 //		this(site, PlatformUI.getWorkbench().getProgressService(), null);
 //	}
+	
+	public ResetAllOutputFoldersAction(IClasspathModifierListener listener, IRunnableContext context, IJavaProject project, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context, listener, project);
+    }
 
-	public ResetAllOutputFoldersAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener, IJavaProject javaProject) {
-		super(site, BuildpathModifierAction.RESET_ALL_OUTPUT_FOLDERS);
+	public ResetAllOutputFoldersAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener, IJavaProject javaProject) {
+		super(site, selectionTarget, BuildpathModifierAction.RESET_ALL_OUTPUT_FOLDERS);
 		
 		fContext= context;
 		fListener= listener;

@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
@@ -52,11 +53,15 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 	private final IClasspathModifierListener fListener;
 
 	public AddSelectedLibraryToBuildpathAction(IWorkbenchSite site) {
-		this(site, PlatformUI.getWorkbench().getProgressService(), null);
+		this(site, null, PlatformUI.getWorkbench().getProgressService(), null);
 	}
 	
-	public AddSelectedLibraryToBuildpathAction(IWorkbenchSite site, IRunnableContext context, IClasspathModifierListener listener) {
-		super(site, BuildpathModifierAction.ADD_SEL_LIB_TO_BP);
+	public AddSelectedLibraryToBuildpathAction(IClasspathModifierListener listener, IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context, listener);
+    }
+	
+	private AddSelectedLibraryToBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener) {
+		super(site, selectionTarget, BuildpathModifierAction.ADD_SEL_LIB_TO_BP);
 		
 		fContext= context;
 		fListener= listener;

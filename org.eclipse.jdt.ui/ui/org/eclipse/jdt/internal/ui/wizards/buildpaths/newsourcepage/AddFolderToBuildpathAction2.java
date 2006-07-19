@@ -14,15 +14,17 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.ui.part.ISetSelectionTarget;
+
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 public class AddFolderToBuildpathAction2 extends AddFolderToBuildpathAction {
 
 	private final HintTextGroup fInformationProvider;
 
-	public AddFolderToBuildpathAction2(IClasspathModifierListener listener, HintTextGroup provider, IRunnableContext context) {
-		super(null, context, listener);
-				
+	public AddFolderToBuildpathAction2(IClasspathModifierListener listener,  HintTextGroup provider, IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		super(listener, context, selectionTarget);
+		
 		fInformationProvider= provider;
     }
 	
@@ -31,5 +33,7 @@ public class AddFolderToBuildpathAction2 extends AddFolderToBuildpathAction {
 	 */
 	protected void selectAndReveal(ISelection selection) {
 		fInformationProvider.handleAddToCP(((StructuredSelection)selection).toList());
+		
+		super.selectAndReveal(selection);
 	}
 }

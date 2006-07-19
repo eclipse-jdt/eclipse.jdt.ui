@@ -14,6 +14,8 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.ui.part.ISetSelectionTarget;
+
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 //Warning: This is unused and untested code!
@@ -21,8 +23,8 @@ public class AddLibraryToBuildpathAction2 extends AddLibraryToBuildpathAction {
 
 	private final HintTextGroup fInformationProvider;
 
-	public AddLibraryToBuildpathAction2(IClasspathModifierListener listener, HintTextGroup provider, IRunnableContext context) {
-		super(null, context, listener);
+	public AddLibraryToBuildpathAction2(IClasspathModifierListener listener, HintTextGroup provider, IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		super(listener, context, selectionTarget);
 				
 		fInformationProvider= provider;
     }
@@ -32,5 +34,7 @@ public class AddLibraryToBuildpathAction2 extends AddLibraryToBuildpathAction {
 	 */
 	protected void selectAndReveal(ISelection selection) {
 	    fInformationProvider.handleAddToCP(((StructuredSelection)selection).toList());
+	    
+	    super.selectAndReveal(selection);
 	}
 }
