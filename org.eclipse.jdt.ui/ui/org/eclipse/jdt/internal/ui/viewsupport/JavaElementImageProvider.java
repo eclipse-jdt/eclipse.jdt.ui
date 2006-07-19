@@ -11,20 +11,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.model.IWorkbenchAdapter;
+
+import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
@@ -37,12 +38,12 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * Default strategy of the Java plugin for the construction of Java element icons.
@@ -276,9 +277,10 @@ public class JavaElementImageProvider {
 
 				case IJavaElement.TYPE_PARAMETER:
 					return JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE;
+					
+				default:
+					// ignore. Must be a new, yet unknown element
 			}
-			
-			Assert.isTrue(false, JavaUIMessages.JavaImageLabelprovider_assert_wrongImage); 
 			return JavaPluginImages.DESC_OBJS_GHOST;
 		
 		} catch (JavaModelException e) {
