@@ -53,6 +53,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
@@ -132,14 +133,13 @@ public class JavaContext extends CompilationUnitContext {
 		try {
 			IRegion region= document.getLineInformationOfOffset(start);
 			String lineContent= document.get(region.getOffset(), region.getLength());
-			ICompilationUnit compilationUnit= getCompilationUnit();
-			IJavaProject project= compilationUnit == null ? null : compilationUnit.getJavaProject();
+			IJavaProject project= getJavaProject();
 			return Strings.computeIndentUnits(lineContent, project);
 		} catch (BadLocationException e) {
 			return 0;
 		}
-	}	
-	
+	}
+
 	/*
 	 * @see TemplateContext#evaluate(Template template)
 	 */
@@ -166,7 +166,7 @@ public class JavaContext extends CompilationUnitContext {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		boolean useCodeFormatter= prefs.getBoolean(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER);
 
-		IJavaProject project= getCompilationUnit() != null ? getCompilationUnit().getJavaProject() : null;
+		IJavaProject project= getJavaProject();
 		JavaFormatter formatter= new JavaFormatter(TextUtilities.getDefaultLineDelimiter(getDocument()), getIndentation(), useCodeFormatter, project);
 		formatter.format(buffer, this);
 		
@@ -390,14 +390,17 @@ public class JavaContext extends CompilationUnitContext {
 	}
 
 	private String[] suggestVariableName(String type, String[] excludes) throws IllegalArgumentException {
-		IJavaProject project= getCompilationUnit().getJavaProject();
 		int dim=0;
 		while (type.endsWith("[]")) //$NON-NLS-1$
 			dim++;
-		
 		String elementType= type.substring(0, type.length() - dim * 2);
-		String[] proposals= NamingConventions.suggestLocalVariableNames(project, "", elementType, dim, excludes); //$NON-NLS-1$
-		return proposals;
+		
+		IJavaProject project= getJavaProject();
+		if (project != null)
+			return NamingConventions.suggestLocalVariableNames(project, "", elementType, dim, excludes); //$NON-NLS-1$
+		
+		// fallback if we lack proper context: roll-our own lowercasing
+		return new String[] {Signature.getSimpleName(elementType).toLowerCase()};
 	}
 	
 	public void addImport(String type) {

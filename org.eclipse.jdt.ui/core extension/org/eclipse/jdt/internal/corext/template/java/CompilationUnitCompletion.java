@@ -238,7 +238,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		public String[] getMemberTypeSignatures() {
 			if (isArray()) {
 				return new String[] {Signature.createArraySignature(Signature.getElementType(signature), Signature.getArrayCount(signature) - 1)};
-			} else if (isIterable() || isCollection()) {
+			} else if (fUnit != null && (isIterable() || isCollection())) {
 				if (fMemberTypes == null) {
 					try {
 						TypeParameterResolver util= new TypeParameterResolver(this);
@@ -300,13 +300,15 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		public String[] getTypeArgumentBoundSignatures(String type, int index) {
 			List all= new ArrayList();
 			IType[] supertypes= getSupertypes(type);
-			for (int i= 0; i < supertypes.length; i++) {
-				try {
-					TypeParameterResolver util= new TypeParameterResolver(this);
-					String[] result= util.computeBinding(supertypes[i].getFullyQualifiedName(), index);
-					all.addAll(Arrays.asList(result));
-				} catch (JavaModelException e) {
-				} catch (IndexOutOfBoundsException e) {
+			if (fUnit != null) {
+				for (int i= 0; i < supertypes.length; i++) {
+					try {
+						TypeParameterResolver util= new TypeParameterResolver(this);
+						String[] result= util.computeBinding(supertypes[i].getFullyQualifiedName(), index);
+						all.addAll(Arrays.asList(result));
+					} catch (JavaModelException e) {
+					} catch (IndexOutOfBoundsException e) {
+					}
 				}
 			}
 			if (all.isEmpty())
@@ -634,9 +636,6 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 			
 			if (Signature.getTypeSignatureKind(subTypeSignature) != Signature.BASE_TYPE_SIGNATURE && SignatureUtil.isJavaLangObject(superTypeSignature)) 
 				return true;
-			
-			if (fUnit == null)
-				return false;
 			
 			IJavaProject project= fUnit.getJavaProject();
 			

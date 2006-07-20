@@ -328,8 +328,9 @@ public class JavaFormatter {
 
 	private void format(IDocument doc, CompilationUnitContext context) throws BadLocationException {
 		Map options;
-		if (context.getCompilationUnit() != null)
-			options= context.getCompilationUnit().getJavaProject().getOptions(true); 
+		IJavaProject project= context.getJavaProject();
+		if (project != null)
+			options= project.getOptions(true); 
 		else
 			options= JavaCore.getOptions();
 

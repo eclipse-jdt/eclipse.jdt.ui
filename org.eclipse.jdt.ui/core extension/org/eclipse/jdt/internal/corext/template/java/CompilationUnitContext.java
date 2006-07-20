@@ -17,6 +17,7 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariableGuess;
@@ -125,4 +126,10 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 	void setMultiVariableGuess(MultiVariableGuess multiVariableGuess) {
 		fMultiVariableGuess= multiVariableGuess;
 	}
+	
+	protected IJavaProject getJavaProject() {
+		ICompilationUnit compilationUnit= getCompilationUnit();
+		IJavaProject project= compilationUnit == null ? null : compilationUnit.getJavaProject();
+		return project;
+	}	
 }

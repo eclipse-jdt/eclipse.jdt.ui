@@ -195,7 +195,7 @@ public class JavaDocContext extends CompilationUnitContext {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		boolean useCodeFormatter= prefs.getBoolean(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER);
 
-		IJavaProject project= getCompilationUnit() != null ? getCompilationUnit().getJavaProject() : null;
+		IJavaProject project= getJavaProject();
 		JavaFormatter formatter= new JavaFormatter(TextUtilities.getDefaultLineDelimiter(getDocument()), getIndentation(), useCodeFormatter, project);
 		formatter.format(buffer, this);
 			
@@ -213,8 +213,7 @@ public class JavaDocContext extends CompilationUnitContext {
 		try {
 			IRegion region= document.getLineInformationOfOffset(start);
 			String lineContent= document.get(region.getOffset(), region.getLength());
-			ICompilationUnit compilationUnit= getCompilationUnit();
-			IJavaProject project= compilationUnit == null ? null : compilationUnit.getJavaProject();
+			IJavaProject project= getJavaProject();
 			return Strings.computeIndentUnits(lineContent, project);
 		} catch (BadLocationException e) {
 			return 0;
