@@ -396,6 +396,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
     		fContentProvider.dispose();
     	}
 		fContentProvider= new PackageContentProvider();
+		fContentProvider.setIsFlatLayout(true);
 		PackageLabelProvider labelProvider= new PackageLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS);
 		fPackageViewer.setContentProvider(fContentProvider);
