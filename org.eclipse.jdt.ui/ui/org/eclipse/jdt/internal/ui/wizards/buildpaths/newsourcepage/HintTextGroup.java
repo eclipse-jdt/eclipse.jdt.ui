@@ -233,18 +233,30 @@ public final class HintTextGroup implements ISelectionChangedListener {
         // Dispose old composite (if necessary)
         if (childComposite != null && childComposite.getParent() != null)
             childComposite.getParent().dispose();
-        
+      
+    	PixelConverter converter= new PixelConverter(fTopComposite);
+    	
         // Create new composite
         ScrolledPageContent spc= new ScrolledPageContent(fTopComposite, SWT.V_SCROLL);
         spc.getVerticalBar().setIncrement(5);
-        spc.setLayoutData(new GridData(GridData.FILL_BOTH));
+        
+        GridData gridData= new GridData(GridData.FILL_BOTH);
+        
+        gridData.heightHint= converter.convertHeightInCharsToPixels(12);
+        gridData.widthHint= converter.convertWidthInCharsToPixels(25);
+        spc.setLayoutData(gridData);
+        
         childComposite= spc.getBody();
         TableWrapLayout tableWrapLayout= new TableWrapLayout();
 		tableWrapLayout.leftMargin= 0;
 		tableWrapLayout.rightMargin= 0;
 		childComposite.setLayout(tableWrapLayout);
-        childComposite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL));
-        fTopComposite.setData(childComposite);
+		gridData= new GridData(GridData.FILL_BOTH);
+        gridData.heightHint= converter.convertHeightInCharsToPixels(12);
+        gridData.widthHint= converter.convertWidthInCharsToPixels(25);
+        childComposite.setLayoutData(gridData);
+        
+		fTopComposite.setData(childComposite);
         
         if (noContextHelpAvailable(actions)) {
             String noAction= noAction(selection);
