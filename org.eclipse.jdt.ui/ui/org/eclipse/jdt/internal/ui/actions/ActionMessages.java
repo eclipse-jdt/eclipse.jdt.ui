@@ -32,6 +32,8 @@ public final class ActionMessages extends NLS {
 	public static String FindNLSProblemsAction_Name;
 	public static String FindNLSProblemsAction_NoPropertieFilesFoundErrorDescription;
 	public static String FindNLSProblemsAction_ToolTip;
+	public static String FormatAllAction_problem_accessing;
+	public static String FormatAllAction_read_only_skipped;
 	public static String OpenAction_error_no_editor_found;
 	public static String OpenAction_error_problem_opening_editor;
 	public static String OpenAction_multistatus_message;

@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.filebuffers.FileBuffers;
@@ -64,6 +65,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -268,11 +270,9 @@ public class FormatAllAction extends SelectionDispatchAction {
 		}
 				
 		IStatus status= Resources.makeCommittable(getResources(cus), getShell());
-		if (!status.isOK()) {
-			ErrorDialog.openError(getShell(), ActionMessages.FormatAllAction_failedvalidateedit_title, ActionMessages.FormatAllAction_failedvalidateedit_message, status); 
+		if (status.matches(IStatus.CANCEL)) {
 			return;
 		}
-		
 		runOnMultiple(cus);
 	}
 
@@ -303,7 +303,7 @@ public class FormatAllAction extends SelectionDispatchAction {
 				}
 			})); // workspace lock
 			if (!status.isOK()) {
-				String title= ActionMessages.FormatAllAction_multi_status_title; 
+				String title= ActionMessages.FormatAllAction_multi_status_title;
 				ErrorDialog.openError(getShell(), title, null, status);
 			}
 		} catch (InvocationTargetException e) {
@@ -384,6 +384,11 @@ public class FormatAllAction extends SelectionDispatchAction {
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
 				}
+				if (cu.getResource().getResourceAttributes().isReadOnly()) {
+					String message= Messages.format(ActionMessages.FormatAllAction_read_only_skipped, path.toString());
+					status.add(new Status(IStatus.WARNING, JavaUI.ID_PLUGIN, IStatus.WARNING, message, null));
+					continue;
+				}
 				
 				ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 				try {
@@ -404,7 +409,8 @@ public class FormatAllAction extends SelectionDispatchAction {
 						manager.disconnect(path, new SubProgressMonitor(monitor, 1));
 					}
 				} catch (CoreException e) {
-					status.add(e.getStatus());
+					String message= Messages.format(ActionMessages.FormatAllAction_problem_accessing, new String[] { path.toString(), e.getLocalizedMessage() });
+					status.add(new Status(IStatus.WARNING, JavaUI.ID_PLUGIN, IStatus.WARNING, message, e));
 				}
 			}
 		} finally {
