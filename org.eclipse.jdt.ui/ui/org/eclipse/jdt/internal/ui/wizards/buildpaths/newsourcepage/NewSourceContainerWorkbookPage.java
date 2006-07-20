@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -35,8 +36,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
+import org.eclipse.jdt.internal.corext.buildpath.IBuildpathModifierListener;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.ScrolledPageContent;
@@ -53,7 +55,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
-public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements IClasspathModifierListener {
+public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements IBuildpathModifierListener {
     
     public static final String OPEN_SETTING= "org.eclipse.jdt.internal.ui.wizards.buildpaths.NewSourceContainerPage.openSetting";  //$NON-NLS-1$
     
@@ -62,6 +64,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     private DialogPackageExplorer fPackageExplorer;
     private SelectionButtonDialogField fUseFolderOutputs;
 	private final StringDialogField fOutputLocationField;
+	private DialogPackageExplorerActionGroup fActionGroup;
 	
 	private IJavaProject fJavaProject;
 
@@ -88,7 +91,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         fUseFolderOutputs.setLabelText(NewWizardMessages.SourceContainerWorkbookPage_folders_check); 
         
 		fPackageExplorer= new DialogPackageExplorer();
-		fHintTextGroup= new HintTextGroup(outputLocationField);
+		fHintTextGroup= new HintTextGroup();
      }
     
     /**
@@ -103,7 +106,6 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
      */
     public void init(IJavaProject javaProject) {
 		fJavaProject= javaProject;
-        fHintTextGroup.setJavaProject(javaProject);
         
         fPackageExplorer.setInput(javaProject);
 		
@@ -123,6 +125,10 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     }
     
     public void dispose() {
+    	if (fActionGroup != null) {
+    		fActionGroup.removeBuildpathModifierListener(this);
+    		fActionGroup= null;
+    	}
     	fPackageExplorer.removePostSelectionChangedListener(fHintTextGroup);
     	fPackageExplorer.dispose();
     }
@@ -177,14 +183,16 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         excomposite.setClient(fHintTextGroup.createControl(excomposite));
         fUseFolderOutputs.doFillIntoGrid(body, 1);
 		
-	    final DialogPackageExplorerActionGroup actionGroup= new DialogPackageExplorerActionGroup(fHintTextGroup, this, fContext, fPackageExplorer);
+	    fActionGroup= new DialogPackageExplorerActionGroup(fHintTextGroup, fContext, fPackageExplorer);
+		fActionGroup.addBuildpathModifierListener(this);
 		   
 		
         fUseFolderOutputs.setDialogFieldListener(new IDialogFieldListener() {
             public void dialogFieldChanged(DialogField field) {
                 boolean isUseFolders= fUseFolderOutputs.isSelected();
                 if (isUseFolders) {
-                	ResetAllOutputFoldersAction action= new ResetAllOutputFoldersAction(NewSourceContainerWorkbookPage.this, fContext, fJavaProject, fPackageExplorer);
+                	ResetAllOutputFoldersAction action= new ResetAllOutputFoldersAction(fContext, fJavaProject, fPackageExplorer);
+                	action.addBuildpathModifierListener(NewSourceContainerWorkbookPage.this);
                 	action.run();
                 }
 				fPackageExplorer.showOutputFolders(isUseFolders);
@@ -199,16 +207,16 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 		LayoutUtil.setHorizontalGrabbing(fOutputLocationField.getTextControl(null));
         
         // Create toolbar with actions on the left
-        ToolBarManager tbm= actionGroup.createLeftToolBarManager(pane);
+        ToolBarManager tbm= fActionGroup.createLeftToolBarManager(pane);
         pane.setTopCenter(null);
         pane.setTopLeft(tbm.getControl());
         
         // Create toolbar with help on the right
-        tbm= actionGroup.createLeftToolBar(pane);
+        tbm= fActionGroup.createLeftToolBar(pane);
         pane.setTopRight(tbm.getControl());
         
-        fHintTextGroup.setActionGroup(actionGroup);
-        fPackageExplorer.setActionGroup(actionGroup);
+        fHintTextGroup.setActionGroup(fActionGroup);
+        fPackageExplorer.setActionGroup(fActionGroup);
         
 		sashForm.setWeights(new int[] {60, 40});
 		adjustSashForm(sashWeight, sashForm, excomposite.isExpanded());
@@ -348,7 +356,13 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     /**
      * Update <code>fClassPathList</code>.
      */
-    public void classpathEntryChanged(List newEntries) {
-        fClassPathList.setElements(newEntries);
+    public void buildpathChanged(BuildpathDelta delta) {
+        fClassPathList.setElements(Arrays.asList(delta.getNewEntries()));
+        
+        try {
+	        fOutputLocationField.setText(fJavaProject.getOutputLocation().makeRelative().toString());
+        } catch (JavaModelException e) {
+	        JavaPlugin.log(e);
+        }
     }
 }

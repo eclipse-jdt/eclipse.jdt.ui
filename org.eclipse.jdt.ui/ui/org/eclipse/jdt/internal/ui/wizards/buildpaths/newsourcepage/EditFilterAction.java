@@ -10,10 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
+import java.util.ArrayList;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -33,8 +36,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -48,21 +51,17 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.EditFilterWizard;
 //SelectedElements iff enabled: (IJavaProject || IPackageFragmentRoot) && size == 1
 public class EditFilterAction extends BuildpathModifierAction {
 	
-	private IClasspathModifierListener fListener;
-	
 	public EditFilterAction(IWorkbenchSite site) {
-		this(site, null, PlatformUI.getWorkbench().getProgressService(), null);
+		this(site, null, PlatformUI.getWorkbench().getProgressService());
 	}
 	
-	public EditFilterAction(IClasspathModifierListener listener, IRunnableContext context, ISetSelectionTarget selectionTarget) {
-		this(null, selectionTarget, context, listener);
+	public EditFilterAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context);
     }
 	
-	private EditFilterAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener) {
+	private EditFilterAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.EDIT_FILTERS);
 		
-		fListener= listener;
-	
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_label);
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH_FILTERS);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_tooltip); 
@@ -99,8 +98,17 @@ public class EditFilterAction extends BuildpathModifierAction {
 			dialog.create();
 			int res= dialog.open();
 			if (res == Window.OK) {
-				if (fListener != null)
-					fListener.classpathEntryChanged(wizard.getExistingEntries());
+				BuildpathDelta delta= new BuildpathDelta(getToolTipText());
+				
+				ArrayList newEntries= wizard.getExistingEntries();
+				delta.setNewEntries((CPListElement[])newEntries.toArray(new CPListElement[newEntries.size()]));
+				
+				IResource resource= wizard.getCreatedElement().getCorrespondingResource();
+				delta.addCreatedResource(resource);
+				
+				delta.setDefaultOutputLocation(wizard.getOutputLocation());
+					
+				informListeners(delta);
 				
 				selectAndReveal(new StructuredSelection(wizard.getCreatedElement()));
 			}

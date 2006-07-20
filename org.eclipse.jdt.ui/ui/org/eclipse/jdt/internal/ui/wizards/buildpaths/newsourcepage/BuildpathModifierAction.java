@@ -37,6 +37,9 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.ui.forms.widgets.FormText;
 
+import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
+import org.eclipse.jdt.internal.corext.buildpath.IBuildpathModifierListener;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public abstract class BuildpathModifierAction extends Action implements ISelectionChangedListener {
@@ -64,6 +67,7 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 	private final IWorkbenchSite fSite;
 	private final List fSelectedElements;
 	private final ISetSelectionTarget fSelectionTarget;
+	private final List fListeners;
 
 	public BuildpathModifierAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, int id) {
 		this(site, selectionTarget, id, IAction.AS_PUSH_BUTTON);
@@ -75,6 +79,7 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 		fSite= site;
 		fSelectionTarget= selectionTarget;
 		fSelectedElements= new ArrayList();
+		fListeners= new ArrayList();
 		
 		setId(Integer.toString(id));
     }
@@ -107,6 +112,20 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 	
 	protected List getSelectedElements() {
 		return fSelectedElements;
+	}
+	
+	public void addBuildpathModifierListener(IBuildpathModifierListener listener) {
+		fListeners.add(listener);
+	}
+	
+	public void removeBuildpathModifierListener(IBuildpathModifierListener listener) {
+		fListeners.remove(listener);
+	}
+
+	protected void informListeners(BuildpathDelta delta) {
+		for (Iterator iterator= fListeners.iterator(); iterator.hasNext();) {
+	        ((IBuildpathModifierListener)iterator.next()).buildpathChanged(delta);
+        }	
 	}
 	
 	protected Shell getShell() {

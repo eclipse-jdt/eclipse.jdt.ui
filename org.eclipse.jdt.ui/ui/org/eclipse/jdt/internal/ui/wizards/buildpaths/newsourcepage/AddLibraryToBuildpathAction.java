@@ -41,8 +41,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -56,20 +56,16 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathContainerWizard;
 //SelectedElements: IJavaProject && size == 1
 public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 
-	private final IClasspathModifierListener fListener;
-
 	public AddLibraryToBuildpathAction(IWorkbenchSite site) {
-		this(site, null, PlatformUI.getWorkbench().getProgressService(), null);
+		this(site, null, PlatformUI.getWorkbench().getProgressService());
 	}
 	
-	public AddLibraryToBuildpathAction(IClasspathModifierListener listener, IRunnableContext context, ISetSelectionTarget selectionTarget) {
-		this(null, selectionTarget, context, listener);
+	public AddLibraryToBuildpathAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context);
     }
 
-	private AddLibraryToBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener) {
+	private AddLibraryToBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.ADD_LIB_TO_BP);
-
-		fListener= listener;
 
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_label);
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_LIBRARY);
@@ -160,9 +156,11 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 						if (pm.isCanceled())
 							throw new InterruptedException();
 
-						ClasspathModifier.commitClassPath(existingEntries, project, fListener, new SubProgressMonitor(pm, 1));
-						if (pm.isCanceled())
-							throw new InterruptedException();
+						ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(pm, 1));
+						
+			        	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
+			        	delta.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
+			        	informListeners(delta);
 
 						List result= new ArrayList(addedEntries.size());
 						for (int i= 0; i < addedEntries.size(); i++) {

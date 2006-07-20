@@ -38,8 +38,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -51,21 +51,19 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
  
 	private final IRunnableContext fContext;
-	private final IClasspathModifierListener fListener;
 	
 	public ExcludeFromBuildpathAction(IWorkbenchSite site) {
-		this(site, null, PlatformUI.getWorkbench().getProgressService(), null);
+		this(site, null, PlatformUI.getWorkbench().getProgressService());
 	}
 	
-	public ExcludeFromBuildpathAction(IClasspathModifierListener listener, IRunnableContext context, ISetSelectionTarget selectionTarget) {
-		this(null, selectionTarget, context, listener);
+	public ExcludeFromBuildpathAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context);
     }
 	
-	private ExcludeFromBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener) {
+	private ExcludeFromBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.EXCLUDE);
 		
 		fContext= context;
-		fListener= listener;
 		
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_label);
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_EXCLUDE_FROM_BUILDPATH);
@@ -147,7 +145,12 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 				}
 			}
 
-			ClasspathModifier.commitClassPath(existingEntries, project, fListener, new SubProgressMonitor(monitor, 4));
+			ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(monitor, 4));
+			
+        	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
+        	delta.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
+        	informListeners(delta);
+			
 			return resources;
 		} finally {
 			monitor.done();

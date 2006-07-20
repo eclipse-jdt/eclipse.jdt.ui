@@ -40,8 +40,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -54,27 +54,25 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 //SelectedElements iff enabled: IPackageFramgentRoot || IJavaProject || ClassPathContainer
 public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 
-	private final IClasspathModifierListener fListener;
 	private final IRunnableContext fContext;
 
 	public RemoveFromBuildpathAction(IWorkbenchSite site) {
-		this(site, null, PlatformUI.getWorkbench().getProgressService(), null);
+		this(site, null, PlatformUI.getWorkbench().getProgressService());
 		
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_REMOVE_FROM_BP);
 	}
 	
-	public RemoveFromBuildpathAction(IClasspathModifierListener listener, IRunnableContext context, ISetSelectionTarget selectionTarget) {
-		this(null, selectionTarget, context, listener);
+	public RemoveFromBuildpathAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context);
 		
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_REMOVE_AS_SOURCE_FOLDER);
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_REMOVE_AS_SOURCE_FOLDER);
     }
 
-	public RemoveFromBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener) {
+	public RemoveFromBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.REMOVE_FROM_BP);
 		
 		fContext= context;
-		fListener= listener;
 
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_label);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip);
@@ -194,7 +192,11 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 				}
 			}
 
-			ClasspathModifier.commitClassPath(existingEntries, project, fListener, new SubProgressMonitor(monitor, 1));
+			ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(monitor, 1));
+			
+        	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
+        	delta.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
+        	informListeners(delta);
 
 			return result;
 		} finally {

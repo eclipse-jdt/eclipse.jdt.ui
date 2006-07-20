@@ -33,8 +33,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -43,23 +43,18 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 
 public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
 	
-	private final IClasspathModifierListener fListener;
 	private final IRunnableContext fContext;
 	private final IJavaProject fJavaProject;
 
-//	public ResetAllOutputFoldersAction(IWorkbenchSite site) {
-//		this(site, PlatformUI.getWorkbench().getProgressService(), null);
-//	}
 	
-	public ResetAllOutputFoldersAction(IClasspathModifierListener listener, IRunnableContext context, IJavaProject project, ISetSelectionTarget selectionTarget) {
-		this(null, selectionTarget, context, listener, project);
+	public ResetAllOutputFoldersAction(IRunnableContext context, IJavaProject project, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context, project);
     }
 
-	public ResetAllOutputFoldersAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener, IJavaProject javaProject) {
+	public ResetAllOutputFoldersAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IJavaProject javaProject) {
 		super(site, selectionTarget, BuildpathModifierAction.RESET_ALL_OUTPUT_FOLDERS);
 		
 		fContext= context;
-		fListener= listener;
 		fJavaProject= javaProject;
 		
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
@@ -148,7 +143,12 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
         		}
         	}
         
-        	ClasspathModifier.commitClassPath(entries, project, fListener, null);
+        	ClasspathModifier.commitClassPath(entries, project, null);
+        	
+        	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
+        	delta.setNewEntries((CPListElement[])entries.toArray(new CPListElement[entries.size()]));
+        	informListeners(delta);
+        	
         	return result;
         } finally {
         	monitor.done();

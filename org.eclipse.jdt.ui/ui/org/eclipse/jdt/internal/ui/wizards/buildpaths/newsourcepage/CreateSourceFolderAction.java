@@ -10,10 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
+import java.util.ArrayList;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -30,7 +33,7 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
+import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -45,21 +48,17 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
 //SelectedElements iff enabled: IJavaProject && size==1
 public class CreateSourceFolderAction extends BuildpathModifierAction {
-	
-	private final IClasspathModifierListener fListener;
 
 	public CreateSourceFolderAction(IWorkbenchSite site) {
-		this(site, null, PlatformUI.getWorkbench().getProgressService(), null);
+		this(site, null, PlatformUI.getWorkbench().getProgressService());
 	}
 	
-	public CreateSourceFolderAction(IClasspathModifierListener listener, IRunnableContext context, ISetSelectionTarget selectionTarget) {
-		this(null, selectionTarget, context, listener);
+	public CreateSourceFolderAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context);
     }
 	
-	private CreateSourceFolderAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener) {
+	private CreateSourceFolderAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.CREATE_FOLDER);
-		
-		fListener= listener;
 		
 		setText(ActionMessages.OpenNewSourceFolderWizardAction_text2); 
 		setDescription(ActionMessages.OpenNewSourceFolderWizardAction_description); 
@@ -100,9 +99,18 @@ public class CreateSourceFolderAction extends BuildpathModifierAction {
 			dialog.create();
 			int res= dialog.open();
 			if (res == Window.OK) {
-				if (fListener != null)
-					fListener.classpathEntryChanged(wizard.getExistingEntries());
-
+				BuildpathDelta delta= new BuildpathDelta(getToolTipText());
+				
+				ArrayList newEntries= wizard.getExistingEntries();
+				delta.setNewEntries((CPListElement[])newEntries.toArray(new CPListElement[newEntries.size()]));
+				
+				IResource resource= wizard.getCreatedElement().getCorrespondingResource();
+				delta.addCreatedResource(resource);
+					
+				delta.setDefaultOutputLocation(wizard.getOutputLocation());
+					
+				informListeners(delta);
+				
 				selectAndReveal(new StructuredSelection(wizard.getCreatedElement()));
 			}
 			

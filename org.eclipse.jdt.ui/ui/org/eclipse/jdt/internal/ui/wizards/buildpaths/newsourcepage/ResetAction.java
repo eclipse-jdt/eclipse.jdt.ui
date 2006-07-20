@@ -35,8 +35,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -47,23 +47,21 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 //SelectedElements iff enabled: IJavaProject || IPackageFragmentRoot || CPListElementAttribute
 public class ResetAction extends BuildpathModifierAction {
 
-	private final IClasspathModifierListener fListener;
 	private final IRunnableContext fContext;
 
 	public ResetAction(IWorkbenchSite site) {
-		this(site, null, PlatformUI.getWorkbench().getProgressService(), null);
+		this(site, null, PlatformUI.getWorkbench().getProgressService());
 	}
 	
-	public ResetAction(IClasspathModifierListener listener, IRunnableContext context, ISetSelectionTarget selectionTarget) {
-		this(null, selectionTarget, context, listener);
+	public ResetAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context);
     }
 
-	public ResetAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener) {
+	public ResetAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.RESET);
 		
 		fContext= context;
-		fListener= listener;
-
+		
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
     }
@@ -157,7 +155,12 @@ public class ResetAction extends BuildpathModifierAction {
         		}
         	}
         
-        	ClasspathModifier.commitClassPath(entries, project, fListener, null);
+        	ClasspathModifier.commitClassPath(entries, project, null);
+        
+        	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
+        	delta.setNewEntries((CPListElement[])entries.toArray(new CPListElement[entries.size()]));
+        	informListeners(delta);
+        	
         	return result;
         } finally {
         	monitor.done();

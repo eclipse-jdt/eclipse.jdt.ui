@@ -35,8 +35,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
@@ -49,21 +49,19 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
 
 	private final IRunnableContext fContext;
-	private final IClasspathModifierListener fListener;
 
 	public AddArchiveToBuildpathAction(IWorkbenchSite site) {
-		this(site, null, PlatformUI.getWorkbench().getProgressService(), null);
+		this(site, null, PlatformUI.getWorkbench().getProgressService());
 	}
 	
-	public AddArchiveToBuildpathAction(IClasspathModifierListener listener, IRunnableContext context, ISetSelectionTarget selectionTarget) {
-		this(null, selectionTarget, context, listener);
+	public AddArchiveToBuildpathAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context);
     }
 	
-	private AddArchiveToBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener) {
+	private AddArchiveToBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.ADD_LIB_TO_BP);
 		
 		fContext= context;
-		fListener= listener;
 
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddJarCP_label);
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_EXTJAR);
@@ -122,7 +120,11 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
 
 				List existingEntries= ClasspathModifier.getExistingEntries(project);
 				ClasspathModifier.setNewEntry(existingEntries, addedEntries, project, new SubProgressMonitor(monitor, 1));
-				ClasspathModifier.commitClassPath(existingEntries, project, fListener, new SubProgressMonitor(monitor, 1));
+				ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(monitor, 1));
+
+        		BuildpathDelta delta= new BuildpathDelta(getToolTipText());
+        		delta.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
+        		informListeners(delta);
 
 				List result= new ArrayList(addedEntries.size());
 				for (int i= 0; i < addedEntries.size(); i++) {

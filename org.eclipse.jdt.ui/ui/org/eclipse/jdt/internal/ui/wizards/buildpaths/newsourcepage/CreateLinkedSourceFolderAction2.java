@@ -16,14 +16,12 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.part.ISetSelectionTarget;
 
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
-
 public class CreateLinkedSourceFolderAction2 extends CreateLinkedSourceFolderAction {
 	
 	private final HintTextGroup fProvider;
 
-	public CreateLinkedSourceFolderAction2(IClasspathModifierListener listener, HintTextGroup provider, IRunnableContext context, ISetSelectionTarget selectionTarget) {
-		super(listener, context, selectionTarget);
+	public CreateLinkedSourceFolderAction2(HintTextGroup provider, IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		super(context, selectionTarget);
 		fProvider= provider;
     }
 

@@ -49,8 +49,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -66,21 +66,19 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 
 	private final IRunnableContext fContext;
-	private final IClasspathModifierListener fListener;
 
 	public AddFolderToBuildpathAction(IWorkbenchSite site) {
-		this(site, null, PlatformUI.getWorkbench().getProgressService(), null);
+		this(site, null, PlatformUI.getWorkbench().getProgressService());
 	}
 	
-	public AddFolderToBuildpathAction(IClasspathModifierListener listener, IRunnableContext context, ISetSelectionTarget selectionTarget) {
-		this(null, selectionTarget, context, listener);
+	public AddFolderToBuildpathAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context);
     }
 	
-	private AddFolderToBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener) {
+	private AddFolderToBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.ADD_SEL_SF_TO_BP);
 		
 		fContext= context;
-		fListener= listener;
 		
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_label);
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_ADD_AS_SOURCE_FOLDER);
@@ -212,8 +210,11 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 				}
 			}
 
+        	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
+        	
 			if (!project.getOutputLocation().equals(outputLocation)) {
 				project.setOutputLocation(outputLocation, new SubProgressMonitor(monitor, 1));
+				delta.setDefaultOutputLocation(outputLocation);
 			} else {
 				monitor.worked(1);
 			}
@@ -241,7 +242,10 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 
 			ClasspathModifier.setNewEntry(existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
 
-			ClasspathModifier.commitClassPath(existingEntries, project, fListener, new SubProgressMonitor(monitor, 1));
+			ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(monitor, 1));
+			
+        	delta.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
+        	informListeners(delta);
 
 			List result= new ArrayList();
 			for (int i= 0; i < newEntries.size(); i++) {

@@ -18,6 +18,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -29,8 +31,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -40,17 +42,15 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 //TODO: Use global history
 public class ResetAllAction extends BuildpathModifierAction {
 	
-	private final IClasspathModifierListener fListener;
 	private final HintTextGroup fProvider;
 	private final IRunnableContext fContext;
 	private IJavaProject fJavaProject;
 	private List fEntries;
 	private IPath fOutputLocation;
 
-	public ResetAllAction(IClasspathModifierListener listener, HintTextGroup provider, IRunnableContext context, ISetSelectionTarget selectionTarget) {
+	public ResetAllAction(HintTextGroup provider, IRunnableContext context, ISetSelectionTarget selectionTarget) {
 		super(null, selectionTarget, BuildpathModifierAction.RESET_ALL);
 		
-		fListener= listener;
 		fProvider= provider;
 		fContext= context;
 		
@@ -90,15 +90,30 @@ public class ResetAllAction extends BuildpathModifierAction {
 	        			if (!hasChange(fJavaProject))
 	        				return;
 	        			
-	        			ClasspathModifier.commitClassPath(fEntries, fJavaProject, fListener, monitor);
-	        			fJavaProject.setOutputLocation(fOutputLocation, monitor);
+	        			BuildpathDelta delta= new BuildpathDelta(getToolTipText());
 	        			
-	                    fProvider.deleteCreatedResources();
+	        			ClasspathModifier.commitClassPath(fEntries, fJavaProject, monitor);
+        				delta.setNewEntries((CPListElement[])fEntries.toArray(new CPListElement[fEntries.size()]));
+        				
+	        			fJavaProject.setOutputLocation(fOutputLocation, monitor);
+	        			delta.setDefaultOutputLocation(fOutputLocation);
+	        			
+	        			for (Iterator iterator= fProvider.getCreatedResources().iterator(); iterator.hasNext();) {
+	                        IResource resource= (IResource)iterator.next();
+	                        resource.delete(false, null);
+	                        delta.addDeletedResource(resource);
+                        }
+	        			
+	        			fProvider.resetCreatedResources();
+	                    
+	                    informListeners(delta);
 	                    
 	            		selectAndReveal(new StructuredSelection(fJavaProject));
 	                } catch (JavaModelException e) {
 	                    showExceptionDialog(e, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_tooltip);
-	                } finally {
+	                } catch (CoreException e) {
+	                    showExceptionDialog(e, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_tooltip);
+                    } finally {
 	                	monitor.done();
 	                }
 	        	}

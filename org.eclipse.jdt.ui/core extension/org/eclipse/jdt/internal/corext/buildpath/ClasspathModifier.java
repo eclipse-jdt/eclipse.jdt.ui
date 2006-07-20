@@ -57,26 +57,6 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 
 public class ClasspathModifier {
 
-	/**
-	 * Interface for listeners that want to receive a notification about 
-	 * changes on <code>IClasspathEntry</code>. For example, if a source 
-	 * folder changes one of it's inclusion/exclusion filters, then 
-	 * this event will be fired.
-	 */
-	public static interface IClasspathModifierListener {
-		/**
-		 * The new build path entry that was generated upon calling a method of 
-		 * <code>ClasspathModifier</code>. The type indicates which kind of 
-		 * interaction was executed on this entry.
-		 * 
-		 * Note that the list does not contain elements of type 
-		 * <code>IClasspathEntry</code>, but <code>CPListElement</code>
-		 * 
-		 * @param newEntries list of <code>CPListElement</code>
-		 */
-		public void classpathEntryChanged(List newEntries);
-	}
-
 	private ClasspathModifier() {}
 
 	/**
@@ -813,7 +793,7 @@ public class ClasspathModifier {
 		return null;
 	}
 	
-	public static void commitClassPath(List newEntries, IJavaProject project, IClasspathModifierListener listener, IProgressMonitor monitor) throws JavaModelException {
+	public static void commitClassPath(List newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -825,10 +805,6 @@ public class ClasspathModifier {
 				throw new JavaModelException(status);
 
 			project.setRawClasspath(entries, outputLocation, new SubProgressMonitor(monitor, 2));
-			
-			//TODO: Remove after first refactoring step
-			if (listener != null)
-				listener.classpathEntryChanged(newEntries);
 		} finally {
 			monitor.done();
 		}

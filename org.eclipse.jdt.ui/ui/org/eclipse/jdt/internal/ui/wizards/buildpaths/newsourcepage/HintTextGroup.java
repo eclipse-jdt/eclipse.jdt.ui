@@ -18,13 +18,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -46,8 +39,6 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -55,11 +46,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.ScrolledPageContent;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /**
  * Displays a set of available links to modify or adjust the project.
@@ -72,19 +60,14 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
  */
 public final class HintTextGroup implements ISelectionChangedListener {
 	    
-    private StringDialogField fOutputLocationField;
     private Composite fTopComposite;
     private DialogPackageExplorerActionGroup fActionGroup;
-    private IJavaProject fCurrJProject;
     private List fNewFolders;
-    private String fOldOutputLocation;
     private HashMap fImageMap;
     
-    public HintTextGroup(StringDialogField outputLocationField) {
-        fCurrJProject= null;
+    public HintTextGroup() {
         fNewFolders= new ArrayList();
         fImageMap= new HashMap();
-        fOutputLocationField= outputLocationField;
     }
     
     public Composite createControl(Composite parent) {
@@ -94,6 +77,7 @@ public final class HintTextGroup implements ISelectionChangedListener {
         GridData gridData= new GridData(GridData.FILL_BOTH);
         PixelConverter converter= new PixelConverter(parent);
         gridData.heightHint= converter.convertHeightInCharsToPixels(12);
+        gridData.widthHint= converter.convertWidthInCharsToPixels(25);
         GridLayout gridLayout= new GridLayout();
         gridLayout.marginWidth= 0;//-converter.convertWidthInCharsToPixels(2);
         gridLayout.marginHeight= 0;//= -4;
@@ -115,16 +99,6 @@ public final class HintTextGroup implements ISelectionChangedListener {
     
     private Shell getShell() {
         return JavaPlugin.getActiveWorkbenchShell();
-    }
-    
-    /**
-     * Set the java project
-     * 
-     * @param jProject the java project to work on
-     */
-    public void setJavaProject(IJavaProject jProject) {
-        fCurrJProject= jProject;
-        fOldOutputLocation= fOutputLocationField.getText();
     }
     
     /**
@@ -223,100 +197,17 @@ public final class HintTextGroup implements ISelectionChangedListener {
             } catch (JavaModelException e) {
 	            JavaPlugin.log(e);
             }
-            setOutputLocationFieldText(getOldOutputLocation());
         }
     }
     
-    /**
-     * Handle adding to classpath. This includes:
-     * <li>Set the selection of the <code>fPackageExplorer</code>
-     * to the list of result elements</li>
-     * <li>Set adjust the text of <code>fOutputLocationField</code> 
-     * and add the project's new output location to the list of 
-     * new folders, if necessary
-     *  
-     * @param result the result list of object to be selected by the 
-     * <code>fPackageExplorer</code>
-     */
-    public void handleAddToCP(List result) {
-    	setOutputLocationFieldText(getOldOutputLocation());
-    }
-    
-    /**
-     * Handle output folder editing. This includes:
-     * <li>Set the selection of the <code>fPackageExplorer</code>
-     * to the only one element contained in the list if this 
-     * element is not <code>null</code></li>
-     * <li>Add the edited folder to the list of new folders</li>
-     *  
-     * @param result a list containing only one element of type 
-     * <code>CPListElementAttribute</code> which can be <code>null</code>
-     */
-    void handleEditOutputFolder(List result) {
-        if(result.size() == 0)
-            return;
-        CPListElementAttribute attribute= (CPListElementAttribute)result.get(0);
-        if (attribute != null) {
-            IPath path= (IPath)attribute.getValue();
-            if (path != null) {
-                IFolder folder= fCurrJProject.getProject().getWorkspace().getRoot().getFolder(path);
-                if (!folder.exists())
-                    fNewFolders.add(folder);
-            }
-            setOutputLocationFieldText(getOldOutputLocation());
-        }
-    }
-    
-    private IPath getOldOutputLocation() {
-        return new Path(fOutputLocationField.getText()).makeAbsolute();
-    }
-    
-    /**
-     * Set the text of <code>fOutputLocationField</code>.
-     * 
-     * @param oldOutputLocation the project's old output location
-     */
-    private void setOutputLocationFieldText(IPath oldOutputLocation) {
-        try {
-            if (!fCurrJProject.getOutputLocation().equals(oldOutputLocation)) {
-                fOutputLocationField.setText(fCurrJProject.getOutputLocation().makeRelative().toString());
-                IJavaElement element= fCurrJProject.findElement(fCurrJProject.getOutputLocation().removeFirstSegments(1));
-                if (element != null)
-                    fNewFolders.add(element);
-            }
-        } catch (JavaModelException exception) {
-            ExceptionHandler.handle(exception, getShell(), NewWizardMessages.HintTextGroup_Exception_Title_output, exception.getMessage()); 
-        }
+    public List getCreatedResources() {
+    	return fNewFolders;
     }
         
-    /**
-     * Delete all newly created folders and files.
-     * Resources that existed before will not be 
-     * deleted.
-     */
-    public void deleteCreatedResources() {
-        Iterator iterator= fNewFolders.iterator();
-        while (iterator.hasNext()) {
-            Object element= iterator.next();
-            IFolder folder;
-            try {
-                if (element instanceof IFolder)
-                    folder= (IFolder)element;
-                else if (element instanceof IJavaElement)
-                    folder= fCurrJProject.getProject().getWorkspace().getRoot().getFolder(((IJavaElement)element).getPath());
-                else {
-                    ((IFile)element).delete(false, null);
-                    continue;
-                }
-                folder.delete(false, null);
-            } catch (CoreException e) {
-            }            
-        }
-        
-        fOutputLocationField.setText(fOldOutputLocation);
-        fNewFolders= new ArrayList();
-    }
-    
+	public void resetCreatedResources() {
+		fNewFolders.clear();
+	}
+	
 	/**
      * {@inheritDoc}
      */

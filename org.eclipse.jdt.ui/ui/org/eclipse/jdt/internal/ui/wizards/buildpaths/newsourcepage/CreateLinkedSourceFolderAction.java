@@ -10,10 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
+import java.util.ArrayList;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -30,7 +33,7 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
+import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -43,21 +46,17 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
 //SelectedElements iff enabled: IJavaProject && size == 1
 public class CreateLinkedSourceFolderAction extends BuildpathModifierAction {
-	
-	private final IClasspathModifierListener fListener;
 
 	public CreateLinkedSourceFolderAction(IWorkbenchSite site) {
-		this(site, null, PlatformUI.getWorkbench().getProgressService(), null);
+		this(site, null, PlatformUI.getWorkbench().getProgressService());
 	}
 	
-	public CreateLinkedSourceFolderAction(IClasspathModifierListener listener, IRunnableContext context, ISetSelectionTarget selectionTarget) {
-		this(null, selectionTarget, context, listener);
+	public CreateLinkedSourceFolderAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context);
     }
 	
-	private CreateLinkedSourceFolderAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener) {
+	private CreateLinkedSourceFolderAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.CREATE_LINK);
-		
-		fListener= listener;
 		
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_label); 
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_tooltip);
@@ -96,8 +95,18 @@ public class CreateLinkedSourceFolderAction extends BuildpathModifierAction {
 			dialog.create();
 			int res= dialog.open();
 			if (res == Window.OK) {
-				if (fListener != null)
-					fListener.classpathEntryChanged(wizard.getExistingEntries());
+		
+				BuildpathDelta delta= new BuildpathDelta(getToolTipText());
+				
+				ArrayList newEntries= wizard.getExistingEntries();
+				delta.setNewEntries((CPListElement[])newEntries.toArray(new CPListElement[newEntries.size()]));
+				
+				IResource resource= wizard.getCreatedElement().getCorrespondingResource();
+				delta.addCreatedResource(resource);
+				
+				delta.setDefaultOutputLocation(wizard.getOutputLocation());
+				
+				informListeners(delta);
 
 				selectAndReveal(new StructuredSelection(wizard.getCreatedElement()));
 			}

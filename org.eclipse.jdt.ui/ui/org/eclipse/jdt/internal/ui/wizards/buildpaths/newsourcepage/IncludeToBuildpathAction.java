@@ -37,8 +37,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -49,22 +49,20 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 //SelectedElements iff enabled: IResource
 public class IncludeToBuildpathAction extends BuildpathModifierAction {
 
-	private final IClasspathModifierListener fListener;
 	private final IRunnableContext fContext;
 
 	public IncludeToBuildpathAction(IWorkbenchSite site) {
-		this(site, null, PlatformUI.getWorkbench().getProgressService(), null);
+		this(site, null, PlatformUI.getWorkbench().getProgressService());
 	}
 	
-	public IncludeToBuildpathAction(IClasspathModifierListener listener, IRunnableContext context, ISetSelectionTarget selectionTarget) {
-		this(null, selectionTarget, context, listener);
+	public IncludeToBuildpathAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context);
     }
 	
-	private IncludeToBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener) {
+	private IncludeToBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.INCLUDE);
 		
 		fContext= context;
-		fListener= listener;
 		
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_label);
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_INCLUDE_ON_BUILDPATH);
@@ -139,7 +137,12 @@ public class IncludeToBuildpathAction extends BuildpathModifierAction {
 				}
 			}
 
-			ClasspathModifier.commitClassPath(entries, project, fListener, new SubProgressMonitor(monitor, 4));
+			ClasspathModifier.commitClassPath(entries, project, new SubProgressMonitor(monitor, 4));
+			
+        	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
+        	delta.setNewEntries((CPListElement[])entries.toArray(new CPListElement[entries.size()]));
+        	informListeners(delta);
+			
 			List resultElements= ClasspathModifier.getCorrespondingElements(elements, project);
 			return resultElements;
 		} finally {

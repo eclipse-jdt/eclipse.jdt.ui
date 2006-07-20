@@ -35,8 +35,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -51,24 +51,22 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 public class EditOutputFolderAction extends BuildpathModifierAction {
 
 	private final IRunnableContext fContext;
-	private final IClasspathModifierListener fListener;
 	private boolean fShowOutputFolders;
 
 	public EditOutputFolderAction(final IWorkbenchSite site) {
-		this(site, null, PlatformUI.getWorkbench().getProgressService(), null);
+		this(site, null, PlatformUI.getWorkbench().getProgressService());
 		
 		fShowOutputFolders= true;
 	}
 	
-	public EditOutputFolderAction(IClasspathModifierListener listener, IRunnableContext context, ISetSelectionTarget selectionTarget) {
-		this(null, selectionTarget, context, listener);
+	public EditOutputFolderAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget, context);
     }
 
-	private EditOutputFolderAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IClasspathModifierListener listener) {
+	private EditOutputFolderAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.EDIT_OUTPUT);
 		
 		fContext= context;
-		fListener= listener;
 		fShowOutputFolders= false;
 		
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_label);
@@ -182,8 +180,12 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 	private void setOutputLocation(final CPListElement entry, final IPath outputLocation, final List existingEntries, final IPath defaultOutputLocation, final boolean removeProjectFromClasspath, final IJavaProject javaProject, final IProgressMonitor monitor) throws CoreException, InterruptedException {
 		try {
 			monitor.beginTask(NewWizardMessages.EditOutputFolderAction_ProgressMonitorDescription, 4);
+			
+			BuildpathDelta delta= new BuildpathDelta(getToolTipText());
+			
 			if (!defaultOutputLocation.equals(javaProject.getOutputLocation().makeRelative())) {
 				javaProject.setOutputLocation(defaultOutputLocation, new SubProgressMonitor(monitor, 1));
+				delta.setDefaultOutputLocation(defaultOutputLocation);
 			} else {
 				monitor.worked(1);
 			}
@@ -201,7 +203,10 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 				monitor.worked(1);
 			}
 			
-			ClasspathModifier.commitClassPath(existingEntries, javaProject, fListener, new SubProgressMonitor(monitor, 1));
+			ClasspathModifier.commitClassPath(existingEntries, javaProject, new SubProgressMonitor(monitor, 1));
+		
+        	delta.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
+        	informListeners(delta);
 		} finally {
 			monitor.done();
 		}

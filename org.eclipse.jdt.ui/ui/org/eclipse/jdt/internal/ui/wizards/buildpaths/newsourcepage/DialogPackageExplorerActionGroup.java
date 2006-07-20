@@ -25,7 +25,7 @@ import org.eclipse.jface.operation.IRunnableContext;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
+import org.eclipse.jdt.internal.corext.buildpath.IBuildpathModifierListener;
 
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.util.ViewerPane;
@@ -54,11 +54,9 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * 
      * @param provider a information provider to pass necessary information 
      * to the operations
-     * @param listener a listener for the changes on classpath entries, that is 
-     * the listener will be notified whenever a classpath entry changed.
      * @param context 
      */
-    public DialogPackageExplorerActionGroup(HintTextGroup provider, IClasspathModifierListener listener, IRunnableContext context, DialogPackageExplorer dialogPackageExplorer) {
+    public DialogPackageExplorerActionGroup(HintTextGroup provider, IRunnableContext context, DialogPackageExplorer dialogPackageExplorer) {
         super();
 		
         fDialogPackageExplorer= dialogPackageExplorer;
@@ -66,22 +64,22 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         if (context == null)
         	context= PlatformUI.getWorkbench().getProgressService();
         
-        fAddFolderToBuildpathAction= new AddFolderToBuildpathAction2(listener, provider, context, fDialogPackageExplorer);
+        fAddFolderToBuildpathAction= new AddFolderToBuildpathAction(context, fDialogPackageExplorer);
 		fDialogPackageExplorer.addSelectionChangedListener(fAddFolderToBuildpathAction);
 		
-		fRemoveFromBuildpathAction= new RemoveFromBuildpathAction(listener, context, fDialogPackageExplorer);
+		fRemoveFromBuildpathAction= new RemoveFromBuildpathAction(context, fDialogPackageExplorer);
 		fDialogPackageExplorer.addSelectionChangedListener(fRemoveFromBuildpathAction);
         
-		fExcludeFromBuildpathAction= new ExcludeFromBuildpathAction(listener, context, fDialogPackageExplorer);
+		fExcludeFromBuildpathAction= new ExcludeFromBuildpathAction(context, fDialogPackageExplorer);
 		fDialogPackageExplorer.addSelectionChangedListener(fExcludeFromBuildpathAction);
 		
-		fIncludeToBuildpathAction= new IncludeToBuildpathAction(listener, context, fDialogPackageExplorer);
+		fIncludeToBuildpathAction= new IncludeToBuildpathAction(context, fDialogPackageExplorer);
 		fDialogPackageExplorer.addSelectionChangedListener(fIncludeToBuildpathAction);
 		
-			fEditFilterAction= new EditFilterAction(listener, context, fDialogPackageExplorer);
+			fEditFilterAction= new EditFilterAction(context, fDialogPackageExplorer);
 			fDialogPackageExplorer.addSelectionChangedListener(fEditFilterAction);
 	
-	        fEditOutputFolderAction= new EditOutputFolderAction2(listener, provider, context, fDialogPackageExplorer);
+	        fEditOutputFolderAction= new EditOutputFolderAction(context, fDialogPackageExplorer);
 			fDialogPackageExplorer.addSelectionChangedListener(fEditOutputFolderAction);
         
         fDropDownAction= new ClasspathModifierDropDownAction();
@@ -89,10 +87,10 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         fDropDownAction.addAction(fEditOutputFolderAction);
 		fDialogPackageExplorer.addPostSelectionChangedListener(fDropDownAction);
         
-        fCreateLinkedSourceFolderAction= new CreateLinkedSourceFolderAction2(listener, provider, context, fDialogPackageExplorer);
+        fCreateLinkedSourceFolderAction= new CreateLinkedSourceFolderAction2(provider, context, fDialogPackageExplorer);
 		fDialogPackageExplorer.addSelectionChangedListener(fCreateLinkedSourceFolderAction);
         
-        fCreateSourceFolderAction= new CreateSourceFolderAction2(listener, provider, context, fDialogPackageExplorer);
+        fCreateSourceFolderAction= new CreateSourceFolderAction2(provider, context, fDialogPackageExplorer);
 		fDialogPackageExplorer.addSelectionChangedListener(fCreateSourceFolderAction);
 
         
@@ -120,6 +118,28 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         fDialogPackageExplorer.removeSelectionChangedListener(fCreateLinkedSourceFolderAction);
         fDialogPackageExplorer.removeSelectionChangedListener(fCreateSourceFolderAction);
         fDialogPackageExplorer= null;
+    }
+    
+    public void addBuildpathModifierListener(IBuildpathModifierListener listener) {
+    	fAddFolderToBuildpathAction.addBuildpathModifierListener(listener);
+    	fRemoveFromBuildpathAction.addBuildpathModifierListener(listener);
+    	fExcludeFromBuildpathAction.addBuildpathModifierListener(listener);
+    	fIncludeToBuildpathAction.addBuildpathModifierListener(listener);
+    	fEditFilterAction.addBuildpathModifierListener(listener);
+    	fEditOutputFolderAction.addBuildpathModifierListener(listener);
+    	fCreateLinkedSourceFolderAction.addBuildpathModifierListener(listener);
+    	fCreateSourceFolderAction.addBuildpathModifierListener(listener);
+    }
+    
+	public void removeBuildpathModifierListener(IBuildpathModifierListener listener) {
+		fAddFolderToBuildpathAction.removeBuildpathModifierListener(listener);
+    	fRemoveFromBuildpathAction.removeBuildpathModifierListener(listener);
+    	fExcludeFromBuildpathAction.removeBuildpathModifierListener(listener);
+    	fIncludeToBuildpathAction.removeBuildpathModifierListener(listener);
+    	fEditFilterAction.removeBuildpathModifierListener(listener);
+    	fEditOutputFolderAction.removeBuildpathModifierListener(listener);
+    	fCreateLinkedSourceFolderAction.removeBuildpathModifierListener(listener);
+    	fCreateSourceFolderAction.removeBuildpathModifierListener(listener);
     }
         
     /**
