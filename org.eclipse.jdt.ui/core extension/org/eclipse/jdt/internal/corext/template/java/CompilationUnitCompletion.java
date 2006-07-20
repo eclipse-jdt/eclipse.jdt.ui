@@ -241,14 +241,16 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 			} else if (fUnit != null && (isIterable() || isCollection())) {
 				if (fMemberTypes == null) {
 					try {
-						TypeParameterResolver util= new TypeParameterResolver(this);
-						fMemberTypes= util.computeBinding("java.lang.Iterable", 0); //$NON-NLS-1$
-					} catch (JavaModelException e) {
 						try {
 							TypeParameterResolver util= new TypeParameterResolver(this);
-							fMemberTypes= util.computeBinding("java.util.Collection", 0); //$NON-NLS-1$
-						} catch (JavaModelException x) {
-							fMemberTypes= new String[0];
+							fMemberTypes= util.computeBinding("java.lang.Iterable", 0); //$NON-NLS-1$
+						} catch (JavaModelException e) {
+							try {
+								TypeParameterResolver util= new TypeParameterResolver(this);
+								fMemberTypes= util.computeBinding("java.util.Collection", 0); //$NON-NLS-1$
+							} catch (JavaModelException x) {
+								fMemberTypes= new String[0];
+							}
 						}
 					} catch (IndexOutOfBoundsException e) {
 						fMemberTypes= new String[0];
