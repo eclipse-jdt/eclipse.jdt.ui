@@ -198,10 +198,11 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 	
 			if (outputLocation != null) {
 				ClasspathModifier.exclude(outputLocation, existingEntries, new ArrayList(), javaProject, new SubProgressMonitor(monitor, 1));
-				entry.setAttribute(CPListElement.OUTPUT, outputLocation);
 			} else {
 				monitor.worked(1);
 			}
+			
+			entry.setAttribute(CPListElement.OUTPUT, outputLocation);
 			
 			ClasspathModifier.commitClassPath(existingEntries, javaProject, new SubProgressMonitor(monitor, 1));
 		
