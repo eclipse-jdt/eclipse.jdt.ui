@@ -283,7 +283,7 @@ public class JavaElementImageProvider {
 					// give an advanced IWorkbenchAdapter the chance
 					IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter) element.getAdapter(IWorkbenchAdapter.class);
 					if (wbAdapter != null && !(wbAdapter instanceof JavaWorkbenchAdapter)) { // avoid recursion
-						return ((JavaWorkbenchAdapter) wbAdapter).getImageDescriptor(element);
+						return wbAdapter.getImageDescriptor(element);
 					}
 					return JavaPluginImages.DESC_OBJS_GHOST;
 			}
