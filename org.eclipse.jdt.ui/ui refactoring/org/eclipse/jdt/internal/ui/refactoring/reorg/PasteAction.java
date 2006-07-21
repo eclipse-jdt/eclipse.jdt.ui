@@ -24,6 +24,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -31,9 +32,9 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.FileTransfer;
@@ -45,6 +46,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -66,6 +69,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -74,6 +78,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -100,16 +105,24 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMInstall2;
+import org.eclipse.jdt.launching.IVMInstallType;
+import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
+
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
 
 public class PasteAction extends SelectionDispatchAction{
@@ -347,15 +360,23 @@ public class PasteAction extends SelectionDispatchAction{
 				return false;
 			if (resources.length != 0)
 				return false; //alternative: create text file?
-			if (javaElements.length != 1)
+			if (javaElements.length > 1)
 				return false;
 			
-			IJavaElement destination= javaElements[0];
 			String text= getClipboardText(fAvailableTypes);
-			fCuParser= new CuParser(destination.getJavaProject(), text);
+			IJavaProject javaProject= null;
+			IJavaElement destination= null;
+			if (javaElements.length == 1) {
+				destination= javaElements[0];
+				javaProject= destination.getJavaProject();
+			}
+			fCuParser= new CuParser(javaProject, text);
 			
 			if (fCuParser.getTypeName() == null)
 				return false;
+			
+			if (destination == null)
+				return true;
 			
 			switch (destination.getElementType()) {
 				case IJavaElement.JAVA_PROJECT :
@@ -408,46 +429,137 @@ public class PasteAction extends SelectionDispatchAction{
 		public void paste(IJavaElement[] javaElements, IResource[] resources, IWorkingSet[] selectedWorkingSets, TransferData[] availableTypes) throws JavaModelException, InterruptedException, InvocationTargetException{
 			final IEditorPart[] editorPart= new IEditorPart[1];
 			
-			IWorkspaceRunnable op= new IWorkspaceRunnable() {
-				public void run(IProgressMonitor pm) throws CoreException {
-					pm.beginTask("", 4); //$NON-NLS-1$
+			IRunnableWithProgress op= new IRunnableWithProgress() {
+				public void run(IProgressMonitor pm) throws InvocationTargetException {
+					pm.beginTask("", 5); //$NON-NLS-1$
 					
-					if (! fDestinationPack.exists())
-						JavaModelUtil.getPackageFragmentRoot(fDestinationPack).createPackageFragment(fCuParser.getPackageName(), true, new SubProgressMonitor(pm, 1));
-					else
-						pm.worked(1);
-					
-					final String cuName= fCuParser.getTypeName() + JavaModelUtil.DEFAULT_CU_SUFFIX;
-					final ICompilationUnit cu= fDestinationPack.getCompilationUnit(cuName);
-					boolean alreadyExists= cu.exists();
-					if (alreadyExists) {
-						String msg= Messages.format(ReorgMessages.PasteAction_TextPaster_exists, new Object[] {cuName});
-						boolean overwrite= MessageDialog.openQuestion(getShell(), ReorgMessages.PasteAction_TextPaster_confirmOverwriting, msg);
-						if (! overwrite)
-							return;
-						
-						editorPart[0]= openCu(cu); //Open editor before overwriting to allow undo.
-					}
-					
-					fDestinationPack.createCompilationUnit(cuName, fCuParser.getText(), true, new SubProgressMonitor(pm, 1));
-					
-					if (!alreadyExists) {
-						editorPart[0]= openCu(cu);
-					}
-					if (!fDestinationPack.getElementName().equals(fCuParser.getPackageName())) {
-						if (fDestinationPack.getElementName().length() == 0) {
-							removePackageDeclaration(cu);
+					try {
+						if (fDestinationPack == null) {
+							fDestinationPack= createNewProject(fCuParser, new SubProgressMonitor(pm, 1));
 						} else {
-							cu.createPackageDeclaration(fDestinationPack.getElementName(), new SubProgressMonitor(pm, 1));
-						}
-						if (!alreadyExists && editorPart[0] != null)
-							editorPart[0].doSave(new SubProgressMonitor(pm, 1)); //avoid showing error marker due to missing/wrong package declaration
-						else
 							pm.worked(1);
-					} else {
-						pm.worked(1);
+						}
+						if (! fDestinationPack.exists()) {
+							JavaModelUtil.getPackageFragmentRoot(fDestinationPack).createPackageFragment(fCuParser.getPackageName(), true, new SubProgressMonitor(pm, 1));
+						} else {
+							pm.worked(1);
+						}
+						
+						final String cuName= fCuParser.getTypeName() + JavaModelUtil.DEFAULT_CU_SUFFIX;
+						final ICompilationUnit cu= fDestinationPack.getCompilationUnit(cuName);
+						boolean alreadyExists= cu.exists();
+						if (alreadyExists) {
+							String msg= Messages.format(ReorgMessages.PasteAction_TextPaster_exists, new Object[] {cuName});
+							boolean overwrite= MessageDialog.openQuestion(getShell(), ReorgMessages.PasteAction_TextPaster_confirmOverwriting, msg);
+							if (! overwrite)
+								return;
+							
+							editorPart[0]= openCu(cu); //Open editor before overwriting to allow undo.
+						}
+						
+						fDestinationPack.createCompilationUnit(cuName, fCuParser.getText(), true, new SubProgressMonitor(pm, 1));
+						
+						if (!alreadyExists) {
+							editorPart[0]= openCu(cu);
+						}
+						if (!fDestinationPack.getElementName().equals(fCuParser.getPackageName())) {
+							if (fDestinationPack.getElementName().length() == 0) {
+								removePackageDeclaration(cu);
+							} else {
+								cu.createPackageDeclaration(fDestinationPack.getElementName(), new SubProgressMonitor(pm, 1));
+							}
+							if (!alreadyExists && editorPart[0] != null)
+								editorPart[0].doSave(new SubProgressMonitor(pm, 1)); //avoid showing error marker due to missing/wrong package declaration
+							else
+								pm.worked(1);
+						} else {
+							pm.worked(1);
+						}
+						BasicNewResourceWizard.selectAndReveal(cu.getResource(), PlatformUI.getWorkbench().getActiveWorkbenchWindow());
+					} catch (CoreException e) {
+						throw new InvocationTargetException(e);
 					}
-					BasicNewResourceWizard.selectAndReveal(cu.getResource(), PlatformUI.getWorkbench().getActiveWorkbenchWindow());
+				}
+
+				private IPackageFragment createNewProject(CuParser cuParser, SubProgressMonitor pm) throws CoreException {
+					pm.beginTask("", 10); //$NON-NLS-1$
+					IProject project;
+					int i= 0;
+					do {
+						String name= Messages.format(ReorgMessages.PasteAction_projectName, i == 0 ? (Object) "" : new Integer(i)); //$NON-NLS-1$
+						project= JavaPlugin.getWorkspace().getRoot().getProject(name);
+						i++;
+					} while (project.exists());
+					
+					BuildPathsBlock.createProject(project, null, new SubProgressMonitor(pm, 3));
+					BuildPathsBlock.addJavaNature(project, new SubProgressMonitor(pm, 1));
+					IJavaProject javaProject= JavaCore.create(project);
+					
+					IResource srcFolder;
+					IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+					String sourceFolderName= store.getString(PreferenceConstants.SRCBIN_SRCNAME);
+					if (store.getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ) && sourceFolderName.length() > 0) {
+						IFolder folder= project.getFolder(sourceFolderName);
+						folder.create(false, true, new SubProgressMonitor(pm, 1));
+						srcFolder= folder;
+					} else {
+						srcFolder= project;
+					}
+					IClasspathEntry srcEntry= JavaCore.newSourceEntry(srcFolder.getFullPath());
+					IClasspathEntry jreEntry= JavaCore.newContainerEntry(getLatestVMPath());
+					IPath outputLocation= BuildPathsBlock.getDefaultOutputLocation(javaProject);
+					IClasspathEntry[] cpes= new IClasspathEntry[] { srcEntry, jreEntry };
+					javaProject.setRawClasspath(cpes, outputLocation, new SubProgressMonitor(pm, 1));
+					return javaProject.getPackageFragmentRoot(srcFolder).getPackageFragment(cuParser.getPackageName());
+				}
+
+				private IPath getLatestVMPath() {
+					IVMInstall bestVM= JavaRuntime.getDefaultVMInstall();
+					String bestVersion= getVMVersion(bestVM);
+					
+					IExecutionEnvironmentsManager eeManager= JavaRuntime.getExecutionEnvironmentsManager();
+					IExecutionEnvironment bestEE= null;
+					
+					IExecutionEnvironment[] ees= eeManager.getExecutionEnvironments();
+					for (int j= 0; j < ees.length; j++) {
+						IExecutionEnvironment ee= ees[j];
+						IVMInstall vm= ee.getDefaultVM();
+						String ver= getVMVersion(vm);
+						if (ver != null && (bestVersion == null || JavaModelUtil.isVersionLessThan(bestVersion, ver))) {
+							bestVersion= ver;
+							bestEE= ee;
+						}
+					}
+					
+					IVMInstallType[] vmTypes= JavaRuntime.getVMInstallTypes();
+					for (int i= 0; i < vmTypes.length; i++) {
+						IVMInstall[] vms= vmTypes[i].getVMInstalls();
+						for (int j= 0; j < vms.length; j++) {
+							IVMInstall vm= vms[j];
+							String ver= getVMVersion(vm);
+							if (ver != null && (bestVersion == null || JavaModelUtil.isVersionLessThan(bestVersion, ver))) {
+								bestVersion= ver;
+								bestVM= vm;
+								bestEE= null;
+							}
+						}
+					}
+					
+					if (bestEE != null)
+						return JavaRuntime.newJREContainerPath(bestEE);
+					else if (bestVM != null)
+						return JavaRuntime.newJREContainerPath(bestVM);
+					else
+						return JavaRuntime.newDefaultJREContainerPath();
+				}
+
+				private String getVMVersion(IVMInstall vm) {
+					if (vm instanceof IVMInstall2) {
+						IVMInstall2 vm2= (IVMInstall2) vm;
+						return vm2.getJavaVersion();
+					} else {
+						return null;
+					}
 				}
 
 				private void removePackageDeclaration(final ICompilationUnit cu) throws JavaModelException, CoreException {
@@ -472,7 +584,7 @@ public class PasteAction extends SelectionDispatchAction{
 			if (context == null) {
 				context= new BusyIndicatorRunnableContext();
 			}
-			PlatformUI.getWorkbench().getProgressService().runInUI(context, new WorkbenchRunnableAdapter(op), null);
+			PlatformUI.getWorkbench().getProgressService().runInUI(context, op, JavaPlugin.getWorkspace().getRoot());
 			
 			if (editorPart[0] != null)
 				editorPart[0].getEditorSite().getPage().activate(editorPart[0]); //activate editor again, since runInUI restores previous active part

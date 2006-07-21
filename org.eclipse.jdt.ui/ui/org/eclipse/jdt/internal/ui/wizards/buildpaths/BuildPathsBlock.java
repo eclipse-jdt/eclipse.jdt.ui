@@ -299,7 +299,7 @@ public class BuildPathsBlock {
 			}
 		}
 		if (outputLocation == null) {
-			outputLocation= getDefaultBuildPath(jproject);
+			outputLocation= getDefaultOutputLocation(jproject);
 		}			
 
 		if (classpathEntries != null) {
@@ -456,7 +456,7 @@ public class BuildPathsBlock {
 		return list;
 	}
 	
-	private IPath getDefaultBuildPath(IJavaProject jproj) {
+	public static IPath getDefaultOutputLocation(IJavaProject jproj) {
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		if (store.getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ)) {
 			String outputLocationName= store.getString(PreferenceConstants.SRCBIN_BINNAME);
