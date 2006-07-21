@@ -1018,6 +1018,17 @@ public class PackageExplorerPart extends ViewPart
 
 	private Object convertElement(Object original) {
 		if (original instanceof IJavaElement) {
+			if (original instanceof ICompilationUnit) {
+				ICompilationUnit cu= (ICompilationUnit) original;
+				IJavaProject javaProject= cu.getJavaProject();
+				if (javaProject != null && javaProject.exists() && ! javaProject.isOnClasspath(cu)) {
+					// could be a working copy of a .java file that is not on classpath 
+					IResource resource= cu.getResource();
+					if (resource != null)
+						return resource;
+				}
+				
+			}
 			return original;
 		
 		} else if (original instanceof IResource) {
