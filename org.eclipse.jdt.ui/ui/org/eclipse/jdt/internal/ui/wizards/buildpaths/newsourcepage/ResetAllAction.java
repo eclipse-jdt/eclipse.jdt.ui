@@ -27,8 +27,11 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.part.ISetSelectionTarget;
 
+import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
@@ -68,12 +71,37 @@ public class ResetAllAction extends BuildpathModifierAction {
 		return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_ResetAll;
 	}
 
-	public void setBreakPoint(IJavaProject javaProject) throws JavaModelException {
+	public void setBreakPoint(IJavaProject javaProject) {
 		fJavaProject= javaProject;
+		if (fJavaProject.exists()) {
+			try {
+	            fEntries= ClasspathModifier.getExistingEntries(fJavaProject);
+	            fOutputLocation= fJavaProject.getOutputLocation();
+            } catch (JavaModelException e) {
+	            JavaPlugin.log(e);
+	            return;
+            }
+			setEnabled(true);
+		} else {
+			JavaCore.addElementChangedListener(new IElementChangedListener() {
 		
-		fEntries= ClasspathModifier.getExistingEntries(javaProject);
-		fOutputLocation= fJavaProject.getOutputLocation();
-		setEnabled(canHandle(null));
+				public void elementChanged(ElementChangedEvent event) {
+					if (fJavaProject.exists()) {
+						try {
+	                        fEntries= ClasspathModifier.getExistingEntries(fJavaProject);
+	                        fOutputLocation= fJavaProject.getOutputLocation();
+                        } catch (JavaModelException e) {
+                        	JavaPlugin.log(e);
+                        	return;
+                        } finally {
+							JavaCore.removeElementChangedListener(this);
+                        }
+						setEnabled(true);
+					}					
+		        }
+				
+			}, ElementChangedEvent.POST_CHANGE);
+		}
     }
 	
 	/**

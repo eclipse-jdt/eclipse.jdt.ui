@@ -27,6 +27,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -118,8 +119,22 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
      */
     public void init(IJavaProject javaProject) {
 		fJavaProject= javaProject;
-        
-        fPackageExplorer.setInput(javaProject);
+		fPackageExplorer.addPostSelectionChangedListener(fHintTextGroup);
+	    fActionGroup.getResetAllAction().setBreakPoint(javaProject);
+
+		if (Display.getCurrent() != null) {
+			doUpdateUI();
+		} else {
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					doUpdateUI();
+				}
+			});
+		}
+    }
+    
+	private void doUpdateUI() {
+        fPackageExplorer.setInput(fJavaProject);
 		
 		boolean useFolderOutputs= false;
 		List cpelements= fClassPathList.getElements();
@@ -132,8 +147,6 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 			}
 		}
 		fUseFolderOutputs.setSelection(useFolderOutputs);
-		
-		fPackageExplorer.addPostSelectionChangedListener(fHintTextGroup);
     }
     
     public void dispose() {
@@ -195,7 +208,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         excomposite.setClient(fHintTextGroup.createControl(excomposite));
         fUseFolderOutputs.doFillIntoGrid(body, 1);
 		
-	    fActionGroup= new DialogPackageExplorerActionGroup(fHintTextGroup, fContext, fPackageExplorer, this);
+        fActionGroup= new DialogPackageExplorerActionGroup(fHintTextGroup, fContext, fPackageExplorer, this);
 		fActionGroup.addBuildpathModifierListener(this);
 		   
 		

@@ -323,6 +323,12 @@ public class BuildPathsBlock {
 		fClassPathList.setElements(newClassPath);
 		fClassPathList.setCheckedElements(exportedEntries);
 		
+		if (fSourceContainerPage != null) {
+			fSourceContainerPage.init(fCurrJProject);
+			fProjectsPage.init(fCurrJProject);
+			fLibrariesPage.init(fCurrJProject);
+		}
+		
 		initializeTimeStamps();
 		updateUI();
 	}
@@ -350,11 +356,6 @@ public class BuildPathsBlock {
 		fBuildPathDialogField.refresh();
 		fClassPathList.refresh();
 	
-		if (fSourceContainerPage != null) {
-			fSourceContainerPage.init(fCurrJProject);
-			fProjectsPage.init(fCurrJProject);
-			fLibrariesPage.init(fCurrJProject);
-		}
 		doStatusLineUpdate();
 	}
 	

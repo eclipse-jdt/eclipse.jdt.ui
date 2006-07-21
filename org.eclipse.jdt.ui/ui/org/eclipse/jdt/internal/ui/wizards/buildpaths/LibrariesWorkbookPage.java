@@ -37,6 +37,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -130,9 +131,16 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		
 	public void init(IJavaProject jproject) {
 		fCurrJProject= jproject;
-		updateLibrariesList();
+		if (Display.getCurrent() != null) {
+			updateLibrariesList();
+		} else {
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					updateLibrariesList();
+				}
+			});
+		}
 	}
-	
 	
 	private void updateLibrariesList() {
 		List cpelements= fClassPathList.getElements();
