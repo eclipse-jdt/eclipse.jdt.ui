@@ -13,12 +13,18 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.ltk.core.refactoring.Change;
+
+import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 
 public class RenameResourceChangeTests extends RefactoringTest {
 	
@@ -29,6 +35,10 @@ public class RenameResourceChangeTests extends RefactoringTest {
 	
 	public static Test suite() {
 		return new RefactoringTestSetup(new TestSuite(clazz));
+	}
+	
+	public static Test setUpTest(Test test) {
+		return new RefactoringTestSetup(test);
 	}
 	
 	public void testFile0() throws Exception{
@@ -187,6 +197,40 @@ public class RenameResourceChangeTests extends RefactoringTest {
 			performDummySearch();
 			folder.getFolder(oldName).delete(true, false, new NullProgressMonitor());
 		}
+	}
+	
+	public void testJavaProject01() throws Exception {
+		String oldName= "RenameResourceChangeTest";
+		String newName= "RenameResourceChangeTest2";
+		String linkName= "link";
+		
+		IWorkspaceRoot workspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
+		IProject project= workspaceRoot.getProject(oldName);
+		IProject project2= workspaceRoot.getProject(newName);
+		try {
+			getPackageP().createCompilationUnit("A.java", "package p;\nclass A{}\n", false, null);
+			
+			project.create(null);
+			project.open(null);
+			IFolder link= project.getFolder(linkName);
+			link.createLink(getPackageP().getResource().getRawLocation(), IResource.NONE, null);
+			assertTrue(link.exists());
+			
+			RenameResourceChange change= new RenameResourceChange(null, project, newName, null);
+			change.initializeValidationData(new NullProgressMonitor());
+			performChange(change);
+			
+			assertTrue("after: linked folder should exist", project2.getFolder(linkName).exists());
+			assertTrue("after: linked folder should be linked", project2.getFolder(linkName).isLinked());
+			assertTrue("after: linked folder should contain cu", project2.getFolder(linkName).getFile("A.java").exists());
+		} finally {
+			performDummySearch();
+			if (project.exists())
+				project.delete(true, null);
+			if (project2.exists())
+				project2.delete(true, null);
+		}
+		
 	}
 }
 
