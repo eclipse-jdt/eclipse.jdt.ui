@@ -2708,6 +2708,7 @@ public class CopyTest extends RefactoringTest {
 			assertTrue("new package does not exist after copying", newPackage.exists());
 			ReorgExecutionLog log= new ReorgExecutionLog();
 			log.setNewName(getPackageP(), MockNewNameQueries.NEW_PACKAGE_NAME);
+			log.setNewName(mapping, MockNewNameQueries.NEW_PACKAGE_NAME);
 			log.markAsProcessed(getPackageP());
 			log.markAsProcessed(mapping);
 			ParticipantTesting.testCopy(handles, new CopyArguments[] {

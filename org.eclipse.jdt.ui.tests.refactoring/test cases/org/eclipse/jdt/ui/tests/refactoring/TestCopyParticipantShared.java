@@ -106,7 +106,7 @@ public class TestCopyParticipantShared extends CopyParticipant implements IShara
 	private static void compareExecutionLog(ReorgExecutionLog expected, ReorgExecutionLog actual) {
 		Assert.assertEquals("Canceled: ", expected.isCanceled(), actual.isCanceled());
 		Object[] expectedRenamed= expected.getRenamedElements();
-		Object[] actualRenamed= expected.getRenamedElements();
+		Object[] actualRenamed= actual.getRenamedElements();
 		Assert.assertEquals(expectedRenamed.length, actualRenamed.length);
 		for (int j= 0; j < expectedRenamed.length; j++) {
 			Assert.assertEquals(expected.getNewName(expectedRenamed[j]), actual.getNewName(actualRenamed[j]));
