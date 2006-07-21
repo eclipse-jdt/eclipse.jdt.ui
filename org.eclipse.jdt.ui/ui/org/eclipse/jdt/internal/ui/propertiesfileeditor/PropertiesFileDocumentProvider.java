@@ -58,7 +58,7 @@ public class PropertiesFileDocumentProvider extends TextFileDocumentProvider {
 		IFileEditorInput input= (IFileEditorInput)element;
 
 		IFile file= input.getFile();
-		if (file == null)
+		if (file == null || !file.isAccessible())
 			return null;
 
 		IContentDescription description= file.getContentDescription();
