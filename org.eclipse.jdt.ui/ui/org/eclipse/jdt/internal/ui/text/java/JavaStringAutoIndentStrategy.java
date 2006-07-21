@@ -188,7 +188,7 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 	 */
 	public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
 		try {
-			if (command.length != 0 || command.text == null)
+			if (command.text == null)
 				return;
 
 			IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
