@@ -413,4 +413,11 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 	        JavaPlugin.log(e);
         }
     }
+
+	/**
+     * {@inheritDoc}
+     */
+    public void setFocus() {
+    	fPackageExplorer.getViewerControl().setFocus();
+    }
 }

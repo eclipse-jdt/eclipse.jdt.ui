@@ -116,8 +116,11 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			removeProject();
 		}
 		super.setVisible(visible);
+		if (visible) {
+			setFocus();
+		}
 	}
-	
+
 	private void changeToNewProject() {
 		fKeepContent= fFirstPage.getDetect();
 		

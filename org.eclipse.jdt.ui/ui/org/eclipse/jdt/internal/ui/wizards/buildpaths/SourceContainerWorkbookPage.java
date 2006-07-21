@@ -607,6 +607,13 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 
 		fOutputLocationField.setText(outputLocation.makeRelative().toOSString());
-	}	
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+    public void setFocus() {
+    	fFoldersList.setFocus();
+    }	
 
 }

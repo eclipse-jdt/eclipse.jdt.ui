@@ -993,4 +993,8 @@ public class BuildPathsBlock {
 	public boolean isOKStatus() {
 	    return findMostSevereStatus().isOK();
     }
+
+	public void setFocus() {
+		fSourceContainerPage.setFocus();
+    }
 }

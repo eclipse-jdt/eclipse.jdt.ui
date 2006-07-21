@@ -110,4 +110,6 @@ public abstract class BuildPathBasePage {
 
 	public abstract Control getControl(Composite parent);
 	
+	public abstract void setFocus();
+	
 }

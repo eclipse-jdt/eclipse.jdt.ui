@@ -867,7 +867,13 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				fLibrariesList.expandElement(selElements.get(i), 1);
 			}
 		}
-	}	
+	}
 
+	/**
+     * {@inheritDoc}
+     */
+    public void setFocus() {
+    	fLibrariesList.setFocus();
+    }	
 
 }

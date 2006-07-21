@@ -76,4 +76,11 @@ public class ClasspathOrderingWorkbookPage extends BuildPathBasePage {
 	public void init(IJavaProject javaProject) {
 	}
 
+	/**
+     * {@inheritDoc}
+     */
+    public void setFocus() {
+    	fClassPathList.setFocus();
+    }
+
 }

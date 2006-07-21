@@ -456,6 +456,11 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		boolean noAttributes= containsOnlyTopLevelEntries(selElements);
 		fProjectsList.enableButton(IDX_ADDPROJECT, noAttributes);
 	}
-	
 
+	/**
+     * {@inheritDoc}
+     */
+    public void setFocus() {
+    	fProjectsList.setFocus();
+    }
 }

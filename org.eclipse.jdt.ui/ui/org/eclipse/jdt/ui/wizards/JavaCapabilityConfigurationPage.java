@@ -272,4 +272,8 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 			monitor.done();
 		}			
 	}
+	
+	protected void setFocus() {
+		getBuildPathsBlock().setFocus();
+	}
 }
