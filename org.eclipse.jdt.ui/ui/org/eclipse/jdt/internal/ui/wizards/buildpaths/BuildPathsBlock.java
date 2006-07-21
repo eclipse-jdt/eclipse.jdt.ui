@@ -212,7 +212,7 @@ public class BuildPathsBlock {
         item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKFRAG_ROOT));
 		
         if (fUseNewPage) {
-			fSourceContainerPage= new NewSourceContainerWorkbookPage(fClassPathList, fBuildPathDialogField, fRunnableContext);
+			fSourceContainerPage= new NewSourceContainerWorkbookPage(fClassPathList, fBuildPathDialogField, fRunnableContext, this);
         } else {
 			fSourceContainerPage= new SourceContainerWorkbookPage(fClassPathList, fBuildPathDialogField);
         }
@@ -987,5 +987,9 @@ public class BuildPathsBlock {
 			((NewSourceContainerWorkbookPage)fSourceContainerPage).dispose();
 			fSourceContainerPage= null;
 		}
+    }
+
+	public boolean isOKStatus() {
+	    return findMostSevereStatus().isOK();
     }
 }

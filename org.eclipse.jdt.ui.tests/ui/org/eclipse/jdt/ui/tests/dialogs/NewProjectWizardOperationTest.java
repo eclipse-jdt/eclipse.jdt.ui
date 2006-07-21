@@ -149,7 +149,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     protected void setUp() throws Exception {
         fProject= createProject();
         fSelection= new ArrayList();
-        fActionGroup= new DialogPackageExplorerActionGroup(null, null, null);
+        fActionGroup= new DialogPackageExplorerActionGroup(null, null, null, null);
         assertFalse(fProject.isOnClasspath(fProject.getUnderlyingResource()));
     }
 

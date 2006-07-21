@@ -15,6 +15,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.core.resources.IFolder;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -34,6 +40,7 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
@@ -46,6 +53,7 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.ViewerPane;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -70,6 +78,8 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 
 	private final IRunnableContext fContext;
 
+	private final BuildPathsBlock fBuildPathsBlock;
+
 
     /**
      * Constructor of the <code>NewSourceContainerWorkbookPage</code> which consists of 
@@ -80,11 +90,13 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
      * @param classPathList
      * @param outputLocationField
      * @param context a runnable context, can be <code>null</code>
+     * @param buildPathsBlock 
      */
-    public NewSourceContainerWorkbookPage(ListDialogField classPathList, StringDialogField outputLocationField, IRunnableContext context) {
+    public NewSourceContainerWorkbookPage(ListDialogField classPathList, StringDialogField outputLocationField, IRunnableContext context, BuildPathsBlock buildPathsBlock) {
         fClassPathList= classPathList;
 		fOutputLocationField= outputLocationField;
 		fContext= context;
+		fBuildPathsBlock= buildPathsBlock;
     
         fUseFolderOutputs= new SelectionButtonDialogField(SWT.CHECK);
         fUseFolderOutputs.setSelection(false);
@@ -183,7 +195,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         excomposite.setClient(fHintTextGroup.createControl(excomposite));
         fUseFolderOutputs.doFillIntoGrid(body, 1);
 		
-	    fActionGroup= new DialogPackageExplorerActionGroup(fHintTextGroup, fContext, fPackageExplorer);
+	    fActionGroup= new DialogPackageExplorerActionGroup(fHintTextGroup, fContext, fPackageExplorer, this);
 		fActionGroup.addBuildpathModifierListener(this);
 		   
 		
@@ -362,6 +374,29 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         try {
 	        fOutputLocationField.setText(fJavaProject.getOutputLocation().makeRelative().toString());
         } catch (JavaModelException e) {
+	        JavaPlugin.log(e);
+        }
+    }
+
+	public void commitDefaultOutputFolder() {
+		if (!fBuildPathsBlock.isOKStatus())
+			return;
+		try {
+			IPath path= new Path(fOutputLocationField.getText()).makeAbsolute();
+			IPath outputLocation= fJavaProject.getOutputLocation();
+			if (path.equals(outputLocation))
+				return;
+			
+			if (!outputLocation.equals(fJavaProject.getPath())) {
+				IFolder folder= fJavaProject.getProject().getWorkspace().getRoot().getFolder(outputLocation);
+				if (folder.exists() && JavaCore.create(folder) == null) {
+					folder.delete(true, null);
+				}
+			}
+	        fJavaProject.setOutputLocation(path, null);
+        } catch (JavaModelException e) {
+	     	JavaPlugin.log(e);
+        } catch (CoreException e) {
 	        JavaPlugin.log(e);
         }
     }

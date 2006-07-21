@@ -56,7 +56,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * to the operations
      * @param context 
      */
-    public DialogPackageExplorerActionGroup(HintTextGroup provider, IRunnableContext context, DialogPackageExplorer dialogPackageExplorer) {
+    public DialogPackageExplorerActionGroup(HintTextGroup provider, IRunnableContext context, DialogPackageExplorer dialogPackageExplorer, final NewSourceContainerWorkbookPage page) {
         super();
 		
         fDialogPackageExplorer= dialogPackageExplorer;
@@ -64,22 +64,52 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         if (context == null)
         	context= PlatformUI.getWorkbench().getProgressService();
         
-        fAddFolderToBuildpathAction= new AddFolderToBuildpathAction(context, fDialogPackageExplorer);
+        fAddFolderToBuildpathAction= new AddFolderToBuildpathAction(context, fDialogPackageExplorer) {
+        	public void run() {
+        		page.commitDefaultOutputFolder();
+        	    super.run();
+        	}
+        };
 		fDialogPackageExplorer.addSelectionChangedListener(fAddFolderToBuildpathAction);
 		
-		fRemoveFromBuildpathAction= new RemoveFromBuildpathAction(context, fDialogPackageExplorer);
+		fRemoveFromBuildpathAction= new RemoveFromBuildpathAction(context, fDialogPackageExplorer) {
+        	public void run() {
+        		page.commitDefaultOutputFolder();
+        	    super.run();
+        	}
+        };
 		fDialogPackageExplorer.addSelectionChangedListener(fRemoveFromBuildpathAction);
         
-		fExcludeFromBuildpathAction= new ExcludeFromBuildpathAction(context, fDialogPackageExplorer);
+		fExcludeFromBuildpathAction= new ExcludeFromBuildpathAction(context, fDialogPackageExplorer) {
+        	public void run() {
+        		page.commitDefaultOutputFolder();
+        	    super.run();
+        	}
+        };
 		fDialogPackageExplorer.addSelectionChangedListener(fExcludeFromBuildpathAction);
 		
-		fIncludeToBuildpathAction= new IncludeToBuildpathAction(context, fDialogPackageExplorer);
+		fIncludeToBuildpathAction= new IncludeToBuildpathAction(context, fDialogPackageExplorer) {
+        	public void run() {
+        		page.commitDefaultOutputFolder();
+        	    super.run();
+        	}
+        };
 		fDialogPackageExplorer.addSelectionChangedListener(fIncludeToBuildpathAction);
 		
-			fEditFilterAction= new EditFilterAction(context, fDialogPackageExplorer);
+			fEditFilterAction= new EditFilterAction(context, fDialogPackageExplorer) {
+	        	public void run() {
+	        		page.commitDefaultOutputFolder();
+	        	    super.run();
+	        	}
+	        };
 			fDialogPackageExplorer.addSelectionChangedListener(fEditFilterAction);
 	
-	        fEditOutputFolderAction= new EditOutputFolderAction(context, fDialogPackageExplorer);
+	        fEditOutputFolderAction= new EditOutputFolderAction(context, fDialogPackageExplorer) {
+	        	public void run() {
+	        		page.commitDefaultOutputFolder();
+	        	    super.run();
+	        	}
+	        };
 			fDialogPackageExplorer.addSelectionChangedListener(fEditOutputFolderAction);
         
         fDropDownAction= new ClasspathModifierDropDownAction();
@@ -87,10 +117,20 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         fDropDownAction.addAction(fEditOutputFolderAction);
 		fDialogPackageExplorer.addPostSelectionChangedListener(fDropDownAction);
         
-        fCreateLinkedSourceFolderAction= new CreateLinkedSourceFolderAction2(provider, context, fDialogPackageExplorer);
+        fCreateLinkedSourceFolderAction= new CreateLinkedSourceFolderAction2(provider, context, fDialogPackageExplorer) {
+        	public void run() {
+        		page.commitDefaultOutputFolder();
+        	    super.run();
+        	}
+        };
 		fDialogPackageExplorer.addSelectionChangedListener(fCreateLinkedSourceFolderAction);
         
-        fCreateSourceFolderAction= new CreateSourceFolderAction2(provider, context, fDialogPackageExplorer);
+        fCreateSourceFolderAction= new CreateSourceFolderAction2(provider, context, fDialogPackageExplorer) {
+        	public void run() {
+        		page.commitDefaultOutputFolder();
+        	    super.run();
+        	}
+        };
 		fDialogPackageExplorer.addSelectionChangedListener(fCreateSourceFolderAction);
 
         
