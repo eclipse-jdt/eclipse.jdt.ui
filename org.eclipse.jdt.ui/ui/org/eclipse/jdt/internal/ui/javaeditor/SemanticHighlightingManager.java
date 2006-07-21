@@ -31,7 +31,6 @@ import org.eclipse.jface.text.TextAttribute;
 
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IColorManagerExtension;
-import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 import org.eclipse.jdt.internal.ui.text.JavaPresentationReconciler;
@@ -294,7 +293,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		fColorManager= colorManager;
 		fPreferenceStore= preferenceStore;
 		if (fEditor != null) {
-			fConfiguration= new JavaSourceViewerConfiguration(colorManager, preferenceStore, editor, IJavaPartitions.JAVA_PARTITIONING);
+			fConfiguration= editor.createJavaSourceViewerConfiguration();
 			fPresentationReconciler= (JavaPresentationReconciler) fConfiguration.getPresentationReconciler(sourceViewer);
 		} else {
 			fConfiguration= null;

@@ -1782,8 +1782,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected void initializeEditor() {
 		IPreferenceStore store= createCombinedPreferenceStore(null);
 		setPreferenceStore(store);
-		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools.getColorManager(), store, this, IJavaPartitions.JAVA_PARTITIONING));
+		setSourceViewerConfiguration(createJavaSourceViewerConfiguration());
 		fMarkOccurrenceAnnotations= store.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
 		fStickyOccurrenceAnnotations= store.getBoolean(PreferenceConstants.EDITOR_STICKY_OCCURRENCES);
 		fMarkTypeOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES);
@@ -1795,6 +1794,17 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fMarkImplementors= store.getBoolean(PreferenceConstants.EDITOR_MARK_IMPLEMENTORS);
 		fMarkMethodExitPoints= store.getBoolean(PreferenceConstants.EDITOR_MARK_METHOD_EXIT_POINTS);
 		fMarkBreakContinueTargets= store.getBoolean(PreferenceConstants.EDITOR_MARK_BREAK_CONTINUE_TARGETS);
+	}
+
+	/**
+	 * Returns a new Java source viewer configuration.
+	 * 
+	 * @return a new <code>JavaSourceViewerConfiguration</code>
+	 * @since 3.3
+	 */
+	protected JavaSourceViewerConfiguration createJavaSourceViewerConfiguration() {
+		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+		return new JavaSourceViewerConfiguration(textTools.getColorManager(), getPreferenceStore(), this, IJavaPartitions.JAVA_PARTITIONING);
 	}
 
 	/*
