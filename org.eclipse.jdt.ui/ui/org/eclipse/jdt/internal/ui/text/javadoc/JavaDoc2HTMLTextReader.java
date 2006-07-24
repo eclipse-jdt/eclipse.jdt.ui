@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.TagElement;
+
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.SubstitutionTextReader;
 
@@ -99,7 +101,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 		return c;
 	}
 
-	private String subsituteQualification(String qualification) {
+	private String substituteQualification(String qualification) {
 		String result= qualification.replace('#', '.');
 		if (result.startsWith(".")) { //$NON-NLS-1$
 			result= result.substring(1);
@@ -210,20 +212,20 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 
 		tagContent= tagContent.trim();
 
-		if ("@param".equals(tag)) //$NON-NLS-1$
+		if (TagElement.TAG_PARAM.equals(tag))
 			fParameters.add(tagContent);
-		else if ("@return".equals(tag)) //$NON-NLS-1$
+		else if (TagElement.TAG_RETURN.equals(tag)) 
 			fReturn= tagContent;
-		else if ("@exception".equals(tag)) //$NON-NLS-1$
+		else if (TagElement.TAG_EXCEPTION.equals(tag)) 
 			fExceptions.add(tagContent);
-		else if ("@throws".equals(tag)) //$NON-NLS-1$
+		else if (TagElement.TAG_THROWS.equals(tag)) 
 			fExceptions.add(tagContent);
-		else if ("@author".equals(tag)) //$NON-NLS-1$
-			fAuthors.add(subsituteQualification(tagContent));
-		else if ("@see".equals(tag)) //$NON-NLS-1$
-			fSees.add(subsituteQualification(tagContent));
-		else if ("@since".equals(tag)) //$NON-NLS-1$
-			fSince.add(subsituteQualification(tagContent));
+		else if (TagElement.TAG_AUTHOR.equals(tag)) 
+			fAuthors.add(substituteQualification(tagContent));
+		else if (TagElement.TAG_SEE.equals(tag)) 
+			fSees.add(substituteQualification(tagContent));
+		else if (TagElement.TAG_SINCE.equals(tag)) 
+			fSince.add(substituteQualification(tagContent));
 		else if (tagContent != null)
 			fRest.add(new Pair(tag, tagContent));
 	}
@@ -262,7 +264,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 
 	private String printBlockTag(String tag, String tagContent) {
 
-		if ("@link".equals(tag) || "@linkplain".equals(tag)) { //$NON-NLS-1$ //$NON-NLS-2$
+		if (TagElement.TAG_LINK.equals(tag) || TagElement.TAG_LINKPLAIN.equals(tag)) {
 
 			char[] contentChars= tagContent.toCharArray();
 			boolean inParentheses= false;
@@ -293,12 +295,28 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 					break;
 				}
 			}
-
-			return subsituteQualification(tagContent.substring(labelStart));
+			return substituteQualification(tagContent.substring(labelStart));
+			
+		} else if (TagElement.TAG_LITERAL.equals(tag)) {
+			return printLiteral(tagContent);
+			
+		} else if (TagElement.TAG_CODE.equals(tag)) {
+			return "<code>" + printLiteral(tagContent) + "</code>"; //$NON-NLS-1$//$NON-NLS-2$
 		}
 
 		// If something went wrong at least replace the {} with the content
-		return subsituteQualification(tagContent);
+		return substituteQualification(tagContent);
+	}
+
+	private String printLiteral(String tagContent) {
+		int contentStart= 0;
+		for (int i= 0; i < tagContent.length(); i++) {
+			if (! Character.isWhitespace(tagContent.charAt(i))) {
+				contentStart= i;
+				break;
+			}
+		}
+		return HTMLPrinter.convertToHTMLContent(tagContent.substring(contentStart));
 	}
 
 	/*
