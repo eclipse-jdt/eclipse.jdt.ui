@@ -80,6 +80,8 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 					word = word.substring(8);
 				}
 			}
+		} else if (word.startsWith("this.")) { //$NON-NLS-1$
+			word= word.substring(5);
 		}
 		return isPrefix(prefix, word);
 	}
@@ -92,6 +94,8 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 		int pos= string.indexOf('(');
 		if (pos > 0)
 			return string.subSequence(0, pos);
+		else if (string.startsWith("this.")) //$NON-NLS-1$
+			return string.substring(5);
 		else
 			return string;
 	}
