@@ -32,6 +32,8 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
+import org.eclipse.jdt.internal.corext.SourceRange;
+
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 
@@ -80,8 +82,12 @@ public class JUnit4TestFinder implements ITestFinder {
 		boolean annotates(IMember member) throws JavaModelException {
 			ISourceRange sourceRange= member.getSourceRange();
 			ISourceRange nameRange= member.getNameRange();
+			String memberSource= member.getSource();
+			if (! SourceRange.isAvailable(sourceRange) || SourceRange.isAvailable(nameRange) || memberSource == null)
+				return false;
+			
 			int charsToSearch= nameRange.getOffset() - sourceRange.getOffset();
-			String source= member.getSource().substring(0, charsToSearch);
+			String source= memberSource.substring(0, charsToSearch);
 			return foundIn(source);
 		}
 

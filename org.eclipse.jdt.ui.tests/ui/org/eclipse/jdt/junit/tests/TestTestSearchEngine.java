@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.junit.launcher.JUnit4TestFinder;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -41,13 +42,19 @@ public class TestTestSearchEngine extends TestCase {
 		fRoot= JavaProjectHelper.addSourceContainer(fProject, "src");
 	}
 	
+	protected void tearDown() throws Exception {
+		JavaProjectHelper.delete(fProject);
+		super.tearDown();
+	}
+	
+	
 	public void testOnePackage() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		ICompilationUnit test1= createCompilationUnit(p, 1);
 		ICompilationUnit test2= createCompilationUnit(p, 2);
 		
 		IType[] result= TestSearchEngine.findTests(new Object[] {p});
-		assertEquals("Test case not found", new IType[] {
+		assertEqualTypes("Test case not found", new IType[] {
 				test1.getType("Test1"), test2.getType("Test2")
 			}, result);
 	}
@@ -61,7 +68,7 @@ public class TestTestSearchEngine extends TestCase {
 		ICompilationUnit test3= createCompilationUnit(q, 3);
 		
 		IType[] result= TestSearchEngine.findTests(new Object[] {p, q});
-		assertEquals("Test case not found", new IType[] {
+		assertEqualTypes("Test case not found", new IType[] {
 				test1.getType("Test1"), test2.getType("Test2"), test3.getType("Test3")
 			}, result);
 	}
@@ -75,7 +82,7 @@ public class TestTestSearchEngine extends TestCase {
 		createCompilationUnit(q, 3);
 		
 		IType[] result= TestSearchEngine.findTests(new Object[] {p});
-		assertEquals("Test case not found", new IType[] {
+		assertEqualTypes("Test case not found", new IType[] {
 				test1.getType("Test1"), test2.getType("Test2")
 			}, result);
 	}
@@ -89,7 +96,7 @@ public class TestTestSearchEngine extends TestCase {
 		ICompilationUnit test3= createCompilationUnit(q, 3);
 		
 		IType[] result= TestSearchEngine.findTests(new Object[] {fRoot});
-		assertEquals("Test case not found", new IType[] {
+		assertEqualTypes("Test case not found", new IType[] {
 				test1.getType("Test1"), test2.getType("Test2"), test3.getType("Test3")
 			}, result);
 	}
@@ -109,7 +116,7 @@ public class TestTestSearchEngine extends TestCase {
 		ICompilationUnit test5= createCompilationUnit(r, 5);
 		
 		IType[] result= TestSearchEngine.findTests(new Object[] {fRoot, root2});
-		assertEquals("Test case not found", new IType[] {
+		assertEqualTypes("Test case not found", new IType[] {
 				test1.getType("Test1"), test2.getType("Test2"), test3.getType("Test3"),
 				test4.getType("Test4"), test5.getType("Test5")
 			}, result);
@@ -130,7 +137,7 @@ public class TestTestSearchEngine extends TestCase {
 		ICompilationUnit test5= createCompilationUnit(r, 5);
 		
 		IType[] result= TestSearchEngine.findTests(new Object[] {root2});
-		assertEquals("Test case not found", new IType[] {
+		assertEqualTypes("Test case not found", new IType[] {
 				test4.getType("Test4"), test5.getType("Test5")
 			}, result);
 	}
@@ -149,7 +156,7 @@ public class TestTestSearchEngine extends TestCase {
 				null);
 		
 		IType[] result= TestSearchEngine.findTests(new Object[] {root2});
-		assertEquals("Test case not found", new IType[] { testSub.getType("TestSub") }, result);
+		assertEqualTypes("Test case not found", new IType[] { testSub.getType("TestSub") }, result);
 	}
 	
 	public void testProject() throws Exception {
@@ -167,7 +174,7 @@ public class TestTestSearchEngine extends TestCase {
 		ICompilationUnit test5= createCompilationUnit(r, 5);
 		
 		IType[] result= TestSearchEngine.findTests(new Object[] {fProject});
-		assertEquals("Test case not found", new IType[] {
+		assertEqualTypes("Test case not found", new IType[] {
 				test1.getType("Test1"), test2.getType("Test2"), test3.getType("Test3"),
 				test4.getType("Test4"), test5.getType("Test5")
 			}, result);
@@ -181,14 +188,15 @@ public class TestTestSearchEngine extends TestCase {
 		createCompilationUnit(q, 2);
 		
 		IType[] result= TestSearchEngine.findTests(new Object[] {p});
-		assertEquals("Test case not found", new IType[] {
+		assertEqualTypes("Test case not found", new IType[] {
 				test1.getType("Test1")
 			}, result);
 	}
 	
-	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fProject);
-		super.tearDown();
+	public void testJUnit4NoSrc() throws Exception {
+		//regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=151003
+		IType noTest= fProject.findType("java.lang.Integer");
+		assertFalse(new JUnit4TestFinder().isTest(noTest));
 	}
 	
 	private ICompilationUnit createCompilationUnit(IPackageFragment pack, int number) throws JavaModelException {
@@ -198,7 +206,7 @@ public class TestTestSearchEngine extends TestCase {
 			true, null);
 	}
 	
-	private void assertEquals(String message, IType[] expected, IType[] actual) {
+	private void assertEqualTypes(String message, IType[] expected, IType[] actual) {
 		assertEquals("Wrong number of found tests", expected.length, actual.length);
 		List list= Arrays.asList(expected);
 		for (int i= 0; i < actual.length; i++) {
