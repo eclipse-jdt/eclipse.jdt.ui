@@ -97,19 +97,19 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 						launch(mode, describeMethodLaunch( ((IMethod) element)));
 						return;
 					}
-					// launch a CU or type
-					launchType(element, mode);
 				}
+				// launch a CU or type (can be an IResource selection)
+				launchType(search, mode);
 			}
 		} catch (LaunchCancelledByUserException e) {
 			// OK, silently move on
 		}
 	}
 
-	protected void launchType(IJavaElement search, String mode) {
+	protected void launchType(Object[] search, String mode) {
 		IType[] types= null;
 		try {
-			types= TestSearchEngine.findTests(new Object[] { search });
+			types= TestSearchEngine.findTests(search);
 		} catch (InterruptedException e) {
 			JUnitPlugin.log(e);
 			return;
