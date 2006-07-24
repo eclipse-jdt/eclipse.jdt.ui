@@ -2688,6 +2688,24 @@
             </separator>
          </menu>
          <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.search.implement.occurrences"
+               label="%ImplementOccurrences.label"
+               retarget="true"
+               id="org.eclipse.jdt.ui.actions.ImplementOccurrences">
+         </action>
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.search.exception.occurrences"
+               label="%ExceptionOccurrences.label"
+               retarget="true"
+               id="org.eclipse.jdt.ui.actions.ExceptionOccurrences">
+         </action>
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
+               label="%OccurrencesInFile.label"
+               retarget="true"
+               id="org.eclipse.jdt.ui.actions.OccurrencesInFile">
+         </action>
+         <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set"
                label="%InWorkingSet.label"
                retarget="true"

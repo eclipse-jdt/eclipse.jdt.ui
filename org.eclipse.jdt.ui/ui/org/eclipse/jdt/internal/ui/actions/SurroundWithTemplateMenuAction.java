@@ -44,7 +44,9 @@ import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 
-import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IPartListener;
+import org.eclipse.ui.IPartService;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -102,7 +104,40 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 	};
 
 	private Menu fMenu;
+	private IPartService fPartService;
+	private IPartListener fPartListener= new IPartListener() {
 
+		public void partActivated(IWorkbenchPart part) {
+		}
+
+		public void partBroughtToTop(IWorkbenchPart part) {
+		}
+
+		public void partClosed(IWorkbenchPart part) {
+		}
+
+		public void partDeactivated(IWorkbenchPart part) {
+			disposeMenuItems();
+		}
+
+		public void partOpened(IWorkbenchPart part) {
+		}
+		
+	};
+
+	protected void disposeMenuItems() {
+		if (fMenu == null || fMenu.isDisposed()) {
+			return;
+		}
+		MenuItem[] items = fMenu.getItems();
+		for (int i=0; i < items.length; i++) {
+			MenuItem menuItem= items[i];
+			if (!menuItem.isDisposed()) {
+				menuItem.dispose();
+			}
+		}
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -153,6 +188,10 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 	 * {@inheritDoc}
 	 */
 	public void dispose() {
+		if (fPartService != null) {
+			fPartService.removePartListener(fPartListener);
+			fPartService= null;
+		}
 		setMenu(null);
 	}
 
@@ -160,17 +199,29 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 	 * {@inheritDoc}
 	 */
 	public void init(IWorkbenchWindow window) {
+		if (fPartService != null) {
+			fPartService.removePartListener(fPartListener);
+			fPartService= null;
+		}
+		
+		if (window != null) {
+			IPartService partService= window.getPartService();
+			if (partService != null) {
+				fPartService= partService;
+				partService.addPartListener(fPartListener);
+			}
+		}
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void run(IAction action) {
-		IEditorPart activeEditor= JavaPlugin.getActivePage().getActiveEditor();
-		if (!(activeEditor instanceof CompilationUnitEditor))
+		IWorkbenchPart activePart= JavaPlugin.getActivePage().getActivePart();
+		if (!(activePart instanceof CompilationUnitEditor))
 			return;
 		
-		final CompilationUnitEditor editor= (CompilationUnitEditor)activeEditor;
+		final CompilationUnitEditor editor= (CompilationUnitEditor)activePart;
 		
 		(new JDTQuickMenuAction(editor, SURROUND_WITH_QUICK_MENU_ACTION_ID) {
 			protected void fillMenu(IMenuManager menu) {
@@ -192,11 +243,14 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 	 */
 	protected void fillMenu(Menu menu) {
 		
-		IEditorPart activeEditor= JavaPlugin.getActivePage().getActiveEditor();
-		if (!(activeEditor instanceof CompilationUnitEditor))
+		IWorkbenchPart activePart= JavaPlugin.getActivePage().getActivePart();
+		if (!(activePart instanceof CompilationUnitEditor)) {
+			ActionContributionItem item= new ActionContributionItem(NONE_APPLICABLE_ACTION);
+			item.fill(menu, -1);
 			return;
+		}
 		
-		CompilationUnitEditor editor= (CompilationUnitEditor)activeEditor;
+		CompilationUnitEditor editor= (CompilationUnitEditor)activePart;
 		
 		IAction[] actions= getTemplateActions(editor);
 		

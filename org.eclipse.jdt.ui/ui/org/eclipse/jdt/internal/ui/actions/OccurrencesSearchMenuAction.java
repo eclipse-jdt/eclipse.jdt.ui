@@ -10,30 +10,23 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
-import org.eclipse.swt.events.MenuAdapter;
-import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
 
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
+import org.eclipse.ui.actions.RetargetAction;
 
-import org.eclipse.jdt.ui.actions.FindExceptionOccurrencesAction;
-import org.eclipse.jdt.ui.actions.FindImplementOccurrencesAction;
-import org.eclipse.jdt.ui.actions.FindOccurrencesInFileAction;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -57,13 +50,15 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 
 	private Menu fMenu;
 
+	private IPartService fPartService;
+	private RetargetAction[] fRetargetActions;
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public Menu getMenu(Menu parent) {
 		setMenu(new Menu(parent));
 		fillMenu(fMenu);
-		installMenuListener();
 		return fMenu;
 	}
 
@@ -73,7 +68,6 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 	public Menu getMenu(Control parent) {
 		setMenu(new Menu(parent));
 		fillMenu(fMenu);
-		installMenuListener();
 		return fMenu;
 	}
 
@@ -82,23 +76,57 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 	 */
 	public void dispose() {
 		setMenu(null);
+		disposeSubmenuActions();
 	}
 
+	private RetargetAction createSubmenuAction(IPartService partService, String actionID, String text, String actionDefinitionId) {
+		RetargetAction action= new RetargetAction(actionID, text);
+		action.setActionDefinitionId(actionDefinitionId);
+
+		partService.addPartListener(action);
+		IWorkbenchPart activePart = partService.getActivePart();
+		if (activePart != null) {
+			action.partActivated(activePart);
+		}
+		return action;
+	}
+	
+	private void disposeSubmenuActions() {
+		if (fPartService != null && fRetargetActions != null) {
+			for (int i= 0; i < fRetargetActions.length; i++) {
+				fPartService.removePartListener(fRetargetActions[i]);
+				fRetargetActions[i].dispose();
+			}
+		}
+		fRetargetActions= null;
+		fPartService= null;
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public void init(IWorkbenchWindow window) {
+		disposeSubmenuActions(); // paranoia code: double initialization should not happen
+		if (window != null) {
+			fPartService= window.getPartService();
+			if (fPartService != null) {
+				fRetargetActions= new RetargetAction[] {
+					createSubmenuAction(fPartService, JdtActionConstants.FIND_OCCURRENCES_IN_FILE, SearchMessages.Search_FindOccurrencesInFile_shortLabel, IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE),
+					createSubmenuAction(fPartService, JdtActionConstants.FIND_IMPLEMENT_OCCURRENCES, ActionMessages.FindImplementOccurrencesAction_text, IJavaEditorActionDefinitionIds.SEARCH_IMPLEMENT_OCCURRENCES_IN_FILE),
+					createSubmenuAction(fPartService, JdtActionConstants.FIND_EXCEPTION_OCCURRENCES, ActionMessages.FindExceptionOccurrences_text, IJavaEditorActionDefinitionIds.SEARCH_EXCEPTION_OCCURRENCES_IN_FILE),
+				};
+			}	
+		}
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void run(IAction action) {
-		IEditorPart activeEditor= JavaPlugin.getActivePage().getActiveEditor();
-		if (!(activeEditor instanceof JavaEditor))
-			return;
-		
-		final JavaEditor editor= (JavaEditor)activeEditor;
+		JavaEditor editor= null;
+		IWorkbenchPart activePart= JavaPlugin.getActivePage().getActivePart();
+		if (activePart instanceof JavaEditor)
+			editor= (JavaEditor) activePart;
 		
 		(new JDTQuickMenuAction(editor, IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE_QUICK_MENU) {
 			protected void fillMenu(IMenuManager menu) {
@@ -115,7 +143,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 	}
 	
 	private void fillQuickMenu(IMenuManager manager) {
-		IAction[] actions= getActions(JavaPlugin.getActiveWorkbenchWindow());
+		IAction[] actions= fRetargetActions;
 		if (actions != null) {
 			boolean hasAction= false;
 			for (int i= 0; i < actions.length; i++) {
@@ -137,121 +165,22 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 	 * The menu to show in the workbench menu
 	 */
 	private void fillMenu(Menu menu) {
-		IAction[] actions= getActions(JavaPlugin.getActiveWorkbenchWindow());
-		if (actions != null) {
-			boolean hasAction= false;
-			for (int i= 0; i < actions.length; i++) {
-				IAction action= actions[i];
-				if (action.isEnabled()) {
-					hasAction= true;
-					ActionContributionItem item= new ActionContributionItem(action);
-					item.fill(menu, -1);
-				}
-			}
-			if (!hasAction) {
-				ActionContributionItem item= new ActionContributionItem(NO_ACTION_AVAILABLE);
+		if (fRetargetActions != null) {
+			for (int i= 0; i < fRetargetActions.length; i++) {
+				ActionContributionItem item= new ActionContributionItem(fRetargetActions[i]);
 				item.fill(menu, -1);
 			}
 		} else {
+			// can only happen if 'init' was not called: programming error
 			ActionContributionItem item= new ActionContributionItem(NO_ACTION_AVAILABLE);
 			item.fill(menu, -1);
 		}
 	}
 	
-	private IAction[] getActions(IWorkbenchWindow window) {
-		IWorkbenchPage activePage= window.getActivePage();
-		if (activePage == null)
-			return null;
-		
-		IWorkbenchPart activePart= activePage.getActivePart();
-		if (activePart == null)
-			return null;
-		
-		if (activePart instanceof JavaEditor) {
-			return getActions((JavaEditor)activePart);
-		} else {
-			return getActions(activePart.getSite());
-		}
-	}
-
-	private IAction[] getActions(IWorkbenchPartSite site) {
-		FindOccurrencesInFileAction findIdentifier= new FindOccurrencesInFileAction(site);
-		FindExceptionOccurrencesAction findExceptions= new FindExceptionOccurrencesAction(site);
-		FindImplementOccurrencesAction findImplement= new FindImplementOccurrencesAction(site);
-		
-		ISelectionProvider selectionProvider= site.getSelectionProvider();
-		if (selectionProvider == null)
-			return null;
-		
-		ISelection selection= selectionProvider.getSelection();
-		init(findIdentifier, selection);
-		init(findExceptions, selection);
-		init(findImplement, selection);
-		return new IAction[] {
-				findIdentifier,
-				findExceptions,
-				findImplement
-		};
-	}
-
-	private IAction[] getActions(JavaEditor editor) {
-		FindOccurrencesInFileAction findIdentifier= new FindOccurrencesInFileAction(editor);
-		FindExceptionOccurrencesAction findExceptions= new FindExceptionOccurrencesAction(editor);
-		FindImplementOccurrencesAction findImplement= new FindImplementOccurrencesAction(editor);
-		
-		ISelectionProvider selectionProvider= editor.getSelectionProvider();
-		if (selectionProvider == null)
-			return null;
-		
-		ISelection selection= selectionProvider.getSelection();
-		init(findIdentifier, selection);
-		init(findExceptions, selection);
-		init(findImplement, selection);
-		
-		editor.setAction("SearchOccurrencesInFile", findIdentifier); //$NON-NLS-1$
-		editor.setAction("SearchExceptionOccurrences", findExceptions); //$NON-NLS-1$
-		editor.setAction("SearchImplementOccurrences", findImplement); //$NON-NLS-1$
-		
-		return new IAction[] {
-				findIdentifier,
-				findExceptions,
-				findImplement
-		};
-	}
-
-	private void init(FindImplementOccurrencesAction findImplement, ISelection selection) {
-		findImplement.update(selection);
-		findImplement.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_IMPLEMENT_OCCURRENCES_IN_FILE);
-	}
-
-	private void init(FindExceptionOccurrencesAction findExceptions, ISelection selection) {
-		findExceptions.update(selection);
-		findExceptions.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_EXCEPTION_OCCURRENCES_IN_FILE);
-	}
-
-	private void init(FindOccurrencesInFileAction findIdentifier, ISelection selection) {
-		findIdentifier.update(selection);
-		findIdentifier.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE);
-		findIdentifier.setText(SearchMessages.Search_FindOccurrencesInFile_shortLabel);
-	}
-
 	private void setMenu(Menu menu) {
 		if (fMenu != null) {
 			fMenu.dispose();
 		}
 		fMenu = menu;
-	}
-	
-	private void installMenuListener() {
-		fMenu.addMenuListener(new MenuAdapter() {
-			public void menuShown(MenuEvent e) {
-				Menu m = (Menu)e.widget;
-				MenuItem[] items = m.getItems();
-				for (int i=0; i < items.length; i++) {
-					items[i].dispose();
-				}
-				fillMenu(m);
-			}
-		});
 	}
 }

@@ -21,7 +21,6 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
@@ -122,22 +121,6 @@ public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 	}
 	
 	private IMember getMember(IStructuredSelection selection) {
-		if (selection.size() != 1)
-			return null;
-		Object o= selection.getFirstElement();
-		if (o instanceof IMember) {
-			IMember member= (IMember)o;
-			IClassFile file= member.getClassFile();
-			if (file != null) {
-				try {
-					if (file.getSourceRange() != null)
-						return member;
-				} catch (JavaModelException e) {
-					return null;
-				}
-			}
-			return member;
-		}
 		return null;
 	}
 }
