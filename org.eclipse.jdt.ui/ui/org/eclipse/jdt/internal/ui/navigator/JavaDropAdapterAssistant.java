@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,6 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 
 import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
@@ -57,7 +56,8 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 	private JavaCopyProcessor fCopyProcessor;
 	private int fCanCopyElements; 
 
-	public IStatus handleDrop(CommonDropAdapter dropAdapter, DropTargetEvent dropTargetEvent, Object target) { 
+	public IStatus handleDrop(CommonDropAdapter dropAdapter,
+			DropTargetEvent dropTargetEvent, Object target) { 
 		if (LocalSelectionTransfer.getInstance().isSupportedType(dropAdapter.getCurrentTransfer())) {
 			try {
 
@@ -87,7 +87,7 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 			try {
 
 				final Object data = FileTransfer.getInstance().nativeToJava(dropAdapter.getCurrentTransfer());
-				if (!(data instanceof String[]))
+				if (data == null || !(data instanceof String[]))
 					return Status.CANCEL_STATUS;
 
 				final IContainer targetContainer = getActualTarget(target);
@@ -107,28 +107,29 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 		return Status.CANCEL_STATUS;
 	}
 
-	public IStatus validateDrop(Object target, int operation, TransferData transferType) { 
+	public IStatus validateDrop(Object target, int operation,
+			TransferData transferType) { 
 		IStatus result = Status.OK_STATUS;
 		if (LocalSelectionTransfer.getInstance().isSupportedType(transferType)) {
 			initializeSelection();
 			try {
 				switch (operation) {
 					case DND.DROP_DEFAULT :
-						if (handleValidateDefault(target) != DND.DROP_NONE) {
+						if(handleValidateDefault(target) != DND.DROP_NONE) {
 							result = Status.OK_STATUS;
 						} else {
 							result = Status.CANCEL_STATUS;
 						}
 						break;
 					case DND.DROP_COPY :
-						if (handleValidateCopy(target) != DND.DROP_NONE) {
+						if(handleValidateCopy(target) != DND.DROP_NONE) {
 							result = Status.OK_STATUS;
 						} else {
 							result = Status.CANCEL_STATUS;
 						}
 						break;
 					case DND.DROP_MOVE :
-						if (handleValidateMove(target) != DND.DROP_NONE) {
+						if(handleValidateMove(target) != DND.DROP_NONE) {
 							result = Status.OK_STATUS;
 						} else {
 							result = Status.CANCEL_STATUS;
@@ -148,6 +149,8 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 		return super.isSupportedType(transferType) || FileTransfer.getInstance().isSupportedType(transferType);
 	}
 	
+	
+
 	private IContainer getActualTarget(Object dropTarget) throws JavaModelException {
 		if (dropTarget instanceof IContainer)
 			return (IContainer) dropTarget;
@@ -191,9 +194,9 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
  
 	private int handleValidateCopy(Object target) throws JavaModelException {
 
-		final ICopyPolicy policy= ReorgPolicyFactory.createCopyPolicy(ReorgUtils.getResources(fElements), ReorgUtils.getJavaElements(fElements));
-		fCopyProcessor= policy.canEnable() ? new JavaCopyProcessor(policy) : null;
-		
+		//if (fCopyProcessor == null)
+			fCopyProcessor= JavaCopyProcessor.create(ReorgUtils.getResources(fElements), ReorgUtils.getJavaElements(fElements));
+
 		if (!canCopyElements())
 			return DND.DROP_NONE;	
 
@@ -216,8 +219,10 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 		if (target == null)
 			return DND.DROP_NONE;
 		
-		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(ReorgUtils.getResources(fElements), ReorgUtils.getJavaElements(fElements));
-		fMoveProcessor= (policy.canEnable()) ? new JavaMoveProcessor(policy) : null;
+		//if (fMoveProcessor == null) {
+			IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(ReorgUtils.getResources(fElements), ReorgUtils.getJavaElements(fElements));
+			fMoveProcessor = new JavaMoveProcessor(policy);
+		//}
 
 		if (!canMoveElements())
 			return DND.DROP_NONE;	
