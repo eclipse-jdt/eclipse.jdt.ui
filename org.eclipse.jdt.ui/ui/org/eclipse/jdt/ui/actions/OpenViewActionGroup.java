@@ -54,7 +54,7 @@ public class OpenViewActionGroup extends ActionGroup {
     private OpenCallHierarchyAction fOpenCallHierarchy;
 	private PropertyDialogAction fOpenPropertiesDialog;
 	
-	private boolean fShowOpenPropertiesAction;
+	private boolean fShowOpenPropertiesAction= true;
 
 	/**
 	 * Creates a new <code>OpenActionGroup</code>. The group requires
