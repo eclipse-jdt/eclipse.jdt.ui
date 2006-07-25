@@ -1912,21 +1912,22 @@ public class ReorgPolicyFactory {
 			if (!fUpdateQualifiedNames)
 				return;
 			IPackageFragment destination= getDestinationAsPackageFragment();
-			
-			ICompilationUnit[] cus= getCus();
-			pm.beginTask("", cus.length); //$NON-NLS-1$
-			pm.subTask(RefactoringCoreMessages.MoveRefactoring_scanning_qualified_names); 
-			for (int i= 0; i < cus.length; i++) {
-				ICompilationUnit cu= cus[i];
-				IType[] types= cu.getTypes();
-				IProgressMonitor typesMonitor= new SubProgressMonitor(pm, 1);
-				typesMonitor.beginTask("", types.length); //$NON-NLS-1$
-				for (int j= 0; j < types.length; j++) {
-					handleType(types[j], destination, new SubProgressMonitor(typesMonitor, 1));
-					if (typesMonitor.isCanceled())
-						throw new OperationCanceledException();
+			if (destination != null) {
+				ICompilationUnit[] cus= getCus();
+				pm.beginTask("", cus.length); //$NON-NLS-1$
+				pm.subTask(RefactoringCoreMessages.MoveRefactoring_scanning_qualified_names);
+				for (int i= 0; i < cus.length; i++) {
+					ICompilationUnit cu= cus[i];
+					IType[] types= cu.getTypes();
+					IProgressMonitor typesMonitor= new SubProgressMonitor(pm, 1);
+					typesMonitor.beginTask("", types.length); //$NON-NLS-1$
+					for (int j= 0; j < types.length; j++) {
+						handleType(types[j], destination, new SubProgressMonitor(typesMonitor, 1));
+						if (typesMonitor.isCanceled())
+							throw new OperationCanceledException();
+					}
+					typesMonitor.done();
 				}
-				typesMonitor.done();
 			}
 			pm.done();
 		}
