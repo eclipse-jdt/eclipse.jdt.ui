@@ -30,7 +30,7 @@ import org.eclipse.ltk.internal.core.refactoring.history.RefactoringHistoryServi
 /**
  * Property tester for the 'refactoringPropertiesEnabled' property.
  * 
- * @since 3.3
+ * @since 3.2.1
  */
 public final class RefactoringPropertyPageTester extends PropertyTester {
 
