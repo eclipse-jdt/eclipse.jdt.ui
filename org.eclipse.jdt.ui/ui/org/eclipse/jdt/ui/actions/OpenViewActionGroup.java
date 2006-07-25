@@ -53,6 +53,8 @@ public class OpenViewActionGroup extends ActionGroup {
 	private OpenTypeHierarchyAction fOpenTypeHierarchy;
     private OpenCallHierarchyAction fOpenCallHierarchy;
 	private PropertyDialogAction fOpenPropertiesDialog;
+	
+	private boolean fShowOpenPropertiesAction;
 
 	/**
 	 * Creates a new <code>OpenActionGroup</code>. The group requires
@@ -151,6 +153,17 @@ public class OpenViewActionGroup extends ActionGroup {
 		initialize(part.getEditorSite().getSelectionProvider());
 	}
 	
+	/**
+	 * Specifies if this action group also contains the 'Properties' action ({@link PropertyDialogAction}).
+	 * By default, the action is contained in the group.
+	 * 
+	 * @param enable If set, the 'Properties' action is part of this action group
+	 * @since 3.3
+	 */
+	public void containsOpenPropertiesAction(boolean enable) {
+		fShowOpenPropertiesAction= enable;
+	}
+	
 	private void createSiteActions(IWorkbenchSite site, ISelectionProvider specialProvider) {
 		fOpenSuperImplementation= new OpenSuperImplementationAction(site);
 		fOpenSuperImplementation.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_SUPER_IMPLEMENTATION);
@@ -170,10 +183,8 @@ public class OpenViewActionGroup extends ActionGroup {
 
         ISelectionProvider provider= specialProvider != null ? specialProvider : site.getSelectionProvider();
         
-        if(getShowProperties()) {
-	        fOpenPropertiesDialog= new PropertyDialogAction(site, provider);
-	        fOpenPropertiesDialog.setActionDefinitionId(IWorkbenchActionDefinitionIds.PROPERTIES);
-        }
+        fOpenPropertiesDialog= new PropertyDialogAction(site, provider);
+        fOpenPropertiesDialog.setActionDefinitionId(IWorkbenchActionDefinitionIds.PROPERTIES);
 		
         initialize(provider);
 	}
@@ -186,10 +197,9 @@ public class OpenViewActionGroup extends ActionGroup {
 		fOpenTypeHierarchy.update(selection);
         fOpenCallHierarchy.update(selection);
 		if (!fEditorIsOwner) {
-			if(getShowProperties()) {
+			if (fShowOpenPropertiesAction) {
 				if (selection instanceof IStructuredSelection) {
-					IStructuredSelection ss= (IStructuredSelection)selection;
-					fOpenPropertiesDialog.selectionChanged(ss);
+					fOpenPropertiesDialog.selectionChanged((IStructuredSelection) selection);
 				} else {
 					fOpenPropertiesDialog.selectionChanged(selection);
 				}
@@ -220,7 +230,7 @@ public class OpenViewActionGroup extends ActionGroup {
         if (!fIsCallHiararchyViewerOwner)
             appendToGroup(menu, fOpenCallHierarchy);
 		IStructuredSelection selection= getStructuredSelection();
-		if (getShowProperties() && fOpenPropertiesDialog != null && fOpenPropertiesDialog.isEnabled() && selection != null &&fOpenPropertiesDialog.isApplicableForSelection(selection))
+		if (fShowOpenPropertiesAction && selection != null)
 			menu.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, fOpenPropertiesDialog);
 	}
 
@@ -241,7 +251,7 @@ public class OpenViewActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_TYPE_HIERARCHY, fOpenTypeHierarchy);
         actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_CALL_HIERARCHY, fOpenCallHierarchy);
         
-        if (!fEditorIsOwner && getShowProperties())
+        if (!fEditorIsOwner && fShowOpenPropertiesAction)
         	actionBars.setGlobalActionHandler(ActionFactory.PROPERTIES.getId(), fOpenPropertiesDialog);		
 	}
 	
@@ -257,11 +267,7 @@ public class OpenViewActionGroup extends ActionGroup {
 		return null;
 	}
 	
-	/**
-	 * Note: This method is for internal use only.
-	 * As specified in the class documentation, this class should not be subclassed by clients.
-	 */
-	protected boolean getShowProperties() {
-		return true;
-	}
+
+	
+	
 }

@@ -101,11 +101,8 @@ public class PackageExplorerActionProvider extends CommonActionProvider {
 			if (workbenchSite.getPart() != null && workbenchSite.getPart() instanceof IViewPart) {
 				IViewPart viewPart = (IViewPart) workbenchSite.getPart();
 				
-				fOpenViewGroup = new OpenViewActionGroup(viewPart, site.getStructuredViewer()) {
-					protected boolean getShowProperties() {
-						return false;
-					}
-				};
+				fOpenViewGroup = new OpenViewActionGroup(viewPart, site.getStructuredViewer());
+				fOpenViewGroup.containsOpenPropertiesAction(false);
 				fCCPGroup = new CCPActionGroup(viewPart);
 				fRefactorGroup = new RefactorActionGroup(viewPart);
 				fGenerateGroup = new GenerateActionGroup(viewPart);
