@@ -14,7 +14,7 @@
 R3.2 and R3.3 and
 how to migrate from the R3.2 API to the R3.3 API.
 </p>
-<table border="0" cellpadding="2" cellspacing="5" width="100%">
+<table border="0" cellpadding="2" cellspacing="5" width="100%" summary="Breaking API changes">
   <tbody>
     <tr>
       <td align="left" width="72%"> <font size="+3"><b>jdt ui -
@@ -29,7 +29,7 @@ Breaking API changes from R3.2 to R3.3</b></font> <br>
   </tbody>
 </table>
 <p> </p>
-<table border="0" cellpadding="2" cellspacing="5" width="100%">
+<table border="0" cellpadding="2" cellspacing="5" width="100%" summary="Non-breaking API changes">
   <tbody>
     <tr>
       <td align="left" width="72%"> <font size="+3"><b>jdt ui -
@@ -53,7 +53,32 @@ deprecated in favor of <code>createJarDescriptionWriter(OutputStream, String)</c
       <td>
         New API <code>org.eclipse.jdt.ui.JavaUI.openInEditor(IJavaElement, activate, reveal)</code>
       </td>
-    </tr>    
+    </tr>
+    <tr>
+      <td>
+        New API in <code>org.eclipse.jdt.ui.ITypeHierarchyViewPart</code>:
+        <ul>
+			<li>showMembersInHierarchy(boolean)</li>
+			<li>isShowMembersInHierarchy()</li>
+			<li>showQualifiedTypeNames(boolean)</li>
+			<li>isQualifiedTypeNamesEnabled()</li>
+			<li>isLinkingEnabled()</li>
+			<li>setLinkingEnabled(boolean)</li>
+			<li>setViewLayout(int)</li>
+			<li>getViewLayout()</li>
+			<li>setHierarchyMode(int)</li>
+			<li>getHierarchyMode()</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        New API in <code>org.eclipse.jdt.ui.actions.OpenViewActionGroup</code>:
+        <ul>
+			<li>containsOpenPropertiesAction(boolean)</li>
+        </ul>
+      </td>
+    </tr>      
   </tbody>
 </table>
 <p> </p>
