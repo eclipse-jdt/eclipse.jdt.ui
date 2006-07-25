@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.SWT;
@@ -22,6 +25,7 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
@@ -29,6 +33,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
@@ -202,10 +207,10 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 */
 	private IInformationControlCreator fCreator;
 	/**
-	 * The URL of the style sheet (css).
-	 * @since 3.2
+	 * The CSS used to format javadoc information.
+	 * @since 3.3
 	 */
-	private URL fStyleSheetURL;	
+	private static String fgCSSStyles;	
 
 	protected AbstractJavaCompletionProposal() {
 	}
@@ -436,18 +441,8 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
-		if (getProposalInfo() != null) {
-			String info= getProposalInfo().getInfo(null);
-			if (info != null && info.length() > 0) {
-				StringBuffer buffer= new StringBuffer();
-				HTMLPrinter.insertPageProlog(buffer, 0, getStyleSheetURL());
-				buffer.append(info);
-				HTMLPrinter.addPageEpilog(buffer);
-				info= buffer.toString();
-			}
-			return info;
-		}
-		return null;
+		Object info= getAdditionalProposalInfo(new NullProgressMonitor());
+		return info == null ? (String) info : info.toString();
 	}
 	
 	/*
@@ -458,7 +453,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			String info= getProposalInfo().getInfo(monitor);
 			if (info != null && info.length() > 0) {
 				StringBuffer buffer= new StringBuffer();
-				HTMLPrinter.insertPageProlog(buffer, 0, getStyleSheetURL());
+				HTMLPrinter.insertPageProlog(buffer, 0, getCSSStyles());
 				buffer.append(info);
 				HTMLPrinter.addPageEpilog(buffer);
 				info= buffer.toString();
@@ -469,24 +464,37 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	}
 	
 	/**
-	 * Returns the style sheet URL.
+	 * Returns the style information for displaying HTML (Javadoc) content.
 	 *
-	 * @since 3.1
+	 * @since 3.3
 	 */
-	protected URL getStyleSheetURL() {
-		if (fStyleSheetURL == null) {
-
+	protected String getCSSStyles() {
+		if (fgCSSStyles == null) {
 			Bundle bundle= Platform.getBundle(JavaPlugin.getPluginId());
-			fStyleSheetURL= bundle.getEntry("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
-			if (fStyleSheetURL != null) {
+			URL url= bundle.getEntry("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
+			if (url != null) {
 				try {
-					fStyleSheetURL= FileLocator.toFileURL(fStyleSheetURL);
+					url= FileLocator.toFileURL(url);
+					BufferedReader reader= new BufferedReader(new InputStreamReader(url.openStream()));
+					StringBuffer buffer= new StringBuffer(200);
+					String line= reader.readLine();
+					while (line != null) {
+						buffer.append(line);
+						buffer.append('\n');
+						line= reader.readLine();
+					}
+					fgCSSStyles= buffer.toString();
 				} catch (IOException ex) {
 					JavaPlugin.log(ex);
 				}
 			}
 		}
-		return fStyleSheetURL;
+		String css= fgCSSStyles;
+		if (css != null) {
+			FontData fontData= JFaceResources.getFontRegistry().getFontData(PreferenceConstants.APPEARANCE_JAVADOC_FONT)[0];
+			css= HTMLPrinter.convertTopLevelFont(css, fontData);
+		}
+		return css;
 	}
 
 	/*

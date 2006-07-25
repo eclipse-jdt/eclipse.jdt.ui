@@ -49,6 +49,7 @@ import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
+import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
@@ -60,12 +61,6 @@ import org.osgi.framework.Bundle;
  * @since 2.1
  */
 public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHover, ITextHoverExtension {
-	/**
-	 * The symbolic font name for Java editors.
-	 * @since 3.3
-	 */
-	private static final String JDT_EDITOR_FONT= "org.eclipse.jdt.ui.editors.textfont"; //$NON-NLS-1$
-
 	/**
 	 * The style sheet (css).
 	 * @since 3.2
@@ -180,9 +175,8 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 			fgStyleSheet= loadStyleSheet();
 		String css= fgStyleSheet;
 		if (css != null) {
-			FontData fontData= JFaceResources.getFontRegistry().getFontData(JDT_EDITOR_FONT)[0];
-			int height= fontData.getHeight();
-			css= css.replaceFirst("(html\\s*\\{.*font-size:\\s*)\\d+(pt\\;?)", "$1" + height + "$2"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			FontData fontData= JFaceResources.getFontRegistry().getFontData(PreferenceConstants.APPEARANCE_JAVADOC_FONT)[0];
+			css= HTMLPrinter.convertTopLevelFont(css, fontData);
 		}
 
 		return css;

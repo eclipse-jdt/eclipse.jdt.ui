@@ -1,7 +1,6 @@
 /* Font definitions */
-html         {font-family: sans-serif; font-size: 12pt; }
-body         { font-size: 0.95em; }
-pre          { font-family: monospace; font-size: 1em }
+html         { font-family: sans-serif; font-size: 9pt; font-style: normal; font-weight: normal; }
+pre          { font-family: monospace; }
 h1           { font-size: 1.8em; }	
 h2           { font-size: 1.2em; }
 h3           { font-size: 1.1em; }

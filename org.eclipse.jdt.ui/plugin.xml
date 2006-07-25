@@ -1006,6 +1006,15 @@
             %propertiesFileEditorFontDefintion.description
          </description>
       </fontDefinition>
+      <fontDefinition
+            label="%javadocDisplayFontDefiniton.label"
+            defaultsTo="org.eclipse.jface.dialogfont"
+            categoryId="org.eclipse.jdt.ui.presentation"
+            id="org.eclipse.jdt.ui.javadocfont">
+         <description>
+            %javadocDisplayFontDefiniton.description
+         </description>
+      </fontDefinition>
       <colorDefinition
             label="%JavadocViewBackgroundColor.label"
             categoryId="org.eclipse.jdt.ui.presentation"

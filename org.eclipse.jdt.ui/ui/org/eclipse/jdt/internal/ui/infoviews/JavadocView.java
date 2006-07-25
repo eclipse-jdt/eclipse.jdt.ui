@@ -79,6 +79,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavadocContentAccess;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -98,12 +99,6 @@ import org.osgi.framework.Bundle;
  * @since 3.0
  */
 public class JavadocView extends AbstractInfoView {
-
-	/**
-	 * The symbolic font name for Java editors.
-	 * @since 3.3
-	 */
-	private static final String JDT_EDITOR_FONT= "org.eclipse.jdt.ui.editors.textfont"; //$NON-NLS-1$
 
 	/**
 	 * Preference key for the preference whether to show a dialog
@@ -339,7 +334,7 @@ public class JavadocView extends AbstractInfoView {
 	private void listenForFontChanges() {
 		fFontListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
-				if (JDT_EDITOR_FONT.equals(event.getProperty())) {
+				if (PreferenceConstants.APPEARANCE_JAVADOC_FONT.equals(event.getProperty())) {
 					fgStyleSheetLoaded= false;
 					// trigger reloading, but make sure other listeners have already run, so that
 					// the style sheet gets reloaded only once.
@@ -384,11 +379,8 @@ public class JavadocView extends AbstractInfoView {
 				line= reader.readLine();
 			}
 
-			// replace top-level font-size in points by the Java editor font size
-			String css= buffer.toString();
-			FontData fontData= JFaceResources.getFontRegistry().getFontData(JDT_EDITOR_FONT)[0];
-			int height= fontData.getHeight();
-			return css.replaceFirst("(html\\s*\\{.*font-size:\\s*)\\d+(pt\\;?)", "$1" + height + "$2"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			FontData fontData= JFaceResources.getFontRegistry().getFontData(PreferenceConstants.APPEARANCE_JAVADOC_FONT)[0];
+			return HTMLPrinter.convertTopLevelFont(buffer.toString(), fontData);
 		} catch (IOException ex) {
 			JavaPlugin.log(ex);
 			return null;
