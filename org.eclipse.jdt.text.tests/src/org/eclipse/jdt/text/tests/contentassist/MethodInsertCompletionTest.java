@@ -67,12 +67,6 @@ public class MethodInsertCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyProposal("e|foobar", "equals(", "equals(|)foobar");
 	}
 	
-	public void testFieldThisQualification() throws Exception {
-		addMembers("private String qqqString;");
-		addLocalVariables("String qqqString;");
-		assertMethodBodyProposal("q|", "this.qqqString", "this.qqqString|");
-	}
-	
 	/* camel case */
 	
 	public void testCamelCase() throws Exception {

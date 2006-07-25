@@ -201,13 +201,6 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
         verify(string, expected);
 	}
 
-    public void test20(){
-    	//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=94189
-    	String string= "/**This is {@code}{@literal <literal>} {@code & code}.*/"; // $NON-NLS-1$
-    	String expected= "This is <code></code>&lt;literal&gt; <code>&amp; code</code>."; //$NON-NLS-1$
-    	verify(string, expected);
-    }
-    
 }
 
 class MockBuffer implements IBuffer{
