@@ -30,16 +30,21 @@ import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -95,6 +100,12 @@ import org.osgi.framework.Bundle;
 public class JavadocView extends AbstractInfoView {
 
 	/**
+	 * The symbolic font name for Java editors.
+	 * @since 3.3
+	 */
+	private static final String JDT_EDITOR_FONT= "org.eclipse.jdt.ui.editors.textfont"; //$NON-NLS-1$
+
+	/**
 	 * Preference key for the preference whether to show a dialog
 	 * when the SWT Browser widget is not available.
 	 * @since 3.0
@@ -122,11 +133,21 @@ public class JavadocView extends AbstractInfoView {
 	private SelectAllAction fSelectAllAction;
 	/** The style sheet (css) */
 	private static String fgStyleSheet;
+	/**
+	 * <code>true</code> once the style sheet has been loaded.
+	 * @since 3.3
+	 */
+	private static boolean fgStyleSheetLoaded= false;
 
 	/** The Browser widget */
 	private boolean fIsUsingBrowserWidget;
 
 	private RGB fBackgroundColorRGB;
+	/**
+	 * The font listener.
+	 * @since 3.3
+	 */
+	private IPropertyChangeListener fFontListener;
 
 	
 	/**
@@ -306,15 +327,52 @@ public class JavadocView extends AbstractInfoView {
 		}
 
 		initStyleSheet();
+		listenForFontChanges();
 		getViewSite().setSelectionProvider(new SelectionProvider(getControl()));
 	}
 
+	/**
+	 * Registers a listener for the Java editor font.
+	 * 
+	 * @since 3.3
+	 */
+	private void listenForFontChanges() {
+		fFontListener= new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				if (JDT_EDITOR_FONT.equals(event.getProperty())) {
+					fgStyleSheetLoaded= false;
+					// trigger reloading, but make sure other listeners have already run, so that
+					// the style sheet gets reloaded only once.
+					final Display display= getSite().getPage().getWorkbenchWindow().getWorkbench().getDisplay();
+					if (!display.isDisposed()) {
+						display.asyncExec(new Runnable() {
+							public void run() {
+								if (!display.isDisposed()) {
+									initStyleSheet();
+									refresh();
+								}
+							}
+						});
+					}
+				}
+			}
+		};
+		JFaceResources.getFontRegistry().addListener(fFontListener);
+	}
+	
 	private static void initStyleSheet() {
+		if (fgStyleSheetLoaded)
+			return;
+		fgStyleSheetLoaded= true;
+		fgStyleSheet= loadStyleSheet();
+	}
+	
+	private static String loadStyleSheet() {
 		Bundle bundle= Platform.getBundle(JavaPlugin.getPluginId());
 		URL styleSheetURL= bundle.getEntry("/JavadocViewStyleSheet.css"); //$NON-NLS-1$
 		if (styleSheetURL == null)
-			return;
-		
+			return null;
+
 		try {
 			styleSheetURL= FileLocator.toFileURL(styleSheetURL);
 			BufferedReader reader= new BufferedReader(new InputStreamReader(styleSheetURL.openStream()));
@@ -325,11 +383,16 @@ public class JavadocView extends AbstractInfoView {
 				buffer.append('\n');
 				line= reader.readLine();
 			}
-			fgStyleSheet= buffer.toString();
+
+			// replace top-level font-size in points by the Java editor font size
+			String css= buffer.toString();
+			FontData fontData= JFaceResources.getFontRegistry().getFontData(JDT_EDITOR_FONT)[0];
+			int height= fontData.getHeight();
+			return css.replaceFirst("(html\\s*\\{.*font-size:\\s*)\\d+(pt\\;?)", "$1" + height + "$2"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		} catch (IOException ex) {
 			JavaPlugin.log(ex);
+			return null;
 		}
-		
 	}
 
 	/*
@@ -377,15 +440,23 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	protected void setBackground(Color color) {
 		getControl().setBackground(color);
-
-		// Apply style sheet
 		fBackgroundColorRGB= color.getRGB();
-		if (getInput() == null) {
+		refresh();
+	}
+
+	/**
+	 * Refreshes the view.
+	 *
+	 * @since 3.3
+	 */
+	private void refresh() {
+		IJavaElement input= getInput();
+		if (input == null) {
 			StringBuffer buffer= new StringBuffer(""); //$NON-NLS-1$
 			HTMLPrinter.insertPageProlog(buffer, 0, fBackgroundColorRGB, fgStyleSheet);
 			setInput(buffer.toString());
 		} else {
-			setInput(computeInput(getInput()));
+			setInput(computeInput(input));
 		}
 	}
 	
@@ -403,6 +474,10 @@ public class JavadocView extends AbstractInfoView {
 	protected void internalDispose() {
 		fText= null;
 		fBrowser= null;
+		if (fFontListener != null) {
+			JFaceResources.getFontRegistry().removeListener(fFontListener);
+			fFontListener= null;
+		}
 	}
 
 	/*

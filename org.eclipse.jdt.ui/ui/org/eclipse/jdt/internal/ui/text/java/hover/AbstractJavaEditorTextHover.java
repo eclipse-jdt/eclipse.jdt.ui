@@ -19,7 +19,10 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IInformationControl;
@@ -57,6 +60,11 @@ import org.osgi.framework.Bundle;
  * @since 2.1
  */
 public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHover, ITextHoverExtension {
+	/**
+	 * The symbolic font name for Java editors.
+	 * @since 3.3
+	 */
+	private static final String JDT_EDITOR_FONT= "org.eclipse.jdt.ui.editors.textfont"; //$NON-NLS-1$
 
 	/**
 	 * The style sheet (css).
@@ -164,37 +172,42 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 		if (keySequence == null)
 			return null;
 		
-		return Messages.format(JavaHoverMessages.JavaTextHover_makeStickyHint, keySequence == null ? "" : keySequence); //$NON-NLS-1$
+		return Messages.format(JavaHoverMessages.JavaTextHover_makeStickyHint, keySequence);
 	}
 
-	/**
-	 * Returns the style sheet.
-	 *
-	 * @since 3.2
-	 */
 	protected static String getStyleSheet() {
-		if (fgStyleSheet == null) {
-			Bundle bundle= Platform.getBundle(JavaPlugin.getPluginId());
-			URL styleSheetURL= bundle.getEntry("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
-			if (styleSheetURL != null) {
-				try {
-					styleSheetURL= FileLocator.toFileURL(styleSheetURL);
-					BufferedReader reader= new BufferedReader(new InputStreamReader(styleSheetURL.openStream()));
-					StringBuffer buffer= new StringBuffer(200);
-					String line= reader.readLine();
-					while (line != null) {
-						buffer.append(line);
-						buffer.append('\n');
-						line= reader.readLine();
-					}
-					fgStyleSheet= buffer.toString();
-				} catch (IOException ex) {
-					JavaPlugin.log(ex);
-					fgStyleSheet= ""; //$NON-NLS-1$
-				}
-			}
+		if (fgStyleSheet == null)
+			fgStyleSheet= loadStyleSheet();
+		String css= fgStyleSheet;
+		if (css != null) {
+			FontData fontData= JFaceResources.getFontRegistry().getFontData(JDT_EDITOR_FONT)[0];
+			int height= fontData.getHeight();
+			css= css.replaceFirst("(html\\s*\\{.*font-size:\\s*)\\d+(pt\\;?)", "$1" + height + "$2"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
-		return fgStyleSheet;
+
+		return css;
 	}
 	
+	private static String loadStyleSheet() {
+		Bundle bundle= Platform.getBundle(JavaPlugin.getPluginId());
+		URL styleSheetURL= bundle.getEntry("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
+		if (styleSheetURL != null) {
+			try {
+				styleSheetURL= FileLocator.toFileURL(styleSheetURL);
+				BufferedReader reader= new BufferedReader(new InputStreamReader(styleSheetURL.openStream()));
+				StringBuffer buffer= new StringBuffer(200);
+				String line= reader.readLine();
+				while (line != null) {
+					buffer.append(line);
+					buffer.append('\n');
+					line= reader.readLine();
+				}
+				return buffer.toString();
+			} catch (IOException ex) {
+				JavaPlugin.log(ex);
+				return ""; //$NON-NLS-1$
+			}
+		}
+		return null;
+	}
 }
