@@ -5072,7 +5072,7 @@
                label="%ConfigClasspathContainer.label"
                tooltip="%ConfigClasspathContainer.tooltip"
                class="org.eclipse.jdt.internal.ui.actions.ConfigureContainerAction"
-               menubarPath="properties"
+               menubarPath="additions"
                enablesFor="1"
                id="ConfigureContainer">
          </action>
