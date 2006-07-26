@@ -645,6 +645,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 			version+= ", from reconciler"; //$NON-NLS-1$
 		} else if (getCurrentInputKind() == ASTInputKindAction.USE_CACHE) {	
 			version+= ", from ASTProvider"; //$NON-NLS-1$
+		} else if (getCurrentInputKind() == ASTInputKindAction.USE_FOCAL) {	
+			version+= ", using focal position"; //$NON-NLS-1$
 		}
 		TreeInfoCollector collector= new TreeInfoCollector(root);
 
