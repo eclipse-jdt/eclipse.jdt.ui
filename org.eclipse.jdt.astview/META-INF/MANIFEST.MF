@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.astview; singleton:=true
-Bundle-Version: 1.1.2
+Bundle-Version: 1.1.3
 Bundle-Activator: org.eclipse.jdt.astview.ASTViewPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
