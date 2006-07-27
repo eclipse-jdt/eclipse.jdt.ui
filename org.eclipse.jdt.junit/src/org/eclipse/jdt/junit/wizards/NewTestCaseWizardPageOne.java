@@ -552,15 +552,17 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		if (root != null) {
 			try {
 				IJavaProject project= root.getJavaProject();
-				if (isJUnit4()) {
-					if (!JUnitStubUtility.is50OrHigher(project)) {
-						message= WizardMessages.NewTestCaseWizardPageOne_linkedtext_java5required;
-					} else if (project.findType(JUnitPlugin.JUNIT4_ANNOTATION_NAME) == null) {
-						message= Messages.format(WizardMessages.NewTestCaseWizardPageOne_linkedtext_junit4_notonbuildpath, project.getElementName());
-					}
-				} else {			
-					if (project.findType(JUnitPlugin.TEST_SUPERCLASS_NAME) == null) {
-						message= Messages.format(WizardMessages.NewTestCaseWizardPageOne_linkedtext_junit3_notonbuildpath, project.getElementName());
+				if (project.exists()) {
+					if (isJUnit4()) {
+						if (!JUnitStubUtility.is50OrHigher(project)) {
+							message= WizardMessages.NewTestCaseWizardPageOne_linkedtext_java5required;
+						} else if (project.findType(JUnitPlugin.JUNIT4_ANNOTATION_NAME) == null) {
+							message= Messages.format(WizardMessages.NewTestCaseWizardPageOne_linkedtext_junit4_notonbuildpath, project.getElementName());
+						}
+					} else {			
+						if (project.findType(JUnitPlugin.TEST_SUPERCLASS_NAME) == null) {
+							message= Messages.format(WizardMessages.NewTestCaseWizardPageOne_linkedtext_junit3_notonbuildpath, project.getElementName());
+						}
 					}
 				}
 			} catch (JavaModelException e) {
@@ -1054,19 +1056,21 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		if (root != null) {
 			try {
 				IJavaProject project= root.getJavaProject();
-				if (isJUnit4()) {
-					if (!JUnitStubUtility.is50OrHigher(project)) {
-						status.setError(WizardMessages.NewTestCaseWizardPageOne_error_java5required);
-						return status;
-					}
-					if (project.findType(JUnitPlugin.JUNIT4_ANNOTATION_NAME) == null) {
-						status.setWarning(WizardMessages.NewTestCaseWizardPageOne__error_junit4NotOnbuildpath); 
-						return status;
-					}
-				} else {			
-					if (project.findType(JUnitPlugin.TEST_SUPERCLASS_NAME) == null) {
-						status.setWarning(WizardMessages.NewTestCaseWizardPageOne_error_junitNotOnbuildpath); 
-						return status;
+				if (project.exists()) {
+					if (isJUnit4()) {
+						if (!JUnitStubUtility.is50OrHigher(project)) {
+							status.setError(WizardMessages.NewTestCaseWizardPageOne_error_java5required);
+							return status;
+						}
+						if (project.findType(JUnitPlugin.JUNIT4_ANNOTATION_NAME) == null) {
+							status.setWarning(WizardMessages.NewTestCaseWizardPageOne__error_junit4NotOnbuildpath); 
+							return status;
+						}
+					} else {			
+						if (project.findType(JUnitPlugin.TEST_SUPERCLASS_NAME) == null) {
+							status.setWarning(WizardMessages.NewTestCaseWizardPageOne_error_junitNotOnbuildpath); 
+							return status;
+						}
 					}
 				}
 			} catch (JavaModelException e) {
@@ -1120,6 +1124,9 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	}
 
 	private IType resolveClassNameToType(IJavaProject jproject, IPackageFragment pack, String classToTestName) throws JavaModelException {
+		if (!jproject.exists()) {
+			return null;
+		}
 		
 		IType type= jproject.findType(classToTestName);
 		
