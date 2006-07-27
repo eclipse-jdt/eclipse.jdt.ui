@@ -43,6 +43,8 @@ public class AbstractRefactoringTestSetup extends TestSetup {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "0");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
+		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, String.valueOf(9999));
+
 		JavaCore.setOptions(options);
 		TestOptions.initializeCodeGenerationOptions();
 		JavaPlugin.getDefault().getCodeTemplateStore().load();		
