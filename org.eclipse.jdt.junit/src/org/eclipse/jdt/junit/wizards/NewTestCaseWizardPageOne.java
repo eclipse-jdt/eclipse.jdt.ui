@@ -1120,6 +1120,9 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	}
 
 	private IType resolveClassNameToType(IJavaProject jproject, IPackageFragment pack, String classToTestName) throws JavaModelException {
+		if (!jproject.exists()) {
+			return null;
+		}
 		
 		IType type= jproject.findType(classToTestName);
 		
