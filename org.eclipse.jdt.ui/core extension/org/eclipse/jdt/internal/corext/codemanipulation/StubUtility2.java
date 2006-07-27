@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -123,7 +124,7 @@ public final class StubUtility2 {
 				varDecl= (SingleVariableDeclaration) iterator.next();
 				invocation.arguments().add(ast.newSimpleName(varDecl.getName().getIdentifier()));
 			}
-			bodyStatement= ASTNodes.asFormattedString(invocation, 0, delimiter);
+			bodyStatement= ASTNodes.asFormattedString(invocation, 0, delimiter, unit.getJavaProject().getOptions(true));
 		}
 
 		if (todo) {
@@ -403,6 +404,7 @@ public final class StubUtility2 {
 
 		String delimiter= StubUtility.getLineDelimiterUsed(unit);
 		if (!deferred) {
+			Map options= unit.getJavaProject().getOptions(true);
 
 			Block body= ast.newBlock();
 			decl.setBody(body);
@@ -414,7 +416,7 @@ public final class StubUtility2 {
 				if (expression != null) {
 					ReturnStatement returnStatement= ast.newReturnStatement();
 					returnStatement.setExpression(expression);
-					bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter);
+					bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter, options);
 				}
 			} else {
 				SuperMethodInvocation invocation= ast.newSuperMethodInvocation();
@@ -427,11 +429,11 @@ public final class StubUtility2 {
 				Expression expression= invocation;
 				Type returnType= decl.getReturnType2();
 				if (returnType != null && (returnType instanceof PrimitiveType) && ((PrimitiveType) returnType).getPrimitiveTypeCode().equals(PrimitiveType.VOID)) {
-					bodyStatement= ASTNodes.asFormattedString(ast.newExpressionStatement(expression), 0, delimiter);
+					bodyStatement= ASTNodes.asFormattedString(ast.newExpressionStatement(expression), 0, delimiter, options);
 				} else {
 					ReturnStatement returnStatement= ast.newReturnStatement();
 					returnStatement.setExpression(expression);
-					bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter);
+					bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter, options);
 				}
 			}
 
@@ -491,7 +493,8 @@ public final class StubUtility2 {
 
 		String delimiter= StubUtility.getLineDelimiterUsed(unit);
 		if (!deferred) {
-
+			Map options= unit.getJavaProject().getOptions(true);
+			
 			Block body= ast.newBlock();
 			decl.setBody(body);
 
@@ -502,7 +505,7 @@ public final class StubUtility2 {
 				if (expression != null) {
 					ReturnStatement returnStatement= ast.newReturnStatement();
 					returnStatement.setExpression(expression);
-					bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter);
+					bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter, options);
 				}
 			} else {
 				SuperMethodInvocation invocation= ast.newSuperMethodInvocation();
@@ -515,11 +518,11 @@ public final class StubUtility2 {
 				Expression expression= invocation;
 				Type returnType= decl.getReturnType2();
 				if (returnType instanceof PrimitiveType && ((PrimitiveType) returnType).getPrimitiveTypeCode().equals(PrimitiveType.VOID)) {
-					bodyStatement= ASTNodes.asFormattedString(ast.newExpressionStatement(expression), 0, delimiter);
+					bodyStatement= ASTNodes.asFormattedString(ast.newExpressionStatement(expression), 0, delimiter, options);
 				} else {
 					ReturnStatement returnStatement= ast.newReturnStatement();
 					returnStatement.setExpression(expression);
-					bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter);
+					bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter, options);
 				}
 			}
 

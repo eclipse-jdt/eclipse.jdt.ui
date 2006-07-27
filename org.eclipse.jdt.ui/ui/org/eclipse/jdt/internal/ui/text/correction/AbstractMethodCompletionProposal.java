@@ -141,7 +141,7 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 			if (!fSenderBinding.isInterface() && returnType != null) {
 				ReturnStatement returnStatement= ast.newReturnStatement();
 				returnStatement.setExpression(ASTNodeFactory.newDefaultExpression(ast, returnType, 0));
-				bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, String.valueOf('\n'));
+				bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, String.valueOf('\n'), getCompilationUnit().getJavaProject().getOptions(true));
 			}
 		}
 		

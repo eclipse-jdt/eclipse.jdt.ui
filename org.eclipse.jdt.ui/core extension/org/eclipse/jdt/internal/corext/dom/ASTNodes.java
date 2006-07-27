@@ -18,6 +18,7 @@ package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.text.edits.TextEdit;
 
@@ -104,10 +105,10 @@ public class ASTNodes {
 		node.accept(flattener);
 		return flattener.getResult();
 	}
-	
-	public static String asFormattedString(ASTNode node, int indent, String lineDelim) {
+		
+	public static String asFormattedString(ASTNode node, int indent, String lineDelim, Map options) {
 		String unformatted= asString(node);
-		TextEdit edit= CodeFormatterUtil.format2(node, unformatted, indent, lineDelim, null);
+		TextEdit edit= CodeFormatterUtil.format2(node, unformatted, indent, lineDelim, options);
 		if (edit != null) {
 			return CodeFormatterUtil.evaluateFormatterEdit(unformatted, edit, null);
 		}
