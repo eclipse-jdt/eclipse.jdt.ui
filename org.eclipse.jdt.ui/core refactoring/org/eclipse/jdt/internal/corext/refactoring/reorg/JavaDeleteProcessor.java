@@ -87,6 +87,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 	private static final String ATTRIBUTE_SUGGEST_ACCESSORS= "accessors"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DELETE_SUBPACKAGES= "subPackages"; //$NON-NLS-1$
 
+	private boolean fAccessorsDeleted;
 	private boolean fWasCanceled;
 	private boolean fSuggestGetterSetterDeletion;
 	private Object[] fElements;
@@ -342,7 +343,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 	 */
 	private void recalculateElementsToDelete() throws CoreException {
 		//the sequence is critical here
-		
+		fAccessorsDeleted= false;
 		if (fDeleteSubPackages) /* add subpackages first, to allow removing elements with parents in selection etc. */
 			addSubPackages();
 		
@@ -631,7 +632,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			if (fDeleteSubPackages)
 				comment.addSetting(RefactoringCoreMessages.JavaDeleteProcessor_delete_subpackages);
-			if (fSuggestGetterSetterDeletion)
+		 	if (fAccessorsDeleted)
 				comment.addSetting(RefactoringCoreMessages.JavaDeleteProcessor_delete_accessors);
 			final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(IJavaRefactorings.DELETE, project, description, comment.asString(), arguments, flags);
 			arguments.put(ATTRIBUTE_DELETE_SUBPACKAGES, Boolean.valueOf(fDeleteSubPackages).toString());
@@ -677,8 +678,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 	private void removeFromSetToDelete(IJavaElement[] elementsToNotDelete) {
 		fJavaElements= ReorgUtils.setMinus(fJavaElements, elementsToNotDelete);
 	}
-	
-	//--- getter setter related methods
+
 	private void addGettersSetters() throws JavaModelException {
 		IField[] fields= getFields(fJavaElements);
 		if (fields.length == 0)
@@ -690,7 +690,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 		removeAlreadySelectedMethods(getterSetterMapping);
 		if (getterSetterMapping.isEmpty())
 			return;
-			
+		fAccessorsDeleted= true;
 		List gettersSettersToAdd= getGettersSettersToDelete(getterSetterMapping);
 		addToSetToDelete((IMethod[]) gettersSettersToAdd.toArray(new IMethod[gettersSettersToAdd.size()]));
 	}
