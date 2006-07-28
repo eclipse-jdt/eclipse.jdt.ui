@@ -20,11 +20,9 @@ import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.navigator.ICommonViewerWorkbenchSite;
 import org.eclipse.ui.navigator.IExtensionStateModel;
 
-import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
-import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.navigator.IExtensionStateConstants.Values;
@@ -39,16 +37,10 @@ public class PackageExplorerActionProvider extends CommonActionProvider {
 	private static final String TAG_LAYOUT = "org.eclipse.jdt.internal.ui.navigator.layout"; //$NON-NLS-1$
 
 	private CommonLayoutActionGroup fLayoutActionGroup;
-
-	private boolean fHasFilledViewMenu = false;
-
+ 
 	private IExtensionStateModel fStateModel;
 	
-	private OpenViewActionGroup fOpenViewGroup;
-
-	private CCPActionGroup fCCPGroup;
-
-	private RefactorActionGroup fRefactorGroup;
+	private OpenViewActionGroup fOpenViewGroup; 
 
 	private JavaSearchActionGroup fSearchGroup;
 
@@ -57,6 +49,7 @@ public class PackageExplorerActionProvider extends CommonActionProvider {
 	private GenerateActionGroup fGenerateGroup;
 
 	private boolean fInViewPart = false;
+	private boolean fHasFilledViewMenu = false;
 
 	public void fillActionBars(IActionBars actionBars) {
 		if (!fHasFilledViewMenu) {
@@ -64,12 +57,9 @@ public class PackageExplorerActionProvider extends CommonActionProvider {
 			fHasFilledViewMenu = true;
 		}
 		if (fInViewPart) {
-			fOpenViewGroup.fillActionBars(actionBars);
-			fCCPGroup.fillActionBars(actionBars);
+			fOpenViewGroup.fillActionBars(actionBars); 
 			fBuildPathGroup.fillActionBars(actionBars);
-			fGenerateGroup.fillActionBars(actionBars);
-			fRefactorGroup.fillActionBars(actionBars);
-			fRefactorGroup.retargetFileMenuActions(actionBars);
+			fGenerateGroup.fillActionBars(actionBars); 
 			fSearchGroup.fillActionBars(actionBars);
 		}
 
@@ -78,11 +68,9 @@ public class PackageExplorerActionProvider extends CommonActionProvider {
 	public void fillContextMenu(IMenuManager menu) {
 
 		if (fInViewPart) {
-			fOpenViewGroup.fillContextMenu(menu);
-			fCCPGroup.fillContextMenu(menu);
+			fOpenViewGroup.fillContextMenu(menu); 
 			fBuildPathGroup.fillContextMenu(menu);
-			fGenerateGroup.fillContextMenu(menu);
-			fRefactorGroup.fillContextMenu(menu);
+			fGenerateGroup.fillContextMenu(menu); 
 			fSearchGroup.fillContextMenu(menu);
 		}
 	}
@@ -105,9 +93,7 @@ public class PackageExplorerActionProvider extends CommonActionProvider {
 					protected boolean getShowProperties() {
 						return false;
 					}
-				};
-				fCCPGroup = new CCPActionGroup(viewPart);
-				fRefactorGroup = new RefactorActionGroup(viewPart);
+				}; 
 				fGenerateGroup = new GenerateActionGroup(viewPart);
 				fSearchGroup = new JavaSearchActionGroup(viewPart);
 				fBuildPathGroup = new GenerateBuildPathActionGroup(viewPart);
@@ -122,9 +108,7 @@ public class PackageExplorerActionProvider extends CommonActionProvider {
 	public void setContext(ActionContext context) {
 		super.setContext(context);
 		if (fInViewPart) {
-			fOpenViewGroup.setContext(context);
-			fCCPGroup.setContext(context);
-			fRefactorGroup.setContext(context);
+			fOpenViewGroup.setContext(context); 
 			fGenerateGroup.setContext(context);
 			fSearchGroup.setContext(context);
 			fBuildPathGroup.setContext(context);
