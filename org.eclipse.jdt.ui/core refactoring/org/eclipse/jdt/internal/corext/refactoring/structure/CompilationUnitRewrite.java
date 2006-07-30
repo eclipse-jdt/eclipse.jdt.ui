@@ -207,10 +207,11 @@ public class CompilationUnitRewrite {
 				}
 				if (!isEmptyEdit(rewriteEdit)) {
 					multiEdit.addChild(rewriteEdit);
-					for (Iterator iter= fTextEditGroups.iterator(); iter.hasNext();) {
-						TextEditGroup group= (TextEditGroup) iter.next();
-						if (generateGroups)
+					if (generateGroups) {
+						for (Iterator iter= fTextEditGroups.iterator(); iter.hasNext();) {
+							TextEditGroup group= (TextEditGroup) iter.next();
 							cuChange.addTextEditGroup(group);
+						}
 					}
 				}
 			}
