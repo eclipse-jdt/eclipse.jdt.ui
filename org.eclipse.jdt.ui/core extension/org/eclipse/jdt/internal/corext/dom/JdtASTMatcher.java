@@ -31,7 +31,7 @@ public class JdtASTMatcher extends ASTMatcher {
 				return false;
 			}
 		} else {
-			if (! Bindings.equals(nodeBinding, otherBinding)) { // workaround for bug 104293 (see bug 108115)
+			if (nodeBinding != otherBinding) {
 				return false;
 			}
 		}
