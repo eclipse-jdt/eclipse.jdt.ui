@@ -8,6 +8,6 @@ class A {
 	 */
 	protected void runTest() throws Throwable {
 		String strong= fName+"\" not found";
-		System.out.println("Method \""+strong);
+		System.out.println("Method \"" + strong);
 	}
 }

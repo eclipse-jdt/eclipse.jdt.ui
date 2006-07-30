@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom.fragments;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 /**
  * An IASTFragment represents 'part' of an AST, but
@@ -74,4 +77,13 @@ public interface IASTFragment {
 	 * @return int		The source length.
 	 */
 	public int getLength();
+
+	/**
+	 * Replaces this fragment with the given replacement node.
+	 * 
+	 * @param rewrite an ASTRewrite
+	 * @param replacement replacement for this fragment
+	 * @param textEditGroup a description or <code>null</code>
+	 */
+	public void replace(ASTRewrite rewrite, ASTNode replacement, TextEditGroup textEditGroup);
 }

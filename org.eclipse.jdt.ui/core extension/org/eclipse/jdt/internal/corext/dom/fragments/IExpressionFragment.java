@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom.fragments;
 
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 /**
  * Represents a fragment (@see IASTFragment) for which the node
@@ -27,4 +29,14 @@ public interface IExpressionFragment extends IASTFragment {
 	 * @return Expression	The node to which this fragment maps.
 	 */
 	public Expression getAssociatedExpression();
+
+	/**
+	 * Creates a copy of this IExpressionFragment.
+	 * 
+	 * @param rewrite an ASTRewrite
+	 * @return a copy of this IExpressionFragment, ready for use in the given
+	 *         rewrite
+	 * @throws JavaModelException 
+	 */
+	public Expression createCopyTarget(ASTRewrite rewrite) throws JavaModelException;
 }

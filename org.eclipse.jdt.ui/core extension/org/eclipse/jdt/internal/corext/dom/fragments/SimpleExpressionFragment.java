@@ -11,14 +11,18 @@
 package org.eclipse.jdt.internal.corext.dom.fragments;
 
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 class SimpleExpressionFragment extends SimpleFragment implements IExpressionFragment {
 	SimpleExpressionFragment(Expression node) {
-		super(node);	
+		super(node);
 	}
-	
+
 	public Expression getAssociatedExpression() {
 		return (Expression) getAssociatedNode();
 	}
-	
+
+	public Expression createCopyTarget(ASTRewrite rewrite) {
+		return (Expression) rewrite.createCopyTarget(getAssociatedNode());
+	}
 }

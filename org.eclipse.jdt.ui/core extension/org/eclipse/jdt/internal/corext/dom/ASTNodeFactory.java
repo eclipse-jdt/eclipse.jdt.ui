@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
@@ -27,6 +28,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 
 public class ASTNodeFactory {
 
@@ -196,6 +198,18 @@ public class ASTNodeFactory {
 			}
 		}
 		return res;
+	}
+
+	public static Expression newInfixExpression(AST ast, Operator operator, ArrayList/*<Expression>*/ operands) {
+		if (operands.size() == 1)
+			return (Expression) operands.get(0);
+		
+		InfixExpression result= ast.newInfixExpression();
+		result.setOperator(operator);
+		result.setLeftOperand((Expression) operands.get(0));
+		result.setRightOperand((Expression) operands.get(1));
+		result.extendedOperands().addAll(operands.subList(2, operands.size()));
+		return result;
 	}
 	
 }

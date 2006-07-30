@@ -6,6 +6,6 @@ class A {
 	private void test() {
         String fdFontName= null;
         String newVariable= "/tmp"+fdFontName+".cff";
-		String tmpFileName = newVariable+".txt";
+		String tmpFileName = newVariable + ".txt";
     }	
 }
