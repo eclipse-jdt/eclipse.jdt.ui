@@ -68,6 +68,7 @@ import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -759,6 +760,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 						fNoSourceTextWidget.copy();
 					}
 				};
+				copyAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.COPY);
 				setAction(ITextEditorActionConstants.COPY, copyAction);
 				fNoSourceTextWidget.addSelectionListener(new SelectionListener() {
 					public void widgetSelected(SelectionEvent e) {
