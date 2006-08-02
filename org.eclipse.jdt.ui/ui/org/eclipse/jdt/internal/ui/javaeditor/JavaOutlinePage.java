@@ -146,7 +146,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			 * The element change listener of the java outline viewer.
 			 * @see IElementChangedListener
 			 */
-			class ElementChangedListener implements IElementChangedListener {
+			protected class ElementChangedListener implements IElementChangedListener {
 
 				public void elementChanged(final ElementChangedEvent e) {
 
@@ -242,7 +242,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			 * an IClassFile
 			 * @see ITreeContentProvider
 			 */
-			class ChildrenProvider implements ITreeContentProvider {
+			protected class ChildrenProvider implements ITreeContentProvider {
 
 				private Object[] NO_CLASS= new Object[] {new NoClassElement()};
 				private ElementChangedListener fListener;
@@ -370,8 +370,12 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				}
 			}
 
-
-			class JavaOutlineViewer extends TreeViewer {
+			/**
+			 * The tree viewer used for displaying the outline.
+			 *
+			 * @see TreeViewer
+			 */
+			protected class JavaOutlineViewer extends TreeViewer {
 
 				/**
 				 * Indicates an item which has been reused. At the point of
@@ -1397,5 +1401,25 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			new SelectionTransferDragAdapter(fOutlineViewer)
 		};
 		fOutlineViewer.addDragSupport(ops, transfers, new JdtViewerDragAdapter(fOutlineViewer, dragListeners));
+	}
+	
+	/**
+	 * Returns whether only the contents of the top level type is to be shown.
+	 * 
+	 * @return <code>true</code> if only the contents of the top level type is to be shown.
+	 * @since 3.3
+	 */
+	protected final boolean isTopLevelTypeOnly() {
+		return fTopLevelTypeOnly;
+	}
+	
+	/**
+	 * Returns the <code>JavaOutlineViewer</code> of this view.
+	 * 
+	 * @return the {@link JavaOutlineViewer}
+	 * @since 3.3
+	 */
+	protected final JavaOutlineViewer getOutlineViewer() {
+		return fOutlineViewer;
 	}
 }
