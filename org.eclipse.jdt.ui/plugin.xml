@@ -5267,7 +5267,7 @@
 			<actionProvider
 					class="org.eclipse.jdt.internal.ui.navigator.PackageExplorerActionProvider"
 					id="org.eclipse.jdt.internal.ui.navigator.PackageExplorerActionProvider"
-					overrides="org.eclipse.ui.navigator.resources.actions.RefactorActions"> 
+					> 
 				<enablement>
 					<or>
 					<adapt
@@ -5304,9 +5304,19 @@
 		         overrides="org.eclipse.ui.navigator.resources.OpenActions"> 
 		   </actionProvider> 
 		   
+		   <actionProvider
+           class="org.eclipse.jdt.internal.ui.navigator.JavaEditActionProvider"
+           id="org.eclipse.jdt.actions.ui.navigator.JavaEditActionProvider"
+           overrides="org.eclipse.ui.navigator.resources.actions.EditActions"/>
+		   
+		   <actionProvider
+           class="org.eclipse.jdt.internal.ui.navigator.JavaRefactorActionProvider"
+           id="org.eclipse.jdt.actions.ui.navigator.JavaRefactorActionProvider"
+           overrides="org.eclipse.ui.navigator.resources.actions.RefactorActions"/>
 			<override
 					policy="InvokeAlwaysRegardlessOfSuppressedExt"
-					suppressedExtensionId="org.eclipse.ui.navigator.resourceContent"/>
+					suppressedExtensionId="org.eclipse.ui.navigator.resourceContent"/>			
+		   					
 			<commonSorter
 					class="org.eclipse.jdt.ui.JavaElementSorter"
 					id="org.eclipse.jdt.ui.javaElementSorter"/>
@@ -5413,7 +5423,7 @@
 				        </or>
 				     </enablement>
 			 </commonWizard>
-      <dropAssistant
+	      <dropAssistant
             class="org.eclipse.jdt.internal.ui.navigator.JavaDropAdapterAssistant"
             id="org.eclipse.jdt.ui.dropAssistant">
          <possibleDropTargets>
