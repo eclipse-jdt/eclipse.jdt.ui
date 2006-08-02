@@ -80,7 +80,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -1799,16 +1798,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		}
 
 		return oldExtension.equals(newExtension);
-	}
-
-	/*
-	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#isPrefQuickDiffAlwaysOn()
-	 */
-	protected boolean isPrefQuickDiffAlwaysOn() {
-		// reestablishes the behavior from AbstractDecoratedTextEditor which was hacked by JavaEditor
-		// to disable the change bar for the class file (attached source) java editor.
-		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON);
 	}
 
 	/*

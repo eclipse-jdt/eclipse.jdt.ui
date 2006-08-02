@@ -3641,10 +3641,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		return new JavaChangeHover(IJavaPartitions.JAVA_PARTITIONING, getOrientation());
 	}
 
-	protected boolean isPrefQuickDiffAlwaysOn() {
-		return false; // never show change ruler for the non-editable java editor. Overridden in subclasses like CompilationUnitEditor
-	}
-
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#createNavigationActions()
 	 */
