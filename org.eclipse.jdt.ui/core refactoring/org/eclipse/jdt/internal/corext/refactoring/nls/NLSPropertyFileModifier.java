@@ -52,6 +52,8 @@ public class NLSPropertyFileModifier {
 			textChange= new DocumentChange(name, document);
 			addChanges(textChange, nlsSubstitutions);
 			textChange.perform(new NullProgressMonitor());
+			
+			// FIXME: Should not explicitly set the encoding but must be done due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=152596
 			return new CreateTextFileChange(propertyFilePath, textChange.getCurrentContent(new NullProgressMonitor()), "8859_1", "properties"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
