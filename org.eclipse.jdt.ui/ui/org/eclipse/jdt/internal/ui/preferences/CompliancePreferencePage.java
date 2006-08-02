@@ -20,6 +20,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -38,7 +40,9 @@ public class CompliancePreferencePage extends PropertyAndPreferencePage {
 		//setDescription(PreferencesMessages.CompliancePreferencePage_description); 
 		
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.CompliancePreferencePage_title);		 
+		setTitle(PreferencesMessages.CompliancePreferencePage_title);	
+		
+		JavaRuntime.getDefaultVMInstall();	// make sure the default JRE is detected (bug 152384)
 	}
 
 	/*
