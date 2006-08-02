@@ -43,7 +43,7 @@ public class NLSUtil {
 	 * Returns null if an error occurred.
 	 * closes the stream 
 	 */
-	public static String readString(InputStream is) {
+	public static String readString(InputStream is, String encoding) {
 		if (is == null)
 			return null;
 		BufferedReader reader= null;
@@ -51,7 +51,7 @@ public class NLSUtil {
 			StringBuffer buffer= new StringBuffer();
 			char[] part= new char[2048];
 			int read= 0;
-			reader= new BufferedReader(new InputStreamReader(is, "8859_1")); //$NON-NLS-1$
+			reader= new BufferedReader(new InputStreamReader(is, encoding));
 
 			while ((read= reader.read(part)) != -1)
 				buffer.append(part, 0, read);

@@ -43,7 +43,8 @@ public class CreateTextFileChange extends CreateFileChange {
 		InputStream stream= null;
 		try{
 			stream= file.getContents();
-			String c= NLSUtil.readString(stream);
+			String encoding= file.getCharset();
+			String c= NLSUtil.readString(stream, encoding);
 			return (c == null) ? "": c; //$NON-NLS-1$
 		} catch (CoreException e){
 			throw new JavaModelException(e, IJavaModelStatusConstants.CORE_EXCEPTION);
