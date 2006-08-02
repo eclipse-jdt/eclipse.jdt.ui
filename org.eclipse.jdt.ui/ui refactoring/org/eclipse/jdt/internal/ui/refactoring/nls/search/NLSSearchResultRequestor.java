@@ -113,7 +113,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		// found reference to NLS Wrapper - now check if the key is there:
 		Position mutableKeyPosition= new Position(offset, length);
 		//TODO: What to do if argument string not found? Currently adds a match with type name.
-		String key= findKey(mutableKeyPosition, offset, javaElement);
+		String key= findKey(mutableKeyPosition, javaElement);
 		if (key != null && isKeyDefined(key))
 			return;
 
@@ -201,11 +201,10 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	 * the key is the first argument and it is a string i.e. quoted ("...").
 	 * 
 	 * @param keyPositionResult reference parameter: will be filled with the position of the found key
-	 * @param typeNameStart start offset of search result
 	 * @param enclosingElement enclosing java element
 	 * @return a string denoting the key, null if no key can be found
 	 */
-	private String findKey(Position keyPositionResult, int typeNameStart, IJavaElement enclosingElement) throws CoreException {
+	private String findKey(Position keyPositionResult, IJavaElement enclosingElement) throws CoreException {
 		ICompilationUnit unit= (ICompilationUnit)enclosingElement.getAncestor(IJavaElement.COMPILATION_UNIT);
 		if (unit == null)
 			return null;
@@ -216,29 +215,20 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		
 		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
 		scanner.setSource(source.toCharArray());
-		scanner.resetTo(typeNameStart, source.length());
+		scanner.resetTo(keyPositionResult.getOffset() + keyPositionResult.getLength() + 1, source.length());
 
 		try {
-			String src= null;
-			int keyStart= -1;
-			int keyEnd= -1;
-			int tok= scanner.getNextToken();
-			// skip type and method names:
-			while (tok == ITerminalSymbols.TokenNameIdentifier || tok == ITerminalSymbols.TokenNameDOT) {
-				if (tok == ITerminalSymbols.TokenNameIdentifier) {
-					src= new String(scanner.getCurrentTokenSource());
-					keyStart= scanner.getCurrentTokenStartPosition();
-					keyEnd= scanner.getCurrentTokenEndPosition();
-				} else {
-					src= null;
-				}
-				tok= scanner.getNextToken();
-			}
-			if (tok == ITerminalSymbols.TokenNameLPAREN) {
+			if (scanner.getNextToken() != ITerminalSymbols.TokenNameIdentifier)
+				return null;
+			
+			String src= new String(scanner.getCurrentTokenSource());
+			int keyStart= scanner.getCurrentTokenStartPosition();
+			int keyEnd= scanner.getCurrentTokenEndPosition();
+			
+			if (scanner.getNextToken() == ITerminalSymbols.TokenNameLPAREN) {
 				// Old school
-				tok= scanner.getNextToken();
 				// next must be key string:
-				if (tok != ITerminalSymbols.TokenNameStringLiteral)
+				if (scanner.getNextToken() != ITerminalSymbols.TokenNameStringLiteral)
 					return null;
 				// found it:
 				keyStart= scanner.getCurrentTokenStartPosition() + 1;
