@@ -20,6 +20,11 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -275,5 +280,43 @@ public class NLSSearchTest extends TestCase {
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
 
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 0);
+	}
+	
+	public void testBug133810() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import org.eclipse.osgi.util.NLS;\n");
+		buf.append("public class Accessor extends NLS {\n");
+		buf.append("\n");
+		buf.append("    public static String Client_s1;\n");
+		buf.append("\n");
+		buf.append("    private Accessor() {}\n");
+		buf.append("    private static final String BUNDLE_NAME = \"test.Accessor\"; //$NON-NLS-1$\n");
+		buf.append("    static {NLS.initializeMessages(BUNDLE_NAME, Accessor.class);}\n");
+		buf.append("}\n");
+		ICompilationUnit accessor= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Client {\n");
+		buf.append("    public String s1= Accessor.Client_s1;\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("Client.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("Client_s2=s1\n");
+		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
+		
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		try {
+			manager.connect(propertiesFile.getLocation(), new NullProgressMonitor());
+			ITextFileBuffer buffer= manager.getTextFileBuffer(propertiesFile.getLocation());
+			buffer.getDocument().replace(8, 1, "1");
+			
+			NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 0);
+		} finally {
+			manager.disconnect(propertiesFile.getLocation(), new NullProgressMonitor());
+		}
 	}
 }

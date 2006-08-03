@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
@@ -20,6 +21,10 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
 
 import org.eclipse.core.resources.IFile;
 
@@ -263,7 +268,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 			encoding= "ISO-8859-1";  //$NON-NLS-1$
 		}
 		try {
-			stream= fPropertiesFile.getContents();
+			stream= createInputStream(fPropertiesFile);
 			lineReader= new LineReader(stream, encoding);
 		} catch (CoreException cex) {
 			// failed to get input stream
@@ -322,7 +327,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		fProperties= new Properties(duplicateKeys);
 		InputStream stream;
 		try {
-			stream= new BufferedInputStream(fPropertiesFile.getContents());
+			stream= new BufferedInputStream(createInputStream(fPropertiesFile));
 		} catch (CoreException ex) {
 			fProperties= new Properties();
 			return;
@@ -339,6 +344,18 @@ class NLSSearchResultRequestor extends SearchRequestor {
 			}
 			reportDuplicateKeys(duplicateKeys);
 		}
+	}
+	
+	private InputStream createInputStream(IFile propertiesFile) throws CoreException {
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		if (manager != null) {
+			ITextFileBuffer buffer= manager.getTextFileBuffer(propertiesFile.getLocation());
+			if (buffer != null) {
+				return new ByteArrayInputStream(buffer.getDocument().get().getBytes());
+			}
+		}
+		
+		return propertiesFile.getContents();
 	}
 
 	private void reportDuplicateKeys(Set duplicateKeys) {
