@@ -16,6 +16,8 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.rules.ICharacterScanner;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 
 
 /**
@@ -113,7 +115,24 @@ public final class BufferedDocumentScanner implements ICharacterScanner {
 			}
 		}
 
-		return fBuffer[fOffset++];
+		try {
+			return fBuffer[fOffset++];
+		} catch (ArrayIndexOutOfBoundsException ex) {
+			StringBuffer buf= new StringBuffer();
+			buf.append("Detailed state of 'BufferedDocumentScanner:'"); //$NON-NLS-1$
+			buf.append("\n\tfOffset= "); //$NON-NLS-1$
+			buf.append(fOffset);
+			buf.append("\n\tfBufferOffset= "); //$NON-NLS-1$
+			buf.append(fBufferOffset);
+			buf.append("\n\tfBufferLength= "); //$NON-NLS-1$
+			buf.append(fBufferLength);
+			buf.append("\n\tfRangeOffset= "); //$NON-NLS-1$
+			buf.append(fRangeOffset);
+			buf.append("\n\tfRangeLength= "); //$NON-NLS-1$
+			buf.append(fRangeLength);
+			JavaPlugin.logErrorMessage(buf.toString());
+			throw ex;
+		}
 	}
 
 	/*
