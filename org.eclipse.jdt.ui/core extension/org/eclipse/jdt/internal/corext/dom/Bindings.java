@@ -97,7 +97,7 @@ public class Bindings {
 		return key.hashCode();
 	}
 	
-	/*
+	/**
 	 * Note: this method is for debugging and testing purposes only.
 	 * There are tests whose precomputed test results rely on the returned String's format.
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider
