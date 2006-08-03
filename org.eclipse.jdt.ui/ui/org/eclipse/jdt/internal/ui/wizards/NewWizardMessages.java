@@ -24,7 +24,10 @@ public final class NewWizardMessages extends NLS {
 	public static String AbstractOpenWizardAction_noproject_message;
 	public static String AbstractOpenWizardAction_createerror_title;
 	public static String AbstractOpenWizardAction_createerror_message;
+	public static String AddArchiveToBuildpathAction_DuplicateArchiveInfo_message;
+	public static String AddArchiveToBuildpathAction_DuplicateArchivesInfo_message;
 	public static String AddArchiveToBuildpathAction_ErrorTitle;
+	public static String AddArchiveToBuildpathAction_InfoTitle;
 	
 	public static String AddLibraryToBuildpathAction_ErrorTitle;
 	

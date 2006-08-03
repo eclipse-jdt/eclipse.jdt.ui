@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -34,9 +35,11 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
@@ -82,12 +85,63 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
 
 		final Shell shell= getShell();
 		final IPath[] selected= BuildPathDialogAccess.chooseExternalJAREntries(shell);
+		if (selected == null)
+			return;
+		
+		try {
+			run(selected, false);
+		} catch (final InvocationTargetException e) {
+			if (e.getCause() instanceof CoreException) {
+				showExceptionDialog((CoreException)e.getCause(), NewWizardMessages.AddArchiveToBuildpathAction_ErrorTitle);
+			} else {
+				JavaPlugin.log(e);
+			}
+		} catch (CoreException e) {
+			showExceptionDialog(e, NewWizardMessages.AddArchiveToBuildpathAction_ErrorTitle);
+			JavaPlugin.log(e);
+        }
+	}
+	
+	public void run(final IPath[] absolutePaths, boolean headless) throws InvocationTargetException, CoreException {
 
+		final IJavaProject javaProject= (IJavaProject)getSelectedElements().get(0);
+		IPath[] duplicatePaths= getDuplicatePaths(absolutePaths, javaProject);
+		final IPath[] paths;
+		if (duplicatePaths.length > 0) {
+			paths= new IPath[absolutePaths.length - duplicatePaths.length];
+			int j= 0;
+			for (int i= 0; i < absolutePaths.length; i++) {
+	            if (!contains(duplicatePaths, absolutePaths[i])) {
+	            	paths[j]= absolutePaths[i];
+	            	j++;
+	            }
+            }
+			
+			if (!headless) {
+				String message;
+				if (duplicatePaths.length > 1) {
+					StringBuffer buf= new StringBuffer();
+					for (int i= 0; i < duplicatePaths.length; i++) {
+		                buf.append('\n').append(duplicatePaths[i].lastSegment());
+	                }
+					message= Messages.format(NewWizardMessages.AddArchiveToBuildpathAction_DuplicateArchivesInfo_message, buf.toString());
+				} else {
+					message= Messages.format(NewWizardMessages.AddArchiveToBuildpathAction_DuplicateArchiveInfo_message, duplicatePaths[0].lastSegment());
+				}
+				MessageDialog.openInformation(getShell(), NewWizardMessages.AddArchiveToBuildpathAction_InfoTitle, message);
+			}
+		} else {
+			paths= absolutePaths;
+		}
+		
+		if (paths.length == 0)
+			return;
+		
 		try {
 			final IRunnableWithProgress runnable= new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
-						List result= addExternalJars(selected == null?new IPath[0]:selected, (IJavaProject)getSelectedElements().get(0), monitor);
+						List result= addExternalJars(paths, javaProject, monitor);
 						if (result != null && result.size() > 0)
 							selectAndReveal(new StructuredSelection(result));
 					} catch (CoreException e) {
@@ -96,15 +150,31 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
 				}
 			};
 			fContext.run(false, false, runnable);
-		} catch (final InvocationTargetException e) {
-			if (e.getCause() instanceof CoreException) {
-				showExceptionDialog((CoreException)e.getCause(), NewWizardMessages.AddArchiveToBuildpathAction_ErrorTitle);
-			} else {
-				JavaPlugin.log(e);
-			}
 		} catch (final InterruptedException e) {
 		}
 	}
+
+	private boolean contains(IPath[] paths, IPath path) {
+		for (int i= 0; i < paths.length; i++) {
+	        if (paths[i].equals(path))
+	        	return true;
+        }
+	    return false;
+    }
+
+	private IPath[] getDuplicatePaths(final IPath[] absolutePaths, final IJavaProject javaProject) throws JavaModelException {
+	    IClasspathEntry[] rawClasspath= javaProject.getRawClasspath();
+
+		List duplicatePaths= new ArrayList();
+		for (int j= 0; j < absolutePaths.length; j++) {
+			for (int i= 0; i < rawClasspath.length; i++) {
+		        if (absolutePaths[j].equals(rawClasspath[i].getPath())) {
+		        	duplicatePaths.add(absolutePaths[j]);
+		        }
+	        }
+		}
+		return (IPath[])duplicatePaths.toArray(new IPath[duplicatePaths.size()]);
+    }
 
 	protected List addExternalJars(IPath[] jarPaths, IJavaProject project, IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
