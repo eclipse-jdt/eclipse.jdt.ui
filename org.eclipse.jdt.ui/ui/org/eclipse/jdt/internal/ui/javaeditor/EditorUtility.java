@@ -20,6 +20,8 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -88,6 +90,7 @@ public class EditorUtility {
 
 	/**
 	 * Tests if a CU is currently shown in an editor
+	 * 
 	 * @return the IEditorPart if shown, null if element is not open in an editor
 	 */
 	public static IEditorPart isOpenInEditor(Object inputElement) {
@@ -112,7 +115,9 @@ public class EditorUtility {
 	/**
 	 * Opens a Java editor for an element such as <code>IJavaElement</code>, <code>IFile</code>, or <code>IStorage</code>.
 	 * The editor is activated by default.
-	 * @return the IEditorPart or null if wrong element type
+	 * 
+	 * @return an open editor or <code>null</code> if an external editor was opened
+	 * @throws PartInitException if the editor could not be opened or the input element is not valid
 	 */
 	public static IEditorPart openInEditor(Object inputElement) throws JavaModelException, PartInitException {
 		return openInEditor(inputElement, true);
@@ -120,7 +125,9 @@ public class EditorUtility {
 
 	/**
 	 * Opens the editor currently associated with the given element (IJavaElement, IFile, IStorage...)
-	 * @return the IEditorPart or null if wrong element type or opening failed
+	 * 
+	 * @return an open editor or <code>null</code> if an external editor was opened
+	 * @throws PartInitException if the editor could not be opened or the input element is not valid
 	 */
 	public static IEditorPart openInEditor(Object inputElement, boolean activate) throws JavaModelException, PartInitException {
 
@@ -154,12 +161,12 @@ public class EditorUtility {
 				}
 			}
 		}
-		
-		IEditorInput input= getEditorInput(inputElement);
-		if (input != null)
-			return openInEditor(input, getEditorID(input, inputElement), activate);
 
-		return null;
+		IEditorInput input= getEditorInput(inputElement);
+		if (input == null)
+			throwPartInitException(JavaEditorMessages.EditorUtility_no_editorInput);
+		
+		return openInEditor(input, getEditorID(input), activate);
 	}
 
 	/**
@@ -265,27 +272,34 @@ public class EditorUtility {
 	}
 
 	private static IEditorPart openInEditor(IFile file, boolean activate) throws PartInitException {
-		if (file != null) {
-			IWorkbenchPage p= JavaPlugin.getActivePage();
-			if (p != null) {
-				IEditorPart editorPart= IDE.openEditor(p, file, activate);
-				initializeHighlightRange(editorPart);
-				return editorPart;
-			}
-		}
-		return null;
+		if (file == null)
+			throwPartInitException(JavaEditorMessages.EditorUtility_file_must_not_be_null);
+		
+		IWorkbenchPage p= JavaPlugin.getActivePage();
+		if (p == null)
+			throwPartInitException(JavaEditorMessages.EditorUtility_no_active_WorkbenchPage);
+		
+		IEditorPart editorPart= IDE.openEditor(p, file, activate);
+		initializeHighlightRange(editorPart);
+		return editorPart;
 	}
 
 	private static IEditorPart openInEditor(IEditorInput input, String editorID, boolean activate) throws PartInitException {
-		if (input != null && editorID != null) {
-			IWorkbenchPage p= JavaPlugin.getActivePage();
-			if (p != null) {
-				IEditorPart editorPart= p.openEditor(input, editorID, activate);
-				initializeHighlightRange(editorPart);
-				return editorPart;
-			}
-		}
-		return null;
+		Assert.isNotNull(input);
+		Assert.isNotNull(editorID);
+
+		IWorkbenchPage p= JavaPlugin.getActivePage();
+		if (p == null)
+			throwPartInitException(JavaEditorMessages.EditorUtility_no_active_WorkbenchPage);
+
+		IEditorPart editorPart= p.openEditor(input, editorID, activate);
+		initializeHighlightRange(editorPart);
+		return editorPart;
+	}
+
+	private static void throwPartInitException(String message) throws PartInitException {
+		IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, null);
+		throw new PartInitException(status);
 	}
 
 	private static void initializeHighlightRange(IEditorPart editorPart) {
@@ -312,25 +326,18 @@ public class EditorUtility {
 		}
 	}
 
-	private static String getEditorID(IEditorInput input, Object inputObject) {
+	private static String getEditorID(IEditorInput input) throws PartInitException {
+		Assert.isNotNull(input);
 		IEditorDescriptor editorDescriptor;
-		try {
-			if (input instanceof IFileEditorInput)
-				editorDescriptor= IDE.getEditorDescriptor(((IFileEditorInput)input).getFile());
-			else {
-				String name= input.getName();
-				if (name == null)
-					return null;
-				editorDescriptor= IDE.getEditorDescriptor(name);
-			}
-		} catch (PartInitException e) {
-			return null;
+		if (input instanceof IFileEditorInput)
+			editorDescriptor= IDE.getEditorDescriptor(((IFileEditorInput)input).getFile());
+		else {
+			String name= input.getName();
+			if (name == null)
+				throwPartInitException(JavaEditorMessages.EditorUtility_could_not_find_editorId);
+			editorDescriptor= IDE.getEditorDescriptor(name);
 		}
-
-		if (editorDescriptor != null)
-			return editorDescriptor.getId();
-
-		return null;
+		return editorDescriptor.getId();
 	}
 
 	/**

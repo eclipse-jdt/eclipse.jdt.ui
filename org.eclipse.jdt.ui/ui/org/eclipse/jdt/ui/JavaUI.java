@@ -664,7 +664,7 @@ public final class JavaUI {
 	 * @since 3.3
 	 */
 	public static IEditorPart openInEditor(IJavaElement element, boolean activate, boolean reveal) throws JavaModelException, PartInitException {
-		if (!(element instanceof ISourceReference)) {
+		if (!(element instanceof ISourceReference || JavaPlugin.getActivePage() == null)) {
 			return null;
 		}
 		IEditorPart part= EditorUtility.openInEditor(element, activate);
