@@ -251,6 +251,10 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		fDrillDownAdapter.reset();
 	}
 
+	void setEmptyInput() {
+		setInput(Collections.emptySet());
+	}
+	
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");
 		menuMgr.setRemoveAllWhenShown(true);
@@ -354,24 +358,38 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		fCodeSelectAction= new Action("Set Input from Editor (codeSelect)", JEPluginImages.IMG_SET_FOCUS_CODE_SELECT) {
 			@Override public void run() {
 				IEditorPart editor= getSite().getPage().getActiveEditor();
+				if (editor == null) {
+					setEmptyInput();
+					return;
+				}
 				IEditorInput input= editor.getEditorInput();
 				ISelectionProvider selectionProvider= editor.getSite().getSelectionProvider();
-				if (input == null || selectionProvider == null)
+				if (input == null || selectionProvider == null) {
+					setEmptyInput();
 					return;
+				}
 				ISelection selection= selectionProvider.getSelection();
-				if (! (selection instanceof ITextSelection))
+				if (! (selection instanceof ITextSelection)) {
+					setEmptyInput();
 					return;
+				}
 				IJavaElement javaElement= (IJavaElement) input.getAdapter(IJavaElement.class);
-				if (javaElement == null)
+				if (javaElement == null) {
+					setEmptyInput();
 					return;
+				}
+				
 				IJavaElement[] resolved;
 				try {
 					resolved= codeResolve(javaElement, (ITextSelection) selection);
 				} catch (JavaModelException e) {
+					setEmptyInput();
 					return;
 				}
-				if (resolved.length == 0)
+				if (resolved.length == 0) {
+					setEmptyInput();
 					return;
+				}
 				
 				setSingleInput(resolved[0]);
 			}
@@ -381,24 +399,38 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		fElementAtAction= new Action("Set Input from Editor location (getElementAt)", JEPluginImages.IMG_SET_FOCUS) {
 			@Override public void run() {
 				IEditorPart editor= getSite().getPage().getActiveEditor();
+				if (editor == null) {
+					setEmptyInput();
+					return;
+				}
 				IEditorInput input= editor.getEditorInput();
 				ISelectionProvider selectionProvider= editor.getSite().getSelectionProvider();
-				if (input == null || selectionProvider == null)
+				if (input == null || selectionProvider == null) {
+					setEmptyInput();
 					return;
+				}
 				ISelection selection= selectionProvider.getSelection();
-				if (! (selection instanceof ITextSelection))
+				if (! (selection instanceof ITextSelection)) {
+					setEmptyInput();
 					return;
+				}
 				IJavaElement javaElement= (IJavaElement) input.getAdapter(IJavaElement.class);
-				if (javaElement == null)
+				if (javaElement == null) {
+					setEmptyInput();
 					return;
+				}
+				
 				IJavaElement resolved;
 				try {
 					resolved= getElementAtOffset(javaElement, (ITextSelection) selection);
 				} catch (JavaModelException e) {
+					setEmptyInput();
 					return;
 				}
-				if (resolved == null)
+				if (resolved == null) {
+					setEmptyInput();
 					return;
+				}
 				
 				setSingleInput(resolved);
 			}
