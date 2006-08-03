@@ -639,9 +639,9 @@ public final class JavaUI {
 	 *
 	 * @param element the input element; either a compilation unit 
 	 *   (<code>ICompilationUnit</code>) or a class file (<code>IClassFile</code>) or source references inside.
-	 * @return returns the editor part of the opened editor or <code>null</code> if the element is not a {@link ISourceReference}, no workbench page is active or the
+	 * @return returns the editor part of the opened editor or <code>null</code> if the element is not a {@link ISourceReference} or the
 	 * file was opened in an external editor.
-	 * @exception PartInitException if the editor could not be initialized
+	 * @exception PartInitException if the editor could not be initialized or no workbench page is active
 	 * @exception JavaModelException if this element does not exist or if an exception occurs while accessing its underlying resource
 	 */
 	public static IEditorPart openInEditor(IJavaElement element) throws JavaModelException, PartInitException {
@@ -657,14 +657,14 @@ public final class JavaUI {
 	 *   (<code>ICompilationUnit</code>) or a class file (<code>IClassFile</code>) or source references inside.
 	 * @param activate if set, the editor will be activated.
 	 * @param reveal if set, the element will be revealed.
-	 * @return returns the editor part of the opened editor or <code>null</code> if the element is not a {@link ISourceReference}, no workbench page is active or the
+	 * @return returns the editor part of the opened editor or <code>null</code> if the element is not a {@link ISourceReference} or the
 	 * file was opened in an external editor.
-	 * @exception PartInitException if the editor could not be initialized
+	 * @exception PartInitException if the editor could not be initialized or no workbench page is active
 	 * @exception JavaModelException if this element does not exist or if an exception occurs while accessing its underlying resource
 	 * @since 3.3
 	 */
 	public static IEditorPart openInEditor(IJavaElement element, boolean activate, boolean reveal) throws JavaModelException, PartInitException {
-		if (!(element instanceof ISourceReference || JavaPlugin.getActivePage() == null)) {
+		if (!(element instanceof ISourceReference)) {
 			return null;
 		}
 		IEditorPart part= EditorUtility.openInEditor(element, activate);
