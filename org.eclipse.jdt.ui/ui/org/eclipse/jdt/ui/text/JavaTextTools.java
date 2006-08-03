@@ -78,8 +78,6 @@ public class JavaTextTools {
 	private SingleTokenJavaScanner fStringScanner;
 	/** The JavaDoc scanner. */
 	private JavaDocScanner fJavaDocScanner;
-	/** The Java partitions scanner. */
-	private FastJavaPartitionScanner fPartitionScanner;
 	/** The preference store. */
 	private IPreferenceStore fPreferenceStore;
 	/**
@@ -168,7 +166,6 @@ public class JavaTextTools {
 		fSinglelineCommentScanner= new JavaCommentScanner(fColorManager, store, coreStore, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);
 		fStringScanner= new SingleTokenJavaScanner(fColorManager, store, IJavaColorConstants.JAVA_STRING);
 		fJavaDocScanner= new JavaDocScanner(fColorManager, store, coreStore);
-		fPartitionScanner= new FastJavaPartitionScanner();
 	}
 
 	/**
@@ -181,7 +178,6 @@ public class JavaTextTools {
 		fSinglelineCommentScanner= null;
 		fStringScanner= null;
 		fJavaDocScanner= null;
-		fPartitionScanner= null;
 
 		if (fColorManager != null) {
 			fColorManager.dispose();
@@ -280,7 +276,7 @@ public class JavaTextTools {
 	 * @return a Java partition scanner
 	 */
 	public IPartitionTokenScanner getPartitionScanner() {
-		return fPartitionScanner;
+		return new FastJavaPartitionScanner();
 	}
 
 	/**
