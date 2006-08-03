@@ -63,7 +63,6 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.CharOperation;
 
 import org.eclipse.jdt.internal.corext.CorextMessages;
@@ -94,89 +93,7 @@ public final class JavaModelUtil {
 	 * @see #getRenamedCUName(ICompilationUnit, String)
 	 */
 	public static final String DEFAULT_CU_SUFFIX= ".java"; //$NON-NLS-1$
-	
-	/** 
-	 * Finds a type by its qualified type name (dot separated).
-	 * @param jproject The java project to search in
-	 * @param fullyQualifiedName The fully qualified name (type name with enclosing type names and package (all separated by dots))
-	 * @return The type found, or null if not existing
-	 */	
-	public static IType findType(IJavaProject jproject, String fullyQualifiedName) throws JavaModelException {
-		//workaround for bug 22883
-		IType type= jproject.findType(fullyQualifiedName);
-		if (type != null)
-			return type;
-		IPackageFragmentRoot[] roots= jproject.getPackageFragmentRoots();
-		for (int i= 0; i < roots.length; i++) {
-			IPackageFragmentRoot root= roots[i];
-			type= findType(root, fullyQualifiedName);
-			if (type != null && type.exists())
-				return type;
-		}	
-		return null;
-	}
-	
-	/** 
-	 * Finds a type by its qualified type name (dot separated).
-	 * @param jproject The java project to search in
-	 * @param fullyQualifiedName The fully qualified name (type name with enclosing type names and package (all separated by dots))
-	 * @param owner the working copy owner
-	 * @return The type found, or null if not existing
-	 */	
-	public static IType findType(IJavaProject jproject, String fullyQualifiedName, WorkingCopyOwner owner) throws JavaModelException {
-		//workaround for bug 22883
-		IType type= jproject.findType(fullyQualifiedName, owner);
-		if (type != null)
-			return type;
-		IPackageFragmentRoot[] roots= jproject.getPackageFragmentRoots();
-		for (int i= 0; i < roots.length; i++) {
-			IPackageFragmentRoot root= roots[i];
-			type= findType(root, fullyQualifiedName);
-			if (type != null && type.exists())
-				return type;
-		}	
-		return null;
-	}
-	
-
-	
-	private static IType findType(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException{
-		IJavaElement[] children= root.getChildren();
-		for (int i= 0; i < children.length; i++) {
-			IJavaElement element= children[i];
-			if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT){
-				IPackageFragment pack= (IPackageFragment)element;
-				if (! fullyQualifiedName.startsWith(pack.getElementName()))
-					continue;
-				IType type= findType(pack, fullyQualifiedName);
-				if (type != null && type.exists())
-					return type;
-			}
-		}		
-		return null;
-	}
-	
-	private static IType findType(IPackageFragment pack, String fullyQualifiedName) throws JavaModelException{
-		ICompilationUnit[] cus= pack.getCompilationUnits();
-		for (int i= 0; i < cus.length; i++) {
-			ICompilationUnit unit= cus[i];
-			IType type= findType(unit, fullyQualifiedName);
-			if (type != null && type.exists())
-				return type;
-		}
-		return null;
-	}
-	
-	private static IType findType(ICompilationUnit cu, String fullyQualifiedName) throws JavaModelException{
-		IType[] types= cu.getAllTypes();
-		for (int i= 0; i < types.length; i++) {
-			IType type= types[i];
-			if (getFullyQualifiedName(type).equals(fullyQualifiedName))
-				return type;
-		}
-		return null;
-	}
-	
+		
 	/**
 	 * Finds a type container by container name.
 	 * The returned element will be of type <code>IType</code> or a <code>IPackageFragment</code>.

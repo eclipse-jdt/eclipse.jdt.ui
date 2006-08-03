@@ -17,6 +17,7 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.graphics.Image;
@@ -221,7 +222,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 
 	private IType getDeclaringType(IJavaProject project, String typeName) {
 		try {
-			return JavaModelUtil.findType(project, typeName);
+			return project.findType(typeName, (IProgressMonitor) null);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
