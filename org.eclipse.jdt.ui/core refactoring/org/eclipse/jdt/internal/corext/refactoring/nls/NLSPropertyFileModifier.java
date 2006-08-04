@@ -19,6 +19,8 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.content.IContentType;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -53,8 +55,17 @@ public class NLSPropertyFileModifier {
 			addChanges(textChange, nlsSubstitutions);
 			textChange.perform(new NullProgressMonitor());
 			
-			// FIXME: Should not explicitly set the encoding but must be done due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=152596
-			return new CreateTextFileChange(propertyFilePath, textChange.getCurrentContent(new NullProgressMonitor()), "8859_1", "properties"); //$NON-NLS-1$ //$NON-NLS-2$
+			String encoding= null;
+			IContentType javaPropertiesContentType= Platform.getContentTypeManager().getContentType("org.eclipse.jdt.core.javaProperties"); //$NON-NLS-1$
+			IContentType[] contentTypes= Platform.getContentTypeManager().findContentTypesFor(propertyFilePath.lastSegment());
+			if (contentTypes.length == 0 || contentTypes.length > 1 || !contentTypes[0].equals(javaPropertiesContentType)) {
+				if (javaPropertiesContentType != null)
+					encoding= javaPropertiesContentType.getDefaultCharset();
+				if (encoding == null)
+					encoding= "ISO-8859-1"; //$NON-NLS-1$
+			}
+			
+			return new CreateTextFileChange(propertyFilePath, textChange.getCurrentContent(new NullProgressMonitor()), encoding, "properties"); //$NON-NLS-1$
 		}
 
 		textChange= new TextFileChange(name, getPropertyFile(propertyFilePath));

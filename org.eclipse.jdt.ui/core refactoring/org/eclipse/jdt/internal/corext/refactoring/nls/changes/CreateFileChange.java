@@ -23,7 +23,9 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.content.IContentType;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -200,7 +202,11 @@ public class CreateFileChange extends JDTChange {
 							fExplicitEncoding= true;
 						}
 					} else {
-						fEncoding= file.getCharset(true);
+						IContentType contentType= Platform.getContentTypeManager().findContentTypeFor(file.getName());
+						if (contentType != null)
+							fEncoding= contentType.getDefaultCharset();
+						if (fEncoding == null)
+							fEncoding= file.getCharset(true);
 					}
 				} catch (CoreException e) {
 					fEncoding= ResourcesPlugin.getEncoding();
