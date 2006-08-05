@@ -1124,7 +1124,6 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         // one package in src folder
         IPackageFragmentRoot root= fProject.findPackageFragmentRoot(fProject.getPath().append(srcPath));
         IPackageFragment pack1= root.createPackageFragment("pack1", true, null);
-        final IPackageFragment pack2= root.createPackageFragment("pack1.pack2", true, null);
         IPackageFragment defaultPack= root.getPackageFragment("");
         
         IPath libraryPath= root.getPath().append("archive.jar");
@@ -1138,7 +1137,8 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         // two compilation units A and B in 'package'
         ICompilationUnit cuA= createICompilationUnit("A", pack1);
         final IResource excludedElements[]= {null, null}; 
-        final ICompilationUnit cuB= createICompilationUnit("B", pack1);
+//        final IPackageFragment pack2= root.createPackageFragment("pack1.pack2", true, null);
+//        final ICompilationUnit cuB= createICompilationUnit("B", pack1);
 //        ExcludeOperation op= new ExcludeOperation(null, new IClasspathInformationProvider() {
 //
 //            public void handleResult(List resultElements, CoreException exception, int operationType) {
