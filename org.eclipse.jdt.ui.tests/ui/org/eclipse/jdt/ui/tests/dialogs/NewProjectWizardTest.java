@@ -12,8 +12,6 @@ package org.eclipse.jdt.ui.tests.dialogs;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -29,9 +27,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -53,11 +48,6 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.BuildpathModifierAction;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ICreateFolderQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IRemoveLinkedFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderValidator;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -1018,86 +1008,7 @@ public class NewProjectWizardTest extends TestCase {
     
     // Helper methods
     protected Object executeOperation(int type, final Object selection, final ClasspathModifierQueries.OutputFolderQuery outputQuery, final ClasspathModifierQueries.IOutputLocationQuery locationQuery, final ClasspathModifierQueries.ICreateFolderQuery creationQuery, final ClasspathModifierQueries.IInclusionExclusionQuery inclQuery) throws InvocationTargetException, InterruptedException {
-        final Object[] returnValue= {null};
-        IClasspathInformationProvider provider= new IClasspathInformationProvider() {
-
-            public void handleResult(List result, CoreException exception, int operationType) {
-                if (result.size() == 1)
-                    returnValue[0]= result.get(0);
-            }
-
-            public IStructuredSelection getSelection() {
-                List list= new ArrayList();
-                list.add(selection);
-                return new StructuredSelection(list);
-            }
-
-            public IJavaProject getJavaProject() {
-                return fProject;
-            }
-
-            public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery() {
-                return outputQuery;
-            }
-
-            public ClasspathModifierQueries.IInclusionExclusionQuery getInclusionExclusionQuery() {
-                return inclQuery;
-            }
-
-            public ClasspathModifierQueries.IOutputLocationQuery getOutputLocationQuery() {
-                return locationQuery;
-            }
-
-            public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
-                return null;
-            }
-            
-            public IAddArchivesQuery getExternalArchivesQuery() throws JavaModelException {
-                return null;
-            }
-
-            public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException {
-                return new IAddLibrariesQuery() {
-
-                    public IClasspathEntry[] doQuery(IJavaProject project, IClasspathEntry[] entries) {
-                        return new IClasspathEntry[] {(IClasspathEntry)selection};
-                    }
-                    
-                };
-            }
-
-            public void deleteCreatedResources() {
-            	
-            }
-
-			public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
-				return null;
-			}
-
-			public ICreateFolderQuery getCreateFolderQuery() throws JavaModelException {
-				return null;
-			}
-        };
-        
-//        ClasspathModifierOperation op= null;
-//        switch(type) {
-//            case IClasspathInformationProvider.ADD_SEL_SF_TO_BP: op= new AddSelectedSourceFolderOperation(null, provider); break;
-//            case IClasspathInformationProvider.ADD_SEL_LIB_TO_BP: op= new AddSelectedLibraryOperation(null, provider); break;
-//            case IClasspathInformationProvider.REMOVE_FROM_BP: op= new RemoveFromClasspathOperation(null, provider); break;
-//            case IClasspathInformationProvider.INCLUDE: op= new IncludeOperation(null, provider); break;
-//            case IClasspathInformationProvider.UNINCLUDE: op= new UnincludeOperation(null, provider); break;
-//            case IClasspathInformationProvider.EXCLUDE: op= new ExcludeOperation(null, provider); break;
-//            case IClasspathInformationProvider.UNEXCLUDE: op= new UnexcludeOperation(null, provider); break;
-//            case IClasspathInformationProvider.EDIT_FILTERS: op= new EditFiltersOperation(null, provider); break;
-//            case IClasspathInformationProvider.EDIT_OUTPUT: op= new EditOutputFolderOperation(null, provider); break;
-//            case IClasspathInformationProvider.RESET: op= new ResetOperation(null, provider); break;
-//            case IClasspathInformationProvider.CREATE_OUTPUT: op= new CreateOutputFolderOperation(null, provider); break;
-//            case IClasspathInformationProvider.ADD_LIB_TO_BP: op= new AddLibraryOperation(null, provider); break;
-//        }
-//        
-//        op.run(null);
-        
-        return returnValue[0];
+        return null;
     }
     
     protected IPackageFragmentRoot addToClasspath(IPath path) throws CoreException, InvocationTargetException, InterruptedException {
