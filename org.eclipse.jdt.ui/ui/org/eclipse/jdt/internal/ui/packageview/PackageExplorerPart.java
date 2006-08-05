@@ -347,7 +347,7 @@ public class PackageExplorerPart extends ViewPart
 		 */ 
 		private boolean isEssential(Object object) {
 			try {
-				if (!isFlatLayout() && object instanceof IPackageFragment) {
+				if (object instanceof IPackageFragment) {
 					IPackageFragment fragment = (IPackageFragment) object;
 					return !fragment.isDefaultPackage() && fragment.hasSubpackages();
 				}
