@@ -16,8 +16,10 @@
 package org.eclipse.jdt.internal.junit4.runner;
 
 
+import org.eclipse.jdt.internal.junit.runner.FailedComparison;
 import org.eclipse.jdt.internal.junit.runner.IListensToTestExecutions;
 import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
+import org.eclipse.jdt.internal.junit.runner.MessageIds;
 import org.eclipse.jdt.internal.junit.runner.TestReferenceFailure;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
@@ -30,6 +32,7 @@ public class JUnit4TestListener extends RunListener {
 		public IgnoredTestIdentifier(Description description) {
 			super(description);
 		}
+		@Override
 		public String getName() {
 			String name= super.getName();
 			if (name != null)
@@ -52,8 +55,17 @@ public class JUnit4TestListener extends RunListener {
 
 	@Override
 	public void testFailure(Failure failure) throws Exception {
-		String status= new FailureException(failure.getException()).getStatus();
-		fNotified.notifyTestFailed(new TestReferenceFailure(getIdentifier(failure.getDescription()), status, failure.getTrace()));
+		Throwable exception= failure.getException();
+		String status= exception instanceof AssertionError ? MessageIds.TEST_FAILED : MessageIds.TEST_ERROR;
+		FailedComparison comparison= null;
+		if (exception instanceof junit.framework.ComparisonFailure) {
+			junit.framework.ComparisonFailure comparisonFailure= (junit.framework.ComparisonFailure) exception;
+			comparison= new FailedComparison(comparisonFailure.getExpected(), comparisonFailure.getActual());
+		} else if (exception instanceof org.junit.ComparisonFailure) {
+			org.junit.ComparisonFailure comparisonFailure= (org.junit.ComparisonFailure) exception;
+			comparison= new FailedComparison(comparisonFailure.getExpected(), comparisonFailure.getActual());
+		}
+		fNotified.notifyTestFailed(new TestReferenceFailure(getIdentifier(failure.getDescription()), status, failure.getTrace(), comparison));
 	}
 
 	@Override
