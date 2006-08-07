@@ -83,7 +83,7 @@ public class JUnit4TestFinder implements ITestFinder {
 			ISourceRange sourceRange= member.getSourceRange();
 			ISourceRange nameRange= member.getNameRange();
 			String memberSource= member.getSource();
-			if (! SourceRange.isAvailable(sourceRange) || SourceRange.isAvailable(nameRange) || memberSource == null)
+			if (! SourceRange.isAvailable(sourceRange) || ! SourceRange.isAvailable(nameRange) || memberSource == null)
 				return false;
 			
 			int charsToSearch= nameRange.getOffset() - sourceRange.getOffset();
