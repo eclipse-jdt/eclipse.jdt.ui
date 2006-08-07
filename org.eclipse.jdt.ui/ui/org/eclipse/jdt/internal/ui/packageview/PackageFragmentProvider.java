@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.widgets.Control;
@@ -26,10 +26,8 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -54,93 +52,103 @@ public class PackageFragmentProvider implements IPropertyChangeListener {
 		fFoldPackages= arePackagesFoldedInHierarchicalLayout();
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 	}
+			
 	
-	/*
-	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(Object)
+	/**
+	 * Returns the hierarchical packages inside a given fragment or root.
+	 * @param parent The parent package fragment root
+	 * @param fragment The package to get the children for or 'null' to get the children of the root.
+	 * @param result Collection where the resulting elements are added
+	 * @throws JavaModelException
 	 */
-	public Object[] getChildren(Object parentElement) {
-		try {
-			if (parentElement instanceof IFolder) {
-				IResource[] resources= ((IFolder) parentElement).members();
-				return filter(getFolders(resources)).toArray();
-			} else if (parentElement instanceof IJavaElement) {
-				IJavaElement iJavaElement= (IJavaElement) parentElement;
-				int type= iJavaElement.getElementType();
-	
-				switch (type) {
-					case IJavaElement.JAVA_PROJECT: {
-						IJavaProject project= (IJavaProject) iJavaElement;
-						
-						IPackageFragmentRoot root= project.findPackageFragmentRoot(project.getPath());
-						if (root != null) {
-							List children= getTopLevelChildren(root);
-							return filter(children).toArray();
-						} 
-						break;
-					}
-					case IJavaElement.PACKAGE_FRAGMENT_ROOT: {
-						IPackageFragmentRoot root= (IPackageFragmentRoot) parentElement;
-						if (root.exists()) {
-							return filter(getTopLevelChildren(root)).toArray();
-						}
-						break;
-					}
-					case IJavaElement.PACKAGE_FRAGMENT: {
-						IPackageFragment packageFragment = (IPackageFragment) parentElement;
-						if (!packageFragment.isDefaultPackage()) {
-							IPackageFragmentRoot root= (IPackageFragmentRoot) packageFragment.getParent();
-							List children = getPackageChildren(root, packageFragment);
-							return filter(children).toArray();
-						}
-						break;
-					}
-					default :
-						// do nothing
+	public void getHierarchicalPackageChildren(IPackageFragmentRoot parent, IPackageFragment fragment, Collection result) throws JavaModelException {
+		IJavaElement[] children= parent.getChildren();
+		String prefix= fragment != null ? fragment.getElementName() + '.' : ""; //$NON-NLS-1$
+		int prefixLen= prefix.length();
+		for (int i= 0; i < children.length; i++) {
+			IPackageFragment curr= (IPackageFragment) children[i];
+			String name= curr.getElementName();
+			if (name.startsWith(prefix) && name.length() > prefixLen && name.indexOf('.', prefixLen) == -1) {
+				if (fFoldPackages) {
+					curr= getFolded(children, curr);
 				}
-			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		}
-		return new Object[0];
-	}
-	
-	private List filter(List children) throws JavaModelException {
-		if (fFoldPackages) {
-			int size= children.size();
-			for (int i = 0; i < size; i++) {
-				Object curr= children.get(i);
-				if (curr instanceof IPackageFragment) {
-					IPackageFragment fragment = (IPackageFragment) curr;
-					if (!fragment.isDefaultPackage() && isEmpty(fragment)) {
-						IPackageFragment collapsed= getCollapsed(fragment);
-						if (collapsed != null) {
-							children.set(i, collapsed); // replace with collapsed
-						}
-					}
-				}
+				result.add(curr);
+			} else if (fragment == null && curr.isDefaultPackage()) {
+				result.add(curr);
 			}
 		}
-		return children;
 	}
 	
-	private IPackageFragment getCollapsed(IPackageFragment pack) throws JavaModelException {
-		IJavaElement[] children= ((IPackageFragmentRoot) pack.getParent()).getChildren();
-		IPackageFragment child= getSinglePackageChild(pack, children);
-		while (child != null && isEmpty(child)) {
-			IPackageFragment collapsed= getSinglePackageChild(child, children);
+	/**
+	 * Returns the hierarchical packages inside a given folder.
+	 * @param folder The parent folder
+	 * @param result Collection where the resulting elements are added
+	 * @throws JavaModelException
+	 */
+	public void getHierarchicalPackagesInFolder(IFolder folder, Collection result) throws CoreException {
+		IResource[] resources= folder.members();
+		for (int i= 0; i < resources.length; i++) {
+			IResource resource= resources[i];
+			if (resource instanceof IFolder) {
+				IFolder curr= (IFolder) resource;
+				IJavaElement element= JavaCore.create(curr);
+				if (element instanceof IPackageFragment) {
+					if (fFoldPackages) {
+						IPackageFragment fragment= (IPackageFragment) element;
+						IPackageFragmentRoot root= (IPackageFragmentRoot) fragment.getParent();
+						element= getFolded(root.getChildren(), fragment);
+					}
+					result.add(element);	
+				} 
+			}	
+		}
+	}
+
+	public Object getHierarchicalPackageParent(IPackageFragment child) {
+		String name= child.getElementName();
+		IPackageFragmentRoot parent= (IPackageFragmentRoot) child.getParent();
+		int index= name.lastIndexOf('.');
+		if (index != -1) {
+			String realParentName= name.substring(0, index);
+			IPackageFragment element= parent.getPackageFragment(realParentName);
+			if (element.exists()) {
+				try {
+					if (fFoldPackages && isEmpty(element) && findSinglePackageChild(element, parent.getChildren()) != null) {
+						return getHierarchicalPackageParent(element);
+					}
+				} catch (JavaModelException e) {
+					// ignore
+				}
+				return element;
+			} else { // bug 65240
+				IResource resource= element.getResource();
+				if (resource != null) {
+					return resource;
+				}
+			}
+		}
+		if (parent.getResource() instanceof IProject) {
+			return parent.getJavaProject();
+		}
+		return parent;
+	}
+	
+	private static IPackageFragment getFolded(IJavaElement[] children, IPackageFragment pack) throws JavaModelException {
+		while (isEmpty(pack)) {
+			IPackageFragment collapsed= findSinglePackageChild(pack, children);
 			if (collapsed == null) {
-				return child;
+				return pack;
 			}
-			child= collapsed;
+			pack= collapsed;
 		}
-		return child;
+		return pack;
 	}
 		
-	private boolean isEmpty(IPackageFragment fragment) throws JavaModelException {
+	private static boolean isEmpty(IPackageFragment fragment) throws JavaModelException {
 		return !fragment.containsJavaResources() && fragment.getNonJavaResources().length == 0;
 	}
 	
-	private static IPackageFragment getSinglePackageChild(IPackageFragment fragment, IJavaElement[] children) {
+	private static IPackageFragment findSinglePackageChild(IPackageFragment fragment, IJavaElement[] children) {
 		String prefix= fragment.getElementName() + '.';
 		int prefixLen= prefix.length();
 		IPackageFragment found= null;
@@ -156,158 +164,6 @@ public class PackageFragmentProvider implements IPropertyChangeListener {
 			}
 		}
 		return found;
-	}
-	
-	
-	private static List getPackageChildren(IPackageFragmentRoot parent, IPackageFragment fragment) throws JavaModelException {
-		IJavaElement[] children= parent.getChildren();
-		ArrayList list= new ArrayList(children.length);
-		String prefix= fragment.getElementName() + '.';
-		int prefixLen= prefix.length();
-		for (int i= 0; i < children.length; i++) {
-			IJavaElement element= children[i];
-			if (element instanceof IPackageFragment) { // see bug 134256
-				String name= element.getElementName();
-				if (name.startsWith(prefix) && name.length() > prefixLen && name.indexOf('.', prefixLen) == -1) {
-					list.add(element);
-				}
-			}
-		}
-		return list;
-	}
-	
-	private static List getTopLevelChildren(IPackageFragmentRoot root) throws JavaModelException {
-		IJavaElement[] elements= root.getChildren();
-		ArrayList topLevelElements= new ArrayList(elements.length);
-		for (int i= 0; i < elements.length; i++) {
-			IJavaElement iJavaElement= elements[i];
-			//if the name of the PackageFragment is the top level package it will contain no "." separators
-			if (iJavaElement instanceof IPackageFragment && iJavaElement.getElementName().indexOf('.')==-1) {
-				topLevelElements.add(iJavaElement);
-			}
-		}	
-		return topLevelElements;
-	}
-
-	private List getFolders(IResource[] resources) throws JavaModelException {
-		List list= new ArrayList(resources.length);
-		for (int i= 0; i < resources.length; i++) {
-			IResource resource= resources[i];
-			if (resource instanceof IFolder) {
-				IFolder folder= (IFolder) resource;
-				IJavaElement element= JavaCore.create(folder);
-				if (element instanceof IPackageFragment) {
-					list.add(element);	
-				} 
-			}	
-		}
-		return list;
-	}
-
-
-	/*
-	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(Object)
-	 */
-	public Object getParent(Object element) {
-
-		if (element instanceof IPackageFragment) {
-			IPackageFragment frag = (IPackageFragment) element;
-			//@Changed: a fix, before: if(frag.exists() && isEmpty(frag))
-		
-			return filterParent(getActualParent(frag));
-		}
-		return null;
-	}
-
-	private Object getActualParent(IPackageFragment fragment) {
-		try {
-
-			if (fragment.exists()) {
-				IJavaElement parent = fragment.getParent();
-
-				if ((parent instanceof IPackageFragmentRoot) && parent.exists()) {
-					IPackageFragmentRoot root = (IPackageFragmentRoot) parent;
-					if (root.isArchive()) {
-						return findNextLevelParentByElementName(fragment);
-					} else {
-
-						IResource resource = fragment.getUnderlyingResource();
-						if ((resource != null) && (resource instanceof IFolder)) {
-							IFolder folder = (IFolder) resource;
-							IResource res = folder.getParent();
-
-							IJavaElement el = JavaCore.create(res);
-							if (el != null) {
-								return el;
-							} else {
-								return res;
-							}
-						}
-					}
-					return parent;
-				}
-			}
-
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		}
-		return null;
-	}
-	
-	private Object filterParent(Object parent) {
-		if (fFoldPackages && (parent!=null)) {
-			try {
-				if (parent instanceof IPackageFragment) {
-					IPackageFragment fragment = (IPackageFragment) parent;
-					if (isEmpty(fragment) && hasSingleChild(fragment)) {
-						return filterParent(getActualParent(fragment));
-					}
-				}
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-			}
-		}
-		return parent;
-	}
-
-	private boolean hasSingleChild(IPackageFragment fragment) {
-		return getChildren(fragment).length==1;
-	}
-
-
-	private Object findNextLevelParentByElementName(IPackageFragment child) {
-		String name= child.getElementName();
-		
-		int index= name.lastIndexOf('.');
-		if (index != -1) {
-			String realParentName= name.substring(0, index);
-			IPackageFragment element= ((IPackageFragmentRoot) child.getParent()).getPackageFragment(realParentName);
-			if (element.exists()) {
-				return element;
-			}
-		}
-		return child.getParent();
-	}
-
-
-	/*
-	 * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(Object)
-	 */
-	public boolean hasChildren(Object element) {
-		
-		if (element instanceof IPackageFragment) {
-			IPackageFragment fragment= (IPackageFragment) element;
-			if(fragment.isDefaultPackage())
-				return false;
-		}
-		return getChildren(element).length > 0;
-	}
-
-	/*
-	 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(Object)
-	 */
-	public Object[] getElements(Object inputElement) {
-		return getChildren(inputElement);
 	}
 
 	/*
@@ -326,12 +182,6 @@ public class PackageFragmentProvider implements IPropertyChangeListener {
 		fViewer= (TreeViewer)viewer;
 	}
 	
-	/*
-	 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
-	 */
-	public void elementChanged(ElementChangedEvent event) {
-		processDelta(event.getDelta());
-	}
 	
 	public void processDelta(IJavaElementDelta delta) {
 
@@ -357,7 +207,7 @@ public class PackageFragmentProvider implements IPropertyChangeListener {
 
 			} else if (kind == IJavaElementDelta.ADDED) {
 
-				final Object parent = getParent(element);
+				final Object parent = getHierarchicalPackageParent((IPackageFragment) element);
 				if (parent != null) {
 					postRunnable(new Runnable() {
 						public void run() {
@@ -393,26 +243,16 @@ public class PackageFragmentProvider implements IPropertyChangeListener {
 	}
 
 	private Object getGrandParent(IPackageFragment element) {
-
-		Object parent= findNextLevelParentByElementName(element);
+		Object parent= getHierarchicalPackageParent(element);
 		if (parent instanceof IPackageFragmentRoot) {
 			IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
-			if(isRootProject(root))
+			if (root.getResource() instanceof IProject)
 				return root.getJavaProject();
-			else return root;
+			return root;
+		} else if (parent instanceof IPackageFragment) {
+			return getHierarchicalPackageParent((IPackageFragment) parent);
 		}
-
-		Object grandParent= getParent(parent);
-		if(grandParent==null){
-			return parent;
-		}
-		return grandParent;
-	}
-
-	private boolean isRootProject(IPackageFragmentRoot root) {
-		if (IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH.equals(root.getElementName()))
-			return true;
-		return false;
+		return parent;
 	}
 	
 	private void postRunnable(final Runnable r) {

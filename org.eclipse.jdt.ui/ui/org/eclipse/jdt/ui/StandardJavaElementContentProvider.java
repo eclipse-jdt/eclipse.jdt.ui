@@ -13,16 +13,28 @@ package org.eclipse.jdt.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IParent;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
  
 /**
  * A base content provider for Java elements. It provides access to the
@@ -167,18 +179,18 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 				return getPackageFragmentRoots((IJavaProject)element);
 			
 			if (element instanceof IPackageFragmentRoot) 
-				return getPackageFragments((IPackageFragmentRoot)element);
+				return getPackageFragmentRootContent((IPackageFragmentRoot)element);
 			
 			if (element instanceof IPackageFragment) 
-				return getPackageContents((IPackageFragment)element);
+				return getPackageContent((IPackageFragment)element);
 				
 			if (element instanceof IFolder)
-				return getResources((IFolder)element);
+				return getFolderContent((IFolder)element);
 			
 			if (getProvideMembers() && element instanceof ISourceReference && element instanceof IParent) {
 				return ((IParent)element).getChildren();
 			}
-		} catch (JavaModelException e) {
+		} catch (CoreException e) {
 			return NO_CHILDREN;
 		}		
 		return NO_CHILDREN;	
@@ -231,8 +243,20 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		return internalGetParent(element);			
 	}
 	
-	private Object[] getPackageFragments(IPackageFragmentRoot root) throws JavaModelException {
+	/**
+	 * Evaluates all children of a given {@link IPackageFragmentRoot}. Clients can override this method.
+	 * @param root The root to evaluate the children for.
+	 * @return The children of the root
+	 * @exception JavaModelException if the package fragment root does not exist or if an
+	 *      exception occurs while accessing its corresponding resource
+	 *      
+	 * @since 3.3
+	 */
+	protected Object[] getPackageFragmentRootContent(IPackageFragmentRoot root) throws JavaModelException {
 		IJavaElement[] fragments= root.getChildren();
+		if (isProjectPackageFragmentRoot(root)) {
+			return fragments;
+		}
 		Object[] nonJavaResources= root.getNonJavaResources();
 		if (nonJavaResources == null)
 			return fragments;
@@ -240,7 +264,11 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	}
 	
 	/**
-	 * Note: This method is for internal use only. Clients should not call this method.
+	 * Evaluates all children of a given {@link IJavaProject}. Clients can override this method.
+	 * @param project The Java project to evaluate the children for.
+	 * @return The children of the project. Typically these are package fragment roots but can also be other elements.
+	 * @exception JavaModelException if the Java project does not exist or if an
+	 *      exception occurs while accessing its corresponding resource
 	 */
 	protected Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
 		if (!project.getProject().isOpen())
@@ -253,15 +281,19 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		for (int i= 0; i < roots.length; i++) {
 			IPackageFragmentRoot root= roots[i];
 			if (isProjectPackageFragmentRoot(root)) {
-				Object[] children= root.getChildren();
-				for (int k= 0; k < children.length; k++) 
-					list.add(children[k]);
-			}
-			else if (hasChildren(root)) {
+				Object[] fragments= getPackageFragmentRootContent(root);
+				for (int j= 0; j < fragments.length; j++) {
+					list.add(fragments[j]);
+				}
+			} else {
 				list.add(root);
 			} 
 		}
-		return concatenate(list.toArray(), project.getNonJavaResources());
+		Object[] resources= project.getNonJavaResources();
+		for (int i= 0; i < resources.length; i++) {
+			list.add(resources[i]);
+		}
+		return list.toArray();
 	}
 
 	/**
@@ -271,40 +303,53 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		return jm.getJavaProjects();
 	}
 	
-	private Object[] getPackageContents(IPackageFragment fragment) throws JavaModelException {
+	/**
+	 * Evaluates all children of a given {@link IPackageFragment}. Clients can override this method.
+	 * @param fragment The fragment to evaluate the children for.
+	 * @return The children of the given package fragment.
+	 * @exception JavaModelException if the package fragment does not exist or if an
+	 *      exception occurs while accessing its corresponding resource
+	 *      
+	 * @since 3.3
+	 */
+	protected Object[] getPackageContent(IPackageFragment fragment) throws JavaModelException {
 		if (fragment.getKind() == IPackageFragmentRoot.K_SOURCE) {
 			return concatenate(fragment.getCompilationUnits(), fragment.getNonJavaResources());
 		}
 		return concatenate(fragment.getClassFiles(), fragment.getNonJavaResources());
 	}
-		
-	private Object[] getResources(IFolder folder) {
-		try {
-			IResource[] members= folder.members();
-			IJavaProject javaProject= JavaCore.create(folder.getProject());
-			if (javaProject == null || !javaProject.exists())
-				return members;
-			boolean isFolderOnClasspath = javaProject.isOnClasspath(folder);
-			List nonJavaResources= new ArrayList();
-			// Can be on classpath but as a member of non-java resource folder
-			for (int i= 0; i < members.length; i++) {
-				IResource member= members[i];
-				// A resource can also be a java element
-				// in the case of exclusion and inclusion filters.
-				// We therefore exclude Java elements from the list
-				// of non-Java resources.
-				if (isFolderOnClasspath) {
-					if (javaProject.findPackageFragmentRoot(member.getFullPath()) == null) {
-						nonJavaResources.add(member);
-					} 
-				} else if (!javaProject.isOnClasspath(member)) {
+	
+	/**
+	 * Evaluates all children of a given {@link IFolder}. Clients can override this method.
+	 * @param folder The folder to evaluate the children for.
+	 * @return The children of the given package fragment.
+	 * @exception CoreException if the folder does not exist.
+	 *      
+	 * @since 3.3
+	 */
+	protected Object[] getFolderContent(IFolder folder) throws CoreException {
+		IResource[] members= folder.members();
+		IJavaProject javaProject= JavaCore.create(folder.getProject());
+		if (javaProject == null || !javaProject.exists())
+			return members;
+		boolean isFolderOnClasspath = javaProject.isOnClasspath(folder);
+		List nonJavaResources= new ArrayList();
+		// Can be on classpath but as a member of non-java resource folder
+		for (int i= 0; i < members.length; i++) {
+			IResource member= members[i];
+			// A resource can also be a java element
+			// in the case of exclusion and inclusion filters.
+			// We therefore exclude Java elements from the list
+			// of non-Java resources.
+			if (isFolderOnClasspath) {
+				if (javaProject.findPackageFragmentRoot(member.getFullPath()) == null) {
 					nonJavaResources.add(member);
-				}
+				} 
+			} else if (!javaProject.isOnClasspath(member)) {
+				nonJavaResources.add(member);
 			}
-			return nonJavaResources.toArray();
-		} catch(CoreException e) {
-			return NO_CHILDREN;
 		}
+		return nonJavaResources.toArray();
 	}
 	
 	/**
@@ -392,13 +437,15 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		}
 		return null;
 	}
-	
+		
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 */
 	protected static Object[] concatenate(Object[] a1, Object[] a2) {
 		int a1Len= a1.length;
 		int a2Len= a2.length;
+		if (a1Len == 0) return a2;
+		if (a2Len == 0) return a1;
 		Object[] res= new Object[a1Len + a2Len];
 		System.arraycopy(a1, 0, res, 0, a1Len);
 		System.arraycopy(a2, 0, res, a1Len, a2Len); 

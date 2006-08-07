@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.packageview;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -129,18 +128,71 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		JavaCore.removeElementChangedListener(this);
 		fPackageFragmentProvider.dispose();
 	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider#getPackageFragmentRootContent(org.eclipse.jdt.core.IPackageFragmentRoot)
+	 */
+	protected Object[] getPackageFragmentRootContent(IPackageFragmentRoot root) throws JavaModelException {
+		if (fIsFlatLayout) {
+			return super.getPackageFragmentRootContent(root);
+		}
+		
+		// hierarchical package mode
+		ArrayList result= new ArrayList();
+		fPackageFragmentProvider.getHierarchicalPackageChildren(root, null, result);
+		if (!isProjectPackageFragmentRoot(root)) {
+			Object[] nonJavaResources= root.getNonJavaResources();
+			for (int i= 0; i < nonJavaResources.length; i++) {
+				result.add(nonJavaResources[i]);
+			}
+		}
+		return result.toArray();
+	}
 	
-	// ------ Code which delegates to PackageFragmentProvider ------
-
-	private boolean needsToDelegateGetChildren(Object element) {
-		int type= -1;
-		if (element instanceof IJavaElement)
-			type= ((IJavaElement)element).getElementType();
-		return (!fIsFlatLayout && (type == IJavaElement.PACKAGE_FRAGMENT || type == IJavaElement.PACKAGE_FRAGMENT_ROOT || type == IJavaElement.JAVA_PROJECT || element instanceof IFolder));
-	}		
-
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider#getPackageContent(org.eclipse.jdt.core.IPackageFragment)
+	 */
+	protected Object[] getPackageContent(IPackageFragment fragment) throws JavaModelException {
+		if (fIsFlatLayout) {
+			return super.getPackageContent(fragment);
+		}
+		
+		// hierarchical package mode
+		ArrayList result= new ArrayList();
+		
+		fPackageFragmentProvider.getHierarchicalPackageChildren((IPackageFragmentRoot) fragment.getParent(), fragment, result);
+		Object[] nonPackages= super.getPackageContent(fragment);
+		if (result.isEmpty())
+			return nonPackages;
+		for (int i= 0; i < nonPackages.length; i++) {
+			result.add(nonPackages[i]);
+		}
+		return result.toArray();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider#getFolderContent(org.eclipse.core.resources.IFolder)
+	 */
+	protected Object[] getFolderContent(IFolder folder) throws CoreException {
+		if (fIsFlatLayout) {
+			return super.getFolderContent(folder);
+		}
+		
+		// hierarchical package mode
+		ArrayList result= new ArrayList();
+		
+		fPackageFragmentProvider.getHierarchicalPackagesInFolder(folder, result);
+		Object[] others= super.getFolderContent(folder);
+		if (result.isEmpty())
+			return others;
+		for (int i= 0; i < others.length; i++) {
+			result.add(others[i]);
+		}
+		return result.toArray();
+	}
+	
+	
 	public Object[] getChildren(Object parentElement) {
-		Object[] children= NO_CHILDREN;
 		try {
 			if (parentElement instanceof IJavaModel) 
 				return concatenate(getJavaProjects((IJavaModel)parentElement), getNonJavaProjects((IJavaModel)parentElement));
@@ -150,53 +202,56 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				
 			if (parentElement instanceof IProject) 
 				return ((IProject)parentElement).members();
-					
-			if (needsToDelegateGetChildren(parentElement)) {
-				Object[] packageFragments= fPackageFragmentProvider.getChildren(parentElement);
-				children= getWithParentsResources(packageFragments, parentElement);
-			} else {
-				children= super.getChildren(parentElement);
-			}
-	
-			if (parentElement instanceof IJavaProject) {
-				IJavaProject project= (IJavaProject)parentElement;
-				return rootsAndContainers(project, children);
-			}
-			else
-				return children;
-
+			
+			return super.getChildren(parentElement);
 		} catch (CoreException e) {
 			return NO_CHILDREN;
 		}
 	}
-
-	private Object[] rootsAndContainers(IJavaProject project, Object[] roots) throws JavaModelException { 
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider#getPackageFragmentRoots(org.eclipse.jdt.core.IJavaProject)
+	 */
+	protected Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
+		if (!project.getProject().isOpen())
+			return NO_CHILDREN;
+			
+		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
+		
 		List result= new ArrayList(roots.length);
 		Set containers= new HashSet(roots.length);
-		Set containedRoots= new HashSet(roots.length); 
-		
-		IClasspathEntry[] entries= project.getRawClasspath();
-		for (int i= 0; i < entries.length; i++) {
-			IClasspathEntry entry= entries[i];
-			if (entry != null && entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) { 
-				IPackageFragmentRoot[] roots1= project.findPackageFragmentRoots(entry);
-				containedRoots.addAll(Arrays.asList(roots1));
-				containers.add(entry);
-			}
-		}
+
 		for (int i= 0; i < roots.length; i++) {
-			if (roots[i] instanceof IPackageFragmentRoot) {
-				if (!containedRoots.contains(roots[i])) {
-					result.add(roots[i]);
-				}
-			} else {
-				result.add(roots[i]);
+			IPackageFragmentRoot root= roots[i];
+			IClasspathEntry classpathEntry= root.getRawClasspathEntry();
+			switch (classpathEntry.getEntryKind()) {
+				case IClasspathEntry.CPE_CONTAINER:
+					containers.add(classpathEntry);
+					break;
+				case IClasspathEntry.CPE_SOURCE:
+					if (isProjectPackageFragmentRoot(root)) {
+						// filter out package fragments that correspond to projects and
+						// replace them with the package fragments directly
+						Object[] fragments= getPackageFragmentRootContent(root);
+						for (int j= 0; j < fragments.length; j++) {
+							result.add(fragments[j]);
+						}
+					} else {
+						result.add(root);
+					}
+					break;
+				default:
+					result.add(root);
 			}
 		}
 		for (Iterator each= containers.iterator(); each.hasNext();) {
 			IClasspathEntry element= (IClasspathEntry) each.next();
 			result.add(new ClassPathContainer(project, element));
 		}		
+		Object[] resources= project.getNonJavaResources();
+		for (int i= 0; i < resources.length; i++) {
+			result.add(resources[i]);
+		}
 		return result.toArray();
 	}
 
@@ -208,19 +263,14 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		return model.getNonJavaResources();
 	}
 
-	public Object getParent(Object child) {
-		if (needsToDelegateGetParent(child)) {
-			return fPackageFragmentProvider.getParent(child);
-		} else
-			return super.getParent(child);
-	}
-
 	protected Object internalGetParent(Object element) {
-		// since we insert logical package containers we have to fix
-		// up the parent for package fragment roots so that they refer
-		// to the container and containers refere to the project
-		//
-		if (element instanceof IPackageFragmentRoot) {
+
+		if (!fIsFlatLayout && element instanceof IPackageFragment) {
+			return fPackageFragmentProvider.getHierarchicalPackageParent((IPackageFragment) element);
+		} else if (element instanceof IPackageFragmentRoot) {
+			// since we insert logical package containers we have to fix
+			// up the parent for package fragment roots so that they refer
+			// to the container and containers refere to the project
 			IPackageFragmentRoot root= (IPackageFragmentRoot)element;
 			IJavaProject project= root.getJavaProject();
 			try {
@@ -235,36 +285,10 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			} catch (JavaModelException e) {
 				// fall through
 			}
-		}
-		if (element instanceof ClassPathContainer) {
+		} else if (element instanceof ClassPathContainer) {
 			return ((ClassPathContainer)element).getJavaProject();
 		}
 		return super.internalGetParent(element);
-	}
-	
-	private boolean needsToDelegateGetParent(Object element) {
-		int type= -1;
-		if (element instanceof IJavaElement)
-			type= ((IJavaElement)element).getElementType();
-		return (!fIsFlatLayout && type == IJavaElement.PACKAGE_FRAGMENT);
-	}		
-
-	/**
-	 * Returns the given objects with the resources of the parent.
-	 */
-	private Object[] getWithParentsResources(Object[] existingObject, Object parent) {
-		Object[] objects= super.getChildren(parent);
-		List list= new ArrayList();
-		// Add everything that is not a PackageFragment
-		for (int i= 0; i < objects.length; i++) {
-			Object object= objects[i];
-			if (!(object instanceof IPackageFragment)) {
-				list.add(object);
-			}
-		}
-		if (existingObject != null)
-			list.addAll(Arrays.asList(existingObject));
-		return list.toArray();
 	}
 
 	/* (non-Javadoc)

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.core.resources.IFolder;
 
 import org.eclipse.jface.util.Assert;
@@ -43,49 +45,40 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 
 
 	public String getText(Object element) {
-		
-		if (fIsFlatLayout || !(element instanceof IPackageFragment))
-			return super.getText(element);			
-
-		IPackageFragment fragment = (IPackageFragment) element;
-		
-		if (fragment.isDefaultPackage()) {
-			return super.getText(fragment);
-		} else {
-			Object parent= fContentProvider.getPackageFragmentProvider().getParent(fragment);
+		if (!fIsFlatLayout && element instanceof IPackageFragment) {
+			IPackageFragment fragment = (IPackageFragment) element;
+			Object parent= fContentProvider.getPackageFragmentProvider().getHierarchicalPackageParent(fragment);
 			if (parent instanceof IPackageFragment) {
 				return getNameDelta((IPackageFragment) parent, fragment);
-			} else if (parent instanceof IFolder) {
-				int prefixLength= getPrefixLength((IFolder) parent);
-				return fragment.getElementName().substring(prefixLength);
+			} else if (parent instanceof IFolder) { // bug 152735
+				return getNameDelta((IFolder) parent, fragment);
 			}
-			else return super.getText(fragment);
 		}
+		return super.getText(element);
 	}
 	
-	private int getPrefixLength(IFolder folder) {
-		Object parent= fContentProvider.getParent(folder);
-		int folderNameLenght= folder.getName().length() + 1;
-		if(parent instanceof IPackageFragment) {
-			String fragmentName= ((IPackageFragment)parent).getElementName();
-			return fragmentName.length() + 1 + folderNameLenght;
-		} else if (parent instanceof IFolder) {
-			return getPrefixLength((IFolder)parent) + folderNameLenght;
-		} else {
-			return folderNameLenght;
+	private String getNameDelta(IPackageFragment parent, IPackageFragment fragment) {
+		String prefix= parent.getElementName() + '.';
+		String fullName= fragment.getElementName();
+		if (fullName.startsWith(prefix)) {
+			return fullName.substring(prefix.length());
 		}
+		return fullName;
 	}
 	
-	private String getNameDelta(IPackageFragment topFragment, IPackageFragment bottomFragment) {
-		
-		String topName= topFragment.getElementName();
-		String bottomName= bottomFragment.getElementName();
-		
-		if(topName.equals(bottomName))
-			return topName;
-		
-		String deltaname= bottomName.substring(topName.length()+1);	
-		return deltaname;
+	private String getNameDelta(IFolder parent, IPackageFragment fragment) {
+		IPath prefix= parent.getFullPath();
+		IPath fullPath= fragment.getPath();
+		if (prefix.isPrefixOf(fullPath)) {
+			StringBuffer buf= new StringBuffer();
+			for (int i= prefix.segmentCount(); i < fullPath.segmentCount(); i++) {
+				if (buf.length() > 0)
+					buf.append('.');
+				buf.append(fullPath.segment(i));
+			}
+			return buf.toString();
+		}
+		return fragment.getElementName();
 	}
 	
 	public void setIsFlatLayout(boolean state) {
