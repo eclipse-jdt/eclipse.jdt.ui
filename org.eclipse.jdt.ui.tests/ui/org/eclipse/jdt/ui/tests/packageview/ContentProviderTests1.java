@@ -84,8 +84,8 @@ public class ContentProviderTests1 extends TestCase {
 
 	private IPackageFragment fPack5;
 	private IPackageFragment fPack6;
-	private IFile fFile1;
-	private IFile fFile2;
+	private IFile fDotClasspathFile;
+	private IFile fDotProjectFile;
 	private ICompilationUnit fCUIMoney;
 	private ICompilationUnit fCUMoney;
 	private ICompilationUnit fCUMoneyBag;
@@ -108,7 +108,7 @@ public class ContentProviderTests1 extends TestCase {
 	//---------Test for getChildren-------------------
 
 	public void testGetChildrenProjectWithSourceFolders() throws Exception{
-		Object[] expectedChildren= new Object[]{fRoot1, fFile1, fFile2};
+		Object[] expectedChildren= new Object[]{fRoot1, fDotClasspathFile, fDotProjectFile};
 		Object[] children= fProvider.getChildren(fJProject2);
 		assertTrue("Wrong children found for project", compareArrays(children, expectedChildren));//$NON-NLS-1$
 	}
@@ -274,7 +274,11 @@ public class ContentProviderTests1 extends TestCase {
 		fJProject2.setRawClasspath(new IClasspathEntry[] {element.getClasspathEntry()}, null);
 		Object[] expectedChildren= new Object[]{fPack4.getResource(), fPack5};
 		Object[] children= fProvider.getChildren(fPack3.getResource());
-		assertTrue("Wrong children found for project", compareArrays(children, expectedChildren));//$NON-NLS-1$
+		assertTrue("Wrong children found for folder", compareArrays(children, expectedChildren));//$NON-NLS-1$
+		
+		expectedChildren= new Object[]{fPack1.getResource(), fPack2.getResource(), fPack3.getResource()};
+		children= fProvider.getChildren(fRoot1);
+		assertTrue("Wrong children found for source folder", compareArrays(children, expectedChildren));//$NON-NLS-1$
 	}
 	
 //	public void testAddWorkingCopyCU() throws Exception {
@@ -340,13 +344,13 @@ public class ContentProviderTests1 extends TestCase {
 			if(object instanceof IFile){
 				IFile file = (IFile) object;
 				if(".classpath".equals(file.getName()))//$NON-NLS-1$
-					fFile1= file;
+					fDotClasspathFile= file;
 				else if (".project".equals(file.getName()))//$NON-NLS-1$
-					fFile2= file;
+					fDotProjectFile= file;
 			}
 		}
-		assertNotNull(fFile1);
-		assertNotNull(fFile2);
+		assertNotNull(fDotClasspathFile);
+		assertNotNull(fDotProjectFile);
 		
 		//set up project #1 : External Jar and zip file
 		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(fJProject1, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
