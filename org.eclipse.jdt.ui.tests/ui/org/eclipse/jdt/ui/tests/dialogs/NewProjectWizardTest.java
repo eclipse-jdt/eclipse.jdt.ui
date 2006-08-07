@@ -78,7 +78,6 @@ public class NewProjectWizardTest extends TestCase {
         TestSuite suite= new TestSuite(THIS);
         fTestSetup= new NewProjectTestSetup(suite);
         suite.addTestSuite(NewEmptyProjectWizardTest.THIS);
-        suite.addTestSuite(NewProjectWizardOperationTest.THIS);
         return fTestSetup;
     }
     

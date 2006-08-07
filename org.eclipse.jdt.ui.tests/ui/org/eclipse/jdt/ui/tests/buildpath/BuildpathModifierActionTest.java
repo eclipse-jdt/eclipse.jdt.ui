@@ -50,7 +50,10 @@ public class BuildpathModifierActionTest extends TestCase {
 	}
 	
 	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+		TestSuite result= new TestSuite();
+		result.addTest(new ProjectTestSetup(new TestSuite(THIS)));
+		result.addTest(new TestSuite(BuildpathModifierActionEnablementTest.THIS));
+		return result;
 	}
 
 	public static Test suite() {
