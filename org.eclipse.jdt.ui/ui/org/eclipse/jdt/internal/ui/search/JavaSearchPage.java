@@ -233,6 +233,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	// Dialog store id constants
 	private final static String PAGE_NAME= "JavaSearchPage"; //$NON-NLS-1$
 	private final static String STORE_CASE_SENSITIVE= "CASE_SENSITIVE"; //$NON-NLS-1$
+	private final static String STORE_INCLUDE_MASK= "INCLUDE_MASK"; //$NON-NLS-1$
 	private final static String STORE_HISTORY= "HISTORY"; //$NON-NLS-1$
 	private final static String STORE_HISTORY_SIZE= "HISTORY_SIZE"; //$NON-NLS-1$
 	
@@ -365,7 +366,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	}
 	
 	private int getIncludeMask() {
-		int mask= JavaSearchScopeFactory.NO_JRE;
+		int mask= 0;
 		for (int i= 0; i < fIncludeMasks.length; i++) {
 			Button button= fIncludeMasks[i];
 			if (button.getSelection()) {
@@ -376,11 +377,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	}
 	
 	private void setIncludeMask(int includeMask, int limitTo) {
-		boolean includeAll= forceIncludeAll(limitTo);
 		for (int i= 0; i < fIncludeMasks.length; i++) {
 			Button button= fIncludeMasks[i];
-			button.setSelection(includeAll || (includeMask & getIntData(button)) != 0);
-			button.setEnabled(!includeAll);
+			button.setSelection((includeMask & getIntData(button)) != 0);
 		}
 	}
 	
@@ -712,24 +711,17 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	}
 	
 	private Control createIncludeMask(Composite parent) {
-		Button includeJRECheckbox= createButton(parent, SWT.CHECK, SearchMessages.SearchPage_searchJRE_label, JavaSearchScopeFactory.JRE, true);
-		includeJRECheckbox.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
-
+		Group result= new Group(parent, SWT.NONE);
+		result.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		result.setText(SearchMessages.SearchPage_searchIn_label); 
+		result.setLayout(new GridLayout(4, false));
 		fIncludeMasks= new Button[] {
-				includeJRECheckbox
+			createButton(result, SWT.CHECK, SearchMessages.SearchPage_searchIn_sources, JavaSearchScopeFactory.SOURCES, true),
+			createButton(result, SWT.CHECK, SearchMessages.SearchPage_searchIn_jre, JavaSearchScopeFactory.JRE, false),
+			createButton(result, SWT.CHECK, SearchMessages.SearchPage_searchIn_projects, JavaSearchScopeFactory.PROJECTS, true),
+			createButton(result, SWT.CHECK, SearchMessages.SearchPage_searchIn_libraries, JavaSearchScopeFactory.LIBS, true),
 		};
-		return includeJRECheckbox;
-		
-//		Group result= new Group(parent, SWT.NONE);
-//		result.setText("Report Matches In"); 
-//		result.setLayout(new GridLayout(4, false));
-//		fIncludeMasks= new Button[] {
-//			createButton(result, SWT.CHECK, "Sources", JavaSearchScopeFactory.SOURCES, true),
-//			createButton(result, SWT.CHECK, "Libraries", JavaSearchScopeFactory.LIBS, true),
-//			createButton(result, SWT.CHECK, "Referenced projects", JavaSearchScopeFactory.PROJECTS, true),
-//			createButton(result, SWT.CHECK, "JRE system libraries", JavaSearchScopeFactory.JRE, false),
-//		};
-//		return result;
+		return result;
 	}
 	
 	private Button createButton(Composite parent, int style, String text, int data, boolean isSelected) {
@@ -895,7 +887,13 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		if (!fPreviousSearchPatterns.isEmpty()) {
 			return (SearchPatternData) fPreviousSearchPatterns.get(0);
 		}
-		return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, "", null, JavaSearchScopeFactory.NO_JRE); //$NON-NLS-1$
+		int includeMask;
+		try {
+			includeMask= getDialogSettings().getInt(STORE_INCLUDE_MASK);
+		} catch (NumberFormatException e) {
+			includeMask= JavaSearchScopeFactory.NO_JRE;
+		}
+		return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, "", null, includeMask); //$NON-NLS-1$
 	}	
 
 	/*
@@ -958,11 +956,12 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	}
 	
 	/**
-	 * Stores it current configuration in the dialog store.
+	 * Stores the current configuration in the dialog store.
 	 */
 	private void writeConfiguration() {
 		IDialogSettings s= getDialogSettings();
 		s.put(STORE_CASE_SENSITIVE, fIsCaseSensitive);
+		s.put(STORE_INCLUDE_MASK, getIncludeMask());
 		
 		int historySize= Math.min(fPreviousSearchPatterns.size(), HISTORY_SIZE);
 		s.put(STORE_HISTORY_SIZE, historySize);

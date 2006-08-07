@@ -80,6 +80,11 @@ public final class SearchMessages extends NLS {
 	public static String SearchPage_limitTo_writeReferences;
 	public static String SearchPage_expression_label;
 	public static String SearchPage_expression_caseSensitive;
+	public static String SearchPage_searchIn_jre;
+	public static String SearchPage_searchIn_label;
+	public static String SearchPage_searchIn_libraries;
+	public static String SearchPage_searchIn_projects;
+	public static String SearchPage_searchIn_sources;
 	public static String SearchPage_searchJRE_label;
 	public static String SearchUtil_workingSetConcatenation;
 	public static String Search_FindDeclarationAction_label;
