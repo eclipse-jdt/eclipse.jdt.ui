@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreePath;
@@ -80,7 +81,10 @@ public class RenameUserInterfaceStarter extends UserInterfaceStarter {
 			} else {
 				target= (ISetSelectionTarget)part;
 			}
-			ISelection s= part.getSite().getSelectionProvider().getSelection();
+			ISelectionProvider selectionProvider= part.getSite().getSelectionProvider();
+			if (selectionProvider == null)
+				return;
+			ISelection s= selectionProvider.getSelection();
 			if (!(s instanceof IStructuredSelection))
 				return;
 			IStructuredSelection selection= (IStructuredSelection)s;
