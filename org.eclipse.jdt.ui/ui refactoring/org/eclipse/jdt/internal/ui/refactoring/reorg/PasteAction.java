@@ -500,7 +500,9 @@ public class PasteAction extends SelectionDispatchAction{
 					String sourceFolderName= store.getString(PreferenceConstants.SRCBIN_SRCNAME);
 					if (store.getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ) && sourceFolderName.length() > 0) {
 						IFolder folder= project.getFolder(sourceFolderName);
-						folder.create(false, true, new SubProgressMonitor(pm, 1));
+						if (! folder.exists()) {
+							folder.create(false, true, new SubProgressMonitor(pm, 1));
+						}
 						srcFolder= folder;
 					} else {
 						srcFolder= project;
