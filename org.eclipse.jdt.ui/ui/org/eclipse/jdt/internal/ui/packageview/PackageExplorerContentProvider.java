@@ -228,7 +228,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				case IClasspathEntry.CPE_CONTAINER:
 					containers.add(classpathEntry);
 					break;
-				case IClasspathEntry.CPE_SOURCE:
+				default:
 					if (isProjectPackageFragmentRoot(root)) {
 						// filter out package fragments that correspond to projects and
 						// replace them with the package fragments directly
@@ -240,8 +240,6 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 						result.add(root);
 					}
 					break;
-				default:
-					result.add(root);
 			}
 		}
 		for (Iterator each= containers.iterator(); each.hasNext();) {

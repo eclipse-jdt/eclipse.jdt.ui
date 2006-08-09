@@ -1144,9 +1144,15 @@ public class JavaElementLabels {
 		if (rootQualified) {
 			buf.append(root.getPath().makeRelative().toString());
 		} else {
-			if (resource != null)
-				buf.append(resource.getProjectRelativePath().toString());
-			else
+			if (resource != null) {
+				IPath projectRelativePath= resource.getProjectRelativePath();
+				if (projectRelativePath.segmentCount() == 0) {
+					buf.append(resource.getName());
+					referencedQualified= false;
+				} else {
+					buf.append(projectRelativePath.toString());
+				}
+			} else
 				buf.append(root.getElementName());
 			if (referencedQualified) {
 				buf.append(CONCAT_STRING);

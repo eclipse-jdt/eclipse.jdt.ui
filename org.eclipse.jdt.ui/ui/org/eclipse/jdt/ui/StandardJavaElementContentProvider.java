@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -393,8 +392,8 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 */
 	protected boolean isProjectPackageFragmentRoot(IPackageFragmentRoot root) {
-		IResource resource= root.getResource();
-		return (resource instanceof IProject);
+		IJavaProject javaProject= root.getJavaProject();
+		return javaProject != null && javaProject.getPath().equals(root.getPath());
 	}
 	
 	/**
