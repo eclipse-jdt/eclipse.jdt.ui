@@ -367,6 +367,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 					IJavaProject project= JavaCore.create(fCurrProject);
 					Map options= project.getOptions(false);
 					JavaModelUtil.setCompilanceOptions(options, compliance);
+					JavaModelUtil.setDefaultClassfileOptions(options, compliance); // complete compliance options
 					project.setOptions(options);
 				}
 			}
