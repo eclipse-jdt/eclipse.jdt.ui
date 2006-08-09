@@ -460,7 +460,12 @@ public class ReorgCorrectionsSubProcessor {
 				JavaCore.setOptions(map);
 			} else {
 				Map map= fProject.getOptions(false);
+				int optionsCount= map.size();
 				JavaModelUtil.set50CompilanceOptions(map);
+				if (map.size() > optionsCount) {
+					// options have been added -> ensure that all compliance options from preference page set
+					JavaModelUtil.setDefaultClassfileOptions(map, JavaCore.VERSION_1_5);
+				}
 				fProject.setOptions(map);
 			}
 			try {

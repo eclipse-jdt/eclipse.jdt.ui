@@ -516,6 +516,7 @@ public class PasteAction extends SelectionDispatchAction{
 					if (fCompilerCompliance != null) {
 						Map options= javaProject.getOptions(false);
 						JavaModelUtil.setCompilanceOptions(options, fCompilerCompliance);
+						JavaModelUtil.setDefaultClassfileOptions(options, fCompilerCompliance);
 						javaProject.setOptions(options);
 					}
 					IClasspathEntry srcEntry= JavaCore.newSourceEntry(srcFolder.getFullPath());
