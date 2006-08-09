@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.text.edits.TextEdit;
@@ -430,6 +431,9 @@ public class PasteAction extends SelectionDispatchAction{
 			final IEditorPart[] editorPart= new IEditorPart[1];
 			
 			IRunnableWithProgress op= new IRunnableWithProgress() {
+				private IPath fVMPath;
+				private String fCompilerCompliance;
+
 				public void run(IProgressMonitor pm) throws InvocationTargetException {
 					pm.beginTask("", 5); //$NON-NLS-1$
 					
@@ -484,9 +488,9 @@ public class PasteAction extends SelectionDispatchAction{
 				private IPackageFragment createNewProject(CuParser cuParser, SubProgressMonitor pm) throws CoreException {
 					pm.beginTask("", 10); //$NON-NLS-1$
 					IProject project;
-					int i= 0;
+					int i= 1;
 					do {
-						String name= Messages.format(ReorgMessages.PasteAction_projectName, i == 0 ? (Object) "" : new Integer(i)); //$NON-NLS-1$
+						String name= Messages.format(ReorgMessages.PasteAction_projectName, i == 1 ? (Object) "" : new Integer(i)); //$NON-NLS-1$
 						project= JavaPlugin.getWorkspace().getRoot().getProject(name);
 						i++;
 					} while (project.exists());
@@ -507,15 +511,22 @@ public class PasteAction extends SelectionDispatchAction{
 					} else {
 						srcFolder= project;
 					}
+					
+					computeLatestVM();
+					if (fCompilerCompliance != null) {
+						Map options= javaProject.getOptions(false);
+						JavaModelUtil.setCompilanceOptions(options, fCompilerCompliance);
+						javaProject.setOptions(options);
+					}
 					IClasspathEntry srcEntry= JavaCore.newSourceEntry(srcFolder.getFullPath());
-					IClasspathEntry jreEntry= JavaCore.newContainerEntry(getLatestVMPath());
+					IClasspathEntry jreEntry= JavaCore.newContainerEntry(fVMPath);
 					IPath outputLocation= BuildPathsBlock.getDefaultOutputLocation(javaProject);
 					IClasspathEntry[] cpes= new IClasspathEntry[] { srcEntry, jreEntry };
 					javaProject.setRawClasspath(cpes, outputLocation, new SubProgressMonitor(pm, 1));
 					return javaProject.getPackageFragmentRoot(srcFolder).getPackageFragment(cuParser.getPackageName());
 				}
 
-				private IPath getLatestVMPath() {
+				private void computeLatestVM() {
 					IVMInstall bestVM= JavaRuntime.getDefaultVMInstall();
 					String bestVersion= getVMVersion(bestVM);
 					
@@ -547,18 +558,21 @@ public class PasteAction extends SelectionDispatchAction{
 						}
 					}
 					
-					if (bestEE != null)
-						return JavaRuntime.newJREContainerPath(bestEE);
-					else if (bestVM != null)
-						return JavaRuntime.newJREContainerPath(bestVM);
-					else
-						return JavaRuntime.newDefaultJREContainerPath();
+					if (bestEE != null) {
+						fVMPath= JavaRuntime.newJREContainerPath(bestEE);
+						fCompilerCompliance= bestVersion;
+					} else if (bestVM != null) {
+						fVMPath= JavaRuntime.newJREContainerPath(bestVM);
+						fCompilerCompliance= bestVersion;
+					} else {
+						fVMPath= JavaRuntime.newDefaultJREContainerPath();
+					}
 				}
 
 				private String getVMVersion(IVMInstall vm) {
 					if (vm instanceof IVMInstall2) {
 						IVMInstall2 vm2= (IVMInstall2) vm;
-						return vm2.getJavaVersion();
+						return JavaModelUtil.getCompilerCompliance(vm2, null);
 					} else {
 						return null;
 					}
