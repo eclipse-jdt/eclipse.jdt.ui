@@ -11,10 +11,8 @@
 package org.eclipse.jdt.internal.ui.packageview;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -216,36 +214,34 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		if (!project.getProject().isOpen())
 			return NO_CHILDREN;
 			
-		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-		
-		List result= new ArrayList(roots.length);
-		Set containers= new HashSet(roots.length);
+		List result= new ArrayList();
 
+		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 		for (int i= 0; i < roots.length; i++) {
 			IPackageFragmentRoot root= roots[i];
 			IClasspathEntry classpathEntry= root.getRawClasspathEntry();
-			switch (classpathEntry.getEntryKind()) {
-				case IClasspathEntry.CPE_CONTAINER:
-					containers.add(classpathEntry);
-					break;
-				default:
-					if (isProjectPackageFragmentRoot(root)) {
-						// filter out package fragments that correspond to projects and
-						// replace them with the package fragments directly
-						Object[] fragments= getPackageFragmentRootContent(root);
-						for (int j= 0; j < fragments.length; j++) {
-							result.add(fragments[j]);
-						}
-					} else {
-						result.add(root);
+			if (classpathEntry.getEntryKind() != IClasspathEntry.CPE_CONTAINER) {
+				if (isProjectPackageFragmentRoot(root)) {
+					// filter out package fragments that correspond to projects and
+					// replace them with the package fragments directly
+					Object[] fragments= getPackageFragmentRootContent(root);
+					for (int j= 0; j < fragments.length; j++) {
+						result.add(fragments[j]);
 					}
-					break;
+				} else {
+					result.add(root);
+				}
 			}
 		}
-		for (Iterator each= containers.iterator(); each.hasNext();) {
-			IClasspathEntry element= (IClasspathEntry) each.next();
-			result.add(new ClassPathContainer(project, element));
-		}		
+		
+		// separate loop to make sure all containers are on the classpath
+		IClasspathEntry[] rawClasspath= project.getRawClasspath();
+		for (int i= 0; i < rawClasspath.length; i++) {
+			IClasspathEntry classpathEntry= rawClasspath[i];
+			if (classpathEntry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+				result.add(new ClassPathContainer(project, classpathEntry));
+			}	
+		}	
 		Object[] resources= project.getNonJavaResources();
 		for (int i= 0; i < resources.length; i++) {
 			result.add(resources[i]);
