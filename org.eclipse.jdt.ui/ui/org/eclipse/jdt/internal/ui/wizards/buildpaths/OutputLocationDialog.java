@@ -224,6 +224,9 @@ public class OutputLocationDialog extends StatusDialog {
 		
 		Path outputPath= (new Path(pathStr));
 		pathStr= outputPath.lastSegment();
+		if (pathStr == null)
+			return;
+		
 		if (pathStr.equals(".settings") && outputPath.segmentCount() == 1) { //$NON-NLS-1$
 			fContainerFieldStatus.setWarning(NewWizardMessages.OutputLocation_SettingsAsLocation);
 			return;
