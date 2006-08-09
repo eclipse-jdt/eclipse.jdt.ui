@@ -20,6 +20,7 @@ import java.util.concurrent.Callable;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
@@ -252,6 +253,18 @@ public class JavaElement extends JEAttribute {
 				return createOptions(this, project.getOptions(true));
 			}
 		});
+		result.add(new JavaElementChildrenProperty(this, "RAW CLASSPATH") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createCPEntries(this, project.getRawClasspath());
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "RESOLVED CLASSPATH") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createCPEntries(this, project.getResolvedClasspath(false));
+			}
+		});
 	}
 	
 	private void addPackageFragmentRootChildren(ArrayList<JEAttribute> result, final IPackageFragmentRoot packageFragmentRoot) {
@@ -453,6 +466,15 @@ public class JavaElement extends JEAttribute {
 				resourceChildren[i]= new JavaElementProperty(parent, "", resource);
 		}
 		return resourceChildren;
+	}
+	
+	static JEAttribute[] createCPEntries(JEAttribute parent, IClasspathEntry[] entries) {
+		JEAttribute[] entryChildren= new JEAttribute[entries.length];
+		for (int i= 0; i < entries.length; i++) {
+			IClasspathEntry entry= entries[i];
+			entryChildren[i]= new JavaElementProperty(parent, null, entry);
+		}
+		return entryChildren;
 	}
 
 	static JEAttribute[] createOptions(JEAttribute parent, Map<String, String> options) {
