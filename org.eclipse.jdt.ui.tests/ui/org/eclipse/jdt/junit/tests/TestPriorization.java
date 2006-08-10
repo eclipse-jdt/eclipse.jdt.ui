@@ -12,7 +12,9 @@
 package org.eclipse.jdt.junit.tests;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import junit.extensions.TestDecorator;
 import junit.extensions.TestSetup;
@@ -34,7 +36,7 @@ public class TestPriorization extends TestCase {
 		String[] expected= {
 				"testF", "testD", "testE"
 		};
-		assertTrue(checkOrder(expected, order));
+		checkOrder(expected, order);
 	}
 
 	public void testReorderCustomSuite() {
@@ -58,7 +60,7 @@ public class TestPriorization extends TestCase {
 				"testF", "testD", "testE"
 		};
 		//printOrder(order);
-		assertTrue(checkOrder(expected, order));
+		checkOrder(expected, order);
 	}
 
 	public void testReorderSimpleWithDecorator() {
@@ -81,7 +83,7 @@ public class TestPriorization extends TestCase {
 		String[] expected= {
 				"testF", "testD", "testE"
 		};
-		assertTrue(checkOrder(expected, order));
+		checkOrder(expected, order);
 	}
 
 	public void testReorderWithPropagation() {
@@ -108,7 +110,7 @@ public class TestPriorization extends TestCase {
 		String[] expected= {
 				"testF", "testD", "testE", "testA", "testB", "testC", 
 		};
-		assertTrue(checkOrder(expected, order));
+		checkOrder(expected, order);
 	}
 
 	public void testReorderWithPropagationWithDecorator() {
@@ -140,7 +142,7 @@ public class TestPriorization extends TestCase {
 		String[] expected= {
 				"testF", "testD", "testE", "testA", "testB", "testC", 
 		};
-		assertTrue(checkOrder(expected, order));
+		checkOrder(expected, order);
 	}
 	
 	public void testReorderWithPropagation2() {
@@ -175,7 +177,7 @@ public class TestPriorization extends TestCase {
 		String[] expected= {
 				"testF", "testD", "testE", "testA", "testB", "testC", "testX", "testY", "testZ",
 		};
-		assertTrue(checkOrder(expected, order));
+		checkOrder(expected, order);
 	}
 	
 	public void testReorderWithPropagationBug() {
@@ -211,7 +213,7 @@ public class TestPriorization extends TestCase {
 				"testF", "testE", "testD", "testA", "testB", "testC", "testX", "testY", "testZ",
 		};
 		//printOrder(order);
-		assertTrue(checkOrder(expected, order));
+		checkOrder(expected, order);
 	}
 
 	public void testReorderWithPropagation3() {
@@ -246,7 +248,7 @@ public class TestPriorization extends TestCase {
 		String[] expected= {
 				"testF", "testD", "testE", "testA", "testB", "testC", "testZ", "testX", "testY",
 		};
-		assertTrue(checkOrder(expected, order));
+		checkOrder(expected, order);
 	}
 	
 	public void testReorder() {
@@ -277,10 +279,25 @@ public class TestPriorization extends TestCase {
 		List order= new ArrayList();
 		collectOrder(reordered, order);
 
-		String[] expected2= {
-				"testF", "testD", "testE", "testA", "testB", "testC", "testZ", "testX", "testY"
-		};
-		assertTrue(checkOrder(expected2, order));
+		// can't check for exact order, since order of Class.getDeclaredMethods() is unspecified (bug 144503)
+		List suiteTests= new ArrayList(Arrays.asList(new String[] { "testX", "testY", "testZ" }));
+		List suite1Tests= new ArrayList(Arrays.asList(new String[] { "testA", "testB", "testC" }));
+		List suite2Tests= new ArrayList(Arrays.asList(new String[] { "testD", "testE", "testF" }));
+		
+		assertEquals("testF", (String) order.get(0));
+		assertEquals("testZ", (String) order.get(6));
+		for (int i= 0; i < 3; i++) {
+			String test= (String) order.get(i);
+			assertTrue(test, suite2Tests.remove(test));
+		}
+		for (int i= 3; i < 6; i++) {
+			String test= (String) order.get(i);
+			assertTrue(test, suite1Tests.remove(test));
+		}
+		for (int i= 6; i < 9; i++) {
+			String test= (String) order.get(i);
+			assertTrue(test, suiteTests.remove(test));
+		}
 	}
 
 	private TestSuite createSuiteDEF() {
@@ -320,14 +337,19 @@ public class TestPriorization extends TestCase {
 	}
 
 
-	private boolean checkOrder(String[] expected, List order) {
-		for (int i= 0; i < expected.length; i++) {
-			String s= (String)order.get(i);
-			s= s.substring(0, s.indexOf('('));
-			if (!s.equals(expected[i]))
-				return false;
+	private void checkOrder(String[] expected, List order) {
+//		assertEquals(Arrays.asList(expected), order);
+		
+		assertEquals(enumerate(Arrays.asList(expected)), enumerate(order));
+	}
+
+	private static String enumerate(List list) {
+		StringBuffer buf= new StringBuffer();
+		for (Iterator iter= list.iterator(); iter.hasNext();) {
+			String s= (String) iter.next();
+			buf.append(s).append('\n');
 		}
-		return true;
+		return buf.toString();
 	}
 
 	/*
@@ -341,7 +363,9 @@ public class TestPriorization extends TestCase {
 
 	private void collectOrder(Test suite, List order) {
 		if (suite instanceof TestCase) {
-			order.add(suite.toString());
+			String s= suite.toString();
+			s= s.substring(0, s.indexOf('('));
+			order.add(s);
 		} else if (suite instanceof TestSuite) {
 			TestSuite aSuite= (TestSuite)suite;
 			for (Enumeration e= aSuite.tests(); e.hasMoreElements();) {

@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringBufferInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +33,7 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -78,6 +80,9 @@ public abstract class RefactoringTest extends TestCase {
 	protected static final String TEST_OUTPUT_INFIX= "/out/";
 	protected static final String CONTAINER= "src";
 	
+	protected static final List/*<String>*/ PROJECT_RESOURCE_CHILDREN= Arrays.asList(new String[] {
+			".project", ".classpath", ".settings" });
+	
 	public RefactoringTest(String name) {
 		super(name);
 	}
@@ -98,6 +103,11 @@ public abstract class RefactoringTest extends TestCase {
 		performDummySearch(getPackageP());
 	}	
 
+	/**
+	 * Removes contents of {@link #getPackageP()}, of {@link #getRoot()} (except for p) and
+	 * of the Java project (except for src and the JRE library).
+	 * @throws Exception 
+	 */
 	protected void tearDown() throws Exception {
 		refreshFromLocal();	
 		performDummySearch();
@@ -121,6 +131,47 @@ public abstract class RefactoringTest extends TestCase {
 					//try to delete'em all
 					e.printStackTrace();
 				}	
+			}
+		}
+		
+		restoreTestProject();
+	}
+
+	private void restoreTestProject() throws Exception {
+		IJavaProject javaProject= getRoot().getJavaProject();
+		if (javaProject.exists()) {
+			IClasspathEntry srcEntry= getRoot().getRawClasspathEntry();
+			IClasspathEntry jreEntry= RefactoringTestSetup.getJRELibrary().getRawClasspathEntry();
+			IClasspathEntry[] cpes= javaProject.getRawClasspath();
+			ArrayList newCPEs= new ArrayList();
+			boolean cpChanged= false;
+			for (int i= 0; i < cpes.length; i++) {
+				IClasspathEntry cpe= cpes[i];
+				if (cpe.equals(srcEntry) || cpe.equals(jreEntry)) {
+					newCPEs.add(cpe);
+				} else {
+					cpChanged= true;
+				}
+			}
+			if (cpChanged) {
+				IClasspathEntry[] newCPEsArray= (IClasspathEntry[]) newCPEs.toArray(new IClasspathEntry[newCPEs.size()]);
+				javaProject.setRawClasspath(newCPEsArray, null);
+			}
+		
+			Object[] nonJavaResources= javaProject.getNonJavaResources();
+			for (int i= 0; i < nonJavaResources.length; i++) {
+				Object kid= nonJavaResources[i];
+				if (kid instanceof IResource) {
+					IResource resource= (IResource) kid;
+					if (! PROJECT_RESOURCE_CHILDREN.contains(resource.getName())) {
+						try {
+							resource.delete(true, null);
+						} catch (CoreException e) {
+							//try to delete'em all
+							e.printStackTrace();
+						}
+					}
+				}
 			}
 		}
 	}

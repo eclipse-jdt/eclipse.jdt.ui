@@ -37,10 +37,17 @@ public class RefactoringTestSetup extends AbstractRefactoringTestSetup {
 	private static IPackageFragmentRoot fgRoot;
 	private static IPackageFragment fgPackageP;
 	private static IJavaProject fgJavaTestProject;
+	private static IPackageFragmentRoot fgJRELibrary;
 	
 	public static IPackageFragmentRoot getDefaultSourceFolder() throws Exception {
 		if (fgRoot != null) 
 			return fgRoot;
+		throw new Exception(RefactoringTestSetup.class.getName() + " not initialized");
+	}
+	
+	public static IPackageFragmentRoot getJRELibrary() throws Exception {
+		if (fgJRELibrary != null) 
+			return fgJRELibrary;
 		throw new Exception(RefactoringTestSetup.class.getName() + " not initialized");
 	}
 	
@@ -65,7 +72,7 @@ public class RefactoringTestSetup extends AbstractRefactoringTestSetup {
 			int breakpointTarget= 0; breakpointTarget++;
 		}
 		fgJavaTestProject= JavaProjectHelper.createJavaProject("TestProject"+System.currentTimeMillis(), "bin");
-		JavaProjectHelper.addRTJar(fgJavaTestProject);
+		fgJRELibrary= JavaProjectHelper.addRTJar(fgJavaTestProject);
 		fgRoot= JavaProjectHelper.addSourceContainer(fgJavaTestProject, CONTAINER);
 		fgPackageP= fgRoot.createPackageFragment("p", true, null);
 		

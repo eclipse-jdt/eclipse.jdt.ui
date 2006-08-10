@@ -13,9 +13,13 @@ package org.eclipse.jdt.ui.tests.reorg;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
+import java.util.TreeMap;
 
 import junit.framework.Test;
+import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
@@ -59,7 +63,24 @@ public class DeleteTest extends RefactoringTest{
 	}
 
 	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
+		TestSuite classSuite= new TestSuite(clazz);
+		
+		// Last tests need to delete package p. Make sure they are really last to run:
+		TreeMap lastTests= new TreeMap(); // sorted by name
+		TestSuite suite= new TestSuite(classSuite.getName());
+		for (Enumeration e= classSuite.tests(); e.hasMoreElements(); ) {
+			TestCase test= (TestCase) e.nextElement();
+			String name= test.getName();
+			if (name.startsWith("test_END_DeletePackageSub")) {
+				lastTests.put(name, test);
+			} else {
+				suite.addTest(test);
+			}
+		}
+		for (Iterator iter= lastTests.values().iterator(); iter.hasNext();) {
+			suite.addTest((Test) iter.next());
+		}
+		return new RefactoringTestSetup(suite);
 	}
 
 	public static Test setUpTest(Test someTest) {
@@ -992,7 +1013,8 @@ public class DeleteTest extends RefactoringTest{
 		assertTrue(frags[2].exists());
 	}
 	
-	public void testDeletePackageSub1() throws Exception {
+	/* Don't rename! See #suite() */
+	public void test_END_DeletePackageSub1() throws Exception {
 		// a0.a1.a2 <-delete with subs
 		// a0.a1.a2.a3
 		// a0.a1.a2.a3.file
@@ -1009,7 +1031,8 @@ public class DeleteTest extends RefactoringTest{
 		assertFalse(file.exists());
 	}
 	
-	public void testDeletePackageSub2() throws Exception {
+	/* Don't rename! See #suite() */
+	public void test_END_DeletePackageSub2() throws Exception {
 		// (default)	<- delete
 		// a0
 		// a0.a1
@@ -1024,7 +1047,8 @@ public class DeleteTest extends RefactoringTest{
 		}
 	}
 	
-	public void testDeletePackageSub3() throws Exception {
+	/* Don't rename! See #suite() */
+	public void test_END_DeletePackageSub3() throws Exception {
 		// (default)	<- delete
 		// (default).A
 		// a0
@@ -1044,7 +1068,8 @@ public class DeleteTest extends RefactoringTest{
 		}
 	}
 	
-	public void testDeletePackageSub4() throws Exception {
+	/* Don't rename! See #suite() */
+	public void test_END_DeletePackageSub4() throws Exception {
 		// (default)
 		// a0 <- delete
 		// a0.a1
@@ -1058,7 +1083,8 @@ public class DeleteTest extends RefactoringTest{
 		assertPackagesAreDeleted(frags);
 	}
 	
-	public void testDeletePackageSub5() throws Exception {
+	/* Don't rename! See #suite() */
+	public void test_END_DeletePackageSub5() throws Exception {
 		// (default)	<- delete
 		// (default).A
 		// a0 <- delete
