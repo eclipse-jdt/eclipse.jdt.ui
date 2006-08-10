@@ -55,13 +55,6 @@ public final class RenameResourceChange extends JDTChange {
 		this(descriptor, resource.getFullPath(), newName, comment, IResource.NULL_STAMP);
 	}
 
-	private int getCoreRenameFlags() {
-		if (getResource().isLinked())
-			return IResource.SHALLOW;
-		else
-			return IResource.NONE;
-	}
-
 	public ChangeDescriptor getDescriptor() {
 		if (fDescriptor != null)
 			return new RefactoringChangeDescriptor(fDescriptor);
@@ -100,7 +93,7 @@ public final class RenameResourceChange extends JDTChange {
 			IResource resource= getResource();
 			long currentStamp= resource.getModificationStamp();
 			IPath newPath= renamedResourcePath(fResourcePath, fNewName);
-			resource.move(newPath, getCoreRenameFlags(), pm);
+			resource.move(newPath, IResource.SHALLOW, pm);
 			if (fStampToRestore != IResource.NULL_STAMP) {
 				IResource newResource= ResourcesPlugin.getWorkspace().getRoot().findMember(newPath);
 				newResource.revertModificationStamp(fStampToRestore);
