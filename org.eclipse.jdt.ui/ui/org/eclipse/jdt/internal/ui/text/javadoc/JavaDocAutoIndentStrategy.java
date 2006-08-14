@@ -122,9 +122,9 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 								try {
 									JavaModelUtil.reconcile(unit);
 									String string= createJavaDocTags(d, c, indentation, lineDelimiter, unit);
-									if (string != null) {
+									// only add tags if they are non-empty - the empty line has already been added above.
+									if (string != null && !string.trim().equals("*")) //$NON-NLS-1$
 										buf.append(string);
-									}
 								} catch (CoreException e) {
 									// ignore
 								}
