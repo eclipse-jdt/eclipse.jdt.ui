@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Michel Ishizuka <cqw10305@nifty.com> - Bug 113266 [syntax highlighting] javadoc tag names including period is not highlighting correctly
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
@@ -47,7 +48,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		}
 
 		public boolean isWordPart(char c) {
-			return Character.isJavaIdentifierPart(c);
+			return c == '.' || Character.isJavaIdentifierPart(c);
 		}
 	}
 
