@@ -108,7 +108,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitDescriptorChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.RefactoringDescriptorChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
@@ -470,19 +470,18 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 		return descriptor;
 	}
 	
-	private TextChange doCreateChange(IProgressMonitor pm) throws CoreException, JavaModelException {
-		pm.beginTask(RefactoringCoreMessages.ExtractTempRefactoring_checking_preconditions, 1);
-		JDTRefactoringDescriptor descriptor= createRefactoringDescriptor();
-		CompilationUnitDescriptorChange result= new CompilationUnitDescriptorChange(descriptor, RefactoringCoreMessages.ExtractTempRefactoring_extract_temp, fCu);
+	private void doCreateChange(IProgressMonitor pm) throws CoreException {
 		try {
-			createTempDeclaration();
-		} catch (CoreException exception) {
-			JavaPlugin.log(exception);
+			pm.beginTask(RefactoringCoreMessages.ExtractTempRefactoring_checking_preconditions, 1);
+			try {
+				createTempDeclaration();
+			} catch (CoreException exception) {
+				JavaPlugin.log(exception);
+			}
+			addReplaceExpressionWithTemp();
+		} finally {
+			pm.done();
 		}
-		pm.worked(1);
-		addReplaceExpressionWithTemp();
-		pm.worked(1);
-		return result;
 	}
 
 	private void checkNewSource(RefactoringStatus result) throws CoreException {
@@ -654,8 +653,13 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 	}
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
-		pm.done();
-		return fChange;
+		try {
+			pm.beginTask(RefactoringCoreMessages.ExtractTempRefactoring_checking_preconditions, 1);
+			JDTRefactoringDescriptor descriptor= createRefactoringDescriptor();
+			return new RefactoringDescriptorChange(descriptor, RefactoringCoreMessages.ExtractTempRefactoring_extract_temp, new Change[] { fChange});
+		} finally {
+			pm.done();
+		}
 	}
 	
 	private void createTempDeclaration() throws CoreException {
