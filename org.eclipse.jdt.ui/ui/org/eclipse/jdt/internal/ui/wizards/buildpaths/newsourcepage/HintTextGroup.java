@@ -113,10 +113,12 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
     private List fNewFolders;
     private String fOldOutputLocation;
     private HashMap fImageMap;
+	private final NewSourceContainerWorkbookPage fPage;
     
-    public HintTextGroup(DialogPackageExplorer packageExplorer, StringDialogField outputLocationField, SelectionButtonDialogField useFolderOutputs, IRunnableContext runnableContext) {
+    public HintTextGroup(DialogPackageExplorer packageExplorer, StringDialogField outputLocationField, SelectionButtonDialogField useFolderOutputs, IRunnableContext runnableContext, NewSourceContainerWorkbookPage page) {
         fPackageExplorer= packageExplorer;
         fRunnableContext= runnableContext;
+		fPage = page;
         fCurrJProject= null;
         fNewFolders= new ArrayList();
         fImageMap= new HashMap();
@@ -231,6 +233,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
 
             public void linkActivated(HyperlinkEvent e) {
                 try {
+                	fPage.commitDefaultOutputFolder();
                     context.run(false, false, action.getOperation());
                 } catch (InvocationTargetException err) {
                     ExceptionHandler.handle(err, getShell(), Messages.format(NewWizardMessages.HintTextGroup_Exception_Title, action.getName()), err.getMessage()); 

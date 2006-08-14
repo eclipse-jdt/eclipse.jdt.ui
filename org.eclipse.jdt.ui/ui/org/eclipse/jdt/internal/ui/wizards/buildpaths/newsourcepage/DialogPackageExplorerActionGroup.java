@@ -182,68 +182,116 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * 
      * @param provider a information provider to pass necessary information 
      * to the operations
-     * @param listener a listener for the changes on classpath entries, that is 
+     * @param page a listener for the changes on classpath entries, that is 
      * the listener will be notified whenever a classpath entry changed.
      * @see IClasspathModifierListener
      */
-    public DialogPackageExplorerActionGroup(IClasspathInformationProvider provider, IClasspathModifierListener listener) {
+    public DialogPackageExplorerActionGroup(IClasspathInformationProvider provider, final NewSourceContainerWorkbookPage page) {
         super();
         fLastType= UNDEFINED;
         fListeners= new ArrayList();
         fActions= new ClasspathModifierAction[8];
         ClasspathModifierOperation op;
-        op= new AddSelectedSourceFolderOperation(listener, provider);
+        op= new AddSelectedSourceFolderOperation(page, provider);
         // TODO User disabled image when available
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_ADD_AS_SOURCE_FOLDER, null,
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_label, 
-                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_tooltip, IAction.AS_PUSH_BUTTON), 
-                0);
-        op= new RemoveFromClasspathOperation(listener, provider);
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_tooltip, IAction.AS_PUSH_BUTTON) {
+        	
+        	public void run() {
+        		page.commitDefaultOutputFolder();
+        		super.run();
+        	}
+        }, 0);
+        op= new RemoveFromClasspathOperation(page, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_REMOVE_AS_SOURCE_FOLDER, JavaPluginImages.DESC_DLCL_REMOVE_AS_SOURCE_FOLDER, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_label, 
-                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip, IAction.AS_PUSH_BUTTON), 
-                1);
-        op= new ExcludeOperation(listener, provider);
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip, IAction.AS_PUSH_BUTTON) {
+        	
+        	public void run() {
+        		page.commitDefaultOutputFolder();
+        		super.run();
+        	}
+        }, 1);
+        op= new ExcludeOperation(page, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_EXCLUDE_FROM_BUILDPATH, JavaPluginImages.DESC_DLCL_EXCLUDE_FROM_BUILDPATH,
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_label, 
-                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_tooltip, IAction.AS_PUSH_BUTTON), 
-                2);
-        op= new UnexcludeOperation(listener, provider);
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_tooltip, IAction.AS_PUSH_BUTTON) {
+        	
+        	public void run() {
+        		page.commitDefaultOutputFolder();
+        		super.run();
+        	}
+        }, 2);
+        op= new UnexcludeOperation(page, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_INCLUDE_ON_BUILDPATH, JavaPluginImages.DESC_DLCL_INCLUDE_ON_BUILDPATH,
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_label, 
-                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_tooltip, IAction.AS_PUSH_BUTTON), 
-                3);
-        op= new EditFiltersOperation(listener, provider);
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_tooltip, IAction.AS_PUSH_BUTTON) {
+        	
+        	public void run() {
+        		page.commitDefaultOutputFolder();
+        		super.run();
+        	}
+        }, 3);
+        op= new EditFiltersOperation(page, provider);
         ClasspathModifierAction action= new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH_FILTERS, JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH_FILTERS,
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_label, 
-                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_tooltip, IAction.AS_PUSH_BUTTON); 
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_tooltip, IAction.AS_PUSH_BUTTON) {
+        	
+        	public void run() {
+        		page.commitDefaultOutputFolder();
+        		super.run();
+        	}
+        }; 
         ClasspathModifierDropDownAction dropDown= new ClasspathModifierDropDownAction(action, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Configure_label, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Configure_tooltip); 
         addAction(dropDown, 4);
-        op= new EditOutputFolderOperation(listener, provider);
+        op= new EditOutputFolderOperation(page, provider);
         action= new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_CONFIGURE_OUTPUT_FOLDER, JavaPluginImages.DESC_DLCL_CONFIGURE_OUTPUT_FOLDER,
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_label, 
-                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip, IAction.AS_PUSH_BUTTON); 
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip, IAction.AS_PUSH_BUTTON) {
+        	
+        	public void run() {
+        		page.commitDefaultOutputFolder();
+        		super.run();
+        	}
+        }; 
         dropDown.addAction(action);
         /*addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_OBJS_TEXT_EDIT, JavaPluginImages.DESC_DLCL_TEXT_EDIT, 
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit.label"), //$NON-NLS-1$
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
                 IClasspathInformationProvider.EDIT);*/
-        op= new LinkedSourceFolderOperation(listener, provider);
+        op= new LinkedSourceFolderOperation(page, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_ADD_LINKED_SOURCE_TO_BUILDPATH, JavaPluginImages.DESC_DLCL_ADD_LINKED_SOURCE_TO_BUILDPATH, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_label, 
-                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_tooltip, IAction.AS_PUSH_BUTTON), 
-                5);
-        op= new CreateFolderOperation(listener, provider);
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_tooltip, IAction.AS_PUSH_BUTTON) {
+        	
+        	public void run() {
+        		page.commitDefaultOutputFolder();
+        		super.run();
+        	}
+        }, 5);
+        op= new CreateFolderOperation(page, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_OBJS_PACKFRAG_ROOT, null, 
         		NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_CreateSrcFolder_label, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_CreateSrcFolder_tooltip
-        		, IAction.AS_PUSH_BUTTON), 6);
-        op= new ResetAllOperation(listener, provider);
+        		, IAction.AS_PUSH_BUTTON){
+        	
+        	public void run() {
+        		page.commitDefaultOutputFolder();
+        		super.run();
+        	}
+        }, 6);
+        op= new ResetAllOperation(page, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_CLEAR, JavaPluginImages.DESC_DLCL_CLEAR,
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_label, 
-                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_tooltip, IAction.AS_PUSH_BUTTON), 
-                7);
+                NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_tooltip, IAction.AS_PUSH_BUTTON){
+        	
+        	public void run() {
+        		page.commitDefaultOutputFolder();
+        		super.run();
+        	}
+        }, 7);
     }
 
     private void addAction(ClasspathModifierAction action, int index) {
