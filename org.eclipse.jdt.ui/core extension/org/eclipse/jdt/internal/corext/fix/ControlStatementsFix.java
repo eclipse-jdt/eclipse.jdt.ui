@@ -224,7 +224,14 @@ public class ControlStatementsFix extends AbstractFix {
 			}
 			return super.visit(node);
 		}
-
+		
+		private static RemoveBlockOperation createRemoveBlockOperation(Statement statement, ChildPropertyDescriptor child, boolean onlyReturnAndThrows) {
+			if (!RemoveBlockOperation.satisfiesCleanUpPrecondition(statement, child, onlyReturnAndThrows))
+				return null;
+		
+			return new RemoveBlockOperation((Block) statement.getStructuralProperty(child), statement, child);
+		}
+	
 	}
 	
 	private static final class AddBlockOperation extends AbstractFixRewriteOperation {
@@ -286,6 +293,123 @@ public class ControlStatementsFix extends AbstractFix {
 			textEditGroups.add(group);
 			rewrite.set(fStatement, fChild, moveTarget, group);
 		}
+		
+		
+		public static boolean satisfiesCleanUpPrecondition(Statement controlStatement, ChildPropertyDescriptor childDescriptor, boolean onlyReturnAndThrows) {
+			return satisfiesPrecondition(controlStatement, childDescriptor, onlyReturnAndThrows, true);
+		}
+		
+		public static boolean satisfiesQuickAssistPrecondition(Statement controlStatement, ChildPropertyDescriptor childDescriptor) {
+			return satisfiesPrecondition(controlStatement, childDescriptor, false, false);
+		}
+
+		//Can the block around child with childDescriptor of controlStatement be removed?
+        private static boolean satisfiesPrecondition(Statement controlStatement, ChildPropertyDescriptor childDescriptor, boolean onlyReturnAndThrows, boolean cleanUpCheck) {
+        	Object child= controlStatement.getStructuralProperty(childDescriptor);
+        	
+        	if (!(child instanceof Block))
+        		return false;
+        	
+        	Block block= (Block)child;
+        	List list= block.statements();
+        	if (list.size() != 1)
+        		return false;
+        	
+        	ASTNode singleStatement= (ASTNode)list.get(0);
+        	
+        	if (onlyReturnAndThrows)
+        		if (!(singleStatement instanceof ReturnStatement) && !(singleStatement instanceof ThrowStatement))
+        			return false;
+        	
+        	if (controlStatement instanceof IfStatement) {
+        		// if (true) {
+        		//  while (true) 
+        		// 	 if (false)
+        		//    ;
+        		// } else
+        		//   ;
+        		
+        		if (((IfStatement)controlStatement).getThenStatement() != child)
+        			return true;//can always remove blocks in else part
+        		
+        		IfStatement ifStatement= (IfStatement)controlStatement;
+        		if (ifStatement.getElseStatement() == null)
+        			return true;//can always remove if no else part
+        		
+        		return !hasUnblockedIf((Statement)singleStatement, onlyReturnAndThrows, cleanUpCheck);
+        	} else {
+        		//if (true)
+        		// while (true) {
+        		//  if (false)
+        		//   ;
+        		// }
+        		//else
+        		// ;
+        		if (!hasUnblockedIf((Statement)singleStatement, onlyReturnAndThrows, cleanUpCheck))
+        			return true;
+        		
+        		ASTNode currentChild= controlStatement;
+        		ASTNode parent= currentChild.getParent();
+        		while (true) {
+        			Statement body= null;
+        			if (parent instanceof IfStatement) {
+        				body= ((IfStatement)parent).getThenStatement();
+        				if (body == currentChild && ((IfStatement)parent).getElseStatement() != null)//->currentChild is an unblocked then part
+        					return false;
+        			} else if (parent instanceof WhileStatement) {
+        				body= ((WhileStatement)parent).getBody();
+        			} else if (parent instanceof DoStatement) {
+        				body= ((DoStatement)parent).getBody();
+        			} else if (parent instanceof ForStatement) {
+        				body= ((ForStatement)parent).getBody();
+        			} else if (parent instanceof EnhancedForStatement) {
+        				body= ((EnhancedForStatement)parent).getBody();
+        			} else {
+        				return true;
+        			}
+        			if (body != currentChild)//->parents child is a block
+        				return true;
+        			
+        			currentChild= parent;
+        			parent= currentChild.getParent();
+        		}
+        	}
+        }
+
+		private static boolean hasUnblockedIf(Statement p, boolean onlyReturnAndThrows, boolean cleanUpCheck) {
+	        while (true) {
+	        	if (p instanceof IfStatement) {
+	        		return true;
+	        	} else {
+
+	        		ChildPropertyDescriptor childD= null;
+	        		if (p instanceof WhileStatement) {
+	        			childD= WhileStatement.BODY_PROPERTY;
+	        		} else if (p instanceof ForStatement) {
+	        			childD= ForStatement.BODY_PROPERTY;
+	        		} else if (p instanceof EnhancedForStatement) {
+	        			childD= EnhancedForStatement.BODY_PROPERTY;
+	        		} else if (p instanceof DoStatement) {
+	        			childD= DoStatement.BODY_PROPERTY;
+	        		} else {
+	        			return false;
+	        		}
+	        		Statement body= (Statement)p.getStructuralProperty(childD);
+	        		if (body instanceof Block) {
+	        			if (!cleanUpCheck) {
+	        				return false;
+	        			} else {
+	        				if (!satisfiesPrecondition(p, childD, onlyReturnAndThrows, cleanUpCheck))
+	        					return false;
+	        				
+	        				p= (Statement)((Block)body).statements().get(0);
+	        			}
+	        		} else {
+	        			p= body;
+	        		}
+	        	}
+	        }
+        }
 
 	}
 
@@ -407,37 +531,10 @@ public class ControlStatementsFix extends AbstractFix {
 	}
 
 	private static RemoveBlockOperation createRemoveBlockOperation(Statement statement, ChildPropertyDescriptor child, boolean onlyReturnAndThrows) {
-		ASTNode node= (ASTNode)statement.getStructuralProperty(child);
+		if (!RemoveBlockOperation.satisfiesQuickAssistPrecondition(statement, child))
+			return null;
 		
-		if (node instanceof Block) {
-			Block block= (Block)node;
-			List statements= block.statements();
-			if (statements.size() == 1) {
-				if (statement instanceof IfStatement && IfStatement.THEN_STATEMENT_PROPERTY == child) {
-					if (!canRemoveBlockArroundThen((IfStatement)statement, (ASTNode)statements.get(0)))
-						return null;
-				}
-				if (onlyReturnAndThrows) {
-					ASTNode stmt= (ASTNode)statements.get(0);
-					if (stmt instanceof ReturnStatement || stmt instanceof ThrowStatement) {
-						return new RemoveBlockOperation(block, statement, child);
-					}
-				} else {
-					return new RemoveBlockOperation(block, statement, child);
-				}
-			}
-		}
-		return null;
-	}
-
-	private static boolean canRemoveBlockArroundThen(IfStatement statement, ASTNode thenStatement) {
-		if (statement.getElseStatement() == null)
-			return true;
-		
-		if (!(thenStatement instanceof IfStatement))
-			return true;
-
-		return false;
+		return new RemoveBlockOperation((Block) statement.getStructuralProperty(child), statement, child);
 	}
 
 	public static IFix createCleanUp(CompilationUnit compilationUnit, 
