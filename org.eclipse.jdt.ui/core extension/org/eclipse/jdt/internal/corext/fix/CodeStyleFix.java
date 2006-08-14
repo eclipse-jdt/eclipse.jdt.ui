@@ -270,6 +270,9 @@ public class CodeStyleFix extends AbstractFix {
 			if (!(expression instanceof ThisExpression)) 
 				return true;
 			
+			if (((ThisExpression)expression).getQualifier() != null)
+				return true;
+			
 			final SimpleName name= node.getName();
 			if (hasConflict(expression.getStartPosition(), name, ScopeAnalyzer.METHODS))
 				return true;

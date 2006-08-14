@@ -5017,7 +5017,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("        public int getFoo() {\n");
 		buf.append("            E1.this.bar(); \n");
 		buf.append("            bar();\n");
-		buf.append("            return foo();\n");
+		buf.append("            return E1.this.foo();\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -5051,6 +5051,45 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("        setEnabled(true);\n");
 		buf.append("    }\n");
 		buf.append("    private void setEnabled(boolean b) {}\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testRemoveQualifierBug150481() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public class Inner extends E {\n");
+		buf.append("        public void test() {\n");
+		buf.append("            E.this.foo();\n");
+		buf.append("            this.foo();\n");
+		buf.append("            foo();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {}\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.REMOVE_THIS_METHOD_QUALIFIER);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public class Inner extends E {\n");
+		buf.append("        public void test() {\n");
+		buf.append("            E.this.foo();\n");
+		buf.append("            foo();\n");
+		buf.append("            foo();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {}\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
