@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Olaf van Zon <olafvanzon@hotmail.com> - Bug 143029 [typing] Correct Indentation works incorrect after >> operator (bit shift right)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
@@ -1284,10 +1285,12 @@ public final class JavaIndenter {
 					return false;
 				int storedPosition= fPosition;
 				int storedToken= fToken;
+				int storedLine= fLine;
+				int storedPreviousPos= fPreviousPos;
 				nextToken();
 				switch (fToken) {
 					case Symbols.TokenIDENT:
-						if (!isGenericStarter(getTokenContent()))
+						if (!JavaHeuristicScanner.isGenericStarter(getTokenContent()))
 							break;
 					case Symbols.TokenQUESTIONMARK:
 					case Symbols.TokenGREATERTHAN:
@@ -1297,6 +1300,8 @@ public final class JavaIndenter {
 				// <> are harder to detect - restore the position if we fail
 				fPosition= storedPosition;
 				fToken= storedToken;
+				fLine= storedLine;
+				fPreviousPos= storedPreviousPos;
 				return false;
 
 			default:
@@ -1313,37 +1318,6 @@ public final class JavaIndenter {
 	 */
 	private CharSequence getTokenContent() {
 		return new DocumentCharacterIterator(fDocument, fPosition, fPreviousPos);
-	}
-
-	/**
-	 * Returns <code>true</code> if <code>identifier</code> is probably a
-	 * type variable or type name, <code>false</code> if it is rather not.
-	 * This is a heuristic.
-	 *
-	 * @param identifier the identifier to check
-	 * @return <code>true</code> if <code>identifier</code> is probably a
-	 *         type variable or type name, <code>false</code> if not
-	 * @since 3.1
-	 */
-	private boolean isGenericStarter(CharSequence identifier) {
-		/* This heuristic allows any identifiers if they start with an upper
-		 * case. This will fail when a comparison is made with constants:
-		 *
-		 * if (MAX > foo)
-		 *
-		 * will try to find the matching '<' which will never come
-		 *
-		 * Also, it will fail on lower case types and type variables
-		 */
-		int length= identifier.length();
-		if (length > 0 && Character.isUpperCase(identifier.charAt(0))) {
-			for (int i= 0; i < length; i++) {
-				if (identifier.charAt(i) == '_')
-					return false;
-			}
-			return true;
-		}
-		return false;
 	}
 
 	/**

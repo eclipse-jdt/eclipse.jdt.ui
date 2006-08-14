@@ -846,5 +846,14 @@ public class JavaHeuristicScannerTest extends TestCase {
 	    	assertFalse(fHeuristicScanner.looksLikeClassInstanceCreationBackward(offset, JavaHeuristicScanner.UNBOUND));
     }
 	
+	public void testShiftOperator() throws Exception {
+		fDocument.set(
+				"		for (int j = 0; j == 0; j ++) {\n" + 
+				"			j = 3 >>> 1;\n" 
+		);
+		
+		String indent= fScanner.computeIndentation(fDocument.getLength()).toString();
+		Assert.assertEquals("\t\t\t", indent);
+	}
 }
 
