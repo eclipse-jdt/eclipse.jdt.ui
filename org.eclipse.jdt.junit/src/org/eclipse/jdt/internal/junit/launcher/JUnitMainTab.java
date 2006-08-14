@@ -433,11 +433,13 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, ""); //$NON-NLS-1$
 			 //workaround for bug 65399
 			config.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, ""); //$NON-NLS-1$
+			config.setMappedResources(new IResource[] { fContainerElement.getJavaProject().getProject() });
 		} else {
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, fProjText.getText());
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, fTestText.getText());
 			config.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, ""); //$NON-NLS-1$
 			config.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, fOriginalTestMethodName);
+			mapResources(config);
 		}
 		config.setAttribute(JUnitBaseLaunchConfiguration.ATTR_KEEPRUNNING, fKeepRunning.getSelection());
 		
@@ -447,6 +449,16 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 			config.setAttribute(JUnitBaseLaunchConfiguration.TEST_KIND_ATTR, testKind.getId());
 		}
 	}
+	
+	private void mapResources(ILaunchConfigurationWorkingCopy config)  {
+		IJavaProject javaProject = getJavaProject();
+		IResource[] resources = null;
+		if (javaProject != null) {
+			resources = new IResource[]{javaProject.getProject()};
+		}
+		config.setMappedResources(resources);
+	}	
+
 	
 	/*
 	 * @see ILaunchConfigurationTab#dispose()

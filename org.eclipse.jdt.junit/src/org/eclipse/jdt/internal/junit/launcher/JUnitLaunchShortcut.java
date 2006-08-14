@@ -19,6 +19,8 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -249,6 +251,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 			ILaunchConfigurationWorkingCopy wc= config.getWorkingCopy();
 			String testKind= description.getAttribute(JUnitBaseLaunchConfiguration.TEST_KIND_ATTR);
 			wc.setAttribute(JUnitBaseLaunchConfiguration.TEST_KIND_ATTR, testKind);
+			wc.setMappedResources(new IResource[] { description.getProject().getProject() });
 			config= wc.doSave();
 		} catch (CoreException ce) {
 			JUnitPlugin.log(ce);

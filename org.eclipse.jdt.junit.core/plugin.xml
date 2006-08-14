@@ -71,7 +71,8 @@
             modes="run, debug"
             id="org.eclipse.jdt.junit.launchconfig"
             sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
-            sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
+            sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer"
+            migrationDelegate="org.eclipse.jdt.internal.junit.launcher.JUnitMigrationDelegate">
          <fileExtension
                default="false"
                extension="java">
