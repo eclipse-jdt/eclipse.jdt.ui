@@ -22,6 +22,7 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.Document;
 
+import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
@@ -209,7 +210,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				protected TextChange createTextChange() throws CoreException {
 					refactoring.setTempName(refactoring.guessTempName());
 					if (!refactoring.checkFinalConditions(new NullProgressMonitor()).hasFatalError()) {
-						return (TextChange) refactoring.createChange(new NullProgressMonitor());
+						final CompositeChange change= (CompositeChange) refactoring.createChange(new NullProgressMonitor());
+						return (TextChange) change.getChildren()[0];
 					} else {
 						Document document= new Document(""); //$NON-NLS-1$
 						document.setInitialLineDelimiter(StubUtility.getLineDelimiterUsed(cu));
