@@ -608,5 +608,23 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		}
 		return new String[] { title, message };
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performOk()
+	 */
+	public boolean performOk() {
+		setValue(INTR_DEFAULT_COMPLIANCE, null);
+		return super.performOk();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performApply()
+	 */
+	public boolean performApply() {
+		setValue(INTR_DEFAULT_COMPLIANCE, null);
+		boolean result= super.performApply();
+		setValue(INTR_DEFAULT_COMPLIANCE, getCurrentCompliance());
+		return result;
+	}
 		
 }
