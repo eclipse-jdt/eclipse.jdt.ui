@@ -23,17 +23,11 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.widgets.Display;
 
-import org.eclipse.jface.viewers.StructuredSelection;
-
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener2;
-
-import org.eclipse.debug.internal.ui.DebugUIPlugin;
-import org.eclipse.debug.internal.ui.launchConfigurations.LaunchConfigurationManager;
-import org.eclipse.debug.internal.ui.launchConfigurations.LaunchShortcutExtension;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -41,6 +35,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
+import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchShortcut;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
@@ -113,16 +108,10 @@ public class TestRunListenerTest extends TestCase {
 			}
 		};
 		lm.addLaunchListener(launchesListener);
+		JUnitLaunchShortcut shortcut= new JUnitLaunchShortcut();
+		ILaunchConfiguration configuration= shortcut.createConfiguration(shortcut.describeContainerLaunch(aTestCase));
 		try {
-			LaunchConfigurationManager manager= DebugUIPlugin.getDefault().getLaunchConfigurationManager();
-			List launchShortcuts= manager.getLaunchShortcuts();
-			LaunchShortcutExtension ext= null;
-			for (Iterator iter= launchShortcuts.iterator(); iter.hasNext();) {
-				ext= (LaunchShortcutExtension) iter.next();
-				if (ext.getLabel().equals("JUnit Test"))
-					break;
-			}
-			ext.launch(new StructuredSelection(aTestCase), ILaunchManager.RUN_MODE);
+			configuration.launch(ILaunchManager.RUN_MODE, null);
 			new DisplayHelper() {
 				protected boolean condition() {
 					return fLaunchHasTerminated;
@@ -130,6 +119,8 @@ public class TestRunListenerTest extends TestCase {
 			}.waitForCondition(Display.getCurrent(), 30 * 1000, 1000);
 		} finally {
 			lm.removeLaunchListener(launchesListener);
+			lm.removeLaunches(lm.getLaunches());
+			configuration.delete();
 		}
 		if (! fLaunchHasTerminated)
 			fail("Launch has not terminated");
