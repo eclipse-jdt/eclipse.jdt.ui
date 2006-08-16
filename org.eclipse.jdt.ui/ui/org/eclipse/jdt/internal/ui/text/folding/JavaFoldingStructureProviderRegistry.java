@@ -17,7 +17,13 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider;
@@ -77,16 +83,34 @@ public class JavaFoldingStructureProviderRegistry {
 	 * @return the current provider according to the preferences
 	 */
 	public IJavaFoldingStructureProvider getCurrentFoldingProvider() {
-		String id= JavaPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.EDITOR_FOLDING_PROVIDER);
-		JavaFoldingStructureProviderDescriptor desc= getFoldingProviderDescriptor(id);
-		if (desc != null) {
-			try {
-				return desc.createProvider();
-			} catch (CoreException e) {
-				JavaPlugin.log(e);
-			}
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+		String currentProviderId= preferenceStore.getString(PreferenceConstants.EDITOR_FOLDING_PROVIDER);
+		JavaFoldingStructureProviderDescriptor desc= getFoldingProviderDescriptor(currentProviderId);
+		
+		// Fallback to default if extension has gone
+		if (desc == null) {
+			String message= Messages.format(FoldingMessages.JavaFoldingStructureProviderRegistry_warning_providerNotFound_resetToDefault, currentProviderId);
+			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, message, null));
+			
+			String defaultProviderId= preferenceStore.getDefaultString(PreferenceConstants.EDITOR_FOLDING_PROVIDER);
+			
+			desc= getFoldingProviderDescriptor(defaultProviderId);
+			/*
+			 * In 3.2.1 we don't want to risk anything, hence don't
+			 * Assert.isNotNull(provider);
+			 */
+			if (desc == null)
+				return null;
+			
+			preferenceStore.setToDefault(PreferenceConstants.EDITOR_FOLDING_PROVIDER);
 		}
-		return null;
+
+		try {
+			return desc.createProvider();
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+			return null;
+		}
 	}
 
 	/**

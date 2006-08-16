@@ -666,6 +666,7 @@ public final class PreferencesMessages extends NLS {
 	public static String FoldingConfigurationBlock_combo_caption;
 	public static String FoldingConfigurationBlock_info_no_preferences;
 	public static String FoldingConfigurationBlock_error_not_exist;
+	public static String FoldingConfigurationBlock_warning_providerNotFound_resetToDefault;
 	public static String PropertiesFileEditorPreferencePage_key;
 	public static String PropertiesFileEditorPreferencePage_value;
 	public static String PropertiesFileEditorPreferencePage_assignment;

@@ -46,6 +46,8 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jface.text.Assert;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.folding.IJavaFoldingPreferenceBlock;
 
@@ -289,7 +291,7 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 		
 		if (desc == null) {
 			// safety in case there is no such descriptor
-			String message= PreferencesMessages.FoldingConfigurationBlock_error_not_exist; 
+			String message= Messages.format(PreferencesMessages.FoldingConfigurationBlock_error_not_exist, id);
 			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, message, null));
 			prefs= new ErrorPreferences(message);
 		} else {
@@ -357,11 +359,28 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 		
 		String id= fStore.getString(PreferenceConstants.EDITOR_FOLDING_PROVIDER);
 		Object provider= fProviderDescriptors.get(id);
-		if (provider != null) {
-			if (fProviderViewer == null)
-				updateListDependencies();
-			else
-				fProviderViewer.setSelection(new StructuredSelection(provider), true);
+		
+		// Fallback to default
+		if (provider == null) {
+			String message= Messages.format(PreferencesMessages.FoldingConfigurationBlock_warning_providerNotFound_resetToDefault, id);
+			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, message, null));
+			
+			id= JavaPlugin.getDefault().getPreferenceStore().getDefaultString(PreferenceConstants.EDITOR_FOLDING_PROVIDER);
+			
+			provider= fProviderDescriptors.get(id);
+			/*
+			 * In 3.2.1 we don't want to risk anything, hence don't
+			 * Assert.isNotNull(provider);
+			 */
+			if (provider == null)
+				return;
+			
+			fStore.setToDefault(PreferenceConstants.EDITOR_FOLDING_PROVIDER);
 		}
+		
+		if (fProviderViewer == null)
+			updateListDependencies();
+		else
+			fProviderViewer.setSelection(new StructuredSelection(provider), true);
 	}
 }
