@@ -59,6 +59,8 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
+import org.eclipse.jdt.internal.corext.SourceRange;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -783,21 +785,29 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		List updates= new ArrayList();
 		
 		computeFoldingStructure(ctx);
-		Map updated= ctx.fMap;
-		Map previous= computeCurrentStructure(ctx);
+		Map newStructure= ctx.fMap;
+		Map oldStructure= computeCurrentStructure(ctx);
 
-
-		Iterator e= updated.keySet().iterator();
+		Iterator e= newStructure.keySet().iterator();
 		while (e.hasNext()) {
 			JavaProjectionAnnotation newAnnotation= (JavaProjectionAnnotation) e.next();
+			Position newPosition= (Position) newStructure.get(newAnnotation);
+
 			IJavaElement element= newAnnotation.getElement();
-			Position newPosition= (Position) updated.get(newAnnotation);
-
-			List annotations= (List) previous.get(element);
+			/*
+			 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=130472 and
+			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=127445 In the presence of syntax
+			 * errors, anonymous types may have a source range offset of 0. When such a situation is
+			 * encountered, we ignore the proposed folding range: if no corresponding folding range
+			 * exists, it is silently ignored; if there *is* a matching folding range, we ignore the
+			 * position update and keep the old range, in order to keep the folding structure
+			 * stable.
+			 */
+			boolean isMalformedAnonymousType= newPosition.getOffset() == 0 && element.getElementType() == IJavaElement.TYPE && isInnerType((IType) element);
+			List annotations= (List) oldStructure.get(element);
 			if (annotations == null) {
-
-				additions.put(newAnnotation, newPosition);
-
+				if (!isMalformedAnonymousType)
+					additions.put(newAnnotation, newPosition);
 			} else {
 				Iterator x= annotations.iterator();
 				boolean matched= false;
@@ -806,10 +816,11 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 					JavaProjectionAnnotation existingAnnotation= tuple.annotation;
 					Position existingPosition= tuple.position;
 					if (newAnnotation.isComment() == existingAnnotation.isComment()) {
-						if (existingPosition != null && (!newPosition.equals(existingPosition) || ctx.allowCollapsing() && existingAnnotation.isCollapsed() != newAnnotation.isCollapsed())) {
+						boolean updateCollapsedState= ctx.allowCollapsing() && existingAnnotation.isCollapsed() != newAnnotation.isCollapsed();
+						if (!isMalformedAnonymousType && existingPosition != null && (!newPosition.equals(existingPosition) || updateCollapsedState)) {
 							existingPosition.setOffset(newPosition.getOffset());
 							existingPosition.setLength(newPosition.getLength());
-							if (ctx.allowCollapsing() && existingAnnotation.isCollapsed() != newAnnotation.isCollapsed())
+							if (updateCollapsedState)
 								if (newAnnotation.isCollapsed())
 									existingAnnotation.markCollapsed();
 								else
@@ -825,11 +836,11 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 					additions.put(newAnnotation, newPosition);
 
 				if (annotations.isEmpty())
-					previous.remove(element);
+					oldStructure.remove(element);
 			}
 		}
 
-		e= previous.values().iterator();
+		e= oldStructure.values().iterator();
 		while (e.hasNext()) {
 			List list= (List) e.next();
 			int size= list.size();
@@ -839,11 +850,9 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 		match(deletions, additions, updates, ctx);
 
-		Annotation[] removals= new Annotation[deletions.size()];
-		deletions.toArray(removals);
-		Annotation[] changes= new Annotation[updates.size()];
-		updates.toArray(changes);
-		ctx.getModel().modifyAnnotations(removals, additions, changes);
+		Annotation[] deletedArray= (Annotation[]) deletions.toArray(new Annotation[deletions.size()]);
+		Annotation[] changedArray= (Annotation[]) updates.toArray(new Annotation[updates.size()]);
+		ctx.getModel().modifyAnnotations(deletedArray, additions, changedArray);
     }
 	
 	private void computeFoldingStructure(FoldingStructureComputationContext ctx) {
@@ -981,6 +990,8 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	protected final IRegion[] computeProjectionRanges(ISourceReference reference, FoldingStructureComputationContext ctx) {
 		try {
 				ISourceRange range= reference.getSourceRange();
+				if (!SourceRange.isAvailable(range))
+					return new IRegion[0];
 
 				String contents= reference.getSource();
 				if (contents == null)
