@@ -82,7 +82,12 @@ public class ClasspathModifier {
 			if (!allowInvalidCP && cpProject.getDefaultOutputLocation().segmentCount() == 1 && !projectPath.equals(elementToChange.getPath())) {
 				String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
 				cpProject.setDefaultOutputLocation(cpProject.getDefaultOutputLocation().append(outputFolderName));
-				ClasspathModifier.removeFromClasspath(javaProject, cpProject.getCPListElements(), new SubProgressMonitor(monitor, 1));
+				List existingEntries= cpProject.getCPListElements();
+				CPListElement elem= ClasspathModifier.getListElement(javaProject.getPath(), existingEntries);
+                if (elem != null) {
+                	existingEntries.remove(elem);
+                	result.removeEntry(elem);
+                }
 			} else {
 				monitor.worked(1);
 			}
@@ -182,6 +187,75 @@ public class ClasspathModifier {
 		
 		return result;
 	}
+	
+    public static IStatus checkAddExternalJarsPrecondition(IPath[] absolutePaths, CPJavaProject cpProject) throws CoreException {
+    	IStatus result= StatusInfo.OK_STATUS;
+    	
+    	IJavaProject javaProject= cpProject.getJavaProject();
+    	
+    	List newEntries= new ArrayList();
+    	List duplicateEntries= new ArrayList();
+    	List existingEntries= cpProject.getCPListElements();
+    	for (int i= 0; i < absolutePaths.length; i++) {
+	        CPListElement newEntry= new CPListElement(javaProject, IClasspathEntry.CPE_LIBRARY, absolutePaths[i], null);
+	        if (existingEntries.contains(newEntry)) {
+	        	duplicateEntries.add(newEntry);
+	        } else {
+	        	newEntries.add(newEntry);
+	        }
+        }
+    	
+		if (duplicateEntries.size() > 0) {
+			String message;
+			if (duplicateEntries.size() > 1) {
+				StringBuffer buf= new StringBuffer();
+				for (Iterator iterator= duplicateEntries.iterator(); iterator.hasNext();) {
+	                CPListElement dup= (CPListElement)iterator.next();
+	                buf.append('\n').append(dup.getPath().lastSegment());
+                }
+				message= Messages.format(NewWizardMessages.AddArchiveToBuildpathAction_DuplicateArchivesInfo_message, buf.toString());
+			} else {
+				message= Messages.format(NewWizardMessages.AddArchiveToBuildpathAction_DuplicateArchiveInfo_message, ((CPListElement)duplicateEntries.get(0)).getPath().lastSegment());
+			}
+			result= new StatusInfo(IStatus.INFO, message);
+		}
+		
+		if (newEntries.size() == 0)
+			return result;
+		
+		cpProject= cpProject.createWorkingCopy();
+		existingEntries= cpProject.getCPListElements();
+	
+		for (Iterator iterator= newEntries.iterator(); iterator.hasNext();) {
+            CPListElement newEntry= (CPListElement)iterator.next();
+            insertAtEndOfCategory(newEntry, existingEntries);
+        }
+		
+		IJavaModelStatus cpStatus= JavaConventions.validateClasspath(javaProject, cpProject.getClasspathEntries(), cpProject.getDefaultOutputLocation());
+		if (!cpStatus.isOK())
+			return cpStatus;
+		
+		return result;
+    }
+    
+    public static BuildpathDelta addExternalJars(IPath[] absolutePaths, CPJavaProject cpProject) throws CoreException {
+    	BuildpathDelta result= new BuildpathDelta(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddJarCP_tooltip);
+    	
+    	IJavaProject javaProject= cpProject.getJavaProject();
+    	
+    	List existingEntries= cpProject.getCPListElements();
+    	for (int i= 0; i < absolutePaths.length; i++) {
+	        CPListElement newEntry= new CPListElement(javaProject, IClasspathEntry.CPE_LIBRARY, absolutePaths[i], null);
+	        if (!existingEntries.contains(newEntry)) {
+	        	insertAtEndOfCategory(newEntry, existingEntries);
+	        	result.addEntry(newEntry);
+	        }
+        }
+    	
+		result.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
+		result.setDefaultOutputLocation(cpProject.getDefaultOutputLocation());
+		return result;
+    }
 
 	/**
 	 * Get the <code>IClasspathEntry</code> from the project and 
@@ -1398,4 +1472,5 @@ public class ClasspathModifier {
 
 		};
 	}
+
 }

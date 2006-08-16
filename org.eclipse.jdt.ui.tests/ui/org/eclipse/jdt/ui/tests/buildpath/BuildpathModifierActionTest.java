@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.buildpath;
 
+import java.util.Iterator;
+import java.util.List;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -23,15 +26,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.ISetSelectionTarget;
-
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -41,11 +35,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.CPJavaProject;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
-import org.eclipse.jdt.internal.corext.buildpath.IBuildpathModifierListener;
 
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.AddArchiveToBuildpathAction;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.BuildpathModifierAction;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -89,12 +80,7 @@ public class BuildpathModifierActionTest extends TestCase {
     	return result;
     }
 	
-	private static void assertActionEnabled(BuildpathModifierAction action) {
-		assertTrue("Action " + action.getDescription() + " is not enabled", action.isEnabled());
-    }
-	
-	private static void assertIsOnBuildpath(IJavaProject project, IPath path) throws JavaModelException {
-	    IClasspathEntry[] entries= project.getRawClasspath();
+	private static void assertIsOnBuildpath(IClasspathEntry[] entries, IPath path) throws JavaModelException {
 		for (int i= 0; i < entries.length; i++) {
 	        if (entries[i].getPath().equals(path))
 	        	return;
@@ -149,6 +135,42 @@ public class BuildpathModifierActionTest extends TestCase {
     		assertTrue("File at " + removedFiles[i] + " was not removed", contains(deletedPaths, removedFiles[i]));
         }
     }
+    
+    private static void assertDeltaRemovedEntries(BuildpathDelta delta, IPath[] paths) {
+    	List removedEntries= delta.getRemovedEntries();
+    	assertTrue("Expected " + paths.length + " is " + removedEntries.size(), removedEntries.size() == paths.length);
+    	IPath[] removed= new IPath[removedEntries.size()];
+    	int i= 0;
+    	for (Iterator iterator= removedEntries.iterator(); iterator.hasNext();) {
+	        CPListElement element= (CPListElement)iterator.next();
+	        removed[i]= element.getPath();
+	        i++;
+        }
+    	for (int j= 0; j < paths.length; j++) {
+	        assertTrue("Entry " + paths[j] + " was not removed", contains(removed, paths[j]));
+        }
+    	for (int j= 0; j < removed.length; j++) {
+	        assertTrue("Entry " + removed[j] + " was removed", contains(paths, removed[j]));
+        }
+    }
+    
+    private static void assertDeltaAddedEntries(BuildpathDelta delta, IPath[] paths) {
+    	List addedEntries= delta.getAddedEntries();
+    	assertTrue("Expected " + paths.length + " is " + addedEntries.size(), addedEntries.size() == paths.length);
+    	IPath[] added= new IPath[addedEntries.size()];
+    	int i= 0;
+    	for (Iterator iterator= addedEntries.iterator(); iterator.hasNext();) {
+	        CPListElement element= (CPListElement)iterator.next();
+	        added[i]= element.getPath();
+	        i++;
+        }
+    	for (int j= 0; j < paths.length; j++) {
+	        assertTrue("Entry " + paths[j] + " was not added", contains(added, paths[j]));
+        }
+    	for (int j= 0; j < added.length; j++) {
+	        assertTrue("Entry " + added[j] + " was added", contains(paths, added[j]));
+        }
+    }
 
     private static boolean contains(IPath[] paths, IPath path) {
     	for (int i= 0; i < paths.length; i++) {
@@ -166,52 +188,111 @@ public class BuildpathModifierActionTest extends TestCase {
     private static void assertNumberOfEntries(IClasspathEntry[] entries, int expected) {
     	assertTrue("Expected count was " + expected + " is " + entries.length, expected == entries.length);
     }
-
-	private static void changeSelection(BuildpathModifierAction action, Object select) {
-	    final StructuredSelection structuredSelection= new StructuredSelection(select);
-		action.selectionChanged(new SelectionChangedEvent(new ISelectionProvider() {
-
-			public void addSelectionChangedListener(ISelectionChangedListener listener) {
-            }
-
-			public ISelection getSelection() {
-	            return structuredSelection;
-            }
-
-			public void removeSelectionChangedListener(ISelectionChangedListener listener) {
-            }
-
-			public void setSelection(ISelection selection) {
-            }
-			
-		}, structuredSelection));
-    }
 	
-	public void testBug132827() throws Exception {
+	public void testAddExternalJar01AddMyLib() throws Exception {
+		fJavaProject= createProject(DEFAULT_OUTPUT_FOLDER_NAME);
+
+		IPath[] jarPaths= new IPath[] {JavaProjectHelper.MYLIB.makeAbsolute()};
+		
+		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
+		IStatus status= ClasspathModifier.checkAddExternalJarsPrecondition(jarPaths, cpProject);
+		assertTrue(status.isOK());
+		
+		BuildpathDelta delta= ClasspathModifier.addExternalJars(jarPaths, cpProject);
+		assertDeltaResources(delta, new IPath[0], new IPath[0], new IPath[0], new IPath[0]);
+		assertDeltaDefaultOutputFolder(delta, fJavaProject.getOutputLocation());
+		assertDeltaRemovedEntries(delta, new IPath[0]);
+		assertDeltaAddedEntries(delta, jarPaths);
+		
+		ClasspathModifier.commitClassPath(cpProject, null);
+		
+		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
+		assertNumberOfEntries(classpathEntries, 2);
+		assertIsOnBuildpath(classpathEntries, JavaProjectHelper.MYLIB.makeAbsolute());
+	}
+	
+	public void testAddExternalJar02AddMuiltiLibs() throws Exception {
+		fJavaProject= createProject(DEFAULT_OUTPUT_FOLDER_NAME);
+
+		IPath[] jarPaths= new IPath[] {
+				JavaProjectHelper.MYLIB.makeAbsolute(),
+				JavaProjectHelper.NLS_LIB.makeAbsolute()
+		};
+		
+		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
+		IStatus status= ClasspathModifier.checkAddExternalJarsPrecondition(jarPaths, cpProject);
+		assertTrue(status.isOK());
+		
+		BuildpathDelta delta= ClasspathModifier.addExternalJars(jarPaths, cpProject);
+		assertDeltaResources(delta, new IPath[0], new IPath[0], new IPath[0], new IPath[0]);
+		assertDeltaDefaultOutputFolder(delta, fJavaProject.getOutputLocation());
+		assertDeltaRemovedEntries(delta, new IPath[0]);
+		assertDeltaAddedEntries(delta, jarPaths);
+		
+		ClasspathModifier.commitClassPath(cpProject, null);
+		
+		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
+		assertNumberOfEntries(classpathEntries, 3);
+		assertIsOnBuildpath(classpathEntries, JavaProjectHelper.MYLIB.makeAbsolute());
+		assertIsOnBuildpath(classpathEntries, JavaProjectHelper.NLS_LIB.makeAbsolute());
+	}
+	
+	public void testAddExternalJar02AddMuiltiLibsTwice() throws Exception {
+		fJavaProject= createProject(DEFAULT_OUTPUT_FOLDER_NAME);
+
+		IPath[] jarPaths= new IPath[] {JavaProjectHelper.MYLIB.makeAbsolute()};
+		
+		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
+		ClasspathModifier.addExternalJars(jarPaths, cpProject);
+		ClasspathModifier.commitClassPath(cpProject, null);
+		
+		jarPaths= new IPath[] {
+				JavaProjectHelper.MYLIB.makeAbsolute(),
+				JavaProjectHelper.NLS_LIB.makeAbsolute()
+		};
+		
+		cpProject= CPJavaProject.createFromExisting(fJavaProject);
+		IStatus status= ClasspathModifier.checkAddExternalJarsPrecondition(jarPaths, cpProject);
+		assertTrue(status.getMessage(), status.getSeverity() == IStatus.INFO);
+		
+		BuildpathDelta delta= ClasspathModifier.addExternalJars(jarPaths, cpProject);
+		assertDeltaResources(delta, new IPath[0], new IPath[0], new IPath[0], new IPath[0]);
+		assertDeltaDefaultOutputFolder(delta, fJavaProject.getOutputLocation());
+		assertDeltaRemovedEntries(delta, new IPath[0]);
+		assertDeltaAddedEntries(delta, new IPath[] {JavaProjectHelper.NLS_LIB.makeAbsolute()});
+		
+		ClasspathModifier.commitClassPath(cpProject, null);
+		
+		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
+		assertNumberOfEntries(classpathEntries, 3);
+		assertIsOnBuildpath(classpathEntries, JavaProjectHelper.MYLIB.makeAbsolute());
+		assertIsOnBuildpath(classpathEntries, JavaProjectHelper.NLS_LIB.makeAbsolute());	
+	}
+
+	public void testAddExternalJarBug132827() throws Exception {
 		fJavaProject= createProject(DEFAULT_OUTPUT_FOLDER_NAME);
 		
-		AddArchiveToBuildpathAction addArchiveAction= new AddArchiveToBuildpathAction(PlatformUI.getWorkbench().getProgressService(), new ISetSelectionTarget() {
-			public void selectReveal(ISelection selection) {
-            }
-		});
-		addArchiveAction.addBuildpathModifierListener(new IBuildpathModifierListener() {
-			public void buildpathChanged(BuildpathDelta delta) {
-            }
-		});
+		IPath[] jarPaths= new IPath[] {JavaProjectHelper.MYLIB.makeAbsolute()};
 		
-		changeSelection(addArchiveAction, fJavaProject);
-		assertActionEnabled(addArchiveAction);
+		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
+		ClasspathModifier.addExternalJars(jarPaths, cpProject);
+		ClasspathModifier.commitClassPath(cpProject, null);
 		
-		addArchiveAction.run(new IPath[] {JavaProjectHelper.MYLIB.makeAbsolute()}, true);
+		cpProject= CPJavaProject.createFromExisting(fJavaProject);
+		IStatus status= ClasspathModifier.checkAddExternalJarsPrecondition(jarPaths, cpProject);
+		assertTrue(status.getSeverity() == IStatus.INFO);
 		
-		assertIsOnBuildpath(fJavaProject, JavaProjectHelper.MYLIB.makeAbsolute());
+		BuildpathDelta delta= ClasspathModifier.addExternalJars(jarPaths, cpProject);
+		assertDeltaResources(delta, new IPath[0], new IPath[0], new IPath[0], new IPath[0]);
+		assertDeltaDefaultOutputFolder(delta, fJavaProject.getOutputLocation());
+		assertDeltaRemovedEntries(delta, new IPath[0]);
+		assertDeltaAddedEntries(delta, new IPath[0]);
 		
-		changeSelection(addArchiveAction, fJavaProject);
-		assertActionEnabled(addArchiveAction);
+		ClasspathModifier.commitClassPath(cpProject, null);
 		
-		addArchiveAction.run(new IPath[] {JavaProjectHelper.MYLIB.makeAbsolute()}, true);
-		
-		assertIsOnBuildpath(fJavaProject, JavaProjectHelper.MYLIB.makeAbsolute());
+		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
+		assertNumberOfEntries(classpathEntries, 2);
+		assertIsOnBuildpath(classpathEntries, JavaProjectHelper.MYLIB.makeAbsolute());
 	}
 
 	public void testEditOutputFolder01SetOutputFolderForSourceFolder() throws Exception {
@@ -229,6 +310,8 @@ public class BuildpathModifierActionTest extends TestCase {
 		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject, null);
 		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[0], new IPath[0], new IPath[0]);
 		assertDeltaDefaultOutputFolder(delta, fJavaProject.getOutputLocation());
+		assertDeltaAddedEntries(delta, new IPath[0]);
+		assertDeltaRemovedEntries(delta, new IPath[0]);
 		
 		ClasspathModifier.commitClassPath(cpProject, null);
 		
@@ -256,6 +339,8 @@ public class BuildpathModifierActionTest extends TestCase {
 		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject, null);
 		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[0], new IPath[0], new IPath[0]);
 		assertDeltaDefaultOutputFolder(delta, fJavaProject.getPath().append(DEFAULT_OUTPUT_FOLDER_NAME));
+		assertDeltaRemovedEntries(delta, new IPath[] {fJavaProject.getPath()});
+		assertDeltaAddedEntries(delta, new IPath[0]);
 		
 		ClasspathModifier.commitClassPath(cpProject, null);
 		
@@ -284,6 +369,8 @@ public class BuildpathModifierActionTest extends TestCase {
 		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject, null);
 		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[0], new IPath[0], new IPath[0]);
 		assertDeltaDefaultOutputFolder(delta, fJavaProject.getPath().append(DEFAULT_OUTPUT_FOLDER_NAME));
+		assertDeltaRemovedEntries(delta, new IPath[0]);
+		assertDeltaAddedEntries(delta, new IPath[0]);
 		
 		ClasspathModifier.commitClassPath(cpProject, null);
 		
@@ -314,6 +401,8 @@ public class BuildpathModifierActionTest extends TestCase {
 		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject, null);
 		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[0], new IPath[0], new IPath[0]);
 		assertDeltaDefaultOutputFolder(delta, fJavaProject.getPath().append(DEFAULT_OUTPUT_FOLDER_NAME));
+		assertDeltaRemovedEntries(delta, new IPath[0]);
+		assertDeltaAddedEntries(delta, new IPath[0]);
 		
 		ClasspathModifier.commitClassPath(cpProject, null);
 		
@@ -348,6 +437,8 @@ public class BuildpathModifierActionTest extends TestCase {
 		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject, null);
 		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[0], new IPath[0], new IPath[0]);
 		assertDeltaDefaultOutputFolder(delta, fJavaProject.getPath().append(DEFAULT_OUTPUT_FOLDER_NAME));
+		assertDeltaRemovedEntries(delta, new IPath[] {fJavaProject.getPath()});
+		assertDeltaAddedEntries(delta, new IPath[0]);
 		
 		ClasspathModifier.commitClassPath(cpProject, null);
 		

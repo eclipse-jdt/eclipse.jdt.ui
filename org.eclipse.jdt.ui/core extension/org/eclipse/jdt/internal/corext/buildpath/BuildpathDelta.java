@@ -26,12 +26,16 @@ public class BuildpathDelta {
 	private final List fCreatedResources;
 	private IPath fOutputLocation;
 	private final List fDeletedResources;
+	private final List fAddedEntries;
+	private final ArrayList fRemovedEntries;
 
 	public BuildpathDelta(String operationDescription) {
 		fOperationDescription= operationDescription;
 		
 		fCreatedResources= new ArrayList();
 		fDeletedResources= new ArrayList();
+		fAddedEntries= new ArrayList();
+		fRemovedEntries= new ArrayList();
     }
 
 	public String getOperationDescription() {
@@ -68,5 +72,21 @@ public class BuildpathDelta {
 
 	public void addDeletedResource(IResource resource) {
 		fDeletedResources.add(resource);
+    }
+
+    public List getAddedEntries() {
+	    return fAddedEntries;
+    }
+
+    public void addEntry(CPListElement entry) {
+    	fAddedEntries.add(entry);
+    }
+    
+    public List getRemovedEntries() {
+    	return fRemovedEntries;
+    }
+
+    public void removeEntry(CPListElement entry) {
+    	fRemovedEntries.add(entry);
     }
 }
