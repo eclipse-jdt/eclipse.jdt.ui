@@ -91,35 +91,39 @@ public final class RefactoringAvailabilityTester {
 
 	public static IMember[] getPullUpMembers(final IType type) throws JavaModelException {
 		final List list= new ArrayList(3);
-		IMember[] members= type.getFields();
-		for (int index= 0; index < members.length; index++) {
-			if (isPullUpAvailable(members[index]))
-				list.add(members[index]);
-		}
-		members= type.getMethods();
-		for (int index= 0; index < members.length; index++) {
-			if (isPullUpAvailable(members[index]))
-				list.add(members[index]);
-		}
-		members= type.getTypes();
-		for (int index= 0; index < members.length; index++) {
-			if (isPullUpAvailable(members[index]))
-				list.add(members[index]);
+		if (type.exists()) {
+			IMember[] members= type.getFields();
+			for (int index= 0; index < members.length; index++) {
+				if (isPullUpAvailable(members[index]))
+					list.add(members[index]);
+			}
+			members= type.getMethods();
+			for (int index= 0; index < members.length; index++) {
+				if (isPullUpAvailable(members[index]))
+					list.add(members[index]);
+			}
+			members= type.getTypes();
+			for (int index= 0; index < members.length; index++) {
+				if (isPullUpAvailable(members[index]))
+					list.add(members[index]);
+			}
 		}
 		return (IMember[]) list.toArray(new IMember[list.size()]);
 	}
 
 	public static IMember[] getPushDownMembers(final IType type) throws JavaModelException {
 		final List list= new ArrayList(3);
-		IMember[] members= type.getFields();
-		for (int index= 0; index < members.length; index++) {
-			if (isPushDownAvailable(members[index]))
-				list.add(members[index]);
-		}
-		members= type.getMethods();
-		for (int index= 0; index < members.length; index++) {
-			if (isPushDownAvailable(members[index]))
-				list.add(members[index]);
+		if (type.exists()) {
+			IMember[] members= type.getFields();
+			for (int index= 0; index < members.length; index++) {
+				if (isPushDownAvailable(members[index]))
+					list.add(members[index]);
+			}
+			members= type.getMethods();
+			for (int index= 0; index < members.length; index++) {
+				if (isPushDownAvailable(members[index]))
+					list.add(members[index]);
+			}
 		}
 		return (IMember[]) list.toArray(new IMember[list.size()]);
 	}
@@ -137,8 +141,11 @@ public final class RefactoringAvailabilityTester {
 		Object first= selection.getFirstElement();
 		if (first instanceof IType)
 			return (IType) first;
-		if (first instanceof ICompilationUnit)
-			return JavaElementUtil.getMainType((ICompilationUnit) first);
+		if (first instanceof ICompilationUnit) {
+			final ICompilationUnit unit= (ICompilationUnit) first;
+			if (unit.exists())
+			return  JavaElementUtil.getMainType(unit);
+		}
 		return null;
 	}
 
@@ -186,11 +193,7 @@ public final class RefactoringAvailabilityTester {
 	public static boolean isConvertAnonymousAvailable(final IStructuredSelection selection) throws JavaModelException {
 		if (selection.size() == 1) {
 			if (selection.getFirstElement() instanceof IType) {
-				final IType type= (IType) selection.getFirstElement();
-				final IJavaElement element= type.getParent();
-				if (element instanceof IField && JdtFlags.isEnum((IMember) element))
-					return false;
-				return type.isAnonymous();
+				return isConvertAnonymousAvailable((IType) selection.getFirstElement());
 			}
 		}
 		return false;
@@ -218,7 +221,7 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isDelegateCreationAvailable(final IField field) throws JavaModelException {
-		return (Flags.isStatic(field.getFlags()) && Flags.isFinal(field.getFlags()) /*
+		return field.exists() && (Flags.isStatic(field.getFlags()) && Flags.isFinal(field.getFlags()) /*
 																					 * &&
 																					 * hasInitializer(field)
 																					 */);
@@ -357,6 +360,8 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isExtractSupertypeAvailable(IMember member) throws JavaModelException {
+		if (!member.exists())
+			return false;
 		final int type= member.getElementType();
 		if (type != IJavaElement.METHOD && type != IJavaElement.FIELD && type != IJavaElement.TYPE)
 			return false;
@@ -457,11 +462,18 @@ public final class RefactoringAvailabilityTester {
 			final Object element= selection.getFirstElement();
 			if (element instanceof IMethod) {
 				final IMethod method= (IMethod) element;
+				if (!method.exists())
+					return false;
 				final String type= method.getReturnType();
 				if (PrimitiveType.toCode(Signature.toString(type)) == null)
 					return Checks.isAvailable(method);
-			} else if (element instanceof IField && !JdtFlags.isEnum((IField) element))
-				return Checks.isAvailable((IField) element);
+			} else if (element instanceof IField) {
+				final IField field= (IField) element;
+				if (!field.exists())
+					return false;
+				if (!JdtFlags.isEnum(field))
+					return Checks.isAvailable(field);
+			}
 		}
 		return false;
 	}
@@ -695,6 +707,8 @@ public final class RefactoringAvailabilityTester {
 		if (elements != null) {
 			for (int index= 0; index < elements.length; index++) {
 				IJavaElement element= elements[index];
+				if (!element.exists())
+					return false;
 				if ((element instanceof IType) && ((IType) element).isLocal())
 					return false;
 				if ((element instanceof IPackageDeclaration))
@@ -754,6 +768,8 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isMoveStaticAvailable(final IMember member) throws JavaModelException {
+		if (!member.exists())
+			return false;
 		final int type= member.getElementType();
 		if (type != IJavaElement.METHOD && type != IJavaElement.FIELD && type != IJavaElement.TYPE)
 			return false;
@@ -816,6 +832,8 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isPullUpAvailable(IMember member) throws JavaModelException {
+		if (!member.exists())
+			return false;
 		final int type= member.getElementType();
 		if (type != IJavaElement.METHOD && type != IJavaElement.FIELD && type != IJavaElement.TYPE)
 			return false;
@@ -882,6 +900,8 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isPushDownAvailable(final IMember member) throws JavaModelException {
+		if (!member.exists())
+			return false;
 		final int type= member.getElementType();
 		if (type != IJavaElement.METHOD && type != IJavaElement.FIELD)
 			return false;
@@ -1100,7 +1120,7 @@ public final class RefactoringAvailabilityTester {
 		if (selection.size() == 1) {
 			if (selection.getFirstElement() instanceof IField) {
 				final IField field= (IField) selection.getFirstElement();
-				return !JdtFlags.isEnum(field) && Checks.isAvailable(field);
+				return Checks.isAvailable(field) && !JdtFlags.isEnum(field);
 			}
 		}
 		return false;
