@@ -707,7 +707,7 @@ public final class RefactoringAvailabilityTester {
 		if (elements != null) {
 			for (int index= 0; index < elements.length; index++) {
 				IJavaElement element= elements[index];
-				if (!element.exists())
+				if (element == null || !element.exists())
 					return false;
 				if ((element instanceof IType) && ((IType) element).isLocal())
 					return false;
