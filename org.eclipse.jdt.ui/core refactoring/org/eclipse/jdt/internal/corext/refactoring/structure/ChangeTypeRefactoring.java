@@ -841,22 +841,30 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 				VariableDeclarationFragment fragment = (VariableDeclarationFragment)parent;
 				fFieldBinding= fragment.resolveBinding();
 				setSelectionRanges(fragment.getName());
-			}					
+			} else {
+				return RefactoringCoreMessages.ChangeTypeRefactoring_notSupportedOnNodeType;
+			}
 		} else if (parent.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION) {
+			SingleVariableDeclaration singleVariableDeclaration= (SingleVariableDeclaration) parent;
 			if ((grandParent.getNodeType() == ASTNode.METHOD_DECLARATION)) {
 				fMethodBinding= ((MethodDeclaration)grandParent).resolveBinding();
 				setOriginalType(simpleName.resolveTypeBinding());
 				fParamIndex= ((MethodDeclaration)grandParent).parameters().indexOf(parent);
-				fParamName= ((SingleVariableDeclaration) parent).getName().getIdentifier();
+				fParamName= singleVariableDeclaration.getName().getIdentifier();
+			} else {
+				setSelectionRanges(singleVariableDeclaration.getName());
 			}
 		} else if (parent.getNodeType() == ASTNode.SIMPLE_TYPE && (grandParent.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION)) {
 			ASTNode greatGrandParent= grandParent.getParent();
+			SingleVariableDeclaration singleVariableDeclaration= (SingleVariableDeclaration) grandParent;
 			if (greatGrandParent != null && greatGrandParent.getNodeType() == ASTNode.METHOD_DECLARATION) {
 				fMethodBinding= ((MethodDeclaration)greatGrandParent).resolveBinding();
 				fParamIndex= ((MethodDeclaration)greatGrandParent).parameters().indexOf(grandParent);
-				fParamName= ((SingleVariableDeclaration) grandParent).getName().getIdentifier();
+				fParamName= singleVariableDeclaration.getName().getIdentifier();
+				setSelectionRanges(simpleName);
+			} else {
+				setSelectionRanges(singleVariableDeclaration.getName());
 			}
-			setSelectionRanges(simpleName);
 		} else if (parent.getNodeType() == ASTNode.SIMPLE_TYPE && grandParent.getNodeType() == ASTNode.METHOD_DECLARATION) {
 			fMethodBinding= ((MethodDeclaration)grandParent).resolveBinding();
 			setOriginalType(fMethodBinding.getReturnType());

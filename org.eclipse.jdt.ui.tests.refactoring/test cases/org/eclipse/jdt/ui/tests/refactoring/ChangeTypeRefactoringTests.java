@@ -582,6 +582,16 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		};
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
+	public void testCatchClause() throws Exception {
+		Collection types= helper1(7, 18, 7, 18, "java.io.IOException").getValidTypeNames();
+		String[] actual= (String[]) types.toArray(new String[types.size()]);
+		String[] expected= {
+				"java.lang.Throwable",
+				"java.lang.Exception",
+				"java.io.IOException"
+		};
+		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
+	}
 	
 	// tests that are supposed to fail
 	
