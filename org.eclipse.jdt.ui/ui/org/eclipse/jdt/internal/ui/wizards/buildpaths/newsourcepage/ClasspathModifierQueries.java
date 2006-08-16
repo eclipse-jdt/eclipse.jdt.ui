@@ -39,7 +39,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ExclusionInclusionDialog;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.OutputLocationDialog;
 
 /**
  * Helper class for queries used by the <code>ClasspathModifier</code>. 
@@ -504,47 +503,6 @@ public class ClasspathModifierQueries {
 			}
 		};
 	}
-
-    /**
-     * A default query for the output location.
-     * The query is used to get information about the output location 
-     * that should be used for a given element.
-     * 
-     * @param shell shell if there is any or <code>null</code>
-     * @param projectOutputLocation the projects desired output location
-     * @param classpathList a list of <code>CPListElement</code>s which represents the 
-     * current list of source folders
-     * @return an <code>IOutputLocationQuery</code> that can be executed
-     * 
-     * @see ClasspathModifierQueries.IOutputLocationQuery
-     */
-    public static IOutputLocationQuery getDefaultOutputLocationQuery(final Shell shell, final IPath projectOutputLocation, final List classpathList) {
-        return new IOutputLocationQuery() {
-
-            protected IPath fOutputLocation;
-
-			public boolean doQuery(final CPListElement element) {
-	            final boolean[] result= new boolean[1];
-                Display.getDefault().syncExec(new Runnable() {
-                    public void run() {
-                        Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
-                        OutputLocationDialog dialog= new OutputLocationDialog(sh, element, classpathList);
-                        result[0]= dialog.open() == Window.OK;
-                        fOutputLocation= dialog.getOutputLocation();
-                    }
-                });
-                return result[0];
-            }
-            
-            public IPath getOutputLocation() {
-                return fOutputLocation;
-            }
-            
-            public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery(IPath p) {
-                return getDefaultFolderQuery(shell, projectOutputLocation);
-            }
-        };
-    }
 
     /**
      * Query to create a linked source folder.

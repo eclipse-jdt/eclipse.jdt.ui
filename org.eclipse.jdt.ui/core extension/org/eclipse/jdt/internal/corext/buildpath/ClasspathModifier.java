@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
@@ -32,7 +33,9 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -48,6 +51,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
@@ -58,6 +63,125 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 public class ClasspathModifier {
 
 	private ClasspathModifier() {}
+	
+	public static BuildpathDelta setOutputLocation(CPListElement elementToChange, IPath outputPath, boolean allowInvalidCP, CPJavaProject cpProject, IProgressMonitor monitor) throws CoreException {
+		if (monitor == null)
+			monitor= new NullProgressMonitor();
+		
+		monitor.beginTask(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip, 2);
+		
+		try {
+			BuildpathDelta result= new BuildpathDelta(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip);
+			
+			IJavaProject javaProject= cpProject.getJavaProject();
+			IProject project= javaProject.getProject();
+			IWorkspace workspace= project.getWorkspace();
+			
+			IPath projectPath= project.getFullPath();								
+			
+			if (!allowInvalidCP && cpProject.getDefaultOutputLocation().segmentCount() == 1 && !projectPath.equals(elementToChange.getPath())) {
+				String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
+				cpProject.setDefaultOutputLocation(cpProject.getDefaultOutputLocation().append(outputFolderName));
+				ClasspathModifier.removeFromClasspath(javaProject, cpProject.getCPListElements(), new SubProgressMonitor(monitor, 1));
+			} else {
+				monitor.worked(1);
+			}
+			
+			exclude(outputPath, cpProject.getCPListElements(), new ArrayList(), cpProject.getJavaProject(), new SubProgressMonitor(monitor, 1));
+			
+			IPath oldOutputLocation= (IPath)elementToChange.getAttribute(CPListElement.OUTPUT);
+	        if (oldOutputLocation != null && oldOutputLocation.segmentCount() > 1) {
+	        	result.addDeletedResource(workspace.getRoot().getFolder(oldOutputLocation));
+	        }
+			elementToChange.setAttribute(CPListElement.OUTPUT, outputPath);
+			
+			result.setDefaultOutputLocation(cpProject.getDefaultOutputLocation());
+			result.setNewEntries((CPListElement[])cpProject.getCPListElements().toArray(new CPListElement[cpProject.getCPListElements().size()]));
+			if (outputPath != null && outputPath.segmentCount() > 1) {
+				result.addCreatedResource(workspace.getRoot().getFolder(outputPath));
+			}
+			
+			return result;
+		} finally {
+			monitor.done();
+		}
+	}
+
+	public static IStatus checkSetOutputLocationPrecondition(CPListElement elementToChange, IPath outputPath, boolean allowInvalidCP, CPJavaProject cpProject) throws CoreException {
+		IJavaProject javaProject= cpProject.getJavaProject();
+		IProject project= javaProject.getProject();
+		IWorkspace workspace= project.getWorkspace();
+		
+		IPath projectPath= project.getFullPath();		
+						
+		IStatus pathValidation= workspace.validatePath(outputPath.toString(), IResource.PROJECT | IResource.FOLDER);
+		if (!pathValidation.isOK())
+			return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.OutputLocationDialog_error_invalidpath, pathValidation.getMessage()));
+		
+		IWorkspaceRoot root= workspace.getRoot();
+		IResource res= root.findMember(outputPath);
+		if (res != null) {
+			// if exists, must be a folder or project
+			if (res.getType() == IResource.FILE)
+				return new StatusInfo(IStatus.ERROR, NewWizardMessages.OutputLocationDialog_error_existingisfile);
+		}
+		
+		IStatus result= StatusInfo.OK_STATUS;
+		
+		int index= cpProject.indexOf(elementToChange);
+		cpProject= cpProject.createWorkingCopy();
+		elementToChange= cpProject.get(index);		
+		
+		if (!allowInvalidCP && cpProject.getDefaultOutputLocation().segmentCount() == 1 && !projectPath.equals(elementToChange.getPath())) {
+			String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
+			cpProject.setDefaultOutputLocation(cpProject.getDefaultOutputLocation().append(outputFolderName));
+			ClasspathModifier.removeFromClasspath(javaProject, cpProject.getCPListElements(), null);
+			result= new StatusInfo(IStatus.INFO, Messages.format(NewWizardMessages.OutputLocationDialog_removeProjectFromBP, cpProject.getDefaultOutputLocation()));
+		}
+		
+		exclude(outputPath, cpProject.getCPListElements(), new ArrayList(), cpProject.getJavaProject(), null);
+        
+		elementToChange.setAttribute(CPListElement.OUTPUT, outputPath);
+		
+		IJavaModelStatus status= JavaConventions.validateClasspath(javaProject, cpProject.getClasspathEntries(), cpProject.getDefaultOutputLocation());
+		if (!status.isOK()) {
+			if (allowInvalidCP) {
+				return new StatusInfo(IStatus.WARNING, status.getMessage());
+			} else {
+				return new StatusInfo(IStatus.ERROR, status.getMessage());
+			}
+		}
+		
+		if (outputPath.segmentCount() - projectPath.segmentCount() < 1)
+			return result;
+		
+		String lastSegment= outputPath.lastSegment();
+		if (lastSegment == null)
+			return result;
+		
+		if (lastSegment.equals(".settings") && outputPath.segmentCount() - projectPath.segmentCount() == 1) { //$NON-NLS-1$
+
+			StatusInfo statusInfo= new StatusInfo(IStatus.WARNING, NewWizardMessages.OutputLocation_SettingsAsLocation);
+			if (result.isOK()) {
+				return statusInfo;
+			} else {
+				MultiStatus ms= new MultiStatus(result.getPlugin(), result.getCode(), new IStatus[] {result, statusInfo}, statusInfo.getMessage(), null);
+				return ms;
+			}
+		}
+		
+		if (lastSegment.length() > 1 && lastSegment.charAt(0) == '.') {
+			StatusInfo statusInfo= new StatusInfo(IStatus.WARNING, Messages.format(NewWizardMessages.OutputLocation_DotAsLocation, outputPath.toString()));
+			if (result.isOK()) {
+				return statusInfo;
+			} else {
+				MultiStatus ms= new MultiStatus(result.getPlugin(), result.getCode(), new IStatus[] {result, statusInfo}, statusInfo.getMessage(), null);
+				return ms;
+			}
+		}
+		
+		return result;
+	}
 
 	/**
 	 * Get the <code>IClasspathEntry</code> from the project and 
@@ -478,9 +602,8 @@ public class ClasspathModifier {
 	 * will be traversed and the entry for the project will be removed.
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @return returns the Java project
-	 * @throws CoreException
 	 */
-	public static IJavaProject removeFromClasspath(IJavaProject project, List existingEntries, IProgressMonitor monitor) throws CoreException {
+	public static IJavaProject removeFromClasspath(IJavaProject project, List existingEntries, IProgressMonitor monitor) {
 		CPListElement elem= getListElement(project.getPath(), existingEntries);
 		if (elem != null) {
 			existingEntries.remove(elem);
@@ -764,9 +887,8 @@ public class ClasspathModifier {
 	 * the list
 	 * @return the <code>CPListElement</code> found in the list (matching by using the path) or 
 	 * the second <code>CPListElement</code> parameter itself if there is no match.
-	 * @throws JavaModelException
 	 */
-	public static CPListElement getClasspathEntry(List elements, CPListElement cpElement) throws JavaModelException {
+	public static CPListElement getClasspathEntry(List elements, CPListElement cpElement) {
 		for (int i= 0; i < elements.size(); i++) {
 			if (((CPListElement) elements.get(i)).getPath().equals(cpElement.getPath()))
 				return (CPListElement) elements.get(i);
@@ -796,6 +918,9 @@ public class ClasspathModifier {
 	public static void commitClassPath(List newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
+		
+		monitor.beginTask("", 2); //$NON-NLS-1$
+		
 		try {
 			IClasspathEntry[] entries= convert(newEntries);
 			IPath outputLocation= project.getOutputLocation();
@@ -809,6 +934,26 @@ public class ClasspathModifier {
 			monitor.done();
 		}
 	}
+	
+    public static void commitClassPath(CPJavaProject cpProject, IProgressMonitor monitor) throws JavaModelException {
+		if (monitor == null)
+			monitor= new NullProgressMonitor();
+		
+		monitor.beginTask("", 2); //$NON-NLS-1$
+		
+		try {
+			IClasspathEntry[] entries= convert(cpProject.getCPListElements());
+			IPath outputLocation= cpProject.getDefaultOutputLocation();
+
+			IJavaModelStatus status= JavaConventions.validateClasspath(cpProject.getJavaProject(), entries, outputLocation);
+			if (!status.isOK())
+				throw new JavaModelException(status);
+
+			cpProject.getJavaProject().setRawClasspath(entries, outputLocation, new SubProgressMonitor(monitor, 2));
+		} finally {
+			monitor.done();
+		}
+    }
 
 	/**
 	 * For a given list of entries, find out what representation they 

@@ -65,6 +65,8 @@ public class CPListElement {
 	private ArrayList fChildren;
 	private IPath fLinkTarget, fOrginalLinkTarget;
 	
+	private CPListElement() {}
+	
 	public CPListElement(IJavaProject project, int entryKind, IPath path, IResource res) {
 		this(null, project, entryKind, path, res);
 	}
@@ -684,5 +686,31 @@ public class CPListElement {
 	public IPath getOrginalLinkTarget() {
 		return fOrginalLinkTarget;
 	}
+
+
+    public CPListElement copy() {
+    	CPListElement result= new CPListElement();
+    	result.fProject= fProject;
+    	result.fEntryKind= fEntryKind;
+    	result.fPath= fPath;
+    	result.fOrginalPath= fOrginalPath;
+    	result.fResource= fResource;
+    	result.fIsExported= fIsExported;
+    	result.fIsMissing= fIsMissing;
+    	result.fParentContainer= fParentContainer;
+    	result.fCachedEntry= null;
+    	result.fChildren= new ArrayList(fChildren.size());
+    	for (Iterator iterator= fChildren.iterator(); iterator.hasNext();) {
+    		Object child= iterator.next();
+    		if (child instanceof CPListElement) {
+    			result.fChildren.add(((CPListElement)child).copy());
+    		} else {
+	        	result.fChildren.add(((CPListElementAttribute)child).copy());
+    		}
+        }
+    	result.fLinkTarget= fLinkTarget;
+    	result.fOrginalLinkTarget= fOrginalLinkTarget;
+	    return result;
+    }
 
 }

@@ -11,18 +11,16 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 
 import org.eclipse.swt.SWT;
@@ -47,9 +45,12 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import org.eclipse.ui.views.navigator.ResourceSorter;
 
+import org.eclipse.jdt.internal.corext.buildpath.CPJavaProject;
+import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -66,14 +67,18 @@ public class OutputLocationDialog extends StatusDialog {
 	private StringButtonDialogField fContainerDialogField;
 	private SelectionButtonDialogField fUseDefault;
 	private SelectionButtonDialogField fUseSpecific;
-	private StatusInfo fContainerFieldStatus;
-	
-	private IProject fCurrProject;
+	private IStatus fContainerFieldStatus;
+
 	private IPath fOutputLocation;
-    private List fClassPathList;
+	private final IProject fCurrProject;
+	private final CPListElement fEntryToEdit;
+	private final boolean fAllowInvalidClasspath;
+	private CPJavaProject fCPJavaProject;
 		
-	public OutputLocationDialog(Shell parent, CPListElement entryToEdit, List classPathList) {
+	public OutputLocationDialog(Shell parent, CPListElement entryToEdit, List classPathList, IPath defaultOutputFolder, boolean allowInvalidClasspath) {
 		super(parent);
+		fEntryToEdit= entryToEdit;
+		fAllowInvalidClasspath= allowInvalidClasspath;
 		setTitle(NewWizardMessages.OutputLocationDialog_title); 
 		fContainerFieldStatus= new StatusInfo();
 	
@@ -95,8 +100,7 @@ public class OutputLocationDialog extends StatusDialog {
 		fUseSpecific.attachDialogField(fContainerDialogField);
 		
 		fCurrProject= entryToEdit.getJavaProject().getProject();
-        fClassPathList= classPathList;
-		classPathList.remove(entryToEdit);
+		fCPJavaProject= new CPJavaProject(classPathList, defaultOutputFolder); 
 		
 		IPath outputLocation= (IPath) entryToEdit.getAttribute(CPListElement.OUTPUT);
 		if (outputLocation == null) {
@@ -107,11 +111,10 @@ public class OutputLocationDialog extends StatusDialog {
 		}
 	}
 	
-	
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite)super.createDialogArea(parent);
 		
-		int widthHint= convertWidthInCharsToPixels(60);
+		int widthHint= convertWidthInCharsToPixels(70);
 		int indent= convertWidthInCharsToPixels(4);
 		
 		Composite inner= new Composite(composite, SWT.NONE);
@@ -163,102 +166,38 @@ public class OutputLocationDialog extends StatusDialog {
 		}
 	}
 	
-	
 	protected void doStatusLineUpdate() {
 		checkIfPathValid();
-		warnIfPathDangerous();
 		updateStatus(fContainerFieldStatus);
 	}
 
 	protected void checkIfPathValid() {
 		fOutputLocation= null;
-		fContainerFieldStatus.setOK();
+		fContainerFieldStatus= StatusInfo.OK_STATUS;
 
 		if (fUseDefault.isSelected()) {
 			return;
 		}
-				
+		
 		String pathStr= fContainerDialogField.getText();
 		if (pathStr.length() == 0) {
-			fContainerFieldStatus.setError(""); //$NON-NLS-1$
-			return;
-		}
-		IPath projectPath= fCurrProject.getFullPath();
-				
-		IPath path= projectPath.append(pathStr);
-		
-		IWorkspace workspace= fCurrProject.getWorkspace();		
-		IStatus pathValidation= workspace.validatePath(path.toString(), IResource.PROJECT | IResource.FOLDER);
-		if (!pathValidation.isOK()) {
-			fContainerFieldStatus.setError(Messages.format(NewWizardMessages.OutputLocationDialog_error_invalidpath, pathValidation.getMessage())); 
+			fContainerFieldStatus= new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 			return;
 		}
 		
-		IWorkspaceRoot root= workspace.getRoot();
-		IResource res= root.findMember(path);
-		if (res != null) {
-			// if exists, must be a folder or project
-			if (res.getType() == IResource.FILE) {
-				fContainerFieldStatus.setError(NewWizardMessages.OutputLocationDialog_error_existingisfile); 
-				return;
-			}
-            
-            if (!checkIfFolderValid(path)) {
-                fContainerFieldStatus.setError(Messages.format(NewWizardMessages.OutputLocationDialog_error_invalidFolder, path)); 
-               return;
-            }
-		}
-		fOutputLocation= path;
-	}
-	
-	private void warnIfPathDangerous() {
-		if (!fContainerFieldStatus.isOK())
-			return;
+		IPath projectPath= fCPJavaProject.getJavaProject().getProject().getFullPath();		
+		IPath outputPath= projectPath.append(pathStr);
 		
-		if (fUseDefault.isSelected())
-			return;
-		
-		String pathStr= fContainerDialogField.getText();
-		if (pathStr.length() == 0)
-			return;
-		
-		Path outputPath= (new Path(pathStr));
-		pathStr= outputPath.lastSegment();
-		if (pathStr == null)
-			return;
-		
-		if (pathStr.equals(".settings") && outputPath.segmentCount() == 1) { //$NON-NLS-1$
-			fContainerFieldStatus.setWarning(NewWizardMessages.OutputLocation_SettingsAsLocation);
-			return;
-		}
-		
-		if (pathStr.charAt(0) == '.' && pathStr.length() > 1) {
-			fContainerFieldStatus.setWarning(Messages.format(NewWizardMessages.OutputLocation_DotAsLocation, pathStr));
-			return;
-		}
-	}
-    
-    /**
-     * Iterate over the list of class path entries and check 
-     * wheter the new path points to a location where a 
-     * source folder has already been established.
-     * 
-     * @param path the new path
-     * @return <code>false</code> if the path belongs to 
-     * a folder which is already taken as source folder, 
-     * <code>true</code> otherwise
-     */
-    private boolean checkIfFolderValid(IPath path) {
-        Iterator iterator= fClassPathList.iterator();
-        while (iterator.hasNext()) {
-            CPListElement element= (CPListElement)iterator.next();
-            if (element.getPath().equals(path))
-                return false;
+		try {
+	        fContainerFieldStatus= ClasspathModifier.checkSetOutputLocationPrecondition(fEntryToEdit, outputPath, fAllowInvalidClasspath, fCPJavaProject);
+	        if (fContainerFieldStatus.getSeverity() != IStatus.ERROR) {
+	        	fOutputLocation= outputPath;
+	        }
+        } catch (CoreException e) {
+	        JavaPlugin.log(e);
         }
-        return true;
-    }
-	
-		
+	}
+
 	public IPath getOutputLocation() {
 		return fOutputLocation;
 	}
@@ -304,9 +243,12 @@ public class OutputLocationDialog extends StatusDialog {
                     return typedStatus;           
                 if (selection[0] instanceof IFolder) {
                     IFolder folder= (IFolder) selection[0];
-                    boolean valid= checkIfFolderValid(folder.getFullPath());
-                    if (!valid) {
-                        return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.OutputLocationDialog_error_invalidFolder, folder.getFullPath())); 
+                    try {
+                    	IStatus result= ClasspathModifier.checkSetOutputLocationPrecondition(fEntryToEdit, folder.getFullPath(), fAllowInvalidClasspath, fCPJavaProject);
+                    	if (result.getSeverity() == IStatus.ERROR)
+	                    	return result;
+                    } catch (CoreException e) {
+	                    JavaPlugin.log(e);
                     }
                 }
                 return new StatusInfo();
@@ -323,7 +265,4 @@ public class OutputLocationDialog extends StatusDialog {
 		}
 		return null;
 	}
-	
-
-
 }

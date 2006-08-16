@@ -35,6 +35,10 @@ public class CPListElementAttribute {
 		}	
 	}
 	
+    private CPListElementAttribute(boolean buildIn) {
+    	fBuiltIn= buildIn;
+    }
+
 	public IClasspathAttribute newClasspathAttribute() {
 		Assert.isTrue(!fBuiltIn);
 		if (fValue != null) {
@@ -89,5 +93,13 @@ public class CPListElementAttribute {
             return false;
         CPListElementAttribute attrib= (CPListElementAttribute)obj;
         return attrib.fKey== this.fKey && attrib.getParent().getPath().equals(fParent.getPath());
+    }
+
+    public CPListElementAttribute copy() {
+    	CPListElementAttribute result= new CPListElementAttribute(fBuiltIn);
+    	result.fParent= fParent;
+    	result.fKey= fKey;
+    	result.fValue= fValue;
+	    return result;
     }
 }

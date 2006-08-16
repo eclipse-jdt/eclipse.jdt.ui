@@ -11,11 +11,9 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -24,6 +22,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbenchSite;
@@ -33,9 +32,11 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
+import org.eclipse.jdt.internal.corext.buildpath.CPJavaProject;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -44,8 +45,6 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.OutputLocationDialog;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderValidator;
 
 //SelectedElements iff enabled: (IPackageFragmentRoot || IJavaProject || CPListElementAttribute) && size == 1
 public class EditOutputFolderAction extends BuildpathModifierAction {
@@ -120,43 +119,27 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 			}
 
 			final List classpathEntries= ClasspathModifier.getExistingEntries(javaProject);
-
 			final CPListElement element= ClasspathModifier.getClasspathEntry(classpathEntries, cpElement);
-			final int index= classpathEntries.indexOf(element);
 
-			final OutputLocationDialog dialog= new OutputLocationDialog(shell, element, classpathEntries);
+			final OutputLocationDialog dialog= new OutputLocationDialog(shell, element, classpathEntries, javaProject.getOutputLocation(), false);
 			if (dialog.open() != Window.OK)
 				return;
 
-			classpathEntries.add(index, element);
-
-			final boolean removeProjectFromClasspath;
-			final IPath defaultOutputLocation= javaProject.getOutputLocation().makeRelative();
-			final IPath newDefaultOutputLocation;
-			if (defaultOutputLocation.segmentCount() == 1) {
-				//Project folder is output location
-				final OutputFolderValidator outputFolderValidator= new OutputFolderValidator(null, javaProject) {
-					public boolean validate(IPath outputLocation) {
-						return true;
-					}
-				};
-				final OutputFolderQuery outputFolderQuery= ClasspathModifierQueries.getDefaultFolderQuery(shell, defaultOutputLocation);
-				if (outputFolderQuery.doQuery(true, outputFolderValidator, javaProject)) {
-					newDefaultOutputLocation= outputFolderQuery.getOutputLocation();
-					removeProjectFromClasspath= outputFolderQuery.removeProjectFromClasspath();
-				} else {
-					return;
-				}
-			} else {
-				removeProjectFromClasspath= false;
-				newDefaultOutputLocation= defaultOutputLocation;
-			}
-			
 			try {
 				final IRunnableWithProgress runnable= new IRunnableWithProgress() {
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						try {
-							setOutputLocation(element, dialog.getOutputLocation(), classpathEntries, newDefaultOutputLocation, removeProjectFromClasspath, javaProject, monitor);
+							try {
+                            	monitor.beginTask(NewWizardMessages.EditOutputFolderAction_ProgressMonitorDescription, 2);
+                            	
+                            	CPJavaProject cpProject= CPJavaProject.createFromExisting(javaProject);
+                            	BuildpathDelta delta= ClasspathModifier.setOutputLocation(cpProject.getCPElement(element), dialog.getOutputLocation(), false, cpProject, new SubProgressMonitor(monitor, 1));
+                            	ClasspathModifier.commitClassPath(cpProject, new SubProgressMonitor(monitor, 1));
+                            	informListeners(delta);
+                            	selectAndReveal(new StructuredSelection(JavaCore.create(element.getResource())));
+                            } finally {
+                            	monitor.done();
+                            }
 						} catch (CoreException e) {
 							throw new InvocationTargetException(e);
 						}
@@ -174,42 +157,6 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 			
 		} catch (final CoreException e) {
 			showExceptionDialog(e, NewWizardMessages.EditOutputFolderAction_ErrorDescription);
-		}
-	}
-
-	private void setOutputLocation(final CPListElement entry, final IPath outputLocation, final List existingEntries, final IPath defaultOutputLocation, final boolean removeProjectFromClasspath, final IJavaProject javaProject, final IProgressMonitor monitor) throws CoreException, InterruptedException {
-		try {
-			monitor.beginTask(NewWizardMessages.EditOutputFolderAction_ProgressMonitorDescription, 4);
-			
-			BuildpathDelta delta= new BuildpathDelta(getToolTipText());
-			
-			if (!defaultOutputLocation.equals(javaProject.getOutputLocation().makeRelative())) {
-				javaProject.setOutputLocation(defaultOutputLocation, new SubProgressMonitor(monitor, 1));
-				delta.setDefaultOutputLocation(defaultOutputLocation);
-			} else {
-				monitor.worked(1);
-			}
-			
-			if (removeProjectFromClasspath) {
-				ClasspathModifier.removeFromClasspath(javaProject, existingEntries, new SubProgressMonitor(monitor, 1));
-			} else {
-				monitor.worked(1);
-			}
-	
-			if (outputLocation != null) {
-				ClasspathModifier.exclude(outputLocation, existingEntries, new ArrayList(), javaProject, new SubProgressMonitor(monitor, 1));
-			} else {
-				monitor.worked(1);
-			}
-			
-			entry.setAttribute(CPListElement.OUTPUT, outputLocation);
-			
-			ClasspathModifier.commitClassPath(existingEntries, javaProject, new SubProgressMonitor(monitor, 1));
-		
-        	delta.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
-        	informListeners(delta);
-		} finally {
-			monitor.done();
 		}
 	}
 
