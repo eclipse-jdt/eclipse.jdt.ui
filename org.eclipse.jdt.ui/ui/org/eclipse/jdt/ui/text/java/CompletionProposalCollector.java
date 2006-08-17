@@ -69,7 +69,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
  * ICompilationUnit unit= ...
  * int offset= ...
  * 
- * CompletionProposalCollector collector= new CompletionProposalCollector(cu);
+ * CompletionProposalCollector collector= new CompletionProposalCollector(unit);
  * unit.codeComplete(offset, collector);
  * IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
  * String errorMessage= collector.getErrorMessage();
@@ -559,10 +559,6 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			case CompletionProposal.JAVADOC_FIELD_REF:
 			case CompletionProposal.JAVADOC_VALUE_REF:
 				char[] declaration= proposal.getDeclarationSignature();
-				// special methods may not have a declaring type: methods defined on arrays etc.
-				// TODO remove when bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=84690 gets fixed
-				if (declaration == null)
-					return "java.lang.Object".toCharArray(); //$NON-NLS-1$
 				return Signature.toCharArray(declaration);
 			case CompletionProposal.PACKAGE_REF:
 				return proposal.getDeclarationSignature();
