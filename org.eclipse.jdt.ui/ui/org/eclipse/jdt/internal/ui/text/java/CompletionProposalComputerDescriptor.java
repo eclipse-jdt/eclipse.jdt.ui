@@ -74,7 +74,7 @@ final class CompletionProposalComputerDescriptor {
 	 * Independently of the {@link PerformanceStats} service, any operation that takes longer than
 	 * {@value} milliseconds will be flagged as an violation. This timeout does not apply to the
 	 * first invocation, as it may take longer due to plug-in initialization etc. See also
-	 * {@link #fMeasureMaxDelay}.
+	 * {@link #fIsReportingDelay}.
 	 */
 	private static final long MAX_DELAY= 5000;
 	
@@ -117,9 +117,11 @@ final class CompletionProposalComputerDescriptor {
 	/** The first error message in the most recent operation, or <code>null</code>. */
 	private String fLastError;
 	/**
-	 * Whether to measure the performance (other than blame performance).
+	 * Tells whether to inform the user when <code>MAX_DELAY</code> has been exceeded.
+	 * We start timing execution after the first session because the first may take
+	 * longer due to plug-in activation and initialization.
 	 */
-	private boolean fMeasureMaxDelay= false;
+	private boolean fIsReportingDelay= false;
 	/** The start of the last operation. */
 	private long fStart;
 
@@ -289,22 +291,25 @@ final class CompletionProposalComputerDescriptor {
 	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (!isEnabled())
 			return Collections.EMPTY_LIST;
-		
+
 		IStatus status;
 		try {
 			IJavaCompletionProposalComputer computer= getComputer();
 			if (computer == null) // not active yet
 				return Collections.EMPTY_LIST;
-
-			PerformanceStats stats= startMeter(context, computer);
-			List proposals= computer.computeCompletionProposals(context, monitor);
-			stopMeter(stats, COMPUTE_COMPLETION_PROPOSALS);
 			
-			if (proposals != null) {
-				fLastError= computer.getErrorMessage();
-				return proposals;
+			try {
+				PerformanceStats stats= startMeter(context, computer);
+				List proposals= computer.computeCompletionProposals(context, monitor);
+				stopMeter(stats, COMPUTE_COMPLETION_PROPOSALS);
+				
+				if (proposals != null) {
+					fLastError= computer.getErrorMessage();
+					return proposals;
+				}
+			} finally {
+				fIsReportingDelay= true;
 			}
-			
 			status= createAPIViolationStatus(COMPUTE_COMPLETION_PROPOSALS);
 		} catch (InvalidRegistryObjectException x) {
 			status= createExceptionStatus(x);
@@ -315,7 +320,7 @@ final class CompletionProposalComputerDescriptor {
 		} finally {
 			monitor.done();
 		}
-		
+
 		fRegistry.informUser(this, status);
 
 		return Collections.EMPTY_LIST;
@@ -369,6 +374,10 @@ final class CompletionProposalComputerDescriptor {
 
 	/**
 	 * Notifies the described extension of a proposal computation session start.
+	 * <p><em>
+	 * Note: This method is called every time code assist is invoked and
+	 * is <strong>not</strong> filtered by partition type.
+	 * </em></p>
 	 */
 	public void sessionStarted() {
 		if (!isEnabled())
@@ -398,22 +407,25 @@ final class CompletionProposalComputerDescriptor {
 
 	/**
 	 * Notifies the described extension of a proposal computation session end.
+	 * <p><em>
+	 * Note: This method is called every time code assist is invoked and
+	 * is <strong>not</strong> filtered by partition type.
+	 * </em></p>
 	 */
 	public void sessionEnded() {
 		if (!isEnabled())
 			return;
-		
+
 		IStatus status;
 		try {
 			IJavaCompletionProposalComputer computer= getComputer();
 			if (computer == null) // not active yet
 				return;
-			
+
 			PerformanceStats stats= startMeter(SESSION_ENDED, computer);
 			computer.sessionEnded();
 			stopMeter(stats, SESSION_ENDED);
-			
-			fMeasureMaxDelay= true; // start timing execution after the first session - the first one may take longer due to plug-in initialization etc.
+
 			return;
 		} catch (InvalidRegistryObjectException x) {
 			status= createExceptionStatus(x);
@@ -422,7 +434,7 @@ final class CompletionProposalComputerDescriptor {
 		} catch (RuntimeException x) {
 			status= createExceptionStatus(x);
 		}
-		
+
 		fRegistry.informUser(this, status);
 	}
 
@@ -435,7 +447,7 @@ final class CompletionProposalComputerDescriptor {
 			stats= null;
 		}
 		
-		if (fMeasureMaxDelay) {
+		if (fIsReportingDelay) {
 			fStart= System.currentTimeMillis();
 		}
 		
@@ -452,7 +464,7 @@ final class CompletionProposalComputerDescriptor {
 			}
 		}
 		
-		if (fMeasureMaxDelay) {
+		if (fIsReportingDelay) {
 			long current= System.currentTimeMillis();
 			if (current - fStart > MAX_DELAY) {
 				IStatus status= createPerformanceStatus(operation);
