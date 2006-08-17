@@ -255,6 +255,32 @@ public class ClasspathModifier {
 		return result;
     }
     
+    public static BuildpathDelta removeFromBuildpath(CPListElement[] toRemove, CPJavaProject cpProject) {
+    	
+        IWorkspaceRoot workspaceRoot= cpProject.getJavaProject().getProject().getWorkspace().getRoot();
+        
+    	List existingEntries= cpProject.getCPListElements();
+		BuildpathDelta result= new BuildpathDelta(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip);
+		
+		for (int i= 0; i < toRemove.length; i++) {
+	        CPListElement element= toRemove[i];
+	        existingEntries.remove(element);
+	        result.removeEntry(element);
+	        IPath path= element.getPath();
+			removeFilters(path, cpProject.getJavaProject(), existingEntries);
+	        if (!path.equals(cpProject.getJavaProject().getPath())) {
+	            IResource member= workspaceRoot.findMember(path);
+	            if (member != null)
+	            	result.addDeletedResource(member);
+            }
+        }
+		
+		result.setDefaultOutputLocation(cpProject.getDefaultOutputLocation());
+    	result.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
+
+	    return result;
+    }
+    
     private static void include(CPJavaProject cpProject, IPath path) {
 	    List elements= cpProject.getCPListElements();
 	    for (Iterator iterator= elements.iterator(); iterator.hasNext();) {
@@ -690,32 +716,6 @@ public class ClasspathModifier {
 		}
 		return project;
 	}
-
-	/**
-	 * Remove a given <code>IPackageFragmentRoot</code> from the build path.
-	 * 
-	 * @param root the <code>IPackageFragmentRoot</code> to be removed from the build path
-	 * @param existingEntries a list of <code>CPListElements</code> representing the build path 
-	 * entries of the project. The entry for the root will be looked up and removed from the list.
-	 * @param project the Java project
-	 * @param monitor progress monitor, can be <code>null</code>
-	 * @return returns the <code>IResource</code> that has been removed from the build path; 
-	 * is of type <code>IFile</code> if the root was an archive, otherwise <code>IFolder</code> or <code>null<code> for external archives.
-	 */
-	public static IResource removeFromClasspath(IPackageFragmentRoot root, List existingEntries, IJavaProject project, IProgressMonitor monitor) throws CoreException {
-		if (monitor == null)
-			monitor= new NullProgressMonitor();
-		try {
-			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_RemoveFromBuildpath, 1); 
-			IClasspathEntry entry= root.getRawClasspathEntry();
-			CPListElement elem= CPListElement.createFromExisting(entry, project);
-			existingEntries.remove(elem);
-			removeFilters(elem.getPath(), project, existingEntries);
-			return elem.getResource();
-		} finally {
-			monitor.done();
-		}
-	}
 	
 	/**
 	 * Remove <code>path</code> from inclusion/exlusion filters in all <code>existingEntries</code>
@@ -985,7 +985,7 @@ public class ClasspathModifier {
 	 * @return the mathed <code>CPListElement</code> or <code>null</code> if 
 	 * no match could be found
 	 */
-	private static CPListElement getListElement(IPath path, List elements) {
+	public static CPListElement getListElement(IPath path, List elements) {
 		for (int i= 0; i < elements.size(); i++) {
 			CPListElement element= (CPListElement) elements.get(i);
 			if (element.getEntryKind() == IClasspathEntry.CPE_SOURCE && element.getPath().equals(path)) {
