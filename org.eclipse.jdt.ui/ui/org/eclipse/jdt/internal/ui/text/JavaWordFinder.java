@@ -33,8 +33,7 @@ public class JavaWordFinder {
 					break;
 				--pos;
 			}
-			if (pos < offset)
-				start= pos;
+			start= pos;
 
 			pos= offset;
 			int length= document.getLength();
