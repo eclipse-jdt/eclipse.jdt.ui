@@ -250,8 +250,10 @@ public class OutputLocationDialog extends StatusDialog {
                     } catch (CoreException e) {
 	                    JavaPlugin.log(e);
                     }
+                    return new StatusInfo();
+                } else {
+                	return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
                 }
-                return new StatusInfo();
             }
         });
 		dialog.setMessage(NewWizardMessages.OutputLocationDialog_ChooseOutputFolder_description); 
