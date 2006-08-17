@@ -200,42 +200,42 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 			fArguments.put(ATTRIBUTE_RENAME_SETTER, Boolean.toString(fRenameSetter));
 		}
 		switch (type) {
-		case IJavaElement.PACKAGE_FRAGMENT:
-		case IJavaElement.TYPE:
-		case IJavaElement.FIELD:
-			fArguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.toString(fTextual));
-		default:
-			break;
+			case IJavaElement.PACKAGE_FRAGMENT:
+			case IJavaElement.TYPE:
+			case IJavaElement.FIELD:
+				fArguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.toString(fTextual));
+			default:
+				break;
 		}
 		switch (type) {
-		case IJavaElement.METHOD:
-		case IJavaElement.FIELD:
-			fArguments.put(ATTRIBUTE_DEPRECATE, Boolean.toString(fDeprecate));
-			fArguments.put(ATTRIBUTE_DELEGATE, Boolean.toString(fDelegate));
-		default:
-			break;
+			case IJavaElement.METHOD:
+			case IJavaElement.FIELD:
+				fArguments.put(ATTRIBUTE_DEPRECATE, Boolean.toString(fDeprecate));
+				fArguments.put(ATTRIBUTE_DELEGATE, Boolean.toString(fDelegate));
+			default:
+				break;
 		}
 		switch (type) {
-		case IJavaElement.PACKAGE_FRAGMENT:
-		case IJavaElement.TYPE:
-			fArguments.put(ATTRIBUTE_QUALIFIED, Boolean.toString(fQualified));
-			if (fPatterns != null && !"".equals(fPatterns)) //$NON-NLS-1$
-				fArguments.put(ATTRIBUTE_PATTERNS, fPatterns);
-		default:
-			break;
+			case IJavaElement.PACKAGE_FRAGMENT:
+			case IJavaElement.TYPE:
+				fArguments.put(ATTRIBUTE_QUALIFIED, Boolean.toString(fQualified));
+				if (fPatterns != null && !"".equals(fPatterns)) //$NON-NLS-1$
+					fArguments.put(ATTRIBUTE_PATTERNS, fPatterns);
+			default:
+				break;
 		}
 		switch (type) {
-		case IJavaElement.TYPE:
-			fArguments.put(ATTRIBUTE_SIMILAR_DECLARATIONS, Boolean.toString(fSimilarDeclarations));
-			fArguments.put(ATTRIBUTE_MATCH_STRATEGY, Integer.toString(fMatchStrategy));
-		default:
-			break;
+			case IJavaElement.TYPE:
+				fArguments.put(ATTRIBUTE_SIMILAR_DECLARATIONS, Boolean.toString(fSimilarDeclarations));
+				fArguments.put(ATTRIBUTE_MATCH_STRATEGY, Integer.toString(fMatchStrategy));
+			default:
+				break;
 		}
 		switch (type) {
-		case IJavaElement.PACKAGE_FRAGMENT:
-			fArguments.put(ATTRIBUTE_HIERARCHICAL, Boolean.toString(fHierarchical));
-		default:
-			break;
+			case IJavaElement.PACKAGE_FRAGMENT:
+				fArguments.put(ATTRIBUTE_HIERARCHICAL, Boolean.toString(fHierarchical));
+			default:
+				break;
 		}
 	}
 
@@ -270,7 +270,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * <p>
 	 * Note: Qualified name updating is applicable to the Java elements
 	 * {@link IPackageFragment} and {@link IType}. The default is to use no
-	 * file name patterns.
+	 * file name patterns (meaning that all files are processed).
 	 * </p>
 	 * 
 	 * @param patterns
@@ -421,6 +421,12 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	/**
 	 * Determines whether qualified names of the Java element should be renamed.
 	 * <p>
+	 * Qualified name updating adapts fully qualified names of the Java element
+	 * to be renamed in non-Java text files. Clients may specify file name
+	 * patterns by calling {@link #setFileNamePatterns(String)} to constrain the
+	 * set of text files to be processed.
+	 * </p>
+	 * <p>
 	 * Note: Qualified name updating is applicable to the Java elements
 	 * {@link IPackageFragment} and {@link IType}. The default is to not rename
 	 * qualified names.
@@ -469,6 +475,10 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * Determines whether textual occurrences of the Java element should be
 	 * renamed.
 	 * <p>
+	 * Textual occurrence updating adapts textual occurrences of the Java
+	 * element to be renamed in Java comments and Java strings.
+	 * </p>
+	 * <p>
 	 * Note: Textual occurrence updating is applicable to the Java elements
 	 * {@link IPackageFragment}, {@link IType} and {@link IField}. The default
 	 * is to not rename textual occurrences.
@@ -499,30 +509,30 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 				status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_reference_constraint));
 			if (fTextual) {
 				switch (type) {
-				case IJavaElement.PACKAGE_FRAGMENT:
-				case IJavaElement.TYPE:
-				case IJavaElement.FIELD:
-					break;
-				default:
-					status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_textual_constraint));
+					case IJavaElement.PACKAGE_FRAGMENT:
+					case IJavaElement.TYPE:
+					case IJavaElement.FIELD:
+						break;
+					default:
+						status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_textual_constraint));
 				}
 			}
 			if (fDeprecate) {
 				switch (type) {
-				case IJavaElement.METHOD:
-				case IJavaElement.FIELD:
-					break;
-				default:
-					status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_deprecation_constraint));
+					case IJavaElement.METHOD:
+					case IJavaElement.FIELD:
+						break;
+					default:
+						status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_deprecation_constraint));
 				}
 			}
 			if (fDelegate) {
 				switch (type) {
-				case IJavaElement.METHOD:
-				case IJavaElement.FIELD:
-					break;
-				default:
-					status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_delegate_constraint));
+					case IJavaElement.METHOD:
+					case IJavaElement.FIELD:
+						break;
+					default:
+						status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_delegate_constraint));
 				}
 			}
 			if (fRenameGetter || fRenameSetter) {
@@ -531,32 +541,32 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 			}
 			if (fQualified || fPatterns != null) {
 				switch (type) {
-				case IJavaElement.PACKAGE_FRAGMENT:
-				case IJavaElement.TYPE: {
-					if (!(fPatterns == null || !"".equals(fPatterns))) //$NON-NLS-1$
-						status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_patterns_constraint));
-					if (!(!fQualified || (fPatterns != null && !"".equals(fPatterns)))) //$NON-NLS-1$
-						status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_patterns_qualified_constraint));
-					break;
-				}
-				default:
-					status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_qualified_constraint));
+					case IJavaElement.PACKAGE_FRAGMENT:
+					case IJavaElement.TYPE: {
+						if (!(fPatterns == null || !"".equals(fPatterns))) //$NON-NLS-1$
+							status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_patterns_constraint));
+						if (!(!fQualified || (fPatterns != null && !"".equals(fPatterns)))) //$NON-NLS-1$
+							status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_patterns_qualified_constraint));
+						break;
+					}
+					default:
+						status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_qualified_constraint));
 				}
 			}
 			if (fSimilarDeclarations) {
 				switch (type) {
-				case IJavaElement.TYPE:
-					break;
-				default:
-					status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_similar_constraint));
+					case IJavaElement.TYPE:
+						break;
+					default:
+						status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_similar_constraint));
 				}
 			}
 			if (fHierarchical) {
 				switch (type) {
-				case IJavaElement.PACKAGE_FRAGMENT:
-					break;
-				default:
-					status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_hierarchical_constraint));
+					case IJavaElement.PACKAGE_FRAGMENT:
+						break;
+					default:
+						status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_hierarchical_constraint));
 				}
 			}
 		}
