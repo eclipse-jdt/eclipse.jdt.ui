@@ -18,8 +18,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
@@ -61,14 +61,9 @@ public abstract class BuildPathWizard extends NewElementWizard {
 			BuildPathsBlock.flush(getExistingEntries(), getOutputLocation(), javaProject, monitor);
 			
 			IProject project= javaProject.getProject();
-			IPath projPath= project.getFullPath();
 			IPath path= getEntryToEdit().getPath();
 			
-			if (!projPath.equals(path) && projPath.isPrefixOf(path)) {
-				path= path.removeFirstSegments(projPath.segmentCount());
-			}
-			
-			IFolder folder= project.getFolder(path);
+			IResource folder= project.getWorkspace().getRoot().findMember(path);
 			fPackageFragmentRoot= javaProject.getPackageFragmentRoot(folder);
 		}
 	}
