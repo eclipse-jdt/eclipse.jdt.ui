@@ -596,4 +596,39 @@ public class BuildpathModifierActionTest extends TestCase {
 		IPath[] exclusionPatterns= entry.getExclusionPatterns();
 		assertTrue(exclusionPatterns.length == 0);
 	}
+	
+	public void testEditOutputFolderBug154196() throws Exception {
+		fJavaProject= createProject(DEFAULT_OUTPUT_FOLDER_NAME);
+		IPackageFragmentRoot src1= JavaProjectHelper.addSourceContainer(fJavaProject, "src1");
+		
+		IPath projectPath= fJavaProject.getProject().getFullPath();		
+		IPath oldOutputPath= projectPath.append("binary");
+		
+		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
+		CPListElement element= cpProject.getCPElement(CPListElement.createFromExisting(src1.getRawClasspathEntry(), fJavaProject));
+		ClasspathModifier.setOutputLocation(element, oldOutputPath, false, cpProject);
+		ClasspathModifier.commitClassPath(cpProject, null);
+		
+		cpProject= CPJavaProject.createFromExisting(fJavaProject);
+		element= cpProject.getCPElement(CPListElement.createFromExisting(src1.getRawClasspathEntry(), fJavaProject));
+		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, null, false, cpProject);
+		assertTrue(status.getMessage(), status.isOK());
+		
+		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, null, false, cpProject);
+		assertDeltaResources(delta, new IPath[0], new IPath[] {oldOutputPath}, new IPath[0], new IPath[0]);
+		assertDeltaDefaultOutputFolder(delta, fJavaProject.getPath().append(DEFAULT_OUTPUT_FOLDER_NAME));
+		assertDeltaRemovedEntries(delta, new IPath[0]);
+		assertDeltaAddedEntries(delta, new IPath[0]);
+		
+		ClasspathModifier.commitClassPath(cpProject, null);
+		
+		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
+		assertNumberOfEntries(classpathEntries, 2);
+		IClasspathEntry entry= classpathEntries[1];
+		assertTrue(src1.getRawClasspathEntry() == entry);
+		IPath location= entry.getOutputLocation();
+		assertTrue(location == null);
+		IPath[] exclusionPatterns= entry.getExclusionPatterns();
+		assertTrue(exclusionPatterns.length == 0);
+	}
 }

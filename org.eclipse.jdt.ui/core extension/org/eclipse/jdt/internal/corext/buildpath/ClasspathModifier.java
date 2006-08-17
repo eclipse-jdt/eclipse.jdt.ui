@@ -84,7 +84,8 @@ public class ClasspathModifier {
             }
 		}
 		
-		exclude(outputPath, cpProject.getCPListElements(), new ArrayList(), cpProject.getJavaProject(), null);
+		if (outputPath != null)
+			exclude(outputPath, cpProject.getCPListElements(), new ArrayList(), cpProject.getJavaProject(), null);
 		
 		IPath oldOutputLocation= (IPath)elementToChange.getAttribute(CPListElement.OUTPUT);
         if (oldOutputLocation != null && oldOutputLocation.segmentCount() > 1 && !oldOutputLocation.equals(cpProject.getDefaultOutputLocation())) {
@@ -108,6 +109,9 @@ public class ClasspathModifier {
 		IWorkspace workspace= project.getWorkspace();
 		
 		IPath projectPath= project.getFullPath();		
+		
+		if (outputPath == null)
+			outputPath= cpProject.getDefaultOutputLocation();
 						
 		IStatus pathValidation= workspace.validatePath(outputPath.toString(), IResource.PROJECT | IResource.FOLDER);
 		if (!pathValidation.isOK())
