@@ -119,7 +119,10 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 			fGenConstructorSettings.put(OMIT_SUPER, false); 
 		}
 
-		fOmitSuper= fGenConstructorSettings.getBoolean(OMIT_SUPER);
+		final boolean isEnum= type.isEnum();
+		fOmitSuper= fGenConstructorSettings.getBoolean(OMIT_SUPER) || isEnum;
+		if (isEnum)
+			setVisibility(Modifier.PRIVATE);
 	}
 
 	Composite addSuperClassConstructorChoices(Composite composite) {
@@ -287,8 +290,13 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 			}
 		});
 		fOmitSuperButton.setSelection(isOmitSuper());
-		// Disable omit super checkbox unless default constructor
-		fOmitSuperButton.setEnabled(getSuperConstructorChoice().getParameterTypes().length == 0);
+		try {
+			// Disable omit super checkbox unless default constructor and enum
+			final boolean hasContructor= getSuperConstructorChoice().getParameterTypes().length == 0;
+			fOmitSuperButton.setEnabled(hasContructor && !getType().isEnum());
+		} catch (JavaModelException exception) {
+			JavaPlugin.log(exception);
+		}
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		fOmitSuperButton.setLayoutData(gd);
@@ -328,7 +336,7 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		int[] visibilities= availableVisibilities;
 		try {
 			if (getType().isEnum())
-				visibilities= new int[] { 0, Modifier.PRIVATE};
+				visibilities= new int[] { };
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 		}
