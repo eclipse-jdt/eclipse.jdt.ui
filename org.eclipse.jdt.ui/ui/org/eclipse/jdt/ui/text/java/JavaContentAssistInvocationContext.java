@@ -17,6 +17,8 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.core.CompletionContext;
+import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -47,6 +49,9 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 	private CompletionProposalCollector fCollector;
 	private RHSHistory fRHSHistory;
 	private IType fType;
+
+	private IJavaCompletionProposal[] fKeywordProposals= null;
+	private CompletionContext fCoreContext= null;
 
 	/**
 	 * Creates a new context.
@@ -106,35 +111,48 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 	
 	/**
 	 * Returns the keyword proposals that are available in this context, possibly none.
+	 * <p>
+	 * <strong>Note:</strong> This method may run
+	 * {@linkplain ICodeAssist#codeComplete(int, org.eclipse.jdt.core.CompletionRequestor) codeComplete}
+	 * on the compilation unit.
+	 * </p>
 	 * 
-	 * @return the available keyword proposals.
+	 * @return the available keyword proposals
 	 */
 	public IJavaCompletionProposal[] getKeywordProposals() {
-		if (fCollector != null)
-			return fCollector.getKeywordCompletionProposals();
-		return new IJavaCompletionProposal[0];
+		if (fKeywordProposals == null) {
+			if (fCollector != null && !fCollector.isIgnored(CompletionProposal.KEYWORD) && fCollector.getContext() != null) {
+				// use the existing collector if it exists, collects keywords, and has already been invoked
+				fKeywordProposals= fCollector.getKeywordCompletionProposals();
+			} else {
+				// otherwise, retrieve keywords ourselves
+				computeKeywordsAndContext();
+			}
+		}
+		
+		return fKeywordProposals;
 	}
-	
-	/**
-	 * Sets the collector, which is used to access the compilation unit, the core context and the
-	 * label provider.
-	 * 
-	 * @param collector the collector
-	 */
-	void setCollector(CompletionProposalCollector collector) {
-		fCollector= collector;
-	}
-	
+
 	/**
 	 * Returns the {@link CompletionContext core completion context} if available, <code>null</code>
 	 * otherwise.
+	 * <p>
+	 * <strong>Note:</strong> This method may run
+	 * {@linkplain ICodeAssist#codeComplete(int, org.eclipse.jdt.core.CompletionRequestor) codeComplete}
+	 * on the compilation unit.
+	 * </p>
 	 * 
 	 * @return the core completion context if available, <code>null</code> otherwise
 	 */
 	public CompletionContext getCoreContext() {
-		if (fCollector != null)
-			return fCollector.getContext();
-		return null;
+		if (fCoreContext == null) {
+			// use the context from the existing collector if it exists, retrieve one ourselves otherwise
+			if (fCollector != null)
+				fCoreContext= fCollector.getContext();
+			if (fCoreContext == null)
+				computeKeywordsAndContext();
+		}
+		return fCoreContext;
 	}
 
 	/**
@@ -142,6 +160,11 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 	 * right hand side for the type expected in the current context. 0 signals that the
 	 * <code>qualifiedTypeName</code> does not match the expected type, while 1.0 signals that
 	 * <code>qualifiedTypeName</code> has most recently been used in a similar context.
+	 * <p>
+	 * <strong>Note:</strong> This method may run
+	 * {@linkplain ICodeAssist#codeComplete(int, org.eclipse.jdt.core.CompletionRequestor) codeComplete}
+	 * on the compilation unit.
+	 * </p>
 	 * 
 	 * @param qualifiedTypeName the type name of the type of interest
 	 * @return a relevance in [0.0,&nbsp;1.0] based on previous content assist invocations
@@ -173,6 +196,11 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 	
 	/**
 	 * Returns the expected type if any, <code>null</code> otherwise.
+	 * <p>
+	 * <strong>Note:</strong> This method may run
+	 * {@linkplain ICodeAssist#codeComplete(int, org.eclipse.jdt.core.CompletionRequestor) codeComplete}
+	 * on the compilation unit.
+	 * </p>
 	 * 
 	 * @return the expected type if any, <code>null</code> otherwise
 	 */
@@ -210,6 +238,73 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 		}
 
 		return fLabelProvider;
+	}
+	
+	/**
+	 * Sets the collector, which is used to access the compilation unit, the core context and the
+	 * label provider. This is a performance optimization: {@link IJavaCompletionProposalComputer}s
+	 * may instantiate a {@link CompletionProposalCollector} and set this invocation context via
+	 * {@link CompletionProposalCollector#setInvocationContext(JavaContentAssistInvocationContext)},
+	 * which in turn calls this method. This allows the invocation context to retrieve the core
+	 * context and keyword proposals from the existing collector, instead of computing theses values
+	 * itself via {@link #computeKeywordsAndContext()}.
+	 * 
+	 * @param collector the collector
+	 */
+	void setCollector(CompletionProposalCollector collector) {
+		fCollector= collector;
+	}
+	
+	/**
+	 * Fallback to retrieve a core context and keyword proposals when no collector is available.
+	 * Runs code completion on the cu and collects keyword proposals. {@link #fKeywordProposals} is
+	 * non-<code>null</code> after this call.
+	 * 
+	 * @since 3.3
+	 */
+	private void computeKeywordsAndContext() {
+		ICompilationUnit cu= getCompilationUnit();
+		if (cu == null) {
+			if (fKeywordProposals == null)
+				fKeywordProposals= new IJavaCompletionProposal[0];
+			return;
+		}
+		
+		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
+		collector.setIgnored(CompletionProposal.KEYWORD, false);
+		collector.setIgnored(CompletionProposal.ANNOTATION_ATTRIBUTE_REF, true);
+		collector.setIgnored(CompletionProposal.ANONYMOUS_CLASS_DECLARATION, true);
+		collector.setIgnored(CompletionProposal.FIELD_REF, true);
+		collector.setIgnored(CompletionProposal.LABEL_REF, true);
+		collector.setIgnored(CompletionProposal.LOCAL_VARIABLE_REF, true);
+		collector.setIgnored(CompletionProposal.METHOD_DECLARATION, true);
+		collector.setIgnored(CompletionProposal.METHOD_NAME_REFERENCE, true);
+		collector.setIgnored(CompletionProposal.METHOD_REF, true);
+		collector.setIgnored(CompletionProposal.PACKAGE_REF, true);
+		collector.setIgnored(CompletionProposal.POTENTIAL_METHOD_DECLARATION, true);
+		collector.setIgnored(CompletionProposal.VARIABLE_DECLARATION, true);
+		collector.setIgnored(CompletionProposal.JAVADOC_BLOCK_TAG, true);
+		collector.setIgnored(CompletionProposal.JAVADOC_FIELD_REF, true);
+		collector.setIgnored(CompletionProposal.JAVADOC_INLINE_TAG, true);
+		collector.setIgnored(CompletionProposal.JAVADOC_METHOD_REF, true);
+		collector.setIgnored(CompletionProposal.JAVADOC_PARAM_REF, true);
+		collector.setIgnored(CompletionProposal.JAVADOC_TYPE_REF, true);
+		collector.setIgnored(CompletionProposal.JAVADOC_VALUE_REF, true);
+		collector.setIgnored(CompletionProposal.TYPE_REF, true);
+		
+		try {
+			cu.codeComplete(getInvocationOffset(), collector);
+			if (fCoreContext == null)
+				fCoreContext= collector.getContext();
+			if (fKeywordProposals == null)
+				fKeywordProposals= collector.getKeywordCompletionProposals();
+			if (fLabelProvider == null)
+				fLabelProvider= collector.getLabelProvider();
+		} catch (JavaModelException x) {
+			JavaPlugin.log(x);
+			if (fKeywordProposals == null)
+				fKeywordProposals= new IJavaCompletionProposal[0];
+		}
 	}
 	
 	/*
