@@ -701,4 +701,46 @@ public class BuildpathModifierActionTest extends TestCase {
 		assertNumberOfEntries(classpathEntries, 1);
 	}
 	
+	public void testRemoveFromBuildpathBug153299Src() throws Exception {
+		fJavaProject= createProject(null);
+		IPackageFragmentRoot p01= JavaProjectHelper.addSourceContainer(fJavaProject, null, new IPath[] {new Path("src1/")});
+		JavaProjectHelper.addSourceContainer(fJavaProject, "src1");
+				
+		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
+		
+		BuildpathDelta delta= ClasspathModifier.removeFromBuildpath(new CPListElement[] {CPListElement.createFromExisting(p01.getRawClasspathEntry(), fJavaProject)}, cpProject);
+		assertDeltaResources(delta, new IPath[0], new IPath[] {}, new IPath[0], new IPath[0]);
+		assertDeltaDefaultOutputFolder(delta, fJavaProject.getPath().append(DEFAULT_OUTPUT_FOLDER_NAME));
+		assertDeltaRemovedEntries(delta, new IPath[] {p01.getPath()});
+		assertDeltaAddedEntries(delta, new IPath[0]);
+		
+		ClasspathModifier.commitClassPath(cpProject, null);
+		
+		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
+		assertNumberOfEntries(classpathEntries, 2);
+	}
+	
+	public void testRemoveFromBuildpathBug153299Lib() throws Exception {
+		fJavaProject= createProject(null);
+		IPackageFragmentRoot p01= JavaProjectHelper.addSourceContainer(fJavaProject, null, new IPath[] {new Path("src1/")});
+				
+		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
+		IPath[] jarPaths= new IPath[] {JavaProjectHelper.MYLIB.makeAbsolute()};
+		
+		ClasspathModifier.addExternalJars(jarPaths, cpProject);
+		ClasspathModifier.commitClassPath(cpProject, null);
+		
+		cpProject= CPJavaProject.createFromExisting(fJavaProject);
+		
+		BuildpathDelta delta= ClasspathModifier.removeFromBuildpath(new CPListElement[] {CPListElement.createFromExisting(p01.getRawClasspathEntry(), fJavaProject)}, cpProject);
+		assertDeltaResources(delta, new IPath[0], new IPath[] {}, new IPath[0], new IPath[0]);
+		assertDeltaDefaultOutputFolder(delta, fJavaProject.getPath());
+		assertDeltaRemovedEntries(delta, new IPath[] {p01.getPath()});
+		assertDeltaAddedEntries(delta, new IPath[0]);
+		
+		ClasspathModifier.commitClassPath(cpProject, null);
+		
+		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
+		assertNumberOfEntries(classpathEntries, 2);
+	}
 }

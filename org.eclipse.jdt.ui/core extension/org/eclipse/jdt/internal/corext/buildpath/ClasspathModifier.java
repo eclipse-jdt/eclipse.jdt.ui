@@ -257,7 +257,9 @@ public class ClasspathModifier {
     
     public static BuildpathDelta removeFromBuildpath(CPListElement[] toRemove, CPJavaProject cpProject) {
     	
-        IWorkspaceRoot workspaceRoot= cpProject.getJavaProject().getProject().getWorkspace().getRoot();
+        IJavaProject javaProject= cpProject.getJavaProject();
+		IPath projectPath= javaProject.getPath();
+        IWorkspaceRoot workspaceRoot= javaProject.getProject().getWorkspace().getRoot();
         
     	List existingEntries= cpProject.getCPListElements();
 		BuildpathDelta result= new BuildpathDelta(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip);
@@ -267,11 +269,14 @@ public class ClasspathModifier {
 	        existingEntries.remove(element);
 	        result.removeEntry(element);
 	        IPath path= element.getPath();
-			removeFilters(path, cpProject.getJavaProject(), existingEntries);
-	        if (!path.equals(cpProject.getJavaProject().getPath())) {
+			removeFilters(path, javaProject, existingEntries);
+			if (!path.equals(projectPath)) {
 	            IResource member= workspaceRoot.findMember(path);
 	            if (member != null)
 	            	result.addDeletedResource(member);
+            } else if (cpProject.getDefaultOutputLocation().equals(projectPath) && containsSourceFolders(cpProject)) {
+            	String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
+    			cpProject.setDefaultOutputLocation(cpProject.getDefaultOutputLocation().append(outputFolderName));
             }
         }
 		
@@ -281,7 +286,17 @@ public class ClasspathModifier {
 	    return result;
     }
     
-    private static void include(CPJavaProject cpProject, IPath path) {
+    private static boolean containsSourceFolders(CPJavaProject cpProject) {
+    	List elements= cpProject.getCPListElements();
+    	for (Iterator iterator= elements.iterator(); iterator.hasNext();) {
+	        CPListElement element= (CPListElement)iterator.next();
+	        if (element.getEntryKind() == IClasspathEntry.CPE_SOURCE)
+	        	return true;
+        }
+	    return false;
+    }
+
+	private static void include(CPJavaProject cpProject, IPath path) {
 	    List elements= cpProject.getCPListElements();
 	    for (Iterator iterator= elements.iterator(); iterator.hasNext();) {
 	        CPListElement element= (CPListElement)iterator.next();
