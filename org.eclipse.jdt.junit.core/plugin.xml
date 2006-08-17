@@ -266,9 +266,6 @@
                             <test property="org.eclipse.jdt.launching.hasMethodWithAnnotation" args="Test, public"/>
                             <test property="org.eclipse.jdt.launching.hasMethodWithAnnotation" args="Test, public final"/>
                  			<test property="org.eclipse.jdt.launching.hasTypeWithAnnotation" args="RunWith"/>
-<!-- TODO: loads plug-in !
-	                 		<test property="org.eclipse.jdt.junit.isTest"/>
- -->
                  		</or>
                		</iterate>
                </with>
@@ -337,9 +334,13 @@
                <instanceof
                      value="org.eclipse.jdt.core.IType">
                </instanceof>
-               <test
-                     property="org.eclipse.jdt.junit.isTest">
-               </test>
+               <or>
+                  <test property="org.eclipse.jdt.launching.extendsInterface" args="junit.framework.Test"/>
+                  <test property="org.eclipse.jdt.launching.hasMethod" args="suite, ()QTest;, public static"/>
+                  <test property="org.eclipse.jdt.launching.hasMethodWithAnnotation" args="Test, public"/>
+                  <test property="org.eclipse.jdt.launching.hasMethodWithAnnotation" args="Test, public final"/>
+                  <test property="org.eclipse.jdt.launching.hasTypeWithAnnotation" args="RunWith"/>
+               </or>
             </with>
          </enablement>
       </renameParticipant>
@@ -355,6 +356,7 @@
            </with>
            <with variable="element">
    	         <instanceof value="org.eclipse.jdt.core.IJavaProject"/>
+             <test property="org.eclipse.jdt.launching.buildpathReference" args="junit"/>
            </with>
          </enablement>
       </renameParticipant>
