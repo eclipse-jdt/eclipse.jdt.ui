@@ -362,7 +362,7 @@ public final class CompletionProposalComputerRegistry {
 	 * Returns the names of contributors affected by disabling a category. 
 	 * 
 	 * @param category the category that would be disabled
-	 * @param culprit the cuprit plug-in, which is not included in the returned list
+	 * @param culprit the culprit plug-in, which is not included in the returned list
 	 * @return the names of the contributors other than <code>culprit</code> that contribute to <code>category</code> (element type: {@link String})
 	 */
 	private Set getAffectedContributors(CompletionProposalCategory category, IContributor culprit) {
