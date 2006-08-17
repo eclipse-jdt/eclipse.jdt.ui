@@ -3031,8 +3031,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (document instanceof IDocumentExtension4) {
 			int offset= selection.getOffset();
 			long currentModificationStamp= ((IDocumentExtension4)document).getModificationStamp();
-			if (fMarkOccurrenceTargetRegion != null && currentModificationStamp == fMarkOccurrenceModificationStamp) {
-				if (fMarkOccurrenceTargetRegion.getOffset() <= offset && offset <= fMarkOccurrenceTargetRegion.getOffset() + fMarkOccurrenceTargetRegion.getLength())
+			IRegion markOccurrenceTargetRegion= fMarkOccurrenceTargetRegion; 
+			if (markOccurrenceTargetRegion != null && currentModificationStamp == fMarkOccurrenceModificationStamp) {
+				if (markOccurrenceTargetRegion.getOffset() <= offset && offset <= markOccurrenceTargetRegion.getOffset() + markOccurrenceTargetRegion.getLength())
 					return;
 			}
 			fMarkOccurrenceTargetRegion= JavaWordFinder.findWord(document, offset);
