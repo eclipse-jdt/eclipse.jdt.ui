@@ -395,7 +395,6 @@ public final class NewWizardMessages extends NLS {
 	public static String OutputLocationDialog_location_button;
 	public static String OutputLocationDialog_error_existingisfile;
 	public static String OutputLocationDialog_error_invalidpath;
-	public static String OutputLocationDialog_error_invalidFolder;
 	public static String OutputLocationDialog_ChooseOutputFolder_title;
 	public static String OutputLocationDialog_ChooseOutputFolder_description;
 	

@@ -85,7 +85,7 @@ public class OutputLocationDialog extends StatusDialog {
 		OutputLocationAdapter adapter= new OutputLocationAdapter();
 
 		fUseDefault= new SelectionButtonDialogField(SWT.RADIO);
-		fUseDefault.setLabelText(NewWizardMessages.OutputLocationDialog_usedefault_label); 
+		fUseDefault.setLabelText(Messages.format(NewWizardMessages.OutputLocationDialog_usedefault_label, defaultOutputFolder.makeRelative().toString())); 
 		fUseDefault.setDialogFieldListener(adapter);		
 
 		String label= Messages.format(NewWizardMessages.OutputLocationDialog_usespecific_label, entryToEdit.getPath().segment(0)); 
