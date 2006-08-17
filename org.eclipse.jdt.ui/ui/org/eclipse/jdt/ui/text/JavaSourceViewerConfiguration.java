@@ -747,10 +747,13 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	public IInformationPresenter getInformationPresenter(ISourceViewer sourceViewer) {
 		InformationPresenter presenter= new InformationPresenter(getInformationPresenterControlCreator(sourceViewer));
 		presenter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
+		
+		// Register information provider
 		IInformationProvider provider= new JavaInformationProvider(getEditor());
-		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
-		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_DOC);
-		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_CHARACTER);
+		String[] contentTypes= getConfiguredContentTypes(sourceViewer);
+		for (int i= 0; i < contentTypes.length; i++)
+			presenter.setInformationProvider(provider, contentTypes[i]);
+		
 		presenter.setSizeConstraints(60, 10, true, true);
 		return presenter;
 	}

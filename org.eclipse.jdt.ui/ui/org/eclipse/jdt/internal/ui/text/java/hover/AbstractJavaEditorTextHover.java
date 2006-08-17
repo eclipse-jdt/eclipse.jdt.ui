@@ -106,7 +106,15 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
 	 */
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
-
+		
+		/*
+		 * The region should be a word region an not of length 0.
+		 * This check is needed because codeSelect(...) also finds
+		 * the Java element if the offset is behind the word.
+		 */
+		if (hoverRegion.getLength() == 0)
+			return null;
+		
 		ICodeAssist resolve= getCodeAssist();
 		if (resolve != null) {
 			try {
