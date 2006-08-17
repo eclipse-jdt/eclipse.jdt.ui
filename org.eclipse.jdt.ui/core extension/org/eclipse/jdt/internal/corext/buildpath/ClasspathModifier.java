@@ -64,53 +64,42 @@ public class ClasspathModifier {
 
 	private ClasspathModifier() {}
 	
-	public static BuildpathDelta setOutputLocation(CPListElement elementToChange, IPath outputPath, boolean allowInvalidCP, CPJavaProject cpProject, IProgressMonitor monitor) throws CoreException {
-		if (monitor == null)
-			monitor= new NullProgressMonitor();
+	public static BuildpathDelta setOutputLocation(CPListElement elementToChange, IPath outputPath, boolean allowInvalidCP, CPJavaProject cpProject) throws CoreException {
+		BuildpathDelta result= new BuildpathDelta(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip);
 		
-		monitor.beginTask(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip, 2);
+		IJavaProject javaProject= cpProject.getJavaProject();
+		IProject project= javaProject.getProject();
+		IWorkspace workspace= project.getWorkspace();
 		
-		try {
-			BuildpathDelta result= new BuildpathDelta(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip);
-			
-			IJavaProject javaProject= cpProject.getJavaProject();
-			IProject project= javaProject.getProject();
-			IWorkspace workspace= project.getWorkspace();
-			
-			IPath projectPath= project.getFullPath();								
-			
-			if (!allowInvalidCP && cpProject.getDefaultOutputLocation().segmentCount() == 1 && !projectPath.equals(elementToChange.getPath())) {
-				String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
-				cpProject.setDefaultOutputLocation(cpProject.getDefaultOutputLocation().append(outputFolderName));
-				List existingEntries= cpProject.getCPListElements();
-				CPListElement elem= ClasspathModifier.getListElement(javaProject.getPath(), existingEntries);
-                if (elem != null) {
-                	existingEntries.remove(elem);
-                	result.removeEntry(elem);
-                }
-			} else {
-				monitor.worked(1);
-			}
-			
-			exclude(outputPath, cpProject.getCPListElements(), new ArrayList(), cpProject.getJavaProject(), new SubProgressMonitor(monitor, 1));
-			
-			IPath oldOutputLocation= (IPath)elementToChange.getAttribute(CPListElement.OUTPUT);
-	        if (oldOutputLocation != null && oldOutputLocation.segmentCount() > 1 && !oldOutputLocation.equals(cpProject.getDefaultOutputLocation())) {
-				include(cpProject, oldOutputLocation);
-	        	result.addDeletedResource(workspace.getRoot().getFolder(oldOutputLocation));
-	        }
-			elementToChange.setAttribute(CPListElement.OUTPUT, outputPath);
-			
-			result.setDefaultOutputLocation(cpProject.getDefaultOutputLocation());
-			result.setNewEntries((CPListElement[])cpProject.getCPListElements().toArray(new CPListElement[cpProject.getCPListElements().size()]));
-			if (outputPath != null && outputPath.segmentCount() > 1) {
-				result.addCreatedResource(workspace.getRoot().getFolder(outputPath));
-			}
-			
-			return result;
-		} finally {
-			monitor.done();
+		IPath projectPath= project.getFullPath();								
+		
+		if (!allowInvalidCP && cpProject.getDefaultOutputLocation().segmentCount() == 1 && !projectPath.equals(elementToChange.getPath())) {
+			String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
+			cpProject.setDefaultOutputLocation(cpProject.getDefaultOutputLocation().append(outputFolderName));
+			List existingEntries= cpProject.getCPListElements();
+			CPListElement elem= ClasspathModifier.getListElement(javaProject.getPath(), existingEntries);
+            if (elem != null) {
+            	existingEntries.remove(elem);
+            	result.removeEntry(elem);
+            }
 		}
+		
+		exclude(outputPath, cpProject.getCPListElements(), new ArrayList(), cpProject.getJavaProject(), null);
+		
+		IPath oldOutputLocation= (IPath)elementToChange.getAttribute(CPListElement.OUTPUT);
+        if (oldOutputLocation != null && oldOutputLocation.segmentCount() > 1 && !oldOutputLocation.equals(cpProject.getDefaultOutputLocation())) {
+			include(cpProject, oldOutputLocation);
+        	result.addDeletedResource(workspace.getRoot().getFolder(oldOutputLocation));
+        }
+		elementToChange.setAttribute(CPListElement.OUTPUT, outputPath);
+		
+		result.setDefaultOutputLocation(cpProject.getDefaultOutputLocation());
+		result.setNewEntries((CPListElement[])cpProject.getCPListElements().toArray(new CPListElement[cpProject.getCPListElements().size()]));
+		if (outputPath != null && outputPath.segmentCount() > 1) {
+			result.addCreatedResource(workspace.getRoot().getFolder(outputPath));
+		}
+		
+		return result;
 	}
 
 	public static IStatus checkSetOutputLocationPrecondition(CPListElement elementToChange, IPath outputPath, boolean allowInvalidCP, CPJavaProject cpProject) throws CoreException {

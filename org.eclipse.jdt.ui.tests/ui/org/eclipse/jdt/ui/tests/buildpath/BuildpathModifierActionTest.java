@@ -307,7 +307,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, outputPath, false, cpProject);
 		assertTrue(status.getMessage(), status.getSeverity() != IStatus.ERROR);
 		
-		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject, null);
+		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject);
 		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[0], new IPath[0], new IPath[0]);
 		assertDeltaDefaultOutputFolder(delta, fJavaProject.getOutputLocation());
 		assertDeltaAddedEntries(delta, new IPath[0]);
@@ -336,7 +336,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, outputPath, false, cpProject);
 		assertTrue(status.getMessage(), status.getSeverity() == IStatus.INFO);
 		
-		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject, null);
+		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject);
 		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[0], new IPath[0], new IPath[0]);
 		assertDeltaDefaultOutputFolder(delta, fJavaProject.getPath().append(DEFAULT_OUTPUT_FOLDER_NAME));
 		assertDeltaRemovedEntries(delta, new IPath[] {fJavaProject.getPath()});
@@ -366,7 +366,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, outputPath, false, cpProject);
 		assertTrue(status.getMessage(), status.getSeverity() != IStatus.ERROR);
 		
-		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject, null);
+		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject);
 		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[0], new IPath[0], new IPath[0]);
 		assertDeltaDefaultOutputFolder(delta, fJavaProject.getPath().append(DEFAULT_OUTPUT_FOLDER_NAME));
 		assertDeltaRemovedEntries(delta, new IPath[0]);
@@ -398,7 +398,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, outputPath, false, cpProject);
 		assertTrue(status.getMessage(), status.getSeverity() != IStatus.ERROR);
 		
-		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject, null);
+		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject);
 		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[0], new IPath[0], new IPath[0]);
 		assertDeltaDefaultOutputFolder(delta, fJavaProject.getPath().append(DEFAULT_OUTPUT_FOLDER_NAME));
 		assertDeltaRemovedEntries(delta, new IPath[0]);
@@ -434,7 +434,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, outputPath, false, cpProject);
 		assertTrue(status.getMessage(), status.getSeverity() == IStatus.INFO);
 		
-		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject, null);
+		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject);
 		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[0], new IPath[0], new IPath[0]);
 		assertDeltaDefaultOutputFolder(delta, fJavaProject.getPath().append(DEFAULT_OUTPUT_FOLDER_NAME));
 		assertDeltaRemovedEntries(delta, new IPath[] {fJavaProject.getPath()});
@@ -494,7 +494,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
 		CPListElement element= cpProject.getCPElement(CPListElement.createFromExisting(src1.getRawClasspathEntry(), fJavaProject));
-		ClasspathModifier.setOutputLocation(element, oldOutputPath, false, cpProject, null);
+		ClasspathModifier.setOutputLocation(element, oldOutputPath, false, cpProject);
 		ClasspathModifier.commitClassPath(cpProject, null);
 				
 		IPath outputPath= projectPath.append("src1").append("sub").append("newBin");
@@ -504,7 +504,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, outputPath, false, cpProject);
 		assertTrue(status.getMessage(), status.isOK());
 		
-		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject, null);
+		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject);
 		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[] {oldOutputPath}, new IPath[0], new IPath[0]);
 		assertDeltaDefaultOutputFolder(delta, fJavaProject.getPath().append(DEFAULT_OUTPUT_FOLDER_NAME));
 		assertDeltaRemovedEntries(delta, new IPath[0]);
@@ -531,7 +531,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
 		CPListElement element= cpProject.getCPElement(CPListElement.createFromExisting(p01.getRawClasspathEntry(), fJavaProject));
-		ClasspathModifier.setOutputLocation(element, projectPath, false, cpProject, null);
+		ClasspathModifier.setOutputLocation(element, projectPath, false, cpProject);
 		ClasspathModifier.commitClassPath(cpProject, null);
 				
 		IPath outputPath= projectPath.append(DEFAULT_OUTPUT_FOLDER_NAME);
@@ -541,7 +541,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, outputPath, false, cpProject);
 		assertTrue(status.getMessage(), status.isOK());
 		
-		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject, null);
+		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject);
 		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[0], new IPath[0], new IPath[0]);
 		assertDeltaDefaultOutputFolder(delta, fJavaProject.getPath());
 		assertDeltaRemovedEntries(delta, new IPath[0]);
@@ -569,7 +569,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
 		CPListElement element= cpProject.getCPElement(CPListElement.createFromExisting(src1.getRawClasspathEntry(), fJavaProject));
-		ClasspathModifier.setOutputLocation(element, oldOutputPath, false, cpProject, null);
+		ClasspathModifier.setOutputLocation(element, oldOutputPath, false, cpProject);
 		ClasspathModifier.commitClassPath(cpProject, null);
 				
 		IPath outputPath= projectPath.append("bin1");
@@ -579,7 +579,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, outputPath, false, cpProject);
 		assertTrue(status.getMessage(), status.isOK());
 		
-		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject, null);
+		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject);
 		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[0], new IPath[0], new IPath[0]);
 		assertDeltaDefaultOutputFolder(delta, fJavaProject.getPath().append(DEFAULT_OUTPUT_FOLDER_NAME));
 		assertDeltaRemovedEntries(delta, new IPath[0]);

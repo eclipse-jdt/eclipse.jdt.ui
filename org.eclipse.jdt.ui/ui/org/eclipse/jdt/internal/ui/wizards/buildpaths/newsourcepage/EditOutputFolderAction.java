@@ -134,7 +134,7 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 				return;
 			
 			final CPJavaProject cpProject= CPJavaProject.createFromExisting(javaProject);
-        	final BuildpathDelta delta= ClasspathModifier.setOutputLocation(cpProject.getCPElement(element), dialog.getOutputLocation(), false, cpProject, null);
+        	final BuildpathDelta delta= ClasspathModifier.setOutputLocation(cpProject.getCPElement(element), dialog.getOutputLocation(), false, cpProject);
         	
         	IFolder oldOutputFolder= getOldOutputFolder(delta);
         	final IFolder folderToDelete;
