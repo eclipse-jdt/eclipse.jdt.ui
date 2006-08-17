@@ -484,4 +484,116 @@ public class BuildpathModifierActionTest extends TestCase {
 		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, outputPath, false, cpProject);
 		assertTrue(status.getMessage(), status.getSeverity() == IStatus.ERROR);
 	}
+	
+	public void testEditOutputFolderBug154044() throws Exception {
+		fJavaProject= createProject(DEFAULT_OUTPUT_FOLDER_NAME);
+		IPackageFragmentRoot src1= JavaProjectHelper.addSourceContainer(fJavaProject, "src1");
+		
+		IPath projectPath= fJavaProject.getProject().getFullPath();		
+		IPath oldOutputPath= projectPath.append("src1").append("sub").append(DEFAULT_OUTPUT_FOLDER_NAME);
+		
+		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
+		CPListElement element= cpProject.getCPElement(CPListElement.createFromExisting(src1.getRawClasspathEntry(), fJavaProject));
+		ClasspathModifier.setOutputLocation(element, oldOutputPath, false, cpProject, null);
+		ClasspathModifier.commitClassPath(cpProject, null);
+				
+		IPath outputPath= projectPath.append("src1").append("sub").append("newBin");
+		
+		cpProject= CPJavaProject.createFromExisting(fJavaProject);
+		element= cpProject.getCPElement(CPListElement.createFromExisting(src1.getRawClasspathEntry(), fJavaProject));
+		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, outputPath, false, cpProject);
+		assertTrue(status.getMessage(), status.isOK());
+		
+		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject, null);
+		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[] {oldOutputPath}, new IPath[0], new IPath[0]);
+		assertDeltaDefaultOutputFolder(delta, fJavaProject.getPath().append(DEFAULT_OUTPUT_FOLDER_NAME));
+		assertDeltaRemovedEntries(delta, new IPath[0]);
+		assertDeltaAddedEntries(delta, new IPath[0]);
+		
+		ClasspathModifier.commitClassPath(cpProject, null);
+		
+		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
+		assertNumberOfEntries(classpathEntries, 2);
+		IClasspathEntry entry= classpathEntries[1];
+		assertTrue(src1.getRawClasspathEntry() == entry);
+		IPath location= entry.getOutputLocation();
+		assertTrue("Output path is " + location + " expected was " + outputPath, outputPath.equals(location));
+		IPath[] exclusionPatterns= entry.getExclusionPatterns();
+		assertTrue(exclusionPatterns.length == 1);
+		assertTrue(exclusionPatterns[0].toString(), exclusionPatterns[0].toString().equals("sub/newBin/"));
+	}
+	
+	public void testEditOutputFolderBug154044OldIsProject() throws Exception {
+		fJavaProject= createProject(null);
+		IPackageFragmentRoot p01= JavaProjectHelper.addSourceContainer(fJavaProject, null);
+		
+		IPath projectPath= fJavaProject.getProject().getFullPath();		
+		
+		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
+		CPListElement element= cpProject.getCPElement(CPListElement.createFromExisting(p01.getRawClasspathEntry(), fJavaProject));
+		ClasspathModifier.setOutputLocation(element, projectPath, false, cpProject, null);
+		ClasspathModifier.commitClassPath(cpProject, null);
+				
+		IPath outputPath= projectPath.append(DEFAULT_OUTPUT_FOLDER_NAME);
+		
+		cpProject= CPJavaProject.createFromExisting(fJavaProject);
+		element= cpProject.getCPElement(CPListElement.createFromExisting(p01.getRawClasspathEntry(), fJavaProject));
+		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, outputPath, false, cpProject);
+		assertTrue(status.getMessage(), status.isOK());
+		
+		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject, null);
+		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[0], new IPath[0], new IPath[0]);
+		assertDeltaDefaultOutputFolder(delta, fJavaProject.getPath());
+		assertDeltaRemovedEntries(delta, new IPath[0]);
+		assertDeltaAddedEntries(delta, new IPath[0]);
+		
+		ClasspathModifier.commitClassPath(cpProject, null);
+		
+		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
+		assertNumberOfEntries(classpathEntries, 2);
+		IClasspathEntry entry= classpathEntries[1];
+		assertTrue(p01.getRawClasspathEntry() == entry);
+		IPath location= entry.getOutputLocation();
+		assertTrue("Output path is " + location + " expected was " + outputPath, outputPath.equals(location));
+		IPath[] exclusionPatterns= entry.getExclusionPatterns();
+		assertTrue(exclusionPatterns.length == 1);
+		assertTrue(exclusionPatterns[0].toString(), exclusionPatterns[0].toString().equals("bin/"));
+	}
+	
+	public void testEditOutputFolderBug154044DonotDeleteDefaultOutputFolder() throws Exception {
+		fJavaProject= createProject(DEFAULT_OUTPUT_FOLDER_NAME);
+		IPackageFragmentRoot src1= JavaProjectHelper.addSourceContainer(fJavaProject, "src1");
+		
+		IPath projectPath= fJavaProject.getProject().getFullPath();		
+		IPath oldOutputPath= projectPath.append(DEFAULT_OUTPUT_FOLDER_NAME);
+		
+		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
+		CPListElement element= cpProject.getCPElement(CPListElement.createFromExisting(src1.getRawClasspathEntry(), fJavaProject));
+		ClasspathModifier.setOutputLocation(element, oldOutputPath, false, cpProject, null);
+		ClasspathModifier.commitClassPath(cpProject, null);
+				
+		IPath outputPath= projectPath.append("bin1");
+		
+		cpProject= CPJavaProject.createFromExisting(fJavaProject);
+		element= cpProject.getCPElement(CPListElement.createFromExisting(src1.getRawClasspathEntry(), fJavaProject));
+		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, outputPath, false, cpProject);
+		assertTrue(status.getMessage(), status.isOK());
+		
+		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject, null);
+		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[0], new IPath[0], new IPath[0]);
+		assertDeltaDefaultOutputFolder(delta, fJavaProject.getPath().append(DEFAULT_OUTPUT_FOLDER_NAME));
+		assertDeltaRemovedEntries(delta, new IPath[0]);
+		assertDeltaAddedEntries(delta, new IPath[0]);
+		
+		ClasspathModifier.commitClassPath(cpProject, null);
+		
+		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
+		assertNumberOfEntries(classpathEntries, 2);
+		IClasspathEntry entry= classpathEntries[1];
+		assertTrue(src1.getRawClasspathEntry() == entry);
+		IPath location= entry.getOutputLocation();
+		assertTrue("Output path is " + location + " expected was " + outputPath, outputPath.equals(location));
+		IPath[] exclusionPatterns= entry.getExclusionPatterns();
+		assertTrue(exclusionPatterns.length == 0);
+	}
 }

@@ -261,27 +261,32 @@ public class CPListElement {
 	}
 	
 	private boolean addFilter(IPath path, String key) {
-		IPath[] exclusionFilters= (IPath[]) getAttribute(key);
-		if (!JavaModelUtil.isExcludedPath(path, exclusionFilters)) {
-			IPath pathToExclude= path.removeFirstSegments(getPath().segmentCount()).addTrailingSeparator();
-			IPath[] newExclusionFilters= new IPath[exclusionFilters.length + 1];
-			System.arraycopy(exclusionFilters, 0, newExclusionFilters, 0, exclusionFilters.length);
-			newExclusionFilters[exclusionFilters.length]= pathToExclude;
-			setAttribute(key, newExclusionFilters);
+		IPath[] filters= (IPath[]) getAttribute(key);
+		if (filters == null)
+			return false;
+		
+		if (!JavaModelUtil.isExcludedPath(path, filters)) {
+			IPath toAdd= path.removeFirstSegments(getPath().segmentCount()).addTrailingSeparator();
+			IPath[] newFilters= new IPath[filters.length + 1];
+			System.arraycopy(filters, 0, newFilters, 0, filters.length);
+			newFilters[filters.length]= toAdd;
+			setAttribute(key, newFilters);
 			return true;
 		}
 		return false;
 	}
 	
 	private boolean removeFilter(IPath path, String key) {
-		IPath[] exclusionFilters= (IPath[]) getAttribute(key);
-		IPath pathToExclude= path.removeFirstSegments(getPath().segmentCount()).addTrailingSeparator();
-		if (JavaModelUtil.isExcludedPath(pathToExclude, exclusionFilters)) {
-			
-			List l= new ArrayList(Arrays.asList(exclusionFilters));
-			l.remove(pathToExclude);
-			IPath[] newExclusionFilters= (IPath[])l.toArray(new IPath[l.size()]);
-			setAttribute(key, newExclusionFilters);
+		IPath[] filters= (IPath[]) getAttribute(key);
+		if (filters == null)
+			return false;
+		
+		IPath toRemove= path.removeFirstSegments(getPath().segmentCount()).addTrailingSeparator();
+		if (JavaModelUtil.isExcludedPath(toRemove, filters)) {
+			List l= new ArrayList(Arrays.asList(filters));
+			l.remove(toRemove);
+			IPath[] newFilters= (IPath[])l.toArray(new IPath[l.size()]);
+			setAttribute(key, newFilters);
 			return true;
 		}
 		return false;

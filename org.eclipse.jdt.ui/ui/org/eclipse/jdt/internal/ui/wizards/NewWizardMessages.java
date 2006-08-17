@@ -41,6 +41,7 @@ public final class NewWizardMessages extends NLS {
 	public static String AddSourceFolderWizardPage_ignoreNestingConflicts;
 	public static String AddSourceFolderWizardPage_replaceSourceFolderInfo;
 	
+	public static String EditOutputFolderAction_DeleteOldOutputFolderQuestion;
 	public static String EditOutputFolderAction_ErrorDescription;
 	public static String EditOutputFolderAction_ProgressMonitorDescription;
 	

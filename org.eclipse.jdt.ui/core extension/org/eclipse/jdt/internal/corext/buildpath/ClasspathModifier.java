@@ -95,7 +95,8 @@ public class ClasspathModifier {
 			exclude(outputPath, cpProject.getCPListElements(), new ArrayList(), cpProject.getJavaProject(), new SubProgressMonitor(monitor, 1));
 			
 			IPath oldOutputLocation= (IPath)elementToChange.getAttribute(CPListElement.OUTPUT);
-	        if (oldOutputLocation != null && oldOutputLocation.segmentCount() > 1) {
+	        if (oldOutputLocation != null && oldOutputLocation.segmentCount() > 1 && !oldOutputLocation.equals(cpProject.getDefaultOutputLocation())) {
+				include(cpProject, oldOutputLocation);
 	        	result.addDeletedResource(workspace.getRoot().getFolder(oldOutputLocation));
 	        }
 			elementToChange.setAttribute(CPListElement.OUTPUT, outputPath);
@@ -146,6 +147,10 @@ public class ClasspathModifier {
 		
 		exclude(outputPath, cpProject.getCPListElements(), new ArrayList(), cpProject.getJavaProject(), null);
         
+		IPath oldOutputLocation= (IPath)elementToChange.getAttribute(CPListElement.OUTPUT);
+        if (oldOutputLocation != null && oldOutputLocation.segmentCount() > 1 && !oldOutputLocation.equals(cpProject.getDefaultOutputLocation())) {
+			include(cpProject, oldOutputLocation);
+        }
 		elementToChange.setAttribute(CPListElement.OUTPUT, outputPath);
 		
 		IJavaModelStatus status= JavaConventions.validateClasspath(javaProject, cpProject.getClasspathEntries(), cpProject.getDefaultOutputLocation());
@@ -255,6 +260,14 @@ public class ClasspathModifier {
 		result.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
 		result.setDefaultOutputLocation(cpProject.getDefaultOutputLocation());
 		return result;
+    }
+    
+    private static void include(CPJavaProject cpProject, IPath path) {
+	    List elements= cpProject.getCPListElements();
+	    for (Iterator iterator= elements.iterator(); iterator.hasNext();) {
+	        CPListElement element= (CPListElement)iterator.next();
+	        element.removeFromExclusions(path);
+	    }
     }
 
 	/**

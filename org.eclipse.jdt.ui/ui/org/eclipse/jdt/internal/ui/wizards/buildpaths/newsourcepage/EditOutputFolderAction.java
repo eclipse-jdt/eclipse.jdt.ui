@@ -11,14 +11,21 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -38,6 +45,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.CPJavaProject;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -124,34 +132,45 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 			final OutputLocationDialog dialog= new OutputLocationDialog(shell, element, classpathEntries, javaProject.getOutputLocation(), false);
 			if (dialog.open() != Window.OK)
 				return;
+			
+			final CPJavaProject cpProject= CPJavaProject.createFromExisting(javaProject);
+        	final BuildpathDelta delta= ClasspathModifier.setOutputLocation(cpProject.getCPElement(element), dialog.getOutputLocation(), false, cpProject, null);
+        	
+        	IFolder oldOutputFolder= getOldOutputFolder(delta);
+        	final IFolder folderToDelete;
+        	if (oldOutputFolder != null) {
+        		String message= Messages.format(NewWizardMessages.EditOutputFolderAction_DeleteOldOutputFolderQuestion, oldOutputFolder.getLocation().toString());
+    	    	if (MessageDialog.openQuestion(getShell(), NewWizardMessages.OutputLocationDialog_title, message)) {
+    	    		folderToDelete= oldOutputFolder;
+    	    	} else {
+    	    		folderToDelete= null;
+    	    	}
+        	} else {
+        		folderToDelete= null;
+        	}
 
 			try {
 				final IRunnableWithProgress runnable= new IRunnableWithProgress() {
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						try {
-							try {
-                            	monitor.beginTask(NewWizardMessages.EditOutputFolderAction_ProgressMonitorDescription, 2);
-                            	
-                            	CPJavaProject cpProject= CPJavaProject.createFromExisting(javaProject);
-                            	BuildpathDelta delta= ClasspathModifier.setOutputLocation(cpProject.getCPElement(element), dialog.getOutputLocation(), false, cpProject, new SubProgressMonitor(monitor, 1));
-                            	ClasspathModifier.commitClassPath(cpProject, new SubProgressMonitor(monitor, 1));
-                            	informListeners(delta);
-                            	selectAndReveal(new StructuredSelection(JavaCore.create(element.getResource())));
-                            } finally {
-                            	monitor.done();
-                            }
+                        	monitor.beginTask(NewWizardMessages.EditOutputFolderAction_ProgressMonitorDescription, 50 + (folderToDelete == null?0:10));
+                        	
+                        	ClasspathModifier.commitClassPath(cpProject, new SubProgressMonitor(monitor, 50));
+                        	if (folderToDelete != null)
+                                folderToDelete.delete(true, new SubProgressMonitor(monitor, 10));
+                        	
+                        	informListeners(delta);
+                        	selectAndReveal(new StructuredSelection(JavaCore.create(element.getResource())));    
 						} catch (CoreException e) {
 							throw new InvocationTargetException(e);
-						}
+						} finally {
+                        	monitor.done();
+                        }
 					}
 				};
 				fContext.run(false, false, runnable);
 			} catch (final InvocationTargetException e) {
-				if (e.getCause() instanceof CoreException) {
-					showExceptionDialog((CoreException)e.getCause(), NewWizardMessages.EditOutputFolderAction_ErrorDescription);
-				} else {
-					JavaPlugin.log(e);
-				}
+				JavaPlugin.log(e);
 			} catch (final InterruptedException e) {
 			}
 			
@@ -159,6 +178,28 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 			showExceptionDialog(e, NewWizardMessages.EditOutputFolderAction_ErrorDescription);
 		}
 	}
+
+	private IFolder getOldOutputFolder(final BuildpathDelta delta) {
+	    IResource[] deletedResources= delta.getDeletedResources();
+	    List existingFolders= new ArrayList();
+	    for (int i= 0; i < deletedResources.length; i++) {
+	        if (deletedResources[i] instanceof IFolder && deletedResources[i].exists()) {
+	        	existingFolders.add(deletedResources[i]);
+	        }
+	    }
+	    if (existingFolders.size() > 0) {
+	    	if (existingFolders.size() > 1) {
+	    		String message= "Found more then one existing folders:"; //$NON-NLS-1$
+	    		for (Iterator iterator= existingFolders.iterator(); iterator.hasNext();) {
+	                IFolder folder= (IFolder)iterator.next();
+	                message+= "\n" + folder.toString(); //$NON-NLS-1$
+	            }
+	    		Assert.isTrue(false, message);
+	    	}
+	    	return (IFolder)existingFolders.get(0);
+	    }
+	    return null;
+    }
 
 	protected boolean canHandle(final IStructuredSelection elements) {
 		if (!fShowOutputFolders)
