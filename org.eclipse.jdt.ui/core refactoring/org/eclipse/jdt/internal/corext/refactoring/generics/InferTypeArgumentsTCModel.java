@@ -347,6 +347,8 @@ public class InferTypeArgumentsTCModel {
 	}
 	
 	public VariableVariable2 makeVariableVariable(IVariableBinding variableBinding) {
+		if (variableBinding == null)
+			return null;
 		TType type= getBoxedType(variableBinding.getType(), /*no boxing*/null);
 		if (type == null)
 			return null;
@@ -405,6 +407,8 @@ public class InferTypeArgumentsTCModel {
 	}
 		
 	public ParameterizedTypeVariable2 makeParameterizedTypeVariable(ITypeBinding typeBinding) {
+		if (typeBinding == null)
+			return null;
 		TType type= createTType(typeBinding);
 		return makeParameterizedTypeVariable(type);
 	}
@@ -424,6 +428,8 @@ public class InferTypeArgumentsTCModel {
 	}
 
 	public ArrayTypeVariable2 makeArrayTypeVariable(ITypeBinding typeBinding) {
+		if (typeBinding == null)
+			return null;
 		TType type= createTType(typeBinding);
 		return makeArrayTypeVariable((ArrayType) type);
 	}
@@ -441,6 +447,8 @@ public class InferTypeArgumentsTCModel {
 	}
 	
 	public ParameterTypeVariable2 makeParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex) {
+		if (methodBinding == null)
+			return null;
 		TType type= getBoxedType(methodBinding.getParameterTypes() [parameterIndex], /*no boxing*/null);
 		if (type == null)
 			return null;
@@ -467,6 +475,8 @@ public class InferTypeArgumentsTCModel {
 	 * @return the ParameterTypeVariable2, or <code>null</code> 
 	 */
 	public ParameterTypeVariable2 makeDeclaredParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex, ICompilationUnit cu) {
+		if (methodBinding == null)
+			return null;
 		ParameterTypeVariable2 cv= makeParameterTypeVariable(methodBinding, parameterIndex);
 		if (cv == null)
 			return null;
@@ -475,6 +485,8 @@ public class InferTypeArgumentsTCModel {
 	}
 
 	public ReturnTypeVariable2 makeReturnTypeVariable(IMethodBinding methodBinding) {
+		if (methodBinding == null)
+			return null;
 		TType returnType= getBoxedType(methodBinding.getReturnType(), /*no boxing*/null);
 		if (returnType == null)
 			return null;
@@ -491,6 +503,8 @@ public class InferTypeArgumentsTCModel {
 	}
 
 	public ReturnTypeVariable2 makeDeclaredReturnTypeVariable(IMethodBinding methodBinding, ICompilationUnit cu) {
+		if (methodBinding == null)
+			return null;
 		ReturnTypeVariable2 cv= makeReturnTypeVariable(methodBinding);
 		if (cv == null)
 			return null;
