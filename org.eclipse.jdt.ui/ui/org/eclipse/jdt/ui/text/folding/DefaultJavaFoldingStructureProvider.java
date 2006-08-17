@@ -793,11 +793,21 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			IJavaElement element= newAnnotation.getElement();
 			Position newPosition= (Position) updated.get(newAnnotation);
 
+			/*
+			 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=130472 and
+			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=127445 In the presence of syntax
+			 * errors, anonymous types may have a source range offset of 0. When such a situation is
+			 * encountered, we ignore the proposed folding range: if no corresponding folding range
+			 * exists, it is silently ignored; if there *is* a matching folding range, we ignore the
+			 * position update and keep the old range, in order to keep the folding structure
+			 * stable.
+			 */
+			boolean isMalformedAnonymousType= newPosition != null && element != null && newPosition.getOffset() == 0 && element.getElementType() == IJavaElement.TYPE && isInnerType((IType) element);
 			List annotations= (List) previous.get(element);
 			if (annotations == null) {
 
-				additions.put(newAnnotation, newPosition);
-
+				if (!isMalformedAnonymousType)
+					additions.put(newAnnotation, newPosition);
 			} else {
 				Iterator x= annotations.iterator();
 				boolean matched= false;
@@ -806,7 +816,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 					JavaProjectionAnnotation existingAnnotation= tuple.annotation;
 					Position existingPosition= tuple.position;
 					if (newAnnotation.isComment() == existingAnnotation.isComment()) {
-						if (existingPosition != null && (!newPosition.equals(existingPosition) || ctx.allowCollapsing() && existingAnnotation.isCollapsed() != newAnnotation.isCollapsed())) {
+						if (!isMalformedAnonymousType && existingPosition != null && (!newPosition.equals(existingPosition) || ctx.allowCollapsing() && existingAnnotation.isCollapsed() != newAnnotation.isCollapsed())) {
 							existingPosition.setOffset(newPosition.getOffset());
 							existingPosition.setLength(newPosition.getLength());
 							if (ctx.allowCollapsing() && existingAnnotation.isCollapsed() != newAnnotation.isCollapsed())
@@ -948,11 +958,11 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 */
 	private boolean isAnonymousEnum(IType type) {
 		try {
-	        return type.isEnum() && type.isAnonymous();
-        } catch (JavaModelException x) {
-        	return false; // optimistically
-        }
-    }
+			return type.isEnum() && type.isAnonymous();
+		} catch (JavaModelException x) {
+			return false; // optimistically
+		}
+	}
 
 	/**
 	 * Returns <code>true</code> if <code>type</code> is not a top-level type, <code>false</code> if it is.
