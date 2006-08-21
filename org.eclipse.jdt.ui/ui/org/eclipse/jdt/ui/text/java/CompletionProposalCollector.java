@@ -559,6 +559,10 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			case CompletionProposal.JAVADOC_FIELD_REF:
 			case CompletionProposal.JAVADOC_VALUE_REF:
 				char[] declaration= proposal.getDeclarationSignature();
+				// special methods may not have a declaring type: methods defined on arrays etc.
+				// Currently known: class literals don't have a declaring type - use Object
+				if (declaration == null)
+					return "java.lang.Object".toCharArray(); //$NON-NLS-1$
 				return Signature.toCharArray(declaration);
 			case CompletionProposal.PACKAGE_REF:
 				return proposal.getDeclarationSignature();
