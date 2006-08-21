@@ -197,7 +197,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 					includeMask= settings.getInt("includeMask"); //$NON-NLS-1$
 				} else {
 					includeMask= JavaSearchScopeFactory.NO_JRE;
-					if (settings.get("includeJRE") == null ? forceIncludeAll(limitTo) : settings.getBoolean("includeJRE")) {  //$NON-NLS-1$ //$NON-NLS-2$
+					if (settings.get("includeJRE") == null ? forceIncludeAll(limitTo, elem) : settings.getBoolean("includeJRE")) {  //$NON-NLS-1$ //$NON-NLS-2$
 						includeMask= JavaSearchScopeFactory.ALL;
 					}
 				}
@@ -775,8 +775,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		setIncludeMask(getIncludeMask(), getLimitTo());
 	}
 
-	private static boolean forceIncludeAll(int limitTo) {
-		return limitTo == DECLARATIONS || limitTo == IMPLEMENTORS;
+	private static boolean forceIncludeAll(int limitTo, IJavaElement elem) {
+		return elem != null && (limitTo == DECLARATIONS || limitTo == IMPLEMENTORS);
 	}
 
 	private SearchPatternData tryStructuredSelection(IStructuredSelection selection) {
@@ -789,7 +789,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			res= determineInitValuesFrom((IJavaElement) o);
 		} else if (o instanceof LogicalPackage) {
 			LogicalPackage lp= (LogicalPackage)o;
-			return new SearchPatternData(PACKAGE, REFERENCES, fIsCaseSensitive, lp.getElementName(), null, JavaSearchScopeFactory.NO_JRE);
+			return new SearchPatternData(PACKAGE, REFERENCES, fIsCaseSensitive, lp.getElementName(), null, getLastIncludeMask());
 		} else if (o instanceof IAdaptable) {
 			IJavaElement element= (IJavaElement) ((IAdaptable) o).getAdapter(IJavaElement.class);
 			if (element != null) {
@@ -799,7 +799,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		if (res == null && o instanceof IAdaptable) {
 			IWorkbenchAdapter adapter= (IWorkbenchAdapter)((IAdaptable)o).getAdapter(IWorkbenchAdapter.class);
 			if (adapter != null) {
-				return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, adapter.getLabel(o), null, JavaSearchScopeFactory.NO_JRE);
+				return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, adapter.getLabel(o), null, getLastIncludeMask());
 			}
 		}
 		return res;
@@ -820,9 +820,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 
 	private SearchPatternData determineInitValuesFrom(IJavaElement element) {
 		try {
-			JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
-			boolean isInsideJRE= factory.isInsideJRE(element);
-			int includeMask= isInsideJRE ? JavaSearchScopeFactory.ALL : JavaSearchScopeFactory.NO_JRE;
+			//JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
+			//boolean isInsideJRE= factory.isInsideJRE(element);
+			int includeMask= getLastIncludeMask();
 			
 			switch (element.getElementType()) {
 				case IJavaElement.PACKAGE_FRAGMENT:
@@ -887,14 +887,17 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		if (!fPreviousSearchPatterns.isEmpty()) {
 			return (SearchPatternData) fPreviousSearchPatterns.get(0);
 		}
-		int includeMask;
+
+		return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, "", null, getLastIncludeMask()); //$NON-NLS-1$
+	}
+	
+	private int getLastIncludeMask() {
 		try {
-			includeMask= getDialogSettings().getInt(STORE_INCLUDE_MASK);
+			return getDialogSettings().getInt(STORE_INCLUDE_MASK);
 		} catch (NumberFormatException e) {
-			includeMask= JavaSearchScopeFactory.NO_JRE;
+			return JavaSearchScopeFactory.NO_JRE;
 		}
-		return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, "", null, includeMask); //$NON-NLS-1$
-	}	
+	}
 
 	/*
 	 * Implements method from ISearchPage
