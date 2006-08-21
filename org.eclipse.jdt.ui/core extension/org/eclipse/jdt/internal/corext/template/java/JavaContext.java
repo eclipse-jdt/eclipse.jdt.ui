@@ -391,16 +391,17 @@ public class JavaContext extends CompilationUnitContext {
 
 	private String[] suggestVariableName(String type, String[] excludes) throws IllegalArgumentException {
 		int dim=0;
-		while (type.endsWith("[]")) //$NON-NLS-1$
+		while (type.endsWith("[]")) {//$NON-NLS-1$
 			dim++;
-		String elementType= type.substring(0, type.length() - dim * 2);
+			type= type.substring(0, type.length() - 2);
+		}
 		
 		IJavaProject project= getJavaProject();
 		if (project != null)
-			return NamingConventions.suggestLocalVariableNames(project, "", elementType, dim, excludes); //$NON-NLS-1$
+			return NamingConventions.suggestLocalVariableNames(project, "", type, dim, excludes); //$NON-NLS-1$
 		
 		// fallback if we lack proper context: roll-our own lowercasing
-		return new String[] {Signature.getSimpleName(elementType).toLowerCase()};
+		return new String[] {Signature.getSimpleName(type).toLowerCase()};
 	}
 	
 	public void addImport(String type) {
