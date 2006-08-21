@@ -81,10 +81,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.ui.search.IMatchPresentation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.CopyQualifiedNameAction;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
@@ -159,6 +161,9 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	private GroupAction fGroupFileAction;
 	private GroupAction fGroupPackageAction;
 	private GroupAction fGroupProjectAction;
+	
+	private SelectionDispatchAction fCopyQualifiedNameAction;
+	
 	private int fCurrentGrouping;
 	
 	private FilterAction[] fFilterActions;
@@ -176,6 +181,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	private int fElementLimit;
 
 	public JavaSearchResultPage() {
+		fCopyQualifiedNameAction= null;
+		
 		initSortActions();
 		initGroupingActions();
 		initFilterActions();
@@ -255,10 +262,19 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			throw new PartInitException(SearchMessages.JavaSearchResultPage_error_marker, e); 
 		}
 	}
+	
+	private SelectionDispatchAction getCopyQualifiedNameAction() {
+		if (fCopyQualifiedNameAction == null) {
+			fCopyQualifiedNameAction= new CopyQualifiedNameAction(getSite(), null, null);
+		}
+		return fCopyQualifiedNameAction;
+	}
 
 	protected void fillContextMenu(IMenuManager mgr) {
 		super.fillContextMenu(mgr);
 		addSortActions(mgr);
+
+		mgr.appendToGroup(IContextMenuConstants.GROUP_EDIT, getCopyQualifiedNameAction());
 
 		fActionGroup.setContext(new ActionContext(getSite().getSelectionProvider().getSelection()));
 		fActionGroup.fillContextMenu(mgr);
@@ -281,6 +297,12 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	
 	protected void fillToolbar(IToolBarManager tbm) {
 		super.fillToolbar(tbm);
+		
+		IActionBars actionBars = getSite().getActionBars();
+		if (actionBars != null) {
+			actionBars.setGlobalActionHandler(CopyQualifiedNameAction.ACTION_HANDLER_ID, getCopyQualifiedNameAction());
+		}
+		
 		if (getLayout() != FLAG_LAYOUT_FLAT)
 			addGroupActions(tbm);
 	}

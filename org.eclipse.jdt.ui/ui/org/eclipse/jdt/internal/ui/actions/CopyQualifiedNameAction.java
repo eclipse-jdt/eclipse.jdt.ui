@@ -96,11 +96,8 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 	public CopyQualifiedNameAction(IWorkbenchSite site, Clipboard clipboard, IAction pastAction) {
 		super(site);
 		fPasteAction= pastAction;
-		if (clipboard == null) {
-			fClipboard= new Clipboard(getShell().getDisplay());
-		} else {
-			fClipboard= clipboard;
-		}
+		fClipboard= clipboard;
+		
 		setText(ActionMessages.CopyQualifiedNameAction_ActionName);
 		setToolTipText(ActionMessages.CopyQualifiedNameAction_ToolTipText);
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_COPY_QUALIFIED_NAME);
@@ -191,9 +188,13 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 				dataTypes= new Transfer[] {TextTransfer.getInstance()};
 			}
 			
+			Clipboard clipboard= fClipboard;
+			if (clipboard == null) {
+				clipboard= new Clipboard(getShell().getDisplay());
+			}
 			try {
-				fClipboard.setContents(data, dataTypes);
-				
+				clipboard.setContents(data, dataTypes);
+
 				// update the enablement of the paste action
 				// workaround since the clipboard does not support callbacks				
 				if (fPasteAction != null) {
@@ -206,13 +207,16 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 					}
 				}
 			} catch (SWTError e) {
-	            if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD) {
+				if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD) {
 					throw e;
 				}
-	            if (MessageDialog.openQuestion(getShell(), ActionMessages.CopyQualifiedNameAction_ErrorTitle, ActionMessages.CopyQualifiedNameAction_ErrorDescription)) {
-	            	fClipboard.setContents(data, dataTypes);
+				if (MessageDialog.openQuestion(getShell(), ActionMessages.CopyQualifiedNameAction_ErrorTitle, ActionMessages.CopyQualifiedNameAction_ErrorDescription)) {
+					clipboard.setContents(data, dataTypes);
 				}
-	        }
+				if (fClipboard == null) {
+					clipboard.dispose();
+				}
+			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
@@ -295,4 +299,5 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 
 		return null;
 	}
+
 }
