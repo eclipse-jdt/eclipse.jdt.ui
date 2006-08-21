@@ -27,7 +27,8 @@
 	  <import plugin="org.eclipse.ltk.core.refactoring"/>      
 	  <import plugin="org.eclipse.ltk.ui.refactoring"/>    
 	  <import plugin="org.eclipse.test.performance"/>
-	  <import plugin="org.eclipse.jdt.core.manipulation"/>    
+	  <import plugin="org.eclipse.jdt.core.manipulation"/>
+   <import plugin="org.eclipse.team.core"/>    
    </requires>
    
     <extension point="org.eclipse.ltk.core.refactoring.renameParticipants">
@@ -234,6 +235,14 @@
       <enablement>
           <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature" />
       </enablement>
+   </extension>
+   <extension point="org.eclipse.team.core.repository">
+   	<repository
+   		  id="org.eclipse.jdt.ui.tests.refactoring.refactoringTestRepositoryProvider"
+          class="org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestRepositoryProvider">
+   	</repository>
+   
+   
    </extension>
    
 </plugin>
