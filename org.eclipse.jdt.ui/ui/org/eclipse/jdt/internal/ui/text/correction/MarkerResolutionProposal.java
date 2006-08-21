@@ -58,6 +58,9 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 		if (fResolution instanceof IMarkerResolution2) {
 			return ((IMarkerResolution2) fResolution).getDescription();
 		}
+		if (fResolution instanceof IJavaCompletionProposal) {
+			return ((IJavaCompletionProposal) fResolution).getAdditionalProposalInfo();
+		}
 		try {
 			String problemDesc= (String) fMarker.getAttribute(IMarker.MESSAGE);
 			return Messages.format(CorrectionMessages.MarkerResolutionProposal_additionaldesc, problemDesc);
@@ -71,6 +74,9 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
 	 */
 	public IContextInformation getContextInformation() {
+		if (fResolution instanceof IJavaCompletionProposal) {
+			return ((IJavaCompletionProposal) fResolution).getContextInformation();
+		}
 		return null;
 	}
 
@@ -88,6 +94,9 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 		if (fResolution instanceof IMarkerResolution2) {
 			return ((IMarkerResolution2) fResolution).getImage();
 		}
+		if (fResolution instanceof IJavaCompletionProposal) {
+			return ((IJavaCompletionProposal) fResolution).getImage();
+		}
 		return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 	}
 
@@ -95,8 +104,8 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal#getRelevance()
 	 */
 	public int getRelevance() {
-		if (fResolution instanceof IJavaMarkerResolutionExtension) {
-			return ((IJavaMarkerResolutionExtension) fResolution).getRelevance();
+		if (fResolution instanceof IJavaCompletionProposal) {
+			return ((IJavaCompletionProposal) fResolution).getRelevance();
 		}
 		return 10;
 	}
@@ -105,6 +114,9 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
 	 */
 	public Point getSelection(IDocument document) {
+		if (fResolution instanceof IJavaCompletionProposal) {
+			return ((IJavaCompletionProposal) fResolution).getSelection(document);
+		}
 		return null;
 	}
 
