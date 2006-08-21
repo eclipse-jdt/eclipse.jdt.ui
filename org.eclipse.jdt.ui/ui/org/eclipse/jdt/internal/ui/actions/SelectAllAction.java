@@ -10,6 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -49,17 +55,30 @@ public class SelectAllAction extends Action {
 		Assert.isNotNull(viewer);
 		fViewer= viewer;
 	}
+	
+	private void collectExpandedAndVisible(TreeItem[] items, List result) {
+		for (int i= 0; i < items.length; i++) {
+			TreeItem item= items[i];
+			result.add(item);
+			if (item.getExpanded()) {
+				collectExpandedAndVisible(item.getItems(), result);
+			}
+		}
+	}
 
 	/**
 	 * Selects all resources in the view.
 	 */
 	public void run() {
 		if (fViewer instanceof TreeViewer) {
-			((TreeViewer) fViewer).getTree().selectAll();
+			ArrayList allVisible= new ArrayList();
+			Tree tree= ((TreeViewer) fViewer).getTree();
+			collectExpandedAndVisible(tree.getItems(), allVisible);
+			tree.setSelection((TreeItem[]) allVisible.toArray(new TreeItem[allVisible.size()]));
 		} else if (fViewer instanceof TableViewer) {
 			((TableViewer) fViewer).getTable().selectAll();
+			// force viewer selection change
+			fViewer.setSelection(fViewer.getSelection());
 		}
-		// force viewer selection change
-		fViewer.setSelection(fViewer.getSelection());
 	}
 }
