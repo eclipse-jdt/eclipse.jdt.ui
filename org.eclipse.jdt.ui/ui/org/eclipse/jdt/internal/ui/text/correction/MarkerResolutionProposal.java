@@ -74,9 +74,6 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
 	 */
 	public IContextInformation getContextInformation() {
-		if (fResolution instanceof IJavaCompletionProposal) {
-			return ((IJavaCompletionProposal) fResolution).getContextInformation();
-		}
 		return null;
 	}
 
