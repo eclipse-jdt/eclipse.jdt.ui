@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
@@ -102,6 +103,7 @@ public class RenameTypeTests extends RefactoringTest {
 	private String[] helperWithTextual(String oldCuName, String oldName, String newName, String newCUName, boolean updateReferences, boolean updateTextualMatches) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), oldCuName);
 		IType classA= getType(cu, oldName);
+		IJavaElement[] classAMembers= classA.getChildren();
 		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 		String[] renameHandles= null;
@@ -122,6 +124,9 @@ public class RenameTypeTests extends RefactoringTest {
 		INameUpdating nameUpdating= ((INameUpdating)refactoring.getAdapter(INameUpdating.class));
 		IType newElement = (IType) nameUpdating.getNewElement();
 		assertTrue("new element does not exist:\n" + newElement.toString(), newElement.exists());
+		
+		checkMappers(refactoring, classA, newCUName + ".java", classAMembers);
+
 		return renameHandles;
 	}
 
@@ -179,6 +184,7 @@ public class RenameTypeTests extends RefactoringTest {
 				assertFalse(element.exists());
 			}
 		}
+		
 	}
 
 	private void helper3(String oldName, String newName, boolean updateSimilar, boolean updateTextual, boolean updateRef) throws JavaModelException, CoreException, IOException, Exception {
@@ -1564,6 +1570,7 @@ public class RenameTypeTests extends RefactoringTest {
 		ParticipantTesting.reset();
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "SomeClass");
 		IType someClass= getType(cu, "SomeClass");
+		IJavaElement[] someClassMembers= someClass.getChildren();
 		
 		RenameJavaElementDescriptor descriptor= createRefactoringDescriptor(someClass, "SomeNewClass");
 		setTheOptions(descriptor, true, false, true, null, RenamingNameSuggestor.STRATEGY_EMBEDDED);
@@ -1573,22 +1580,39 @@ public class RenameTypeTests extends RefactoringTest {
 		
 		checkResultInClass("SomeNewClass");
 		
-		RenameTypeProcessor rtp= (RenameTypeProcessor)((RenameRefactoring) ref).getProcessor();
-		ICompilationUnit newUnit= (ICompilationUnit)rtp.getRefactoredJavaElement(someClass.getCompilationUnit());
+		checkMappers(ref, someClass, "SomeNewClass.java", someClassMembers);
+	}
+
+	private void checkMappers(Refactoring refactoring, IType type, String newCUName, IJavaElement[] someClassMembers) throws JavaModelException {
+		RenameTypeProcessor rtp= (RenameTypeProcessor)((RenameRefactoring) refactoring).getProcessor();
 		
+		ICompilationUnit newUnit= (ICompilationUnit)rtp.getRefactoredJavaElement(type.getCompilationUnit());
 		assertTrue(newUnit.exists());
-		assertTrue(newUnit.getElementName().equals("SomeNewClass.java"));
-		assertFalse(someClass.getCompilationUnit().exists());
+		assertTrue(newUnit.getElementName().equals(newCUName));
 		
-		IFile newFile= (IFile)rtp.getRefactoredResource(someClass.getResource());
-		
+		IFile newFile= (IFile)rtp.getRefactoredResource(type.getResource());
 		assertTrue(newFile.exists());
-		assertTrue(newFile.getName().equals("SomeNewClass.java"));
-		assertFalse(someClass.getResource().exists());
+		assertTrue(newFile.getName().equals(newCUName));
 		
-		IPackageFragment oldPackage= (IPackageFragment)cu.getParent();
+		if ((type.getParent().getElementType() == IJavaElement.COMPILATION_UNIT)
+				&& type.getCompilationUnit().getElementName().equals(type.getElementName() + ".java")) {
+			assertFalse(type.getCompilationUnit().exists());
+			assertFalse(type.getResource().exists());
+		}
+		
+		IPackageFragment oldPackage= (IPackageFragment)type.getCompilationUnit().getParent();
 		IPackageFragment newPackage= (IPackageFragment)rtp.getRefactoredJavaElement(oldPackage);
 		assertEquals(oldPackage, newPackage);
+		
+		for (int i= 0; i < someClassMembers.length; i++) {
+			IMember member= (IMember) someClassMembers[i];
+			IJavaElement refactoredMember= rtp.getRefactoredJavaElement(member);
+			if (member instanceof IMethod && member.getElementName().equals(type.getElementName()))
+				continue; // constructor
+			assertTrue(refactoredMember.exists());
+			assertEquals(member.getElementName(), refactoredMember.getElementName());
+			assertFalse(refactoredMember.equals(member));
+		}
 	}
 	
 	public void testSimilarElements25() throws Exception {

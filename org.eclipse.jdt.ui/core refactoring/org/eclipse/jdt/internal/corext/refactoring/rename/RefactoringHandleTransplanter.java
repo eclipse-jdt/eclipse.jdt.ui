@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -38,14 +39,22 @@ import org.eclipse.jdt.core.Signature;
  */
 public class RefactoringHandleTransplanter {
 
-	private IType fOldType;
-	private IType fNewType;
-	private Map fRefactoredSimilarElements;
+	private final IType fOldType;
+	private final IType fNewType;
+	private final Map/*<IJavaElement, String>*/ fRefactoredSimilarElements;
 
-	public RefactoringHandleTransplanter(IType oldType, IType newType, Map refactoredSimilarElements) {
+	/**
+	 * @param oldType old type
+	 * @param newType renamed type
+	 * @param refactoredSimilarElements map from similar element (IJavaElement) to new name (String), or <code>null</code>
+	 */
+	public RefactoringHandleTransplanter(IType oldType, IType newType, Map/*<IJavaElement, String>*/ refactoredSimilarElements) {
 		fOldType= oldType;
 		fNewType= newType;
-		fRefactoredSimilarElements= refactoredSimilarElements;
+		if (refactoredSimilarElements == null)
+			fRefactoredSimilarElements= Collections.EMPTY_MAP;
+		else
+			fRefactoredSimilarElements= refactoredSimilarElements;
 	}
 
 	/**
@@ -187,12 +196,12 @@ public class RefactoringHandleTransplanter {
 		return newparams;
 	}
 
-	private String resolveElementName(IJavaElement method) {
-		final String newName= (String) fRefactoredSimilarElements.get(method);
+	private String resolveElementName(IJavaElement element) {
+		final String newName= (String) fRefactoredSimilarElements.get(element);
 		if (newName != null)
 			return newName;
 		else
-			return method.getElementName();
+			return element.getElementName();
 	}
 
 	private IMember resolveTypeInMember(final IMember newParent, IType oldChild) {
