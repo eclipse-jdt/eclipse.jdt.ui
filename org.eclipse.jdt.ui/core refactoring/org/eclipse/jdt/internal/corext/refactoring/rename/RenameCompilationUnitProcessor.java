@@ -423,24 +423,31 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 	}
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String handle= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JDTRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_COMPILATION_UNIT);
-				else
-					fCu= (ICompilationUnit) element;
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_INPUT));
-			final String name= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_NAME);
-			if (name != null && !"".equals(name)) //$NON-NLS-1$
-				setNewElementName(name);
-			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_NAME));
-		} else
+		if (!(arguments instanceof JavaRefactoringArguments)) {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+		}
+		
+		final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+		final String handle= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_INPUT);
+		if (handle == null) {
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_INPUT));
+		}
+			
+		final IJavaElement element= JDTRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+		if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
+			return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_COMPILATION_UNIT);
+		
+		final String name= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_NAME);
+		if (name == null || name.length() == 0)
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_NAME));
+
+		fCu= (ICompilationUnit) element;
+		try {
+			computeRenameTypeRefactoring();
+			setNewElementName(name);
+		} catch (CoreException e) {
+			return RefactoringStatus.create(e.getStatus());
+		}
 		return new RefactoringStatus();
 	}
 
