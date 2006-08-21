@@ -57,6 +57,8 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 public final class RenameCompilationUnitProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating, ISimilarDeclarationUpdating, IResourceMapper, IJavaElementMapper {
 	
 	private RenameTypeProcessor fRenameTypeProcessor= null;
@@ -445,8 +447,9 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 		try {
 			computeRenameTypeRefactoring();
 			setNewElementName(name);
-		} catch (CoreException e) {
-			return RefactoringStatus.create(e.getStatus());
+		} catch (CoreException exception) {
+			JavaPlugin.log(exception);
+			return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_COMPILATION_UNIT);
 		}
 		return new RefactoringStatus();
 	}
