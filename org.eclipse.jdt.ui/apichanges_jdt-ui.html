@@ -46,6 +46,9 @@ deprecated in favor of <code>createJarDescriptionWriter(OutputStream, String)</c
         New API in <code>org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds.java</code>:
         <ul>
           <li>COPY_PROCESSOR</li>
+          <li>addition to RENAME_PACKAGE_FRAGMENT_PROCESSOR:
+              <br>participants can now get an IJavaElementMapper and an IResourceMapper
+              from the processor to find the location of elements after the rename</li>
         </ul>
       </td>
     </tr>
