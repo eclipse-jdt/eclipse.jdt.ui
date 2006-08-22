@@ -75,6 +75,9 @@ public class MethodOverrideTester {
 	private Map /* <IType, Substitutions> */ fTypeVariableSubstitutions;
 			
 	public MethodOverrideTester(IType focusType, ITypeHierarchy hierarchy) {
+		if (focusType == null || hierarchy == null) {
+			throw new IllegalArgumentException();
+		}
 		fFocusType= focusType;
 		fHierarchy= hierarchy;
 		fTypeVariableSubstitutions= null;
