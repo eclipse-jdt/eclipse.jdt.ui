@@ -34,8 +34,11 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
+import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.GroupCategory;
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.MultiStateTextFileChange;
 import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -768,7 +771,13 @@ public class CleanUpRefactoring extends Refactoring {
 		TextEditBasedChangeGroup[] changeGroups= source.getChangeGroups();
 		for (int i= 0; i < changeGroups.length; i++) {
 			TextEditGroup textEditGroup= changeGroups[i].getTextEditGroup();
-			TextEditGroup newGroup= new TextEditGroup(textEditGroup.getName());
+			TextEditGroup newGroup;
+			if (textEditGroup instanceof CategorizedTextEditGroup) {
+				String label= textEditGroup.getName();
+				newGroup= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
+			} else {
+				newGroup= new TextEditGroup(textEditGroup.getName());
+			}
 			TextEdit[] textEdits= textEditGroup.getTextEdits();
 			for (int j= 0; j < textEdits.length; j++) {
 				if (!removedEdits.contains(textEdits[j]))
