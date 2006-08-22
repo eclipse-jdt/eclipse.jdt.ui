@@ -36,6 +36,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.IResourceMapper;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -121,6 +122,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 	private boolean fRenameSubpackages;
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renamePackageProcessor"; //$NON-NLS-1$
+	private RenamePackageChange fRenamePackageChange;
 
 	/**
 	 * Creates a new rename package processor.
@@ -532,32 +534,11 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.RenamePackageRefactoring_creating_change, 1);
-			String project= null;
-			IJavaProject javaProject= fPackage.getJavaProject();
-			if (javaProject != null)
-				project= javaProject.getElementName();
-			final int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
-			final String description= Messages.format(RefactoringCoreMessages.RenamePackageProcessor_descriptor_description_short, fPackage.getElementName());
-			final String header= Messages.format(RefactoringCoreMessages.RenamePackageProcessor_descriptor_description, new String[] { fPackage.getElementName(), getNewElementName()});
-			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
-			if (fRenameSubpackages)
-				comment.addSetting(RefactoringCoreMessages.RenamePackageProcessor_rename_subpackages);
-			final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
-			descriptor.setProject(project);
-			descriptor.setDescription(description);
-			descriptor.setComment(comment.asString());
-			descriptor.setFlags(flags);
-			descriptor.setJavaElement(fPackage);
-			descriptor.setNewName(getNewElementName());
-			descriptor.setUpdateReferences(fUpdateReferences);
-			descriptor.setUpdateTextualOccurrences(fUpdateTextualMatches);
-			descriptor.setUpdateQualifiedNames(fUpdateQualifiedNames);
-			if (fUpdateQualifiedNames && fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
-				descriptor.setFileNamePatterns(fFilePatterns);
-			descriptor.setUpdateHierarchy(fRenameSubpackages);
+			final RenameJavaElementDescriptor descriptor= createRefactoringDescriptor();
 			final DynamicValidationRefactoringChange result= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.RenamePackageRefactoring_change_name);
 			result.addAll(fChangeManager.getAllChanges());
-			result.add(new RenamePackageChange( fPackage, getNewElementName(),  fRenameSubpackages));
+			fRenamePackageChange= new RenamePackageChange( fPackage, getNewElementName(),  fRenameSubpackages);
+			result.add(fRenamePackageChange);
 			monitor.worked(1);
 			return result;
 		} finally {
@@ -567,21 +548,56 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 		}
 	}
 
+	private RenameJavaElementDescriptor createRefactoringDescriptor() {
+		String project= null;
+		IJavaProject javaProject= fPackage.getJavaProject();
+		if (javaProject != null)
+			project= javaProject.getElementName();
+		final int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+		final String description= Messages.format(RefactoringCoreMessages.RenamePackageProcessor_descriptor_description_short, fPackage.getElementName());
+		final String header= Messages.format(RefactoringCoreMessages.RenamePackageProcessor_descriptor_description, new String[] { fPackage.getElementName(), getNewElementName()});
+		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
+		if (fRenameSubpackages)
+			comment.addSetting(RefactoringCoreMessages.RenamePackageProcessor_rename_subpackages);
+		final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
+		descriptor.setProject(project);
+		descriptor.setDescription(description);
+		descriptor.setComment(comment.asString());
+		descriptor.setFlags(flags);
+		descriptor.setJavaElement(fPackage);
+		descriptor.setNewName(getNewElementName());
+		descriptor.setUpdateReferences(fUpdateReferences);
+		descriptor.setUpdateTextualOccurrences(fUpdateTextualMatches);
+		descriptor.setUpdateQualifiedNames(fUpdateQualifiedNames);
+		if (fUpdateQualifiedNames && fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
+			descriptor.setFileNamePatterns(fFilePatterns);
+		descriptor.setUpdateHierarchy(fRenameSubpackages);
+		return descriptor;
+	}
+
 	public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
 		if (fQualifiedNameSearchResult != null) {
+			CompositeChange parent= (CompositeChange) fRenamePackageChange.getParent();
 			try {
-				return fQualifiedNameSearchResult.getSingleChange(Changes.getModifiedFiles(participantChanges));
+				/*
+				 * Sneak text changes in before the package rename to ensure
+				 * modified files are still at original location (see
+				 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=154238)
+				 */
+				parent.remove(fRenamePackageChange);
+				parent.add(fQualifiedNameSearchResult.getSingleChange(Changes.getModifiedFiles(participantChanges)));
 			} finally {
 				fQualifiedNameSearchResult= null;
+				parent.add(fRenamePackageChange);
+				fRenamePackageChange= null;
 			}
-		} else {
-			return null;
 		}
+		return null;
 	}
 	
 	private void computeQualifiedNameMatches(IProgressMonitor pm) throws CoreException {
 		if (fQualifiedNameSearchResult == null)
-			fQualifiedNameSearchResult= new QualifiedNameSearchResult(this);
+			fQualifiedNameSearchResult= new QualifiedNameSearchResult();
 		QualifiedNameFinder.process(fQualifiedNameSearchResult, fPackage.getElementName(), getNewElementName(), 
 			fFilePatterns, fPackage.getJavaProject().getProject(), pm);
 	}

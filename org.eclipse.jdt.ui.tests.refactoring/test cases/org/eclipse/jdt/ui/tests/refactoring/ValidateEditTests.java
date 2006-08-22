@@ -47,7 +47,6 @@ public class ValidateEditTests extends RefactoringTest {
 	private static final Class clazz= ValidateEditTests.class;
 	
 	private static final boolean BUG_154511= true; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=154511
-	private static final boolean BUG_154238= true; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=154238
 	
 	public ValidateEditTests(String name) {
 		super(name);
@@ -177,10 +176,6 @@ public class ValidateEditTests extends RefactoringTest {
 
 	public void testPackageRenameWithResource2() throws Exception {
 		// MyClass readonly and moved, x.properties readonly moved
-		
-		if (BUG_154238) {
-			return;
-		}
 		
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 		
