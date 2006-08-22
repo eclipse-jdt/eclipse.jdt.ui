@@ -26,12 +26,17 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.IResourceMapper;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -44,12 +49,14 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.refactoring.IJavaElementMapper;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
@@ -93,7 +100,8 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class RenamePackageProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating {
+public class RenamePackageProcessor extends JavaRenameProcessor implements
+		IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating, IResourceMapper, IJavaElementMapper {
 	
 	private static final String ATTRIBUTE_QUALIFIED= "qualified"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_TEXTUAL_MATCHES= "textual"; //$NON-NLS-1$
@@ -220,6 +228,97 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		fFilePatterns= patterns;
 	}
 	
+	//---- IResourceMapper  ----------------------------------
+	
+	public IResource getRefactoredResource(IResource element) {
+		IFolder packageFolder= (IFolder) fPackage.getResource();
+		if (packageFolder == null)
+			return element;
+		
+		IContainer newPackageFolder= (IContainer) getNewPackage().getResource();
+		
+		if (packageFolder.equals(element))
+			return newPackageFolder;
+		
+		IPath packagePath= packageFolder.getProjectRelativePath();
+		IPath elementPath= element.getProjectRelativePath();
+		
+		if (packagePath.isPrefixOf(elementPath)) {
+			if (fRenameSubpackages || (element instanceof IFile && packageFolder.equals(element.getParent()))) {
+				IPath pathInPackage= elementPath.removeFirstSegments(packagePath.segmentCount());
+				if (element instanceof IFile)
+					return newPackageFolder.getFile(pathInPackage);
+				else
+					return newPackageFolder.getFolder(pathInPackage);
+			}
+		}
+		return element;
+	}
+	
+	//---- IJavaElementMapper ----------------------------------
+	
+	public IJavaElement getRefactoredJavaElement(IJavaElement element) {
+		return new GenericRefactoringHandleTransplanter() {
+			protected IPackageFragment transplantHandle(IPackageFragmentRoot parent, IPackageFragment element) {
+				if (! fRenameSubpackages) {
+					if (fPackage.equals(element))
+						return getNewPackage();
+				} else {
+					String packName= element.getElementName();
+					String packageName= fPackage.getElementName();
+					if (fPackage.getParent().equals(parent)
+							&& packName.startsWith(packageName + '.')) {
+						String newPackName= getNewElementName() + packName.substring(packageName.length() - 1);
+						return getPackageFragmentRoot().getPackageFragment(newPackName);
+					}
+				}
+				return super.transplantHandle(parent, element);
+			}
+			
+			protected IMethod transplantHandle(IType parent, IMethod element) {
+				String[] parameterTypes= resolveParameterTypes(element);
+				return parent.getMethod(element.getElementName(), parameterTypes);
+			}
+			
+			private String[] resolveParameterTypes(IMethod method) {
+				final String[] oldParameterTypes= method.getParameterTypes();
+				final String[] newparams= new String[oldParameterTypes.length];
+
+				final String[] possibleOldSigs= new String[2];
+				//using type signature, since there is no package signature
+				possibleOldSigs[0]= Signature.createTypeSignature(fPackage.getElementName(), false);
+				possibleOldSigs[1]= Signature.createTypeSignature(fPackage.getElementName(), true);
+
+				final String[] possibleNewSigs= new String[2];
+				possibleNewSigs[0]= Signature.createTypeSignature(getNewElementName(), false);
+				possibleNewSigs[1]= Signature.createTypeSignature(getNewElementName(), true);
+
+				// Textually replace all occurrences
+				// This handles stuff like Map<SomeClass, some.package.SomeClass>
+				for (int i= 0; i < oldParameterTypes.length; i++) {
+					newparams[i]= oldParameterTypes[i];
+					for (int j= 0; j < possibleOldSigs.length; j++) {
+						newparams[i]= replaceAll(newparams[i], possibleOldSigs[j], possibleNewSigs[j]);
+					}
+				}
+				return newparams;
+			}
+			
+		    private String replaceAll(final String source, final String replaceFrom, final String replaceTo) {
+				final StringBuffer buf= new StringBuffer(source.length());
+				int currentIndex= 0;
+				int matchIndex;
+				while ((matchIndex= source.indexOf(replaceFrom, currentIndex)) != -1) {
+					buf.append(source.substring(currentIndex, matchIndex));
+					buf.append(replaceTo);
+					currentIndex= matchIndex + replaceFrom.length();
+				}
+				buf.append(source.substring(currentIndex));
+				return buf.toString();
+			}
+		}.transplantHandle(element);
+	}
+
 	//----
 	
 	public boolean canEnableRenameSubpackages() throws JavaModelException {
@@ -254,11 +353,11 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	}
 	
 	public Object getNewElement(){
-		IJavaElement parent= fPackage.getParent();
-		if (!(parent instanceof IPackageFragmentRoot))
-			return fPackage;//??
-			
-		IPackageFragmentRoot root= (IPackageFragmentRoot)parent;
+		return getNewPackage();
+	}
+
+	private IPackageFragment getNewPackage() {
+		IPackageFragmentRoot root= getPackageFragmentRoot();
 		return root.getPackageFragment(getNewElementName());
 	}
 	
@@ -482,7 +581,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	
 	private void computeQualifiedNameMatches(IProgressMonitor pm) throws CoreException {
 		if (fQualifiedNameSearchResult == null)
-			fQualifiedNameSearchResult= new QualifiedNameSearchResult();
+			fQualifiedNameSearchResult= new QualifiedNameSearchResult(this);
 		QualifiedNameFinder.process(fQualifiedNameSearchResult, fPackage.getElementName(), getNewElementName(), 
 			fFilePatterns, fPackage.getJavaProject().getProject(), pm);
 	}

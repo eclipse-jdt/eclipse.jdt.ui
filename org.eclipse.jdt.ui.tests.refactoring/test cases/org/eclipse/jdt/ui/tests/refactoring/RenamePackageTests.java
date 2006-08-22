@@ -40,23 +40,32 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
 import org.eclipse.ltk.core.refactoring.CreateChangeOperation;
+import org.eclipse.ltk.core.refactoring.IResourceMapper;
 import org.eclipse.ltk.core.refactoring.IUndoManager;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.refactoring.IJavaElementMapper;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
+import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -170,7 +179,7 @@ public class RenamePackageTests extends RefactoringTest {
 		helper1(new String[]{"r"}, new String[][]{{"A"}}, "p1");
 	}
 	
-	private void helper2(String[] packageNames, String[][] packageFileNames, String newPackageName) throws Exception{
+	private RenamePackageProcessor helper2(String[] packageNames, String[][] packageFileNames, String newPackageName) throws Exception{
 			ParticipantTesting.reset();
 			IPackageFragment[] packages= new IPackageFragment[packageNames.length];
 			ICompilationUnit[][] cus= new ICompilationUnit[packageFileNames.length][packageFileNames[0].length];
@@ -223,7 +232,8 @@ public class RenamePackageTests extends RefactoringTest {
 			descriptor.setUpdateReferences(fUpdateReferences);
 			descriptor.setUpdateTextualOccurrences(fUpdateTextualMatches);
 			setFilePatterns(descriptor);
-			RefactoringStatus result= performRefactoring(descriptor);
+			Refactoring refactoring= createRefactoring(descriptor);
+			RefactoringStatus result= performRefactoring(refactoring);
 			assertEquals("preconditions were supposed to pass", null, result);
 			
 			if (isRename) {
@@ -281,6 +291,8 @@ public class RenamePackageTests extends RefactoringTest {
 					assertEqualLines("invalid update in file " + cu.getElementName(), s1,	s2);
 				}
 			}
+			RefactoringProcessor processor= ((JavaRenameRefactoring) refactoring).getProcessor();
+			return (RenamePackageProcessor) processor;
 	}
 	
 	class PackageRename {
@@ -461,7 +473,95 @@ public class RenamePackageTests extends RefactoringTest {
 			descriptor.setFileNamePatterns(fQualifiedNamesFilePatterns);
 	}
 
+	private void checkMappingUnchanged(IJavaElementMapper jm, IResourceMapper rm, Object[] resOrJEs) {
+		for (int i= 0; i < resOrJEs.length; i++) {
+			Object resOrJE= resOrJEs[i];
+			if (resOrJE instanceof IJavaElement) {
+				IJavaElement javaElement= (IJavaElement) resOrJE;
+				resOrJE= javaElement.getResource();
+				assertEquals(javaElement, jm.getRefactoredJavaElement(javaElement));
+			}
+			if (resOrJE instanceof IResource) {
+				IResource resource= (IResource) resOrJE;
+				assertEquals(resource, rm.getRefactoredResource(resource));
+			}
+		}
+	}
+
+	private void checkMappingChanged(IJavaElementMapper jm, IResourceMapper rm, Object[][] resOrJeToChangeds) {
+		for (int i= 0; i < resOrJeToChangeds.length; i++) {
+			Object[] resOrJeToChanged= resOrJeToChangeds[i];
+			Object resOrJE= resOrJeToChanged[0];
+			Object changed= resOrJeToChanged[1];
+			if (resOrJE instanceof IJavaElement) {
+				IJavaElement javaElement= (IJavaElement) resOrJE;
+				assertEquals(changed, jm.getRefactoredJavaElement(javaElement));
+				resOrJE= javaElement.getResource();
+				changed= ((IJavaElement) resOrJeToChanged[1]).getResource();
+			}
+			if (resOrJE instanceof IResource) {
+				IResource resource= (IResource) resOrJE;
+				assertEquals(changed, rm.getRefactoredResource(resource));
+			}
+		}
+	}
+	
 	// ---------- tests -------------	
+	
+	
+	public void testPackageRenameWithResource1() throws Exception {
+		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package org.test;\n");
+		buf.append("public class MyClass {\n");
+		buf.append("	org.test.MyClass me;\n");
+		buf.append("}\n");
+		fragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
+
+		IFile file= ((IFolder) fragment.getResource()).getFile("x.properties");
+		byte[] content= "This is about 'org.test' and more".getBytes();
+		file.create(new ByteArrayInputStream(content), true, null);
+		file.refreshLocal(IResource.DEPTH_ONE, null);
+
+		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
+		descriptor.setJavaElement(fragment);
+		descriptor.setNewName("org.test2");
+		descriptor.setUpdateReferences(true);
+		descriptor.setUpdateQualifiedNames(true);
+		descriptor.setFileNamePatterns("*.properties");
+		RefactoringStatus status= performRefactoring(descriptor);
+		if (status != null)
+			assertTrue(status.toString(), status.isOK());
+		//TODO: add content checks
+	}
+	
+	public void testPackageRenameWithResource2() throws Exception {
+		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package org.test;\n");
+		buf.append("public class MyClass {\n");
+		buf.append("}\n");
+		fragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
+		
+		IFile file= ((IFolder) fragment.getResource()).getFile("x.properties");
+		byte[] content= "This is about 'org.test' and more".getBytes();
+		file.create(new ByteArrayInputStream(content), true, null);
+		file.refreshLocal(IResource.DEPTH_ONE, null);
+		
+		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
+		descriptor.setJavaElement(fragment);
+		descriptor.setNewName("org.test2");
+		descriptor.setUpdateReferences(true);
+		descriptor.setUpdateQualifiedNames(true);
+		descriptor.setFileNamePatterns("*.properties");
+		RefactoringStatus status= performRefactoring(descriptor);
+		if (status != null)
+			assertTrue(status.toString(), status.isOK());
+		//TODO: add content checks
+	}
+	
 	public void testHierarchical01() throws Exception {
 		fRenameSubpackages= true;
 		
@@ -700,12 +800,35 @@ public class RenamePackageTests extends RefactoringTest {
 			return;
 		}
 		fIsPreDeltaTest= true;
-		helper2(new String[]{"r"}, new String[][]{{"A"}}, "p1");
 	}
 	
 	public void test1() throws Exception{
 		fIsPreDeltaTest= true;
-		helper2(new String[]{"r"}, new String[][]{{"A"}}, "p1");
+		RenamePackageProcessor proc= helper2(new String[]{"r"}, new String[][]{{"A"}}, "p1");
+		IJavaElementMapper jm= (IJavaElementMapper) proc.getAdapter(IJavaElementMapper.class);
+		IResourceMapper rm= (IResourceMapper) proc.getAdapter(IResourceMapper.class);
+		
+		IJavaModel javaModel= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+		IJavaProject project= getRoot().getJavaProject();
+		IFile _project= project.getProject().getFile(".project");
+		checkMappingUnchanged(jm, rm, new Object[] {javaModel, project, _project, getRoot(), getPackageP(),
+				getRoot().getPackageFragment("inexistent"), getRoot().getPackageFragment("r.inexistent"),
+				getRoot().getPackageFragment("p1.inexistent")});
+
+		IPackageFragment r= getRoot().getPackageFragment("r");
+		ICompilationUnit r_A= r.getCompilationUnit("A.java");
+		IType r_A_A= r_A.getType("A");
+		IField r_A_A_a= r_A_A.getField("a");
+		IPackageFragment p1= getRoot().getPackageFragment("p1");
+		ICompilationUnit p1_A= p1.getCompilationUnit("A.java");
+		IType p1_A_A= p1_A.getType("A");
+		IField p1_A_A_a= p1_A_A.getField("a");
+		checkMappingChanged(jm, rm, new Object[][] {
+				{ r, p1},
+				{ r_A, p1_A},
+				{ r_A_A, p1_A_A},
+				{ r_A_A_a, p1_A_A_a},
+		});
 	}
 	
 	public void test2() throws Exception{

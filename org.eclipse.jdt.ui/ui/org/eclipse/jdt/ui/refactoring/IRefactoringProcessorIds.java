@@ -16,6 +16,10 @@ import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.mapping.ResourceMapping;
 import org.eclipse.core.resources.mapping.ResourceMappingContext;
 
+import org.eclipse.ltk.core.refactoring.IResourceMapper;
+
+import org.eclipse.jdt.core.refactoring.IJavaElementMapper;
+
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameEnumConstProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
@@ -80,6 +84,14 @@ public interface IRefactoringProcessorIds {
 	 *       rename results in deleting the folder corresponding to the package
 	 *       fragment to be renamed.</li>
 	 * </ul>
+	 * 
+	 * <p>Since 3.3:</p>
+	 * 
+	 * <p>The refactoring processor moves and renames Java elements and resources.
+	 * Rename package fragment participants can retrieve the new location of
+	 * Java elements and resources through the interfaces
+	 * {@link IJavaElementMapper} and {@link IResourceMapper}, which can be
+	 * retrieved from the processor using the getAdapter() method.</p>
 	 */
 	public static String RENAME_PACKAGE_FRAGMENT_PROCESSOR= RenamePackageProcessor.IDENTIFIER;
 	
@@ -117,8 +129,9 @@ public interface IRefactoringProcessorIds {
 	 * "update similar declarations" feature.</p> 
 	 * 
 	 * <p>Rename type participants can retrieve information about similar declarations by casting the
-	 * RenameArguments to RenameTypeArguments. The new signatures of similar declarations are available 
-	 * through the interfaces IJavaElementMapper and IResourceMapper, which can be retrieved from the 
+	 * RenameArguments to RenameTypeArguments. The new signatures of similar declarations
+	 * (and of other Java elements or resources) are available 
+	 * through the interfaces {@link IJavaElementMapper} and {@link IResourceMapper}, which can be retrieved from the 
 	 * processor using the getAdapter() method.</p>
 	 * 
 	 */

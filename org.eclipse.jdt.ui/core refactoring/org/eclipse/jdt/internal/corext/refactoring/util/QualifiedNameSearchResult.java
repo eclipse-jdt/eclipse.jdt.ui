@@ -20,21 +20,32 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.IResourceMapper;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
 public class QualifiedNameSearchResult {
 
-	private Map fChanges;
+	private final Map fChanges;
+	private final IResourceMapper fResourceMapper;
 	
 	public QualifiedNameSearchResult() {
-		fChanges= new HashMap();
+		this(null);
 	}
 	
+	public QualifiedNameSearchResult(IResourceMapper resourceMapper) {
+		fChanges= new HashMap();
+		fResourceMapper= resourceMapper;
+	}
+
 	public TextChange getChange(IFile file) {
+		if (fResourceMapper != null)
+			file= (IFile) fResourceMapper.getRefactoredResource(file);
+		
 		TextChange result= (TextChange)fChanges.get(file);
 		if (result == null) {
 			result= new TextFileChange(file.getName(), file);
