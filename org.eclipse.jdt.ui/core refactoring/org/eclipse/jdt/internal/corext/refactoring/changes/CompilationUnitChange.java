@@ -81,12 +81,12 @@ public class CompilationUnitChange extends TextFileChange {
 	 * {@inheritDoc}
 	 */
 	protected void releaseDocument(IDocument document, IProgressMonitor pm) throws CoreException {
-		boolean needsReconcile= (getAcquireCount() == 1) && isDocumentModified();
+		boolean isModified= isDocumentModified();
 		super.releaseDocument(document, pm);
 		try {
 			fCUnit.discardWorkingCopy();
 		} finally {
-			if (needsReconcile) {
+			if (isModified && !isDocumentAcquired()) {
 				if (fCUnit.isWorkingCopy())
 					JavaModelUtil.reconcile(fCUnit);
 				else
