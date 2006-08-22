@@ -124,7 +124,7 @@ public class UnusedCodeFix extends AbstractFix {
 		 */
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
 			ImportDeclaration node= fImportDeclaration;
-			TextEditGroup group= new TextEditGroup(FixMessages.UnusedCodeFix_RemoveImport_description);
+			TextEditGroup group= createTextEditGroup(FixMessages.UnusedCodeFix_RemoveImport_description);
 			cuRewrite.getASTRewrite().remove(node, group);
 			textEditGroups.add(group);
 		}
