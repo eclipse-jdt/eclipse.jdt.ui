@@ -23,6 +23,11 @@ public final class CorrectionMessages extends NLS {
 		// Do not instantiate
 	}
 
+	public static String ModifierCorrectionSubProcessor_addstatictoparenttype_description;
+	public static String ModifierCorrectionSubProcessor_changefieldmodifiertononstatic_description;
+	public static String ModifierCorrectionSubProcessor_changemodifiertostaticfinal_description;
+	public static String ModifierCorrectionSubProcessor_removefinal_description;
+	public static String ModifierCorrectionSubProcessor_removevolatile_description;
 	public static String SerialVersionSubProcessor_createdefault_description;
 	public static String SerialVersionSubProcessor_createhashed_description;
 	public static String SerialVersionLaunchConfigurationDelegate_setting_up;

@@ -142,6 +142,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalModifierForField:
 			case IProblem.IllegalModifierForMethod:
 			case IProblem.IllegalModifierForVariable:
+			case IProblem.UnexpectedStaticModifierForField:
+			case IProblem.IllegalModifierCombinationFinalVolatileForField:
 			case IProblem.IllegalVisibilityModifierForInterfaceMemberType:
 			case IProblem.IncompatibleReturnType:
 			case IProblem.IncompatibleExceptionInThrowsClause:
@@ -347,6 +349,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalModifierForInterface:
 			case IProblem.IllegalModifierForClass:
 			case IProblem.IllegalModifierForInterfaceField:
+			case IProblem.UnexpectedStaticModifierForField:
+			case IProblem.IllegalModifierCombinationFinalVolatileForField:
 			case IProblem.IllegalModifierForMemberInterface:
 			case IProblem.IllegalModifierForMemberClass:
 			case IProblem.IllegalModifierForLocalClass:

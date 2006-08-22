@@ -284,14 +284,10 @@ public class ModifierCorrectionSubProcessor {
 		IBinding binding= ((SimpleName) selectedNode).resolveBinding();
 		if (binding != null) {
 			String methodName= binding.getName();
-			String label;
+			String label= null;
 			int problemId= problem.getProblemId();
-			if (problemId == IProblem.CannotHideAnInstanceMethodWithAStaticMethod || problemId == IProblem.UnexpectedStaticModifierForMethod) {
-				label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemethodtononstatic_description, methodName);
-			} else {
-				label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_removeinvalidmodifiers_description, methodName);
-			}
 
+			
 			int excludedModifiers= 0;
 			int includedModifiers= 0;
 
@@ -299,6 +295,15 @@ public class ModifierCorrectionSubProcessor {
 				case IProblem.CannotHideAnInstanceMethodWithAStaticMethod:
 				case IProblem.UnexpectedStaticModifierForMethod:
 					excludedModifiers= Modifier.STATIC;
+					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemethodtononstatic_description, methodName);
+					break;
+				case IProblem.UnexpectedStaticModifierForField:
+					excludedModifiers= Modifier.STATIC;
+					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changefieldmodifiertononstatic_description, methodName);
+					break;
+				case IProblem.IllegalModifierCombinationFinalVolatileForField:
+					excludedModifiers= Modifier.VOLATILE;
+					label= CorrectionMessages.ModifierCorrectionSubProcessor_removevolatile_description;
 					break;
 				case IProblem.IllegalModifierForInterfaceMethod:
 					excludedModifiers= ~(Modifier.PUBLIC | Modifier.ABSTRACT);
@@ -341,10 +346,36 @@ public class ModifierCorrectionSubProcessor {
 					Assert.isTrue(false, "not supported"); //$NON-NLS-1$
 					return;
 			}
-
+			
+			if (label == null)
+				label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_removeinvalidmodifiers_description, methodName);
 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, includedModifiers, excludedModifiers, relevance, image));
+			
+			if (problemId == IProblem.IllegalModifierCombinationFinalVolatileForField) {
+				proposals.add(new ModifierChangeCompletionProposal(CorrectionMessages.ModifierCorrectionSubProcessor_removefinal_description, cu, binding, selectedNode, 0, Modifier.FINAL, relevance + 1, image));
+			}
+			
+			if (problemId == IProblem.UnexpectedStaticModifierForField && binding instanceof IVariableBinding) {
+				ITypeBinding declClass= ((IVariableBinding) binding).getDeclaringClass();
+				if (declClass.isMember()) {
+					proposals.add(new ModifierChangeCompletionProposal(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertostaticfinal_description, cu, binding, selectedNode, Modifier.FINAL, Modifier.VOLATILE, relevance + 1, image));
+					ASTNode parentType= context.getASTRoot().findDeclaringNode(declClass);
+					if (parentType != null) {
+						proposals.add(new ModifierChangeCompletionProposal(CorrectionMessages.ModifierCorrectionSubProcessor_addstatictoparenttype_description, cu, declClass, parentType, Modifier.STATIC, 0, relevance - 1, image));
+					}
+				}
+			}
+			if (problemId == IProblem.UnexpectedStaticModifierForMethod && binding instanceof IMethodBinding) {
+				ITypeBinding declClass= ((IMethodBinding) binding).getDeclaringClass();
+				if (declClass.isMember()) {
+					ASTNode parentType= context.getASTRoot().findDeclaringNode(declClass);
+					if (parentType != null) {
+						proposals.add(new ModifierChangeCompletionProposal(CorrectionMessages.ModifierCorrectionSubProcessor_addstatictoparenttype_description, cu, declClass, parentType, Modifier.STATIC, 0, relevance - 1, image));
+					}
+				}
+			}
 		}
 	}
 
