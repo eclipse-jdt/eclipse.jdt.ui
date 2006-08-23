@@ -70,6 +70,8 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
@@ -584,6 +586,34 @@ public class RenamePackageTests extends RefactoringTest {
 				{ fragment, newFragment },
 				{ file, newFile },
 		});
+	}
+	
+	public void testPackageRenameWithResource3() throws Exception {
+		// regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=108019
+		fIsPreDeltaTest= true;
+		
+		fQualifiedNamesFilePatterns= "*.txt";
+		String textFileName= "Textfile.txt";
+		
+		String textfileContent= getFileContents(getTestPath() + getName() + TEST_INPUT_INFIX + "my/pack/" + textFileName);
+		IFolder myPackFolder= getRoot().getJavaProject().getProject().getFolder("my").getFolder("pack");
+		CoreUtility.createFolder(myPackFolder, true, true, null);
+		IFile textfile= myPackFolder.getFile(textFileName);
+		textfile.create(new ByteArrayInputStream(textfileContent.getBytes()), true, null);
+		
+		helper2(new String[]{"my.pack", "my"}, new String[][]{{}, {}}, "my");
+		
+		InputStreamReader reader= new InputStreamReader(textfile.getContents(true));
+		StringBuffer newContent= new StringBuffer();
+		try {
+			int ch;
+			while((ch= reader.read()) != -1)
+				newContent.append((char)ch);
+		} finally {
+			reader.close();
+		}
+		String definedContent= getFileContents(getTestPath() + getName() + TEST_OUTPUT_INFIX + "my/" + textFileName);
+		assertEqualLines("invalid updating", definedContent, newContent.toString());
 	}
 	
 	public void testHierarchical01() throws Exception {
