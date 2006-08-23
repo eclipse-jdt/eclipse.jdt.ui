@@ -29,6 +29,7 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -49,6 +50,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -519,7 +521,7 @@ public class RenamePackageTests extends RefactoringTest {
 		buf.append("}\n");
 		fragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
 
-		IFile file= ((IFolder) fragment.getResource()).getFile("x.properties");
+		IFile file= ((IFolder) getRoot().getResource()).getFile("x.properties");
 		byte[] content= "This is about 'org.test' and more".getBytes();
 		file.create(new ByteArrayInputStream(content), true, null);
 		file.refreshLocal(IResource.DEPTH_ONE, null);
@@ -530,10 +532,20 @@ public class RenamePackageTests extends RefactoringTest {
 		descriptor.setUpdateReferences(true);
 		descriptor.setUpdateQualifiedNames(true);
 		descriptor.setFileNamePatterns("*.properties");
-		RefactoringStatus status= performRefactoring(descriptor);
+		Refactoring refactoring= createRefactoring(descriptor);
+		RefactoringStatus status= performRefactoring(refactoring);
 		if (status != null)
 			assertTrue(status.toString(), status.isOK());
-		//TODO: add content checks
+		
+		RefactoringProcessor processor= ((RenameRefactoring) refactoring).getProcessor();
+		IResourceMapper rm= (IResourceMapper) processor.getAdapter(IResourceMapper.class);
+		IJavaElementMapper jm= (IJavaElementMapper) processor.getAdapter(IJavaElementMapper.class);
+		checkMappingUnchanged(jm, rm, new Object[] { getRoot().getJavaProject(), getRoot(), file });
+		IFile newFile= ((IContainer) getRoot().getResource()).getFile(new Path("x.properties"));
+		assertEquals("This is about 'org.test2' and more", getContents(newFile));
+		checkMappingChanged(jm, rm, new Object[][] {
+				{ fragment, getRoot().getPackageFragment("org.test2") }
+		});
 	}
 	
 	public void testPackageRenameWithResource2() throws Exception {
@@ -556,10 +568,22 @@ public class RenamePackageTests extends RefactoringTest {
 		descriptor.setUpdateReferences(true);
 		descriptor.setUpdateQualifiedNames(true);
 		descriptor.setFileNamePatterns("*.properties");
-		RefactoringStatus status= performRefactoring(descriptor);
+		Refactoring refactoring= createRefactoring(descriptor);
+		RefactoringStatus status= performRefactoring(refactoring);
 		if (status != null)
 			assertTrue(status.toString(), status.isOK());
-		//TODO: add content checks
+		
+		RefactoringProcessor processor= ((RenameRefactoring) refactoring).getProcessor();
+		IResourceMapper rm= (IResourceMapper) processor.getAdapter(IResourceMapper.class);
+		IJavaElementMapper jm= (IJavaElementMapper) processor.getAdapter(IJavaElementMapper.class);
+		checkMappingUnchanged(jm, rm, new Object[] { getRoot().getJavaProject(), getRoot() });
+		IPackageFragment newFragment= getRoot().getPackageFragment("org.test2");
+		IFile newFile= ((IContainer) newFragment.getResource()).getFile(new Path("x.properties"));
+		assertEquals("This is about 'org.test2' and more", getContents(newFile));
+		checkMappingChanged(jm, rm, new Object[][] {
+				{ fragment, newFragment },
+				{ file, newFile },
+		});
 	}
 	
 	public void testHierarchical01() throws Exception {
