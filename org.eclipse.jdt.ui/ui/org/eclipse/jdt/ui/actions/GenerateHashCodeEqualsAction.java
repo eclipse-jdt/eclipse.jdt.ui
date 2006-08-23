@@ -33,10 +33,15 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -328,7 +333,7 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 				}
 				if (Modifier.isTransient(selectedBindings[i].getModifiers()))
 					status.addWarning(Messages.format(ActionMessages.GenerateHashCodeEqualsAction_transient_field_included_error, selectedBindings[i]
-							.getName()), JavaStatusContext.create((IMember) selectedBindings[i].getJavaElement()));
+							.getName()), createRefactoringStatusContext(selectedBindings[i].getJavaElement()));
 			}
 
 			if (status.hasEntries()) {
@@ -365,6 +370,25 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 		}
 		notifyResult(dialogResult == Window.OK);
 	}
+	
+	public static RefactoringStatusContext createRefactoringStatusContext(IJavaElement element) {
+		if (element instanceof IMember) {
+			return JavaStatusContext.create((IMember) element);
+		}
+		if (element instanceof ISourceReference) {
+			IOpenable openable= element.getOpenable();
+			try {
+				if (openable instanceof ICompilationUnit) {
+					return JavaStatusContext.create((ICompilationUnit) openable, ((ISourceReference) element).getSourceRange());
+				} else if (openable instanceof IClassFile) {
+					return JavaStatusContext.create((IClassFile) openable, ((ISourceReference) element).getSourceRange());
+				}
+			} catch (JavaModelException e) {
+				// ignore
+			}
+		}
+		return null;
+	}
 
 	private boolean hasHashCodeOrEquals(ITypeBinding someType) {
 		HashCodeEqualsInfo info= getTypeInfo(someType);
@@ -393,11 +417,11 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 
 		if (!info.foundEquals && !info.foundHashCode)
 			status.addWarning(Messages.format(concreteMethWarning, new String[] { Messages.format(concreteTypeWarning, someType.getQualifiedName()),
-					concreteHCEWarning }), JavaStatusContext.create((IMember) someType.getJavaElement()));
+					concreteHCEWarning }), createRefactoringStatusContext(someType.getJavaElement()));
 
 		if (superClass && (info.foundFinalEquals || info.foundFinalHashCode)) {
 			status.addError(Messages.format(ActionMessages.GenerateHashCodeEqualsAction_final_hashCode_equals_in_superclass_error, Messages.format(
-					concreteTypeWarning, someType.getQualifiedName())), JavaStatusContext.create((IMember) someType.getJavaElement()));
+					concreteTypeWarning, someType.getQualifiedName())), createRefactoringStatusContext(someType.getJavaElement()));
 		}
 
 		return status;
@@ -405,6 +429,10 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 
 	private HashCodeEqualsInfo getTypeInfo(ITypeBinding someType) {
 		HashCodeEqualsInfo info= new HashCodeEqualsInfo();
+		if (someType.isTypeVariable()) {
+			someType= someType.getErasure();
+		}
+		
 		IMethodBinding[] declaredMethods= someType.getDeclaredMethods();
 
 		for (int i= 0; i < declaredMethods.length; i++) {
