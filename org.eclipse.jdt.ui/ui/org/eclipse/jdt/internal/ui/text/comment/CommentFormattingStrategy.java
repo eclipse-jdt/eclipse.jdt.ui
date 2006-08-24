@@ -67,19 +67,36 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	 * @see org.eclipse.jface.text.formatter.IFormattingStrategyExtension#format()
 	 */
 	public void format() {
+		
+		final IDocument document= (IDocument) fDocuments.getFirst();
+
+		TextEdit edit= calculateTextEdit();
+		if (edit == null)
+			return;
+		
+		try {
+			edit.apply(document);
+		} catch (MalformedTreeException x) {
+			JavaPlugin.log(x);
+		} catch (BadLocationException x) {
+			JavaPlugin.log(x);
+		}
+	}
+	
+	public TextEdit calculateTextEdit() {
 		super.format();
 
 		final IDocument document= (IDocument) fDocuments.removeFirst();
 		final TypedPosition position= (TypedPosition)fPartitions.removeFirst();
 		if (document == null || position == null)
-			return;
+			return null;
 
 		Map preferences= getPreferences();
 		final boolean isFormattingHeader= Boolean.toString(true).equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER));
 		int documentsHeaderEnd= computeHeaderEnd(document);
 
+		TextEdit edit= null;
 		if (isFormattingHeader || position.offset >= documentsHeaderEnd) {
-			TextEdit edit= null;
 			try {
 				// compute offset in document of region passed to the formatter
 				int sourceOffset= document.getLineOffset(document.getLineOfOffset(position.getOffset()));
@@ -98,16 +115,8 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 			} catch (BadLocationException x) {
 				JavaPlugin.log(x);
 			}
-
-			try {
-				if (edit != null)
-					edit.apply(document);
-			} catch (MalformedTreeException x) {
-				JavaPlugin.log(x);
-			} catch (BadLocationException x) {
-				JavaPlugin.log(x);
-			}
 		}
+		return edit;		
 	}
 
 	/*

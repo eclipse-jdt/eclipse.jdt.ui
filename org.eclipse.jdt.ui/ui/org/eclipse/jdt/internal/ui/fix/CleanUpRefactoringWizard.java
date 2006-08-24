@@ -33,10 +33,12 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Layout;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -53,6 +55,7 @@ import org.eclipse.jface.text.formatter.IFormattingContext;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ContainerCheckedTreeViewer;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
@@ -77,6 +80,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 
@@ -573,11 +577,13 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 
 			private final ICleanUp[] fPreviewCleanUps;
 			private boolean fUpdateBlocked;
+			private final boolean fFormat;
 
-			public CleanUpPreview(Composite parent, Map map, ICleanUp[] cleanUps) {
+			public CleanUpPreview(Composite parent, Map map, ICleanUp[] cleanUps, boolean formatted) {
 				super(map, parent);
 				fPreviewCleanUps= cleanUps;
 				fUpdateBlocked= false;
+				fFormat= formatted;
 			}
 
 			/**
@@ -600,6 +606,9 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		        }
 		        fPreviewDocument.set(text);
 				
+		        if (!fFormat)
+		        	return;
+		        
 				fSourceViewer.setRedraw(false);
 				final IFormattingContext context = new CommentFormattingContext();
 				try {
@@ -678,7 +687,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			IDialogSettings section= getCleanUpWizardSettings();
 			
-			fCleanUps= new ICleanUp[9];
+			fCleanUps= new ICleanUp[11];
 			
 			Composite codeStyleTab= createTab(parent, MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description);
 			fillCodeStyleTab(codeStyleTab, project, section);
@@ -691,6 +700,9 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			Composite missingCodeTab= createTab(parent, MultiFixMessages.CleanUpRefactoringWizard_MissingCode_tabLabel);
 			fillMissingCodeTab(missingCodeTab, project, section);
+			
+			Composite codeOrgTab= createTab(parent, MultiFixMessages.CleanUpRefactoringWizard_FormatingGroup_tabName);
+			fillCodeOrganizationTab(codeOrgTab, project, section);
 		}
 		
 		private Composite fillCodeStyleTab(Composite parent, final IJavaProject project, IDialogSettings settings) {
@@ -748,7 +760,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			FlagConfigurationGroup[] radioButtonGroups= new FlagConfigurationGroup[] {blockGroup, parenthesisGroup};
 			FlagConfigurationGroup[] checkBoxGroup= new FlagConfigurationGroup[] {addFinalGroup};
 			
-			CleanUpPreview preview= addPreview(composite, new ICleanUp[] {controlStatementsCleanUp, expressionsCleanUp, varDeclCleanUp}, flagConfigurationButtons);
+			CleanUpPreview preview= addPreview(composite, new ICleanUp[] {controlStatementsCleanUp, expressionsCleanUp, varDeclCleanUp}, flagConfigurationButtons, true);
 			
 			if (project != null && !JavaModelUtil.is50OrHigher(project)) {
 				convertLoop.disable();
@@ -815,7 +827,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			FlagConfigurationButton[] flagConfigurationButtons= new FlagConfigurationButton[] {addThisField, removeThisField, addThisMethod, removeThisMethod, nonStatic, indirect, qualifyStatic, qualifyStaticMethod};
 			FlagConfigurationGroup[] radioButtonGroups= new FlagConfigurationGroup[] {addThisGroup, addThisMethodGroup};
 			
-			CleanUpPreview preview= addPreview(composite, new ICleanUp[] {codeStyleCleanUp}, flagConfigurationButtons);
+			CleanUpPreview preview= addPreview(composite, new ICleanUp[] {codeStyleCleanUp}, flagConfigurationButtons, true);
 			
 			addEnableButtonsGroup(left, flagConfigurationButtons, radioButtonGroups, new FlagConfigurationGroup[] {staticGroup}, new FlagConfigurationButton[0], preview);
 			
@@ -876,7 +888,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			FlagConfigurationButton[] flagConfigurationButtons= new FlagConfigurationButton[] {imports, types, contructors, methods, locals, fields, casts, nlsTags};
 			
-			CleanUpPreview preview= addPreview(composite, new ICleanUp[] {unusedCodeCleanUp, unnecessaryCodeCleanUp, stringCleanUp}, flagConfigurationButtons);
+			CleanUpPreview preview= addPreview(composite, new ICleanUp[] {unusedCodeCleanUp, unnecessaryCodeCleanUp, stringCleanUp}, flagConfigurationButtons, true);
 			
 			addEnableButtonsGroup(left, flagConfigurationButtons, new FlagConfigurationGroup[0], new FlagConfigurationGroup[] {membersGroup}, new FlagConfigurationButton[0], preview);
 			
@@ -930,7 +942,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			FlagConfigurationButton[] flagConfigurationButtons= new FlagConfigurationButton[] {override, deprecated, hash, defaultId};
 			
-			CleanUpPreview preview= addPreview(composite, new ICleanUp[] {java50CleanUp, potentialProgrammingProblemsCleanUp}, flagConfigurationButtons);
+			CleanUpPreview preview= addPreview(composite, new ICleanUp[] {java50CleanUp, potentialProgrammingProblemsCleanUp}, flagConfigurationButtons, true);
 			
 			if (project != null && !JavaModelUtil.is50OrHigher(project)) {
 				override.deselect();
@@ -954,7 +966,73 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			return composite;
 		}
 		
-		private CleanUpPreview addPreview(Composite parent, ICleanUp[] cleanUps, FlagConfigurationButton[] flagConfigurationButtons) {
+		private void fillCodeOrganizationTab(Composite parent, final IJavaProject project, IDialogSettings section) {
+			
+			Composite composite= new Composite(parent, SWT.NONE);
+			GridLayout gridLayout= new GridLayout(2, false);
+			gridLayout.marginWidth= 0;
+			gridLayout.marginHeight= 0;
+			composite.setLayout(gridLayout);
+			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			Composite left= new Composite(composite, SWT.NONE);
+			gridLayout= new GridLayout(1, false);
+			gridLayout.marginWidth= 0;
+			gridLayout.marginHeight= 0;
+			left.setLayout(gridLayout);
+			left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+			
+			Composite groups= new Composite(left, SWT.NONE);
+			groups.setLayout(new GridLayout(1, false));
+			groups.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+			
+			//Format Group
+			CodeFormatCleanUp codeFormatCleanUp= new CodeFormatCleanUp(section);
+			Composite group= createGroup(groups, MultiFixMessages.CleanUpRefactoringWizard_FormatingGroup_formatGroupName);
+			
+			FlagConfigurationButton code= new FlagConfigurationButton(codeFormatCleanUp, CodeFormatCleanUp.FORMAT_CODE, MultiFixMessages.CleanUpRefactoringWizard_FormatingGroup_formatCodeCheckBox, SWT.CHECK);
+			code.createButton(group);
+			
+			CommentFormatCleanUp commentFormatCleanUp= new CommentFormatCleanUp(section);
+			
+			FlagConfigurationButton javaDoc= new FlagConfigurationButton(commentFormatCleanUp, CommentFormatCleanUp.JAVA_DOC, MultiFixMessages.CleanUpRefactoringWizard_FormatingGroup_formatJavadocCheckBox, SWT.CHECK);
+			FlagConfigurationButton multiLine= new FlagConfigurationButton(commentFormatCleanUp, CommentFormatCleanUp.MULTI_LINE_COMMENT, MultiFixMessages.CleanUpRefactoringWizard_FormatingGroup_formatMultiLineCommentCheckBox, SWT.CHECK);
+			FlagConfigurationButton singleLine= new FlagConfigurationButton(commentFormatCleanUp, CommentFormatCleanUp.SINGLE_LINE_COMMENT, MultiFixMessages.CleanUpRefactoringWizard_FormatingGroup_formatSingleLineCommentCheckBox, SWT.CHECK);
+			FlagConfigurationGroup comments= new FlagConfigurationGroup(MultiFixMessages.CleanUpRefactoringWizard_FormatingGroup_formatCommentsCheckBox, new FlagConfigurationButton[] {javaDoc, multiLine, singleLine}, SWT.CHECK | SWT.VERTICAL, section);
+			comments.createButton(group);
+			
+			Link link= new Link(group, SWT.WRAP | SWT.RIGHT);
+			link.setText(MultiFixMessages.CleanUpRefactoringWizard_FormatingGroup_goToFormatPreferenceLink); 
+			link.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					if (project != null) {
+						PreferencesUtil.createPropertyDialogOn(getShell(), project, CodeFormatterPreferencePage.PROP_ID, null, null).open();	
+					} else {
+						PreferencesUtil.createPreferenceDialogOn(getShell(), CodeFormatterPreferencePage.PREF_ID, null, null).open();
+					}
+				}
+			});
+			link.setToolTipText(MultiFixMessages.CleanUpRefactoringWizard_FormatingGroup_goToFormatPreferenceToolTip); 
+			GridData gridData= new GridData(GridData.FILL, GridData.CENTER, true, false);
+			gridData.widthHint= convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH);
+			link.setLayoutData(gridData);
+			link.setFont(composite.getFont());
+			
+			FlagConfigurationButton[] flagConfigurationButtons= new FlagConfigurationButton[] {code, javaDoc, multiLine, singleLine};
+			
+			CleanUpPreview preview= addPreview(composite, new ICleanUp[] {codeFormatCleanUp, commentFormatCleanUp}, flagConfigurationButtons, false);
+			
+			addEnableButtonsGroup(left, flagConfigurationButtons, new FlagConfigurationGroup[0], new FlagConfigurationGroup[] {comments}, new FlagConfigurationButton[0], preview);
+			
+			addSelectionCounter(flagConfigurationButtons);
+			
+        	fCleanUps[9]= commentFormatCleanUp;
+			fCleanUps[10]= codeFormatCleanUp;
+			
+			fConfigurationGroups.add(comments);
+        }
+		
+		private CleanUpPreview addPreview(Composite parent, ICleanUp[] cleanUps, FlagConfigurationButton[] flagConfigurationButtons, boolean formatted) {
 			Composite composite= new Composite(parent, SWT.NONE);
 			composite.setLayout(new GridLayout(1, true));
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -964,7 +1042,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			label.setText(MultiFixMessages.CleanUpRefactoringWizard_previewLabel_text);
 			
 			IJavaProject javaProject= ((CleanUpRefactoring)getRefactoring()).getProjects()[0];
-			final CleanUpPreview preview= new CleanUpPreview(composite, javaProject.getOptions(true), cleanUps);
+			final CleanUpPreview preview= new CleanUpPreview(composite, javaProject.getOptions(true), cleanUps, formatted);
 			
 			GridData gd= new GridData(SWT.FILL, SWT.FILL, true, true);
 			gd.widthHint= 0;
@@ -1162,6 +1240,10 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			if (fCleanUps != null) {
 				CleanUpRefactoring refactoring= (CleanUpRefactoring)getRefactoring();
 				refactoring.clearCleanUps();
+				
+				if (fSelectedCleanUpsCount == 0)
+					return;
+				
 				for (int i= 0; i < fCleanUps.length; i++) {
 					refactoring.addCleanUp(fCleanUps[i]);
 				}

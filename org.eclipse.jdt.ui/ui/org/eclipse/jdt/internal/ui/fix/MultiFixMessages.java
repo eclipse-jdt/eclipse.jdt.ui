@@ -104,6 +104,15 @@ public class MultiFixMessages extends NLS {
 	public static String CleanUpRefactoringWizard_NonStaticAccesses_groupDescription;
 	public static String CleanUpRefactoringWizard_StaticAccesses_groupDescription;
 	public static String CleanUpRefactoringWizard_NoBlockForReturnOrThrow_checkBoxLabel;
+	public static String CleanUpRefactoringWizard_FormatingGroup_formatCodeCheckBox;
+	public static String CleanUpRefactoringWizard_FormatingGroup_formatCommentsCheckBox;
+	public static String CleanUpRefactoringWizard_FormatingGroup_formatGroupName;
+	public static String CleanUpRefactoringWizard_FormatingGroup_formatJavadocCheckBox;
+	public static String CleanUpRefactoringWizard_FormatingGroup_formatMultiLineCommentCheckBox;
+	public static String CleanUpRefactoringWizard_FormatingGroup_formatSingleLineCommentCheckBox;
+	public static String CleanUpRefactoringWizard_FormatingGroup_goToFormatPreferenceLink;
+	public static String CleanUpRefactoringWizard_FormatingGroup_goToFormatPreferenceToolTip;
+	public static String CleanUpRefactoringWizard_FormatingGroup_tabName;
 
 	public static String PotentialProgrammingProblemsCleanUp_AddSerialId_section_name;
 	public static String PotentialProgrammingProblemsCleanUp_Generated_radioButton_name;
@@ -126,6 +135,14 @@ public class MultiFixMessages extends NLS {
 	public static String VariableDeclarationCleanUp_AddFinalField_description;
 	public static String VariableDeclarationCleanUp_AddFinalParameters_description;
 	public static String VariableDeclarationCleanUp_AddFinalLocals_description;
+	
+	public static String CodeFormatCleanUp_description;
+	public static String CodeFormatFix_description;
+	
+	public static String CommentFormatCleanUp_javadocComments;
+	public static String CommentFormatCleanUp_multiLineComments;
+	public static String CommentFormatCleanUp_singleLineComments;
+	public static String CommentFormatFix_description;
 	
 	static {
 		// initialize resource bundle
