@@ -24,9 +24,13 @@ import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
@@ -111,7 +115,7 @@ public class ControlStatementsFix extends AbstractFix {
 					fUsedNames.put(node, identifierName);
 				} else {
 					ConvertIterableLoopOperation iterableConverter= new ConvertIterableLoopOperation(fCompilationUnit, node, identifierName);
-					if (iterableConverter.isApplicable()) {
+					if (expressionSatisfiesPrecondition(node) && iterableConverter.isApplicable()) {
 						fResult.add(iterableConverter);
 						fUsedNames.put(node, identifierName);
 					} else if (fFindControlStatementsWithoutBlock) {
@@ -136,6 +140,35 @@ public class ControlStatementsFix extends AbstractFix {
 					fResult.add(op);
 			}
 			return super.visit(node);
+		}
+		
+		private boolean expressionSatisfiesPrecondition(ForStatement forStatement) {
+	    	Expression expression= forStatement.getExpression();
+			if (!(expression instanceof MethodInvocation))
+				return false;
+			
+			MethodInvocation invoc= (MethodInvocation)expression;
+			IMethodBinding methodBinding= invoc.resolveMethodBinding();
+			if (methodBinding == null)
+				return false;
+			
+			ITypeBinding declaringClass= methodBinding.getDeclaringClass();
+			if (declaringClass == null)
+				return false;
+			
+			String qualifiedName= declaringClass.getQualifiedName();
+			String methodName= invoc.getName().getIdentifier();
+			if (qualifiedName.startsWith("java.util.Enumeration")) { //$NON-NLS-1$
+				if (!methodName.equals("hasMoreElements")) //$NON-NLS-1$
+					return false;
+			} else if (qualifiedName.startsWith("java.util.Iterator")) { //$NON-NLS-1$
+				if (!methodName.equals("hasNext")) //$NON-NLS-1$
+					return false;
+			} else {
+				return false;
+			}
+			
+		    return true;
 		}
 		
 		/**
