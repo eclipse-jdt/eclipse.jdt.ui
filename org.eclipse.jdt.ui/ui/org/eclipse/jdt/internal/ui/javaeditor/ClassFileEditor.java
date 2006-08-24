@@ -60,6 +60,7 @@ import org.eclipse.jface.text.IWidgetTokenKeeper;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
@@ -739,6 +740,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) input;
 		IClassFile file= classFileEditorInput.getClassFile();
+		
+		boolean wasUsingSourceCopyAction= fSourceCopyAction == getAction(ITextEditorActionConstants.COPY);
 
 		// show source attachment form if no source found
 		if (file.getSourceRange() == null) {
@@ -787,6 +790,15 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			setAction(ITextEditorActionConstants.COPY, fSourceCopyAction);
 
 		}
+		
+		IAction currentCopyAction= getAction(ITextEditorActionConstants.COPY);
+		boolean isUsingSourceCopyAction=  fSourceCopyAction == currentCopyAction;
+		if (wasUsingSourceCopyAction != isUsingSourceCopyAction) {
+			IActionBars actionBars= getEditorSite().getActionBars();
+			actionBars.setGlobalActionHandler(ITextEditorActionConstants.COPY, currentCopyAction);
+			actionBars.updateActionBars();
+		}
+		
 	}
 
 	/*
