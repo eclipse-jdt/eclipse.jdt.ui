@@ -546,14 +546,15 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 
 		fGotoInputAction.setEnabled(true);
 
-		long flags;
+		IJavaElement inputElement= getInput();
 		
-		if (getInput() instanceof ILocalVariable)
+		long flags;
+		if (inputElement instanceof ILocalVariable)
 			flags= LOCAL_VARIABLE_TITLE_FLAGS;
 		else
 			flags= TITLE_FLAGS;
 		
-		setContentDescription(JavaElementLabels.getElementLabel(getInput(), flags));
-		setTitleToolTip(JavaElementLabels.getElementLabel(getInput(), TOOLTIP_LABEL_FLAGS));
+		setContentDescription(JavaElementLabels.getElementLabel(inputElement, flags));
+		setTitleToolTip(JavaElementLabels.getElementLabel(inputElement, TOOLTIP_LABEL_FLAGS));
 	}
 }
