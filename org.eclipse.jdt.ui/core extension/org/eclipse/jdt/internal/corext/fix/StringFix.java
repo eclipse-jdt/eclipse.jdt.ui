@@ -19,6 +19,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
@@ -38,6 +39,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
@@ -224,4 +226,10 @@ public class StringFix implements IFix {
 		return fCompilationUnit;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.fix.IFix#getStatus()
+	 */
+	public IStatus getStatus() {
+	    return StatusInfo.OK_STATUS;
+	}
 }

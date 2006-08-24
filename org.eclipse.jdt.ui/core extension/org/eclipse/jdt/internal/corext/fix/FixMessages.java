@@ -24,6 +24,8 @@ public final class FixMessages extends NLS {
 	public static String CleanUpRefactoring_ProcessingCompilationUnit_message;
 	public static String CleanUpRefactoring_Initialize_message;
 	
+	public static String ConvertIterableLoopOperation_semanticChangeWarning;
+	
 	public static String PotentialProgrammingProblemsFix_calculatingUIDFailed_binding;
 	public static String PotentialProgrammingProblemsFix_calculatingUIDFailed_exception;
 	public static String PotentialProgrammingProblemsFix_calculatingUIDFailed_unknown;

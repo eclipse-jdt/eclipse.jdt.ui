@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
@@ -34,6 +35,8 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 
 public abstract class AbstractFix implements IFix {
@@ -58,12 +61,14 @@ public abstract class AbstractFix implements IFix {
 	private final ICompilationUnit fCompilationUnit;
 	private final IFixRewriteOperation[] fFixRewrites;
 	private final CompilationUnit fUnit;
+	private IStatus fStatus;
 	
 	protected AbstractFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations) {
 		fName= name;
 		fCompilationUnit= (ICompilationUnit)compilationUnit.getJavaElement();
 		fFixRewrites= fixRewriteOperations;
 		fUnit= compilationUnit;
+		fStatus= StatusInfo.OK_STATUS;
 	}
 
 	/* (non-Javadoc)
@@ -105,5 +110,15 @@ public abstract class AbstractFix implements IFix {
 		}
 		return result;
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.fix.IFix#getStatus()
+	 */
+	public IStatus getStatus() {
+	    return fStatus;
+	}
+	
+    public void setStatus(IStatus status) {
+    	fStatus= status;
+    }
 }

@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -111,7 +112,7 @@ public class ControlStatementsFix extends AbstractFix {
 					fUsedNames.put(node, identifierName);
 				} else {
 					ConvertIterableLoopOperation iterableConverter= new ConvertIterableLoopOperation(fCompilationUnit, node, identifierName);
-					if (iterableConverter.isApplicable()) {
+					if (iterableConverter.isApplicable().isOK()) {
 						fResult.add(iterableConverter);
 						fUsedNames.put(node, identifierName);
 					} else if (fFindControlStatementsWithoutBlock) {
@@ -449,10 +450,13 @@ public class ControlStatementsFix extends AbstractFix {
 	
 	public static IFix createConvertIterableLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
 		ConvertIterableLoopOperation loopConverter= new ConvertIterableLoopOperation(compilationUnit, loop, FOR_LOOP_ELEMENT_IDENTIFIER);
-		if (!loopConverter.isApplicable())
+		IStatus status= loopConverter.isApplicable();
+		if (status.getSeverity() == IStatus.ERROR)
 			return null;
 
-		return new ControlStatementsFix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new ILinkedFixRewriteOperation[] {loopConverter});
+		ControlStatementsFix result= new ControlStatementsFix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new ILinkedFixRewriteOperation[] {loopConverter});
+		result.setStatus(status);
+		return result;
 	}
 		
 	public static IFix[] createRemoveBlockFix(CompilationUnit compilationUnit, ASTNode node) {

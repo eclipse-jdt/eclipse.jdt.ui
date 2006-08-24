@@ -23,6 +23,7 @@ public final class CorrectionMessages extends NLS {
 		// Do not instantiate
 	}
 
+	public static String FixCorrectionProposal_WarningAdditionalProposalInfo;
 	public static String ModifierCorrectionSubProcessor_addstatictoparenttype_description;
 	public static String ModifierCorrectionSubProcessor_changefieldmodifiertononstatic_description;
 	public static String ModifierCorrectionSubProcessor_changemodifiertostaticfinal_description;

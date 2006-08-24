@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.ltk.core.refactoring.TextChange;
 
@@ -49,4 +50,11 @@ public interface IFix {
 	 * @return The ICompilationUnit, not null
 	 */
 	public abstract ICompilationUnit getCompilationUnit();
+	
+	/**
+	 * A status to inform about issues with this fix
+	 * 
+	 * @return The status, not null
+	 */
+	public abstract IStatus getStatus();
 }

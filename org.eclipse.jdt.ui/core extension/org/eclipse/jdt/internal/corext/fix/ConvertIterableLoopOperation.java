@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -45,8 +46,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -56,6 +57,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 /**
@@ -289,10 +291,15 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 	/**
 	 * Is this proposal applicable?
 	 * 
-	 * @return <code>true</code> if it is applicable, <code>false</code> otherwise
+	 * @return A status with severity <code>IStatus.Error</code> if not applicable
 	 */
-	public final boolean isApplicable() {
+	public final IStatus isApplicable() {
+		IStatus resultStatus= StatusInfo.OK_STATUS;
 		if (JavaModelUtil.is50OrHigher(fCompilationUnit.getJavaProject())) {
+			resultStatus= checkExpressionCondition();
+			if (resultStatus.getSeverity() == IStatus.ERROR)
+				return resultStatus;
+			
 			for (final Iterator outer= fStatement.initializers().iterator(); outer.hasNext();) {
 				final Expression initializer= (Expression) outer.next();
 				if (initializer instanceof VariableDeclarationExpression) {
@@ -468,10 +475,10 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 					}
 				});
 				if (otherInvocationThenNext[0])
-					return false;
+					return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 				
 				if (nextInvocationCount[0] > 1)
-					return false;
+					return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 			}
 			final ASTNode root= fStatement.getRoot();
 			if (root != null) {
@@ -490,8 +497,43 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 				});
 			}
 		}
-		return (fExpression != null || fThis) && fIterable != null && fIterator != null && !fAssigned;
+		if ((fExpression != null || fThis) && fIterable != null && fIterator != null && !fAssigned) {
+			return resultStatus;
+		} else {
+			return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
+		}
 	}
+
+    private IStatus checkExpressionCondition() {
+		String warningLable= FixMessages.ConvertIterableLoopOperation_semanticChangeWarning;
+		
+    	Expression expression= fStatement.getExpression();
+		if (!(expression instanceof MethodInvocation))
+			return new StatusInfo(IStatus.WARNING, warningLable);
+		
+		MethodInvocation invoc= (MethodInvocation)expression;
+		IMethodBinding methodBinding= invoc.resolveMethodBinding();
+		if (methodBinding == null)
+			return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
+		
+		ITypeBinding declaringClass= methodBinding.getDeclaringClass();
+		if (declaringClass == null)
+			return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
+		
+		String qualifiedName= declaringClass.getQualifiedName();
+		String methodName= invoc.getName().getIdentifier();
+		if (qualifiedName.startsWith("java.util.Enumeration")) { //$NON-NLS-1$
+			if (!methodName.equals("hasMoreElements")) //$NON-NLS-1$
+				return new StatusInfo(IStatus.WARNING, warningLable);
+		} else if (qualifiedName.startsWith("java.util.Iterator")) { //$NON-NLS-1$
+			if (!methodName.equals("hasNext")) //$NON-NLS-1$
+				return new StatusInfo(IStatus.WARNING, warningLable);
+		} else {
+			return new StatusInfo(IStatus.WARNING, warningLable);
+		}
+		
+	    return StatusInfo.OK_STATUS;
+    }
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List, java.util.List)

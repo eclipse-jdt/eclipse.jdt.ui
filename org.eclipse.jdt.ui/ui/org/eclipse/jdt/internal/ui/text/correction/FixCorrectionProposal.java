@@ -13,12 +13,15 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -39,11 +42,13 @@ import org.eclipse.jdt.internal.corext.fix.PositionGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
 
 /**
  * A correction proposal which uses an {@link IFix} to
@@ -65,6 +70,58 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 	
 	public ICleanUp getCleanUp() {
 		return fCleanUp;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#getImage()
+	 */
+	public Image getImage() {
+		IStatus status= fFix.getStatus();
+		if (!status.isOK()) {
+			ImageImageDescriptor image= new ImageImageDescriptor(super.getImage());
+			
+			int flag= JavaElementImageDescriptor.WARNING;
+			if (status.getSeverity() == IStatus.ERROR) {
+				flag= JavaElementImageDescriptor.ERROR;
+			}
+			
+			ImageDescriptor composite= new JavaElementImageDescriptor(image, flag, new Point(image.getImageData().width, image.getImageData().height));
+			return composite.createImage();		
+		} else {
+			return super.getImage();
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getAdditionalProposalInfo()
+	 */
+	public String getAdditionalProposalInfo() {
+	    String result= super.getAdditionalProposalInfo();
+	    IStatus status= fFix.getStatus();
+	    if (!status.isOK()) {
+	    	StringBuffer buf= new StringBuffer();
+	    	buf.append("<b>"); //$NON-NLS-1$
+	    	buf.append(CorrectionMessages.FixCorrectionProposal_WarningAdditionalProposalInfo);
+	    	buf.append("</b>"); //$NON-NLS-1$
+	    	buf.append(status.getMessage());
+	    	buf.append("<br><br>"); //$NON-NLS-1$
+	    	buf.append(result);
+	    	return buf.toString();
+	    } else {
+	    	return result;
+	    }
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#getRelevance()
+	 */
+	public int getRelevance() {
+		IStatus status= fFix.getStatus();
+	    if (status.getSeverity() == IStatus.WARNING) {
+	    	return super.getRelevance() - 100;
+	    } else {
+	    	return super.getRelevance();
+	    }
 	}
 
 	/* (non-Javadoc)

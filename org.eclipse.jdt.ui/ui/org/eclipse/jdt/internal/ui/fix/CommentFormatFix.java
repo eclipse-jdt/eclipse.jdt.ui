@@ -20,6 +20,7 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -45,6 +46,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
 
@@ -202,4 +204,10 @@ public class CommentFormatFix implements IFix {
 		return MultiFixMessages.CommentFormatFix_description;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.fix.IFix#getStatus()
+	 */
+	public IStatus getStatus() {
+	    return StatusInfo.OK_STATUS;
+	}
 }
