@@ -18,6 +18,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
@@ -58,7 +59,16 @@ public class JavaTestPlugin extends Plugin {
 			URL localURL= Platform.asLocalURL(installURL);
 			return new File(localURL.getFile());
 		} catch (IOException e) {
-			return null;
+			log(e);
+			
+			try {
+				URL installURL= new URL(getBundle().getEntry("/"), path.toString());
+				URL localURL= FileLocator.toFileURL(installURL);
+				return new File(localURL.getFile());
+			} catch (IOException e2) {
+				log(e2);
+				throw new RuntimeException(e2);
+			}
 		}
 	}
 	
