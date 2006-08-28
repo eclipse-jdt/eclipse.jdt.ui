@@ -669,8 +669,9 @@ public class JavaProjectHelper {
 	/**
 	 * @param rtStubsPath the path to the RT stubs
 	 * @return a rt.jar (stubs only)
+	 * @throws CoreException 
 	 */
-	public static IPath[] findRtJar(IPath rtStubsPath) {
+	public static IPath[] findRtJar(IPath rtStubsPath) throws CoreException {
 		File rtStubs= JavaTestPlugin.getDefault().getFileInPlugin(rtStubsPath);
 		Assert.assertNotNull(rtStubs);
 		Assert.assertTrue(rtStubs.exists());

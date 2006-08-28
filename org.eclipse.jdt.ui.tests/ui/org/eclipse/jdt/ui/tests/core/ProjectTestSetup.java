@@ -14,6 +14,7 @@ package org.eclipse.jdt.ui.tests.core;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IProject;
@@ -37,10 +38,10 @@ public class ProjectTestSetup extends TestSetup {
 	
 	public static IJavaProject getProject() {
 		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME);
-		return  JavaCore.create(project);
+		return JavaCore.create(project);
 	}
 	
-	public static IClasspathEntry[] getDefaultClasspath() {
+	public static IClasspathEntry[] getDefaultClasspath() throws CoreException {
 		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS_15);
 		return new IClasspathEntry[] {  JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], true) };
 	}
