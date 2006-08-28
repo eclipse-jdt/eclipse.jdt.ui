@@ -160,14 +160,14 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
 	
 	public void test14_withText(){
 		String string= "/**\n * This is a {@link Foo#bar(String, int) test link}. End.*/"; //$NON-NLS-1$
-		String expected= " This is a test link. End."; //$NON-NLS-1$
+		String expected= " This is a <code>test link</code>. End."; //$NON-NLS-1$
 		verify(string, expected);
 	}
 	
 	
 	public void test14_withoutText(){
 		String string= "/**\n * This is a {@link Foo#bar(String, int)}. End.*/"; //$NON-NLS-1$
-		String expected= " This is a Foo.bar(String, int). End."; //$NON-NLS-1$
+		String expected= " This is a <code>Foo.bar(String, int)</code>. End."; //$NON-NLS-1$
 		verify(string, expected);
 	}
 	
@@ -179,7 +179,7 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
     
     public void test16() {
         String string= "/**\n *@param foo {@link Bar bar}*/"; //$NON-NLS-1$
-        String expected= "<dl><dt>Parameters:</dt><dd><b>foo</b> bar</dd></dl>"; //$NON-NLS-1$
+        String expected= "<dl><dt>Parameters:</dt><dd><b>foo</b> <code>bar</code></dd></dl>"; //$NON-NLS-1$
         verify(string, expected);
     }
     
