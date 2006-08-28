@@ -619,309 +619,169 @@
             name="%javaCategoryPageName"
             class="org.eclipse.jdt.internal.ui.preferences.JavaCategoryPropertyPage"
             id="org.eclipse.jdt.ui.propertyPages.JavaCategoryPropertyPage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
-      </page>
-      <page
-            objectClass="org.eclipse.jdt.core.IJavaProject"
-            name="%javaCategoryPageName"
-            class="org.eclipse.jdt.internal.ui.preferences.JavaCategoryPropertyPage"
-            id="org.eclipse.jdt.ui.propertyPages.JavaCategoryPropertyPage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
+         <enabledWhen>
+		     <adapt type="org.eclipse.core.resources.IProject">
+		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+		     </adapt>         
+         </enabledWhen>
       </page>
 -->
       <page
-            objectClass="org.eclipse.core.resources.IProject"
             name="%buildPathPageName"        
             class="org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage"
             id="org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
+         <enabledWhen>
+		     <adapt type="org.eclipse.core.resources.IProject">
+		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+		     </adapt>         
+         </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.buildpath"/>
       </page>
       <page
-            objectClass="org.eclipse.jdt.core.IJavaProject"
-            name="%buildPathPageName"
-            class="org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage"
-            id="org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
-         <keywordReference id="org.eclipse.jdt.ui.buildpath"/>
-      </page>
-      <page
-            objectClass="org.eclipse.core.resources.IProject"
             name="%codeStylePageName"
             class="org.eclipse.jdt.internal.ui.preferences.CodeStylePreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
+         <enabledWhen>
+		     <adapt type="org.eclipse.core.resources.IProject">
+		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+		     </adapt>         
+         </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.codestyle"/>
       </page>
       <page
-            objectClass="org.eclipse.jdt.core.IJavaProject"
-            name="%codeStylePageName"
-            class="org.eclipse.jdt.internal.ui.preferences.CodeStylePreferencePage"
-            id="org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
-         <keywordReference id="org.eclipse.jdt.ui.codestyle"/>
-      </page>
-      <page
-            objectClass="org.eclipse.core.resources.IProject"
             name="%importOrganizePageName"
             category="org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.ImportOrganizePreferencePage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
+         <enabledWhen>
+		     <adapt type="org.eclipse.core.resources.IProject">
+		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+		     </adapt>         
+         </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.organizeimports"/>
       </page>
       <page
-            objectClass="org.eclipse.jdt.core.IJavaProject"
-            name="%importOrganizePageName"
-            category="org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage"
-            class="org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage"
-            id="org.eclipse.jdt.ui.propertyPages.ImportOrganizePreferencePage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
-          <keywordReference id="org.eclipse.jdt.ui.organizeimports"/>
-      </page>
-            <page
-            objectClass="org.eclipse.core.resources.IProject"
             name="%codeFormatterPageName"
             category="org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.CodeFormatterPreferencePage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
+         <enabledWhen>
+		     <adapt type="org.eclipse.core.resources.IProject">
+		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+		     </adapt>         
+         </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.formatter"/>
       </page>
       <page
-            objectClass="org.eclipse.jdt.core.IJavaProject"
-            name="%codeFormatterPageName"
-            category="org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage"
-            class="org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage"
-            id="org.eclipse.jdt.ui.propertyPages.CodeFormatterPreferencePage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
-         <keywordReference id="org.eclipse.jdt.ui.formatter"/>
-      </page>   
-      <page
-            objectClass="org.eclipse.core.resources.IProject"
             name="%codeTemplatePageName"
             category="org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.CodeTemplatePreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.CodeTemplatePreferencePage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
+         <enabledWhen>
+		     <adapt type="org.eclipse.core.resources.IProject">
+		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+		     </adapt>         
+         </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.codetemplates"/>
       </page>
       <page
-            objectClass="org.eclipse.jdt.core.IJavaProject"
-            name="%codeTemplatePageName"
-            category="org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage"
-            class="org.eclipse.jdt.internal.ui.preferences.CodeTemplatePreferencePage"
-            id="org.eclipse.jdt.ui.propertyPages.CodeTemplatePreferencePage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
-         <keywordReference id="org.eclipse.jdt.ui.codetemplates"/>
-      </page>
-
-      <page
-            objectClass="org.eclipse.core.resources.IProject"
             name="%compliancePageName"
             class="org.eclipse.jdt.internal.ui.preferences.CompliancePreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage">
-          <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-          </filter>
+         <enabledWhen>
+		     <adapt type="org.eclipse.core.resources.IProject">
+		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+		     </adapt>         
+         </enabledWhen>
           <keywordReference id="org.eclipse.jdt.ui.compliance"/>
       </page>
       <page
-            objectClass="org.eclipse.jdt.core.IJavaProject"
-            name="%compliancePageName"
-            class="org.eclipse.jdt.internal.ui.preferences.CompliancePreferencePage"
-            id="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage">
-          <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-          </filter>
-          <keywordReference id="org.eclipse.jdt.ui.compliance"/>
-      </page>
-      <page
-            objectClass="org.eclipse.core.resources.IProject"
             name="%problemSeveritiesPageName"
             class="org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesPreferencePage"
             category="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.ProblemSeveritiesPreferencePage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
+         <enabledWhen>
+		     <adapt type="org.eclipse.core.resources.IProject">
+		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+		     </adapt>         
+         </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.severities"/>
       </page>
       <page
-            objectClass="org.eclipse.jdt.core.IJavaProject"
-            name="%problemSeveritiesPageName"
-            class="org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesPreferencePage"
-            category="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"
-            id="org.eclipse.jdt.ui.propertyPages.ProblemSeveritiesPreferencePage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
-         <keywordReference id="org.eclipse.jdt.ui.severities"/>
-      </page>
-      <page
-            objectClass="org.eclipse.core.resources.IProject"
             name="%javadocProblemsPageName"
             class="org.eclipse.jdt.internal.ui.preferences.JavadocProblemsPreferencePage"
             category="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.JavadocProblemsPreferencePage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
+         <enabledWhen>
+		     <adapt type="org.eclipse.core.resources.IProject">
+		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+		     </adapt>         
+         </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.javadocproblems"/>
       </page>
       <page
-            objectClass="org.eclipse.jdt.core.IJavaProject"
-            name="%javadocProblemsPageName"
-            class="org.eclipse.jdt.internal.ui.preferences.JavadocProblemsPreferencePage"
-            category="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"
-            id="org.eclipse.jdt.ui.propertyPages.JavadocProblemsPreferencePage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
-         <keywordReference id="org.eclipse.jdt.ui.javadocproblems"/>
-      </page>
-      <page
-            objectClass="org.eclipse.core.resources.IProject"
             name="%builderPageName"
             class="org.eclipse.jdt.internal.ui.preferences.JavaBuildPreferencePage"
             category="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.JavaBuildPreferencePage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
+         <enabledWhen>
+		     <adapt type="org.eclipse.core.resources.IProject">
+		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+		     </adapt>         
+         </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.building"/>
       </page>
       <page
-            objectClass="org.eclipse.jdt.core.IJavaProject"
-            name="%builderPageName"
-            class="org.eclipse.jdt.internal.ui.preferences.JavaBuildPreferencePage"
-            category="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"
-            id="org.eclipse.jdt.ui.propertyPages.JavaBuildPreferencePage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
-         <keywordReference id="org.eclipse.jdt.ui.building"/>
-      </page>
-
-      <page
-            objectClass="org.eclipse.core.resources.IProject"
             name="%todoPageName"
             class="org.eclipse.jdt.internal.ui.preferences.TodoTaskPreferencePage"
             category="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.TodoTaskPreferencePage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
+         <enabledWhen>
+		     <adapt type="org.eclipse.core.resources.IProject">
+		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+		     </adapt>         
+         </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.todo"/>-->
       </page>
       <page
-            objectClass="org.eclipse.jdt.core.IJavaProject"
-            name="%todoPageName"
-            class="org.eclipse.jdt.internal.ui.preferences.TodoTaskPreferencePage"
-            category="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"
-            id="org.eclipse.jdt.ui.propertyPages.TodoTaskPreferencePage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
-         <keywordReference id="org.eclipse.jdt.ui.todo"/>
-      </page>
-      <page
-            objectClass="org.eclipse.jdt.core.IPackageFragmentRoot"
             name="%sourceAttachmentPageName"
             class="org.eclipse.jdt.internal.ui.preferences.SourceAttachmentPropertyPage"
-            id="org.eclipse.jdt.ui.propertyPages.SourceAttachmentPage1">
+            id="org.eclipse.jdt.ui.propertyPages.SourceAttachmentPage">
+         <enabledWhen>
+            <and>
+		      <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
+		      <not>
+		        <test property="org.eclipse.jdt.core.inSourceFolder"/>
+		      </not>
+		    </and>
+         </enabledWhen>
       </page>
       <page
-            objectClass="org.eclipse.core.resources.IFile"
-            name="%sourceAttachmentPageName"
-            nameFilter="*.jar"
-            class="org.eclipse.jdt.internal.ui.preferences.SourceAttachmentPropertyPage"
-            id="org.eclipse.jdt.ui.propertyPages.SourceAttachmentPage2">
-      </page>
-      <page
-            objectClass="org.eclipse.core.resources.IProject"
-            name="%projectJavadocLocationPageName"
-            class="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage"
-            id="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage1">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
-      </page>
-      <page
-            objectClass="org.eclipse.jdt.core.IJavaProject"
-            name="%projectJavadocLocationPageName"
-            class="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage"
-            id="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage4">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
-      </page>
-      <page
-            objectClass="org.eclipse.core.resources.IFile"
-            name="%javadocLocationPageName"
-            nameFilter="*.jar"
-            class="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage"
-            id="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage2">
-      </page>
-      <page
-            objectClass="org.eclipse.jdt.core.IPackageFragmentRoot"
             name="%javadocLocationPageName"
             class="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage"
-            id="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage3">
+            id="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage">
+         <enabledWhen>
+             <or>
+               <adapt type="org.eclipse.core.resources.IProject">
+		         <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+		       </adapt>
+               <and>
+		         <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
+		         <not>
+		            <test property="org.eclipse.jdt.core.inSourceFolder"/>
+		         </not>
+		       </and>
+
+		     </or>
+         </enabledWhen>
       </page>
       <page
-            objectClass="org.eclipse.jdt.core.IPackageFragmentRoot"
             name="%nativeLibraryPageName"
             class="org.eclipse.jdt.internal.ui.preferences.NativeLibrariesPropertyPage"
             id="org.eclipse.jdt.internal.ui.preferences.NativeLibrariesPropertyPage">
+         <enabledWhen>
+            <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
+         </enabledWhen>
       </page>
 
    </extension>
