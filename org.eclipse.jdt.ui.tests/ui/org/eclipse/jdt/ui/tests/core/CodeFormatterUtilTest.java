@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.tests.core;
 
 import java.util.Hashtable;
+import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -25,6 +26,7 @@ import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
@@ -517,5 +519,67 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertEqualString(curr3, word3);
 		
 	}	
+	
+	public void testArgBreaking() throws Exception {
+		Map options= DefaultCodeFormatterConstants.getEclipseDefaultSettings();
+		
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
+		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "30");
+
+		String optionValue= DefaultCodeFormatterConstants.createAlignmentValue(false, DefaultCodeFormatterConstants.WRAP_ONE_PER_LINE, DefaultCodeFormatterConstants.INDENT_DEFAULT);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PARAMETERS_IN_CONSTRUCTOR_DECLARATION, optionValue);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("public class A {\n");
+		buf.append("    A(int a, int b, int c, int d) {\n");
+		buf.append("    }\n");
+		buf.append("    public void foo(int a, int b, int c, int d) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+		
+		TextEdit edit= ToolFactory.createCodeFormatter(options).format(CodeFormatter.K_COMPILATION_UNIT, contents, 0, contents.length(), 0, "\n");
+		Document doc= new Document(contents);
+		edit.apply(doc);
+		String formatted= doc.get();
+		
+		buf= new StringBuffer();
+		buf.append("public class A {\n");
+		buf.append("    public A(int a, int b, int c, int d) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void foo(int a, int b, int c, int d) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(formatted, expected);
+	}
+	
+	public void testSuper() throws Exception {
+		Map options= DefaultCodeFormatterConstants.getEclipseDefaultSettings();
+		
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
+		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "20");
+
+		String optionValue= DefaultCodeFormatterConstants.createAlignmentValue(false, DefaultCodeFormatterConstants.WRAP_ONE_PER_LINE, DefaultCodeFormatterConstants.INDENT_DEFAULT);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_EXPLICIT_CONSTRUCTOR_CALL, optionValue);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("super(list,colx,v,al,i,insets,ja);");
+		String contents= buf.toString();
+		
+		TextEdit edit= ToolFactory.createCodeFormatter(options).format(CodeFormatter.K_STATEMENTS, contents, 0, contents.length(), 0, "\n");
+		Document doc= new Document(contents);
+		edit.apply(doc);
+		String formatted= doc.get();
+		
+		buf= new StringBuffer();
+		buf.append("super(list,colx,v,al,i,insets,ja);");
+		String expected= buf.toString();
+		assertEqualString(formatted, expected);
+	}	
+	
 	
 }
