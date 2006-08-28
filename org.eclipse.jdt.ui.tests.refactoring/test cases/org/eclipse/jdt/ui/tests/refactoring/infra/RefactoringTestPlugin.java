@@ -16,10 +16,10 @@ import java.io.InputStream;
 import java.net.URL;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 
 import org.eclipse.core.resources.IWorkspace;
@@ -54,14 +54,14 @@ public class RefactoringTestPlugin extends Plugin {
 	
 	public InputStream getTestResourceStream(String fileName) throws IOException {
 		IPath path= new Path("resources").append(fileName);
-		URL url= new URL(getDescriptor().getInstallURL(), path.toString());
+		URL url= new URL(getBundle().getEntry("/"), path.toString());
 		return url.openStream();
 	}
 	
 	public File getFileInPlugin(IPath path) {
 		try {
-			URL installURL= new URL(getDescriptor().getInstallURL(), path.toString());
-			URL localURL= Platform.asLocalURL(installURL);
+			URL installURL= new URL(getBundle().getEntry("/"), path.toString());
+			URL localURL= FileLocator.toFileURL(installURL);
 			return new File(localURL.getFile());
 		} catch (IOException e) {
 			return null;

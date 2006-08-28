@@ -55,20 +55,12 @@ public class JavaTestPlugin extends Plugin {
 	
 	public File getFileInPlugin(IPath path) {
 		try {
-			URL installURL= new URL(getDescriptor().getInstallURL(), path.toString());
-			URL localURL= Platform.asLocalURL(installURL);
+			URL installURL= new URL(getBundle().getEntry("/"), path.toString());
+			URL localURL= FileLocator.toFileURL(installURL);
 			return new File(localURL.getFile());
-		} catch (IOException e) {
-			log(e);
-			
-			try {
-				URL installURL= new URL(getBundle().getEntry("/"), path.toString());
-				URL localURL= FileLocator.toFileURL(installURL);
-				return new File(localURL.getFile());
-			} catch (IOException e2) {
-				log(e2);
-				throw new RuntimeException(e2);
-			}
+		} catch (IOException e2) {
+			log(e2);
+			throw new RuntimeException(e2);
 		}
 	}
 	
