@@ -82,7 +82,16 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 			JavaPlugin.log(x);
 		}
 	}
-	
+
+	/**
+	 * Calculates the <code>TextEdit</code> used to format the region with the 
+	 * properties indicated in the formatting context previously supplied by 
+	 * <code>formatterStarts(IFormattingContext)</code>.
+	 * 
+	 * @see CommentFormattingStrategy#format()
+	 * @return A <code>TextEdit</code>, or <code>null</code> if no formating is required
+	 * @since 3.3
+	 */
 	public TextEdit calculateTextEdit() {
 		super.format();
 
