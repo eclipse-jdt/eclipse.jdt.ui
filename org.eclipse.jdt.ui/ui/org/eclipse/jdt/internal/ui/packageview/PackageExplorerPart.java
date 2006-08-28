@@ -342,7 +342,9 @@ public class PackageExplorerPart extends ViewPart
 			try {
 				if (!isFlatLayout() && object instanceof IPackageFragment) {
 					IPackageFragment fragment = (IPackageFragment) object;
-					return !fragment.isDefaultPackage() && fragment.hasSubpackages();
+					if (!fragment.isDefaultPackage() && fragment.hasSubpackages()) {
+						return getFilteredChildren(fragment).length != 0;
+					}
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
