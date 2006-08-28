@@ -716,8 +716,10 @@ public class UnresolvedElementsSubProcessor {
 					if ((kind & SimilarElementsRequestor.ENUMS) != 0) {
 			            proposals.add(new NewCUCompletionUsingWizardProposal(cu, node, NewCUCompletionUsingWizardProposal.K_ENUM, enclosing, rel));
 					}
-					if (kind == SimilarElementsRequestor.ANNOTATIONS) { // only when in annotation
-			            proposals.add(new NewCUCompletionUsingWizardProposal(cu, node, NewCUCompletionUsingWizardProposal.K_ANNOTATION, enclosing, rel+4));
+					if ((kind & SimilarElementsRequestor.ANNOTATIONS) != 0) { // only when in annotation
+						if ((kind & (SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES)) == 0) {
+							proposals.add(new NewCUCompletionUsingWizardProposal(cu, node, NewCUCompletionUsingWizardProposal.K_ANNOTATION, enclosing, rel+4));
+						}
 					}
 				}
 			}

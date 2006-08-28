@@ -860,6 +860,9 @@ public class ASTResolving {
 					kind= SimilarElementsRequestor.ALL_TYPES | SimilarElementsRequestor.VOIDTYPE;
 				}
 				break;
+			case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
+				kind= SimilarElementsRequestor.PRIMITIVETYPES | SimilarElementsRequestor.ANNOTATIONS | SimilarElementsRequestor.ENUMS;
+				break;
 			case ASTNode.INSTANCEOF_EXPRESSION:
 				kind= SimilarElementsRequestor.REF_TYPES;
 				break;
