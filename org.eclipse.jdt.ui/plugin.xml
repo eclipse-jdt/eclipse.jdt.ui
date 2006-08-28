@@ -759,26 +759,31 @@
       <page
             name="%javadocLocationPageName"
             class="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage"
-            id="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage">
+            id="org.eclipse.jdt.ui.preferences.JavadocConfigurationPropertyPage0">
          <enabledWhen>
-             <or>
-               <adapt type="org.eclipse.core.resources.IProject">
-		         <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
-		       </adapt>
-               <and>
-		         <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
-		         <not>
-		            <test property="org.eclipse.jdt.core.inSourceFolder"/>
-		         </not>
-		       </and>
-
-		     </or>
+            <and>
+              <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
+	          <not>
+	            <test property="org.eclipse.jdt.core.inSourceFolder"/>
+		      </not>
+		    </and>
+         </enabledWhen>
+      </page>
+      <!-- can be merged again when bug 155422 is fixed --> 
+      <page
+            name="%javadocLocationPageName"
+            class="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage"
+            id="org.eclipse.jdt.ui.preferences.JavadocConfigurationPropertyPage1">
+         <enabledWhen>
+             <adapt type="org.eclipse.core.resources.IProject">
+               <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+		     </adapt>
          </enabledWhen>
       </page>
       <page
             name="%nativeLibraryPageName"
             class="org.eclipse.jdt.internal.ui.preferences.NativeLibrariesPropertyPage"
-            id="org.eclipse.jdt.internal.ui.preferences.NativeLibrariesPropertyPage">
+            id="org.eclipse.jdt.ui.preferences.NativeLibrariesPropertyPage">
          <enabledWhen>
             <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
          </enabledWhen>
