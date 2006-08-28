@@ -33,7 +33,7 @@ public class JdtTextTestSuite {
 		suite.addTest(JavaHeuristicScannerTest.suite());
 		suite.addTest(JavaParameterListValidatorTest.suite());
 		suite.addTest(JavaDoc2HTMLTextReaderTester.suite());
-		suite.addTest(PairMatcherTest.suite());
+		suite.addTest(JavaPairMatcherTest.suite());
 		suite.addTest(HTML2TextReaderTester.suite());
 		suite.addTest(JavaPartitionerExtensionTest.suite());
 		suite.addTest(JavaColoringTest.suite());

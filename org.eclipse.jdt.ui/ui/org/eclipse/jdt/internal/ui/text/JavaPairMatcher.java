@@ -7,15 +7,15 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Christian Plesner Hansen (plesner@quenta.org) - changed implementation to use DefaultCharacterPairMatcher
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
-import org.eclipse.jface.text.source.ICharacterPairMatcher;
+import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -24,16 +24,8 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
 /**
  * Helper class for match pairs of characters.
  */
-public final class JavaPairMatcher implements ICharacterPairMatcher, ISourceVersionDependent {
+public final class JavaPairMatcher extends DefaultCharacterPairMatcher implements ISourceVersionDependent {
 
-	private char[] fPairs;
-	private IDocument fDocument;
-	private int fOffset;
-
-	private int fStartPos;
-	private int fEndPos;
-	private int fAnchor;
-	
 	/**
 	 * Stores the source version state.
 	 * @since 3.1
@@ -42,123 +34,52 @@ public final class JavaPairMatcher implements ICharacterPairMatcher, ISourceVers
 
 
 	public JavaPairMatcher(char[] pairs) {
-		fPairs= pairs;
+		super(pairs, IJavaPartitions.JAVA_PARTITIONING);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.source.ICharacterPairMatcher#match(org.eclipse.jface.text.IDocument, int)
-	 */
+	/* @see ICharacterPairMatcher#match(IDocument, int) */
 	public IRegion match(IDocument document, int offset) {
-
-		fOffset= offset;
-
-		if (fOffset < 0)
-			return null;
-
-		fDocument= document;
-
-		if (fDocument != null && matchPairsAt() && fStartPos != fEndPos)
-			return new Region(fStartPos, fEndPos - fStartPos + 1);
-
-		return null;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.source.ICharacterPairMatcher#getAnchor()
-	 */
-	public int getAnchor() {
-		return fAnchor;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.source.ICharacterPairMatcher#dispose()
-	 */
-	public void dispose() {
-		clear();
-		fDocument= null;
-	}
-
-	/*
-	 * @see org.eclipse.jface.text.source.ICharacterPairMatcher#clear()
-	 */
-	public void clear() {
-	}
-
-	private boolean matchPairsAt() {
-
-		int i;
-		int pairIndex1= fPairs.length;
-		int pairIndex2= fPairs.length;
-
-		fStartPos= -1;
-		fEndPos= -1;
-
-		// get the char preceding the start position
 		try {
-
-			char prevChar= fDocument.getChar(Math.max(fOffset - 1, 0));
-			// search for opening peer character next to the activation point
-			for (i= 0; i < fPairs.length; i= i + 2) {
-				if (prevChar == fPairs[i]) {
-					fStartPos= fOffset - 1;
-					pairIndex1= i;
-				}
-			}
-
-			// search for closing peer character next to the activation point
-			for (i= 1; i < fPairs.length; i= i + 2) {
-				if (prevChar == fPairs[i]) {
-					fEndPos= fOffset - 1;
-					pairIndex2= i;
-				}
-			}
-
-			if (fEndPos > -1) {
-				fAnchor= RIGHT;
-				fStartPos= searchForOpeningPeer(fEndPos, fPairs[pairIndex2 - 1], fPairs[pairIndex2], fDocument);
-				if (fStartPos > -1)
-					return true;
-				else
-					fEndPos= -1;
-			}	else if (fStartPos > -1) {
-				fAnchor= LEFT;
-				fEndPos= searchForClosingPeer(fStartPos, fPairs[pairIndex1], fPairs[pairIndex1 + 1], fDocument);
-				if (fEndPos > -1)
-					return true;
-				else
-					fStartPos= -1;
-			}
-
-		} catch (BadLocationException x) {
+			return performMatch(document, offset);
+		} catch (BadLocationException ble) {
+			return null;
 		}
-
-		return false;
+	}
+	
+	/*
+	 * Performs the actual work of matching for #match(IDocument, int).
+	 */ 
+	private IRegion performMatch(IDocument document, int offset) throws BadLocationException {
+		if (offset < 0 || document == null) return null;
+		final char prevChar= document.getChar(Math.max(offset - 1, 0));
+		if ((prevChar == '<' || prevChar == '>') && !fHighlightAngularBrackets)
+			return null;
+		if (prevChar == '<' && isLessThanOperator(document, offset - 1))
+			return null;
+		final IRegion region= super.match(document, offset);
+		if (region == null) return region;
+		if (prevChar == '>') {
+			final int peer= region.getOffset();
+			if (isLessThanOperator(document, peer)) return null;
+		}
+		return region;
 	}
 
-	private int searchForClosingPeer(int offset, char openingPeer, char closingPeer, IDocument document) throws BadLocationException {
-		boolean useGenericsHeuristic= openingPeer == '<';
-		if (useGenericsHeuristic && !fHighlightAngularBrackets)
-			return -1;
+	/**
+	 * Returns true if the character at the specified offset is a
+	 * less-than sign, rather than an type parameter list open
+	 * angle bracket.
+	 * 
+	 * @param document a document
+	 * @param offset an offset within the document
+	 * @return true if the character at the specified offset is not
+	 *   a type parameter start bracket
+	 * @throws BadLocationException
+	 */
+	private boolean isLessThanOperator(IDocument document, int offset) throws BadLocationException {
+		if (offset < 0) return false;
 		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document, IJavaPartitions.JAVA_PARTITIONING, TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, offset, false));
-		if (useGenericsHeuristic && !isTypeParameterBracket(offset, document, scanner))
-			return -1;
-
-		return scanner.findClosingPeer(offset + 1, openingPeer, closingPeer);
-	}
-
-
-	private int searchForOpeningPeer(int offset, char openingPeer, char closingPeer, IDocument document) throws BadLocationException {
-		boolean useGenericsHeuristic= openingPeer == '<';
-		if (useGenericsHeuristic && !fHighlightAngularBrackets)
-			return -1;
-
-		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document, IJavaPartitions.JAVA_PARTITIONING, TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, offset, false));
-		int peer= scanner.findOpeningPeer(offset - 1, openingPeer, closingPeer);
-		if (peer == JavaHeuristicScanner.NOT_FOUND)
-			return -1;
-		if (useGenericsHeuristic && !isTypeParameterBracket(peer, document, scanner))
-			return -1;
-		return peer;
+		return !isTypeParameterBracket(offset, document, scanner);
 	}
 
 	/**

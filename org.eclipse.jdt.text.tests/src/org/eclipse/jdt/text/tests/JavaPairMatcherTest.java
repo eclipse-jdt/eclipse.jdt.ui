@@ -7,24 +7,29 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Christian Plesner Hansen (plesner@quenta.org) - integrated with the generic test for pair matchers
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
+import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.rules.FastPartitioner;
-
-import org.eclipse.jdt.ui.text.IJavaPartitions;
-
-import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
-import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
-
-public class PairMatcherTest extends TestCase {
+import org.eclipse.jface.text.source.ICharacterPairMatcher;
+import org.eclipse.jface.text.tests.AbstractPairMatcherTest;
+/**
+ * Tests for the java pair matcher
+ * 
+ * @since 3.3
+ */
+public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 	
 	private static boolean BEFORE_MATCHES_DISABLED= true;
 	
@@ -32,8 +37,16 @@ public class PairMatcherTest extends TestCase {
 	protected JavaPairMatcher fPairMatcher;
 	
 	
-	public PairMatcherTest(String name) {
+	public JavaPairMatcherTest(String name) {
 		super(name);
+	}
+	
+	protected String getDocumentPartitioning() {
+		return IJavaPartitions.JAVA_PARTITIONING;
+	}
+	
+	protected ICharacterPairMatcher createMatcher(String chars) {
+		return new JavaPairMatcher(chars.toCharArray());
 	}
 	
 	protected void setUp() {
@@ -55,7 +68,7 @@ public class PairMatcherTest extends TestCase {
 	}
 	
 	public static Test suite() {
-		return new TestSuite(PairMatcherTest.class); 
+		return new TestSuite(JavaPairMatcherTest.class); 
 	}
 	
 	protected void tearDown () {
@@ -153,5 +166,36 @@ public class PairMatcherTest extends TestCase {
 		IRegion match= fPairMatcher.match(fDocument, 15);
 		assertNotNull(match);
 		assertTrue(match.getOffset() == 3 && match.getLength() == 12);
-	}	
+	}
+	
+	public void testAngleBrackets1_4() {
+		final JavaPairMatcher matcher= (JavaPairMatcher) createMatcher("(){}[]<>");
+		matcher.setSourceVersion(JavaCore.VERSION_1_4);
+		performMatch(matcher, " <>% ");
+		performMatch(matcher, " <%> ");
+		performMatch(matcher, " 2 < 3 || 4 >% 5 ");
+		performMatch(matcher, " 2 <% 3 || 4 > 5 ");
+		performMatch(matcher, " List<String>% ");
+		performMatch(matcher, " foo < T >% ");
+		performMatch(matcher, " foo <% T > ");
+		performMatch(matcher, " foo < T >% ");
+		performMatch(matcher, " final <% T > ");
+		matcher.dispose();
+	}
+	
+	public void testAngleBrackets1_5() {
+		final JavaPairMatcher matcher= (JavaPairMatcher) createMatcher("(){}[]<>");
+		matcher.setSourceVersion(JavaCore.VERSION_1_5);
+		performMatch(matcher, " #<>% ");
+		performMatch(matcher, " <%># ");
+		performMatch(matcher, " 2 < 3 || 4 >% 5 ");
+		performMatch(matcher, " 2 <% 3 || 4 > 5 ");
+		performMatch(matcher, " List#<String>% ");
+		performMatch(matcher, " foo < T >% ");
+		performMatch(matcher, " foo <% T > ");
+		performMatch(matcher, " foo < T >% ");
+		performMatch(matcher, " final <% T ># ");
+		matcher.dispose();
+	}
+
 }
