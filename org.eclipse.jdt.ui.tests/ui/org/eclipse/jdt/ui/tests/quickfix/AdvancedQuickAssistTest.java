@@ -1770,6 +1770,120 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	}
 	
+	public void testConvertSwitchToIf2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public enum TimeUnit {\n");
+		buf.append("        SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS\n");
+		buf.append("    }\n");
+		buf.append("    public static int getPower(TimeUnit unit) {\n");
+		buf.append("        switch (unit) {\n");
+		buf.append("        case SECONDS:\n");
+		buf.append("                return 0;\n");
+		buf.append("        case MILLISECONDS:\n");
+		buf.append("                return -3;\n");
+		buf.append("        case MICROSECONDS:\n");
+		buf.append("                return -6;\n");
+		buf.append("        case NANOSECONDS:\n");
+		buf.append("                return -9;\n");
+		buf.append("        default:\n");
+		buf.append("                throw new InternalError();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("switch");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public enum TimeUnit {\n");
+		buf.append("        SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS\n");
+		buf.append("    }\n");
+		buf.append("    public static int getPower(TimeUnit unit) {\n");
+		buf.append("        if (unit == TimeUnit.SECONDS) {\n");
+		buf.append("            return 0;\n");
+		buf.append("        } else if (unit == TimeUnit.MILLISECONDS) {\n");
+		buf.append("            return -3;\n");
+		buf.append("        } else if (unit == TimeUnit.MICROSECONDS) {\n");
+		buf.append("            return -6;\n");
+		buf.append("        } else if (unit == TimeUnit.NANOSECONDS) {\n");
+		buf.append("            return -9;\n");
+		buf.append("        } else {\n");
+		buf.append("            throw new InternalError();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
+	
+	public void testConvertSwitchToIf3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    final static int SECONDS=1, MILLISECONDS=2, MICROSECONDS=4,NANOSECONDS=8;\n");
+		buf.append("    public static int getPower(int unit) {\n");
+		buf.append("        switch (unit) {\n");
+		buf.append("        case SECONDS:\n");
+		buf.append("                return 0;\n");
+		buf.append("        case MILLISECONDS:\n");
+		buf.append("                return -3;\n");
+		buf.append("        case MICROSECONDS:\n");
+		buf.append("                return -6;\n");
+		buf.append("        case NANOSECONDS:\n");
+		buf.append("                return -9;\n");
+		buf.append("        default:\n");
+		buf.append("                throw new InternalError();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("switch");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    final static int SECONDS=1, MILLISECONDS=2, MICROSECONDS=4,NANOSECONDS=8;\n");
+		buf.append("    public static int getPower(int unit) {\n");
+		buf.append("        if (unit == SECONDS) {\n");
+		buf.append("            return 0;\n");
+		buf.append("        } else if (unit == MILLISECONDS) {\n");
+		buf.append("            return -3;\n");
+		buf.append("        } else if (unit == MICROSECONDS) {\n");
+		buf.append("            return -6;\n");
+		buf.append("        } else if (unit == NANOSECONDS) {\n");
+		buf.append("            return -9;\n");
+		buf.append("        } else {\n");
+		buf.append("            throw new InternalError();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
+	
 	public void testSurroundWithTemplate01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

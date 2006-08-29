@@ -71,6 +71,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -81,6 +82,7 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.CodeStyleConfiguration;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -2149,6 +2151,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		//
 		final AST ast= covering.getAST();
 		final ASTRewrite rewrite= ASTRewrite.create(ast);
+		final ImportRewrite importRewrite= CodeStyleConfiguration.createImportRewrite(context.getASTRoot(), true);
 		//
 		SwitchStatement switchStatement= (SwitchStatement) covering;
 		IfStatement firstIfStatement= null;
@@ -2187,7 +2190,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					return false;
 				}
 				// prepare condition
-				InfixExpression switchCaseCondition= createSwitchCaseCondition(ast, rewrite, switchStatement, switchCase);
+				InfixExpression switchCaseCondition= createSwitchCaseCondition(ast, rewrite, importRewrite, switchStatement, switchCase);
 				if (currentCondition == null) {
 					currentCondition= switchCaseCondition;
 				} else {
@@ -2261,24 +2264,36 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			rewrite,
 			1,
 			image);
+		proposal.setImportRewrite(importRewrite);
 		resultingCollections.add(proposal);
 		return true;
 	}
-	private static InfixExpression createSwitchCaseCondition(AST ast,
-			ASTRewrite rewrite,
-			SwitchStatement switchStatement,
-			SwitchCase switchCase) {
+	private static InfixExpression createSwitchCaseCondition(AST ast, ASTRewrite rewrite, ImportRewrite importRewrite,
+	                                                      SwitchStatement switchStatement, SwitchCase switchCase) {
 		InfixExpression condition= ast.newInfixExpression();
 		condition.setOperator(InfixExpression.Operator.EQUALS);
 		//
 		Expression leftExpression= (Expression) rewrite.createCopyTarget(switchStatement.getExpression());
 		condition.setLeftOperand(leftExpression);
 		//
-		Expression rightExpression= (Expression) rewrite.createCopyTarget(switchCase.getExpression());
+		Expression rightExpression= null;
+		Expression expression= switchCase.getExpression();
+		if (expression instanceof SimpleName && ((SimpleName) expression).resolveBinding() instanceof IVariableBinding) {
+			IVariableBinding binding= (IVariableBinding) ((SimpleName) expression).resolveBinding();
+			if (binding.isEnumConstant()) {
+				String qualifiedName= importRewrite.addImport(binding.getDeclaringClass()) + '.' + binding.getName();
+				rightExpression= ast.newName(qualifiedName);
+			}
+		}
+		if (rightExpression == null) {
+			rightExpression= (Expression) rewrite.createCopyTarget(expression);
+		}
 		condition.setRightOperand(rightExpression);
 		//
 		return condition;
 	}
+	
+	
 	private static boolean hasStopAsLastExecutableStatement(Statement lastStatement) {
 		if ((lastStatement instanceof ReturnStatement) || (lastStatement instanceof BreakStatement)) {
 			return true;
