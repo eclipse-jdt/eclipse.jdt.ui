@@ -371,7 +371,7 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 		notifyResult(dialogResult == Window.OK);
 	}
 	
-	public static RefactoringStatusContext createRefactoringStatusContext(IJavaElement element) {
+	private static RefactoringStatusContext createRefactoringStatusContext(IJavaElement element) {
 		if (element instanceof IMember) {
 			return JavaStatusContext.create((IMember) element);
 		}
