@@ -21,23 +21,38 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.ui.IActionDelegate;
+import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * This abstract action delegate offers base functionality used by
  * other JAR Package based action delegates.
  */
-abstract class JarPackageActionDelegate implements IActionDelegate {
+abstract class JarPackageActionDelegate implements IObjectActionDelegate {
 
 	private IStructuredSelection fSelection;
+	private Shell fShell;
 
 	/**
 	 * Returns the active shell.
 	 */
 	protected Shell getShell() {
-		return getWorkbench().getActiveWorkbenchWindow().getShell();
+		if (fShell != null)
+			return fShell;
+		return JavaPlugin.getActiveWorkbenchShell();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.IObjectActionDelegate#setActivePart(org.eclipse.jface.action.IAction, org.eclipse.ui.IWorkbenchPart)
+	 */
+	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
+		IWorkbenchPartSite site= targetPart.getSite();
+		fShell= site != null ? site.getShell() : null;
 	}
 
 	/*
