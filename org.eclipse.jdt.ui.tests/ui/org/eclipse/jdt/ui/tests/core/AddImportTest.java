@@ -18,11 +18,6 @@ import junit.framework.TestSuite;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-
-import org.eclipse.core.filebuffers.FileBuffers;
-
-import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -787,31 +782,22 @@ public class AddImportTest extends CoreTests {
 		buf.append("    java.util.Vector c= null;\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
-		
-		IPath path= cu.getPath();
-		
-		FileBuffers.getTextFileBufferManager().connect(path, null);
-		try {
-			IDocument doc= FileBuffers.getTextFileBufferManager().getTextFileBuffer(path).getDocument();
-			int selOffset= buf.indexOf("Vector");
-		
-			AddImportsOperation op= new AddImportsOperation(cu, doc, selOffset, 0, null);
-			op.run(null);
+				
+		int selOffset= buf.indexOf("Vector");
+	
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
+		op.run(null);
 
-			buf= new StringBuffer();
-			buf.append("package pack1;\n");
-			buf.append("\n");
-			buf.append("import java.lang.System;\n");
-			buf.append("import java.util.Vector;\n");
-			buf.append("\n");		
-			buf.append("public class C {\n");
-			buf.append("    Vector c= null;\n");
-			buf.append("}\n");
-			assertEqualString(doc.get(), buf.toString());
-
-		} finally {
-			FileBuffers.getTextFileBufferManager().disconnect(path, null);
-		}
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.System;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");		
+		buf.append("public class C {\n");
+		buf.append("    Vector c= null;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
 	public void testAddImportAction2() throws Exception {
@@ -828,30 +814,21 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 		
-		IPath path= cu.getPath();
-		
-		FileBuffers.getTextFileBufferManager().connect(path, null);
-		try {
-			IDocument doc= FileBuffers.getTextFileBufferManager().getTextFileBuffer(path).getDocument();
-			int selOffset= buf.indexOf("Vector");
-		
-			AddImportsOperation op= new AddImportsOperation(cu, doc, selOffset, 0, null);
-			op.run(null);
+		int selOffset= buf.indexOf("Vector");
+	
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
+		op.run(null);
 
-			buf= new StringBuffer();
-			buf.append("package pack1;\n");
-			buf.append("\n");
-			buf.append("import java.lang.System;\n");
-			buf.append("import java.util.Vector;\n");
-			buf.append("\n");		
-			buf.append("public class C {\n");
-			buf.append("    Vector c= null;\n");
-			buf.append("}\n");
-			assertEqualString(doc.get(), buf.toString());
-
-		} finally {
-			FileBuffers.getTextFileBufferManager().disconnect(path, null);
-		}
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.System;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");		
+		buf.append("public class C {\n");
+		buf.append("    Vector c= null;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
 	public void testAddImportAction3() throws Exception {
@@ -868,30 +845,21 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 		
-		IPath path= cu.getPath();
-		
-		FileBuffers.getTextFileBufferManager().connect(path, null);
-		try {
-			IDocument doc= FileBuffers.getTextFileBufferManager().getTextFileBuffer(path).getDocument();
-			int selOffset= buf.indexOf("Vector");
-		
-			AddImportsOperation op= new AddImportsOperation(cu, doc, selOffset, 0, null);
-			op.run(null);
+		int selOffset= buf.indexOf("Vector");
+	
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
+		op.run(null);
 
-			buf= new StringBuffer();
-			buf.append("package pack1;\n");
-			buf.append("\n");
-			buf.append("import java.lang.System;\n");
-			buf.append("import java.util.Vector;\n");
-			buf.append("\n");		
-			buf.append("public class C {\n");
-			buf.append("    Vector c= null\n");
-			buf.append("}\n");
-			assertEqualString(doc.get(), buf.toString());
-
-		} finally {
-			FileBuffers.getTextFileBufferManager().disconnect(path, null);
-		}
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.System;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");		
+		buf.append("public class C {\n");
+		buf.append("    Vector c= null\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
 	public void testAddImportAction4() throws Exception {
@@ -908,30 +876,21 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 		
-		IPath path= cu.getPath();
-		
-		FileBuffers.getTextFileBufferManager().connect(path, null);
-		try {
-			IDocument doc= FileBuffers.getTextFileBufferManager().getTextFileBuffer(path).getDocument();
-			int selOffset= buf.indexOf("Vector");
-		
-			AddImportsOperation op= new AddImportsOperation(cu, doc, selOffset, 0, null);
-			op.run(null);
+		int selOffset= buf.indexOf("Vector");
+	
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
+		op.run(null);
 
-			buf= new StringBuffer();
-			buf.append("package pack1;\n");
-			buf.append("\n");
-			buf.append("import java.lang.System;\n");
-			buf.append("import java.util.Vector;\n");
-			buf.append("\n");		
-			buf.append("public class C {\n");
-			buf.append("    Vector c= null\n");
-			buf.append("}\n");
-			assertEqualString(doc.get(), buf.toString());
-
-		} finally {
-			FileBuffers.getTextFileBufferManager().disconnect(path, null);
-		}
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.System;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");		
+		buf.append("public class C {\n");
+		buf.append("    Vector c= null\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
 	public void testAddImports_bug107206() throws Exception {
@@ -948,29 +907,20 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 		
-		IPath path= cu.getPath();
-		
-		FileBuffers.getTextFileBufferManager().connect(path, null);
-		try {
-			IDocument doc= FileBuffers.getTextFileBufferManager().getTextFileBuffer(path).getDocument();
-			int selOffset= buf.indexOf("Vector.class") + "Vector.class".length();
-		
-			AddImportsOperation op= new AddImportsOperation(cu, doc, selOffset, 0, null);
-			op.run(null);
+		int selOffset= buf.indexOf("Vector.class") + "Vector.class".length();
+	
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
+		op.run(null);
 
-			buf= new StringBuffer();
-			buf.append("package pack1;\n");
-			buf.append("\n");
-			buf.append("import java.lang.System;\n");
-			buf.append("\n");		
-			buf.append("public class C {\n");
-			buf.append("    java.util.Vector.class x;\n"); // no change
-			buf.append("}\n");
-			assertEqualString(doc.get(), buf.toString());
-
-		} finally {
-			FileBuffers.getTextFileBufferManager().disconnect(path, null);
-		}
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.System;\n");
+		buf.append("\n");		
+		buf.append("public class C {\n");
+		buf.append("    java.util.Vector.class x;\n"); // no change
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
 	}	
 
 	public void testAddImportActionStatic1() throws Exception {
@@ -987,31 +937,22 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 		
-		IPath path= cu.getPath();
+		int selOffset= buf.indexOf("separator");
 		
-		FileBuffers.getTextFileBufferManager().connect(path, null);
-		try {
-			IDocument doc= FileBuffers.getTextFileBufferManager().getTextFileBuffer(path).getDocument();
-			int selOffset= buf.indexOf("separator");
-		
-			AddImportsOperation op= new AddImportsOperation(cu, doc, selOffset, 0, null);
-			op.run(null);
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
+		op.run(null);
 
-			buf= new StringBuffer();
-			buf.append("package pack1;\n");
-			buf.append("\n");
-			buf.append("import static java.io.File.separator;\n");
-			buf.append("\n");
-			buf.append("import java.lang.System;\n");
-			buf.append("\n");		
-			buf.append("public class C {\n");
-			buf.append("    String str= separator;\n");
-			buf.append("}\n");
-			assertEqualString(doc.get(), buf.toString());
-
-		} finally {
-			FileBuffers.getTextFileBufferManager().disconnect(path, null);
-		}
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import static java.io.File.separator;\n");
+		buf.append("\n");
+		buf.append("import java.lang.System;\n");
+		buf.append("\n");		
+		buf.append("public class C {\n");
+		buf.append("    String str= separator;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
 	}	
 	
 	public void testAddImportContextSensitive01() throws Exception {

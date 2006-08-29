@@ -24,6 +24,7 @@ public final class CodeGenerationMessages extends NLS {
 	public static String AddImportsOperation_description;
 	public static String AddImportsOperation_error_notresolved_message;
 	public static String AddImportsOperation_error_importclash;
+	public static String AddImportsOperation_error_private_class;
 	public static String AddUnimplementedMethodsOperation_description;
 	public static String AddCustomConstructorOperation_description;
 	public static String OrganizeImportsOperation_description;

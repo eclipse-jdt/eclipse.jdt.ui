@@ -31,7 +31,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.DocumentEvent;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IEditingSupport;
 import org.eclipse.jface.text.IEditingSupportRegistry;
 import org.eclipse.jface.text.IRegion;
@@ -109,7 +108,6 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		if (fEditor == null) {
 			return null;
 		}
-
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 		return manager.getWorkingCopy(fEditor.getEditorInput());
 	}
@@ -127,11 +125,10 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			return;
 
 		ISelection selection= fEditor.getSelectionProvider().getSelection();
-		IDocument doc= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-		if (selection instanceof ITextSelection && doc != null) {
+		if (selection instanceof ITextSelection) {
 			final ITextSelection textSelection= (ITextSelection) selection;
 			AddImportOnSelectionAction.SelectTypeQuery query= new SelectTypeQuery(getShell());
-			AddImportsOperation op= new AddImportsOperation(cu, doc, textSelection.getOffset(), textSelection.getLength(), query);
+			AddImportsOperation op= new AddImportsOperation(cu, textSelection.getOffset(), textSelection.getLength(), query, false);
 			IEditingSupport helper= createViewerHelper(textSelection, query);
 			try {
 				registerHelper(helper);

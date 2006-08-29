@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
 
+import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
@@ -28,9 +29,9 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
@@ -90,11 +91,11 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	}
 	
 	private ICompilationUnit fCompilationUnit;
-	private final IDocument fDocument;
 	private final int fSelectionOffset;
 	private final int fSelectionLength;
 	private final IChooseImportQuery fQuery;
 	private IStatus fStatus;
+	private boolean fDoSave;
 	
 	
 	/**
@@ -102,23 +103,22 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	 * Elements must be of type IType (-> single import) or IPackageFragment
 	 * (on-demand-import). Other JavaElements are ignored
 	 * @param cu The compilation unit
-	 * @param document Document corresponding to the compilation unit
 	 * @param selectionOffset Start of the current text selection
 	 * 	@param selectionLength End of the current text selection
 	 * @param query Query element to be used for UI interaction or <code>null</code> to not select anything
 	 * when multiple possibilities are available
+	 * @param save If set, the result will be saved
 	 */
-	public AddImportsOperation(ICompilationUnit cu, IDocument document, int selectionOffset, int selectionLength, IChooseImportQuery query) {
+	public AddImportsOperation(ICompilationUnit cu, int selectionOffset, int selectionLength, IChooseImportQuery query, boolean save) {
 		super();
 		Assert.isNotNull(cu);
-		Assert.isNotNull(document);
 		
 		fCompilationUnit= cu;
-		fDocument= document;
 		fSelectionOffset= selectionOffset;
 		fSelectionLength= selectionLength;
 		fQuery= query;
 		fStatus= Status.OK_STATUS;
+		fDoSave= save;
 	}
 	
 	/**
@@ -139,19 +139,24 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			monitor= new NullProgressMonitor();
 		}
 		try {
-			monitor.beginTask(CodeGenerationMessages.AddImportsOperation_description, 15); 
+			monitor.beginTask(CodeGenerationMessages.AddImportsOperation_description, 4); 
 			
-			CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(fCompilationUnit, ASTProvider.WAIT_YES, new SubProgressMonitor(monitor, 5));
+			CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(fCompilationUnit, ASTProvider.WAIT_YES, new SubProgressMonitor(monitor, 1));
 
 			ImportRewrite importRewrite= StubUtility.createImportRewrite(astRoot, true);
 			
-			TextEdit edit= evaluateEdits(astRoot, importRewrite, fSelectionOffset, fSelectionLength, new SubProgressMonitor(monitor, 5));
-			if (edit != null) {
-				edit.apply(fDocument, 0);
-				
-				TextEdit importsEdit= importRewrite.rewriteImports(new SubProgressMonitor(monitor, 5));
-				importsEdit.apply(fDocument, 0);
+			MultiTextEdit res= new MultiTextEdit();
+			
+			TextEdit edit= evaluateEdits(astRoot, importRewrite, fSelectionOffset, fSelectionLength, new SubProgressMonitor(monitor, 1));
+			if (edit == null) {
+				return;
 			}
+			res.addChild(edit);
+				
+			TextEdit importsEdit= importRewrite.rewriteImports(new SubProgressMonitor(monitor, 1));
+			res.addChild(importsEdit);
+			
+			JavaModelUtil.applyEdit(fCompilationUnit, res, fDoSave, new SubProgressMonitor(monitor, 1));
 		} catch (BadLocationException e) {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		} finally {
@@ -226,6 +231,11 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 						return null; // variablebinding.getDeclaringClass() is null for array.length
 					}
 					if (Modifier.isStatic(binding.getModifiers())) {
+						if (Modifier.isPrivate(declaringClass.getModifiers())) {
+							fStatus= JavaUIStatus.createError(IStatus.ERROR, Messages.format(CodeGenerationMessages.AddImportsOperation_error_private_class, declaringClass.getName()), null);
+							return null;
+						}
+						
 						if (containerName.length() > 0) { 
 							if (containerName.equals(declaringClass.getName()) || containerName.equals(declaringClass.getQualifiedName()) ) {
 								String res= importRewrite.addStaticImport(declaringClass.getQualifiedName(), binding.getName(), isField);
@@ -244,15 +254,17 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			}
 			
 		} else {
-			qualifierStart= getNameStart(fDocument, offset);
-			int nameEnd= getNameEnd(fDocument, offset + length);
+			IBuffer buffer= fCompilationUnit.getBuffer();
+			
+			qualifierStart= getNameStart(buffer, offset);
+			int nameEnd= getNameEnd(buffer, offset + length);
 			int len= nameEnd - qualifierStart;
 			
-			name= fDocument.get(qualifierStart, len).trim();
+			name= buffer.getText(qualifierStart, len).trim();
 			simpleName= Signature.getSimpleName(name);
 			containerName= Signature.getQualifier(name);
 			
-			simpleNameStart= getSimpleNameStart(fDocument, qualifierStart, containerName);
+			simpleNameStart= getSimpleNameStart(buffer, qualifierStart, containerName);
 			
 			int res= importRewrite.getDefaultImportRewriteContext().findInContext(containerName, simpleName, ImportRewriteContext.KIND_TYPE);
 			if (res == ImportRewriteContext.RES_NAME_CONFLICT) {
@@ -287,9 +299,9 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	}
 
 	
-	private int getNameStart(IDocument doc, int pos) throws BadLocationException {
+	private int getNameStart(IBuffer buffer, int pos) throws BadLocationException {
 		while (pos > 0) {
-			char ch= doc.getChar(pos - 1);
+			char ch= buffer.getChar(pos - 1);
 			if (!Character.isJavaIdentifierPart(ch) && ch != '.') {
 				return pos;
 			}
@@ -298,7 +310,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		return pos;
 	}
 	
-	private int getNameEnd(IDocument doc, int pos) throws BadLocationException {
+	private int getNameEnd(IBuffer doc, int pos) throws BadLocationException {
 		if (pos > 0) {
 			if (Character.isWhitespace(doc.getChar(pos - 1))) {
 				return pos;
@@ -315,16 +327,16 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		return pos;
 	}
 	
-	private int getSimpleNameStart(IDocument doc, int nameStart, String containerName) throws BadLocationException {
+	private int getSimpleNameStart(IBuffer buffer, int nameStart, String containerName) throws BadLocationException {
 		int containerLen= containerName.length();
-		int docLen= doc.getLength();
+		int docLen= buffer.getLength();
 		if ((containerLen > 0) && (nameStart + containerLen + 1 < docLen)) {
 			for (int k= 0; k < containerLen; k++) {
-				if (doc.getChar(nameStart + k) != containerName.charAt(k)) {
+				if (buffer.getChar(nameStart + k) != containerName.charAt(k)) {
 					return nameStart;
 				}
 			}
-			if (doc.getChar(nameStart + containerLen) == '.') {
+			if (buffer.getChar(nameStart + containerLen) == '.') {
 				return nameStart + containerLen + 1;
 			}
 		}
