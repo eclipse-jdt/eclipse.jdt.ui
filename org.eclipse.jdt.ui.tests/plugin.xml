@@ -151,13 +151,7 @@
             id="org.eclipse.jdt.ui.examples.MyQuickFixProcessor">
          <enablement>
 	           <with variable="compilationUnit">
-	            <adapt
-	                  type="org.eclipse.core.resources.IResource">
-	               <test
-	                     value="A.java"
-	                     property="org.eclipse.jdt.internal.ui.matchesPattern">
-	               </test>
-	            </adapt>
+	              <test property="org.eclipse.jdt.core.name" value="A.java"/>
 	           </with>  
          </enablement>
 
