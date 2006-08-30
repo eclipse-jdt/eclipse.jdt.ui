@@ -62,6 +62,7 @@ import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
@@ -343,6 +344,10 @@ public class JavaPlugin extends AbstractUIPlugin {
 		// Initialize AST provider
 		getASTProvider();
 		new InitializeAfterLoadJob().schedule();
+		
+		// make sure is loaded too for org.eclipse.jdt.core.manipulation
+		// can be removed if JavaElementPropertyTester is moved down to jdt.core (bug 127085)
+		JavaManipulation.class.toString();
 	}
 
 	/* package */ static void initializeAfterLoad(IProgressMonitor monitor) {
