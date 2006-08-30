@@ -17,7 +17,7 @@
         id="org.eclipse.jdt.core.javaElementPropertyTester"
         class="org.eclipse.jdt.internal.core.manipulation.JavaElementPropertyTester"
         namespace="org.eclipse.jdt.core"
-        properties="name,isOnClasspath,inSourceFolder,inArchive,inExternalArchive,projectOption"
+        properties="name,isInJavaProject,isOnClasspath,hasTypeOnClasspath,inSourceFolder,inArchive,inExternalArchive,projectOption"
         type="org.eclipse.jdt.core.IJavaElement"/>
    </extension>
 
