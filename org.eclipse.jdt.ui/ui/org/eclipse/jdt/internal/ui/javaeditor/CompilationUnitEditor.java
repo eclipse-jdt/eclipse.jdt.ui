@@ -89,8 +89,6 @@ import org.eclipse.ui.texteditor.ResourceAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
-import org.eclipse.ui.editors.text.EditorsUI;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -1401,23 +1399,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 	public boolean isSaveAsAllowed() {
 		return true;
-	}
-
-	/**
-	 * The compilation unit editor implementation of this  <code>AbstractTextEditor</code>
-	 * method asks the user for the workspace path of a file resource and saves the document
-	 * there. See http://dev.eclipse.org/bugs/show_bug.cgi?id=6295
-	 * <p>
-	 * XXX: This method will be removed in 3.3: for now tell the subclass to handle it.
-	 * </p>
-	 *
-	 * @param progressMonitor the progress monitor
-	 */
-	protected void performSaveAs(IProgressMonitor progressMonitor) {
-		IPreferenceStore store= EditorsUI.getPreferenceStore();
-		String key= getEditorSite().getId() + ".internal.delegateSaveAs"; //$NON-NLS-1$
-		store.setValue(key, true);
-		super.performSaveAs(progressMonitor);
 	}
 
 	/*
