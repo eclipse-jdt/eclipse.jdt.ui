@@ -122,6 +122,11 @@ public class JavaElementPropertyTesterTest extends TestCase {
 
 	public void testJavaElementPropertyTester() {
 		JavaElementPropertyTester tester= new JavaElementPropertyTester();
+		
+		assertEquals(true, tester.test(fJProject1, JavaElementPropertyTester.NAME, new Object[0], "Test"));
+		assertEquals(true, tester.test(fJProject1, JavaElementPropertyTester.NAME, new Object[0], "T.*"));
+		assertEquals(false, tester.test(fJProject1, JavaElementPropertyTester.NAME, new Object[0], "Tests"));
+		
 
 		IJavaElement[] allElements=
 			{ fJProject1, fOtherProject, fOtherClosedProject, fJProject1.getJavaModel(), fJDK, fSourceFolder, fLocalArchive, fFolder, fPack, fCU };
@@ -157,9 +162,14 @@ public class JavaElementPropertyTesterTest extends TestCase {
 	
 		fJProject1.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_6);
 		
-		assertEquals(false, tester.test(fJProject1, JavaElementPropertyTester.PROJECT_OPTION, args , null));
+		assertEquals(false, tester.test(fJProject1, JavaElementPropertyTester.PROJECT_OPTION, args, null));
 
+		assertEquals(true, tester.test(fJProject1, JavaElementPropertyTester.HAS_TYPE_ON_CLASSPATH, args, "org.test.A"));
+		assertEquals(false, tester.test(fJProject1, JavaElementPropertyTester.HAS_TYPE_ON_CLASSPATH, args, "junit.framework.Test"));
+		assertEquals(false, tester.test(fOtherClosedProject, JavaElementPropertyTester.HAS_TYPE_ON_CLASSPATH, args, "org.test.A"));
 		
+		assertEquals(true, tester.test(fSourceFolder, JavaElementPropertyTester.HAS_TYPE_ON_CLASSPATH, args, "java.util.ArrayList"));
+
 	}
 	
 	
