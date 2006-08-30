@@ -206,6 +206,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaBasePreferencePage_inView;
 	public static String JavaBasePreferencePage_inPerspective;
 	public static String JavaEditorPreferencePage_quickassist_lightbulb;
+	public static String JavaEditorPreferencePage_showJavaElementOnly;
 	public static String JavaEditorPreferencePage_accessibility_disableCustomCarets;
 	public static String JavaEditorPreferencePage_accessibility_wideCaret;
 	public static String JavaEditorHoverConfigurationBlock_annotationRollover;

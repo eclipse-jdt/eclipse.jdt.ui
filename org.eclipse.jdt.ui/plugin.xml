@@ -2802,15 +2802,6 @@
    <extension
          point="org.eclipse.ui.actionSetPartAssociations">
       <actionSetPartAssociation
-            targetID="org.eclipse.ui.edit.text.actionSet.presentation">
-         <part
-               id="org.eclipse.jdt.ui.CompilationUnitEditor">
-         </part>
-         <part
-               id="org.eclipse.jdt.ui.ClassFileEditor">
-         </part>
-      </actionSetPartAssociation>
-      <actionSetPartAssociation
             targetID="org.eclipse.jdt.ui.text.java.actionSet.presentation">
          <part
                id="org.eclipse.jdt.ui.CompilationUnitEditor">
