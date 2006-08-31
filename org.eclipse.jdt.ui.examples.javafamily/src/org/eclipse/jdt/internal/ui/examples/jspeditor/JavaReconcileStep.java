@@ -14,11 +14,12 @@ package org.eclipse.jdt.internal.ui.examples.jspeditor;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 
-import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.reconciler.AbstractReconcileStep;

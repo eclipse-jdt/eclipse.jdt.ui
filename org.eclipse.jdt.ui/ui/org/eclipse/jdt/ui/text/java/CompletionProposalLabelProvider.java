@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.text.java;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 
-import org.eclipse.jface.text.Assert;
 
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;

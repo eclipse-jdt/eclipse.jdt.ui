@@ -11,8 +11,9 @@
 
 package org.eclipse.jdt.internal.ui.javaeditor;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.text.Assert;
 
 import org.eclipse.ui.PlatformUI;
 

@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
@@ -21,7 +22,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.jface.text.Assert;
 
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWindowListener;

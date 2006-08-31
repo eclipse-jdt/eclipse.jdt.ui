@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.template.contentassist;
 
-import org.eclipse.jface.text.Assert;
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.link.LinkedPositionGroup;

@@ -15,9 +15,9 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jface.text.Assert;
 
 import org.eclipse.ui.IEditorInput;
 

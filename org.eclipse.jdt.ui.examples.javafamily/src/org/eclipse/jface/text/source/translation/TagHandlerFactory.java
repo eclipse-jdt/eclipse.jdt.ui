@@ -14,7 +14,8 @@ package org.eclipse.jface.text.source.translation;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.jface.text.Assert;
+import org.eclipse.core.runtime.Assert;
+
 
 /**
  * Default implementation of a tag handler factory

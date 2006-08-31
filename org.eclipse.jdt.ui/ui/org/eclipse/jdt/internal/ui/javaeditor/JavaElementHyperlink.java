@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.action.IAction;
 
-import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 

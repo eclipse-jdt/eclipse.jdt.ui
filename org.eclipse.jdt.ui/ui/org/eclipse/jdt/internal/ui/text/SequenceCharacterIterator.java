@@ -12,7 +12,8 @@ package org.eclipse.jdt.internal.ui.text;
 
 import java.text.CharacterIterator;
 
-import org.eclipse.jface.text.Assert;
+import org.eclipse.core.runtime.Assert;
+
 
 
 /**
