@@ -11,9 +11,9 @@
 
 package org.eclipse.jdt.internal.junit.util;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jface.util.Assert;
 
 /**
  * An implemention of IStatus. 

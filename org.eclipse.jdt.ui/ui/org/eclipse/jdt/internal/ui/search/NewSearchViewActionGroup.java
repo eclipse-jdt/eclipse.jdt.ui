@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
@@ -18,7 +20,6 @@ import org.eclipse.jdt.ui.actions.NavigateActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.actions.ActionGroup;

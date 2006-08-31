@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.workingsets;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbenchPartSite;

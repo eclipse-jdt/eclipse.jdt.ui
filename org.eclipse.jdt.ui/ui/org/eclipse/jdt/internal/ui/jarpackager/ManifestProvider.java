@@ -15,9 +15,9 @@ import java.io.InputStream;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.core.IPackageFragment;
 

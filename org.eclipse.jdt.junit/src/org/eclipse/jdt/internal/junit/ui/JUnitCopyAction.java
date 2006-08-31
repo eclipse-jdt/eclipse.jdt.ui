@@ -16,6 +16,8 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
@@ -27,7 +29,6 @@ import org.eclipse.ui.actions.SelectionListenerAction;
 import org.eclipse.jdt.internal.junit.model.TestElement;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.util.Assert;
 
 /**
  * Copies a test failure stack trace to the clipboard.

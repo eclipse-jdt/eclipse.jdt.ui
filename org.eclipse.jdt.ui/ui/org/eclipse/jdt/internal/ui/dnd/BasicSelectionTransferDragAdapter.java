@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dnd;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSourceAdapter;
 import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.Transfer;
 
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.TransferDragSourceListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;

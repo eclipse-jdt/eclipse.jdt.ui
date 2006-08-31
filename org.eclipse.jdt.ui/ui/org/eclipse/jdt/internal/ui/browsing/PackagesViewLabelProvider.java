@@ -11,12 +11,13 @@
 
 package org.eclipse.jdt.internal.ui.browsing;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;

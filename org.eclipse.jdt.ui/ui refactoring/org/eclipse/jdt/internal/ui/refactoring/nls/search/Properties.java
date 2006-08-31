@@ -12,7 +12,8 @@ package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
 import java.util.Set;
 
-import org.eclipse.jface.util.Assert;
+import org.eclipse.core.runtime.Assert;
+
 
 
 class Properties extends java.util.Properties {

@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.browsing;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
 
 import org.eclipse.swt.events.HelpListener;
@@ -19,7 +20,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Widget;
 
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;

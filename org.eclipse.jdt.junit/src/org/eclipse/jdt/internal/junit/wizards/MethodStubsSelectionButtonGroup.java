@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.wizards;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -22,7 +24,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 

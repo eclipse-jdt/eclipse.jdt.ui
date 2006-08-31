@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IActionDelegate;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;

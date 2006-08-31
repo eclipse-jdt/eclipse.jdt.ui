@@ -12,9 +12,10 @@ package org.eclipse.jdt.internal.ui.javaeditor.selectionactions;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jface.text.ITextSelection;
 

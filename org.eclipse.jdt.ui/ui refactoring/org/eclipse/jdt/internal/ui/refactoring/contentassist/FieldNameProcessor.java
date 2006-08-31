@@ -14,6 +14,8 @@ package org.eclipse.jdt.internal.ui.refactoring.contentassist;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.contentassist.IContentAssistSubjectControl;
@@ -24,7 +26,6 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 

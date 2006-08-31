@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
@@ -23,7 +24,6 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;

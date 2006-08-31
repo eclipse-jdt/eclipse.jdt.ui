@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.util;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.internal.junit.wizards.MethodStubsSelectionButtonGroup;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -21,7 +23,6 @@ import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 

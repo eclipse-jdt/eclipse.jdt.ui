@@ -19,10 +19,10 @@ import java.util.Map;
 
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;

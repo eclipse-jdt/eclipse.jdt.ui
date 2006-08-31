@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.StructuredViewer;
 
 import org.eclipse.core.resources.IResourceChangeEvent;

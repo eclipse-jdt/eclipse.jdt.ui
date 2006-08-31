@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.util.Assert;
 
 public class NLSElement {
 

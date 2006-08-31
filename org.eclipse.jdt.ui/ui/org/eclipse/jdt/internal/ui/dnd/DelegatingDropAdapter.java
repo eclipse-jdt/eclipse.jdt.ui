@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dnd;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.SafeRunner;
 
 import org.eclipse.swt.dnd.DND;
@@ -18,7 +19,6 @@ import org.eclipse.swt.dnd.DropTargetListener;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.TransferData;
 
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.jface.util.TransferDropTargetListener;
 

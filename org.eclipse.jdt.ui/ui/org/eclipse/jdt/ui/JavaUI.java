@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IProject;
@@ -23,7 +24,6 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;

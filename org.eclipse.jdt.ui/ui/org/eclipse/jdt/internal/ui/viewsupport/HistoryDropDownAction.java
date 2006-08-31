@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
@@ -21,7 +23,6 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IMenuCreator;
-import org.eclipse.jface.util.Assert;
 
 /*package*/ class HistoryDropDownAction extends Action {
 

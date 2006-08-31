@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.dialogs;
  
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -21,7 +23,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;

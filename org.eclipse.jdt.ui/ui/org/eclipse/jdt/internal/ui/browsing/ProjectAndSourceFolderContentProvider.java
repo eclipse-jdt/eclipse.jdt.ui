@@ -14,7 +14,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jface.util.Assert;
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.core.IJavaProject;

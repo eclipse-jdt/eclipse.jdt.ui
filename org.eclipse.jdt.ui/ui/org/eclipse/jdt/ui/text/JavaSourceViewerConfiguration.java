@@ -12,6 +12,7 @@ package org.eclipse.jdt.ui.text;
 
 import java.util.Vector;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.SWT;
@@ -19,7 +20,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.AbstractInformationControlManager;

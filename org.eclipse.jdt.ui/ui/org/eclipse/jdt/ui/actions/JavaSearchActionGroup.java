@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;

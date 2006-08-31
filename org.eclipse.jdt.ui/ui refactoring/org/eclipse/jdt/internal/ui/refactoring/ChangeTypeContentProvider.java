@@ -15,10 +15,11 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
+
 //import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 

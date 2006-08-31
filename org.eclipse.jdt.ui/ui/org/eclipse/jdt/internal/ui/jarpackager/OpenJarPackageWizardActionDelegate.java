@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.io.IOException;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFile;
@@ -21,7 +22,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionReader;

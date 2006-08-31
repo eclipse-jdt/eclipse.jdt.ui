@@ -12,7 +12,8 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets;
 
 import java.util.Iterator;
 
-import org.eclipse.jface.util.Assert;
+import org.eclipse.core.runtime.Assert;
+
 
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 

@@ -25,6 +25,7 @@ import java.util.jar.Manifest;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -36,7 +37,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 

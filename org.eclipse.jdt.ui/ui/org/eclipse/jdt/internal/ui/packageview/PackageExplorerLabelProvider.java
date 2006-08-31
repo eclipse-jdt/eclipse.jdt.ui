@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IFolder;
 
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.core.IPackageFragment;
 
