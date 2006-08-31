@@ -216,7 +216,12 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
             public void dialogFieldChanged(DialogField field) {
                 boolean isUseFolders= fUseFolderOutputs.isSelected();
                 if (isUseFolders) {
-                	ResetAllOutputFoldersAction action= new ResetAllOutputFoldersAction(fContext, fJavaProject, fPackageExplorer);
+                	ResetAllOutputFoldersAction action= new ResetAllOutputFoldersAction(fContext, fJavaProject, fPackageExplorer) {
+                		public void run() {
+                    		commitDefaultOutputFolder();
+                    	    super.run();
+                    	}
+                	};
                 	action.addBuildpathModifierListener(NewSourceContainerWorkbookPage.this);
                 	action.run();
                 }

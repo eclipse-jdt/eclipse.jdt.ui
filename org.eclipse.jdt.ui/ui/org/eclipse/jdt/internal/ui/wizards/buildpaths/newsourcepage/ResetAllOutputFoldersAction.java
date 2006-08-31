@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.part.ISetSelectionTarget;
@@ -75,8 +74,7 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
 		final IRunnableWithProgress runnable= new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
-					List result= resetOutputFolders(fJavaProject, monitor);
-					selectAndReveal(new StructuredSelection(result));					
+					resetOutputFolders(fJavaProject, monitor);					
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				}
