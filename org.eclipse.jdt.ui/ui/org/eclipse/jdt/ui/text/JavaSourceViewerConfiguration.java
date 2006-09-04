@@ -511,34 +511,14 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		
 		Assert.isLegal(allowTabs || useSpaces);
 		
-		String[] result= null; // FIXME: directly return once finished with testing and debugging
-		
 		if (!allowTabs) {
 			char[] spaces= new char[indentWidth];
 			Arrays.fill(spaces, ' ');
-			result= new String[] { new String(spaces), "" }; //$NON-NLS-1$
+			return new String[] { new String(spaces), "" }; //$NON-NLS-1$
 		} else if  (!useSpaces)
-			result= getIndentPrefixesForTab(tabWidth);
-		else {
-			result= getIndentPrefixesForSpaces(tabWidth);
-		}
-		
-		// sysout
-		for (int i= 0; i < result.length; i++) {
-			String prefix= result[i];
-			for (int j= 0; j < prefix.length(); j++) {
-				char ch= prefix.charAt(j);
-				if (ch == '\t')
-					System.out.print('t');
-				else if (ch == ' ')
-					System.out.print('s');
-				else
-					org.eclipse.core.runtime.Assert.isTrue(false);
-			}
-			System.out.println();
-		}
-
-		return result;
+			return getIndentPrefixesForTab(tabWidth);
+		else
+			return getIndentPrefixesForSpaces(tabWidth);
 	}
 
 	/**
