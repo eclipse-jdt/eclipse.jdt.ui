@@ -206,7 +206,7 @@ public class JavaContext extends CompilationUnitContext {
 			int start= getCompletionOffset();
 			int end= getCompletionOffset() + getCompletionLength();
 			
-			while (start != 0 && Character.isUnicodeIdentifierPart(document.getChar(start - 1)))
+			while (start != 0 && !Character.isWhitespace(document.getChar(start - 1)))
 				start--;
 			
 			while (start != end && Character.isWhitespace(document.getChar(start)))

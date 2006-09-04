@@ -46,6 +46,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -143,7 +144,7 @@ public class EditTemplateDialog extends StatusDialog {
 	private boolean fIsNameModifiable;
 
 	private StatusInfo fValidationStatus;
-	private boolean fSuppressError= true; // #4354	
+	private boolean fSuppressError= true; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=4354	
 	private Map fGlobalActions= new HashMap(10);
 	private List fSelectionActions = new ArrayList(3);	
 	private String[][] fContextTypes;
@@ -199,13 +200,9 @@ public class EditTemplateDialog extends StatusDialog {
 	 */
 	public void create() {
 		super.create();
-		// update initial OK button to be disabled for new templates 
-		boolean valid= fNameText == null || fNameText.getText().trim().length() != 0;
-		if (!valid) {
-			StatusInfo status = new StatusInfo();
-			status.setError(PreferencesMessages.EditTemplateDialog_error_noname); 
-			updateButtonsEnableState(status);
- 		}
+		updateStatusAndButtons();
+		boolean isEmpty= fNameText != null && fNameText.getText().length() == 0;
+		getButton(IDialogConstants.OK_ID).setEnabled(!isEmpty);
 	}
 	
 	/*
@@ -244,7 +241,7 @@ public class EditTemplateDialog extends StatusDialog {
 				public void focusLost(FocusEvent e) {
 					if (fSuppressError) {
 						fSuppressError= false;
-						updateButtons();
+						updateStatusAndButtons();
 					}
 				}
 			});
@@ -313,7 +310,7 @@ public class EditTemplateDialog extends StatusDialog {
 	protected void doTextWidgetChanged(Widget w) {
 		if (w == fNameText) {
 			fSuppressError= false;
-			updateButtons();			
+			updateStatusAndButtons();			
 		} else if (w == fContextCombo) {
 			String contextId= getContextId();
 			fTemplateProcessor.setContextType(fContextTypeRegistry.getContextType(contextId));
@@ -352,7 +349,7 @@ public class EditTemplateDialog extends StatusDialog {
 		}
 
 		updateUndoAction();
-		updateButtons();
+		updateStatusAndButtons();
 	}	
 
 	private static GridData getButtonGridData(Button button) {
@@ -559,21 +556,19 @@ public class EditTemplateDialog extends StatusDialog {
 		super.okPressed();
 	}
 	
-	private void updateButtons() {		
-		StatusInfo status;
-
-		boolean valid= fNameText == null || fNameText.getText().trim().length() != 0;
-		if (!valid) {
-			status = new StatusInfo();
-			if (!fSuppressError) {
-				status.setError(PreferencesMessages.EditTemplateDialog_error_noname); 
-			}
- 		} else {
- 			status= fValidationStatus; 
- 		}
+	private void updateStatusAndButtons() {		
+		StatusInfo status= fValidationStatus;
+		boolean isEmpty= fNameText != null && fNameText.getText().length() == 0;
+		if (!fSuppressError && isEmpty) {
+			status= new StatusInfo();
+			status.setError(PreferencesMessages.EditTemplateDialog_error_noname); 
+		} else if (fNameText != null && fNameText.getText().indexOf(' ') > -1) {
+			status= new StatusInfo();
+			status.setError(PreferencesMessages.EditTemplateDialog_error_spaces); 
+		}
 		updateStatus(status);
 	}
-
+	
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
