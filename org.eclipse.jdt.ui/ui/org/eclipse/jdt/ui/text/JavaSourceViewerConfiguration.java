@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.text;
 
-import java.util.Vector;
+import java.util.Arrays;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -496,44 +496,88 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * @see SourceViewerConfiguration#getIndentPrefixes(ISourceViewer, String)
 	 */
 	public String[] getIndentPrefixes(ISourceViewer sourceViewer, String contentType) {
-
-		Vector vector= new Vector();
-
-		// prefix[0] is either '\t' or ' ' x tabWidth, depending on useSpaces
-
-		IJavaProject project= getProject();
+ 		IJavaProject project= getProject();
 		final int tabWidth= CodeFormatterUtil.getTabWidth(project);
 		final int indentWidth= CodeFormatterUtil.getIndentWidth(project);
-		int spaceEquivalents= Math.min(tabWidth, indentWidth);
-		boolean useSpaces;
+		boolean allowTabs= tabWidth <= indentWidth;
+		
+		String indentMode;
 		if (project == null)
-			useSpaces= JavaCore.SPACE.equals(JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR)) || tabWidth > indentWidth;
+			indentMode= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
 		else
-			useSpaces= JavaCore.SPACE.equals(project.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, true)) || tabWidth > indentWidth;
+			indentMode= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, true);
 
-		for (int i= 0; i <= spaceEquivalents; i++) {
-		    StringBuffer prefix= new StringBuffer();
-
-			if (useSpaces) {
-			    for (int j= 0; j + i < spaceEquivalents; j++)
-			    	prefix.append(' ');
-
-				if (i != 0)
-		    		prefix.append('\t');
-			} else {
-			    for (int j= 0; j < i; j++)
-			    	prefix.append(' ');
-
-				if (i != spaceEquivalents)
-		    		prefix.append('\t');
+		boolean useSpaces= JavaCore.SPACE.equals(indentMode) || DefaultCodeFormatterConstants.MIXED.equals(indentMode);
+		
+		Assert.isLegal(allowTabs || useSpaces);
+		
+		String[] result= null; // FIXME: directly return once finished with testing and debugging
+		
+		if (!allowTabs) {
+			char[] spaces= new char[indentWidth];
+			Arrays.fill(spaces, ' ');
+			result= new String[] { new String(spaces), "" }; //$NON-NLS-1$
+		} else if  (!useSpaces)
+			result= getIndentPrefixesForTab(tabWidth);
+		else {
+			result= getIndentPrefixesForSpaces(tabWidth);
+		}
+		
+		// sysout
+		for (int i= 0; i < result.length; i++) {
+			String prefix= result[i];
+			for (int j= 0; j < prefix.length(); j++) {
+				char ch= prefix.charAt(j);
+				if (ch == '\t')
+					System.out.print('t');
+				else if (ch == ' ')
+					System.out.print('s');
+				else
+					org.eclipse.core.runtime.Assert.isTrue(false);
 			}
-
-			vector.add(prefix.toString());
+			System.out.println();
 		}
 
-		vector.add(""); //$NON-NLS-1$
+		return result;
+	}
 
-		return (String[]) vector.toArray(new String[vector.size()]);
+	/**
+	 * Computes and returns the indent prefixes for space indentation
+	 * and the given <code>tabWidth</code>.
+	 * 
+	 * @param tabWidth the display tab width
+	 * @return the indent prefixes
+	 * @see #getIndentPrefixes(ISourceViewer, String)
+	 * @since 3.3
+	 */
+	private String[] getIndentPrefixesForSpaces(int tabWidth) {
+		String[] indentPrefixes= new String[tabWidth + 2];
+		indentPrefixes[0]= getStringWithSpaces(tabWidth);
+		
+		for (int i= 0; i < tabWidth; i++) {
+			String spaces= getStringWithSpaces(i);
+			if (i < tabWidth)
+				indentPrefixes[i+1]= spaces + '\t';
+			else
+				indentPrefixes[i+1]= new String(spaces);
+		}
+		
+		indentPrefixes[tabWidth + 1]= ""; //$NON-NLS-1$
+
+		return indentPrefixes;
+	}
+
+	/**
+	 * Creates and returns a String with <code>count</code> spaces.
+	 * 
+	 * @param count	the space count
+	 * @return the string with the spaces
+	 * @since 3.3
+	 */
+	private String getStringWithSpaces(int count) {
+		char[] spaceChars= new char[count];
+		Arrays.fill(spaceChars, ' ');
+		return new String(spaceChars);
 	}
 
 	private IJavaProject getProject() {
@@ -896,4 +940,5 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 		return detectors;
 	}
+	
 }
