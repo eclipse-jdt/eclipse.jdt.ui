@@ -19,7 +19,7 @@ public interface ITestLoader {
 	 * @param testName individual method to be run
 	 * @param failureNames may want to run these first, since they failed
 	 * @param listener to be notified if tests could not be loaded
-	 * @return
+	 * @return the loaded test references
 	 */
 	public abstract ITestReference[] loadTests(Class[] testClasses, String testName, String[] failureNames, RemoteTestRunner listener);
 }
