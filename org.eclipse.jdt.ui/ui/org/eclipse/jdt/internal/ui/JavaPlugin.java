@@ -647,7 +647,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @return an array of JavaEditorTextHoverDescriptor
 	 * @since 2.1
 	 */
-	public JavaEditorTextHoverDescriptor[] getJavaEditorTextHoverDescriptors() {
+	public synchronized JavaEditorTextHoverDescriptor[] getJavaEditorTextHoverDescriptors() {
 		if (fJavaEditorTextHoverDescriptors == null) {
 			fJavaEditorTextHoverDescriptors= JavaEditorTextHoverDescriptor.getContributedHovers();
 			ConfigurationElementSorter sorter= new ConfigurationElementSorter() {
@@ -685,7 +685,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * 
 	 * @since 2.1
 	 */
-	public void resetJavaEditorTextHoverDescriptors() {
+	public synchronized void resetJavaEditorTextHoverDescriptors() {
 		fJavaEditorTextHoverDescriptors= null;
 	}
 
