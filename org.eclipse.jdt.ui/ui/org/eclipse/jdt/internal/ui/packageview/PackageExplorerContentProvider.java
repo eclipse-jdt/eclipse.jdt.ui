@@ -29,6 +29,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
+import org.eclipse.ui.IWorkingSet;
+
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -113,6 +115,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		if ((fInput instanceof IResource) && ((IResource) fInput).exists())
 			return false;
 		if (fInput instanceof WorkingSetModel)
+			return false;
+		if (fInput instanceof IWorkingSet) // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=156239
 			return false;
 		postRefresh(fInput, ORIGINAL, fInput);
 		return true;
