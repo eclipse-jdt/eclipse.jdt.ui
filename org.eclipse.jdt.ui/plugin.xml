@@ -12,7 +12,6 @@
    <extension-point id="queryParticipants" name="%queryParticipantsExtensionPoint" schema="schema/queryParticipants.exsd"/>
    <extension-point id="javaCompletionProposalComputer" name="%javaCompletionProposalComputer" schema="schema/javaCompletionProposalComputer.exsd"/>
    <extension-point id="javaCompletionProposalSorters" name="%javaCompletionProposalSorters" schema="schema/javaCompletionProposalSorters.exsd"/>
-   <extension-point id="internal_refactoringElementFilter" name="%internal_refactoringElementFilter" schema="schema/internal_refactoringElementFilter.exsd"/>
    
 
 <extension

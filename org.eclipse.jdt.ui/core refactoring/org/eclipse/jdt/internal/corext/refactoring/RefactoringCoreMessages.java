@@ -1528,10 +1528,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RefactoringAnalyzeUtil_name_collision;
 
-	public static String RefactoringElementFilterDescriptor_filterCreationError_message;
-
-	public static String RefactoringElementFilterDescriptor_filterDescriptionCreationError_message;
-
 	public static String RefactoringSearchEngine_binary_match_grouped;
 
 	public static String RefactoringSearchEngine_binary_match_ungrouped;

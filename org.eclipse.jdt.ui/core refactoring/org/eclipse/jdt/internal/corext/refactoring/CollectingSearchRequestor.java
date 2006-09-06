@@ -30,9 +30,6 @@ public class CollectingSearchRequestor extends SearchRequestor {
 	 * @see org.eclipse.jdt.core.search.SearchRequestor#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)
 	 */
 	public void acceptSearchMatch(SearchMatch match) throws CoreException {
-		if (RefactoringSearchEngine.isFiltered(match))
-			return;
-
 		fFound.add(match);
 	}
 

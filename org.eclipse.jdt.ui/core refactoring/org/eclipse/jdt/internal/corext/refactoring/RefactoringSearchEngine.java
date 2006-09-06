@@ -47,11 +47,6 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
  */
 public class RefactoringSearchEngine {
 
-	public static boolean isFiltered(SearchMatch match) {
-		ICompilationUnit cu= SearchUtils.getCompilationUnit(match);
-		return RefactoringElementFilterDescriptor.isFiltered(cu);
-	}
-
 	private RefactoringSearchEngine(){
 		//no instances
 	}
@@ -67,8 +62,6 @@ public class RefactoringSearchEngine {
 		SearchRequestor requestor = new SearchRequestor() {
 			private IResource fLastResource;
 			public void acceptSearchMatch(SearchMatch match) {
-				if (isFiltered(match))
-					return;
 				if (match.getAccuracy() == SearchMatch.A_INACCURATE)
 					hasPotentialMatches[0]= true;
 				if (fLastResource != match.getResource()) {

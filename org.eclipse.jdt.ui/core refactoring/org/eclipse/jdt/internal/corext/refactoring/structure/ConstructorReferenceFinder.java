@@ -44,7 +44,6 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringElementFilterDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
@@ -236,8 +235,6 @@ class ConstructorReferenceFinder {
 		List result= new ArrayList(subTypes.length);
 		for (int i= 0; i < subTypes.length; i++) {
 			if (! subTypes[i].isBinary()) {
-				if (RefactoringElementFilterDescriptor.isFiltered(subTypes[i].getCompilationUnit()))
-					continue;
 				result.add(subTypes[i]);
 			}
 		}
