@@ -20,6 +20,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -50,6 +51,14 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 
 	public CommentFormatCleanUp(IDialogSettings settings) {
 		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
+	}
+	
+	public CommentFormatCleanUp(Map options) {
+		super(options);
+	}
+	
+	public CommentFormatCleanUp() {
+		super();
 	}
 
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
@@ -101,11 +110,11 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 		buf.append("* @param i\n"); //$NON-NLS-1$
 		buf.append(" */\n"); //$NON-NLS-1$
 		buf.append("\n"); //$NON-NLS-1$
-		buf.append("//A single line comment\n"); //$NON-NLS-1$
-		buf.append("\n"); //$NON-NLS-1$
 		buf.append("/*\n"); //$NON-NLS-1$
 		buf.append("*A multi line comment\n"); //$NON-NLS-1$
 		buf.append("*/\n"); //$NON-NLS-1$
+		buf.append("\n"); //$NON-NLS-1$
+		buf.append("//A single line comment\n"); //$NON-NLS-1$
 		return CommentFormatFix.format(buf.toString(),
 				isFlag(SINGLE_LINE_COMMENT),
 				isFlag(MULTI_LINE_COMMENT),
@@ -128,5 +137,21 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 
     public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
 	    return false;
+    }
+    
+    protected int createFlag(Map options) {
+	    int flag= 0;
+		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.FORMAT_COMMENT))) {
+			if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT))) {
+				flag|= SINGLE_LINE_COMMENT;
+			}
+			if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.FORMAT_MULTI_LINE_COMMENT))) {
+				flag|= MULTI_LINE_COMMENT;
+			}
+			if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.FORMAT_JAVADOC))) {
+				flag|= JAVA_DOC;
+			}
+		}
+		return flag;
     }
 }

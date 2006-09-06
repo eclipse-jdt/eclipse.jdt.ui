@@ -18,33 +18,42 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 
 
-public class ProfileVersioner {
+public class ProfileVersioner implements IProfileVersioner {
 	
-	public static final int VERSION_1= 1; // < 20040113 (includes M6)
-	public static final int VERSION_2= 2; // before renaming almost all
-	public static final int VERSION_3= 3; // after renaming almost all
-	public static final int VERSION_4= 4; 
-	public static final int VERSION_5= 5; // after splitting of FORMATTER_INDENT_BLOCK_STATEMENTS
-	public static final int VERSION_6= 6; // after splitting of new_line_in_control_statements
-	public static final int VERSION_7= 7; // after moving comment formatter to JDT Core
-	public static final int VERSION_8= 8; // fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=89739
-	public static final int VERSION_9= 9; // after storing project profile names in preferences
-	public static final int VERSION_10= 10; // splitting options for annotation types
+	private static final int VERSION_1= 1; // < 20040113 (includes M6)
+	private static final int VERSION_2= 2; // before renaming almost all
+	private static final int VERSION_3= 3; // after renaming almost all
+	private static final int VERSION_4= 4; 
+	private static final int VERSION_5= 5; // after splitting of FORMATTER_INDENT_BLOCK_STATEMENTS
+	private static final int VERSION_6= 6; // after splitting of new_line_in_control_statements
+	private static final int VERSION_7= 7; // after moving comment formatter to JDT Core
+	private static final int VERSION_8= 8; // fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=89739
+	private static final int VERSION_9= 9; // after storing project profile names in preferences
+	private static final int VERSION_10= 10; // splitting options for annotation types
 	
-	public static final int CURRENT_VERSION= VERSION_10;
+	private static final int CURRENT_VERSION= VERSION_10;
 	
-	public static void updateAndComplete(CustomProfile profile) {
+	public int getFirstVersion() {
+	    return VERSION_1;
+    }
+
+	public int getCurrentVersion() {
+	    return CURRENT_VERSION;
+    }
+
+	public void update(CustomProfile profile) {
 		final Map oldSettings= profile.getSettings();
 		Map newSettings= updateAndComplete(oldSettings, profile.getVersion());
 		profile.setVersion(CURRENT_VERSION);
 		profile.setSettings(newSettings);
 	}
 	
-	public static Map updateAndComplete(Map oldSettings, int version) {
-		final Map newSettings= ProfileManager.getDefaultSettings();
+	private static Map updateAndComplete(Map oldSettings, int version) {
+		final Map newSettings= FormatterProfileManager.getDefaultSettings();
 		
 		switch (version) {
 

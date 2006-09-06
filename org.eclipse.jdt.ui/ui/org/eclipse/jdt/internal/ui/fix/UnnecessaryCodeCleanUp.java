@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 
@@ -44,6 +45,14 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 
 	public UnnecessaryCodeCleanUp(IDialogSettings settings) {
 		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
+	}
+	
+	public UnnecessaryCodeCleanUp(Map options) {
+		super(options);
+	}
+	
+	public UnnecessaryCodeCleanUp() {
+		super();
 	}
 	
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
@@ -145,5 +154,15 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 	public int getDefaultFlag() {
 		return DEFAULT_FLAG;
 	}
+	
+	protected int createFlag(Map options) {
+		int result= 0;
+		
+		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.REMOVE_UNNECESSARY_CASTS))) {
+			result|= REMOVE_UNUSED_CAST;
+		}
+		
+	    return result;
+    }
 
 }

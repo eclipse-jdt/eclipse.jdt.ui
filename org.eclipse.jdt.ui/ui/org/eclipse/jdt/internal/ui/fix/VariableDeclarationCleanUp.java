@@ -20,6 +20,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFix;
 
@@ -58,6 +59,14 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 
 	public VariableDeclarationCleanUp(IDialogSettings settings) {
 		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
+	}
+	
+	public VariableDeclarationCleanUp(Map options) {
+		super(options);
+	}
+	
+	public VariableDeclarationCleanUp() {
+		super();
 	}
 
 	/**
@@ -153,5 +162,24 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 	public int getDefaultFlag() {
 		return DEFAULT_FLAG;
 	}
+	
+    protected int createFlag(Map options) {
+    	int result= 0;
+    	
+    	if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL))) {
+    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES))) {
+    			result|= ADD_FINAL_MODIFIER_LOCAL_VARIABLES;
+    		}
+    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS))) {
+    			result|= ADD_FINAL_MODIFIER_PARAMETERS;
+    		}
+    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS))) {
+    			result|= ADD_FINAL_MODIFIER_FIELDS;
+    		}
+    	}
+    	
+	    return result;
+    }
+
 
 }

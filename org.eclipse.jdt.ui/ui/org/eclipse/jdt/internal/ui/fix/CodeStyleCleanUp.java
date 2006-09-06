@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CodeStyleFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 
@@ -116,6 +117,14 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 
 	public CodeStyleCleanUp(IDialogSettings settings) {
 		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
+	}
+	
+	public CodeStyleCleanUp(Map options) {
+		super(options);
+    }
+	
+	public CodeStyleCleanUp() {
+		super();
 	}
 
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
@@ -299,6 +308,43 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 	 */
 	public int getDefaultFlag() {
 		return DEFAULT_FLAG;
+	}
+	
+
+	protected int createFlag(Map options) {
+		int result= 0;
+		
+		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS))) {
+			if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS))) {
+				result|= QUALIFY_FIELD_ACCESS;
+			}
+			if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY))) {
+				result|= REMOVE_THIS_FIELD_QUALIFIER;
+			}
+		}
+		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS))) {
+			if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS))) {
+				result|= QUALIFY_METHOD_ACCESS;
+			}
+			if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY))) {
+				result|= REMOVE_THIS_METHOD_QUALIFIER;
+			}
+		}
+		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS))) {
+			if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD))) {
+				result|= QUALIFY_STATIC_FIELD_ACCESS;
+			}
+			if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_METHOD))) {
+				result|= QUALIFY_STATIC_METHOD_ACCESS;
+			}
+			if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS))) {
+				result|= CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT;
+			}
+			if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS))) {
+				result|= CHANGE_NON_STATIC_ACCESS_TO_STATIC;
+			}
+		}
+		return result;
 	}
 	
 }

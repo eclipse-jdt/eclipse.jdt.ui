@@ -42,9 +42,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -146,7 +143,7 @@ public abstract class ModifyDialogTabPage {
 	/**
 	 * Wrapper around a checkbox and a label. 
 	 */	
-	protected final class CheckboxPreference extends Preference {
+	protected class ButtonPreference extends Preference {
 		private final String[] fValues;
 		private final Button fCheckbox;
 		
@@ -158,16 +155,17 @@ public abstract class ModifyDialogTabPage {
 		 * @param key The key to store the values.
 		 * @param values An array of two elements indicating the values to store on unchecked/checked.
 		 * @param text The label text for this Preference.
+		 * @param style SWT style flag for the button
 		 */
-		public CheckboxPreference(Composite composite, int numColumns,
+		public ButtonPreference(Composite composite, int numColumns,
 								  Map preferences, String key, 
-								  String [] values, String text) {
+								  String [] values, String text, int style) {
 		    super(preferences, key);
 		    if (values == null || text == null) 
 		        throw new IllegalArgumentException(FormatterMessages.ModifyDialogTabPage_error_msg_values_text_unassigned); 
 			fValues= values;
 
-			fCheckbox= new Button(composite, SWT.CHECK);
+			fCheckbox= new Button(composite, style);
 			fCheckbox.setText(text);
 			fCheckbox.setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL, SWT.DEFAULT));
 			fCheckbox.setFont(composite.getFont());
@@ -206,6 +204,17 @@ public abstract class ModifyDialogTabPage {
 		}
 	}
 	
+	protected final class CheckboxPreference extends ButtonPreference {
+		public CheckboxPreference(Composite composite, int numColumns, Map preferences, String key, String[] values, String text) {
+	        super(composite, numColumns, preferences, key, values, text, SWT.CHECK);
+        }
+	}
+	
+	protected final class RadioPreference extends ButtonPreference {
+		public RadioPreference(Composite composite, int numColumns, Map preferences, String key, String[] values, String text) {
+	        super(composite, numColumns, preferences, key, values, text, SWT.RADIO);
+        }	
+	}
 	
 	/**
 	 * Wrapper around a Combo box.
@@ -507,24 +516,6 @@ public abstract class ModifyDialogTabPage {
 	 * when they are created.
 	 */
 	protected final DefaultFocusManager fDefaultFocusManager;
-	
-	
-	
-	/**
-	 * Constant array for boolean selection 
-	 */
-	protected static String[] FALSE_TRUE = {
-		DefaultCodeFormatterConstants.FALSE,
-		DefaultCodeFormatterConstants.TRUE
-	};	
-	
-    /**
-     * Constant array for insert / not_insert. 
-     */
-    protected static String[] DO_NOT_INSERT_INSERT = {
-        JavaCore.DO_NOT_INSERT,
-        JavaCore.INSERT
-    };
 
 	/**
 	 * A pixel converter for layout calculations
@@ -796,35 +787,20 @@ public abstract class ModifyDialogTabPage {
 		return pref;
 	}
 	
+	protected RadioPreference createRadioPref(Composite composite, int numColumns, String name, String key,
+			String [] values) {
+		final RadioPreference pref= new RadioPreference(composite, numColumns, 
+				fWorkingValues, key, values, name);
+		fDefaultFocusManager.add(pref);
+		pref.addObserver(fUpdater);
+		return pref;
+	}
+	
 
 	/*
 	 * Create a nice javadoc comment for some string.
 	 */
 	protected static String createPreviewHeader(String title) {
 		return "/**\n* " + title + "\n*/\n"; //$NON-NLS-1$ //$NON-NLS-2$
-	}
-
-	
+	}	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

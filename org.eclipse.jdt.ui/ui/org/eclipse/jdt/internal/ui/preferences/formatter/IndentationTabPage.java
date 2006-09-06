@@ -21,12 +21,19 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
-
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 
 public class IndentationTabPage extends ModifyDialogTabPage {
+	
+	/**
+	 * Constant array for boolean selection 
+	 */
+	private static String[] FALSE_TRUE = {
+		DefaultCodeFormatterConstants.FALSE,
+		DefaultCodeFormatterConstants.TRUE
+	};
 	
 	private final String PREVIEW=
 	createPreviewHeader(FormatterMessages.IndentationTabPage_preview_header) + 

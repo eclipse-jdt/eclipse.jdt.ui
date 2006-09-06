@@ -672,6 +672,18 @@
          <keywordReference id="org.eclipse.jdt.ui.formatter"/>
       </page>
       <page
+            name="%cleanUpPageName"
+            category="org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.CleanUpPreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.CleanUpPreferencePage">
+         <enabledWhen>
+		     <adapt type="org.eclipse.core.resources.IProject">
+		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+		     </adapt>         
+         </enabledWhen>
+         <keywordReference id="org.eclipse.jdt.ui.cleanup"/>
+      </page>
+      <page
             name="%codeTemplatePageName"
             category="org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.CodeTemplatePreferencePage"
@@ -1178,7 +1190,13 @@
             id="org.eclipse.jdt.ui.preferences.CodeFormatterPreferencePage">
             <keywordReference id="org.eclipse.jdt.ui.formatter"/>
       </page>
-      
+      <page
+            name="%cleanUpPrefName"
+            category="org.eclipse.jdt.ui.preferences.CodeStylePreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.CleanUpPreferencePage"
+            id="org.eclipse.jdt.ui.preferences.CleanUpPreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.cleanup"/>
+      </page>
       <page
             name="%buildPathPrefName"
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
@@ -1357,7 +1375,10 @@
             id="org.eclipse.jdt.ui.codetemplates"/>
       <keyword
             label="%preferenceKeywords.formatter"
-            id="org.eclipse.jdt.ui.formatter"/>      
+            id="org.eclipse.jdt.ui.formatter"/>  
+      <keyword
+            label="%preferenceKeywords.cleanup"
+            id="org.eclipse.jdt.ui.cleanup"/>     
       <keyword
             label="%preferenceKeywords.organizeimports"
             id="org.eclipse.jdt.ui.organizeimports"/>

@@ -37,6 +37,8 @@ public final class PreferencesMessages extends NLS {
 	public static String ClasspathVariablesPreferencePage_description;
 	public static String ClasspathVariablesPreferencePage_savechanges_title;
 	public static String ClasspathVariablesPreferencePage_savechanges_message;
+	public static String CleanUpPreferencePage_Description;
+	public static String CleanUpPreferencePage_Title;
 	public static String CodeAssistAdvancedConfigurationBlock_default_table_category_column_title;
 	public static String CodeAssistAdvancedConfigurationBlock_default_table_description;
 	public static String CodeAssistAdvancedConfigurationBlock_default_table_keybinding_column_title;

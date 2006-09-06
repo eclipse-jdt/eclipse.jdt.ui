@@ -196,12 +196,12 @@ public abstract class JavaPreview {
 	
 
 	
-	public final Map getWorkingValues() {
+	public Map getWorkingValues() {
 		return fWorkingValues;
 	}
 	
 	
-	public final void setWorkingValues(Map workingValues) {
+	public void setWorkingValues(Map workingValues) {
 		fWorkingValues= workingValues;
 	}
 }

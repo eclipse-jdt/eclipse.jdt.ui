@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
 
@@ -73,6 +74,14 @@ public class Java50CleanUp extends AbstractCleanUp {
 
 	public Java50CleanUp(IDialogSettings settings) {
 		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
+	}
+	
+	public Java50CleanUp(Map options) {
+		super(options);
+	}
+	
+	public Java50CleanUp() {
+		super();
 	}
 
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
@@ -209,5 +218,21 @@ public class Java50CleanUp extends AbstractCleanUp {
 	public int getDefaultFlag() {
 		return DEFAULT_FLAG;
 	}
+
+	protected int createFlag(Map options) {
+    	int result= 0;
+    	
+    	if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.ADD_MISSING_ANNOTATIONS))) {
+    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE))) {
+    			result|= ADD_OVERRIDE_ANNOATION;
+    		}
+    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED))) {
+    			result|= ADD_DEPRECATED_ANNOTATION;
+    		}
+    	}
+    	
+	    return result;
+    }
+
 	
 }

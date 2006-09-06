@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -154,10 +155,11 @@ public class CleanUpAction extends SelectionDispatchAction {
 			return;
 		
 		try {
-			RefactoringExecutionStarter.startCleanupRefactoring(cu);
-		} catch (JavaModelException e) {
+			RefactoringExecutionStarter.startCleanupRefactoring(new ICompilationUnit[] {cu}, getShell());
+		} catch (InvocationTargetException e) {
 			JavaPlugin.log(e);
-			showUnexpectedError(e);
+			if (e.getCause() instanceof CoreException)
+				showUnexpectedError((CoreException)e.getCause());
 		}
 		return;
 	}
@@ -181,10 +183,11 @@ public class CleanUpAction extends SelectionDispatchAction {
 		}
 			
 		try {
-			RefactoringExecutionStarter.startCleanupRefactoring(cus);
-		} catch (JavaModelException e) {
+			RefactoringExecutionStarter.startCleanupRefactoring(cus, getShell());
+		} catch (InvocationTargetException e) {
 			JavaPlugin.log(e);
-			showUnexpectedError(e);
+			if (e.getCause() instanceof CoreException)
+				showUnexpectedError((CoreException)e.getCause());
 		}
 		return;
 	}

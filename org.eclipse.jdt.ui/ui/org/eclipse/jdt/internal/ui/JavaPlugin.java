@@ -85,7 +85,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
+import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileStore;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.folding.JavaFoldingStructureProviderRegistry;
@@ -456,7 +456,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 			JavaDocLocations.migrateToClasspathAttributes();
 		}
 		
-		ProfileStore.checkCurrentOptionsVersion();
+		FormatterProfileStore.checkCurrentOptionsVersion();
 		
 		/*
 		 * Backward compatibility: migrate "alphabetic ordering" preference to point the sorter

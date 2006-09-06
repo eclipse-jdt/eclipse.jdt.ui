@@ -13,25 +13,27 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.swt.widgets.Composite;
 
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.jface.preference.IPreferenceStore;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.preferences.formatter.CodeFormatterConfigurationBlock;
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+
+import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpConfigurationBlock;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileConfigurationBlock;
 
 /*
- * The page to configure the code formatter options.
+ * The page to configure the clean up options.
  */
-public class CodeFormatterPreferencePage extends ProfilePreferencePage {
+public class CleanUpPreferencePage extends ProfilePreferencePage {
 
-	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.CodeFormatterPreferencePage"; //$NON-NLS-1$
-	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.CodeFormatterPreferencePage"; //$NON-NLS-1$
+	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.CleanUpPreferencePage"; //$NON-NLS-1$
+	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.CleanUpPreferencePage"; //$NON-NLS-1$
 	
-	public CodeFormatterPreferencePage() {
-		setDescription(PreferencesMessages.CodeFormatterPreferencePage_description); 
+	public CleanUpPreferencePage() {
+		setDescription(PreferencesMessages.CleanUpPreferencePage_Description); 
 		
-		// only used when page is shown programatically
-		setTitle(PreferencesMessages.CodeFormatterPreferencePage_title);		 
+		// only used when page is shown programmatically
+		setTitle(PreferencesMessages.CleanUpPreferencePage_Title );		 
 	}
 	
 	/* (non-Javadoc)
@@ -39,11 +41,11 @@ public class CodeFormatterPreferencePage extends ProfilePreferencePage {
 	 */
 	public void createControl(Composite parent) {
 	    super.createControl(parent);
-    	PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.CODEFORMATTER_PREFERENCE_PAGE);
+//    	PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.CODEFORMATTER_PREFERENCE_PAGE);
 	}
 
 	protected ProfileConfigurationBlock createConfigurationBlock(PreferencesAccess access) {
-	    return new CodeFormatterConfigurationBlock(getProject(), access);
+	    return new CleanUpConfigurationBlock(getProject(), access);
     }
 
 	/* (non-Javadoc)
@@ -60,4 +62,11 @@ public class CodeFormatterPreferencePage extends ProfilePreferencePage {
 		return PROP_ID;
 	}
 
+	/**
+     * @param store
+     */
+    public static void initDefaults(IPreferenceStore store) {
+    	store.setDefault(CleanUpProfileManager.PROFILE_KEY, CleanUpProfileManager.DEFAULT_PROFILE);
+    	CleanUpConstants.initDefaults(store);
+    }
 }

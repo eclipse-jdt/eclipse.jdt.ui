@@ -10,49 +10,44 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.regex.Pattern;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
-import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
-import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
-import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -116,50 +111,65 @@ public class CleanUpTest extends QuickFixTest {
 		fJProject1= ProjectTestSetup.getProject();
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		disableAll();
 	}
 
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		disableAll();
 	}
 	
-	private void assertRefactoringResultAsExpected(CleanUpRefactoring refactoring, String[] expected) throws CoreException {
-		refactoring.checkAllConditions(new NullProgressMonitor());
-		CompositeChange change= (CompositeChange)refactoring.createChange(null);
-		Change[] children= change.getChildren();
-		String[] previews= new String[children.length]; 
-		for (int i= 0; i < children.length; i++) {
-			previews[i]= ((TextEditBasedChange)children[i]).getPreviewContent(null);
-		}
-
-		assertEqualStringsIgnoreOrder(previews, expected);
-	}
-	
-	private void assertRefactoringResultAsExpectedIgnoreHashValue(CleanUpRefactoring refactoring, String[] expected) throws CoreException {
-		refactoring.checkAllConditions(new NullProgressMonitor());
-		CompositeChange change= (CompositeChange)refactoring.createChange(null);
-		Change[] children= change.getChildren();
-		String[] previews= new String[children.length]; 
-		Pattern regex= Pattern.compile("long serialVersionUID = .*L;");
-		for (int i= 0; i < children.length; i++) {
-			String previewContent= ((TextEditBasedChange)children[i]).getPreviewContent(null);
-			previews[i]= previewContent.replaceAll(regex.pattern(), "long serialVersionUID = 1L;");
-		}
-
-		assertEqualStringsIgnoreOrder(previews, expected);
-	}
-	
-	private void assertRefactoringHasNoChange(CleanUpRefactoring refactoring) throws CoreException {
-		refactoring.checkAllConditions(new NullProgressMonitor());
-		CompositeChange change= (CompositeChange)refactoring.createChange(null);
-		Change[] children= change.getChildren();
-		StringBuffer buf= new StringBuffer();
-		buf.append("Refactoring should generate no changes but does change:\n");
-		for (int i= 0; i < children.length; i++) {
-			buf.append(((TextChange)children[i]).getPreviewContent(null));
-		}
+	private void disableAll() {
+	    IScopeContext context= new InstanceScope();
+		IEclipsePreferences node= context.getNode(JavaUI.ID_PLUGIN);
 		
-		assertTrue(buf.toString(), change.getChildren().length == 0);
-	}
+		Collection keys= CleanUpConstants.getEclipseDefaultSettings().keySet();
+		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
+	        String key= (String)iterator.next();
+	        node.put(key, CleanUpConstants.FALSE);
+        }
+    }
+
+	private void enable(String key) {
+		IScopeContext context= new InstanceScope();
+		IEclipsePreferences node= context.getNode(JavaUI.ID_PLUGIN);
+		node.put(key, CleanUpConstants.TRUE);
+    }
+	
+    private void assertRefactoringResultAsExpected(ICompilationUnit[] cus, String[] expected) throws InvocationTargetException, JavaModelException {
+    	RefactoringExecutionStarter.startCleanupRefactoring(cus, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+    	
+    	String[] previews= new String[cus.length];
+    	for (int i= 0; i < cus.length; i++) {
+	        ICompilationUnit cu= cus[i];
+	        previews[i]= cu.getBuffer().getContents();
+        }
+    	
+    	assertEqualStringsIgnoreOrder(previews, expected);
+    }
+    
+    private void assertRefactoringResultAsExpectedIgnoreHashValue(ICompilationUnit[] cus, String[] expected) throws InvocationTargetException, JavaModelException {
+		RefactoringExecutionStarter.startCleanupRefactoring(cus, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+
+		Pattern regex= Pattern.compile("long serialVersionUID = .*L;");
+		
+    	String[] previews= new String[cus.length];
+    	for (int i= 0; i < cus.length; i++) {
+	        ICompilationUnit cu= cus[i];
+	        previews[i]= cu.getBuffer().getContents().replaceAll(regex.pattern(), "long serialVersionUID = 1L;");
+        }
+    	
+    	assertEqualStringsIgnoreOrder(previews, expected);
+    }
+
+    private void assertRefactoringHasNoChange(ICompilationUnit[] cus) throws JavaModelException, InvocationTargetException {
+    	String[] expected= new String[cus.length];
+    	for (int i= 0; i < cus.length; i++) {
+	        expected[i]= cus[i].getBuffer().getContents();
+        }
+    	assertRefactoringResultAsExpected(cus, expected);
+    }
 	
 	public void testAddNLSTag01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -196,13 +206,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		refactoring.addCompilationUnit(cu3);
-		
-		ICleanUp cleanUp= new StringCleanUp(StringCleanUp.ADD_MISSING_NLS_TAG);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.ADD_MISSING_NLS_TAGS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -236,9 +240,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});	
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});	
 	}
-	
+
 	public void testRemoveNLSTag01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -274,13 +278,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		refactoring.addCompilationUnit(cu3);
-
-		ICleanUp cleanUp= new StringCleanUp(StringCleanUp.REMOVE_UNNECESSARY_NLS_TAG);
-		refactoring.addCleanUp(cleanUp);		
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -314,7 +312,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});	
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});	
 	}
 
 	public void testUnusedCode01() throws Exception {
@@ -347,13 +345,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		refactoring.addCompilationUnit(cu3);
-		
-		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_IMPORTS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -376,7 +368,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});	
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});	
 	}
 	
 	public void testUnusedCode02() throws Exception {
@@ -412,13 +404,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		refactoring.addCompilationUnit(cu3);
-		
-		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_METHODS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -445,7 +432,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});	
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});	
 	}
 	
 	public void testUnusedCode03() throws Exception {
@@ -478,13 +465,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		refactoring.addCompilationUnit(cu3);
-		
-		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_CONSTRUCTORS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -509,7 +491,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});	
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});	
 	}
 	
 	public void testUnusedCode04() throws Exception {
@@ -543,13 +525,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		refactoring.addCompilationUnit(cu3);
-		
-		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -572,7 +549,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
 	
 	public void testUnusedCode05() throws Exception {
@@ -603,13 +580,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		refactoring.addCompilationUnit(cu3);
-		
-		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_TYPES);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -632,7 +604,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});	
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});	
 	}
 	
 	public void testUnusedCode06() throws Exception {
@@ -677,13 +649,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		refactoring.addCompilationUnit(cu3);
-		
-		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_LOCAL_VARIABLES);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -716,7 +682,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
 	
 	public void testUnusedCode07() throws Exception {
@@ -732,11 +698,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_LOCAL_VARIABLES);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -748,7 +710,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testUnusedCode08() throws Exception {
@@ -762,11 +724,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -776,7 +735,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testUnusedCode09() throws Exception {
@@ -794,11 +753,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_LOCAL_VARIABLES);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -811,7 +766,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testUnusedCode10() throws Exception {
@@ -829,11 +784,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -846,7 +798,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testUnusedCode11() throws Exception {
@@ -872,12 +824,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		
-		ICleanUp cleanUp= new UnnecessaryCodeCleanUp(UnnecessaryCodeCleanUp.REMOVE_UNUSED_CAST);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -900,7 +847,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
 	}
 	
 	public void testUnusedCodeBug123766() throws Exception {
@@ -915,11 +862,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS | UnusedCodeCleanUp.REMOVE_UNUSED_LOCAL_VARIABLES);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -929,7 +874,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testUnusedCodeBug150853() throws Exception {
@@ -940,18 +885,14 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("public class E1 {}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_IMPORTS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testJava5001() throws Exception {
@@ -980,12 +921,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		
-		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.ADD_DEPRECATED_ANNOTATION);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1014,7 +951,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2});	
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});	
 	}
 	
 	public void testJava5002() throws Exception {
@@ -1043,12 +980,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		
-		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.ADD_DEPRECATED_ANNOTATION);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1077,7 +1010,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2});	
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});	
 	}
 	
 	public void testJava5003() throws Exception {
@@ -1105,12 +1038,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		
-		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.ADD_DEPRECATED_ANNOTATION);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1138,7 +1067,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
 	}
 	
 	public void testJava5004() throws Exception {
@@ -1172,13 +1101,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		refactoring.addCompilationUnit(cu3);
-		
-		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.ADD_OVERRIDE_ANNOATION);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1204,7 +1128,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {cu1.getBuffer().getContents(), expected1, expected2});
 	}
 	
 	public void testJava5005() throws Exception {
@@ -1266,13 +1190,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		refactoring.addCompilationUnit(cu3);
-		
-		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.ADD_OVERRIDE_ANNOATION | Java50CleanUp.ADD_DEPRECATED_ANNOTATION);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1344,7 +1264,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
 	
 	public void testCodeStyle01() throws Exception {
@@ -1382,12 +1302,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1422,7 +1338,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
 	}
 	
 	public void testCodeStyle02() throws Exception {
@@ -1446,12 +1362,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS | CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1465,7 +1379,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {cu1.getBuffer().getContents(), expected1});
 	}
 	
 	public void testCodeStyle03() throws Exception {
@@ -1506,13 +1420,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		refactoring.addCompilationUnit(cu3);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1549,7 +1458,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
 	
 	public void testCodeStyle04() throws Exception {
@@ -1590,13 +1499,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		refactoring.addCompilationUnit(cu3);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1633,7 +1537,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 
 	}
 	
@@ -1677,13 +1581,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		refactoring.addCompilationUnit(cu3);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS | CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 		
 		buf= new StringBuffer();
 		buf.append("package test2;\n");
@@ -1703,9 +1604,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		String[] expected= new String[] {expected1};
-		
-		assertRefactoringResultAsExpected(refactoring, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {cu1.getBuffer().getContents(), cu2.getBuffer().getContents(), expected1});
 	}
 	
 	public void testCodeStyle06() throws Exception {
@@ -1723,13 +1622,12 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS | CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
-		refactoring.addCleanUp(cleanUp);
-		
-		assertRefactoringHasNoChange(refactoring);
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 	
 	public void testCodeStyle07() throws Exception {
@@ -1745,13 +1643,12 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS | CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
-		refactoring.addCleanUp(cleanUp);
-		
-		assertRefactoringHasNoChange(refactoring);
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 	
 	public void testCodeStyle08() throws Exception {
@@ -1773,13 +1670,12 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS | CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
-		refactoring.addCleanUp(cleanUp);
-		
-		assertRefactoringHasNoChange(refactoring);
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 	
 	public void testCodeStyle09() throws Exception {
@@ -1808,13 +1704,12 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS | CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
-		refactoring.addCleanUp(cleanUp);
-		
-		assertRefactoringHasNoChange(refactoring);
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 	
 	public void testCodeStyle10() throws Exception {
@@ -1827,13 +1722,13 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS | CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC | CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS);
-		refactoring.addCleanUp(cleanUp);
-		
-		assertRefactoringHasNoChange(refactoring);
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 	
 	public void testCodeStyle11() throws Exception {
@@ -1879,13 +1774,11 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		refactoring.addCompilationUnit(cu3);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS | CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC | CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1928,7 +1821,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 
 	}
 	
@@ -1947,11 +1840,11 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS | CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC | CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1966,7 +1859,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyle13() throws Exception {
@@ -1985,11 +1878,11 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS | CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC | CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2005,7 +1898,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyle14() throws Exception {
@@ -2024,11 +1917,11 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS | CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC | CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2044,7 +1937,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyle15() throws Exception {
@@ -2063,11 +1956,11 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS | CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC | CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2083,7 +1976,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyle16() throws Exception {
@@ -2122,14 +2015,12 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		refactoring.addCompilationUnit(cu2);
-		refactoring.addCompilationUnit(cu3);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS | CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC | 
-		                                       CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS | CodeStyleCleanUp.CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2157,7 +2048,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {cu1.getBuffer().getContents(), expected1, expected2});
 
 	}
 	
@@ -2189,11 +2080,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2226,7 +2114,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyle18() throws Exception {
@@ -2249,11 +2137,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2274,7 +2159,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyle19() throws Exception {
@@ -2300,11 +2185,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2331,7 +2213,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyle20() throws Exception {
@@ -2357,11 +2239,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2388,7 +2267,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyle21() throws Exception {
@@ -2417,11 +2296,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2448,7 +2324,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyle22() throws Exception {
@@ -2474,13 +2350,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("public interface I1 {}\n");
 		pack2.createCompilationUnit("I1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS);
-		refactoring.addCleanUp(cleanUp);
-		
-		assertRefactoringHasNoChange(refactoring);
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 	
 	public void testCodeStyle23() throws Exception {
@@ -2497,15 +2370,11 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp codeStyle= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS);
-		refactoring.addCleanUp(codeStyle);
-		ControlStatementsCleanUp statmentsCleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
-		refactoring.addCleanUp(statmentsCleanUp);
-		ICleanUp stringFix= new StringCleanUp(StringCleanUp.REMOVE_UNNECESSARY_NLS_TAG);
-		refactoring.addCleanUp(stringFix);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2520,7 +2389,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyle24() throws Exception {
@@ -2535,15 +2404,12 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp codeStyle= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS);
-		refactoring.addCleanUp(codeStyle);
-		ControlStatementsCleanUp statmentsCleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
-		refactoring.addCleanUp(statmentsCleanUp);
-		ICleanUp stringFix= new StringCleanUp(StringCleanUp.REMOVE_UNNECESSARY_NLS_TAG | StringCleanUp.ADD_MISSING_NLS_TAG);
-		refactoring.addCleanUp(stringFix);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
+		enable(CleanUpConstants.ADD_MISSING_NLS_TAGS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2556,7 +2422,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyle25() throws Exception {
@@ -2590,11 +2456,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		pack2.createCompilationUnit("I1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2606,7 +2469,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyle26() throws Exception {
@@ -2621,11 +2484,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_METHOD_ACCESS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2637,7 +2497,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyle27() throws Exception {
@@ -2652,11 +2512,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_STATIC_METHOD_ACCESS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_METHOD);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2668,7 +2525,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyleBug118204() throws Exception {
@@ -2684,11 +2541,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2701,7 +2555,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
 	public void testCodeStyleBug114544() throws Exception {
@@ -2716,11 +2570,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2732,7 +2583,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyleBug119170_01() throws Exception {
@@ -2753,13 +2604,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("        e1.foo();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu2);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2772,7 +2620,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyleBug119170_02() throws Exception {
@@ -2793,13 +2641,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("        e1.foo();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu2);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2812,7 +2657,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyleBug123468() throws Exception {
@@ -2833,13 +2678,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("        field= 10;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu2);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2852,7 +2694,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyleBug129115() throws Exception {
@@ -2870,11 +2712,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2889,7 +2728,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyleBug135219() throws Exception {
@@ -2905,11 +2744,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_METHOD_ACCESS | CodeStyleCleanUp.QUALIFY_FIELD_ACCESS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS);
 		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -2922,7 +2760,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyleBug_138318() throws Exception {
@@ -2943,11 +2781,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS | CodeStyleCleanUp.QUALIFY_STATIC_METHOD_ACCESS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_METHOD);
 		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -2965,7 +2801,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyleBug138325_1() throws Exception {
@@ -2982,11 +2818,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS | CodeStyleCleanUp.QUALIFY_METHOD_ACCESS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS);
 
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -3000,7 +2835,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
 	public void testCodeStyleBug138325_2() throws Exception {
@@ -3021,11 +2856,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS | CodeStyleCleanUp.QUALIFY_METHOD_ACCESS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS);
 
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -3043,7 +2877,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCodeStyle_Bug140565() throws Exception {
@@ -3063,13 +2897,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-
-		ICleanUp cleanUp1= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
-		ICleanUp cleanUp2= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_IMPORTS);
-		refactoring.addCleanUp(cleanUp1);
-		refactoring.addCleanUp(cleanUp2);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3085,7 +2915,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}		
 
 	public void testJava50ForLoop01() throws Exception {
@@ -3106,11 +2936,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3126,7 +2952,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testJava50ForLoop02() throws Exception {
@@ -3152,11 +2978,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3177,7 +2999,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testJava50ForLoop03() throws Exception {
@@ -3197,11 +3019,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3218,7 +3036,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testJava50ForLoop04() throws Exception {
@@ -3242,11 +3060,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3267,7 +3081,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testJava50ForLoop05() throws Exception {
@@ -3282,13 +3096,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp);
-		
-		assertRefactoringHasNoChange(refactoring);
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 	
 	public void testJava50ForLoop06() throws Exception {
@@ -3303,13 +3113,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp);
-		
-		assertRefactoringHasNoChange(refactoring);
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 	
 	public void testJava50ForLoop07() throws Exception {
@@ -3324,13 +3130,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp);
-		
-		assertRefactoringHasNoChange(refactoring);
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 	
 	public void testJava50ForLoop08() throws Exception {
@@ -3346,13 +3148,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp);
-		
-		assertRefactoringHasNoChange(refactoring);
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 	
 	public void testJava50ForLoop09() throws Exception {
@@ -3369,11 +3167,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3386,7 +3180,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testJava50ForLoop10() throws Exception {
@@ -3403,13 +3197,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp);
-		
-		assertRefactoringHasNoChange(refactoring);
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 	
 	public void testJava50ForLoop11() throws Exception {
@@ -3429,11 +3219,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3450,7 +3236,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testJava50ForLoop12() throws Exception {
@@ -3467,11 +3253,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3485,7 +3267,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testJava50ForLoop13() throws Exception {
@@ -3502,13 +3284,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp);
-		
-		assertRefactoringHasNoChange(refactoring);
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 	
 	public void testJava50ForLoop14() throws Exception {
@@ -3548,11 +3326,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3569,7 +3343,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
 	public void testJava50ForLoopBug154939() throws Exception {
@@ -3587,13 +3361,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp);
-		
-		assertRefactoringHasNoChange(refactoring);
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 	
 	public void testCombination01() throws Exception {
@@ -3612,13 +3382,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp1= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS);
-		ICleanUp cleanUp2= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS);
-		refactoring.addCleanUp(cleanUp1);
-		refactoring.addCleanUp(cleanUp2);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3631,7 +3398,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCombination02() throws Exception {
@@ -3651,13 +3418,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
-		ICleanUp cleanUp2= new StringCleanUp(StringCleanUp.ADD_MISSING_NLS_TAG);
-		refactoring.addCleanUp(cleanUp1);
-		refactoring.addCleanUp(cleanUp2);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.ADD_MISSING_NLS_TAGS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3677,7 +3440,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCombination03() throws Exception {
@@ -3696,13 +3459,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp1= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS);
-		refactoring.addCleanUp(cleanUp1);
-		ICleanUp cleanUp2= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp2);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;  \n");
@@ -3717,7 +3476,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCombinationBug120585() throws Exception {
@@ -3735,13 +3494,11 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS | ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		ICleanUp cleanUp2= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS);
-		refactoring.addCleanUp(cleanUp1);
-		refactoring.addCleanUp(cleanUp2);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3755,7 +3512,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testCombinationBug125455() throws Exception {
@@ -3775,13 +3532,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
-		ICleanUp cleanUp2= new StringCleanUp(StringCleanUp.ADD_MISSING_NLS_TAG);
-		refactoring.addCleanUp(cleanUp1);
-		refactoring.addCleanUp(cleanUp2);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.ADD_MISSING_NLS_TAGS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3800,7 +3553,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testSerialVersion01() throws Exception {
@@ -3816,10 +3569,10 @@ public class CleanUpTest extends QuickFixTest {
 	        buf.append("}\n");
 	        ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 	        fJProject1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
-	        CleanUpRefactoring refactoring= new CleanUpRefactoring();
-	        refactoring.addCompilationUnit(cu1);
-	        ICleanUp cleanUp1= new PotentialProgrammingProblemsCleanUp(PotentialProgrammingProblemsCleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
-	        refactoring.addCleanUp(cleanUp1);
+	        
+	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
+	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
+	        
 	        buf= new StringBuffer();
 	        buf.append("package test1;\n");
 	        buf.append("import java.io.Serializable;\n");
@@ -3829,7 +3582,7 @@ public class CleanUpTest extends QuickFixTest {
 	        buf.append("    private static final long serialVersionUID = 1L;\n");
 	        buf.append("}\n");
 	        String expected1= buf.toString();
-	        assertRefactoringResultAsExpectedIgnoreHashValue(refactoring, new String[] { expected1 });
+	        assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] { expected1 });
         } finally {
         	JavaProjectHelper.set15CompilerOptions(fJProject1);    
         }
@@ -3851,10 +3604,10 @@ public class CleanUpTest extends QuickFixTest {
 	        buf.append("    }\n");
 	        buf.append("}\n");
 	        ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-	        CleanUpRefactoring refactoring= new CleanUpRefactoring();
-	        refactoring.addCompilationUnit(cu1);
-	        ICleanUp cleanUp1= new PotentialProgrammingProblemsCleanUp(PotentialProgrammingProblemsCleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
-	        refactoring.addCleanUp(cleanUp1);
+
+	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
+	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
+	        
 	        buf= new StringBuffer();
 	        buf.append("package test1;\n");
 	        buf.append("import java.io.Serializable;\n");
@@ -3873,7 +3626,7 @@ public class CleanUpTest extends QuickFixTest {
 	        buf.append("    }\n");
 	        buf.append("}\n");
 	        String expected1= buf.toString();
-	        assertRefactoringResultAsExpectedIgnoreHashValue(refactoring, new String[] { expected1 });
+	        assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] { expected1 });
         } finally {
         	JavaProjectHelper.set15CompilerOptions(fJProject1);   
         }
@@ -3897,11 +3650,10 @@ public class CleanUpTest extends QuickFixTest {
 	        buf.append("public class E2 implements Externalizable {\n");
 	        buf.append("}\n");
 	        ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
-	        CleanUpRefactoring refactoring= new CleanUpRefactoring();
-	        refactoring.addCompilationUnit(cu1);
-	        refactoring.addCompilationUnit(cu2);
-	        ICleanUp cleanUp1= new PotentialProgrammingProblemsCleanUp(PotentialProgrammingProblemsCleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
-	        refactoring.addCleanUp(cleanUp1);
+	        
+	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
+	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
+	       
 	        buf= new StringBuffer();
 	        buf.append("package test1;\n");
 	        buf.append("import java.io.Serializable;\n");
@@ -3921,7 +3673,7 @@ public class CleanUpTest extends QuickFixTest {
 	        buf.append("}\n");
 	        String expected1= buf.toString();
 	        
-	        assertRefactoringResultAsExpectedIgnoreHashValue(refactoring, new String[] {expected1, expected2});
+	        assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
         } finally {
         	JavaProjectHelper.set15CompilerOptions(fJProject1);   
         }
@@ -3943,10 +3695,10 @@ public class CleanUpTest extends QuickFixTest {
 	        buf.append("    }\n");
 	        buf.append("}\n");
 	        ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-	        CleanUpRefactoring refactoring= new CleanUpRefactoring();
-	        refactoring.addCompilationUnit(cu1);
-	        ICleanUp cleanUp1= new PotentialProgrammingProblemsCleanUp(PotentialProgrammingProblemsCleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
-	        refactoring.addCleanUp(cleanUp1);
+
+	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
+	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
+	        
 	        buf= new StringBuffer();
 	        buf.append("package test1;\n");
 	        buf.append("import java.io.Serializable;\n");
@@ -3963,7 +3715,7 @@ public class CleanUpTest extends QuickFixTest {
 	        buf.append("    }\n");
 	        buf.append("}\n");
 	        String expected1= buf.toString();
-	        assertRefactoringResultAsExpectedIgnoreHashValue(refactoring, new String[] { expected1 });
+	        assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] { expected1 });
         } finally {
         	JavaProjectHelper.set15CompilerOptions(fJProject1);   
         }
@@ -3985,10 +3737,10 @@ public class CleanUpTest extends QuickFixTest {
 	        buf.append("    };\n");
 	        buf.append("}\n");
 	        ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-	        CleanUpRefactoring refactoring= new CleanUpRefactoring();
-	        refactoring.addCompilationUnit(cu1);
-	        ICleanUp cleanUp1= new PotentialProgrammingProblemsCleanUp(PotentialProgrammingProblemsCleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
-	        refactoring.addCleanUp(cleanUp1);
+	        
+	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
+	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
+	        
 	        buf= new StringBuffer();
 	        buf.append("package test1;\n");
 	        buf.append("import java.io.Serializable;\n");
@@ -4004,7 +3756,7 @@ public class CleanUpTest extends QuickFixTest {
 	        buf.append("    };\n");
 	        buf.append("}\n");
 	        String expected1= buf.toString();
-	        assertRefactoringResultAsExpectedIgnoreHashValue(refactoring, new String[] { expected1 });
+	        assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] { expected1 });
         } finally {
         	JavaProjectHelper.set15CompilerOptions(fJProject1);   
         }
@@ -4032,10 +3784,10 @@ public class CleanUpTest extends QuickFixTest {
 	        buf.append("    }\n");
 	        buf.append("}\n");
 	        ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-	        CleanUpRefactoring refactoring= new CleanUpRefactoring();
-	        refactoring.addCompilationUnit(cu1);
-	        ICleanUp cleanUp1= new PotentialProgrammingProblemsCleanUp(PotentialProgrammingProblemsCleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
-	        refactoring.addCleanUp(cleanUp1);
+	        
+	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
+	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
+	        
 	        buf= new StringBuffer();
 	        buf.append("package test1;\n");
 	        buf.append("import java.io.Serializable;\n");
@@ -4058,7 +3810,7 @@ public class CleanUpTest extends QuickFixTest {
 	        buf.append("    }\n");
 	        buf.append("}\n");
 	        String expected1= buf.toString();
-	        assertRefactoringResultAsExpectedIgnoreHashValue(refactoring, new String[] { expected1 });
+	        assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] { expected1 });
         } finally {
     		JavaProjectHelper.set15CompilerOptions(fJProject1);
         }
@@ -4090,11 +3842,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS | ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp1);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4118,7 +3868,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testRemoveBlock02() throws Exception {
@@ -4140,11 +3890,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS | ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp1);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4160,7 +3908,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testRemoveBlock03() throws Exception {
@@ -4182,11 +3930,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS | ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp1);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4202,7 +3948,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testRemoveBlock04() throws Exception {
@@ -4224,11 +3970,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS | ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp1);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4244,7 +3988,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testRemoveBlock05() throws Exception {
@@ -4262,11 +4006,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS | ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		refactoring.addCleanUp(cleanUp1);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4278,7 +4020,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testRemoveBlockBug138628() throws Exception {
@@ -4308,11 +4050,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS);
-		refactoring.addCleanUp(cleanUp1);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4335,7 +4074,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testRemoveBlockBug149990() throws Exception {
@@ -4357,11 +4096,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS);
-		refactoring.addCleanUp(cleanUp1);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
 		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -4377,7 +4113,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testUnnecessaryCodeBug127704_1() throws Exception {
@@ -4392,11 +4128,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp1= new UnnecessaryCodeCleanUp(UnnecessaryCodeCleanUp.REMOVE_UNUSED_CAST);
-		refactoring.addCleanUp(cleanUp1);
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4407,7 +4139,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
 	public void testUnnecessaryCodeBug127704_2() throws Exception {
@@ -4423,11 +4155,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp1= new UnnecessaryCodeCleanUp(UnnecessaryCodeCleanUp.REMOVE_UNUSED_CAST);
-		refactoring.addCleanUp(cleanUp1);
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4439,7 +4167,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testAddParenthesis01() throws Exception {
@@ -4462,13 +4190,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-
-		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
-		ICleanUp cleanUp2= new ExpressionsCleanUp(ExpressionsCleanUp.ADD_PARANOIC_PARENTHESIS);
-		refactoring.addCleanUp(cleanUp1);
-		refactoring.addCleanUp(cleanUp2);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4491,7 +4216,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testRemoveParenthesis01() throws Exception {
@@ -4518,13 +4243,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-
-		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS);
-		ICleanUp cleanUp2= new ExpressionsCleanUp(ExpressionsCleanUp.REMOVE_UNNECESSARY_PARENTHESIS);
-		refactoring.addCleanUp(cleanUp1);
-		refactoring.addCleanUp(cleanUp2);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4543,7 +4265,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testRemoveParenthesisBug134739() throws Exception {
@@ -4563,13 +4285,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-
-		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS);
-		ICleanUp cleanUp2= new ExpressionsCleanUp(ExpressionsCleanUp.REMOVE_UNNECESSARY_PARENTHESIS);
-		refactoring.addCleanUp(cleanUp1);
-		refactoring.addCleanUp(cleanUp2);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -4585,7 +4304,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testRemoveParenthesisBug134741_1() throws Exception {
@@ -4602,11 +4321,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-
-		ICleanUp cleanUp= new ExpressionsCleanUp(ExpressionsCleanUp.REMOVE_UNNECESSARY_PARENTHESIS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -4619,7 +4335,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testRemoveParenthesisBug134741_2() throws Exception {
@@ -4634,14 +4350,11 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
 
-		ICleanUp cleanUp= new ExpressionsCleanUp(ExpressionsCleanUp.REMOVE_UNNECESSARY_PARENTHESIS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 		
-		assertRefactoringHasNoChange(refactoring);
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 	
 	public void testRemoveParenthesisBug134741_3() throws Exception {
@@ -4655,14 +4368,11 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-	
-		ICleanUp cleanUp= new ExpressionsCleanUp(ExpressionsCleanUp.REMOVE_UNNECESSARY_PARENTHESIS);
-		refactoring.addCleanUp(cleanUp);
-		
-		assertRefactoringHasNoChange(refactoring);
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 	
 	public void testRemoveParenthesisBug134985_1() throws Exception {
@@ -4676,12 +4386,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-	
-		ICleanUp cleanUp= new ExpressionsCleanUp(ExpressionsCleanUp.REMOVE_UNNECESSARY_PARENTHESIS);
-		refactoring.addCleanUp(cleanUp);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -4691,7 +4398,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {buf.toString()});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
 	}
 	
 	public void testRemoveParenthesisBug134985_2() throws Exception {
@@ -4706,11 +4413,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-	
-		ICleanUp cleanUp= new ExpressionsCleanUp(ExpressionsCleanUp.REMOVE_UNNECESSARY_PARENTHESIS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -4720,7 +4424,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {buf.toString()});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
 	}
 	
 	public void testRemoveQualifier01() throws Exception {
@@ -4738,11 +4442,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.REMOVE_THIS_FIELD_QUALIFIER);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4757,7 +4458,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testRemoveQualifier02() throws Exception {
@@ -4772,11 +4473,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.REMOVE_THIS_METHOD_QUALIFIER);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4788,7 +4486,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testRemoveQualifier03() throws Exception {
@@ -4808,11 +4506,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.REMOVE_THIS_FIELD_QUALIFIER);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4829,7 +4524,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testRemoveQualifier04() throws Exception {
@@ -4850,11 +4545,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.REMOVE_THIS_METHOD_QUALIFIER);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4872,7 +4564,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testRemoveQualifierBug134720() throws Exception {
@@ -4887,11 +4579,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.REMOVE_THIS_METHOD_QUALIFIER);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY);
 		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -4903,7 +4592,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testRemoveQualifierBug150481_1() throws Exception {
@@ -4922,11 +4611,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.REMOVE_THIS_METHOD_QUALIFIER);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY);
 		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -4942,7 +4628,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testRemoveQualifierBug150481_2() throws Exception {
@@ -4960,11 +4646,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.REMOVE_THIS_METHOD_QUALIFIER);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY);
 		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -4979,7 +4662,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testAddFinal01() throws Exception {
@@ -4995,11 +4678,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new VariableDeclarationCleanUp(VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_FIELDS | VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_LOCAL_VARIABLES | VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_PARAMETERS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
 		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -5013,7 +4695,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testAddFinal02() throws Exception {
@@ -5028,11 +4710,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new VariableDeclarationCleanUp(VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_FIELDS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
 		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -5044,7 +4723,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testAddFinal03() throws Exception {
@@ -5065,11 +4744,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new VariableDeclarationCleanUp(VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_LOCAL_VARIABLES);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
 		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -5087,7 +4763,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}	
 	
 	public void testAddFinal04() throws Exception {
@@ -5108,11 +4784,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new VariableDeclarationCleanUp(VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_PARAMETERS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS);
 		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -5130,7 +4803,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testAddFinal05() throws Exception {
@@ -5146,12 +4819,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new VariableDeclarationCleanUp(VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_LOCAL_VARIABLES);
-		refactoring.addCleanUp(cleanUp);
-		refactoring.addCleanUp(new ExpressionsCleanUp(ExpressionsCleanUp.ADD_PARANOIC_PARENTHESIS));
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS);
 		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -5164,7 +4835,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testAddFinalBug129807() throws Exception {
@@ -5183,11 +4854,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new VariableDeclarationCleanUp(VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_PARAMETERS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS);
 		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -5203,7 +4871,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 	public void testAddFinalBug134676_1() throws Exception {
@@ -5218,13 +4886,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
 		
-		ICleanUp cleanUp= new VariableDeclarationCleanUp(VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_FIELDS);
-		refactoring.addCleanUp(cleanUp);
-		
-		assertRefactoringHasNoChange(refactoring);
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 	
 	public void testAddFinalBug134676_2() throws Exception {
@@ -5241,11 +4906,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new VariableDeclarationCleanUp(VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_FIELDS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
 		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -5258,7 +4920,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {buf.toString()});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
 	}
 
 	public void testAddFinalBug145028() throws Exception {
@@ -5270,11 +4932,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new VariableDeclarationCleanUp(VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_FIELDS);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -5282,7 +4941,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    private final int field;\n");
 		buf.append("}\n");
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {buf.toString()});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
 	}
 	
 	public void testRemoveBlockReturnThrows01() throws Exception {
@@ -5313,11 +4972,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu1);
-		
-		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS_CONTAINING_RETURN_OR_THROW);
-		refactoring.addCleanUp(cleanUp);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW);
 		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -5343,7 +4999,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 }

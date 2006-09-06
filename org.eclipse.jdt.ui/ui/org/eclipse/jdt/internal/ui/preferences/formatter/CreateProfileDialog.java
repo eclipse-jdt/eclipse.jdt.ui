@@ -65,10 +65,14 @@ public class CreateProfileDialog extends StatusDialog {
 	
 	private CustomProfile fCreatedProfile;
 	protected boolean fOpenEditDialog;
+
+
+	private final IProfileVersioner fProfileVersioner;
 	
-	public CreateProfileDialog(Shell parentShell, ProfileManager profileManager) {
+	public CreateProfileDialog(Shell parentShell, ProfileManager profileManager, IProfileVersioner profileVersioner) {
 		super(parentShell);
 		fProfileManager= profileManager;
+		fProfileVersioner= profileVersioner;
 		fSortedProfiles= fProfileManager.getSortedProfiles();
 		fSortedNames= fProfileManager.getSortedDisplayNames();
 	}
@@ -148,7 +152,7 @@ public class CreateProfileDialog extends StatusDialog {
 		fEditCheckbox.setSelection(fOpenEditDialog);
 		
 		fProfileCombo.setItems(fSortedNames);
-		fProfileCombo.setText(fProfileManager.getProfile(ProfileManager.DEFAULT_PROFILE).getName());
+		fProfileCombo.setText(fProfileManager.getDefaultProfile().getName());
 		updateStatus(fEmpty);
 		
 		applyDialogFont(composite);
@@ -186,7 +190,7 @@ public class CreateProfileDialog extends StatusDialog {
 		final Map baseSettings= new HashMap(((Profile)fSortedProfiles.get(fProfileCombo.getSelectionIndex())).getSettings());
 		final String profileName= fNameText.getText();
 		
-		fCreatedProfile= new CustomProfile(profileName, baseSettings, ProfileVersioner.CURRENT_VERSION);
+		fCreatedProfile= new CustomProfile(profileName, baseSettings, fProfileVersioner.getCurrentVersion());
 		fProfileManager.addProfile(fCreatedProfile);
 		super.okPressed();
 	}

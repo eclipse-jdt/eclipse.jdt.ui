@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 
@@ -75,6 +76,14 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 
 	public UnusedCodeCleanUp(IDialogSettings settings) {
 		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
+	}
+	
+	public UnusedCodeCleanUp(Map options) {
+		super(options);
+	}
+	
+	public UnusedCodeCleanUp() {
+		super();
 	}
 
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
@@ -241,5 +250,33 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 	public int getDefaultFlag() {
 		return DEFAULT_FLAG;
 	}
+	
+    protected int createFlag(Map options) {
+    	int result= 0;
+    	
+    	if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS))) {
+    		result|= REMOVE_UNUSED_IMPORTS;
+    	}
+    	if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS))) {
+    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS))) {
+    			result|= REMOVE_UNUSED_PRIVATE_CONSTRUCTORS;
+    		}
+    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS))) {
+    			result|= REMOVE_UNUSED_PRIVATE_FIELDS;
+    		}
+    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS))) {
+    			result|= REMOVE_UNUSED_PRIVATE_METHODS;
+    		}
+    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES))) {
+    			result|= REMOVE_UNUSED_PRIVATE_TYPES;
+    		}
+    	}
+    	if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES))) {
+    		result|= REMOVE_UNUSED_LOCAL_VARIABLES;
+    	}
+    	
+	    return result;
+    }
+
 
 }

@@ -15,10 +15,29 @@ import java.util.Map;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 
+
 public class NewLinesTabPage extends ModifyDialogTabPage {
+	
+	/**
+	 * Constant array for boolean selection 
+	 */
+	private static String[] FALSE_TRUE = {
+		DefaultCodeFormatterConstants.FALSE,
+		DefaultCodeFormatterConstants.TRUE
+	};	
+	
+    /**
+     * Constant array for insert / not_insert. 
+     */
+    private static String[] DO_NOT_INSERT_INSERT = {
+        JavaCore.DO_NOT_INSERT,
+        JavaCore.INSERT
+    };
+	
 	
 	private final String PREVIEW= 
 	createPreviewHeader(FormatterMessages.NewLinesTabPage_preview_header) + 

@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.PotentialProgrammingProblemsFix;
 
@@ -81,7 +82,15 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 	public PotentialProgrammingProblemsCleanUp(IDialogSettings settings) {
 		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
 	}
-
+	
+	public PotentialProgrammingProblemsCleanUp(Map options) {
+		super(options);
+	}
+	
+	public PotentialProgrammingProblemsCleanUp() {
+		super();
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -171,6 +180,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 	 * {@inheritDoc}
 	 */
 	public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
+		super.checkPreConditions(project, compilationUnits, null);
 		return PotentialProgrammingProblemsFix.checkPreConditions(project, compilationUnits, monitor,
 				isFlag(ADD_CALCULATED_SERIAL_VERSION_ID),
 				isFlag(ADD_DEFAULT_SERIAL_VERSION_ID),
@@ -200,5 +210,20 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 	public int getDefaultFlag() {
 		return DEFAULT_FLAG;
 	}
+
+    protected int createFlag(Map options) {
+    	int result= 0;
+    	
+    	if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID))) {
+    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT))) {
+    			result|= ADD_DEFAULT_SERIAL_VERSION_ID;
+    		}
+    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED))) {
+    			result|= ADD_CALCULATED_SERIAL_VERSION_ID;
+    		}
+    	}
+    	
+	    return result;
+    }
 
 }

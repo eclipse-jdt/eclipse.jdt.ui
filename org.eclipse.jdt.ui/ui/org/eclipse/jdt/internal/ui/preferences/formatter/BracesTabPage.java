@@ -22,6 +22,14 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 public class BracesTabPage extends ModifyDialogTabPage {
 	
+	/**
+	 * Constant array for boolean selection 
+	 */
+	private static String[] FALSE_TRUE = {
+		DefaultCodeFormatterConstants.FALSE,
+		DefaultCodeFormatterConstants.TRUE
+	};	
+	
 	private final String PREVIEW=
 	createPreviewHeader(FormatterMessages.BracesTabPage_preview_header) + 
 	"interface Empty {}\n" + //$NON-NLS-1$

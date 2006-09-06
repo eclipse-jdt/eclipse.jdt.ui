@@ -20,6 +20,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 
@@ -66,6 +67,14 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 
 	public ControlStatementsCleanUp(IDialogSettings settings) {
 		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
+	}
+
+	public ControlStatementsCleanUp(Map options) {
+		super(options);
+    }
+	
+	public ControlStatementsCleanUp() {
+		super();
 	}
 
 	/**
@@ -199,6 +208,24 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 		return DEFAULT_FLAG;
 	}
 
-
-
+    protected int createFlag(Map options) {
+    	int result= 0;
+    	
+    	if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS))) {
+    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS))) {
+    			result|= ADD_BLOCK_TO_CONTROL_STATEMENTS;
+    		}
+    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER))) {
+    			result|= REMOVE_UNNECESSARY_BLOCKS;
+    		}
+    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW))) {
+    			result|= REMOVE_UNNECESSARY_BLOCKS_CONTAINING_RETURN_OR_THROW;
+    		}
+    	}
+    	if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED))) {
+    		result|= CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP;
+    	}
+    	
+	    return result;
+    }
 }

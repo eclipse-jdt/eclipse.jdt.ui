@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
@@ -52,6 +53,14 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 	public CodeFormatCleanUp(IDialogSettings settings) {
 		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
 	}
+
+	public CodeFormatCleanUp(Map options) {
+		super(options);
+	}
+	
+	public CodeFormatCleanUp() {
+		super();
+    }
 
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
@@ -134,5 +143,15 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 
     public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
 	    return false;
+    }
+    
+	protected int createFlag(Map options) {
+	    int flag= 0;
+		
+		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.FORMAT_SOURCE_CODE))) {
+			flag|= FORMAT_CODE;
+		}
+		
+		return flag;
     }
 }

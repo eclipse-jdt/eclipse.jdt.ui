@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.StringFix;
 
@@ -58,6 +59,14 @@ public class StringCleanUp extends AbstractCleanUp {
 
 	public StringCleanUp(IDialogSettings settings) {
 		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
+	}
+	
+	public StringCleanUp(Map options) {
+		super(options);
+	}
+	
+	public StringCleanUp() {
+		super();
 	}
 
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
@@ -150,5 +159,18 @@ public class StringCleanUp extends AbstractCleanUp {
 	public int getDefaultFlag() {
 		return DEFAULT_FLAG;
 	}
+	
+	protected int createFlag(Map options) {
+    	int result= 0;
+    	
+    	if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS))) {
+    		result|= REMOVE_UNNECESSARY_NLS_TAG;
+    	}
+    	if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.ADD_MISSING_NLS_TAGS))) {
+    		result|= ADD_MISSING_NLS_TAG;
+    	}
+    	
+	    return result;
+    }
 	
 }

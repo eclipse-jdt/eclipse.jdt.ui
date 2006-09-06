@@ -22,6 +22,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ExpressionsFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 
@@ -57,7 +58,15 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 	public ExpressionsCleanUp(IDialogSettings settings) {
 		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
 	}
-
+	
+	public ExpressionsCleanUp(Map options) {
+		super(options);
+	}
+	
+	public ExpressionsCleanUp() {
+		super();
+	}
+	
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
@@ -140,5 +149,20 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 	public int getDefaultFlag() {
 		return DEFAULT_FLAG;
 	}
+
+    protected int createFlag(Map options) {
+    	int result= 0;
+    	
+    	if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES))) {
+    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER))) {
+    			result|= REMOVE_UNNECESSARY_PARENTHESIS;
+    		}
+    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS))) {
+    			result|= ADD_PARANOIC_PARENTHESIS;
+    		}
+    	}
+    	
+	    return result;
+    }
 
 }

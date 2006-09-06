@@ -16,14 +16,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -46,21 +44,14 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.jdt.core.JavaCore;
-
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIException;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
-import org.eclipse.jdt.internal.ui.preferences.PreferencesAccess;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 
-import org.osgi.service.prefs.BackingStoreException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.Attributes;
@@ -69,11 +60,15 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 
-
+/**
+ * Can load/store profiles from/to profilesKey
+ */
 public class ProfileStore {
 
 	/** The default encoding to use */
 	public static final String ENCODING= "UTF-8"; //$NON-NLS-1$
+	
+	protected static final String VERSION_KEY_SUFFIX= ".version"; //$NON-NLS-1$
 
 	/**
 	 * A SAX event handler to parse the xml format for profiles. 
@@ -126,18 +121,6 @@ public class ProfileStore {
 		}
 		
 	}
-
-	/**
-	 * Preference key where all profiles are stored
-	 */
-	private static final String PREF_FORMATTER_PROFILES= "org.eclipse.jdt.ui.formatterprofiles"; //$NON-NLS-1$
-	
-	/**
-	 * Preference key where all profiles are stored
-	 */
-	private static final String PREF_FORMATTER_PROFILES_VERSION= "org.eclipse.jdt.ui.formatterprofiles.version"; //$NON-NLS-1$
-	
-	
 	
 	/**
 	 * Identifiers for the XML file.
@@ -150,25 +133,29 @@ public class ProfileStore {
 	private final static String XML_ATTRIBUTE_ID= "id"; //$NON-NLS-1$
 	private final static String XML_ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 	private final static String XML_ATTRIBUTE_VALUE= "value"; //$NON-NLS-1$
+	
+	private final IProfileVersioner fProfileVersioner;
+	private final String fProfilesKey;
+	private final String fProfilesVersionKey;
 		
-	private ProfileStore() {
+	
+	public ProfileStore(String profilesKey, IProfileVersioner profileVersioner) {
+		fProfilesKey= profilesKey;
+		fProfileVersioner= profileVersioner;
+		fProfilesVersionKey= profilesKey + VERSION_KEY_SUFFIX;
 	}
 	
 	/**
 	 * @return Returns the collection of profiles currently stored in the preference store or
-	 * <code>null</code> if the loading failed. The elements are of type {@link CustomProfile}
+	 * <code>null</code> if the loading failed. The elements are of type {@link ProfileManager.CustomProfile}
 	 * and are all updated to the latest version.
 	 * @throws CoreException
 	 */
-	public static List readProfiles(IScopeContext scope) throws CoreException {
-		List res= readProfilesFromPreferences(scope);
-		if (res == null) {
-			return readOldForCompatibility(scope);
-		}
-		return res;
+	public List readProfiles(IScopeContext scope) throws CoreException {
+		return readProfilesFromPreferences(scope);
 	}
 	
-	public static void writeProfiles(Collection profiles, IScopeContext instanceScope) throws CoreException {
+	public void writeProfiles(Collection profiles, IScopeContext instanceScope) throws CoreException {
 		ByteArrayOutputStream stream= new ByteArrayOutputStream(2000);
 		try {
 			writeProfilesToStream(profiles, stream, ENCODING);
@@ -179,15 +166,15 @@ public class ProfileStore {
 				val= stream.toString(); 
 			}
 			IEclipsePreferences uiPreferences = instanceScope.getNode(JavaUI.ID_PLUGIN);
-			uiPreferences.put(PREF_FORMATTER_PROFILES, val);
-			uiPreferences.putInt(PREF_FORMATTER_PROFILES_VERSION, ProfileVersioner.CURRENT_VERSION);
+			uiPreferences.put(fProfilesKey, val);
+			uiPreferences.putInt(fProfilesVersionKey, fProfileVersioner.getCurrentVersion());
 		} finally {
 			try { stream.close(); } catch (IOException e) { /* ignore */ }
 		}
 	}
 	
-	public static List readProfilesFromPreferences(IScopeContext scope) throws CoreException {
-		String string= scope.getNode(JavaUI.ID_PLUGIN).get(PREF_FORMATTER_PROFILES, null);
+	private List readProfilesFromPreferences(IScopeContext scope) throws CoreException {
+		String string= scope.getNode(JavaUI.ID_PLUGIN).get(fProfilesKey, null);
 		if (string != null && string.length() > 0) {
 			byte[] bytes;
 			try {
@@ -200,7 +187,7 @@ public class ProfileStore {
 				List res= readProfilesFromStream(new InputSource(is));
 				if (res != null) {
 					for (int i= 0; i < res.size(); i++) {
-						ProfileVersioner.updateAndComplete((CustomProfile) res.get(i));
+						fProfileVersioner.update((CustomProfile) res.get(i));
 					}
 				}
 				return res;
@@ -210,44 +197,6 @@ public class ProfileStore {
 		}
 		return null;
 	}	
-
-	/**
-	 * Read the available profiles from the internal XML file and return them
-	 * as collection.
-	 * @return returns a list of <code>CustomProfile</code> or <code>null</code>
-	 */
-	private static List readOldForCompatibility(IScopeContext instanceScope) {
-		
-		// in 3.0 M9 and less the profiles were stored in a file in the plugin's meta data
-		final String STORE_FILE= "code_formatter_profiles.xml"; //$NON-NLS-1$
-
-		File file= JavaPlugin.getDefault().getStateLocation().append(STORE_FILE).toFile();
-		if (!file.exists())
-			return null;
-		
-		try {
-			// note that it's wrong to use a file reader when XML declares UTF-8: Kept for compatibility
-			final FileReader reader= new FileReader(file);
-			try {
-				List res= readProfilesFromStream(new InputSource(reader));
-				if (res != null) {
-					for (int i= 0; i < res.size(); i++) {
-						ProfileVersioner.updateAndComplete((CustomProfile) res.get(i));
-					}
-					writeProfiles(res, instanceScope);
-				}
-				file.delete(); // remove after successful write
-				return res;
-			} finally {
-				reader.close();
-			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e); // log but ignore
-		} catch (IOException e) {
-			JavaPlugin.log(e); // log but ignore
-		}
-		return null;
-	}
 	
 	
 	/**
@@ -257,7 +206,7 @@ public class ProfileStore {
 	 * @return returns a list of <code>CustomProfile</code> or <code>null</code>
 	 * @throws CoreException
 	 */
-	public static List readProfilesFromFile(File file) throws CoreException {
+	public List readProfilesFromFile(File file) throws CoreException {
 		try {
 			final FileInputStream reader= new FileInputStream(file); 
 			try {
@@ -276,7 +225,7 @@ public class ProfileStore {
 	 * @return returns a list of <code>CustomProfile</code> or <code>null</code>
 	 * @throws CoreException
 	 */
-	private static List readProfilesFromStream(InputSource inputSource) throws CoreException {
+	protected List readProfilesFromStream(InputSource inputSource) throws CoreException {
 		
 		final ProfileDefaultHandler handler= new ProfileDefaultHandler();
 		try {
@@ -300,7 +249,7 @@ public class ProfileStore {
 	 * @param encoding the encoding to use
 	 * @throws CoreException
 	 */
-	public static void writeProfilesToFile(Collection profiles, File file, String encoding) throws CoreException {
+	public void writeProfilesToFile(Collection profiles, File file, String encoding) throws CoreException {
 		final OutputStream stream;
 		try {
 			stream= new FileOutputStream(file);
@@ -321,7 +270,7 @@ public class ProfileStore {
 	 * @param encoding the encoding to use
 	 * @throws CoreException
 	 */
-	private static void writeProfilesToStream(Collection profiles, OutputStream stream, String encoding) throws CoreException {
+	private void writeProfilesToStream(Collection profiles, OutputStream stream, String encoding) throws CoreException {
 
 		try {
 			final DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
@@ -329,7 +278,7 @@ public class ProfileStore {
 			final Document document= builder.newDocument();
 			
 			final Element rootElement = document.createElement(XML_NODE_ROOT);
-			rootElement.setAttribute(XML_ATTRIBUTE_VERSION, Integer.toString(ProfileVersioner.CURRENT_VERSION));
+			rootElement.setAttribute(XML_ATTRIBUTE_VERSION, Integer.toString(fProfileVersioner.getCurrentVersion()));
 
 			document.appendChild(rootElement);
 			
@@ -363,7 +312,7 @@ public class ProfileStore {
 		element.setAttribute(XML_ATTRIBUTE_NAME, profile.getName());
 		element.setAttribute(XML_ATTRIBUTE_VERSION, Integer.toString(profile.getVersion()));
 		
-		final Iterator keyIter= ProfileManager.getKeys().iterator();
+		final Iterator keyIter= profile.getSettings().keySet().iterator();
 		
 		while (keyIter.hasNext()) {
 			final String key= (String)keyIter.next();
@@ -378,51 +327,6 @@ public class ProfileStore {
 			}
 		}
 		return element;
-	}
-	
-	public static void checkCurrentOptionsVersion() {
-		PreferencesAccess access= PreferencesAccess.getOriginalPreferences();
-		
-		IScopeContext instanceScope= access.getInstanceScope();
-		IEclipsePreferences uiPreferences= instanceScope.getNode(JavaUI.ID_PLUGIN);
-		int version= uiPreferences.getInt(PREF_FORMATTER_PROFILES_VERSION, 0);
-		if (version >= ProfileVersioner.CURRENT_VERSION) {
-			return; // is up to date
-		}
-		try {
-			List profiles= ProfileStore.readProfiles(instanceScope);
-			if (profiles == null) {
-				profiles= Collections.EMPTY_LIST;
-			}
-			ProfileManager manager= new ProfileManager(profiles, instanceScope, access);
-			if (manager.getSelected() instanceof CustomProfile) {
-				manager.commitChanges(instanceScope); // updates JavaCore options
-			}
-			uiPreferences.putInt(PREF_FORMATTER_PROFILES_VERSION, ProfileVersioner.CURRENT_VERSION);
-			savePreferences(instanceScope);
-						
-			IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
-			for (int i= 0; i < projects.length; i++) {
-				IScopeContext scope= access.getProjectScope(projects[i]);
-				if (ProfileManager.hasProjectSpecificSettings(scope)) {
-					manager= new ProfileManager(profiles, scope, access);
-					manager.commitChanges(scope); // updates JavaCore project options
-					savePreferences(scope);
-				}
-			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		} catch (BackingStoreException e) {
-			JavaPlugin.log(e);
-		}
-	}
-	
-	private static void savePreferences(final IScopeContext context) throws BackingStoreException {
-		try {
-			context.getNode(JavaUI.ID_PLUGIN).flush();
-		} finally {
-			context.getNode(JavaCore.PLUGIN_ID).flush();
-		}
 	}
 	
 		

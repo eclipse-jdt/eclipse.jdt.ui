@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,42 +46,48 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 
-public class ModifyDialog extends StatusDialog {
+public abstract class ModifyDialog extends StatusDialog {
     
     /**
      * The keys to retrieve the preferred area from the dialog settings.
      */
-    private static final String DS_KEY_PREFERRED_WIDTH= JavaUI.ID_PLUGIN + "formatter_page.modify_dialog.preferred_width"; //$NON-NLS-1$
-    private static final String DS_KEY_PREFERRED_HEIGHT= JavaUI.ID_PLUGIN + "formatter_page.modify_dialog.preferred_height"; //$NON-NLS-1$
-    private static final String DS_KEY_PREFERRED_X= JavaUI.ID_PLUGIN + "formatter_page.modify_dialog.preferred_x"; //$NON-NLS-1$
-    private static final String DS_KEY_PREFERRED_Y= JavaUI.ID_PLUGIN + "formatter_page.modify_dialog.preferred_y"; //$NON-NLS-1$
+    private static final String DS_KEY_PREFERRED_WIDTH= "modify_dialog.preferred_width"; //$NON-NLS-1$
+    private static final String DS_KEY_PREFERRED_HEIGHT= "modify_dialog.preferred_height"; //$NON-NLS-1$
+    private static final String DS_KEY_PREFERRED_X= "modify_dialog.preferred_x"; //$NON-NLS-1$
+    private static final String DS_KEY_PREFERRED_Y= "modify_dialog.preferred_y"; //$NON-NLS-1$
     
     
     /**
      * The key to store the number (beginning at 0) of the tab page which had the 
      * focus last time.
      */
-    private static final String DS_KEY_LAST_FOCUS= JavaUI.ID_PLUGIN + "formatter_page.modify_dialog.last_focus"; //$NON-NLS-1$ 
+    private static final String DS_KEY_LAST_FOCUS= "modify_dialog.last_focus"; //$NON-NLS-1$ 
 
-	
+	private final String fKeyPreferredWidth;
+	private final String fKeyPreferredHight;
+	private final String fKeyPreferredX;
+	private final String fKeyPreferredY;
+	private final String fKeyLastFocus;
 	private final String fTitle;
-	
 	private final boolean fNewProfile;
-
 	private Profile fProfile;
 	private final Map fWorkingValues;
-	
 	private IStatus fStandardStatus;
-	
-	protected final List fTabPages;
-	
-	final IDialogSettings fDialogSettings;
+	private final List fTabPages;
+	private final IDialogSettings fDialogSettings;
 	private TabFolder fTabFolder;
 	private ProfileManager fProfileManager;
 	private Button fApplyButton;
-		
-	protected ModifyDialog(Shell parentShell, Profile profile, ProfileManager profileManager, boolean newProfile) {
+
+	public ModifyDialog(Shell parentShell, Profile profile, ProfileManager profileManager, boolean newProfile, String dialogPreferencesKey) {
 		super(parentShell);
+
+		fKeyPreferredWidth= JavaUI.ID_PLUGIN + dialogPreferencesKey + DS_KEY_PREFERRED_WIDTH;
+		fKeyPreferredHight= JavaUI.ID_PLUGIN + dialogPreferencesKey + DS_KEY_PREFERRED_HEIGHT;
+		fKeyPreferredX= JavaUI.ID_PLUGIN + dialogPreferencesKey + DS_KEY_PREFERRED_X;
+		fKeyPreferredY= JavaUI.ID_PLUGIN + dialogPreferencesKey + DS_KEY_PREFERRED_Y;
+		fKeyLastFocus= JavaUI.ID_PLUGIN + dialogPreferencesKey + DS_KEY_LAST_FOCUS;
+
 		fProfileManager= profileManager;
 		fNewProfile= newProfile;
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX );
@@ -100,12 +106,14 @@ public class ModifyDialog extends StatusDialog {
 		fTabPages= new ArrayList();
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();	
 	}
-	
+
+	protected abstract void addPages(Map values);
+
 	public void create() {
 		super.create();
 		int lastFocusNr= 0;
 		try {
-			lastFocusNr= fDialogSettings.getInt(DS_KEY_LAST_FOCUS);
+			lastFocusNr= fDialogSettings.getInt(fKeyLastFocus);
 			if (lastFocusNr < 0) lastFocusNr= 0;
 			if (lastFocusNr > fTabPages.size() - 1) lastFocusNr= fTabPages.size() - 1;
 		} catch (NumberFormatException x) {
@@ -131,15 +139,8 @@ public class ModifyDialog extends StatusDialog {
 		fTabFolder.setFont(composite.getFont());
 		fTabFolder.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		addTabPage(fTabFolder, FormatterMessages.ModifyDialog_tabpage_indentation_title, new IndentationTabPage(this, fWorkingValues)); 
-		addTabPage(fTabFolder, FormatterMessages.ModifyDialog_tabpage_braces_title, new BracesTabPage(this, fWorkingValues)); 
-		addTabPage(fTabFolder, FormatterMessages.ModifyDialog_tabpage_whitespace_title, new WhiteSpaceTabPage(this, fWorkingValues)); 
-		addTabPage(fTabFolder, FormatterMessages.ModifyDialog_tabpage_blank_lines_title, new BlankLinesTabPage(this, fWorkingValues)); 
-		addTabPage(fTabFolder, FormatterMessages.ModifyDialog_tabpage_new_lines_title, new NewLinesTabPage(this, fWorkingValues)); 
-		addTabPage(fTabFolder, FormatterMessages.ModifyDialog_tabpage_control_statements_title, new ControlStatementsTabPage(this, fWorkingValues)); 
-		addTabPage(fTabFolder, FormatterMessages.ModifyDialog_tabpage_line_wrapping_title, new LineWrappingTabPage(this, fWorkingValues)); 
-		addTabPage(fTabFolder, FormatterMessages.ModifyDialog_tabpage_comments_title, new CommentsTabPage(this, fWorkingValues)); 
-		
+		addPages(fWorkingValues); 
+
 		applyDialogFont(composite);
 		
 		fTabFolder.addSelectionListener(new SelectionListener() {
@@ -147,8 +148,8 @@ public class ModifyDialog extends StatusDialog {
 			public void widgetSelected(SelectionEvent e) {
 				final TabItem tabItem= (TabItem)e.item;
 				final ModifyDialogTabPage page= (ModifyDialogTabPage)tabItem.getData();
-//				page.fSashForm.setWeights();
-				fDialogSettings.put(DS_KEY_LAST_FOCUS, fTabPages.indexOf(page));
+				//				page.fSashForm.setWeights();
+				fDialogSettings.put(fKeyLastFocus, fTabPages.indexOf(page));
 				page.makeVisible();
 			}
 		});
@@ -163,39 +164,39 @@ public class ModifyDialog extends StatusDialog {
 	 * @see org.eclipse.jface.window.Window#getInitialSize()
 	 */
 	protected Point getInitialSize() {
-    	Point initialSize= super.getInitialSize();
-        try {
-        	int lastWidth= fDialogSettings.getInt(DS_KEY_PREFERRED_WIDTH);
-        	if (initialSize.x > lastWidth)
-        		lastWidth= initialSize.x;
-        	int lastHeight= fDialogSettings.getInt(DS_KEY_PREFERRED_HEIGHT);
-        	if (initialSize.y > lastHeight)
-        		lastHeight= initialSize.x;
-       		return new Point(lastWidth, lastHeight);
-        } catch (NumberFormatException ex) {
-        }
-        return initialSize;
+		Point initialSize= super.getInitialSize();
+		try {
+			int lastWidth= fDialogSettings.getInt(fKeyPreferredWidth);
+			if (initialSize.x > lastWidth)
+				lastWidth= initialSize.x;
+			int lastHeight= fDialogSettings.getInt(fKeyPreferredHight);
+			if (initialSize.y > lastHeight)
+				lastHeight= initialSize.x;
+			return new Point(lastWidth, lastHeight);
+		} catch (NumberFormatException ex) {
+		}
+		return initialSize;
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.window.Window#getInitialLocation(org.eclipse.swt.graphics.Point)
 	 */
 	protected Point getInitialLocation(Point initialSize) {
-        try {
-        	return new Point(fDialogSettings.getInt(DS_KEY_PREFERRED_X), fDialogSettings.getInt(DS_KEY_PREFERRED_Y));
-        } catch (NumberFormatException ex) {
-        	return super.getInitialLocation(initialSize);
-        }
+		try {
+			return new Point(fDialogSettings.getInt(fKeyPreferredX), fDialogSettings.getInt(fKeyPreferredY));
+		} catch (NumberFormatException ex) {
+			return super.getInitialLocation(initialSize);
+		}
 	}
 	    
 	public boolean close() {
 		final Rectangle shell= getShell().getBounds();
-		
-		fDialogSettings.put(DS_KEY_PREFERRED_WIDTH, shell.width);
-		fDialogSettings.put(DS_KEY_PREFERRED_HEIGHT, shell.height);
-		fDialogSettings.put(DS_KEY_PREFERRED_X, shell.x);
-		fDialogSettings.put(DS_KEY_PREFERRED_Y, shell.y);
-		
+
+		fDialogSettings.put(fKeyPreferredWidth, shell.width);
+		fDialogSettings.put(fKeyPreferredHight, shell.height);
+		fDialogSettings.put(fKeyPreferredX, shell.x);
+		fDialogSettings.put(fKeyPreferredY, shell.y);
+
 		return super.close();
 	}
 	
@@ -243,15 +244,14 @@ public class ModifyDialog extends StatusDialog {
 		data.widthHint= layout.horizontalSpacing;
 		label.setLayoutData(data);
 		super.createButtonsForButtonBar(parent);
-    }
-    
-	
-	private final void addTabPage(TabFolder tabFolder, String title, ModifyDialogTabPage tabPage) {
-		final TabItem tabItem= new TabItem(tabFolder, SWT.NONE);
+	}
+
+	protected final void addTabPage(String title, ModifyDialogTabPage tabPage) {
+		final TabItem tabItem= new TabItem(fTabFolder, SWT.NONE);
 		applyDialogFont(tabItem.getControl());
 		tabItem.setText(title);
 		tabItem.setData(tabPage);
-		tabItem.setControl(tabPage.createContents(tabFolder));
+		tabItem.setControl(tabPage.createContents(fTabFolder));
 		fTabPages.add(tabPage);
 	}
 
