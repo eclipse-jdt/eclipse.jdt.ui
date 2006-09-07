@@ -101,18 +101,21 @@ public class JUnit3TestLoader implements ITestLoader {
 			// try to extract a test suite automatically
 			return new TestSuite(testClass);
 		}
-		Test test= null;
 		try {
-			test= (Test) suiteMethod.invoke(null, new Class[0]); // static
-			// method
+			Test test= (Test) suiteMethod.invoke(null, new Class[0]); // static
+			if (test != null) {
+				return test;
+			}
+			return warning(JUnitMessages.getString("RemoteTestRunner.error.suite.nullreturn")); //$NON-NLS-1$
 		} catch (InvocationTargetException e) {
-			failureListener.runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.invoke", e.getTargetException().toString()), e); //$NON-NLS-1$
-			return null;
+			String message= JUnitMessages.getFormattedString("RemoteTestRunner.error.invoke", e.getTargetException().toString()); //$NON-NLS-1$
+			failureListener.runFailed(message, e);
+			return new TestSuite(testClass);
 		} catch (IllegalAccessException e) {
-			failureListener.runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.invoke", e.toString()), e); //$NON-NLS-1$
-			return null;
+			String message= JUnitMessages.getFormattedString("RemoteTestRunner.error.invoke", e.toString()); //$NON-NLS-1$
+			failureListener.runFailed(message, e);
+			return new TestSuite(testClass);
 		}
-		return test;
 	}
 
 	/**
