@@ -11,16 +11,23 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -29,10 +36,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.MultiStateTextFileChange;
-import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -44,26 +48,15 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.MultiStateCompilationUnitChange;
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
-import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
-import org.eclipse.jdt.internal.ui.fix.CommentFormatCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
-import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
-import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -121,17 +114,17 @@ public class CleanUpStressTest extends TestCase {
 		return new MyTestSetup(someTest);
 	}
 	
-	private void addAllCUs(CleanUpRefactoring cleanUp, IJavaElement[] children) throws JavaModelException {
+	private void addAllCUs(IJavaElement[] children, List result) throws JavaModelException {
 		for (int i= 0; i < children.length; i++) {
 			IJavaElement element= children[i];
 			if (element instanceof ICompilationUnit) {
-				cleanUp.addCompilationUnit((ICompilationUnit)element);
+				result.add(element);
 			} else if (element instanceof IPackageFragmentRoot) {
 				IPackageFragmentRoot root= ((IPackageFragmentRoot)element);
-				addAllCUs(cleanUp, root.getChildren());
+				addAllCUs(root.getChildren(), result);
 			} else if (element instanceof IPackageFragment) {
 				IPackageFragment pack= ((IPackageFragment)element);
-				addAllCUs(cleanUp, pack.getChildren());
+				addAllCUs(pack.getChildren(), result);
 			}
 		}
 	}
@@ -464,10 +457,11 @@ public class CleanUpStressTest extends TestCase {
         buf.append("                \"junit.textui.TestRunner\", //$NON-NLS-1$\n");
         buf.append("                \"java.lang.reflect.Method.invoke(\" //$NON-NLS-1$\n");
         buf.append("        };\n");
-        buf.append("        for (String element : patterns)\n");
+        buf.append("        for (String element : patterns) {\n");
         buf.append("            if (line.indexOf(element) > 0) {\n");
         buf.append("                return true;\n");
         buf.append("            }\n");
+        buf.append("        }\n");
         buf.append("        return false;\n");
         buf.append("    }\n");
         buf.append("\n");
@@ -2051,8 +2045,9 @@ public class CleanUpStressTest extends TestCase {
         buf.append("        final Vector names = new Vector();\n");
         buf.append("        while (Test.class.isAssignableFrom(superClass)) {\n");
         buf.append("            final Method[] methods = superClass.getDeclaredMethods();\n");
-        buf.append("            for (Method element : methods)\n");
+        buf.append("            for (Method element : methods) {\n");
         buf.append("                this.addTestMethod(element, names, theClass);\n");
+        buf.append("            }\n");
         buf.append("            superClass = superClass.getSuperclass();\n");
         buf.append("        }\n");
         buf.append("        if (this.fTests.size() == 0) {\n");
@@ -4082,8 +4077,7 @@ public class CleanUpStressTest extends TestCase {
         buf.append("    /**\n");
         buf.append("     * Uses the system class loader to load the test class\n");
         buf.append("     */\n");
-        buf.append("    public Class load(final String suiteClassName)\n");
-        buf.append("            throws ClassNotFoundException {\n");
+        buf.append("    public Class load(final String suiteClassName) throws ClassNotFoundException {\n");
         buf.append("        return Class.forName(suiteClassName);\n");
         buf.append("    }\n");
         buf.append("    /**\n");
@@ -5181,102 +5175,84 @@ public class CleanUpStressTest extends TestCase {
     }
     
 	public void testAllCleanUps() throws Exception {
-		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
-		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+		List cus= new ArrayList();
+		addAllCUs(MyTestSetup.fJProject1.getChildren(), cus);
 		
-		cleanUpRefactoring.addCleanUp(new CodeStyleCleanUp(
-				CodeStyleCleanUp.QUALIFY_FIELD_ACCESS |
-				CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC |
-				CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS |
-				CodeStyleCleanUp.CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT |
-				CodeStyleCleanUp.QUALIFY_METHOD_ACCESS |
-				CodeStyleCleanUp.QUALIFY_STATIC_METHOD_ACCESS));
+		IScopeContext context= new InstanceScope();
+		IEclipsePreferences node= context.getNode(JavaUI.ID_PLUGIN);
 		
-		cleanUpRefactoring.addCleanUp(new ControlStatementsCleanUp(
-				ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS |
-				ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP |
-				ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS));
+		Collection keys= CleanUpConstants.getEclipseDefaultSettings().keySet();
+		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
+	        String key= (String)iterator.next();
+	        node.put(key, CleanUpConstants.FALSE);
+        }
 		
-		cleanUpRefactoring.addCleanUp(new ExpressionsCleanUp(
-				ExpressionsCleanUp.ADD_PARANOIC_PARENTHESIS));
+		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_METHOD, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS, CleanUpConstants.TRUE);
+
+		node.put(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpConstants.TRUE);
 		
-		cleanUpRefactoring.addCleanUp(new Java50CleanUp(
-				Java50CleanUp.ADD_DEPRECATED_ANNOTATION | 
-				Java50CleanUp.ADD_OVERRIDE_ANNOATION));
+		node.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpConstants.TRUE);
 		
-		cleanUpRefactoring.addCleanUp(new PotentialProgrammingProblemsCleanUp(
-				PotentialProgrammingProblemsCleanUp.ADD_DEFAULT_SERIAL_VERSION_ID));
+		node.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE, CleanUpConstants.TRUE);
 		
-		cleanUpRefactoring.addCleanUp(new StringCleanUp(
-				StringCleanUp.ADD_MISSING_NLS_TAG |
-				StringCleanUp.REMOVE_UNNECESSARY_NLS_TAG));
+		node.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, CleanUpConstants.TRUE);
 		
-		cleanUpRefactoring.addCleanUp(new UnnecessaryCodeCleanUp(
-				UnnecessaryCodeCleanUp.REMOVE_UNUSED_CAST));
+		node.put(CleanUpConstants.ADD_MISSING_NLS_TAGS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNNECESSARY_CASTS, CleanUpConstants.TRUE);
 		
-		cleanUpRefactoring.addCleanUp(new UnusedCodeCleanUp(
-				UnusedCodeCleanUp.REMOVE_UNUSED_IMPORTS |
-				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_CONSTRUCTORS |
-				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_METHODS |
-				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_TYPES |
-				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS |
-				UnusedCodeCleanUp.REMOVE_UNUSED_LOCAL_VARIABLES));
+		node.put(CleanUpConstants.REMOVE_UNNECESSARY_CASTS, CleanUpConstants.TRUE);
+
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES, CleanUpConstants.TRUE);
 		
-		cleanUpRefactoring.addCleanUp(new VariableDeclarationCleanUp(
-				VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_FIELDS |
-				VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_PARAMETERS |
-				VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_LOCAL_VARIABLES));
+		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, CleanUpConstants.TRUE);				
+
+		node.put(CleanUpConstants.FORMAT_COMMENT, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.FORMAT_JAVADOC, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.FORMAT_MULTI_LINE_COMMENT, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT, CleanUpConstants.TRUE);
 		
-		cleanUpRefactoring.addCleanUp(new CommentFormatCleanUp(
-				CommentFormatCleanUp.JAVA_DOC |
-				CommentFormatCleanUp.MULTI_LINE_COMMENT |
-				CommentFormatCleanUp.SINGLE_LINE_COMMENT));
-		
-		cleanUpRefactoring.addCleanUp(new CodeFormatCleanUp(
-				CodeFormatCleanUp.FORMAT_CODE));
-		
-		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-		CompositeChange change= (CompositeChange)cleanUpRefactoring.createChange(null);
-		Change[] changes= change.getChildren();
-		
-		int numberOfBrokenCUs= 71;
-		assertTrue("Number of broken cus is " + changes.length + " expected " + numberOfBrokenCUs, changes.length == numberOfBrokenCUs);
+		node.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpConstants.TRUE);
 	
-//		generateTable(cleanUpRefactoring.getCompilationUnits(), changes);
+		ICompilationUnit[] units= (ICompilationUnit[])cus.toArray(new ICompilationUnit[cus.size()]);	
+		Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+		RefactoringExecutionStarter.startCleanupRefactoring(units, shell);
 		
-		for (int i= 0; i < changes.length; i++) {
-			String previewContent= getNormalizedContent(new Document(getPreviewContent(changes[i])));
-			ICompilationUnit cu= getCompilationUnit(changes[i]);
-			String compilationUnitName= getCompilationUnitName(cu);
-			
-			String expected= (String)fExpectedChangesAllTests.get(compilationUnitName);
-			
-			assertTrue("No expected value in table for " + compilationUnitName, expected != null);
-			assertEquals("Content not as expected for " + compilationUnitName, expected, previewContent);
+//		generateTable(units);
+		
+		for (int i= 0; i < units.length; i++) {
+	        ICompilationUnit cu= units[i];
+			String previewContent= getNormalizedContent(new Document(cu.getBuffer().getContents()));
+	       	String compilationUnitName= getCompilationUnitName(cu);
+	       	
+	       	String expected= (String)fExpectedChangesAllTests.get(compilationUnitName);
+	       	
+	       	assertTrue("No expected value in table for " + compilationUnitName, expected != null);
+	       	assertEquals("Content not as expected for " + compilationUnitName, expected, previewContent);
         }
 	}
-
-	private static String getPreviewContent(Change change) throws CoreException {
-	    if (change instanceof TextChange) {
-	    	return ((TextChange)change).getPreviewContent(new NullProgressMonitor());
-	    } else if (change instanceof MultiStateTextFileChange) {
-	    	return ((MultiStateTextFileChange)change).getPreviewContent(new NullProgressMonitor());
-	    } else {
-	    	assertTrue("Change of unknown type: " + change, false);
-	    	return null;
-	    }
-    }
-	
-	private static ICompilationUnit getCompilationUnit(Change change) throws CoreException {
-	    if (change instanceof CompilationUnitChange) {
-	    	return ((CompilationUnitChange)change).getCompilationUnit();
-	    } else if (change instanceof MultiStateCompilationUnitChange) {
-	    	return ((MultiStateCompilationUnitChange)change).getCompilationUnit();
-	    } else {
-	    	assertTrue("Change of unknown type: " + change, false);
-	    	return null;
-	    }
-    }
 
 	private static String getCompilationUnitName(ICompilationUnit cu) {
 		StringBuffer result= new StringBuffer();
@@ -5316,9 +5292,89 @@ public class CleanUpStressTest extends TestCase {
 	}
 	
 //	Do not remove, used to generate the table
-//	private static void generateTable(ICompilationUnit[] units, Change[] changes) throws CoreException {
+//	private static final String[] CU_ORDER= new String[71];
+//	static {
+//		CU_ORDER[0]= "junit.runner.BaseTestRunner.java";
+//		CU_ORDER[1]= "junit.tests.framework.NotVoidTestCase.java";
+//		CU_ORDER[2]= "junit.tests.runner.StackFilterTest.java";
+//		CU_ORDER[3]= "junit.tests.framework.DoublePrecisionAssertTest.java";
+//		CU_ORDER[4]= "junit.tests.framework.AssertTest.java";
+//		CU_ORDER[5]= "junit.samples.AllTests.java";
+//		CU_ORDER[6]= "junit.tests.extensions.ExceptionTestCaseTest.java";
+//		CU_ORDER[7]= "junit.tests.framework.TestListenerTest.java";
+//		CU_ORDER[8]= "junit.tests.runner.SorterTest.java";
+//		CU_ORDER[9]= "junit.tests.framework.OneTestCase.java";
+//		CU_ORDER[10]= "junit.tests.framework.TestImplementorTest.java";
+//		CU_ORDER[11]= "junit.extensions.TestDecorator.java";
+//		CU_ORDER[12]= "junit.runner.TestSuiteLoader.java";
+//		CU_ORDER[13]= "junit.framework.TestResult.java";
+//		CU_ORDER[14]= "junit.tests.framework.NotPublicTestCase.java";
+//		CU_ORDER[15]= "junit.extensions.ActiveTestSuite.java";
+//		CU_ORDER[16]= "junit.tests.framework.SuiteTest.java";
+//		CU_ORDER[17]= "junit.runner.SimpleTestCollector.java";
+//		CU_ORDER[18]= "junit.framework.Test.java";
+//		CU_ORDER[19]= "junit.tests.framework.NoTestCaseClass.java";
+//		CU_ORDER[20]= "junit.tests.framework.Success.java";
+//		CU_ORDER[21]= "junit.runner.LoadingTestCollector.java";
+//		CU_ORDER[22]= "junit.runner.TestCaseClassLoader.java";
+//		CU_ORDER[23]= "junit.framework.AssertionFailedError.java";
+//		CU_ORDER[24]= "junit.tests.framework.InheritedTestCase.java";
+//		CU_ORDER[25]= "junit.samples.SimpleTest.java";
+//		CU_ORDER[26]= "junit.runner.Version.java";
+//		CU_ORDER[27]= "junit.tests.runner.BaseTestRunnerTest.java";
+//		CU_ORDER[28]= "junit.tests.WasRun.java";
+//		CU_ORDER[29]= "junit.framework.TestSuite.java";
+//		CU_ORDER[30]= "junit.extensions.ExceptionTestCase.java";
+//		CU_ORDER[31]= "junit.framework.Assert.java";
+//		CU_ORDER[32]= "junit.runner.ClassPathTestCollector.java";
+//		CU_ORDER[33]= "junit.framework.TestListener.java";
+//		CU_ORDER[34]= "junit.tests.extensions.ActiveTestTest.java";
+//		CU_ORDER[35]= "junit.framework.Protectable.java";
+//		CU_ORDER[36]= "junit.samples.money.IMoney.java";
+//		CU_ORDER[37]= "junit.textui.TestRunner.java";
+//		CU_ORDER[38]= "junit.tests.runner.ClassLoaderTest.java";
+//		CU_ORDER[39]= "junit.runner.TestRunListener.java";
+//		CU_ORDER[40]= "junit.tests.runner.TextFeedbackTest.java";
+//		CU_ORDER[41]= "junit.tests.extensions.ExtensionTest.java";
+//		CU_ORDER[42]= "junit.tests.AllTests.java";
+//		CU_ORDER[43]= "junit.tests.runner.LoadedFromJar.java";
+//		CU_ORDER[44]= "junit.tests.framework.ComparisonFailureTest.java";
+//		CU_ORDER[45]= "junit.textui.ResultPrinter.java";
+//		CU_ORDER[46]= "junit.samples.VectorTest.java";
+//		CU_ORDER[47]= "junit.framework.ComparisonFailure.java";
+//		CU_ORDER[48]= "junit.tests.framework.TestCaseTest.java";
+//		CU_ORDER[49]= "junit.framework.TestFailure.java";
+//		CU_ORDER[50]= "junit.runner.ReloadingTestSuiteLoader.java";
+//		CU_ORDER[51]= "junit.runner.StandardTestSuiteLoader.java";
+//		CU_ORDER[52]= "junit.extensions.TestSetup.java";
+//		CU_ORDER[53]= "junit.tests.runner.TextRunnerTest.java";
+//		CU_ORDER[54]= "junit.tests.framework.Failure.java";
+//		CU_ORDER[55]= "junit.tests.framework.OverrideTestCase.java";
+//		CU_ORDER[56]= "junit.extensions.RepeatedTest.java";
+//		CU_ORDER[57]= "junit.tests.framework.NoArgTestCaseTest.java";
+//		CU_ORDER[58]= "junit.runner.Sorter.java";
+//		CU_ORDER[59]= "junit.tests.framework.AllTests.java";
+//		CU_ORDER[60]= "junit.tests.extensions.RepeatedTestTest.java";
+//		CU_ORDER[61]= "junit.tests.runner.AllTests.java";
+//		CU_ORDER[62]= "junit.runner.TestCollector.java";
+//		CU_ORDER[63]= "junit.samples.money.MoneyBag.java";
+//		CU_ORDER[64]= "junit.tests.runner.SimpleTestCollectorTest.java";
+//		CU_ORDER[65]= "junit.framework.TestCase.java";
+//		CU_ORDER[66]= "junit.samples.money.MoneyTest.java";
+//		CU_ORDER[67]= "junit.tests.extensions.AllTests.java";
+//		CU_ORDER[68]= "junit.tests.framework.NoTestCases.java";
+//		CU_ORDER[69]= "junit.tests.runner.TestCaseClassLoaderTest.java";
+//		CU_ORDER[70]= "junit.samples.money.Money.java";
+//	}
+//	
+//	private static void generateTable(ICompilationUnit[] units) throws CoreException {
 //
-//		testNoCompileErrors(units, changes);
+//		assertNoCompileErrors(units);
+//		
+//		Hashtable expected= new Hashtable();
+//		for (int i= 0; i < units.length; i++) {
+//	        expected.put(getCompilationUnitName(units[i]), units[i].getBuffer().getContents());
+//        }
 //		
 //		StringBuffer buf= new StringBuffer();
 //		
@@ -5327,14 +5383,13 @@ public class CleanUpStressTest extends TestCase {
 //		buf.append("        fExpectedChangesAllTests= new Hashtable();").append("\n");
 //		buf.append("        StringBuffer buf= null;").append("\n");
 //		
-//		for (int i= 0; i < changes.length; i++) {
-//			String previewContent= getPreviewContent(changes[i]);
+//		for (int i= 0; i < CU_ORDER.length; i++) {
+//			String previewContent= (String)expected.get(CU_ORDER[i]);
 //			String bufWrappedContext= getBufWrappedContext(new Document(previewContent));
-//			ICompilationUnit cu= getCompilationUnit(changes[i]);
 //			
 //			buf.append("        buf= new StringBuffer();").append("\n");
 //			buf.append(bufWrappedContext).append("\n");
-//			buf.append("        fExpectedChangesAllTests.put(\""+ getCompilationUnitName(cu) +"\", buf.toString());").append("\n");
+//			buf.append("        fExpectedChangesAllTests.put(\""+CU_ORDER[i] +"\", buf.toString());").append("\n");
 //        }
 //		
 //		buf.append("    }").append("\n");
@@ -5380,70 +5435,31 @@ public class CleanUpStressTest extends TestCase {
 //		return buf.toString();
 //	}
 //	
-//	private static void testNoCompileErrors(ICompilationUnit[] compilationUnits, Change[] changes) throws JavaModelException, CoreException {
+//	private static void assertNoCompileErrors(ICompilationUnit[] units) throws JavaModelException, CoreException {
 //        ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 //        parser.setResolveBindings(true);
 //        parser.setProject(MyTestSetup.fJProject1);
+//    
+//        parser.createASTs(units, new String[0], new ASTRequestor() {
+//        	public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
+//        	    IProblem[] problems= ast.getProblems();
 //
-//        ICompilationUnit[] units= new ICompilationUnit[compilationUnits.length];
-//        try {
-//	        for (int i= 0; i < compilationUnits.length; i++) {
-//		        ICompilationUnit unit= compilationUnits[i];
-//		        Change change= getChangeForUnit(unit, changes);
-//		        if (change == null) {
-//		        	units[i]= unit;
-//		        } else {
-//		        	units[i]= createWorkingCopy(unit, change);
-//		        }
-//	        }
-//	        
-//	        parser.createASTs(units, new String[0], new ASTRequestor() {
-//	        	public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
-//	        	    IProblem[] problems= ast.getProblems();
-//
-//        	    	StringBuffer buf= new StringBuffer();
-//	        	    for (int i= 0; i < problems.length; i++) {
-//	                    if (problems[i].isError()) {
-//	                        buf.append(problems[i].getMessage()).append('\n');	
-//	                    }
+//    	    	StringBuffer buf= new StringBuffer();
+//        	    for (int i= 0; i < problems.length; i++) {
+//                    if (problems[i].isError()) {
+//                        buf.append(problems[i].getMessage()).append('\n');	
 //                    }
-//	        	    if (buf.length() != 0) {
-//	        	    	buf.insert(0, "Found errors in " + source.getElementName() + ":\n");
-//	        	    	assertTrue(buf.toString(), false);
-//	        	    }
-//	        	}
-//	        }, new NullProgressMonitor());
-//        } finally {
-//	        for (int i= 0; i < units.length; i++) {
-//		        units[i].discardWorkingCopy();
-//	        }
-//        }
-//    }
-//	
-//	private static Change getChangeForUnit(ICompilationUnit unit, Change[] changes) {
-//		for (int i= 0; i < changes.length; i++) {
-//	        if (changes[i] instanceof CompilationUnitChange) {
-//	        	if (((CompilationUnitChange)changes[i]).getCompilationUnit().equals(unit))
-//	        		return changes[i];
-//	        } else if (changes[i] instanceof MultiStateCompilationUnitChange) {
-//	        	if (((MultiStateCompilationUnitChange)changes[i]).getCompilationUnit().equals(unit))
-//	        		return changes[i];
-//	        }
-//        }
-//	    return null;
-//    }
-//
-//	private static ICompilationUnit createWorkingCopy(ICompilationUnit compilationUnit, Change change) throws JavaModelException, CoreException {
-//        ICompilationUnit workingCopy= compilationUnit.getWorkingCopy(new WorkingCopyOwner() {}, null, null);
-//        
-//        IBuffer buffer= workingCopy.getBuffer();
-//        if (change instanceof TextChange) {
-//        	buffer.setContents(((TextChange)change).getPreviewContent(null));
-//        } else if (change instanceof MultiStateTextFileChange) {
-//        	buffer.setContents(((MultiStateTextFileChange)change).getPreviewContent(null));
-//        } else {
-//        	assertTrue(false);
-//        }
-//        return workingCopy;
+//                }
+//        	    if (buf.length() != 0) {
+//        	    	buf.insert(0, "Found errors in " + source.getElementName() + ":\n");
+//        	    	try {
+//                        buf.append(source.getBuffer().getContents());
+//                    } catch (JavaModelException e) {
+//                        JavaPlugin.log(e);
+//                    }
+//        	    	assertTrue(buf.toString(), false);
+//        	    }
+//        	}
+//        }, new NullProgressMonitor());
 //    }
 }
