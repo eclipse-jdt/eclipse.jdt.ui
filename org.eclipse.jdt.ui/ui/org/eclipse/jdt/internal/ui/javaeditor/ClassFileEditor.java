@@ -81,6 +81,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.util.ClassFileBytesDisassembler;
 import org.eclipse.jdt.core.util.IClassFileDisassembler;
 import org.eclipse.jdt.core.util.IClassFileReader;
 
@@ -411,7 +412,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			IClassFileReader classFileReader= ToolFactory.createDefaultClassFileReader(classFile, flags);
 			if (classFileReader != null) {
 				IClassFileDisassembler disassembler= ToolFactory.createDefaultClassFileDisassembler();
-				content= disassembler.disassemble(classFileReader, "\n"); //$NON-NLS-1$
+				content= disassembler.disassemble(classFileReader, "\n", ClassFileBytesDisassembler.SYSTEM); //$NON-NLS-1$
 			}
 			styledText.setText(content == null ? "" : content); //$NON-NLS-1$
 		}
