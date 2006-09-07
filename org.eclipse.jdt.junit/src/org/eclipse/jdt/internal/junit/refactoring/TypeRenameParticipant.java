@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.junit.refactoring;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
@@ -31,7 +30,7 @@ public class TypeRenameParticipant extends JUnitRenameParticipant {
 	protected boolean isTestOrTestSuite() {
 		try {
 			return TestSearchEngine.isTestOrTestSuite(fType);
-		} catch (JavaModelException e) {
+		} catch (CoreException e) {
 			return false;
 		}
 	}

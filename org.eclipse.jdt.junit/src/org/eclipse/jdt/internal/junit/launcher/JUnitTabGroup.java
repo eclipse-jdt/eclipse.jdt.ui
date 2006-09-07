@@ -26,8 +26,9 @@ import org.eclipse.jdt.debug.ui.launchConfigurations.JavaJRETab;
 
  
 public class JUnitTabGroup extends AbstractLaunchConfigurationTabGroup {
-	/**
-	 * @see ILaunchConfigurationTabGroup#createTabs(ILaunchConfigurationDialog, String)
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.ui.ILaunchConfigurationTabGroup#createTabs(org.eclipse.debug.ui.ILaunchConfigurationDialog, java.lang.String)
 	 */
 	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {		
 		ILaunchConfigurationTab[] tabs= new ILaunchConfigurationTab[] {
@@ -42,8 +43,8 @@ public class JUnitTabGroup extends AbstractLaunchConfigurationTabGroup {
 		setTabs(tabs);
 	}
 
-	/**
-	 * @see ILaunchConfigurationTabGroup#setDefaults(ILaunchConfigurationWorkingCopy)
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.ui.AbstractLaunchConfigurationTabGroup#setDefaults(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
 	 */
 	public void setDefaults(ILaunchConfigurationWorkingCopy config) {
 		super.setDefaults(config); 

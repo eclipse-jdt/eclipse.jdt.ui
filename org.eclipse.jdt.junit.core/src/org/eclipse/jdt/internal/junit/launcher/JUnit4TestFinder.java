@@ -12,164 +12,243 @@
 
 package org.eclipse.jdt.internal.junit.launcher;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IRegion;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.compiler.ITerminalSymbols;
-import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
 
-import org.eclipse.jdt.internal.corext.SourceRange;
-
+import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 
 public class JUnit4TestFinder implements ITestFinder {
-	
-	private JUnit3TestFinder fJUnit3TestFinder= new JUnit3TestFinder();
-	
+		
 	private static class Annotation {
-		private static final JUnit4TestFinder.Annotation RUN_WITH= new JUnit4TestFinder.Annotation(new String[] { "RunWith", "org.junit.runner.RunWith" }); //$NON-NLS-1$ //$NON-NLS-2$
 
-		private static final JUnit4TestFinder.Annotation TEST= new JUnit4TestFinder.Annotation(new String[] { "Test", "org.junit.Test" }); //$NON-NLS-1$ //$NON-NLS-2$
+		private static final Annotation RUN_WITH= new Annotation("org.junit.runner.RunWith"); //$NON-NLS-1$
+		private static final Annotation TEST= new Annotation("org.junit.Test"); //$NON-NLS-1$
 
-		private final String[] names;
+		private final String fName;
 
-		private Annotation(String[] names) {
-			this.names= names;
+		private Annotation(String name) {
+			fName= name;
 		}
-
-		public boolean foundIn(String source) {
-			IScanner scanner= ToolFactory.createScanner(false, true, false, false);
-			scanner.setSource(source.toCharArray());
-			try {
-				int tok;
-				do {
-					tok= scanner.getNextToken();
-					if (tok == ITerminalSymbols.TokenNameAT) {
-						String annotationName= ""; //$NON-NLS-1$
-						tok= scanner.getNextToken();
-						while (tok == ITerminalSymbols.TokenNameIdentifier || tok == ITerminalSymbols.TokenNameDOT) {
-							annotationName+= String.valueOf(scanner.getCurrentTokenSource());
-							tok= scanner.getNextToken();
-						}
-						for (int i= 0; i < names.length; i++) {
-							String annotation= names[i];
-							if (annotationName.equals(annotation))
-								return true;
-						}
-					}
-				} while (tok != ITerminalSymbols.TokenNameEOF);
-			} catch (InvalidInputException e) {
-				return false;
-			}
-			return false;
+		
+		public String getName() {
+			return fName;
 		}
-
-		boolean annotates(IMember member) throws JavaModelException {
-			ISourceRange sourceRange= member.getSourceRange();
-			ISourceRange nameRange= member.getNameRange();
-			String memberSource= member.getSource();
-			if (! SourceRange.isAvailable(sourceRange) || ! SourceRange.isAvailable(nameRange) || memberSource == null)
-				return false;
-			
-			int charsToSearch= nameRange.getOffset() - sourceRange.getOffset();
-			String source= memberSource.substring(0, charsToSearch);
-			return foundIn(source);
-		}
-
-		boolean annotatesAtLeastOneMethod(IType type) throws JavaModelException {
-			IMethod[] methods= type.getMethods();
-			for (int i= 0; i < methods.length; i++) {
-				if (annotates(methods[i]))
+		
+		private boolean annotates(IAnnotationBinding[] annotations) throws JavaModelException {
+			for (int i= 0; i < annotations.length; i++) {
+				ITypeBinding annotationType= annotations[i].getAnnotationType();
+				if (annotationType != null && (annotationType.getQualifiedName().equals(fName))) {
 					return true;
+				}
+			}
+			return  false;
+		}
+		
+		public boolean annotatesTypeOrSuperTypes(ITypeBinding type) throws JavaModelException {
+			while (type != null) {
+				if (annotates(type.getAnnotations())) {
+					return true;
+				}
+				type= type.getSuperclass();
+			}
+			return false;
+		}
+		
+		public boolean annotatesAtLeastOneMethod(ITypeBinding type) throws JavaModelException {
+			while (type != null) {
+				IMethodBinding[] declaredMethods= type.getDeclaredMethods();
+				for (int i= 0; i < declaredMethods.length; i++) {
+					IMethodBinding curr= declaredMethods[i];
+					if (annotates(curr.getAnnotations())) {
+						return true;
+					}
+				}
+				type= type.getSuperclass();
 			}
 			return false;
 		}
 	}
 
-	public void findTestsInContainer(Object[] elements, Set result, IProgressMonitor pm) {
+	public void findTestsInContainer(IJavaElement element, Set result, IProgressMonitor pm) throws CoreException {
+		if (element == null || result == null) {
+			throw new IllegalArgumentException();
+		}
+		
+		if (element instanceof IType) {
+			if (internalIsTest((IType) element, pm)) {
+				result.add(element);
+				return;
+			}
+		}
+
+		if (pm == null)
+			pm= new NullProgressMonitor();
+		
 		try {
-			for (int i= 0; i < elements.length; i++) {
-				Object container= TestSearchEngine.computeScope(elements[i]);
-				if (container instanceof IJavaProject) {
-					IJavaProject project= (IJavaProject) container;
-					findTestsInProject(project, result);
-				} else if (container instanceof IPackageFragmentRoot) {
-					IPackageFragmentRoot root= (IPackageFragmentRoot) container;
-					findTestsInPackageFragmentRoot(root, result);
-				} else if (container instanceof IPackageFragment) {
-					IPackageFragment fragment= (IPackageFragment) container;
-					findTestsInPackageFragment(fragment, result);
-				} else if (container instanceof ICompilationUnit) {
-					ICompilationUnit cu= (ICompilationUnit) container;
-					findTestsInCompilationUnit(cu, result);
-				} else if (container instanceof IType) {
-					IType type= (IType) container;
-					findTestsInType(type, result);
+			pm.beginTask(JUnitMessages.JUnit4TestFinder_searching_description, 3);
+			
+			IRegion region= getRegion(element);
+			ITypeHierarchy hierarchy= JavaCore.newTypeHierarchy(region, null, new SubProgressMonitor(pm, 1));
+			IType[] allClasses= hierarchy.getAllClasses();
+			
+			// search for all types with references to RunWith and Test and all subclasses
+			HashSet candidates= new HashSet(allClasses.length);
+			SearchRequestor requestor= new AnnotationSearchRequestor(hierarchy, candidates);
+			
+			IJavaSearchScope scope= SearchEngine.createJavaSearchScope(allClasses, IJavaSearchScope.SOURCES);
+			int matchRule= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
+			SearchPattern runWithPattern= SearchPattern.createPattern(Annotation.RUN_WITH.getName(), IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.REFERENCES, matchRule);
+			SearchPattern testPattern= SearchPattern.createPattern(Annotation.TEST.getName(), IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.REFERENCES, matchRule);
+			SearchParticipant[] searchParticipants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
+			new SearchEngine().search(runWithPattern, searchParticipants, scope, requestor, new SubProgressMonitor(pm, 1));
+			new SearchEngine().search(testPattern, searchParticipants, scope, requestor, new SubProgressMonitor(pm, 1));
+			
+			// find all classes in the region
+			for (Iterator iterator= candidates.iterator(); iterator.hasNext();) {
+				IType curr= (IType) iterator.next();
+				if (TestSearchEngine.isAccessibleClass(curr) && region.contains(curr)) {
+					result.add(curr);
 				}
-			}			
-		} catch (JavaModelException e) {
-			// do nothing
+			}
+			
+			// add all classes implementing Test in the region
+			IType testInterface= element.getJavaProject().findType(JUnitPlugin.TEST_INTERFACE_NAME);
+			if (testInterface != null) {
+				IType[] allSubtypes= hierarchy.getAllSubtypes(testInterface);
+				for (int i= 0; i < allSubtypes.length; i++) {
+					IType curr= allSubtypes[i];
+					if (TestSearchEngine.isAccessibleClass(curr) && !Flags.isAbstract(curr.getFlags()) && region.contains(curr)) {
+						result.add(curr);
+					}
+				}
+			}
+		} finally {
+			pm.done();
 		}
 	}
-
-	private void findTestsInProject(IJavaProject project, Set result) throws JavaModelException {
-		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-		for (int i= 0; i < roots.length; i++) {
-			IPackageFragmentRoot root= roots[i];
-			findTestsInPackageFragmentRoot(root, result);
+		
+	private static IRegion getRegion(IJavaElement element) throws JavaModelException {
+		IRegion result= JavaCore.newRegion();
+		if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
+			// for projects only add the contained source folders
+			IPackageFragmentRoot[] roots= ((IJavaProject) element).getPackageFragmentRoots();
+			for (int i= 0; i < roots.length; i++) {
+				if (!roots[i].isArchive()) {
+					result.add(roots[i]);
+				}
+			}
+		} else {
+			result.add(element);
 		}
+		return result;
 	}
 
-	private void findTestsInPackageFragmentRoot(IPackageFragmentRoot root, Set result) throws JavaModelException {
-		IJavaElement[] children= root.getChildren();
-		for (int j= 0; j < children.length; j++) {
-			IPackageFragment fragment= (IPackageFragment) children[j];
-			findTestsInPackageFragment(fragment, result);
-		}
-	}
+	private static class AnnotationSearchRequestor extends SearchRequestor {
+		
+		private final Collection fResult;
+		private final ITypeHierarchy fHierarchy;
 
-	private void findTestsInPackageFragment(IPackageFragment fragment, Set result) throws JavaModelException {
-		ICompilationUnit[] compilationUnits= fragment.getCompilationUnits();
-		for (int k= 0; k < compilationUnits.length; k++) {
-			ICompilationUnit unit= compilationUnits[k];
-			findTestsInCompilationUnit(unit, result);
+		public AnnotationSearchRequestor(ITypeHierarchy hierarchy, Collection result) {
+			fHierarchy= hierarchy;
+			fResult= result;
 		}
-	}
 
-	private void findTestsInCompilationUnit(ICompilationUnit unit, Set result) throws JavaModelException {
-		IType[] types= unit.getAllTypes();
-		for (int l= 0; l < types.length; l++) {
-			IType type= types[l];
-			findTestsInType(type, result);
+		public void acceptSearchMatch(SearchMatch match) throws CoreException {
+			if (match.getAccuracy() == SearchMatch.A_ACCURATE && !match.isInsideDocComment()) {
+				Object element= match.getElement();
+				if (element instanceof IType || element instanceof IMethod) {
+					IMember member= (IMember) element;
+					if (member.getNameRange().getOffset() > match.getOffset()) {
+						IType type= member.getElementType() == IJavaElement.TYPE ? (IType) member : member.getDeclaringType();
+						addTypeAndSubtypes(type);
+					}
+				}
+			}
 		}
-	}
 
-	private void findTestsInType(IType type, Set result) throws JavaModelException {
-		if (isTest(type))
-			result.add(type);
+		private void addTypeAndSubtypes(IType type) {
+			if (fResult.add(type)) {
+				IType[] subclasses= fHierarchy.getSubclasses(type);
+				for (int i= 0; i < subclasses.length; i++) {
+					addTypeAndSubtypes(subclasses[i]);
+				}
+			}
+		}
 	}
 
 	public boolean isTest(IType type) throws JavaModelException {
-		if (!Flags.isAbstract(type.getFlags())) {
-			if (Annotation.RUN_WITH.annotates(type) || Annotation.TEST.annotatesAtLeastOneMethod(type))
-				return true;
-			return fJUnit3TestFinder.isTest(type);
+		return internalIsTest(type, null);
+	}
+	
+	private boolean internalIsTest(IType type, IProgressMonitor monitor) throws JavaModelException {
+		if (TestSearchEngine.isAccessibleClass(type)) {
+			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			/* enable when bug 156352 is fixed
+			parser.setProject(type.getJavaProject());
+			IBinding[] bindings= parser.createBindings(new IJavaElement[] { type }, monitor);
+			if (bindings.length == 1 && bindings[0] instanceof ITypeBinding) {
+				ITypeBinding binding= (ITypeBinding) bindings[0];
+				return isTest(binding);
+			}*/
+			parser.setSource(type.getCompilationUnit());
+			parser.setFocalPosition(0);
+			parser.setResolveBindings(true);
+			CompilationUnit root= (CompilationUnit) parser.createAST(monitor);
+			ASTNode node= root.findDeclaringNode(type.getKey());
+			if (node instanceof TypeDeclaration) {
+				ITypeBinding binding= ((TypeDeclaration) node).resolveBinding();
+				if (binding != null) {
+					return isTest(binding);
+				}
+			}
 		}
 		return false;
+		
+	}
+	
+	
+	private boolean isTest(ITypeBinding binding) throws JavaModelException {
+		if (Annotation.RUN_WITH.annotatesTypeOrSuperTypes(binding) || Annotation.TEST.annotatesAtLeastOneMethod(binding)) {
+			return true;
+		}
+		return !Modifier.isAbstract(binding.getModifiers()) && TestSearchEngine.isTestImplementor(binding);
 	}
 }

@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.junit.launcher;
 
 
+
 public interface ITestKind {
 	static class NullTestKind extends TestKind {
 		private NullTestKind() {
@@ -27,6 +28,15 @@ public interface ITestKind {
 		protected String getAttribute(String arg0) {
 			return null;
 		}
+		
+		public ITestFinder getFinder() {
+			return ITestFinder.NULL;
+		}
+		
+		public JUnitRuntimeClasspathEntry[] getClasspathEntries() {
+			return new JUnitRuntimeClasspathEntry[0];
+		}
+		
 	}
 	
 	public static final TestKind NULL = new NullTestKind();
@@ -43,7 +53,7 @@ public interface ITestKind {
 	public static final String CLASSPATH_PLUGIN_ID = "pluginId"; //$NON-NLS-1$
 	public static final String CLASSPATH_PATH_TO_JAR = "pathToJar"; //$NON-NLS-1$
 
-	public abstract ITestFinder createFinder();
+	public abstract ITestFinder getFinder();
 
 	public abstract String getId();
 	public abstract String getDisplayName();

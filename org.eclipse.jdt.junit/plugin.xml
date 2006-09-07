@@ -245,29 +245,20 @@
             label="%JUnitShortcut.label"
             icon="$nl$/icons/full/obj16/julaunch.gif"
             helpContextId="org.eclipse.jdt.junit.launch_shortcut"
-            class="org.eclipse.jdt.internal.junit.launcher.JUnitLaunchShortcut"
+            class="org.eclipse.jdt.junit.JUnitLaunchShortcut"
             modes="run, debug"
             id="org.eclipse.jdt.junit.junitShortcut">
          <contextualLaunch>
             <enablement>
-               <with
-                     variable="selection">
-                  <count
-                        value="1">
-                  </count>
-               		<iterate>
-                 		<or>
-                 			<test property="org.eclipse.jdt.launching.extendsInterface" args="junit.framework.Test"/>
-                 			<test property="org.eclipse.jdt.launching.hasMethod" args="suite, ()QTest;, public static"/>
-                 			<and>
-                 				<test property="org.eclipse.jdt.launching.isContainer"/>
-                 				<test property="org.eclipse.jdt.launching.buildpathReference" args="junit"/>
-                 			</and>
-                            <test property="org.eclipse.jdt.launching.hasMethodWithAnnotation" args="Test, public"/>
-                            <test property="org.eclipse.jdt.launching.hasMethodWithAnnotation" args="Test, public final"/>
-                 			<test property="org.eclipse.jdt.launching.hasTypeWithAnnotation" args="RunWith"/>
-                 		</or>
-               		</iterate>
+               <with variable="selection">
+                  <count value="1"/>
+               	  <iterate>
+                     <adapt type="org.eclipse.jdt.core.IJavaElement">
+		                <test property="org.eclipse.jdt.core.isInJavaProject"/>
+		                <test property="org.eclipse.jdt.core.hasTypeOnClasspath" value="junit.framework.Test"/>
+		                <test property="org.eclipse.jdt.junit.canLaunchAsJUnit" forcePluginActivation="true"/>
+		             </adapt>
+		          </iterate>
                </with>
             </enablement>
          </contextualLaunch>
@@ -307,11 +298,11 @@
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
-            properties="isTest"
+            properties="isTest,canLaunchAsJUnit"
             namespace="org.eclipse.jdt.junit"
             type="org.eclipse.core.runtime.IAdaptable"
-            class="org.eclipse.jdt.internal.junit.ui.JavaTypeExtender"
-            id="org.eclipse.jdt.junit.ITypeExtender">
+            class="org.eclipse.jdt.internal.junit.JUnitPropertyTester"
+            id="org.eclipse.jdt.junit.JUnitPropertyTester">
       </propertyTester>
    </extension>
    <extension

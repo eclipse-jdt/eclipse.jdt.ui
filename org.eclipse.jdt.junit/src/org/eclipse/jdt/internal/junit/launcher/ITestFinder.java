@@ -15,10 +15,11 @@ package org.eclipse.jdt.internal.junit.launcher;
 
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * Interface to be implemented by for extension point
@@ -26,21 +27,21 @@ import org.eclipse.jdt.core.JavaModelException;
  */
 public interface ITestFinder {
 	ITestFinder NULL= new ITestFinder() {
-		public void findTestsInContainer(Object[] elements, Set result, IProgressMonitor pm) {
+		public void findTestsInContainer(IJavaElement element, Set result, IProgressMonitor pm) {
 			// do nothing
 		}
 
-		public boolean isTest(IType type) throws JavaModelException {
+		public boolean isTest(IType type) {
 			return false;
 		}
 	};
 
 	/**
-	 * @param elements elements to search for tests
+	 * @param element element to search for tests
 	 * @param result a Set to add ITypes
 	 * @param pm
 	 */
-	public abstract void findTestsInContainer(Object[] elements, Set/*<IType>*/ result, IProgressMonitor pm);
-
-	public abstract boolean isTest(IType type) throws JavaModelException;
+	public abstract void findTestsInContainer(IJavaElement element, Set/*<IType>*/ result, IProgressMonitor pm) throws CoreException;
+	
+	public abstract boolean isTest(IType type) throws CoreException;
 }

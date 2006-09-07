@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.junit.launcher;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -32,9 +33,10 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.ExecutionArguments;
@@ -45,7 +47,6 @@ import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
 
 import org.eclipse.jdt.internal.junit.Messages;
-import org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestLoader;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.IJUnitStatusConstants;
@@ -79,8 +80,8 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 	 * The name of the prioritized tests
 	 */
 	public static final String FAILURES_FILENAME_ATTR= JUnitPlugin.PLUGIN_ID+".FAILURENAMES"; //$NON-NLS-1$
-
 	public static final String TEST_KIND_ATTR = JUnitPlugin.PLUGIN_ID+".TEST_KIND"; //$NON-NLS-1$
+	
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor pm) throws CoreException {		
 		if (mode.equals(RUN_QUIETLY_MODE)) {
 			launch.setAttribute(NO_DISPLAY_ATTR, "true"); //$NON-NLS-1$
@@ -103,14 +104,7 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		runner.run(runConfig, launch, pm);		
 	}
 
-	/**
-	 * @param configuration
-	 * @param pm
-	 * @return The types representing tests to be launched for this
-	 *         configuration
-	 * @throws CoreException
-	 */
-	protected TestSearchResult findTestTypes(ILaunchConfiguration configuration, IProgressMonitor pm) throws CoreException {
+	protected final TestSearchResult findTestTypes(ILaunchConfiguration configuration, IProgressMonitor pm) throws CoreException {
 		IJavaProject javaProject= getJavaProject(configuration);
 		if ((javaProject == null) || !javaProject.exists()) {
 			informAndAbort(JUnitMessages.JUnitBaseLaunchConfiguration_error_invalidproject, null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT); 
@@ -118,34 +112,36 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		if (!TestSearchEngine.hasTestCaseType(javaProject)) {
 			informAndAbort(JUnitMessages.JUnitBaseLaunchConfiguration_error_junitnotonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 		}
-		boolean isJUnit4Configuration= TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(TestKindRegistry.getDefault().getKind(configuration).getId());
+
+		ITestKind testKind= TestKindRegistry.getDefault().getKind(configuration);
+		if (testKind.isNull()) {
+			informAndAbort(JUnitMessages.JUnitBaseLaunchConfiguration_erro_unknowtestrunner, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
+		}
+				
+		boolean isJUnit4Configuration= TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId());
 		if (isJUnit4Configuration && ! TestSearchEngine.hasTestAnnotation(javaProject)) {
 			informAndAbort(JUnitMessages.JUnitBaseLaunchConfiguration_error_junit4notonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 		}
-		final ITestSearchExtent testTarget= testSearchTarget(configuration, javaProject, pm);
-		TestSearchResult searchResult= TestKindRegistry.getDefault().getTestTypes(configuration, testTarget);
-		if (searchResult.isEmpty()) {
-			final String msg;
-			ITestKind testKind= searchResult.getTestKind();
-			if (testKind == null || testKind.isNull()) {
-				msg= JUnitMessages.JUnitBaseLaunchConfiguration_error_notests;
-			} else {
-				msg= Messages.format(JUnitMessages.JUnitBaseLaunchConfiguration_error_notests_kind, testKind.getDisplayName());
-			}
+		
+		IJavaElement testTarget= getTestTarget(configuration, javaProject);
+		HashSet result= new HashSet();
+		testKind.getFinder().findTestsInContainer(testTarget, result, pm);
+		if (result.isEmpty()) {
+			String msg= Messages.format(JUnitMessages.JUnitBaseLaunchConfiguration_error_notests_kind, testKind.getDisplayName());
 			informAndAbort(msg, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE); 
 		}
-		return searchResult;
+		IType[] types= (IType[]) result.toArray(new IType[result.size()]);
+		return new TestSearchResult(types, testKind);
 	}
 
-	protected void informAndAbort(String message, Throwable exception, int code) throws CoreException {
+	private void informAndAbort(String message, Throwable exception, int code) throws CoreException {
 		IStatus status= new Status(IStatus.INFO, JUnitPlugin.PLUGIN_ID, code, message, exception);
 		if (showStatusMessage(status))
 			throw new CoreException(status);
 		abort(message, exception, code);
 	}
 
-	protected VMRunnerConfiguration launchTypes(ILaunchConfiguration configuration,
-					String mode, TestSearchResult tests, int port) throws CoreException {
+	private final VMRunnerConfiguration launchTypes(ILaunchConfiguration configuration, String mode, TestSearchResult tests, int port) throws CoreException {
 		File workingDir = verifyWorkingDirectory(configuration);
 		String workingDirName = null;
 		if (workingDir != null) 
@@ -170,36 +166,31 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		return runConfig;
 	}
 
-	public ITestSearchExtent testSearchTarget(ILaunchConfiguration configuration, IJavaProject javaProject, IProgressMonitor pm) throws CoreException {
+	private final IJavaElement getTestTarget(ILaunchConfiguration configuration, IJavaProject javaProject) throws CoreException {
 		String containerHandle = configuration.getAttribute(LAUNCH_CONTAINER_ATTR, ""); //$NON-NLS-1$
 		if (containerHandle.length() != 0) {
-			return containerTestTarget(containerHandle, pm);
+			 IJavaElement element= JavaCore.create(containerHandle);
+			 if (element == null || !element.exists()) {
+				 informAndAbort(JUnitMessages.JUnitBaseLaunchConfiguration_error_input_element_deosn_not_exist, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE); 
+			 }
+			 return element;
 		}
-		String testTypeName= configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String) null);
-		return singleTypeTarget(javaProject, performStringSubstitution(testTypeName));
+		String testTypeName= configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, ""); //$NON-NLS-1$
+		if (testTypeName.length() != 0) {
+			testTypeName= performStringSubstitution(testTypeName);
+			IType type= javaProject.findType(testTypeName);
+			if (type != null) {
+				return type;
+			}
+		}
+		informAndAbort(JUnitMessages.JUnitBaseLaunchConfiguration_input_type_does_not_exist, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
+		return null; // not reachable
 	}
 	
-	protected String performStringSubstitution(String testTypeName) throws CoreException {
+	private final String performStringSubstitution(String testTypeName) throws CoreException {
 		return VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(testTypeName);
-		}
-
-	protected ITestSearchExtent containerTestTarget(final String containerHandle, final IProgressMonitor pm) {
-		return new ContainerTestSearchExtent(pm, containerHandle);
 	}
 
-	public ITestSearchExtent singleTypeTarget(final IJavaProject javaProject, final String testName) throws CoreException {
-		IType type = null;
-		try {
-			type = javaProject.findType(testName);
-		} catch (JavaModelException jme) {
-			testTypeDoesNotExist();
-		}
-		if (type == null) {
-			testTypeDoesNotExist();
-		}
-		return new SingleTypeTestSearchExtent(type);
-	}
-	
 	private boolean showStatusMessage(final IStatus status) {
 		final boolean[] success= new boolean[] { false };
 		getDisplay().syncExec(
@@ -226,10 +217,6 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		return display;		
 	}
 	
-	private void testTypeDoesNotExist() throws CoreException {
-		abort("Test type does not exist", null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE); //$NON-NLS-1$
-	}
-	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.junit.launcher.ITestFindingAbortHandler#abort(java.lang.String, java.lang.Throwable, int)
 	 */
@@ -250,7 +237,7 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		return false;
 	}
 
-	public List getBasicArguments(ILaunchConfiguration configuration, int port, String runMode, TestSearchResult result) throws CoreException {
+	protected List getBasicArguments(ILaunchConfiguration configuration, int port, String runMode, TestSearchResult result) throws CoreException {
 		ArrayList argv = new ArrayList();
 		argv.add("-version"); //$NON-NLS-1$
 		argv.add("3"); //$NON-NLS-1$
@@ -269,9 +256,5 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		// result.getTestKind().addArguments(configuration, argv)
 		
 		return argv;
-	}
-	
-	public String defaultTestLoaderClass() {
-		return JUnit3TestLoader.class.getName();
 	}
 }

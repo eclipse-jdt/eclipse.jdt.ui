@@ -16,29 +16,32 @@ package org.eclipse.jdt.internal.junit.launcher;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 
 public class TestKind implements ITestKind {
 
 	private final IConfigurationElement fElement;
+	private ITestFinder fFinder;
 
 	public TestKind(IConfigurationElement element) {
-		this.fElement = element;
+		fElement = element;
+		fFinder= null;
 	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.junit.launcher.ITestKind#createFinder()
 	 */
-	public ITestFinder createFinder() {
-		try {
-			return (ITestFinder) fElement.createExecutableExtension(FINDER_CLASS_NAME);
-		} catch (CoreException e1) {
-			JUnitPlugin.log(e1);
-			return ITestFinder.NULL;
+	public ITestFinder getFinder() {
+		if (fFinder == null) {
+			try {
+				fFinder= (ITestFinder) fElement.createExecutableExtension(FINDER_CLASS_NAME);
+			} catch (CoreException e1) {
+				JUnitPlugin.log(e1);
+				fFinder= ITestFinder.NULL;
+			}
 		}
+		return fFinder;
 	}
 
 	/*
@@ -100,11 +103,6 @@ public class TestKind implements ITestKind {
 				return true;
 		}
 		return false;
-	}
-
-	TestSearchResult search(final ITestSearchExtent testTarget)
-			throws JavaModelException {
-		return new TestSearchResult(testTarget.find(createFinder()), this);
 	}
 
 	/*

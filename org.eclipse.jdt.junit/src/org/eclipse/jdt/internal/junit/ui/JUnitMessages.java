@@ -47,6 +47,8 @@ public final class JUnitMessages extends NLS {
 	public static String GotoReferencedTestAction_dialog_title;
 	public static String GotoReferencedTestAction_selectdialog_title;
 
+	public static String JUnit4TestFinder_searching_description;
+
 	public static String JUnitAddLibraryProposa_junit4_label;
 
 	public static String JUnitAddLibraryProposal_info;
@@ -57,12 +59,18 @@ public final class JUnitMessages extends NLS {
 	public static String JUnitAddLibraryProposal_label;
 	
 	public static String JUnitBaseLaunchConfiguration_dialog_title;
+
+	public static String JUnitBaseLaunchConfiguration_erro_unknowtestrunner;
+
+	public static String JUnitBaseLaunchConfiguration_error_input_element_deosn_not_exist;
 	public static String JUnitBaseLaunchConfiguration_error_invalidproject;
 	public static String JUnitBaseLaunchConfiguration_error_junitnotonpath;
 	public static String JUnitBaseLaunchConfiguration_error_junit4notonpath;
 	public static String JUnitBaseLaunchConfiguration_error_notests;
 	public static String JUnitBaseLaunchConfiguration_error_notests_kind;
 	public static String JUnitBaseLaunchConfiguration_error_novmrunner;
+
+	public static String JUnitBaseLaunchConfiguration_input_type_does_not_exist;
 
 	public static String JUnitContainerInitializer_description_initializer_junit3;
 
@@ -93,6 +101,24 @@ public final class JUnitMessages extends NLS {
 	public static String JUnitContainerWizardPage_wizard_description;
 
 	public static String JUnitContainerWizardPage_wizard_title;
+
+	public static String JUnitLaunchShortcut_dialog_title;
+
+	public static String JUnitLaunchShortcut_dialog_title2;
+
+	public static String JUnitLaunchShortcut_message_launchfailed;
+
+	public static String JUnitLaunchShortcut_message_notests;
+
+	public static String JUnitLaunchShortcut_message_selectConfiguration;
+
+	public static String JUnitLaunchShortcut_message_selectDebugConfiguration;
+
+	public static String JUnitLaunchShortcut_message_selectRunConfiguration;
+
+	public static String JUnitLaunchShortcut_message_selectTestToDebug;
+
+	public static String JUnitLaunchShortcut_message_selectTestToRun;
 	public static String JUnitMainTab_error_invalidProjectName;
 	public static String JUnitMainTab_error_noContainer;
 	public static String JUnitMainTab_error_notJavaProject;
@@ -148,15 +174,6 @@ public final class JUnitMessages extends NLS {
 	public static String LaunchConfigChange_configDeleted;
 	public static String LaunchConfigRenameChange_name;
 	public static String LaunchConfigSetAttributeChange_name;
-	public static String LaunchTestAction_dialog_title;
-	public static String LaunchTestAction_dialog_title2;
-	public static String LaunchTestAction_message_notests;
-	public static String LaunchTestAction_message_selectConfiguration;
-	public static String LaunchTestAction_message_selectDebugConfiguration;
-	public static String LaunchTestAction_message_selectRunConfiguration;
-	public static String LaunchTestAction_message_selectTestToDebug;
-	public static String LaunchTestAction_message_selectTestToRun;
-
 	public static String OpenEditorAction_action_label;
 	public static String OpenEditorAction_error_cannotopen_message;
 	public static String OpenEditorAction_error_cannotopen_title;

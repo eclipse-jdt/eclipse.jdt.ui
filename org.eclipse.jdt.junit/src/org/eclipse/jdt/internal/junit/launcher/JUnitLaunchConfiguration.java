@@ -19,7 +19,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -27,7 +26,6 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 
@@ -53,20 +51,18 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration  {
 	protected VMRunnerConfiguration createVMRunner(ILaunchConfiguration configuration, TestSearchResult testTypes, int port, String runMode) throws CoreException {
 		String[] classPath = createClassPath(configuration, testTypes.getTestKind());
 		VMRunnerConfiguration vmConfig= new VMRunnerConfiguration("org.eclipse.jdt.internal.junit.runner.RemoteTestRunner", classPath); //$NON-NLS-1$
-		Vector argv= getVMArgs(configuration, testTypes, port, runMode);
-		String[] args= new String[argv.size()];
-		argv.copyInto(args);
+		String[] args= getVMArgs(configuration, testTypes, port, runMode);
 		vmConfig.setProgramArguments(args);
 		return vmConfig;
 	}
 
-	public Vector getVMArgs(ILaunchConfiguration configuration, TestSearchResult result, int port, String runMode) throws CoreException {
+	private String[] getVMArgs(ILaunchConfiguration configuration, TestSearchResult result, int port, String runMode) throws CoreException {
 		String progArgs= getProgramArguments(configuration);
 		String testName= configuration.getAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, ""); //$NON-NLS-1$
 		String testFailureNames= configuration.getAttribute(JUnitBaseLaunchConfiguration.FAILURES_FILENAME_ATTR, ""); //$NON-NLS-1$
 		
 		// insert the program arguments
-		Vector argv= new Vector(10);
+		ArrayList argv= new ArrayList(10);
 		ExecutionArguments execArgs = new ExecutionArguments("", progArgs); //$NON-NLS-1$
 		String[] pa= execArgs.getProgramArgumentsArray();
 		for (int i= 0; i < pa.length; i++) {
@@ -95,7 +91,7 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration  {
 			argv.add(testFailureNames);			
 		}
 
-		return argv;
+		return (String[]) argv.toArray(new String[argv.size()]);
 	}
 
 	private String createTestNamesFile(IType[] testTypes) throws CoreException {
@@ -121,7 +117,7 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration  {
 		}
 	}
 	
-	public String[] createClassPath(ILaunchConfiguration configuration, ITestKind kind) throws CoreException {
+	private String[] createClassPath(ILaunchConfiguration configuration, ITestKind kind) throws CoreException {
 		String[] cp= getClasspath(configuration);
 				
 		List junitEntries = new ClasspathLocalizer(Platform.inDevelopmentMode()).localizeClasspath(kind);
@@ -146,7 +142,7 @@ class ClasspathLocalizer {
 		fInDevelopmentMode = inDevelopmentMode;
 	}
 
-	protected List localizeClasspath(ITestKind kind) {
+	public List localizeClasspath(ITestKind kind) {
 		JUnitRuntimeClasspathEntry[] entries= kind.getClasspathEntries();
 		List junitEntries= new ArrayList();
 		

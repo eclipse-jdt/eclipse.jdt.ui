@@ -63,8 +63,6 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
@@ -349,9 +347,9 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 
 
 	private void updateTestLoaderFromConfig(ILaunchConfiguration config) {
-		TestKind testKind= TestKindRegistry.getDefault().getKind(config);
+		ITestKind testKind= TestKindRegistry.getDefault().getKind(config);
 		if (testKind == null || testKind.isNull())
-			testKind= (TestKind) TestKindRegistry.getDefault().getAllKinds().get(0); // TODO: assumes JUnit3 is first
+			testKind= TestKindRegistry.getDefault().getKind(TestKindRegistry.JUNIT3_TEST_KIND_ID);
 		fTestLoaderViewer.setSelection(new StructuredSelection(testKind));
 	}
 	
@@ -492,7 +490,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 			radioSetting[0]= fTestRadioButton.getSelection();
 			radioSetting[1]= fTestContainerRadioButton.getSelection();
 			
-			types= TestSearchEngine.findTests(getLaunchConfigurationDialog(), new Object[] {javaProject}, getSelectedTestKind()); 
+			types= TestSearchEngine.findTests(getLaunchConfigurationDialog(), javaProject, getSelectedTestKind()); 
 		} catch (InterruptedException e) {
 			setErrorMessage(e.getMessage());
 			return;
@@ -658,7 +656,8 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 				setErrorMessage(JUnitMessages.JUnitMainTab_error_testnotdefined);
 				return;
 			}
-		} catch (Exception e) {
+		} catch (CoreException e) {
+			JUnitPlugin.log(e);
 		}
 		IJavaProject javaProject= JavaCore.create(project);
 		validateJavaProject(javaProject);
@@ -736,30 +735,29 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	 */
 	protected void initializeTestType(IJavaElement javaElement, ILaunchConfigurationWorkingCopy config) {
 		String name= ""; //$NON-NLS-1$
-		ITestKind testKind= null;
+		String testKindId= null;
 		try {
 			// we only do a search for compilation units or class files or 
 			// or source references
-			if ((javaElement instanceof ICompilationUnit) || 
-				(javaElement instanceof ISourceReference) ||
-				(javaElement instanceof IClassFile)) {
-		
-				IType[] types = TestSearchEngine.findTests(new Object[] {javaElement});
+			if (javaElement instanceof ISourceReference) {
+				ITestKind testKind= TestKindRegistry.getContainerTestKind(javaElement);
+				testKindId= testKind.getId();
+
+				IType[] types = TestSearchEngine.findTests(getLaunchConfigurationDialog(), javaElement, testKind); 
 				if ((types == null) || (types.length < 1)) {
 					return;
 				}
 				// Simply grab the first main type found in the searched element
 				name= JavaModelUtil.getFullyQualifiedName(types[0]);
-				testKind= TestKindRegistry.getDefault().getKind(types[0]);
+				
 			}	
 		} catch (InterruptedException ie) {
+			
 		} catch (InvocationTargetException ite) {
 		}
-		if (name == null)
-			name= ""; //$NON-NLS-1$
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, name);
-		if (testKind != null && ! testKind.isNull())
-			config.setAttribute(JUnitBaseLaunchConfiguration.TEST_KIND_ATTR, testKind.getId());
+		if (testKindId != null)
+			config.setAttribute(JUnitBaseLaunchConfiguration.TEST_KIND_ATTR, testKindId);
 		initializeName(config, name);
 	}
 	

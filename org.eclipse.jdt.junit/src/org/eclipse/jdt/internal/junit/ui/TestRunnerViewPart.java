@@ -104,8 +104,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.viewsupport.ViewHistory;
 
 import org.eclipse.jdt.internal.junit.Messages;
+import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
-import org.eclipse.jdt.internal.junit.launcher.TestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.model.ITestRunSessionListener;
 import org.eclipse.jdt.internal.junit.model.ITestSessionListener;
@@ -1135,7 +1135,7 @@ action enablement
 		if (config == null)
 			return true;
 
-		TestKind kind= TestKindRegistry.getDefault().getKind(config);
+		ITestKind kind= TestKindRegistry.getDefault().getKind(config);
 		return kind.isNull() || TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(kind.getId());
     }
 
@@ -1146,7 +1146,7 @@ action enablement
 		String testKindDisplayStr= null;
 		ILaunchConfiguration config= fTestRunSession.getLaunch().getLaunchConfiguration();
 		if (config != null) {
-			TestKind kind= TestKindRegistry.getDefault().getKind(config);
+			ITestKind kind= TestKindRegistry.getDefault().getKind(config);
 			if (!kind.isNull())
 				testKindDisplayStr= kind.getDisplayName();
 		}
