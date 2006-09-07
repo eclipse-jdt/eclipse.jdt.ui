@@ -245,7 +245,7 @@
             label="%JUnitShortcut.label"
             icon="$nl$/icons/full/obj16/julaunch.gif"
             helpContextId="org.eclipse.jdt.junit.launch_shortcut"
-            class="org.eclipse.jdt.junit.JUnitLaunchShortcut"
+            class="org.eclipse.jdt.junit.launcher.JUnitLaunchShortcut"
             modes="run, debug"
             id="org.eclipse.jdt.junit.junitShortcut">
          <contextualLaunch>

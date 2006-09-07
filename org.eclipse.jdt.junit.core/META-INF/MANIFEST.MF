@@ -16,6 +16,7 @@ Export-Package: org.eclipse.jdt.internal.junit;x-internal:=true,
  org.eclipse.jdt.internal.junit.util;x-internal:=true,
  org.eclipse.jdt.internal.junit.wizards;x-internal:=true,
  org.eclipse.jdt.junit,
+ org.eclipse.jdt.junit.launcher,
  org.eclipse.jdt.junit.wizards
 Require-Bundle: 
  org.eclipse.ui.ide;bundle-version="[3.2.0,4.0.0)",

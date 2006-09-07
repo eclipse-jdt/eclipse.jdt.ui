@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
  *******************************************************************************/
-package org.eclipse.jdt.junit;
+package org.eclipse.jdt.junit.launcher;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -77,7 +77,6 @@ import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
  * </p>
  * @since 3.3
  */
-
 public class JUnitLaunchShortcut implements ILaunchShortcut {
 
 	private static final String EMPTY_STRING= ""; //$NON-NLS-1$
