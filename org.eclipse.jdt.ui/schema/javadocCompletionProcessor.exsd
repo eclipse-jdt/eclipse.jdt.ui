@@ -19,7 +19,6 @@ Deprecated as of 3.2. Extenders should rather contribute to the &lt;tt&gt;org.ec
             <meta.element deprecated="true" replacement="org.eclipse.jdt.ui.javaCompletionProposalComputer" />
          </appInfo>
          <documentation>
-            (no description available)
          </documentation>
       </annotation>
       <complexType>
@@ -56,7 +55,6 @@ Deprecated as of 3.2. Extenders should rather contribute to the &lt;tt&gt;org.ec
    <element name="javadocCompletionProcessor">
       <annotation>
          <documentation>
-            (no description available)
          </documentation>
       </annotation>
       <complexType>
