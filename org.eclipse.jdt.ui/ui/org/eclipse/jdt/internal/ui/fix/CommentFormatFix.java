@@ -39,6 +39,7 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -105,6 +106,9 @@ public class CommentFormatFix implements IFix {
 
 	private static List format(IDocument document, boolean singleLine, boolean multiLine, boolean javaDoc, HashMap preferences) {
 	    final List edits= new ArrayList();
+	    
+	    if (DefaultCodeFormatterConstants.FALSE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT)))
+	    	preferences.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT, DefaultCodeFormatterConstants.TRUE);
 		
 		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 		
@@ -156,7 +160,7 @@ public class CommentFormatFix implements IFix {
 	    if (!edit.hasChildren())
 	    	return null;
 	    
-	    //Filter out noops
+	    // Filter out noops
 	    TextEdit[] children= edit.getChildren();
 	    for (int i= 0; i < children.length; i++) {
 	        if (!(children[i] instanceof ReplaceEdit))
@@ -183,29 +187,29 @@ public class CommentFormatFix implements IFix {
 		fCompilationUnit= compilationUnit;
     }
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.IFix#createChange()
+	/**
+	 * {@inheritDoc}
 	 */
 	public TextChange createChange() throws CoreException {
 		return fChange;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.IFix#getCompilationUnit()
+	/**
+	 * {@inheritDoc}
 	 */
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.IFix#getDescription()
+	/**
+	 * {@inheritDoc}
 	 */
 	public String getDescription() {
 		return MultiFixMessages.CommentFormatFix_description;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.IFix#getStatus()
+	/**
+	 * {@inheritDoc}
 	 */
 	public IStatus getStatus() {
 	    return StatusInfo.OK_STATUS;
