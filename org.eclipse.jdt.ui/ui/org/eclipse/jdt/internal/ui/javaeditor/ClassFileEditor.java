@@ -24,18 +24,14 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -44,7 +40,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
@@ -109,7 +104,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	private class SourceAttachmentForm implements IPropertyChangeListener {
 
 		private final IClassFile fFile;
-		private ScrolledComposite fScrolledComposite;
+		private Composite fComposite;
 		private Color fBackgroundColor;
 		private Color fForegroundColor;
 		private Color fSeparatorColor;
@@ -148,14 +143,12 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 			JFaceResources.getFontRegistry().addListener(this);
 
-			fScrolledComposite= new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
-			fScrolledComposite.setAlwaysShowScrollBars(false);
-			fScrolledComposite.setExpandHorizontal(true);
-			fScrolledComposite.setExpandVertical(true);
-			fScrolledComposite.addDisposeListener(new DisposeListener() {
+			fComposite= createComposite(parent);
+			fComposite.setLayout(new GridLayout());
+			fComposite.addDisposeListener(new DisposeListener() {
 				public void widgetDisposed(DisposeEvent e) {
 					JFaceResources.getFontRegistry().removeListener(SourceAttachmentForm.this);
-					fScrolledComposite= null;
+					fComposite= null;
 					fSeparatorColor.dispose();
 					fSeparatorColor= null;
 					fBannerLabels.clear();
@@ -167,32 +160,13 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				}
 			});
 
-			fScrolledComposite.addControlListener(new ControlListener() {
-				public void controlMoved(ControlEvent e) {}
+			createTitleLabel(fComposite, JavaEditorMessages.SourceAttachmentForm_title);
+			createLabel(fComposite, null);
+			createLabel(fComposite, null);
 
-				public void controlResized(ControlEvent e) {
-					Rectangle clientArea = fScrolledComposite.getClientArea();
+			createHeadingLabel(fComposite, JavaEditorMessages.SourceAttachmentForm_heading);
 
-					ScrollBar verticalBar= fScrolledComposite.getVerticalBar();
-					verticalBar.setIncrement(VERTICAL_SCROLL_INCREMENT);
-					verticalBar.setPageIncrement(clientArea.height - verticalBar.getIncrement());
-
-					ScrollBar horizontalBar= fScrolledComposite.getHorizontalBar();
-					horizontalBar.setIncrement(HORIZONTAL_SCROLL_INCREMENT);
-					horizontalBar.setPageIncrement(clientArea.width - horizontalBar.getIncrement());
-				}
-			});
-
-			Composite composite= createComposite(fScrolledComposite);
-			composite.setLayout(new GridLayout());
-
-			createTitleLabel(composite, JavaEditorMessages.SourceAttachmentForm_title);
-			createLabel(composite, null);
-			createLabel(composite, null);
-
-			createHeadingLabel(composite, JavaEditorMessages.SourceAttachmentForm_heading);
-
-			Composite separator= createCompositeSeparator(composite);
+			Composite separator= createCompositeSeparator(fComposite);
 			GridData data= new GridData(GridData.FILL_HORIZONTAL);
 			data.heightHint= 2;
 			separator.setLayoutData(data);
@@ -200,28 +174,26 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			try {
 				IPackageFragmentRoot root= getPackageFragmentRoot(fFile);
 				if (root != null) {
-					createSourceAttachmentControls(composite, root);
+					createSourceAttachmentControls(fComposite, root);
 				}
 			} catch (JavaModelException e) {
 				String title= JavaEditorMessages.SourceAttachmentForm_error_title;
 				String message= JavaEditorMessages.SourceAttachmentForm_error_message;
-				ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);
+				ExceptionHandler.handle(e, fComposite.getShell(), title, message);
 			}
 
-			separator= createCompositeSeparator(composite);
+			separator= createCompositeSeparator(fComposite);
 			data= new GridData(GridData.FILL_HORIZONTAL);
 			data.heightHint= 2;
 			separator.setLayoutData(data);
 
-			fNoSourceTextWidget= createCodeView(composite);
+			fNoSourceTextWidget= createCodeView(fComposite);
 			data= new GridData(GridData.FILL_BOTH);
 			fNoSourceTextWidget.setLayoutData(data);
+			
 			updateCodeView(fNoSourceTextWidget, fFile);
-
-			fScrolledComposite.setContent(composite);
-			fScrolledComposite.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-
-			return fScrolledComposite;
+			
+			return fComposite;
 		}
 
 		private void createSourceAttachmentControls(Composite composite, IPackageFragmentRoot root) throws JavaModelException {
@@ -279,19 +251,17 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		private SelectionListener getButtonListener(final IClasspathEntry entry, final IPath containerPath, final IJavaProject jproject) {
 			return new SelectionListener() {
 				public void widgetSelected(SelectionEvent event) {
+					Shell shell= getSite().getShell();
 					try {
-						Shell shell= fScrolledComposite.getShell();
-
 						IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(shell, entry);
 						if (result != null) {
 							applySourceAttachment(shell, result, jproject, containerPath);
 							verifyInput(getEditorInput());
 						}
-
 					} catch (CoreException e) {
 						String title= JavaEditorMessages.SourceAttachmentForm_error_title;
 						String message= JavaEditorMessages.SourceAttachmentForm_error_message;
-						ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);
+						ExceptionHandler.handle(e, shell, title, message);
 					}
 				}
 
@@ -329,12 +299,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				label.setFont(JFaceResources.getHeaderFont());
 			}
 
-			Control control= fScrolledComposite.getContent();
-			fScrolledComposite.setMinSize(control.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-			fScrolledComposite.setContent(control);
-
-			fScrolledComposite.layout(true);
-			fScrolledComposite.redraw();
+			fComposite.layout(true);
+			fComposite.redraw();
 		}
 
 		// --- copied from org.eclipse.update.ui.forms.internal.FormWidgetFactory
@@ -357,7 +323,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		}
 
 		private StyledText createCodeView(Composite parent) {
-			int styles= SWT.MULTI | SWT.FULL_SELECTION;
+			int styles= SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION;
 			StyledText styledText= new StyledText(parent, styles);
 			styledText.setBackground(fBackgroundColor);
 			styledText.setForeground(fForegroundColor);
@@ -402,7 +368,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			button.setForeground(fForegroundColor);
 			if (text != null)
 				button.setText(text);
-			//		button.addFocusListener(visibilityHandler);
 			return button;
 		}
 
