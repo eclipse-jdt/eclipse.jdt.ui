@@ -377,7 +377,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			IClassFileReader classFileReader= ToolFactory.createDefaultClassFileReader(classFile, flags);
 			if (classFileReader != null) {
 				IClassFileDisassembler disassembler= ToolFactory.createDefaultClassFileDisassembler();
-				content= disassembler.disassemble(classFileReader, "\n", ClassFileBytesDisassembler.SYSTEM); //$NON-NLS-1$
+				content= disassembler.disassemble(classFileReader, "\n", ClassFileBytesDisassembler.DETAILED); //$NON-NLS-1$
 			}
 			styledText.setText(content == null ? "" : content); //$NON-NLS-1$
 		}
