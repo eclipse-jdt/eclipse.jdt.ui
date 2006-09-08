@@ -55,7 +55,7 @@ public class JUnitPropertyTester extends PropertyTester {
 		} else if (PROPERTY_CAN_LAUNCH_AS_JUNIT_TEST.equals(property)) {
 			return canLaunchAsJUnitTest(element);
 		}
-		throw new IllegalArgumentException("Method must be 'isTest' method"); //$NON-NLS-1$
+		throw new IllegalArgumentException("Unknown test property '" + property + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	private boolean canLaunchAsJUnitTest(IJavaElement element) {
