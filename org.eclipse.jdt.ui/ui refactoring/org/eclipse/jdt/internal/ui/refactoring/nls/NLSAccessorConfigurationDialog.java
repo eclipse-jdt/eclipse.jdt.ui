@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -186,7 +187,6 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 
 
 	private void createAccessorPart(Composite parent, final int nOfColumns, int textWidth) {
-
 		createLabel(parent, NLSUIMessages.NLSAccessorConfigurationDialog_resourceBundle_title, nOfColumns); 
 		fAccessorPackage.createControl(parent, nOfColumns, textWidth);
 
@@ -204,9 +204,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	}
 
 	private void createPropertyPart(Composite parent, final int nOfColumns, final int textWidth) {
-		Separator label= new Separator(SWT.NONE);
-		((Label) label.getSeparator(parent)).setText(NLSUIMessages.NLSAccessorConfigurationDialog_property_location); 
-		label.doFillIntoGrid(parent, nOfColumns, 20);
+		createLabel(parent, NLSUIMessages.NLSAccessorConfigurationDialog_property_location, nOfColumns); 
 		fResourceBundlePackage.createControl(parent, nOfColumns, textWidth);
 
 		fResourceBundleFile.doFillIntoGrid(parent, nOfColumns);
@@ -216,7 +214,10 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	private void createLabel(Composite parent, final String text, final int N_OF_COLUMNS) {
 		Separator label= new Separator(SWT.NONE);
 		((Label) label.getSeparator(parent)).setText(text);
-		label.doFillIntoGrid(parent, N_OF_COLUMNS, 20);
+		GC gc= new GC(parent);
+		int height= gc.stringExtent(text).y;
+		gc.dispose();
+		label.doFillIntoGrid(parent, N_OF_COLUMNS, height);
 	}
 
 	private void browseForPropertyFile() {
