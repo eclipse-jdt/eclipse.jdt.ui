@@ -232,7 +232,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 
 	/**
 	 * Returns the launch configuration type id of the launch configuration this shortcut will create. Clients can override this method to
-	 * return the id of their lauch configuration.
+	 * return the id of their launch configuration.
 	 * 
 	 * @return the launch configuration type id of the launch configuration this shortcut will create
 	 */
@@ -246,7 +246,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	 *  
 	 * Clients can extend this method (should call super) to configure additional attributes on the launch configuration working copy.
 	 * 
-	 * @return the launch configuration type id of the launch configuration this shortcut will create
+	 * @return a launch configuration working copy for the given element 
 	 */
 	protected ILaunchConfigurationWorkingCopy createLaunchConfiguration(IJavaElement element) throws CoreException {
 		final String testName;
@@ -299,10 +299,10 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	}
 	
 	/**
-	 * Returns the attributes names of the attributes that are compared when looking for an existing similar launch configurations.
+	 * Returns the attribute names of the attributes that are compared when looking for an existing similar launch configuration.
 	 * Clients can override and replace to customize. 
 	 * 
-	 * @return the attributes names of the attributes that are compared
+	 * @return the attribute names of the attributes that are compared
 	 */
 	protected String[] getAttributeNamesToCompare() {
 		return new String[] {

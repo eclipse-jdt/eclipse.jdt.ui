@@ -104,7 +104,7 @@ import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 /**
  * The launch configuration tab for JUnit.
  * <p>
- * This class may be instantiated nut is not intended to be subclassed.
+ * This class may be instantiated but is not intended to be subclassed.
  * </p>
  * @since 3.3
  */
@@ -133,6 +133,9 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	
 	private ComboViewer fTestLoaderViewer;
 	
+	/**
+	 * Creates a JUnit launch configuration tab.
+	 */
 	public JUnitLaunchConfigurationTab() {
 	}
 	
