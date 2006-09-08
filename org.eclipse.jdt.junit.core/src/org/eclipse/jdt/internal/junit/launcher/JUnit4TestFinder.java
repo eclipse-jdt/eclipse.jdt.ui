@@ -51,6 +51,8 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
+import org.eclipse.jdt.internal.corext.SourceRange;
+
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
@@ -232,7 +234,7 @@ public class JUnit4TestFinder implements ITestFinder {
 			
 			if (type.getCompilationUnit() != null) {
 				parser.setSource(type.getCompilationUnit());
-			} else if (type.getSourceRange() == null) { // class file with no source
+			} else if (! SourceRange.isAvailable(type.getSourceRange())) { // class file with no source
 				parser.setProject(type.getJavaProject());
 				IBinding[] bindings= parser.createBindings(new IJavaElement[] { type }, monitor);
 				if (bindings.length == 1 && bindings[0] instanceof ITypeBinding) {
