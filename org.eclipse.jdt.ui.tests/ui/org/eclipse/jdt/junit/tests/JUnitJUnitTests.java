@@ -29,6 +29,8 @@ public class JUnitJUnitTests {
 		suite.addTestSuite(TestTestSearchEngine.class);
 		
 		suite.addTestSuite(TestRunListenerTest.class);
+		suite.addTestSuite(JUnit3TestFinderTest.class);
+		suite.addTestSuite(JUnit4TestFinderTest.class);
 		//$JUnit-END$
 		return suite;
 	}

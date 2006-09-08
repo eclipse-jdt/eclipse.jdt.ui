@@ -16,6 +16,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -26,19 +27,23 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener2;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
-import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchShortcut;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
+
+import org.eclipse.jdt.junit.launcher.JUnitLaunchShortcut;
 
 import org.eclipse.jdt.junit.ITestRunListener;
 
@@ -58,10 +63,18 @@ public class TestRunListenerTest extends TestCase {
 		JavaProjectHelper.delete(fProject);
 	}
 	
+	private static class TestJUnitLaunchShortcut extends JUnitLaunchShortcut {
+		public static ILaunchConfiguration createConfiguration(IJavaElement element) throws CoreException {
+			ILaunchConfigurationWorkingCopy copy= new TestJUnitLaunchShortcut().createLaunchConfiguration(element);
+			return copy.doSave();
+		}
+	}
+	
 	private void runTest(String source, final String[] expectedSequence) throws Exception {
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fProject, "src");
 		IPackageFragment pack= root.createPackageFragment("pack", true, null);
-		ICompilationUnit aTestCase= pack.createCompilationUnit("ATestCase.java", source, true, null);
+		ICompilationUnit aTestCaseCU= pack.createCompilationUnit("ATestCase.java", source, true, null);
+		IType aTestCase= aTestCaseCU.findPrimaryType();
 		
 		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 		
@@ -108,8 +121,8 @@ public class TestRunListenerTest extends TestCase {
 			}
 		};
 		lm.addLaunchListener(launchesListener);
-		JUnitLaunchShortcut shortcut= new JUnitLaunchShortcut();
-		ILaunchConfiguration configuration= shortcut.createConfiguration(shortcut.describeContainerLaunch(aTestCase));
+		
+		ILaunchConfiguration configuration= TestJUnitLaunchShortcut.createConfiguration(aTestCase);
 		try {
 			configuration.launch(ILaunchManager.RUN_MODE, null);
 			new DisplayHelper() {
