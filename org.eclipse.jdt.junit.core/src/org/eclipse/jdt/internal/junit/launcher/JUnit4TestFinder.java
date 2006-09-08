@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -221,14 +222,27 @@ public class JUnit4TestFinder implements ITestFinder {
 	private boolean internalIsTest(IType type, IProgressMonitor monitor) throws JavaModelException {
 		if (TestSearchEngine.isAccessibleClass(type)) {
 			ASTParser parser= ASTParser.newParser(AST.JLS3);
-			/* enable when bug 156352 is fixed
+			/* TODO: When bug 156352 is fixed:
 			parser.setProject(type.getJavaProject());
 			IBinding[] bindings= parser.createBindings(new IJavaElement[] { type }, monitor);
 			if (bindings.length == 1 && bindings[0] instanceof ITypeBinding) {
 				ITypeBinding binding= (ITypeBinding) bindings[0];
 				return isTest(binding);
 			}*/
-			parser.setSource(type.getCompilationUnit());
+			
+			if (type.getCompilationUnit() != null) {
+				parser.setSource(type.getCompilationUnit());
+			} else if (type.getSourceRange() == null) { // class file with no source
+				parser.setProject(type.getJavaProject());
+				IBinding[] bindings= parser.createBindings(new IJavaElement[] { type }, monitor);
+				if (bindings.length == 1 && bindings[0] instanceof ITypeBinding) {
+					ITypeBinding binding= (ITypeBinding) bindings[0];
+					return isTest(binding);
+				}
+				return false;
+			} else {
+				parser.setSource(type.getClassFile());
+			}
 			parser.setFocalPosition(0);
 			parser.setResolveBindings(true);
 			CompilationUnit root= (CompilationUnit) parser.createAST(monitor);
