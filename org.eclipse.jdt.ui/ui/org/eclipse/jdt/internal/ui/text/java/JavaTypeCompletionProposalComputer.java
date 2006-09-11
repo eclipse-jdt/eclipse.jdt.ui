@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -19,6 +21,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -80,14 +83,25 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 				if (types.size() > 0 && context.computeIdentifierPrefix().length() == 0) {
 					IType expectedType= javaContext.getExpectedType();
 					if (expectedType != null) {
-						// empty prefix completion - insert LRU types if known
-						LazyJavaTypeCompletionProposal typeProposal= (LazyJavaTypeCompletionProposal) types.get(0);
-						List history= JavaPlugin.getDefault().getContentAssistHistory().getHistory(expectedType.getFullyQualifiedName()).getTypes();
+						// empty prefix completion - insert LRU types if known, but prune if they already occur in the core list
 						
-						int relevance= typeProposal.getRelevance() - history.size() - 1;
+						// compute minmimum relevance and already proposed list
+						int relevance= Integer.MAX_VALUE;
+						Set proposed= new HashSet();
+						for (Iterator it= types.iterator(); it.hasNext();) {
+							AbstractJavaCompletionProposal p= (AbstractJavaCompletionProposal) it.next();
+							IJavaElement element= p.getJavaElement();
+							if (element instanceof IType)
+								proposed.add(((IType) element).getFullyQualifiedName());
+							relevance= Math.min(relevance, p.getRelevance());
+						}
+
+						// insert history types
+						List history= JavaPlugin.getDefault().getContentAssistHistory().getHistory(expectedType.getFullyQualifiedName()).getTypes();
+						relevance-= history.size() + 1;
 						for (Iterator it= history.iterator(); it.hasNext();) {
 							String type= (String) it.next();
-							if (type.equals(((IType) typeProposal.getJavaElement()).getFullyQualifiedName()))
+							if (proposed.contains(type))
 								continue;
 							
 							IJavaCompletionProposal proposal= createTypeProposal(relevance, type, javaContext);
