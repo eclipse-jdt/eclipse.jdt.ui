@@ -70,6 +70,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
@@ -557,7 +558,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		composite.setWeights(new int[]{65, 45});
 
 		validateKeys(false);
-
+		updateButtonStates(StructuredSelection.EMPTY);
+		
 		// promote control
 		setControl(supercomposite);
 		Dialog.applyDialogFont(supercomposite);
