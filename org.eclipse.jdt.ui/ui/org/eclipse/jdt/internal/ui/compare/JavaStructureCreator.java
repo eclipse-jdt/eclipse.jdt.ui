@@ -199,9 +199,6 @@ public class JavaStructureCreator extends StructureCreator {
 		String contents;
 		Map compilerOptions= null;
 		
-		// Ensure document is correctly setup
-		setupDocument(doc);
-		
 		if (input instanceof IResourceProvider) {
 			IResource resource= ((IResourceProvider) input).getResource();
 			if (resource != null) {
