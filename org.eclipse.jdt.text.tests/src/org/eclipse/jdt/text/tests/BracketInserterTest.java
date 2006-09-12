@@ -14,21 +14,18 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.widgets.Event;
-
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.widgets.Event;
 
 import org.eclipse.text.tests.Accessor;
-
-import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -37,21 +34,20 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedPosition;
 
-import org.eclipse.ui.PartInitException;
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.text.tests.performance.DisplayHelper;
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.ui.PartInitException;
 
 
 /**
@@ -62,7 +58,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  */
 public class BracketInserterTest extends TestCase {
 
-	private static final String PROJECT= "BracketInserterTest";
 	private static final String SRC= "src";
 	private static final String SEP= "/";
 	private static final String CU_NAME= "PR75423.java";
@@ -94,7 +89,11 @@ public class BracketInserterTest extends TestCase {
 	private static final int FIELD_OFFSET= 264;
 	
 	public static Test suite() {
-		return new TestSuite(BracketInserterTest.class);
+		TestSuite suite= new TestSuite(BracketInserterTest.class);
+//		BracketInserterTest loop= new BracketInserterTest();
+//		loop.setName("testLoop");
+		return suite;
+//		return loop;
 	}
 	
 	private JavaEditor fEditor;
@@ -109,21 +108,22 @@ public class BracketInserterTest extends TestCase {
 	}
 	
 	private void setUpProject(String sourceLevel) throws CoreException, JavaModelException {
-		fProject= JavaProjectHelper.createJavaProject(PROJECT, "bin");
+		fProject= JavaProjectHelper.createJavaProject(getName(), "bin");
 		fProject.setOption(JavaCore.COMPILER_SOURCE, sourceLevel);
 		JavaProjectHelper.addSourceContainer(fProject, SRC);
-		IPackageFragment fragment= fProject.findPackageFragment(new Path(SEP + PROJECT + SEP + SRC));
+		IPackageFragment fragment= fProject.findPackageFragment(new Path(SEP + getName() + SEP + SRC));
 		fragment.createCompilationUnit(CU_NAME, CU_CONTENTS, true, new NullProgressMonitor());
 	}
 
 	private void setUpEditor() {
-		fEditor= openJavaEditor(new Path(SEP + PROJECT + SEP + SRC + SEP + CU_NAME));
+		fEditor= openJavaEditor(new Path(SEP + getName() + SEP + SRC + SEP + CU_NAME));
 		assertNotNull(fEditor);
 		fTextWidget= fEditor.getViewer().getTextWidget();
 		assertNotNull(fTextWidget);
 		fAccessor= new Accessor(fTextWidget, StyledText.class);
 		fDocument= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
 		assertNotNull(fDocument);
+		assertEquals(CU_CONTENTS, fDocument.get());
 	}
 
 	private JavaEditor openJavaEditor(IPath path) {
@@ -139,7 +139,11 @@ public class BracketInserterTest extends TestCase {
 	
 	protected void tearDown() throws Exception {
 		EditorTestHelper.closeEditor(fEditor);
-		JavaProjectHelper.delete(fProject);
+		fEditor= null;
+		if (fProject != null) {
+			JavaProjectHelper.delete(fProject);
+			fProject= null;
+		}
 
 		// reset to defaults
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -168,54 +172,38 @@ public class BracketInserterTest extends TestCase {
 	public void testMultipleParenthesisInsertion() throws BadLocationException, JavaModelException, CoreException {
 		use14();
 		setCaret(BODY_OFFSET);
-		type('(');
-		type('(');
-		type('(');
-		type('(');
+		type("((((");
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 4, getCaret());
 		
-		LinkedModeModel model= LinkedModeModel.getModel(fDocument, BODY_OFFSET + 4);
-		assertNotNull(model);
-		assertTrue(model.isNested());
+		assertModel(true);
 	}
 	
 	public void testDeletingMultipleParenthesisInertion() throws BadLocationException, JavaModelException, CoreException {
 		use14();
 		setCaret(BODY_OFFSET);
-		type('(');
-		type('(');
-		type('(');
-		type('(');
+		type("((((");
 		
 		// delete two levels
-		type(SWT.BS);
-		type(SWT.BS);
+		linkedType(SWT.BS, true);
+		linkedType(SWT.BS, true);
 
 		assertEquals("(())", fDocument.get(BODY_OFFSET, 4));
 		assertEquals(BODY_OFFSET + 2, getCaret());
 		
-		LinkedModeModel model= LinkedModeModel.getModel(fDocument, BODY_OFFSET + 2);
-		assertNotNull(model);
-		assertTrue("models must be nested", model.isNested());
-		
 		// delete the second-last level
-		type(SWT.BS);
+		linkedType(SWT.BS, true);
 		assertEquals("()", fDocument.get(BODY_OFFSET, 2));
 		assertEquals(BODY_OFFSET + 1, getCaret());
 		
-		model= LinkedModeModel.getModel(fDocument, BODY_OFFSET + 1);
-		assertNotNull(model);
-		assertFalse("model must not be nested", model.isNested());
-		
 		// delete last level
-		type(SWT.BS);
+		linkedType(SWT.BS, false);
 		assertEquals(CU_CONTENTS, fDocument.get());
 		assertEquals(BODY_OFFSET, getCaret());
 		
 		assertEquals(CU_CONTENTS, fDocument.get());
-		assertFalse("no linked model must exist", LinkedModeModel.hasInstalledModel(fDocument));
+		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 	
 	public void testNoInsertInsideText() throws BadLocationException, JavaModelException, CoreException {
@@ -240,8 +228,7 @@ public class BracketInserterTest extends TestCase {
 	public void testPeerEntry() throws BadLocationException, JavaModelException, CoreException {
 		use14();
 		setCaret(BODY_OFFSET);
-		type('(');
-		type(')');
+		type("()");
 		
 		assertEquals("()", fDocument.get(BODY_OFFSET, 2));
 		assertEquals(BODY_OFFSET + 2, getCaret());
@@ -249,30 +236,32 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 	
+//	public void testLoop() throws Exception {
+//		for (int i= 0; i < 50; i++) {
+//			setUp();
+//			testExitOnTab();
+//			tearDown();
+//		}
+//	}
+//	
 	public void testMultiplePeerEntry() throws BadLocationException, JavaModelException, CoreException {
 		use14();
 		setCaret(BODY_OFFSET);
-		type('(');
-		type('(');
-		type('(');
-		type('(');
+		type("((((");
 
-		type(')');
-		type(')');
-		type(')');
+		linkedType(')', true);
+		linkedType(')', true);
+		linkedType(')', true);
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 7, getCaret());
 		
-		LinkedModeModel model= LinkedModeModel.getModel(fDocument, BODY_OFFSET + 4);
-		assertNotNull(model);
-		assertFalse(model.isNested());
-		LinkedPosition position= model.findPosition(new LinkedPosition(fDocument, BODY_OFFSET + 1, 0));
+		LinkedPosition position= assertModel(false).findPosition(new LinkedPosition(fDocument, BODY_OFFSET + 1, 0));
 		assertNotNull(position);
 		assertEquals(BODY_OFFSET + 1, position.getOffset());
 		assertEquals(6, position.getLength());
 		
-		type(')');
+		linkedType(')', false);
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 8, getCaret());
@@ -282,30 +271,19 @@ public class BracketInserterTest extends TestCase {
 	public void testExitOnTab() throws BadLocationException, JavaModelException, CoreException {
 		use14();
 		setCaret(BODY_OFFSET);
-		type('(');
-		type('(');
-		type('(');
-		type('(');
-		type('\t');
+		type("((((");
+		linkedType('\t', true);
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 5, getCaret());
 
-		LinkedModeModel model= LinkedModeModel.getModel(fDocument, BODY_OFFSET + 5);
-		assertNotNull(model);
-		assertTrue(model.isNested());
-		
-		type('\t');
-		type('\t');
+		linkedType('\t', true);
+		linkedType('\t', true);
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 7, getCaret());
 
-		model= LinkedModeModel.getModel(fDocument, BODY_OFFSET + 7);
-		assertNotNull(model);
-		assertFalse(model.isNested());
-		
-		type('\t');
+		linkedType('\t', false);
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 8, getCaret());
@@ -316,11 +294,8 @@ public class BracketInserterTest extends TestCase {
 	public void testExitOnReturn() throws BadLocationException, JavaModelException, CoreException {
 		use14();
 		setCaret(BODY_OFFSET);
-		type('(');
-		type('(');
-		type('(');
-		type('(');
-		type(SWT.CR);
+		type("((((");
+		linkedType(SWT.CR, true);
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 8, getCaret());
@@ -331,11 +306,8 @@ public class BracketInserterTest extends TestCase {
 	public void testExitOnEsc() throws BadLocationException, JavaModelException, CoreException {
 		use14();
 		setCaret(BODY_OFFSET);
-		type('(');
-		type('(');
-		type('(');
-		type('(');
-		type(SWT.ESC);
+		type("((((");
+		linkedType(SWT.ESC, true);
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 4, getCaret());
@@ -437,10 +409,7 @@ public class BracketInserterTest extends TestCase {
 	private void assertSingleLinkedPosition(int offset) {
 		assertEquals(offset, getCaret());
 		
-		LinkedModeModel model= LinkedModeModel.getModel(fDocument, offset);
-		assertNotNull(model);
-		assertFalse(model.isNested());
-		LinkedPosition position= model.findPosition(new LinkedPosition(fDocument, offset, 0));
+		LinkedPosition position= assertModel(false).findPosition(new LinkedPosition(fDocument, offset, 0));
 		assertNotNull(position);
 		assertEquals(offset, position.getOffset());
 		assertEquals(0, position.getLength());
@@ -473,6 +442,24 @@ public class BracketInserterTest extends TestCase {
 	 */
 	private void type(char character) {
 		type(character, 0, 0);
+	}
+	
+	/**
+	 * Ensure there is a linked mode and type a character into the styled text.
+	 * 
+	 * @param character the character to type
+	 * @param nested whether the linked mode is expected to be nested or not
+	 */
+	private void linkedType(char character, boolean nested) {
+		assertModel(nested);
+		type(character, 0, 0);
+	}
+	
+	private LinkedModeModel assertModel(boolean nested) {
+		LinkedModeModel model= LinkedModeModel.getModel(fDocument, 0); // offset does not matter
+		assertNotNull(model);
+		assertEquals(nested, model.isNested());
+		return model;
 	}
 
 	/**
