@@ -31,6 +31,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedPosition;
 
@@ -186,19 +187,19 @@ public class BracketInserterTest extends TestCase {
 		type("((((");
 		
 		// delete two levels
-		linkedType(SWT.BS, true);
-		linkedType(SWT.BS, true);
+		linkedType(SWT.BS, true, ILinkedModeListener.EXTERNAL_MODIFICATION);
+		linkedType(SWT.BS, true, ILinkedModeListener.EXTERNAL_MODIFICATION);
 
 		assertEquals("(())", fDocument.get(BODY_OFFSET, 4));
 		assertEquals(BODY_OFFSET + 2, getCaret());
 		
 		// delete the second-last level
-		linkedType(SWT.BS, true);
+		linkedType(SWT.BS, true, ILinkedModeListener.EXTERNAL_MODIFICATION);
 		assertEquals("()", fDocument.get(BODY_OFFSET, 2));
 		assertEquals(BODY_OFFSET + 1, getCaret());
 		
 		// delete last level
-		linkedType(SWT.BS, false);
+		linkedType(SWT.BS, false, ILinkedModeListener.EXTERNAL_MODIFICATION);
 		assertEquals(CU_CONTENTS, fDocument.get());
 		assertEquals(BODY_OFFSET, getCaret());
 		
@@ -249,9 +250,9 @@ public class BracketInserterTest extends TestCase {
 		setCaret(BODY_OFFSET);
 		type("((((");
 
-		linkedType(')', true);
-		linkedType(')', true);
-		linkedType(')', true);
+		linkedType(')', true, ILinkedModeListener.UPDATE_CARET);
+		linkedType(')', true, ILinkedModeListener.UPDATE_CARET);
+		linkedType(')', true, ILinkedModeListener.UPDATE_CARET);
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 7, getCaret());
@@ -261,7 +262,7 @@ public class BracketInserterTest extends TestCase {
 		assertEquals(BODY_OFFSET + 1, position.getOffset());
 		assertEquals(6, position.getLength());
 		
-		linkedType(')', false);
+		linkedType(')', false, ILinkedModeListener.UPDATE_CARET);
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 8, getCaret());
@@ -272,18 +273,18 @@ public class BracketInserterTest extends TestCase {
 		use14();
 		setCaret(BODY_OFFSET);
 		type("((((");
-		linkedType('\t', true);
+		linkedType('\t', true, ILinkedModeListener.NONE);
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 5, getCaret());
 
-		linkedType('\t', true);
-		linkedType('\t', true);
+		linkedType('\t', true, ILinkedModeListener.NONE);
+		linkedType('\t', true, ILinkedModeListener.NONE);
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 7, getCaret());
 
-		linkedType('\t', false);
+		linkedType('\t', false, ILinkedModeListener.NONE);
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 8, getCaret());
@@ -295,7 +296,7 @@ public class BracketInserterTest extends TestCase {
 		use14();
 		setCaret(BODY_OFFSET);
 		type("((((");
-		linkedType(SWT.CR, true);
+		linkedType(SWT.CR, true, ILinkedModeListener.UPDATE_CARET | ILinkedModeListener.EXIT_ALL);
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 8, getCaret());
@@ -307,7 +308,7 @@ public class BracketInserterTest extends TestCase {
 		use14();
 		setCaret(BODY_OFFSET);
 		type("((((");
-		linkedType(SWT.ESC, true);
+		linkedType(SWT.ESC, true, ILinkedModeListener.EXIT_ALL);
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 4, getCaret());
@@ -449,10 +450,21 @@ public class BracketInserterTest extends TestCase {
 	 * 
 	 * @param character the character to type
 	 * @param nested whether the linked mode is expected to be nested or not
+	 * @param expectedExitFlags the expected exit flags for the current linked mode after typing the character, -1 for no exit
 	 */
-	private void linkedType(char character, boolean nested) {
-		assertModel(nested);
+	private void linkedType(char character, boolean nested, int expectedExitFlags) {
+		final int[] exitFlags= { -1 };
+		assertModel(nested).addLinkingListener(new ILinkedModeListener() {
+			public void left(LinkedModeModel model, int flags) {
+				exitFlags[0]= flags;
+			}
+			public void resume(LinkedModeModel model, int flags) {
+			}
+			public void suspend(LinkedModeModel model) {
+			}
+		});
 		type(character, 0, 0);
+		assertEquals(expectedExitFlags, exitFlags[0]);
 	}
 	
 	private LinkedModeModel assertModel(boolean nested) {
