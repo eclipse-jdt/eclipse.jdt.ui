@@ -204,6 +204,10 @@ public class JavaMergeViewer extends TextMergeViewer {
 	protected IDocumentPartitioner getDocumentPartitioner() {
 		return JavaCompareUtilities.createJavaPartitioner();
 	}
+	
+	protected String getDocumentPartitioning() {
+		return IJavaPartitions.JAVA_PARTITIONING;
+	}
 		
 	protected void configureTextViewer(TextViewer textViewer) {
 		if (textViewer instanceof SourceViewer) {
@@ -376,7 +380,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 			// silently ignored
 		}
 		
-		// ensure that pos is within container range
+		// ensure that position is within container range
 		Position containerRange= container.getRange();
 		int start= containerRange.getOffset();
 		int end= containerRange.getOffset() + containerRange.getLength();
@@ -397,7 +401,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 		fPreferenceStore= ps;
 		if (fPreferenceStore != null) {
 			JavaTextTools tools= JavaCompareUtilities.getJavaTextTools();
-			fSourceViewerConfiguration= new JavaSourceViewerConfiguration(tools.getColorManager(), fPreferenceStore, null, null);
+			fSourceViewerConfiguration= new JavaSourceViewerConfiguration(tools.getColorManager(), fPreferenceStore, null, getDocumentPartitioning());
 			fPreferenceChangeListener= new IPropertyChangeListener() {
 				public void propertyChange(PropertyChangeEvent event) {
 					handlePropertyChange(event);

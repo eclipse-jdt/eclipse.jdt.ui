@@ -33,7 +33,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
-import org.eclipse.jface.text.rules.FastPartitioner;
 
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.IEncodedStreamContentAccessor;
@@ -44,12 +43,12 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
-import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFilePartitionScanner;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant;
 
 
 class JavaCompareUtilities {
@@ -274,15 +273,13 @@ class JavaCompareUtilities {
 	static void setupDocument(IDocument document) {
 		JavaTextTools tools= getJavaTextTools();
 		if (tools != null)
-			tools.setupJavaDocumentPartitioner(document);
+			tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 	}
 	
 	static void setupPropertiesFileDocument(IDocument document) {
-		IDocumentPartitioner partitioner= new FastPartitioner(new PropertiesFilePartitionScanner(), IPropertiesFilePartitions.PARTITIONS);
-		document.setDocumentPartitioner(partitioner);
-		partitioner.connect(document);
+		PropertiesFileDocumentSetupParticipant.setupDocument(document);
 	}
-
+	
 	/**
 	 * Reads the contents of the given input stream into a string.
 	 * The function assumes that the input stream uses the platform's default encoding

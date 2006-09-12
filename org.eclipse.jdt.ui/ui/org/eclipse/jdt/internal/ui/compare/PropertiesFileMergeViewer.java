@@ -61,7 +61,7 @@ public class PropertiesFileMergeViewer extends TextMergeViewer {
 
 	private SourceViewerConfiguration getSourceViewerConfiguration(JavaTextTools textTools) {
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
-		return new PropertiesFileSourceViewerConfiguration(textTools.getColorManager(), store, null, null);
+		return new PropertiesFileSourceViewerConfiguration(textTools.getColorManager(), store, null, getDocumentPartitioning());
 	}
 
 	/*
@@ -69,6 +69,14 @@ public class PropertiesFileMergeViewer extends TextMergeViewer {
 	 */
 	protected IDocumentPartitioner getDocumentPartitioner() {
 		return new FastPartitioner(new PropertiesFilePartitionScanner(), IPropertiesFilePartitions.PARTITIONS);
+	}
+	
+	/*
+	 * @see org.eclipse.compare.contentmergeviewer.TextMergeViewer#getDocumentPartitioning()
+	 * @since 3.3
+	 */
+	protected String getDocumentPartitioning() {
+		return IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING;
 	}
 
 	/*

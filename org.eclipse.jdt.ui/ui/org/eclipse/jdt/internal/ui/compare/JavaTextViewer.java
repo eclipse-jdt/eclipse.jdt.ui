@@ -25,6 +25,7 @@ import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.Viewer;
 
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -43,7 +44,7 @@ public class JavaTextViewer extends Viewer {
 		JavaTextTools tools= JavaCompareUtilities.getJavaTextTools();
 		if (tools != null) {
 			IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
-			fSourceViewer.configure(new JavaSourceViewerConfiguration(tools.getColorManager(), store, null, null));
+			fSourceViewer.configure(new JavaSourceViewerConfiguration(tools.getColorManager(), store, null, IJavaPartitions.JAVA_PARTITIONING));
 		}
 
 		fSourceViewer.setEditable(false);
@@ -60,7 +61,6 @@ public class JavaTextViewer extends Viewer {
 	}
 	
 	public void setInput(Object input) {
-		
 		if (input instanceof IStreamContentAccessor) {
 			Document document= new Document(getString(input));
 			JavaCompareUtilities.setupDocument(document);

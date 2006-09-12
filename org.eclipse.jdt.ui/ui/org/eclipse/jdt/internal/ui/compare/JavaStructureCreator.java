@@ -11,30 +11,81 @@
 package org.eclipse.jdt.internal.ui.compare;
 
 import java.io.UnsupportedEncodingException;
-import java.util.*;
-
-import org.eclipse.jface.text.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.core.compiler.*;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentPartitioner;
+
+import org.eclipse.ui.services.IDisposable;
+
+import org.eclipse.compare.CompareUI;
+import org.eclipse.compare.IEditableContent;
+import org.eclipse.compare.IEncodedStreamContentAccessor;
+import org.eclipse.compare.IResourceProvider;
+import org.eclipse.compare.IStreamContentAccessor;
+import org.eclipse.compare.ITypedElement;
+import org.eclipse.compare.structuremergeviewer.DiffNode;
+import org.eclipse.compare.structuremergeviewer.Differencer;
+import org.eclipse.compare.structuremergeviewer.DocumentRangeNode;
+import org.eclipse.compare.structuremergeviewer.ICompareInput;
+import org.eclipse.compare.structuremergeviewer.IDiffContainer;
+import org.eclipse.compare.structuremergeviewer.IDiffElement;
+import org.eclipse.compare.structuremergeviewer.IStructureComparator;
+import org.eclipse.compare.structuremergeviewer.StructureCreator;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.compare.*;
-import org.eclipse.compare.IResourceProvider;
-import org.eclipse.compare.structuremergeviewer.*;
 
-
-public class JavaStructureCreator implements IStructureCreator {
+public class JavaStructureCreator extends StructureCreator {
 	
 	private Map fDefaultCompilerOptions;
 	
+	private final class RootJavaNode extends JavaNode implements IDisposable {
+		
+		private final Object fInput;
+		private final IDisposable fDisposable;
+
+		private RootJavaNode(IDocument document, boolean editable, Object input, IDisposable disposable) {
+			super(document, editable);
+			fInput = input;
+			fDisposable = disposable;
+		}
+
+		void nodeChanged(JavaNode node) {
+			save(this, fInput);
+		}
+
+		public void dispose() {
+			if (fDisposable != null)
+				fDisposable.dispose();
+		}
+	}
+
 	/**
 	 * RewriteInfos are used temporarily when rewriting the diff tree
 	 * in order to combine similar diff nodes ("smart folding").
@@ -130,12 +181,27 @@ public class JavaStructureCreator implements IStructureCreator {
 				contents.getChars(0, n, buffer, 0);
 				
 				doc= new Document(contents);
-				//CompareUI.registerDocument(input, doc);
-				JavaCompareUtilities.setupDocument(doc);				
+				setupDocument(doc);				
 			}
 		}
 		
+		return createStructureComparator(input, buffer, doc, null);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.compare.structuremergeviewer.DocumentStructureCreator#createStructureComparator(java.lang.Object, org.eclipse.jface.text.IDocument, org.eclipse.ui.services.IDisposable)
+	 */
+	protected IStructureComparator createStructureComparator(Object input, IDocument doc, IDisposable disposable) throws CoreException {
+		return createStructureComparator(input, null, doc, disposable);
+	}
+	
+	private IStructureComparator createStructureComparator(final Object input, char[] buffer, IDocument doc, IDisposable disposable) {
+		String contents;
 		Map compilerOptions= null;
+		
+		// Ensure document is correctly setup
+		setupDocument(doc);
+		
 		if (input instanceof IResourceProvider) {
 			IResource resource= ((IResourceProvider) input).getResource();
 			if (resource != null) {
@@ -156,11 +222,7 @@ public class JavaStructureCreator implements IStructureCreator {
 				isEditable= ((IEditableContent) input).isEditable();
 			
 			// we hook into the root node to intercept all node changes
-			JavaNode root= new JavaNode(doc, isEditable) {
-				void nodeChanged(JavaNode node) {
-					save(this, input);
-				}
-			};
+			JavaNode root= new RootJavaNode(doc, isEditable, input, disposable);
 			
 			if (buffer == null) {
 				contents= doc.get();
@@ -180,13 +242,6 @@ public class JavaStructureCreator implements IStructureCreator {
 			return root;
 		}
 		return null;
-	}
-		
-	/**
-	 * Returns true because this IStructureCreator knows how to save.
-	 */
-	public boolean canSave() {
-		return true;
 	}
 	
 	public void save(IStructureComparator node, Object input) {
@@ -220,7 +275,7 @@ public class JavaStructureCreator implements IStructureCreator {
 	 * for equality. Is is never shown in the UI, so any string representing
 	 * the content will do.
 	 * @param node must implement the IStreamContentAccessor interface
-	 * @param ignoreWhiteSpace if true all Java white space (incl. comments) is removed from the contents.
+	 * @param ignoreWhiteSpace if true all Java white space (including comments) is removed from the contents.
 	 */
 	public String getContents(Object node, boolean ignoreWhiteSpace) {
 		
@@ -274,15 +329,15 @@ public class JavaStructureCreator implements IStructureCreator {
 	
 	/**
 	 * Returns true since this IStructureCreator can rewrite the diff tree
-	 * in order to fold certain combinations of additons and deletions.
+	 * in order to fold certain combinations of additions and deletions.
 	 */
 	public boolean canRewriteTree() {
 		return true;
 	}
 	
 	/**
-	 * Tries to detect certain combinations of additons and deletions
-	 * as renames or signature changes and foldes them into a single node.
+	 * Tries to detect certain combinations of additions and deletions
+	 * as renames or signature changes and folders them into a single node.
 	 */
 	public void rewriteTree(Differencer differencer, IDiffContainer root) {
 		
@@ -326,7 +381,7 @@ public class JavaStructureCreator implements IStructureCreator {
 				case Differencer.ADDITION:
 				case Differencer.DELETION:
 					// we only consider addition and deletions
-					// since a rename or arg list change looks
+					// since a rename or argument list change looks
 					// like a pair of addition and deletions
 					if (type != JavaNode.CONSTRUCTOR)
 						nameInfo.setDiff(diff);
@@ -349,7 +404,7 @@ public class JavaStructureCreator implements IStructureCreator {
 		while (it.hasNext()) {
 			String name= (String) it.next();
 			RewriteInfo i= (RewriteInfo) map.get(name);
-			if (i.matches()) { // we found a RewriteInfo that could be succesfully combined
+			if (i.matches()) { // we found a RewriteInfo that could be successfully combined
 				
 				// we have to find the differences of the newly combined node
 				// (because in the first pass we only got a deletion and an addition)
@@ -376,11 +431,11 @@ public class JavaStructureCreator implements IStructureCreator {
 	 * @param input must implement the IStreamContentAccessor interface.
 	 */
 	public IStructureComparator locate(Object selector, Object input) {
-		
 		if (!(selector instanceof IJavaElement))
 			return null;
 
 		// try to build the JavaNode tree from input
+		// TODO: Could make use of shared document
 		IStructureComparator structure= getStructure(input);
 		if (structure == null)	// we couldn't parse the structure 
 			return null;		// so we can't find anything
@@ -419,7 +474,7 @@ public class JavaStructureCreator implements IStructureCreator {
 	}
 	
 	/**
-	 * Recursivly extracts the given path from the tree.
+	 * Recursively extracts the given path from the tree.
 	 */
 	private static IStructureComparator find(IStructureComparator tree, String[] path, int index) {
 		if (tree != null) {
@@ -471,5 +526,19 @@ public class JavaStructureCreator implements IStructureCreator {
 			return true;
 		}
 		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.compare.structuremergeviewer.StructureCreator#getDocumentPartitioner()
+	 */
+	protected IDocumentPartitioner getDocumentPartitioner() {
+		return JavaCompareUtilities.createJavaPartitioner();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.compare.structuremergeviewer.StructureCreator#getDocumentPartitioning()
+	 */
+	protected String getDocumentPartitioning() {
+		return IJavaPartitions.JAVA_PARTITIONING;
 	}
 }

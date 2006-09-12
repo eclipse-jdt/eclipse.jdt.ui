@@ -12,7 +12,18 @@ package org.eclipse.jdt.internal.ui.compare;
 
 import java.io.IOException;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.rules.FastPartitioner;
+
+import org.eclipse.ui.services.IDisposable;
 
 import org.eclipse.compare.CompareUI;
 import org.eclipse.compare.IEditableContent;
@@ -20,23 +31,18 @@ import org.eclipse.compare.IStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.structuremergeviewer.DocumentRangeNode;
 import org.eclipse.compare.structuremergeviewer.IStructureComparator;
-import org.eclipse.compare.structuremergeviewer.IStructureCreator;
-
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
+import org.eclipse.compare.structuremergeviewer.StructureCreator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFilePartitionScanner;
 
 
-public class PropertiesStructureCreator implements IStructureCreator {
+public class PropertiesStructureCreator extends StructureCreator {
 	
 	/**
 	 * A PropertyNode represents a key/value pair of a Java property file.
-	 * The text range of a ley/value pair starts with an optional
+	 * The text range of a leg/value pair starts with an optional
 	 * comment and ends right after the value.
 	 */
 	static class PropertyNode extends DocumentRangeNode implements ITypedElement {
@@ -63,7 +69,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		 * see ITypedElement#getName
 		 */
 		public String getName() {
-			return this.getId();
+			return getId();
 		}
 
 		/* (non Java doc)
@@ -108,6 +114,27 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		}
 	}
 	
+	class RootPropertyNode extends PropertyNode implements IDisposable {
+
+		private final IDisposable fDisposable;
+		private final Object fInput;
+
+		public RootPropertyNode(Object input, IDocument doc, boolean editable, IDisposable disposable) {
+			super(doc, editable);
+			fInput = input;
+			fDisposable = disposable;
+		}
+		
+		public void dispose() {
+			if (fDisposable != null)
+				fDisposable.dispose();
+		}
+		
+		void nodeChanged(PropertyNode node) {
+			save(this, fInput);
+		}
+	}
+	
 	private static final String WHITESPACE= " \t\r\n\f"; //$NON-NLS-1$
 	private static final String SEPARATORS= "=:"; //$NON-NLS-1$
 	private static final String SEPARATORS2= SEPARATORS + WHITESPACE;
@@ -133,17 +160,16 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		}
 			
 		Document doc= new Document(content != null ? content : ""); //$NON-NLS-1$
-		JavaCompareUtilities.setupPropertiesFileDocument(doc);
-				
+		setupDocument(doc);
+		return createStructureComparator(input, doc, null);
+	}
+	
+	protected IStructureComparator createStructureComparator(final Object input, IDocument doc, IDisposable disposable) {
 		boolean isEditable= false;
 		if (input instanceof IEditableContent)
 			isEditable= ((IEditableContent) input).isEditable();
 
-		PropertyNode root= new PropertyNode(doc, isEditable) {
-			void nodeChanged(PropertyNode node) {
-				save(this, input);
-			}
-		};
+		PropertyNode root= new RootPropertyNode(input, doc, isEditable, disposable);
 				
 		try {
 			parsePropertyFile(root, doc);
@@ -152,10 +178,6 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		}
 		
 		return root;
-	}
-	
-	public boolean canSave() {
-		return true;
 	}
 	
 	public void save(IStructureComparator structure, Object input) {
@@ -170,16 +192,6 @@ public class PropertiesStructureCreator implements IStructureCreator {
 	public IStructureComparator locate(Object path, Object source) {
 		return null;
 	}
-	
-	public boolean canRewriteTree() {
-		return false;
-	}
-	
-	/*
-	public void rewriteTree(Differencer differencer, IDiffContainer root) {
-		// empty implementation
-	}
-	*/
 	
 	public String getContents(Object node, boolean ignoreWhitespace) {
 		if (node instanceof IStreamContentAccessor) {
@@ -381,4 +393,13 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		}
 		return buf.toString();
 	}
+
+	protected IDocumentPartitioner getDocumentPartitioner() {
+		return new FastPartitioner(new PropertiesFilePartitionScanner(), IPropertiesFilePartitions.PARTITIONS);
+	}
+	
+	protected String getDocumentPartitioning() {
+		return IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING;
+	}
+	
 }
