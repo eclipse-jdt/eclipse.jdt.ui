@@ -83,6 +83,7 @@ import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
+import org.eclipse.jdt.core.refactoring.descriptors.MoveStaticMembersDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
@@ -92,9 +93,9 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -688,7 +689,6 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	private void createChange(List modifiedCus, RefactoringStatus status, IProgressMonitor monitor) throws CoreException {
 		monitor.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, 5);
 		final IMember[] members= getMembersToMove();
-		final Map arguments= new HashMap();
 		String project= null;
 		final IJavaProject javaProject= getDeclaringType().getJavaProject();
 		if (javaProject != null)
@@ -709,12 +709,15 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		final String description= members.length == 1 ? Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_description_descriptor_short_multi, members[0].getElementName()) : RefactoringCoreMessages.MoveMembersRefactoring_move_members;
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_target_element_pattern, JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
-		final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(IJavaRefactorings.MOVE_STATIC_MEMBERS, project, description, comment.asString(), arguments, flags);
-		arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fDestinationType));
-		arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
-		arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
-		for (int index= 0; index < members.length; index++)
-			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1), descriptor.elementToHandle(members[index]));
+		final MoveStaticMembersDescriptor descriptor= new MoveStaticMembersDescriptor();
+		descriptor.setProject(project);
+		descriptor.setDescription(description);
+		descriptor.setComment(comment.asString());
+		descriptor.setFlags(flags);
+		descriptor.setDestinationType(fDestinationType);
+		descriptor.setKeepOriginal(fDelegateUpdating);
+		descriptor.setDeprecateDelegate(fDelegateDeprecation);
+		descriptor.setMembers(members);
 		fChange= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.MoveMembersRefactoring_move_members);
 		fTarget= getCuRewrite(fDestinationType.getCompilationUnit());
 		ITypeBinding targetBinding= getDestinationBinding();
