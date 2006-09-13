@@ -123,11 +123,6 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 	}
 
 	public void testInnerTypeOfGenericOuter2() throws Exception {
-		if (true) {
-			// FIXME re-enable one bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=139000 is fixed
-			System.out.println("disabled, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=139000");
-			return;
-		}
 		addMembers("static class Outer<E> { class Inner {} }");
 		expectImport("test1.Completion_" + getName() + ".Outer.Inner");
 		assertMethodBodyProposal("Inner|", "Completion_" + getName() +"<T>.Outer<E>.Inner", "Inner|");
