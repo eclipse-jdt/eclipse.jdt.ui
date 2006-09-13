@@ -451,12 +451,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	}
 
 
-	/** The horizontal scroll increment. */
-	private static final int HORIZONTAL_SCROLL_INCREMENT= 10;
-	/** The vertical scroll increment. */
-	private static final int VERTICAL_SCROLL_INCREMENT= 10;
-	
-	
 	private StackLayout fStackLayout;
 	private Composite fParent;
 
@@ -510,7 +504,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {group});
 
 		/*
-		 * 1GF82PL: ITPJUI:ALL - Need to be able to add bookmark to classfile
+		 * 1GF82PL: ITPJUI:ALL - Need to be able to add bookmark to class file
 		 *
 		 *  // replace default action with class file specific ones
 		 *
