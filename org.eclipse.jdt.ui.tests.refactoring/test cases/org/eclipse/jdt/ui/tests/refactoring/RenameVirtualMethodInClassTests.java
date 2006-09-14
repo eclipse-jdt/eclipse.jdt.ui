@@ -35,7 +35,6 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	private static final Class clazz= RenameVirtualMethodInClassTests.class;
 	private static final String REFACTORING_PATH= "RenameVirtualMethodInClass/";
 	
-	private final static boolean BUG_96761_core_finds_non_overriding= true;
 	private static final boolean BUG_83217_IMPLICIT_ENUM_METHODS= true;
 		
 	public RenameVirtualMethodInClassTests(String name) {
@@ -157,10 +156,6 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}
 	
 	public void testGenerics1() throws Exception {
-		if (BUG_96761_core_finds_non_overriding) {
-			printTestDisabledMessage("BUG_96761_core_finds_non_overriding");
-			return;
-		}
 		helper2_0("m", "k", new String[]{"QG;"});
 	}
 	

@@ -4,7 +4,7 @@ class Test {
         new A<Integer>().k(new Integer(2));
 
         new Impl().m(new Integer(3));
-        new Impl().m(new Float(4));
+        new Impl().k(new Float(4));
         
         A<Number> a= new Impl();
         a.k(new Integer(6));
