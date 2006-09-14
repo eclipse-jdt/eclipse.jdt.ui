@@ -979,7 +979,7 @@ public class CleanUpStressTest extends TestCase {
         buf.append(" */\n");
         buf.append("public class TestImplementorTest extends TestCase {\n");
         buf.append("    public static class DoubleTestCase implements Test {\n");
-        buf.append("        private TestCase fTestCase;\n");
+        buf.append("        private final TestCase fTestCase;\n");
         buf.append("\n");
         buf.append("        public DoubleTestCase(final TestCase testCase) {\n");
         buf.append("            this.fTestCase = testCase;\n");
@@ -1002,7 +1002,7 @@ public class CleanUpStressTest extends TestCase {
         buf.append("        }\n");
         buf.append("    }\n");
         buf.append("\n");
-        buf.append("    private DoubleTestCase fTest;\n");
+        buf.append("    private final DoubleTestCase fTest;\n");
         buf.append("\n");
         buf.append("    public TestImplementorTest() {\n");
         buf.append("        final TestCase testCase = new TestCase() {\n");
@@ -3737,8 +3737,8 @@ public class CleanUpStressTest extends TestCase {
         buf.append("public class ComparisonFailure extends AssertionFailedError {\n");
         buf.append("    /* Test */\n");
         buf.append("    private static final long serialVersionUID = 1L;\n");
-        buf.append("    private String fExpected;\n");
-        buf.append("    private String fActual;\n");
+        buf.append("    private final String fExpected;\n");
+        buf.append("    private final String fActual;\n");
         buf.append("\n");
         buf.append("    /**\n");
         buf.append("     * Constructs a comparison failure.\n");
@@ -4234,7 +4234,7 @@ public class CleanUpStressTest extends TestCase {
         buf.append(" * \n");
         buf.append(" */\n");
         buf.append("public class RepeatedTest extends TestDecorator {\n");
-        buf.append("    private int fTimesRepeat;\n");
+        buf.append("    private final int fTimesRepeat;\n");
         buf.append("\n");
         buf.append("    public RepeatedTest(final Test test, final int repeat) {\n");
         buf.append("        super(test);\n");
@@ -4358,7 +4358,7 @@ public class CleanUpStressTest extends TestCase {
         buf.append(" */\n");
         buf.append("\n");
         buf.append("public class RepeatedTestTest extends TestCase {\n");
-        buf.append("    private TestSuite fSuite;\n");
+        buf.append("    private final TestSuite fSuite;\n");
         buf.append("\n");
         buf.append("    public static class SuccessTest extends TestCase {\n");
         buf.append("\n");
@@ -5100,8 +5100,8 @@ public class CleanUpStressTest extends TestCase {
         buf.append(" */\n");
         buf.append("public class Money implements IMoney {\n");
         buf.append("\n");
-        buf.append("    private int fAmount;\n");
-        buf.append("    private String fCurrency;\n");
+        buf.append("    private final int fAmount;\n");
+        buf.append("    private final String fCurrency;\n");
         buf.append("\n");
         buf.append("    /**\n");
         buf.append("     * Constructs a money from the given amount and currency.\n");
