@@ -161,7 +161,8 @@ public class VariableDeclarationFix extends AbstractFix {
 					IVariableBinding varbinding= (IVariableBinding)resolveBinding;
 					if (varbinding.isField()) {
 						if (!fWrittenVariables.containsKey(resolveBinding)) {
-							toChange.add(fragment);
+							if (fragment.getInitializer() != null)
+								toChange.add(fragment);
 						} else {
 							if (fragment.getInitializer() == null &&
 									!Modifier.isStatic(((FieldDeclaration)declaration).getModifiers()) &&

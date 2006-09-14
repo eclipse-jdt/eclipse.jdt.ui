@@ -4703,7 +4703,7 @@ public class CleanUpTest extends QuickFixTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
-		buf.append("    private Object obj1;\n");
+		buf.append("    private Object obj1= new Object();\n");
 		buf.append("    protected Object obj2;\n");
 		buf.append("    Object obj3;\n");
 		buf.append("    public Object obj4;\n");
@@ -4716,7 +4716,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
-		buf.append("    private final Object obj1;\n");
+		buf.append("    private final Object obj1= new Object();\n");
 		buf.append("    protected Object obj2;\n");
 		buf.append("    Object obj3;\n");
 		buf.append("    public Object obj4;\n");
@@ -4897,9 +4897,10 @@ public class CleanUpTest extends QuickFixTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("public class E<T> { \n");
-		buf.append("    private String s;\n");
+		buf.append("    private String s= \"\";\n");
 		buf.append("    private T t;\n");
 		buf.append("    private T t2;\n");
+		buf.append("    public E(T t) {t2= t;}\n");
 		buf.append("    void setT(T t) {\n");
 		buf.append("        this.t = t;\n");
 		buf.append("    }\n");
@@ -4912,9 +4913,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("public class E<T> { \n");
-		buf.append("    private final String s;\n");
+		buf.append("    private final String s= \"\";\n");
 		buf.append("    private T t;\n");
 		buf.append("    private final T t2;\n");
+		buf.append("    public E(T t) {t2= t;}\n");
 		buf.append("    void setT(T t) {\n");
 		buf.append("        this.t = t;\n");
 		buf.append("    }\n");
@@ -4928,7 +4930,7 @@ public class CleanUpTest extends QuickFixTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
-		buf.append("    private volatile int field;\n");
+		buf.append("    private volatile int field= 0;\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
@@ -4938,7 +4940,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
-		buf.append("    private final int field;\n");
+		buf.append("    private final int field= 0;\n");
 		buf.append("}\n");
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
@@ -5098,6 +5100,37 @@ public class CleanUpTest extends QuickFixTest {
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
 		
 		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
+	}
+	
+	public void testAddFinalBug156842() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private int f0;\n");
+		buf.append("    private int f1= 0;\n");
+		buf.append("    private int f3;\n");
+		buf.append("    public E1() {\n");
+		buf.append("        f3= 0;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private int f0;\n");
+		buf.append("    private final int f1= 0;\n");
+		buf.append("    private final int f3;\n");
+		buf.append("    public E1() {\n");
+		buf.append("        f3= 0;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
 	}
 	
 	public void testRemoveBlockReturnThrows01() throws Exception {
