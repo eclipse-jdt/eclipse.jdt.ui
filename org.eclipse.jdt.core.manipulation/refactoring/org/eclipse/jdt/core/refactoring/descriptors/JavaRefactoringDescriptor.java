@@ -65,8 +65,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * </p>
 	 * <p>
 	 * The element arguments are simply distinguished by appending a number to
-	 * the argument name, e.g. element1. The indices of this argument are non
-	 * zero-based.
+	 * the argument name, e.g. element1. The indices of this argument are one-based.
 	 * </p>
 	 */
 	protected static final String ATTRIBUTE_ELEMENT= "element"; //$NON-NLS-1$
@@ -96,7 +95,8 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * Predefined argument called <code>references</code>.
 	 * <p>
 	 * This argument should be used to describe whether references to the
-	 * elements being refactored should be updated as well.
+	 * elements being refactored should be updated as well. The value of this
+	 * argument is either <code>"true"</code> or <code>"false"</code>.
 	 * </p>
 	 */
 	protected static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
