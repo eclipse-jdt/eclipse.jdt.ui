@@ -62,12 +62,13 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix.IRemoveBlockOperation;
 import org.eclipse.jdt.internal.corext.fix.LinkedFix.AbstractLinkedFixRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
-public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
+public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation implements IRemoveBlockOperation {
 
 	private ForStatement fOldForStatement;
 	private EnhancedForStatement fEnhancedForStatement;
@@ -85,6 +86,8 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 	private final CompilationUnit fRoot;
 	private final boolean fAddBlock;
 	private final boolean fRemoveUnnecessaryBlocks;
+	private boolean fPassive;
+	private IFixRewriteOperation fOperation;
 
 	/**
 	 * Visitor class for finding all references to a certain Name within the
@@ -171,7 +174,46 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 		this.fOldForStatement= forStatement;
 		fAst= root.getAST();
 		fParameterName= parameterName;
+		fPassive= false;
 	}
+	
+	public void makePassive() {
+		fPassive= true;
+	}
+	
+    public ForStatement getForLoop() {
+	    return fOldForStatement;
+    }
+	
+	public EnhancedForStatement getEnhancedForStatement() {
+	    return fEnhancedForStatement;
+    }
+	
+
+	/**
+     * {@inheritDoc}
+     */
+    public Statement getSingleStatement() {
+    	if (!fRemoveUnnecessaryBlocks)
+    		return null;
+    	
+    	if (!(fOldForStatement.getBody() instanceof Block))
+    		return null;
+    	
+    	List statements= ((Block)fOldForStatement.getBody()).statements();
+		if (statements.size() != 1)
+    		return null;
+    	
+	    return (Statement)statements.get(0);
+    }
+
+	/**
+     * {@inheritDoc}
+     */
+    public void setSubOperation(IFixRewriteOperation operation) {
+		fOperation= operation;
+    }
+
 
 	/**
 	 * Check if the OldFor can be converted to Enhanced For. Unless all
@@ -441,8 +483,16 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 		}
 		return fIndexBinding;
 	}
-
-	private ITrackedNodePosition doConvert(ASTRewrite rewrite, ImportRewrite importRewrite, TextEditGroup group) throws CoreException {
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List, java.util.List)
+	 */
+	public ITrackedNodePosition rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, List positionGroups) throws CoreException {
+		TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
+		textEditGroups.add(group);
+		clearPositionGroups();
+		ASTRewrite rewrite= cuRewrite.getASTRewrite();
+		ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 		doInferCollection();
 		doInferElement(importRewrite);
 		doFindAndReplaceInBody(rewrite, group);
@@ -455,8 +505,25 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 			ListRewrite listRewrite= rewrite.getListRewrite(newBody, Block.STATEMENTS_PROPERTY);
 			listRewrite.insertFirst(theBody, group);
 			fEnhancedForStatement.setBody(newBody);
-		} else if (fRemoveUnnecessaryBlocks && fOldForStatement.getBody() instanceof Block && ((Block)fOldForStatement.getBody()).statements().size() == 1) {
-			Statement moveTarget= (Statement)rewrite.createMoveTarget((Statement)((Block)fOldForStatement.getBody()).statements().get(0));
+		} else if (getSingleStatement() != null) {
+			Statement moveTarget;
+			
+			if (fOperation == null) {
+				moveTarget= (Statement)rewrite.createMoveTarget(getSingleStatement());
+			} else {
+				if (fOperation instanceof ConvertForLoopOperation) {
+					ConvertForLoopOperation convertForLoopOperation= ((ConvertForLoopOperation)fOperation);
+					convertForLoopOperation.makePassive();
+					fOperation.rewriteAST(cuRewrite, textEditGroups);
+					moveTarget= convertForLoopOperation.getEnhancedForStatement();
+				} else  {
+					ConvertIterableLoopOperation convertIterableLoopOperation= ((ConvertIterableLoopOperation)fOperation);
+					convertIterableLoopOperation.makePassive();
+					fOperation.rewriteAST(cuRewrite, textEditGroups);
+					moveTarget= convertIterableLoopOperation.getEnhancedForStatement();
+				}
+			}
+			
 			fEnhancedForStatement.setBody(moveTarget);
 		} else {
 			Statement theBody= (Statement)rewrite.createMoveTarget(fOldForStatement.getBody());
@@ -476,7 +543,10 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 		for (Iterator iterator= proposals.iterator(); iterator.hasNext();)
 			pg.addProposal((String) iterator.next(), null);
 
-		rewrite.replace(fOldForStatement, fEnhancedForStatement, group);
+		if (!fPassive)
+			rewrite.replace(fOldForStatement, fEnhancedForStatement, group);
+		
+		positionGroups.addAll(getAllPositionGroups());
 		return null;
 	}
 
@@ -772,18 +842,6 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 		if (fIndexBinding != null)
 			return fIndexBinding;
 		else return inferIndexBinding();
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List, java.util.List)
-	 */
-	public ITrackedNodePosition rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, List positionGroups) throws CoreException {
-		TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
-		textEditGroups.add(group);
-		clearPositionGroups();
-		ITrackedNodePosition endPosition= doConvert(cuRewrite.getASTRewrite(), cuRewrite.getImportRewrite(), group);
-		positionGroups.addAll(getAllPositionGroups());
-		return endPosition;
 	}
 
 }

@@ -128,6 +128,10 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 
 	private final String fIdentifierName;
 
+	private EnhancedForStatement fEnhancedForLoop;
+	
+	private boolean fPassive;
+
 	/**
 	 * Creates a new convert iterable loop proposal.
 	 * 
@@ -139,7 +143,19 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 		fCompilationUnit= (ICompilationUnit)unit.getJavaElement();
 		fStatement= statement;
 		fRoot= (CompilationUnit) statement.getRoot();
+		fPassive= false;
 	}
+
+    public ForStatement getForLoop() {
+	    return fStatement;
+    }
+	
+	public EnhancedForStatement getEnhancedForStatement() {
+		return fEnhancedForLoop;
+	}
+	
+    public void makePassive() {
+    }
 
 	private List computeElementNames() {
 		final List names= new ArrayList();
@@ -204,7 +220,7 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 	private ITrackedNodePosition rewriteAST(final AST ast, final ASTRewrite astRewrite, final ImportRewrite importRewrite, final TextEditGroup group) throws CoreException {
 		final ImportRemover remover= new ImportRemover(fCompilationUnit.getJavaProject(), (CompilationUnit) fStatement.getRoot());
 		
-		final EnhancedForStatement statement= ast.newEnhancedForStatement();
+		fEnhancedForLoop= ast.newEnhancedForStatement();
 		final List names= computeElementNames();
 		String name= fIdentifierName;
 		if (fElement != null) {
@@ -270,7 +286,7 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 					}
 				});
 			}
-			statement.setBody((Statement) astRewrite.createMoveTarget(body));
+			fEnhancedForLoop.setBody((Statement) astRewrite.createMoveTarget(body));
 		}
 		final SingleVariableDeclaration declaration= ast.newSingleVariableDeclaration();
 		final SimpleName simple= ast.newSimpleName(name);
@@ -280,9 +296,11 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 		final ImportRewrite imports= importRewrite;
 		declaration.setType(importType(iterable, fStatement, importRewrite, fRoot));
 		remover.registerAddedImport(iterable.getQualifiedName());
-		statement.setParameter(declaration);
-		statement.setExpression(getExpression(astRewrite));
-		astRewrite.replace(fStatement, statement, group);
+		fEnhancedForLoop.setParameter(declaration);
+		fEnhancedForLoop.setExpression(getExpression(astRewrite));
+		if (!fPassive)
+			astRewrite.replace(fStatement, fEnhancedForLoop, group);
+		
 		remover.registerRemovedNode(fStatement);
 		remover.applyRemoves(imports);
 		return null;
@@ -546,4 +564,5 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 		positionGroups.addAll(getAllPositionGroups());
 		return endPosition;
 	}
+
 }

@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.text.edits.TextEditGroup;
@@ -42,6 +43,14 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 public class ControlStatementsFix extends AbstractFix {
 	
+	public interface IRemoveBlockOperation {
+
+		public void setSubOperation(IFixRewriteOperation op);
+
+		public Statement getSingleStatement();
+
+    }
+
 	private static final String FOR_LOOP_ELEMENT_IDENTIFIER= "element"; //$NON-NLS-1$
 	
 	private final static class ControlStatementFinder extends GenericVisitor {
@@ -298,10 +307,11 @@ public class ControlStatementsFix extends AbstractFix {
 		}
 	}
 	
-	private static class RemoveBlockOperation extends AbstractFixRewriteOperation {
+	static class RemoveBlockOperation extends AbstractFixRewriteOperation implements IRemoveBlockOperation {
 
 		private final Statement fStatement;
 		private final ChildPropertyDescriptor fChild;
+		private IFixRewriteOperation fOperation;
 
 		public RemoveBlockOperation(Statement controlStatement, ChildPropertyDescriptor child) {
 			fStatement= controlStatement;
@@ -314,13 +324,35 @@ public class ControlStatementsFix extends AbstractFix {
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 
-			Block block= (Block)fStatement.getStructuralProperty(fChild);
-			Statement moveTarget= (Statement)rewrite.createMoveTarget((ASTNode)block.statements().get(0));
+			Statement moveTarget;
+			if (fOperation == null) {
+				moveTarget= (Statement)rewrite.createMoveTarget(getSingleStatement());
+			} else {
+				if (fOperation instanceof ConvertForLoopOperation) {
+					ConvertForLoopOperation convertForLoopOperation= ((ConvertForLoopOperation)fOperation);
+					convertForLoopOperation.makePassive();
+					fOperation.rewriteAST(cuRewrite, textEditGroups);
+					moveTarget= convertForLoopOperation.getEnhancedForStatement();
+				} else  {
+					ConvertIterableLoopOperation convertIterableLoopOperation= ((ConvertIterableLoopOperation)fOperation);
+					convertIterableLoopOperation.makePassive();
+					fOperation.rewriteAST(cuRewrite, textEditGroups);
+					moveTarget= convertIterableLoopOperation.getEnhancedForStatement();
+				}
+			}
 			
 			TextEditGroup group= createTextEditGroup(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription);
 			textEditGroups.add(group);
 			rewrite.set(fStatement, fChild, moveTarget, group);
 		}
+		
+        public void setSubOperation(IFixRewriteOperation op) {
+        	fOperation= op;
+        }
+		
+        public Statement getSingleStatement() {
+	        return (Statement)((Block)fStatement.getStructuralProperty(fChild)).statements().get(0);
+        }
 		
 		public static boolean satisfiesCleanUpPrecondition(Statement controlStatement, ChildPropertyDescriptor childDescriptor, boolean onlyReturnAndThrows) {
 			return satisfiesPrecondition(controlStatement, childDescriptor, onlyReturnAndThrows, true);
@@ -548,9 +580,45 @@ public class ControlStatementsFix extends AbstractFix {
 		if (operations.isEmpty())
 			return null;
 		
+		flattenOperations(operations);
+		
 		IFixRewriteOperation[] ops= (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]);
 		return new ControlStatementsFix("", compilationUnit, ops); //$NON-NLS-1$
 	}	
+
+    private static void flattenOperations(List operations) {
+    	Hashtable removeBlockOps= new Hashtable();
+    	for (Iterator iterator= operations.iterator(); iterator.hasNext();) {
+	        IFixRewriteOperation op= (IFixRewriteOperation)iterator.next();
+	        if (op instanceof IRemoveBlockOperation) {
+	        	IRemoveBlockOperation rOp= (IRemoveBlockOperation)op;
+	        	Statement singleStatement= rOp.getSingleStatement();
+	        	if (singleStatement instanceof ForStatement)
+					removeBlockOps.put(singleStatement, rOp);
+	        }
+        }
+    	
+    	for (Iterator iterator= operations.iterator(); iterator.hasNext();) {
+	        IFixRewriteOperation op= (IFixRewriteOperation)iterator.next();
+	        if (op instanceof ConvertForLoopOperation) {
+	        	ConvertForLoopOperation convertOp= (ConvertForLoopOperation)op;
+	        	ForStatement forStatement= convertOp.getForLoop();
+	        	if (removeBlockOps.containsKey(forStatement)) {
+	        		IRemoveBlockOperation removeOp= (IRemoveBlockOperation)removeBlockOps.get(forStatement);
+	        		removeOp.setSubOperation(convertOp);
+	        		iterator.remove();
+	        	}
+	        } else if (op instanceof ConvertIterableLoopOperation) {
+	        	ConvertIterableLoopOperation convertOp= (ConvertIterableLoopOperation)op;
+	        	ForStatement forStatement= convertOp.getForLoop();
+	        	if (removeBlockOps.containsKey(forStatement)) {
+	        		IRemoveBlockOperation removeOp= (IRemoveBlockOperation)removeBlockOps.get(forStatement);
+	        		removeOp.setSubOperation(convertOp);
+	        		iterator.remove();
+	        	}
+	        }
+        }
+    }
 
 	protected ControlStatementsFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations) {
 		super(name, compilationUnit, fixRewriteOperations);
