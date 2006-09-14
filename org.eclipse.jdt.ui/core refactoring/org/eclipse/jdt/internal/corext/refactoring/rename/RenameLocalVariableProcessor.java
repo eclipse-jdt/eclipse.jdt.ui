@@ -384,10 +384,18 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 			final String handle= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
 				final IJavaElement element= JDTRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
+				if (element != null && element.exists()) {
+					if (element.getElementType() == IJavaElement.COMPILATION_UNIT) {
+						fCu= (ICompilationUnit) element;
+					} else if (element.getElementType() == IJavaElement.LOCAL_VARIABLE) {
+						fLocalVariable= (ILocalVariable) element;
+						fCu= (ICompilationUnit) fLocalVariable.getAncestor(IJavaElement.COMPILATION_UNIT);
+						if (fCu == null)
+							return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_LOCAL_VARIABLE);
+					} else
+						return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_LOCAL_VARIABLE);
+				} else
 					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_LOCAL_VARIABLE);
-				else
-					fCu= (ICompilationUnit) element;
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_INPUT));
 			final String name= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_NAME);
@@ -395,7 +403,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 				setNewElementName(name);
 			else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_NAME));
-			if (fCu != null) {
+			if (fCu != null && fLocalVariable == null) {
 				final String selection= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_SELECTION);
 				if (selection != null) {
 					int offset= -1;
