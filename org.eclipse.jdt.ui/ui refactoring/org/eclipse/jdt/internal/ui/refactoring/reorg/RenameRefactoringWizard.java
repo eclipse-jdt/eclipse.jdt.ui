@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -29,6 +30,46 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	private final String fPageContextHelpId;
 	private final ImageDescriptor fInputPageImageDescriptor;
 	
+	// dialog settings constants:
+	
+	/**
+	 * Dialog settings key (value is of type boolean).
+	 */
+	public static final String UPDATE_TEXTUAL_MATCHES= "updateTextualMatches"; //$NON-NLS-1$
+	/**
+	 * Dialog settings key (value is of type boolean).
+	 */
+	public static final String UPDATE_QUALIFIED_NAMES= "updateQualifiedNames"; //$NON-NLS-1$
+	/**
+	 * Dialog settings key (value is of type String).
+	 */
+	public static final String QUALIFIED_NAMES_PATTERNS= "patterns"; //$NON-NLS-1$
+	
+	/**
+	 * Dialog settings key (value is of type boolean).
+	 */
+	public static final String TYPE_UPDATE_SIMILAR_ELEMENTS= "updateSimilarElements"; //$NON-NLS-1$
+	/**
+	 * Dialog settings key (value is of type int).
+	 * @see RenamingNameSuggestor
+	 */
+	public static final String TYPE_SIMILAR_MATCH_STRATEGY= "updateSimilarElementsMatchStrategy"; //$NON-NLS-1$
+	
+	/**
+	 * Dialog settings key (value is of type boolean).
+	 */
+	public static final String PACKAGE_RENAME_SUBPACKAGES= "renameSubpackages"; //$NON-NLS-1$
+	
+	/**
+	 * Dialog settings key (value is of type boolean).
+	 */
+	public static final String FIELD_RENAME_GETTER= "renameGetter"; //$NON-NLS-1$
+	/**
+	 * Dialog settings key (value is of type boolean).
+	 */
+	public static final String FIELD_RENAME_SETTER= "renameSetter"; //$NON-NLS-1$
+	
+	
 	public RenameRefactoringWizard(Refactoring refactoring, String defaultPageTitle, String inputPageDescription, 
 			ImageDescriptor inputPageImageDescriptor, String pageContextHelpId) {
 		super(refactoring, DIALOG_BASED_USER_INTERFACE);
@@ -36,6 +77,7 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 		fInputPageDescription= inputPageDescription;
 		fInputPageImageDescriptor= inputPageImageDescriptor;
 		fPageContextHelpId= pageContextHelpId;
+		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 	}
 
 	/* non java-doc

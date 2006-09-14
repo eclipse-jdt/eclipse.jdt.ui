@@ -51,8 +51,6 @@ public class RenamePackageWizard extends RenameRefactoringWizard {
 	private static class RenamePackageInputWizardPage extends RenameInputWizardPage {
 		
 		private Button fRenameSubpackages;
-		private static final String RENAME_SUBPACKAGES= "renameSubpackages"; //$NON-NLS-1$
-		
 		public RenamePackageInputWizardPage(String message, String contextHelpId, String initialValue) {
 			super(message, contextHelpId, true, initialValue);
 		}
@@ -60,7 +58,7 @@ public class RenamePackageWizard extends RenameRefactoringWizard {
 		protected void addAdditionalOptions(Composite composite, RowLayouter layouter) {
 			fRenameSubpackages= new Button(composite, SWT.CHECK);
 			fRenameSubpackages.setText(RefactoringMessages.RenamePackageWizard_rename_subpackages);
-			boolean subpackagesSelection= getBooleanSetting(RENAME_SUBPACKAGES, getRenamePackageProcessor().getRenameSubpackages());
+			boolean subpackagesSelection= getBooleanSetting(RenameRefactoringWizard.PACKAGE_RENAME_SUBPACKAGES, getRenamePackageProcessor().getRenameSubpackages());
 			fRenameSubpackages.setSelection(subpackagesSelection);
 			getRenamePackageProcessor().setRenameSubpackages(subpackagesSelection);
 			fRenameSubpackages.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -78,7 +76,7 @@ public class RenamePackageWizard extends RenameRefactoringWizard {
 		
 		public void dispose() {
 			if (saveSettings() && fRenameSubpackages.isEnabled())
-				saveBooleanSetting(RENAME_SUBPACKAGES, fRenameSubpackages);
+				saveBooleanSetting(RenameRefactoringWizard.PACKAGE_RENAME_SUBPACKAGES, fRenameSubpackages);
 			super.dispose();
 		}
 		

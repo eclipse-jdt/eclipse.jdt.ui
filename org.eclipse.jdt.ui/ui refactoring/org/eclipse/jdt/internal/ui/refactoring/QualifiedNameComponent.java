@@ -24,9 +24,10 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 
+import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameRefactoringWizard;
+
 public class QualifiedNameComponent extends Composite {
 
-	private static final String PATTERNS= "patterns"; //$NON-NLS-1$
 	private Text fPatterns;
 
 	public QualifiedNameComponent(Composite parent, int style, final IQualifiedNameUpdating refactoring, IDialogSettings settings) {
@@ -46,7 +47,7 @@ public class QualifiedNameComponent extends Composite {
 		label.setLayoutData(gd);
 		String text= refactoring.getFilePatterns();
 		if (text == null) 
-			text= settings.get(PATTERNS);
+			text= settings.get(RenameRefactoringWizard.QUALIFIED_NAMES_PATTERNS);
 		if (text != null) { 
 			fPatterns.setText(text);
 			refactoring.setFilePatterns(text);
@@ -67,6 +68,6 @@ public class QualifiedNameComponent extends Composite {
 	}
 	
 	public void savePatterns(IDialogSettings settings) {
-		settings.put(PATTERNS, fPatterns.getText());
+		settings.put(RenameRefactoringWizard.QUALIFIED_NAMES_PATTERNS, fPatterns.getText());
 	}
 }

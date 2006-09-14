@@ -157,6 +157,9 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		addCheckBox(refactoringGroup, 
 			PreferencesMessages.JavaBasePreferencePage_refactoring_auto_save, 
 			RefactoringSavePreferences.PREF_SAVE_ALL_EDITORS);
+		addCheckBox(refactoringGroup, 
+				"Sho&w Rename refactoring in editor (work in progress)", 
+				PreferenceConstants.REFACTOR_LIGHTWEIGHT);
 
 		Group group= new Group(result, SWT.NONE);
 		group.setLayout(new GridLayout());

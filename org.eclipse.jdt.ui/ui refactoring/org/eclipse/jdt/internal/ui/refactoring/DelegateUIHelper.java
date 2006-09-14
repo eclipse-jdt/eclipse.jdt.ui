@@ -83,9 +83,15 @@ public class DelegateUIHelper {
 
 	// ************** Helper methods *******************
 
-	private static final String DELEGATE_UPDATING= "delegateUpdating"; //$NON-NLS-1$
+	/**
+	 * Dialog settings key (value is of type boolean).
+	 */
+	public static final String DELEGATE_UPDATING= "delegateUpdating"; //$NON-NLS-1$
 
-	private static final String DELEGATE_DEPRECATION= "delegateDeprecation"; //$NON-NLS-1$
+	/**
+	 * Dialog settings key (value is of type boolean).
+	 */
+	public static final String DELEGATE_DEPRECATION= "delegateDeprecation"; //$NON-NLS-1$
 
 	private DelegateUIHelper() {
 		// no instances

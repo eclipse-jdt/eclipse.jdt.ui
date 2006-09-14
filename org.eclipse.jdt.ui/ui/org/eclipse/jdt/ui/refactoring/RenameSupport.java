@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
+import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
@@ -149,7 +150,7 @@ public class RenameSupport {
 			getJavaRenameProcessor().needsSavedEditors(),
 			parent,
 			context);
-		helper.perform(false);
+		helper.perform(true);
 	}
 	
 	/** Flag indication that no additional update is to be performed. */
@@ -187,6 +188,35 @@ public class RenameSupport {
 	/** Flag indicating that the setter method is to be updated as well. */
 	public static final int UPDATE_SETTER_METHOD= 1 << 5;
 
+
+	private RenameSupport(RenameJavaElementDescriptor descriptor) throws CoreException {
+		RefactoringStatus refactoringStatus= new RefactoringStatus();
+		fRefactoring= (RenameRefactoring) descriptor.createRefactoring(refactoringStatus);
+		if (refactoringStatus.hasFatalError()) {
+			fPreCheckStatus= refactoringStatus;
+		} else {
+			preCheck();
+			refactoringStatus.merge(fPreCheckStatus);
+			fPreCheckStatus= refactoringStatus;
+		}
+	}
+	
+	/**
+	 * Creates a new rename support for the given
+	 * {@link RenameJavaElementDescriptor}.
+	 * 
+	 * @param descriptor the {@link RenameJavaElementDescriptor} to create a
+	 *        {@link RenameSupport} for. The caller is responsible for
+	 *        configuring the descriptor before it is passed.
+	 * @return the {@link RenameSupport}.
+	 * @throws CoreException if an unexpected error occurred while creating the
+	 *         {@link RenameSupport}.
+	 * @since 3.3
+	 */
+	public static RenameSupport create(RenameJavaElementDescriptor descriptor) throws CoreException {
+		return new RenameSupport(descriptor);
+	}
+	
 	private RenameSupport(JavaRenameProcessor processor, String newName, int flags) throws CoreException {
 		fRefactoring= new JavaRenameRefactoring(processor);
 		initialize(fRefactoring, newName, flags);

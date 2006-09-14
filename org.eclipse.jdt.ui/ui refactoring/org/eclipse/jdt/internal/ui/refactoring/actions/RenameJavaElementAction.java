@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -36,14 +37,17 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameLinkedMode;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class RenameJavaElementAction extends SelectionDispatchAction {
@@ -99,7 +103,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		if (element == null)
 			return;
 		try {
-			run(element);	
+			run(element, false);	
 		} catch (CoreException e){
 			ExceptionHandler.handle(e, RefactoringMessages.RenameJavaElementAction_name, RefactoringMessages.RenameJavaElementAction_exception);  
 		}	
@@ -125,10 +129,17 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 	}
 
 	public void run(ITextSelection selection) {
+		RenameLinkedMode activeLinkedMode= RenameLinkedMode.getActiveLinkedMode();
+		if (activeLinkedMode != null) {
+			activeLinkedMode.startFullDialog();
+			return;
+		}
+		
 		try {
 			IJavaElement element= getJavaElement();
 			if (element != null && isRenameAvailable(element)) {
-				run(element);
+				IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+				run(element, store.getBoolean(PreferenceConstants.REFACTOR_LIGHTWEIGHT));
 				return;
 			}
 		} catch (CoreException e) {
@@ -162,14 +173,17 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 	
 	//---- helper methods -------------------------------------------------------------------
 
-	private void run(IJavaElement element) throws CoreException {
+	private void run(IJavaElement element, boolean lightweight) throws CoreException {
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104		
 		if (!ActionUtil.isProcessable(getShell(), element))
 			return;
 		//XXX workaround bug 31998
 		if (ActionUtil.mustDisableJavaModelAction(getShell(), element))
 			return;
-		RefactoringExecutionStarter.startRenameRefactoring(element, getShell());
+		if (lightweight && fEditor instanceof CompilationUnitEditor)
+			new RenameLinkedMode(element, (CompilationUnitEditor) fEditor).start();
+		else
+			RefactoringExecutionStarter.startRenameRefactoring(element, getShell());
 	}
 
 	private static boolean isRenameAvailable(IJavaElement element) throws CoreException {

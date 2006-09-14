@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
 
 import org.eclipse.ui.PlatformUI;
 
@@ -48,9 +47,6 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	private Button fLeaveDelegateCheckBox;
 	private Button fDeprecateDelegateCheckBox;
 	private QualifiedNameComponent fQualifiedNameComponent;
-	
-	private static final String UPDATE_TEXTUAL_MATCHES= "updateTextualMatches"; //$NON-NLS-1$
-	private static final String UPDATE_QUALIFIED_NAMES= "updateQualifiedNames"; //$NON-NLS-1$
 	
 	/**
 	 * Creates a new text input page.
@@ -146,15 +142,16 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	}
 	
 	protected boolean saveSettings() {
-		if (getContainer() instanceof Dialog)
-			return ((Dialog)getContainer()).getReturnCode() == IDialogConstants.OK_ID;
+		// always save
+//		if (getContainer() instanceof Dialog)
+//			return ((Dialog)getContainer()).getReturnCode() == IDialogConstants.OK_ID;
 		return true;
 	}
 	
 	public void dispose() {
 		if (saveSettings()) {
-			saveBooleanSetting(UPDATE_TEXTUAL_MATCHES, fUpdateTextualMatches);
-			saveBooleanSetting(UPDATE_QUALIFIED_NAMES, fUpdateQualifiedNames);
+			saveBooleanSetting(RenameRefactoringWizard.UPDATE_TEXTUAL_MATCHES, fUpdateTextualMatches);
+			saveBooleanSetting(RenameRefactoringWizard.UPDATE_QUALIFIED_NAMES, fUpdateQualifiedNames);
 			if (fQualifiedNameComponent != null)
 				fQualifiedNameComponent.savePatterns(getRefactoringSettings());
 			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);
@@ -183,7 +180,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		if (refactoring == null || !refactoring.canEnableTextUpdating())
 			return;
 		String title= RefactoringMessages.RenameInputWizardPage_update_textual_matches; 
-		boolean defaultValue= getBooleanSetting(UPDATE_TEXTUAL_MATCHES, refactoring.getUpdateTextualMatches());
+		boolean defaultValue= getBooleanSetting(RenameRefactoringWizard.UPDATE_TEXTUAL_MATCHES, refactoring.getUpdateTextualMatches());
 		fUpdateTextualMatches= createCheckbox(result, title, defaultValue, layouter);
 		refactoring.setUpdateTextualMatches(fUpdateTextualMatches.getSelection());
 		fUpdateTextualMatches.addSelectionListener(new SelectionAdapter(){
@@ -209,7 +206,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		gd.horizontalAlignment= GridData.FILL;
 		gd.horizontalIndent= indent;
 		
-		boolean defaultSelection= getBooleanSetting(UPDATE_QUALIFIED_NAMES, ref.getUpdateQualifiedNames());
+		boolean defaultSelection= getBooleanSetting(RenameRefactoringWizard.UPDATE_QUALIFIED_NAMES, ref.getUpdateQualifiedNames());
 		fUpdateQualifiedNames.setSelection(defaultSelection);
 		updateQulifiedNameUpdating(ref, defaultSelection);
 

@@ -48,8 +48,6 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 	private Button fUpdateSimilarElements;
 	private int fSelectedStrategy;
 
-	private static final String UPDATE_SIMILAR_ELEMENTS= "updateSimilarElements"; //$NON-NLS-1$
-	private final static String DIALOG_SETTINGS_SIMILAR_MATCH_STRATEGY= "updateSimilarElementsMatchStrategy"; //$NON-NLS-1$
 	private Link fUpdateSimilarElementsButton;
 
 	public RenameTypeWizardInputPage(String description, String contextHelpId, boolean isLastUserPage, String initialValue) {
@@ -62,7 +60,7 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 			return;
 
 		try {
-			fSelectedStrategy= getRefactoringSettings().getInt(DIALOG_SETTINGS_SIMILAR_MATCH_STRATEGY);
+			fSelectedStrategy= getRefactoringSettings().getInt(RenameRefactoringWizard.TYPE_SIMILAR_MATCH_STRATEGY);
 		} catch (NumberFormatException e) {
 			fSelectedStrategy= getSimilarElementUpdating().getMatchStrategy();
 		}
@@ -78,7 +76,7 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 		fUpdateSimilarElements= new Button(c, SWT.CHECK);
 		fUpdateSimilarElements.setText(RefactoringMessages.RenameTypeWizardInputPage_update_similar_elements);
 
-		final boolean updateSimilarElements= getBooleanSetting(UPDATE_SIMILAR_ELEMENTS, getSimilarElementUpdating().getUpdateSimilarDeclarations());
+		final boolean updateSimilarElements= getBooleanSetting(RenameRefactoringWizard.TYPE_UPDATE_SIMILAR_ELEMENTS, getSimilarElementUpdating().getUpdateSimilarDeclarations());
 		fUpdateSimilarElements.setSelection(updateSimilarElements);
 		getSimilarElementUpdating().setUpdateSimilarDeclarations(updateSimilarElements);
 		fUpdateSimilarElements.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -122,8 +120,8 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 	public void dispose() {
 		if (saveSettings())
 			if (fUpdateSimilarElements != null && !fUpdateSimilarElements.isDisposed() && fUpdateSimilarElements.isEnabled()) {
-				saveBooleanSetting(UPDATE_SIMILAR_ELEMENTS, fUpdateSimilarElements);
-				getRefactoringSettings().put(DIALOG_SETTINGS_SIMILAR_MATCH_STRATEGY, fSelectedStrategy);
+				saveBooleanSetting(RenameRefactoringWizard.TYPE_UPDATE_SIMILAR_ELEMENTS, fUpdateSimilarElements);
+				getRefactoringSettings().put(RenameRefactoringWizard.TYPE_SIMILAR_MATCH_STRATEGY, fSelectedStrategy);
 			}
 
 		super.dispose();

@@ -2943,6 +2943,19 @@ public class PreferenceConstants {
 	public static final String REFACTOR_SAVE_ALL_EDITORS= "Refactoring.savealleditors"; //$NON-NLS-1$
 	
 	/**
+	 * A named preference that controls whether certain refactorings use a lightweight UI when
+	 * started from a Java editor.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * <p>
+	 * Note: this is work in progress and may change any time
+	 * </p>
+	 * @since 3.3
+	 */
+	public static final String REFACTOR_LIGHTWEIGHT= "Refactoring.lightweight"; //$NON-NLS-1$
+	
+	/**
 	 * A named preference that controls a reduced search menu is used in the Java editors.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -3455,6 +3468,7 @@ public class PreferenceConstants {
 		// RefactoringPreferencePage
 		store.setDefault(PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, PreferenceConstants.REFACTOR_WARNING_SEVERITY);
 		store.setDefault(PreferenceConstants.REFACTOR_SAVE_ALL_EDITORS, false);		
+		store.setDefault(PreferenceConstants.REFACTOR_LIGHTWEIGHT, false);		
 
 		// TemplatePreferencePage
 		store.setDefault(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER, true);

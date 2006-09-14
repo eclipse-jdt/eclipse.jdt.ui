@@ -63,8 +63,6 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 		private Button fRenameSetter;
 		private String fGetterRenamingErrorMessage;
 		private String fSetterRenamingErrorMessage;
-		private static final String RENAME_GETTER= "renameGetter"; //$NON-NLS-1$
-		private static final String RENAME_SETTER= "renameSetter"; //$NON-NLS-1$
 		
 		public RenameFieldInputWizardPage(String message, String contextHelpId, String initialValue) {
 			super(message, contextHelpId, true, initialValue);
@@ -89,7 +87,7 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 			fRenameGetter= new Button(composite, SWT.CHECK);
 			boolean getterEnablement= fGetterRenamingErrorMessage == null;
 			fRenameGetter.setEnabled(getterEnablement);
-			boolean getterSelection= getterEnablement && getBooleanSetting(RENAME_GETTER, getRenameFieldProcessor().getRenameGetter());
+			boolean getterSelection= getterEnablement && getBooleanSetting(RenameRefactoringWizard.FIELD_RENAME_GETTER, getRenameFieldProcessor().getRenameGetter());
 			fRenameGetter.setSelection(getterSelection);
 			getRenameFieldProcessor().setRenameGetter(getterSelection);
 			fRenameGetter.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -103,7 +101,7 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 			fRenameSetter= new Button(composite, SWT.CHECK);
 			boolean setterEnablement= fSetterRenamingErrorMessage == null;
 			fRenameSetter.setEnabled(setterEnablement);
-			boolean setterSelection= setterEnablement && getBooleanSetting(RENAME_SETTER, getRenameFieldProcessor().getRenameSetter());
+			boolean setterSelection= setterEnablement && getBooleanSetting(RenameRefactoringWizard.FIELD_RENAME_SETTER, getRenameFieldProcessor().getRenameSetter());
 			fRenameSetter.setSelection(setterSelection);
 			getRenameFieldProcessor().setRenameSetter(setterSelection);
 			fRenameSetter.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -122,9 +120,9 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 		public void dispose() {
 			if (saveSettings()) {
 				if (fRenameGetter.isEnabled())
-					saveBooleanSetting(RENAME_GETTER, fRenameGetter);
+					saveBooleanSetting(RenameRefactoringWizard.FIELD_RENAME_GETTER, fRenameGetter);
 				if (fRenameSetter.isEnabled())
-					saveBooleanSetting(RENAME_SETTER, fRenameSetter);
+					saveBooleanSetting(RenameRefactoringWizard.FIELD_RENAME_SETTER, fRenameSetter);
 			}
 			super.dispose();
 		}
