@@ -35,10 +35,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.DocumentRewriteSession;
-import org.eclipse.jface.text.DocumentRewriteSessionType;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentExtension4;
+import org.eclipse.jface.text.RewriteSessionEditProcessor;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
@@ -224,17 +222,10 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 			JavaPlugin.log(e);
 		}
 			
-		DocumentRewriteSession session= null;
 		try {
-			if (document instanceof IDocumentExtension4)
-				session= ((IDocumentExtension4)document).startRewriteSession(DocumentRewriteSessionType.UNRESTRICTED);
-			
-			edit.apply(document, TextEdit.UPDATE_REGIONS);
+			new RewriteSessionEditProcessor(document, edit, TextEdit.UPDATE_REGIONS).performEdits();
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
-		} finally {
-			if (session != null)
-				((IDocumentExtension4)document).stopRewriteSession(session);
 		}
 		
 		IRunnableWithProgress r= new IRunnableWithProgress() {

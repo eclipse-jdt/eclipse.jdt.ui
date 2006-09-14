@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.Map;
 
 import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.Assert;
@@ -36,10 +35,8 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.DocumentRewriteSession;
-import org.eclipse.jface.text.DocumentRewriteSessionType;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentExtension4;
+import org.eclipse.jface.text.RewriteSessionEditProcessor;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.Flags;
@@ -907,50 +904,23 @@ public final class JavaModelUtil {
 		monitor.beginTask(CorextMessages.JavaModelUtil_applyedit_operation, 3); 
 
 		try {
-			if (!save && isEmpty(edit))
-				return;
-			
 			IDocument document= null;
-			DocumentRewriteSession session= null;
 			try {
 				document= aquireDocument(cu, new SubProgressMonitor(monitor, 1));
-				if (document instanceof IDocumentExtension4) {
-					session= ((IDocumentExtension4)document).startRewriteSession(
-							DocumentRewriteSessionType.UNRESTRICTED);
-				}
 				if (save) {
 					commitDocument(cu, document, edit, new SubProgressMonitor(monitor, 1));
 				} else {
-					edit.apply(document);
+					new RewriteSessionEditProcessor(document, edit, TextEdit.UPDATE_REGIONS).performEdits();
 				}
 			} catch (BadLocationException e) {
 				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 			} finally {
-				try {
-					if (session != null && document != null) {
-						((IDocumentExtension4)document).stopRewriteSession(session);
-					}
-				} finally {
-					releaseDocument(cu, document, new SubProgressMonitor(monitor, 1));
-				}
+				releaseDocument(cu, document, new SubProgressMonitor(monitor, 1));
 			}
 		} finally {
 			monitor.done();
 		}		
 	}
-
-	/**
-	 * If this method returns <code>true</code>, <code>edit</code> is a no-op. Note that the
-	 * contrary may not be true: a complex edit that results in a no-op may not be detected as such.
-	 * 
-	 * @param edit a text edit to test
-	 * @return <code>false</code> if <code>edit</code> may contain real changes,
-	 *         <code>true</code> if it certainly does not
-	 * @since 3.2
-	 */
-    private static boolean isEmpty(TextEdit edit) {
-    	return edit instanceof MultiTextEdit && !((MultiTextEdit) edit).hasChildren();
-    }
 
 	private static IDocument aquireDocument(ICompilationUnit cu, IProgressMonitor monitor) throws CoreException {
 		if (JavaModelUtil.isPrimary(cu)) {
@@ -974,7 +944,7 @@ public final class JavaModelUtil {
 				if (!status.isOK()) {
 					throw new ValidateEditException(status);
 				}
-				edit.apply(document); // apply after file is commitable
+				new RewriteSessionEditProcessor(document, edit, TextEdit.UPDATE_REGIONS).performEdits(); // apply after file is commitable
 				
 				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
 				bufferManager.getTextFileBuffer(file.getFullPath()).commit(monitor, true);
@@ -982,7 +952,7 @@ public final class JavaModelUtil {
 			}
 		}
 		// no commit possible, make sure changes are in
-		edit.apply(document);
+		new RewriteSessionEditProcessor(document, edit, TextEdit.UPDATE_REGIONS).performEdits();
 	}
 
 	
