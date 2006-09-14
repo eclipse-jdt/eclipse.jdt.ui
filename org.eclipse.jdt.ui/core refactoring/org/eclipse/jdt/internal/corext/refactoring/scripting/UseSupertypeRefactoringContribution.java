@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.corext.refactoring.scripting;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.refactoring.descriptors.UseSupertypeDescriptor;
+
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringContribution;
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeRefactoring;
@@ -31,5 +33,12 @@ public final class UseSupertypeRefactoringContribution extends JDTRefactoringCon
 	 */
 	public final Refactoring createRefactoring(final RefactoringDescriptor descriptor) throws CoreException {
 		return new UseSuperTypeRefactoring(new UseSuperTypeProcessor(null, null));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public RefactoringDescriptor createDescriptor() {
+		return new UseSupertypeDescriptor();
 	}
 }

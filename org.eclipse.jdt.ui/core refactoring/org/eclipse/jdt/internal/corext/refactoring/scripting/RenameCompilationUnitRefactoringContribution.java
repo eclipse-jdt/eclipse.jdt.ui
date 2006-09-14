@@ -12,6 +12,9 @@ package org.eclipse.jdt.internal.corext.refactoring.scripting;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
+
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 
@@ -31,5 +34,12 @@ public final class RenameCompilationUnitRefactoringContribution extends JDTRefac
 	 */
 	public Refactoring createRefactoring(final RefactoringDescriptor descriptor) throws CoreException {
 		return new JavaRenameRefactoring(new RenameCompilationUnitProcessor(null));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public RefactoringDescriptor createDescriptor() {
+		return new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_COMPILATION_UNIT);
 	}
 }

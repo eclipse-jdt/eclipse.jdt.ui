@@ -15,6 +15,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 
+import org.eclipse.jdt.core.refactoring.descriptors.MoveStaticMembersDescriptor;
+
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringContribution;
 import org.eclipse.jdt.internal.corext.refactoring.structure.JavaMoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
@@ -31,5 +33,12 @@ public final class MoveStaticMembersRefactoringContribution extends JDTRefactori
 	 */
 	public Refactoring createRefactoring(final RefactoringDescriptor descriptor) throws CoreException {
 		return new JavaMoveRefactoring(new MoveStaticMembersProcessor(null, null));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public RefactoringDescriptor createDescriptor() {
+		return new MoveStaticMembersDescriptor();
 	}
 }
