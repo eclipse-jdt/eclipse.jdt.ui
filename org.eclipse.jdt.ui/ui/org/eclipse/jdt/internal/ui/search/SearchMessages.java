@@ -227,6 +227,9 @@ public final class SearchMessages extends NLS {
 	public static String MatchFilter_JavadocFilter_name;
 	public static String MatchFilter_JavadocFilter_actionLabel;
 	public static String MatchFilter_JavadocFilter_description;
+	public static String MatchFilter_PolymorphicFilter_name;
+	public static String MatchFilter_PolymorphicFilter_actionLabel;
+	public static String MatchFilter_PolymorphicFilter_description;
 	public static String MatchFilter_ErasureFilter_name;
 	public static String MatchFilter_ErasureFilter_actionLabel;
 	public static String MatchFilter_ErasureFilter_description;

@@ -16,19 +16,21 @@ import org.eclipse.search.ui.text.Match;
  * A search match with additional java-specific info.
  */
 public class JavaElementMatch extends Match {
-	private int fAccuracy;
-	private int fMatchRule;
-	private boolean fIsWriteAccess;
-	private boolean fIsReadAccess;
-	private boolean fIsJavadoc;
+	private final int fAccuracy;
+	private final int fMatchRule;
+	private final boolean fIsWriteAccess;
+	private final boolean fIsReadAccess;
+	private final boolean fIsJavadoc;
+	private final boolean fIsPolymorphic;
 	
-	JavaElementMatch(Object element, int matchRule, int offset, int length, int accuracy, boolean isReadAccess, boolean isWriteAccess, boolean isJavadoc) {
+	JavaElementMatch(Object element, int matchRule, int offset, int length, int accuracy, boolean isReadAccess, boolean isWriteAccess, boolean isJavadoc, boolean isPolymorphic) {
 		super(element, offset, length);
 		fAccuracy= accuracy;
 		fMatchRule= matchRule;
 		fIsWriteAccess= isWriteAccess;
 		fIsReadAccess= isReadAccess;
 		fIsJavadoc= isJavadoc;
+		fIsPolymorphic= isPolymorphic;
 	}
 
 	public int getAccuracy() {
@@ -45,6 +47,10 @@ public class JavaElementMatch extends Match {
 
 	public boolean isJavadoc() {
 		return fIsJavadoc;
+	}
+	
+	public boolean isPolymorphic() {
+		return fIsPolymorphic;
 	}
 	
 	public int getMatchRule() {

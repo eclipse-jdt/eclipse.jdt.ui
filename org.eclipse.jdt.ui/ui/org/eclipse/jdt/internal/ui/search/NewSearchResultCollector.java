@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.search.FieldReferenceMatch;
 import org.eclipse.jdt.core.search.LocalVariableReferenceMatch;
+import org.eclipse.jdt.core.search.MethodReferenceMatch;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchRequestor;
@@ -44,7 +45,12 @@ public class NewSearchResultCollector extends SearchRequestor {
 				isWriteAccess= localVarRef.isWriteAccess();
 				isReadAccess= localVarRef.isReadAccess();
 			}
-			fSearch.addMatch(new JavaElementMatch(enclosingElement, match.getRule(), match.getOffset(), match.getLength(), match.getAccuracy(), isReadAccess, isWriteAccess, match.isInsideDocComment()));
+			boolean isPolymorphic= false;
+			if (match instanceof MethodReferenceMatch) {
+				MethodReferenceMatch methodRef= (MethodReferenceMatch) match;
+				isPolymorphic= methodRef.isPolymorphic();
+			}
+			fSearch.addMatch(new JavaElementMatch(enclosingElement, match.getRule(), match.getOffset(), match.getLength(), match.getAccuracy(), isReadAccess, isWriteAccess, match.isInsideDocComment(), isPolymorphic));
 		}
 	}
 

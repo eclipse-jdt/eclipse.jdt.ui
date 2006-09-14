@@ -51,7 +51,7 @@ abstract class MatchFilter {
 	}
 	
 	public static MatchFilter[] getDefaultFilters() {
-		return new MatchFilter[] { IMPORT_FILTER };
+		return new MatchFilter[] { IMPORT_FILTER, POLYMORPHIC_FILTER };
 	}
 	
 	private static String encodeFilters(MatchFilter[] enabledFilters) {
@@ -92,6 +92,7 @@ abstract class MatchFilter {
 	private static final MatchFilter READ_FILTER= new ReadFilter(); 
 	private static final MatchFilter WRITE_FILTER= new WriteFilter(); 
 	
+	private static final MatchFilter POLYMORPHIC_FILTER= new PolymorphicFilter(); 
 	private static final MatchFilter INEXACT_FILTER= new InexactMatchFilter(); 
 	private static final MatchFilter ERASURE_FILTER= new ErasureMatchFilter(); 
 	
@@ -108,6 +109,7 @@ abstract class MatchFilter {
 			READ_FILTER,
 			WRITE_FILTER,
 			
+            POLYMORPHIC_FILTER,
 			INEXACT_FILTER,
 			ERASURE_FILTER,
 			
@@ -264,6 +266,44 @@ class JavadocFilter extends MatchFilter {
 	public String getID() {
 		return "filter_javadoc"; //$NON-NLS-1$
 	}
+}
+
+class PolymorphicFilter extends MatchFilter {
+    public boolean filters(JavaElementMatch match) {
+        return match.isPolymorphic();
+    }
+
+    public String getName() {
+        return SearchMessages.MatchFilter_PolymorphicFilter_name; 
+    }
+
+    public String getActionLabel() {
+        return SearchMessages.MatchFilter_PolymorphicFilter_actionLabel; 
+    }
+
+    public String getDescription() {
+        return SearchMessages.MatchFilter_PolymorphicFilter_description; 
+    }
+    
+    public boolean isApplicable(JavaSearchQuery query) {
+        QuerySpecification spec= query.getSpecification();
+        switch (spec.getLimitTo()) {
+			case IJavaSearchConstants.REFERENCES:
+			case IJavaSearchConstants.ALL_OCCURRENCES:
+                if (spec instanceof ElementQuerySpecification) {
+                    ElementQuerySpecification elementSpec= (ElementQuerySpecification) spec;
+                    return elementSpec.getElement() instanceof IMethod;
+                } else if (spec instanceof PatternQuerySpecification) {
+                    PatternQuerySpecification patternSpec= (PatternQuerySpecification) spec;
+                    return patternSpec.getSearchFor() == IJavaSearchConstants.METHOD;
+                }
+        }
+        return false;
+    }
+
+    public String getID() {
+        return "filter_polymorphic"; //$NON-NLS-1$
+    }
 }
 
 abstract class GenericTypeFilter extends MatchFilter {

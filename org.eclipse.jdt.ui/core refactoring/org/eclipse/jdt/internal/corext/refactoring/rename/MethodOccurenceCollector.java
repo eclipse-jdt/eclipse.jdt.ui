@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
+import org.eclipse.jdt.core.search.MethodReferenceMatch;
 import org.eclipse.jdt.core.search.SearchMatch;
 
 import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
@@ -34,6 +35,12 @@ class MethodOccurenceCollector extends CollectingSearchRequestor {
 			ICompilationUnit unit= SearchUtils.getCompilationUnit(match);
 			if (unit == null)
 				return;
+			
+			if (match instanceof MethodReferenceMatch
+					&& ((MethodReferenceMatch) match).isPolymorphic()
+					&& match.getAccuracy() == SearchMatch.A_INACCURATE) {
+				return; // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=156491
+			}
 			
 			int start= match.getOffset();
 			int length= match.getLength();
