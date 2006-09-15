@@ -20,6 +20,7 @@ public class AllTests {
 	public static Test suite ( ) {
 		TestSuite suite= new TestSuite("All Change Tests");
 		suite.addTest(TrackPositionTest.suite());
+		suite.addTest(TextDiffContentTest.suite());
 	    return suite;
 	}
 }
