@@ -501,7 +501,7 @@ public class RenameLinkedMode {
 		}
 		
 		Shell workbenchShell= fEditor.getSite().getShell();
-		Display display= workbenchShell.getDisplay();
+		final Display display= workbenchShell.getDisplay();
 		
 		fPopup= new Shell(workbenchShell, SWT.ON_TOP | SWT.NO_TRIM);
 		GridLayout shellLayout= new GridLayout();
@@ -519,7 +519,16 @@ public class RenameLinkedMode {
 		new PopupVisibilityManager().start();
 		fPopup.addShellListener(new ShellAdapter() {
 			public void shellDeactivated(ShellEvent e) {
-				fLinkedModeModel.exit(ILinkedModeListener.NONE);
+				final Shell editorShell= fEditor.getSite().getShell();
+				display.asyncExec(new Runnable() {
+					// post to UI thread since editor shell only gets activated after popup has lost focus
+					public void run() {
+						Shell activeShell= display.getActiveShell();
+						if (activeShell != editorShell) {
+							fLinkedModeModel.exit(ILinkedModeListener.NONE);
+						}
+					}
+				});
 			}
 		});
 		
