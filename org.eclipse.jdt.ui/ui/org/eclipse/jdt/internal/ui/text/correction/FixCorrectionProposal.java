@@ -189,7 +189,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 			ProgressMonitorDialog context= new ProgressMonitorDialog(shell);
 			RefactoringExecutionHelper executer= new RefactoringExecutionHelper(refactoring, stopSeverity, false, shell, context);
 			try {
-				executer.perform(true);
+				executer.perform(true, true);
 			} catch (InterruptedException e) {
 			} catch (InvocationTargetException e) {
 				JavaPlugin.log(e);

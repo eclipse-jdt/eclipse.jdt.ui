@@ -72,6 +72,6 @@ public class ReorgCopyStarter {
 		IRunnableContext context= new ProgressMonitorDialog(parent);
 		fCopyProcessor.setNewNameQueries(new NewNameQueries(parent));
 		fCopyProcessor.setReorgQueries(new ReorgQueries(parent));
-		new RefactoringExecutionHelper(new JavaCopyRefactoring(fCopyProcessor), RefactoringCore.getConditionCheckingFailedSeverity(), false, parent, context).perform(false);
+		new RefactoringExecutionHelper(new JavaCopyRefactoring(fCopyProcessor), RefactoringCore.getConditionCheckingFailedSeverity(), false, parent, context).perform(false, false);
 	}
 }

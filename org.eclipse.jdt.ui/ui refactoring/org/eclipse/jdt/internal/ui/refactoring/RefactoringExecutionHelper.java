@@ -35,11 +35,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IThreadListener;
 
-
-import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -47,6 +42,10 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler;
 import org.eclipse.ltk.ui.refactoring.RefactoringUI;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 
 /**
  * A helper class to execute a refactoring. The class takes care of pushing the
@@ -98,7 +97,7 @@ public class RefactoringExecutionHelper {
 		fNeedsSavedEditors= needsSavedEditors;
 	}
 	
-	public void perform(boolean cancelable) throws InterruptedException, InvocationTargetException {
+	public void perform(boolean fork, boolean cancelable) throws InterruptedException, InvocationTargetException {
 		Assert.isTrue(Display.getCurrent() != null);
 		final IJobManager manager=  Platform.getJobManager();
 		final IWorkspaceRoot rule= ResourcesPlugin.getWorkspace().getRoot();
@@ -128,7 +127,7 @@ public class RefactoringExecutionHelper {
 			Operation op= new Operation();
 			fRefactoring.setValidationContext(fParent);
 			try{
-				fExecContext.run(false, cancelable, new OperationRunner(op, rule));
+				fExecContext.run(fork, cancelable, new OperationRunner(op, rule));
 				RefactoringStatus validationStatus= op.fPerformChangeOperation.getValidationStatus();
 				if (validationStatus != null && validationStatus.hasFatalError()) {
 					MessageDialog.openError(fParent, fRefactoring.getName(), 

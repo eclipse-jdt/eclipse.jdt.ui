@@ -930,7 +930,7 @@ public class PasteAction extends SelectionDispatchAction{
 
 			public void run(Shell parent) throws InterruptedException, InvocationTargetException {
 				IRunnableContext context= new ProgressMonitorDialog(parent);
-				new RefactoringExecutionHelper(fPasteRefactoring, RefactoringCore.getConditionCheckingFailedSeverity(), false, parent, context).perform(false);
+				new RefactoringExecutionHelper(fPasteRefactoring, RefactoringCore.getConditionCheckingFailedSeverity(), false, parent, context).perform(false, false);
 			}
 		}
 		private static class PasteTypedSourcesRefactoring extends Refactoring {

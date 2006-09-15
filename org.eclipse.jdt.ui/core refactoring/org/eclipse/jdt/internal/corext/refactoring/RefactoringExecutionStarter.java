@@ -255,7 +255,7 @@ public final class RefactoringExecutionStarter {
 		
 		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.ERROR, false, shell, PlatformUI.getWorkbench().getProgressService());
 		try {
-	        helper.perform(true);
+	        helper.perform(true, true);
         } catch (InterruptedException e) {
         }
 	}
@@ -281,7 +281,7 @@ public final class RefactoringExecutionStarter {
 		final JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
 		processor.setSuggestGetterSetterDeletion(false);
 		processor.setQueries(new ReorgQueries(shell));
-		new RefactoringExecutionHelper(new JavaDeleteRefactoring(processor), RefactoringCore.getConditionCheckingFailedSeverity(), false, shell, new ProgressMonitorDialog(shell)).perform(false);
+		new RefactoringExecutionHelper(new JavaDeleteRefactoring(processor), RefactoringCore.getConditionCheckingFailedSeverity(), false, shell, new ProgressMonitorDialog(shell)).perform(false, false);
 	}
 
 	public static void startDeleteRefactoring(final Object[] elements, final Shell shell) throws CoreException {
