@@ -1384,4 +1384,8 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		return OptionalMessageDialog.isDialogEnabled(SHOW_CLEAN_UP_WIZARD_PREFERENCE_KEY);
 	}
 
+    public static void setShowCleanUpWizard(boolean enabled) {
+    	OptionalMessageDialog.setDialogEnabled(SHOW_CLEAN_UP_WIZARD_PREFERENCE_KEY, enabled);
+    }
+
 }
