@@ -295,28 +295,6 @@ public abstract class ProfileConfigurationBlock {
 		}
 	}
 
-	class PreviewController implements Observer {
-
-		public PreviewController() {
-			fProfileManager.addObserver(this);
-			fJavaPreview.setWorkingValues(fProfileManager.getSelected().getSettings());
-			fJavaPreview.update();
-		}
-
-		public void update(Observable o, Object arg) {
-			final int value= ((Integer)arg).intValue();
-			switch (value) {
-			case ProfileManager.PROFILE_CREATED_EVENT:
-			case ProfileManager.PROFILE_DELETED_EVENT:
-			case ProfileManager.SELECTION_CHANGED_EVENT:
-			case ProfileManager.SETTINGS_CHANGED_EVENT:
-				fJavaPreview.setWorkingValues(((ProfileManager)o).getSelected().getSettings());
-				fJavaPreview.update();
-			}
-		}
-
-	}
-
 	/**
 	 * The GUI controls
 	 */
@@ -328,10 +306,7 @@ public abstract class ProfileConfigurationBlock {
 	private Button fNewButton;
 	private Button fLoadButton;
 	private Button fSaveButton;
-	/**
-	 * The JavaPreview.
-	 */
-	private JavaPreview fJavaPreview;
+	
 	private PixelConverter fPixConv;
 	/**
 	 * The ProfileManager, the model of this page.
@@ -387,7 +362,7 @@ public abstract class ProfileConfigurationBlock {
 	
 	protected abstract ModifyDialog createModifyDialog(Shell shell, Profile profile, ProfileManager profileManager, boolean newProfile);
 
-	protected abstract JavaPreview createJavaPreview(Composite composite, int numColumns, Profile profile);
+	protected abstract void configurePreview(Composite composite, int numColumns, ProfileManager profileManager);
 
 	private static Button createButton(Composite composite, String text, final int style) {
 		final Button button= new Button(composite, SWT.PUSH);
@@ -427,11 +402,10 @@ public abstract class ProfileConfigurationBlock {
 		fLoadButton= createButton(group, FormatterMessages.CodingStyleConfigurationBlock_load_button_desc, GridData.HORIZONTAL_ALIGN_END); 
 		fSaveButton= createButton(group, FormatterMessages.CodingStyleConfigurationBlock_save_button_desc, GridData.HORIZONTAL_ALIGN_END); 
 
-		configurePreview(fComposite, numColumns);
+		configurePreview(fComposite, numColumns, fProfileManager);
 
 		new ButtonController();
 		new ProfileComboController();
-		new PreviewController();
 
 		return fComposite;
 	}
@@ -447,7 +421,7 @@ public abstract class ProfileConfigurationBlock {
 		return combo;
 	}
 
-	private Label createLabel(Composite composite, String text, int numColumns) {
+	protected static Label createLabel(Composite composite, String text, int numColumns) {
 		final GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan = numColumns;
 		gd.widthHint= 0;
@@ -468,18 +442,6 @@ public abstract class ProfileConfigurationBlock {
 		layout.marginWidth = 0;
 		composite.setLayout(layout);
 		return composite;
-	}
-
-	private void configurePreview(Composite composite, int numColumns) {
-		createLabel(fComposite, FormatterMessages.CodingStyleConfigurationBlock_preview_label_text, numColumns);
-		fJavaPreview= createJavaPreview(composite, numColumns, fProfileManager.getSelected());
-
-		final GridData gd = new GridData(GridData.FILL_VERTICAL | GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan = numColumns;
-		gd.verticalSpan= 7;
-		gd.widthHint = 0;
-		gd.heightHint = 0;
-		fJavaPreview.getControl().setLayoutData(gd);
 	}
 
 	public final boolean hasProjectSpecificOptions(IProject project) {

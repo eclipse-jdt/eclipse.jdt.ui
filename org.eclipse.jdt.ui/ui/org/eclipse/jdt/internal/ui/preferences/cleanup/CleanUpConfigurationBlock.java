@@ -15,13 +15,19 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
 import org.eclipse.core.resources.IProject;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -39,10 +45,9 @@ import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.preferences.PreferencesAccess;
 import org.eclipse.jdt.internal.ui.preferences.formatter.IProfileVersioner;
-import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 
@@ -73,34 +78,66 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 	protected ProfileManager createProfileManager(List profiles, IScopeContext context, PreferencesAccess access, IProfileVersioner profileVersioner) {
 	    return new CleanUpProfileManager(profiles, context, access, profileVersioner);
     }
-
-	protected JavaPreview createJavaPreview(Composite composite, int numColumns, Profile profile) {
-		Map settings= profile.getSettings();
+	
+	/**
+     * {@inheritDoc}
+     */
+    protected void configurePreview(Composite composite, int numColumns, final ProfileManager profileManager) {
+    	Map settings= profileManager.getSelected().getSettings();
 		final Map sharedSettings= new Hashtable();
 		fill(settings, sharedSettings);
 		
-		ICleanUp[] cleanUps1= {
-        		new ControlStatementsCleanUp(sharedSettings),
-        		new ExpressionsCleanUp(sharedSettings),
-        		new VariableDeclarationCleanUp(sharedSettings),
-        		new CodeStyleCleanUp(sharedSettings),
-        		new UnusedCodeCleanUp(sharedSettings),
-        		new UnnecessaryCodeCleanUp(sharedSettings),
-        		new StringCleanUp(sharedSettings),
-        		new Java50CleanUp(sharedSettings),
-        		new PotentialProgrammingProblemsCleanUp(sharedSettings),
-        		new CodeFormatCleanUp(sharedSettings),
-        		new CommentFormatCleanUp(sharedSettings)
-        };
+		final ICleanUp[] cleanUps= new ICleanUp[]{
+                		new ControlStatementsCleanUp(sharedSettings),
+                		new ExpressionsCleanUp(sharedSettings),
+                		new VariableDeclarationCleanUp(sharedSettings),
+                		new CodeStyleCleanUp(sharedSettings),
+                		new UnusedCodeCleanUp(sharedSettings),
+                		new UnnecessaryCodeCleanUp(sharedSettings),
+                		new StringCleanUp(sharedSettings),
+                		new Java50CleanUp(sharedSettings),
+                		new PotentialProgrammingProblemsCleanUp(sharedSettings),
+                		new CodeFormatCleanUp(sharedSettings),
+                		new CommentFormatCleanUp(sharedSettings)
+                };
 		
-		ICleanUp[] cleanUps= cleanUps1;
-    	CleanUpPreview result= new CleanUpPreview(composite, cleanUps, false) {
-    		public void setWorkingValues(Map workingValues) {
-    			fill(workingValues, sharedSettings);
-    		}
+		createLabel(composite, CleanUpMessages.CleanUpConfigurationBlock_SelectedCleanUps_label, numColumns);
+		
+		final Text detailField= new Text(composite, SWT.BORDER | SWT.FLAT | SWT.MULTI | SWT.READ_ONLY | SWT.H_SCROLL | SWT.V_SCROLL);
+		detailField.setText(getSelectedCleanUpsInfo(cleanUps));
+		detailField.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+		final GridData data= new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
+		data.horizontalSpan= numColumns;
+		detailField.setLayoutData(data);
+		
+		profileManager.addObserver(new Observer() {
 
-    	};
-		return result;
+			public void update(Observable o, Object arg) {
+				final int value= ((Integer)arg).intValue();
+				switch (value) {
+				case ProfileManager.PROFILE_CREATED_EVENT:
+				case ProfileManager.PROFILE_DELETED_EVENT:
+				case ProfileManager.SELECTION_CHANGED_EVENT:
+				case ProfileManager.SETTINGS_CHANGED_EVENT:
+					fill(profileManager.getSelected().getSettings(), sharedSettings);
+					detailField.setText(getSelectedCleanUpsInfo(cleanUps));
+				}
+            }
+			
+		});
+    }
+
+    private String getSelectedCleanUpsInfo(ICleanUp[] cleanUps) {
+    	StringBuffer buf= new StringBuffer();
+    	for (int i= 0; i < cleanUps.length; i++) {
+	        String[] descriptions= cleanUps[i].getDescriptions();
+	        if (descriptions != null) {
+    	        for (int j= 0; j < descriptions.length; j++) {
+    	            buf.append(descriptions[j]).append('\n');
+                }
+	        }
+        }
+    	return buf.toString();
     }
 
 	private void fill(Map settings, Map sharedSettings) {

@@ -117,12 +117,12 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 		List result= new ArrayList();
 		if (isFlag(ADD_BLOCK_TO_CONTROL_STATEMENTS))
 			result.add(MultiFixMessages.CodeStyleMultiFix_ConvertSingleStatementInControlBodeyToBlock_description);
-		if (isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP))
-			result.add(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description);
 		if (isFlag(REMOVE_UNNECESSARY_BLOCKS))
 			result.add(MultiFixMessages.ControlStatementsCleanUp_RemoveUnnecessaryBlocks_description);
 		if (isFlag(REMOVE_UNNECESSARY_BLOCKS_CONTAINING_RETURN_OR_THROW))
 			result.add(MultiFixMessages.ControlStatementsCleanUp_RemoveUnnecessaryBlocksWithReturnOrThrow_description);
+		if (isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP))
+			result.add(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description);
 		
 		return (String[])result.toArray(new String[result.size()]);
 	}

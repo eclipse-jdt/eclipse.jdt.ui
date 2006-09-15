@@ -175,20 +175,20 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 		List result= new ArrayList();
 		if (isFlag(QUALIFY_FIELD_ACCESS))
 			result.add(MultiFixMessages.CodeStyleMultiFix_AddThisQualifier_description);
-		if (isFlag(QUALIFY_STATIC_FIELD_ACCESS))
-			result.add(MultiFixMessages.CodeStyleMultiFix_QualifyAccessToStaticField);
-		if (isFlag(CHANGE_NON_STATIC_ACCESS_TO_STATIC))
-			result.add(MultiFixMessages.CodeStyleMultiFix_ChangeNonStaticAccess_description);
-		if (isFlag(CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT))
-			result.add(MultiFixMessages.CodeStyleMultiFix_ChangeIndirectAccessToStaticToDirect);
 		if (isFlag(QUALIFY_METHOD_ACCESS))
 			result.add(MultiFixMessages.CodeStyleCleanUp_QualifyNonStaticMethod_description);
-		if (isFlag(QUALIFY_STATIC_METHOD_ACCESS)) 
-			result.add(MultiFixMessages.CodeStyleCleanUp_QualifyStaticMethod_description);
 		if (isFlag(REMOVE_THIS_FIELD_QUALIFIER))
 			result.add(MultiFixMessages.CodeStyleCleanUp_removeFieldThis_description);
 		if (isFlag(REMOVE_THIS_METHOD_QUALIFIER))
 			result.add(MultiFixMessages.CodeStyleCleanUp_removeMethodThis_description);
+		if (isFlag(QUALIFY_STATIC_FIELD_ACCESS))
+			result.add(MultiFixMessages.CodeStyleMultiFix_QualifyAccessToStaticField);
+		if (isFlag(QUALIFY_STATIC_METHOD_ACCESS)) 
+			result.add(MultiFixMessages.CodeStyleCleanUp_QualifyStaticMethod_description);
+		if (isFlag(CHANGE_NON_STATIC_ACCESS_TO_STATIC))
+			result.add(MultiFixMessages.CodeStyleMultiFix_ChangeNonStaticAccess_description);
+		if (isFlag(CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT))
+			result.add(MultiFixMessages.CodeStyleMultiFix_ChangeIndirectAccessToStaticToDirect);
 		return (String[])result.toArray(new String[result.size()]);
 	}
 	

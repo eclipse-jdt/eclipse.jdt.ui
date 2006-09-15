@@ -16,6 +16,8 @@ public class CleanUpMessages extends NLS {
 	
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpMessages"; //$NON-NLS-1$
 	
+	public static String CleanUpConfigurationBlock_SelectedCleanUps_label;
+
 	public static String CleanUpModifyDialog_TabPageName_CodeFormating;
 	public static String CleanUpModifyDialog_TabPageName_CodeStyle;
 	public static String CleanUpModifyDialog_TabPageName_MemberAccesses;
