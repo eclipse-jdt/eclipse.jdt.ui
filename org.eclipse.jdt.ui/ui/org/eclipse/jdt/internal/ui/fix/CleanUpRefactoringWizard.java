@@ -30,12 +30,14 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -72,7 +74,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
@@ -80,20 +81,27 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
+import org.eclipse.jdt.internal.ui.preferences.CleanUpPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
-/**
- * @deprecated Replaced by preference page in 3.3M2
- */
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+
 public class CleanUpRefactoringWizard extends RefactoringWizard {
 	
 	private static final String CLEAN_UP_WIZARD_SETTINGS_SECTION_ID= "CleanUpWizard"; //$NON-NLS-1$
+	private static final String SHOW_CLEAN_UP_WIZARD_PREFERENCE_KEY= "CleanUpWizard.optionalDialog.id"; //$NON-NLS-1$
 	
 	private interface ISelectionChangeListener {
 		void selectionChanged(ICleanUp cleanUp, int flag, boolean selection);
 	}
 	
+	/**
+	 * @deprecated
+	 */
 	private class SelectCUPage extends UserInputWizardPage {
 
 		private ContainerCheckedTreeViewer fTreeViewer;
@@ -244,6 +252,9 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		}
 	}
 	
+	/**
+	 * @deprecated
+	 */
 	private class SelectCleanUpPage extends UserInputWizardPage {
 		
 		private class TabFolderLayout extends Layout {
@@ -1254,13 +1265,100 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		
 	}
 	
-	private final boolean fShowCUPage;
-	private final boolean fShowCleanUpPage;
+	private static class CleanUpConfigurationPage extends UserInputWizardPage {
+
+		private final CleanUpRefactoring fCleanUpRefactoring;
+
+		public CleanUpConfigurationPage(CleanUpRefactoring refactoring) {
+			super(MultiFixMessages.CleanUpRefactoringWizard_CleanUpConfigurationPage_title);
+			fCleanUpRefactoring= refactoring;
+			setMessage(MultiFixMessages.CleanUpRefactoringWizard_CleanUpConfigurationPage_message);
+        }
+
+		/**
+         * {@inheritDoc}
+         */
+        public void createControl(Composite parent) {
+        	Composite composite= new Composite(parent, SWT.NONE);
+			composite.setLayout(new GridLayout(1, true));
+			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			Link link= new Link(composite, SWT.WRAP | SWT.RIGHT);
+    		link.setText(MultiFixMessages.CleanUpRefactoringWizard_CleanUpConfigurationPage_link); 
+    		link.setToolTipText(MultiFixMessages.CleanUpRefactoringWizard_CleanUpConfigurationPage_linkToolTip); 
+    		GridData gridData= new GridData(GridData.FILL, GridData.CENTER, true, false);
+    		gridData.widthHint= convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH);
+    		link.setLayoutData(gridData);
+    		link.setFont(composite.getFont());
+    		
+    		final Label label = new Label(composite, SWT.WRAP);
+    		label.setFont(composite.getFont());
+    		label.setText(MultiFixMessages.CleanUpRefactoringWizard_CleanUpConfigurationPage_detaileTitle);
+    		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+    		
+    		final Text detailField= new Text(composite, SWT.BORDER | SWT.FLAT | SWT.MULTI | SWT.READ_ONLY | SWT.H_SCROLL | SWT.V_SCROLL);
+    		detailField.setText(getCleanUpsInfo());
+    		detailField.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+    		final GridData data= new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
+    		data.heightHint= convertHeightInCharsToPixels(20);
+    		detailField.setLayoutData(data);
+    		
+    		link.addSelectionListener(new SelectionAdapter() {
+    			public void widgetSelected(SelectionEvent e) {
+    				IJavaProject[] projects= fCleanUpRefactoring.getProjects();
+    				if (projects.length == 1) {
+    					PreferencesUtil.createPropertyDialogOn(getShell(), projects[0], CleanUpPreferencePage.PROP_ID, null, null).open();
+    				} else {
+    					PreferencesUtil.createPreferenceDialogOn(getShell(), CleanUpPreferencePage.PREF_ID, null, null).open();	
+    				}
+    				detailField.setText(getCleanUpsInfo());	
+    			}
+    		});
+    		
+    		final SelectionButtonDialogField dontShowAgainField= new SelectionButtonDialogField(SWT.CHECK);
+    		dontShowAgainField.setLabelText(MultiFixMessages.CleanUpRefactoringWizard_CleanUpConfigurationPage_DoNotShowAgainLabel);
+    		dontShowAgainField.setDialogFieldListener(new IDialogFieldListener() {
+
+				public void dialogFieldChanged(DialogField field) {
+					OptionalMessageDialog.setDialogEnabled(SHOW_CLEAN_UP_WIZARD_PREFERENCE_KEY, !dontShowAgainField.isSelected());
+                }
+    			
+    		});
+    		
+    		dontShowAgainField.doFillIntoGrid(composite, 1);
+    				
+			setControl(composite);
+        }
+
+        private String getCleanUpsInfo() {
+        	StringBuffer result= new StringBuffer();
+        	
+        	IJavaProject[] projects= fCleanUpRefactoring.getProjects();
+        	for (int p= 0; p < projects.length; p++) {
+	            result.append(Messages.format(MultiFixMessages.CleanUpRefactoringWizard_CleanUpConfigurationPage_SettingsForProjectX, projects[p].getElementName())).append('\n');
+	            ICleanUp[] cleanUps= fCleanUpRefactoring.getCleanUps();
+	        	for (int i= 0; i < cleanUps.length; i++) {
+		            ICleanUp cleanUp= cleanUps[i];
+		            if (cleanUp instanceof AbstractCleanUp)
+		            	((AbstractCleanUp)cleanUp).loadSettings(projects[p]);
+		            
+					String[] descriptions= cleanUp.getDescriptions();
+		            if (descriptions != null) {
+	    	            for (int j= 0; j < descriptions.length; j++) {
+	    	                result.append('\t').append(descriptions[j]).append('\n');
+	                    }
+		            }
+	            }
+	        	result.append('\n');
+            }
+        	
+        	
+	        return result.toString();
+        }
+	}
 	
-	public CleanUpRefactoringWizard(CleanUpRefactoring refactoring, int flags, boolean showCUPage, boolean showCleanUpPage) {
+	public CleanUpRefactoringWizard(CleanUpRefactoring refactoring, int flags) {
 		super(refactoring, flags);
-		fShowCUPage= showCUPage;
-		fShowCleanUpPage= showCleanUpPage;
 		setDefaultPageTitle(MultiFixMessages.CleanUpRefactoringWizard_PageTitle);
 		setWindowTitle(MultiFixMessages.CleanUpRefactoringWizard_WindowTitle);
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_CLEAN_UP);
@@ -1270,42 +1368,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 	 * @see org.eclipse.ltk.ui.refactoring.RefactoringWizard#addUserInputPages()
 	 */
 	protected void addUserInputPages() {
-		if (fShowCUPage) {
-			SelectCUPage selectCUPage= new SelectCUPage(MultiFixMessages.CleanUpRefactoringWizard_SelectCompilationUnitsPage_name);
-			if (fShowCleanUpPage) {
-				selectCUPage.setMessage(MultiFixMessages.CleanUpRefactoringWizard_SelectCompilationUnitsPage_message);
-			} else {
-				ICleanUp[] cleanUps= ((CleanUpRefactoring)getRefactoring()).getCleanUps();
-				if (cleanUps.length == 1) {
-					ICleanUp cleanUp= cleanUps[0];
-					String[] descriptions= cleanUp.getDescriptions();
-					if (descriptions.length == 1) {
-						selectCUPage.setMessage(Messages.format(MultiFixMessages.CleanUpRefactoringWizard_SelectCompilationUnitsPage_preSingleSelect_message, descriptions[0]));
-					} else {
-						selectCUPage.setMessage(MultiFixMessages.CleanUpRefactoringWizard_SelectCompilationUnitsPage_preSelect_message);
-					}
-				} else {
-					selectCUPage.setMessage(MultiFixMessages.CleanUpRefactoringWizard_SelectCompilationUnitsPage_preSelect_message);
-				}
-			}
-			addPage(selectCUPage);
-		}
-		
-		if (fShowCleanUpPage){
-			SelectCleanUpPage selectSolverPage= new SelectCleanUpPage(MultiFixMessages.CleanUpRefactoringWizard_SelectCleanUpsPage_name);
-			if (fShowCUPage) {
-				selectSolverPage.setMessage(MultiFixMessages.CleanUpRefactoringWizard_SelectCleanUpsPage_message);
-			} else {
-				ICompilationUnit[] compilationUnits= ((CleanUpRefactoring)getRefactoring()).getCompilationUnits();
-				if (compilationUnits.length == 1) {
-					String label= JavaElementLabels.getElementLabel(compilationUnits[0], JavaElementLabels.ALL_DEFAULT);
-					selectSolverPage.setMessage(Messages.format(MultiFixMessages.CleanUpRefactoringWizard_SelectCleanUpsPage_preSingleSelect_message, label));
-				} else {
-					selectSolverPage.setMessage(MultiFixMessages.CleanUpRefactoringWizard_SelectCleanUpsPage_message);
-				}
-			}
-			addPage(selectSolverPage);
-		}
+		addPage(new CleanUpConfigurationPage((CleanUpRefactoring)getRefactoring()));
 	}
 	
 	private static IDialogSettings getCleanUpWizardSettings() {
@@ -1316,6 +1379,9 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		}
 		return section;
 	}
-
+	
+	public static boolean showCleanUpWizard() {
+		return OptionalMessageDialog.isDialogEnabled(SHOW_CLEAN_UP_WIZARD_PREFERENCE_KEY);
+	}
 
 }

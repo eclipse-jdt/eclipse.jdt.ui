@@ -80,9 +80,9 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	 * preference on <code>checkPreConditions</code> 
 	 */
 	protected AbstractCleanUp() {
-		fFlags= 0;
 		fOptions= null;
 		fOptionsFromPreferences= true;
+		loadSettings(null);
 	}
     
 	public void saveSettings(IDialogSettings settings) {
@@ -122,16 +122,7 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
 		
 		if (fOptionsFromPreferences) {
-			IScopeContext context= new ProjectScope(project.getProject());
-			
-			if (!hasSettingsInContext(context, CleanUpProfileManager.KEY_SETS))
-				context= new InstanceScope();
-			
-			if (!hasSettingsInContext(context, CleanUpProfileManager.KEY_SETS))
-				context= new DefaultScope();
-			
-			Map options= CleanUpConstants.loadOptions(context);
-			fFlags= createFlag(options);
+			loadSettings(project);
 		}
 		
 		if (monitor != null)
@@ -172,4 +163,26 @@ public abstract class AbstractCleanUp implements ICleanUp {
     }
     
     protected abstract int createFlag(Map options);
+
+	/**
+     * @param project
+     */
+    public void loadSettings(IJavaProject project) {
+    	
+    	IScopeContext context;
+    	if (project != null) {
+    		context= new ProjectScope(project.getProject());
+    		
+    		if (!hasSettingsInContext(context, CleanUpProfileManager.KEY_SETS))
+    			context= new InstanceScope();
+    	} else {
+			context= new InstanceScope();
+    	}
+		
+		if (!hasSettingsInContext(context, CleanUpProfileManager.KEY_SETS))
+			context= new DefaultScope();
+		
+		Map options= CleanUpConstants.loadOptions(context);
+		fFlags= createFlag(options);
+    }
 }

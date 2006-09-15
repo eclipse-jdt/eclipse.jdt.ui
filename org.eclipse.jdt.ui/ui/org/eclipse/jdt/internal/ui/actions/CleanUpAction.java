@@ -160,7 +160,9 @@ public class CleanUpAction extends SelectionDispatchAction {
 			JavaPlugin.log(e);
 			if (e.getCause() instanceof CoreException)
 				showUnexpectedError((CoreException)e.getCause());
-		}
+		} catch (JavaModelException e) {
+			showUnexpectedError(e);
+        }
 		return;
 	}
 
@@ -188,6 +190,8 @@ public class CleanUpAction extends SelectionDispatchAction {
 			JavaPlugin.log(e);
 			if (e.getCause() instanceof CoreException)
 				showUnexpectedError((CoreException)e.getCause());
+		} catch (JavaModelException e) {
+			showUnexpectedError(e);
 		}
 		return;
 	}

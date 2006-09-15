@@ -18,6 +18,13 @@ public class MultiFixMessages extends NLS {
 	private MultiFixMessages() {
 	}
 
+	public static String CleanUpRefactoringWizard_CleanUpConfigurationPage_detaileTitle;
+	public static String CleanUpRefactoringWizard_CleanUpConfigurationPage_DoNotShowAgainLabel;
+	public static String CleanUpRefactoringWizard_CleanUpConfigurationPage_link;
+	public static String CleanUpRefactoringWizard_CleanUpConfigurationPage_linkToolTip;
+	public static String CleanUpRefactoringWizard_CleanUpConfigurationPage_message;
+	public static String CleanUpRefactoringWizard_CleanUpConfigurationPage_SettingsForProjectX;
+	public static String CleanUpRefactoringWizard_CleanUpConfigurationPage_title;
 	public static String StringMultiFix_AddMissingNonNls_description;
 	public static String StringMultiFix_RemoveUnnecessaryNonNls_description;
 	public static String StringCleanUp_RemoveNLSTag_label;

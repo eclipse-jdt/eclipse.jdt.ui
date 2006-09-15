@@ -99,6 +99,7 @@ import org.eclipse.jdt.ui.refactoring.RenameSupport;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
 import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CommentFormatCleanUp;
@@ -235,7 +236,7 @@ public final class RefactoringExecutionStarter {
 		new RefactoringStarter().activate(refactoring, new ChangeTypeWizard(refactoring), shell, RefactoringMessages.ChangeTypeAction_dialog_title, false);
 	}
 	
-	public static void startCleanupRefactoring(ICompilationUnit[] cus, Shell shell) throws InvocationTargetException {
+	public static void startCleanupRefactoring(ICompilationUnit[] cus, Shell shell) throws InvocationTargetException, JavaModelException {
 		final CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		for (int i= 0; i < cus.length; i++) {
 			refactoring.addCompilationUnit(cus[i]);
@@ -253,11 +254,17 @@ public final class RefactoringExecutionStarter {
 		refactoring.addCleanUp(new CodeFormatCleanUp());
 		refactoring.addCleanUp(new CommentFormatCleanUp());
 		
-		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.ERROR, false, shell, PlatformUI.getWorkbench().getProgressService());
-		try {
-	        helper.perform(true, true);
-        } catch (InterruptedException e) {
-        }
+		if (cus.length == 1 || !CleanUpRefactoringWizard.showCleanUpWizard()) {
+    		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.ERROR, false, shell, PlatformUI.getWorkbench().getProgressService());
+    		try {
+    	        helper.perform(true, true);
+            } catch (InterruptedException e) {
+            }
+		} else {
+			CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE);
+			RefactoringStarter starter= new RefactoringStarter();
+			starter.activate(refactoring, refactoringWizard, shell, "Clean ups", false); //$NON-NLS-1$
+		}
 	}
 
 	public static void startConvertAnonymousRefactoring(final ICompilationUnit unit, final int offset, final int length, final Shell shell) throws JavaModelException {
