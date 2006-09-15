@@ -63,9 +63,15 @@ public class RefactoringExecutionHelper {
 	private class Operation implements IWorkspaceRunnable {
 		public Change fChange;
 		public PerformChangeOperation fPerformChangeOperation;
+		private final boolean fApplyChanges;
+		
+		public Operation(boolean applyChanges) {
+			fApplyChanges= applyChanges;
+        }
+		
 		public void run(IProgressMonitor pm) throws CoreException {
 			try {
-				pm.beginTask("", 11); //$NON-NLS-1$
+				pm.beginTask("", fApplyChanges?11:7); //$NON-NLS-1$
 				pm.subTask(""); //$NON-NLS-1$
 				RefactoringStatus status= fRefactoring.checkAllConditions(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 				if (status.getSeverity() >= fStopSeverity) {
@@ -78,7 +84,8 @@ public class RefactoringExecutionHelper {
 				fChange.initializeValidationData(new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 				fPerformChangeOperation= RefactoringUI.createUIAwareChangeOperation(fChange);
 				fPerformChangeOperation.setUndoManager(RefactoringCore.getUndoManager(), fRefactoring.getName());
-				fPerformChangeOperation.run(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
+				if (fApplyChanges)
+					fPerformChangeOperation.run(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 			} finally {
 				pm.done();
 			}
@@ -124,10 +131,13 @@ public class RefactoringExecutionHelper {
 			RefactoringSaveHelper saveHelper= new RefactoringSaveHelper();
 			if (fNeedsSavedEditors && !saveHelper.saveEditors(fParent))
 				throw new InterruptedException();
-			Operation op= new Operation();
+			final Operation op= new Operation(!fork);
 			fRefactoring.setValidationContext(fParent);
 			try{
 				fExecContext.run(fork, cancelable, new OperationRunner(op, rule));
+				if (fork)
+					fExecContext.run(false, false, new OperationRunner(op.fPerformChangeOperation, rule));
+
 				RefactoringStatus validationStatus= op.fPerformChangeOperation.getValidationStatus();
 				if (validationStatus != null && validationStatus.hasFatalError()) {
 					MessageDialog.openError(fParent, fRefactoring.getName(), 
