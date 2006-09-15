@@ -31,9 +31,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * A clean up can solve several different problems in
  * a given <code>CompilationUnit</code>. The <code>CompilationUnit</code>
  * is compiled by using the compiler options returned by
- * <code>getRequiredOptions</code>. A <code>ICleanUp</code> can have
- * different options which can be set by using the <code>Control</code>
- * returned by <code>createConfigurationControl</code>
+ * <code>getRequiredOptions</code>.
  *
  * @since 3.2
  */
@@ -72,6 +70,7 @@ public interface ICleanUp {
 	 * Persist current settings of this in <code>settings</code>
 	 * 
 	 * @param settings The settings to store to, not null
+	 * @deprecated
 	 */
 	public abstract void saveSettings(IDialogSettings settings);
 	
@@ -128,6 +127,7 @@ public interface ICleanUp {
 	 * Default flags for this clean up.
 	 * 
 	 * @return Default flags for this clean up >= 0
+	 * @deprecated
 	 */
 	public abstract int getDefaultFlag();
 
@@ -136,6 +136,7 @@ public interface ICleanUp {
 	 * 
 	 * @param id The id of the flag to set
 	 * @param b The value for the flag
+	 * @deprecated
 	 */
 	public void setFlag(int id, boolean b);
 
@@ -143,6 +144,7 @@ public interface ICleanUp {
 	 * Is flag with id enabled?
 	 * 
 	 * @return True if flag with id is enabled
+	 * @deprecated
 	 */
 	public boolean isFlag(int id);
 

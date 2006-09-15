@@ -83,7 +83,9 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
-
+/**
+ * @deprecated Replaced by preference page in 3.3M2
+ */
 public class CleanUpRefactoringWizard extends RefactoringWizard {
 	
 	private static final String CLEAN_UP_WIZARD_SETTINGS_SECTION_ID= "CleanUpWizard"; //$NON-NLS-1$
