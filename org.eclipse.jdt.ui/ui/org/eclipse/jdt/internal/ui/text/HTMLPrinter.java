@@ -115,16 +115,16 @@ public class HTMLPrinter {
 			buffer.insert(position,  pageProlog.toString());
 		}
 	}
-	public static void insertPageProlog(StringBuffer buffer, int position, RGB bgRGB, String styles) {
+	public static void insertPageProlog(StringBuffer buffer, int position, RGB bgRGB, String styleSheet) {
 		
 		if (bgRGB == null)
-			insertPageProlog(buffer, position, styles);
+			insertPageProlog(buffer, position, styleSheet);
 		else {
 			StringBuffer pageProlog= new StringBuffer(300);
 			
 			pageProlog.append("<html>"); //$NON-NLS-1$
 			
-			appendStylesInline(pageProlog, styles);
+			appendStyleSheetURL(pageProlog, styleSheet);
 			
 			pageProlog.append("<body text=\"#000000\" bgcolor=\""); //$NON-NLS-1$
 			appendColor(pageProlog, bgRGB);
@@ -146,11 +146,20 @@ public class HTMLPrinter {
 		}
 
 		// Find insertion index
+		// a) within existing body tag with trailing space 
 		int index= buffer.indexOf("<body "); //$NON-NLS-1$
-		if (index == -1)
+		if (index != -1) {
+			buffer.insert(index+5, styleBuf);
 			return;
+		}
 
-		buffer.insert(index+5, styleBuf);
+		// b) within existing body tag without attributes
+		index= buffer.indexOf("<body>"); //$NON-NLS-1$
+		if (index != -1) {
+			buffer.insert(index+5, ' ');
+			buffer.insert(index+6, styleBuf);
+			return;
+		}
 	}
 
 	public static void insertPageProlog(StringBuffer buffer, int position, RGB bgRGB) {
@@ -165,12 +174,12 @@ public class HTMLPrinter {
 		}
 	}
 
-	private static void appendStylesInline(StringBuffer buffer, String styles) {
-		if (styles == null)
+	private static void appendStyleSheetURL(StringBuffer buffer, String styleSheet) {
+		if (styleSheet == null)
 			return;
 		
 		buffer.append("<head><style CHARSET=\"ISO-8859-1\" TYPE=\"text/css\">"); //$NON-NLS-1$
-		buffer.append(styles);
+		buffer.append(styleSheet);
 		buffer.append("</style></head>"); //$NON-NLS-1$
 	}
 	
@@ -202,8 +211,8 @@ public class HTMLPrinter {
 		insertPageProlog(buffer, position, getBgColor(), styleSheetURL); 
 	}
 	
-	public static void insertPageProlog(StringBuffer buffer, int position, String styles) {
-		insertPageProlog(buffer, position, getBgColor(), styles); 
+	public static void insertPageProlog(StringBuffer buffer, int position, String styleSheet) {
+		insertPageProlog(buffer, position, getBgColor(), styleSheet); 
 	}
 
 	private static RGB getBgColor() {
