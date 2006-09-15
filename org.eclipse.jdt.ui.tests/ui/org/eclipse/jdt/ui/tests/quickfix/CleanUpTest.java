@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import junit.framework.Test;
@@ -3553,6 +3554,49 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("            System.out.println();\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+	
+	public void testCombinationBug157468() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private void bar(boolean bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) {\n");
+		buf.append("        if (bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) { // a b c d e f g h i j k\n");
+		buf.append("            final String s = \"\";\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.FORMAT_COMMENT);
+		enable(CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT);
+		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
+		
+		Hashtable options= TestOptions.getDefaultOptions();
+		
+		Map eclipse21Settings= DefaultCodeFormatterConstants.getEclipseDefaultSettings();
+		for (Iterator iterator= eclipse21Settings.keySet().iterator(); iterator.hasNext();) {
+	        String key= (String)iterator.next();
+	        options.put(key, eclipse21Settings.get(key));
+        }
+		
+		JavaCore.setOptions(options);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E1 {\n");
+		buf.append("	private void bar(boolean bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) {\n");
+		buf.append("		if (bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) { // a b c d e f g\n");
+		buf.append("																// h i j k\n");
+		buf.append("			final String s = \"\";\n");
+		buf.append("		}\n");
+		buf.append("	}\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
 		

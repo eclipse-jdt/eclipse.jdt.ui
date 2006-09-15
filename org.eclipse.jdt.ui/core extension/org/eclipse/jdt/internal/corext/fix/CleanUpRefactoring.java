@@ -207,21 +207,28 @@ public class CleanUpRefactoring extends Refactoring {
 					IFix fix= cleanUp.createFix(ast);
 					if (fix != null) {
 						TextChange current= fix.createChange();
-						if (current instanceof TextFileChange && fLeaveFilesDirty)
-							((TextFileChange)current).setSaveMode(TextFileChange.LEAVE_DIRTY);
+						
+						CompilationUnitChange change= new CompilationUnitChange(current.getName(), source);
+						change.setEdit(pack(current.getEdit()));
+						TextEditBasedChangeGroup[] changeGroups= change.getChangeGroups();
+						for (int j= 0; j < changeGroups.length; j++) {
+	                        change.addChangeGroup(changeGroups[j]);
+                        }
+						if (fLeaveFilesDirty)
+							change.setSaveMode(TextFileChange.LEAVE_DIRTY);
 						
 						if (solution != null) {
-							if (intersects(current.getEdit(),solution.getEdit())) {
+							if (intersects(change.getEdit(), solution.getEdit())) {
 								if (result == null) {
 									result= new ArrayList();
 								}
 								result.add(cleanUp);
 							} else {
-								mergeTextChanges(current, solution);
-								solution= current;
+								mergeTextChanges(change, solution);
+								solution= change;
 							}
 						} else {
-							solution= current;
+							solution= change;
 						}
 					}
 				} catch (CoreException e) {
@@ -239,6 +246,26 @@ public class CleanUpRefactoring extends Refactoring {
 				return (ICleanUp[])result.toArray(new ICleanUp[result.size()]);
 			}
 		}
+
+		private TextEdit pack(TextEdit edit) {
+        	final List edits= new ArrayList();
+        	edit.accept(new TextEditVisitor() {
+        		public boolean visitNode(TextEdit node) {
+    				if (node instanceof MultiTextEdit)
+    					return true;
+    					
+    				edits.add(node);
+    				return false;
+    			}
+        	});
+        	MultiTextEdit result= new MultiTextEdit();
+        	for (Iterator iterator= edits.iterator(); iterator.hasNext();) {
+	            TextEdit child= (TextEdit)iterator.next();
+	            child.getParent().removeChild(child);
+	            TextChangeCompatibility.insert(result, child);
+            }
+        	return result;
+        }
 
 		private void integrateSolution(TextChange solution, ICompilationUnit source) {
 			if (fSolutions.containsKey(source)) {
