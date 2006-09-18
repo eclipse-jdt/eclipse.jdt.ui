@@ -99,6 +99,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaBasePreferencePage_doubleclick_action;
 	public static String JavaBasePreferencePage_doubleclick_gointo;
 	public static String JavaBasePreferencePage_doubleclick_expand;
+	public static String JavaBasePreferencePage_refactoring_lightweight;
 	public static String JavaBasePreferencePage_refactoring_title;
 	public static String JavaBasePreferencePage_refactoring_auto_save;
 	public static String JavaBasePreferencePage_search;

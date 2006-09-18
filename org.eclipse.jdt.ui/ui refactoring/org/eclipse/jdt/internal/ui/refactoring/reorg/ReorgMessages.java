@@ -35,6 +35,9 @@ public final class ReorgMessages extends NLS {
 	public static String moveAction_name;
 	public static String moveAction_destination_label;
 	public static String PasteAction_projectName;
+	public static String RenameLinkedMode_error_saving_editor;
+	public static String RenameLinkedMode_open_dialog;
+	public static String RenameLinkedMode_refactor_rename;
 	public static String ReorgAction_checkSaveTargets;
 	public static String ReorgAction_checkSaveTargets_title;
 	public static String ReorgAction_exception_saving;

@@ -31,6 +31,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.bindings.keys.IKeyLookup;
+import org.eclipse.jface.bindings.keys.KeyLookupFactory;
+import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.JFaceResources;
@@ -339,7 +342,7 @@ public class RenameLinkedMode {
 				}
 			});
 		} catch (InvocationTargetException e) {
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), "An error occured while saving the editor", e));
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), ReorgMessages.RenameLinkedMode_error_saving_editor, e));
 		} catch (InterruptedException e) {
 			// cancelling is OK
 			return null;
@@ -586,7 +589,7 @@ public class RenameLinkedMode {
 		table.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
 		
 		Hyperlink refactorLink= new Hyperlink(table, SWT.NONE);
-		refactorLink.setText("Refactor Rename");
+		refactorLink.setText(ReorgMessages.RenameLinkedMode_refactor_rename);
 		refactorLink.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
 		refactorLink.addHyperlinkListener(new HyperlinkAdapter() {
 			public void linkActivated(HyperlinkEvent e) {
@@ -598,25 +601,18 @@ public class RenameLinkedMode {
 			}
 		});
 		Label refactorBinding= new Label(table, SWT.NONE);
-		refactorBinding.setText("Enter");
+		String refactorBindingText= KeyStroke.getInstance(KeyLookupFactory.getDefault().formalKeyLookup(IKeyLookup.CR_NAME)).format();
+		refactorBinding.setText(refactorBindingText);
 		
-		Hyperlink previewLink= new Hyperlink(table, SWT.NONE);
-		previewLink.setText("Preview");
-		previewLink.setEnabled(false);
-		Label previewBinding= new Label(table, SWT.NONE);
-		previewBinding.setText("Ctrl+Enter"); //TODO: make keybinding platform-independent 
-		previewBinding.setEnabled(false);
-		
-		//TODO: enable preview
-		GridData gd= new GridData();
-		gd.exclude= true;
-		previewLink.setLayoutData(gd);
-		gd= new GridData();
-		gd.exclude= true;
-		previewBinding.setLayoutData(gd);
+//		Hyperlink previewLink= new Hyperlink(table, SWT.NONE);
+//		previewLink.setText("Preview");
+//		previewLink.setEnabled(false);
+//		Label previewBinding= new Label(table, SWT.NONE);
+//		previewBinding.setText("Ctrl+Enter"); //TODO: make keybinding platform-independent 
+//		previewBinding.setEnabled(false);
 		
 		Hyperlink openDialogLink= new Hyperlink(table, SWT.NONE);
-		openDialogLink.setText("Open Dialog");
+		openDialogLink.setText(ReorgMessages.RenameLinkedMode_open_dialog);
 		openDialogLink.addHyperlinkListener(new HyperlinkAdapter() {
 			public void linkActivated(HyperlinkEvent e) {
 				display.asyncExec(new Runnable() { //TODO: workaround for 157196: [Forms] Hyperlink listener notification throws AIOOBE when listener removed in callback
@@ -629,10 +625,10 @@ public class RenameLinkedMode {
 		
 		HyperlinkGroup hyperlinkGroup= new HyperlinkGroup(display);
 		hyperlinkGroup.add(refactorLink);
-		hyperlinkGroup.add(previewLink);
+//		hyperlinkGroup.add(previewLink);
 		hyperlinkGroup.add(openDialogLink);
 		hyperlinkGroup.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-		previewLink.setForeground(display.getSystemColor(SWT.COLOR_WIDGET_DARK_SHADOW));
+//		previewLink.setForeground(display.getSystemColor(SWT.COLOR_WIDGET_DARK_SHADOW));
 		
 		Label openDialogBinding= new Label(table, SWT.NONE);
 		String openDialogBindingString= getOpenDialogBinding();
@@ -647,7 +643,7 @@ public class RenameLinkedMode {
 		
 		addMoveSupport(fPopup, table);
 		addMoveSupport(fPopup, refactorBinding);
-		addMoveSupport(fPopup, previewBinding);
+//		addMoveSupport(fPopup, previewBinding);
 		addMoveSupport(fPopup, openDialogBinding);
 		
 		return table;
