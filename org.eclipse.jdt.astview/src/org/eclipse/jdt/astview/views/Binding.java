@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 
 /**
  *
@@ -136,6 +137,9 @@ public class Binding extends ASTAttribute {
 					res.add(new Binding(this, "ELEMENT TYPE", typeBinding.getElementType(), isType(typeKind, ARRAY_TYPE))); //$NON-NLS-1$
 					res.add(new Binding(this, "COMPONENT TYPE", typeBinding.getComponentType(), isType(typeKind, ARRAY_TYPE))); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "DIMENSIONS", typeBinding.getDimensions(), isType(typeKind, ARRAY_TYPE))); //$NON-NLS-1$
+					if (! typeBinding.getName().equals(PrimitiveType.VOID.toString())) {
+						res.add(new Binding(this, "CREATE ARRAY TYPE (+1)", typeBinding.createArrayType(1), true));
+					}
 					
 					res.add(new BindingProperty(this, "TYPE BOUNDS", typeBinding.getTypeBounds(), isType(typeKind, VARIABLE_TYPE | CAPTURE_TYPE))); //$NON-NLS-1$
 					
