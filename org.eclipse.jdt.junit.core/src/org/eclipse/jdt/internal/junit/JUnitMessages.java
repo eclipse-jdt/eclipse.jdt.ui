@@ -238,6 +238,8 @@ public final class JUnitMessages extends NLS {
 	public static String TestRunnerViewPart_max_remembered;
 	public static String TestRunnerViewPart_show_failures_only;
 	public static String TestRunnerViewPart_hierarchical_layout;
+
+	public static String TestRunSession_unrootedTests;
 	
 	public static String TestSearchEngine_message_searching;
 

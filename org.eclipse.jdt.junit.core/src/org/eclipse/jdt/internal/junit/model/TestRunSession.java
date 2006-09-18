@@ -65,6 +65,11 @@ public class TestRunSession {
 	 */
 	private List/*<IncompleteTestSuite>*/ fIncompleteTestSuites;
 	
+	/**
+	 * Suite for unrooted test case elements, or <code>null</code>.
+	 */
+	private TestSuiteElement fUnrootedSuite;
+	
  	/**
  	 * Number of tests started during this test run.
  	 */
@@ -374,9 +379,30 @@ public class TestRunSession {
 			}
 		}
 	
+		private TestElement createUnrootedTestElement(String testId, String testName) {
+			TestSuiteElement unrootedSuite= getUnrootedSuite();
+			TestElement testElement= createTestElement(unrootedSuite, testId, testName, false, 1);
+			
+			Object[] listeners= fSessionListeners.getListeners();
+			for (int i= 0; i < listeners.length; ++i) {
+				((ITestSessionListener) listeners[i]).testAdded(testElement);
+			}
+			
+			return testElement;
+		}
+
+		private TestSuiteElement getUnrootedSuite() {
+			if (fUnrootedSuite == null) {
+				fUnrootedSuite= (TestSuiteElement) createTestElement(fTestRoot, "-2", JUnitMessages.TestRunSession_unrootedTests, true, 0);  //$NON-NLS-1$
+			}
+			return fUnrootedSuite;
+		}
+
 		public void testStarted(String testId, String testName) {
 			TestElement testElement= getTestElement(testId);
-			if (! (testElement instanceof TestCaseElement)) {
+			if (testElement == null) {
+				testElement= createUnrootedTestElement(testId, testName);
+			} else if (! (testElement instanceof TestCaseElement)) {
 				logUnexpectedTest(testId, testElement);
 				return;
 			}
@@ -393,7 +419,9 @@ public class TestRunSession {
 	
 		public void testEnded(String testId, String testName) {
 			TestElement testElement= getTestElement(testId);
-			if (! (testElement instanceof TestCaseElement)) {
+			if (testElement == null) {
+				testElement= createUnrootedTestElement(testId, testName);
+			} else if (! (testElement instanceof TestCaseElement)) {
 				logUnexpectedTest(testId, testElement);
 				return;
 			}
@@ -423,7 +451,7 @@ public class TestRunSession {
 		public void testFailed(int statusCode, String testId, String testName, String trace, String expected, String actual) {
 			TestElement testElement= getTestElement(testId);
 			if (testElement == null) {
-				logUnexpectedTest(testId, testElement);
+				testElement= createUnrootedTestElement(testId, testName);
 				return;
 			}
 
@@ -461,8 +489,10 @@ public class TestRunSession {
 		 */
 		public void testReran(String testId, String className, String testName, int statusCode, String trace, String expectedResult, String actualResult) {
 			TestElement testElement= getTestElement(testId);
-			if (! (testElement instanceof TestCaseElement)) {
-				logUnexpectedTest(testId, testElement); //TODO: rerun suites?
+			if (testElement == null) {
+				testElement= createUnrootedTestElement(testId, testName);
+			} else if (! (testElement instanceof TestCaseElement)) {
+				logUnexpectedTest(testId, testElement);
 				return;
 			}
 			TestCaseElement testCaseElement= (TestCaseElement) testElement;
