@@ -243,7 +243,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * Determines whether the delegate for a Java element should be declared as
 	 * deprecated.
 	 * <p>
-	 * Note: Deprecation of the delegate is applicable to the Java elements
+	 * Note: Deprecation of the delegate is currently applicable to the Java elements
 	 * {@link IMethod} and {@link IField}. The default is to not deprecate the
 	 * delegate.
 	 * </p>
@@ -268,7 +268,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * enabled by calling {@link #setUpdateQualifiedNames(boolean)}.
 	 * </p>
 	 * <p>
-	 * Note: Qualified name updating is applicable to the Java elements
+	 * Note: Qualified name updating is currently applicable to the Java elements
 	 * {@link IPackageFragment} and {@link IType}. The default is to use no
 	 * file name patterns (meaning that all files are processed).
 	 * </p>
@@ -302,7 +302,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * Determines whether the the original Java element should be kept as
 	 * delegate to the renamed one.
 	 * <p>
-	 * Note: Keeping of original elements as delegates is applicable to the Java
+	 * Note: Keeping of original elements as delegates is currently applicable to the Java
 	 * elements {@link IMethod} and {@link IField}. The default is to not keep
 	 * the original as delegate.
 	 * </p>
@@ -323,7 +323,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * or {@link #STRATEGY_SUFFIX}.
 	 * </p>
 	 * <p>
-	 * Note: Similar declaration updating is applicable to Java elements of type
+	 * Note: Similar declaration updating is currently applicable to Java elements of type
 	 * {@link IType}. The default is to use the {@link #STRATEGY_EXACT} match
 	 * strategy.
 	 * </p>
@@ -427,7 +427,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * set of text files to be processed.
 	 * </p>
 	 * <p>
-	 * Note: Qualified name updating is applicable to the Java elements
+	 * Note: Qualified name updating is currently applicable to the Java elements
 	 * {@link IPackageFragment} and {@link IType}. The default is to not rename
 	 * qualified names.
 	 * </p>
@@ -443,7 +443,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	/**
 	 * Determines whether references to the Java element should be renamed.
 	 * <p>
-	 * Note: Reference updating is applicable to all Java element types except
+	 * Note: Reference updating is currently applicable to all Java element types except
 	 * {@link IPackageFragmentRoot}. The default is to not update references.
 	 * </p>
 	 * 
@@ -459,7 +459,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * Determines whether similar declarations of the Java element should be
 	 * updated.
 	 * <p>
-	 * Note: Similar declaration updating is applicable to Java elements of type
+	 * Note: Similar declaration updating is currently applicable to Java elements of type
 	 * {@link IType}. The default is to not update similar declarations.
 	 * </p>
 	 * 
@@ -479,7 +479,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * element to be renamed in Java comments and Java strings.
 	 * </p>
 	 * <p>
-	 * Note: Textual occurrence updating is applicable to the Java elements
+	 * Note: Textual occurrence updating is currently applicable to the Java elements
 	 * {@link IPackageFragment}, {@link IType} and {@link IField}. The default
 	 * is to not rename textual occurrences.
 	 * </p>
