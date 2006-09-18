@@ -18,8 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.text.edits.DeleteEdit;
-import org.eclipse.text.edits.MoveSourceEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
@@ -199,7 +197,7 @@ public class CleanUpRefactoring extends Refactoring {
         }
 
 		private ICleanUp[] calculateSolutions(ICompilationUnit source, CompilationUnit ast, ICleanUp[] cleanUps) {
-			TextChange solution= null;
+			CompilationUnitChange solution= null;
 			List/*<ICleanUp>*/ result= null;
 			for (int i= 0; i < cleanUps.length; i++) {
 				ICleanUp cleanUp= cleanUps[i];
@@ -207,28 +205,28 @@ public class CleanUpRefactoring extends Refactoring {
 					IFix fix= cleanUp.createFix(ast);
 					if (fix != null) {
 						TextChange current= fix.createChange();
-						
-						CompilationUnitChange change= new CompilationUnitChange(current.getName(), source);
-						change.setEdit(pack(current.getEdit()));
-						TextEditBasedChangeGroup[] changeGroups= change.getChangeGroups();
-						for (int j= 0; j < changeGroups.length; j++) {
-	                        change.addChangeGroup(changeGroups[j]);
-                        }
-						if (fLeaveFilesDirty)
-							change.setSaveMode(TextFileChange.LEAVE_DIRTY);
+						TextEdit currentEdit= pack(current.getEdit());
 						
 						if (solution != null) {
-							if (intersects(change.getEdit(), solution.getEdit())) {
+							if (intersects(currentEdit, solution.getEdit())) {
 								if (result == null) {
 									result= new ArrayList();
 								}
 								result.add(cleanUp);
 							} else {
-								mergeTextChanges(change, solution);
-								solution= change;
+								CompilationUnitChange merge= new CompilationUnitChange(solution.getName(), source);
+								merge.setEdit(merge(currentEdit, solution.getEdit()));
+								
+								copyChangeGroups(merge, solution);
+								copyChangeGroups(merge, current);
+                                
+                                solution= merge;
 							}
 						} else {
-							solution= change;
+							solution= new CompilationUnitChange(current.getName(), source);
+                            solution.setEdit(currentEdit);
+                            
+                            copyChangeGroups(solution, current);
 						}
 					}
 				} catch (CoreException e) {
@@ -237,6 +235,8 @@ public class CleanUpRefactoring extends Refactoring {
 			}
 			
 			if (solution != null) {
+				if (fLeaveFilesDirty)
+					solution.setSaveMode(TextFileChange.LEAVE_DIRTY);
 				integrateSolution(solution, source);
 			}
 			
@@ -246,6 +246,25 @@ public class CleanUpRefactoring extends Refactoring {
 				return (ICleanUp[])result.toArray(new ICleanUp[result.size()]);
 			}
 		}
+
+        private void copyChangeGroups(CompilationUnitChange target, TextChange source) {
+            TextEditBasedChangeGroup[] changeGroups= source.getChangeGroups();
+    		for (int i= 0; i < changeGroups.length; i++) {
+    			TextEditGroup textEditGroup= changeGroups[i].getTextEditGroup();
+    			TextEditGroup newGroup;
+    			if (textEditGroup instanceof CategorizedTextEditGroup) {
+    				String label= textEditGroup.getName();
+    				newGroup= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
+    			} else {
+    				newGroup= new TextEditGroup(textEditGroup.getName());
+    			}
+    			TextEdit[] textEdits= textEditGroup.getTextEdits();
+    			for (int j= 0; j < textEdits.length; j++) {
+    				newGroup.addTextEdit(textEdits[j]);
+    			}
+    			target.addTextEditGroup(newGroup);
+    		}
+        }
 
 		private TextEdit pack(TextEdit edit) {
         	final List edits= new ArrayList();
@@ -748,69 +767,111 @@ public class CleanUpRefactoring extends Refactoring {
 			return true;
 		}
 	}
-
-	private static void mergeTextChanges(TextChange target, TextChange source) {
-		final List edits= new ArrayList();
-		source.getEdit().accept(new TextEditVisitor() {
-			public boolean visitNode(TextEdit edit) {
-				if (edit instanceof MoveSourceEdit)
-					return false;
+	
+	private static TextEdit merge(TextEdit edit1, TextEdit edit2) {
+		MultiTextEdit result= new MultiTextEdit();
+		if (edit1 instanceof MultiTextEdit && edit2 instanceof MultiTextEdit) {
+			MultiTextEdit multiTextEdit1= (MultiTextEdit)edit1;
+			TextEdit[] children1= multiTextEdit1.getChildren();
+			
+			MultiTextEdit multiTextEdit2= (MultiTextEdit)edit2;
+			TextEdit[] children2= multiTextEdit2.getChildren();
+			
+			int i1= 0;
+			int i2= 0;
+			while (i1 < children1.length && i2 < children2.length) {
 				
-				if (edit instanceof MultiTextEdit)
-					return true;
-					
-				edits.add(edit);
-				return super.visitNode(edit);
+				while (i1 < children1.length && children1[i1].getExclusiveEnd() < children2[i2].getOffset()) {
+					edit1.removeChild(0);
+					result.addChild(children1[i1]);
+					i1++;
+				}
+				if (i1 >= children1.length) {
+					for (int i= i2; i < children2.length; i++) {
+						edit2.removeChild(0);
+                        result.addChild(children2[i]);
+                    }
+					return result;
+				}
+				while (i2 < children2.length && children2[i2].getExclusiveEnd() < children1[i1].getOffset()) {
+					edit2.removeChild(0);
+					result.addChild(children2[i2]);
+					i2++;
+				}
+				if (i2 >= children2.length) {
+					for (int i= i1; i < children1.length; i++) {
+						edit1.removeChild(0);
+                        result.addChild(children1[i]);
+                    }
+					return result;
+				}
+				
+				if (!(children1[i1].getExclusiveEnd() < children2[i2].getOffset())) {
+					edit1.removeChild(0);
+					edit2.removeChild(0);
+					result.addChild(merge(children1[i1], children2[i2]));
+					i1++;
+					i2++;
+				}
 			}
 			
-		});
-		if (edits.isEmpty())
-			return;
-		
-		final List removedEdits= new ArrayList();
-		target.getEdit().accept(new TextEditVisitor() {
-			public boolean visit(DeleteEdit deleteEdit) {
-				int start= deleteEdit.getOffset();
-				int end= start + deleteEdit.getLength();
-				
-				List toRemove= new ArrayList();
-				for (Iterator iter= edits.iterator(); iter.hasNext();) {
-					TextEdit edit= (TextEdit)iter.next();
-					int offset= edit.getOffset();
-					if (offset >= start && offset <= end) {
-						toRemove.add(edit);
-					}
+			return result;
+		} else if (edit1 instanceof MultiTextEdit) {
+			TextEdit[] children= edit1.getChildren();
+			
+			int i= 0;
+			while (children[i].getExclusiveEnd() < edit2.getOffset()) {
+				edit1.removeChild(0);
+				result.addChild(children[i]);
+				i++;
+				if (i >= children.length) {
+					result.addChild(edit2);
+					return result;
 				}
-				
-				if (!toRemove.isEmpty()) {
-					edits.removeAll(toRemove);
-					removedEdits.addAll(toRemove);
-				}
-				
-				return super.visit(deleteEdit);
 			}
-		});
-		for (Iterator iter= edits.iterator(); iter.hasNext();) {
-			TextEdit edit= (TextEdit)iter.next();
-			edit.getParent().removeChild(edit);
-			TextChangeCompatibility.insert(target.getEdit(), edit);
-		}
-		TextEditBasedChangeGroup[] changeGroups= source.getChangeGroups();
-		for (int i= 0; i < changeGroups.length; i++) {
-			TextEditGroup textEditGroup= changeGroups[i].getTextEditGroup();
-			TextEditGroup newGroup;
-			if (textEditGroup instanceof CategorizedTextEditGroup) {
-				String label= textEditGroup.getName();
-				newGroup= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
+			edit1.removeChild(0);
+			result.addChild(merge(children[i], edit2));
+			i++;
+			while (i < children.length) {
+				edit1.removeChild(0);
+				result.addChild(children[i]);
+				i++;
+			}
+			
+			return result;
+		} else if (edit2 instanceof MultiTextEdit) {
+			TextEdit[] children= edit2.getChildren();
+			
+			int i= 0;
+			while (children[i].getExclusiveEnd() < edit1.getOffset()) {
+				edit2.removeChild(0);
+				result.addChild(children[i]);
+				i++;
+				if (i >= children.length) {
+					result.addChild(edit1);
+					return result;
+				}
+			}
+			edit2.removeChild(0);
+			result.addChild(merge(edit1, children[i]));
+			i++;
+			while (i < children.length) {
+				edit2.removeChild(0);
+				result.addChild(children[i]);
+				i++;
+			}
+			
+			return result;
+		} else {
+			if (edit1.getExclusiveEnd() < edit2.getOffset()) {
+				result.addChild(edit1);
+				result.addChild(edit2);
 			} else {
-				newGroup= new TextEditGroup(textEditGroup.getName());
+				result.addChild(edit2);
+				result.addChild(edit1);
 			}
-			TextEdit[] textEdits= textEditGroup.getTextEdits();
-			for (int j= 0; j < textEdits.length; j++) {
-				if (!removedEdits.contains(textEdits[j]))
-					newGroup.addTextEdit(textEdits[j]);
-			}
-			target.addTextEditGroup(newGroup);
+			
+			return result;
 		}
 	}
 

@@ -2920,7 +2920,42 @@ public class CleanUpTest extends QuickFixTest {
 		String expected1= buf.toString();
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
-	}		
+	}
+	
+	public void testCodeStyleBug157480() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 extends ETop {\n");
+		buf.append("    public void bar(boolean b) {\n");
+		buf.append("        if (b == true && b || b) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class ETop {\n");
+		buf.append("    public void bar(boolean b) {}\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 extends ETop {\n");
+		buf.append("    @Override\n");
+		buf.append("    public void bar(boolean b) {\n");
+		buf.append("        if (((b == true) && b) || b) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class ETop {\n");
+		buf.append("    public void bar(boolean b) {}\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
 
 	public void testJava50ForLoop01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
