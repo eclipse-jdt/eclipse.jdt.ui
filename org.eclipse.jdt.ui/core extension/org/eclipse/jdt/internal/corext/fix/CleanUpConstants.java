@@ -781,7 +781,7 @@ public class CleanUpConstants {
     		result.put(ADD_MISSING_ANNOTATIONS_DEPRECATED, TRUE);
     		
     	result.put(ADD_MISSING_SERIAL_VERSION_ID, FALSE);
-    		result.put(ADD_MISSING_SERIAL_VERSION_ID_GENERATED, TRUE);
+    		result.put(ADD_MISSING_SERIAL_VERSION_ID_GENERATED, FALSE);
     		result.put(ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, TRUE);
     		
     	result.put(ADD_MISSING_NLS_TAGS, FALSE);
