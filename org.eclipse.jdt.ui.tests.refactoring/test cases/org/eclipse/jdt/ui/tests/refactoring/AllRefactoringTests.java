@@ -71,7 +71,10 @@ public class AllRefactoringTests {
 		suite.addTest(RenameNonPrivateFieldTests.suite());
 		
 		//--projects
-		suite.addTest(RenameJavaProjectTests.suite());		
+		suite.addTest(RenameJavaProjectTests.suite());
+		
+		// validate edit
+		suite.addTest(ValidateEditTests.suite());
 		
 		//--helpers
 		suite.addTest(RenamingNameSuggestorTests.suite());
