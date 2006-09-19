@@ -47,7 +47,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String FORMAT_SOURCE_CODE= JavaUI.ID_PLUGIN + "cleanup.format_source_code"; //$NON-NLS-1$
+	public static final String FORMAT_SOURCE_CODE= "cleanup.format_source_code"; //$NON-NLS-1$
 
 	/**
 	 * Format comments. Specify which comment with:<br>
@@ -62,7 +62,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String FORMAT_COMMENT= JavaUI.ID_PLUGIN + "cleanup.format_comment"; //$NON-NLS-1$
+	public static final String FORMAT_COMMENT= "cleanup.format_comment"; //$NON-NLS-1$
 
 	/**
 	 * Format single line comments. Only has an effect if {@link #FORMAT_COMMENT} is TRUE 
@@ -74,7 +74,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String FORMAT_SINGLE_LINE_COMMENT= JavaUI.ID_PLUGIN + "cleanup.format_single_line_comment"; //$NON-NLS-1$
+	public static final String FORMAT_SINGLE_LINE_COMMENT= "cleanup.format_single_line_comment"; //$NON-NLS-1$
 
 	/**
 	 * Format multi line comments. Only has an effect if {@link #FORMAT_COMMENT} is TRUE 
@@ -86,7 +86,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String FORMAT_MULTI_LINE_COMMENT= JavaUI.ID_PLUGIN + "cleanup.format_multi_line_comment"; //$NON-NLS-1$
+	public static final String FORMAT_MULTI_LINE_COMMENT= "cleanup.format_multi_line_comment"; //$NON-NLS-1$
 
 	/**
 	 * Format javadoc comments. Only has an effect if {@link #FORMAT_COMMENT} is TRUE 
@@ -98,7 +98,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String FORMAT_JAVADOC= JavaUI.ID_PLUGIN + "cleanup.format_javadoc"; //$NON-NLS-1$
+	public static final String FORMAT_JAVADOC= "cleanup.format_javadoc"; //$NON-NLS-1$
 
 	/**
 	 * Controls access qualifiers for instance fields. For detailed settings use<br>
@@ -112,7 +112,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS= JavaUI.ID_PLUGIN + "cleanup.use_this_for_non_static_field_access"; //$NON-NLS-1$
+	public static final String MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS= "cleanup.use_this_for_non_static_field_access"; //$NON-NLS-1$
 
 	/**
 	 * Adds a 'this' qualifier to field accesses.<p>
@@ -129,7 +129,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS= JavaUI.ID_PLUGIN + "cleanup.always_use_this_for_non_static_field_access"; //$NON-NLS-1$
+	public static final String MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS= "cleanup.always_use_this_for_non_static_field_access"; //$NON-NLS-1$
 
 	/**
 	 * Removes 'this' qualifier to field accesses.<p>
@@ -146,7 +146,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY= JavaUI.ID_PLUGIN + "cleanup.use_this_for_non_static_field_access_only_if_necessary"; //$NON-NLS-1$
+	public static final String MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY= "cleanup.use_this_for_non_static_field_access_only_if_necessary"; //$NON-NLS-1$
 
 	/**
 	 * Controls access qualifiers for instance methods. For detailed settings use<br>
@@ -160,7 +160,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS= JavaUI.ID_PLUGIN + "cleanup.use_this_for_non_static_method_access"; //$NON-NLS-1$
+	public static final String MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS= "cleanup.use_this_for_non_static_method_access"; //$NON-NLS-1$
 
 	/**
 	 * Adds a 'this' qualifier to method accesses.<p>
@@ -177,7 +177,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS= JavaUI.ID_PLUGIN + "cleanup.always_use_this_for_non_static_method_access"; //$NON-NLS-1$
+	public static final String MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS= "cleanup.always_use_this_for_non_static_method_access"; //$NON-NLS-1$
 
 	/**
 	 * Removes 'this' qualifier to field accesses.<p>
@@ -194,7 +194,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY= JavaUI.ID_PLUGIN + "cleanup.use_this_for_non_static_method_access_only_if_necessary"; //$NON-NLS-1$
+	public static final String MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY= "cleanup.use_this_for_non_static_method_access_only_if_necessary"; //$NON-NLS-1$
 
 	/**
 	 * Controls access qualifiers for static members. For detailed settings use<br>
@@ -210,7 +210,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS= JavaUI.ID_PLUGIN + "cleanup.qualify_static_member_accesses_with_declaring_class"; //$NON-NLS-1$
+	public static final String MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS= "cleanup.qualify_static_member_accesses_with_declaring_class"; //$NON-NLS-1$
 
 	/**
 	 * Qualify static field accesses with declaring type.<p>
@@ -229,7 +229,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD= JavaUI.ID_PLUGIN + "cleanup.qualify_static_field_accesses_with_declaring_class"; //$NON-NLS-1$
+	public static final String MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD= "cleanup.qualify_static_field_accesses_with_declaring_class"; //$NON-NLS-1$
 
 	/**
 	 * Qualifies static method accesses with declaring type.<p>
@@ -248,7 +248,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_METHOD= JavaUI.ID_PLUGIN + "cleanup.qualify_static_method_accesses_with_declaring_class"; //$NON-NLS-1$
+	public static final String MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_METHOD= "cleanup.qualify_static_method_accesses_with_declaring_class"; //$NON-NLS-1$
 
 	/**
 	 * Changes indirect accesses to static members to direct ones.<p>
@@ -267,7 +267,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS= JavaUI.ID_PLUGIN + "cleanup.qualify_static_member_accesses_through_subtypes_with_declaring_class"; //$NON-NLS-1$
+	public static final String MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS= "cleanup.qualify_static_member_accesses_through_subtypes_with_declaring_class"; //$NON-NLS-1$
 	
 	/**
 	 * Changes non static accesses to static members to static accesses.<p>
@@ -286,7 +286,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS= JavaUI.ID_PLUGIN + "cleanup.qualify_static_member_accesses_through_instances_with_declaring_class"; //$NON-NLS-1$
+	public static final String MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS= "cleanup.qualify_static_member_accesses_through_instances_with_declaring_class"; //$NON-NLS-1$
 
 	/**
 	 * Controls the usage of blocks around single control statement bodies. For detailed settings use<br>
@@ -301,7 +301,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String CONTROL_STATEMENTS_USE_BLOCKS= JavaUI.ID_PLUGIN + "cleanup.use_blocks"; //$NON-NLS-1$
+	public static final String CONTROL_STATEMENTS_USE_BLOCKS= "cleanup.use_blocks"; //$NON-NLS-1$
 
 	/**
 	 * Adds block to control statement body if the body is not a block.<p>
@@ -317,7 +317,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String CONTROL_STATMENTS_USE_BLOCKS_ALWAYS= JavaUI.ID_PLUGIN + "cleanup.always_use_blocks"; //$NON-NLS-1$
+	public static final String CONTROL_STATMENTS_USE_BLOCKS_ALWAYS= "cleanup.always_use_blocks"; //$NON-NLS-1$
 
 	/**
 	 * Remove unnecessary blocks in control statement bodies if they contain
@@ -334,7 +334,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW= JavaUI.ID_PLUGIN + "cleanup.use_blocks_only_for_return_and_throw"; //$NON-NLS-1$
+	public static final String CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW= "cleanup.use_blocks_only_for_return_and_throw"; //$NON-NLS-1$
 
 	/**
 	 * Remove unnecessary blocks in control statement bodies.<p>
@@ -350,7 +350,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String CONTROL_STATMENTS_USE_BLOCKS_NEVER= JavaUI.ID_PLUGIN + "cleanup.never_use_blocks"; //$NON-NLS-1$
+	public static final String CONTROL_STATMENTS_USE_BLOCKS_NEVER= "cleanup.never_use_blocks"; //$NON-NLS-1$
 
 	/**
 	 * Convert for loops to enhanced for loops.<p>
@@ -364,7 +364,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED= JavaUI.ID_PLUGIN + "cleanup.convert_to_enhanced_for_loop"; //$NON-NLS-1$
+	public static final String CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED= "cleanup.convert_to_enhanced_for_loop"; //$NON-NLS-1$
 
 	/**
 	 * Controls the usage of parenthesis in expressions. For detailed settings use<br>
@@ -378,7 +378,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String EXPRESSIONS_USE_PARENTHESES= JavaUI.ID_PLUGIN + "cleanup.use_parentheses_in_expressions"; //$NON-NLS-1$
+	public static final String EXPRESSIONS_USE_PARENTHESES= "cleanup.use_parentheses_in_expressions"; //$NON-NLS-1$
 
 	/**
 	 * Add paranoic parenthesis around conditional expressions.<p>
@@ -396,7 +396,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String EXPRESSIONS_USE_PARENTHESES_ALWAYS= JavaUI.ID_PLUGIN + "cleanup.always_use_parentheses_in_expressions"; //$NON-NLS-1$
+	public static final String EXPRESSIONS_USE_PARENTHESES_ALWAYS= "cleanup.always_use_parentheses_in_expressions"; //$NON-NLS-1$
 
 	/**
 	 * Remove unnecessary parenthesis around conditional expressions.<p>
@@ -414,7 +414,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String EXPRESSIONS_USE_PARENTHESES_NEVER= JavaUI.ID_PLUGIN + "cleanup.never_use_parentheses_in_expressions"; //$NON-NLS-1$
+	public static final String EXPRESSIONS_USE_PARENTHESES_NEVER= "cleanup.never_use_parentheses_in_expressions"; //$NON-NLS-1$
 
 	/**
 	 * Controls the usage of 'final' modifier for variable declarations. For detailed settings use:<br>
@@ -429,7 +429,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String VARIABLE_DECLARATIONS_USE_FINAL= JavaUI.ID_PLUGIN + "cleanup.make_variable_declarations_final"; //$NON-NLS-1$
+	public static final String VARIABLE_DECLARATIONS_USE_FINAL= "cleanup.make_variable_declarations_final"; //$NON-NLS-1$
 
 	/**
 	 * Add a final modifier to private fields where possible
@@ -445,7 +445,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS= JavaUI.ID_PLUGIN + "cleanup.make_private_fields_final"; //$NON-NLS-1$
+	public static final String VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS= "cleanup.make_private_fields_final"; //$NON-NLS-1$
 
 	/**
 	 * Add a final modifier to method parameters where possible
@@ -461,7 +461,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS= JavaUI.ID_PLUGIN + "cleanup.make_parameters_final"; //$NON-NLS-1$
+	public static final String VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS= "cleanup.make_parameters_final"; //$NON-NLS-1$
 
 	/**
 	 * Add a final modifier to local variables where possible
@@ -477,7 +477,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES= JavaUI.ID_PLUGIN + "cleanup.make_local_variable_final"; //$NON-NLS-1$
+	public static final String VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES= "cleanup.make_local_variable_final"; //$NON-NLS-1$
 
 	/**
 	 * Removes unused imports.
@@ -489,7 +489,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String REMOVE_UNUSED_CODE_IMPORTS= JavaUI.ID_PLUGIN + "cleanup.remove_unused_imports"; //$NON-NLS-1$
+	public static final String REMOVE_UNUSED_CODE_IMPORTS= "cleanup.remove_unused_imports"; //$NON-NLS-1$
 
 	/**
 	 * Controls the removal of unused private members. For detailed settings use:<br>
@@ -505,7 +505,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String REMOVE_UNUSED_CODE_PRIVATE_MEMBERS= JavaUI.ID_PLUGIN + "cleanup.remove_unused_private_members"; //$NON-NLS-1$
+	public static final String REMOVE_UNUSED_CODE_PRIVATE_MEMBERS= "cleanup.remove_unused_private_members"; //$NON-NLS-1$
 
 	/**
 	 * Removes unused private types.
@@ -519,7 +519,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String REMOVE_UNUSED_CODE_PRIVATE_TYPES= JavaUI.ID_PLUGIN + "cleanup.remove_unused_private_types"; //$NON-NLS-1$
+	public static final String REMOVE_UNUSED_CODE_PRIVATE_TYPES= "cleanup.remove_unused_private_types"; //$NON-NLS-1$
 
 	/**
 	 * Removes unused private constructors.
@@ -533,7 +533,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS= JavaUI.ID_PLUGIN + "cleanup.remove_private_constructors"; //$NON-NLS-1$
+	public static final String REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS= "cleanup.remove_private_constructors"; //$NON-NLS-1$
 
 	/**
 	 * Removes unused private fields.
@@ -547,7 +547,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String REMOVE_UNUSED_CODE_PRIVATE_FELDS= JavaUI.ID_PLUGIN + "cleanup.remove_unused_private_fields"; //$NON-NLS-1$
+	public static final String REMOVE_UNUSED_CODE_PRIVATE_FELDS= "cleanup.remove_unused_private_fields"; //$NON-NLS-1$
 	
 	/**
 	 * Removes unused private methods.
@@ -561,7 +561,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String REMOVE_UNUSED_CODE_PRIVATE_METHODS= JavaUI.ID_PLUGIN + "cleanup.remove_unused_private_methods"; //$NON-NLS-1$
+	public static final String REMOVE_UNUSED_CODE_PRIVATE_METHODS= "cleanup.remove_unused_private_methods"; //$NON-NLS-1$
 
 	/**
 	 * Removes unused local variables.
@@ -573,7 +573,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String REMOVE_UNUSED_CODE_LOCAL_VARIABLES= JavaUI.ID_PLUGIN + "cleanup.remove_unused_local_variables"; //$NON-NLS-1$
+	public static final String REMOVE_UNUSED_CODE_LOCAL_VARIABLES= "cleanup.remove_unused_local_variables"; //$NON-NLS-1$
 
 	/**
 	 * Removes unused casts.
@@ -585,7 +585,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String REMOVE_UNNECESSARY_CASTS= JavaUI.ID_PLUGIN + "cleanup.remove_unnecessary_casts"; //$NON-NLS-1$
+	public static final String REMOVE_UNNECESSARY_CASTS= "cleanup.remove_unnecessary_casts"; //$NON-NLS-1$
 
 	/**
 	 * Remove unnecessary '$NON-NLS$' tags.<p>
@@ -599,7 +599,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String REMOVE_UNNECESSARY_NLS_TAGS= JavaUI.ID_PLUGIN + "cleanup.remove_unnecessary_nls_tags"; //$NON-NLS-1$
+	public static final String REMOVE_UNNECESSARY_NLS_TAGS= "cleanup.remove_unnecessary_nls_tags"; //$NON-NLS-1$
 
 	/**
 	 * Controls whether missing annotations should be added to the code. For detailed settings use:<br>
@@ -613,7 +613,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String ADD_MISSING_ANNOTATIONS= JavaUI.ID_PLUGIN + "cleanup.add_missing_annotations"; //$NON-NLS-1$
+	public static final String ADD_MISSING_ANNOTATIONS= "cleanup.add_missing_annotations"; //$NON-NLS-1$
 
 	/**
 	 * Add '@Override' annotation in front of overriding methods.<p>
@@ -632,7 +632,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String ADD_MISSING_ANNOTATIONS_OVERRIDE= JavaUI.ID_PLUGIN + "cleanup.add_missing_override_annotations"; //$NON-NLS-1$
+	public static final String ADD_MISSING_ANNOTATIONS_OVERRIDE= "cleanup.add_missing_override_annotations"; //$NON-NLS-1$
 
 	/**
 	 * Add '@Deprecated' annotation in front of deprecated members.<p>
@@ -653,7 +653,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String ADD_MISSING_ANNOTATIONS_DEPRECATED= JavaUI.ID_PLUGIN + "cleanup.add_missing_deprecated_annotations"; //$NON-NLS-1$
+	public static final String ADD_MISSING_ANNOTATIONS_DEPRECATED= "cleanup.add_missing_deprecated_annotations"; //$NON-NLS-1$
 
 	/**
 	 * Controls whether missing serial version ids should be added to the code. For detailed settings use:<br>
@@ -667,7 +667,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String ADD_MISSING_SERIAL_VERSION_ID= JavaUI.ID_PLUGIN + "cleanup.add_serial_version_id"; //$NON-NLS-1$
+	public static final String ADD_MISSING_SERIAL_VERSION_ID= "cleanup.add_serial_version_id"; //$NON-NLS-1$
 
 	/**
 	 * Adds a generated serial version id to subtypes of
@@ -688,7 +688,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String ADD_MISSING_SERIAL_VERSION_ID_GENERATED= JavaUI.ID_PLUGIN + "cleanup.add_generated_serial_version_id"; //$NON-NLS-1$
+	public static final String ADD_MISSING_SERIAL_VERSION_ID_GENERATED= "cleanup.add_generated_serial_version_id"; //$NON-NLS-1$
 
 	/**
 	 * Adds a default serial version it to subtypes of
@@ -709,7 +709,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String ADD_MISSING_SERIAL_VERSION_ID_DEFAULT= JavaUI.ID_PLUGIN + "cleanup.add_default_serial_version_id"; //$NON-NLS-1$
+	public static final String ADD_MISSING_SERIAL_VERSION_ID_DEFAULT= "cleanup.add_default_serial_version_id"; //$NON-NLS-1$
 
 	/**
 	 * Add '$NON-NLS$' tags to non externalized strings.<p>
@@ -723,7 +723,7 @@ public class CleanUpConstants {
 	 * @see #FALSE
 	 * @since 3.3
 	 */
-	public static final String ADD_MISSING_NLS_TAGS= JavaUI.ID_PLUGIN + "cleanup.add_missing_nls_tags"; //$NON-NLS-1$
+	public static final String ADD_MISSING_NLS_TAGS= "cleanup.add_missing_nls_tags"; //$NON-NLS-1$
 
     public static Map getEclipseDefaultSettings() {
     	HashMap result= new HashMap();
