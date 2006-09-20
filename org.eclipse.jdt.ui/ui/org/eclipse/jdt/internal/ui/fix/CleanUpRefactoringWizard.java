@@ -16,7 +16,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
@@ -77,7 +76,6 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
     		
     		final Text detailField= new Text(composite, SWT.BORDER | SWT.FLAT | SWT.MULTI | SWT.READ_ONLY | SWT.H_SCROLL | SWT.V_SCROLL);
     		detailField.setText(getCleanUpsInfo());
-    		detailField.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
     		final GridData data= new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
     		data.heightHint= convertHeightInCharsToPixels(20);
     		detailField.setLayoutData(data);
@@ -124,7 +122,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 					String[] descriptions= cleanUp.getDescriptions();
 		            if (descriptions != null) {
 	    	            for (int j= 0; j < descriptions.length; j++) {
-	    	                result.append('\t').append(descriptions[j]).append('\n');
+	    	                result.append('\t').append('-').append(' ').append(descriptions[j]).append('\n');
 	                    }
 		            }
 	            }

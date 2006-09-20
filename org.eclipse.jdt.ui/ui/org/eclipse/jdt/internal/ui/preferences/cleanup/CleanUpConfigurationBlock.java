@@ -25,7 +25,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -105,7 +104,6 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		
 		final Text detailField= new Text(composite, SWT.BORDER | SWT.FLAT | SWT.MULTI | SWT.READ_ONLY | SWT.H_SCROLL | SWT.V_SCROLL);
 		detailField.setText(getSelectedCleanUpsInfo(cleanUps));
-		detailField.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 		final GridData data= new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
 		data.horizontalSpan= numColumns;
 		detailField.setLayoutData(data);
@@ -133,7 +131,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 	        String[] descriptions= cleanUps[i].getDescriptions();
 	        if (descriptions != null) {
     	        for (int j= 0; j < descriptions.length; j++) {
-    	            buf.append(descriptions[j]).append('\n');
+    	            buf.append('-').append(' ').append(descriptions[j]).append('\n');
                 }
 	        }
         }
