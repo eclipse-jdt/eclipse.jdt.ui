@@ -51,7 +51,7 @@ abstract class MatchFilter {
 	}
 	
 	public static MatchFilter[] getDefaultFilters() {
-		return new MatchFilter[] { IMPORT_FILTER, POLYMORPHIC_FILTER };
+		return new MatchFilter[] { IMPORT_FILTER };
 	}
 	
 	private static String encodeFilters(MatchFilter[] enabledFilters) {
