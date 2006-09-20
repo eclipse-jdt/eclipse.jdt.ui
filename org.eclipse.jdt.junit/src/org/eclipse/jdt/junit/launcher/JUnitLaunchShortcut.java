@@ -293,7 +293,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		wc.setMappedResources(new IResource[] { element.getJavaProject().getProject() });
 		AssertionVMArg.setArgDefault(wc);
 		if (element instanceof IMethod) {
-			wc.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, testName); // only set for methods
+			wc.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, element.getElementName()); // only set for methods
 		}
 		return wc;
 	}
