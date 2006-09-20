@@ -278,6 +278,13 @@ public abstract class ProfileConfigurationBlock {
 				return;
 
 			final CustomProfile profile= (CustomProfile)profiles.iterator().next();
+			
+			if (!fProfileVersioner.getProfileKind().equals(profile.getKind())) {
+				final String title= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_title; 
+				final String message= Messages.format(FormatterMessages.ProfileConfigurationBlock_load_profile_wrong_profile_message, new String[] {fProfileVersioner.getProfileKind(), profile.getKind()});
+				MessageDialog.openError(fComposite.getShell(), title, message);
+				return;
+			}
 
 			if (profile.getVersion() > fProfileVersioner.getCurrentVersion()) {
 				final String title= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_too_new_title; 

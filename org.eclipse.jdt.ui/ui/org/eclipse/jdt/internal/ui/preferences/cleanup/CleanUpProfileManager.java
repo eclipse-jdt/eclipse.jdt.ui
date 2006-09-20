@@ -37,11 +37,11 @@ public class CleanUpProfileManager extends ProfileManager {
 	private final static String FORMATTER_SETTINGS_VERSION= "cleanup_settings_version";  //$NON-NLS-1$
 
 	public CleanUpProfileManager(List profiles, IScopeContext context, PreferencesAccess preferencesAccess, IProfileVersioner profileVersioner) {
-	    super(addBuiltInProfiles(profiles, profileVersioner.getCurrentVersion()), context, preferencesAccess, profileVersioner, KEY_SETS, PROFILE_KEY, FORMATTER_SETTINGS_VERSION);
+	    super(addBuiltInProfiles(profiles, profileVersioner), context, preferencesAccess, profileVersioner, KEY_SETS, PROFILE_KEY, FORMATTER_SETTINGS_VERSION);
     }
 	
-	private static List addBuiltInProfiles(List profiles, int version) {
-		final Profile eclipseProfile= new BuiltInProfile(ECLIPSE_PROFILE, CleanUpMessages.CleanUpProfileManager_ProfileName_EclipseBuildIn, getEclipseSettings(), 2, version);
+	private static List addBuiltInProfiles(List profiles, IProfileVersioner profileVersioner) {
+		final Profile eclipseProfile= new BuiltInProfile(ECLIPSE_PROFILE, CleanUpMessages.CleanUpProfileManager_ProfileName_EclipseBuildIn, getEclipseSettings(), 2, profileVersioner.getCurrentVersion(), profileVersioner.getProfileKind());
 		profiles.add(eclipseProfile);
 		return profiles;
 	}

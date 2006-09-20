@@ -25,6 +25,7 @@ final class FormatterMessages extends NLS {
 		// Do not instantiate
 	}
 
+	public static String ProfileConfigurationBlock_load_profile_wrong_profile_message;
 	public static String WhiteSpaceTabPage_assignments;
 	public static String WhiteSpaceTabPage_assignments_before_assignment_operator;
 	public static String WhiteSpaceTabPage_assignments_after_assignment_operator;

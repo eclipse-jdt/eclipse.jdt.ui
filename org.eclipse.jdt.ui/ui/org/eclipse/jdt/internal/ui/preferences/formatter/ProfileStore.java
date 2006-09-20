@@ -80,7 +80,7 @@ public class ProfileStore {
 		
 		private String fName;
 		private Map fSettings;
-
+		private String fKind;
 
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 
@@ -93,6 +93,10 @@ public class ProfileStore {
 			} else if (qName.equals(XML_NODE_PROFILE)) {
 
 				fName= attributes.getValue(XML_ATTRIBUTE_NAME);
+				fKind= attributes.getValue(XML_ATTRIBUTE_PROFILE_KIND);
+				if (fKind == null) //Can only be an CodeFormatterProfile created pre 3.3M2
+					fKind= ProfileVersioner.CODE_FORMATTER_PROFILE_KIND;
+				
 				fSettings= new HashMap(200);
 
 			}
@@ -110,9 +114,10 @@ public class ProfileStore {
 		
 		public void endElement(String uri, String localName, String qName) {
 			if (qName.equals(XML_NODE_PROFILE)) {
-				fProfiles.add(new CustomProfile(fName, fSettings, fVersion));
+				fProfiles.add(new CustomProfile(fName, fSettings, fVersion, fKind));
 				fName= null;
 				fSettings= null;
+				fKind= null;
 			}
 		}
 		
@@ -132,6 +137,7 @@ public class ProfileStore {
 	private final static String XML_ATTRIBUTE_VERSION= "version"; //$NON-NLS-1$
 	private final static String XML_ATTRIBUTE_ID= "id"; //$NON-NLS-1$
 	private final static String XML_ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
+	private final static String XML_ATTRIBUTE_PROFILE_KIND= "kind"; //$NON-NLS-1$
 	private final static String XML_ATTRIBUTE_VALUE= "value"; //$NON-NLS-1$
 	
 	private final IProfileVersioner fProfileVersioner;
@@ -307,10 +313,11 @@ public class ProfileStore {
 	 * Create a new profile element in the specified document. The profile is not added
 	 * to the document by this method. 
 	 */
-	private static Element createProfileElement(Profile profile, Document document) {
+	private Element createProfileElement(Profile profile, Document document) {
 		final Element element= document.createElement(XML_NODE_PROFILE);
 		element.setAttribute(XML_ATTRIBUTE_NAME, profile.getName());
 		element.setAttribute(XML_ATTRIBUTE_VERSION, Integer.toString(profile.getVersion()));
+		element.setAttribute(XML_ATTRIBUTE_PROFILE_KIND, fProfileVersioner.getProfileKind());
 		
 		final Iterator keyIter= profile.getSettings().keySet().iterator();
 		

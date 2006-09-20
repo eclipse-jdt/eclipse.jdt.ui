@@ -120,13 +120,15 @@ public abstract class ProfileManager extends Observable {
 		private final Map fSettings;
 		private final int fOrder;
 		private final int fCurrentVersion;
+		private final String fProfileKind;
 		
-		public BuiltInProfile(String ID, String name, Map settings, int order, int currentVersion) {
+		public BuiltInProfile(String ID, String name, Map settings, int order, int currentVersion, String profileKind) {
 			fName= name;
 			fID= ID;
 			fSettings= settings;
 			fOrder= order;
 			fCurrentVersion= currentVersion;
+			fProfileKind= profileKind;
 		}
 		
 		public String getName() { 
@@ -135,7 +137,7 @@ public abstract class ProfileManager extends Observable {
 		
 		public Profile rename(String name, ProfileManager manager) {
 			final String trimmed= name.trim();
-		 	CustomProfile newProfile= new CustomProfile(trimmed, fSettings, fCurrentVersion);
+		 	CustomProfile newProfile= new CustomProfile(trimmed, fSettings, fCurrentVersion, fProfileKind);
 		 	manager.addProfile(newProfile);
 			return newProfile;
 		}
@@ -180,11 +182,13 @@ public abstract class ProfileManager extends Observable {
 		private Map fSettings;
 		protected ProfileManager fManager;
 		private int fVersion;
+		private final String fKind;
 
-		public CustomProfile(String name, Map settings, int version) {
+		public CustomProfile(String name, Map settings, int version, String kind) {
 			fName= name;
 			fSettings= settings;
 			fVersion= version;
+			fKind= kind;
 		}
 		
 		public String getName() {
@@ -250,16 +254,20 @@ public abstract class ProfileManager extends Observable {
 			return true;
 		}
 
+        public String getKind() {
+	        return fKind;
+        }
+
 	}
 	
 	public final class SharedProfile extends CustomProfile {
 		
-		public SharedProfile(String oldName, Map options, int version) {
-			super(oldName, options, version);
+		public SharedProfile(String oldName, Map options, int version, String profileKind) {
+			super(oldName, options, version, profileKind);
 		}
 		
 		public Profile rename(String name, ProfileManager manager) {
-			CustomProfile profile= new CustomProfile(name.trim(), getSettings(), getVersion());
+			CustomProfile profile= new CustomProfile(name.trim(), getSettings(), getVersion(), getKind());
 
 			manager.profileReplaced(this, profile);
 			return profile;
@@ -410,7 +418,7 @@ public abstract class ProfileManager extends Observable {
 						name= FormatterMessages.ProfileManager_unmanaged_profile;
 					}
 					// current settings do not correspond to any profile -> create a 'team' profile
-					SharedProfile shared= new SharedProfile(name, map, fProfileVersioner.getCurrentVersion());
+					SharedProfile shared= new SharedProfile(name, map, fProfileVersioner.getCurrentVersion(), fProfileVersioner.getProfileKind());
 					shared.setManager(this);
 					fProfiles.put(shared.getID(), shared);
 					fProfilesByName.add(shared); // add last
@@ -478,7 +486,7 @@ public abstract class ProfileManager extends Observable {
 			for (int i= 0; i < fKeySets.length; i++) {
 	            addAll(context.getNode(fKeySets[i].getNodeName()), allOptions);
             }
-			CustomProfile profile= new CustomProfile("tmp", allOptions, version); //$NON-NLS-1$
+			CustomProfile profile= new CustomProfile("tmp", allOptions, version, fProfileVersioner.getProfileKind()); //$NON-NLS-1$
 			fProfileVersioner.update(profile);
 			return profile.getSettings();
 		}

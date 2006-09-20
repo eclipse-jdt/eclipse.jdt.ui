@@ -24,6 +24,8 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomPr
 
 public class ProfileVersioner implements IProfileVersioner {
 	
+	public static final String CODE_FORMATTER_PROFILE_KIND= "CodeFormatterProfile"; //$NON-NLS-1$
+	
 	private static final int VERSION_1= 1; // < 20040113 (includes M6)
 	private static final int VERSION_2= 2; // before renaming almost all
 	private static final int VERSION_3= 3; // after renaming almost all
@@ -43,6 +45,13 @@ public class ProfileVersioner implements IProfileVersioner {
 
 	public int getCurrentVersion() {
 	    return CURRENT_VERSION;
+    }
+	
+	/**
+     * {@inheritDoc}
+     */
+    public String getProfileKind() {
+	    return CODE_FORMATTER_PROFILE_KIND;
     }
 
 	public void update(CustomProfile profile) {
