@@ -121,7 +121,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 					selected= ((IAdaptable) selected).getAdapter(IJavaElement.class);
 				}
 				if (selected instanceof IJavaElement) {
-					IJavaElement element= (IJavaElement) elements[0];
+					IJavaElement element= (IJavaElement) selected;
 					switch (element.getElementType()) {
 						case IJavaElement.JAVA_PROJECT:
 						case IJavaElement.PACKAGE_FRAGMENT_ROOT:
