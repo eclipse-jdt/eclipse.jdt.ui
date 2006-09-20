@@ -41,15 +41,16 @@ public class ASTRewriteSnippet extends TestCase {
 		project.create(null);
 		project.open(null);
 		try {
-			// set teh Java nature and classpath
+			// set the Java nature and Java build path
 			IProjectDescription description = project.getDescription();
 			description.setNatureIds(new String[] { JavaCore.NATURE_ID } );
 			project.setDescription(description, null);
 			
 			IJavaProject javaProject= JavaCore.create(project);
 			
+			// build path is: project as source folder and JRE container
 			IClasspathEntry[] cpentry= new IClasspathEntry[] {
-					JavaCore.newSourceEntry(javaProject.getPath()), // project as source folder
+					JavaCore.newSourceEntry(javaProject.getPath()), 
 					JavaRuntime.getDefaultJREContainerEntry()
 			};
 			javaProject.setRawClasspath(cpentry, javaProject.getPath(), null);
@@ -64,8 +65,8 @@ public class ASTRewriteSnippet extends TestCase {
 			StringBuffer buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("public class E {\n");
-			buf.append("    public void foo() {\n");
-			buf.append("        while (i == j) {\n");
+			buf.append("    public void foo(int i) {\n");
+			buf.append("        while (--i > 0) {\n");
 			buf.append("            System.beep();\n");
 			buf.append("        }\n");		
 			buf.append("    }\n");
@@ -116,9 +117,9 @@ public class ASTRewriteSnippet extends TestCase {
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("public class E {\n");
-			buf.append("    public void foo() {\n");
+			buf.append("    public void foo(int i) {\n");
 			buf.append("        bar1();\n");
-			buf.append("        while (i == j) {\n");
+			buf.append("        while (--i > 0) {\n");
 			buf.append("            System.beep();\n");
 			buf.append("        }\n");
 			buf.append("        bar2();\n");
