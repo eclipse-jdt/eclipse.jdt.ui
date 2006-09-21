@@ -320,10 +320,11 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 					return false;
 				}
 			}
+			return true;
 		} catch (CoreException e) {
 			// ignore access problems here, return false
 		}
-		return true;
+		return false;
 	}
 	
 
