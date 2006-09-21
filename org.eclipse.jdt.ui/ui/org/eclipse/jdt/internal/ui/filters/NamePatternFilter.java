@@ -10,11 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.filters;
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+
+import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.jdt.core.IJavaElement;
 
@@ -57,18 +61,17 @@ public class NamePatternFilter extends ViewerFilter {
 		String matchName= null;
 		if (element instanceof IJavaElement) {
 			matchName= ((IJavaElement) element).getElementName();
+		} else if (element instanceof IResource) {
+			matchName= ((IResource) element).getName();
+		} else if (element instanceof IStorage) {
+			matchName= ((IStorage) element).getName();
 		} else if (element instanceof IAdaptable) {
-			IAdaptable adaptable= (IAdaptable) element;
-			IJavaElement javaElement= (IJavaElement)adaptable.getAdapter(IJavaElement.class);
-			if (javaElement != null)
-				matchName= javaElement.getElementName();
-			else {
-				IResource resource= (IResource)adaptable.getAdapter(IResource.class);
-				if (resource != null)
-					matchName= resource.getName();
+			IWorkbenchAdapter wbadapter= (IWorkbenchAdapter) ((IAdaptable)element).getAdapter(IWorkbenchAdapter.class);
+			if (wbadapter != null) {
+				matchName= wbadapter.getLabel(element);
 			}
 		}
-		if (matchName != null) {
+		if (matchName != null && matchName.length() > 0) {
 			StringMatcher[] testMatchers= getMatchers();
 			for (int i = 0; i < testMatchers.length; i++) {
 				if (testMatchers[i].match(matchName))
