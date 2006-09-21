@@ -323,7 +323,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		} catch (CoreException e) {
 			// ignore access problems here, return false
 		}
-		return false;
+		return true;
 	}
 	
 
