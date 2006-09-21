@@ -29,7 +29,7 @@
 			<property name="data-dir" value="${refactoring-folder}"/>
 			<property name="plugin-name" value="${plugin-name}"/>
 			<property name="classname" 
-                value="org.eclipse.jdt.ui.tests.all.AllAllTests"/>
+                value="org.eclipse.jdt.ui.tests.all.AllRefactoringTests"/>
 		</ant>
 	</target>
 

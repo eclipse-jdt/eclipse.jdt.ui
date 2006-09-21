@@ -15,7 +15,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.TestOptionsSetup;
 
-public class AllAllTests {
+public class AllRefactoringTests {
 	public static Test suite ( ) {
 		TestSuite suite= new TestSuite("All All Tests");
 		suite.addTest(org.eclipse.jdt.ui.tests.actions.AllTests.suite());
