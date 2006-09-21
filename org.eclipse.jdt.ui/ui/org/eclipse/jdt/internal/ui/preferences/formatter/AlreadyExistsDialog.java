@@ -58,7 +58,9 @@ public class AlreadyExistsDialog extends StatusDialog {
 		fProfileManager= profileManager;
 		fOk= new StatusInfo();
 		fDuplicate= new StatusInfo(IStatus.ERROR, FormatterMessages.AlreadyExistsDialog_message_profile_already_exists); 
-		fEmpty= new StatusInfo(IStatus.ERROR, FormatterMessages.AlreadyExistsDialog_message_profile_name_empty); 
+		fEmpty= new StatusInfo(IStatus.ERROR, FormatterMessages.AlreadyExistsDialog_message_profile_name_empty);
+		
+		setHelpAvailable(false);
 	}
 	
 	
@@ -153,6 +155,7 @@ public class AlreadyExistsDialog extends StatusDialog {
 	private Text createTextField() {
 		final GridData gd = new GridData( GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= NUM_COLUMNS;
+		gd.horizontalIndent= 15;
 		final Text text= new Text(fComposite, SWT.SINGLE | SWT.BORDER);
 		text.setLayoutData(gd);
 		return text;
