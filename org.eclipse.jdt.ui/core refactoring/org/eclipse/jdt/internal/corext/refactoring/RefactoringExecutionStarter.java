@@ -255,7 +255,7 @@ public final class RefactoringExecutionStarter {
 		refactoring.addCleanUp(new CommentFormatCleanUp());
 		
 		if (cus.length == 1 || !CleanUpRefactoringWizard.showCleanUpWizard()) {
-    		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.ERROR, false, shell, PlatformUI.getWorkbench().getProgressService());
+    		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.ERROR, false, shell, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
     		try {
     	        helper.perform(true, true);
             } catch (InterruptedException e) {
