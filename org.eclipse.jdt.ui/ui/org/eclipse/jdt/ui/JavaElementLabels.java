@@ -377,13 +377,14 @@ public class JavaElementLabels {
 	public static String getTextLabel(Object obj, long flags) {
 		if (obj instanceof IJavaElement) {
 			return getElementLabel((IJavaElement) obj, flags);
+		} else if (obj instanceof IResource) {
+			return ((IResource) obj).getName();
+		} else if (obj instanceof IStorage) {
+			return new StorageLabelProvider().getText(obj);
 		} else if (obj instanceof IAdaptable) {
 			IWorkbenchAdapter wbadapter= (IWorkbenchAdapter) ((IAdaptable)obj).getAdapter(IWorkbenchAdapter.class);
 			if (wbadapter != null) {
 				return wbadapter.getLabel(obj);
-			}
-			if (obj instanceof IStorage) {
-				return new StorageLabelProvider().getText(obj);
 			}
 		}
 		return ""; //$NON-NLS-1$
