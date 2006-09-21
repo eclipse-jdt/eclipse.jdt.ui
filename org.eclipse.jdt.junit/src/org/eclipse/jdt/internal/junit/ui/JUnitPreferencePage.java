@@ -56,13 +56,13 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionDialog;
-import org.eclipse.ui.model.WorkbenchViewerSorter;
 import org.eclipse.ui.progress.IProgressService;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -77,7 +77,6 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
-
 
 import org.eclipse.jdt.internal.junit.launcher.AssertionVMArg;
 import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
@@ -162,7 +161,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	/**
 	 * Sorter for the filter table; sorts alphabetically ascending.
 	 */
-	private static class FilterViewerSorter extends WorkbenchViewerSorter {
+	private static class FilterViewerSorter extends ViewerComparator {
 		public int compare(Viewer viewer, Object e1, Object e2) {
 			ILabelProvider lprov= (ILabelProvider) ((ContentViewer) viewer).getLabelProvider();
 			String name1= lprov.getText(e1);
@@ -182,7 +181,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 				if (char2 == '*' && char2 != char1)
 					return 1;
 			}
-			return name1.compareTo(name2);
+			return getComparator().compare(name1, name2);
 		}
 	}
 
@@ -390,7 +389,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		fFilterViewer= new CheckboxTableViewer(fFilterTable);
 		fTableEditor= new TableEditor(fFilterTable);
 		fFilterViewer.setLabelProvider(new FilterLabelProvider());
-		fFilterViewer.setSorter(new FilterViewerSorter());
+		fFilterViewer.setComparator(new FilterViewerSorter());
 		fStackFilterContentProvider= new StackFilterContentProvider();
 		fFilterViewer.setContentProvider(fStackFilterContentProvider);
 		// input just needs to be non-null

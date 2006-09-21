@@ -100,7 +100,6 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		private final ILabelProvider fLabelProvider;
 
 		public DecoratorIgnoringViewerSorter(ILabelProvider labelProvider) {
-			super(null); // lazy initialization
 			fLabelProvider= labelProvider;
 		}
 		

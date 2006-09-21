@@ -15,15 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.viewers.ViewerSorter;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -37,13 +29,22 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.ViewerFilter;
+
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 
+import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
+
 /**
  * A dialog with checked table viewer.
- * 
- * TO DO: this class is duplicated from org.eclipse.jdt.ui
  */
 public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	
@@ -53,7 +54,6 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	private IStructuredContentProvider fContentProvider;
 	
 	private ISelectionStatusValidator fValidator= null; 
-	private ViewerSorter fSorter;
 	private String fEmptyListMessage= WizardMessages.CheckedTableSelectionDialog_emptyListMessage; 
 	
 	private IStatus fCurrStatus= new JUnitStatus();
@@ -96,14 +96,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	public void setEmptyListMessage(String message) {
 		fEmptyListMessage= message;
 	}	
-	
-	/**
-	 * Sets the sorter used by the tree viewer.
-	 */
-	public void setSorter(ViewerSorter sorter) {
-		fSorter= sorter;
-	}		
-	
+		
 	/**
 	 * Adds a filter to the tree viewer.
 	 * @param filter a filter.
@@ -237,7 +230,6 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 			}	
 		});
 		
-		fViewer.setSorter(fSorter);
 		if (fFilters != null) {
 			for (int i= 0; i != fFilters.size(); i++)
 				fViewer.addFilter((ViewerFilter) fFilters.get(i));
