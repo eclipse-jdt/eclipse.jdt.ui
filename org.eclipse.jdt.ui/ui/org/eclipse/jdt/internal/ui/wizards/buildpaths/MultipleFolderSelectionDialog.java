@@ -187,7 +187,7 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 			}
 		});
 
-		fViewer.setSorter(new ResourceSorter(ResourceSorter.NAME));
+		fViewer.setComparator(new ResourceSorter(ResourceSorter.NAME));
 		if (fFilters != null) {
 			for (int i = 0; i != fFilters.size(); i++)
 				fViewer.addFilter((ViewerFilter) fFilters.get(i));

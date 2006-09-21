@@ -136,7 +136,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		
 		fLifeCycle= new TypeHierarchyLifeCycle(false);
 
-		treeViewer.setSorter(new HierarchyViewerSorter(fLifeCycle));
+		treeViewer.setComparator(new HierarchyViewerSorter(fLifeCycle));
 		treeViewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
 
 		fLabelProvider= new HierarchyLabelProvider(fLifeCycle);

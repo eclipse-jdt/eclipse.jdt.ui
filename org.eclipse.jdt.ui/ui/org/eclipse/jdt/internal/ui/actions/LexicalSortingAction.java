@@ -57,9 +57,9 @@ public class LexicalSortingAction extends Action {
 		BusyIndicator.showWhile(fViewer.getControl().getDisplay(), new Runnable() {
 			public void run() {
 				if (on)
-					fViewer.setSorter(fSorter);
+					fViewer.setComparator(fSorter);
 				else
-					fViewer.setSorter(fSourcePositonSorter);
+					fViewer.setComparator(fSourcePositonSorter);
 			}
 		});
 		

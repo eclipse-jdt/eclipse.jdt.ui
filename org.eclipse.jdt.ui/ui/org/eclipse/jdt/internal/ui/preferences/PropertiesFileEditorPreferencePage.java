@@ -440,7 +440,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		fHighlightingColorListViewer= new TableViewer(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
 		fHighlightingColorListViewer.setLabelProvider(new ColorListLabelProvider());
 		fHighlightingColorListViewer.setContentProvider(new ColorListContentProvider());
-		fHighlightingColorListViewer.setSorter(new WorkbenchViewerSorter());
+		fHighlightingColorListViewer.setComparator(new WorkbenchViewerSorter());
 		gd= new GridData(SWT.BEGINNING, SWT.FILL, false, true);
 		gd.heightHint= convertHeightInCharsToPixels(5);
 		fHighlightingColorListViewer.getControl().setLayoutData(gd);

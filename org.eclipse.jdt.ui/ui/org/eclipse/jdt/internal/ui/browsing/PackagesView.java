@@ -360,7 +360,7 @@ public class PackagesView extends JavaBrowsingPart{
 		JavaUILabelProvider labelProvider= createLabelProvider();
 		viewer.setLabelProvider(createDecoratingLabelProvider(labelProvider));
 
-		viewer.setSorter(createJavaElementSorter());
+		viewer.setComparator(createJavaElementSorter());
 		viewer.setUseHashlookup(true);
 
 		createContextMenu();

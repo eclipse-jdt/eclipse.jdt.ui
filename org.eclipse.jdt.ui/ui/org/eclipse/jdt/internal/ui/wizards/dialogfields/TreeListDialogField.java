@@ -41,7 +41,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -58,7 +58,7 @@ public class TreeListDialogField extends DialogField {
 	protected ILabelProvider fLabelProvider;
 	protected TreeViewerAdapter fTreeViewerAdapter;
 	protected List fElements;
-	protected ViewerSorter fViewerSorter;
+	protected ViewerComparator fViewerComperator;
 
 	protected String[] fButtonLabels;
 	private Button[] fButtonControls;
@@ -147,11 +147,11 @@ public class TreeListDialogField extends DialogField {
 	}
 
 	/**
-	* Sets the viewerSorter.
-	* @param viewerSorter The viewerSorter to set
+	* Sets the viewer comperator.
+	* @param viewerComperator The viewer comperator to set
 	*/
-	public void setViewerSorter(ViewerSorter viewerSorter) {
-		fViewerSorter= viewerSorter;
+	public void setViewerComperator(ViewerComparator viewerComperator) {
+		fViewerComperator= viewerComperator;
 	}
 	
 	public void setTreeExpansionLevel(int level) {
@@ -269,8 +269,8 @@ public class TreeListDialogField extends DialogField {
 			fTree.setInput(fParentElement);
 			fTree.expandToLevel(fTreeExpandLevel);
 
-			if (fViewerSorter != null) {
-				fTree.setSorter(fViewerSorter);
+			if (fViewerComperator != null) {
+				fTree.setComparator(fViewerComperator);
 			}
 
 			fTreeControl.setEnabled(isEnabled());
@@ -669,9 +669,9 @@ public class TreeListDialogField extends DialogField {
 
 	public void selectFirstElement() {
 		Object element= null;
-		if (fViewerSorter != null) {
+		if (fViewerComperator != null) {
 			Object[] arr= fElements.toArray();
-			fViewerSorter.sort(fTree, arr);
+			fViewerComperator.sort(fTree, arr);
 			if (arr.length > 0) {
 				element= arr[0];
 			}

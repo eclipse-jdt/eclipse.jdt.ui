@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
 
@@ -239,7 +240,11 @@ class PackageViewerWrapper extends StructuredViewer {
 	public void setSorter(ViewerSorter sorter) {
 		fViewer.setSorter(sorter);
 	}
-
+	
+	public void setComparator(ViewerComparator comparator) {
+		fViewer.setComparator(comparator);
+	}
+	
 	public void setUseHashlookup(boolean enable) {
 		fViewer.setUseHashlookup(enable);
 	}

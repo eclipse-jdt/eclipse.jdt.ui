@@ -25,7 +25,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.WizardPage;
 
 import org.eclipse.ui.PlatformUI;
@@ -48,9 +48,6 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 		public String getText(Object element) {
 			return ((ClasspathContainerDescriptor) element).getName();
 		}
-	}
-
-	private static class ClasspathContainerSorter extends ViewerSorter {
 	}
 
 	private ListViewer fListViewer;
@@ -85,7 +82,7 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 		fListViewer= new ListViewer(parent, SWT.SINGLE | SWT.BORDER);
 		fListViewer.setLabelProvider(new ClasspathContainerLabelProvider());
 		fListViewer.setContentProvider(new ArrayContentProvider());
-		fListViewer.setSorter(new ClasspathContainerSorter());
+		fListViewer.setComparator(new ViewerComparator());
 		fListViewer.setInput(Arrays.asList(fContainers));
 		fListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {

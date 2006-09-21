@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
-import com.ibm.icu.text.Collator;
+import java.util.Comparator;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 
+import org.eclipse.jface.util.Policy;
 import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -84,7 +85,7 @@ public class JavaElementSorter extends ViewerSorter {
 	private static final int OTHERS= 51;
 	
 	private MembersOrderPreferenceCache fMemberOrderCache;
-	private Collator fNewCollator; // collator from ICU
+	private Comparator fComparator; 
 	
 	/**
 	 * Constructor.
@@ -92,7 +93,7 @@ public class JavaElementSorter extends ViewerSorter {
 	public JavaElementSorter() {	
 		super(null); // delay initialization of collator
 		fMemberOrderCache= JavaPlugin.getDefault().getMemberOrderPreferenceCache();
-		fNewCollator= null;
+		fComparator= null;
 	}
 		
 	/**
@@ -227,7 +228,7 @@ public class JavaElementSorter extends ViewerSorter {
 			String name1= getNonJavaElementLabel(viewer, e1);
 			String name2= getNonJavaElementLabel(viewer, e2);
 			if (name1 != null && name2 != null) {
-				return getNewCollator().compare(name1, name2);
+				return getComparator().compare(name1, name2);
 			}
 			return 0; // can't compare
 		}
@@ -254,7 +255,7 @@ public class JavaElementSorter extends ViewerSorter {
 			if (name1.length() == 0) {
 				if (name2.length() == 0) {
 					try {
-						return getNewCollator().compare(((IType) e1).getSuperclassName(), ((IType) e2).getSuperclassName());
+						return getComparator().compare(((IType) e1).getSuperclassName(), ((IType) e2).getSuperclassName());
 					} catch (JavaModelException e) {
 						return 0;
 					}
@@ -266,7 +267,7 @@ public class JavaElementSorter extends ViewerSorter {
 			}
 		}
 				
-		int cmp= getNewCollator().compare(name1, name2);
+		int cmp= getComparator().compare(name1, name2);
 		if (cmp != 0) {
 			return cmp;
 		}
@@ -276,7 +277,7 @@ public class JavaElementSorter extends ViewerSorter {
 			String[] params2= ((IMethod) e2).getParameterTypes();
 			int len= Math.min(params1.length, params2.length);
 			for (int i = 0; i < len; i++) {
-				cmp= getNewCollator().compare(Signature.toString(params1[i]), Signature.toString(params2[i]));
+				cmp= getComparator().compare(Signature.toString(params1[i]), Signature.toString(params2[i]));
 				if (cmp != 0) {
 					return cmp;
 				}
@@ -333,8 +334,9 @@ public class JavaElementSorter extends ViewerSorter {
 		return Integer.MAX_VALUE;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ViewerSorter#getCollator()
+	/**
+	 * Overrides {@link org.eclipse.jface.viewers.ViewerSorter#getCollator()}.
+	 * @deprecated The method is not intended to be used by clients.
 	 */
 	public final java.text.Collator getCollator() {
 		// kept in for API compatibility
@@ -344,11 +346,14 @@ public class JavaElementSorter extends ViewerSorter {
 		return collator;
 	}
 	
-	private final Collator getNewCollator() {
-		if (fNewCollator == null) {
-			fNewCollator= Collator.getInstance();
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ViewerComparator#getComparator()
+	 */
+	protected Comparator getComparator() {
+		if (fComparator == null) {
+			fComparator= Policy.getComparator();
 		}
-		return fNewCollator;
+		return fComparator;
 	}
 
 	private boolean needsClasspathComparision(Object e1, int cat1, Object e2, int cat2) {

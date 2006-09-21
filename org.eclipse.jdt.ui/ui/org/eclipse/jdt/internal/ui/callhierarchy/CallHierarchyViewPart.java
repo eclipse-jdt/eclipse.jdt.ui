@@ -51,7 +51,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
@@ -902,11 +902,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			fCallHierarchyViewer.setInput(null);
 			if (fCurrentCallMode == CALL_MODE_CALLERS) {
 				setContentDescription(Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMethod, args)); 
-				fCallHierarchyViewer.setSorter(new ViewerSorter()); // bug 111423: sort caller hierarchy alphabetically
+				fCallHierarchyViewer.setComparator(new ViewerComparator()); // bug 111423: sort caller hierarchy alphabetically
     			fCallHierarchyViewer.setMethodWrapper(getCallerRoot());
 			} else {
 				setContentDescription(Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMethod, args));
-				fCallHierarchyViewer.setSorter(null);
+				fCallHierarchyViewer.setComparator(null);
 				fCallHierarchyViewer.setMethodWrapper(getCalleeRoot());
 			}
 		}

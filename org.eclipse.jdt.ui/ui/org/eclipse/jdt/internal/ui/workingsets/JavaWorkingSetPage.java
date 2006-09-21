@@ -154,7 +154,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 			);
 		
 		fTree.setLabelProvider(new DecoratingJavaLabelProvider(fJavaElementLabelProvider));
-		fTree.setSorter(new JavaElementSorter());
+		fTree.setComparator(new JavaElementSorter());
 		fTree.addFilter(new EmptyInnerPackageFilter());
 		fTree.setUseHashlookup(true);
 		

@@ -33,7 +33,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
@@ -120,10 +120,10 @@ public class NewVariableEntryDialog extends StatusDialog {
 		
 		fVariablesList.enableButton(IDX_EXTEND, false);
 		
-		fVariablesList.setViewerSorter(new ViewerSorter() {
+		fVariablesList.setViewerComperator(new ViewerComparator() {
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				if (e1 instanceof CPVariableElement && e2 instanceof CPVariableElement) {
-					return ((CPVariableElement)e1).getName().compareTo(((CPVariableElement)e2).getName());
+					return getComparator().compare(((CPVariableElement)e1).getName(), ((CPVariableElement)e2).getName());
 				}
 				return super.compare(viewer, e1, e2);
 			}

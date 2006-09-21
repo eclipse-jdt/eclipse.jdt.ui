@@ -110,7 +110,7 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 
 		fTableViewer.setLabelProvider(new JavaElementLabelProvider());
 		fTableViewer.setContentProvider(new StandardJavaElementContentProvider());
-		fTableViewer.setSorter(new JavaElementSorter());
+		fTableViewer.setComparator(new JavaElementSorter());
 		fTableViewer.getControl().setFont(font);
 
 		Button checkbox= new Button(composite, SWT.CHECK);

@@ -45,7 +45,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.Document;
@@ -78,7 +78,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
   */
 public class CodeTemplateBlock {
 	
-	private class CodeTemplateAdapter extends ViewerSorter implements ITreeListAdapter, IDialogFieldListener {
+	private class CodeTemplateAdapter extends ViewerComparator implements ITreeListAdapter, IDialogFieldListener {
 
 		private final Object[] NO_CHILDREN= new Object[0];
 
@@ -292,7 +292,7 @@ public class CodeTemplateBlock {
 		fCodeTemplateTree= new TreeListDialogField(adapter, buttonLabels, new CodeTemplateLabelProvider());
 		fCodeTemplateTree.setDialogFieldListener(adapter);
 		fCodeTemplateTree.setLabelText(PreferencesMessages.CodeTemplateBlock_templates_label);
-		fCodeTemplateTree.setViewerSorter(adapter);
+		fCodeTemplateTree.setViewerComperator(adapter);
 
 		fCodeTemplateTree.enableButton(IDX_EXPORT, false);
 		fCodeTemplateTree.enableButton(IDX_EDIT, false);

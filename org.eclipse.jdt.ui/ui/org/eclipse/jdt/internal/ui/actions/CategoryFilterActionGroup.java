@@ -42,10 +42,9 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
-
 
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
@@ -123,7 +122,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 							public void removeListener(ILabelProviderListener listener) {}
 						});
 			fCategoryList.addElements(categories);
-			fCategoryList.setViewerSorter(new ViewerSorter());
+			fCategoryList.setViewerComperator(new ViewerComparator());
 			fCategoryList.setLabelText(ActionMessages.CategoryFilterActionGroup_SelectCategoriesDescription);
 			fCategoryList.checkAll(true);
 			for (Iterator iter= selectedCategories.iterator(); iter.hasNext();) {

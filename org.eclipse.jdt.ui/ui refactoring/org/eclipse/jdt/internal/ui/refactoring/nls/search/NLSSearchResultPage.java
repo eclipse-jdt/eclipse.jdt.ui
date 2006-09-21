@@ -17,6 +17,8 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchResultPage;
 import org.eclipse.jdt.internal.ui.search.TextSearchTableContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.ViewerComparator;
+
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.ui.IEditorPart;
@@ -74,12 +76,20 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements 
 	protected void configureTreeViewer(TreeViewer viewer) {
 		throw new IllegalStateException("Doesn't support tree mode."); //$NON-NLS-1$
 	}
-
+	
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#configureTableViewer(org.eclipse.jface.viewers.TableViewer)
 	 */
 	protected void configureTableViewer(TableViewer viewer) {
-		viewer.setSorter(new NLSSorter());
+		viewer.setComparator(new ViewerComparator() {
+			public int category(Object element) {
+				if (element instanceof FileEntry) {
+					return 0;
+				} else {
+					return 1;
+				}
+			}
+		});
 		viewer.setLabelProvider(new NLSSearchResultLabelProvider2(this));
 		fContentProvider= new TextSearchTableContentProvider();
 		viewer.setContentProvider(fContentProvider);

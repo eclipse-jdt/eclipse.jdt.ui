@@ -11,7 +11,7 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
@@ -30,7 +30,7 @@ import org.eclipse.jdt.core.JavaModelException;
  * 
  * @since 3.2
  */
-public class SourcePositionSorter extends ViewerSorter {
+public class SourcePositionSorter extends ViewerComparator {
 
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerSorter#compare(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)

@@ -328,7 +328,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
         fPackageViewer= new TreeViewer(parent, SWT.MULTI);
         fPackageViewer.setComparer(WorkingSetModel.COMPARER);
         fPackageViewer.addFilter(new PackageFilter());
-        fPackageViewer.setSorter(new ExtendedJavaElementSorter());
+        fPackageViewer.setComparator(new ExtendedJavaElementSorter());
         fPackageViewer.addDoubleClickListener(new IDoubleClickListener() {
             public void doubleClick(DoubleClickEvent event) {
                 Object element= ((IStructuredSelection)event.getSelection()).getFirstElement();

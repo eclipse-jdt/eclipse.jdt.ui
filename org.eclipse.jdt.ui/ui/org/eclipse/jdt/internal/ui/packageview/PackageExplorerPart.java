@@ -1770,9 +1770,9 @@ public class PackageExplorerPart extends ViewPart
 	
 	private void setSorter() {
 		if (showWorkingSets()) {
-			fViewer.setSorter(new WorkingSetAwareJavaElementSorter());
+			fViewer.setComparator(new WorkingSetAwareJavaElementSorter());
 		} else {
-			fViewer.setSorter(new JavaElementSorter());
+			fViewer.setComparator(new JavaElementSorter());
 		}
 	}
 	

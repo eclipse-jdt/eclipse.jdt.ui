@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
@@ -150,7 +150,7 @@ public class ExclusionInclusionDialog extends StatusDialog {
 		patternList.setElements(elements);
 		patternList.selectFirstElement();
 		patternList.enableButton(IDX_ADD_MULTIPLE, fCurrSourceFolder != null);
-		patternList.setViewerSorter(new ViewerSorter());
+		patternList.setViewerComperator(new ViewerComparator());
 		return patternList;
 	}
 

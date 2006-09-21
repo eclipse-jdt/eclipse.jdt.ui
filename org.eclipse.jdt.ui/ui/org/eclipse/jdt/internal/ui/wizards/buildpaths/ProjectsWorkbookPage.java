@@ -85,7 +85,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		fProjectsList.enableButton(IDX_REMOVE, false);
 		fProjectsList.enableButton(IDX_EDIT, false);
 		
-		fProjectsList.setViewerSorter(new CPListElementSorter());
+		fProjectsList.setViewerComperator(new CPListElementSorter());
 	}
 	
 	public void init(final IJavaProject jproject) {

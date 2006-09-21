@@ -11,7 +11,7 @@
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
@@ -19,16 +19,16 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
+
 import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.internal.ui.viewsupport.SourcePositionSorter;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
-
 /**
   */
-public abstract class AbstractHierarchyViewerSorter extends ViewerSorter {
+public abstract class AbstractHierarchyViewerSorter extends ViewerComparator {
 	
 	private static final int OTHER= 1;
 	private static final int CLASS= 2;
@@ -120,7 +120,7 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerSorter {
 		} else if (isSortAlphabetically()) {
 			String name1= ((IType) e1).getElementName(); 
 			String name2= ((IType) e2).getElementName(); 
-			return getCollator().compare(name1, name2);
+			return getComparator().compare(name1, name2);
 		}
 		return 0;
 	}
@@ -167,7 +167,7 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerSorter {
 		String name1= def1.getElementName();
 		String name2= def2.getElementName();
 		
-		return getCollator().compare(name1, name2);
+		return getComparator().compare(name1, name2);
 	}
 
 }

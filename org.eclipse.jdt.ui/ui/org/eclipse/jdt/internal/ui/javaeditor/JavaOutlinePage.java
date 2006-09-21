@@ -402,7 +402,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				public void reconcile(IJavaElementDelta delta) {
 					fReorderedMembers= false;
 					fForceFireSelectionChanged= false;
-					if (getSorter() == null) {
+					if (getComparator() == null) {
 						if (fTopLevelTypeOnly
 							&& delta.getElement() instanceof IType
 							&& (delta.getKind() & IJavaElementDelta.ADDED) != 0)
@@ -793,9 +793,9 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), new Runnable() {
 						public void run() {
 							if (on)
-								fOutlineViewer.setSorter(fSorter);
+								fOutlineViewer.setComparator(fSorter);
 							else
-								fOutlineViewer.setSorter(fSourcePositonSorter);
+								fOutlineViewer.setComparator(fSourcePositonSorter);
 						}
 					});
 

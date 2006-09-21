@@ -194,7 +194,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 					ExtractInterfaceInputPage.this.updateUIElementEnablement();
 				}
 			});
-			fTableViewer.setSorter(new JavaElementSorter());
+			fTableViewer.setComparator(new JavaElementSorter());
 			fTableViewer.getControl().setEnabled(anyMembersToExtract());
 
 			createButtonComposite(composite);

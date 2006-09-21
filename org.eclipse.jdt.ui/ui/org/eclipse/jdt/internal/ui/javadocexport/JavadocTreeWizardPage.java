@@ -202,7 +202,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				doValidation(TREESTATUS);
 			}
 		});
-		fInputGroup.setTreeSorter(new JavaElementSorter());
+		fInputGroup.setTreeComperator(new JavaElementSorter());
 		
 		IJavaElement[] elements= fStore.getInitialElements();
 		setTreeChecked(elements);

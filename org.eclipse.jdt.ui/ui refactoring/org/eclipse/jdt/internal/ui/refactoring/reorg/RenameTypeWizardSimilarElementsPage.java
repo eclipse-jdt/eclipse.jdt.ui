@@ -473,7 +473,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
 		fTreeViewer= new ContainerCheckedTreeViewer(tree);
 		fTreeViewer.setUseHashlookup(true);
-		fTreeViewer.setSorter(new SimilarElementSorter());
+		fTreeViewer.setComparator(new SimilarElementSorter());
 		fTreeViewer.setContentProvider(new SimilarElementTreeContentProvider());
 		fTreeViewerLabelProvider= new SimilarLabelProvider();
 		fTreeViewer.setLabelProvider(fTreeViewerLabelProvider);

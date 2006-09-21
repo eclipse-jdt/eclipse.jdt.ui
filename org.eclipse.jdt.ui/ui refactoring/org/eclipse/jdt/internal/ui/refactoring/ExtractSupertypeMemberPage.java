@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import com.ibm.icu.text.Collator;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -50,7 +48,7 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
@@ -118,7 +116,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 			fViewer= new TableViewer(control, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 			fViewer.setLabelProvider(createLabelProvider());
 			fViewer.setContentProvider(new ArrayContentProvider());
-			fViewer.setSorter(new SupertypeSelectionViewerSorter());
+			fViewer.setComparator(new SupertypeSelectionViewerSorter());
 			fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
 				public void selectionChanged(final SelectionChangedEvent event) {
@@ -182,7 +180,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	}
 
 	/** The viewer sorter */
-	private static class SupertypeSelectionViewerSorter extends ViewerSorter {
+	private static class SupertypeSelectionViewerSorter extends ViewerComparator {
 
 		/**
 		 * {@inheritDoc}
@@ -190,7 +188,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		public int compare(final Viewer viewer, final Object first, final Object second) {
 			final IType predecessor= (IType) first;
 			final IType successor= (IType) second;
-			return Collator.getInstance().compare(predecessor.getElementName(), successor.getElementName());
+			return getComparator().compare(predecessor.getElementName(), successor.getElementName());
 		}
 	}
 
@@ -453,7 +451,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		fTableViewer.getTable().setLayoutData(data);
 		fTableViewer.setLabelProvider(createLabelProvider());
 		fTableViewer.setContentProvider(new ArrayContentProvider());
-		fTableViewer.setSorter(new JavaElementSorter());
+		fTableViewer.setComparator(new JavaElementSorter());
 		fTypesToExtract.add(getDeclaringType());
 		fTableViewer.setInput(fTypesToExtract.toArray());
 

@@ -14,12 +14,12 @@ import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathEntry;
 
-public class CPListElementSorter extends ViewerSorter {
+public class CPListElementSorter extends ViewerComparator {
 	
 	private static final int SOURCE= 0;
 	private static final int PROJECT= 1;
@@ -82,7 +82,7 @@ public class CPListElementSorter extends ViewerSorter {
                 ILabelProvider lprov = (ILabelProvider) prov;
                 String name1 = lprov.getText(e1);
                 String name2 = lprov.getText(e2);
-                return collator.compare(name1, name2);
+                return getComparator().compare(name1, name2);
             }
 		}
 		return 0;

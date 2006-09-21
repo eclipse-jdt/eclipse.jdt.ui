@@ -52,8 +52,7 @@ import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.ViewerSorter;
-
+import org.eclipse.jface.viewers.ViewerComparator;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
@@ -440,7 +439,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		DefaultTableLabelProvider labelProvider= new DefaultTableLabelProvider();
 		fDefaultViewer.setLabelProvider(labelProvider);
 		fDefaultViewer.setInput(fModel.elements);
-		fDefaultViewer.setSorter(new ViewerSorter()); // sort alphabetically
+		fDefaultViewer.setComparator(new ViewerComparator()); // sort alphabetically
 		
 		final int ICON_AND_CHECKBOX_WITH= 50;
 		final int HEADER_MARGIN= 20;

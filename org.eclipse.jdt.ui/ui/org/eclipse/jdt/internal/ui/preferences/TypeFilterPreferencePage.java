@@ -25,7 +25,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbench;
@@ -164,7 +164,7 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		LayoutUtil.setWidthHint(fFilterListField.getLabelControl(null), convertWidthInCharsToPixels(40));
 		LayoutUtil.setHorizontalGrabbing(fFilterListField.getListControl(null));
 		
-		fFilterListField.getTableViewer().setSorter(new ViewerSorter() {});
+		fFilterListField.getTableViewer().setComparator(new ViewerComparator());
 		
 		Dialog.applyDialogFont(composite);
 		return composite;

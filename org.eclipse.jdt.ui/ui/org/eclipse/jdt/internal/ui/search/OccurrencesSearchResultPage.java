@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
@@ -82,7 +84,13 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#configureTableViewer(org.eclipse.jface.viewers.TableViewer)
 	 */
 	protected void configureTableViewer(TableViewer viewer) {
-		viewer.setSorter(new JavaElementLineSorter());
+		viewer.setComparator(new ViewerComparator() {
+			public int compare(Viewer v, Object e1, Object e2) {
+				JavaElementLine jel1= (JavaElementLine) e1;
+				JavaElementLine jel2= (JavaElementLine) e2;
+				return jel1.getLine() - jel2.getLine();
+			}
+		});
 		viewer.setLabelProvider(new OccurrencesSearchLabelProvider(this));
 		fContentProvider= new TextSearchTableContentProvider();
 		viewer.setContentProvider(fContentProvider);

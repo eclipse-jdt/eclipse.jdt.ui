@@ -13,8 +13,9 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
@@ -29,7 +30,7 @@ import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
@@ -127,9 +128,9 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		}
 	}
 	
-	private static class TodoTaskSorter extends ViewerSorter {
+	private static class TodoTaskSorter extends ViewerComparator {
 		public int compare(Viewer viewer, Object e1, Object e2) {
-			return collator.compare(((TodoTask) e1).name, ((TodoTask) e2).name);
+			return getComparator().compare(((TodoTask) e1).name, ((TodoTask) e2).name);
 		}
 	}
 	
@@ -164,7 +165,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		};
 		
 		fTodoTasksList.setTableColumns(new ListDialogField.ColumnsDescription(columnsHeaders, true));
-		fTodoTasksList.setViewerSorter(new TodoTaskSorter());
+		fTodoTasksList.setViewerComperator(new TodoTaskSorter());
 		
 		
 		fCaseSensitiveCheckBox= new SelectionButtonDialogField(SWT.CHECK);

@@ -39,7 +39,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -98,10 +98,10 @@ public class VariableBlock {
 		
 		fVariablesList.enableButton(1, false);
 		
-		fVariablesList.setViewerSorter(new ViewerSorter() {
+		fVariablesList.setViewerComperator(new ViewerComparator() {
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				if (e1 instanceof CPVariableElement && e2 instanceof CPVariableElement) {
-					return ((CPVariableElement)e1).getName().compareTo(((CPVariableElement)e2).getName());
+					return getComparator().compare(((CPVariableElement)e1).getName(), ((CPVariableElement)e2).getName());
 				}
 				return super.compare(viewer, e1, e2);
 			}

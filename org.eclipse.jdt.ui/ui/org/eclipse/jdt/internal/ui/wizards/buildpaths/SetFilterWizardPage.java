@@ -32,7 +32,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
@@ -181,7 +181,7 @@ public class SetFilterWizardPage extends NewElementWizardPage {
 		patternList.setElements(elements);
 		patternList.selectFirstElement();
 		patternList.enableButton(IDX_ADD_MULTIPLE, fCurrSourceFolder != null);
-		patternList.setViewerSorter(new ViewerSorter());
+		patternList.setViewerComperator(new ViewerComparator());
 		return patternList;
 	}
 	

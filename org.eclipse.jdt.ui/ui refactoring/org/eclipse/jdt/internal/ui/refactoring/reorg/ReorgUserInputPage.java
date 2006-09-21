@@ -140,7 +140,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		treeViewer.getTree().setLayoutData(gd);
 		treeViewer.setLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS));
 		treeViewer.setContentProvider(new DestinationContentProvider(getDestinationValidator()));
-		treeViewer.setSorter(new JavaElementSorter());
+		treeViewer.setComparator(new JavaElementSorter());
 		treeViewer.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
 		return treeViewer;
 	}

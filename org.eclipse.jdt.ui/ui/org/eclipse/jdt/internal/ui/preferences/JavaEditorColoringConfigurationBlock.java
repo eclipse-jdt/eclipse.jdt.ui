@@ -52,7 +52,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -575,7 +575,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		fListViewer= new TreeViewer(editorComposite, SWT.SINGLE | SWT.BORDER);
 		fListViewer.setLabelProvider(new ColorListLabelProvider());
 		fListViewer.setContentProvider(new ColorListContentProvider());
-		fListViewer.setSorter(new ViewerSorter() {
+		fListViewer.setComparator(new ViewerComparator() {
 			public int category(Object element) {
 				// don't sort the top level categories
 				if (fJavaCategory.equals(element))

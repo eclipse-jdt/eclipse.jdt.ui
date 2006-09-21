@@ -53,7 +53,7 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 		setUseHashlookup(true);
 			
 		setContentProvider(contentProvider);
-		setSorter(new HierarchyViewerSorter(lifeCycle));
+		setComparator(new HierarchyViewerSorter(lifeCycle));
 		
 		fOpen= new OpenAction(part.getSite());
 		addOpenListener(new IOpenListener() {

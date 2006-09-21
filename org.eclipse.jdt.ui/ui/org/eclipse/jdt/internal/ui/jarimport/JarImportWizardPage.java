@@ -216,7 +216,7 @@ public final class JarImportWizardPage extends WizardPage {
 		fTreeViewer.setLabelProvider(labelProvider);
 		fTreeViewer.setContentProvider(contentProvider);
 		fTreeViewer.addFilter(new EmptyPackageFilter());
-		fTreeViewer.setSorter(new JavaElementSorter());
+		fTreeViewer.setComparator(new JavaElementSorter());
 		fTreeViewer.setAutoExpandLevel(2);
 		fTreeViewer.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
 		final IPackageFragmentRoot root= fWizard.getPackageFragmentRoot();

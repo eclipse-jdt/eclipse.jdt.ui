@@ -44,7 +44,7 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.StatusDialog;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
@@ -243,7 +243,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		fListDialogField.setDialogFieldListener(adapter);
 		fListDialogField.setCheckAllButtonIndex(0);
 		fListDialogField.setUncheckAllButtonIndex(1);
-		fListDialogField.setViewerSorter(new ViewerSorter());
+		fListDialogField.setViewerComperator(new ViewerComparator());
 
 		createLabel(c, SWT.NONE, JavadocExportMessages.JavadocStandardWizardPage_referencedclasses_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 4, 0)); 
 		fListDialogField.doFillIntoGrid(c, 3);

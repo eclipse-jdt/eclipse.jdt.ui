@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import com.ibm.icu.text.Collator;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -38,7 +36,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.PlatformUI;
@@ -207,10 +205,8 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			fLabelProvider= new UseSupertypeLabelProvider(fFileCount);
 			fTreeViewer.setLabelProvider(fLabelProvider);
 			fTreeViewer.setContentProvider(new UseSupertypeContentProvider());
-			fTreeViewer.setSorter(new ViewerSorter() {
-			
-				private final Collator fCollator= Collator.getInstance();
-				
+			fTreeViewer.setComparator(new ViewerComparator() {
+							
 				public boolean isSorterProperty(Object element, String property) {
 					return true;
 				}
@@ -226,7 +222,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
-					return fCollator.compare(type1.getElementName(), type2.getElementName());
+					return getComparator().compare(type1.getElementName(), type2.getElementName());
 				}
 			});
 			fTreeViewer.addSelectionChangedListener(new ISelectionChangedListener(){

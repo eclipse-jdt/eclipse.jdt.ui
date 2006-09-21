@@ -159,7 +159,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		fFoldersList.setDialogFieldListener(adapter);
 		fFoldersList.setLabelText(NewWizardMessages.SourceContainerWorkbookPage_folders_label); 
 		
-		fFoldersList.setViewerSorter(new CPListElementSorter());
+		fFoldersList.setViewerComperator(new CPListElementSorter());
 		fFoldersList.enableButton(IDX_EDIT, false);
 		
 		fUseFolderOutputs= new SelectionButtonDialogField(SWT.CHECK);

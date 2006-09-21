@@ -81,7 +81,7 @@ public class MethodsViewer extends ProblemTableViewer {
 		
 		HierarchyViewerSorter sorter= new HierarchyViewerSorter(lifeCycle);
 		sorter.setSortByDefiningType(false);
-		setSorter(sorter);
+		setComparator(sorter);
 		
 		fOpen= new OpenAction(part.getSite());
 		addOpenListener(new IOpenListener() {
@@ -136,7 +136,7 @@ public class MethodsViewer extends ProblemTableViewer {
 	private void sortByDefiningTypeNoRedraw(boolean on) {
 		fSortByDefiningTypeAction.setChecked(on);
 		fLabelProvider.setShowDefiningType(on);
-		((HierarchyViewerSorter) getSorter()).setSortByDefiningType(on);
+		((HierarchyViewerSorter) getComparator()).setSortByDefiningType(on);
 	}
 
 	/**

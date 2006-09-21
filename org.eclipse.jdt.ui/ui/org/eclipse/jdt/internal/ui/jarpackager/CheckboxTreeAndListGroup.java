@@ -26,7 +26,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Tree;
 
-
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
@@ -41,8 +40,8 @@ import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.viewers.ViewerSorter;
 
 /**
  *	Combines a CheckboxTreeViewer and CheckboxListViewer.
@@ -549,8 +548,8 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	/**
 	 *	Sets the sorter that is to be applied to self's list viewer
 	 */
-	public void setListSorter(ViewerSorter sorter) {
-		fListViewer.setSorter(sorter);
+	public void setListComperator(ViewerComparator comparator) {
+		fListViewer.setComparator(comparator);
 	}
 	/**
 	 * Sets the root of the widget to be new Root. Regenerate all of the tables and lists from this
@@ -607,8 +606,8 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	/**
 	 *	Sets the sorter that is to be applied to self's tree viewer
 	 */
-	public void setTreeSorter(ViewerSorter sorter) {
-		fTreeViewer.setSorter(sorter);
+	public void setTreeComperator(ViewerComparator sorter) {
+		fTreeViewer.setComparator(sorter);
 	}
 	/**
 	 *	Adjusts the collection of references to white-checked tree elements appropriately.

@@ -338,7 +338,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		fLabelProvider= createLabelProvider();
 		fViewer.setLabelProvider(createDecoratingLabelProvider(fLabelProvider));
 
-		fViewer.setSorter(createJavaElementSorter());
+		fViewer.setComparator(createJavaElementSorter());
 		fViewer.setUseHashlookup(true);
 		fTitleProvider= createTitleProvider();
 

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import com.ibm.icu.text.Collator;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -45,7 +43,7 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
@@ -97,16 +95,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
 public class JavaSearchResultPage extends AbstractTextSearchViewPage implements IAdaptable {
 	
-	public static class DecoratorIgnoringViewerSorter extends ViewerSorter {
+	public static class DecoratorIgnoringViewerSorter extends ViewerComparator {
 
 		private final ILabelProvider fLabelProvider;
-		private Collator fNewCollator;
-		
 
 		public DecoratorIgnoringViewerSorter(ILabelProvider labelProvider) {
 			super(null); // lazy initialization
 			fLabelProvider= labelProvider;
-			fNewCollator= null;
 		}
 		
 	    public int compare(Viewer viewer, Object e1, Object e2) {
@@ -116,26 +111,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	            name1 = "";//$NON-NLS-1$
 	        if (name2 == null)
 	            name2 = "";//$NON-NLS-1$
-	        return getNewCollator().compare(name1, name2);
+	        return getComparator().compare(name1, name2);
 	    }
-	    
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ViewerSorter#getCollator()
-		 */
-		public final java.text.Collator getCollator() {
-			// kept in for API compatibility
-			if (collator == null) {
-				collator= java.text.Collator.getInstance();
-			}
-			return collator;
-		}
-		
-		private final Collator getNewCollator() {
-			if (fNewCollator == null) {
-				fNewCollator= Collator.getInstance();
-			}
-			return fNewCollator;
-		}
 	}
 
 		
@@ -359,7 +336,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		viewer.setLabelProvider(new ColorDecoratingLabelProvider(sortingLabelProvider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 		fContentProvider=new JavaSearchTableContentProvider(this);
 		viewer.setContentProvider(fContentProvider);
-		viewer.setSorter(new DecoratorIgnoringViewerSorter(sortingLabelProvider));
+		viewer.setComparator(new DecoratorIgnoringViewerSorter(sortingLabelProvider));
 		setSortOrder(fCurrentSortOrder);
 		addDragAdapters(viewer);
 	}
@@ -367,7 +344,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	protected void configureTreeViewer(TreeViewer viewer) {
 		PostfixLabelProvider postfixLabelProvider= new PostfixLabelProvider(this);
 		viewer.setUseHashlookup(true);
-		viewer.setSorter(new DecoratorIgnoringViewerSorter(postfixLabelProvider));
+		viewer.setComparator(new DecoratorIgnoringViewerSorter(postfixLabelProvider));
 		viewer.setLabelProvider(new ColorDecoratingLabelProvider(postfixLabelProvider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 		fContentProvider= new LevelTreeContentProvider(this, fCurrentGrouping);
 		viewer.setContentProvider(fContentProvider);

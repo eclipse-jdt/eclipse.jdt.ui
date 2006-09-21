@@ -46,7 +46,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -93,7 +93,7 @@ public class ListDialogField extends DialogField {
 	protected ILabelProvider fLabelProvider;
 	protected ListViewerAdapter fListViewerAdapter;
 	protected List fElements;
-	protected ViewerSorter fViewerSorter;
+	protected ViewerComparator fViewerComperator;
 
 	protected String[] fButtonLabels;
 	private Button[] fButtonControls;
@@ -185,11 +185,11 @@ public class ListDialogField extends DialogField {
 	}
 	
 	/**
-	 * Sets the viewerSorter.
-	 * @param viewerSorter The viewerSorter to set
+	 * Sets the viewer comperator.
+	 * @param viewerComperator The viewer comperator to set
 	 */
-	public void setViewerSorter(ViewerSorter viewerSorter) {
-		fViewerSorter= viewerSorter;
+	public void setViewerComperator(ViewerComparator viewerComperator) {
+		fViewerComperator= viewerComperator;
 	}
 	
 	public void setTableColumns(ColumnsDescription column) {
@@ -339,8 +339,8 @@ public class ListDialogField extends DialogField {
 			
 			fTable.setInput(fParentElement);
 			
-			if (fViewerSorter != null) {
-				fTable.setSorter(fViewerSorter);
+			if (fViewerComperator != null) {
+				fTable.setComparator(fViewerComperator);
 			}
 			
 			fTableControl.setEnabled(isEnabled());
@@ -729,9 +729,9 @@ public class ListDialogField extends DialogField {
 	
 	public void selectFirstElement() {
 		Object element= null;
-		if (fViewerSorter != null) {
+		if (fViewerComperator != null) {
 			Object[] arr= fElements.toArray(); 
-			fViewerSorter.sort(fTable, arr);
+			fViewerComperator.sort(fTable, arr);
 			if (arr.length > 0) {
 				element= arr[0];
 			}
