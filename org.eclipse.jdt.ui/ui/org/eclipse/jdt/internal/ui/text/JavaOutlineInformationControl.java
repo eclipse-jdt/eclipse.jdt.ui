@@ -213,7 +213,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		 * {@inheritDoc}
 		 */
 		protected void internalExpandToLevel(Widget node, int level) {
-			if (!fIsFiltering && node instanceof Item) {
+			if (!fIsFiltering && node instanceof Item && getMatcher() == null) {
 				Item i= (Item) node;
 				if (i.getData() instanceof IJavaElement) {
 					IJavaElement je= (IJavaElement) i.getData();
