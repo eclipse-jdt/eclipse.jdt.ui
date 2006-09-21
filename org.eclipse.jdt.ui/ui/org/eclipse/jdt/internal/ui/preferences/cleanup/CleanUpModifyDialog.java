@@ -18,6 +18,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 
 public class CleanUpModifyDialog extends ModifyDialog {
@@ -30,8 +31,8 @@ public class CleanUpModifyDialog extends ModifyDialog {
 		CleanUpConstants.TRUE
 	};
 
-	public CleanUpModifyDialog(Shell parentShell, Profile profile, ProfileManager profileManager, boolean newProfile, String dialogPreferencesKey) {
-	    super(parentShell, profile, profileManager, newProfile, dialogPreferencesKey);
+	public CleanUpModifyDialog(Shell parentShell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile, String dialogPreferencesKey, String lastSavePathKey) {
+	    super(parentShell, profile, profileManager, profileStore, newProfile, dialogPreferencesKey, lastSavePathKey);
     }
 
 	/**

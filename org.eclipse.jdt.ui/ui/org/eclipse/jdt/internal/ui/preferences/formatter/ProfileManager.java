@@ -790,4 +790,8 @@ public abstract class ProfileManager extends Observable {
 	}
 
     public abstract Profile getDefaultProfile();
+
+	public IProfileVersioner getProfileVersioner() {
+    	return fProfileVersioner;
+    }
 }

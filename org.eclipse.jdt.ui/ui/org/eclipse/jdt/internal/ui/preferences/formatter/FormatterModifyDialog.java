@@ -18,8 +18,8 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 
 public class FormatterModifyDialog extends ModifyDialog {
     
-    public FormatterModifyDialog(Shell parentShell, Profile profile, ProfileManager profileManager, boolean newProfile, String dialogPreferencesKey) {
-		super(parentShell, profile, profileManager, newProfile, dialogPreferencesKey);
+    public FormatterModifyDialog(Shell parentShell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile, String dialogPreferencesKey, String lastSavePathKey) {
+		super(parentShell, profile, profileManager, profileStore, newProfile, dialogPreferencesKey, lastSavePathKey);
 	}
 	
 	protected void addPages(Map values) {

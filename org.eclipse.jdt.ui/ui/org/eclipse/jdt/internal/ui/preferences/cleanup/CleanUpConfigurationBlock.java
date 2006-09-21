@@ -146,8 +146,8 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
         }
     }
 
-	protected ModifyDialog createModifyDialog(Shell shell, Profile profile, ProfileManager profileManager, boolean newProfile) {
-        return new CleanUpModifyDialog(shell, profile, profileManager, newProfile, CLEANUP_PAGE_SETTINGS_KEY);
+	protected ModifyDialog createModifyDialog(Shell shell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile) {
+        return new CleanUpModifyDialog(shell, profile, profileManager, profileStore, newProfile, CLEANUP_PAGE_SETTINGS_KEY, DIALOGSTORE_LASTSAVELOADPATH);
     }
 
 }

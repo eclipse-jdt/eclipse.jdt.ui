@@ -25,6 +25,13 @@ final class FormatterMessages extends NLS {
 		// Do not instantiate
 	}
 
+	public static String ModifyDialog_BuiltIn_Status;
+	public static String ModifyDialog_Duplicate_Status;
+	public static String ModifyDialog_EmptyName_Status;
+	public static String ModifyDialog_Export_Button;
+	public static String ModifyDialog_NewCreated_Status;
+	public static String ModifyDialog_ProfileName_Label;
+	public static String ModifyDialog_Shared_Status;
 	public static String ProfileConfigurationBlock_load_profile_wrong_profile_message;
 	public static String WhiteSpaceTabPage_assignments;
 	public static String WhiteSpaceTabPage_assignments_before_assignment_operator;
@@ -433,8 +440,6 @@ final class FormatterMessages extends NLS {
 	public static String CodingStyleConfigurationBlock_save_profile_overwrite_title;
 	public static String CodingStyleConfigurationBlock_save_profile_overwrite_message;
 	public static String CodingStyleConfigurationBlock_edit_button_desc;
-	public static String CodingStyleConfigurationBlock_show_button_desc;
-	public static String CodingStyleConfigurationBlock_rename_button_desc;
 	public static String CodingStyleConfigurationBlock_remove_button_desc;
 	public static String CodingStyleConfigurationBlock_new_button_desc;
 	public static String CodingStyleConfigurationBlock_load_button_desc;
@@ -454,17 +459,10 @@ final class FormatterMessages extends NLS {
 	
 	public static String ModifyDialog_dialog_title;
 	public static String ModifyDialog_apply_button;
-	public static String ModifyDialog_dialog_show_title;
-	public static String ModifyDialog_dialog_show_warning_builtin;
 	public static String ModifyDialogTabPage_preview_label_text;
 	
 	public static String ProfileManager_unmanaged_profile;
 	public static String ProfileManager_unmanaged_profile_with_name;
-	
-	public static String RenameProfileDialog_status_message_profile_with_this_name_already_exists;
-	public static String RenameProfileDialog_status_message_profile_name_empty;
-	public static String RenameProfileDialog_dialog_title;
-	public static String RenameProfileDialog_dialog_label_enter_a_new_name;
 	
 	public static String ModifyDialogTabPage_error_msg_values_text_unassigned;
 	public static String ModifyDialogTabPage_error_msg_values_items_text_unassigned;

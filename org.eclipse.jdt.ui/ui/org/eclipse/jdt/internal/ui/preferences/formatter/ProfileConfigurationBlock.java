@@ -18,8 +18,6 @@ import java.util.Observable;
 import java.util.Observer;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
@@ -136,29 +134,21 @@ public abstract class ProfileConfigurationBlock {
 		public ButtonController() {
 			fProfileManager.addObserver(this);
 			fNewButton.addSelectionListener(this);
-			fRenameButton.addSelectionListener(this);
 			fEditButton.addSelectionListener(this);
 			fDeleteButton.addSelectionListener(this);
-			fSaveButton.addSelectionListener(this);
 			fLoadButton.addSelectionListener(this);
 			update(fProfileManager, null);
 		}
 
 		public void update(Observable o, Object arg) {
 			Profile selected= ((ProfileManager)o).getSelected();
-			final boolean notBuiltIn= !selected.isBuiltInProfile();
-			fEditButton.setText(notBuiltIn ? FormatterMessages.CodingStyleConfigurationBlock_edit_button_desc
-					: FormatterMessages.CodingStyleConfigurationBlock_show_button_desc); 
+			final boolean notBuiltIn= !selected.isBuiltInProfile(); 
 			fDeleteButton.setEnabled(notBuiltIn);
-			fSaveButton.setEnabled(notBuiltIn);
-			fRenameButton.setEnabled(notBuiltIn);
 		}
 
 		public void widgetSelected(SelectionEvent e) {
 			final Button button= (Button)e.widget;
-			if (button == fSaveButton)
-				saveButtonPressed();
-			else if (button == fEditButton)
+			if (button == fEditButton)
 				modifyButtonPressed();
 			else if (button == fDeleteButton) 
 				deleteButtonPressed();
@@ -166,25 +156,13 @@ public abstract class ProfileConfigurationBlock {
 				newButtonPressed();
 			else if (button == fLoadButton)
 				loadButtonPressed();
-			else if (button == fRenameButton) 
-				renameButtonPressed();
 		}
 
 		public void widgetDefaultSelected(SelectionEvent e) {
 		}
 
-		private void renameButtonPressed() {
-			if (fProfileManager.getSelected().isBuiltInProfile())
-				return;
-			final CustomProfile profile= (CustomProfile) fProfileManager.getSelected();
-			final RenameProfileDialog renameDialog= new RenameProfileDialog(fComposite.getShell(), profile, fProfileManager);
-			if (renameDialog.open() == Window.OK) {
-				fProfileManager.setSelected(renameDialog.getRenamedProfile());
-			}
-		}
-
 		private void modifyButtonPressed() {
-			final StatusDialog modifyDialog= createModifyDialog(fComposite.getShell(), fProfileManager.getSelected(), fProfileManager, false);
+			final StatusDialog modifyDialog= createModifyDialog(fComposite.getShell(), fProfileManager.getSelected(), fProfileManager, fProfileStore, false);
 			modifyDialog.open();
 		}
 
@@ -203,53 +181,8 @@ public abstract class ProfileConfigurationBlock {
 				return;
 			if (!p.openEditDialog()) 
 				return;
-			final StatusDialog modifyDialog= createModifyDialog(fComposite.getShell(), p.getCreatedProfile(), fProfileManager, true);
+			final StatusDialog modifyDialog= createModifyDialog(fComposite.getShell(), p.getCreatedProfile(), fProfileManager, fProfileStore, true);
 			modifyDialog.open();
-		}
-
-		private void saveButtonPressed() {
-			Profile selected= fProfileManager.getSelected();
-			if (selected.isSharedProfile()) {
-				final RenameProfileDialog renameDialog= new RenameProfileDialog(fComposite.getShell(), selected, fProfileManager);
-				if (renameDialog.open() != Window.OK) {
-					return;
-				}
-
-				selected= renameDialog.getRenamedProfile();
-				fProfileManager.setSelected(selected);
-			}
-
-			final FileDialog dialog= new FileDialog(fComposite.getShell(), SWT.SAVE);
-			dialog.setText(FormatterMessages.CodingStyleConfigurationBlock_save_profile_dialog_title); 
-			dialog.setFilterExtensions(new String [] {"*.xml"}); //$NON-NLS-1$
-
-			final String lastPath= JavaPlugin.getDefault().getDialogSettings().get(fLastSaveLoadPathKey + ".savepath"); //$NON-NLS-1$
-			if (lastPath != null) {
-				dialog.setFilterPath(lastPath);
-			}
-			final String path= dialog.open();
-			if (path == null) 
-				return;
-
-			JavaPlugin.getDefault().getDialogSettings().put(fLastSaveLoadPathKey + ".savepath", dialog.getFilterPath()); //$NON-NLS-1$
-
-			final File file= new File(path);
-			if (file.exists() && !MessageDialog.openQuestion(fComposite.getShell(), FormatterMessages.CodingStyleConfigurationBlock_save_profile_overwrite_title, Messages.format(FormatterMessages.CodingStyleConfigurationBlock_save_profile_overwrite_message, path))) { 
-				return;
-			}
-			String encoding= ProfileStore.ENCODING;
-			final IContentType type= Platform.getContentTypeManager().getContentType("org.eclipse.core.runtime.xml"); //$NON-NLS-1$
-			if (type != null)
-				encoding= type.getDefaultCharset();
-			final Collection profiles= new ArrayList();
-			profiles.add(selected);
-			try {
-				fProfileStore.writeProfilesToFile(profiles, file, encoding);
-			} catch (CoreException e) {
-				final String title= FormatterMessages.CodingStyleConfigurationBlock_save_profile_error_title;
-				final String message= FormatterMessages.CodingStyleConfigurationBlock_save_profile_error_message;
-				ExceptionHandler.handle(e, fComposite.getShell(), title, message);
-			}
 		}
 
 		private void loadButtonPressed() {
@@ -308,11 +241,9 @@ public abstract class ProfileConfigurationBlock {
 	private Composite fComposite;
 	private Combo fProfileCombo;
 	private Button fEditButton;
-	private Button fRenameButton;
 	private Button fDeleteButton;
 	private Button fNewButton;
 	private Button fLoadButton;
-	private Button fSaveButton;
 	
 	private PixelConverter fPixConv;
 	/**
@@ -367,7 +298,7 @@ public abstract class ProfileConfigurationBlock {
 	
 	protected abstract ProfileManager createProfileManager(List profiles, IScopeContext context, PreferencesAccess access, IProfileVersioner profileVersioner);
 	
-	protected abstract ModifyDialog createModifyDialog(Shell shell, Profile profile, ProfileManager profileManager, boolean newProfile);
+	protected abstract ModifyDialog createModifyDialog(Shell shell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile);
 
 	protected abstract void configurePreview(Composite composite, int numColumns, ProfileManager profileManager);
 
@@ -389,25 +320,18 @@ public abstract class ProfileConfigurationBlock {
 	 */
 	public Composite createContents(Composite parent) {
 
-		final int numColumns = 5;
+		final int numColumns = 3;
 
 		fPixConv = new PixelConverter(parent);
 		fComposite = createComposite(parent, numColumns);
 
-		fProfileCombo= createProfileCombo(fComposite, numColumns - 3, fPixConv.convertWidthInCharsToPixels(20));
-		fEditButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_edit_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING); 
-		fRenameButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_rename_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING); 
+		fProfileCombo= createProfileCombo(fComposite, 1, fPixConv.convertWidthInCharsToPixels(20));
+		fEditButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_edit_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING);  
 		fDeleteButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_remove_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING); 
 
-		final Composite group= createComposite(fComposite, 4);
-		final GridData groupData= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		groupData.horizontalSpan= numColumns;
-		group.setLayoutData(groupData);
-
-		fNewButton= createButton(group, FormatterMessages.CodingStyleConfigurationBlock_new_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING); 
-		((GridData)createLabel(group, "", 1).getLayoutData()).grabExcessHorizontalSpace= true; //$NON-NLS-1$
-		fLoadButton= createButton(group, FormatterMessages.CodingStyleConfigurationBlock_load_button_desc, GridData.HORIZONTAL_ALIGN_END); 
-		fSaveButton= createButton(group, FormatterMessages.CodingStyleConfigurationBlock_save_button_desc, GridData.HORIZONTAL_ALIGN_END); 
+		createLabel(fComposite, "", 1); //$NON-NLS-1$
+		fNewButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_new_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING);
+		fLoadButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_load_button_desc, GridData.HORIZONTAL_ALIGN_END); 
 
 		configurePreview(fComposite, numColumns, fProfileManager);
 

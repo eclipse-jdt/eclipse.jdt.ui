@@ -118,7 +118,7 @@ public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock {
 	}
 
     
-    protected ModifyDialog createModifyDialog(Shell shell, Profile profile, ProfileManager profileManager, boolean newProfile) {
-        return new FormatterModifyDialog(shell, profile, profileManager, newProfile, FORMATTER_DIALOG_PREFERENCE_KEY);
+    protected ModifyDialog createModifyDialog(Shell shell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile) {
+        return new FormatterModifyDialog(shell, profile, profileManager, profileStore, newProfile, FORMATTER_DIALOG_PREFERENCE_KEY, DIALOGSTORE_LASTSAVELOADPATH);
     }
 }
