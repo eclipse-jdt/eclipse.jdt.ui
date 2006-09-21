@@ -74,7 +74,7 @@ public class AllRefactoringTests {
 		suite.addTest(RenameJavaProjectTests.suite());
 		
 		// validate edit
-		suite.addTest(ValidateEditTests.suite());
+		//suite.addTest(ValidateEditTests.suite()); // commented out see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=158105
 		
 		//--helpers
 		suite.addTest(RenamingNameSuggestorTests.suite());
