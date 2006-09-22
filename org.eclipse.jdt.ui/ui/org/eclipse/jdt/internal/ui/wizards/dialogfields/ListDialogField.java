@@ -47,6 +47,7 @@ import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -924,8 +925,13 @@ public class ListDialogField extends DialogField {
 		if (fListAdapter != null) {
 			fListAdapter.doubleClicked(this);
 		}
+	}
+
+	/**
+	 * @deprecated Use {@link #setViewerComperator(ViewerComparator)} instead}
+	 */
+	public void setViewerSorter(ViewerSorter sorter) {
+		setViewerComperator(sorter);
 	}	
-
-
 
 }
