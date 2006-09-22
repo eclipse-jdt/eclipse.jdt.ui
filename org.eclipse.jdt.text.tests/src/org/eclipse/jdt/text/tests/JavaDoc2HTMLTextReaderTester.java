@@ -17,8 +17,11 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jface.internal.text.html.HTMLPrinter;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IBufferChangedListener;
@@ -27,8 +30,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocCommentReader;
 
-import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
+
 
 public class JavaDoc2HTMLTextReaderTester extends TestCase {
 

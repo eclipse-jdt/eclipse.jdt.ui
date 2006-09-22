@@ -8,12 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.text.tests;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import org.eclipse.jdt.text.tests.comments.CommentsTestSuite;
 import org.eclipse.jdt.text.tests.contentassist.ContentAssistTestSuite;
 import org.eclipse.jdt.text.tests.spelling.SpellingTestSuite;
@@ -34,7 +32,6 @@ public class JdtTextTestSuite {
 		suite.addTest(JavaParameterListValidatorTest.suite());
 		suite.addTest(JavaDoc2HTMLTextReaderTester.suite());
 		suite.addTest(JavaPairMatcherTest.suite());
-		suite.addTest(HTML2TextReaderTester.suite());
 		suite.addTest(JavaPartitionerExtensionTest.suite());
 		suite.addTest(JavaColoringTest.suite());
 		suite.addTest(SmartSemicolonAutoEditStrategyTest.suite());
