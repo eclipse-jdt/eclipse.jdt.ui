@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 
-import org.eclipse.jdt.ui.tests.reorg.MockReorgQueries;
+import org.eclipse.jdt.ui.tests.refactoring.ccp.MockReorgQueries;
 
 
 public class AbstractMoveCompilationUnitPrefTest extends RepeatingRefactoringPerformanceTestCase {
