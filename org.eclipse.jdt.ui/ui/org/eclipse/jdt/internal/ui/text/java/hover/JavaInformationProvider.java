@@ -14,6 +14,9 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.internal.text.html.BrowserInformationControl;
+import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
+
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
@@ -31,7 +34,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
-import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
 

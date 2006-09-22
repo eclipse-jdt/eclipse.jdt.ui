@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.text;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jface.internal.text.html.HTMLPrinter;
+
 import org.eclipse.jface.text.source.DefaultAnnotationHover;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;

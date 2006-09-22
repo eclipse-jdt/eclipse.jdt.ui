@@ -32,6 +32,8 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.internal.text.html.BrowserInformationControl;
+import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
@@ -78,9 +80,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator;
-import org.eclipse.jdt.internal.ui.text.java.hover.BrowserInformationControl;
 
 import org.osgi.framework.Bundle;
 
@@ -859,7 +859,8 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getInformationControlCreator()
 	 */
 	public IInformationControlCreator getInformationControlCreator() {
-		if (!BrowserInformationControl.isAvailable(null))
+		Shell shell= JavaPlugin.getActiveWorkbenchShell();
+		if (shell == null || !BrowserInformationControl.isAvailable(shell))
 			return null;
 		
 		if (fCreator == null) {

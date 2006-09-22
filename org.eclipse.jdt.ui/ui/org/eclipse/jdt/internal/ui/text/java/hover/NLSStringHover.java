@@ -14,6 +14,8 @@ import java.util.Properties;
 
 import org.eclipse.core.resources.IStorage;
 
+import org.eclipse.jface.internal.text.html.HTMLPrinter;
+
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
@@ -38,7 +40,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 
 /**
  * Provides externalized string as hover info for NLS key.

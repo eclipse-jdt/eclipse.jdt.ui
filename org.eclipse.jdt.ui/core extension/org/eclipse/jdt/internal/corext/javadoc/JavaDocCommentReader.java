@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.javadoc;
 
+import org.eclipse.jface.internal.text.html.SingleCharReader;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
+
 
 /**
  * Reads a java doc comment from a java doc comment. Skips star-character

@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.util;
 
+import com.ibm.icu.text.BreakIterator;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
-import com.ibm.icu.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +26,8 @@ import org.eclipse.help.HelpSystem;
 import org.eclipse.help.IContext;
 import org.eclipse.help.IContext2;
 import org.eclipse.help.IHelpResource;
+
+import org.eclipse.jface.internal.text.html.HTML2TextReader;
 
 import org.eclipse.ui.PlatformUI;
 
@@ -42,7 +45,6 @@ import org.eclipse.jdt.ui.JavadocContentAccess;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
-import org.eclipse.jdt.internal.ui.text.HTML2TextReader;
 
 public class JavadocHelpContext implements IContext2 {
 	

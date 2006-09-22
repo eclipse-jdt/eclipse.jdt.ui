@@ -18,10 +18,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.TagElement;
+import org.eclipse.jface.internal.text.html.HTMLPrinter;
+import org.eclipse.jface.internal.text.html.SubstitutionTextReader;
 
-import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
-import org.eclipse.jdt.internal.ui.text.SubstitutionTextReader;
+import org.eclipse.jdt.core.dom.TagElement;
 
 
 /**
