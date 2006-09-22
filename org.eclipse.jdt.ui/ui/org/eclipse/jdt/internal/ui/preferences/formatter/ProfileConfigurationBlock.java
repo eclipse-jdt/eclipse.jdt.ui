@@ -320,18 +320,19 @@ public abstract class ProfileConfigurationBlock {
 	 */
 	public Composite createContents(Composite parent) {
 
-		final int numColumns = 3;
+		final int numColumns = 5;
 
 		fPixConv = new PixelConverter(parent);
 		fComposite = createComposite(parent, numColumns);
 
-		fProfileCombo= createProfileCombo(fComposite, 1, fPixConv.convertWidthInCharsToPixels(20));
+		fProfileCombo= createProfileCombo(fComposite, 3, fPixConv.convertWidthInCharsToPixels(20));
 		fEditButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_edit_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING);  
 		fDeleteButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_remove_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING); 
 
-		createLabel(fComposite, "", 1); //$NON-NLS-1$
+//		createLabel(fComposite, "", 1); //$NON-NLS-1$
 		fNewButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_new_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING);
-		fLoadButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_load_button_desc, GridData.HORIZONTAL_ALIGN_END); 
+		fLoadButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_load_button_desc, GridData.HORIZONTAL_ALIGN_END);
+		createLabel(fComposite, "", 3); //$NON-NLS-1$
 
 		configurePreview(fComposite, numColumns, fProfileManager);
 
