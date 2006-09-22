@@ -17,7 +17,7 @@ import org.eclipse.jdt.testplugin.TestOptionsSetup;
 
 public class AllRefactoringTests {
 	public static Test suite ( ) {
-		TestSuite suite= new TestSuite("All All Tests");
+		TestSuite suite= new TestSuite("All Refactoring Tests");
 		suite.addTest(org.eclipse.jdt.ui.tests.actions.AllTests.suite());
 		suite.addTest(org.eclipse.jdt.ui.tests.nls.AllTests.suite());
 		suite.addTest(org.eclipse.jdt.ui.tests.refactoring.AllTests.suite());
