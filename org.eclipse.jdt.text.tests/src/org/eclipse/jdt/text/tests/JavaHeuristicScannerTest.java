@@ -855,5 +855,32 @@ public class JavaHeuristicScannerTest extends TestCase {
 		String indent= fScanner.computeIndentation(fDocument.getLength()).toString();
 		Assert.assertEquals("\t\t\t", indent);
 	}
-}
 
+	public void testConditional1() throws Exception {
+		if (true) // XXX enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed
+			return;
+    	fDocument.set(
+    			"		public boolean isPrime() {\n" +
+    			"			return fPrime == true ? true\n" +
+    			"			                      : false;"
+    	);
+    	
+    	String indent= fScanner.computeIndentation(fDocument.getLength() - 8).toString();
+    	Assert.assertEquals("			                      ", indent);
+    }
+
+	public void testConditional2() throws Exception {
+		if (true) // XXX enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed
+			return;
+    	fDocument.set(
+    			"		public boolean isPrime() {\n" +
+    			"			return fPrime == true" +
+    			"					? true\n" +
+    			"					: false;"
+    	);
+    	
+    	String indent= fScanner.computeIndentation(fDocument.getLength() - 8).toString();
+    	Assert.assertEquals("					", indent);
+    	
+    }
+}
