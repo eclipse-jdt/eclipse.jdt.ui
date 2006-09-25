@@ -1093,6 +1093,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 * @since 2.1
+	 * @deprecated as of 3.3 replaced by {@link org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants}
 	 */
 	public final static String EDITOR_SMART_HOME_END= AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END;
 
@@ -3600,7 +3601,6 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_LRU_HISTORY, ""); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_SORTER, "org.eclipse.jdt.ui.RelevanceSorter"); //$NON-NLS-1$
 
-		store.setDefault(PreferenceConstants.EDITOR_SMART_HOME_END, true);
 		store.setDefault(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION, true);
 		store.setDefault(PreferenceConstants.EDITOR_SMART_PASTE, true);
 		store.setDefault(PreferenceConstants.EDITOR_IMPORTS_ON_PASTE, true);
@@ -3686,6 +3686,7 @@ public class PreferenceConstants {
 
 		// reset preferences that are not settable by editor any longer
 		// see AbstractDecoratedTextEditorPreferenceConstants
+		store.setToDefault(EDITOR_SMART_HOME_END); // global
 		store.setToDefault(EDITOR_LINE_NUMBER_RULER); // global
 		store.setToDefault(EDITOR_LINE_NUMBER_RULER_COLOR); // global
 		store.setToDefault(EDITOR_OVERVIEW_RULER); // removed -> true

@@ -198,7 +198,6 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_link;
 	public static String JavaEditorPreferencePage_link_tooltip;
 	public static String JavaEditorPreferencePage_importsOnPaste;
-	public static String JavaEditorPreferencePage_smartHomeEnd;
 	public static String JavaEditorPreferencePage_subWordNavigation;
 	public static String JavaEditorPreferencePage_typing_smartSemicolon;
 	public static String JavaEditorPreferencePage_typing_smartOpeningBrace;
