@@ -94,7 +94,7 @@ public class ListDialogField extends DialogField {
 	protected ILabelProvider fLabelProvider;
 	protected ListViewerAdapter fListViewerAdapter;
 	protected List fElements;
-	protected ViewerComparator fViewerComperator;
+	protected ViewerComparator fViewerComparator;
 
 	protected String[] fButtonLabels;
 	private Button[] fButtonControls;
@@ -186,11 +186,11 @@ public class ListDialogField extends DialogField {
 	}
 	
 	/**
-	 * Sets the viewer comperator.
-	 * @param viewerComperator The viewer comperator to set
+	 * Sets the viewer comparator.
+	 * @param viewerComparator The viewer comparator to set
 	 */
-	public void setViewerComperator(ViewerComparator viewerComperator) {
-		fViewerComperator= viewerComperator;
+	public void setViewerComparator(ViewerComparator viewerComparator) {
+		fViewerComparator= viewerComparator;
 	}
 	
 	public void setTableColumns(ColumnsDescription column) {
@@ -340,8 +340,8 @@ public class ListDialogField extends DialogField {
 			
 			fTable.setInput(fParentElement);
 			
-			if (fViewerComperator != null) {
-				fTable.setComparator(fViewerComperator);
+			if (fViewerComparator != null) {
+				fTable.setComparator(fViewerComparator);
 			}
 			
 			fTableControl.setEnabled(isEnabled());
@@ -730,9 +730,9 @@ public class ListDialogField extends DialogField {
 	
 	public void selectFirstElement() {
 		Object element= null;
-		if (fViewerComperator != null) {
+		if (fViewerComparator != null) {
 			Object[] arr= fElements.toArray(); 
-			fViewerComperator.sort(fTable, arr);
+			fViewerComparator.sort(fTable, arr);
 			if (arr.length > 0) {
 				element= arr[0];
 			}
@@ -928,10 +928,10 @@ public class ListDialogField extends DialogField {
 	}
 
 	/**
-	 * @deprecated Use {@link #setViewerComperator(ViewerComparator)} instead}
+	 * @deprecated Use {@link #setViewerComparator(ViewerComparator)} instead}
 	 */
 	public void setViewerSorter(ViewerSorter sorter) {
-		setViewerComperator(sorter);
+		setViewerComparator(sorter);
 	}	
 
 }

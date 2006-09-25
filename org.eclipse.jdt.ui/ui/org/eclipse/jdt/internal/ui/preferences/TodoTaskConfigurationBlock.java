@@ -165,7 +165,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		};
 		
 		fTodoTasksList.setTableColumns(new ListDialogField.ColumnsDescription(columnsHeaders, true));
-		fTodoTasksList.setViewerComperator(new TodoTaskSorter());
+		fTodoTasksList.setViewerComparator(new TodoTaskSorter());
 		
 		
 		fCaseSensitiveCheckBox= new SelectionButtonDialogField(SWT.CHECK);

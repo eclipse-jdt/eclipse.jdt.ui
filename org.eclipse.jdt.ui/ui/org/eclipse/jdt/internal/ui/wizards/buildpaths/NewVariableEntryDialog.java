@@ -120,7 +120,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 		
 		fVariablesList.enableButton(IDX_EXTEND, false);
 		
-		fVariablesList.setViewerComperator(new ViewerComparator() {
+		fVariablesList.setViewerComparator(new ViewerComparator() {
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				if (e1 instanceof CPVariableElement && e2 instanceof CPVariableElement) {
 					return getComparator().compare(((CPVariableElement)e1).getName(), ((CPVariableElement)e2).getName());

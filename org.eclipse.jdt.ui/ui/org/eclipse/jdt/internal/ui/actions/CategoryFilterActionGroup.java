@@ -122,7 +122,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 							public void removeListener(ILabelProviderListener listener) {}
 						});
 			fCategoryList.addElements(categories);
-			fCategoryList.setViewerComperator(new ViewerComparator());
+			fCategoryList.setViewerComparator(new ViewerComparator());
 			fCategoryList.setLabelText(ActionMessages.CategoryFilterActionGroup_SelectCategoriesDescription);
 			fCategoryList.checkAll(true);
 			for (Iterator iter= selectedCategories.iterator(); iter.hasNext();) {

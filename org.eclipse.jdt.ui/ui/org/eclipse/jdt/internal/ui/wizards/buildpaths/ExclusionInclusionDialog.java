@@ -150,7 +150,7 @@ public class ExclusionInclusionDialog extends StatusDialog {
 		patternList.setElements(elements);
 		patternList.selectFirstElement();
 		patternList.enableButton(IDX_ADD_MULTIPLE, fCurrSourceFolder != null);
-		patternList.setViewerComperator(new ViewerComparator());
+		patternList.setViewerComparator(new ViewerComparator());
 		return patternList;
 	}
 

@@ -519,8 +519,8 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 						}
 		};
 		fInputGroup.addTreeFilter(new EmptyInnerPackageFilter());
-		fInputGroup.setTreeComperator(new JavaElementSorter());
-		fInputGroup.setListComperator(new JavaElementSorter());
+		fInputGroup.setTreeComparator(new JavaElementSorter());
+		fInputGroup.setListComparator(new JavaElementSorter());
 		fInputGroup.addTreeFilter(new ContainerFilter(ContainerFilter.FILTER_NON_CONTAINERS));
 		fInputGroup.addTreeFilter(new LibraryFilter());
 		fInputGroup.addListFilter(new ContainerFilter(ContainerFilter.FILTER_CONTAINERS));

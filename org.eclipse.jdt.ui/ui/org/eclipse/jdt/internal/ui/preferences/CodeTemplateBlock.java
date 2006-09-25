@@ -292,7 +292,7 @@ public class CodeTemplateBlock {
 		fCodeTemplateTree= new TreeListDialogField(adapter, buttonLabels, new CodeTemplateLabelProvider());
 		fCodeTemplateTree.setDialogFieldListener(adapter);
 		fCodeTemplateTree.setLabelText(PreferencesMessages.CodeTemplateBlock_templates_label);
-		fCodeTemplateTree.setViewerComperator(adapter);
+		fCodeTemplateTree.setViewerComparator(adapter);
 
 		fCodeTemplateTree.enableButton(IDX_EXPORT, false);
 		fCodeTemplateTree.enableButton(IDX_EDIT, false);

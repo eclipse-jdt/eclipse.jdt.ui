@@ -548,7 +548,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	/**
 	 *	Sets the sorter that is to be applied to self's list viewer
 	 */
-	public void setListComperator(ViewerComparator comparator) {
+	public void setListComparator(ViewerComparator comparator) {
 		fListViewer.setComparator(comparator);
 	}
 	/**
@@ -606,7 +606,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	/**
 	 *	Sets the sorter that is to be applied to self's tree viewer
 	 */
-	public void setTreeComperator(ViewerComparator sorter) {
+	public void setTreeComparator(ViewerComparator sorter) {
 		fTreeViewer.setComparator(sorter);
 	}
 	/**

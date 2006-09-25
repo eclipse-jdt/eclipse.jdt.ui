@@ -58,7 +58,7 @@ public class TreeListDialogField extends DialogField {
 	protected ILabelProvider fLabelProvider;
 	protected TreeViewerAdapter fTreeViewerAdapter;
 	protected List fElements;
-	protected ViewerComparator fViewerComperator;
+	protected ViewerComparator fViewerComparator;
 
 	protected String[] fButtonLabels;
 	private Button[] fButtonControls;
@@ -147,11 +147,11 @@ public class TreeListDialogField extends DialogField {
 	}
 
 	/**
-	* Sets the viewer comperator.
-	* @param viewerComperator The viewer comperator to set
+	* Sets the viewer comparator.
+	* @param viewerComparator The viewer comparator to set
 	*/
-	public void setViewerComperator(ViewerComparator viewerComperator) {
-		fViewerComperator= viewerComperator;
+	public void setViewerComparator(ViewerComparator viewerComparator) {
+		fViewerComparator= viewerComparator;
 	}
 	
 	public void setTreeExpansionLevel(int level) {
@@ -269,8 +269,8 @@ public class TreeListDialogField extends DialogField {
 			fTree.setInput(fParentElement);
 			fTree.expandToLevel(fTreeExpandLevel);
 
-			if (fViewerComperator != null) {
-				fTree.setComparator(fViewerComperator);
+			if (fViewerComparator != null) {
+				fTree.setComparator(fViewerComparator);
 			}
 
 			fTreeControl.setEnabled(isEnabled());
@@ -669,9 +669,9 @@ public class TreeListDialogField extends DialogField {
 
 	public void selectFirstElement() {
 		Object element= null;
-		if (fViewerComperator != null) {
+		if (fViewerComparator != null) {
 			Object[] arr= fElements.toArray();
-			fViewerComperator.sort(fTree, arr);
+			fViewerComparator.sort(fTree, arr);
 			if (arr.length > 0) {
 				element= arr[0];
 			}

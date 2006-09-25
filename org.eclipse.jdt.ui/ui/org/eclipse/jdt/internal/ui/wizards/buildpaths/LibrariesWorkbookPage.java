@@ -125,7 +125,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		fLibrariesList.enableButton(IDX_EDIT, false);
 		fLibrariesList.enableButton(IDX_REPLACE, false);
 
-		fLibrariesList.setViewerComperator(new CPListElementSorter());
+		fLibrariesList.setViewerComparator(new CPListElementSorter());
 
 	}
 		
@@ -169,7 +169,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		int buttonBarWidth= converter.convertWidthInCharsToPixels(24);
 		fLibrariesList.setButtonsMinWidth(buttonBarWidth);
 		
-		fLibrariesList.setViewerComperator(new CPListElementSorter());
+		fLibrariesList.setViewerComparator(new CPListElementSorter());
 		
 		fSWTControl= composite;
 				

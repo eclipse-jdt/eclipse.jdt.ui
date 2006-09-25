@@ -287,7 +287,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			fExportImportList= new CheckedListDialogField(this, buttonNames, new CPListLabelProvider());
 			fExportImportList.setCheckAllButtonIndex(0);
 			fExportImportList.setUncheckAllButtonIndex(1);
-			fExportImportList.setViewerComperator(new CPListElementSorter());
+			fExportImportList.setViewerComparator(new CPListElementSorter());
 			fExportImportList.setDialogFieldListener(this);
 			if (isSave()) {
 				fExportImportList.setLabelText(PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_list_save_label); 
@@ -790,7 +790,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			}
 		}
 		fLibraryList.setElements(elements);
-		fLibraryList.setViewerComperator(new CPListElementSorter());
+		fLibraryList.setViewerComparator(new CPListElementSorter());
 		
 		doSelectionChanged(fLibraryList); //update button enable state 
 	}
