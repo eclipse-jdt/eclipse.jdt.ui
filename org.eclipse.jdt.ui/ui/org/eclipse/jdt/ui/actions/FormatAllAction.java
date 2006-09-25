@@ -256,22 +256,23 @@ public class FormatAllAction extends SelectionDispatchAction {
 			MessageDialog.openInformation(getShell(), ActionMessages.FormatAllAction_EmptySelection_title, ActionMessages.FormatAllAction_EmptySelection_description);
 			return;
 		}
-		if (cus.length > 1) {
-			int returnCode= OptionalMessageDialog.open("FormatAll",  //$NON-NLS-1$
-					getShell(), 
-					ActionMessages.FormatAllAction_noundo_title, 
-					null,
-					ActionMessages.FormatAllAction_noundo_message,  
-					MessageDialog.WARNING, 		
-					new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 
-					0);
-			if (returnCode != OptionalMessageDialog.NOT_SHOWN && 
-					returnCode != Window.OK ) return;
-		}
-				
-		IStatus status= Resources.makeCommittable(getResources(cus), getShell());
-		if (status.matches(IStatus.CANCEL)) {
-			return;
+		try {
+			if (cus.length == 1) {
+				JavaUI.openInEditor(cus[0]);
+			} else {
+				int returnCode= OptionalMessageDialog.open("FormatAll",  //$NON-NLS-1$
+						getShell(), 
+						ActionMessages.FormatAllAction_noundo_title, 
+						null,
+						ActionMessages.FormatAllAction_noundo_message,  
+						MessageDialog.WARNING, 		
+						new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 
+						0);
+				if (returnCode != OptionalMessageDialog.NOT_SHOWN && returnCode != Window.OK )
+					return;
+			}
+		} catch (CoreException e) {
+			ExceptionHandler.handle(e, getShell(), ActionMessages.FormatAllAction_error_title, ActionMessages.FormatAllAction_error_message); 
 		}
 		runOnMultiple(cus);
 	}
@@ -290,18 +291,20 @@ public class FormatAllAction extends SelectionDispatchAction {
 	 */
 	public void runOnMultiple(final ICompilationUnit[] cus) {
 		try {
-			String message= ActionMessages.FormatAllAction_status_description; 
-			final MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, message, null);
+			final MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, ActionMessages.FormatAllAction_status_description, null);
 			
-			if (cus.length == 1) {
-				JavaUI.openInEditor(cus[0]);
+			IStatus valEditStatus= Resources.makeCommittable(getResources(cus), getShell());
+			if (valEditStatus.matches(IStatus.CANCEL)) {
+				return;
 			}
-			
-			PlatformUI.getWorkbench().getProgressService().run(true, true, new WorkbenchRunnableAdapter(new IWorkspaceRunnable() {
-				public void run(IProgressMonitor monitor) {
-					doRunOnMultiple(cus, status, monitor);
-				}
-			})); // workspace lock
+			status.merge(valEditStatus);
+			if (!status.matches(IStatus.ERROR)) {
+				PlatformUI.getWorkbench().getProgressService().run(true, true, new WorkbenchRunnableAdapter(new IWorkspaceRunnable() {
+					public void run(IProgressMonitor monitor) {
+						doRunOnMultiple(cus, status, monitor);
+					}
+				})); // workspace lock
+			}
 			if (!status.isOK()) {
 				String title= ActionMessages.FormatAllAction_multi_status_title;
 				ErrorDialog.openError(getShell(), title, null, status);
@@ -310,8 +313,6 @@ public class FormatAllAction extends SelectionDispatchAction {
 			ExceptionHandler.handle(e, getShell(), ActionMessages.FormatAllAction_error_title, ActionMessages.FormatAllAction_error_message); 
 		} catch (InterruptedException e) {
 			// Canceled by user
-		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), ActionMessages.FormatAllAction_error_title, ActionMessages.FormatAllAction_error_message); 
 		}
 	}
 	
