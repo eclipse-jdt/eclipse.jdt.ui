@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.filebuffers.ITextFileBuffer;
@@ -99,6 +100,8 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.TypedSource;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IConfirmQuery;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ParentChecker;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
@@ -502,73 +505,83 @@ public class PasteAction extends SelectionDispatchAction{
 				public void run(IProgressMonitor pm) throws InvocationTargetException {
 					pm.beginTask("", 1 + fParsedCus.length); //$NON-NLS-1$
 					
+					ArrayList cus= new ArrayList();
 					try {
 						if (fDestination == null) {
 							fDestination= createNewProject(new SubProgressMonitor(pm, 1));
 						} else {
 							pm.worked(1);
 						}
-						ArrayList cus= new ArrayList();
+						IConfirmQuery confirmQuery= new ReorgQueries(getShell()).createYesYesToAllNoNoToAllQuery(ReorgMessages.PasteAction_TextPaster_confirmOverwriting, true, IReorgQueries.CONFIRM_OVERWRITING);
 						for (int i= 0; i < fParsedCus.length; i++) {
-							ICompilationUnit cu= pasteCU(fParsedCus[i], new SubProgressMonitor(pm, 1));
+							if (pm.isCanceled())
+								break;
+							ICompilationUnit cu= pasteCU(fParsedCus[i], new SubProgressMonitor(pm, 1), confirmQuery);
 							if (cu != null)
 								cus.add(cu);
 						}
-						
-						IResource[] cuResources= ResourceUtil.getFiles((ICompilationUnit[]) cus.toArray(new ICompilationUnit[cus.size()]));
-						SelectionUtil.selectAndReveal(cuResources, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
+					} catch (OperationCanceledException e) {
+						// cancelling is fine
 					} catch (CoreException e) {
 						throw new InvocationTargetException(e);
+					} finally {
+						pm.done();
 					}
+					IResource[] cuResources= ResourceUtil.getFiles((ICompilationUnit[]) cus.toArray(new ICompilationUnit[cus.size()]));
+					SelectionUtil.selectAndReveal(cuResources, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
 				}
 
-				private ICompilationUnit pasteCU(ParsedCu parsedCu, SubProgressMonitor pm) throws CoreException {
-					IPackageFragment destinationPack;
-					if (fDestinationPack != null) {
-						destinationPack= fDestinationPack;
-						pm.worked(1);
-					} else {
-						String packageName= parsedCu.getPackageName();
-						destinationPack= fDestination.getPackageFragment(packageName);
-						if (! destinationPack.exists()) {
-							JavaModelUtil.getPackageFragmentRoot(destinationPack).createPackageFragment(packageName, true, new SubProgressMonitor(pm, 1));
-						} else {
+				private ICompilationUnit pasteCU(ParsedCu parsedCu, SubProgressMonitor pm, IConfirmQuery confirmQuery) throws CoreException, OperationCanceledException {
+					pm.beginTask("", 4); //$NON-NLS-1$
+					try {
+						IPackageFragment destinationPack;
+						if (fDestinationPack != null) {
+							destinationPack= fDestinationPack;
 							pm.worked(1);
+						} else {
+							String packageName= parsedCu.getPackageName();
+							destinationPack= fDestination.getPackageFragment(packageName);
+							if (! destinationPack.exists()) {
+								JavaModelUtil.getPackageFragmentRoot(destinationPack).createPackageFragment(packageName, true, new SubProgressMonitor(pm, 1));
+							} else {
+								pm.worked(1);
+							}
 						}
-					}
-					
-					final String cuName= parsedCu.getTypeName() + JavaModelUtil.DEFAULT_CU_SUFFIX;
-					final ICompilationUnit cu= destinationPack.getCompilationUnit(cuName);
-					boolean alreadyExists= cu.exists();
-					if (alreadyExists) {
-						String msg= Messages.format(ReorgMessages.PasteAction_TextPaster_exists, new Object[] {cuName});
-						// TODO: overwrite all, ...
-						boolean overwrite= MessageDialog.openQuestion(getShell(), ReorgMessages.PasteAction_TextPaster_confirmOverwriting, msg);
-						if (! overwrite)
-							return null;
 						
-						editorPart[0]= openCu(cu); //Open editor before overwriting to allow undo to restore original package declaration
-					}
-					
-					destinationPack.createCompilationUnit(cuName, parsedCu.getText(), true, new SubProgressMonitor(pm, 1));
-					
-					if (! alreadyExists) {
-						editorPart[0]= openCu(cu);
-					}
-					if (fDestinationPack != null && ! fDestinationPack.getElementName().equals(parsedCu.getPackageName())) {
-						if (fDestinationPack.getElementName().length() == 0) {
-							removePackageDeclaration(cu);
-						} else {
-							cu.createPackageDeclaration(fDestinationPack.getElementName(), new SubProgressMonitor(pm, 1));
+						final String cuName= parsedCu.getTypeName() + JavaModelUtil.DEFAULT_CU_SUFFIX;
+						ICompilationUnit cu= destinationPack.getCompilationUnit(cuName);
+						boolean alreadyExists= cu.exists();
+						if (alreadyExists) {
+							String msg= Messages.format(ReorgMessages.PasteAction_TextPaster_exists, new Object[] {cuName});
+							boolean overwrite= confirmQuery.confirm(msg);
+							if (! overwrite)
+								return null;
+							
+							editorPart[0]= openCu(cu); //Open editor before overwriting to allow undo to restore original package declaration
 						}
-						if (! alreadyExists && editorPart[0] != null)
-							editorPart[0].doSave(new SubProgressMonitor(pm, 1)); //avoid showing error marker due to missing/wrong package declaration
-						else
+						
+						destinationPack.createCompilationUnit(cuName, parsedCu.getText(), true, new SubProgressMonitor(pm, 1));
+						
+						if (! alreadyExists) {
+							editorPart[0]= openCu(cu);
+						}
+						if (fDestinationPack != null && ! fDestinationPack.getElementName().equals(parsedCu.getPackageName())) {
+							if (fDestinationPack.getElementName().length() == 0) {
+								removePackageDeclaration(cu);
+							} else {
+								cu.createPackageDeclaration(fDestinationPack.getElementName(), new SubProgressMonitor(pm, 1));
+							}
+							if (! alreadyExists && editorPart[0] != null)
+								editorPart[0].doSave(new SubProgressMonitor(pm, 1)); //avoid showing error marker due to missing/wrong package declaration
+							else
+								pm.worked(1);
+						} else {
 							pm.worked(1);
-					} else {
-						pm.worked(1);
+						}
+						return cu;
+					} finally {
+						pm.done();
 					}
-					return cu;
 				}
 
 				private IPackageFragmentRoot createNewProject(SubProgressMonitor pm) throws CoreException {
