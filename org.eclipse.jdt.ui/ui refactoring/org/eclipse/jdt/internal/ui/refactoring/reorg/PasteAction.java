@@ -62,7 +62,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.CopyFilesAndFoldersOperation;
 import org.eclipse.ui.actions.CopyProjectOperation;
 import org.eclipse.ui.part.ResourceTransfer;
-import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -81,6 +80,10 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -123,6 +126,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
 
@@ -271,39 +275,76 @@ public class PasteAction extends SelectionDispatchAction{
 			return null;
 		}
 
-		public abstract void paste(IJavaElement[] selectedJavaElements, IResource[] selectedResources, IWorkingSet[] selectedWorkingSets, TransferData[] availableTypes) throws JavaModelException, InterruptedException, InvocationTargetException;
+		/**
+		 * Used to be called on selection change, but is only called on execution now
+		 * (before {@link #canPasteOn(IJavaElement[], IResource[], IWorkingSet[])}).
+		 */
 		public abstract boolean canEnable(TransferData[] availableTypes)  throws JavaModelException;
+		
+		/**
+		 * Only called if {@link #canEnable(TransferData[])} returns <code>true</code>.
+		 */
 		public abstract boolean canPasteOn(IJavaElement[] selectedJavaElements, IResource[] selectedResources, IWorkingSet[] selectedWorkingSets)  throws JavaModelException;
+		
+		/**
+		 * only called if {@link #canPasteOn(IJavaElement[], IResource[], IWorkingSet[])} returns <code>true</code>
+		 */
+		public abstract void paste(IJavaElement[] selectedJavaElements, IResource[] selectedResources, IWorkingSet[] selectedWorkingSets, TransferData[] availableTypes) throws JavaModelException, InterruptedException, InvocationTargetException;
 	}
     
     private static class TextPaster extends Paster {
 
-		private static class CuParser {
-			private final IJavaProject fJavaProject;
+		private static class ParsedCu {
 			private final String fText;
-			
-			private String fTypeName;
-			private String fPackageName;
+			private final String fTypeName;
+			private final String fPackageName;
 
-			public CuParser(IJavaProject javaProject, String text) {
-				fJavaProject= javaProject;
-				fText= text;
-			}
-
-			private void parseText() {
-				if (fPackageName != null)
-					return;
+			public static ParsedCu[] parse(IJavaProject javaProject, String text) {
+				IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+				scanner.setSource(text.toCharArray());
 				
-				fPackageName= IPackageFragment.DEFAULT_PACKAGE_NAME;
+				ArrayList cus= new ArrayList();
+				int start= 0;
+				boolean tokensScanned= false;
+				int tok;
+				try {
+					while (true) {
+						tok= scanner.getNextToken();
+						if (tok == ITerminalSymbols.TokenNamepackage && tokensScanned) {
+							int packageStart= scanner.getCurrentTokenStartPosition();
+							ParsedCu cu= parseCu(javaProject, text.substring(start, packageStart));
+							if (cu != null) {
+								cus.add(cu);
+								start= packageStart;
+							}
+						} else if (tok == ITerminalSymbols.TokenNameEOF) {
+							ParsedCu cu= parseCu(javaProject, text.substring(start, text.length()));
+							if (cu != null) {
+								cus.add(cu);
+							}
+							break;
+						}
+						tokensScanned= true;
+					}
+				} catch (InvalidInputException e) {
+					return new ParsedCu[0];
+				}
+
+				return (ParsedCu[]) cus.toArray(new ParsedCu[cus.size()]);
+			}
+			
+			private static ParsedCu parseCu(IJavaProject javaProject, String text) {
+				String packageName= IPackageFragment.DEFAULT_PACKAGE_NAME;
 				ASTParser parser= ASTParser.newParser(AST.JLS3);
-				parser.setProject(fJavaProject);
-				parser.setSource(fText.toCharArray());
+				parser.setProject(javaProject);
+				parser.setSource(text.toCharArray());
 				CompilationUnit unit= (CompilationUnit) parser.createAST(null);
 				
 				if (unit == null)
-					return;
+					return null;
 				
 				int typesCount= unit.types().size();
+				String typeName= null;
 				if (typesCount > 0) {
 					// get first most visible type:
 					int maxVisibility= Modifier.PRIVATE;
@@ -312,29 +353,32 @@ public class PasteAction extends SelectionDispatchAction{
 						int visibility= JdtFlags.getVisibilityCode(type);
 						if (! JdtFlags.isHigherVisibility(maxVisibility, visibility)) {
 							maxVisibility= visibility;
-							fTypeName= type.getName().getIdentifier();
+							typeName= type.getName().getIdentifier();
 						}
 					}
 				}
-				if (fTypeName == null)
-					return;
+				if (typeName == null)
+					return null;
 				
 				PackageDeclaration pack= unit.getPackage();
 				if (pack != null) {
-					fPackageName= pack.getName().getFullyQualifiedName();
+					packageName= pack.getName().getFullyQualifiedName();
 				}
+				
+				return new ParsedCu(text, typeName, packageName);
 			}
 			
-			/**
-			 * @return the type name, or <code>null</code> iff the text could not be parsed
-			 */
+			private ParsedCu(String text, String typeName, String packageName) {
+				fText= text;
+				fTypeName= typeName;
+				fPackageName= packageName;
+			}
+
 			public String getTypeName() {
-				parseText();
 				return fTypeName;
 			}
 
 			public String getPackageName() {
-				parseText();
 				return fPackageName;
 			}
 
@@ -343,8 +387,12 @@ public class PasteAction extends SelectionDispatchAction{
 			}
 		}
 		
+		private IPackageFragmentRoot fDestination;
+		/**
+		 * destination pack iff pasted 1 CU to package fragment or compilation unit, <code>null</code> otherwise
+		 */
 		private IPackageFragment fDestinationPack;
-		private CuParser fCuParser;
+		private ParsedCu[] fParsedCus;
 		private TransferData[] fAvailableTypes;
 		
 		protected TextPaster(Shell shell, Clipboard clipboard) {
@@ -371,59 +419,76 @@ public class PasteAction extends SelectionDispatchAction{
 				destination= javaElements[0];
 				javaProject= destination.getJavaProject();
 			}
-			fCuParser= new CuParser(javaProject, text);
+			fParsedCus= ParsedCu.parse(javaProject, text);
 			
-			if (fCuParser.getTypeName() == null)
+			if (fParsedCus.length == 0)
 				return false;
 			
 			if (destination == null)
 				return true;
 			
+			/*
+			 * 1 CU: paste into package, adapt package declaration
+			 * 2+ CUs: always paste into source folder
+			 */
+			
+			IPackageFragmentRoot packageFragmentRoot;
+			IPackageFragment destinationPack;
 			switch (destination.getElementType()) {
 				case IJavaElement.JAVA_PROJECT :
 					IPackageFragmentRoot[] packageFragmentRoots= ((IJavaProject) destination).getPackageFragmentRoots();
 					for (int i= 0; i < packageFragmentRoots.length; i++) {
-						IPackageFragmentRoot packageFragmentRoot= packageFragmentRoots[i];
-						if (packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE) {
-							fDestinationPack= packageFragmentRoot.getPackageFragment(fCuParser.getPackageName());
-							if (isWritable(fDestinationPack))
-								return true;
+						packageFragmentRoot= packageFragmentRoots[i];
+						if (isWritable(packageFragmentRoot)) {
+							fDestination= packageFragmentRoot;
+							return true;
 						}
 					}
 					return false;
 					
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT :
-					IPackageFragmentRoot packageFragmentRoot= (IPackageFragmentRoot) destination;
-					if (packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE) {
-						fDestinationPack= packageFragmentRoot.getPackageFragment(fCuParser.getPackageName());
-						return isWritable(fDestinationPack);
+					packageFragmentRoot= (IPackageFragmentRoot) destination;
+					if (isWritable(packageFragmentRoot)) {
+						fDestination= packageFragmentRoot;
+						return true;
 					}
 					return false;
 					
 				case IJavaElement.PACKAGE_FRAGMENT :
-					fDestinationPack= (IPackageFragment) destination;
-					return isWritable(fDestinationPack);
+					destinationPack= (IPackageFragment) destination;
+					packageFragmentRoot= (IPackageFragmentRoot) destinationPack.getParent();
+					if (isWritable(packageFragmentRoot)) {
+						fDestination= packageFragmentRoot;
+						if (fParsedCus.length == 1) {
+							fDestinationPack= destinationPack;
+						}
+						return true;
+					}
+					return false;
 					
 				case IJavaElement.COMPILATION_UNIT :
-					fDestinationPack= (IPackageFragment) destination.getParent();
-					return isWritable(fDestinationPack);
+					destinationPack= (IPackageFragment) destination.getParent();
+					packageFragmentRoot= (IPackageFragmentRoot) destinationPack.getParent();
+					if (isWritable(packageFragmentRoot)) {
+						fDestination= packageFragmentRoot;
+						if (fParsedCus.length == 1) {
+							fDestinationPack= destinationPack;
+						}
+						return true;
+					}
+					return false;
 					
 				default:
 					return false;
 			}
 		}
 		
-		private boolean isWritable(IPackageFragment destinationPack) {
-			if (destinationPack.exists() && destinationPack.isReadOnly()) {
+		private boolean isWritable(IPackageFragmentRoot packageFragmentRoot) {
+			try {
+				return packageFragmentRoot.exists() && ! packageFragmentRoot.isArchive() && ! packageFragmentRoot.isReadOnly()
+						&& packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE;
+			} catch (JavaModelException e) {
 				return false;
-			} else {
-				IPackageFragmentRoot packageFragmentRoot= JavaModelUtil.getPackageFragmentRoot(destinationPack);
-				try {
-					return packageFragmentRoot.exists() && ! packageFragmentRoot.isArchive() && ! packageFragmentRoot.isReadOnly()
-							&& packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE;
-				} catch (JavaModelException e) {
-					return false;
-				}
 			}
 		}
 
@@ -435,57 +500,78 @@ public class PasteAction extends SelectionDispatchAction{
 				private String fCompilerCompliance;
 
 				public void run(IProgressMonitor pm) throws InvocationTargetException {
-					pm.beginTask("", 5); //$NON-NLS-1$
+					pm.beginTask("", 1 + fParsedCus.length); //$NON-NLS-1$
 					
 					try {
-						if (fDestinationPack == null) {
-							fDestinationPack= createNewProject(fCuParser, new SubProgressMonitor(pm, 1));
+						if (fDestination == null) {
+							fDestination= createNewProject(new SubProgressMonitor(pm, 1));
 						} else {
 							pm.worked(1);
 						}
-						if (! fDestinationPack.exists()) {
-							JavaModelUtil.getPackageFragmentRoot(fDestinationPack).createPackageFragment(fCuParser.getPackageName(), true, new SubProgressMonitor(pm, 1));
-						} else {
-							pm.worked(1);
+						ArrayList cus= new ArrayList();
+						for (int i= 0; i < fParsedCus.length; i++) {
+							ICompilationUnit cu= pasteCU(fParsedCus[i], new SubProgressMonitor(pm, 1));
+							if (cu != null)
+								cus.add(cu);
 						}
 						
-						final String cuName= fCuParser.getTypeName() + JavaModelUtil.DEFAULT_CU_SUFFIX;
-						final ICompilationUnit cu= fDestinationPack.getCompilationUnit(cuName);
-						boolean alreadyExists= cu.exists();
-						if (alreadyExists) {
-							String msg= Messages.format(ReorgMessages.PasteAction_TextPaster_exists, new Object[] {cuName});
-							boolean overwrite= MessageDialog.openQuestion(getShell(), ReorgMessages.PasteAction_TextPaster_confirmOverwriting, msg);
-							if (! overwrite)
-								return;
-							
-							editorPart[0]= openCu(cu); //Open editor before overwriting to allow undo.
-						}
-						
-						fDestinationPack.createCompilationUnit(cuName, fCuParser.getText(), true, new SubProgressMonitor(pm, 1));
-						
-						if (!alreadyExists) {
-							editorPart[0]= openCu(cu);
-						}
-						if (!fDestinationPack.getElementName().equals(fCuParser.getPackageName())) {
-							if (fDestinationPack.getElementName().length() == 0) {
-								removePackageDeclaration(cu);
-							} else {
-								cu.createPackageDeclaration(fDestinationPack.getElementName(), new SubProgressMonitor(pm, 1));
-							}
-							if (!alreadyExists && editorPart[0] != null)
-								editorPart[0].doSave(new SubProgressMonitor(pm, 1)); //avoid showing error marker due to missing/wrong package declaration
-							else
-								pm.worked(1);
-						} else {
-							pm.worked(1);
-						}
-						BasicNewResourceWizard.selectAndReveal(cu.getResource(), PlatformUI.getWorkbench().getActiveWorkbenchWindow());
+						IResource[] cuResources= ResourceUtil.getFiles((ICompilationUnit[]) cus.toArray(new ICompilationUnit[cus.size()]));
+						SelectionUtil.selectAndReveal(cuResources, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
 					} catch (CoreException e) {
 						throw new InvocationTargetException(e);
 					}
 				}
 
-				private IPackageFragment createNewProject(CuParser cuParser, SubProgressMonitor pm) throws CoreException {
+				private ICompilationUnit pasteCU(ParsedCu parsedCu, SubProgressMonitor pm) throws CoreException {
+					IPackageFragment destinationPack;
+					if (fDestinationPack != null) {
+						destinationPack= fDestinationPack;
+						pm.worked(1);
+					} else {
+						String packageName= parsedCu.getPackageName();
+						destinationPack= fDestination.getPackageFragment(packageName);
+						if (! destinationPack.exists()) {
+							JavaModelUtil.getPackageFragmentRoot(destinationPack).createPackageFragment(packageName, true, new SubProgressMonitor(pm, 1));
+						} else {
+							pm.worked(1);
+						}
+					}
+					
+					final String cuName= parsedCu.getTypeName() + JavaModelUtil.DEFAULT_CU_SUFFIX;
+					final ICompilationUnit cu= destinationPack.getCompilationUnit(cuName);
+					boolean alreadyExists= cu.exists();
+					if (alreadyExists) {
+						String msg= Messages.format(ReorgMessages.PasteAction_TextPaster_exists, new Object[] {cuName});
+						// TODO: overwrite all, ...
+						boolean overwrite= MessageDialog.openQuestion(getShell(), ReorgMessages.PasteAction_TextPaster_confirmOverwriting, msg);
+						if (! overwrite)
+							return null;
+						
+						editorPart[0]= openCu(cu); //Open editor before overwriting to allow undo to restore original package declaration
+					}
+					
+					destinationPack.createCompilationUnit(cuName, parsedCu.getText(), true, new SubProgressMonitor(pm, 1));
+					
+					if (! alreadyExists) {
+						editorPart[0]= openCu(cu);
+					}
+					if (fDestinationPack != null && ! fDestinationPack.getElementName().equals(parsedCu.getPackageName())) {
+						if (fDestinationPack.getElementName().length() == 0) {
+							removePackageDeclaration(cu);
+						} else {
+							cu.createPackageDeclaration(fDestinationPack.getElementName(), new SubProgressMonitor(pm, 1));
+						}
+						if (! alreadyExists && editorPart[0] != null)
+							editorPart[0].doSave(new SubProgressMonitor(pm, 1)); //avoid showing error marker due to missing/wrong package declaration
+						else
+							pm.worked(1);
+					} else {
+						pm.worked(1);
+					}
+					return cu;
+				}
+
+				private IPackageFragmentRoot createNewProject(SubProgressMonitor pm) throws CoreException {
 					pm.beginTask("", 10); //$NON-NLS-1$
 					IProject project;
 					int i= 1;
@@ -524,7 +610,7 @@ public class PasteAction extends SelectionDispatchAction{
 					IPath outputLocation= BuildPathsBlock.getDefaultOutputLocation(javaProject);
 					IClasspathEntry[] cpes= new IClasspathEntry[] { srcEntry, jreEntry };
 					javaProject.setRawClasspath(cpes, outputLocation, new SubProgressMonitor(pm, 1));
-					return javaProject.getPackageFragmentRoot(srcFolder).getPackageFragment(cuParser.getPackageName());
+					return javaProject.getPackageFragmentRoot(srcFolder);
 				}
 
 				private void computeLatestVM() {
