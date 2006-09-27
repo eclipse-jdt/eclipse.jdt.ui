@@ -59,7 +59,7 @@ public class WorkingSetFilter extends ViewerFilter {
 	 * Overrides method from ViewerFilter.
 	 */
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
-		if (fWorkingSet == null || (fWorkingSet.isAggregateWorkingSet() && fWorkingSet.getElements().length == 0))
+		if (fWorkingSet == null || (fWorkingSet.isAggregateWorkingSet() && fWorkingSet.isEmpty()))
 			return true;
 
 		if (element instanceof IJavaElement)
