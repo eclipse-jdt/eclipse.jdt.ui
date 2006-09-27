@@ -10,7 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
+import java.util.HashSet;
 import java.util.StringTokenizer;
+
+import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.text.Match;
+import org.eclipse.search.ui.text.MatchFilter;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -33,7 +38,33 @@ import org.eclipse.jdt.ui.search.QuerySpecification;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-abstract class MatchFilter {
+abstract class JavaMatchFilter extends MatchFilter {
+	
+	public abstract boolean filters(JavaElementMatch match);
+	
+	/**
+	 * Returns whether this filter is applicable for this query
+	 * @param query 
+	 * @return returns <code>true</code> if this match filter is applicable for the given query
+	 */
+	public abstract boolean isApplicable(JavaSearchQuery query);
+	
+	public abstract String getActionLabel();
+	public abstract String getID();
+	
+	public boolean isApplicable(ISearchQuery query) {
+		if (query instanceof JavaSearchQuery) {
+			return isApplicable((JavaSearchQuery) query);
+		}
+		return false;
+	}
+	
+	public boolean filters(Match match) {
+		if (match instanceof JavaElementMatch) {
+			return filters((JavaElementMatch) match);
+		}
+		return false;
+	}
 	
 	private static final String SETTINGS_LAST_USED_FILTERS= "filters_last_used";  //$NON-NLS-1$
 	
@@ -56,53 +87,45 @@ abstract class MatchFilter {
 	
 	private static String encodeFilters(MatchFilter[] enabledFilters) {
 		StringBuffer buf= new StringBuffer();
-		buf.append(enabledFilters.length);
 		for (int i= 0; i < enabledFilters.length; i++) {
-			buf.append(';');
-			buf.append(enabledFilters[i].getID());
+			MatchFilter matchFilter= enabledFilters[i];
+			if (matchFilter instanceof JavaMatchFilter) {
+				buf.append(((JavaMatchFilter) matchFilter).getID());
+				buf.append(';');
+			}
 		}
 		return buf.toString();
 	}
 	
-	private static MatchFilter[] decodeFiltersString(String encodedString) {
+	private static JavaMatchFilter[] decodeFiltersString(String encodedString) {
 		StringTokenizer tokenizer= new StringTokenizer(encodedString, String.valueOf(';'));
-		int count= Integer.valueOf(tokenizer.nextToken()).intValue();
-		MatchFilter[] res= new MatchFilter[count];
-		for (int i= 0; i < count; i++) {
-			res[i]= findMatchFilter(tokenizer.nextToken());
+		HashSet result= new HashSet();
+		while (tokenizer.hasMoreTokens()) {
+			JavaMatchFilter curr= findMatchFilter(tokenizer.nextToken());
+			if (curr != null) {
+				result.add(curr);
+			}
 		}
-		return res;
+		return (JavaMatchFilter[]) result.toArray(new JavaMatchFilter[result.size()]);
 	}
 		
+	private static final JavaMatchFilter POTENTIAL_FILTER= new PotentialFilter(); 
+	private static final JavaMatchFilter IMPORT_FILTER= new ImportFilter(); 
+	private static final JavaMatchFilter JAVADOC_FILTER= new JavadocFilter(); 
+	private static final JavaMatchFilter READ_FILTER= new ReadFilter(); 
+	private static final JavaMatchFilter WRITE_FILTER= new WriteFilter(); 
 	
-	public abstract boolean isApplicable(JavaSearchQuery query);
+	private static final JavaMatchFilter POLYMORPHIC_FILTER= new PolymorphicFilter(); 
+	private static final JavaMatchFilter INEXACT_FILTER= new InexactMatchFilter(); 
+	private static final JavaMatchFilter ERASURE_FILTER= new ErasureMatchFilter(); 
 	
-	public abstract boolean filters(JavaElementMatch match);
-
-	public abstract String getName();
-	public abstract String getActionLabel();
+	private static final JavaMatchFilter NON_PUBLIC_FILTER= new NonPublicFilter();
+	private static final JavaMatchFilter STATIC_FILTER= new StaticFilter();
+	private static final JavaMatchFilter NON_STATIC_FILTER= new NonStaticFilter();
+	private static final JavaMatchFilter DEPRECATED_FILTER= new DeprecatedFilter();
+	private static final JavaMatchFilter NON_DEPRECATED_FILTER= new NonDeprecatedFilter();
 	
-	public abstract String getDescription();
-	
-	public abstract String getID();
-	
-	private static final MatchFilter POTENTIAL_FILTER= new PotentialFilter(); 
-	private static final MatchFilter IMPORT_FILTER= new ImportFilter(); 
-	private static final MatchFilter JAVADOC_FILTER= new JavadocFilter(); 
-	private static final MatchFilter READ_FILTER= new ReadFilter(); 
-	private static final MatchFilter WRITE_FILTER= new WriteFilter(); 
-	
-	private static final MatchFilter POLYMORPHIC_FILTER= new PolymorphicFilter(); 
-	private static final MatchFilter INEXACT_FILTER= new InexactMatchFilter(); 
-	private static final MatchFilter ERASURE_FILTER= new ErasureMatchFilter(); 
-	
-	private static final MatchFilter NON_PUBLIC_FILTER= new NonPublicFilter();
-	private static final MatchFilter STATIC_FILTER= new StaticFilter();
-	private static final MatchFilter NON_STATIC_FILTER= new NonStaticFilter();
-	private static final MatchFilter DEPRECATED_FILTER= new DeprecatedFilter();
-	private static final MatchFilter NON_DEPRECATED_FILTER= new NonDeprecatedFilter();
-	
-	private static final MatchFilter[] ALL_FILTERS= new MatchFilter[] {
+	private static final JavaMatchFilter[] ALL_FILTERS= new JavaMatchFilter[] {
 			POTENTIAL_FILTER,
 			IMPORT_FILTER,
 			JAVADOC_FILTER,
@@ -120,22 +143,23 @@ abstract class MatchFilter {
 			NON_DEPRECATED_FILTER
 	};
 		
-	public static MatchFilter[] allFilters() {
+	public static JavaMatchFilter[] allFilters() {
 		return ALL_FILTERS;
 	}
 	
-	private static MatchFilter findMatchFilter(String id) {
+	private static JavaMatchFilter findMatchFilter(String id) {
 		for (int i= 0; i < ALL_FILTERS.length; i++) {
-			if (ALL_FILTERS[i].getID().equals(id))
-				return ALL_FILTERS[i];
+			JavaMatchFilter matchFilter= ALL_FILTERS[i];
+			if (matchFilter.getID().equals(id))
+				return matchFilter;
 		}
-		return IMPORT_FILTER; // just return something, should not happen
+		return null;
 	}
 
 
 }
 
-class PotentialFilter extends MatchFilter {
+class PotentialFilter extends JavaMatchFilter {
 	public boolean filters(JavaElementMatch match) {
 		return match.getAccuracy() == SearchMatch.A_INACCURATE;
 	}
@@ -161,7 +185,7 @@ class PotentialFilter extends MatchFilter {
 	}
 }
 
-class ImportFilter extends MatchFilter {
+class ImportFilter extends JavaMatchFilter {
 	public boolean filters(JavaElementMatch match) {
 		return match.getElement() instanceof IImportDeclaration;
 	}
@@ -195,7 +219,7 @@ class ImportFilter extends MatchFilter {
 	}
 }
 
-abstract class VariableFilter extends MatchFilter {
+abstract class VariableFilter extends JavaMatchFilter {
 	public boolean isApplicable(JavaSearchQuery query) {
 		QuerySpecification spec= query.getSpecification();
 		if (spec instanceof ElementQuerySpecification) {
@@ -247,7 +271,7 @@ class ReadFilter extends VariableFilter {
 	}
 }
 
-class JavadocFilter extends MatchFilter {
+class JavadocFilter extends JavaMatchFilter {
 	public boolean filters(JavaElementMatch match) {
 		return match.isJavadoc();
 	}
@@ -268,7 +292,7 @@ class JavadocFilter extends MatchFilter {
 	}
 }
 
-class PolymorphicFilter extends MatchFilter {
+class PolymorphicFilter extends JavaMatchFilter {
     public boolean filters(JavaElementMatch match) {
         return match.isPolymorphic();
     }
@@ -306,7 +330,7 @@ class PolymorphicFilter extends MatchFilter {
     }
 }
 
-abstract class GenericTypeFilter extends MatchFilter {
+abstract class GenericTypeFilter extends JavaMatchFilter {
 	public boolean isApplicable(JavaSearchQuery query) {
 		QuerySpecification spec= query.getSpecification();
 		if (spec instanceof ElementQuerySpecification) {
@@ -364,7 +388,7 @@ class InexactMatchFilter extends GenericTypeFilter {
 	}
 }
 
-abstract class ModifierFilter extends MatchFilter {
+abstract class ModifierFilter extends JavaMatchFilter {
 	public boolean isApplicable(JavaSearchQuery query) {
 		return true;
 	}
@@ -479,7 +503,7 @@ class NonDeprecatedFilter extends ModifierFilter {
 		Object element= match.getElement();
 		if (element instanceof IMember) {
 			try {
-				return ! JdtFlags.isDeprecated((IMember) element);
+				return !JdtFlags.isDeprecated((IMember) element);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 			}

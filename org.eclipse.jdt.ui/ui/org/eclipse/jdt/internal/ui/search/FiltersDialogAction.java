@@ -10,8 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.window.Window;
+
+import org.eclipse.search.ui.text.MatchFilter;
+import org.eclipse.search.ui.text.MatchFilterSelectionDialog;
 
 
 public class FiltersDialogAction extends Action {
@@ -23,12 +28,17 @@ public class FiltersDialogAction extends Action {
 	}
 
 	public void run() {
-		FiltersDialog dialog = new FiltersDialog(fPage);
-
+		Shell shell= fPage.getSite().getShell();
+		MatchFilter[] allFilters= JavaMatchFilter.allFilters();
+		MatchFilter[] checkedFilters= fPage.getMatchFilters();
+		int limit= fPage.getElementLimit();
+		
+		MatchFilterSelectionDialog dialog = new MatchFilterSelectionDialog(shell, allFilters, checkedFilters, true, limit);
+		dialog.setTitle(SearchMessages.FiltersDialog_title);
+		
 		if (dialog.open() == Window.OK) {
-			fPage.setFilters(dialog.getEnabledFilters());
-			fPage.enableLimit(dialog.isLimitEnabled());
-			fPage.setElementLimit(dialog.getElementLimit());
+			fPage.setFilters(dialog.getMatchFilters());
+			fPage.setElementLimit(dialog.getLimit());
 		}
 	}
 

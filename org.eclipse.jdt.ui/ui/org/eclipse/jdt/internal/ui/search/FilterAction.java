@@ -15,10 +15,10 @@ import org.eclipse.jface.action.IAction;
 
 
 public class FilterAction extends Action {
-	private MatchFilter fFilter;
+	private JavaMatchFilter fFilter;
 	private JavaSearchResultPage fPage;
 	
-	public FilterAction(JavaSearchResultPage page, MatchFilter filter) {
+	public FilterAction(JavaSearchResultPage page, JavaMatchFilter filter) {
 		super(filter.getActionLabel(), IAction.AS_CHECK_BOX);
 		fPage= page;
 		fFilter= filter;
@@ -32,7 +32,7 @@ public class FilterAction extends Action {
 		}
 	}
 
-	public MatchFilter getFilter() {
+	public JavaMatchFilter getFilter() {
 		return fFilter;
 	}
 

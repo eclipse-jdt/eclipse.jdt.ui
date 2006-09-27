@@ -255,8 +255,9 @@ public class JavaSearchQuery implements ISearchQuery {
 
 	public ISearchResult getSearchResult() {
 		if (fResult == null) {
-			fResult= new JavaSearchResult(this);
-			new SearchResultUpdater((JavaSearchResult) fResult);
+			JavaSearchResult result= new JavaSearchResult(this);
+			new SearchResultUpdater(result);
+			fResult= result;
 		}
 		return fResult;
 	}

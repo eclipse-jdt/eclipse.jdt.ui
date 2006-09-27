@@ -241,10 +241,6 @@ public final class SearchMessages extends NLS {
 	public static String BreakContinueTargetFinder_no_break_or_continue_selected;
 	public static String TextSearchLabelProvider_matchCountFormat;
 	public static String FiltersDialog_title;
-	public static String FiltersDialog_filters_label;
-	public static String FiltersDialog_description_label;
-	public static String FiltersDialog_limit_label;
-	public static String FiltersDialog_limit_error;
 	public static String FiltersDialogAction_label;
 
 	static {

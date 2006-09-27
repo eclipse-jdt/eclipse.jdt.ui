@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.search;
 
 import java.util.HashSet;
 import java.util.Set;
+
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 
@@ -57,11 +58,6 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider im
 		viewer.add(added.toArray());
 		viewer.update(updated.toArray(), new String[] { SearchLabelProvider.PROPERTY_MATCH_COUNT });
 		viewer.remove(removed.toArray());
-	}
-
-	public void filtersChanged(MatchFilter[] filters) {
-		super.filtersChanged(filters);
-		getPage().getViewer().refresh();
 	}
 
 	public void clear() {

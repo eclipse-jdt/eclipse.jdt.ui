@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
+
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -32,10 +33,6 @@ public abstract class JavaSearchContentProvider implements IStructuredContentPro
 	public abstract void elementsChanged(Object[] updatedElements);
 	public abstract void clear();
 
-	public void filtersChanged(MatchFilter[] filters) {
-	}
-	
-	
 	public void dispose() {
 		// nothing to do
 	}

@@ -18,13 +18,16 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jface.viewers.AbstractTreeViewer;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
+
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
-import org.eclipse.jface.viewers.AbstractTreeViewer;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 
 public class LevelTreeContentProvider extends JavaSearchContentProvider implements ITreeContentProvider {
 	private Map fChildrenMap;
@@ -35,12 +38,12 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 	public static final int LEVEL_PACKAGE= 3;
 	public static final int LEVEL_PROJECT= 4;
 	
-	private static int[][] JAVA_ELEMENT_TYPES= {{IJavaElement.TYPE},
+	private static final int[][] JAVA_ELEMENT_TYPES= {{IJavaElement.TYPE},
 			{IJavaElement.CLASS_FILE, IJavaElement.COMPILATION_UNIT},
 			{IJavaElement.PACKAGE_FRAGMENT},
 			{IJavaElement.JAVA_PROJECT, IJavaElement.PACKAGE_FRAGMENT_ROOT},
 			{IJavaElement.JAVA_MODEL}};
-	private static int[][] RESOURCE_TYPES= {
+	private static final int[][] RESOURCE_TYPES= {
 			{}, 
 			{IResource.FILE},
 			{IResource.FOLDER}, 
@@ -195,7 +198,8 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 	}
 
 	public boolean hasChildren(Object element) {
-		return getChildren(element).length > 0;
+		Set children= (Set) fChildrenMap.get(element);
+		return children != null && !children.isEmpty();
 	}
 
 	public synchronized void elementsChanged(Object[] updatedElements) {
@@ -235,9 +239,4 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 		getPage().getViewer().refresh();
 	}
 
-	public void filtersChanged(MatchFilter[] filters) {
-		super.filtersChanged(filters);
-		initialize(fResult);
-		getPage().getViewer().refresh();
-	}
 }
