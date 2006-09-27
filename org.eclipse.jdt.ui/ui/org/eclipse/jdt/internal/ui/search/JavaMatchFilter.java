@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.StringTokenizer;
 
-import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.search.ui.text.MatchFilter;
 
@@ -49,16 +49,9 @@ abstract class JavaMatchFilter extends MatchFilter {
 	 */
 	public abstract boolean isApplicable(JavaSearchQuery query);
 	
-	public abstract String getActionLabel();
-	public abstract String getID();
-	
-	public boolean isApplicable(ISearchQuery query) {
-		if (query instanceof JavaSearchQuery) {
-			return isApplicable((JavaSearchQuery) query);
-		}
-		return false;
-	}
-	
+	/* (non-Javadoc)
+	 * @see org.eclipse.search.ui.text.MatchFilter#filters(org.eclipse.search.ui.text.Match)
+	 */
 	public boolean filters(Match match) {
 		if (match instanceof JavaElementMatch) {
 			return filters((JavaElementMatch) match);
@@ -89,10 +82,8 @@ abstract class JavaMatchFilter extends MatchFilter {
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < enabledFilters.length; i++) {
 			MatchFilter matchFilter= enabledFilters[i];
-			if (matchFilter instanceof JavaMatchFilter) {
-				buf.append(((JavaMatchFilter) matchFilter).getID());
-				buf.append(';');
-			}
+			buf.append(matchFilter.getID());
+			buf.append(';');
 		}
 		return buf.toString();
 	}
@@ -147,6 +138,17 @@ abstract class JavaMatchFilter extends MatchFilter {
 		return ALL_FILTERS;
 	}
 	
+	public static JavaMatchFilter[] allFilters(JavaSearchQuery query) {
+		ArrayList res= new ArrayList();
+		for (int i= 0; i < ALL_FILTERS.length; i++) {
+			JavaMatchFilter curr= ALL_FILTERS[i];
+			if (curr.isApplicable(query)) {
+				res.add(curr);
+			}
+		}
+		return (JavaMatchFilter[]) res.toArray(new JavaMatchFilter[res.size()]);
+	}
+	
 	private static JavaMatchFilter findMatchFilter(String id) {
 		for (int i= 0; i < ALL_FILTERS.length; i++) {
 			JavaMatchFilter matchFilter= ALL_FILTERS[i];
@@ -155,8 +157,6 @@ abstract class JavaMatchFilter extends MatchFilter {
 		}
 		return null;
 	}
-
-
 }
 
 class PotentialFilter extends JavaMatchFilter {

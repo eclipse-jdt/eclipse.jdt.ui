@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.CoreException;
@@ -63,16 +62,11 @@ import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.search.ui.IContextMenuConstants;
-import org.eclipse.search.ui.ISearchQuery;
-import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.ISearchResultViewPart;
 import org.eclipse.search.ui.NewSearchUI;
-import org.eclipse.search.ui.SearchResultEvent;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
-import org.eclipse.search.ui.text.FilterUpdateEvent;
 import org.eclipse.search.ui.text.Match;
-import org.eclipse.search.ui.text.MatchFilter;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -144,9 +138,6 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	
 	private int fCurrentGrouping;
 	
-	private FilterAction[] fFilterActions;
-	private FiltersDialogAction fFilterDialogAction;
-	
 	private static final String[] SHOW_IN_TARGETS= new String[] { JavaUI.ID_PACKAGES , IPageLayout.ID_RES_NAV };
 	public static final IShowInTargetList SHOW_IN_TARGET_LIST= new IShowInTargetList() {
 		public String[] getShowInTargetIds() {
@@ -163,21 +154,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		
 		initSortActions();
 		initGroupingActions();
-		initFilterActions();
 	}
 		
-	private void initFilterActions() {
-		JavaMatchFilter[] allFilters= JavaMatchFilter.allFilters();
-		fFilterActions= new FilterAction[allFilters.length];
-		for (int i= 0; i < fFilterActions.length; i++) {
-			fFilterActions[i]= new FilterAction(this, allFilters[i]);
-			fFilterActions[i].setId("org.eclipse.jdt.search.filters."+i); //$NON-NLS-1$
-		}
-		fFilterDialogAction= new FiltersDialogAction(this);
-		fFilterDialogAction.setId("org.eclipse.jdt.search.filters."+allFilters.length); //$NON-NLS-1$
-		JavaPluginImages.setLocalImageDescriptors(fFilterDialogAction, "filter_ps.gif"); //$NON-NLS-1$
-	}
-
 	private void initSortActions() {
 		fSortByNameAction= new SortAction(SearchMessages.JavaSearchResultPage_sortByName, this, SortingLabelProvider.SHOW_ELEMENT_CONTAINER); 
 		fSortByPathAction= new SortAction(SearchMessages.JavaSearchResultPage_sortByPath, this, SortingLabelProvider.SHOW_PATH); 
@@ -449,7 +427,6 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		IMenuManager menuManager = site.getActionBars().getMenuManager();
 		menuManager.insertBefore(IContextMenuConstants.GROUP_PROPERTIES, new Separator(GROUP_FILTERING));
 		fActionGroup.fillActionBars(site.getActionBars());
-		menuManager.appendToGroup(GROUP_FILTERING, fFilterDialogAction);
 		menuManager.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, new Action(SearchMessages.JavaSearchResultPage_preferences_label) {
 			public void run() {
 				String pageId= "org.eclipse.search.preferences.SearchPreferencePage"; //$NON-NLS-1$
@@ -530,101 +507,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		getViewer().refresh();
 		getViewPart().updateLabel();
 	}
-
-	void removeMatchFilter(MatchFilter filter) {
-		MatchFilter[] matchFilters= getMatchFilters();
-		ArrayList res= new ArrayList(matchFilters.length);
-		for (int i= 0; i < matchFilters.length; i++) {
-			if (!filter.equals(matchFilters[i])) {
-				res.add(matchFilters[i]);
-			}
-		}
-		MatchFilter[] newFilters= (MatchFilter[]) res.toArray(new MatchFilter[res.size()]);
-		setFilters(newFilters);
-	}
-	
-	void addMatchFilter(JavaMatchFilter filter) {
-		MatchFilter[] matchFilters= getMatchFilters();
-		ArrayList res= new ArrayList(matchFilters.length);
-		for (int i= 0; i < matchFilters.length; i++) {
-			if (!filter.equals(matchFilters[i])) {
-				res.add(matchFilters[i]);
-			}
-		}
-		res.add(filter);
-		MatchFilter[] newFilters= (MatchFilter[]) res.toArray(new MatchFilter[res.size()]);
-		setFilters(newFilters);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#handleSearchResultChanged(org.eclipse.search.ui.SearchResultEvent)
-	 */
-	protected synchronized void handleSearchResultChanged(SearchResultEvent e) {
-		super.handleSearchResultChanged(e);
-
-		if (e instanceof FilterUpdateEvent) {
-			updateFilterActions();
-		}
-	}
-	
-	private void updateFilterActions() {
-		for (int i= 0; i < fFilterActions.length; i++) {
-			fFilterActions[i].updateCheckState();
-		}
-		getSite().getActionBars().updateActionBars();
 		
-		IMenuManager menu= getSite().getActionBars().getMenuManager();
-		menu.updateAll(true);
-	}
-
-	boolean hasMatchFilter(MatchFilter filter) {
-		JavaSearchResult input= (JavaSearchResult) getInput();
-		if (input != null) {
-			MatchFilter[] matchFilters= input.getMatchFilters();
-			for (int i= 0; i < matchFilters.length; i++) {
-				if (matchFilters[i] == filter) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	
-	MatchFilter[] getMatchFilters() {
-		JavaSearchResult input= (JavaSearchResult) getInput();
-		if (input != null) {
-			return input.getMatchFilters();
-		}
-		return new MatchFilter[0];
-	}
-	
-	public void setInput(ISearchResult search, Object viewState) {
-		super.setInput(search, viewState);
-		JavaSearchResult input= (JavaSearchResult) search;
-		updateFilterEnablement(input);
-	}
-
-	private void updateFilterEnablement(JavaSearchResult result) {
-		IActionBars bars= getSite().getActionBars();
-		IMenuManager menu= bars.getMenuManager();
-		for (int i= 0; i < fFilterActions.length; i++) {
-			menu.remove(fFilterActions[i].getId());
-		}
-		
-		if (result != null) {
-			ISearchQuery query= result.getQuery();
-			for (int i= fFilterActions.length-1; i >= 0 ; i--) {
-				FilterAction filterAction= fFilterActions[i];
-				if (filterAction.getFilter().isApplicable(query))
-					menu.prependToGroup(GROUP_FILTERING, filterAction);
-				filterAction.updateCheckState();
-			}
-		}
-		
-		menu.updateAll(true);
-		bars.updateActionBars();
-	}
-	
 	private boolean isQueryRunning() {
 		AbstractTextSearchResult result= getInput();
 		if (result != null) {
@@ -636,7 +519,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	public String getLabel() {
 		String label= super.getLabel();
 		AbstractTextSearchResult input= getInput();
-		if (input != null && hasMatchFilters(input)) {
+		if (input != null && input.getActiveMatchFilters() != null && input.getActiveMatchFilters().length > 0) {
 			if (isQueryRunning()) {
 				String message= SearchMessages.JavaSearchResultPage_filtered_message; 
 				return Messages.format(message, new Object[] { label });
@@ -648,15 +531,6 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			}
 		}
 		return label;
-	}
-
-	private boolean hasMatchFilters(AbstractTextSearchResult result) {
-		MatchFilter[] filters= getMatchFilters();
-		for (int i= 0; i < filters.length; i++) {
-			if (((JavaMatchFilter) filters[i]).isApplicable(result.getQuery()))
-				return true;
-		}
-		return false;
 	}
 
 	private int getFilteredMatchCount() {
@@ -735,13 +609,6 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			}
 		}
 		super.handleOpen(event);
-	}
-
-	public void setFilters(MatchFilter[] enabledFilters) {
-		JavaSearchResult input= (JavaSearchResult) getInput();
-		if (input != null) {
-			input.setMatchFilters(enabledFilters);
-		}
 	}
 
 	void setElementLimit(int elementLimit) {

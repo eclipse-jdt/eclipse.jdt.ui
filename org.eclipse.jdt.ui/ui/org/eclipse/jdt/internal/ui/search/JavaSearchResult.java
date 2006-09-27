@@ -52,7 +52,7 @@ public class JavaSearchResult extends AbstractTextSearchResult implements IEdito
 	public JavaSearchResult(JavaSearchQuery query) {
 		fQuery= query;
 		fElementsToParticipants= new HashMap();
-		setMatchFilters(JavaMatchFilter.getLastUsedFilters());
+		setActiveMatchFilters(JavaMatchFilter.getLastUsedFilters());
 	}
 
 	public ImageDescriptor getImageDescriptor() {
@@ -74,9 +74,16 @@ public class JavaSearchResult extends AbstractTextSearchResult implements IEdito
 	/* (non-Javadoc)
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#setMatchFilters(org.eclipse.search.ui.text.MatchFilter[])
 	 */
-	public void setMatchFilters(MatchFilter[] filters) {
-		super.setMatchFilters(filters);
+	public void setActiveMatchFilters(MatchFilter[] filters) {
+		super.setActiveMatchFilters(filters);
 		JavaMatchFilter.setLastUsedFilters(filters);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#getAllMatchFilters()
+	 */
+	public MatchFilter[] getAllMatchFilters() {
+		return JavaMatchFilter.allFilters(fQuery);
 	}
 
 	public Match[] computeContainedMatches(AbstractTextSearchResult result, IFile file) {

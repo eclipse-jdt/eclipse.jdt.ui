@@ -240,9 +240,6 @@ public final class SearchMessages extends NLS {
 	public static String BreakContinueTargetFinder_cannot_highlight;
 	public static String BreakContinueTargetFinder_no_break_or_continue_selected;
 	public static String TextSearchLabelProvider_matchCountFormat;
-	public static String FiltersDialog_title;
-	public static String FiltersDialogAction_label;
-
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, SearchMessages.class);
 	}
