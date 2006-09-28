@@ -26,8 +26,12 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 	
 	public static final String JUNIT_CONTAINER_ID= "org.eclipse.jdt.junit.JUNIT_CONTAINER"; //$NON-NLS-1$
 	
-	public final static String JUNIT3= "3.8.1"; //$NON-NLS-1$
-	public final static String JUNIT4= "4"; //$NON-NLS-1$
+	/**
+	 * @deprecated just for compatibility
+	 */
+	private final static String JUNIT3_8_1= "3.8.1"; //$NON-NLS-1$
+	private final static String JUNIT3= "3"; //$NON-NLS-1$
+	private final static String JUNIT4= "4"; //$NON-NLS-1$
 	
 	public final static IPath JUNIT3_PATH= new Path(JUNIT_CONTAINER_ID).append(JUNIT3);
 	public final static IPath JUNIT4_PATH= new Path(JUNIT_CONTAINER_ID).append(JUNIT4);
@@ -72,7 +76,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 
 			IClasspathEntry entry= null;
 			String version= containerPath.segment(1);
-			if (JUNIT3.equals(version)) {
+			if (JUNIT3_8_1.equals(version) || JUNIT3.equals(version)) {
 				entry= BuildPathSupport.getJUnit3LibraryEntry();
 			} else if (JUNIT4.equals(version)) {
 				entry= BuildPathSupport.getJUnit4LibraryEntry();
@@ -115,7 +119,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 	public String getDescription(IPath containerPath, IJavaProject project) {
 		if (isValidJUnitContainerPath(containerPath)) {
 			String version= containerPath.segment(1);
-			if (JUNIT3.equals(version)) {
+			if (JUNIT3_8_1.equals(version) || JUNIT3.equals(version)) {
 				return JUnitMessages.JUnitContainerInitializer_description_initializer_junit3;
 			} else if (JUNIT4.equals(version)) {
 				return JUnitMessages.JUnitContainerInitializer_description_initializer_junit4;

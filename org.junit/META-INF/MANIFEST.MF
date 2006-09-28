@@ -2,16 +2,16 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.junit
-Bundle-Version: 3.8.1
+Bundle-Version: 3.8.2
 Bundle-ClassPath: junit.jar
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Export-Package: 
- junit.awtui;version="3.8.1",
- junit.extensions;version="3.8.1",
- junit.framework;version="3.8.1",
- junit.runner;version="3.8.1",
- junit.swingui;version="3.8.1",
- junit.swingui.icons;version="3.8.1",
- junit.textui;version="3.8.1"
+ junit.awtui;version="3.8.2",
+ junit.extensions;version="3.8.2",
+ junit.framework;version="3.8.2",
+ junit.runner;version="3.8.2",
+ junit.swingui;version="3.8.2",
+ junit.swingui.icons;version="3.8.2",
+ junit.textui;version="3.8.2"
 Bundle-RequiredExecutionEnvironment: J2SE-1.3
