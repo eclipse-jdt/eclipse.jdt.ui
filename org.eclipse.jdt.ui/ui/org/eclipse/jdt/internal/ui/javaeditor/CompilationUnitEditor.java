@@ -818,6 +818,18 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 						setSelection(element);
 					return;
 				}
+				
+				// Ensure selection is LTR
+				if (endOffset < startOffset) {
+					int i= endOffset;
+					endOffset= startOffset;
+					startOffset= i;
+				}
+				if (revealEndOffset < revealStartOffset) {
+					int i= revealEndOffset;
+					revealEndOffset= revealStartOffset;
+					revealStartOffset= i;
+				}
 
 				if (isValidSelection(revealStartOffset, revealEndOffset - revealStartOffset) && isValidSelection(startOffset, endOffset - startOffset))
 					selectAndReveal(startOffset, endOffset - startOffset, revealStartOffset, revealEndOffset - revealStartOffset);
@@ -834,7 +846,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				if (document != null) {
 					int end= offset + length;
 					int documentLength= document.getLength();
-					return 0 <= offset  && offset <= documentLength && 0 <= end && end <= documentLength;
+					return 0 <= offset  && offset <= documentLength && 0 <= end && end <= documentLength && length >= 0;
 				}
 			}
 			return false;
