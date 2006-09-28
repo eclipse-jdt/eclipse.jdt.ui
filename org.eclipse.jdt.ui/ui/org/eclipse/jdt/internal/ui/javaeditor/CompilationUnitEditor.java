@@ -754,9 +754,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			 */
 			ISourceViewer viewer= getSourceViewer();
 			if (viewer != null) {
-				IRegion selection= getSignedSelection(viewer);
-				int startOffset= selection.getOffset();
-				int endOffset= startOffset + selection.getLength();
+				Point selection= viewer.getSelectedRange();
+				int startOffset= selection.x;
+				int endOffset= startOffset + selection.y;
 
 				fStartOffset.setOffset(startOffset);
 				fEndOffset.setOffset(endOffset);
@@ -817,18 +817,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					if (element != null)
 						setSelection(element);
 					return;
-				}
-				
-				// Ensure selection is LTR
-				if (endOffset < startOffset) {
-					int i= endOffset;
-					endOffset= startOffset;
-					startOffset= i;
-				}
-				if (revealEndOffset < revealStartOffset) {
-					int i= revealEndOffset;
-					revealEndOffset= revealStartOffset;
-					revealStartOffset= i;
 				}
 
 				if (isValidSelection(revealStartOffset, revealEndOffset - revealStartOffset) && isValidSelection(startOffset, endOffset - startOffset))
