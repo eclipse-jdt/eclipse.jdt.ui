@@ -41,6 +41,7 @@ public class TestOptions {
 		result.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.IGNORE);
 		result.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.IGNORE);
 		result.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
+		result.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.IGNORE);
 		// should cover all compiler settings
 		result.putAll(TestFormatterOptions.getSettings());
 		return result;
