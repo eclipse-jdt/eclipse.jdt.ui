@@ -15,7 +15,8 @@ import org.eclipse.jface.viewers.Viewer;
 
 public abstract class JavaSearchContentProvider implements IStructuredContentProvider {
 	protected final Object[] EMPTY_ARR= new Object[0];
-	protected JavaSearchResult fResult;
+	
+	private JavaSearchResult fResult;
 	private JavaSearchResultPage fPage;
 
 	JavaSearchContentProvider(JavaSearchResultPage page) {
@@ -24,6 +25,7 @@ public abstract class JavaSearchContentProvider implements IStructuredContentPro
 	
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		initialize((JavaSearchResult) newInput);
+		
 	}
 	
 	protected void initialize(JavaSearchResult result) {
@@ -39,6 +41,10 @@ public abstract class JavaSearchContentProvider implements IStructuredContentPro
 
 	JavaSearchResultPage getPage() {
 		return fPage;
+	}
+	
+	JavaSearchResult getSearchResult() {
+		return fResult;
 	}
 
 }

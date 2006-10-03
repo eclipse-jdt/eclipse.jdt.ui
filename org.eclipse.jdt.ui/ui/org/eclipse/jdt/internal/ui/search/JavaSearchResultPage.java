@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
@@ -146,14 +145,13 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	};
 	
 	private JavaSearchEditorOpener fEditorOpener= new JavaSearchEditorOpener();
-	private boolean fLimitElements= false;
-	private int fElementLimit;
 
 	public JavaSearchResultPage() {
 		fCopyQualifiedNameAction= null;
 		
 		initSortActions();
 		initGroupingActions();
+		setElementLimit(new Integer(DEFAULT_ELEMENT_LIMIT));
 	}
 		
 	private void initSortActions() {
@@ -331,84 +329,11 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	}
 	
 	protected TreeViewer createTreeViewer(Composite parent) {
-		return new ProblemTreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL) {
-			public void add(Object parentElement, Object[] childElements) {
-				int elementLimit= getElementLimit();
-				if (elementLimit != -1 && parentElement.equals(getInput())) {
-					Widget parentWidget= findItem(parentElement);
-					if (parentWidget == null)
-						return;
-					Item[] children= getChildren(parentWidget);
-					if (children.length >= elementLimit)
-						return;
-					if (children.length + childElements.length <= elementLimit) {
-						super.add(parentElement, childElements);
-						return;
-					}
-					int toAdd= elementLimit-children.length;
-					Object[] limited= new Object[toAdd];
-					System.arraycopy(childElements, 0, limited, 0, limited.length);
-					super.add(parentElement, limited);
-					return;
-				} else {
-					super.add(parentElement, childElements);
-				}
-			}
-
-			protected Object[] getFilteredChildren(Object parentElement) {
-				if (parentElement == null)
-					return new Object[0];
-				Object[] filtered= super.getFilteredChildren(parentElement);
-				int elementLimit = getElementLimit();
-				if (elementLimit != -1 && parentElement.equals(getInput()) &&  filtered.length > elementLimit) {
-					Object[] limited= new Object[elementLimit];
-					System.arraycopy(filtered, 0, limited, 0, limited.length);
-					return limited;
-				} else 
-					return filtered;
-			}
-		};
+		return new ProblemTreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 	}
 	
-	int getElementLimit() {
-		return fLimitElements ? fElementLimit : -1;
-	}
-
 	protected TableViewer createTableViewer(Composite parent) {
-		return new ProblemTableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL) {
-			
-			public void add(Object[] elements) {
-				int elementLimit= getElementLimit();
-				if (elementLimit != -1) {
-					int currentCount= getTable().getItemCount();
-					if (currentCount >= elementLimit)
-						return;
-					if (currentCount + elements.length <= elementLimit) {
-						super.add(elements);
-						return;
-					}
-					int toAdd= elementLimit-currentCount;
-					Object[] limited= new Object[toAdd];
-					System.arraycopy(elements, 0, limited, 0, limited.length);
-					super.add(limited);
-				} else {
-					super.add(elements);
-				}
-			}
-
-			protected Object[] getFilteredChildren(Object parentElement) {
-				if (parentElement == null)
-					return new Object[0];
-				Object[] filtered= super.getFilteredChildren(parentElement);
-				int elementLimit = getElementLimit();
-				if (elementLimit != -1 && parentElement.equals(getInput()) &&  filtered.length > elementLimit) {
-					Object[] limited= new Object[elementLimit];
-					System.arraycopy(filtered, 0, limited, 0, limited.length);
-					return limited;
-				} else 
-					return filtered;
-			}
-		};
+		return new ProblemTableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 	}
 	
 	void setSortOrder(int order) {
@@ -459,34 +384,43 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	 */
 	public void restoreState(IMemento memento) {
 		super.restoreState(memento);
-		try {
-			fCurrentSortOrder= getSettings().getInt(KEY_SORTING);
+		
+		int sortOrder= SortingLabelProvider.SHOW_ELEMENT_CONTAINER;
+		int grouping= LevelTreeContentProvider.LEVEL_PACKAGE;
+		int elementLimit= DEFAULT_ELEMENT_LIMIT;
+		
+		try { 
+			sortOrder= getSettings().getInt(KEY_SORTING);
 		} catch (NumberFormatException e) {
-			fCurrentSortOrder=  SortingLabelProvider.SHOW_ELEMENT_CONTAINER;
 		}
-		try {
-			fCurrentGrouping= getSettings().getInt(KEY_GROUPING);
+		try { 
+			grouping= getSettings().getInt(KEY_GROUPING);
 		} catch (NumberFormatException e) {
-			fCurrentGrouping= LevelTreeContentProvider.LEVEL_PACKAGE;
 		}
-		fLimitElements= !FALSE.equals(getSettings().get(KEY_LIMIT_ENABLED));
-		try {
-			fElementLimit= getSettings().getInt(KEY_LIMIT);
-		} catch (NumberFormatException e) {
-			fElementLimit= DEFAULT_ELEMENT_LIMIT;
+		if (FALSE.equals(getSettings().get(KEY_LIMIT_ENABLED))) {
+			elementLimit= -1;
+		} else {
+			try {
+				elementLimit= getSettings().getInt(KEY_LIMIT);
+			} catch (NumberFormatException e) {
+			}
 		}
 		if (memento != null) {
 			Integer value= memento.getInteger(KEY_GROUPING);
 			if (value != null)
-				fCurrentGrouping= value.intValue();
+				grouping= value.intValue();
 			value= memento.getInteger(KEY_SORTING);
 			if (value != null)
-				fCurrentSortOrder= value.intValue();
-			fLimitElements= !FALSE.equals(memento.getString(KEY_LIMIT_ENABLED));
+				sortOrder= value.intValue();
+			boolean limitElements= !FALSE.equals(memento.getString(KEY_LIMIT_ENABLED));
 			value= memento.getInteger(KEY_LIMIT);
 			if (value != null)
-				fElementLimit= value.intValue();
+				elementLimit= limitElements ? value.intValue() : -1;
 		}
+		
+		fCurrentGrouping= grouping;
+		fCurrentSortOrder= sortOrder;
+		setElementLimit(new Integer(elementLimit));
 	}
 
 	/* (non-Javadoc)
@@ -496,16 +430,12 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		super.saveState(memento);
 		memento.putInteger(KEY_GROUPING, fCurrentGrouping);
 		memento.putInteger(KEY_SORTING, fCurrentSortOrder);
-		if (fLimitElements)
+		int limit= getElementLimit().intValue();
+		if (limit != -1)
 			memento.putString(KEY_LIMIT_ENABLED, TRUE);
 		else 
 			memento.putString(KEY_LIMIT_ENABLED, FALSE);
-		memento.putInteger(KEY_LIMIT, getElementLimit());
-	}
-	
-	private void limitChanged() {
-		getViewer().refresh();
-		getViewPart().updateLabel();
+		memento.putInteger(KEY_LIMIT, limit);
 	}
 		
 	private boolean isQueryRunning() {
@@ -611,12 +541,10 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		super.handleOpen(event);
 	}
 
-	void setElementLimit(int elementLimit) {
-		fElementLimit= elementLimit;
-		fLimitElements= elementLimit != -1;
-		getSettings().put(KEY_LIMIT, elementLimit);
-		getSettings().put(KEY_LIMIT_ENABLED, fLimitElements ? TRUE : FALSE);
-
-		limitChanged();
+	public void setElementLimit(Integer elementLimit) {
+		super.setElementLimit(elementLimit);
+		int limit= elementLimit.intValue();
+		getSettings().put(KEY_LIMIT, limit);
+		getSettings().put(KEY_LIMIT_ENABLED, limit != -1 ? TRUE : FALSE);
 	}	
 }

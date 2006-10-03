@@ -129,9 +129,9 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 			child= parent;
 			parent= getParent(child);
 		}
-		if (insertChild(fResult, child)) {
+		if (insertChild(getSearchResult(), child)) {
 			if (toAdd != null)
-				insertInto(fResult, child, toAdd);
+				insertInto(getSearchResult(), child, toAdd);
 		}
 	}
 
@@ -163,7 +163,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 						remove(toRemove, toUpdate, parent);
 					}
 				} else {
-					if (removeFromSiblings(element, fResult)) {
+					if (removeFromSiblings(element, getSearchResult())) {
 						if (toRemove != null)
 							toRemove.add(element);
 					}
@@ -194,6 +194,16 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 		Set children= (Set) fChildrenMap.get(parentElement);
 		if (children == null)
 			return EMPTY_ARR;
+		int limit= getPage().getElementLimit().intValue();
+		if (limit != -1 && limit < children.size()) {
+			Object[] limitedArray= new Object[limit];
+			Iterator iterator= children.iterator();
+			for (int i= 0; i < limit; i++) {
+				limitedArray[i]= iterator.next();
+			}
+			return limitedArray;
+		}
+		
 		return children.toArray();
 	}
 
@@ -203,9 +213,11 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 	}
 
 	public synchronized void elementsChanged(Object[] updatedElements) {
-		AbstractTreeViewer viewer= (AbstractTreeViewer) getPage().getViewer();
-		if (fResult == null)
+		if (getSearchResult() == null)
 			return;
+		
+		AbstractTreeViewer viewer= (AbstractTreeViewer) getPage().getViewer();
+
 		Set toRemove= new HashSet();
 		Set toUpdate= new HashSet();
 		Map toAdd= new HashMap();
@@ -229,13 +241,13 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 	}
 	
 	public void clear() {
-		initialize(fResult);
+		initialize(getSearchResult());
 		getPage().getViewer().refresh();
 	}
 
 	public void setLevel(int level) {
 		fCurrentLevel= level;
-		initialize(fResult);
+		initialize(getSearchResult());
 		getPage().getViewer().refresh();
 	}
 
