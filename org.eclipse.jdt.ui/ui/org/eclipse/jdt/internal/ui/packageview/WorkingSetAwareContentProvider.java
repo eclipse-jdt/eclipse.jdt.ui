@@ -12,9 +12,12 @@ package org.eclipse.jdt.internal.ui.packageview;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
@@ -35,8 +38,6 @@ import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
-import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
 
 public class WorkingSetAwareContentProvider extends PackageExplorerContentProvider implements IMultiElementTreeContentProvider {
@@ -90,50 +91,44 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 
 	private Object[] getWorkingSetChildren(IWorkingSet set) {
 		IAdaptable[] elements= fWorkingSetModel.getChildren(set);
-		boolean isKnownWorkingSet= isKnownWorkingSet(set);
-		List result= new ArrayList(elements.length);
+		Set result= new HashSet(elements.length);
 		for (int i= 0; i < elements.length; i++) {
 			IAdaptable element= elements[i];
-			boolean add= false;
 			if (element instanceof IProject) {
-				add= true;
+				processResource((IProject) element, result); // also add closed projects
 			} else if (element instanceof IResource) {
-				IProject project= ((IResource)element).getProject();
-				add= project == null || project.isOpen();
+				IProject project= ((IResource) element).getProject();
+				if (project.isOpen()) {
+					processResource((IResource) element, result);
+				}
 			} else if (element instanceof IJavaProject) {
-				add= true;
+				result.add(element); // also add closed projects
 			} else if (element instanceof IJavaElement) {
-				IProject project= getProject((IJavaElement)element);
-				add= project == null || project.isOpen();
-			}
-			if (add) {
-				if (isKnownWorkingSet) {
-					result.add(element);
-				} else {
-					IProject project= (IProject)element.getAdapter(IProject.class);
-					if (project != null && project.exists()) {
-						IJavaProject jp= JavaCore.create(project);
-						if (jp != null && jp.exists()) {
-							result.add(jp);
-						} else {
-							result.add(project);
-						}
-					}
+				IJavaElement elem= (IJavaElement) element;
+				IProject project= getProject(elem);
+				if (project.isOpen()) {
+					result.add(elem);
+				}
+			} else {
+				IProject project= (IProject) element.getAdapter(IProject.class);
+				if (project != null) {
+					processResource(project, result);
 				}
 			}
 		}
 		return result.toArray();
 	}
 	
-	private boolean isKnownWorkingSet(IWorkingSet set) {
-		String id= set.getId();
-		return OthersWorkingSetUpdater.ID.equals(id) ||
-			JavaWorkingSetUpdater.ID.equals(id);
+	private void processResource(IResource resource, Collection result) {
+		IJavaElement elem= JavaCore.create(resource);
+		if (elem != null && elem.exists()) {
+			result.add(elem);
+		} else {
+			result.add(resource);
+		}
 	}
 	
 	private IProject getProject(IJavaElement element) {
-		if (element == null)
-			return null;
 		IJavaProject project= element.getJavaProject();
 		if (project == null)
 			return null;
