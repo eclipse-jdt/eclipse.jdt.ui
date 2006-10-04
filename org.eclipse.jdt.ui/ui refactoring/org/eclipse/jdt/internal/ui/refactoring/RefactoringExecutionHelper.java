@@ -41,11 +41,13 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler;
+import org.eclipse.ltk.internal.ui.refactoring.RefactoringWizardDialog2;
 import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameRefactoringWizard;
 
 /**
  * A helper class to execute a refactoring. The class takes care of pushing the
@@ -63,9 +65,11 @@ public class RefactoringExecutionHelper {
 	private class Operation implements IWorkspaceRunnable {
 		public Change fChange;
 		public PerformChangeOperation fPerformChangeOperation;
+		private final boolean fShowPreview;
 		private final boolean fApplyChanges;
 		
-		public Operation(boolean applyChanges) {
+		public Operation(boolean showPreview, boolean applyChanges) {
+			fShowPreview= showPreview;
 			fApplyChanges= applyChanges;
         }
 		
@@ -73,21 +77,46 @@ public class RefactoringExecutionHelper {
 			try {
 				pm.beginTask("", fApplyChanges?11:7); //$NON-NLS-1$
 				pm.subTask(""); //$NON-NLS-1$
+				
 				RefactoringStatus status= fRefactoring.checkAllConditions(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
-				if (status.getSeverity() >= fStopSeverity) {
-					Dialog dialog= RefactoringUI.createRefactoringStatusDialog(status, fParent, fRefactoring.getName(), false);
-					if(dialog.open() == IDialogConstants.CANCEL_ID) {
-						throw new OperationCanceledException();
+				int severity= status.getSeverity();
+				if (fShowPreview) {
+					if (severity == RefactoringStatus.FATAL) {
+						showStatusDialog(status);
 					}
+				} else if (severity >= fStopSeverity) {
+					showStatusDialog(status);
 				}
+
 				fChange= fRefactoring.createChange(new SubProgressMonitor(pm, 2, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 				fChange.initializeValidationData(new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
+				if (fShowPreview) {
+					RenameRefactoringWizard wizard= new RenameRefactoringWizard(fRefactoring, fRefactoring.getName(), null, null, null) {
+						protected void addUserInputPages() {
+							// nothing to add
+						}
+					};
+					RefactoringWizardDialog2 dialog= new RefactoringWizardDialog2(fParent, wizard);
+					if (dialog.open() == IDialogConstants.CANCEL_ID) {
+						throw new OperationCanceledException();
+					} else {
+						return;
+					}
+				}
+				
 				fPerformChangeOperation= RefactoringUI.createUIAwareChangeOperation(fChange);
 				fPerformChangeOperation.setUndoManager(RefactoringCore.getUndoManager(), fRefactoring.getName());
 				if (fApplyChanges)
 					fPerformChangeOperation.run(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 			} finally {
 				pm.done();
+			}
+		}
+
+		private void showStatusDialog(RefactoringStatus status) throws OperationCanceledException {
+			Dialog dialog= RefactoringUI.createRefactoringStatusDialog(status, fParent, fRefactoring.getName(), false);
+			if (dialog.open() == IDialogConstants.CANCEL_ID) {
+				throw new OperationCanceledException();
 			}
 		}
 	}
@@ -105,6 +134,10 @@ public class RefactoringExecutionHelper {
 	}
 	
 	public void perform(boolean fork, boolean cancelable) throws InterruptedException, InvocationTargetException {
+		perform(false, fork, cancelable);
+	}
+	
+	public void perform(boolean showPreview, boolean fork, boolean cancelable) throws InterruptedException, InvocationTargetException {
 		Assert.isTrue(Display.getCurrent() != null);
 		final IJobManager manager=  Platform.getJobManager();
 		final IWorkspaceRoot rule= ResourcesPlugin.getWorkspace().getRoot();
@@ -131,20 +164,22 @@ public class RefactoringExecutionHelper {
 			RefactoringSaveHelper saveHelper= new RefactoringSaveHelper();
 			if (fNeedsSavedEditors && !saveHelper.saveEditors(fParent))
 				throw new InterruptedException();
-			final Operation op= new Operation(!fork);
+			final Operation op= new Operation(showPreview, !fork);
 			fRefactoring.setValidationContext(fParent);
 			try{
 				fExecContext.run(fork, cancelable, new OperationRunner(op, rule));
-				if (fork)
+				if (fork && op.fPerformChangeOperation != null)
 					fExecContext.run(false, false, new OperationRunner(op.fPerformChangeOperation, rule));
 
-				RefactoringStatus validationStatus= op.fPerformChangeOperation.getValidationStatus();
-				if (validationStatus != null && validationStatus.hasFatalError()) {
-					MessageDialog.openError(fParent, fRefactoring.getName(), 
-						Messages.format(
-							RefactoringMessages.RefactoringExecutionHelper_cannot_execute, 
-							validationStatus.getMessageMatchingSeverity(RefactoringStatus.FATAL)));
-					return;
+				if (op.fPerformChangeOperation != null) {
+					RefactoringStatus validationStatus= op.fPerformChangeOperation.getValidationStatus();
+					if (validationStatus != null && validationStatus.hasFatalError()) {
+						MessageDialog.openError(fParent, fRefactoring.getName(), 
+								Messages.format(
+										RefactoringMessages.RefactoringExecutionHelper_cannot_execute, 
+										validationStatus.getMessageMatchingSeverity(RefactoringStatus.FATAL)));
+						return;
+					}
 				}
 			} catch (InvocationTargetException e) {
 				PerformChangeOperation pco= op.fPerformChangeOperation;

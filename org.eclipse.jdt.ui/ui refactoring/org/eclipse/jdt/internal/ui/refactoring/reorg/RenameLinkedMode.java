@@ -20,6 +20,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -49,11 +50,14 @@ import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
+import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
+import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
@@ -110,7 +114,7 @@ public class RenameLinkedMode {
 		public void left(LinkedModeModel model, int flags) {
 			closePopup();
 			if ( (flags & ILinkedModeListener.UPDATE_CARET) != 0) {
-				doRename();
+				doRename(fShowPreview);
 			}
 		}
 
@@ -118,6 +122,13 @@ public class RenameLinkedMode {
 		}
 
 		public void suspend(LinkedModeModel model) {
+		}
+	}
+	
+	private class ExitPolicy implements IExitPolicy {
+		public ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length) {
+			fShowPreview= (event.stateMask & SWT.CTRL) != 0;
+			return null; // don't change behavior; do actions in EditorSynchronizer
 		}
 	}
 	
@@ -196,6 +207,7 @@ public class RenameLinkedMode {
 
 	private LinkedModeModel fLinkedModeModel;
 	private LinkedPositionGroup fLinkedPositionGroup;
+	private boolean fShowPreview;
 
 
 	public RenameLinkedMode(IJavaElement element, CompilationUnitEditor editor) {
@@ -267,15 +279,11 @@ public class RenameLinkedMode {
 			fLinkedModeModel.addGroup(fLinkedPositionGroup);
 			fLinkedModeModel.forceInstall();
 			fLinkedModeModel.addLinkingListener(new EditorHighlightingSynchronizer(fEditor));
-			/*
-			 * TODO: This is a hack. Should use ui.setExitPolicy(..) to find
-			 * difference between Enter and Ctrl+Enter.
-			 */
-			
 			fLinkedModeModel.addLinkingListener(new EditorSynchronizer());
             
 			LinkedModeUI ui= new EditorLinkedModeUI(fLinkedModeModel, viewer);
 			ui.setExitPosition(viewer, offset, 0, Integer.MAX_VALUE);
+			ui.setExitPolicy(new ExitPolicy());
 			ui.enter();
 			
 			viewer.setSelectedRange(fOriginalSelection.x, fOriginalSelection.y); // by default, full word is selected; restore original selection
@@ -287,17 +295,25 @@ public class RenameLinkedMode {
 		fgActiveLinkedMode= this;
 	}
 	
-	void doRename() {
+	void doRename(boolean showPreview) {
 		fLinkedModeModel.exit(ILinkedModeListener.NONE);
 		closePopup();
 		
 		String oldName= fJavaElement.getElementName();
 		try {
 			String newName= fNamePosition.getContent();
-			if (! oldName.equals(newName)) {
-				RenameSupport renameSupport= undoAndCreateRenameSupport(newName);
-				if (renameSupport != null)
-					renameSupport.perform(fEditor.getSite().getShell(), fEditor.getSite().getWorkbenchWindow());
+			if (oldName.equals(newName))
+				return;
+			RenameSupport renameSupport= undoAndCreateRenameSupport(newName);
+			if (renameSupport == null)
+				return;
+			
+			Shell shell= fEditor.getSite().getShell();
+			IWorkbenchWindow workbenchWindow= fEditor.getSite().getWorkbenchWindow();
+			if (showPreview) {
+				renameSupport.openPreview(shell, workbenchWindow);
+			} else {
+				renameSupport.perform(shell, workbenchWindow);
 			}
 		} catch (CoreException ex) {
 			JavaPlugin.log(ex);
@@ -309,7 +325,7 @@ public class RenameLinkedMode {
 			JavaPlugin.log(e);
 		}
 	}
-
+	
 	private RenameSupport undoAndCreateRenameSupport(String newName) throws CoreException {
 		// Assumption: the linked mode model should be shut down by now.
 		
@@ -595,7 +611,7 @@ public class RenameLinkedMode {
 			public void linkActivated(HyperlinkEvent e) {
 				display.asyncExec(new Runnable() { //TODO: workaround for 157196: [Forms] Hyperlink listener notification throws AIOOBE when listener removed in callback
 					public void run() {
-						doRename();
+						doRename(false);
 					}
 				});
 			}
@@ -604,12 +620,20 @@ public class RenameLinkedMode {
 		String refactorBindingText= KeyStroke.getInstance(KeyLookupFactory.getDefault().formalKeyLookup(IKeyLookup.CR_NAME)).format();
 		refactorBinding.setText(refactorBindingText);
 		
-//		Hyperlink previewLink= new Hyperlink(table, SWT.NONE);
-//		previewLink.setText("Preview");
-//		previewLink.setEnabled(false);
-//		Label previewBinding= new Label(table, SWT.NONE);
-//		previewBinding.setText("Ctrl+Enter"); //TODO: make keybinding platform-independent 
-//		previewBinding.setEnabled(false);
+		Hyperlink previewLink= new Hyperlink(table, SWT.NONE);
+		previewLink.setText(ReorgMessages.RenameLinkedMode_preview);
+		previewLink.addHyperlinkListener(new HyperlinkAdapter() {
+			public void linkActivated(HyperlinkEvent e) {
+				display.asyncExec(new Runnable() { //TODO: workaround for 157196: [Forms] Hyperlink listener notification throws AIOOBE when listener removed in callback
+					public void run() {
+						doRename(true);
+					}
+				});
+			}
+		});
+		Label previewBinding= new Label(table, SWT.NONE);
+		String previewBindingText= KeyStroke.getInstance(SWT.CTRL, KeyLookupFactory.getDefault().formalKeyLookup(IKeyLookup.CR_NAME)).format();
+		previewBinding.setText(previewBindingText);
 		
 		Hyperlink openDialogLink= new Hyperlink(table, SWT.NONE);
 		openDialogLink.setText(ReorgMessages.RenameLinkedMode_open_dialog);
@@ -622,28 +646,25 @@ public class RenameLinkedMode {
 				});
 			}
 		});
-		
-		HyperlinkGroup hyperlinkGroup= new HyperlinkGroup(display);
-		hyperlinkGroup.add(refactorLink);
-//		hyperlinkGroup.add(previewLink);
-		hyperlinkGroup.add(openDialogLink);
-		hyperlinkGroup.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-//		previewLink.setForeground(display.getSystemColor(SWT.COLOR_WIDGET_DARK_SHADOW));
-		
 		Label openDialogBinding= new Label(table, SWT.NONE);
 		String openDialogBindingString= getOpenDialogBinding();
 		if (openDialogBindingString != null)
 			openDialogBinding.setText(openDialogBindingString); 
 		
+		HyperlinkGroup hyperlinkGroup= new HyperlinkGroup(display);
+		hyperlinkGroup.add(refactorLink);
+		hyperlinkGroup.add(previewLink);
+		hyperlinkGroup.add(openDialogLink);
+		hyperlinkGroup.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+		
 		recursiveSetBackgroundColor(table, display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-		// cannot set foreground color of links
 		
 		Point size= table.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		fPopup.setSize(size);
 		
 		addMoveSupport(fPopup, table);
 		addMoveSupport(fPopup, refactorBinding);
-//		addMoveSupport(fPopup, previewBinding);
+		addMoveSupport(fPopup, previewBinding);
 		addMoveSupport(fPopup, openDialogBinding);
 		
 		return table;

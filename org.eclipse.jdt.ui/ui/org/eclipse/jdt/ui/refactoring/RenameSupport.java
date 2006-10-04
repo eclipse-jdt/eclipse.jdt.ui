@@ -23,6 +23,7 @@ import org.eclipse.jface.operation.IRunnableContext;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -59,6 +60,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameSelectionState;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceManager;
 
 /**
@@ -116,6 +118,31 @@ public class RenameSupport {
 	}
 	
 	/**
+	 * Shows a preview of the rename refactoring without showing a dialog to gather
+	 * additional user input (for example the new name of the <tt>IJavaElement</tt>).
+	 * If necessary, an error dialog is shown to present the result
+	 * of the refactoring's full precondition checking.
+	 * <p>
+	 * This method has to be called from within the UI thread. 
+	 * </p>
+	 * 
+	 * @param parent a shell used as a parent for the preview and error dialogs.
+	 * @param context a {@link IRunnableContext} to execute the operation.
+	 * 
+	 * @throws InterruptedException if the operation has been canceled by the
+	 * user.
+	 * @throws InvocationTargetException if an error occurred while executing the
+	 * operation.
+	 * 
+	 * @see #openDialog(Shell)
+	 * @see IRunnableContext#run(boolean, boolean, org.eclipse.jface.operation.IRunnableWithProgress)
+	 * @since 3.3
+	 */
+	public void openPreview(Shell parent, IRunnableContext context) throws InterruptedException, InvocationTargetException {
+		perform(true, parent, context);
+	}
+
+	/**
 	 * Executes the rename refactoring without showing a dialog to gather
 	 * additional user input (for example the new name of the <tt>IJavaElement</tt>).
 	 * Only an error dialog is shown (if necessary) to present the result
@@ -136,21 +163,47 @@ public class RenameSupport {
 	 * @see IRunnableContext#run(boolean, boolean, org.eclipse.jface.operation.IRunnableWithProgress)
 	 */
 	public void perform(Shell parent, IRunnableContext context) throws InterruptedException, InvocationTargetException {
+		perform(false, parent, context);
+	}
+	
+	private void perform(boolean showPreview, Shell parent, IRunnableContext context) throws InvocationTargetException, InterruptedException {
+		RenameProcessor processor= (RenameProcessor) fRefactoring.getAdapter(RenameProcessor.class);
+		Object[] elements= processor.getElements();
+		RenameSelectionState state= elements.length == 1 ? new RenameSelectionState(elements[0]) : null;
+		
+		RefactoringExecutionHelper helper= createExecutionHelper(parent, context);
+		if (helper != null) {
+			helper.perform(showPreview, false, true);
+			INameUpdating nameUpdating= (INameUpdating) fRefactoring.getAdapter(INameUpdating.class);
+			if (nameUpdating != null && state != null) {
+				try {
+					Object newElement= nameUpdating.getNewElement();
+					if (newElement != null) {
+						state.restore(newElement);
+					}			
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
+				}
+			}
+		}
+	}
+	
+	private RefactoringExecutionHelper createExecutionHelper(Shell parent, IRunnableContext context) throws InvocationTargetException {
 		try {
 			ensureChecked();
 			if (fPreCheckStatus.hasFatalError()) {
 				showInformation(parent, fPreCheckStatus);
-				return; 
+				return null;
 			}
 		} catch (CoreException e){
 			throw new InvocationTargetException(e);
 		}
 		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(fRefactoring,
-			RefactoringCore.getConditionCheckingFailedSeverity(),
-			getJavaRenameProcessor().needsSavedEditors(),
-			parent,
-			context);
-		helper.perform(false, true);
+				RefactoringCore.getConditionCheckingFailedSeverity(),
+				getJavaRenameProcessor().needsSavedEditors(),
+				parent,
+				context);
+		return helper;
 	}
 	
 	/** Flag indication that no additional update is to be performed. */
