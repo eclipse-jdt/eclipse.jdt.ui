@@ -10,15 +10,22 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.scripting;
 
+import java.util.Map;
+
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringContribution;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 
 /**
@@ -32,7 +39,18 @@ public final class RenameMethodRefactoringContribution extends JDTRefactoringCon
 	 * {@inheritDoc}
 	 */
 	public Refactoring createRefactoring(final RefactoringDescriptor descriptor) throws JavaModelException {
-		return new JavaRenameRefactoring(new RenameVirtualMethodProcessor(null));
+		String project= descriptor.getProject();
+		Map arguments= ((JDTRefactoringDescriptor) descriptor).getArguments();
+		String input= (String) arguments.get(JDTRefactoringDescriptor.ATTRIBUTE_INPUT);
+		IMethod method= (IMethod) JDTRefactoringDescriptor.handleToElement(project, input);
+		
+		JavaRenameProcessor processor;
+		if (MethodChecks.isVirtual(method)) {
+			processor= new RenameVirtualMethodProcessor(method);
+		} else {
+			processor= new RenameNonVirtualMethodProcessor(method);
+		}
+		return new JavaRenameRefactoring(processor);
 	}
 	
 	/**
