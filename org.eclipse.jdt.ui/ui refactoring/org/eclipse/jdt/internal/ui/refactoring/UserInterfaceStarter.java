@@ -55,6 +55,9 @@ public class UserInterfaceStarter {
 	 * @exception CoreException if the user interface can't be activated
 	 */
 	public boolean activate(Refactoring refactoring, Shell parent, boolean mustSaveEditors) throws CoreException {
-		return new RefactoringStarter().activate(refactoring, fWizard, parent, fWizard.getDefaultPageTitle(), mustSaveEditors);
+		String title= fWizard.getDefaultPageTitle();
+		if (title == null)
+			title= ""; //$NON-NLS-1$
+		return new RefactoringStarter().activate(refactoring, fWizard, parent, title, mustSaveEditors);
 	}
 }
