@@ -305,6 +305,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				return result;
 			pm.setTaskName(RefactoringCoreMessages.RenameMethodRefactoring_taskName_checkingPreconditions); 
 			result.merge(checkNewElementName(getNewElementName()));
+			if (result.hasFatalError())
+				return result;
 			
 			boolean mustAnalyzeShadowing;
 			IMethod[] newNameMethods= searchForDeclarationsOfClashingMethods(new SubProgressMonitor(pm, 1));
