@@ -149,7 +149,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 				varBinding= varBinding.getVariableDeclaration();
 				ITypeBinding declaringClass= varBinding.getDeclaringClass();
 				if (declaringClass != null && !declaringClass.isLocal()) {
-					if (new ScopeAnalyzer(getASTRoot(name)).isDeclaredInScope(varBinding, (SimpleName)name, ScopeAnalyzer.VARIABLES))
+					if (new ScopeAnalyzer(getASTRoot(name)).isDeclaredInScope(varBinding, (SimpleName)name, ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY))
 							return;
 					fStaticImports.add(name);
 				}
@@ -158,7 +158,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 			IMethodBinding methodBinding= ((IMethodBinding) binding).getMethodDeclaration();
 			ITypeBinding declaringClass= methodBinding.getDeclaringClass();
 			if (declaringClass != null && !declaringClass.isLocal()) {
-				if (new ScopeAnalyzer(getASTRoot(name)).isDeclaredInScope(methodBinding, (SimpleName)name, ScopeAnalyzer.METHODS))
+				if (new ScopeAnalyzer(getASTRoot(name)).isDeclaredInScope(methodBinding, (SimpleName)name, ScopeAnalyzer.METHODS | ScopeAnalyzer.CHECK_VISIBILITY))
 						return;
 				fStaticImports.add(name);
 			}

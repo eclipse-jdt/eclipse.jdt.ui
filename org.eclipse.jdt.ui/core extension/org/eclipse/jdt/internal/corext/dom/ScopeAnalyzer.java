@@ -395,7 +395,7 @@ public class ScopeAnalyzer {
 				return false;
 			}
 			
-			
+			boolean checkVisibility= hasFlag(CHECK_VISIBILITY, fFlags);
 			if (binding == fToSearch) {
 				fFound= true;
 			} else {
@@ -405,12 +405,15 @@ public class ScopeAnalyzer {
 				} else if (binding.getName().equals(fToSearch.getName())) {
 					String signature= getSignature(binding);
 					if (signature != null && signature.equals(getSignature(fToSearch))) {
-						fIsVisible= false;
+						if (checkVisibility) {
+							fIsVisible= false;
+						}
 						return true; // found element that hides the binding to find
 					}
 				}
 			}
-			if (fFound && hasFlag(CHECK_VISIBILITY, fFlags)) {
+
+			if (fFound && checkVisibility) {
 				fIsVisible= ScopeAnalyzer.isVisible(binding, fParentTypeBinding);
 			}
 			return fFound;
