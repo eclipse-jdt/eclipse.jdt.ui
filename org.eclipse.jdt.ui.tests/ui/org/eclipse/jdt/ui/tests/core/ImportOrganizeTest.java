@@ -1511,6 +1511,92 @@ public class ImportOrganizeTest extends CoreTests {
 	}
 
 	
+	public void testVisibility_bug131305() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		
+		IPackageFragment packUtil= sourceFolder.createPackageFragment("util", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package util;\n");
+		buf.append("\n");
+		buf.append("public interface Map \n");
+		buf.append("        public static interface Entry {\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		packUtil.createCompilationUnit("Map.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package util;\n");
+		buf.append("\n");
+		buf.append("public interface HashMap implements Map {\n");
+		buf.append("        private static interface Entry {\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		packUtil.createCompilationUnit("HashMap.java", buf.toString(), false, null);
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import util.HashMap;\n");
+		buf.append("import util.Map;\n");
+		buf.append("import util.Map.Entry;\n");
+		buf.append("\n");
+		buf.append("public class A extends HashMap {\n");
+		buf.append("        public A(Map m, Entry e) {\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("testVisibility_bug131305", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		assertEqualString(cu.getSource(), buf.toString()); // no changes, import for Entry is required
+	}
+	
+	public void testVisibility_bug159638() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		
+		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("public abstract class Parent<E> {\n");
+		buf.append("    public static class Inner {\n");
+		buf.append("    }\n");
+		buf.append("    public @interface Tag{\n");
+		buf.append("        String value();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("Map.java", buf.toString(), false, null);
+		
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import pack0.Parent;\n");
+		buf.append("import pack0.Parent.Inner;\n");
+		buf.append("import pack0.Parent.Tag;\n");
+		buf.append("\n");
+		buf.append("@Tag(\"foo\")\n");
+		buf.append("public class Child extends Parent<Inner> {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("testVisibility_bug159638", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		assertEqualString(cu.getSource(), buf.toString()); // no changes, imports for Inner and tag are required
+	}
+
+
 	public void test5() throws Exception {
 	
 		String[] types= new String[] {
@@ -1963,6 +2049,49 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("	}\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testStaticImports_bug159424() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("public abstract class B {\n");
+		buf.append("    private static List logger;\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("B.java", buf.toString(), false, null);
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import pack0.B;\n");
+		buf.append("\n");
+		buf.append("public abstract class A {\n");
+		buf.append("    private static List logger;\n");
+		buf.append("\n");
+		buf.append("    protected class BSubClass extends B {\n");
+		buf.append("        public void someMethod() {\n");
+		buf.append("            logger.toString();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("testStaticImports_bug159424", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		assertEqualString(cu.getSource(), buf.toString()); // no changes, don't add 'logger' as static import
 	}
 
 	

@@ -113,7 +113,7 @@ public class UnresolvedElementsSubProcessor {
 
 		// type that defines the variable
 		ITypeBinding binding= null;
-		ITypeBinding declaringTypeBinding= ASTResolving.getBindingOfParentType(selectedNode, true);
+		ITypeBinding declaringTypeBinding= Bindings.getBindingOfParentTypeContext(selectedNode);
 		if (declaringTypeBinding == null) {
 			return;
 		}

@@ -438,7 +438,7 @@ public class ScopeAnalyzer {
 				}
 			}
 			
-			ITypeBinding parentTypeBinding= Bindings.getBindingOfParentType(selector);
+			ITypeBinding parentTypeBinding= Bindings.getBindingOfParentTypeContext(selector);
 			if (parentTypeBinding != null) {			
 				ITypeBinding binding= getQualifier(selector);
 				SearchRequestor requestor= new SearchRequestor(declaration, parentTypeBinding, flags);

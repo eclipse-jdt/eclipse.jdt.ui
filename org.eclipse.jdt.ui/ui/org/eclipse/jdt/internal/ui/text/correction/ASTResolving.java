@@ -720,25 +720,6 @@ public class ASTResolving {
 		return false;
 	}
 	
-	public static ITypeBinding getBindingOfParentType(ASTNode node, boolean treatModifiersOutside) {
-		StructuralPropertyDescriptor lastLocation= null;
-
-		while (node != null) {
-			if (node instanceof AbstractTypeDeclaration) {
-				AbstractTypeDeclaration decl= (AbstractTypeDeclaration) node;
-				if (!treatModifiersOutside || lastLocation != decl.getModifiersProperty()) {
-					return decl.resolveBinding();
-				}
-			} else if (node instanceof AnonymousClassDeclaration) {
-				return ((AnonymousClassDeclaration) node).resolveBinding();
-			}
-			lastLocation= node.getLocationInParent();
-			node= node.getParent();
-		}
-		return null;
-	}
-	
-	
 	public static boolean isInsideModifiers(ASTNode node) {
 		while (node != null && !(node instanceof BodyDeclaration)) {
 			if (node instanceof Annotation) {

@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -979,9 +980,9 @@ public class Bindings {
 	}
 
 	/**
-	 * Returns the type binding of the node's parent type declaration
+	 * Returns the type binding of the node's parent type declaration.
 	 * @param node
-	 * @return CompilationUnit
+	 * @return the type binding of the node's parent type declaration
 	 */
 	public static ITypeBinding getBindingOfParentType(ASTNode node) {
 		while (node != null) {
@@ -993,7 +994,31 @@ public class Bindings {
 			node= node.getParent();
 		}
 		return null;
-	}				
+	}
+	
+	/**
+	 * Returns the type binding of the node's type context or null if the node is an annotation, type parameter or super type declaration of a tope level type.
+	 * The result of this method is equal to the result of {@link #getBindingOfParentType(ASTNode)} for nodes in the type's body.
+	 * @param node
+	 * @return the type binding of the node's parent type context
+	 */
+	public static ITypeBinding getBindingOfParentTypeContext(ASTNode node) {
+		StructuralPropertyDescriptor lastLocation= null;
+
+		while (node != null) {
+			if (node instanceof AbstractTypeDeclaration) {
+				AbstractTypeDeclaration decl= (AbstractTypeDeclaration) node;
+				if (lastLocation == decl.getBodyDeclarationsProperty()) {
+					return decl.resolveBinding();
+				}
+			} else if (node instanceof AnonymousClassDeclaration) {
+				return ((AnonymousClassDeclaration) node).resolveBinding();
+			}
+			lastLocation= node.getLocationInParent();
+			node= node.getParent();
+		}
+		return null;
+	}
 
 	
 	public static String getRawName(ITypeBinding binding) {
