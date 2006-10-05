@@ -735,7 +735,7 @@ public final class ReorgPolicyFactory {
 		}
 
 		public boolean canElementBeDestination(IResource resource) {
-			return resource instanceof IContainer;
+			return resource instanceof IProject || resource instanceof IFolder;
 		}
 
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws CoreException {
@@ -1041,7 +1041,9 @@ public final class ReorgPolicyFactory {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_phantom);
 			if (!resource.isAccessible())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_inaccessible);
-			Assert.isTrue(resource.getType() != IResource.ROOT);
+			
+			if (resource.getType() == IResource.ROOT)
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_not_this_resource);
 
 			if (isChildOfOrEqualToAnyFolder(resource))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_not_this_resource);
