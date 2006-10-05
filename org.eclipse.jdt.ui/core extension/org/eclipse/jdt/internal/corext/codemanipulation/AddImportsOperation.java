@@ -259,8 +259,11 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			qualifierStart= getNameStart(buffer, offset);
 			int nameEnd= getNameEnd(buffer, offset + length);
 			int len= nameEnd - qualifierStart;
-			
 			name= buffer.getText(qualifierStart, len).trim();
+			if (name.length() == 0) {
+				return null;
+			}
+			
 			simpleName= Signature.getSimpleName(name);
 			containerName= Signature.getQualifier(name);
 			
@@ -374,7 +377,8 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		
 		ArrayList typeInfos= new ArrayList();
 		TypeInfoRequestor requestor= new TypeInfoRequestor(typeInfos);
-		new SearchEngine().searchAllTypeNames(null, simpleTypeName.toCharArray(), SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, getSearchForConstant(typeKinds), searchScope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
+		int matchMode= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
+		new SearchEngine().searchAllTypeNames(null, matchMode, simpleTypeName.toCharArray(), matchMode, getSearchForConstant(typeKinds), searchScope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
 
 		ArrayList typeRefsFound= new ArrayList(typeInfos.size());
 		for (int i= 0, len= typeInfos.size(); i < len; i++) {
