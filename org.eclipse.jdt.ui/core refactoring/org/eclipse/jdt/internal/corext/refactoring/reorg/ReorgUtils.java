@@ -589,29 +589,26 @@ public class ReorgUtils {
 	}
 
 	public static boolean containsElementOrParent(Set elements, IJavaElement element) {
-		if (elements.contains(element))
-			return true;
-		IJavaElement parent= element.getParent();
-		while (parent != null) {
-			if (elements.contains(parent))
+		IJavaElement curr= element;
+		do {
+			if (elements.contains(curr))
 				return true;
-			parent= parent.getParent();
-		}
+			curr= curr.getParent();
+		} while (curr != null);
 		return false;
 	}
 
 	public static boolean containsElementOrParent(Set elements, IResource element) {
-		if (elements.contains(element))
-			return true;
-		IResource parent= element.getParent();
-		while (parent != null) {
-			if (elements.contains(parent))
+		IResource curr= element;
+		do {
+			if (elements.contains(curr))
 				return true;
-			IJavaElement parentAsJavaElement= JavaCore.create(parent);
-			if (parentAsJavaElement != null && parentAsJavaElement.exists() && elements.contains(parentAsJavaElement))
-				return true;
-			parent= parent.getParent();
-		}
+			IJavaElement jElement= JavaCore.create(curr);
+			if (jElement != null && jElement.exists()) {
+				return containsElementOrParent(elements, jElement);
+			}
+			curr= curr.getParent();
+		} while (curr != null);
 		return false;
 	}
 }
