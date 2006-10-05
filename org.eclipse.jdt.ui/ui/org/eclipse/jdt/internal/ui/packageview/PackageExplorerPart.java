@@ -214,7 +214,7 @@ public class PackageExplorerPart extends ViewPart
 	private String fWorkingSetLabel;
 	
 	private IPartListener2 fLinkWithEditorListener= new IPartListener2() {
-		public void partActivated(IWorkbenchPartReference partRef) {}
+		public void partVisible(IWorkbenchPartReference partRef) {}
 		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
 		public void partClosed(IWorkbenchPartReference partRef) {}
 		public void partDeactivated(IWorkbenchPartReference partRef) {}
@@ -225,12 +225,13 @@ public class PackageExplorerPart extends ViewPart
 				editorActivated(((IEditorReference) partRef).getEditor(true));
 			}
 		}
-
-		public void partVisible(IWorkbenchPartReference partRef) {
+		
+		public void partActivated(IWorkbenchPartReference partRef) {
 			if (partRef instanceof IEditorReference) {
 				editorActivated(((IEditorReference) partRef).getEditor(true));
 			}
 		}
+
 	};
 	
 	private ITreeViewerListener fExpansionListener= new ITreeViewerListener() {
