@@ -88,7 +88,10 @@ public class WorkingSetActionGroup extends ActionGroup {
 			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fCloseAction);
 		if (fOpenAction != null && fOpenAction.isEnabled())
 			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fOpenAction);
-		if (fEditAction != null && fEditAction.isEnabled())
-			menu.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, fEditAction);
+		if (fEditAction != null && fEditAction.isEnabled()) {
+			menu.prependToGroup(IContextMenuConstants.GROUP_PROPERTIES, new Separator());
+			menu.prependToGroup(IContextMenuConstants.GROUP_PROPERTIES, fEditAction);
+		}
+			
 	}
 }
