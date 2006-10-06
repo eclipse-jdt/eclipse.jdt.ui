@@ -571,6 +571,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		if (res != null && res.length > 0) {
 			CPListElement curr= res[0];
 			curr.setExported(elem.isExported());
+			curr.setAttributesFromExisting(elem);
 			fLibrariesList.replaceElement(elem, curr);
 			if (elem.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
 				fLibrariesList.refresh();
