@@ -158,7 +158,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 						extension.setStatusLineVisible(true);
 						extension.setStatusMessage(createIterationMessage());
 						extension.setShowEmptyList(true);
-						if (extension instanceof IContentAssistantExtension3) {
+						if (extension instanceof IContentAssistantExtension3 && binding != null) { // TODO: temporary fix for bug 160045 
 							IContentAssistantExtension3 ext3= (IContentAssistantExtension3) extension;
 							((ContentAssistant) ext3).setRepeatedInvocationTrigger(binding);
 						}
