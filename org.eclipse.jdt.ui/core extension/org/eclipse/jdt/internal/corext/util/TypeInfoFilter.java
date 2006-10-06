@@ -187,7 +187,7 @@ public class TypeInfoFilter {
 		return fText.indexOf('.', text.length()) == -1;
 	}
 
-	public boolean isCamcelCasePattern() {
+	public boolean isCamelCasePattern() {
 		return fNameMatcher.getMatchKind() == SearchPattern.R_CAMELCASE_MATCH;
 	}
 
@@ -242,10 +242,7 @@ public class TypeInfoFilter {
 	private boolean matchesPackage(TypeInfo type) {
 		if (fPackageMatcher == null)
 			return true;
-		// We should use the type container name here. However this
-		// require support from JDT/Core. See
-		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=120534
-		return fPackageMatcher.matches(type.getPackageName());
+		return fPackageMatcher.matches(type.getTypeContainerName());
 	}
 
 	private boolean matchesScope(TypeInfo type) {
