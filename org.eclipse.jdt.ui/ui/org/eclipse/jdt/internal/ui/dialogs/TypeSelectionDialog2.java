@@ -318,7 +318,8 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 			private void refreshSearchIndices(IProgressMonitor monitor) throws InvocationTargetException {
 				try {
 					new SearchEngine().searchAllTypeNames(
-						null, 
+						null,
+						0,
 						// make sure we search a concrete name. This is faster according to Kent  
 						"_______________".toCharArray(), //$NON-NLS-1$
 						SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, 

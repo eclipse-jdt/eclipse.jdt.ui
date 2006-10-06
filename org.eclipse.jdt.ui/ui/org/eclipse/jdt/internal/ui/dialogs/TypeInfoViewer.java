@@ -199,7 +199,7 @@ public class TypeInfoViewer {
 		private int getCamelCaseCategory(TypeInfo type) {
 			if (fFilter == null)
 				return 0;
-			if (!fFilter.isCamcelCasePattern())
+			if (!fFilter.isCamelCasePattern())
 				return 0;
 			return fFilter.matchesRawNamePattern(type) ? 0 : 1;
 		}
@@ -684,7 +684,7 @@ public class TypeInfoViewer {
 			}
 			// we have to sort if the filter is a camel case filter.
 			TypeInfo[] types= (TypeInfo[])result.toArray(new TypeInfo[result.size()]);
-			if (fFilter.isCamcelCasePattern()) {
+			if (fFilter.isCamelCasePattern()) {
 				Arrays.sort(types, new TypeInfoComparator(fLabelProvider, fFilter));
 			}
 			return types;
@@ -703,6 +703,7 @@ public class TypeInfoViewer {
 				monitor.setTaskName(JavaUIMessages.TypeInfoViewer_syncJob_taskName);
 				new SearchEngine().searchAllTypeNames(
 					null, 
+					0,
 					// make sure we search a concrete name. This is faster according to Kent  
 					"_______________".toCharArray(), //$NON-NLS-1$
 					SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, 
