@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -35,11 +36,13 @@ import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.util.IFileTypeInfo;
 import org.eclipse.jdt.internal.corext.util.JarFileEntryTypeInfo;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
+import org.eclipse.jdt.testplugin.StringAsserts;
 
 
 public class TypeInfoTest extends TestCase {
@@ -131,14 +134,23 @@ public class TypeInfoTest extends TestCase {
 		for (int i= 0; i < result.size(); i++) {
 			TypeInfo ref= (TypeInfo) result.get(i);
 			//System.out.println(ref.getTypeName());
-			IType resolvedType= ref.resolveType(scope);
-			if (resolvedType == null) {
-				assertTrue("Could not be resolved: " + ref.toString(), false);
-			}
+			assertResolve(scope, ref);
+			
 		}
 		assertTrue("Should find 8 elements, is " + result.size(), result.size() == 8);
 
 
+	}
+
+	private void assertResolve(IJavaSearchScope scope, TypeInfo ref) throws JavaModelException {
+		IType resolvedType= ref.resolveType(scope);
+		if (resolvedType == null) {
+			assertTrue("Could not be resolved: " + ref.toString(), false);
+		}
+		if (!resolvedType.exists()) {
+			assertTrue("Resolved type does not exist: " + ref.toString(), false);
+		}
+		StringAsserts.assertEqualString(JavaModelUtil.getFullyQualifiedName(resolvedType), ref.getFullyQualifiedName());
 	}
 	
 	private void findTypeRef(List refs, String fullname) {
@@ -186,10 +198,7 @@ public class TypeInfoTest extends TestCase {
 		for (int i= 0; i < result.size(); i++) {
 			TypeInfo ref= (TypeInfo) result.get(i);
 			//System.out.println(ref.getTypeName());
-			IType resolvedType= ref.resolveType(scope);
-			if (resolvedType == null) {
-				assertTrue("Could not be resolved: " + ref.toString(), false);
-			}
+			assertResolve(scope, ref);
 		}
 	}
 	
