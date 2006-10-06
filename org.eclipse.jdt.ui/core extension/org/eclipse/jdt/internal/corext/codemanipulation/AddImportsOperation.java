@@ -232,7 +232,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 					}
 					if (Modifier.isStatic(binding.getModifiers())) {
 						if (Modifier.isPrivate(declaringClass.getModifiers())) {
-							fStatus= JavaUIStatus.createError(IStatus.ERROR, Messages.format(CodeGenerationMessages.AddImportsOperation_error_private_class, declaringClass.getName()), null);
+							fStatus= JavaUIStatus.createError(IStatus.ERROR, Messages.format(CodeGenerationMessages.AddImportsOperation_error_not_visible_class, declaringClass.getName()), null);
 							return null;
 						}
 						
