@@ -717,5 +717,13 @@ public class CPListElement {
     	result.fOrginalLinkTarget= fOrginalLinkTarget;
 	    return result;
     }
+    
+    public void setAttributesFromExisting(CPListElement existing) {
+    	Assert.isTrue(existing.getEntryKind() == getEntryKind());
+		String[] allAttributes= { ACCESSRULES, NATIVE_LIB_PATH, SOURCEATTACHMENT, OUTPUT, INCLUSION, EXCLUSION, JAVADOC, COMBINE_ACCESSRULES };
+		for (int i= 0; i < allAttributes.length; i++) {
+			setAttribute(allAttributes[i], existing.getAttribute(allAttributes[i]));
+		}
+    }
 
 }
