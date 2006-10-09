@@ -552,6 +552,9 @@ public class LocalCorrectionsSubProcessor {
 
 		CompilationUnit root= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(root);
+		if (selectedNode instanceof MethodDeclaration) {
+			selectedNode= ((MethodDeclaration) selectedNode).getName();
+		}
 		if (!(selectedNode instanceof SimpleName)) {
 			return;
 		}
@@ -566,12 +569,17 @@ public class LocalCorrectionsSubProcessor {
 				break;
 			case IProblem.FieldHidingLocalVariable:
 			case IProblem.FieldHidingField:
+			case IProblem.DuplicateField:
 				name= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_hiding_field_label, nameNode.getIdentifier());
 				break;
 			case IProblem.ArgumentHidingLocalVariable:
 			case IProblem.ArgumentHidingField:
 				name= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_hiding_argument_label, nameNode.getIdentifier());
 				break;
+			case IProblem.DuplicateMethod:
+				name= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_renaming_duplicate_method, nameNode.getIdentifier());
+				break;
+				
 			default:
 				name= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_rename_var_label, nameNode.getIdentifier());
 		}

@@ -131,6 +131,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.FieldHidingField:
 			case IProblem.ArgumentHidingLocalVariable:
 			case IProblem.ArgumentHidingField:
+			case IProblem.DuplicateField:
+			case IProblem.DuplicateMethod:
+			case IProblem.DuplicateTypeVariable:
+			case IProblem.DuplicateNestedType:
 			case IProblem.IllegalModifierForInterfaceMethod:
 			case IProblem.IllegalModifierForInterface:
 			case IProblem.IllegalModifierForClass:
@@ -456,6 +460,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UseEnumAsAnIdentifier:
 			case IProblem.RedefinedLocal:
 			case IProblem.RedefinedArgument:
+			case IProblem.DuplicateField:
+			case IProblem.DuplicateMethod:
+			case IProblem.DuplicateTypeVariable:
+			case IProblem.DuplicateNestedType:
 				LocalCorrectionsSubProcessor.addInvalidVariableNameProposals(context, problem, proposals);
 				break;
 			case IProblem.NoMessageSendOnArrayType:
