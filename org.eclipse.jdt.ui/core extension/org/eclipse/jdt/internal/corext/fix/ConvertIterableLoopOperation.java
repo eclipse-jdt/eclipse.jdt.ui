@@ -155,6 +155,7 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 	}
 	
     public void makePassive() {
+    	fPassive= true;
     }
 
 	private List computeElementNames() {
