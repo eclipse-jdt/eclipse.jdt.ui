@@ -50,7 +50,6 @@ import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -149,8 +148,8 @@ public class CleanUpRefactoring extends Refactoring {
 		}
 		
 		public String getSubTaskMessage(ICompilationUnit source) {
-			String typeName= JavaCore.removeJavaLikeExtension(source.getElementName());
-			return Messages.format(FixMessages.CleanUpRefactoring_ProcessingCompilationUnit_message, new Object[] {typeName, new Integer(getIndex()), new Integer(fSize)});
+			String typeName= source.getElementName();
+			return Messages.format(FixMessages.CleanUpRefactoring_ProcessingCompilationUnit_message, new Object[] {new Integer(getIndex()), new Integer(fSize), typeName});
 		}
 	}
 	
