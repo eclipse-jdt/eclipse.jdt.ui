@@ -236,8 +236,9 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 		
 		final Statement body= fStatement.getBody();
 		if (body != null) {
+			final ListRewrite list;
 			if (body instanceof Block) {
-				final ListRewrite list= astRewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY);
+				list= astRewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY);
 				for (final Iterator iterator= fOccurrences.iterator(); iterator.hasNext();) {
 					final Statement parent= (Statement) ASTNodes.getParent((ASTNode) iterator.next(), Statement.class);
 					if (parent != null && list.getRewrittenList().contains(parent)) {
@@ -245,47 +246,49 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 						remover.registerRemovedNode(parent);
 					}
 				}
-				final String text= name;
-				body.accept(new ASTVisitor() {
-
-					private boolean replace(final Expression expression) {
-						final SimpleName node= ast.newSimpleName(text);
-						astRewrite.replace(expression, node, group);
-						remover.registerRemovedNode(expression);
-						getPositionGroup(fIdentifierName).addPosition(astRewrite.track(node));
-						return false;
-					}
-
-					public final boolean visit(final MethodInvocation node) {
-						final IMethodBinding binding= node.resolveMethodBinding();
-						if (binding != null && (binding.getName().equals("next") || binding.getName().equals("nextElement"))) { //$NON-NLS-1$ //$NON-NLS-2$
-							final Expression expression= node.getExpression();
-							if (expression instanceof Name) {
-								final IBinding result= ((Name) expression).resolveBinding();
-								if (result != null && result.equals(fIterator))
-									return replace(node);
-							} else if (expression instanceof FieldAccess) {
-								final IBinding result= ((FieldAccess) expression).resolveFieldBinding();
-								if (result != null && result.equals(fIterator))
-									return replace(node);
-							}
-						}
-						return super.visit(node);
-					}
-
-					public final boolean visit(final SimpleName node) {
-						if (fElement != null) {
-							final IBinding binding= node.resolveBinding();
-							if (binding != null && binding.equals(fElement)) {
-								final Statement parent= (Statement) ASTNodes.getParent(node, Statement.class);
-								if (parent != null && list.getRewrittenList().contains(parent))
-									getPositionGroup(fIdentifierName).addPosition(astRewrite.track(node));
-							}
-						}
-						return false;
-					}
-				});
+			} else {
+				list= null;
 			}
+			final String text= name;
+			body.accept(new ASTVisitor() {
+
+				private boolean replace(final Expression expression) {
+					final SimpleName node= ast.newSimpleName(text);
+					astRewrite.replace(expression, node, group);
+					remover.registerRemovedNode(expression);
+					getPositionGroup(fIdentifierName).addPosition(astRewrite.track(node));
+					return false;
+				}
+
+				public final boolean visit(final MethodInvocation node) {
+					final IMethodBinding binding= node.resolveMethodBinding();
+					if (binding != null && (binding.getName().equals("next") || binding.getName().equals("nextElement"))) { //$NON-NLS-1$ //$NON-NLS-2$
+						final Expression expression= node.getExpression();
+						if (expression instanceof Name) {
+							final IBinding result= ((Name) expression).resolveBinding();
+							if (result != null && result.equals(fIterator))
+								return replace(node);
+						} else if (expression instanceof FieldAccess) {
+							final IBinding result= ((FieldAccess) expression).resolveFieldBinding();
+							if (result != null && result.equals(fIterator))
+								return replace(node);
+						}
+					}
+					return super.visit(node);
+				}
+
+				public final boolean visit(final SimpleName node) {
+					if (fElement != null) {
+						final IBinding binding= node.resolveBinding();
+						if (binding != null && binding.equals(fElement)) {
+							final Statement parent= (Statement) ASTNodes.getParent(node, Statement.class);
+							if (parent != null && (list == null || list.getRewrittenList().contains(parent)))
+								getPositionGroup(fIdentifierName).addPosition(astRewrite.track(node));
+						}
+					}
+					return false;
+				}
+			});
 			fEnhancedForLoop.setBody((Statement) astRewrite.createMoveTarget(body));
 		}
 		final SingleVariableDeclaration declaration= ast.newSingleVariableDeclaration();
