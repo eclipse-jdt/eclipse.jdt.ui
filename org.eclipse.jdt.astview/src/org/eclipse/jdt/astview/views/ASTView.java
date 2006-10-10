@@ -137,6 +137,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 				Object element= iter.next();
 				if (element instanceof JavaElement)
 					externalSelection.add(((JavaElement) element).getJavaElement());
+                if (element instanceof ASTNode)
+                    externalSelection.add(element);
 			}
 			return new StructuredSelection(externalSelection);
 		}
