@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -64,13 +65,16 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
@@ -841,33 +845,79 @@ public class StubUtility {
 		return null;
 	}
 	
+	private static String removeTypeArguments(String baseName) {
+		int idx= baseName.indexOf('<');
+		if (idx != -1) {
+			return baseName.substring(0, idx);
+		}
+		return baseName;
+	}
+	
+	public static String[] getArgumentNameSuggestions(IType type, String[] excluded) {
+		String packageName= type.getPackageFragment().getElementName();
+		String typeQualifiedName= type.getTypeQualifiedName();
+		String[] res= NamingConventions.suggestArgumentNames(type.getJavaProject(), packageName, typeQualifiedName, 0, excluded);
+		return sortByLength(res); // longest first
+	}
+	
+	
+	public static String[] getArgumentNameSuggestions(IJavaProject project, Type type, String[] excluded) {
+		int dim= 0;
+		if (type.isArrayType()) {
+			ArrayType arrayType= (ArrayType) type;
+			dim= arrayType.getDimensions();
+			type= arrayType.getElementType();
+		}
+		if (type.isParameterizedType()) {
+			type= ((ParameterizedType) type).getType();
+		}
+		
+		String typeName= workaround38111(ASTNodes.asString(type));
+		String packName= Signature.getQualifier(typeName);
+		String[] res= NamingConventions.suggestArgumentNames(project, packName, typeName, dim, excluded);
+		return sortByLength(res); // longest first
+	}
+	
 	/*
 	 * Workarounds for bug 38111
 	 */
 	public static String[] getArgumentNameSuggestions(IJavaProject project, String baseName, int dimensions, String[] excluded) {
 		String name= workaround38111(baseName);
+		name= removeTypeArguments(name);
 		String[] res= NamingConventions.suggestArgumentNames(project, "", name, dimensions, excluded); //$NON-NLS-1$
 		return sortByLength(res); // longest first
+	}
+	
+	public static String[] getFieldNameSuggestions(IType type, int fieldModifiers, String[] excluded) {
+		String packageName= type.getPackageFragment().getElementName();
+		String typeQualifiedName= type.getTypeQualifiedName();
+		if (Flags.isStatic(fieldModifiers) && Flags.isFinal(fieldModifiers)) {
+			return getConstantSuggestions(type.getJavaProject(), packageName, typeQualifiedName, 0, excluded);
+		}
+		return sortByLength(NamingConventions.suggestFieldNames(type.getJavaProject(), packageName, typeQualifiedName, 0, fieldModifiers, excluded));
 	}
 		 
 	public static String[] getFieldNameSuggestions(IJavaProject project, String baseName, int dimensions, int modifiers, String[] excluded) {
 		String name= workaround38111(baseName);
-		String[] res;
+		name= removeTypeArguments(name);
 		if (modifiers == (Flags.AccStatic | Flags.AccFinal)) {
-			//TODO: workaround JDT/Core bug 85946:
-			List excludedList= Arrays.asList(excluded);
-			String[] camelCase= NamingConventions.suggestLocalVariableNames(project, "", name, dimensions, new String[0]); //$NON-NLS-1$
-			ArrayList result= new ArrayList(camelCase.length);
-			for (int i= 0; i < camelCase.length; i++) {
-				String upper= getUpperFromCamelCase(camelCase[i]);
-				if (! excludedList.contains(upper))
-					result.add(upper);
-			}
-			res= (String[]) result.toArray(new String[result.size()]);
+			return getConstantSuggestions(project, "", name, dimensions, excluded); //$NON-NLS-1$
 		} else {
-			res= NamingConventions.suggestFieldNames(project, "", name, dimensions, modifiers, excluded); //$NON-NLS-1$
+			return sortByLength(NamingConventions.suggestFieldNames(project, "", name, dimensions, modifiers, excluded)); //$NON-NLS-1$
 		}
-		return sortByLength(res); // longest first
+	}
+
+	private static String[] getConstantSuggestions(IJavaProject project, String packageName, String typeName, int dimensions, String[] excluded) {
+		//TODO: workaround JDT/Core bug 85946:
+		List excludedList= Arrays.asList(excluded);
+		String[] camelCase= NamingConventions.suggestLocalVariableNames(project, packageName, typeName, dimensions, new String[0]);
+		ArrayList result= new ArrayList(camelCase.length);
+		for (int i= 0; i < camelCase.length; i++) {
+			String upper= getUpperFromCamelCase(camelCase[i]);
+			if (! excludedList.contains(upper))
+				result.add(upper);
+		}
+		return sortByLength((String[]) result.toArray(new String[result.size()])); // longest first
 	}
 	
 	private static String getUpperFromCamelCase(String string) {
@@ -889,6 +939,7 @@ public class StubUtility {
 	
 	public static String[] getLocalNameSuggestions(IJavaProject project, String baseName, int dimensions, String[] excluded) {
 		String name= workaround38111(baseName);
+		name= removeTypeArguments(name);
 		String[] res= NamingConventions.suggestLocalVariableNames(project, "", name, dimensions, excluded); //$NON-NLS-1$
 		return sortByLength(res); // longest first
 	}

@@ -21,10 +21,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -291,17 +289,13 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 					favourite= StubUtility.suggestArgumentName(getCompilationUnit().getJavaProject(), suggestedName, excludedNames);
 					addLinkedPositionProposal(nameKey, favourite, null);
 				}
-				Type type= desc.resultingParamType;
-				int dim= 0;
-				if (type.isArrayType()) {
-					dim= ((ArrayType) type).getDimensions();
-					type= ((ArrayType) type).getElementType();
-				}
 				
 				if (desc instanceof EditDescription) {
 					addLinkedPositionProposal(nameKey, ((EditDescription)desc).orginalName, null);
 				}
-				String[] suggestedNames=  NamingConventions.suggestArgumentNames(getCompilationUnit().getJavaProject(), "", ASTNodes.asString(type), dim, excludedNames); //$NON-NLS-1$
+				
+				Type type= desc.resultingParamType;
+				String[] suggestedNames= StubUtility.getArgumentNameSuggestions(getCompilationUnit().getJavaProject(), type, excludedNames);
 				for (int k= 0; k < suggestedNames.length; k++) {
 					addLinkedPositionProposal(nameKey, suggestedNames[k], null);
 				}

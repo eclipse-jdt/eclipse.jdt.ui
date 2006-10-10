@@ -21,12 +21,9 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.NamingConventions;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -260,16 +257,7 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 			addNameProposals(key, suggestions, namesTaken);
 		}
 
-		int dim= 0;
-		if (type.isArrayType()) {
-			ArrayType arrayType= (ArrayType) type;
-			dim= arrayType.getDimensions();
-			type= arrayType.getElementType();
-		}
-		String typeName= ASTNodes.asString(type);
-		String packName= Signature.getQualifier(typeName);
-
-		String[] names= NamingConventions.suggestArgumentNames(project, packName, typeName, dim, excludedNames);
+		String[] names= StubUtility.getArgumentNameSuggestions(project, type, excludedNames);
 		if (favourite == null) {
 			favourite= names[0];
 		}

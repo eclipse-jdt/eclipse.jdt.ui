@@ -64,7 +64,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -114,15 +113,16 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
@@ -3051,10 +3051,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 * @return a best guess for the name
 	 */
 	protected String suggestTargetName() {
-		final IType type= fMethod.getDeclaringType();
-		final String name= type.getFullyQualifiedName();
 		try {
-			final String[] candidates= NamingConventions.suggestArgumentNames(fMethod.getJavaProject(), type.getPackageFragment().getElementName(), name, 0, computeReservedIdentifiers());
+			final String[] candidates= StubUtility.getArgumentNameSuggestions(fMethod.getDeclaringType(), computeReservedIdentifiers());
 			if (candidates.length > 0) {
 				if (candidates[0].indexOf('$') < 0)
 					return candidates[0];

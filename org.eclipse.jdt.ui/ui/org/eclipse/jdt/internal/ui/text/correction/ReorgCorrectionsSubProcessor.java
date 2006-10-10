@@ -70,7 +70,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
-import org.eclipse.jdt.core.search.TypeNameRequestor;
+import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.IFix;
@@ -81,8 +81,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitCh
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
-import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
+import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
 
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
@@ -216,9 +215,10 @@ public class ReorgCorrectionsSubProcessor {
 			}
 			IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
 			ArrayList res= new ArrayList();
-			TypeNameRequestor requestor= new TypeInfoRequestor(res);
-			new SearchEngine().searchAllTypeNames(packageName, typeName,
-					SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, IJavaSearchConstants.TYPE, scope, requestor,
+			TypeNameMatchCollector requestor= new TypeNameMatchCollector(res);
+			int matchMode= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
+			new SearchEngine().searchAllTypeNames(packageName, matchMode, typeName,
+					matchMode, IJavaSearchConstants.TYPE, scope, requestor,
 					IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
 
 			if (res.isEmpty()) {
@@ -226,8 +226,8 @@ public class ReorgCorrectionsSubProcessor {
 			}
 			HashSet addedClaspaths= new HashSet();
 			for (int i= 0; i < res.size(); i++) {
-				TypeInfo curr= (TypeInfo) res.get(i);
-				IType type= curr.resolveType(scope);
+				TypeNameMatch curr= (TypeNameMatch) res.get(i);
+				IType type= curr.getType();
 				if (type != null) {
 					IPackageFragmentRoot root= (IPackageFragmentRoot) type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 					IClasspathEntry entry= root.getRawClasspathEntry();

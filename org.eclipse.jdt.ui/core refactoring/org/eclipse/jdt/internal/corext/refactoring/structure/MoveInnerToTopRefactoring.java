@@ -48,7 +48,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -105,9 +104,9 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
@@ -1148,7 +1147,7 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 		IType enclosingType= fType.getDeclaringType();
 		if (enclosingType == null)
 			return ""; //$NON-NLS-1$
-		String[] suggestedNames= NamingConventions.suggestFieldNames(enclosingType.getJavaProject(), enclosingType.getPackageFragment().getElementName(), JavaModelUtil.getTypeQualifiedName(fType.getDeclaringType()), 0, getEnclosingInstanceAccessModifiers(), getFieldNames(fType));
+		String[] suggestedNames= StubUtility.getFieldNameSuggestions(fType.getDeclaringType(), getEnclosingInstanceAccessModifiers(), getFieldNames(fType));
 		if (suggestedNames.length > 0)
 			return suggestedNames[0];
 		String name= enclosingType.getElementName();
@@ -1172,8 +1171,7 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 		if (fNameForEnclosingInstanceConstructorParameter != null)
 			return fNameForEnclosingInstanceConstructorParameter;
 
-		IType enclosingType= fType.getDeclaringType();
-		String[] suggestedNames= NamingConventions.suggestArgumentNames(enclosingType.getJavaProject(), enclosingType.getPackageFragment().getElementName(), JavaModelUtil.getTypeQualifiedName(fType.getDeclaringType()), 0, getParameterNamesOfAllConstructors(fType));
+		String[] suggestedNames= StubUtility.getArgumentNameSuggestions(fType.getDeclaringType(), getParameterNamesOfAllConstructors(fType));
 		if (suggestedNames.length > 0)
 			fNameForEnclosingInstanceConstructorParameter= suggestedNames[0];
 		else
