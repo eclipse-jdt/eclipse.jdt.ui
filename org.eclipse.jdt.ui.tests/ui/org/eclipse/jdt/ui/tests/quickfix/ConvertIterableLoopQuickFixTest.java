@@ -474,8 +474,8 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 				"public class A {\r\n" + 
 				"	public A() {\r\n" + 
 				"		Collection<Collection<String>> cc= null;\r\n" + 
-				"		for (Collection<String> name : cc) {\r\n" + 
-				"			for (final Iterator<String> inner= name.iterator(); inner.hasNext();) {\r\n" + 
+				"		for (Collection<String> collection : cc) {\r\n" + 
+				"			for (final Iterator<String> inner= collection.iterator(); inner.hasNext();) {\r\n" + 
 				"				System.out.println(inner.next());\r\n" + 
 				"			}\r\n" + 
 				"		}\r\n" + 
