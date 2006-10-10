@@ -56,9 +56,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 
@@ -331,14 +333,47 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private class ElementChangedListener implements IElementChangedListener {
-
+		
 		/*
 		 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
 		 */
 		public void elementChanged(ElementChangedEvent e) {
+			if (hasErrorOnCaretLine(e.getDelta().getCompilationUnitAST()))
+				return;
+			
 			IJavaElementDelta delta= findElement(fInput, e.getDelta());
 			if (delta != null && (delta.getFlags() & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_CHILDREN)) != 0)
 	            update(createContext(false));
+		}
+
+		private boolean hasErrorOnCaretLine(CompilationUnit ast) {
+			if (ast == null)
+				return false; // can't compute
+				
+			IDocument document= getDocument();
+			if (document == null)
+				return false; // can't compute
+
+			JavaEditor editor= fEditor;
+			if (editor == null || editor.getCachedSelectedRange() == null)
+				return false; // can't compute
+				
+			int caretLine= 0;
+			try {
+				caretLine= document.getLineOfOffset(editor.getCachedSelectedRange().x) + 1; 
+			} catch (BadLocationException x) {
+				return false; // can't compute
+			}
+			
+			if (caretLine > 0 && ast != null) {
+				IProblem[] problems= ast.getProblems();
+				for (int i= 0; i < problems.length; i++) {
+					if (problems[i].isError() && caretLine == problems[i].getSourceLineNumber())
+						return true;
+				}
+			}
+			
+			return false;
 		}
 
 		private IJavaElementDelta findElement(IJavaElement target, IJavaElementDelta delta) {
@@ -611,7 +646,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 	
 	/* context and listeners */
-	private ITextEditor fEditor;
+	private JavaEditor fEditor;
 	private ProjectionListener fProjectionListener;
 	private IJavaElement fInput;
 	private IElementChangedListener fElementListener;
@@ -656,8 +691,8 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		internalUninstall();
 		
 		if (editor instanceof JavaEditor) {
-			fEditor= editor;
 			fProjectionListener= new ProjectionListener(viewer);
+			fEditor= (JavaEditor)editor;
 		}
 	}
 
@@ -709,7 +744,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		// message.
 		handleProjectionDisabled();
 
-		if (fEditor instanceof JavaEditor) {
+		if (isInstalled()) {
 			initialize();
 			fElementListener= new ElementChangedListener();
 			JavaCore.addElementChangedListener(fElementListener);
@@ -1164,8 +1199,15 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private IDocument getDocument() {
-		IDocumentProvider provider= fEditor.getDocumentProvider();
-		return provider.getDocument(fEditor.getEditorInput());
+		JavaEditor editor= fEditor;
+		if (editor == null)
+			return null;
+		
+		IDocumentProvider provider= editor.getDocumentProvider();
+		if (provider == null)
+			return null;
+		
+		return provider.getDocument(editor.getEditorInput());
 	}
 
 	/**

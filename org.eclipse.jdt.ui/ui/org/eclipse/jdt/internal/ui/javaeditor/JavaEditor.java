@@ -1726,6 +1726,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.2
 	 */
 	private boolean fSelectionChangedViaGotoAnnotation;
+	/**
+	 * The cached selected range.
+	 * 
+	 * @see ITextViewer#getSelectedRange()
+	 * @since 3.3
+	 */
+	private Point fCachedSelectedRange;
 
 
 	/**
@@ -3441,6 +3448,29 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		selection.x= widgetOffset2ModelOffset(sourceViewer, selection.x);
 
 		return new Region(selection.x, selection.y);
+	}
+
+	/**
+	 * Returns the cached selected range, which allows
+	 * to query it from a non-UI thread.
+	 * <p>
+	 * The result might be outdated if queried from a non-UI thread.</em></p>
+	 *
+	 * @return the caret offset in the master document
+	 * @see ITextViewer#getSelectedRange()
+	 * @since 3.3
+	 */
+	public Point getCachedSelectedRange() {
+		return fCachedSelectedRange;
+	}
+
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#handleCursorPositionChanged()
+	 * @since 3.3
+	 */
+	protected void handleCursorPositionChanged() {
+		super.handleCursorPositionChanged();
+		fCachedSelectedRange= getViewer().getSelectedRange();
 	}
 
 	private static boolean isBracket(char character) {
