@@ -191,7 +191,7 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 		};
 		
 		try {
-			engine.searchAllTypeNames(null, null, SearchPattern.R_EXACT_MATCH, IJavaSearchConstants.TYPE, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH , null);
+			engine.searchAllTypeNames(null, SearchPattern.R_EXACT_MATCH, null, SearchPattern.R_EXACT_MATCH, IJavaSearchConstants.TYPE, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH , null);
 		} catch (Result e) {
 			return getOverlayFromFlags(e.modifiers);
 		} catch (JavaModelException e) {

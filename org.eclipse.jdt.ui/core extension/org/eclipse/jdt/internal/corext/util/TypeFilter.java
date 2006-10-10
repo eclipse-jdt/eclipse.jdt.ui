@@ -16,6 +16,7 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -51,6 +52,9 @@ public class TypeFilter implements IPropertyChangeListener {
 		return false;
 	}
 	
+	public static boolean isFiltered(TypeNameMatch match) {
+		return getDefault().filter(match.getFullyQualifiedName());
+	}
 
 	private StringMatcher[] fStringMatchers;
 
@@ -108,4 +112,6 @@ public class TypeFilter implements IPropertyChangeListener {
 			fStringMatchers= null;
 		}
 	}
+
+
 }

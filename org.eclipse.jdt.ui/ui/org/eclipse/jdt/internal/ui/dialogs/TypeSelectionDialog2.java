@@ -49,10 +49,10 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -129,7 +129,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		fValidator= validator;
 	}
 	
-	protected TypeInfo[] getSelectedTypes() {
+	protected TypeNameMatch[] getSelectedTypes() {
 		if (fContent == null || fContent.isDisposed())
 			return null;
 		return fContent.getSelection();
@@ -164,13 +164,13 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		return area;
 	}
 	
-	protected void handleDefaultSelected(TypeInfo[] selection) {
+	protected void handleDefaultSelected(TypeNameMatch[] selection) {
 		if (selection.length == 0)
 			return;
 		okPressed();
 	}
 	
-	protected void handleWidgetSelected(TypeInfo[] selection) {
+	protected void handleWidgetSelected(TypeNameMatch[] selection) {
 		IStatus status= null;
 		if (selection.length == 0) {
 	    	status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, "",null); //$NON-NLS-1$
@@ -179,7 +179,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 				if (fValidator != null) {
 					List jElements= new ArrayList();
 					for (int i= 0; i < selection.length; i++) {
-						IType type= selection[i].resolveType(fScope);
+						IType type= selection[i].getType();
 						if (type != null) {
 							jElements.add(type);
 						} else {
@@ -250,7 +250,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	}
 	
 	protected void computeResult() {
-		TypeInfo[] selected= fContent.getSelection();
+		TypeNameMatch[] selected= fContent.getSelection();
 		if (selected == null || selected.length == 0) {
 			setResult(null);
 			return;
@@ -265,11 +265,11 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		List result= new ArrayList(selected.length);
 		for (int i= 0; i < selected.length; i++) {
 			try {
-				TypeInfo typeInfo= selected[i];
-				IType type= typeInfo.resolveType(fScope);
+				TypeNameMatch typeInfo= selected[i];
+				IType type= typeInfo.getType();
 				if (type == null) {
 					String title= JavaUIMessages.TypeSelectionDialog_errorTitle; 
-					String message= Messages.format(JavaUIMessages.TypeSelectionDialog_dialogMessage, typeInfo.getPath()); 
+					String message= Messages.format(JavaUIMessages.TypeSelectionDialog_dialogMessage, typeInfo.getFullyQualifiedName()); 
 					MessageDialog.openError(getShell(), title, message);
 					history.remove(typeInfo);
 					setResult(null);

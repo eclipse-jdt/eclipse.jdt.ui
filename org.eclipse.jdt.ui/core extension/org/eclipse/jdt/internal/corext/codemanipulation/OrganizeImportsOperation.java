@@ -36,9 +36,12 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -54,6 +57,8 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.TypeNameMatch;
+import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -61,14 +66,69 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
-import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.SimilarElementsRequestor;
 
 public class OrganizeImportsOperation implements IWorkspaceRunnable {
+	
+	
+	private static class InternalTypeNameMatch extends TypeNameMatch {
+		
+		private final String fPackageName;
+		private final String fTypeQualifiedName;
+		private final IJavaProject fProject;
+		
+		public InternalTypeNameMatch(int modifiers, char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, IJavaProject project) {
+			super(null, modifiers);
+			fPackageName= new String(packageName);
+			StringBuffer buf= new StringBuffer();
+			for (int i= 0; i < enclosingTypeNames.length; i++) {
+				buf.append(enclosingTypeNames[i]).append('.');
+			}
+			fTypeQualifiedName= buf.append(simpleTypeName).toString();
+			fProject= project;
+		}
+		
+		public String getPackageName() {
+			return fPackageName;
+		}
+		
+		public String getSimpleTypeName() {
+			return Signature.getSimpleName(fTypeQualifiedName);
+		}
+		
+		public String getTypeQualifiedName() {
+			return fTypeQualifiedName;
+		}
+		
+		public String getFullyQualifiedName() {
+			return JavaModelUtil.concatenateName(fPackageName, fTypeQualifiedName);
+		}
+		
+		public String getTypeContainerName() {
+			return JavaModelUtil.concatenateName(fPackageName, Signature.getQualifier(fTypeQualifiedName));
+		}
+		
+		public IPackageFragmentRoot getPackageFragmentRoot() {
+			try {
+				IType type= getType();
+				if (type != null) {
+					return JavaModelUtil.getPackageFragmentRoot(type);
+				}
+			} catch (JavaModelException e) {
+				
+			}
+			return null;
+		}
+		
+		public IType getType() throws JavaModelException {
+			return fProject.findType(getFullyQualifiedName());
+		}		
+	}
+	
+	
 
 	public static interface IChooseImportQuery {
 		/**
@@ -78,7 +138,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		 * @return Returns <code>null</code> to cancel the operation, or the
 		 *         selected imports.
 		 */
-		TypeInfo[] chooseImports(TypeInfo[][] openChoices, ISourceRange[] ranges);
+		TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges);
 	}
 	
 	
@@ -95,9 +155,9 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				this.foundInfos= new ArrayList(3);
 			}
 			
-			public void addInfo(TypeInfo info) {
+			public void addInfo(TypeNameMatch info) {
 				for (int i= this.foundInfos.size() - 1; i >= 0; i--) {
-					TypeInfo curr= (TypeInfo) this.foundInfos.get(i);
+					TypeNameMatch curr= (TypeNameMatch) this.foundInfos.get(i);
 					if (curr.getTypeContainerName().equals(info.getTypeContainerName())) {
 						return; // not added. already contains type with same name
 					}
@@ -122,7 +182,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		
 		private Map fUnresolvedTypes;
 		private Set fImportsAdded;
-		private TypeInfo[][] fOpenChoices;
+		private TypeNameMatch[][] fOpenChoices;
 		private SourceRange[] fSourceRanges;
 		
 		
@@ -231,17 +291,22 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				for (Iterator iter= fUnresolvedTypes.keySet().iterator(); iter.hasNext();) {
 					allTypes[i++]= ((String) iter.next()).toCharArray();
 				}
-				ArrayList typesFound= new ArrayList();
-				IJavaProject project= fCurrPackage.getJavaProject();
+				final ArrayList typesFound= new ArrayList();
+				final IJavaProject project= fCurrPackage.getJavaProject();
 				IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { project });
-				TypeInfoRequestor requestor= new TypeInfoRequestor(typesFound);
+				TypeNameRequestor requestor= new TypeNameRequestor() {
+					public void acceptType(int modifiers, char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
+						typesFound.add(new InternalTypeNameMatch(modifiers, packageName, simpleTypeName, enclosingTypeNames, project));
+					}
+				};
+				
 				new SearchEngine().searchAllTypeNames(null, allTypes, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
 
 				boolean is50OrHigher= 	JavaModelUtil.is50OrHigher(project);
 				
 				for (i= 0; i < typesFound.size(); i++) {
-					TypeInfo curr= (TypeInfo) typesFound.get(i);
-					UnresolvedTypeData data= (UnresolvedTypeData) fUnresolvedTypes.get(curr.getTypeName());
+					TypeNameMatch curr= (TypeNameMatch) typesFound.get(i);
+					UnresolvedTypeData data= (UnresolvedTypeData) fUnresolvedTypes.get(curr.getSimpleTypeName());
 					if (data != null && isVisible(curr) && isOfKind(curr, data.typeKinds, is50OrHigher)) {
 						if (fAllowDefaultPackageImports || curr.getPackageName().length() > 0) {
 							data.addInfo(curr);
@@ -253,7 +318,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				ArrayList sourceRanges= new ArrayList(nUnresolved);
 				for (Iterator iter= fUnresolvedTypes.values().iterator(); iter.hasNext();) {
 					UnresolvedTypeData data= (UnresolvedTypeData) iter.next();
-					TypeInfo[] openChoice= processTypeInfo(data.foundInfos);
+					TypeNameMatch[] openChoice= processTypeInfo(data.foundInfos);
 					if (openChoice != null) {
 						openChoices.add(openChoice);
 						sourceRanges.add(new SourceRange(data.ref.getStartPosition(), data.ref.getLength()));
@@ -262,7 +327,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				if (openChoices.isEmpty()) {
 					return false;
 				}
-				fOpenChoices= (TypeInfo[][]) openChoices.toArray(new TypeInfo[openChoices.size()][]);
+				fOpenChoices= (TypeNameMatch[][]) openChoices.toArray(new TypeNameMatch[openChoices.size()][]);
 				fSourceRanges= (SourceRange[]) sourceRanges.toArray(new SourceRange[sourceRanges.size()]);
 				return true;
 			} finally {
@@ -270,13 +335,13 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 		}
 		
-		private TypeInfo[] processTypeInfo(List typeRefsFound) {
+		private TypeNameMatch[] processTypeInfo(List typeRefsFound) {
 			int nFound= typeRefsFound.size();
 			if (nFound == 0) {
 				// nothing found
 				return null;
 			} else if (nFound == 1) {
-				TypeInfo typeRef= (TypeInfo) typeRefsFound.get(0);
+				TypeNameMatch typeRef= (TypeNameMatch) typeRefsFound.get(0);
 				fImpStructure.addImport(typeRef.getFullyQualifiedName());
 				return null;
 			} else {
@@ -285,7 +350,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				
 				// multiple found, use old imports to find an entry
 				for (int i= 0; i < nFound; i++) {
-					TypeInfo typeRef= (TypeInfo) typeRefsFound.get(i);
+					TypeNameMatch typeRef= (TypeNameMatch) typeRefsFound.get(i);
 					String fullName= typeRef.getFullyQualifiedName();
 					String containerName= typeRef.getTypeContainerName();
 					if (fOldSingleImports.contains(fullName)) {
@@ -306,11 +371,11 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 					return null;
 				}
 				// return the open choices
-				return (TypeInfo[]) typeRefsFound.toArray(new TypeInfo[nFound]);
+				return (TypeNameMatch[]) typeRefsFound.toArray(new TypeNameMatch[nFound]);
 			}
 		}
 		
-		private boolean isOfKind(TypeInfo curr, int typeKinds, boolean is50OrHigher) {
+		private boolean isOfKind(TypeNameMatch curr, int typeKinds, boolean is50OrHigher) {
 			int flags= curr.getModifiers();
 			if (Flags.isAnnotation(flags)) {
 				return is50OrHigher && ((typeKinds & SimilarElementsRequestor.ANNOTATIONS) != 0);
@@ -324,7 +389,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			return (typeKinds & SimilarElementsRequestor.CLASSES) != 0;
 		}
 
-		private boolean isVisible(TypeInfo curr) {
+		private boolean isVisible(TypeNameMatch curr) {
 			int flags= curr.getModifiers();
 			if (Flags.isPrivate(flags)) {
 				return false;
@@ -335,7 +400,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			return curr.getPackageName().equals(fCurrPackage.getElementName());
 		}
 
-		public TypeInfo[][] getChoices() {
+		public TypeNameMatch[][] getChoices() {
 			return fOpenChoices;
 		}
 
@@ -419,15 +484,15 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			addStaticImports(staticReferences, importsRewrite);
 			
 			if (hasOpenChoices && fChooseImportQuery != null) {
-				TypeInfo[][] choices= processor.getChoices();
+				TypeNameMatch[][] choices= processor.getChoices();
 				ISourceRange[] ranges= processor.getChoicesSourceRanges();
-				TypeInfo[] chosen= fChooseImportQuery.chooseImports(choices, ranges);
+				TypeNameMatch[] chosen= fChooseImportQuery.chooseImports(choices, ranges);
 				if (chosen == null) {
 					// cancel pressed by the user
 					throw new OperationCanceledException();
 				}
 				for (int i= 0; i < chosen.length; i++) {
-					TypeInfo typeInfo= chosen[i];
+					TypeNameMatch typeInfo= chosen[i];
 					importsRewrite.addImport(typeInfo.getFullyQualifiedName());
 				}				
 			}

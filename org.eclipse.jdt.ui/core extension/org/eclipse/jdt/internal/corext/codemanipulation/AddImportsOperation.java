@@ -57,13 +57,13 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
-import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
+import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
@@ -87,7 +87,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		 * @return Returns <code>null</code> to cancel the operation, or the
 		 *         selected imports.
 		 */
-		TypeInfo chooseImport(TypeInfo[] openChoices, String containerName);
+		TypeNameMatch chooseImport(TypeNameMatch[] openChoices, String containerName);
 	}
 	
 	private ICompilationUnit fCompilationUnit;
@@ -279,7 +279,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		}
 		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { fCompilationUnit.getJavaProject() });
 		
-		TypeInfo[] types= findAllTypes(simpleName, searchScope, nameNode, new SubProgressMonitor(monitor, 1));
+		TypeNameMatch[] types= findAllTypes(simpleName, searchScope, nameNode, new SubProgressMonitor(monitor, 1));
 		if (types.length == 0) {
 			fStatus= JavaUIStatus.createError(IStatus.ERROR, Messages.format(CodeGenerationMessages.AddImportsOperation_error_notresolved_message, simpleName), null); 
 			return null;
@@ -288,7 +288,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
-		TypeInfo chosen;
+		TypeNameMatch chosen;
 		if (types.length > 1 && fQuery != null) {
 			chosen= fQuery.chooseImport(types, containerName);
 			if (chosen == null) {
@@ -367,7 +367,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	/*
 	 * Finds a type by the simple name.
 	 */
-	private TypeInfo[] findAllTypes(String simpleTypeName, IJavaSearchScope searchScope, SimpleName nameNode, IProgressMonitor monitor) throws JavaModelException {
+	private TypeNameMatch[] findAllTypes(String simpleTypeName, IJavaSearchScope searchScope, SimpleName nameNode, IProgressMonitor monitor) throws JavaModelException {
 		boolean is50OrHigher= JavaModelUtil.is50OrHigher(fCompilationUnit.getJavaProject());
 		
 		int typeKinds= SimilarElementsRequestor.ALL_TYPES;
@@ -376,23 +376,23 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		}
 		
 		ArrayList typeInfos= new ArrayList();
-		TypeInfoRequestor requestor= new TypeInfoRequestor(typeInfos);
+		TypeNameMatchCollector requestor= new TypeNameMatchCollector(typeInfos);
 		int matchMode= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
 		new SearchEngine().searchAllTypeNames(null, matchMode, simpleTypeName.toCharArray(), matchMode, getSearchForConstant(typeKinds), searchScope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
 
 		ArrayList typeRefsFound= new ArrayList(typeInfos.size());
 		for (int i= 0, len= typeInfos.size(); i < len; i++) {
-			TypeInfo curr= (TypeInfo) typeInfos.get(i);
+			TypeNameMatch curr= (TypeNameMatch) typeInfos.get(i);
 			if (curr.getPackageName().length() > 0) { // do not suggest imports from the default package
 				if (isOfKind(curr, typeKinds, is50OrHigher) && isVisible(curr)) {
 					typeRefsFound.add(curr);
 				}
 			}
 		}
-		return (TypeInfo[]) typeRefsFound.toArray(new TypeInfo[typeRefsFound.size()]);
+		return (TypeNameMatch[]) typeRefsFound.toArray(new TypeNameMatch[typeRefsFound.size()]);
 	}
 	
-	private boolean isOfKind(TypeInfo curr, int typeKinds, boolean is50OrHigher) {
+	private boolean isOfKind(TypeNameMatch curr, int typeKinds, boolean is50OrHigher) {
 		int flags= curr.getModifiers();
 		if (Flags.isAnnotation(flags)) {
 			return is50OrHigher && ((typeKinds & SimilarElementsRequestor.ANNOTATIONS) != 0);
@@ -407,7 +407,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	}
 
 	
-	private boolean isVisible(TypeInfo curr) {
+	private boolean isVisible(TypeNameMatch curr) {
 		int flags= curr.getModifiers();
 		if (Flags.isPrivate(flags)) {
 			return false;

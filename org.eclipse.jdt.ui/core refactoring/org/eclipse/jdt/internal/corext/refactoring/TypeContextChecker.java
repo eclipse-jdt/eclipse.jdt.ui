@@ -70,6 +70,8 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -81,8 +83,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
-import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
+import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
@@ -292,7 +293,7 @@ public class TypeContextChecker {
 				status.addError(msg);
 				return elementTypeName;
 			} else if (typeRefsFound.size() == 1){
-				TypeInfo typeInfo= (TypeInfo) typeRefsFound.get(0);
+				TypeNameMatch typeInfo= (TypeNameMatch) typeRefsFound.get(0);
 				return typeInfo.getFullyQualifiedName();
 			} else {
 				Assert.isTrue(typeRefsFound.size() > 1);
@@ -307,13 +308,14 @@ public class TypeContextChecker {
 			IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaProject[]{contextType.getJavaProject()}, true);
 			IPackageFragment currPackage= contextType.getPackageFragment();
 			ArrayList collectedInfos= new ArrayList();
-			TypeInfoRequestor requestor= new TypeInfoRequestor(collectedInfos);
-			new SearchEngine().searchAllTypeNames(null, new char[][] {typeName.toCharArray()}, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, pm);
+			TypeNameMatchCollector requestor= new TypeNameMatchCollector(collectedInfos);
+			int matchMode= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
+			new SearchEngine().searchAllTypeNames(null, matchMode, typeName.toCharArray(), matchMode, IJavaSearchConstants.TYPE, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, pm);
 			
 			List result= new ArrayList();
 			for (Iterator iter= collectedInfos.iterator(); iter.hasNext();) {
-				TypeInfo curr= (TypeInfo) iter.next();
-				IType type= curr.resolveType(scope);
+				TypeNameMatch curr= (TypeNameMatch) iter.next();
+				IType type= curr.getType();
 				if (type != null && JavaModelUtil.isVisible(type, currPackage)) {
 					result.add(curr);
 				}

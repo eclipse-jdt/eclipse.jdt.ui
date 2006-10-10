@@ -11,12 +11,12 @@
 package org.eclipse.jdt.internal.corext.util;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
-
-import org.eclipse.jdt.internal.corext.util.TypeInfo.TypeInfoAdapter;
+import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.ui.dialogs.ITypeInfoFilterExtension;
 
@@ -126,7 +126,7 @@ public class TypeInfoFilter {
 	private boolean fIsWorkspaceScope;
 	private int fElementKind;
 	private ITypeInfoFilterExtension fFilterExtension;
-	private TypeInfoAdapter fAdapter= new TypeInfoAdapter();
+	private TypeInfoRequestorAdapter fAdapter= new TypeInfoRequestorAdapter();
 
 	private PatternMatcher fPackageMatcher;
 	private PatternMatcher fNameMatcher;
@@ -212,46 +212,50 @@ public class TypeInfoFilter {
 		return fPackageMatcher.getMatchKind();
 	}
 
-	public boolean matchesRawNamePattern(TypeInfo type) {
-		return Strings.startsWithIgnoreCase(type.getTypeName(), fNameMatcher.getPattern());
+	public boolean matchesRawNamePattern(TypeNameMatch type) {
+		return Strings.startsWithIgnoreCase(type.getSimpleTypeName(), fNameMatcher.getPattern());
 	}
 
-	public boolean matchesCachedResult(TypeInfo type) {
+	public boolean matchesCachedResult(TypeNameMatch type) {
 		if (!(matchesPackage(type) && matchesFilterExtension(type)))
 			return false;
 		return matchesName(type);
 	}
 	
-	public boolean matchesHistoryElement(TypeInfo type) {
+	public boolean matchesHistoryElement(TypeNameMatch type) {
 		if (!(matchesPackage(type) && matchesModifiers(type) && matchesScope(type) && matchesFilterExtension(type)))
 			return false;
 		return matchesName(type);
 	}
 
-	public boolean matchesFilterExtension(TypeInfo type) {
+	public boolean matchesFilterExtension(TypeNameMatch type) {
 		if (fFilterExtension == null)
 			return true;
-		fAdapter.setInfo(type);
+		fAdapter.setMatch(type);
 		return fFilterExtension.select(fAdapter);
 	}
 	
-	private boolean matchesName(TypeInfo type) {
-		return fNameMatcher.matches(type.getTypeName());
+	private boolean matchesName(TypeNameMatch type) {
+		return fNameMatcher.matches(type.getSimpleTypeName());
 	}
 
-	private boolean matchesPackage(TypeInfo type) {
+	private boolean matchesPackage(TypeNameMatch type) {
 		if (fPackageMatcher == null)
 			return true;
 		return fPackageMatcher.matches(type.getTypeContainerName());
 	}
 
-	private boolean matchesScope(TypeInfo type) {
+	private boolean matchesScope(TypeNameMatch type) {
 		if (fIsWorkspaceScope)
 			return true;
-		return type.isEnclosed(fSearchScope);
+		try {
+			return fSearchScope.encloses(type.getType());
+		} catch (JavaModelException e) {
+			return false;
+		}
 	}
 	
-	private boolean matchesModifiers(TypeInfo type) {
+	private boolean matchesModifiers(TypeNameMatch type) {
 		if (fElementKind == IJavaSearchConstants.TYPE)
 			return true;
 		int modifiers= type.getModifiers() & TYPE_MODIFIERS;

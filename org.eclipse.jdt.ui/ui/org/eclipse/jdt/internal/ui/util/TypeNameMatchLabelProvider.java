@@ -15,15 +15,15 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.jdt.core.Flags;
-
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
-public class TypeInfoLabelProvider extends LabelProvider {
+public class TypeNameMatchLabelProvider extends LabelProvider {
 	
 	public static final int SHOW_FULLYQUALIFIED=		0x01;
 	public static final int SHOW_PACKAGE_POSTFIX=		0x02;
@@ -41,7 +41,7 @@ public class TypeInfoLabelProvider extends LabelProvider {
 	
 	private int fFlags;
 	
-	public TypeInfoLabelProvider(int flags) {
+	public TypeNameMatchLabelProvider(int flags) {
 		fFlags= flags;
 	}	
 	
@@ -60,13 +60,13 @@ public class TypeInfoLabelProvider extends LabelProvider {
 	 * @see ILabelProvider#getText
 	 */
 	public String getText(Object element) {
-		if (! (element instanceof TypeInfo)) 
+		if (! (element instanceof TypeNameMatch)) 
 			return super.getText(element);
 		
-		TypeInfo typeRef= (TypeInfo) element;
+		TypeNameMatch typeRef= (TypeNameMatch) element;
 		StringBuffer buf= new StringBuffer();
 		if (isSet(SHOW_TYPE_ONLY)) {
-			buf.append(typeRef.getTypeName());
+			buf.append(typeRef.getSimpleTypeName());
 		} else if (isSet(SHOW_TYPE_CONTAINER_ONLY)) {
 			String containerName= typeRef.getTypeContainerName();
 			buf.append(getPackageName(containerName));
@@ -77,7 +77,7 @@ public class TypeInfoLabelProvider extends LabelProvider {
 			if (isSet(SHOW_FULLYQUALIFIED)) {
 				buf.append(typeRef.getFullyQualifiedName());
 			} else if (isSet(SHOW_POST_QUALIFIED)) {
-				buf.append(typeRef.getTypeName());
+				buf.append(typeRef.getSimpleTypeName());
 				String containerName= typeRef.getTypeContainerName();
 				if (containerName != null && containerName.length() > 0) {
 					buf.append(JavaElementLabels.CONCAT_STRING);
@@ -95,7 +95,8 @@ public class TypeInfoLabelProvider extends LabelProvider {
 		}
 		if (isSet(SHOW_ROOT_POSTFIX)) {
 			buf.append(JavaElementLabels.CONCAT_STRING);
-			buf.append(typeRef.getPackageFragmentRootPath().toString());
+			IPackageFragmentRoot root= typeRef.getPackageFragmentRoot();
+			JavaElementLabels.getPackageFragmentRootLabel(root, JavaElementLabels.ROOT_QUALIFIED, buf);
 		}
 		return buf.toString();				
 	}
@@ -104,11 +105,11 @@ public class TypeInfoLabelProvider extends LabelProvider {
 	 * @see ILabelProvider#getImage
 	 */	
 	public Image getImage(Object element) {
-		if (! (element instanceof TypeInfo)) 
+		if (! (element instanceof TypeNameMatch)) 
 			return super.getImage(element);	
 
 		if (isSet(SHOW_TYPE_CONTAINER_ONLY)) {
-			TypeInfo typeRef= (TypeInfo) element;
+			TypeNameMatch typeRef= (TypeNameMatch) element;
 			if (typeRef.getPackageName().equals(typeRef.getTypeContainerName()))
 				return PKG_ICON;
 
@@ -118,7 +119,7 @@ public class TypeInfoLabelProvider extends LabelProvider {
 		} else if (isSet(SHOW_PACKAGE_ONLY)) {
 			return PKG_ICON;
 		} else {
-			int modifiers= ((TypeInfo)element).getModifiers();
+			int modifiers= ((TypeNameMatch)element).getModifiers();
 			if (Flags.isAnnotation(modifiers)) {
 				return ANNOTATION_ICON;
 			} else if (Flags.isEnum(modifiers)) {

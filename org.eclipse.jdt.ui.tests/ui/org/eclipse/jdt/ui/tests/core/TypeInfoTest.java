@@ -18,7 +18,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -32,13 +31,10 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
-import org.eclipse.jdt.core.search.TypeNameRequestor;
+import org.eclipse.jdt.core.search.TypeNameMatch;
+import org.eclipse.jdt.core.search.TypeNameMatchRequestor;
 
-import org.eclipse.jdt.internal.corext.util.IFileTypeInfo;
-import org.eclipse.jdt.internal.corext.util.JarFileEntryTypeInfo;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
-import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
+import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -107,11 +103,12 @@ public class TypeInfoTest extends TestCase {
 
 		IJavaElement[] elements= new IJavaElement[] { fJProject1 };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
-		TypeNameRequestor requestor= new TypeInfoRequestor(result);
+		TypeNameMatchRequestor requestor= new TypeNameMatchCollector(result);
 		SearchEngine engine= new SearchEngine();
 
 		engine.searchAllTypeNames(
 			null, 
+			0,
 			new char[] {'V'}, 
 			SearchPattern.R_PREFIX_MATCH, 
 			IJavaSearchConstants.TYPE, 
@@ -132,9 +129,9 @@ public class TypeInfoTest extends TestCase {
 
 		
 		for (int i= 0; i < result.size(); i++) {
-			TypeInfo ref= (TypeInfo) result.get(i);
+			TypeNameMatch ref= (TypeNameMatch) result.get(i);
 			//System.out.println(ref.getTypeName());
-			assertResolve(scope, ref);
+			assertResolve(ref);
 			
 		}
 		assertTrue("Should find 8 elements, is " + result.size(), result.size() == 8);
@@ -142,20 +139,20 @@ public class TypeInfoTest extends TestCase {
 
 	}
 
-	private void assertResolve(IJavaSearchScope scope, TypeInfo ref) throws JavaModelException {
-		IType resolvedType= ref.resolveType(scope);
+	private void assertResolve(TypeNameMatch ref) throws JavaModelException {
+		IType resolvedType= ref.getType();
 		if (resolvedType == null) {
 			assertTrue("Could not be resolved: " + ref.toString(), false);
 		}
 		if (!resolvedType.exists()) {
 			assertTrue("Resolved type does not exist: " + ref.toString(), false);
 		}
-		StringAsserts.assertEqualString(JavaModelUtil.getFullyQualifiedName(resolvedType), ref.getFullyQualifiedName());
+		StringAsserts.assertEqualString(resolvedType.getFullyQualifiedName('.'), ref.getFullyQualifiedName());
 	}
 	
 	private void findTypeRef(List refs, String fullname) {
 		for (int i= 0; i <refs.size(); i++) {
-			TypeInfo curr= (TypeInfo) refs.get(i);
+			TypeNameMatch curr= (TypeNameMatch) refs.get(i);
 			if (fullname.equals(curr.getFullyQualifiedName())) {
 				return;
 			}
@@ -175,11 +172,12 @@ public class TypeInfoTest extends TestCase {
 		
 		IJavaProject[] elements= new IJavaProject[] { fJProject2 };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
-		TypeNameRequestor requestor= new TypeInfoRequestor(result);
+		TypeNameMatchRequestor requestor= new TypeNameMatchCollector(result);
 		SearchEngine engine= new SearchEngine();
 
 		engine.searchAllTypeNames(
-			null, 
+			null,
+			0,
 			new char[] {'T'}, 
 			SearchPattern.R_PREFIX_MATCH, 
 			IJavaSearchConstants.TYPE, 
@@ -196,95 +194,12 @@ public class TypeInfoTest extends TestCase {
 		assertEquals("wrong element count", 51, result.size());
 		//System.out.println("Elements found: " + result.size());
 		for (int i= 0; i < result.size(); i++) {
-			TypeInfo ref= (TypeInfo) result.get(i);
+			TypeNameMatch ref= (TypeNameMatch) result.get(i);
 			//System.out.println(ref.getTypeName());
-			assertResolve(scope, ref);
-		}
-	}
-	
-	
-	
-	
-	
-	public void testNoSourceFolder() throws Exception {
-		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJProject1, "");
-		IPackageFragment pack1= root.createPackageFragment("", true, null);
-		ICompilationUnit cu1= pack1.getCompilationUnit("A.java");
-		cu1.createType("public class A {\n}\n", null, true, null);		
-
-		IPackageFragment pack2= root.createPackageFragment("org.eclipse", true, null);
-		ICompilationUnit cu2= pack2.getCompilationUnit("B.java");
-		cu2.createType("public class B {\n}\n", null, true, null);
-		
-		TypeInfo[] result= getAllTypes();
-		for (int i= 0; i < result.length; i++) {
-			TypeInfo info= result[i];
-			if (info.getElementType() == TypeInfo.IFILE_TYPE_INFO) {
-				IFileTypeInfo fileInfo= (IFileTypeInfo)info;
-				if (info.getTypeName().equals("A")) {
-					assertEquals(info.getPackageName(), "");
-					assertEquals(fileInfo.getProject(), "TestProject1");
-					assertNull(fileInfo.getFolder());
-					assertEquals(fileInfo.getFileName(), "A");
-					assertEquals(fileInfo.getExtension(), "java");
-				} else if (info.getTypeName().equals("B")) {
-					assertEquals(info.getPackageName(), "org.eclipse");
-					assertEquals(fileInfo.getProject(), "TestProject1");
-					assertNull(fileInfo.getFolder());
-					assertEquals(fileInfo.getFileName(), "B");
-					assertEquals(fileInfo.getExtension(), "java");
-				}
-			}
+			assertResolve(ref);
 		}
 	}
 
-	public void testSourceFolder() throws Exception {
-		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-		IPackageFragment pack1= root.createPackageFragment("", true, null);
-		ICompilationUnit cu1= pack1.getCompilationUnit("A.java");
-		cu1.createType("public class A {\n}\n", null, true, null);		
-
-		IPackageFragment pack2= root.createPackageFragment("org.eclipse", true, null);
-		ICompilationUnit cu2= pack2.getCompilationUnit("B.java");
-		cu2.createType("public class B {\n}\n", null, true, null);
-		
-		TypeInfo[] result= getAllTypes();
-		for (int i= 0; i < result.length; i++) {
-			TypeInfo info= result[i];
-			if (info.getElementType() == TypeInfo.IFILE_TYPE_INFO) {
-				IFileTypeInfo fileInfo= (IFileTypeInfo)info;
-				if (info.getTypeName().equals("A")) {
-					assertEquals(info.getPackageName(), "");
-					assertEquals(fileInfo.getProject(), "TestProject1");
-					assertEquals(fileInfo.getFolder(), "src");
-					assertEquals(fileInfo.getFileName(), "A");
-					assertEquals(fileInfo.getExtension(), "java");
-				} else if (info.getTypeName().equals("B")) {
-					assertEquals(info.getPackageName(), "org.eclipse");
-					assertEquals(fileInfo.getProject(), "TestProject1");
-					assertEquals(fileInfo.getFolder(), "src");
-					assertEquals(fileInfo.getFileName(), "B");
-					assertEquals(fileInfo.getExtension(), "java");
-				}
-			}
-		}
-	}
-	
-	public void testJar() throws Exception {
-		TypeInfo[] result= getAllTypes();
-		for (int i= 0; i < result.length; i++) {
-			TypeInfo info= result[i];
-			if (info.getElementType() == TypeInfo.JAR_FILE_ENTRY_TYPE_INFO) {
-				JarFileEntryTypeInfo jarInfo= (JarFileEntryTypeInfo)info;
-				if (info.getTypeName().equals("Object")) {
-					assertEquals(info.getPackageName(), "java.lang");
-					assertTrue(jarInfo.getJar().endsWith("rtstubs15.jar"));
-					assertEquals(jarInfo.getFileName(), "Object");
-					assertEquals(jarInfo.getExtension(), "class");
-				}
-			}
-		}		
-	}
 
 	public void test_bug44772() throws Exception {
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
@@ -296,11 +211,12 @@ public class TypeInfoTest extends TestCase {
 
 		IJavaElement[] elements= new IJavaElement[] { fJProject1 };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
-		TypeNameRequestor requestor= new TypeInfoRequestor(result);
+		TypeNameMatchRequestor requestor= new TypeNameMatchCollector(result);
 		SearchEngine engine= new SearchEngine();
 
 		engine.searchAllTypeNames(
-			null, 
+			null,
+			0,
 			"Foo".toCharArray(),
 			SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, 
 			IJavaSearchConstants.TYPE, 
@@ -309,8 +225,8 @@ public class TypeInfoTest extends TestCase {
 			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
 			null); 
 		assertEquals("result size", result.size(), 2);
-		IType type1= ((TypeInfo) result.get(0)).resolveType(scope);
-		IType type2= ((TypeInfo) result.get(1)).resolveType(scope);
+		IType type1= ((TypeNameMatch) result.get(0)).getType();
+		IType type2= ((TypeNameMatch) result.get(1)).getType();
 		
 		assertNotNull(type1);
 		assertNotNull(type2);
@@ -318,19 +234,4 @@ public class TypeInfoTest extends TestCase {
 
 	}
 
-	private TypeInfo[] getAllTypes() throws CoreException {
-		List result= new ArrayList();
-		TypeNameRequestor requestor= new TypeInfoRequestor(result);
-		SearchEngine engine= new SearchEngine();
-		engine.searchAllTypeNames(
-			null, 
-			"*".toCharArray(), 
-			SearchPattern.R_PATTERN_MATCH, 
-			IJavaSearchConstants.TYPE, 
-			SearchEngine.createWorkspaceScope(), 
-			requestor, 
-			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
-			null); 
-		return (TypeInfo[])result.toArray(new TypeInfo[result.size()]);
-	}
 }

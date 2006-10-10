@@ -60,9 +60,9 @@ import org.eclipse.ui.XMLMemento;
 
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.corext.util.Strings;
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 import org.eclipse.jdt.ui.dialogs.ITypeSelectionComponent;
 import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
@@ -73,7 +73,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
+import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 public class TypeSelectionComponent extends Composite implements ITypeSelectionComponent {
@@ -170,7 +170,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		fViewer.forceSearch();
 	}
 	
-	public TypeInfo[] getSelection() {
+	public TypeNameMatch[] getSelection() {
 		return fViewer.getSelection();
 	}
 	
@@ -272,15 +272,15 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 			fLabel.setFont(fForm.getFont());
 			fForm.setContent(fLabel);
 			table.addSelectionListener(new SelectionAdapter() {
-				private TypeInfoLabelProvider fLabelProvider= new TypeInfoLabelProvider(
-					TypeInfoLabelProvider.SHOW_TYPE_CONTAINER_ONLY + TypeInfoLabelProvider.SHOW_ROOT_POSTFIX);
+				private TypeNameMatchLabelProvider fLabelProvider= new TypeNameMatchLabelProvider(
+					TypeNameMatchLabelProvider.SHOW_TYPE_CONTAINER_ONLY + TypeNameMatchLabelProvider.SHOW_ROOT_POSTFIX);
 				public void widgetSelected(SelectionEvent event) {
-					TypeInfo[] selection= fViewer.getSelection();
+					TypeNameMatch[] selection= fViewer.getSelection();
 					if (selection.length != 1) {
 						fLabel.setText(""); //$NON-NLS-1$
 						fLabel.setImage(null);
 					} else {
-						TypeInfo type= selection[0];
+						TypeNameMatch type= selection[0];
 						fLabel.setText(fViewer.getLabelProvider().getQualificationText(type));
 						fLabel.setImage(fLabelProvider.getImage(type));
 					}

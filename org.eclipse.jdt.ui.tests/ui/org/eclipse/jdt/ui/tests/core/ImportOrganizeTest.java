@@ -31,10 +31,10 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -84,7 +84,7 @@ public class ImportOrganizeTest extends CoreTests {
 	
 	private IChooseImportQuery createQuery(final String name, final String[] choices, final int[] nEntries) {
 		return new IChooseImportQuery() {
-			public TypeInfo[] chooseImports(TypeInfo[][] openChoices, ISourceRange[] ranges) {
+			public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
 				assertTrue(name + "-query-nchoices1", choices.length == openChoices.length);
 				assertTrue(name + "-query-nchoices2", nEntries.length == openChoices.length);
 				if (nEntries != null) {
@@ -92,12 +92,12 @@ public class ImportOrganizeTest extends CoreTests {
 						assertTrue(name + "-query-cnt" + i, openChoices[i].length == nEntries[i]);
 					}
 				}
-				TypeInfo[] res= new TypeInfo[openChoices.length];
+				TypeNameMatch[] res= new TypeNameMatch[openChoices.length];
 				for (int i= 0; i < openChoices.length; i++) {
-					TypeInfo[] selection= openChoices[i];
+					TypeNameMatch[] selection= openChoices[i];
 					assertNotNull(name + "-query-setset" + i, selection);
 					assertTrue(name + "-query-setlen" + i, selection.length > 0);
-					TypeInfo found= null;
+					TypeNameMatch found= null;
 					for (int k= 0; k < selection.length; k++) {
 						if (selection[k].getFullyQualifiedName().equals(choices[i])) {
 							found= selection[k];

@@ -66,6 +66,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -75,7 +76,6 @@ import org.eclipse.jdt.internal.corext.util.History;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaUI;
@@ -93,7 +93,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
+import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
 
 /**
  * Organizes the imports of a compilation unit.
@@ -367,7 +367,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		monitor.beginTask("", cus.length); //$NON-NLS-1$
 		try {
 			IChooseImportQuery query= new IChooseImportQuery() {
-				public TypeInfo[] chooseImports(TypeInfo[][] openChoices, ISourceRange[] ranges) {
+				public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
 					throw new OrganizeImportError();
 				}
 			};
@@ -532,17 +532,17 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		
 	private IChooseImportQuery createChooseImportQuery() {
 		return new IChooseImportQuery() {
-			public TypeInfo[] chooseImports(TypeInfo[][] openChoices, ISourceRange[] ranges) {
+			public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
 				return doChooseImports(openChoices, ranges);
 			}
 		};
 	}
 	
-	private TypeInfo[] doChooseImports(TypeInfo[][] openChoices, final ISourceRange[] ranges) {
+	private TypeNameMatch[] doChooseImports(TypeNameMatch[][] openChoices, final ISourceRange[] ranges) {
 		// remember selection
 		ISelection sel= fEditor != null ? fEditor.getSelectionProvider().getSelection() : null;
-		TypeInfo[] result= null;
-		ILabelProvider labelProvider= new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_FULLYQUALIFIED);
+		TypeNameMatch[] result= null;
+		ILabelProvider labelProvider= new TypeNameMatchLabelProvider(TypeNameMatchLabelProvider.SHOW_FULLYQUALIFIED);
 		
 		MultiElementListSelectionDialog dialog= new MultiElementListSelectionDialog(getShell(), labelProvider) {
 			protected void handleSelectionChanged() {
@@ -558,11 +558,11 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		dialog.setComparator(ORGANIZE_IMPORT_COMPARATOR);
 		if (dialog.open() == Window.OK) {
 			Object[] res= dialog.getResult();			
-			result= new TypeInfo[res.length];
+			result= new TypeNameMatch[res.length];
 			for (int i= 0; i < res.length; i++) {
 				Object[] array= (Object[]) res[i];
 				if (array.length > 0) {
-					result[i]= (TypeInfo) array[0];
+					result[i]= (TypeNameMatch) array[0];
 					QualifiedTypeNameHistory.remember(result[i].getFullyQualifiedName());
 				}
 			}

@@ -44,12 +44,12 @@ import org.eclipse.ui.progress.IProgressService;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.History;
 import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
@@ -59,7 +59,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
+import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
 
 
 public class AddImportOnSelectionAction extends Action implements IUpdate {
@@ -197,7 +197,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation.IChooseImportQuery#chooseImport(org.eclipse.jdt.internal.corext.util.TypeInfo[], java.lang.String)
 		 */
-		public TypeInfo chooseImport(TypeInfo[] results, String containerName) {
+		public TypeNameMatch chooseImport(TypeNameMatch[] results, String containerName) {
 			int nResults= results.length;
 
 			if (nResults == 0) {
@@ -208,14 +208,14 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 
 			if (containerName.length() != 0) {
 				for (int i= 0; i < nResults; i++) {
-					TypeInfo curr= results[i];
+					TypeNameMatch curr= results[i];
 					if (containerName.equals(curr.getTypeContainerName())) {
 						return curr;
 					}
 				}
 			}
 			fIsShowing= true;
-			ElementListSelectionDialog dialog= new ElementListSelectionDialog(fShell, new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_FULLYQUALIFIED)) {
+			ElementListSelectionDialog dialog= new ElementListSelectionDialog(fShell, new TypeNameMatchLabelProvider(TypeNameMatchLabelProvider.SHOW_FULLYQUALIFIED)) {
 				protected FilteredList createFilteredList(Composite parent) {
 					FilteredList filteredList= super.createFilteredList(parent);
 					filteredList.setComparator(ADD_IMPORT_COMPARATOR);
@@ -227,7 +227,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			dialog.setElements(results);
 			if (dialog.open() == Window.OK) {
 				fIsShowing= false;
-				TypeInfo result= (TypeInfo) dialog.getFirstResult();
+				TypeNameMatch result= (TypeNameMatch) dialog.getFirstResult();
 				QualifiedTypeNameHistory.remember(result.getFullyQualifiedName());
 				return result;
 			}

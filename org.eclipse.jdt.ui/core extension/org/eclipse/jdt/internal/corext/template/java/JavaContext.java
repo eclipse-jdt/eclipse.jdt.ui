@@ -62,14 +62,14 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.LocalVariable;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
-import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
+import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -417,7 +417,7 @@ public class JavaContext extends CompilationUnitContext {
 			if (!qualified) {
 				IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { cu.getJavaProject() });
 				SimpleName nameNode= null;
-				TypeInfo[] matches= findAllTypes(type, searchScope, nameNode, null, cu);
+				TypeNameMatch[] matches= findAllTypes(type, searchScope, nameNode, null, cu);
 				if (matches.length != 1) // only add import if we have a single match
 					return;
 				type= matches[0].getFullyQualifiedName();
@@ -470,7 +470,7 @@ public class JavaContext extends CompilationUnitContext {
 	/*
 	 * Finds a type by the simple name. From AddImportsOperation
 	 */
-	private TypeInfo[] findAllTypes(String simpleTypeName, IJavaSearchScope searchScope, SimpleName nameNode, IProgressMonitor monitor, ICompilationUnit cu) throws JavaModelException {
+	private TypeNameMatch[] findAllTypes(String simpleTypeName, IJavaSearchScope searchScope, SimpleName nameNode, IProgressMonitor monitor, ICompilationUnit cu) throws JavaModelException {
 		boolean is50OrHigher= JavaModelUtil.is50OrHigher(cu.getJavaProject());
 		
 		int typeKinds= SimilarElementsRequestor.ALL_TYPES;
@@ -479,19 +479,19 @@ public class JavaContext extends CompilationUnitContext {
 		}
 		
 		ArrayList typeInfos= new ArrayList();
-		TypeInfoRequestor requestor= new TypeInfoRequestor(typeInfos);
-		new SearchEngine().searchAllTypeNames(null, simpleTypeName.toCharArray(), SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, getSearchForConstant(typeKinds), searchScope, requestor, IJavaSearchConstants.FORCE_IMMEDIATE_SEARCH, monitor);
+		TypeNameMatchCollector requestor= new TypeNameMatchCollector(typeInfos);
+		new SearchEngine().searchAllTypeNames(null, 0, simpleTypeName.toCharArray(), SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, getSearchForConstant(typeKinds), searchScope, requestor, IJavaSearchConstants.FORCE_IMMEDIATE_SEARCH, monitor);
 
 		ArrayList typeRefsFound= new ArrayList(typeInfos.size());
 		for (int i= 0, len= typeInfos.size(); i < len; i++) {
-			TypeInfo curr= (TypeInfo) typeInfos.get(i);
+			TypeNameMatch curr= (TypeNameMatch) typeInfos.get(i);
 			if (curr.getPackageName().length() > 0) { // do not suggest imports from the default package
 				if (isOfKind(curr, typeKinds, is50OrHigher) && isVisible(curr, cu)) {
 					typeRefsFound.add(curr);
 				}
 			}
 		}
-		return (TypeInfo[]) typeRefsFound.toArray(new TypeInfo[typeRefsFound.size()]);
+		return (TypeNameMatch[]) typeRefsFound.toArray(new TypeNameMatch[typeRefsFound.size()]);
 	}
 	
 	private int getSearchForConstant(int typeKinds) {
@@ -511,7 +511,7 @@ public class JavaContext extends CompilationUnitContext {
 		}
 	}
 	
-	private boolean isOfKind(TypeInfo curr, int typeKinds, boolean is50OrHigher) {
+	private boolean isOfKind(TypeNameMatch curr, int typeKinds, boolean is50OrHigher) {
 		int flags= curr.getModifiers();
 		if (Flags.isAnnotation(flags)) {
 			return is50OrHigher && ((typeKinds & SimilarElementsRequestor.ANNOTATIONS) != 0);
@@ -526,7 +526,7 @@ public class JavaContext extends CompilationUnitContext {
 	}
 
 	
-	private boolean isVisible(TypeInfo curr, ICompilationUnit cu) {
+	private boolean isVisible(TypeNameMatch curr, ICompilationUnit cu) {
 		int flags= curr.getModifiers();
 		if (Flags.isPrivate(flags)) {
 			return false;

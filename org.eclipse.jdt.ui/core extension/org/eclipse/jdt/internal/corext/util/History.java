@@ -270,7 +270,9 @@ public abstract class History {
 				Element type= (Element) node;
 				if (type.getNodeName().equalsIgnoreCase(fInfoNodeName)) {
 					Object object= createFromElement(type);
-					fHistory.put(getKey(object), object);
+					if (object != null) {
+						fHistory.put(getKey(object), object);
+					}
 				}
 			}
 		}
