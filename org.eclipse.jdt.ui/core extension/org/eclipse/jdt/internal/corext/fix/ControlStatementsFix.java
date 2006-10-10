@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 public class ControlStatementsFix extends AbstractFix {
 	
-	public interface IRemoveBlockOperation {
+	public interface IChangeBlockOperation {
 
 		public void setSubOperation(IFixRewriteOperation op);
 
@@ -84,7 +84,7 @@ public class ControlStatementsFix extends AbstractFix {
 		 */
 		public boolean visit(DoStatement node) {
 			if (fFindControlStatementsWithoutBlock) {
-				ASTNode doBody= node.getBody();
+				Statement doBody= node.getBody();
 				if (!(doBody instanceof Block)) {
 					fResult.add(new AddBlockOperation(DoStatement.BODY_PROPERTY, doBody, node));
 				}
@@ -125,7 +125,7 @@ public class ControlStatementsFix extends AbstractFix {
 						fResult.add(iterableConverter);
 						fUsedNames.put(node, identifierName);
 					} else if (fFindControlStatementsWithoutBlock) {
-						ASTNode forBody= node.getBody();
+						Statement forBody= node.getBody();
 						if (!(forBody instanceof Block)) {
 							fResult.add(new AddBlockOperation(ForStatement.BODY_PROPERTY, forBody, node));
 						}
@@ -136,7 +136,7 @@ public class ControlStatementsFix extends AbstractFix {
 					}
 				}
 			} else if (fFindControlStatementsWithoutBlock) {
-				ASTNode forBody= node.getBody();
+				Statement forBody= node.getBody();
 				if (!(forBody instanceof Block)) {
 					fResult.add(new AddBlockOperation(ForStatement.BODY_PROPERTY, forBody, node));
 				}
@@ -153,7 +153,7 @@ public class ControlStatementsFix extends AbstractFix {
 		 */
 		public boolean visit(EnhancedForStatement node) {
 			if (fFindControlStatementsWithoutBlock) {
-				ASTNode forBody= node.getBody();
+				Statement forBody= node.getBody();
 				if (!(forBody instanceof Block)) {
 					fResult.add(new AddBlockOperation(EnhancedForStatement.BODY_PROPERTY, forBody, node));
 				}
@@ -197,11 +197,11 @@ public class ControlStatementsFix extends AbstractFix {
 		 */
 		public boolean visit(IfStatement statement) {
 			if (fFindControlStatementsWithoutBlock) {
-				ASTNode then= statement.getThenStatement();
+				Statement then= statement.getThenStatement();
 				if (!(then instanceof Block)) {
 					fResult.add(new AddBlockOperation(IfStatement.THEN_STATEMENT_PROPERTY, then, statement));
 				}
-				ASTNode elseStatement= statement.getElseStatement();
+				Statement elseStatement= statement.getElseStatement();
 				if (elseStatement != null && !(elseStatement instanceof Block) && !(elseStatement instanceof IfStatement)) {
 					fResult.add(new AddBlockOperation(IfStatement.ELSE_STATEMENT_PROPERTY, elseStatement, statement));
 				}
@@ -223,7 +223,7 @@ public class ControlStatementsFix extends AbstractFix {
 		 */
 		public boolean visit(WhileStatement node) {
 			if (fFindControlStatementsWithoutBlock) {
-				ASTNode whileBody= node.getBody();
+				Statement whileBody= node.getBody();
 				if (!(whileBody instanceof Block)) {
 					fResult.add(new AddBlockOperation(WhileStatement.BODY_PROPERTY, whileBody, node));
 				}
@@ -271,16 +271,17 @@ public class ControlStatementsFix extends AbstractFix {
         }
 	}
 	
-	private static final class AddBlockOperation extends AbstractFixRewriteOperation {
+	private static final class AddBlockOperation extends AbstractFixRewriteOperation implements IChangeBlockOperation {
 
 		private final ChildPropertyDescriptor fBodyProperty;
-		private final ASTNode fBody;
-		private final Statement fStatement;
+		private final Statement fBody;
+		private final Statement fControlStatement;
+		private IFixRewriteOperation fOperation;
 
-		public AddBlockOperation(ChildPropertyDescriptor bodyProperty, ASTNode body, Statement statement) {
+		public AddBlockOperation(ChildPropertyDescriptor bodyProperty, Statement body, Statement controlStatement) {
 			fBodyProperty= bodyProperty;
 			fBody= body;
-			fStatement= statement;
+			fControlStatement= controlStatement;
 		}
 
 		/* (non-Javadoc)
@@ -300,14 +301,44 @@ public class ControlStatementsFix extends AbstractFix {
 			TextEditGroup group= createTextEditGroup(label);
 			textEditGroups.add(group);
 			
-			ASTNode childPlaceholder= rewrite.createMoveTarget(fBody);
+			ASTNode moveTarget;
+			if (fOperation == null) {
+				moveTarget= rewrite.createMoveTarget(fBody);
+			} else {
+				if (fOperation instanceof ConvertForLoopOperation) {
+					ConvertForLoopOperation convertForLoopOperation= ((ConvertForLoopOperation)fOperation);
+					convertForLoopOperation.makePassive();
+					fOperation.rewriteAST(cuRewrite, textEditGroups);
+					moveTarget= convertForLoopOperation.getEnhancedForStatement();
+				} else  {
+					ConvertIterableLoopOperation convertIterableLoopOperation= ((ConvertIterableLoopOperation)fOperation);
+					convertIterableLoopOperation.makePassive();
+					fOperation.rewriteAST(cuRewrite, textEditGroups);
+					moveTarget= convertIterableLoopOperation.getEnhancedForStatement();
+				}
+			}
+			
 			Block replacingBody= cuRewrite.getRoot().getAST().newBlock();
-			replacingBody.statements().add(childPlaceholder);
-			rewrite.set(fStatement, fBodyProperty, replacingBody, group);
+			replacingBody.statements().add(moveTarget);
+			rewrite.set(fControlStatement, fBodyProperty, replacingBody, group);
 		}
+
+		/**
+         * {@inheritDoc}
+         */
+        public Statement getSingleStatement() {
+	        return fBody;
+        }
+
+		/**
+         * {@inheritDoc}
+         */
+        public void setSubOperation(IFixRewriteOperation op) {
+			fOperation= op;
+        }
 	}
 	
-	static class RemoveBlockOperation extends AbstractFixRewriteOperation implements IRemoveBlockOperation {
+	static class RemoveBlockOperation extends AbstractFixRewriteOperation implements IChangeBlockOperation {
 
 		private final Statement fStatement;
 		private final ChildPropertyDescriptor fChild;
@@ -587,14 +618,14 @@ public class ControlStatementsFix extends AbstractFix {
 	}	
 
     private static void flattenOperations(List operations) {
-    	Hashtable removeBlockOps= new Hashtable();
+    	Hashtable changeBlockOps= new Hashtable();
     	for (Iterator iterator= operations.iterator(); iterator.hasNext();) {
 	        IFixRewriteOperation op= (IFixRewriteOperation)iterator.next();
-	        if (op instanceof IRemoveBlockOperation) {
-	        	IRemoveBlockOperation rOp= (IRemoveBlockOperation)op;
+	        if (op instanceof IChangeBlockOperation) {
+	        	IChangeBlockOperation rOp= (IChangeBlockOperation)op;
 	        	Statement singleStatement= rOp.getSingleStatement();
 	        	if (singleStatement instanceof ForStatement)
-					removeBlockOps.put(singleStatement, rOp);
+					changeBlockOps.put(singleStatement, rOp);
 	        }
         }
     	
@@ -603,17 +634,17 @@ public class ControlStatementsFix extends AbstractFix {
 	        if (op instanceof ConvertForLoopOperation) {
 	        	ConvertForLoopOperation convertOp= (ConvertForLoopOperation)op;
 	        	ForStatement forStatement= convertOp.getForLoop();
-	        	if (removeBlockOps.containsKey(forStatement)) {
-	        		IRemoveBlockOperation removeOp= (IRemoveBlockOperation)removeBlockOps.get(forStatement);
-	        		removeOp.setSubOperation(convertOp);
+	        	if (changeBlockOps.containsKey(forStatement)) {
+	        		IChangeBlockOperation changeOp= (IChangeBlockOperation)changeBlockOps.get(forStatement);
+	        		changeOp.setSubOperation(convertOp);
 	        		iterator.remove();
 	        	}
 	        } else if (op instanceof ConvertIterableLoopOperation) {
 	        	ConvertIterableLoopOperation convertOp= (ConvertIterableLoopOperation)op;
 	        	ForStatement forStatement= convertOp.getForLoop();
-	        	if (removeBlockOps.containsKey(forStatement)) {
-	        		IRemoveBlockOperation removeOp= (IRemoveBlockOperation)removeBlockOps.get(forStatement);
-	        		removeOp.setSubOperation(convertOp);
+	        	if (changeBlockOps.containsKey(forStatement)) {
+	        		IChangeBlockOperation changeOp= (IChangeBlockOperation)changeBlockOps.get(forStatement);
+	        		changeOp.setSubOperation(convertOp);
 	        		iterator.remove();
 	        	}
 	        }

@@ -62,13 +62,13 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix.IRemoveBlockOperation;
+import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix.IChangeBlockOperation;
 import org.eclipse.jdt.internal.corext.fix.LinkedFix.AbstractLinkedFixRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
-public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation implements IRemoveBlockOperation {
+public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation implements IChangeBlockOperation {
 
 	private ForStatement fOldForStatement;
 	private EnhancedForStatement fEnhancedForStatement;
