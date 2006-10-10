@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix.IChangeBlockOperation;
 import org.eclipse.jdt.internal.corext.fix.LinkedFix.AbstractLinkedFixRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
@@ -65,7 +66,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
  * 
  * @since 3.1
  */
-public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewriteOperation {
+public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewriteOperation implements IChangeBlockOperation {
 
 	/**
 	 * Returns the supertype of the given type with the qualified name.
@@ -132,14 +133,22 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 	
 	private boolean fPassive;
 
+	private final boolean fAddBlocks;
+
+	private final boolean fRemoveUnnecessaryBlocks;
+
+	private IFixRewriteOperation fOperation;
+
 	/**
 	 * Creates a new convert iterable loop proposal.
 	 * 
 	 * @param unit the compilation unit containing the for statement
 	 * @param statement the for statement to be converted
 	 */
-	public ConvertIterableLoopOperation(final CompilationUnit unit, final ForStatement statement, String identifierName) {
+	public ConvertIterableLoopOperation(final CompilationUnit unit, final ForStatement statement, String identifierName, boolean addBlocks, boolean removeUnnecessaryBlocks) {
 		fIdentifierName= identifierName;
+		fAddBlocks= addBlocks;
+		fRemoveUnnecessaryBlocks= removeUnnecessaryBlocks;
 		fCompilationUnit= (ICompilationUnit)unit.getJavaElement();
 		fStatement= statement;
 		fRoot= (CompilationUnit) statement.getRoot();
@@ -218,7 +227,18 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 		return fRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 	}
 
-	private ITrackedNodePosition rewriteAST(final AST ast, final ASTRewrite astRewrite, final ImportRewrite importRewrite, final TextEditGroup group) throws CoreException {
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List, java.util.List)
+	 */
+	public ITrackedNodePosition rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, List positionGroups) throws CoreException {
+		final TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
+		textEditGroups.add(group);
+		clearPositionGroups();
+		
+		final AST ast= cuRewrite.getAST();
+		final ASTRewrite astRewrite= cuRewrite.getASTRewrite();
+		final ImportRewrite importRewrite= cuRewrite.getImportRewrite();
+	
 		final ImportRemover remover= new ImportRemover(fCompilationUnit.getJavaProject(), (CompilationUnit) fStatement.getRoot());
 		
 		fEnhancedForLoop= ast.newEnhancedForStatement();
@@ -290,7 +310,36 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 					return false;
 				}
 			});
-			fEnhancedForLoop.setBody((Statement) astRewrite.createMoveTarget(body));
+			
+			if (fAddBlocks && !(body instanceof Block)) {
+				Statement theBody= (Statement)astRewrite.createMoveTarget(body);
+				Block newBody= ast.newBlock();
+				ListRewrite listRewrite= astRewrite.getListRewrite(newBody, Block.STATEMENTS_PROPERTY);
+				listRewrite.insertFirst(theBody, group);
+				fEnhancedForLoop.setBody(newBody);
+			} else if (getSingleStatement() != null) {
+				Statement moveTarget;
+				
+				if (fOperation == null) {
+					moveTarget= (Statement)astRewrite.createMoveTarget(getSingleStatement());
+				} else {
+					if (fOperation instanceof ConvertForLoopOperation) {
+						ConvertForLoopOperation convertForLoopOperation= ((ConvertForLoopOperation)fOperation);
+						convertForLoopOperation.makePassive();
+						fOperation.rewriteAST(cuRewrite, textEditGroups);
+						moveTarget= convertForLoopOperation.getEnhancedForStatement();
+					} else  {
+						ConvertIterableLoopOperation convertIterableLoopOperation= ((ConvertIterableLoopOperation)fOperation);
+						convertIterableLoopOperation.makePassive();
+						fOperation.rewriteAST(cuRewrite, textEditGroups);
+						moveTarget= convertIterableLoopOperation.getEnhancedForStatement();
+					}
+				}
+				
+				fEnhancedForLoop.setBody(moveTarget);
+			} else {
+				fEnhancedForLoop.setBody((Statement)astRewrite.createMoveTarget(body));
+			}
 		}
 		final SingleVariableDeclaration declaration= ast.newSingleVariableDeclaration();
 		final SimpleName simple= ast.newSimpleName(name);
@@ -307,6 +356,8 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 		
 		remover.registerRemovedNode(fStatement);
 		remover.applyRemoves(imports);
+		
+		positionGroups.addAll(getAllPositionGroups());
 		return null;
 	}
 
@@ -557,16 +608,27 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 	    return StatusInfo.OK_STATUS;
     }
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List, java.util.List)
-	 */
-	public ITrackedNodePosition rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, List positionGroups) throws CoreException {
-		TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
-		textEditGroups.add(group);
-		clearPositionGroups();
-		ITrackedNodePosition endPosition= rewriteAST(cuRewrite.getRoot().getAST(), cuRewrite.getASTRewrite(), cuRewrite.getImportRewrite(), group);
-		positionGroups.addAll(getAllPositionGroups());
-		return endPosition;
-	}
+	/**
+     * {@inheritDoc}
+     */
+    public Statement getSingleStatement() {
+    	if (!fRemoveUnnecessaryBlocks)
+    		return null;
+    	
+    	if (!(fStatement.getBody() instanceof Block))
+    		return null;
+    	
+    	List statements= ((Block)fStatement.getBody()).statements();
+		if (statements.size() != 1)
+    		return null;
+    	
+	    return (Statement)statements.get(0);
+    }
 
+	/**
+     * {@inheritDoc}
+     */
+    public void setSubOperation(IFixRewriteOperation op) {
+		fOperation= op;    	
+    }
 }

@@ -120,7 +120,7 @@ public class ControlStatementsFix extends AbstractFix {
 					fResult.add(forConverter);
 					fUsedNames.put(node, identifierName);
 				} else {
-					ConvertIterableLoopOperation iterableConverter= new ConvertIterableLoopOperation(fCompilationUnit, node, identifierName);
+					ConvertIterableLoopOperation iterableConverter= new ConvertIterableLoopOperation(fCompilationUnit, node, identifierName, fFindControlStatementsWithoutBlock, fRemoveUnnecessaryBlocks);
 					if (iterableConverter.isApplicable().isOK()) {
 						fResult.add(iterableConverter);
 						fUsedNames.put(node, identifierName);
@@ -512,7 +512,7 @@ public class ControlStatementsFix extends AbstractFix {
 	}
 	
 	public static IFix createConvertIterableLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
-		ConvertIterableLoopOperation loopConverter= new ConvertIterableLoopOperation(compilationUnit, loop, FOR_LOOP_ELEMENT_IDENTIFIER);
+		ConvertIterableLoopOperation loopConverter= new ConvertIterableLoopOperation(compilationUnit, loop, FOR_LOOP_ELEMENT_IDENTIFIER, false, false);
 		IStatus status= loopConverter.isApplicable();
 		if (status.getSeverity() == IStatus.ERROR)
 			return null;
