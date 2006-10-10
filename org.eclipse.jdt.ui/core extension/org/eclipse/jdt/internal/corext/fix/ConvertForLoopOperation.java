@@ -194,17 +194,15 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
      * {@inheritDoc}
      */
     public Statement getSingleStatement() {
-    	if (!fRemoveUnnecessaryBlocks)
-    		return null;
+    	if (fOldForStatement.getBody() instanceof Block) {
+    		List statements= ((Block)fOldForStatement.getBody()).statements();
+			if (statements.size() != 1)
+    			return null;
     	
-    	if (!(fOldForStatement.getBody() instanceof Block))
-    		return null;
-    	
-    	List statements= ((Block)fOldForStatement.getBody()).statements();
-		if (statements.size() != 1)
-    		return null;
-    	
-	    return (Statement)statements.get(0);
+	    	return (Statement)statements.get(0);
+    	} else {
+    		return fOldForStatement.getBody();
+    	}
     }
 
 	/**
@@ -500,31 +498,12 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 		AST ast= fOldForStatement.getAST();
 		fEnhancedForStatement= ast.newEnhancedForStatement();
 		if (fAddBlock && !(fOldForStatement.getBody() instanceof Block)) {
-			Statement theBody= (Statement)rewrite.createMoveTarget(fOldForStatement.getBody());
 			Block newBody= ast.newBlock();
 			ListRewrite listRewrite= rewrite.getListRewrite(newBody, Block.STATEMENTS_PROPERTY);
-			listRewrite.insertFirst(theBody, group);
+			listRewrite.insertFirst(createBodyStatement(cuRewrite, textEditGroups), group);
 			fEnhancedForStatement.setBody(newBody);
-		} else if (getSingleStatement() != null) {
-			Statement moveTarget;
-			
-			if (fOperation == null) {
-				moveTarget= (Statement)rewrite.createMoveTarget(getSingleStatement());
-			} else {
-				if (fOperation instanceof ConvertForLoopOperation) {
-					ConvertForLoopOperation convertForLoopOperation= ((ConvertForLoopOperation)fOperation);
-					convertForLoopOperation.makePassive();
-					fOperation.rewriteAST(cuRewrite, textEditGroups);
-					moveTarget= convertForLoopOperation.getEnhancedForStatement();
-				} else  {
-					ConvertIterableLoopOperation convertIterableLoopOperation= ((ConvertIterableLoopOperation)fOperation);
-					convertIterableLoopOperation.makePassive();
-					fOperation.rewriteAST(cuRewrite, textEditGroups);
-					moveTarget= convertIterableLoopOperation.getEnhancedForStatement();
-				}
-			}
-			
-			fEnhancedForStatement.setBody(moveTarget);
+		} else if (fRemoveUnnecessaryBlocks && fOldForStatement.getBody() instanceof Block && ((Block)fOldForStatement.getBody()).statements().size() == 1) {			
+			fEnhancedForStatement.setBody(createBodyStatement(cuRewrite, textEditGroups));
 		} else {
 			Statement theBody= (Statement)rewrite.createMoveTarget(fOldForStatement.getBody());
 			fEnhancedForStatement.setBody(theBody);
@@ -549,6 +528,22 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 		positionGroups.addAll(getAllPositionGroups());
 		return null;
 	}
+
+	private Statement createBodyStatement(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+    	if (fOperation instanceof ConvertForLoopOperation) {
+    		ConvertForLoopOperation convertForLoopOperation= ((ConvertForLoopOperation)fOperation);
+    		convertForLoopOperation.makePassive();
+    		fOperation.rewriteAST(cuRewrite, textEditGroups);
+    		return convertForLoopOperation.getEnhancedForStatement();
+    	} else if (fOperation instanceof ConvertIterableLoopOperation) {
+    		ConvertIterableLoopOperation convertIterableLoopOperation= ((ConvertIterableLoopOperation)fOperation);
+    		convertIterableLoopOperation.makePassive();
+    		fOperation.rewriteAST(cuRewrite, textEditGroups);
+    		return convertIterableLoopOperation.getEnhancedForStatement();
+    	} else {
+    		return (Statement)cuRewrite.getASTRewrite().createMoveTarget(getSingleStatement());
+    	}
+    }
 
 	private Expression createExpression(ASTRewrite rewrite, AST ast) {
 		if (fCollectionIsMethodCall) {
