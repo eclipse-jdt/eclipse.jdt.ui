@@ -691,39 +691,4 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		assertNull(fConvertLoopProposal);
 		assertCorrectLabels(proposals);
 	}
-	
-	public void testBug159337() throws Exception {
-		IPackageFragment pack= fSourceFolder.createPackageFragment("a", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Iterator;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    void bar(List<Number> x) {\n");
-		buf.append("        for (Iterator<Number> i = x.iterator(); i.hasNext();)\n");
-		buf.append("            System.out.println(i.next());\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
-
-		List proposals= fetchConvertingProposal(buf, unit);
-
-		assertNotNull(fConvertLoopProposal);
-
-		assertCorrectLabels(proposals);
-
-		String preview= getPreviewContent(fConvertLoopProposal);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    void bar(List<Number> x) {\n");
-		buf.append("        for (Number number : x)\n");
-		buf.append("            System.out.println(number);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
-		assertEqualString(preview, expected);
-	}
 }
