@@ -57,6 +57,7 @@ import org.eclipse.jdt.internal.corext.fix.LinkedFix.AbstractLinkedFixRewriteOpe
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
@@ -317,7 +318,7 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 				ListRewrite listRewrite= astRewrite.getListRewrite(newBody, Block.STATEMENTS_PROPERTY);
 				listRewrite.insertFirst(theBody, group);
 				fEnhancedForLoop.setBody(newBody);
-			} else if (getSingleStatement() != null) {
+			} else if (fRemoveUnnecessaryBlocks && body instanceof Block && ((Block)body).statements().size() == 1) {
 				Statement moveTarget;
 				
 				if (fOperation == null) {
@@ -372,6 +373,13 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 			resultStatus= checkExpressionCondition();
 			if (resultStatus.getSeverity() == IStatus.ERROR)
 				return resultStatus;
+			
+			List updateExpressions= ((List)fStatement.getStructuralProperty(ForStatement.UPDATERS_PROPERTY));
+			if (updateExpressions.size() == 1) {
+				resultStatus= new StatusInfo(IStatus.WARNING, Messages.format(FixMessages.ConvertIterableLoopOperation_RemoveUpdateExpression_Warning, ((Expression)updateExpressions.get(0)).toString()));
+			} else if (updateExpressions.size() > 1) {
+				resultStatus= new StatusInfo(IStatus.WARNING, FixMessages.ConvertIterableLoopOperation_RemoveUpdateExpressions_Warning);
+			}
 			
 			for (final Iterator outer= fStatement.initializers().iterator(); outer.hasNext();) {
 				final Expression initializer= (Expression) outer.next();
@@ -612,17 +620,15 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
      * {@inheritDoc}
      */
     public Statement getSingleStatement() {
-    	if (!fRemoveUnnecessaryBlocks)
-    		return null;
+    	if (fStatement.getBody() instanceof Block) {
+    		List statements= ((Block)fStatement.getBody()).statements();
+			if (statements.size() != 1)
+    			return null;
     	
-    	if (!(fStatement.getBody() instanceof Block))
-    		return null;
-    	
-    	List statements= ((Block)fStatement.getBody()).statements();
-		if (statements.size() != 1)
-    		return null;
-    	
-	    return (Statement)statements.get(0);
+	    	return (Statement)statements.get(0);
+    	} else {
+    		return fStatement.getBody();
+    	}
     }
 
 	/**

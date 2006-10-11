@@ -3607,6 +3607,61 @@ public class CleanUpTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
+	public void testJava50ForLoop160270() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo(List<Object> y) {\n");
+		buf.append("        for (Iterator<Object> it = y.iterator(); it.hasNext();) {\n");
+		buf.append("            System.out.println(it.next());\n");
+		buf.append("        }\n");
+		buf.append("        \n");
+		buf.append("        int j= 0;\n");
+		buf.append("        for (Iterator<Object> it = y.iterator(); it.hasNext(); j++) {\n");
+		buf.append("            System.out.println(it.next());\n");
+		buf.append("        }\n");
+		buf.append("        \n");
+		buf.append("        for (Iterator<Object> it = y.iterator(); it.hasNext(); bar()) {\n");
+		buf.append("            System.out.println(it.next());\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private void bar() {}\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo(List<Object> y) {\n");
+		buf.append("        for (Object object : y) {\n");
+		buf.append("            System.out.println(object);\n");
+		buf.append("        }\n");
+		buf.append("        \n");
+		buf.append("        int j= 0;\n");
+		buf.append("        for (Iterator<Object> it = y.iterator(); it.hasNext(); j++) {\n");
+		buf.append("            System.out.println(it.next());\n");
+		buf.append("        }\n");
+		buf.append("        \n");
+		buf.append("        for (Iterator<Object> it = y.iterator(); it.hasNext(); bar()) {\n");
+		buf.append("            System.out.println(it.next());\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private void bar() {}\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+	
 	public void testCombination01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
