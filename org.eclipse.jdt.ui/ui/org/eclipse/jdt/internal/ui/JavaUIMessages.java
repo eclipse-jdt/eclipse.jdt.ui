@@ -38,13 +38,6 @@ public final class JavaUIMessages extends NLS {
 	
 	public static String MultiElementListSelectionDialog_pageInfoMessage;
 	
-	public static String MultiTypeSelectionDialog_dialogMessage;
-	public static String MultiTypeSelectionDialog_dialogTitle;
-	public static String MultiTypeSelectionDialog_errorMessage;
-	public static String MultiTypeSelectionDialog_errorTitle;
-	public static String MultiTypeSelectionDialog_error2Message;
-	public static String MultiTypeSelectionDialog_error2Title;
-	
 	public static String TypeSelectionDialog_errorMessage;
 	public static String TypeSelectionDialog_dialogMessage;
 	public static String TypeSelectionDialog_errorTitle;
