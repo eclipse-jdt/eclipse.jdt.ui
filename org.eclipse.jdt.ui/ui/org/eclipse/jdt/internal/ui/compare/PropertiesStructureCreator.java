@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.compare;
 import java.io.IOException;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -23,14 +24,17 @@ import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.rules.FastPartitioner;
 
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.services.IDisposable;
 
 import org.eclipse.compare.CompareUI;
 import org.eclipse.compare.IEditableContent;
+import org.eclipse.compare.ISharedDocumentAdapter;
 import org.eclipse.compare.IStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.structuremergeviewer.DocumentRangeNode;
 import org.eclipse.compare.structuremergeviewer.IStructureComparator;
+import org.eclipse.compare.structuremergeviewer.SharedDocumentAdapterWrapper;
 import org.eclipse.compare.structuremergeviewer.StructureCreator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -45,7 +49,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 	 * The text range of a leg/value pair starts with an optional
 	 * comment and ends right after the value.
 	 */
-	static class PropertyNode extends DocumentRangeNode implements ITypedElement {
+	static class PropertyNode extends DocumentRangeNode implements ITypedElement, IAdaptable {
 		
 		private boolean fIsEditable;
 		private PropertyNode fParent;
@@ -112,6 +116,13 @@ public class PropertiesStructureCreator extends StructureCreator {
 			if (fParent != null)
 				fParent.nodeChanged(node);
 		}
+		
+		public Object getAdapter(Class adapter) {
+			if (adapter == ISharedDocumentAdapter.class && fParent != null)
+				return fParent.getAdapter(adapter);
+
+			return null;
+		}
 	}
 	
 	class RootPropertyNode extends PropertyNode implements IDisposable {
@@ -132,6 +143,25 @@ public class PropertiesStructureCreator extends StructureCreator {
 		
 		void nodeChanged(PropertyNode node) {
 			save(this, fInput);
+		}
+		
+		public Object getAdapter(Class adapter) {
+			if (adapter == ISharedDocumentAdapter.class) {
+				ISharedDocumentAdapter elementAdapter = SharedDocumentAdapterWrapper.getAdapter(fInput);
+				if (elementAdapter == null)
+					return null;
+
+				return new SharedDocumentAdapterWrapper(elementAdapter) {
+					public IEditorInput getDocumentKey(Object element) {
+						if (element instanceof PropertyNode)
+							return getWrappedAdapter().getDocumentKey(fInput);
+						
+						return super.getDocumentKey(element);
+					}
+				};
+			}
+			
+			return super.getAdapter(adapter);
 		}
 	}
 	
@@ -178,15 +208,6 @@ public class PropertiesStructureCreator extends StructureCreator {
 		}
 		
 		return root;
-	}
-	
-	public void save(IStructureComparator structure, Object input) {
-		if (input instanceof IEditableContent && structure instanceof PropertyNode) {
-			IDocument doc= ((PropertyNode)structure).getDocument();
-			IEditableContent bca= (IEditableContent) input;
-			String content= doc.get();
-			bca.setContent(content.getBytes());
-		}
 	}
 		
 	public IStructureComparator locate(Object path, Object source) {

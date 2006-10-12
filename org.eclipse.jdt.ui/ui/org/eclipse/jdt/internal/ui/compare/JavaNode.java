@@ -10,22 +10,27 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
+import org.eclipse.core.runtime.IAdaptable;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
+import org.eclipse.compare.ISharedDocumentAdapter;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.structuremergeviewer.DocumentRangeNode;
+
+import org.eclipse.jdt.core.IJavaElement;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Comparable Java elements are represented as JavaNodes.
  * Extends the DocumentRangeNode with method signature information.
  */
-class JavaNode extends DocumentRangeNode implements ITypedElement {
+class JavaNode extends DocumentRangeNode implements ITypedElement, IAdaptable {
 	
 	public static final int CU= 0;
 	public static final int PACKAGE= 1;
@@ -194,6 +199,13 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	void nodeChanged(JavaNode node) {
 		if (fParent != null)
 			fParent.nodeChanged(node);
+	}
+	
+	public Object getAdapter(Class adapter) {
+		if (adapter == ISharedDocumentAdapter.class && fParent != null)
+			return fParent.getAdapter(adapter);
+		
+		return null;
 	}
 }
 

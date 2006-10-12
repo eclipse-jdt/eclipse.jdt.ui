@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -20,18 +19,18 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.services.IDisposable;
 
 import org.eclipse.compare.CompareUI;
 import org.eclipse.compare.IEditableContent;
-import org.eclipse.compare.IEncodedStreamContentAccessor;
 import org.eclipse.compare.IResourceProvider;
+import org.eclipse.compare.ISharedDocumentAdapter;
 import org.eclipse.compare.IStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
@@ -41,6 +40,7 @@ import org.eclipse.compare.structuremergeviewer.ICompareInput;
 import org.eclipse.compare.structuremergeviewer.IDiffContainer;
 import org.eclipse.compare.structuremergeviewer.IDiffElement;
 import org.eclipse.compare.structuremergeviewer.IStructureComparator;
+import org.eclipse.compare.structuremergeviewer.SharedDocumentAdapterWrapper;
 import org.eclipse.compare.structuremergeviewer.StructureCreator;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -72,8 +72,8 @@ public class JavaStructureCreator extends StructureCreator {
 
 		private RootJavaNode(IDocument document, boolean editable, Object input, IDisposable disposable) {
 			super(document, editable);
-			fInput = input;
-			fDisposable = disposable;
+			fInput= input;
+			fDisposable= disposable;
 		}
 
 		void nodeChanged(JavaNode node) {
@@ -83,6 +83,25 @@ public class JavaStructureCreator extends StructureCreator {
 		public void dispose() {
 			if (fDisposable != null)
 				fDisposable.dispose();
+		}
+
+		public Object getAdapter(Class adapter) {
+			if (adapter == ISharedDocumentAdapter.class) {
+				ISharedDocumentAdapter elementAdapter= SharedDocumentAdapterWrapper.getAdapter(fInput);
+				if (elementAdapter == null)
+					return null;
+				
+				return new SharedDocumentAdapterWrapper(elementAdapter) {
+					public IEditorInput getDocumentKey(Object element) {
+						if (element instanceof JavaNode)
+							return getWrappedAdapter().getDocumentKey(fInput);
+
+						return super.getDocumentKey(element);
+					}
+				};
+			}
+			
+			return super.getAdapter(adapter);
 		}
 	}
 
@@ -239,31 +258,6 @@ public class JavaStructureCreator extends StructureCreator {
 			return root;
 		}
 		return null;
-	}
-	
-	public void save(IStructureComparator node, Object input) {
-		if (node instanceof JavaNode && input instanceof IEditableContent) {
-			IDocument document= ((JavaNode)node).getDocument();
-			IEditableContent bca= (IEditableContent) input;
-			String contents= document.get();
-			String encoding= null;
-			if (input instanceof IEncodedStreamContentAccessor) {
-				try {
-					encoding= ((IEncodedStreamContentAccessor)input).getCharset();
-				} catch (CoreException e1) {
-					// ignore
-				}
-			}
-			if (encoding == null)
-				encoding= ResourcesPlugin.getEncoding();
-			byte[] bytes;				
-			try {
-				bytes= contents.getBytes(encoding);
-			} catch (UnsupportedEncodingException e) {
-				bytes= contents.getBytes();	
-			}
-			bca.setContent(bytes);
-		}
 	}
 	
 	/**
