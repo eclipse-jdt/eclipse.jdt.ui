@@ -112,24 +112,23 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 		
 		public IPackageFragmentRoot getPackageFragmentRoot() {
-			try {
-				IType type= getType();
-				if (type != null) {
-					return JavaModelUtil.getPackageFragmentRoot(type);
-				}
-			} catch (JavaModelException e) {
-				
+			IType type= getType();
+			if (type != null) {
+				return JavaModelUtil.getPackageFragmentRoot(type);
 			}
 			return null;
 		}
 		
-		public IType getType() throws JavaModelException {
-			return fProject.findType(getFullyQualifiedName());
+		public IType getType() {
+			try {
+				return fProject.findType(getFullyQualifiedName());
+			} catch (JavaModelException e) {
+				return null;
+			}
 		}		
 	}
-	
-	
 
+	
 	public static interface IChooseImportQuery {
 		/**
 		 * Selects imports from a list of choices.

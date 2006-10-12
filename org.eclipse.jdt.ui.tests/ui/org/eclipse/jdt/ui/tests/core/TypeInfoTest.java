@@ -26,7 +26,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -139,7 +138,7 @@ public class TypeInfoTest extends TestCase {
 
 	}
 
-	private void assertResolve(TypeNameMatch ref) throws JavaModelException {
+	private void assertResolve(TypeNameMatch ref) {
 		IType resolvedType= ref.getType();
 		if (resolvedType == null) {
 			assertTrue("Could not be resolved: " + ref.toString(), false);

@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.util;
 
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -248,11 +247,7 @@ public class TypeInfoFilter {
 	private boolean matchesScope(TypeNameMatch type) {
 		if (fIsWorkspaceScope)
 			return true;
-		try {
-			return fSearchScope.encloses(type.getType());
-		} catch (JavaModelException e) {
-			return false;
-		}
+		return fSearchScope.encloses(type.getType());
 	}
 	
 	private boolean matchesModifiers(TypeNameMatch type) {

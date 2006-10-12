@@ -29,7 +29,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -175,29 +174,24 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		if (selection.length == 0) {
 	    	status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, "",null); //$NON-NLS-1$
 	    } else {
-		    try {
-				if (fValidator != null) {
-					List jElements= new ArrayList();
-					for (int i= 0; i < selection.length; i++) {
-						IType type= selection[i].getType();
-						if (type != null) {
-							jElements.add(type);
-						} else {
-				    		status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
-				    			Messages.format(JavaUIMessages.TypeSelectionDialog_error_type_doesnot_exist, selection[i].getFullyQualifiedName()),
-				    			null);
-				    		break;
-						}
+		    if (fValidator != null) {
+				List jElements= new ArrayList();
+				for (int i= 0; i < selection.length; i++) {
+					IType type= selection[i].getType();
+					if (type != null) {
+						jElements.add(type);
+					} else {
+			    		status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
+			    			Messages.format(JavaUIMessages.TypeSelectionDialog_error_type_doesnot_exist, selection[i].getFullyQualifiedName()),
+			    			null);
+			    		break;
 					}
-					if (status == null) {
-						status= fValidator.validate(jElements.toArray());
-					}
-				} else {
-					status= new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "",null); //$NON-NLS-1$
 				}
-			} catch (JavaModelException e) {
-	    		status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, 
-	    			e.getStatus().getMessage(), null);
+				if (status == null) {
+					status= fValidator.validate(jElements.toArray());
+				}
+			} else {
+				status= new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "",null); //$NON-NLS-1$
 			}
 	    }
     	updateStatus(status);
@@ -264,23 +258,17 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		OpenTypeHistory history= OpenTypeHistory.getInstance();
 		List result= new ArrayList(selected.length);
 		for (int i= 0; i < selected.length; i++) {
-			try {
-				TypeNameMatch typeInfo= selected[i];
-				IType type= typeInfo.getType();
-				if (type == null) {
-					String title= JavaUIMessages.TypeSelectionDialog_errorTitle; 
-					String message= Messages.format(JavaUIMessages.TypeSelectionDialog_dialogMessage, typeInfo.getFullyQualifiedName()); 
-					MessageDialog.openError(getShell(), title, message);
-					history.remove(typeInfo);
-					setResult(null);
-				} else {
-					history.accessed(typeInfo);
-					result.add(type);
-				}
-			} catch (JavaModelException e) {
-				String title= JavaUIMessages.MultiTypeSelectionDialog_errorTitle; 
-				String message= JavaUIMessages.MultiTypeSelectionDialog_errorMessage; 
-				ErrorDialog.openError(getShell(), title, message, e.getStatus());
+			TypeNameMatch typeInfo= selected[i];
+			IType type= typeInfo.getType();
+			if (type == null) {
+				String title= JavaUIMessages.TypeSelectionDialog_errorTitle; 
+				String message= Messages.format(JavaUIMessages.TypeSelectionDialog_dialogMessage, typeInfo.getFullyQualifiedName()); 
+				MessageDialog.openError(getShell(), title, message);
+				history.remove(typeInfo);
+				setResult(null);
+			} else {
+				history.accessed(typeInfo);
+				result.add(type);
 			}
 		}
 		setResult(result);

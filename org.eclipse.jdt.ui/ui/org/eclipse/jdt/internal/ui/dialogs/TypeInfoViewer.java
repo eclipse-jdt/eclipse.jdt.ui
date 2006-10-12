@@ -1594,10 +1594,6 @@ public class TypeInfoViewer {
 	}
 	
 	private static String getMatchId(TypeNameMatch match) {
-		try {
-			return match.getType().getHandleIdentifier();
-		} catch (JavaModelException e) {
-			return null;
-		}
+		return match.getType().getHandleIdentifier();
 	}
 }

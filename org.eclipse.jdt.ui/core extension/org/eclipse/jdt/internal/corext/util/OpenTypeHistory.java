@@ -356,19 +356,15 @@ public class OpenTypeHistory extends History {
 	
 	
 	public boolean isContainerDirty(TypeNameMatch match) {
-		try {
-			ICompilationUnit cu= match.getType().getCompilationUnit();
-			if (cu == null) {
-				return false;
-			}
-			IResource resource= cu.getResource(); 
-			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
-			ITextFileBuffer textFileBuffer= manager.getTextFileBuffer(resource.getFullPath());
-			if (textFileBuffer != null) {
-				return textFileBuffer.isDirty();
-			}
-		} catch (JavaModelException e) {
-			// ignore
+		ICompilationUnit cu= match.getType().getCompilationUnit();
+		if (cu == null) {
+			return false;
+		}
+		IResource resource= cu.getResource(); 
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		ITextFileBuffer textFileBuffer= manager.getTextFileBuffer(resource.getFullPath());
+		if (textFileBuffer != null) {
+			return textFileBuffer.isDirty();
 		}
 		return false;
 	}
@@ -412,18 +408,14 @@ public class OpenTypeHistory extends History {
 
 	protected void setAttributes(Object object, Element typeElement) {
 		TypeNameMatch type= (TypeNameMatch) object;
-		try {
-			String handleId= type.getType().getHandleIdentifier();
-			typeElement.setAttribute(NODE_HANDLE, handleId);
-			typeElement.setAttribute(NODE_MODIFIERS, Integer.toString(type.getModifiers()));
-			Long timestamp= (Long) fTimestampMapping.get(type);
-			if (timestamp == null) {
-				typeElement.setAttribute(NODE_TIMESTAMP, Long.toString(IResource.NULL_STAMP));			
-			} else {
-				typeElement.setAttribute(NODE_TIMESTAMP, timestamp.toString()); 
-			}
-		} catch (JavaModelException e) {
-			typeElement.setAttribute(NODE_HANDLE, null); // invalid history entry
+		String handleId= type.getType().getHandleIdentifier();
+		typeElement.setAttribute(NODE_HANDLE, handleId);
+		typeElement.setAttribute(NODE_MODIFIERS, Integer.toString(type.getModifiers()));
+		Long timestamp= (Long) fTimestampMapping.get(type);
+		if (timestamp == null) {
+			typeElement.setAttribute(NODE_TIMESTAMP, Long.toString(IResource.NULL_STAMP));			
+		} else {
+			typeElement.setAttribute(NODE_TIMESTAMP, timestamp.toString()); 
 		}
 	}
 
