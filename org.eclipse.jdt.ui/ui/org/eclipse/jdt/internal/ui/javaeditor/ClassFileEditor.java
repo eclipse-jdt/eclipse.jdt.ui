@@ -466,6 +466,11 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 * @since 3.3
 	 */
 	private IAction fSourceCopyAction;
+	/**
+	 * The Select All action used when there's attached source.
+	 * @since 3.3
+	 */
+	private IAction fSelectAllAction;
 
 	/**
 	 * StyledText widget used to show the disassembled code.
@@ -498,6 +503,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		setAction(ITextEditorActionConstants.REVERT_TO_SAVED, null);
 
 		fSourceCopyAction= getAction(ITextEditorActionConstants.COPY);
+		fSelectAllAction= getAction(ITextEditorActionConstants.SELECT_ALL);
 
 		final ActionGroup group= new RefactorActionGroup(this, ITextEditorActionConstants.GROUP_EDIT, true);
 		fActionGroups.addGroup(group);
@@ -716,8 +722,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			fStackLayout.topControl= fSourceAttachmentForm;
 			fParent.layout();
 
-			// Copy action for the no attached source case
 			if (fNoSourceTextWidget != null) {
+				// Copy action for the no attached source case
 				final IAction copyAction= new Action() {
 					public void run() {
 						fNoSourceTextWidget.copy();
@@ -729,12 +735,21 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				fNoSourceTextWidget.addSelectionListener(new SelectionListener() {
 					public void widgetSelected(SelectionEvent e) {
 						copyAction.setEnabled(fNoSourceTextWidget.getSelectionText().length() > 0);
-	
 					}
 					public void widgetDefaultSelected(SelectionEvent e) {
-	
 					}
 				});
+				
+				// Select All action for the no attached source case
+				final IAction selectAllAction= new Action() {
+					public void run() {
+						fNoSourceTextWidget.selectAll();
+						copyAction.setEnabled(true);
+					}
+				};
+				selectAllAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.SELECT_ALL);
+				setAction(ITextEditorActionConstants.SELECT_ALL, selectAllAction);
+				copyAction.setEnabled(fNoSourceTextWidget.getSelectionText().length() > 0);
 			}
 
 		} else { // show source viewer
@@ -748,6 +763,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			}
 
 			setAction(ITextEditorActionConstants.COPY, fSourceCopyAction);
+			setAction(ITextEditorActionConstants.SELECT_ALL, fSelectAllAction);
 
 		}
 		
@@ -755,7 +771,19 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		boolean isUsingSourceCopyAction=  fSourceCopyAction == currentCopyAction;
 		if (wasUsingSourceCopyAction != isUsingSourceCopyAction) {
 			IActionBars actionBars= getEditorSite().getActionBars();
+			
+			if (isUsingSourceCopyAction) {
+				createNavigationActions();
+			} else {
+				for (int i= 0; i < ACTION_MAP.length; i++) {
+					IdMapEntry entry= ACTION_MAP[i];
+					actionBars.setGlobalActionHandler(entry.getActionId(), null);
+					setAction(entry.getActionId(), null);
+				}
+			}
+			
 			actionBars.setGlobalActionHandler(ITextEditorActionConstants.COPY, currentCopyAction);
+			actionBars.setGlobalActionHandler(ITextEditorActionConstants.SELECT_ALL, getAction(ITextEditorActionConstants.SELECT_ALL));
 			actionBars.updateActionBars();
 		}
 		
