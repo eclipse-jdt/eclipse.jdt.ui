@@ -195,7 +195,7 @@ public class JavaPartitionerTest extends TestCase {
 	public void testRemovePartition1() {
 		try {
 			
-			fDocument.replace(13, 16, null);
+			fDocument.replace(13, 16, "");
 			//	"xxx\n/*xxx*/\nx/**/\nxxx\n/***/\nxxx");
 			
 			assertTrue(fDocumentPartitioningChanged);
@@ -225,7 +225,7 @@ public class JavaPartitionerTest extends TestCase {
 		
 		try {
 			
-			fDocument.replace(5, 2, null);
+			fDocument.replace(5, 2, "");
 			//	"xxx\nxxx\nxxx\n/**xxx*/\nxxx\n/**/\nxxx\n/***/\nxxx"
 			
 			assertTrue(fDocumentPartitioningChanged);
@@ -251,7 +251,7 @@ public class JavaPartitionerTest extends TestCase {
 	public void testJoinPartitions1() {
 		try {
 			
-			fDocument.replace(31, 1, null);
+			fDocument.replace(31, 1, "");
 			//	"xxx\n/*xxx*/\nxxx\n/**xxx*/\nxxx\n/*/\nxxx\n/***/\nxxx"
 			
 			assertTrue(fDocumentPartitioningChanged);
@@ -276,7 +276,7 @@ public class JavaPartitionerTest extends TestCase {
 	public void testJoinPartitions2() {
 		try {
 			
-			fDocument.replace(32, 1, null);
+			fDocument.replace(32, 1, "");
 			//	"xxx\n/*xxx*/\nxxx\n/**xxx*/\nxxx\n/**\nxxx\n/***/\nxxx"
 			
 			assertTrue(fDocumentPartitioningChanged);
@@ -301,7 +301,7 @@ public class JavaPartitionerTest extends TestCase {
 	public void testJoinPartition3() {
 		try {
 			
-			fDocument.replace(9, 2, null);
+			fDocument.replace(9, 2, "");
 			//	"xxx\n/*xxx\nxxx\n/**xxx*/\nxxx\n/**/\nxxx\n/***/\nxxx"
 			
 			assertTrue(fDocumentPartitioningChanged);
@@ -497,7 +497,7 @@ public class JavaPartitionerTest extends TestCase {
 	public void testOpenPartition1() {
 		try {
 			
-			fDocument.replace(42, 1, null);
+			fDocument.replace(42, 1, "");
 			//	"xxx\n/*xxx*/\nxxx\n/**xxx*/\nxxx\n/**/\nxxx\n/***\nxxx"
 			
 			assertTrue(fDocumentPartitioningChanged);
@@ -554,7 +554,7 @@ public class JavaPartitionerTest extends TestCase {
 	public void testChangeContentTypeOfPartition() {
 		try {
 			
-			fDocument.replace(39, 1, null);
+			fDocument.replace(39, 1, "");
 			//	"xxx\n/*xxx*/\nxxx\n/**xxx*/\nxxx\n/**/\nxxx\n/**/\nxxx"
 			
 			assertTrue(fDocumentPartitioningChanged);

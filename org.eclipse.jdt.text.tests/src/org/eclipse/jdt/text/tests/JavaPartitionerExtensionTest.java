@@ -174,7 +174,7 @@ public class JavaPartitionerExtensionTest extends TestCase {
 		try {
 			fDocument.set("class x {\n/***/\n}");
 			check(10, 5);
-			fDocument.replace(10, 5,  null);
+			fDocument.replace(10, 5,  "");
 			check(10, 0);
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -185,7 +185,7 @@ public class JavaPartitionerExtensionTest extends TestCase {
 		try {
 			fDocument.set("class x {\n/***/\n}");
 			check(10, 5);
-			fDocument.replace(10, 7,  null);
+			fDocument.replace(10, 7,  "");
 			check(10, 0);
 		} catch (BadLocationException x) {
 			assertTrue(false);

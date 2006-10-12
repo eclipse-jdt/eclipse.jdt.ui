@@ -248,7 +248,7 @@ public class PropertiesFilePartitionerTest extends TestCase {
 	public void testRemoveCommentPartition() {
 		try {
 			
-			fDocument.replace(0, 11, null);
+			fDocument.replace(0, 11, "");
 			
 			assertTrue(fDocumentPartitioningChanged);
 			
@@ -276,7 +276,7 @@ public class PropertiesFilePartitionerTest extends TestCase {
 		
 		try {
 			
-			fDocument.replace(34, 6, null);
+			fDocument.replace(34, 6, "");
 			
 			assertTrue(fDocumentPartitioningChanged);
 			
