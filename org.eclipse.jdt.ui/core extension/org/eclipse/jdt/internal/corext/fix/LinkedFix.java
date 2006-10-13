@@ -41,17 +41,17 @@ public class LinkedFix extends AbstractFix {
 	
 	private final IFixRewriteOperation[] fFixRewrites;
 	private final CompilationUnit fCompilationUnit;
-	private final LinkedProposalModel fLinkedProposalPositions;
+	private final LinkedProposalModel fLinkedProposalModel;
 
 	protected LinkedFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewrites) {
 		super(name, compilationUnit, null);
 		fCompilationUnit= compilationUnit;
 		fFixRewrites= fixRewrites;
-		fLinkedProposalPositions= new LinkedProposalModel();
+		fLinkedProposalModel= new LinkedProposalModel();
 	}
 		
 	public LinkedProposalModel getLinkedPositions() {
-		return fLinkedProposalPositions;
+		return fLinkedProposalModel;
 	}
 
 	/* (non-Javadoc)
@@ -65,13 +65,13 @@ public class LinkedFix extends AbstractFix {
 	
 		List/*<TextEditGroup>*/ groups= new ArrayList();
 
-		fLinkedProposalPositions.clear();
+		fLinkedProposalModel.clear();
 		
 		for (int i= 0; i < fFixRewrites.length; i++) {
 			IFixRewriteOperation operation= fFixRewrites[i];
 			if (operation instanceof ILinkedFixRewriteOperation) {
 				ILinkedFixRewriteOperation linkedOperation= (ILinkedFixRewriteOperation)operation;
-				linkedOperation.rewriteAST(cuRewrite, groups, fLinkedProposalPositions);
+				linkedOperation.rewriteAST(cuRewrite, groups, fLinkedProposalModel);
 			} else {
 				operation.rewriteAST(cuRewrite, groups);
 			}

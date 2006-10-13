@@ -92,7 +92,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 
 	private ICompilationUnit fCompilationUnit;
-	private LinkedProposalModel fLinkedProposalPositions;
+	private LinkedProposalModel fLinkedProposalModel;
 
 
 	/**
@@ -113,7 +113,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			throw new IllegalArgumentException("Compilation unit must not be null"); //$NON-NLS-1$
 		}
 		fCompilationUnit= cu;
-		fLinkedProposalPositions= null;
+		fLinkedProposalModel= null;
 	}
 	
 	/**
@@ -148,15 +148,15 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		}
 	}
 	
-	protected LinkedProposalModel getLinkedProposalPositions() {
-		if (fLinkedProposalPositions == null) {
-			fLinkedProposalPositions= new LinkedProposalModel();
+	protected LinkedProposalModel getLinkedProposalModel() {
+		if (fLinkedProposalModel == null) {
+			fLinkedProposalModel= new LinkedProposalModel();
 		}
-		return fLinkedProposalPositions;
+		return fLinkedProposalModel;
 	}
 	
-	protected void setLinkedProposalPostions(LinkedProposalModel positions) {
-		fLinkedProposalPositions= positions;
+	protected void setLinkedProposalModel(LinkedProposalModel model) {
+		fLinkedProposalModel= model;
 	}
 
 	/*
@@ -306,13 +306,13 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 				return;
 			}
 
-			if (fLinkedProposalPositions != null) {
-				if (fLinkedProposalPositions.hasLinkedPositions() && part instanceof JavaEditor) {
+			if (fLinkedProposalModel != null) {
+				if (fLinkedProposalModel.hasLinkedPositions() && part instanceof JavaEditor) {
 					// enter linked mode
 					ITextViewer viewer= ((JavaEditor) part).getViewer();
 					enterLinkedMode(viewer, part);
 				} else if (part instanceof ITextEditor) {
-					LinkedProposalPositionGroup.PositionInformation endPosition= fLinkedProposalPositions.getEndPosition();
+					LinkedProposalPositionGroup.PositionInformation endPosition= fLinkedProposalModel.getEndPosition();
 					if (endPosition != null) {
 						// select a result
 						int pos= endPosition.getOffset() + endPosition.getLength();
@@ -332,7 +332,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		LinkedModeModel model= new LinkedModeModel();
 		boolean added= false;
 		
-		Iterator iterator= fLinkedProposalPositions.getPositionGroupIterator();
+		Iterator iterator= fLinkedProposalModel.getPositionGroupIterator();
 		while (iterator.hasNext()) {
 			LinkedProposalPositionGroup curr= (LinkedProposalPositionGroup) iterator.next();
 			
@@ -374,7 +374,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 
 		if (added) { // only set up UI if there are any positions set
 			LinkedModeUI ui= new EditorLinkedModeUI(model, viewer);
-			LinkedProposalPositionGroup.PositionInformation endPosition= fLinkedProposalPositions.getEndPosition();
+			LinkedProposalPositionGroup.PositionInformation endPosition= fLinkedProposalModel.getEndPosition();
 			if (endPosition != null && endPosition.getOffset() != -1) {
 				ui.setExitPosition(viewer, endPosition.getOffset() + endPosition.getLength(), 0, Integer.MAX_VALUE);
 			} else {

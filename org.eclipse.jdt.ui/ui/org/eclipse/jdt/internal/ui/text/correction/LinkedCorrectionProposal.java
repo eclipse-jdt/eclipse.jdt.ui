@@ -70,7 +70,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	 * are linked.
 	 */
 	public void addLinkedPosition(ITrackedNodePosition position, boolean isFirst, String groupID) {
-		getLinkedProposalPositions().getPositionGroup(groupID, true).addPosition(position, isFirst);
+		getLinkedProposalModel().getPositionGroup(groupID, true).addPosition(position, isFirst);
 	}
 
 	/**
@@ -78,7 +78,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	 * @param position The position that describes the end position of the linked mode.
 	 */
 	public void setEndPosition(ITrackedNodePosition position) {
-		getLinkedProposalPositions().setEndPosition(position);
+		getLinkedProposalModel().setEndPosition(position);
 	}
 
 	/**
@@ -101,7 +101,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	 * no image is desired.
 	 */
 	public void addLinkedPositionProposal(String groupID, String displayString, String proposal, Image image) {
-		getLinkedProposalPositions().getPositionGroup(groupID, true).addProposal(new JavaLinkedModeProposal(displayString, image, proposal));
+		getLinkedProposalModel().getPositionGroup(groupID, true).addProposal(new JavaLinkedModeProposal(displayString, image, proposal));
 	}
 
 	/**
@@ -110,7 +110,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	 * @param type The binding to use as type name proposal.
 	 */
 	public void addLinkedPositionProposal(String groupID, ITypeBinding type) {
-		getLinkedProposalPositions().getPositionGroup(groupID, true).addProposal(new JavaLinkedModeProposal(getCompilationUnit(), type));
+		getLinkedProposalModel().getPositionGroup(groupID, true).addProposal(new JavaLinkedModeProposal(getCompilationUnit(), type));
 
 	}
 	

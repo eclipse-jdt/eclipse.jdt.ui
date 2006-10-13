@@ -132,7 +132,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 			((TextFileChange)createChange).setSaveMode(TextFileChange.LEAVE_DIRTY);
 		
 		if (fix instanceof LinkedFix) {
-			setLinkedProposalPostions(((LinkedFix) fix).getLinkedPositions());
+			setLinkedProposalModel(((LinkedFix) fix).getLinkedPositions());
 		}
 		
 		if (createChange == null)

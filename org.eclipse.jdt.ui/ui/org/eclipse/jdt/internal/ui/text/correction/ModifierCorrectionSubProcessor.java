@@ -697,7 +697,7 @@ public class ModifierCorrectionSubProcessor {
 		if (modifier != null) {
 			int selected= ((Modifier) modifier).getKeyword().toFlagValue();
 			
-			LinkedProposalPositionGroup positionGroup= proposal.getLinkedProposalPositions().getPositionGroup(KEY_MODIFIER, true);
+			LinkedProposalPositionGroup positionGroup= proposal.getLinkedProposalModel().getPositionGroup(KEY_MODIFIER, true);
 			positionGroup.addPosition(rewrite.track(modifier), false);
 			positionGroup.addProposal(new ModifierLinkedModeProposal(selected, 10));
 			
