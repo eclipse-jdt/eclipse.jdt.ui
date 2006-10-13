@@ -14,10 +14,8 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
-
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 public interface ILinkedFixRewriteOperation extends IFixRewriteOperation {
-	public ITrackedNodePosition rewriteAST(CompilationUnitRewrite cuRewrite, List/*<TextEditGroup>*/ textEditGroups, List/*<PositionGroup>*/ positionGroups) throws CoreException;
+	public void rewriteAST(CompilationUnitRewrite cuRewrite, List/*<TextEditGroup>*/ textEditGroups, LinkedProposalModel linkedProposalPositions) throws CoreException;
 }

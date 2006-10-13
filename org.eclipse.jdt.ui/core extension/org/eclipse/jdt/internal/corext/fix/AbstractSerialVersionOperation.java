@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.text.edits.TextEditGroup;
@@ -31,7 +30,6 @@ import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -82,21 +80,14 @@ public abstract class AbstractSerialVersionOperation extends AbstractLinkedFixRe
 	 *
 	 * @param rewrite the ast rewrite to operate on
 	 * @param fragment the fragment to add linked positions to
-	 * @param positionGroups the list of {@link PositionGroup}s
+	 * @param positionGroups the list of {@link LinkedProposalPositionGroup}s
 	 */
-	protected abstract void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment, final List positionGroups);
+	protected abstract void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment, final LinkedProposalModel positionGroups);
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
-		rewriteAST(cuRewrite, textEditGroups, new ArrayList());
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public ITrackedNodePosition rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, List positionGroups) throws CoreException {
+	public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, LinkedProposalModel positionGroups) throws CoreException {
 		final ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		VariableDeclarationFragment fragment= null;
 		for (int i= 0; i < fNodes.length; i++) {
@@ -145,9 +136,9 @@ public abstract class AbstractSerialVersionOperation extends AbstractLinkedFixRe
 			}
 		}
 		if (fragment == null)
-			return null;
-			
-		return rewrite.track(fragment);
+			return;
+		
+		positionGroups.setEndPosition(rewrite.track(fragment));
 	}
 	
 }

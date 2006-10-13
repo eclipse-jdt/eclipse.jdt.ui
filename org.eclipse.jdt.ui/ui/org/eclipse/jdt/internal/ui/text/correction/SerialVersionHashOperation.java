@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.fix.AbstractSerialVersionOperation;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
@@ -195,7 +196,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void addLinkedPositions(ASTRewrite rewrite, VariableDeclarationFragment fragment, List positionGroups) {
+	protected void addLinkedPositions(ASTRewrite rewrite, VariableDeclarationFragment fragment, LinkedProposalModel positionGroups) {
 		//Do nothing
 	}
 

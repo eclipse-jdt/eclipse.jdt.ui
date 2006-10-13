@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
-import java.util.List;
-
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -59,16 +57,16 @@ public final class SerialVersionDefaultOperation extends AbstractSerialVersionOp
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment, final List positionGroups) {
+	protected void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment, final LinkedProposalModel positionGroups) {
 
 		Assert.isNotNull(rewrite);
 		Assert.isNotNull(fragment);
 
 		final Expression initializer= fragment.getInitializer();
 		if (initializer != null) {
-			PositionGroup group= new PositionGroup(GROUP_INITIALIZER);
-			group.addFirstPosition(rewrite.track(initializer));
-			positionGroups.add(group);
+			LinkedProposalPositionGroup group= new LinkedProposalPositionGroup(GROUP_INITIALIZER);
+			group.addPosition(rewrite.track(initializer), true);
+			positionGroups.addPositionGroup(group);
 		}
 	}
 

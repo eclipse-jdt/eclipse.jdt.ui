@@ -45,7 +45,6 @@ import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -231,10 +230,9 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List, java.util.List)
 	 */
-	public ITrackedNodePosition rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, List positionGroups) throws CoreException {
+	public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, final LinkedProposalModel positionGroups) throws CoreException {
 		final TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
 		textEditGroups.add(group);
-		clearPositionGroups();
 		
 		final AST ast= cuRewrite.getAST();
 		final ASTRewrite astRewrite= cuRewrite.getASTRewrite();
@@ -254,7 +252,7 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 				name= (String) names.get(0);
 		}
 		for (final Iterator iterator= names.iterator(); iterator.hasNext();)
-			getPositionGroup(fIdentifierName).addProposal((String) iterator.next(), null);
+			positionGroups.getPositionGroup(fIdentifierName, true).addProposal((String) iterator.next(), null, 10);
 		
 		final Statement body= fStatement.getBody();
 		if (body != null) {
@@ -278,7 +276,7 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 					final SimpleName node= ast.newSimpleName(text);
 					astRewrite.replace(expression, node, group);
 					remover.registerRemovedNode(expression);
-					getPositionGroup(fIdentifierName).addPosition(astRewrite.track(node));
+					positionGroups.getPositionGroup(fIdentifierName, true).addPosition(astRewrite.track(node), false);
 					return false;
 				}
 
@@ -305,7 +303,7 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 						if (binding != null && binding.equals(fElement)) {
 							final Statement parent= (Statement) ASTNodes.getParent(node, Statement.class);
 							if (parent != null && (list == null || list.getRewrittenList().contains(parent)))
-								getPositionGroup(fIdentifierName).addPosition(astRewrite.track(node));
+								positionGroups.getPositionGroup(fIdentifierName, true).addPosition(astRewrite.track(node), false);
 						}
 					}
 					return false;
@@ -344,7 +342,7 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 		}
 		final SingleVariableDeclaration declaration= ast.newSingleVariableDeclaration();
 		final SimpleName simple= ast.newSimpleName(name);
-		getPositionGroup(fIdentifierName).addFirstPosition(astRewrite.track(simple));
+		positionGroups.getPositionGroup(fIdentifierName, true).addPosition(astRewrite.track(simple), true);
 		declaration.setName(simple);
 		final ITypeBinding iterable= getIterableType(fIterator.getType());
 		final ImportRewrite imports= importRewrite;
@@ -357,9 +355,6 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 		
 		remover.registerRemovedNode(fStatement);
 		remover.applyRemoves(imports);
-		
-		positionGroups.addAll(getAllPositionGroups());
-		return null;
 	}
 
 	/**

@@ -13,21 +13,21 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
-import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedPosition;
-import org.eclipse.jface.text.link.LinkedPositionGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -64,16 +64,16 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
-import org.eclipse.jdt.internal.ui.text.correction.LinkedCorrectionProposal.ILinkedModeProposal;
 
 /**
   */
@@ -639,17 +639,13 @@ public class ModifierCorrectionSubProcessor {
 
 	private static final String KEY_MODIFIER= "modifier"; //$NON-NLS-1$
 	
-	private static class ModifierLinkedModeProposal implements ILinkedModeProposal, ICompletionProposalExtension2 {
+	private static class ModifierLinkedModeProposal extends LinkedProposalPositionGroup.Proposal {
 
-		private LinkedPositionGroup fLinkedPositionGroup;
 		private final int fModifier;
 
-		public ModifierLinkedModeProposal(int modifier) {
+		public ModifierLinkedModeProposal(int modifier, int relevance) {
+			super(null, null, relevance);
 			fModifier= modifier;
-		}
-		
-		public void setLinkedPositionGroup(LinkedPositionGroup group) {
-			fLinkedPositionGroup= group;
 		}
 
 		public String getAdditionalProposalInfo() {
@@ -664,79 +660,52 @@ public class ModifierCorrectionSubProcessor {
 			}
 		}
 
-		public Image getImage() {
-			return null;
-		}
-
-		private Position getCurrentPosition(int offset) {
-			if (fLinkedPositionGroup != null) {
-				LinkedPosition[] positions= fLinkedPositionGroup.getPositions();
-				for (int i= 0; i < positions.length; i++) {
-					Position position= positions[i];
-					if (position.overlapsWith(offset, 0)) {
-						return position;
-					}
-				}
-			}
-			return null;
-		}
-		
 		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
+		 * @see org.eclipse.jdt.internal.corext.fix.PositionGroup.Proposal#computeEdits(int, org.eclipse.jface.text.link.LinkedPosition, char, int, org.eclipse.jface.text.link.LinkedModeModel)
 		 */
-		public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
-			Position currentPosition= getCurrentPosition(offset);
-			if (currentPosition == null)
-				return;
+		public TextEdit computeEdits(int offset, LinkedPosition currentPosition, char trigger, int stateMask, LinkedModeModel model) throws CoreException {
 			try {
-				IDocument document= viewer.getDocument();
+				IDocument document= currentPosition.getDocument();
+				MultiTextEdit edit= new MultiTextEdit();
 				int documentLen= document.getLength();
-
 				if (fModifier == 0) {
-
 					int end= currentPosition.offset + currentPosition.length; // current end position
 					int k= end;
 					while (k < documentLen && IndentManipulation.isIndentChar(document.getChar(k))) {
 						k++;
 					}
 					// first remove space then replace range (remove space can destroy empty position)
-					document.replace(end, k - end, new String()); // remove extra spaces
-					document.replace(currentPosition.offset, currentPosition.length, new String());
+					edit.addChild(new ReplaceEdit(end, k - end, new String())); // remove extra spaces
+					edit.addChild(new ReplaceEdit(currentPosition.offset, currentPosition.length, new String()));
 				} else {
 					// first then replace range the insert space (insert space can destroy empty position)
-					document.replace(currentPosition.offset, currentPosition.length, ModifierKeyword.fromFlagValue(fModifier).toString());
+					edit.addChild(new ReplaceEdit(currentPosition.offset, currentPosition.length, ModifierKeyword.fromFlagValue(fModifier).toString()));
 					int end= currentPosition.offset + currentPosition.length; // current end position
 					if (end < documentLen && !Character.isWhitespace(document.getChar(end))) {
-						document.replace(end, 0, String.valueOf(' ')); // insert extra space
+						edit.addChild(new ReplaceEdit(end, 0, String.valueOf(' '))); // insert extra space
 					}
 				}
-				
+				return edit;
 			} catch (BadLocationException e) {
-				JavaPlugin.log(e);
+				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, e.getMessage(), e));
 			}
 		}
-
-		public int getRelevance() { return 0; 	}
-		public IContextInformation getContextInformation() { return null; }
-		public void apply(IDocument document) {} // not called
-		public Point getSelection(IDocument document) { return null; }
-		public void selected(ITextViewer viewer, boolean smartToggle) {}
-		public void unselected(ITextViewer viewer) { }
-		public boolean validate(IDocument document, int offset, DocumentEvent event) { return false; }
 	}
 	
 	public static void installLinkedVisibilityProposals(LinkedCorrectionProposal proposal, ASTRewrite rewrite, List modifiers, boolean inInterface) {
 		ASTNode modifier= findVisibilityModifier(modifiers);
 		if (modifier != null) {
 			int selected= ((Modifier) modifier).getKeyword().toFlagValue();
-			proposal.addLinkedPosition(rewrite.track(modifier), false, KEY_MODIFIER);
-			proposal.addLinkedPositionProposal(KEY_MODIFIER, new ModifierLinkedModeProposal(selected));
+			
+			LinkedProposalPositionGroup positionGroup= proposal.getLinkedProposalPositions().getPositionGroup(KEY_MODIFIER, true);
+			positionGroup.addPosition(rewrite.track(modifier), false);
+			positionGroup.addProposal(new ModifierLinkedModeProposal(selected, 10));
 			
 			// add all others
 			int[] flagValues= inInterface ? new int[] { Modifier.PUBLIC, 0 } : new int[] { Modifier.PUBLIC, 0, Modifier.PROTECTED, Modifier.PRIVATE };
 			for (int i= 0; i < flagValues.length; i++) {
 				if (flagValues[i] != selected) {
-					proposal.addLinkedPositionProposal(KEY_MODIFIER,  new ModifierLinkedModeProposal(flagValues[i]));
+					positionGroup.addProposal(new ModifierLinkedModeProposal(flagValues[i], 9 - i));
 				}
 			}
 		} 

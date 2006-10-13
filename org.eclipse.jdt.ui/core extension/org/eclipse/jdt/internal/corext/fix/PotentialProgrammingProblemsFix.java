@@ -65,7 +65,7 @@ import org.eclipse.jdt.internal.ui.text.correction.SerialVersionHashOperation;
 import org.eclipse.jdt.internal.ui.text.correction.SerialVersionLaunchConfigurationDelegate;
 
 
-public class PotentialProgrammingProblemsFix extends AbstractFix {
+public class PotentialProgrammingProblemsFix extends LinkedFix {
 	
 	/** Name of the externalizable class */
 	private static final String EXTERNALIZABLE_NAME= "java.io.Externalizable"; //$NON-NLS-1$
@@ -286,7 +286,7 @@ public class PotentialProgrammingProblemsFix extends AbstractFix {
 		/**
 		 * {@inheritDoc}
 		 */
-		protected void addLinkedPositions(ASTRewrite rewrite, VariableDeclarationFragment fragment, List positionGroups) {}
+		protected void addLinkedPositions(ASTRewrite rewrite, VariableDeclarationFragment fragment, LinkedProposalModel positionGroups) {}
 		
 	}
 

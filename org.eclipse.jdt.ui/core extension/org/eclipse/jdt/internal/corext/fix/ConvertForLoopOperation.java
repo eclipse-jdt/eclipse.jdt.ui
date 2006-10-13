@@ -52,7 +52,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -485,15 +484,14 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List, java.util.List)
 	 */
-	public ITrackedNodePosition rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, List positionGroups) throws CoreException {
+	public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, LinkedProposalModel positionGroups) throws CoreException {
 		TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
 		textEditGroups.add(group);
-		clearPositionGroups();
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 		doInferCollection();
 		doInferElement(importRewrite);
-		doFindAndReplaceInBody(rewrite, group);
+		doFindAndReplaceInBody(rewrite, group, positionGroups);
 
 		AST ast= fOldForStatement.getAST();
 		fEnhancedForStatement= ast.newEnhancedForStatement();
@@ -510,8 +508,8 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 		}
 		fEnhancedForStatement.setExpression(createExpression(rewrite, ast));
 		fEnhancedForStatement.setParameter(fParameterDeclaration);
-		PositionGroup pg= getPositionGroup(fParameterName);
-		pg.addFirstPosition(rewrite.track(fParameterDeclaration.getName()));
+		LinkedProposalPositionGroup pg= positionGroups.getPositionGroup(fParameterName, true);
+		pg.addPosition(rewrite.track(fParameterDeclaration.getName()), true);
 
 		String name= fParameterDeclaration.getName().getIdentifier();
 
@@ -520,13 +518,10 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 			proposals.add(0, name);
 
 		for (Iterator iterator= proposals.iterator(); iterator.hasNext();)
-			pg.addProposal((String) iterator.next(), null);
+			pg.addProposal((String) iterator.next(), null, 10);
 
 		if (!fPassive)
 			rewrite.replace(fOldForStatement, fEnhancedForStatement, group);
-		
-		positionGroups.addAll(getAllPositionGroups());
-		return null;
 	}
 
 	private Statement createBodyStatement(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
@@ -589,7 +584,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 		return names;
 	}
 
-	private void doFindAndReplaceInBody(ASTRewrite rewrite, TextEditGroup group) {
+	private void doFindAndReplaceInBody(ASTRewrite rewrite, TextEditGroup group, LinkedProposalModel positionGroups) {
 		LocalOccurencesFinder finder= new LocalOccurencesFinder(fCollectionName, fOldCollectionBinding,
 			fOldCollectionTypeBinding, fOldForStatement.getBody());
 		finder.perform();
@@ -603,16 +598,16 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 				: (ArrayAccess)ASTNodes.getParent(soleOccurence, ArrayAccess.class);
 			if (arrayAccess != null) {
 				if (arrayAccess.getParent() instanceof VariableDeclarationFragment) {
-					replaceSingleVariableDeclaration(rewrite, arrayAccess, group);
+					replaceSingleVariableDeclaration(rewrite, arrayAccess, group, positionGroups);
 					return;
 				}
 			}
 		}
 
-		replaceMultipleOccurences(rewrite, occurences, group);
+		replaceMultipleOccurences(rewrite, occurences, group, positionGroups);
 	}
 
-	private void replaceSingleVariableDeclaration(ASTRewrite rewrite, ArrayAccess arrayAccess, TextEditGroup group) {
+	private void replaceSingleVariableDeclaration(ASTRewrite rewrite, ArrayAccess arrayAccess, TextEditGroup group, LinkedProposalModel positionGroups) {
 		VariableDeclarationFragment declarationFragment= (VariableDeclarationFragment)arrayAccess.getParent();
 		VariableDeclarationStatement declarationStatement= (VariableDeclarationStatement)declarationFragment.getParent();
 
@@ -637,20 +632,20 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 		finder2.perform();
 		List occurences2= finder2.getOccurences();
 
-		linkAllReferences(rewrite, occurences2);
+		linkAllReferences(rewrite, occurences2, positionGroups);
 
 		rewrite.replace(declarationStatement, null, group);
 		return;
 	}
 
-	private void linkAllReferences(ASTRewrite rewrite, List occurences) {
+	private void linkAllReferences(ASTRewrite rewrite, List occurences, LinkedProposalModel positionGroups) {
 		for (Iterator iter= occurences.iterator(); iter.hasNext();) {
 			ASTNode variableRef= (ASTNode)iter.next();
-			getPositionGroup(fParameterName).addPosition(rewrite.track(variableRef));
+			positionGroups.getPositionGroup(fParameterName, true).addPosition(rewrite.track(variableRef), false);
 		}
 	}
 
-	private void replaceMultipleOccurences(ASTRewrite rewrite, List occurences, TextEditGroup group) {
+	private void replaceMultipleOccurences(ASTRewrite rewrite, List occurences, TextEditGroup group, LinkedProposalModel positionGroups) {
 		for (Iterator iter= occurences.iterator(); iter.hasNext();) {
 			ASTNode element= (ASTNode)iter.next();
 			ArrayAccess arrayAccess= element instanceof ArrayAccess ? (ArrayAccess)element : (ArrayAccess)ASTNodes.getParent(
@@ -659,8 +654,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 				SimpleName elementReference= fAst.newSimpleName(fParameterDeclaration.getName().getIdentifier());
 
 				rewrite.replace(arrayAccess, elementReference, group);
-				getPositionGroup(fParameterName).addPosition(rewrite.track(elementReference));
-
+				positionGroups.getPositionGroup(fParameterName, true).addPosition(rewrite.track(elementReference), false);
 			}
 		}
 	}

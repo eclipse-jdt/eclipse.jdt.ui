@@ -44,7 +44,6 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
@@ -108,7 +107,7 @@ public class Java50Fix extends LinkedFix {
 		/**
 		 * {@inheritDoc}
 		 */
-		public ITrackedNodePosition rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, List positionGroups) throws CoreException {
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, LinkedProposalModel positionGroups) throws CoreException {
 			InferTypeArgumentsTCModel model= new InferTypeArgumentsTCModel();
 			InferTypeArgumentsConstraintCreator creator= new InferTypeArgumentsConstraintCreator(model, true);
 			
@@ -121,7 +120,7 @@ public class Java50Fix extends LinkedFix {
 			
 			ASTNode[] nodes= InferTypeArgumentsRefactoring.inferArguments(fTypes, update, model, cuRewrite);
 			if (nodes.length == 0)
-				return null;
+				return;
 			
 			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
 			for (int i= 0; i < nodes.length; i++) {
@@ -130,23 +129,23 @@ public class Java50Fix extends LinkedFix {
 					List args= (List)type.getStructuralProperty(ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
 					int j= 0;
 					for (Iterator iter= args.iterator(); iter.hasNext();) {
-						PositionGroup group= new PositionGroup("G" + i + "_" + j); //$NON-NLS-1$ //$NON-NLS-2$
+						LinkedProposalPositionGroup group= new LinkedProposalPositionGroup("G" + i + "_" + j); //$NON-NLS-1$ //$NON-NLS-2$
 						Type argType= (Type)iter.next();
-						if (positionGroups.isEmpty()) {
-							group.addFirstPosition(astRewrite.track(argType));
+						if (!positionGroups.hasLinkedPositions()) {
+							group.addPosition(astRewrite.track(argType), true);
 						} else {
-							group.addPosition(astRewrite.track(argType));
+							group.addPosition(astRewrite.track(argType), false);
 						}
 						if (argType.isWildcardType()) {
-							group.addProposal("?", "?");  //$NON-NLS-1$//$NON-NLS-2$
-							group.addProposal("Object", "Object");  //$NON-NLS-1$//$NON-NLS-2$
+							group.addProposal("?", null, 10);  //$NON-NLS-1$
+							group.addProposal("Object", null, 10);  //$NON-NLS-1$
 						}
-						positionGroups.add(group);
+						positionGroups.addPositionGroup(group);
 						j++;
 					}
 				}
 			}
-			return astRewrite.track(nodes[0]);
+			positionGroups.setEndPosition(astRewrite.track(nodes[0]));
 		}
 	}
 	
