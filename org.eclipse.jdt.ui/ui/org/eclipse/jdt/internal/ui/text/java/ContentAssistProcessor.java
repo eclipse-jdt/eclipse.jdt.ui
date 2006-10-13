@@ -189,7 +189,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 					extension.setStatusLineVisible(false);
 					if (extension instanceof IContentAssistantExtension3) {
 						IContentAssistantExtension3 ext3= (IContentAssistantExtension3) extension;
-						((ContentAssistant) ext3).setRepeatedInvocationTrigger(KeySequence.getInstance());
+						((ContentAssistant) ext3).setRepeatedInvocationTrigger(null);
 					}
 				}
 			}
