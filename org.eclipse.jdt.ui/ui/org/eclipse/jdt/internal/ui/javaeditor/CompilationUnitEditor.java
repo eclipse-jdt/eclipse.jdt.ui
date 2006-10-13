@@ -697,7 +697,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 							try {
 								document.replace(level.fSecondPosition.offset,
 												 level.fSecondPosition.length,
-												 null);
+												 ""); //$NON-NLS-1$
 							} catch (BadLocationException e) {
 								JavaPlugin.log(e);
 							}
