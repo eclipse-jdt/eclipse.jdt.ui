@@ -724,6 +724,16 @@ public class CleanUpConstants {
 	 * @since 3.3
 	 */
 	public static final String ADD_MISSING_NLS_TAGS= "cleanup.add_missing_nls_tags"; //$NON-NLS-1$
+	
+	/**
+	 * Should the Clean Up Wizard be shown when executing the Clean Up Action?
+	 * <br><br>
+	 * Possible values: {<code><b>true</b></code>, <code><b>false</b></code>}<br>
+	 * Default value: <code><b>true</b></code><br>
+	 * <br>
+	 * @since 3.3
+	 */
+	public static final String SHOW_CLEAN_UP_WIZARD= "cleanup.showwizard"; //$NON-NLS-1$
 
     public static Map getEclipseDefaultSettings() {
     	HashMap result= new HashMap();
@@ -820,6 +830,8 @@ public class CleanUpConstants {
 	        String key= (String)iterator.next();
 	        store.setDefault(key, (String)settings.get(key));
         }
+    	
+    	store.setDefault(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, true);
     }
 
 }

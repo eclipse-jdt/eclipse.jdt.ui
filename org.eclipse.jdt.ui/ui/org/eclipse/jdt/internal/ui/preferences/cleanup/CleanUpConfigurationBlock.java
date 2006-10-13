@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.eclipse.core.runtime.preferences.DefaultScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
 import org.eclipse.core.resources.IProject;
@@ -27,6 +29,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -49,6 +53,9 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileConfigurationBlo
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
 
 /**
@@ -57,13 +64,20 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 	
 	private static final String CLEANUP_PAGE_SETTINGS_KEY= "cleanup_page"; //$NON-NLS-1$
-
 	private static final String CLEANUP_PROFILES_PREFERENCE_KEY= "org.eclipse.jdt.ui.cleanupprofiles"; //$NON-NLS-1$
-    
 	private static final String DIALOGSTORE_LASTSAVELOADPATH= JavaUI.ID_PLUGIN + ".cleanup"; //$NON-NLS-1$
+
+	private final IScopeContext fCurrContext;
+	private SelectionButtonDialogField fShowCleanUpWizardDialogField;
     
     public CleanUpConfigurationBlock(IProject project, PreferencesAccess access) {
 	    super(project, access, DIALOGSTORE_LASTSAVELOADPATH);
+	    
+		if (project != null) {
+			fCurrContext= null;
+		} else {
+			fCurrContext= access.getInstanceScope();
+		}
     }
 
 	protected IProfileVersioner createProfileVersioner() {
@@ -149,5 +163,64 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 	protected ModifyDialog createModifyDialog(Shell shell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile) {
         return new CleanUpModifyDialog(shell, profile, profileManager, profileStore, newProfile, CLEANUP_PAGE_SETTINGS_KEY, DIALOGSTORE_LASTSAVELOADPATH);
     }
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public Composite createContents(Composite parent) {
+	    Composite composite= super.createContents(parent);
+	    
+	    if (fCurrContext == null)
+	    	return composite;
+	    
+	    fShowCleanUpWizardDialogField= new SelectionButtonDialogField(SWT.CHECK);
+		fShowCleanUpWizardDialogField.setLabelText(CleanUpMessages.CleanUpConfigurationBlock_ShowCleanUpWizard_checkBoxLabel);
+	    fShowCleanUpWizardDialogField.doFillIntoGrid(composite, 5);
+	    
+	    IEclipsePreferences node= fCurrContext.getNode(JavaUI.ID_PLUGIN);
+		boolean showWizard;
+		if (node.get(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, null) != null) {
+			showWizard= node.getBoolean(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, true);
+		} else {
+			showWizard= new DefaultScope().getNode(JavaUI.ID_PLUGIN).getBoolean(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, true);
+		}
+		if (showWizard)
+			fShowCleanUpWizardDialogField.setSelection(true);
+		
+	    fShowCleanUpWizardDialogField.setDialogFieldListener(new IDialogFieldListener() {
+			public void dialogFieldChanged(DialogField field) {
+				doShowCleanUpWizard(fShowCleanUpWizardDialogField.isSelected());
+            }
+	    });
+	        
+		return composite;
+	}
 
+	private void doShowCleanUpWizard(boolean showWizard) {
+		IEclipsePreferences preferences= fCurrContext.getNode(JavaUI.ID_PLUGIN);
+		if (preferences.get(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, null) != null &&
+				preferences.getBoolean(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, true) == showWizard)
+			return;
+		
+		preferences.putBoolean(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, showWizard);
+    }
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void performDefaults() {
+		super.performDefaults();
+		if (fCurrContext == null)
+			return;
+		
+		fCurrContext.getNode(JavaUI.ID_PLUGIN).remove(CleanUpConstants.SHOW_CLEAN_UP_WIZARD);
+		boolean showWizard= new DefaultScope().getNode(JavaUI.ID_PLUGIN).getBoolean(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, true);
+		fShowCleanUpWizardDialogField.setDialogFieldListener(null);
+		fShowCleanUpWizardDialogField.setSelection(showWizard);
+		fShowCleanUpWizardDialogField.setDialogFieldListener(new IDialogFieldListener() {
+			public void dialogFieldChanged(DialogField field) {
+				doShowCleanUpWizard(fShowCleanUpWizardDialogField.isSelected());
+            }
+	    });
+	}
 }

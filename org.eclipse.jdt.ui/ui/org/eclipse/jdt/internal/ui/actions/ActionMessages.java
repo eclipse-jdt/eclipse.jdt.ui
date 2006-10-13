@@ -88,6 +88,7 @@ public final class ActionMessages extends NLS {
 	public static String OverrideMethodsAction_annotation_not_applicable;
 	
 	public static String CleanUpAction_label;
+	public static String CleanUpAction_labelWizard;
 	public static String CleanUpAction_tooltip;
 	public static String CleanUpAction_description;
 	public static String CleanUpAction_ErrorDialogTitle;

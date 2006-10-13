@@ -33,15 +33,9 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.preferences.CleanUpPreferencePage;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
 public class CleanUpRefactoringWizard extends RefactoringWizard {
-	
-	private static final String SHOW_CLEAN_UP_WIZARD_PREFERENCE_KEY= "CleanUpWizard.optionalDialog.id"; //$NON-NLS-1$
 	
 	private static class CleanUpConfigurationPage extends UserInputWizardPage {
 
@@ -91,19 +85,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
     				detailField.setText(getCleanUpsInfo());	
     			}
     		});
-    		
-    		final SelectionButtonDialogField dontShowAgainField= new SelectionButtonDialogField(SWT.CHECK);
-    		dontShowAgainField.setLabelText(MultiFixMessages.CleanUpRefactoringWizard_CleanUpConfigurationPage_DoNotShowAgainLabel);
-    		dontShowAgainField.setDialogFieldListener(new IDialogFieldListener() {
-
-				public void dialogFieldChanged(DialogField field) {
-					OptionalMessageDialog.setDialogEnabled(SHOW_CLEAN_UP_WIZARD_PREFERENCE_KEY, !dontShowAgainField.isSelected());
-                }
     			
-    		});
-    		
-    		dontShowAgainField.doFillIntoGrid(composite, 1);
-    				
 			setControl(composite);
         }
 
@@ -147,13 +129,5 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 	protected void addUserInputPages() {
 		addPage(new CleanUpConfigurationPage((CleanUpRefactoring)getRefactoring()));
 	}
-	
-	public static boolean showCleanUpWizard() {
-		return OptionalMessageDialog.isDialogEnabled(SHOW_CLEAN_UP_WIZARD_PREFERENCE_KEY);
-	}
-
-    public static void setShowCleanUpWizard(boolean enabled) {
-    	OptionalMessageDialog.setDialogEnabled(SHOW_CLEAN_UP_WIZARD_PREFERENCE_KEY, enabled);
-    }
 
 }

@@ -49,7 +49,6 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -140,8 +139,7 @@ public class CleanUpTest extends QuickFixTest {
     }
 	
     private void assertRefactoringResultAsExpected(ICompilationUnit[] cus, String[] expected) throws InvocationTargetException, JavaModelException {
-    	CleanUpRefactoringWizard.setShowCleanUpWizard(false);
-    	RefactoringExecutionStarter.startCleanupRefactoring(cus, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+    	RefactoringExecutionStarter.startCleanupRefactoring(cus, false, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
     	
     	String[] previews= new String[cus.length];
     	for (int i= 0; i < cus.length; i++) {
@@ -153,8 +151,7 @@ public class CleanUpTest extends QuickFixTest {
     }
     
     private void assertRefactoringResultAsExpectedIgnoreHashValue(ICompilationUnit[] cus, String[] expected) throws InvocationTargetException, JavaModelException {
-    	CleanUpRefactoringWizard.setShowCleanUpWizard(false);
-		RefactoringExecutionStarter.startCleanupRefactoring(cus, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+		RefactoringExecutionStarter.startCleanupRefactoring(cus, false, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
 
 		Pattern regex= Pattern.compile("long serialVersionUID = .*L;");
 		

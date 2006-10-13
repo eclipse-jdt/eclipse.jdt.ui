@@ -19,6 +19,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.DefaultScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -35,6 +40,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -51,12 +57,23 @@ import org.eclipse.jdt.internal.ui.util.ElementValidator;
 public class CleanUpAction extends SelectionDispatchAction {
 
 	private JavaEditor fEditor;
+	private IPreferenceChangeListener fPreferenceChangeListener;
 
 	public CleanUpAction(IWorkbenchSite site) {
-		super(site);
-		setText(ActionMessages.CleanUpAction_label); 
+		super(site); 
 		setToolTipText(ActionMessages.CleanUpAction_tooltip); 
-		setDescription(ActionMessages.CleanUpAction_description); 
+		setDescription(ActionMessages.CleanUpAction_description);
+		
+		fPreferenceChangeListener= new IPreferenceChangeListener() {
+			public void preferenceChange(PreferenceChangeEvent event) {
+				if (event.getKey().equals(CleanUpConstants.SHOW_CLEAN_UP_WIZARD)) {
+					updateActionLabel();
+				}
+			}
+		};
+		new InstanceScope().getNode(JavaUI.ID_PLUGIN).addPreferenceChangeListener(fPreferenceChangeListener);
+
+		updateActionLabel();
 
 //		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ORGANIZE_IMPORTS_ACTION);
 	}
@@ -155,7 +172,7 @@ public class CleanUpAction extends SelectionDispatchAction {
 			return;
 		
 		try {
-			RefactoringExecutionStarter.startCleanupRefactoring(new ICompilationUnit[] {cu}, getShell());
+			RefactoringExecutionStarter.startCleanupRefactoring(new ICompilationUnit[] {cu}, showWizard(), getShell());
 		} catch (InvocationTargetException e) {
 			JavaPlugin.log(e);
 			if (e.getCause() instanceof CoreException)
@@ -185,7 +202,7 @@ public class CleanUpAction extends SelectionDispatchAction {
 		}
 			
 		try {
-			RefactoringExecutionStarter.startCleanupRefactoring(cus, getShell());
+			RefactoringExecutionStarter.startCleanupRefactoring(cus, showWizard(), getShell());
 		} catch (InvocationTargetException e) {
 			JavaPlugin.log(e);
 			if (e.getCause() instanceof CoreException)
@@ -285,4 +302,27 @@ public class CleanUpAction extends SelectionDispatchAction {
 		return cu;
 	}
 
+	private boolean showWizard() {
+		InstanceScope instanceScope= new InstanceScope();
+		IEclipsePreferences instanceNode= instanceScope.getNode(JavaUI.ID_PLUGIN);
+		if (instanceNode.get(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, null) != null)
+			return instanceNode.getBoolean(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, true);
+		
+		DefaultScope defaultScope= new DefaultScope();
+		IEclipsePreferences defaultNode= defaultScope.getNode(JavaUI.ID_PLUGIN);
+		return defaultNode.getBoolean(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, true);
+    }
+
+	private void updateActionLabel() {
+	    if (showWizard()) {
+			setText(ActionMessages.CleanUpAction_labelWizard);
+		} else {
+			setText(ActionMessages.CleanUpAction_label);
+		}
+    }
+
+	public void dispose() {
+		new InstanceScope().getNode(JavaUI.ID_PLUGIN).removePreferenceChangeListener(fPreferenceChangeListener);
+		fPreferenceChangeListener= null;
+    }
 }

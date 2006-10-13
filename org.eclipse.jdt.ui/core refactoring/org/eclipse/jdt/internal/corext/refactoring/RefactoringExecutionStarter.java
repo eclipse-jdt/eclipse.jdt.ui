@@ -236,7 +236,7 @@ public final class RefactoringExecutionStarter {
 		new RefactoringStarter().activate(refactoring, new ChangeTypeWizard(refactoring), shell, RefactoringMessages.ChangeTypeAction_dialog_title, false);
 	}
 	
-	public static void startCleanupRefactoring(ICompilationUnit[] cus, Shell shell) throws InvocationTargetException, JavaModelException {
+	public static void startCleanupRefactoring(ICompilationUnit[] cus, boolean showWizard, Shell shell) throws InvocationTargetException, JavaModelException {
 		final CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		for (int i= 0; i < cus.length; i++) {
 			refactoring.addCompilationUnit(cus[i]);
@@ -254,7 +254,7 @@ public final class RefactoringExecutionStarter {
 		refactoring.addCleanUp(new CodeFormatCleanUp());
 		refactoring.addCleanUp(new CommentFormatCleanUp());
 		
-		if (cus.length == 1 || !CleanUpRefactoringWizard.showCleanUpWizard()) {
+		if (!showWizard) {
     		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.ERROR, false, shell, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
     		try {
     	        helper.perform(true, true);

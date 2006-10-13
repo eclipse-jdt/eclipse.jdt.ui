@@ -470,6 +470,7 @@ public class GenerateActionGroup extends ActionGroup {
 			fHandlerService.deactivateHandler(fQuickAccessHandlerActivation);
 		}
 		fEditor= null;
+		fCleanUp.dispose();
 		super.dispose();
 	}
 	

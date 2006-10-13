@@ -19,7 +19,6 @@ public class MultiFixMessages extends NLS {
 	}
 
 	public static String CleanUpRefactoringWizard_CleanUpConfigurationPage_detaileTitle;
-	public static String CleanUpRefactoringWizard_CleanUpConfigurationPage_DoNotShowAgainLabel;
 	public static String CleanUpRefactoringWizard_CleanUpConfigurationPage_link;
 	public static String CleanUpRefactoringWizard_CleanUpConfigurationPage_linkToolTip;
 	public static String CleanUpRefactoringWizard_CleanUpConfigurationPage_message;

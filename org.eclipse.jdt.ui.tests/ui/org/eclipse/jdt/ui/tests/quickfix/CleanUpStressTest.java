@@ -57,7 +57,6 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -5239,8 +5238,7 @@ public class CleanUpStressTest extends TestCase {
 	
 		ICompilationUnit[] units= (ICompilationUnit[])cus.toArray(new ICompilationUnit[cus.size()]);	
 		Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-		CleanUpRefactoringWizard.setShowCleanUpWizard(false);
-		RefactoringExecutionStarter.startCleanupRefactoring(units, shell);
+		RefactoringExecutionStarter.startCleanupRefactoring(units, false, shell);
 		
 //		generateTable(units);
 		
