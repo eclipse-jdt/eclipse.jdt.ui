@@ -329,7 +329,6 @@ public abstract class ProfileConfigurationBlock {
 		fEditButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_edit_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING);  
 		fDeleteButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_remove_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING); 
 
-//		createLabel(fComposite, "", 1); //$NON-NLS-1$
 		fNewButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_new_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING);
 		fLoadButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_load_button_desc, GridData.HORIZONTAL_ALIGN_END);
 		createLabel(fComposite, "", 3); //$NON-NLS-1$
