@@ -131,7 +131,7 @@ public class TypeInfoViewer {
 				return;
 			if (TypeFilter.isFiltered(match))
 				return;
-			if (fHistory.contains(getMatchId(match)))
+			if (fHistory.contains(match))
 				return;
 			if (fFilter.matchesFilterExtension(match))
 				fResult.add(match);
@@ -543,7 +543,7 @@ public class TypeInfoViewer {
 			List elements= new ArrayList();
 			List imageDescriptors= new ArrayList();
 			List labels= new ArrayList();
-			Set matchIdsInHistory= new HashSet();
+			Set filteredMatches= new HashSet();
 			
 			TypeNameMatch[] matchingTypes= fHistory.getFilteredTypeInfos(fFilter);
 			if (matchingTypes.length > 0) {
@@ -553,10 +553,7 @@ public class TypeInfoViewer {
 				while(type != null) {
 					next= (i == matchingTypes.length) ? null : matchingTypes[i];
 					elements.add(type);
-					String matchId= getMatchId(type);
-					if (matchId != null) {
-						matchIdsInHistory.add(matchId);
-					}
+					filteredMatches.add(type);
 					imageDescriptors.add(fLabelProvider.getImageDescriptor(type));
 					labels.add(fLabelProvider.getText(last, type, next));
 					last= type;
@@ -571,7 +568,7 @@ public class TypeInfoViewer {
 			if ((fMode & INDEX) == 0) {
 				return;
 			}
-			TypeNameMatch[] result= getSearchResult(matchIdsInHistory, monitor);
+			TypeNameMatch[] result= getSearchResult(filteredMatches, monitor);
 			fViewer.fExpectedItemCount+= result.length;
 			if (result.length == 0) {
 				return;
@@ -581,7 +578,7 @@ public class TypeInfoViewer {
 			int processed= 0;
 			int nextIndex= 1;
 			type= result[0];
-			if (!matchIdsInHistory.isEmpty()) {
+			if (!filteredMatches.isEmpty()) {
 				fViewer.addDashLineAndUpdateLastHistoryEntry(fTicket, type);
 			}
 			while (true) {
@@ -622,18 +619,16 @@ public class TypeInfoViewer {
 			fViewer.clear(fTicket);
 
 			TypeNameMatch[] matchingTypes= fHistory.getFilteredTypeInfos(fFilter);
-			Set matchIdsInHistory= new HashSet(matchingTypes.length * 2);
-			for (int i= 0; i < matchingTypes.length; i++) {
-				String matchId= getMatchId(matchingTypes[i]);
-				if (matchId != null) {
-					matchIdsInHistory.add(matchId);
-				}
-			}
 			fViewer.setHistoryResult(fTicket, matchingTypes);
 			if ((fMode & INDEX) == 0)
 				return;
 				
-			TypeNameMatch[] result= getSearchResult(matchIdsInHistory, monitor);
+			Set filteredMatches= new HashSet(matchingTypes.length * 2);
+			for (int i= 0; i < matchingTypes.length; i++) {
+				filteredMatches.add(matchingTypes[i]);
+			}
+			
+			TypeNameMatch[] result= getSearchResult(filteredMatches, monitor);
 			if (monitor.isCanceled())
 				throw new OperationCanceledException();
 			
@@ -702,8 +697,7 @@ public class TypeInfoViewer {
 			List result= new ArrayList(2048);
 			for (int i= 0; i < fLastResult.length; i++) {
 				TypeNameMatch type= fLastResult[i];
-				String matchId= getMatchId(type);
-				if (matchId != null && filteredHistory.contains(matchId))
+				if (filteredHistory.contains(type))
 					continue;
 				if (fFilter.matchesCachedResult(type))
 					result.add(type);
@@ -1591,9 +1585,5 @@ public class TypeInfoViewer {
 		return fFullyQualifySelection
 			? fLabelProvider.getFullyQualifiedText(type)
 			: fLabelProvider.getQualifiedText(type);
-	}
-	
-	private static String getMatchId(TypeNameMatch match) {
-		return match.getType().getHandleIdentifier();
 	}
 }

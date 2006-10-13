@@ -36,12 +36,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -58,7 +55,6 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.TypeNameMatch;
-import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -66,69 +62,13 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.SimilarElementsRequestor;
 
 public class OrganizeImportsOperation implements IWorkspaceRunnable {
-	
-	
-	private static class InternalTypeNameMatch extends TypeNameMatch {
-		
-		private final String fPackageName;
-		private final String fTypeQualifiedName;
-		private final IJavaProject fProject;
-		
-		public InternalTypeNameMatch(int modifiers, char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, IJavaProject project) {
-			super(null, modifiers);
-			fPackageName= new String(packageName);
-			StringBuffer buf= new StringBuffer();
-			for (int i= 0; i < enclosingTypeNames.length; i++) {
-				buf.append(enclosingTypeNames[i]).append('.');
-			}
-			fTypeQualifiedName= buf.append(simpleTypeName).toString();
-			fProject= project;
-		}
-		
-		public String getPackageName() {
-			return fPackageName;
-		}
-		
-		public String getSimpleTypeName() {
-			return Signature.getSimpleName(fTypeQualifiedName);
-		}
-		
-		public String getTypeQualifiedName() {
-			return fTypeQualifiedName;
-		}
-		
-		public String getFullyQualifiedName() {
-			return JavaModelUtil.concatenateName(fPackageName, fTypeQualifiedName);
-		}
-		
-		public String getTypeContainerName() {
-			return JavaModelUtil.concatenateName(fPackageName, Signature.getQualifier(fTypeQualifiedName));
-		}
-		
-		public IPackageFragmentRoot getPackageFragmentRoot() {
-			IType type= getType();
-			if (type != null) {
-				return JavaModelUtil.getPackageFragmentRoot(type);
-			}
-			return null;
-		}
-		
-		public IType getType() {
-			try {
-				return fProject.findType(getFullyQualifiedName());
-			} catch (JavaModelException e) {
-				return null;
-			}
-		}		
-	}
-
-	
 	public static interface IChooseImportQuery {
 		/**
 		 * Selects imports from a list of choices.
@@ -293,13 +233,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				final ArrayList typesFound= new ArrayList();
 				final IJavaProject project= fCurrPackage.getJavaProject();
 				IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { project });
-				TypeNameRequestor requestor= new TypeNameRequestor() {
-					public void acceptType(int modifiers, char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
-						typesFound.add(new InternalTypeNameMatch(modifiers, packageName, simpleTypeName, enclosingTypeNames, project));
-					}
-				};
-				
-				new SearchEngine().searchAllTypeNames(null, allTypes, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
+				TypeNameMatchCollector collector= new TypeNameMatchCollector(typesFound);
+				new SearchEngine().searchAllTypeNames(null, allTypes, scope, collector, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
 
 				boolean is50OrHigher= 	JavaModelUtil.is50OrHigher(project);
 				
