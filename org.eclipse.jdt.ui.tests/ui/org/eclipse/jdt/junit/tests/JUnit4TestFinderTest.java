@@ -329,6 +329,21 @@ public class JUnit4TestFinderTest extends TestCase {
 		
 		assertTestFound(validTest3, new String[] { "p.Test3" });
 		assertTestFound(validTest3.getCompilationUnit(), new String[] { "p.Test3" });
+		
+		
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import org.junit.Test;\n");
+		buf.append("\n");
+		buf.append("public abstract class AbstractTest {\n");
+		buf.append("        @Test public void testBar() {\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		IType invalidTest4= p.createCompilationUnit("AbstractTest.java", buf.toString(), false, null).getType("AbstractTest");
+		
+		assertTestFound(invalidTest4, new String[] {});
+		assertTestFound(invalidTest4.getCompilationUnit(), new String[] {});
 				
 		String[] validTests= { "p.Test1", "p.Test2", "p.Test3"};
 		
