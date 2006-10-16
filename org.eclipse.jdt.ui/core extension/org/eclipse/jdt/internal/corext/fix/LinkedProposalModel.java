@@ -44,6 +44,13 @@ public class LinkedProposalModel {
 	}
 	
 	public Iterator getPositionGroupIterator() {
+		if (fPositionGroups == null) {
+			return new Iterator() {
+				public boolean hasNext() {return false;}
+				public Object next() {return null;}
+				public void remove() {}
+			};
+		}
 		return fPositionGroups.values().iterator();
 	}
 	
