@@ -852,7 +852,9 @@ public class TypeInfoViewer {
 	
 	private static final TypeNameMatch[] EMTPY_TYPE_INFO_ARRAY= new TypeNameMatch[0];
 	// only needed when in virtual table mode
-	private static final TypeNameMatch DASH_LINE= new TypeNameMatch(null, 0);
+	
+	private static final TypeNameMatch DASH_LINE= SearchEngine.createTypeNameMatch(null, 0);
+		
 
 	public TypeInfoViewer(Composite parent, int flags, Label progressLabel, 
 			IJavaSearchScope scope, int elementKind, String initialFilter,

@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.corext.CorextMessages;
@@ -309,7 +310,7 @@ public class OpenTypeHistory extends History {
 					// copy over the modifiers since they may have changed
 					int modifiers= jType.getFlags();
 					if (modifiers != type.getModifiers()) {
-						replace(type, new TypeNameMatch(jType, modifiers));
+						replace(type, SearchEngine.createTypeNameMatch(jType, modifiers));
 					} else {
 						fTimestampMapping.put(type, new Long(currentTimestamp));
 					}
@@ -390,7 +391,7 @@ public class OpenTypeHistory extends History {
 		} catch (NumberFormatException e) {
 			// take zero
 		}
-		TypeNameMatch info= new TypeNameMatch((IType) element, modifiers);
+		TypeNameMatch info= SearchEngine.createTypeNameMatch((IType) element, modifiers);
 		long timestamp= IResource.NULL_STAMP;
 		String timestampValue= type.getAttribute(NODE_TIMESTAMP);
 		if (timestampValue != null && timestampValue.length() > 0) {
