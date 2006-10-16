@@ -322,7 +322,9 @@ public class CleanUpAction extends SelectionDispatchAction {
     }
 
 	public void dispose() {
-		new InstanceScope().getNode(JavaUI.ID_PLUGIN).removePreferenceChangeListener(fPreferenceChangeListener);
-		fPreferenceChangeListener= null;
+		if (fPreferenceChangeListener != null) {
+			new InstanceScope().getNode(JavaUI.ID_PLUGIN).removePreferenceChangeListener(fPreferenceChangeListener);
+			fPreferenceChangeListener= null;
+		}
     }
 }
