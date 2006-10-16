@@ -170,6 +170,45 @@ public class MockPluginView extends ViewPart implements INavigatorContentService
 		add(diff);
 	}
 
+	public void addIncomingAddition(IProject project, String path){
+		IDiff diff = createIncomingAddition(project,path);
+		add(diff);
+	}
+	
+	private IDiff createIncomingAddition(IProject project, String path) {
+		final IResource resource = getResource(project, path);
+		ResourceDiff diff = new ResourceDiff(resource, IDiff.ADD, 0, new FileRevision() {
+			public String getName() {
+				return resource.getName();
+			}
+			public IStorage getStorage(IProgressMonitor monitor) throws CoreException {
+				return new IStorage() {
+					public Object getAdapter(Class adapter) {
+						return null;
+					}
+					public boolean isReadOnly() {
+						return true;
+					}
+					public String getName() {
+						return resource.getName();
+					}
+					public IPath getFullPath() {
+						return resource.getFullPath();
+					}
+					public InputStream getContents() throws CoreException {
+						return new ByteArrayInputStream("".getBytes());
+					}
+				};
+			}
+			public boolean isPropertyMissing() {
+				return false;
+			}
+			public IFileRevision withAllProperties(IProgressMonitor monitor) throws CoreException {
+				return this;
+			}}, null);
+		return new ThreeWayDiff(null, diff);
+	}
+
 	private void add(IDiff diff) {
 		((ResourceDiffTree)fContext.getDiffTree()).add(diff);
 	}

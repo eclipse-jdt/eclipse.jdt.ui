@@ -384,12 +384,15 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		if (resource != null) {
 			final IResourceDiffTree tree= context.getDiffTree();
 			final IResource[] members= tree.members(resource);
-			for (int index= 0; index < members.length; index++)
-				if (isVisible(context, members[index])) {
-					if (!members[index].exists()) {
+			for (int index= 0; index < members.length; index++) {
+				IResource child = members[index];
+				if (isVisible(context, child)) {
+					if (hasPhantomFolder(tree, child)) {
 						// Add any phantom resources that are visible
-						list.add(members[index]);
+						list.add(child);
 					}
+					
+					
 //					if (members[index] instanceof IFolder) {
 //						final IFolder folder= (IFolder) members[index];
 //						if (folder.getName().equals(NAME_REFACTORING_FOLDER)) {
@@ -401,10 +404,30 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 //						}
 //					}
 				}
+			}
+				
 		}
 		return list.toArray(new Object[list.size()]);
 	}
 
+	private boolean hasPhantomFolder(IResourceDiffTree tree, IResource child) {
+		if (!child.exists())
+			return true;
+		final boolean[] found = new boolean[] { false };
+		tree.accept(child.getFullPath(), new IDiffVisitor() {
+			public boolean visit(IDiff delta){
+				IResource treeResource = ResourceDiffTree.getResourceFor(delta);
+				if (treeResource.getType()==IResource.FILE && !treeResource.getParent().exists()){
+					found[0] = true;
+					return false;
+				}
+				
+				return true;
+			}}, IResource.DEPTH_INFINITE);
+		return found[0];
+	}
+
+	
 	/**
 	 * {@inheritDoc}
 	 */

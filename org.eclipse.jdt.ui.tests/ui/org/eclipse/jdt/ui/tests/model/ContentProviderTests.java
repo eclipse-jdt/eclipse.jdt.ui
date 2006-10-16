@@ -142,4 +142,55 @@ public class ContentProviderTests extends TestCase {
 		expectedChildren = new Object[] { ((IFolder)fPackageFragment2.getResource()).getFile("a")};
 		children = fProvider.getChildren(fPackageFragment2);
 	}
+	
+	public void testIncomingAddition159884() throws CoreException {
+		IProject project = (IProject)fJProject1.getResource();
+		fMyPart.addIncomingAddition(project, "f1/newFolder/");
+		fMyPart.addIncomingAddition(project, "f1/newFolder/a");
+	
+	
+		// Children of project
+		IFolder f1 = project.getFolder("f1");
+		Object[] expectedChildren = new Object[] { f1 };
+		Object[] children = fProvider.getChildren(fJProject1);
+		assertTrue("Expected children of project does not match actual children", compareArrays(children, expectedChildren));
+		
+		IFolder addedFolder = project.getFolder("f1/newFolder");
+		
+		// Children of f1
+		expectedChildren = new Object[] { addedFolder};
+		children = fProvider.getChildren(f1);
+		assertTrue("Expected children of f1 does not match actual children", compareArrays(children, expectedChildren));
+		
+		// Children of newFolder
+	
+		expectedChildren = new Object[] {addedFolder.getFile("a")};
+		children = fProvider.getChildren(addedFolder);
+		assertTrue("Expected children of new folder does not match actual children", compareArrays(children, expectedChildren));
+	}
+	
+	public void testIncomingAddition159884Part2() throws CoreException {
+		IProject project = (IProject)fJProject1.getResource();
+		fMyPart.addIncomingAddition(project, "f1/newFolder/a");
+	
+	
+		// Children of project
+		IFolder f1 = project.getFolder("f1");
+		Object[] expectedChildren = new Object[] { f1 };
+		Object[] children = fProvider.getChildren(fJProject1);
+		assertTrue("Expected children of project does not match actual children", compareArrays(children, expectedChildren));
+		
+		IFolder addedFolder = project.getFolder("f1/newFolder");
+		
+		// Children of f1
+		expectedChildren = new Object[] { addedFolder};
+		children = fProvider.getChildren(f1);
+		assertTrue("Expected children of f1 does not match actual children", compareArrays(children, expectedChildren));
+		
+		// Children of newFolder
+	
+		expectedChildren = new Object[] {addedFolder.getFile("a")};
+		children = fProvider.getChildren(addedFolder);
+		assertTrue("Expected children of new folder does not match actual children", compareArrays(children, expectedChildren));
+	}
 }
