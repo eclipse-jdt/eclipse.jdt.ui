@@ -734,6 +734,17 @@ public class CleanUpConstants {
 	 * @since 3.3
 	 */
 	public static final String SHOW_CLEAN_UP_WIZARD= "cleanup.showwizard"; //$NON-NLS-1$
+	
+	/**
+	 * A key to a serialized string in the <code>InstanceScope</code> containing all the
+	 * profiles.<br>
+	 * Following code snippet can load the profiles:
+	 * <pre><code>
+	 * List profiles= new ProfileStore(CLEANUP_PROFILES, new CleanUpVersioner()).readProfiles(new InstanceScope());
+	 * </code></pre>
+	 * @since 3.3
+	 */
+	public static final String CLEANUP_PROFILES= "org.eclipse.jdt.ui.cleanupprofiles"; //$NON-NLS-1$
 
     public static Map getEclipseDefaultSettings() {
     	HashMap result= new HashMap();

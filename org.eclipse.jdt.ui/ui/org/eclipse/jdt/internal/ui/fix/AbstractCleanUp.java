@@ -164,10 +164,7 @@ public abstract class AbstractCleanUp implements ICleanUp {
     
     protected abstract int createFlag(Map options);
 
-	/**
-     * @param project
-     */
-    public void loadSettings(IJavaProject project) {
+    private void loadSettings(IJavaProject project) {
     	
     	IScopeContext context;
     	if (project != null) {

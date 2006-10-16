@@ -40,7 +40,7 @@ public class CleanUpProfileManager extends ProfileManager {
 	    super(addBuiltInProfiles(profiles, profileVersioner), context, preferencesAccess, profileVersioner, KEY_SETS, PROFILE_KEY, FORMATTER_SETTINGS_VERSION);
     }
 	
-	private static List addBuiltInProfiles(List profiles, IProfileVersioner profileVersioner) {
+	public static List addBuiltInProfiles(List profiles, IProfileVersioner profileVersioner) {
 		final Profile eclipseProfile= new BuiltInProfile(ECLIPSE_PROFILE, CleanUpMessages.CleanUpProfileManager_ProfileName_EclipseBuildIn, getEclipseSettings(), 2, profileVersioner.getCurrentVersion(), profileVersioner.getProfileKind());
 		profiles.add(eclipseProfile);
 		return profiles;

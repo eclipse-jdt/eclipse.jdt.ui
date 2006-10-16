@@ -64,7 +64,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 	
 	private static final String CLEANUP_PAGE_SETTINGS_KEY= "cleanup_page"; //$NON-NLS-1$
-	private static final String CLEANUP_PROFILES_PREFERENCE_KEY= "org.eclipse.jdt.ui.cleanupprofiles"; //$NON-NLS-1$
 	private static final String DIALOGSTORE_LASTSAVELOADPATH= JavaUI.ID_PLUGIN + ".cleanup"; //$NON-NLS-1$
 
 	private final IScopeContext fCurrContext;
@@ -85,7 +84,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
     }
 	
 	protected ProfileStore createProfileStore(IProfileVersioner versioner) {
-	    return new ProfileStore(CLEANUP_PROFILES_PREFERENCE_KEY, versioner);
+	    return new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, versioner);
     }
 	
 	protected ProfileManager createProfileManager(List profiles, IScopeContext context, PreferencesAccess access, IProfileVersioner profileVersioner) {
