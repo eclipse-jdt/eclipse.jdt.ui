@@ -147,7 +147,7 @@ public class JUnit4TestFinder implements ITestFinder {
 			// find all classes in the region
 			for (Iterator iterator= candidates.iterator(); iterator.hasNext();) {
 				IType curr= (IType) iterator.next();
-				if (TestSearchEngine.isAccessibleClass(curr) && region.contains(curr)) {
+				if (TestSearchEngine.isAccessibleClass(curr) && !Flags.isAbstract(curr.getFlags()) && region.contains(curr)) {
 					result.add(curr);
 				}
 			}
@@ -262,9 +262,12 @@ public class JUnit4TestFinder implements ITestFinder {
 	
 	
 	private boolean isTest(ITypeBinding binding) throws JavaModelException {
+		if (Modifier.isAbstract(binding.getModifiers()))
+			return false;
+		
 		if (Annotation.RUN_WITH.annotatesTypeOrSuperTypes(binding) || Annotation.TEST.annotatesAtLeastOneMethod(binding)) {
 			return true;
 		}
-		return !Modifier.isAbstract(binding.getModifiers()) && TestSearchEngine.isTestImplementor(binding);
+		return TestSearchEngine.isTestImplementor(binding);
 	}
 }

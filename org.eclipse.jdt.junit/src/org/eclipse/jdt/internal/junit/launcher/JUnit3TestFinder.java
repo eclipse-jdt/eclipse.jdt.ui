@@ -142,7 +142,7 @@ public class JUnit3TestFinder implements ITestFinder {
 			}
 			
 			IType declaringType= ((IMethod) enclosingElement).getDeclaringType();
-			if (!TestSearchEngine.isAccessibleClass(declaringType)) {
+			if (!TestSearchEngine.isAccessibleClass(declaringType) && !Flags.isAbstract(declaringType.getFlags())) {
 				return;
 			}
 			fResult.add(declaringType);
@@ -161,11 +161,6 @@ public class JUnit3TestFinder implements ITestFinder {
 		new SearchEngine().search(suitePattern, participants, scope, requestor, pm);
 	}	
 
-
-	
-
-	
-	
 	public boolean isTest(ITypeBinding type) throws JavaModelException {
 		if (!type.isClass() || !Modifier.isPublic(type.getModifiers())) {
 			return false;
