@@ -30,6 +30,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationExtension;
 
+import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -157,6 +158,10 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		
 		CompletionProposalCollector collector= createCollector(context);
 		collector.setInvocationContext(context);
+		
+		// Allow completions for unresolved types - since 3.3
+		collector.setAllowsRequiredProposals(CompletionProposal.FIELD_REF, CompletionProposal.TYPE_REF, true);
+		collector.setAllowsRequiredProposals(CompletionProposal.METHOD_REF, CompletionProposal.TYPE_REF, true);
 
 		try {
 			Point selection= viewer.getSelectedRange();
