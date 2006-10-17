@@ -65,6 +65,15 @@ public interface ICleanUp {
 	 * @return The options as map or null
 	 */
 	public abstract Map getRequiredOptions();
+	
+	/**
+	 * If true a fresh AST, containing all the changes from previous clean ups, 
+	 * will be created and passed to createFix.
+	 * 
+	 * @param compilationUnit The current available AST
+	 * @return true if the caller needs an up to date AST
+	 */
+	public abstract boolean needsFreshAST(CompilationUnit compilationUnit);
 
 	/**
 	 * Persist current settings of this in <code>settings</code>

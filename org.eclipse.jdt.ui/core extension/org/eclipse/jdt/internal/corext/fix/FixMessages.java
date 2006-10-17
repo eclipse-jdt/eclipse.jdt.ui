@@ -27,6 +27,7 @@ public final class FixMessages extends NLS {
 	public static String ConvertIterableLoopOperation_RemoveUpdateExpression_Warning;
 	public static String ConvertIterableLoopOperation_RemoveUpdateExpressions_Warning;
 	public static String ConvertIterableLoopOperation_semanticChangeWarning;
+	public static String ImportsFix_OrganizeImports_Description;
 	
 	public static String PotentialProgrammingProblemsFix_calculatingUIDFailed_binding;
 	public static String PotentialProgrammingProblemsFix_calculatingUIDFailed_exception;

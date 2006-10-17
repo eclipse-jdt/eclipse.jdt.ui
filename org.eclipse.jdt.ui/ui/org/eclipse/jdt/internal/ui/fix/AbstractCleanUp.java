@@ -29,6 +29,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
@@ -181,5 +182,12 @@ public abstract class AbstractCleanUp implements ICleanUp {
 		
 		Map options= CleanUpConstants.loadOptions(context);
 		fFlags= createFlag(options);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public boolean needsFreshAST(CompilationUnit compilationUnit) {
+        return false;
     }
 }

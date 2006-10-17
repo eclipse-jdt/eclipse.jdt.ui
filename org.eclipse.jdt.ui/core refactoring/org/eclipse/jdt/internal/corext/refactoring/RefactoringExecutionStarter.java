@@ -106,6 +106,7 @@ import org.eclipse.jdt.internal.ui.fix.CommentFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
@@ -251,6 +252,7 @@ public final class RefactoringExecutionStarter {
 		refactoring.addCleanUp(new PotentialProgrammingProblemsCleanUp());
 		refactoring.addCleanUp(new UnnecessaryCodeCleanUp());
 		refactoring.addCleanUp(new StringCleanUp());
+		refactoring.addCleanUp(new ImportsCleanUp());
 		refactoring.addCleanUp(new CodeFormatCleanUp());
 		refactoring.addCleanUp(new CommentFormatCleanUp());
 		

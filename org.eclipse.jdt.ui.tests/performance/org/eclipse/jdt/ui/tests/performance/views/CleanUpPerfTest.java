@@ -136,6 +136,9 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 			public String getPreview() {
 				return null;
 			}
+			public boolean needsFreshAST(CompilationUnit compilationUnit) {
+	            return false;
+            }
 		});
 		
 		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());

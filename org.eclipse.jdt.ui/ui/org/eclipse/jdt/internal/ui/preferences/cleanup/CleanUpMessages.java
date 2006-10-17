@@ -32,7 +32,11 @@ public class CleanUpMessages extends NLS {
 	public static String CodeFormatingTabPage_CheckboxName_FormatMultiLineComments;
 	public static String CodeFormatingTabPage_CheckboxName_FormatSingleLineComments;
 	public static String CodeFormatingTabPage_CheckboxName_FormatSourceCode;
+	public static String CodeFormatingTabPage_FormatterSettings_Description;
 	public static String CodeFormatingTabPage_GroupName_Formatter;
+	public static String CodeFormatingTabPage_Imports_GroupName;
+	public static String CodeFormatingTabPage_OrganizeImports_CheckBoxLable;
+	public static String CodeFormatingTabPage_OrganizeImportsSettings_Description;
 
 	public static String CodeStyleTabPage_CheckboxName_ConvertForLoopToEnhanced;
 	public static String CodeStyleTabPage_CheckboxName_UseBlocks;

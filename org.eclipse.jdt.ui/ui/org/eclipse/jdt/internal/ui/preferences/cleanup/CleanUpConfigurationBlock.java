@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.ui.fix.CommentFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
+import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
@@ -109,6 +110,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
                 		new StringCleanUp(sharedSettings),
                 		new Java50CleanUp(sharedSettings),
                 		new PotentialProgrammingProblemsCleanUp(sharedSettings),
+                		new ImportsCleanUp(sharedSettings),
                 		new CodeFormatCleanUp(sharedSettings),
                 		new CommentFormatCleanUp(sharedSettings)
                 };

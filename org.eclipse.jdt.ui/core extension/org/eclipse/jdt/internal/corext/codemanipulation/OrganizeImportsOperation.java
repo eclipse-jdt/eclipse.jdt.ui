@@ -380,10 +380,27 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			monitor= new NullProgressMonitor();
 		}
 		try {
+			monitor.beginTask(Messages.format(CodeGenerationMessages.OrganizeImportsOperation_description, fCompilationUnit.getElementName()), 10);
+			
+    		TextEdit edit= createTextEdit(new SubProgressMonitor(monitor, 9));
+    		if (edit == null)
+    			return;
+    		
+    		JavaModelUtil.applyEdit(fCompilationUnit, edit, fDoSave, new SubProgressMonitor(monitor, 1));
+		} finally {
+			monitor.done();
+		}
+	}
+	
+	public TextEdit createTextEdit(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}
+		try {
 			fNumberOfImportsAdded= 0;
 			fNumberOfImportsRemoved= 0;
 			
-			monitor.beginTask(Messages.format(CodeGenerationMessages.OrganizeImportsOperation_description, fCompilationUnit.getElementName()), 10);
+			monitor.beginTask(Messages.format(CodeGenerationMessages.OrganizeImportsOperation_description, fCompilationUnit.getElementName()), 9);
 			
 			CompilationUnit astRoot= fASTRoot;
 			if (astRoot == null) {
@@ -399,10 +416,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			List/*<SimpleName>*/ typeReferences= new ArrayList();
 			List/*<SimpleName>*/ staticReferences= new ArrayList();
 			
-			boolean res= collectReferences(astRoot, typeReferences, staticReferences, oldSingleImports, oldDemandImports);
-			if (!res) {
-				return;
-			}
+			if (!collectReferences(astRoot, typeReferences, staticReferences, oldSingleImports, oldDemandImports))
+				return null;
 						
 			monitor.worked(1);
 		
@@ -430,12 +445,12 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 					importsRewrite.addImport(typeInfo.getFullyQualifiedName());
 				}				
 			}
+
+			TextEdit result= importsRewrite.rewriteImports(new SubProgressMonitor(monitor, 3));
 			
-			TextEdit edit= importsRewrite.rewriteImports(new SubProgressMonitor(monitor, 3));
-			JavaModelUtil.applyEdit(fCompilationUnit, edit, fDoSave, new SubProgressMonitor(monitor, 1));
-						
 			determineImportDifferences(importsRewrite, oldSingleImports, oldDemandImports);
-			processor= null;
+			
+			return result;
 		} finally {
 			monitor.done();
 		}

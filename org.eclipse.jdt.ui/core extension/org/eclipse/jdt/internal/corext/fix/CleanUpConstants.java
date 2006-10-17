@@ -15,7 +15,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
@@ -726,6 +725,18 @@ public class CleanUpConstants {
 	public static final String ADD_MISSING_NLS_TAGS= "cleanup.add_missing_nls_tags"; //$NON-NLS-1$
 	
 	/**
+	 * If true the imports are organized while cleaning up code.
+	 * 
+	 * Possible values: {TRUE, FALSE}<br>
+	 * Default value: Value returned by {@link #getEclipseDefaultSettings()}<br>
+	 * <br>
+	 * @see #TRUE
+	 * @see #FALSE
+	 * @since 3.3
+	 */
+	public static final String ORGANIZE_IMPORTS= "cleanup.organize_imports"; //$NON-NLS-1$
+	
+	/**
 	 * Should the Clean Up Wizard be shown when executing the Clean Up Action?
 	 * <br><br>
 	 * Possible values: {<code><b>true</b></code>, <code><b>false</b></code>}<br>
@@ -807,13 +818,15 @@ public class CleanUpConstants {
     		
     	result.put(ADD_MISSING_NLS_TAGS, FALSE);
 
-    	//Code Formatting
+    	//Code Organising
     	result.put(FORMAT_SOURCE_CODE, FALSE);
     	
     	result.put(FORMAT_COMMENT, FALSE);
     		result.put(FORMAT_SINGLE_LINE_COMMENT, TRUE);
     		result.put(FORMAT_MULTI_LINE_COMMENT, TRUE);
     		result.put(FORMAT_JAVADOC, TRUE);
+    		
+    	result.put(ORGANIZE_IMPORTS, FALSE);
     	
 	    return result;
     }
@@ -825,9 +838,7 @@ public class CleanUpConstants {
 		Map defaultSettings= getEclipseDefaultSettings();
 		for (Iterator iterator= defaultSettings.keySet().iterator(); iterator.hasNext();) {
 	        String key= (String)iterator.next();
-	        String value= node.get(key, null);
-	        
-	        Assert.isTrue(value != null, key);
+	        String value= node.get(key, FALSE);
 	        
 	        result.put(key, value);
         }

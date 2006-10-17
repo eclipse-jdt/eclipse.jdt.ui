@@ -99,7 +99,7 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 	
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package model;\n"); //$NON-NLS-1$
+		buf.append("package org.model;\n"); //$NON-NLS-1$
 		buf.append("public class Engine {\n"); //$NON-NLS-1$
 		buf.append("  public void start() {}\n"); //$NON-NLS-1$
 		buf.append("    public \n"); //$NON-NLS-1$

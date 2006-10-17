@@ -11,6 +11,10 @@
 
 package org.eclipse.jdt.internal.ui.preferences.cleanup;
 
+import java.util.Map;
+
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+
 import org.eclipse.jdt.internal.ui.preferences.formatter.IProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 
@@ -20,8 +24,9 @@ public class CleanUpProfileVersioner implements IProfileVersioner {
 	private static final String CLEAN_UP_PROFILE_KIND= "CleanUpProfile"; //$NON-NLS-1$
 
 	private static final int VERSION_1= 1; // 3.3M2
+	private static final int VERSION_2= 2; // 3.3M3 Added ORGANIZE_IMPORTS
 	
-	private static final int CURRENT_VERSION= VERSION_1;
+	private static final int CURRENT_VERSION= VERSION_2;
 	
 	/* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.preferences.cleanup.IProfileVersioner#getFirstVersion()
@@ -41,6 +46,9 @@ public class CleanUpProfileVersioner implements IProfileVersioner {
      * @see org.eclipse.jdt.internal.ui.preferences.cleanup.IProfileVersioner#updateAndComplete(org.eclipse.jdt.internal.ui.preferences.cleanup.ProfileManager.CustomProfile)
      */
 	public void update(CustomProfile profile) {
+		if (profile.getVersion() == VERSION_1)
+			updateFrom1To2(profile);
+		
 		profile.setVersion(CURRENT_VERSION);
 	}
 
@@ -49,6 +57,11 @@ public class CleanUpProfileVersioner implements IProfileVersioner {
      */
     public String getProfileKind() {
 	    return CLEAN_UP_PROFILE_KIND;
+    }
+    
+	private static void updateFrom1To2(CustomProfile profile) {
+		Map defaultSettings= CleanUpConstants.getEclipseDefaultSettings();
+		profile.getSettings().put(CleanUpConstants.ORGANIZE_IMPORTS, defaultSettings.get(CleanUpConstants.ORGANIZE_IMPORTS));
     }
 	
  }

@@ -196,9 +196,13 @@ public class CleanUpRefactoring extends Refactoring {
         }
 
 		private ICleanUp[] calculateSolutions(ICompilationUnit source, CompilationUnit ast, ICleanUp[] cleanUps) {
+			if (cleanUps.length == 0)
+				return null;
+			
 			CompilationUnitChange solution= null;
 			List/*<ICleanUp>*/ result= null;
-			for (int i= 0; i < cleanUps.length; i++) {
+			int i= 0;
+			do {
 				ICleanUp cleanUp= cleanUps[i];
 				try {
 					IFix fix= cleanUp.createFix(ast);
@@ -231,13 +235,21 @@ public class CleanUpRefactoring extends Refactoring {
 				} catch (CoreException e) {
 					throw new FixCalculationException(e);
 				}
-			}
+				i++;
+			} while (i < cleanUps.length && (solution == null || !cleanUps[i].needsFreshAST(ast)));
 			
 			if (solution != null) {
 				if (fLeaveFilesDirty)
 					solution.setSaveMode(TextFileChange.LEAVE_DIRTY);
 				integrateSolution(solution, source);
 			}
+			
+			for (; i < cleanUps.length; i++) {
+	            if (result == null) {
+	            	result= new ArrayList();
+	            }
+	            result.add(cleanUps[i]);
+            }
 			
 			if (result == null) {
 				return null;
@@ -773,8 +785,14 @@ public class CleanUpRefactoring extends Refactoring {
 			MultiTextEdit multiTextEdit1= (MultiTextEdit)edit1;
 			TextEdit[] children1= multiTextEdit1.getChildren();
 			
+			if (children1.length == 0)
+				return edit2;
+			
 			MultiTextEdit multiTextEdit2= (MultiTextEdit)edit2;
 			TextEdit[] children2= multiTextEdit2.getChildren();
+			
+			if (children2.length == 0)
+				return edit1;
 			
 			int i1= 0;
 			int i2= 0;

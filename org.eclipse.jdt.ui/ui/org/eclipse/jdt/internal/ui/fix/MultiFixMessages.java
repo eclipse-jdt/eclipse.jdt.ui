@@ -27,6 +27,7 @@ public class MultiFixMessages extends NLS {
 	public static String CleanUpRefactoringWizard_Profile_TableHeader;
 	public static String CleanUpRefactoringWizard_Project_TableHeader;
 	public static String CleanUpRefactoringWizard_unknownProfile_Name;
+	public static String ImportsCleanUp_OrganizeImports_Description;
 	public static String StringMultiFix_AddMissingNonNls_description;
 	public static String StringMultiFix_RemoveUnnecessaryNonNls_description;
 	

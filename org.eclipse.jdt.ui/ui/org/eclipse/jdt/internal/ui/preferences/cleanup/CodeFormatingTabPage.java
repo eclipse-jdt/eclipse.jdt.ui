@@ -25,9 +25,11 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CommentFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
+import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
 import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 public final class CodeFormatingTabPage extends ModifyDialogTabPage {
 	   
@@ -42,6 +44,7 @@ public final class CodeFormatingTabPage extends ModifyDialogTabPage {
 
 	    protected JavaPreview doCreateJavaPreview(Composite parent) {
 	        fCleanUpPreview= new CleanUpPreview(parent, new ICleanUp[] {
+	        	new ImportsCleanUp(fValues),
         		new CodeFormatCleanUp(fValues),
     	    	new CommentFormatCleanUp(fValues)
 	        }, false);
@@ -77,20 +80,24 @@ public final class CodeFormatingTabPage extends ModifyDialogTabPage {
 	    	multiLinePref.setEnabled(formatCommentsPref.getChecked());
 	    	singleLinePref.setEnabled(formatCommentsPref.getChecked());
 	    	
-//	    	Link link= new Link(group, SWT.WRAP | SWT.RIGHT);
-//			link.setText("The settings for the Formatter can be changed on the <a>Formatter preference page</a>."); 
-//			link.addSelectionListener(new SelectionAdapter() {
-//				public void widgetSelected(SelectionEvent e) {
-//					CleanUpModifyDialog.this.okPressed();
-//					PreferencesUtil.createPreferenceDialogOn(getShell(), CodeFormatterPreferencePage.PREF_ID, null, null).open();
-//				}
-//			});
-//			link.setToolTipText("Shows the Formatter preference page"); 
-//			GridData gridData= new GridData(GridData.FILL, GridData.CENTER, true, false, numColumns, 0);
-//			gridData.widthHint= convertHorizontalDLUsToPixels(150);
-//			link.setLayoutData(gridData);
-//			link.setFont(composite.getFont());
+	    	PixelConverter pixelConverter= new PixelConverter(composite);
+	    	
+	    	createLabel(CleanUpMessages.CodeFormatingTabPage_FormatterSettings_Description, group, numColumns, pixelConverter).setFont(composite.getFont());
+			
+			Group importsGroup= createGroup(numColumns, composite, CleanUpMessages.CodeFormatingTabPage_Imports_GroupName);
+	    	createCheckboxPref(importsGroup, numColumns, CleanUpMessages.CodeFormatingTabPage_OrganizeImports_CheckBoxLable, CleanUpConstants.ORGANIZE_IMPORTS, CleanUpModifyDialog.FALSE_TRUE);
+	    	
+	    	createLabel(CleanUpMessages.CodeFormatingTabPage_OrganizeImportsSettings_Description, importsGroup, numColumns, pixelConverter).setFont(composite.getFont());
 	    }
+
+		private Label createLabel(String text, Group group, int numColumns, PixelConverter pixelConverter) {
+	        Label label= new Label(group, SWT.WRAP);
+	    	label.setText(text); 
+			GridData gridData= new GridData(GridData.FILL, GridData.CENTER, true, false, numColumns, 0);
+			gridData.widthHint= pixelConverter.convertHorizontalDLUsToPixels(150);
+			label.setLayoutData(gridData);
+			return label;
+        }
 
 	    private void intent(Group group) {
 	        Label l= new Label(group, SWT.NONE);
