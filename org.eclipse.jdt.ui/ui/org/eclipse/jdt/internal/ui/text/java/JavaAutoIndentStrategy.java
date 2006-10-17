@@ -838,7 +838,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				break;
 		}
 
-		document.replace(from, to - from, null);
+		document.replace(from, to - from, ""); //$NON-NLS-1$
 	}
 
 	/**
