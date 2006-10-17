@@ -58,10 +58,7 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 		fArguments= arguments;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#evaluateModifiers(org.eclipse.jdt.core.dom.ASTNode)
-	 */
-	protected int evaluateModifiers(ASTNode targetTypeDecl) {
+	private int evaluateModifiers(ASTNode targetTypeDecl) {
 		if (getSenderBinding().isAnnotation()) {
 			return 0;
 		}
@@ -99,6 +96,15 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 		}
 		return Modifier.PUBLIC;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewModifiers(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List)
+	 */
+	protected void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List modifiers) {
+		modifiers.addAll(rewrite.getAST().newModifiers(evaluateModifiers(targetTypeDecl)));
+		ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(this, rewrite, modifiers, getSenderBinding().isInterface());
+	}
+
 
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#isConstructor()

@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -636,6 +637,27 @@ public class ModifierCorrectionSubProcessor {
 			proposals.add(proposal);
 		}
 	}
+	
+	public static void removeOverrideAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
+
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (!(selectedNode instanceof MethodDeclaration)) {
+			return;
+		}
+		MethodDeclaration methodDecl= (MethodDeclaration) selectedNode;
+		Annotation annot= findAnnotation("java.lang.Override", methodDecl.modifiers()); //$NON-NLS-1$
+		if (annot != null) {
+			ASTRewrite rewrite= ASTRewrite.create(annot.getAST());
+			rewrite.remove(annot, null);
+			String label= CorrectionMessages.ModifierCorrectionSubProcessor_remove_override;
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
+			proposals.add(proposal);
+			
+			QuickAssistProcessor.getCreateInSuperClassProposals(context, methodDecl.getName(), proposals);
+		}
+	}
 
 	private static final String KEY_MODIFIER= "modifier"; //$NON-NLS-1$
 	
@@ -724,4 +746,20 @@ public class ModifierCorrectionSubProcessor {
 		}
 		return null;
 	}
+	
+	private static Annotation findAnnotation(String qualifiedTypeName, List modifiers) {
+		for (int i= 0; i < modifiers.size(); i++) {
+			Object curr= modifiers.get(i);
+			if (curr instanceof Annotation) {
+				Annotation annot= (Annotation) curr;
+				ITypeBinding binding= annot.getTypeName().resolveTypeBinding();
+				if (binding != null && qualifiedTypeName.equals(binding.getQualifiedName())) {
+					return annot;
+				}
+			}
+		}
+		return null;
+	}
+
+
 }

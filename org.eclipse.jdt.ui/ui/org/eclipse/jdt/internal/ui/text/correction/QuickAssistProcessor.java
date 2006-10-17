@@ -185,7 +185,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 	
-	private static boolean getExtractLocalProposal(IInvocationContext context, ASTNode covering, ArrayList proposals) throws CoreException {
+	private static boolean getExtractLocalProposal(IInvocationContext context, ASTNode covering, Collection proposals) throws CoreException {
 		ASTNode node= context.getCoveredNode();
 		
 		if (!(node instanceof Expression)) {
@@ -1092,7 +1092,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 
-	private static boolean getCreateInSuperClassProposals(IInvocationContext context, ASTNode node, ArrayList resultingCollections) throws CoreException {
+	public static boolean getCreateInSuperClassProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		if (!(node instanceof SimpleName) || !(node.getParent() instanceof MethodDeclaration)) {
 			return false;
 		}
@@ -1132,7 +1132,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					ITypeBinding typeDecl= curr.getTypeDeclaration();
 					ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, typeDecl);
 					if (targetCU != null) {
-						String label= Messages.format(CorrectionMessages.QuickAssistProcessor_createmethodinsuper_description, curr.getName());
+						String label= Messages.format(CorrectionMessages.QuickAssistProcessor_createmethodinsuper_description, new String[] { curr.getName(), binding.getName() });
 						resultingCollections.add(new NewDefiningMethodProposal(label, targetCU, astRoot, typeDecl, binding, paramNames, 6));
 					}
 				}
@@ -1141,7 +1141,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getConvertForLoopProposal(IInvocationContext context, ASTNode node, ArrayList resultingCollections) throws CoreException {
+	private static boolean getConvertForLoopProposal(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		ForStatement forStatement= getEnclosingForStatementHeader(node);
 		if (forStatement == null)
 			return false;
@@ -1162,7 +1162,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getConvertIterableLoopProposal(IInvocationContext context, ASTNode node, ArrayList resultingCollections) throws CoreException {
+	private static boolean getConvertIterableLoopProposal(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		ForStatement forStatement= getEnclosingForStatementHeader(node);
 		if (forStatement == null)
 			return false;
@@ -1203,7 +1203,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return null;
 	}
 	
-	private static boolean getMakeVariableDeclarationFinalProposals(IInvocationContext context, ASTNode node, ArrayList resultingCollections) {
+	private static boolean getMakeVariableDeclarationFinalProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(context.getSelectionOffset(), context.getSelectionLength()), false);
 		context.getASTRoot().accept(analyzer);
 		ASTNode[] selectedNodes= analyzer.getSelectedNodes();

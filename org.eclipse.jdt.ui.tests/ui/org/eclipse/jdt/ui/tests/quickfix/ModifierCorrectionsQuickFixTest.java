@@ -30,6 +30,9 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
@@ -75,6 +78,8 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 		
 		fJProject1= ProjectTestSetup.getProject();
+		
+		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "", null);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
@@ -2730,6 +2735,65 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    class F {\n");
 		buf.append("        volatile int x;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	
+	public void testOverrideAnnotationButNotOverriding() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class OtherMachine {\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("OtherMachine.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("\n");
+		buf.append("public class Machine extends OtherMachine {\n");
+		buf.append("    @Override\n");
+		buf.append("    public boolean isAlive(OtherMachine m) throws IOException {\n");
+		buf.append("        return true;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Machine.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("\n");
+		buf.append("public class Machine extends OtherMachine {\n");
+		buf.append("    public boolean isAlive(OtherMachine m) throws IOException {\n");
+		buf.append("        return true;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("\n");
+		buf.append("public class OtherMachine {\n");
+		buf.append("\n");
+		buf.append("    public boolean isAlive(OtherMachine m) throws IOException {\n");
+		buf.append("        return false;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[1]= buf.toString();

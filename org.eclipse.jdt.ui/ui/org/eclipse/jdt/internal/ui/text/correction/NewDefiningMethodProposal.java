@@ -41,9 +41,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  */
 public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal {
 
-	private static final String KEY_NAME= "name"; //$NON-NLS-1$
-	private static final String KEY_TYPE= "type"; //$NON-NLS-1$
-
 	private final IMethodBinding fMethod;
 	private final String[] fParamNames;
 
@@ -84,9 +81,17 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 
 			params.add(newParam);
 
-			addLinkedPosition(rewrite.track(newParam.getType()), false, "arg_type_" + i); //$NON-NLS-1$
-			addLinkedPosition(rewrite.track(newParam.getName()), false, "arg_name_" + i); //$NON-NLS-1$
+			String groupId= "arg_name_" + i; //$NON-NLS-1$
+			addLinkedPosition(rewrite.track(newParam.getName()), false, groupId);
+			addLinkedPositionProposal(groupId, paramNames[i], null);
+			
+			String[] nameProposals= StubUtility.getArgumentNameSuggestions(project, curr, paramNames);
+			for (int k= 0; k < nameProposals.length; k++) {
+				addLinkedPositionProposal(groupId, nameProposals[k], null);
+			}
 		}
+			
+			
 	}
 
 	/* (non-Javadoc)
@@ -95,14 +100,10 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 	protected SimpleName getNewName(ASTRewrite rewrite) {
 		AST ast= rewrite.getAST();
 		SimpleName nameNode= ast.newSimpleName(fMethod.getName());
-		addLinkedPosition(rewrite.track(nameNode), false, KEY_NAME);
 		return nameNode;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#evaluateModifiers(org.eclipse.jdt.core.dom.ASTNode)
-	 */
-	protected int evaluateModifiers(ASTNode targetTypeDecl) {
+	private int evaluateModifiers() {
 		if (getSenderBinding().isInterface()) {
 			return 0;
 		} else {
@@ -113,15 +114,19 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 			return modifiers & (Modifier.PUBLIC | Modifier.PROTECTED | Modifier.ABSTRACT | Modifier.STRICTFP);
 		}
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewModifiers(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List)
+	 */
+	protected void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List modifiers) {
+		modifiers.addAll(rewrite.getAST().newModifiers(evaluateModifiers()));
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#getNewMethodType(org.eclipse.jdt.core.dom.rewrite.ASTRewrite)
 	 */
 	protected Type getNewMethodType(ASTRewrite rewrite) throws CoreException {
-		Type newTypeNode= getImportRewrite().addImport(fMethod.getReturnType(), rewrite.getAST());
-
-		addLinkedPosition(rewrite.track(newTypeNode), false, KEY_TYPE);
-		return newTypeNode;
+		return getImportRewrite().addImport(fMethod.getReturnType(), rewrite.getAST());
 	}
 
 	/* (non-Javadoc)

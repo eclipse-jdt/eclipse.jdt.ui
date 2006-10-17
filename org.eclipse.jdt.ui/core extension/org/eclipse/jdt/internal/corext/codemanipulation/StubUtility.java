@@ -878,6 +878,22 @@ public class StubUtility {
 		return sortByLength(res); // longest first
 	}
 	
+	public static String[] getArgumentNameSuggestions(IJavaProject project, ITypeBinding binding, String[] excluded) {
+		int dim= 0;
+		if (binding.isArray()) {
+			dim= binding.getDimensions();
+			binding= binding.getElementType();
+		}
+		if (binding.isParameterizedType()) {
+			binding= binding.getTypeDeclaration();
+		}
+		
+		String typeName= workaround38111(binding.getQualifiedName());
+		String packName= Signature.getQualifier(typeName);
+		String[] res= NamingConventions.suggestArgumentNames(project, packName, typeName, dim, excluded);
+		return sortByLength(res); // longest first
+	}
+	
 	/*
 	 * Workarounds for bug 38111
 	 */
