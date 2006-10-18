@@ -129,7 +129,7 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 			return null;
 		
 		CompletionProposal proposal= CompletionProposal.create(CompletionProposal.TYPE_REF, context.getInvocationOffset());
-		proposal.setCompletion(type.getElementName().toCharArray());
+		proposal.setCompletion(fullyQualifiedType.toCharArray());
 		proposal.setDeclarationSignature(type.getPackageFragment().getElementName().toCharArray());
 		proposal.setFlags(type.getFlags());
 		proposal.setRelevance(relevance);
