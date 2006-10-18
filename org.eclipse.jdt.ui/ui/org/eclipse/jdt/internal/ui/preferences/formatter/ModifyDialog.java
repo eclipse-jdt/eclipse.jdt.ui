@@ -261,12 +261,7 @@ public abstract class ModifyDialog extends StatusDialog {
 	}
 	
 	private void saveButtonPressed() {
-		Profile selected;
-		if (!fProfile.getName().trim().equals(fProfileNameField.getText())) {
-			selected= new CustomProfile(fProfileNameField.getText(), fProfile.getSettings(), fProfile.getVersion(), fProfileManager.getProfileVersioner().getProfileKind());
-		} else {
-			selected= fProfile;
-		}
+		Profile selected= new CustomProfile(fProfileNameField.getText(), new HashMap(fWorkingValues), fProfile.getVersion(), fProfileManager.getProfileVersioner().getProfileKind());
 		
 		final FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
 		dialog.setText(FormatterMessages.CodingStyleConfigurationBlock_save_profile_dialog_title); 
