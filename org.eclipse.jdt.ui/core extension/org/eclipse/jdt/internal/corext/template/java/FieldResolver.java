@@ -7,7 +7,6 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Sebastian Davids: sdavids@gmx.de - see bug 25376
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
@@ -20,24 +19,24 @@ import org.eclipse.jface.text.templates.TemplateVariableResolver;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.Variable;
 
 /**
- * Resolves template variables to a local variable that is assignment-compatible with the variable
- * instance' class parameter.
+ * Resolves a template variable to a field that is assignment-compatible
+ * with the variable instance' class parameter.
  * 
  * @since 3.3
  */
-public class VarResolver extends TemplateVariableResolver {
+public class FieldResolver extends TemplateVariableResolver {
 	
 	private final String fDefaultType;
 	private String fType;
 
 	/**
-	 * Default ctor for instantiation by the extension point.
+	 * Default constructor for instantiation by the extension point.
 	 */
-	public VarResolver() {
+	public FieldResolver() {
 		this("java.lang.Object"); //$NON-NLS-1$
 	}
 	
-	VarResolver(String defaultType) {
+	FieldResolver(String defaultType) {
 		fDefaultType= defaultType;
 	}
 
@@ -55,20 +54,15 @@ public class VarResolver extends TemplateVariableResolver {
 			JavaContext jc= (JavaContext) context;
 			JavaVariable jv= (JavaVariable) variable;
 			jv.setParamType(fType);
-	        Variable[] localLariables= jc.getLocalVariables(fType);
 	        Variable[] fields= jc.getFields(fType);
-	        Variable[] variables= new Variable[localLariables.length + fields.length];
-	        System.arraycopy(fields, 0, variables, 0, fields.length);
-	        System.arraycopy(localLariables, 0, variables, fields.length, localLariables.length);
-	        
-			if (variables.length > 0) {
-				jv.setChoices(variables);
+			if (fields.length > 0) {
+				jv.setChoices(fields);
 				jc.markAsUsed(jv.getDefaultValue());
 			} else {
 				super.resolve(variable, context);
 				return;
 			}
-			if (variables.length > 1)
+			if (fields.length > 1)
 				variable.setUnambiguous(false);
 			else
 				variable.setUnambiguous(isUnambiguous(context));
@@ -81,15 +75,10 @@ public class VarResolver extends TemplateVariableResolver {
 	 */
 	protected String[] resolveAll(TemplateContext context) {
         JavaContext jc= (JavaContext) context;
-        Variable[] localVariables= jc.getLocalVariables(fType);
-        Variable[] fields= jc.getFields(fType);
-        Variable[] variables= new Variable[localVariables.length + fields.length];
-        System.arraycopy(fields, 0, variables, 0, fields.length);
-        System.arraycopy(localVariables, 0, variables, fields.length, localVariables.length);
-        
-        String[] names= new String[variables.length];
-        for (int i= 0; i < variables.length; i++)
-			names[i]= variables[i].getName();
+        Variable[] iterables= jc.getFields(fType);
+        String[] names= new String[iterables.length];
+        for (int i= 0; i < iterables.length; i++)
+			names[i]= iterables[i].getName();
         if (names.length > 0)
         	jc.markAsUsed(names[0]);
 		return names;

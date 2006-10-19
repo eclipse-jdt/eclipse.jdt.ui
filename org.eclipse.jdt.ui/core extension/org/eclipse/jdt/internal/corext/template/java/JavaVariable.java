@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import org.eclipse.jface.text.templates.TemplateVariableType;
 
-import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.LocalVariable;
+import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.Variable;
 
 import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
 
@@ -29,8 +29,8 @@ public final class JavaVariable extends MultiVariable {
 	 * @since 3.3
 	 */
 	public String toString(Object object) {
-		if (object instanceof LocalVariable)
-			return ((LocalVariable) object).getName();
+		if (object instanceof Variable)
+			return ((Variable) object).getName();
 		return super.toString(object);
 	}
 

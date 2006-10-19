@@ -47,7 +47,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 	 * code completion was invoked. Special predicates exist to query whether
 	 * a variable can be iterated over. 
 	 */
-	public final class LocalVariable {
+	public final class Variable {
 		private static final int UNKNOWN= 0, NONE= 0;
 		private static final int ARRAY= 1;
 		private static final int COLLECTION= 2;
@@ -68,7 +68,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		private int fChecked= NONE;
 		private String[] fMemberTypes;
 		
-		private LocalVariable(String name, String signature) {
+		private Variable(String name, String signature) {
 			this.name= name;
 			this.signature= signature;
 		}
@@ -350,7 +350,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		private static final String OBJECT_SIGNATURE= "Ljava.lang.Object;"; //$NON-NLS-1$
 		
 		private final ITypeHierarchy fHierarchy;
-		private final LocalVariable fVariable;
+		private final Variable fVariable;
 		private final IType fType;
 		private final List fBounds= new ArrayList();
 
@@ -366,7 +366,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		 * @throws JavaModelException if the type of <code>variable</code>
 		 *         cannot be found
 		 */
-		public TypeParameterResolver(LocalVariable variable) throws JavaModelException {
+		public TypeParameterResolver(Variable variable) throws JavaModelException {
 			String typeName= SignatureUtil.stripSignatureToFQN(variable.signature);
 			IJavaProject project= fUnit.getJavaProject();
 			fType= project.findType(typeName);
@@ -693,6 +693,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 	private ICompilationUnit fUnit;
 
 	private List fLocalVariables= new ArrayList();
+	private List fFields= new ArrayList();
 	private Map fLocalTypes= new HashMap();
 
 	private boolean fError;
@@ -705,7 +706,6 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 	CompilationUnitCompletion(ICompilationUnit unit) {
 		reset(unit);
 		setIgnored(CompletionProposal.ANONYMOUS_CLASS_DECLARATION, true);
-		setIgnored(CompletionProposal.FIELD_REF, true);
 		setIgnored(CompletionProposal.KEYWORD, true);
 		setIgnored(CompletionProposal.LABEL_REF, true);
 		setIgnored(CompletionProposal.METHOD_DECLARATION, true);
@@ -725,7 +725,9 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 	private void reset(ICompilationUnit unit) {
 		fUnit= unit;
 		fLocalVariables.clear();
+		fFields.clear();
 		fLocalTypes.clear();
+		
 		if (fUnit != null) {
 			try {
 				IType[] cuTypes= fUnit.getAllTypes();
@@ -753,7 +755,11 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 			
 			case CompletionProposal.LOCAL_VARIABLE_REF:
 				// collect local variables
-				fLocalVariables.add(new LocalVariable(name, signature));
+				fLocalVariables.add(new Variable(name, signature));
+				break;
+			case CompletionProposal.FIELD_REF:
+				// collect local variables
+				fFields.add(new Variable(name, signature));
 				break;
 				
 			default:
@@ -787,8 +793,24 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		String[] names= new String[fLocalVariables.size()];
 		int i= 0;
 		for (ListIterator iterator= fLocalVariables.listIterator(fLocalVariables.size()); iterator.hasPrevious();) {
-			LocalVariable localVariable= (LocalVariable) iterator.previous();
+			Variable localVariable= (Variable) iterator.previous();
 			names[i++]= localVariable.getName();
+		}		
+		return names;
+	}	
+	
+	/**
+	 * Returns all field names.
+	 * 
+	 * @return all field names
+	 * @since 3.3
+	 */
+	public String[] getFieldNames() {
+		String[] names= new String[fFields.size()];
+		int i= 0;
+		for (ListIterator iterator= fFields.listIterator(fFields.size()); iterator.hasPrevious();) {
+			Variable field= (Variable)iterator.previous();
+			names[i++]= field.getName();
 		}		
 		return names;
 	}	
@@ -798,17 +820,17 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 	 * 
 	 * @return all local arrays
 	 */
-	public LocalVariable[] findLocalArrays() {
+	public Variable[] findLocalArrays() {
 		List arrays= new ArrayList();
 
 		for (ListIterator iterator= fLocalVariables.listIterator(fLocalVariables.size()); iterator.hasPrevious();) {
-			LocalVariable localVariable= (LocalVariable) iterator.previous();
+			Variable localVariable= (Variable) iterator.previous();
 
 			if (localVariable.isArray())
 				arrays.add(localVariable);
 		}
 
-		return (LocalVariable[]) arrays.toArray(new LocalVariable[arrays.size()]);
+		return (Variable[]) arrays.toArray(new Variable[arrays.size()]);
 	}
 	
 	/**
@@ -818,17 +840,37 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 	 * @param clazz the fully qualified type name of the class to match
 	 * @return all local variables matching <code>clazz</code>
 	 */
-	public LocalVariable[] findLocalVariables(String clazz) {
+	public Variable[] findLocalVariables(String clazz) {
 		List matches= new ArrayList();
 		
 		for (ListIterator iterator= fLocalVariables.listIterator(fLocalVariables.size()); iterator.hasPrevious();) {
-			LocalVariable localVariable= (LocalVariable) iterator.previous();
+			Variable localVariable= (Variable) iterator.previous();
 			
 			if (localVariable.isSubtypeOf(clazz))
 				matches.add(localVariable);
 		}
 		
-		return (LocalVariable[]) matches.toArray(new LocalVariable[matches.size()]);
+		return (Variable[]) matches.toArray(new Variable[matches.size()]);
+	}
+	
+	/**
+	 * Returns all local variables implementing or extending
+	 * <code>clazz</code> in the order that they appear.
+	 * 
+	 * @param clazz the fully qualified type name of the class to match
+	 * @return all local variables matching <code>clazz</code>
+	 */
+	public Variable[] findFieldVariables(String clazz) {
+		List matches= new ArrayList();
+		
+		for (ListIterator iterator= fFields.listIterator(fFields.size()); iterator.hasPrevious();) {
+			Variable localVariable= (Variable)iterator.previous();
+			
+			if (localVariable.isSubtypeOf(clazz))
+				matches.add(localVariable);
+		}
+		
+		return (Variable[]) matches.toArray(new Variable[matches.size()]);
 	}
 
 	/**
@@ -839,17 +881,17 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 	 * 
 	 * @return all local <code>Iterable</code>s and arrays
 	 */
-	public LocalVariable[] findLocalIterables() {
+	public Variable[] findLocalIterables() {
 		List iterables= new ArrayList();
 
 		for (ListIterator iterator= fLocalVariables.listIterator(fLocalVariables.size()); iterator.hasPrevious();) {
-			LocalVariable localVariable= (LocalVariable) iterator.previous();
+			Variable localVariable= (Variable) iterator.previous();
 
 			if (localVariable.isArray() || localVariable.isIterable())			
 				iterables.add(localVariable);
 		}
 
-		return (LocalVariable[]) iterables.toArray(new LocalVariable[iterables.size()]);
+		return (Variable[]) iterables.toArray(new Variable[iterables.size()]);
 	}
 
 }

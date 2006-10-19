@@ -6,7 +6,7 @@ import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
-import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.LocalVariable;
+import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.Variable;
 
 import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
 
@@ -46,8 +46,8 @@ public class ElementTypeResolver extends TemplateVariableResolver {
 
 	private void resolve(MultiVariable variable, JavaVariable master, JavaContext context) {
 		Object[] choices= master.getChoices();
-		if (choices instanceof LocalVariable[]) {
-			LocalVariable[] variables= (LocalVariable[]) choices;
+		if (choices instanceof Variable[]) {
+			Variable[] variables= (Variable[]) choices;
 
 			for (int i= 0; i < variables.length; i++)
 				variable.setChoices(variables[i], variables[i].getMemberTypeNames());

@@ -66,7 +66,7 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.LocalVariable;
+import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.Variable;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
@@ -320,8 +320,8 @@ public class JavaContext extends CompilationUnitContext {
 	 * 
 	 * @return the names of local arrays
 	 */
-	public LocalVariable[] getArrays() {
-		LocalVariable[] localArrays= getCompletion().findLocalArrays();
+	public Variable[] getArrays() {
+		Variable[] localArrays= getCompletion().findLocalArrays();
 		arrange(localArrays);
 		return localArrays;
 	}
@@ -332,13 +332,13 @@ public class JavaContext extends CompilationUnitContext {
 	 * @param variables the variables to sort
 	 * @since 3.3
 	 */
-	private void arrange(LocalVariable[] variables) {
+	private void arrange(Variable[] variables) {
 		Arrays.sort(variables, new Comparator() {
 			public int compare(Object o1, Object o2) {
-				return rank((LocalVariable) o1) - rank((LocalVariable) o2);
+				return rank((Variable) o1) - rank((Variable) o2);
 			}
 			
-			private int rank(LocalVariable l) {
+			private int rank(Variable l) {
 				return fUsedNames.contains(l.getName()) ? 1 : 0;
 			}
 		});
@@ -350,10 +350,22 @@ public class JavaContext extends CompilationUnitContext {
 	 * @return the names of local variables matching <code>type</code>
 	 * @since 3.3
 	 */
-	public LocalVariable[] getLocalVariables(String type) {
-		LocalVariable[] localVariables= getCompletion().findLocalVariables(type);
+	public Variable[] getLocalVariables(String type) {
+		Variable[] localVariables= getCompletion().findLocalVariables(type);
 		arrange(localVariables);
 		return localVariables;
+	}
+	
+	/**
+	 * Returns the names of fields matching <code>type</code>.
+	 * 
+	 * @return the names of fields matching <code>type</code>
+	 * @since 3.3
+	 */
+	public Variable[] getFields(String type) {
+		Variable[] fields= getCompletion().findFieldVariables(type);
+		arrange(fields);
+		return fields;
 	}
 	
 	/**
@@ -361,8 +373,8 @@ public class JavaContext extends CompilationUnitContext {
 	 * 
 	 * @return the names of local iterables or arrays
 	 */
-	public LocalVariable[] getIterables() {
-		LocalVariable[] iterables= getCompletion().findLocalIterables();
+	public Variable[] getIterables() {
+		Variable[] iterables= getCompletion().findLocalIterables();
 		arrange(iterables);
 		return iterables;
 	}

@@ -8,7 +8,7 @@ import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.LocalVariable;
+import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.Variable;
 
 import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
 
@@ -62,9 +62,9 @@ public class TypeVariableResolver extends TemplateVariableResolver {
 
 	private void resolve(MultiVariable mv, JavaVariable master, int index, JavaContext context) {
 		Object[] choices= master.getChoices();
-		if (choices instanceof LocalVariable[]) {
+		if (choices instanceof Variable[]) {
 			context.addDependency(master, mv);
-			LocalVariable[] variables= (LocalVariable[]) choices;
+			Variable[] variables= (Variable[]) choices;
 			String type= master.getParamType();
 			for (int i= 0; i < choices.length; i++) {
 				String[] bounds= variables[i].getTypeArgumentBoundSignatures(type, index);

@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.LocalVariable;
+import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.Variable;
 
 import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
 
@@ -40,7 +40,7 @@ public class JavaContextType extends CompilationUnitContextType {
 
 		protected String[] resolveAll(TemplateContext context) {
 	        JavaContext jc= (JavaContext) context;
-	        LocalVariable[] iterables= getLocalVariables(jc);
+	        Variable[] iterables= getLocalVariables(jc);
 	        String[] names= new String[iterables.length];
 	        for (int i= 0; i < iterables.length; i++)
 				names[i]= iterables[i].getName();
@@ -49,7 +49,7 @@ public class JavaContextType extends CompilationUnitContextType {
 			return names;
 	    }
 
-		abstract protected LocalVariable[] getLocalVariables(JavaContext jc);
+		abstract protected Variable[] getLocalVariables(JavaContext jc);
 
 		/*
 		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
@@ -58,7 +58,7 @@ public class JavaContextType extends CompilationUnitContextType {
 			if (variable instanceof MultiVariable) {
 				JavaContext jc= (JavaContext) context;
 				JavaVariable jv= (JavaVariable) variable;
-		        LocalVariable[] iterables= getLocalVariables(jc);
+		        Variable[] iterables= getLocalVariables(jc);
 				if (iterables.length > 0) {
 					jv.setChoices(iterables);
 					jc.markAsUsed(iterables[0].getName());
@@ -81,7 +81,7 @@ public class JavaContextType extends CompilationUnitContextType {
 			super("array", JavaTemplateMessages.JavaContextType_variable_description_array);  //$NON-NLS-1$
 		}
 		
-		protected LocalVariable[] getLocalVariables(JavaContext jc) {
+		protected Variable[] getLocalVariables(JavaContext jc) {
 			return jc.getArrays();
 		}
 	}
@@ -91,7 +91,7 @@ public class JavaContextType extends CompilationUnitContextType {
 		    super("iterable", JavaTemplateMessages.JavaContextType_variable_description_iterable);  //$NON-NLS-1$
 		}
 		
-		protected LocalVariable[] getLocalVariables(JavaContext jc) {
+		protected Variable[] getLocalVariables(JavaContext jc) {
 			return jc.getIterables();
 		}
 	}
@@ -105,14 +105,14 @@ public class JavaContextType extends CompilationUnitContextType {
 	    }
 	    protected String[] resolveAll(TemplateContext context) {
 	        JavaContext jc= (JavaContext) context;
-	        LocalVariable[] iterables= getLocalVariables(jc);
+	        Variable[] iterables= getLocalVariables(jc);
 	        String[] types= new String[iterables.length];
 	        for (int i= 0; i < iterables.length; i++)
 	        	types[i]= iterables[i].getMemberTypeNames()[0];
 			return types;
 	    }
 	    
-		abstract protected LocalVariable[] getLocalVariables(JavaContext jc);
+		abstract protected Variable[] getLocalVariables(JavaContext jc);
 
 		/*
 		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
@@ -122,7 +122,7 @@ public class JavaContextType extends CompilationUnitContextType {
 				JavaContext jc= (JavaContext) context;
 				MultiVariable mv= (MultiVariable) variable;
 
-				LocalVariable[] iterables= getLocalVariables(jc);
+				Variable[] iterables= getLocalVariables(jc);
 				if (iterables.length > 0) {
 
 					for (int i= 0; i < iterables.length; i++)
@@ -153,7 +153,7 @@ public class JavaContextType extends CompilationUnitContextType {
 		public ArrayType() {
 			super("array_type", JavaTemplateMessages.JavaContextType_variable_description_array_type, "array");  //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		protected LocalVariable[] getLocalVariables(JavaContext jc) {
+		protected Variable[] getLocalVariables(JavaContext jc) {
 			return jc.getArrays();
 		}
 	}
@@ -162,7 +162,7 @@ public class JavaContextType extends CompilationUnitContextType {
 		public IterableType() {
 	     	super("iterable_type", JavaTemplateMessages.JavaContextType_variable_description_iterable_type, "iterable");  //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		protected LocalVariable[] getLocalVariables(JavaContext jc) {
+		protected Variable[] getLocalVariables(JavaContext jc) {
 			return jc.getIterables();
 		}
 	}
@@ -177,7 +177,7 @@ public class JavaContextType extends CompilationUnitContextType {
 	    
 	    protected String[] resolveAll(TemplateContext context) {
 	        JavaContext jc= (JavaContext) context;
-	        LocalVariable[] iterables= getLocalVariables(jc);
+	        Variable[] iterables= getLocalVariables(jc);
 	        String[] elements= new String[iterables.length];
 	        for (int i= 0; i < iterables.length; i++) {
 	        	elements[i]= jc.suggestVariableNames(iterables[i].getMemberTypeNames()[0])[0];
@@ -188,7 +188,7 @@ public class JavaContextType extends CompilationUnitContextType {
 	        return elements;
 	    }	    
 	    
-		abstract protected LocalVariable[] getLocalVariables(JavaContext jc);
+		abstract protected Variable[] getLocalVariables(JavaContext jc);
 
 		/*
 		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
@@ -198,7 +198,7 @@ public class JavaContextType extends CompilationUnitContextType {
 				JavaContext jc= (JavaContext) context;
 				MultiVariable mv= (MultiVariable) variable;
 
-		        LocalVariable[] iterables= getLocalVariables(jc);
+		        Variable[] iterables= getLocalVariables(jc);
 				if (iterables.length > 0) {
 					for (int i= 0; i < iterables.length; i++) {
 						String[] elements= jc.suggestVariableNames(iterables[i].getMemberTypeNames()[0]);
@@ -231,7 +231,7 @@ public class JavaContextType extends CompilationUnitContextType {
 		public ArrayElement() {
 			super("array_element", JavaTemplateMessages.JavaContextType_variable_description_array_element, "array");	 //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		protected LocalVariable[] getLocalVariables(JavaContext jc) {
+		protected Variable[] getLocalVariables(JavaContext jc) {
 			return jc.getArrays();
 		}
 	}
@@ -240,7 +240,7 @@ public class JavaContextType extends CompilationUnitContextType {
 		public IterableElement() {
 	     	super("iterable_element", JavaTemplateMessages.JavaContextType_variable_description_iterable_element, "iterable");	 //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		protected LocalVariable[] getLocalVariables(JavaContext jc) {
+		protected Variable[] getLocalVariables(JavaContext jc) {
 			return jc.getIterables();
 		}
 	}
