@@ -13,18 +13,20 @@ package org.eclipse.jdt.internal.ui.packageview;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.model.IWorkbenchAdapter;
+
+import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -134,6 +136,12 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 		List list= new ArrayList();
 		if (fContainer != null) {
 			IClasspathEntry[] classpathEntries= fContainer.getClasspathEntries();
+			if (classpathEntries == null) {
+				// invalid implementation of a classpath container
+				JavaPlugin.log(new IllegalArgumentException("Invalid classpath container implementation: getClasspathEntries() returns null. " + fContainer.getPath())); //$NON-NLS-1$
+				return new Object[0];
+			}
+			
 			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 			for (int i= 0; i < classpathEntries.length; i++) {
 				IClasspathEntry entry= classpathEntries[i];
