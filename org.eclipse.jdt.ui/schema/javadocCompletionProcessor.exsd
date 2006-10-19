@@ -18,12 +18,10 @@ Deprecated as of 3.2. Extenders should rather contribute to the &lt;tt&gt;org.ec
          <appInfo>
             <meta.element deprecated="true" replacement="org.eclipse.jdt.ui.javaCompletionProposalComputer" />
          </appInfo>
-         <documentation>
-         </documentation>
       </annotation>
       <complexType>
          <sequence>
-            <element ref="javadocCompletionProcessor" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="javadocCompletionProcessor" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -53,10 +51,6 @@ Deprecated as of 3.2. Extenders should rather contribute to the &lt;tt&gt;org.ec
    </element>
 
    <element name="javadocCompletionProcessor">
-      <annotation>
-         <documentation>
-         </documentation>
-      </annotation>
       <complexType>
          <attribute name="id" type="string" use="required">
             <annotation>

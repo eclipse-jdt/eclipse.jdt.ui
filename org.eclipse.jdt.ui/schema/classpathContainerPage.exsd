@@ -14,7 +14,7 @@ edit a classpath container entry.
    <element name="extension">
       <complexType>
          <sequence>
-            <element ref="classpathContainerPage" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="classpathContainerPage" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>

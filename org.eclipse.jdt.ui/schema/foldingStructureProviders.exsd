@@ -16,7 +16,7 @@ Extensions may optionally contribute a preference block which will appear on the
    <element name="extension">
       <complexType>
          <sequence>
-            <element ref="provider"/>
+            <element ref="provider" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>

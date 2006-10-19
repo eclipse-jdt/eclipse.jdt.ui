@@ -20,7 +20,6 @@ This extension point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Prope
 &lt;li&gt;sourceLevel: type String; the source compliance of the current project&lt;/li&gt;
 &lt;/dl&gt;
 &lt;/p&gt;
-
       </documentation>
    </annotation>
 
@@ -29,7 +28,7 @@ This extension point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Prope
    <element name="extension">
       <complexType>
          <sequence>
-            <element ref="quickFixProcessor" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="quickFixProcessor" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>

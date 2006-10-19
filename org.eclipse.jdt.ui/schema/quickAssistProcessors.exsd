@@ -22,7 +22,7 @@ This extension point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Prope
    <element name="extension">
       <complexType>
          <sequence>
-            <element ref="quickAssistProcessor" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="quickAssistProcessor" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
