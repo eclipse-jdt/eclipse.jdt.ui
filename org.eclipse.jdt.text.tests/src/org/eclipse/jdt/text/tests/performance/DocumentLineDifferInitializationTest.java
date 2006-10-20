@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
+import org.eclipse.swt.widgets.Display;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -69,15 +71,18 @@ public class DocumentLineDifferInitializationTest extends AbstractDocumentLineDi
 	}
 
 	private void measureInitialization(PerformanceMeter meter, IDocument document) throws InterruptedException {
-		DocumentLineDiffer differ= new DocumentLineDiffer();
+		final DocumentLineDiffer differ= new DocumentLineDiffer();
 		setUpDiffer(differ);
-		BooleanFuture future= waitForSynchronization(differ);
+		DisplayHelper helper= new DisplayHelper() {
+			public boolean condition() {
+				return differ.isSynchronized();
+			}
+		};
 		meter.start();
 		differ.connect(document);
-		boolean inSync= future.get();
+		boolean inSync= helper.waitForCondition(Display.getDefault(), MAX_WAIT);
 		meter.stop();
 		assertTrue(inSync);
-		future.cancel();
 		differ.disconnect(document);
 	}
 

@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.swt.widgets.Display;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -196,7 +198,6 @@ public class DocumentLineDifferModificationTest extends AbstractDocumentLineDiff
 	}
 	
 	private void measureReplaceAll(DifferenceMeter meter, String contents, String searchExpression, String replacementString) throws Exception {
-		BooleanFuture reinitialized= null;
 		DocumentLineDiffer differ= null;
 		try {
 			// reference measurement
@@ -215,8 +216,6 @@ public class DocumentLineDifferModificationTest extends AbstractDocumentLineDiff
 			
 			assertFalse("QuickDiff reinitialization makes performance results unusable", fInitialized);
 		} finally {
-			if (reinitialized != null)
-				reinitialized.cancel();
 			if (differ != null)
 				differ.disconnect(fDocument);
 		}
@@ -231,7 +230,7 @@ public class DocumentLineDifferModificationTest extends AbstractDocumentLineDiff
 	}
 	
 	private DocumentLineDiffer ensureInitialized(Document document) throws InterruptedException {
-		DocumentLineDiffer differ= new DocumentLineDiffer() {
+		final DocumentLineDiffer differ= new DocumentLineDiffer() {
 			/*
 			 * @see org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer#initialize()
 			 */
@@ -241,11 +240,15 @@ public class DocumentLineDifferModificationTest extends AbstractDocumentLineDiff
 			}
 		};
 		setUpDiffer(differ);
-		BooleanFuture future= waitForSynchronization(differ);
+		DisplayHelper helper= new DisplayHelper() {
+			public boolean condition() {
+				return differ.isSynchronized();
+			}
+		};
 		differ.connect(document);
-		assertTrue(future.get());
-		future.cancel();
 		
+		assertTrue(helper.waitForCondition(Display.getDefault(), MAX_WAIT));
+
 		return differ;
 	}
 }
