@@ -713,7 +713,7 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 				VariableDeclarationFragment fragment= (VariableDeclarationFragment) iter.next();
 				Expression initializer= fragment.getInitializer();
 				Expression replacement= (Expression) astRewrite.get(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY);
-				if (replacement == null) {
+				if (replacement == initializer) {
 					replacement= (Expression) astRewrite.createMoveTarget(initializer);
 				}
 				astRewrite.remove(initializer, null);
