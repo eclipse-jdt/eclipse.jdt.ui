@@ -998,24 +998,10 @@ public class StubUtility {
 		if (assignedExpression instanceof Name) {
 			Name simpleNode= (Name) assignedExpression;
 			IBinding binding= simpleNode.resolveBinding();
-			String varName= ASTNodes.getSimpleNameIdentifier(simpleNode);
 			if (binding instanceof IVariableBinding) {
-				if (((IVariableBinding) binding).isField()) {
-					if (Modifier.isStatic(binding.getModifiers()) && Modifier.isFinal(binding.getModifiers())) {
-						varName= getCamelCaseFromUpper(varName);
-					} else {
-						varName= NamingConventions.removePrefixAndSuffixForFieldName(project, varName, binding.getModifiers());
-					}
-				} else {
-					CompilationUnit astRoot= (CompilationUnit) assignedExpression.getRoot();
-					if (astRoot.findDeclaringNode(binding) instanceof SingleVariableDeclaration) {
-						varName= NamingConventions.removePrefixAndSuffixForArgumentName(project, varName);
-					} else {
-						varName= NamingConventions.removePrefixAndSuffixForLocalVariableName(project, varName);
-					}
-				}
+				return removePrefixAndSuffixForVariable(project, (IVariableBinding) binding);
 			}
-			return varName;
+			return ASTNodes.getSimpleNameIdentifier(simpleNode);
 		} else if (assignedExpression instanceof MethodInvocation) {
 			name= ((MethodInvocation) assignedExpression).getName().getIdentifier();
 		} else if (assignedExpression instanceof SuperMethodInvocation) {
@@ -1295,7 +1281,11 @@ public class StubUtility {
 		if (binding.isEnumConstant()) {
 			return binding.getName();
 		} else if (binding.isField()) {
-			return NamingConventions.removePrefixAndSuffixForFieldName(project, binding.getName(), binding.getModifiers());
+			if (Modifier.isStatic(binding.getModifiers()) && Modifier.isFinal(binding.getModifiers())) {
+				return getCamelCaseFromUpper(binding.getName());
+			} else {
+				return NamingConventions.removePrefixAndSuffixForFieldName(project, binding.getName(), binding.getModifiers());
+			}
 		} else if (binding.isParameter()) {
 			return NamingConventions.removePrefixAndSuffixForArgumentName(project, binding.getName());
 		} else {
