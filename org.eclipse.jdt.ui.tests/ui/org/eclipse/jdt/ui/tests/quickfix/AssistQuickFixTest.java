@@ -306,10 +306,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("\n");
 		buf.append("    private int f;\n");
-		buf.append("    private float g;\n");
+		buf.append("    private float min;\n");
 		buf.append("\n");				
 		buf.append("    public void foo() {\n");
-		buf.append("        g = Math.min(1.0f, 2.0f);\n");
+		buf.append("        min = Math.min(1.0f, 2.0f);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -324,7 +324,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("    private int f;\n");
 		buf.append("\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        float g = Math.min(1.0f, 2.0f);\n");
+		buf.append("        float min = Math.min(1.0f, 2.0f);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
@@ -1022,12 +1022,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");				
 		buf.append("public class E {\n");
-		buf.append("    private Object[] objects;\n");
+		buf.append("    private Object[] array;\n");
 		buf.append("    public Vector goo() {\n");
 		buf.append("        return null;\n");
 		buf.append("    }\n");		
 		buf.append("    public void foo() {\n");
-		buf.append("        objects = goo().toArray();\n");
+		buf.append("        array = goo().toArray();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -1043,7 +1043,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        return null;\n");
 		buf.append("    }\n");		
 		buf.append("    public void foo() {\n");
-		buf.append("        Object[] objects = goo().toArray();\n");
+		buf.append("        Object[] array = goo().toArray();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
@@ -4498,5 +4498,103 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});	
 	}
+	public void testConvertAnonymousToNested1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    public Object foo(final String name) {\n");
+		buf.append("        return new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                foo(name);\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		int offset= buf.toString().indexOf("Runnable");
+		AssistContext context= getCorrectionContext(cu, offset, 1);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    private final class RunnableImplementation implements Runnable {\n");
+		buf.append("        private final String name;\n");
+		buf.append("        private RunnableImplementation(String name) {\n");
+		buf.append("            this.name = name;\n");
+		buf.append("        }\n");
+		buf.append("        public void run() {\n");
+		buf.append("            foo(name);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public Object foo(final String name) {\n");
+		buf.append("        return new RunnableImplementation(name);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});	
+	}
+	
+	public void testConvertAnonymousToNested2() throws Exception {
+		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
+		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
+		corePrefs.setValue(JavaCore.CODEASSIST_LOCAL_PREFIXES, "l");
+		corePrefs.setValue(JavaCore.CODEASSIST_ARGUMENT_PREFIXES, "p");	
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("public class E {\n");
+		buf.append("    public Object foo(final String pName) {\n");
+		buf.append("        int lVar= 8;\n");
+		buf.append("        return new ArrayList(lVar) {\n");
+		buf.append("            String fExisting= pName;\n");
+		buf.append("            public void run() {\n");
+		buf.append("                foo(fExisting);\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		int offset= buf.toString().lastIndexOf("ArrayList");
+		AssistContext context= getCorrectionContext(cu, offset, 1);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("public class E {\n");
+		buf.append("    private final class ArrayListExtension extends ArrayList {\n");
+		buf.append("        private final String fName;\n");
+		buf.append("        String fExisting;\n");
+		buf.append("        private ArrayListExtension(int pArg0, String pName) {\n");
+		buf.append("            super(pArg0);\n");
+		buf.append("            fName = pName;\n");
+		buf.append("            fExisting = fName;\n");
+		buf.append("        }\n");
+		buf.append("        public void run() {\n");
+		buf.append("            foo(fExisting);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public Object foo(final String pName) {\n");
+		buf.append("        int lVar= 8;\n");
+		buf.append("        return new ArrayListExtension(lVar, pName);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});	
+	}
+	
+
 	
 }
