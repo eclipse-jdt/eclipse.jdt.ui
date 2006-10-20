@@ -82,10 +82,12 @@ public class ImportsCleanUp extends AbstractCleanUp {
      * {@inheritDoc}
      */
     public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
-    	if (isFlag(ORGANIZE_IMPORTS))
+		RefactoringStatus result= super.checkPreConditions(project, compilationUnits, monitor);
+    	
+		if (isFlag(ORGANIZE_IMPORTS))
     		fCodeGeneratorSettings= JavaPreferencesSettings.getCodeGenerationSettings(project);
     	
-		return super.checkPreConditions(project, compilationUnits, monitor);
+    	return result;
     }
     
     /**
