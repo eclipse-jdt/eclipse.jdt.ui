@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.fix;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
@@ -20,10 +21,22 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedPosition;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class LinkedProposalPositionGroup {
 	
@@ -102,6 +115,34 @@ public class LinkedProposalPositionGroup {
 			return fIsFirst ? 0 : 1;
 		}
 	}
+	
+	private static final class JavaLinkedModeProposal extends Proposal {
+		private final ITypeBinding fTypeProposal;
+		private final ICompilationUnit fCompilationUnit;
+
+		public JavaLinkedModeProposal(ICompilationUnit unit, ITypeBinding typeProposal, int relevance) {
+			super(BindingLabelProvider.getBindingLabel(typeProposal, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_POST_QUALIFIED), null, relevance);
+			fTypeProposal= typeProposal;
+			fCompilationUnit= unit;
+			ImageDescriptor desc= BindingLabelProvider.getBindingImageDescriptor(fTypeProposal, BindingLabelProvider.DEFAULT_IMAGEFLAGS);
+			if (desc != null) {
+				setImage(JavaPlugin.getImageDescriptorRegistry().get(desc));
+			}
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.fix.PositionGroup.Proposal#computeEdits(int, org.eclipse.jface.text.link.LinkedPosition, char, int, org.eclipse.jface.text.link.LinkedModeModel)
+		 */
+		public TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model) throws CoreException {
+			ImportRewrite impRewrite= StubUtility.createImportRewrite(fCompilationUnit, true);
+			String replaceString= impRewrite.addImport(fTypeProposal);
+				
+			MultiTextEdit composedEdit= new MultiTextEdit();
+			composedEdit.addChild(new ReplaceEdit(position.getOffset(), position.getLength(), replaceString));
+			composedEdit.addChild(impRewrite.rewriteImports(null));
+			return composedEdit;
+		}
+	}
 		
 
 	private final String fGroupId;
@@ -130,6 +171,10 @@ public class LinkedProposalPositionGroup {
 	
 	public void addProposal(String displayString, Image image, int relevance) {
 		addProposal(new Proposal(displayString, image, relevance));
+	}
+	
+	public void addProposal(ITypeBinding type, ICompilationUnit cu, int relevance) {
+		addProposal(new JavaLinkedModeProposal(cu, type, relevance));
 	}
 	
 	public String getGroupId() {
