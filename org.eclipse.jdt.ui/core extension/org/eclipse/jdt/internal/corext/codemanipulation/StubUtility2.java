@@ -22,9 +22,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -62,8 +59,6 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Utilities for code generation based on ast rewrite.
@@ -283,7 +278,7 @@ public final class StubUtility2 {
 
 		List parameters= decl.parameters();
 		ITypeBinding[] params= methodBinding.getParameterTypes();
-		String[] paramNames= suggestArgumentNames(unit.getJavaProject(), methodBinding);
+		String[] paramNames= StubUtility.suggestArgumentNames(unit.getJavaProject(), methodBinding);
 		for (int i= 0; i < params.length; i++) {
 			SingleVariableDeclaration varDecl= ast.newSingleVariableDeclaration();
 			if (params[i].isWildcardType() && !params[i].isUpperbound())
@@ -549,7 +544,7 @@ public final class StubUtility2 {
 	private static List createParameters(ICompilationUnit unit, ImportRewrite imports, AST ast, IMethodBinding binding, MethodDeclaration decl, ImportRewriteContext context) {
 		List parameters= decl.parameters();
 		ITypeBinding[] params= binding.getParameterTypes();
-		String[] paramNames= suggestArgumentNames(unit.getJavaProject(), binding);
+		String[] paramNames= StubUtility.suggestArgumentNames(unit.getJavaProject(), binding);
 		for (int i= 0; i < params.length; i++) {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 			if (binding.isVarargs() && params[i].isArray() && i == params.length - 1) {
@@ -569,7 +564,7 @@ public final class StubUtility2 {
 	private static List createParameters(ICompilationUnit unit, ImportRewrite imports, AST ast, IMethodBinding binding, MethodDeclaration decl) {
 		List parameters= decl.parameters();
 		ITypeBinding[] params= binding.getParameterTypes();
-		String[] paramNames= suggestArgumentNames(unit.getJavaProject(), binding);
+		String[] paramNames= StubUtility.suggestArgumentNames(unit.getJavaProject(), binding);
 		for (int i= 0; i < params.length; i++) {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 			if (binding.isVarargs() && params[i].isArray() && i == params.length - 1) {
@@ -913,24 +908,7 @@ public final class StubUtility2 {
 		return (IMethodBinding[]) constructorMethods.toArray(new IMethodBinding[constructorMethods.size()]);
 	}
 
-	private static String[] suggestArgumentNames(IJavaProject project, IMethodBinding binding) {
-		int nParams= binding.getParameterTypes().length;
-		if (nParams > 0) {
-			try {
-				IMethod method= (IMethod) binding.getMethodDeclaration().getJavaElement();
-				if (method != null) {
-					return StubUtility.suggestArgumentNames(project, method.getParameterNames());
-				}
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-			}
-		}
-		String[] names= new String[nParams];
-		for (int i= 0; i < names.length; i++) {
-			names[i]= "arg" + i; //$NON-NLS-1$
-		}
-		return names;
-	}
+
 
 	/**
 	 * Creates a new stub utility.

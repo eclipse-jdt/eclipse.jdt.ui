@@ -12,10 +12,12 @@
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -66,22 +68,34 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.CodeStyleConfiguration;
@@ -853,13 +867,239 @@ public class StubUtility {
 		return baseName;
 	}
 	
-	public static String[] getArgumentNameSuggestions(IType type, String[] excluded) {
-		String packageName= type.getPackageFragment().getElementName();
-		String typeQualifiedName= type.getTypeQualifiedName();
-		String[] res= NamingConventions.suggestArgumentNames(type.getJavaProject(), packageName, typeQualifiedName, 0, excluded);
-		return sortByLength(res); // longest first
+	
+	// --------------------------- name suggestions --------------------------
+	
+	public static final int FIELD= 1;
+	public static final int ARGUMENT= 2;
+	public static final int LOCAL= 3;
+	
+	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, ITypeBinding expectedType, Expression assignedExpression, int newModifiers, String[] excluded) {
+		LinkedHashSet res= new LinkedHashSet(); // avoid duplicates but keep order
+
+		if (assignedExpression != null) {
+			String nameFromExpression= getBaseNameFromExpression(project, assignedExpression, excluded);
+			if (nameFromExpression != null) {
+				add(getVariableNameSuggestions(variableKind, project, nameFromExpression, 0, newModifiers, excluded), res); // pass 0 as dimension, base name already contains plural.
+			}
+		}
+		if (expectedType != null) {
+			expectedType= Bindings.normalizeTypeBinding(expectedType);
+			if (expectedType != null) {
+				int dim= 0;
+				if (expectedType.isArray()) {
+					dim= expectedType.getDimensions();
+					expectedType= expectedType.getElementType();
+				}
+				if (expectedType.isParameterizedType()) {
+					expectedType= expectedType.getTypeDeclaration();
+				}
+				String typeName= expectedType.getQualifiedName();
+				if (typeName.length() > 0) {
+					String[] names= getVariableNameSuggestions(variableKind, project, typeName, dim, newModifiers, excluded);
+					for (int i= 0; i < names.length; i++) {
+						res.add(names[i]);
+					}
+				}
+			}
+		}
+		if (assignedExpression != null) {
+			// add at end, less important
+			String nameFromParent= getBaseNameFromLocationInParent(project, assignedExpression);
+			if (nameFromParent != null) {
+				add(getVariableNameSuggestions(variableKind, project, nameFromParent, 0, newModifiers, excluded), res); // pass 0 as dimension, base name already contains plural.
+			}
+		}
+		return (String[]) res.toArray(new String[res.size()]);
 	}
 	
+	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, Type expectedType, Expression assignedExpression, int newModifiers, String[] excluded) {
+		LinkedHashSet res= new LinkedHashSet(); // avoid duplicates but keep order
+
+		if (assignedExpression != null) {
+			String nameFromExpression= getBaseNameFromExpression(project, assignedExpression, excluded);
+			if (nameFromExpression != null) {
+				add(getVariableNameSuggestions(variableKind, project, nameFromExpression, 0, newModifiers, excluded), res); // pass 0 as dimension, base name already contains plural.
+			}
+		}
+		if (expectedType != null) {			
+			int dim= 0;
+			if (expectedType.isArrayType()) {
+				ArrayType arrayType= (ArrayType) expectedType;
+				dim= arrayType.getDimensions();
+				expectedType= arrayType.getElementType();
+			}
+			if (expectedType.isParameterizedType()) {
+				expectedType= ((ParameterizedType) expectedType).getType();
+			}
+			String typeName= ASTNodes.asString(expectedType);
+			
+			if (typeName.length() > 0) {
+				String[] names= getVariableNameSuggestions(variableKind, project, typeName, dim, newModifiers, excluded);
+				for (int i= 0; i < names.length; i++) {
+					res.add(names[i]);
+				}
+			}
+		}
+		if (assignedExpression != null) {
+			// add at end, less important
+			String nameFromParent= getBaseNameFromLocationInParent(project, assignedExpression);
+			if (nameFromParent != null) {
+				add(getVariableNameSuggestions(variableKind, project, nameFromParent, 0, newModifiers, excluded), res); // pass 0 as dimension, base name already contains plural.
+			}
+		}
+		if (res.isEmpty()) { // should nto happen, but make sure there's always at least one proposal
+			res.add("x"); //$NON-NLS-1$
+		}
+		return (String[]) res.toArray(new String[res.size()]);
+	}
+	
+	
+	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, String baseName, int dimensions, int newModifiers, String[] excluded) {
+		String name= workaround38111(baseName);
+		name= removeTypeArguments(name);
+		String packageName= new String(); // not used, so don't compute for now
+		String[] result= null;
+		switch (variableKind) {
+			case FIELD:
+				if (Flags.isStatic(newModifiers) && Flags.isFinal(newModifiers)) {
+					result= getConstantSuggestions(project, packageName, name, dimensions, excluded);
+				} else {
+					result= sortByLength(NamingConventions.suggestFieldNames(project, packageName, name, dimensions, newModifiers, excluded));
+				}
+				break;
+			case ARGUMENT:
+				result= sortByLength(NamingConventions.suggestArgumentNames(project, packageName, name, dimensions, excluded));
+				break;
+			case LOCAL:
+				result= sortByLength(NamingConventions.suggestLocalVariableNames(project, packageName, name, dimensions, excluded));
+				break;
+		}
+		if (result == null || result.length == 0) {
+			return new String[] { "x" }; //$NON-NLS-1$
+		}
+		return result;
+	}
+	
+	private static final String[] KNOWN_METHOD_NAME_PREFIXES= { "get", "is", "to"}; //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-1$
+	
+	
+	private static void add(String[] names, Set result) {
+		for (int i= 0; i < names.length; i++) {
+			result.add(names[i]);
+		}
+	}
+	
+	private static String getBaseNameFromExpression(IJavaProject project, Expression assignedExpression, String[] excluded) {
+		String name= null;
+		if (assignedExpression instanceof CastExpression) {
+			assignedExpression= ((CastExpression) assignedExpression).getExpression();
+		}
+		if (assignedExpression instanceof Name) {
+			Name simpleNode= (Name) assignedExpression;
+			IBinding binding= simpleNode.resolveBinding();
+			String varName= ASTNodes.getSimpleNameIdentifier(simpleNode);
+			if (binding instanceof IVariableBinding) {
+				if (((IVariableBinding) binding).isField()) {
+					if (Modifier.isStatic(binding.getModifiers()) && Modifier.isFinal(binding.getModifiers())) {
+						varName= getCamelCaseFromUpper(varName);
+					} else {
+						varName= NamingConventions.removePrefixAndSuffixForFieldName(project, varName, binding.getModifiers());
+					}
+				} else {
+					CompilationUnit astRoot= (CompilationUnit) assignedExpression.getRoot();
+					if (astRoot.findDeclaringNode(binding) instanceof SingleVariableDeclaration) {
+						varName= NamingConventions.removePrefixAndSuffixForArgumentName(project, varName);
+					} else {
+						varName= NamingConventions.removePrefixAndSuffixForLocalVariableName(project, varName);
+					}
+				}
+			}
+			return varName;
+		} else if (assignedExpression instanceof MethodInvocation) {
+			name= ((MethodInvocation) assignedExpression).getName().getIdentifier();
+		} else if (assignedExpression instanceof SuperMethodInvocation) {
+			name= ((SuperMethodInvocation) assignedExpression).getName().getIdentifier();
+		} else if (assignedExpression instanceof FieldAccess) {
+			return ((FieldAccess) assignedExpression).getName().getIdentifier();
+		}
+		if (name != null) {
+			for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
+				String curr= KNOWN_METHOD_NAME_PREFIXES[i];
+				if (name.startsWith(curr)) {
+					if (name.equals(curr)) {
+						return null; // don't sugget 'get' as variable name
+					} else if (Character.isUpperCase(name.charAt(curr.length()))) {
+						return name.substring(curr.length());
+					}
+				}
+			}
+		}
+		return name;
+	}
+	
+	private static String getBaseNameFromLocationInParent(IJavaProject project, Expression assignedExpression) {
+		StructuralPropertyDescriptor location= assignedExpression.getLocationInParent();
+		if (location == MethodInvocation.ARGUMENTS_PROPERTY) {
+			MethodInvocation parent= (MethodInvocation) assignedExpression.getParent();
+			IMethodBinding binding= parent.resolveMethodBinding();
+			int index= parent.arguments().indexOf(assignedExpression);
+			if (binding != null && index != -1) {
+				return getParameterName(binding, index);
+			}
+		} else if (location == ClassInstanceCreation.ARGUMENTS_PROPERTY) {
+			ClassInstanceCreation parent= (ClassInstanceCreation) assignedExpression.getParent();
+			IMethodBinding binding= parent.resolveConstructorBinding();
+			int index= parent.arguments().indexOf(assignedExpression);
+			if (binding != null && index != -1) {
+				return getParameterName(binding, index);
+			}
+		} else if (location == SuperMethodInvocation.ARGUMENTS_PROPERTY) {
+			SuperMethodInvocation parent= (SuperMethodInvocation) assignedExpression.getParent();
+			IMethodBinding binding= parent.resolveMethodBinding();
+			int index= parent.arguments().indexOf(assignedExpression);
+			if (binding != null && index != -1) {
+				return getParameterName(binding, index);
+			}
+		} else if (location == ConstructorInvocation.ARGUMENTS_PROPERTY) {
+			ConstructorInvocation parent= (ConstructorInvocation) assignedExpression.getParent();
+			IMethodBinding binding= parent.resolveConstructorBinding();
+			int index= parent.arguments().indexOf(assignedExpression);
+			if (binding != null && index != -1) {
+				return getParameterName(binding, index);
+			}
+		} else if (location == SuperConstructorInvocation.ARGUMENTS_PROPERTY) {
+			SuperConstructorInvocation parent= (SuperConstructorInvocation) assignedExpression.getParent();
+			IMethodBinding binding= parent.resolveConstructorBinding();
+			int index= parent.arguments().indexOf(assignedExpression);
+			if (binding != null && index != -1) {
+				return getParameterName(binding, index);
+			}
+		}
+		return null;
+	}
+	
+	private static String getParameterName(IMethodBinding binding, int index) {
+		try {
+			IJavaElement javaElement= binding.getJavaElement();
+			if (javaElement instanceof IMethod) {
+				IMethod method= (IMethod) javaElement;
+				if (method.getOpenable().getBuffer() != null) { // avoid dummy names and lookup from Javadoc
+					String[] parameterNames= method.getParameterNames();
+					if (index < parameterNames.length) {
+						return NamingConventions.removePrefixAndSuffixForArgumentName(method.getJavaProject(), parameterNames[index]);
+					}
+				}
+			}
+		} catch (JavaModelException e) {
+			// ignore
+		}
+		return null;
+	}
+	
+	public static String[] getArgumentNameSuggestions(IType type, String[] excluded) {
+		return getVariableNameSuggestions(ARGUMENT, type.getJavaProject(), JavaModelUtil.getFullyQualifiedName(type), 0, 0, excluded);
+	}
 	
 	public static String[] getArgumentNameSuggestions(IJavaProject project, Type type, String[] excluded) {
 		int dim= 0;
@@ -871,56 +1111,23 @@ public class StubUtility {
 		if (type.isParameterizedType()) {
 			type= ((ParameterizedType) type).getType();
 		}
-		
-		String typeName= workaround38111(ASTNodes.asString(type));
-		String packName= Signature.getQualifier(typeName);
-		String[] res= NamingConventions.suggestArgumentNames(project, packName, typeName, dim, excluded);
-		return sortByLength(res); // longest first
+		return getVariableNameSuggestions(ARGUMENT, project, ASTNodes.asString(type), dim, 0, excluded);
 	}
 	
 	public static String[] getArgumentNameSuggestions(IJavaProject project, ITypeBinding binding, String[] excluded) {
-		int dim= 0;
-		if (binding.isArray()) {
-			dim= binding.getDimensions();
-			binding= binding.getElementType();
-		}
-		if (binding.isParameterizedType()) {
-			binding= binding.getTypeDeclaration();
-		}
-		
-		String typeName= workaround38111(binding.getQualifiedName());
-		String packName= Signature.getQualifier(typeName);
-		String[] res= NamingConventions.suggestArgumentNames(project, packName, typeName, dim, excluded);
-		return sortByLength(res); // longest first
+		return getVariableNameSuggestions(ARGUMENT, project, binding, null, 0, excluded);
 	}
-	
-	/*
-	 * Workarounds for bug 38111
-	 */
+		
 	public static String[] getArgumentNameSuggestions(IJavaProject project, String baseName, int dimensions, String[] excluded) {
-		String name= workaround38111(baseName);
-		name= removeTypeArguments(name);
-		String[] res= NamingConventions.suggestArgumentNames(project, "", name, dimensions, excluded); //$NON-NLS-1$
-		return sortByLength(res); // longest first
+		return getVariableNameSuggestions(ARGUMENT, project, baseName, dimensions, 0, excluded);
 	}
 	
 	public static String[] getFieldNameSuggestions(IType type, int fieldModifiers, String[] excluded) {
-		String packageName= type.getPackageFragment().getElementName();
-		String typeQualifiedName= type.getTypeQualifiedName();
-		if (Flags.isStatic(fieldModifiers) && Flags.isFinal(fieldModifiers)) {
-			return getConstantSuggestions(type.getJavaProject(), packageName, typeQualifiedName, 0, excluded);
-		}
-		return sortByLength(NamingConventions.suggestFieldNames(type.getJavaProject(), packageName, typeQualifiedName, 0, fieldModifiers, excluded));
+		return getVariableNameSuggestions(FIELD, type.getJavaProject(), JavaModelUtil.getFullyQualifiedName(type), 0, fieldModifiers, excluded);
 	}
 		 
 	public static String[] getFieldNameSuggestions(IJavaProject project, String baseName, int dimensions, int modifiers, String[] excluded) {
-		String name= workaround38111(baseName);
-		name= removeTypeArguments(name);
-		if (modifiers == (Flags.AccStatic | Flags.AccFinal)) {
-			return getConstantSuggestions(project, "", name, dimensions, excluded); //$NON-NLS-1$
-		} else {
-			return sortByLength(NamingConventions.suggestFieldNames(project, "", name, dimensions, modifiers, excluded)); //$NON-NLS-1$
-		}
+		return getVariableNameSuggestions(FIELD, project, baseName, dimensions, modifiers, excluded);
 	}
 
 	private static String[] getConstantSuggestions(IJavaProject project, String packageName, String typeName, int dimensions, String[] excluded) {
@@ -953,11 +1160,28 @@ public class StubUtility {
 		return result.toString();
 	}
 	
+	private static String getCamelCaseFromUpper(String string) {
+		StringBuffer result= new StringBuffer();
+		boolean lastWasUnderscore= false;
+		for (int i= 0; i < string.length(); i++) {
+			char ch= string.charAt(i);
+			if (Character.isUpperCase(ch)) {
+				if (!lastWasUnderscore) {
+					ch= Character.toLowerCase(ch);
+				}
+				result.append(ch);
+				lastWasUnderscore= false;
+			} else if (ch == '_') {
+				lastWasUnderscore= true;
+			} else {
+				return string; // abord
+			}
+		}
+		return result.toString();
+	}
+	
 	public static String[] getLocalNameSuggestions(IJavaProject project, String baseName, int dimensions, String[] excluded) {
-		String name= workaround38111(baseName);
-		name= removeTypeArguments(name);
-		String[] res= NamingConventions.suggestLocalVariableNames(project, "", name, dimensions, excluded); //$NON-NLS-1$
-		return sortByLength(res); // longest first
+		return getVariableNameSuggestions(LOCAL, project, baseName, dimensions, 0, excluded);
 	}
 	
 	private static String[] sortByLength(String[] proposals) {
@@ -979,38 +1203,106 @@ public class StubUtility {
 			new String[] {"boolean", "byte", "char", "double", "float", "int", "long", "short"});  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 
 	public static String suggestArgumentName(IJavaProject project, String baseName, String[] excluded) {
-		String[] argnames= getArgumentNameSuggestions(project, baseName, 0, excluded);
-		if (argnames.length > 0) {
-			return argnames[0];
-		}
-		return baseName;
+		return suggestVariableName(ARGUMENT, project, baseName, 0, excluded);
 	}
 	
-	public static String[] suggestArgumentNames(IJavaProject project, String[] paramNames) {
-		String prefixes= project.getOption(JavaCore.CODEASSIST_ARGUMENT_PREFIXES, true);
-		if (prefixes == null) {
-			prefixes= ""; //$NON-NLS-1$
-		}
-		String suffixes= project.getOption(JavaCore.CODEASSIST_ARGUMENT_SUFFIXES, true);
-		if (suffixes == null) {
-			suffixes= ""; //$NON-NLS-1$
-		}
-		if (prefixes.length() + suffixes.length() == 0) {
-			return paramNames;
-		}
+	public static String suggestVariableName(int varKind, IJavaProject project, String baseName, int modifiers, String[] excluded) {
+		return getVariableNameSuggestions(varKind, project, baseName, 0, modifiers, excluded)[0];
+	}
+	
+	
+	public static String[][] suggestArgumentNamesWithProposals(IJavaProject project, String[] paramNames) {
+		String[][] newNames= new String[paramNames.length][];
+		ArrayList takenNames= new ArrayList();
 		
-		String[] newNames= new String[paramNames.length];
 		// Ensure that the code generation preferences are respected
 		for (int i= 0; i < paramNames.length; i++) {
 			String curr= paramNames[i];
-			if (!hasPrefixOrSuffix(prefixes, suffixes, curr)) {
-				newNames[i]= suggestArgumentName(project, paramNames[i], null);
-			} else {
-				newNames[i]= curr;
+			String baseName= NamingConventions.removePrefixAndSuffixForArgumentName(project, curr);
+
+			String[] proposedNames= getVariableNameSuggestions(ARGUMENT, project, curr, 0, 0, (String[]) takenNames.toArray(new String[takenNames.size()]));
+			if (!curr.equals(baseName)) {
+				// make the existing name to favourite
+				LinkedHashSet updatedNames= new LinkedHashSet();
+				updatedNames.add(curr);
+				for (int k= 0; k < proposedNames.length; k++) {
+					updatedNames.add(proposedNames[k]);
+				}
+				proposedNames= (String[]) updatedNames.toArray(new String[updatedNames.size()]);
 			}
+			newNames[i]= proposedNames;
+			takenNames.add(proposedNames[0]);
 		}
 		return newNames;
 	}
+	
+	public static String[][] suggestArgumentNamesWithProposals(IJavaProject project, IMethodBinding binding) {
+		int nParams= binding.getParameterTypes().length;
+		if (nParams > 0) {
+			try {
+				IMethod method= (IMethod) binding.getMethodDeclaration().getJavaElement();
+				if (method != null) {
+					return suggestArgumentNamesWithProposals(project, method.getParameterNames());
+				}
+			} catch (JavaModelException e) {
+				// ignore
+			}
+		}
+		String[][] names= new String[nParams][];
+		for (int i= 0; i < names.length; i++) {
+			names[i]= new String[] { "arg" + i }; //$NON-NLS-1$
+		}
+		return names;
+	}
+	
+	
+	public static String[] suggestArgumentNames(IJavaProject project, IMethodBinding binding) {
+		int nParams= binding.getParameterTypes().length;
+
+		if (nParams > 0) {
+			try {
+				IMethod method= (IMethod) binding.getMethodDeclaration().getJavaElement();
+				if (method != null) {
+					String[] paramNames= method.getParameterNames();
+					String[] namesArray= new String[0];
+					ArrayList newNames= new ArrayList(paramNames.length);
+					// Ensure that the code generation preferences are respected
+					for (int i= 0; i < paramNames.length; i++) {
+						String curr= paramNames[i];
+						String baseName= NamingConventions.removePrefixAndSuffixForArgumentName(project, curr);
+						if (!curr.equals(baseName)) {
+							// make the existing name the favourite
+							newNames.add(curr);
+						} else {
+							newNames.add(suggestArgumentName(project, curr, namesArray));
+						}
+						namesArray= (String[]) newNames.toArray(new String[newNames.size()]);
+					}
+					return namesArray;
+				}
+			} catch (JavaModelException e) {
+				// ignore
+			}
+		}
+		String[] names= new String[nParams];
+		for (int i= 0; i < names.length; i++) {
+			names[i]= "arg" + i; //$NON-NLS-1$
+		}
+		return names;
+	}
+	
+	public static String removePrefixAndSuffixForVariable(IJavaProject project, IVariableBinding binding) {
+		if (binding.isEnumConstant()) {
+			return binding.getName();
+		} else if (binding.isField()) {
+			return NamingConventions.removePrefixAndSuffixForFieldName(project, binding.getName(), binding.getModifiers());
+		} else if (binding.isParameter()) {
+			return NamingConventions.removePrefixAndSuffixForArgumentName(project, binding.getName());
+		} else {
+			return NamingConventions.removePrefixAndSuffixForLocalVariableName(project, binding.getName());
+		}
+	}
+	
 	
 	public static boolean hasFieldName(IJavaProject project, String name) {
 		String prefixes= project.getOption(JavaCore.CODEASSIST_FIELD_PREFIXES, true);
@@ -1060,6 +1352,8 @@ public class StubUtility {
 		}
 		return false;
 	}
+	
+	// -------------------- preference access -----------------------
 	
 	public static boolean useThisForFieldAccess(IJavaProject project) {
 		return Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_KEYWORD_THIS, project)).booleanValue(); 
