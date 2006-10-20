@@ -52,7 +52,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -410,7 +409,7 @@ public class JavaContext extends CompilationUnitContext {
 		
 		IJavaProject project= getJavaProject();
 		if (project != null)
-			return NamingConventions.suggestLocalVariableNames(project, "", type, dim, excludes); //$NON-NLS-1$
+			return StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, project, type, dim, 0, excludes);
 		
 		// fallback if we lack proper context: roll-our own lowercasing
 		return new String[] {Signature.getSimpleName(type).toLowerCase()};
