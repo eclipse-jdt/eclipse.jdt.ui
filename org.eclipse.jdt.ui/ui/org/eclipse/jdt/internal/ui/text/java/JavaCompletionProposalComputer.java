@@ -202,7 +202,7 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 	 */
 	protected CompletionProposalCollector createCollector(JavaContentAssistInvocationContext context) {
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES))
-			return new ExperimentalResultCollector(context);
+			return new FillArgumentNamesCompletionProposalCollector(context);
 		else
 			return new CompletionProposalCollector(context.getCompilationUnit());
 	}

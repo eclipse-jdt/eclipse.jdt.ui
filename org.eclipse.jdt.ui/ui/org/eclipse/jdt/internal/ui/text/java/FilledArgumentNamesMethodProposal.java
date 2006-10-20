@@ -36,15 +36,15 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
- * An experimental proposal.
+ * A method proposal with filled in argument names.
  */
-public final class ExperimentalProposal extends JavaMethodCompletionProposal {
+public final class FilledArgumentNamesMethodProposal extends JavaMethodCompletionProposal {
 
 	private IRegion fSelectedRegion; // initialized by apply()
 	private int[] fArgumentOffsets;
 	private int[] fArgumentLengths;
 
-	public ExperimentalProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
+	public FilledArgumentNamesMethodProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
 		super(proposal, context);
 	}
 
@@ -168,7 +168,7 @@ public final class ExperimentalProposal extends JavaMethodCompletionProposal {
 
 	private void openErrorDialog(BadLocationException e) {
 		Shell shell= getTextViewer().getTextWidget().getShell();
-		MessageDialog.openError(shell, JavaTextMessages.ExperimentalProposal_error_msg, e.getMessage());
+		MessageDialog.openError(shell, JavaTextMessages.FilledArgumentNamesMethodProposal_error_msg, e.getMessage());
 	}
 
 }

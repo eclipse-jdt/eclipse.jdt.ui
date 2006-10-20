@@ -32,7 +32,7 @@ final class JavaTextMessages extends NLS {
 	public static String ContentAssistProcessor_all_disabled_message;
 	public static String ContentAssistProcessor_all_disabled_preference_link;
 	public static String ContentAssistProcessor_all_disabled_title;
-	public static String ExperimentalProposal_error_msg;
+	public static String FilledArgumentNamesMethodProposal_error_msg;
 	public static String ParameterGuessingProposal_error_msg;
 	public static String ProposalInfo_more_to_come;
 	public static String GetterSetterCompletionProposal_getter_label;

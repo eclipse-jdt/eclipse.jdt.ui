@@ -62,9 +62,12 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
- * An experimental proposal.
+ * Proposal for generic types.
+ * <p>
+ * Only used when compliance is set to 5.0 or higher.
+ * </p>
  */
-public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposal {
+public final class LazzyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 	/** Triggers for types. Do not modify. */
 	private final static char[] GENERIC_TYPE_TRIGGERS= new char[] { '.', '\t', '[', '(', '<', ' ' };
 
@@ -79,7 +82,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 		private final Image fImage;
 		private final int fPosition;
 		
-		ContextInformation(GenericJavaTypeProposal proposal) {
+		ContextInformation(LazzyGenericTypeProposal proposal) {
 			// don't cache the proposal as content assistant
 			// might hang on to the context info
 			fContextDisplayString= proposal.getDisplayString();
@@ -109,7 +112,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 			return fInformationDisplayString;
 		}
 
-		private String computeContextString(GenericJavaTypeProposal proposal) {
+		private String computeContextString(LazzyGenericTypeProposal proposal) {
 			try {
 				TypeArgumentProposal[] proposals= proposal.computeTypeArgumentProposals();
 				if (proposals.length == 0)
@@ -178,7 +181,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	private IRegion fSelectedRegion; // initialized by apply()
 	private TypeArgumentProposal[] fTypeArgumentProposals;
 
-	public GenericJavaTypeProposal(CompletionProposal typeProposal, JavaContentAssistInvocationContext context) {
+	public LazzyGenericTypeProposal(CompletionProposal typeProposal, JavaContentAssistInvocationContext context) {
 		super(typeProposal, context);
 	}
 
@@ -757,7 +760,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 
 	private void openErrorDialog(BadLocationException e) {
 		Shell shell= getTextViewer().getTextWidget().getShell();
-		MessageDialog.openError(shell, JavaTextMessages.ExperimentalProposal_error_msg, e.getMessage());
+		MessageDialog.openError(shell, JavaTextMessages.FilledArgumentNamesMethodProposal_error_msg, e.getMessage());
 	}
 
 	/*

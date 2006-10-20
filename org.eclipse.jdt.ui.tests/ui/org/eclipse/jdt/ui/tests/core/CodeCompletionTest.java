@@ -51,7 +51,7 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.text.java.ExperimentalResultCollector;
+import org.eclipse.jdt.internal.ui.text.java.FillArgumentNamesCompletionProposalCollector;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -341,7 +341,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		CompletionProposalCollector collector= new ExperimentalResultCollector(createContext(offset, cu));
+		CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext(offset, cu));
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -583,7 +583,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		CompletionProposalCollector collector= new ExperimentalResultCollector(createContext(offset, cu));
+		CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext(offset, cu));
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -632,7 +632,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		CompletionProposalCollector collector= new ExperimentalResultCollector(createContext(offset, cu));
+		CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext(offset, cu));
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);

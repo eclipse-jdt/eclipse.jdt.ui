@@ -26,13 +26,18 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * Bin to collect the proposal of the infrastructure on code assist in a java text.
+ * Completion proposal collector which creates proposals with
+ * filled in argument names.
+ * <p>
+ * This collector is used when
+ * {@link PreferenceConstants#CODEASSIST_FILL_ARGUMENT_NAMES} is enabled.
+ * <p/>
  */
-public final class ExperimentalResultCollector extends CompletionProposalCollector {
+public final class FillArgumentNamesCompletionProposalCollector extends CompletionProposalCollector {
 
 	private final boolean fIsGuessArguments;
 
-	public ExperimentalResultCollector(JavaContentAssistInvocationContext context) {
+	public FillArgumentNamesCompletionProposalCollector(JavaContentAssistInvocationContext context) {
 		super(context.getCompilationUnit());
 		setInvocationContext(context);
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
@@ -65,7 +70,7 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 		if (compilationUnit != null && fIsGuessArguments)
 			proposal= new ParameterGuessingProposal(methodProposal, getInvocationContext());
 		else
-			proposal= new ExperimentalProposal(methodProposal, getInvocationContext());
+			proposal= new FilledArgumentNamesMethodProposal(methodProposal, getInvocationContext());
 		return proposal;
 	}
 
@@ -86,7 +91,7 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 		if (completion.length > 0 && (completion[completion.length - 1] == ';' || completion[completion.length - 1] == '.'))
 			return super.createJavaCompletionProposal(typeProposal);
 
-		LazyJavaCompletionProposal newProposal= new GenericJavaTypeProposal(typeProposal, getInvocationContext());
+		LazyJavaCompletionProposal newProposal= new LazzyGenericTypeProposal(typeProposal, getInvocationContext());
 		return newProposal;
 	}
 

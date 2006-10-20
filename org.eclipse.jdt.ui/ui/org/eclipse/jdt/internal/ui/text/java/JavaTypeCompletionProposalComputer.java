@@ -137,7 +137,7 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 		proposal.setSignature(Signature.createTypeSignature(fullyQualifiedType, true).toCharArray());
 
 		if (shouldProposeGenerics(context.getProject()))
-			return new GenericJavaTypeProposal(proposal, context);
+			return new LazzyGenericTypeProposal(proposal, context);
 		else
 			return new LazyJavaTypeCompletionProposal(proposal, context);
 	}
