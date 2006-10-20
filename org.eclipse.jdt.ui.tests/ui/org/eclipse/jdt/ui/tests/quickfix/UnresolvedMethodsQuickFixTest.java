@@ -1743,7 +1743,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("    public static void xoo(int i, Object o) {\n");
 		buf.append("    }\n");
 		buf.append("\n");
-		buf.append("    public static void xoo(float f, E e) {\n");
+		buf.append("    public static void xoo(float x, E e) {\n");
 		buf.append("    }\n");		
 		buf.append("}\n");		
 		String expected2= buf.toString();
@@ -1952,7 +1952,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("class E {\n");
 		buf.append("    void foo(@Deprecated final String map){}\n");
 		buf.append("    {foo(Collections.EMPTY_MAP);}\n");
-		buf.append("    private void foo(Map empty_map) {\n");
+		buf.append("    private void foo(Map emptyMap) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[1]= buf.toString();
@@ -2165,7 +2165,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("        goo(this.foo());\n");
 		buf.append("        return 9;\n");	
 		buf.append("    }\n");
-		buf.append("    private void goo(int i) {\n");
+		buf.append("    private void goo(int foo) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
@@ -2297,7 +2297,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("        goo(this.foo());\n");
 		buf.append("        return 9;\n");	
 		buf.append("    }\n");
-		buf.append("    private void goo(int i) {\n");
+		buf.append("    private void goo(int foo) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
@@ -3040,7 +3040,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("       int j= 0;\n");		
 		buf.append("    }\n");
 		buf.append("\n");		
-		buf.append("    public void xoo(Set empty_set, int i, int j) {\n");
+		buf.append("    public void xoo(Set emptySet, int i, int j) {\n");
 		buf.append("    }\n");		
 		buf.append("}\n");
 		String expected3= buf.toString();
@@ -3800,7 +3800,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("    public A(int i) {\n");
 		buf.append("    }\n");
 		buf.append("\n");
-		buf.append("    public A(int i, String string, boolean b) {\n");
+		buf.append("    public A(int i, String valueOf, boolean b) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();			
@@ -3866,7 +3866,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("    public A(int i) {\n");
 		buf.append("    }\n");
 		buf.append("\n");
-		buf.append("    public A(int i, String string, boolean b) {\n");
+		buf.append("    public A(int i, String valueOf, boolean b) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();			
