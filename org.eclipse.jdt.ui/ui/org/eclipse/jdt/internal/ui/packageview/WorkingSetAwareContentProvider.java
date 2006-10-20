@@ -106,7 +106,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 			} else if (element instanceof IJavaElement) {
 				IJavaElement elem= (IJavaElement) element;
 				IProject project= getProject(elem);
-				if (project.isOpen()) {
+				if (project != null && project.isOpen()) {
 					result.add(elem);
 				}
 			} else {
