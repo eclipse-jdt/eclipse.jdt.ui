@@ -29,6 +29,6 @@ public final class ConvertAnonymousRefactoringContribution extends JDTRefactorin
 	 * {@inheritDoc}
 	 */
 	public Refactoring createRefactoring(final RefactoringDescriptor descriptor) throws CoreException {
-		return new ConvertAnonymousToNestedRefactoring(null, null, 0, 0);
+		return new ConvertAnonymousToNestedRefactoring(null, 0, 0);
 	}
 }

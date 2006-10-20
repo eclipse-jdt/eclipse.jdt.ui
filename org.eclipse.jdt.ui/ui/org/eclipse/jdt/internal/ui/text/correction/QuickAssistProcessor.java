@@ -20,12 +20,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.text.Document;
-
-import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
@@ -40,6 +37,7 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
@@ -77,7 +75,6 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -87,6 +84,7 @@ import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFix;
+import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -95,10 +93,12 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
   */
@@ -134,6 +134,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getInvertEqualsProposal(context, coveringNode, null)
 				|| getConvertForLoopProposal(context, coveringNode, null)
 				|| getExtractLocalProposal(context, coveringNode, null)
+				|| getConvertAnonymousToNestedProposal(context, coveringNode, null)
 				|| getConvertIterableLoopProposal(context, coveringNode, null)
 				|| getRemoveBlockProposals(context, coveringNode, null)
 				|| getMakeVariableDeclarationFinalProposals(context, coveringNode, null);
@@ -164,6 +165,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getArrayInitializerToArrayCreation(context, coveringNode, resultingCollections);
 				getCreateInSuperClassProposals(context, coveringNode, resultingCollections);
 				getExtractLocalProposal(context, coveringNode, resultingCollections);
+				getConvertAnonymousToNestedProposal(context, coveringNode, resultingCollections);
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
 				getRemoveBlockProposals(context, coveringNode, resultingCollections);
@@ -209,14 +211,49 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, 5, image) {
 				protected TextChange createTextChange() throws CoreException {
 					refactoring.setTempName(refactoring.guessTempName());
-					if (!refactoring.checkFinalConditions(new NullProgressMonitor()).hasFatalError()) {
-						final CompositeChange change= (CompositeChange) refactoring.createChange(new NullProgressMonitor());
-						return (TextChange) change.getChildren()[0];
+					refactoring.setLinkedProposalModel(getLinkedProposalModel());
+					return refactoring.createTextChange(new NullProgressMonitor());
+				}
+			};
+			proposals.add(proposal);
+		}
+		return false;
+	}
+	
+
+	private static boolean getConvertAnonymousToNestedProposal(IInvocationContext context, final ASTNode node, Collection proposals) throws CoreException {
+		if (!(node instanceof Name))
+			return false;
+		
+		ASTNode normalized= ASTNodes.getNormalizedNode(node);
+		if (normalized.getLocationInParent() != ClassInstanceCreation.TYPE_PROPERTY)
+			return false;
+		
+		final AnonymousClassDeclaration anonymTypeDecl= ((ClassInstanceCreation) normalized.getParent()).getAnonymousClassDeclaration();
+		if (anonymTypeDecl == null || anonymTypeDecl.resolveBinding() == null) {
+			return false;
+		}
+		
+		if (proposals == null) {
+			return true;
+		}
+
+		final ICompilationUnit cu= context.getCompilationUnit();
+		final ConvertAnonymousToNestedRefactoring refactoring= new ConvertAnonymousToNestedRefactoring(anonymTypeDecl);
+		
+		if (refactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
+			String label= CorrectionMessages.QuickAssistProcessor_convert_anonym_to_nested;
+			Image image= JavaPlugin.getImageDescriptorRegistry().get(JavaElementImageProvider.getTypeImageDescriptor(true, false, Flags.AccPrivate, false));
+			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, 5, image) {
+				protected TextChange createTextChange() throws CoreException {
+					String extTypeName= ASTNodes.getSimpleNameIdentifier((Name) node);
+					if (anonymTypeDecl.resolveBinding().getInterfaces().length == 0) {
+						refactoring.setClassName(Messages.format(CorrectionMessages.QuickAssistProcessor_name_extension_from_interface, extTypeName));
 					} else {
-						Document document= new Document(""); //$NON-NLS-1$
-						document.setInitialLineDelimiter(StubUtility.getLineDelimiterUsed(cu));
-						return new DocumentChange(getDisplayString(), document);
+						refactoring.setClassName(Messages.format(CorrectionMessages.QuickAssistProcessor_name_extension_from_class, extTypeName));
 					}
+					refactoring.setLinkedProposalModel(getLinkedProposalModel());
+					return refactoring.createCompilationUnitChange(new NullProgressMonitor());
 				}
 			};
 			proposals.add(proposal);

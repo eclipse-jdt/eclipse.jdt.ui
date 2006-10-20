@@ -26,20 +26,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -48,27 +40,24 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -77,6 +66,7 @@ import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.Type;
@@ -84,36 +74,35 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitDescriptorChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
@@ -121,7 +110,12 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_FINAL= "final"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_STATIC= "static"; //$NON-NLS-1$
-
+	
+	private static final String KEY_TYPE_NAME= "type_name"; //$NON-NLS-1$
+	private static final String KEY_PARAM_NAME_EXT= "param_name_ext"; //$NON-NLS-1$
+	private static final String KEY_PARAM_NAME_CONST= "param_name_const"; //$NON-NLS-1$
+	private static final String KEY_FIELD_NAME_EXT= "field_name_ext"; //$NON-NLS-1$
+	
 	public static class TypeVariableFinder extends ASTVisitor {
 
 		private final Map fBindings= new HashMap();
@@ -152,30 +146,49 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
     private boolean fDeclareFinal= true;
     private boolean fDeclareStatic;
     private String fClassName= ""; //$NON-NLS-1$
-    private CodeGenerationSettings fSettings;
 
     private CompilationUnit fCompilationUnitNode;
     private AnonymousClassDeclaration fAnonymousInnerClassNode;
     private Set fClassNamesUsed;
 	private boolean fSelfInitializing= false;
+	
+	private LinkedProposalModel fLinkedProposalModel;
 
 	/**
 	 * Creates a new convert anonymous to nested refactoring
 	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
-	 * @param settings the code generation settings
 	 * @param selectionStart
 	 * @param selectionLength
 	 */
-    public ConvertAnonymousToNestedRefactoring(ICompilationUnit unit, CodeGenerationSettings settings, int selectionStart, int selectionLength) {
+    public ConvertAnonymousToNestedRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) {
         Assert.isTrue(selectionStart >= 0);
         Assert.isTrue(selectionLength >= 0);
         Assert.isTrue(unit == null || unit.exists());
         fSelectionStart= selectionStart;
         fSelectionLength= selectionLength;
         fCu= unit;
-        if (unit != null)
-        	fSettings= settings;
+        fAnonymousInnerClassNode= null;
+        fCompilationUnitNode= null;
     }
+    
+    public ConvertAnonymousToNestedRefactoring(AnonymousClassDeclaration declaration) {
+    	Assert.isTrue(declaration != null);
+    	
+    	ASTNode astRoot= declaration.getRoot();
+    	Assert.isTrue(astRoot instanceof CompilationUnit);
+    	fCompilationUnitNode= (CompilationUnit) astRoot;
+    	
+     	IJavaElement javaElement= fCompilationUnitNode.getJavaElement();
+        Assert.isTrue(javaElement instanceof ICompilationUnit);
+        
+        fCu= (ICompilationUnit) javaElement;
+        fSelectionStart= declaration.getStartPosition();
+        fSelectionLength= declaration.getLength();
+    }
+    
+	public void setLinkedProposalModel(LinkedProposalModel linkedProposalModel) {
+		fLinkedProposalModel= linkedProposalModel;
+	}
 
     public int[] getAvailableVisibilities() {
         if (isLocalInnerType()) {
@@ -226,7 +239,15 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
     public String getName() {
         return RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_name; 
     }
-
+    
+    private boolean useThisForFieldAccess() {
+    	return StubUtility.useThisForFieldAccess(fCu.getJavaProject());
+    }
+    
+    private boolean doAddComments() {
+    	return StubUtility.doAddComments(fCu.getJavaProject());
+    }
+    
     public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
         RefactoringStatus result= Checks.validateModifiesFiles(
         	ResourceUtil.getFiles(new ICompilationUnit[]{fCu}),
@@ -253,8 +274,12 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
     }
 
     private void initAST(IProgressMonitor pm) {
-		fCompilationUnitNode= RefactoringASTParser.parseWithASTProvider(fCu, true, pm);
-		fAnonymousInnerClassNode= getAnonymousInnerClass(NodeFinder.perform(fCompilationUnitNode, fSelectionStart, fSelectionLength));
+    	if (fCompilationUnitNode == null) {
+    		fCompilationUnitNode= RefactoringASTParser.parseWithASTProvider(fCu, true, pm);
+    	}
+    	if (fAnonymousInnerClassNode == null) {
+    		fAnonymousInnerClassNode= getAnonymousInnerClass(NodeFinder.perform(fCompilationUnitNode, fSelectionStart, fSelectionLength));
+    	}
 		if (fAnonymousInnerClassNode != null) {
 			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(fAnonymousInnerClassNode, AbstractTypeDeclaration.class);
 			if (declaration instanceof TypeDeclaration) {
@@ -405,21 +430,23 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
             pm.done();
         }
     }
+    
+    public CompilationUnitChange createCompilationUnitChange(IProgressMonitor pm) throws CoreException {
+		final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(fCu, fCompilationUnitNode);
+		final ITypeBinding[] typeParameters= getTypeParameters();
+		addNestedClass(rewrite, typeParameters);
+		modifyConstructorCall(rewrite, typeParameters);
+		return rewrite.createChange(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_name, false, pm); 
+    }
+    
 
     /*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
-		pm.beginTask("", 1); //$NON-NLS-1$
-		try {
-			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(fCu, fCompilationUnitNode);
-			final ITypeBinding[] parameters= getTypeParameters();
-			addNestedClass(rewrite, parameters);
-			modifyConstructorCall(rewrite, parameters);
-			return createChange(rewrite);
-		} finally {
-			pm.done();
-		}
+		final CompilationUnitChange result= createCompilationUnitChange(pm);
+		result.setDescriptor(createRefactoringDescriptor());
+		return result;
 	}
 
 	private ITypeBinding[] getTypeParameters() {
@@ -478,22 +505,19 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 		return null;
 	}
 
-	private Change createChange(CompilationUnitRewrite rewrite) throws CoreException {
+	private RefactoringChangeDescriptor createRefactoringDescriptor() {
 		final ITypeBinding binding= fAnonymousInnerClassNode.resolveBinding();
 		final String[] labels= new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)};
 		final Map arguments= new HashMap();
-		String project= null;
-		IJavaProject javaProject= fCu.getJavaProject();
-		if (javaProject != null)
-			project= javaProject.getElementName();
+		final String projectName= fCu.getJavaProject().getElementName();
 		final int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 		final String description= RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_descriptor_description_short;
 		final String header= Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_descriptor_description, labels);
-		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
+		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(projectName, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_original_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_class_name_pattern, fClassName));
 		String visibility= JdtFlags.getVisibilityString(fVisibility);
-		if ("".equals(visibility)) //$NON-NLS-1$
+		if (visibility.length() == 0)
 			visibility= RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_default_visibility;
 		comment.addSetting(Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_visibility_pattern, visibility));
 		if (fDeclareFinal && fDeclareStatic)
@@ -502,22 +526,14 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 			comment.addSetting(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_declare_final);			
 		else if (fDeclareStatic)
 			comment.addSetting(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_declare_static);			
-		final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(IJavaRefactorings.CONVERT_ANONYMOUS, project, description, comment.asString(), arguments, flags);
+		final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(IJavaRefactorings.CONVERT_ANONYMOUS, projectName, description, comment.asString(), arguments, flags);
 		arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
 		arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_NAME, fClassName);
-		arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+		arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + ' ' + new Integer(fSelectionLength).toString());
 		arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
 		arguments.put(ATTRIBUTE_STATIC, Boolean.valueOf(fDeclareStatic).toString());
 		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
-		final CompilationUnitDescriptorChange result= new CompilationUnitDescriptorChange(descriptor, RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_name, fCu);
-		try {
-			ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fCu);
-			TextEdit resultingEdits= rewrite.getASTRewrite().rewriteAST(buffer.getDocument(), fCu.getJavaProject().getOptions(true));
-			TextChangeCompatibility.addTextEdit(result, RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_edit_name, resultingEdits);
-		} finally {
-			RefactoringFileBuffers.release(fCu);
-		}
-		return result;
+		return new RefactoringChangeDescriptor(descriptor);
 	}
 
     private void modifyConstructorCall(CompilationUnitRewrite rewrite, ITypeBinding[] parameters) {
@@ -529,16 +545,20 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 		ClassInstanceCreation newClassCreation= ast.newClassInstanceCreation();
 		newClassCreation.setAnonymousClassDeclaration(null);
 		Type type= null;
+		SimpleName newNameNode= ast.newSimpleName(fClassName);
 		if (parameters.length > 0) {
-			final ParameterizedType parameterized= ast.newParameterizedType(ast.newSimpleType(ast.newSimpleName(fClassName)));
+			final ParameterizedType parameterized= ast.newParameterizedType(ast.newSimpleType(newNameNode));
 			for (int index= 0; index < parameters.length; index++)
 				parameterized.typeArguments().add(ast.newSimpleType(ast.newSimpleName(parameters[index].getName())));
 			type= parameterized;
 		} else
-			type= ast.newSimpleType(ast.newSimpleName(fClassName));
+			type= ast.newSimpleType(newNameNode);
 		newClassCreation.setType(type);
 		copyArguments(rewrite, newClassCreation);
 		addArgumentsForLocalsUsedInInnerClass(rewrite, newClassCreation);
+		
+		addLinkedPosition(KEY_TYPE_NAME, newNameNode, rewrite.getASTRewrite(), true);
+
 		return newClassCreation;
 	}
 
@@ -561,12 +581,12 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
             newClassCreation.arguments().add(rewrite.getASTRewrite().createCopyTarget((Expression)iter.next()));
     }
 
-    private void addNestedClass(CompilationUnitRewrite rewrite, ITypeBinding[] parameters) throws CoreException {
+    private void addNestedClass(CompilationUnitRewrite rewrite, ITypeBinding[] typeParameters) throws CoreException {
         final AbstractTypeDeclaration declarations= (AbstractTypeDeclaration) ASTNodes.getParent(fAnonymousInnerClassNode, AbstractTypeDeclaration.class);
         int index= findIndexOfFistNestedClass(declarations.bodyDeclarations());
         if (index == -1)
             index= 0;
-        rewrite.getASTRewrite().getListRewrite(declarations, declarations.getBodyDeclarationsProperty()).insertAt(createNewNestedClass(rewrite, parameters), index, null);
+        rewrite.getASTRewrite().getListRewrite(declarations, declarations.getBodyDeclarationsProperty()).insertAt(createNewNestedClass(rewrite, typeParameters), index, null);
     }
 
     private static int findIndexOfFistNestedClass(List bodyDeclarations) {
@@ -584,179 +604,194 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
         return (each.getParent() instanceof AbstractTypeDeclaration);
     }
 
-    private AbstractTypeDeclaration createNewNestedClass(CompilationUnitRewrite rewrite, ITypeBinding[] parameters) throws CoreException {
+    private AbstractTypeDeclaration createNewNestedClass(CompilationUnitRewrite rewrite, ITypeBinding[] typeParameters) throws CoreException {
 		final AST ast= fAnonymousInnerClassNode.getAST();
-		final TypeDeclaration declaration= ast.newTypeDeclaration();
-		declaration.setInterface(false);
-		declaration.setJavadoc(null);
-		declaration.modifiers().addAll(ASTNodeFactory.newModifiers(ast, createModifiersForNestedClass()));
-		declaration.setName(ast.newSimpleName(fClassName));
+		
+		final TypeDeclaration newDeclaration= ast.newTypeDeclaration();
+		newDeclaration.setInterface(false);
+		newDeclaration.setJavadoc(null);
+		newDeclaration.modifiers().addAll(ASTNodeFactory.newModifiers(ast, createModifiersForNestedClass()));
+		newDeclaration.setName(ast.newSimpleName(fClassName));
+		
 		TypeParameter parameter= null;
-		for (int index= 0; index < parameters.length; index++) {
+		for (int index= 0; index < typeParameters.length; index++) {
 			parameter= ast.newTypeParameter();
-			parameter.setName(ast.newSimpleName(parameters[index].getName()));
-			declaration.typeParameters().add(parameter);
+			parameter.setName(ast.newSimpleName(typeParameters[index].getName()));
+			newDeclaration.typeParameters().add(parameter);
 		}
-		setSuperType(declaration);
-		removeInitializationFromDeclaredFields(rewrite);
-		final String delimiter= StubUtility.getLineDelimiterUsed(fCu);
-		ITextFileBuffer buffer= null;
-		try {
-			buffer= RefactoringFileBuffers.acquire(fCu);
-			final IDocument document= buffer.getDocument();
-			IBinding[] bindings= getUsedLocalVariables();
-			for (final Iterator iterator= fAnonymousInnerClassNode.bodyDeclarations().iterator(); iterator.hasNext();) {
-				final BodyDeclaration body= (BodyDeclaration) iterator.next();
-				declaration.bodyDeclarations().add(createBodyDeclaration(rewrite, document, bindings, body, delimiter));
+		setSuperType(newDeclaration);
+		
+		IJavaProject project= fCu.getJavaProject();
+		
+		IVariableBinding[] bindings= getUsedLocalVariables();
+		ArrayList fieldNames= new ArrayList();
+		String[] allFieldNames= new String[0];
+		for (int i= 0; i < bindings.length; i++) {
+			String name= StubUtility.removePrefixAndSuffixForVariable(project, bindings[i]);
+			String[] fieldNameProposals= StubUtility.getVariableNameSuggestions(StubUtility.FIELD, project, name, 0, Flags.AccPrivate, allFieldNames);
+			fieldNames.add(fieldNameProposals[0]);
+			allFieldNames= (String[]) fieldNames.toArray(new String[fieldNames.size()]);
+			
+			if (fLinkedProposalModel != null) {
+				LinkedProposalPositionGroup positionGroup= fLinkedProposalModel.getPositionGroup(KEY_FIELD_NAME_EXT + i, true);
+				for (int k= 0; k < fieldNameProposals.length; k++) {
+					positionGroup.addProposal(fieldNameProposals[k], null, fieldNameProposals.length - k);
+				}
 			}
-		} finally {
-			if (buffer != null)
-				RefactoringFileBuffers.release(fCu);
 		}
-		createFieldsForAccessedLocals(rewrite, declaration);
-		createNewConstructorIfNeeded(rewrite, declaration);
-		if (fSettings.createComments) {
-			String[] parameterNames= new String[parameters.length];
+		
+		List newBodyDeclarations= newDeclaration.bodyDeclarations();
+		
+		createFieldsForAccessedLocals(rewrite, bindings, allFieldNames, newBodyDeclarations);
+		
+		MethodDeclaration newConstructorDecl= createNewConstructor(rewrite, bindings, allFieldNames);
+		if (newConstructorDecl != null) {
+			newBodyDeclarations.add(newConstructorDecl);
+		}
+		
+		updateAndMoveBodyDeclarations(rewrite, bindings, allFieldNames, newBodyDeclarations, newConstructorDecl);
+		
+		if (doAddComments()) {
+			String[] parameterNames= new String[typeParameters.length];
 			for (int index= 0; index < parameterNames.length; index++) {
-				parameterNames[index]= parameters[index].getName();
+				parameterNames[index]= typeParameters[index].getName();
 			}
-			String string= CodeGeneration.getTypeComment(rewrite.getCu(), fClassName, parameterNames, StubUtility.getLineDelimiterUsed(rewrite.getCu()));
+			String string= CodeGeneration.getTypeComment(rewrite.getCu(), fClassName, parameterNames, StubUtility.getLineDelimiterUsed(fCu));
 			if (string != null) {
 				Javadoc javadoc= (Javadoc) rewrite.getASTRewrite().createStringPlaceholder(string, ASTNode.JAVADOC);
-				declaration.setJavadoc(javadoc);
+				newDeclaration.setJavadoc(javadoc);
 			}
 		}
-		return declaration;
+		if (fLinkedProposalModel != null) {
+			addLinkedPosition(KEY_TYPE_NAME, newDeclaration.getName(), rewrite.getASTRewrite(), false);
+			ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(fLinkedProposalModel, rewrite.getASTRewrite(), newDeclaration.modifiers(), false);
+		}
+		
+		return newDeclaration;
 	}
 
-	private ASTNode createBodyDeclaration(CompilationUnitRewrite rewriter, IDocument document, IBinding[] bindings, BodyDeclaration body, String delimiter) {
-		final ASTRewrite rewrite= ASTRewrite.create(rewriter.getAST());
-		final ITrackedNodePosition position= rewrite.track(body);
-		final IBinding[] binding= { null};
-		final ASTNode[] newNode= { null};
-		List excludedFields= new ArrayList();
-		final AST ast= fAnonymousInnerClassNode.getAST();
-		final IJavaProject javaProject= fCu.getJavaProject();
-		final IJavaProject project= javaProject;
-		for (int index= 0; index < bindings.length; index++) {
-			binding[0]= bindings[index];
-			String name= binding[0].getName();
-			String fieldName= name;
-			String oldName= name;
-			if (binding[0] instanceof IVariableBinding) {
-				IVariableBinding variable= (IVariableBinding) binding[0];
-				if (!variable.isEnumConstant()) {
-					name= NamingConventions.removePrefixAndSuffixForLocalVariableName(project, name);
-					if (name.equals(oldName))
-						name= NamingConventions.removePrefixAndSuffixForArgumentName(project, name);
-					fieldName= NamingConventions.suggestFieldNames(project, "", name, 0, Flags.AccPrivate, (String[]) excludedFields.toArray(new String[excludedFields.size()]))[0]; //$NON-NLS-1$
-					excludedFields.add(fieldName);
-					if (fSettings.useKeywordThis) {
+	private void updateAndMoveBodyDeclarations(CompilationUnitRewrite rewriter, IVariableBinding[] bindings, String[] fieldNames, List newBodyDeclarations, MethodDeclaration newConstructorDecl) throws JavaModelException {
+		final ASTRewrite astRewrite= rewriter.getASTRewrite();
+		final AST ast= astRewrite.getAST();
+		
+		final boolean useThisAccess= useThisForFieldAccess();
+		
+		int fieldInsertIndex= newConstructorDecl != null ? newBodyDeclarations.lastIndexOf(newConstructorDecl) : newBodyDeclarations.size();
+		
+		for (Iterator iterator= fAnonymousInnerClassNode.bodyDeclarations().iterator(); iterator.hasNext();) {
+			BodyDeclaration body= (BodyDeclaration) iterator.next();
+			
+			for (int i= 0; i < bindings.length; i++) {
+				SimpleName[] names= LinkedNodeFinder.findByBinding(body, bindings[i]);
+				String fieldName= fieldNames[i];
+				for (int k= 0; k < names.length; k++) {
+					SimpleName newNode= ast.newSimpleName(fieldName);
+					if (useThisAccess) {
 						FieldAccess access= ast.newFieldAccess();
 						access.setExpression(ast.newThisExpression());
-						access.setName(ast.newSimpleName(fieldName));
-						newNode[0]= access;
-					} else
-						newNode[0]= ast.newSimpleName(fieldName);
-				} else
-					newNode[0]= ast.newSimpleName(fieldName);
-			}
-			body.accept(new ASTVisitor() {
-
-				public boolean visit(SimpleName node) {
-					IBinding resolved= node.resolveBinding();
-					if (binding[0].equals(resolved))
-						rewrite.replace(node, ASTNode.copySubtree(ast, newNode[0]), null);
-					return false;
+						access.setName(newNode);
+						astRewrite.replace(names[k], access, null);
+					} else {
+						astRewrite.replace(names[k], newNode, null);
+					}
+					addLinkedPosition(KEY_FIELD_NAME_EXT + i, newNode, astRewrite, false);
 				}
+			}
+			if (body instanceof Initializer || body instanceof FieldDeclaration) {
+				newBodyDeclarations.add(fieldInsertIndex++, astRewrite.createMoveTarget(body));
+			} else {
+				newBodyDeclarations.add(astRewrite.createMoveTarget(body));
+			}
+		}
+		
+		if (newConstructorDecl != null) {
+			// move initialization of existing fields to constructor if an outer is referenced 
+			List bodyStatements= newConstructorDecl.getBody().statements();
 
-			});
+			List fieldsToInitializeInConstructor= getFieldsToInitializeInConstructor();
+			for (Iterator iter= fieldsToInitializeInConstructor.iterator(); iter.hasNext();) {
+				VariableDeclarationFragment fragment= (VariableDeclarationFragment) iter.next();
+				Expression initializer= fragment.getInitializer();
+				Expression replacement= (Expression) astRewrite.get(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY);
+				if (replacement == null) {
+					replacement= (Expression) astRewrite.createMoveTarget(initializer);
+				}
+				astRewrite.remove(initializer, null);
+				SimpleName fieldNameNode= ast.newSimpleName(fragment.getName().getIdentifier());
+				bodyStatements.add(newFieldAssignment(ast, fieldNameNode, replacement, useThisAccess));
+			}
 		}
-		final IDocument buffer= new Document(document.get());
-		final Map options= javaProject.getOptions(true);
-		final CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(javaProject);
-		final TextEdit edit= rewrite.rewriteAST(buffer, options);
-		try {
-			edit.apply(buffer, TextEdit.UPDATE_REGIONS);
-			final String trimmed= Strings.trimIndentation(buffer.get(position.getStartPosition(), position.getLength()), settings.tabWidth, settings.indentWidth, false);
-			return rewriter.getASTRewrite().createStringPlaceholder(trimmed, ASTNode.METHOD_DECLARATION);
-		} catch (MalformedTreeException exception) {
-			JavaPlugin.log(exception);
-		} catch (BadLocationException exception) {
-			JavaPlugin.log(exception);
-		}
-		return null;
 	}
 
-	private void removeInitializationFromDeclaredFields(CompilationUnitRewrite rewrite) {
-		for (Iterator iter= getFieldsToInitializeInConstructor().iterator(); iter.hasNext();) {
-			VariableDeclarationFragment fragment= (VariableDeclarationFragment) iter.next();
-			Assert.isNotNull(fragment.getInitializer());
-			rewrite.getASTRewrite().remove(fragment.getInitializer(), null);
-		}
-	}
-
-    private void createFieldsForAccessedLocals(CompilationUnitRewrite rewrite, AbstractTypeDeclaration declaration) {
-		final IVariableBinding[] bindings= getUsedLocalVariables();
-		final IJavaProject project= rewrite.getCu().getJavaProject();
-		List excluded= new ArrayList();
-		final AST ast= fAnonymousInnerClassNode.getAST();
-		for (int index= 0; index < bindings.length; index++) {
+    private void createFieldsForAccessedLocals(CompilationUnitRewrite rewrite, IVariableBinding[] varBindings, String[] fieldNames, List newBodyDeclarations) {
+		final ImportRewrite importRewrite= rewrite.getImportRewrite();
+		final ASTRewrite astRewrite= rewrite.getASTRewrite();
+		final AST ast= astRewrite.getAST();
+				
+		for (int i= 0; i < varBindings.length; i++) {
 			VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 			fragment.setExtraDimensions(0);
 			fragment.setInitializer(null);
-			String name= bindings[index].getName();
-			String oldName= name;
-			name= NamingConventions.removePrefixAndSuffixForLocalVariableName(project, name);
-			if (name.equals(oldName))
-				name= NamingConventions.removePrefixAndSuffixForArgumentName(project, name);
-			name= NamingConventions.suggestFieldNames(project, "", name, 0, Flags.AccPrivate, (String[]) excluded.toArray(new String[excluded.size()]))[0]; //$NON-NLS-1$
-			fragment.setName(ast.newSimpleName(name));
-			excluded.add(name);
+			fragment.setName(ast.newSimpleName(fieldNames[i]));
 			FieldDeclaration field= ast.newFieldDeclaration(fragment);
-			field.setType(rewrite.getImportRewrite().addImport(bindings[index].getType(), ast));
+			ITypeBinding varType= varBindings[i].getType();
+			field.setType(importRewrite.addImport(varType, ast));
 			field.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.PRIVATE | Modifier.FINAL));
-			declaration.bodyDeclarations().add(findIndexOfLastField(declaration.bodyDeclarations()) + 1, field);
-			if (fSettings.createComments) {
+			if (doAddComments()) {
 				try {
-					String string= CodeGeneration.getFieldComment(rewrite.getCu(), bindings[index].getType().getName(), name, StubUtility.getLineDelimiterUsed(rewrite.getCu()));
+					String string= CodeGeneration.getFieldComment(rewrite.getCu(), varType.getName(), fieldNames[i], StubUtility.getLineDelimiterUsed(fCu));
 					if (string != null) {
-						Javadoc javadoc= (Javadoc) rewrite.getASTRewrite().createStringPlaceholder(string, ASTNode.JAVADOC);
+						Javadoc javadoc= (Javadoc) astRewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
 						field.setJavadoc(javadoc);
 					}
 				} catch (CoreException exception) {
 					JavaPlugin.log(exception);
 				}
 			}
+			
+			newBodyDeclarations.add(field);
+			
+			addLinkedPosition(KEY_FIELD_NAME_EXT + i, fragment.getName(), astRewrite, false);
 		}
 	}
+    
+    private void addLinkedPosition(String key, ASTNode nodeToTrack, ASTRewrite rewrite, boolean isFirst) {
+    	if (fLinkedProposalModel != null) {
+    		fLinkedProposalModel.getPositionGroup(key, true).addPosition(rewrite.track(nodeToTrack), isFirst);
+    	}
+    }
+    
 
     private IVariableBinding[] getUsedLocalVariables() {
         final Set result= new HashSet(0);
-        fAnonymousInnerClassNode.accept(createTempUsageFinder(result));
-        return (IVariableBinding[])result.toArray(new IVariableBinding[result.size()]);
+        collectRefrencedVariables(fAnonymousInnerClassNode, result);
+        ArrayList usedLocals= new ArrayList();
+        for (Iterator iterator= result.iterator(); iterator.hasNext();) {
+        	IVariableBinding next= (IVariableBinding) iterator.next();
+			if (isBindingToTemp(next)) {
+        		usedLocals.add(next);
+        	}
+		}
+        return (IVariableBinding[])usedLocals.toArray(new IVariableBinding[usedLocals.size()]);
     }
 
-    private ASTVisitor createTempUsageFinder(final Set result) {
-        return new ASTVisitor() {
+    private void collectRefrencedVariables(ASTNode root, final Set result) {
+    	root.accept(new ASTVisitor() {
             public boolean visit(SimpleName node) {
                 IBinding binding= node.resolveBinding();
-                if (ConvertAnonymousToNestedRefactoring.this.isBindingToTemp(binding))
-                    result.add(binding);
+                if (binding instanceof IVariableBinding)
+                	result.add(binding);
                 return true;
             }
-        };
+        });
     }
 
-    private boolean isBindingToTemp(IBinding binding) {
-		if (!(binding instanceof IVariableBinding))
-			return false;
-		final IVariableBinding variable= (IVariableBinding) binding;
+    private boolean isBindingToTemp(IVariableBinding variable) {
 		if (variable.isField())
 			return false;
-		if (!Modifier.isFinal(binding.getModifiers()))
+		if (!Modifier.isFinal(variable.getModifiers()))
 			return false;
-		ASTNode declaringNode= fCompilationUnitNode.findDeclaringNode(binding);
+		ASTNode declaringNode= fCompilationUnitNode.findDeclaringNode(variable);
 		if (declaringNode == null)
 			return false;
 		if (ASTNodes.isParent(declaringNode, fAnonymousInnerClassNode))
@@ -764,149 +799,160 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 		return true;
 	}
 
-    private void createNewConstructorIfNeeded(CompilationUnitRewrite rewrite, AbstractTypeDeclaration declaration) throws JavaModelException {
-		IVariableBinding[] bindings= getUsedLocalVariables();
+    private MethodDeclaration createNewConstructor(CompilationUnitRewrite rewrite, IVariableBinding[] bindings, String[] fieldNames) throws JavaModelException {
+    	ClassInstanceCreation instanceCreation= (ClassInstanceCreation) fAnonymousInnerClassNode.getParent();
+    	
+    	if (instanceCreation.arguments().isEmpty() && bindings.length == 0)
+			return null;
 
-		if (((ClassInstanceCreation) fAnonymousInnerClassNode.getParent()).arguments().isEmpty() && bindings.length == 0)
-			return;
-
-		final AST ast= fAnonymousInnerClassNode.getAST();
+    	IJavaProject project= fCu.getJavaProject();
+        AST ast= rewrite.getAST();
+        ImportRewrite importRewrite= rewrite.getImportRewrite();
+        ASTRewrite astRewrite= rewrite.getASTRewrite();
+		
 		MethodDeclaration newConstructor= ast.newMethodDeclaration();
 		newConstructor.setConstructor(true);
 		newConstructor.setExtraDimensions(0);
 		newConstructor.setJavadoc(null);
 		newConstructor.modifiers().addAll(ASTNodeFactory.newModifiers(ast, fVisibility));
 		newConstructor.setName(ast.newSimpleName(fClassName));
-		List paramNames= new ArrayList();
-		addParametersToNewConstructor(newConstructor, rewrite, paramNames);
-		int paramCount= newConstructor.parameters().size();
-
-		addParametersForLocalsUsedInInnerClass(rewrite, bindings, newConstructor, paramNames);
-
-		Block body= ast.newBlock();
-		if (paramCount > 0) {
-			SuperConstructorInvocation superConstructorInvocation= ast.newSuperConstructorInvocation();
-			for (int i= 0; i < paramCount; i++) {
-				SingleVariableDeclaration param= (SingleVariableDeclaration) newConstructor.parameters().get(i);
-				superConstructorInvocation.arguments().add(ast.newSimpleName(param.getName().getIdentifier()));
+		addLinkedPosition(KEY_TYPE_NAME, newConstructor.getName(), astRewrite, false);
+		
+		newConstructor.setBody(ast.newBlock());
+		
+		List newStatements= newConstructor.getBody().statements();
+		
+        List newParameters= newConstructor.parameters();
+        List newParameterNames= new ArrayList();
+		
+        // add parameters for elements passed with the instance creation
+        if (!instanceCreation.arguments().isEmpty()) {
+        	IMethodBinding constructorBinding= getSuperConstructorBinding();
+        	if (constructorBinding != null) {
+        		SuperConstructorInvocation superConstructorInvocation= ast.newSuperConstructorInvocation();
+    			ITypeBinding[] parameterTypes= constructorBinding.getParameterTypes();
+    	        String[][] parameterNames= StubUtility.suggestArgumentNamesWithProposals(project, constructorBinding);
+    	        for (int i= 0; i < parameterNames.length; i++) {
+    	        	String[] nameProposals= parameterNames[i];
+    	        	String paramName= nameProposals[0];
+    	        	
+    	    		SingleVariableDeclaration param= newParameterDeclaration(ast, importRewrite, paramName, parameterTypes[i]);
+    	    		newParameters.add(param);
+    	    		newParameterNames.add(paramName);
+    	    		
+    	    		SimpleName newSIArgument= ast.newSimpleName(paramName);
+					superConstructorInvocation.arguments().add(newSIArgument);
+    	    		
+					if (fLinkedProposalModel != null) {
+						LinkedProposalPositionGroup positionGroup= fLinkedProposalModel.getPositionGroup(KEY_PARAM_NAME_CONST+ String.valueOf(i), true);
+						positionGroup.addPosition(astRewrite.track(param.getName()), false);
+						positionGroup.addPosition(astRewrite.track(newSIArgument), false);
+	        	        for (int k= 0; k < nameProposals.length; k++) {
+	        	        	positionGroup.addProposal(nameProposals[k], null, nameProposals.length - k);
+						}
+					}
+    	        }
+    	        newStatements.add(superConstructorInvocation);
+        	}
+        }
+        // add parameters for all outer variables used
+        boolean useThisAccess= useThisForFieldAccess();
+        for (int i= 0; i < bindings.length; i++) {
+        	String baseName= StubUtility.removePrefixAndSuffixForVariable(project, bindings[i]);
+        	String[] paramNameProposals= StubUtility.getVariableNameSuggestions(StubUtility.ARGUMENT, project, baseName, 0, 0, (String[]) newParameterNames.toArray(new String[newParameterNames.size()]));
+        	String paramName= paramNameProposals[0];
+        	
+        	SingleVariableDeclaration param= newParameterDeclaration(ast, importRewrite, paramName, bindings[i].getType());
+    		newParameters.add(param);
+    		newParameterNames.add(paramName);
+    		
+    		String fieldName= fieldNames[i];
+    		SimpleName fieldNameNode= ast.newSimpleName(fieldName);
+    		SimpleName paramNameNode= ast.newSimpleName(paramName);
+			newStatements.add(newFieldAssignment(ast, fieldNameNode, paramNameNode, useThisAccess || fieldName.equals(paramName)));
+			
+			if (fLinkedProposalModel != null) {
+				LinkedProposalPositionGroup positionGroup= fLinkedProposalModel.getPositionGroup(KEY_PARAM_NAME_EXT+ String.valueOf(i), true);
+				positionGroup.addPosition(astRewrite.track(param.getName()), false);
+				positionGroup.addPosition(astRewrite.track(paramNameNode), false);
+    	        for (int k= 0; k < paramNameProposals.length; k++) {
+    	        	positionGroup.addProposal(paramNameProposals[k], null, paramNameProposals.length - k);
+				}
+    	        
+    	        fLinkedProposalModel.getPositionGroup(KEY_FIELD_NAME_EXT + i, true).addPosition(astRewrite.track(fieldNameNode), false);
 			}
-			body.statements().add(superConstructorInvocation);
 		}
-		final IJavaProject project= fCu.getJavaProject();
-		List excludedFields= new ArrayList();
-		List excludedParams= new ArrayList();
-		for (int index= 0; index < bindings.length; index++) {
-			String name= bindings[index].getName();
-			String fieldName= name;
-			String paramName= name;
-			String oldName= name;
-			name= NamingConventions.removePrefixAndSuffixForLocalVariableName(project, name);
-			if (name.equals(oldName))
-				name= NamingConventions.removePrefixAndSuffixForArgumentName(project, name);
-			fieldName= NamingConventions.suggestFieldNames(project, "", name, 0, Flags.AccPrivate, (String[]) excludedFields.toArray(new String[excludedFields.size()]))[0]; //$NON-NLS-1$
-			excludedFields.add(fieldName);
-			paramName= NamingConventions.suggestArgumentNames(project, "", name, 0, (String[]) excludedParams.toArray(new String[excludedParams.size()]))[0]; //$NON-NLS-1$
-			excludedParams.add(paramName);
-			Assignment assignmentExpression= ast.newAssignment();
-			assignmentExpression.setOperator(Assignment.Operator.ASSIGN);
-			if (fSettings.useKeywordThis || fieldName.equals(paramName)) {
-				FieldAccess access= ast.newFieldAccess();
-				access.setExpression(ast.newThisExpression());
-				access.setName(ast.newSimpleName(fieldName));
-				assignmentExpression.setLeftHandSide(access);
-			} else
-				assignmentExpression.setLeftHandSide(ast.newSimpleName(fieldName));
-			assignmentExpression.setRightHandSide(ast.newSimpleName(paramName));
-			ExpressionStatement assignmentStatement= ast.newExpressionStatement(assignmentExpression);
-			body.statements().add(assignmentStatement);
-		}
-
-		addFieldInitialization(rewrite, body);
-
-		newConstructor.setBody(body);
 
 		addExceptionsToNewConstructor(newConstructor);
-		declaration.bodyDeclarations().add(1 + bindings.length + findIndexOfLastField(fAnonymousInnerClassNode.bodyDeclarations()), newConstructor);
-		if (fSettings.createComments) {
+		
+		if (doAddComments()) {
 			try {
-				String string= CodeGeneration.getMethodComment(rewrite.getCu(), fClassName, fClassName, (String[]) paramNames.toArray(new String[paramNames.size()]), new String[0], null, new String[0], null, StubUtility.getLineDelimiterUsed(rewrite.getCu()));
+				String[] allParamNames= (String[]) newParameterNames.toArray(new String[newParameterNames.size()]);
+				String string= CodeGeneration.getMethodComment(fCu, fClassName, fClassName, allParamNames, new String[0], null, new String[0], null, StubUtility.getLineDelimiterUsed(fCu));
 				if (string != null) {
-					Javadoc javadoc= (Javadoc) rewrite.getASTRewrite().createStringPlaceholder(string, ASTNode.JAVADOC);
+					Javadoc javadoc= (Javadoc) astRewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
 					newConstructor.setJavadoc(javadoc);
 				}
 			} catch (CoreException exception) {
 				JavaPlugin.log(exception);
 			}
 		}
+		return newConstructor;
 	}
-
-    private void addFieldInitialization(CompilationUnitRewrite rewrite, Block constructorBody) {
-		final IJavaProject project= rewrite.getCu().getJavaProject();
-		List excluded= new ArrayList();
-		final AST ast= fAnonymousInnerClassNode.getAST();
-		for (Iterator iter= getFieldsToInitializeInConstructor().iterator(); iter.hasNext();) {
-			VariableDeclarationFragment fragment= (VariableDeclarationFragment) iter.next();
-			Assignment assignmentExpression= ast.newAssignment();
-			assignmentExpression.setOperator(Assignment.Operator.ASSIGN);
-			String name= fragment.getName().getIdentifier();
-			String oldName= name;
-			name= NamingConventions.removePrefixAndSuffixForLocalVariableName(project, name);
-			if (name.equals(oldName))
-				name= NamingConventions.removePrefixAndSuffixForArgumentName(project, name);
-			name= NamingConventions.suggestFieldNames(project, "", name, 0, Flags.AccPrivate, (String[]) excluded.toArray(new String[excluded.size()]))[0]; //$NON-NLS-1$
-			if (fSettings.useKeywordThis) {
-				FieldAccess access= ast.newFieldAccess();
-				access.setExpression(ast.newThisExpression());
-				access.setName(ast.newSimpleName(name));
-				assignmentExpression.setLeftHandSide(access);
-			} else
-				assignmentExpression.setLeftHandSide(ast.newSimpleName(name));
-			excluded.add(name);
-			Expression rhs= (Expression) rewrite.getASTRewrite().createCopyTarget(fragment.getInitializer());
-			assignmentExpression.setRightHandSide(rhs);
-			ExpressionStatement assignmentStatement= ast.newExpressionStatement(assignmentExpression);
-			constructorBody.statements().add(assignmentStatement);
+    
+    private Statement newFieldAssignment(AST ast, SimpleName fieldNameNode, Expression initializer, boolean useThisAccess) {
+		Assignment assignment= ast.newAssignment();
+		if (useThisAccess) {
+			FieldAccess access= ast.newFieldAccess();
+			access.setExpression(ast.newThisExpression());
+			access.setName(fieldNameNode);
+			assignment.setLeftHandSide(access);
+		} else {
+			assignment.setLeftHandSide(fieldNameNode);
 		}
-	}
+		assignment.setOperator(Assignment.Operator.ASSIGN);
+		assignment.setRightHandSide(initializer);
+		
+		return ast.newExpressionStatement(assignment);
+     }
+    
 
     // live List of VariableDeclarationFragments
     private List getFieldsToInitializeInConstructor() {
         List result= new ArrayList(0);
         for (Iterator iter= fAnonymousInnerClassNode.bodyDeclarations().iterator(); iter.hasNext(); ) {
-            BodyDeclaration element= (BodyDeclaration)iter.next();
-            if (!(element instanceof FieldDeclaration))
-                continue;
-            FieldDeclaration field= (FieldDeclaration)element;
-            for (Iterator fragmentIter= field.fragments().iterator(); fragmentIter.hasNext(); ) {
-                VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragmentIter.next();
-                if (isToBeInitializerInConstructor(fragment))
-                    result.add(fragment);
+            Object element= iter.next();
+            if (element instanceof FieldDeclaration) {
+            	List fragments= ((FieldDeclaration) element).fragments();
+                for (Iterator fragmentIter= fragments.iterator(); fragmentIter.hasNext(); ) {
+                    VariableDeclarationFragment fragment= (VariableDeclarationFragment) fragmentIter.next();
+                    if (isToBeInitializerInConstructor(fragment, result))
+                        result.add(fragment);
+                }
             }
         }
         return result;
     }
 
-    private boolean isToBeInitializerInConstructor(VariableDeclarationFragment fragment) {
-        if (fragment.getInitializer() == null)
-            return false;
-        return areLocalsUsedIn(fragment.getInitializer());
+    private boolean isToBeInitializerInConstructor(VariableDeclarationFragment fragment, List fieldsToInitialize) {
+    	return fragment.getInitializer() != null && areLocalsUsedIn(fragment.getInitializer(), fieldsToInitialize);
     }
 
-    private boolean areLocalsUsedIn(Expression fieldInitializer) {
+    private boolean areLocalsUsedIn(Expression fieldInitializer, List fieldsToInitialize) {
         Set localsUsed= new HashSet(0);
-        fieldInitializer.accept(createTempUsageFinder(localsUsed));
-        return !localsUsed.isEmpty();
-    }
-
-    private void addParametersForLocalsUsedInInnerClass(CompilationUnitRewrite rewrite, IVariableBinding[] usedLocals, MethodDeclaration newConstructor, List params) {
-    	List excluded= new ArrayList();
-        for (int index= 0; index < usedLocals.length; index++) {
-        	SingleVariableDeclaration declaration= createNewParamDeclarationNode(usedLocals[index].getName(), usedLocals[index].getType(), rewrite, (String[]) excluded.toArray(new String[excluded.size()]));
-            newConstructor.parameters().add(declaration);
-            final String identifier= declaration.getName().getIdentifier();
-			excluded.add(identifier);
-			params.add(identifier);
-        }
+        collectRefrencedVariables(fieldInitializer, localsUsed);
+        
+        ITypeBinding anonType= fAnonymousInnerClassNode.resolveBinding();
+        
+        for (Iterator iterator= localsUsed.iterator(); iterator.hasNext();) {
+			IVariableBinding curr= (IVariableBinding) iterator.next();
+			if (isBindingToTemp(curr)) { // reference a local from outside
+				return true;
+			} else if (curr.isField() && (curr.getDeclaringClass() == anonType) && fieldsToInitialize.contains(fCompilationUnitNode.findDeclaringNode(curr))) {
+				return true; // references a field that references a local from outside
+			}
+		}
+        return false;
     }
 
     private IMethodBinding getSuperConstructorBinding() {
@@ -949,38 +995,14 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
         }
     }
 
-    private void addParametersToNewConstructor(MethodDeclaration newConstructor, CompilationUnitRewrite rewrite, List params) throws JavaModelException {
-        IMethodBinding constructorBinding= getSuperConstructorBinding();
-        if (constructorBinding == null)
-            return;
-        ITypeBinding[] paramTypes= constructorBinding.getParameterTypes();
-        IMethod method= (IMethod) constructorBinding.getJavaElement();
-        if (method == null)
-            return;
-        String[] parameterNames= method.getParameterNames();
-        final List excluded= new ArrayList();
-        for (int index= 0; index < parameterNames.length; index++) {
-        	SingleVariableDeclaration declaration= createNewParamDeclarationNode(parameterNames[index], paramTypes[index], rewrite, (String[]) excluded.toArray(new String[excluded.size()]));
-            newConstructor.parameters().add(declaration);
-            final String identifier= declaration.getName().getIdentifier();
-			excluded.add(identifier);
-			params.add(identifier);
-        }
-    }
-
-    private SingleVariableDeclaration createNewParamDeclarationNode(String paramName, ITypeBinding paramType, CompilationUnitRewrite rewrite, String[] excluded) {
-		SingleVariableDeclaration param= fAnonymousInnerClassNode.getAST().newSingleVariableDeclaration();
+    private SingleVariableDeclaration newParameterDeclaration(AST ast, ImportRewrite importRewrite, String paramName, ITypeBinding paramType) {
+    	SingleVariableDeclaration param= ast.newSingleVariableDeclaration();	
 		param.setExtraDimensions(0);
 		param.setInitializer(null);
-		final IJavaProject project= rewrite.getCu().getJavaProject();
-		String name= NamingConventions.removePrefixAndSuffixForLocalVariableName(project, paramName);
-		if (name.equals(paramName))
-			name= NamingConventions.removePrefixAndSuffixForArgumentName(project, paramName);
-		name= NamingConventions.suggestArgumentNames(project, "", name, 0, excluded)[0]; //$NON-NLS-1$
-		param.setName(fAnonymousInnerClassNode.getAST().newSimpleName(name));
-		param.setType(rewrite.getImportRewrite().addImport(paramType, fAnonymousInnerClassNode.getAST()));
+		param.setType(importRewrite.addImport(paramType, ast));
+		param.setName(ast.newSimpleName(paramName));
 		return param;
-	}
+    }
 
     private void setSuperType(TypeDeclaration declaration) throws JavaModelException {
         ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) fAnonymousInnerClassNode.getParent();
@@ -1057,16 +1079,7 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
         return ans;
     }
 
-    private static int findIndexOfLastField(List bodyDeclarations) {
-        for (int i= bodyDeclarations.size() - 1; i >= 0; i--) {
-            BodyDeclaration each= (BodyDeclaration)bodyDeclarations.get(i);
-            if (each instanceof FieldDeclaration)
-                return i;
-        }
-        return -1;
-    }
-
-	public RefactoringStatus initialize(final RefactoringArguments arguments) {
+    public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		fSelfInitializing= true;
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
@@ -1077,7 +1090,6 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 					return createInputFatalStatus(element, IJavaRefactorings.CONVERT_ANONYMOUS);
 				else {
 					fCu= (ICompilationUnit) element;
-		        	fSettings= JavaPreferencesSettings.getCodeGenerationSettings(fCu.getJavaProject());
 				}
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_INPUT));
