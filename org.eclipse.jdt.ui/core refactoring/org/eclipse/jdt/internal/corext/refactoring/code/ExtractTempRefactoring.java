@@ -18,7 +18,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -68,7 +67,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
@@ -100,6 +98,8 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
@@ -119,6 +119,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
@@ -153,7 +154,7 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	private static final String[] KNOWN_METHOD_NAME_PREFIXES= { "get", "is"}; //$NON-NLS-2$ //$NON-NLS-1$
+
 
 	private static boolean allArraysEqual(Object[][] arrays, int position) {
 		Object element= arrays[0][position];
@@ -239,15 +240,6 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 		} while (current.getParent() != null);
 		Collections.reverse(parents);
 		return (ASTNode[]) parents.toArray(new ASTNode[parents.size()]);
-	}
-
-	private static String getQualifiedName(ITypeBinding typeBinding) {
-		if (typeBinding.isAnonymous())
-			return getQualifiedName(typeBinding.getSuperclass());
-		if (!typeBinding.isArray())
-			return typeBinding.getQualifiedName();
-		else
-			return typeBinding.getElementType().getQualifiedName();
 	}
 
 	private static boolean isLeftValue(ASTNode node) {
@@ -339,8 +331,15 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 	private int fSelectionStart;
 
 	private String fTempName;
+	private String[] fGuessedTempNames;
 
 	private TextChange fChange;
+	
+	private LinkedProposalModel fLinkedProposalModel;
+	
+	private static final String KEY_NAME= "name"; //$NON-NLS-1$
+	private static final String KEY_TYPE= "type"; //$NON-NLS-1$
+	
 
 	/**
 	 * Creates a new extract temp refactoring
@@ -358,11 +357,18 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 		fReplaceAllOccurrences= true; // default
 		fDeclareFinal= false; // default
 		fTempName= ""; //$NON-NLS-1$
+		
+		fLinkedProposalModel= null;
+	}
+	
+	public void setLinkedProposalModel(LinkedProposalModel linkedProposalModel) {
+		fLinkedProposalModel= linkedProposalModel;
 	}
 
 	private void addReplaceExpressionWithTemp() throws JavaModelException {
 		IASTFragment[] fragmentsToReplace= retainOnlyReplacableMatches(getMatchingFragments());
 		//TODO: should not have to prune duplicates here...
+		ASTRewrite rewrite= fCURewrite.getASTRewrite();
 		HashSet seen= new HashSet();
 		for (int i= 0; i < fragmentsToReplace.length; i++) {
 			IASTFragment fragment= fragmentsToReplace[i];
@@ -370,7 +376,10 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 				continue;
 			SimpleName tempName= fCURewrite.getAST().newSimpleName(fTempName);
 			TextEditGroup description= fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_replace);
-			fragment.replace(fCURewrite.getASTRewrite(), tempName, description);
+
+			fragment.replace(rewrite, tempName, description);
+			if (fLinkedProposalModel != null)
+				fLinkedProposalModel.getPositionGroup(KEY_NAME, true).addPosition(rewrite.track(tempName), false);
 		}
 	}
 
@@ -413,30 +422,36 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 				return null;
 		}
 	}
-
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
+	
+	public TextChange createTextChange(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.ExtractTempRefactoring_checking_preconditions, 3);
 			
 			fCURewrite= new CompilationUnitRewrite(fCu, fCompilationUnitNode);
 			fCURewrite.getASTRewrite().setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 			
-			RefactoringStatus result= new RefactoringStatus();
-			if (Arrays.asList(getExcludedVariableNames()).contains(fTempName))
-				result.addWarning(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_another_variable, fTempName)); 
-
-			result.merge(checkMatchingFragments());
-			
 			doCreateChange(new SubProgressMonitor(pm, 2));
 			
-			fChange= fCURewrite.createChange(true, new SubProgressMonitor(pm, 1));
-			fChange.setKeepPreviewEdits(true);
-			checkNewSource(result);
-			
-			return result;
+			return fCURewrite.createChange(true, new SubProgressMonitor(pm, 1));
 		} finally {
 			pm.done();
 		}
+	}
+	
+
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
+		fChange= createTextChange(pm);
+
+		RefactoringStatus result= new RefactoringStatus();
+		if (Arrays.asList(getExcludedVariableNames()).contains(fTempName))
+			result.addWarning(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_another_variable, fTempName)); 
+
+		result.merge(checkMatchingFragments());
+		
+		fChange.setKeepPreviewEdits(true);
+		checkNewSource(result);
+		
+		return result;
 	}
 	
 	private final JDTRefactoringDescriptor createRefactoringDescriptor() {
@@ -622,6 +637,20 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 			vds.modifiers().add(ast.newModifier(ModifierKeyword.FINAL_KEYWORD));
 		}
 		vds.setType(createTempType());
+		
+		if (fLinkedProposalModel != null) {
+			ASTRewrite rewrite= fCURewrite.getASTRewrite();
+			LinkedProposalPositionGroup nameGroup= fLinkedProposalModel.getPositionGroup(KEY_NAME, true);
+			nameGroup.addPosition(rewrite.track(vdf.getName()), true);
+			
+			String[] nameSuggestions= guessTempNames();
+			if (nameSuggestions.length > 0 && !nameSuggestions[0].equals(fTempName)) {
+				nameGroup.addProposal(fTempName, null, nameSuggestions.length + 1);
+			}
+			for (int i= 0; i < nameSuggestions.length; i++) {
+				nameGroup.addProposal(nameSuggestions[i], null, nameSuggestions.length - i);
+			}
+		}
 		return vds;
 	}
 
@@ -778,22 +807,38 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 	private Type createTempType() throws CoreException {
 		Expression expression= getSelectedExpression().getAssociatedExpression();
 		
-		if (expression instanceof ClassInstanceCreation) {
-			ClassInstanceCreation creation= (ClassInstanceCreation) expression;
-			return (Type) fCURewrite.getASTRewrite().createCopyTarget(creation.getType());
-		} else if (expression instanceof CastExpression) {
-			CastExpression cast= (CastExpression) expression;
-			return (Type) fCURewrite.getASTRewrite().createCopyTarget(cast.getType());
-		}
-		
+		Type resultingType= null;
 		ITypeBinding typeBinding= expression.resolveTypeBinding();
-		if (typeBinding != null) {
-			typeBinding= Bindings.normalizeForDeclarationUse(typeBinding, fCURewrite.getAST());
-			return fCURewrite.getImportRewrite().addImport(typeBinding, fCURewrite.getAST());
-		} else {
-			return fCURewrite.getAST().newSimpleType(fCURewrite.getAST().newSimpleName("Object")); //$NON-NLS-1$
-		}
 		
+		ASTRewrite rewrite= fCURewrite.getASTRewrite();
+		AST ast= rewrite.getAST();
+		
+		if (expression instanceof ClassInstanceCreation) {
+			resultingType= (Type) rewrite.createCopyTarget(((ClassInstanceCreation) expression).getType());
+		} else if (expression instanceof CastExpression) {
+			resultingType= (Type) rewrite.createCopyTarget(((CastExpression) expression).getType());
+		} else {
+			if (typeBinding == null) {
+				typeBinding= ASTResolving.guessBindingForReference(expression);
+			}
+			if (typeBinding != null) {
+				typeBinding= Bindings.normalizeForDeclarationUse(typeBinding, ast);
+				resultingType= fCURewrite.getImportRewrite().addImport(typeBinding, ast);
+			} else {
+				resultingType= ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+			}
+		}
+		if (fLinkedProposalModel != null) {
+			LinkedProposalPositionGroup typeGroup= fLinkedProposalModel.getPositionGroup(KEY_TYPE, true);
+			typeGroup.addPosition(rewrite.track(resultingType), false);
+			if (typeBinding != null) {
+				ITypeBinding[] relaxingTypes= ASTResolving.getRelaxingTypes(ast, typeBinding);
+				for (int i= 0; i < relaxingTypes.length; i++) {
+					typeGroup.addProposal(relaxingTypes[i], fCURewrite.getCu(), relaxingTypes.length - i);
+				}
+			}
+		}
+		return resultingType;
 	}
 
 	public String guessTempName() {
@@ -808,58 +853,19 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 	 * @return proposed variable names (may be empty, but not null). The first proposal should be used as "best guess" (if it exists).
 	 */
 	public String[] guessTempNames() {
-		LinkedHashSet proposals= new LinkedHashSet(); // retain ordering, but prevent duplicates
-		try {
-			String[] excludedVariableNames= getExcludedVariableNames();
-			ASTNode associatedNode= getSelectedExpression().getAssociatedNode();
-			if (associatedNode instanceof MethodInvocation) {
-				proposals.addAll(guessTempNamesFromMethodInvocation((MethodInvocation) associatedNode, excludedVariableNames));
-			} else if (associatedNode instanceof CastExpression) {
-				Expression expression= ((CastExpression) associatedNode).getExpression();
-				if (expression instanceof MethodInvocation) {
-					proposals.addAll(guessTempNamesFromMethodInvocation((MethodInvocation) expression, excludedVariableNames));
-				}
+		if (fGuessedTempNames == null) {
+			try {
+				Expression expression= getSelectedExpression().getAssociatedExpression();
+				if (expression != null) {
+					ITypeBinding binding= expression.resolveTypeBinding();
+					fGuessedTempNames= StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, fCu.getJavaProject(), binding, expression, 0, getExcludedVariableNames());
+				} 
+			} catch (JavaModelException e) {
 			}
-			if (associatedNode instanceof Expression) {
-				proposals.addAll(guessTempNamesFromExpression((Expression) associatedNode, excludedVariableNames));
-			}
-		} catch (JavaModelException e) {
-			// too bad ... no proposals this time
+			if (fGuessedTempNames == null)
+				fGuessedTempNames= new String[0];
 		}
-		return (String[]) proposals.toArray(new String[proposals.size()]);
-	}
-
-	private List guessTempNamesFromExpression(Expression selectedExpression, String[] excluded) {
-		ITypeBinding expressionBinding= selectedExpression.resolveTypeBinding();
-		String typeName= getQualifiedName(expressionBinding);
-		if (typeName.length() == 0)
-			typeName= expressionBinding.getName();
-		if (typeName.length() == 0)
-			return Collections.EMPTY_LIST;
-		int typeParamStart= typeName.indexOf("<"); //$NON-NLS-1$
-		if (typeParamStart != -1)
-			typeName= typeName.substring(0, typeParamStart);
-		String[] proposals= StubUtility.getLocalNameSuggestions(fCu.getJavaProject(), typeName, expressionBinding.getDimensions(), excluded);
-		return Arrays.asList(proposals);
-	}
-
-	private List guessTempNamesFromMethodInvocation(MethodInvocation selectedMethodInvocation, String[] excludedVariableNames) {
-		String methodName= selectedMethodInvocation.getName().getIdentifier();
-		for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
-			String prefix= KNOWN_METHOD_NAME_PREFIXES[i];
-			if (!methodName.startsWith(prefix))
-				continue; // not this prefix
-			if (methodName.length() == prefix.length())
-				return Collections.EMPTY_LIST;
-			char firstAfterPrefix= methodName.charAt(prefix.length());
-			if (!Character.isUpperCase(firstAfterPrefix))
-				continue;
-			String proposal= Character.toLowerCase(firstAfterPrefix) + methodName.substring(prefix.length() + 1);
-			methodName= proposal;
-			break;
-		}
-		String[] proposals= StubUtility.getLocalNameSuggestions(fCu.getJavaProject(), methodName, 0, excludedVariableNames);
-		return Arrays.asList(proposals);
+		return fGuessedTempNames;
 	}
 
 	private boolean isLiteralNodeSelected() throws JavaModelException {
