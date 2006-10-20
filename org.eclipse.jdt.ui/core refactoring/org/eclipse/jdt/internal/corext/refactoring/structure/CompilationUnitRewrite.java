@@ -166,11 +166,25 @@ public class CompilationUnitRewrite {
 	 * @throws IllegalArgumentException when the AST rewrite encounters problems
 	 */
 	public CompilationUnitChange createChange(boolean generateGroups, IProgressMonitor monitor) throws CoreException {
-		CompilationUnitChange cuChange= new CompilationUnitChange(fCu.getElementName(), fCu);
+		return createChange(fCu.getElementName(), generateGroups, monitor);
+	}
+	
+	/**
+	 * Creates a compilation unit change based on the events recorded by this compilation unit rewrite.
+	 * @param name the name of the change to create
+	 * @param generateGroups <code>true</code> to generate text edit groups, <code>false</code> otherwise
+	 * @param monitor the progress monitor or <code>null</code>
+	 * @return a {@link CompilationUnitChange}, or <code>null</code> for an empty change
+	 * @throws CoreException when text buffer acquisition or import rewrite text edit creation fails
+	 * @throws IllegalArgumentException when the AST rewrite encounters problems
+	 */
+	public CompilationUnitChange createChange(String name, boolean generateGroups, IProgressMonitor monitor) throws CoreException {
+		CompilationUnitChange cuChange= new CompilationUnitChange(name, fCu);
 		MultiTextEdit multiEdit= new MultiTextEdit();
 		cuChange.setEdit(multiEdit);
 		return attachChange(cuChange, generateGroups, monitor);
 	}
+	
 	
 	/**
 	 * Attaches the changes of this compilation unit rewrite to the given CU Change. The given
