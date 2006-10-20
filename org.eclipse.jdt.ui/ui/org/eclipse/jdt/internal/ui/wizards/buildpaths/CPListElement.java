@@ -120,15 +120,19 @@ public class CPListElement {
 					IClasspathContainer container= JavaCore.getClasspathContainer(fPath, fProject);
 					if (container != null) {
 						IClasspathEntry[] entries= container.getClasspathEntries();
-						for (int i= 0; i < entries.length; i++) {
-							IClasspathEntry entry= entries[i];
-							if (entry != null) {
-								CPListElement curr= createFromExisting(this, entry, fProject);
-								fChildren.add(curr);
-							} else {
-								JavaPlugin.logErrorMessage("Null entry in container '" + fPath + "'");  //$NON-NLS-1$//$NON-NLS-2$
+						if (entries != null) { // invalid container implementation
+							for (int i= 0; i < entries.length; i++) {
+								IClasspathEntry entry= entries[i];
+								if (entry != null) {
+									CPListElement curr= createFromExisting(this, entry, fProject);
+									fChildren.add(curr);
+								} else {
+									JavaPlugin.logErrorMessage("Null entry in container '" + fPath + "'");  //$NON-NLS-1$//$NON-NLS-2$
+								}
 							}
-						}						
+						} else {
+							JavaPlugin.logErrorMessage("container returns null as entries: '" + fPath + "'");  //$NON-NLS-1$//$NON-NLS-2$
+						}
 					}
 				} catch (JavaModelException e) {
 				}			
