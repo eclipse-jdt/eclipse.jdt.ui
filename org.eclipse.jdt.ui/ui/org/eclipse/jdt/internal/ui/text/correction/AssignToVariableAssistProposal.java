@@ -11,7 +11,6 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -19,9 +18,29 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.NamingConventions;
-
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -235,7 +254,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		newDecl.setType(type);
 		newDecl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers));
 		
-		ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(this, rewrite, newDecl.modifiers(), false);
+		ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(getLinkedProposalModel(), rewrite, newDecl.modifiers(), false);
 
 		int insertIndex= findFieldInsertIndex(decls, fNodeToAssign.getStartPosition());
 		rewrite.getListRewrite(newTypeDecl, property).insertAt(newDecl, insertIndex, null);
@@ -254,40 +273,12 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 	private String[] suggestLocalVariableNames(ITypeBinding binding, Expression expression) {
 		IJavaProject project= getCompilationUnit().getJavaProject();
-		String[] excludedNames= getUsedVariableNames();
-		return ASTResolving.suggestLocalVariableNames(project, binding, expression, excludedNames);
+		return StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, project, binding, expression, 0, getUsedVariableNames());
 	}
 
 	private String[] suggestFieldNames(ITypeBinding binding, Expression expression, int modifiers) {
-		ArrayList res= new ArrayList();
-
 		IJavaProject project= getCompilationUnit().getJavaProject();
-		ITypeBinding base= binding.isArray() ? binding.getElementType() : binding;
-		IPackageBinding packBinding= base.getPackage();
-		String packName= packBinding != null ? packBinding.getName() : ""; //$NON-NLS-1$
-
-		String[] excludedNames= getUsedVariableNames();
-
-		String name= ASTResolving.getBaseNameFromExpression(project, expression);
-		if (name != null) {
-			String[] argname= StubUtility.getFieldNameSuggestions(project, name, 0, modifiers, excludedNames); // base name already contains dimension
-			for (int i= 0; i < argname.length; i++) {
-				String curr= argname[i];
-				if (!res.contains(curr)) {
-					res.add(curr);
-				}
-			}
-		}
-
-		String typeName= base.getName();
-		String[] names= NamingConventions.suggestFieldNames(project, packName, typeName, binding.getDimensions(), modifiers, excludedNames);
-		for (int i= 0; i < names.length; i++) {
-			String curr= names[i];
-			if (!res.contains(curr)) {
-				res.add(curr);
-			}
-		}
-		return (String[]) res.toArray(new String[res.size()]);
+		return StubUtility.getVariableNameSuggestions(StubUtility.FIELD, project, binding, expression, modifiers, getUsedVariableNames());
 	}
 
 	private String[] getUsedVariableNames() {

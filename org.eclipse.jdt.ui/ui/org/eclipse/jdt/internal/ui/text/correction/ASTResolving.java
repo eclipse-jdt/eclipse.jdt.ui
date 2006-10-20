@@ -20,9 +20,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -46,7 +44,6 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -84,7 +81,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -952,69 +948,6 @@ public class ASTResolving {
 			collectRelaxingTypes(res, binding);
 		}
 	}
-
-	public static String getBaseNameFromExpression(IJavaProject project, Expression assignedExpression) {
-		String name= null;
-		if (assignedExpression instanceof Name) {
-			Name simpleNode= (Name) assignedExpression;
-			IBinding binding= simpleNode.resolveBinding();
-			String varName= ASTNodes.getSimpleNameIdentifier(simpleNode);
-			if (binding instanceof IVariableBinding) {
-				if (((IVariableBinding) binding).isField()) {
-					varName= NamingConventions.removePrefixAndSuffixForFieldName(project, varName, binding.getModifiers());
-				} else {
-					CompilationUnit astRoot= (CompilationUnit) assignedExpression.getRoot();
-					if (astRoot.findDeclaringNode(binding) instanceof SingleVariableDeclaration) {
-						varName= NamingConventions.removePrefixAndSuffixForArgumentName(project, varName);
-					} else {
-						varName= NamingConventions.removePrefixAndSuffixForLocalVariableName(project, varName);
-					}
-				}
-			}
-			return varName;
-		} else if (assignedExpression instanceof MethodInvocation) {
-			name= ((MethodInvocation) assignedExpression).getName().getIdentifier();
-		} else if (assignedExpression instanceof SuperMethodInvocation) {
-			name= ((SuperMethodInvocation) assignedExpression).getName().getIdentifier();
-		} else if (assignedExpression instanceof FieldAccess) {
-			return ((FieldAccess) assignedExpression).getName().getIdentifier();
-		}
-		if (name != null && name.length() > 3) {
-			if (name.startsWith("get")) { //$NON-NLS-1$
-				return name.substring(3);
-			}
-		}
-		return null;
-	}
-	
-	public static String[] suggestLocalVariableNames(IJavaProject project, ITypeBinding binding, Expression expression, String[] excludedNames) {
-		ArrayList res= new ArrayList();
-
-		ITypeBinding base= binding.isArray() ? binding.getElementType() : binding;
-		IPackageBinding packBinding= base.getPackage();
-		String packName= packBinding != null ? packBinding.getName() : ""; //$NON-NLS-1$
-
-		String name= ASTResolving.getBaseNameFromExpression(project, expression);
-		if (name != null) {
-			String[] argname= StubUtility.getLocalNameSuggestions(project, name, 0, excludedNames); // pass 0 as dimension, base name already contains plural.
-			for (int i= 0; i < argname.length; i++) {
-				String curr= argname[i];
-				if (!res.contains(curr)) {
-					res.add(curr);
-				}
-			}
-		}
-
-		String typeName= base.getName();
-		String[] names= NamingConventions.suggestLocalVariableNames(project, packName, typeName, binding.getDimensions(), excludedNames);
-		for (int i= 0; i < names.length; i++) {
-			String curr= names[i];
-			if (!res.contains(curr)) {
-				res.add(curr);
-			}
-		}
-		return (String[]) res.toArray(new String[res.size()]);
-	}
 	
 	public static String[] getUsedVariableNames(ASTNode node) {
 		CompilationUnit root= (CompilationUnit) node.getRoot();
@@ -1030,8 +963,6 @@ public class ASTResolving {
 		}
 		return names;
 	}
-	
-	
 
 	private static boolean isVariableDefinedInContext(IBinding binding, ITypeBinding typeVariable) {
 		if (binding.getKind() == IBinding.VARIABLE) {

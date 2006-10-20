@@ -69,29 +69,27 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 		ITypeBinding[] bindings= fMethod.getParameterTypes();
 
 		IJavaProject project= getCompilationUnit().getJavaProject();
-		String[] paramNames= StubUtility.suggestArgumentNames(project, fParamNames);
+		String[][] paramNames= StubUtility.suggestArgumentNamesWithProposals(project, fParamNames);
 
 		for (int i= 0; i < bindings.length; i++) {
 			ITypeBinding curr= bindings[i];
 
+			String[] proposedNames= paramNames[i];
+			
 			SingleVariableDeclaration newParam= ast.newSingleVariableDeclaration();
 
 			newParam.setType(importRewrite.addImport(curr, ast));
-			newParam.setName(ast.newSimpleName(paramNames[i]));
+			newParam.setName(ast.newSimpleName(proposedNames[0]));
 
 			params.add(newParam);
 
 			String groupId= "arg_name_" + i; //$NON-NLS-1$
 			addLinkedPosition(rewrite.track(newParam.getName()), false, groupId);
-			addLinkedPositionProposal(groupId, paramNames[i], null);
 			
-			String[] nameProposals= StubUtility.getArgumentNameSuggestions(project, curr, paramNames);
-			for (int k= 0; k < nameProposals.length; k++) {
-				addLinkedPositionProposal(groupId, nameProposals[k], null);
+			for (int k= 0; k < proposedNames.length; k++) {
+				addLinkedPositionProposal(groupId, proposedNames[k], null);
 			}
 		}
-			
-			
 	}
 
 	/* (non-Javadoc)

@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -41,7 +40,6 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -74,6 +72,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
@@ -1490,11 +1489,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 	private static String[] suggestLocalVariableNames(ICompilationUnit cu, ITypeBinding binding) {
-		ITypeBinding base= binding.isArray() ? binding.getElementType() : binding;
-		IPackageBinding packBinding= base.getPackage();
-		String packName= packBinding != null ? packBinding.getName() : ""; //$NON-NLS-1$
-		String typeName= base.getName();
-		return NamingConventions.suggestLocalVariableNames(cu.getJavaProject(), packName, typeName, binding.getDimensions(), new String[0]);
+		return StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, cu.getJavaProject(), binding, null, 0, new String[0]);
 	}
 
 	private static boolean getPickOutStringProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {

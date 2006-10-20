@@ -18,15 +18,20 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-
-import org.eclipse.jdt.ui.CodeGeneration;
-import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -34,6 +39,9 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -229,23 +237,6 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		if (binding == null) {
 			return new String[0];
 		}
-		IMethodBinding methodDecl= binding.getMethodDeclaration();
-		int nParams= binding.getParameterTypes().length;
-		if (nParams > 0) {
-			try {
-				IJavaProject project= getCompilationUnit().getJavaProject();
-				IMethod method= (IMethod) methodDecl.getJavaElement();
-				if (method != null) {
-					return StubUtility.suggestArgumentNames(project, method.getParameterNames());
-				}
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-			}
-		}
-		String[] names= new String[nParams];
-		for (int i= 0; i < names.length; i++) {
-			names[i]= "arg" + i; //$NON-NLS-1$
-		}
-		return names;
+		return StubUtility.suggestArgumentNames(getCompilationUnit().getJavaProject(), binding);
 	}
 }
