@@ -11,7 +11,6 @@
 
 package org.eclipse.jdt.astview.views;
 
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IBinding;
 
 import org.eclipse.swt.graphics.Image;
@@ -45,10 +44,10 @@ public abstract class DynamicAttributeProperty extends ExceptionAttribute {
 		
 		fViewerElement= viewerAttribute;
 		fException= null;
-		Object trayObject= unwrapAttribute(fParent);
+		Object trayObject= ASTView.unwrapAttribute(fParent);
 		StringBuffer buf= new StringBuffer(fName);
 		if (viewerAttribute != null) {
-			Object viewerObject= unwrapAttribute(viewerAttribute);
+			Object viewerObject= ASTView.unwrapAttribute(viewerAttribute);
 			try {
 				String queryResult= executeQuery(viewerObject, trayObject);
 				buf.append(queryResult);
@@ -77,22 +76,6 @@ public abstract class DynamicAttributeProperty extends ExceptionAttribute {
 		}
 	}
 
-	/**
-	 * @param attribute an attribute
-	 * @return the object inside the attribute, or <code>null</code> iff none
-	 */
-	public static Object unwrapAttribute(Object attribute) {
-		if (attribute instanceof Binding) {
-			return ((Binding) attribute).getBinding();
-		} else if (attribute instanceof JavaElement) {
-			return ((JavaElement) attribute).getJavaElement();
-		} else if (attribute instanceof ASTNode) {
-			return attribute;
-		} else {
-			return null;
-		}
-	}
-	
 	/**
 	 * Executes this dynamic attribute property's query in a protected environment.
 	 * A {@link RuntimeException} thrown by this method is made available via

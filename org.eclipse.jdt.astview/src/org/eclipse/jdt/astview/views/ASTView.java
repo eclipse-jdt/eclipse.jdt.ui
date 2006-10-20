@@ -134,11 +134,9 @@ public class ASTView extends ViewPart implements IShowInSource {
 			IStructuredSelection selection= (IStructuredSelection) fViewer.getSelection();
 			ArrayList externalSelection= new ArrayList();
 			for (Iterator iter= selection.iterator(); iter.hasNext();) {
-				Object element= iter.next();
-				if (element instanceof JavaElement)
-					externalSelection.add(((JavaElement) element).getJavaElement());
-                if (element instanceof ASTNode)
-                    externalSelection.add(element);
+				Object unwrapped= ASTView.unwrapAttribute(iter.next());
+				if (unwrapped != null)
+					externalSelection.add(unwrapped);
 			}
 			return new StructuredSelection(externalSelection);
 		}
@@ -725,8 +723,9 @@ public class ASTView extends ViewPart implements IShowInSource {
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection viewerSelection= (IStructuredSelection) fViewer.getSelection();
 				if (viewerSelection.size() == 1) {
-					if (DynamicAttributeProperty.unwrapAttribute(viewerSelection.getFirstElement()) != null) {
-						trayLabelProvider.setViewerElement(viewerSelection.getFirstElement());
+					Object first= viewerSelection.getFirstElement();
+					if (unwrapAttribute(first) != null) {
+						trayLabelProvider.setViewerElement(first);
 						return;
 					}
 				}
@@ -1109,7 +1108,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		IStructuredSelection structuredSelection= (IStructuredSelection) selection;
 		if (structuredSelection.size() == 1 && fViewer.getTree().isFocusControl()) {
 			Object first= structuredSelection.getFirstElement();
-			Object unwrapped= DynamicAttributeProperty.unwrapAttribute(first);
+			Object unwrapped= ASTView.unwrapAttribute(first);
 			addEnabled= unwrapped != null;
 		}
 		fAddToTrayAction.setEnabled(addEnabled);
@@ -1465,5 +1464,21 @@ public class ASTView extends ViewPart implements IShowInSource {
 
 	public ShowInContext getShowInContext() {
 		return new ShowInContext(null, getSite().getSelectionProvider().getSelection());
+	}
+
+	/**
+	 * @param attribute an attribute
+	 * @return the object inside the attribute, or <code>null</code> iff none
+	 */
+	static Object unwrapAttribute(Object attribute) {
+		if (attribute instanceof Binding) {
+			return ((Binding) attribute).getBinding();
+		} else if (attribute instanceof JavaElement) {
+			return ((JavaElement) attribute).getJavaElement();
+		} else if (attribute instanceof ASTNode) {
+			return attribute;
+		} else {
+			return null;
+		}
 	}
 }
