@@ -2077,7 +2077,7 @@ public class CleanUpStressTest extends TestCase {
         buf.append("    /**\n");
         buf.append("     * Constructs a TestSuite from the given class. Adds all the methods\n");
         buf.append("     * starting with \"test\" as test cases to the suite. Parts of this method was\n");
-        buf.append("     * written at 2337 meters in the Hüffihütte, Kanton Uri\n");
+        buf.append("     * written at 2337 meters in the Hüffih\u00FCtte, Kanton Uri\n");
         buf.append("     */\n");
         buf.append("    public TestSuite(final Class theClass) {\n");
         buf.append("        this.fName = theClass.getName();\n");
