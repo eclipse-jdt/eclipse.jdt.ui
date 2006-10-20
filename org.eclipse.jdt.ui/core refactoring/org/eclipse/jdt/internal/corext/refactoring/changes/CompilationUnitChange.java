@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.ContentStamp;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
@@ -33,7 +34,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CompilationUnitChange extends TextFileChange {
 
-	private ICompilationUnit fCUnit;
+	private final ICompilationUnit fCUnit;
+	
+	/** The (optional) refactoring descriptor */
+	private ChangeDescriptor fDescriptor;
 	
 	/**
 	 * Creates a new <code>CompilationUnitChange</code>.
@@ -114,6 +118,22 @@ public class CompilationUnitChange extends TextFileChange {
 		if (ICompilationUnit.class.equals(adapter))
 			return fCUnit;
 		return super.getAdapter(adapter);
+	}
+	
+	/**
+	 * Sets the refactoring descriptor for this change
+	 * 
+	 * @param descriptor the descriptor to set
+	 */
+	public void setDescriptor(ChangeDescriptor descriptor) {
+		fDescriptor= descriptor;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public ChangeDescriptor getDescriptor() {
+		return fDescriptor;
 	}
 }
 
