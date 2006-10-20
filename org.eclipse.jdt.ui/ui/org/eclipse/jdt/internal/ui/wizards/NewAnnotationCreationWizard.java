@@ -26,17 +26,19 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 public class NewAnnotationCreationWizard extends NewElementWizard {
 
     private NewAnnotationWizardPage fPage;
+    private boolean fOpenEditorOnFinish;
 	
-	public NewAnnotationCreationWizard(NewAnnotationWizardPage page) {
+	public NewAnnotationCreationWizard(NewAnnotationWizardPage page, boolean openEditorOnFinish) {
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWANNOT);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 		setWindowTitle(NewWizardMessages.NewAnnotationCreationWizard_title);
 		
 		fPage= page;
+		fOpenEditorOnFinish= openEditorOnFinish;
 	}
 	
 	public NewAnnotationCreationWizard() {
-		this(null);
+		this(null, true);
 	}
 
 	/*
@@ -76,7 +78,9 @@ public class NewAnnotationCreationWizard extends NewElementWizard {
 			IResource resource= fPage.getModifiedResource();
 			if (resource != null) {
 				selectAndReveal(resource);
-				openResource((IFile) resource);
+				if (fOpenEditorOnFinish) {
+					openResource((IFile) resource);
+				}
 			}	
 		}
 		return res;

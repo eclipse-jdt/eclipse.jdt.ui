@@ -26,17 +26,19 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 public class NewEnumCreationWizard extends NewElementWizard {
 
     private NewEnumWizardPage fPage;
+    private boolean fOpenEditorOnFinish;
 	
 	public NewEnumCreationWizard() {
-		this(null);
+		this(null, true);
 	}
 
-	public NewEnumCreationWizard(NewEnumWizardPage page) {
+	public NewEnumCreationWizard(NewEnumWizardPage page, boolean openEditorOnFinish) {
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWENUM);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 		setWindowTitle(NewWizardMessages.NewEnumCreationWizard_title);
 		
 		fPage= page;
+		fOpenEditorOnFinish= openEditorOnFinish;
 	}
 
 	/*
@@ -75,7 +77,9 @@ public class NewEnumCreationWizard extends NewElementWizard {
 			IResource resource= fPage.getModifiedResource();
 			if (resource != null) {
 				selectAndReveal(resource);
-				openResource((IFile) resource);
+				if (fOpenEditorOnFinish) {
+					openResource((IFile) resource);
+				}
 			}	
 		}
 		return res;

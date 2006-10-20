@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewAnnotationCreationWizard;
 public class OpenNewAnnotationWizardAction extends AbstractOpenWizardAction {
 	
 	private NewAnnotationWizardPage fPage;
+	private boolean fOpenEditorOnFinish;
 
 	/**
 	 * Creates an instance of the <code>OpenNewAnnotationWizardAction</code>.
@@ -54,6 +55,7 @@ public class OpenNewAnnotationWizardAction extends AbstractOpenWizardAction {
 		setShell(JavaPlugin.getActiveWorkbenchShell());
 		
 		fPage= null;
+		fOpenEditorOnFinish= true;
 	}
 	
 	/**
@@ -65,10 +67,22 @@ public class OpenNewAnnotationWizardAction extends AbstractOpenWizardAction {
 		fPage= page;
 	}
 	
+	/**
+	 * Specifies if the wizard will open the created type with the default editor. The default behaviour is to open
+	 * an editor.
+	 * 
+	 * @param openEditorOnFinish if set, the wizard will open the created type with the default editor
+	 * 
+	 * @since 3.3
+	 */
+	public void setOpenEditorOnFinish(boolean openEditorOnFinish) {
+		fOpenEditorOnFinish= openEditorOnFinish;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.AbstractOpenWizardAction#createWizard()
 	 */
 	protected final INewWizard createWizard() throws CoreException {
-		return new NewAnnotationCreationWizard(fPage);
+		return new NewAnnotationCreationWizard(fPage, fOpenEditorOnFinish);
 	}
 }

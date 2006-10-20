@@ -26,17 +26,19 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 public class NewClassCreationWizard extends NewElementWizard {
 
 	private NewClassWizardPage fPage;
+    private boolean fOpenEditorOnFinish;
 	
-	public NewClassCreationWizard(NewClassWizardPage page) {
+	public NewClassCreationWizard(NewClassWizardPage page, boolean openEditorOnFinish) {
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWCLASS);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 		setWindowTitle(NewWizardMessages.NewClassCreationWizard_title);
 		
 		fPage= page;
+		fOpenEditorOnFinish= openEditorOnFinish;
 	}
 	
 	public NewClassCreationWizard() {
-		this(null);
+		this(null, true);
 	}
 	
 	/*
@@ -75,7 +77,9 @@ public class NewClassCreationWizard extends NewElementWizard {
 			IResource resource= fPage.getModifiedResource();
 			if (resource != null) {
 				selectAndReveal(resource);
-				openResource((IFile) resource);
+				if (fOpenEditorOnFinish) {
+					openResource((IFile) resource);
+				}
 			}	
 		}
 		return res;

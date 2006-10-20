@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
 public class OpenNewClassWizardAction extends AbstractOpenWizardAction {
 	
 	private NewClassWizardPage fPage;
+	private boolean fOpenEditorOnFinish;
 
 	/**
 	 * Creates an instance of the <code>OpenNewClassWizardAction</code>.
@@ -51,6 +52,7 @@ public class OpenNewClassWizardAction extends AbstractOpenWizardAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_CLASS_WIZARD_ACTION);
 		
 		fPage= null;
+		fOpenEditorOnFinish= true;
 	}
 	
 	/**
@@ -62,10 +64,22 @@ public class OpenNewClassWizardAction extends AbstractOpenWizardAction {
 		fPage= page;
 	}
 	
+	/**
+	 * Specifies if the wizard will open the created type with the default editor. The default behaviour is to open
+	 * an editor.
+	 * 
+	 * @param openEditorOnFinish if set, the wizard will open the created type with the default editor
+	 * 
+	 * @since 3.3
+	 */
+	public void setOpenEditorOnFinish(boolean openEditorOnFinish) {
+		fOpenEditorOnFinish= openEditorOnFinish;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.AbstractOpenWizardAction#createWizard()
 	 */
 	protected final INewWizard createWizard() throws CoreException {
-		return new NewClassCreationWizard(fPage);
+		return new NewClassCreationWizard(fPage, fOpenEditorOnFinish);
 	}
 }

@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewEnumCreationWizard;
 public class OpenNewEnumWizardAction extends AbstractOpenWizardAction {
 	
 	private NewEnumWizardPage fPage;
+	private boolean fOpenEditorOnFinish;
 
 	/**
 	 * Creates an instance of the <code>OpenNewEnumWizardAction</code>.
@@ -52,6 +53,7 @@ public class OpenNewEnumWizardAction extends AbstractOpenWizardAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_ENUM_WIZARD_ACTION);
 		
 		fPage= null;
+		fOpenEditorOnFinish= true;
 	}
 	
 	/**
@@ -63,10 +65,22 @@ public class OpenNewEnumWizardAction extends AbstractOpenWizardAction {
 		fPage= page;
 	}
 	
+	/**
+	 * Specifies if the wizard will open the created type with the default editor. The default behaviour is to open
+	 * an editor.
+	 * 
+	 * @param openEditorOnFinish if set, the wizard will open the created type with the default editor
+	 * 
+	 * @since 3.3
+	 */
+	public void setOpenEditorOnFinish(boolean openEditorOnFinish) {
+		fOpenEditorOnFinish= openEditorOnFinish;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.AbstractOpenWizardAction#createWizard()
 	 */
 	protected final INewWizard createWizard() throws CoreException {
-		return new NewEnumCreationWizard(fPage);
+		return new NewEnumCreationWizard(fPage, fOpenEditorOnFinish);
 	}
 }
