@@ -171,7 +171,7 @@ public class TypeInfoViewer {
 	    }
 		private int compareName(String leftString, String rightString) {
 			int result= leftString.compareToIgnoreCase(rightString);
-			if (result != 0) {
+			if (result != 0 || rightString.length() == 0) {
 				return result;
 			} else if (Strings.isLowerCase(leftString.charAt(0)) && 
 				!Strings.isLowerCase(rightString.charAt(0))) {
