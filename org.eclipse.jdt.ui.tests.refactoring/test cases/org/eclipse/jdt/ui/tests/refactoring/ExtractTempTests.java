@@ -240,7 +240,7 @@ public class ExtractTempTests extends RefactoringTest {
 //	}	
 	
 	public void test21() throws Exception{
-		helper1(5, 16, 5, 17, false, false, "temp", "j");
+		helper1(5, 16, 5, 17, false, false, "temp", "f2");
 	}	
 
 //cannot do it - see testFail17
@@ -284,7 +284,7 @@ public class ExtractTempTests extends RefactoringTest {
 	}
 	
 	public void test30() throws Exception{
-		helper1(5, 16, 5, 20, true, false, "temp", "i");
+		helper1(5, 16, 5, 20, true, false, "temp", "ff2");
 	}
 
 	public void test31() throws Exception{
@@ -322,7 +322,7 @@ public class ExtractTempTests extends RefactoringTest {
 
 	public void test38() throws Exception{
 //		printTestDisabledMessage("regression test for bug#17473");
-		helper1(5, 28, 5, 32, true, false, "temp1", "i");
+		helper1(5, 28, 5, 32, true, false, "temp1", "temp2");
 	}
 
 	public void test39() throws Exception{
@@ -422,17 +422,17 @@ public class ExtractTempTests extends RefactoringTest {
 
 	public void test59() throws Exception{
 //		printTestDisabledMessage("test for bug 30304");
-		helper1(7, 17, 7, 18, true, false, "temp", "i");
+		helper1(7, 17, 7, 18, true, false, "temp", "s2");
 	}	
 
 	public void test60() throws Exception{
 //		printTestDisabledMessage("test for bug 30304");
-		helper1(7, 17, 7, 18, true, false, "temp", "i");
+		helper1(7, 17, 7, 18, true, false, "temp", "s2");
 	}	
 
 	public void test61() throws Exception{
 //		printTestDisabledMessage("test for bug 30304");
-		helper1(7, 17, 7, 18, true, false, "temp", "i");
+		helper1(7, 17, 7, 18, true, false, "temp", "s2");
 	}	
 		
 	public void test62() throws Exception{
@@ -452,11 +452,11 @@ public class ExtractTempTests extends RefactoringTest {
 
 	public void test65() throws Exception{
 //		printTestDisabledMessage("test for bug 35981 extract local variable causing exception [refactoring] ");
-		helper1(6, 19, 6, 22, true, false, "temp", "string");
+		helper1(6, 19, 6, 22, true, false, "temp", "bar2");
 	}	
 
 	public void test66() throws Exception{
-		helper1(7, 32, 7, 33, true, false, "temp", "exception");
+		helper1(7, 32, 7, 33, true, false, "temp", "e2");
 	}	
 
 	public void test67() throws Exception{
@@ -466,7 +466,7 @@ public class ExtractTempTests extends RefactoringTest {
 
 	public void test68() throws Exception{
 //		printTestDisabledMessage("test for bug 37834");
-		helper1(6, 14, 6, 21, true, false, "temp", "d2");
+		helper1(6, 14, 6, 21, true, false, "temp", "temp");
 	}	
 
 	public void test69() throws Exception{
@@ -475,7 +475,7 @@ public class ExtractTempTests extends RefactoringTest {
 
 	public void test70() throws Exception{
 //		printTestDisabledMessage("test for bug 40353");
-		helper1(7, 28, 7, 42, true, true, "temp", "j");
+		helper1(7, 28, 7, 42, true, true, "temp", "length");
 	}	
 
 	public void test71() throws Exception{
@@ -485,12 +485,12 @@ public class ExtractTempTests extends RefactoringTest {
 
 	public void test72() throws Exception{
 //		printTestDisabledMessage("test for bug 40353");
-		helper1(8, 32, 8, 33, true, false, "temp", "j");
+		helper1(8, 32, 8, 33, true, false, "temp", "i2");
 	}	
 
 	public void test73() throws Exception{
 //		printTestDisabledMessage("test for bug 40353");
-		warningHelper1(6, 39, 6, 40, true, false, "temp", "j", RefactoringStatus.WARNING);
+		warningHelper1(6, 39, 6, 40, true, false, "temp", "i2", RefactoringStatus.WARNING);
 		// (warning is superfluous, but detection would need flow analysis)
 	}	
 
@@ -506,7 +506,7 @@ public class ExtractTempTests extends RefactoringTest {
 
 	public void test76() throws Exception{
 //		printTestDisabledMessage("test for bug 40353");
-		helper1(7, 48, 7, 49, true, false, "temp", "j");
+		helper1(7, 48, 7, 49, true, false, "temp", "k2");
 	}	
 
 	public void test77() throws Exception {
@@ -528,7 +528,7 @@ public class ExtractTempTests extends RefactoringTest {
 	}
 
 	public void test81() throws Exception {
-		helper1(7, 18, 7, 23, true, false, "k", "i");
+		helper1(7, 18, 7, 23, true, false, "k", "const2");
 	}
 	
 	public void test82() throws Exception {
@@ -582,11 +582,11 @@ public class ExtractTempTests extends RefactoringTest {
 	}
 	
 	public void test90() throws Exception {
-		helper1(8, 19, 8, 28, true, false, "temp", "temp");
+		helper1(8, 19, 8, 28, true, false, "temp", "number");
 	}
 	
 	public void test91() throws Exception {
-		helper1(8, 19, 8, 28, true, false, "temp", "temp");
+		helper1(8, 19, 8, 28, true, false, "temp", "integer");
 	}
 	
 	public void test92() throws Exception { //bug 104293
@@ -599,7 +599,7 @@ public class ExtractTempTests extends RefactoringTest {
 	
 	public void test94() throws Exception {
 		//test for bug 19851, syntax error
-		helper1(6, 9, 6, 24, false, false, "temp", "toString");
+		helper1(6, 9, 6, 24, false, false, "temp", "string");
 	}
 	
 	public void test95() throws Exception {
@@ -619,7 +619,7 @@ public class ExtractTempTests extends RefactoringTest {
 	
 	public void test98() throws Exception {
 		//test for bug 132931
-		helper1(8, 32, 8, 44, true, true, "temp", "toString");
+		helper1(8, 32, 8, 44, true, true, "temp", "string");
 	}
 	
 	public void test99() throws Exception {
