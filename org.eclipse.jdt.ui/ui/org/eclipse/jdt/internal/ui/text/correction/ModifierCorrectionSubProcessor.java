@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -714,12 +715,12 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 	
-	public static void installLinkedVisibilityProposals(LinkedCorrectionProposal proposal, ASTRewrite rewrite, List modifiers, boolean inInterface) {
+	public static void installLinkedVisibilityProposals(LinkedProposalModel linkedProposalModel, ASTRewrite rewrite, List modifiers, boolean inInterface) {
 		ASTNode modifier= findVisibilityModifier(modifiers);
 		if (modifier != null) {
 			int selected= ((Modifier) modifier).getKeyword().toFlagValue();
 			
-			LinkedProposalPositionGroup positionGroup= proposal.getLinkedProposalModel().getPositionGroup(KEY_MODIFIER, true);
+			LinkedProposalPositionGroup positionGroup= linkedProposalModel.getPositionGroup(KEY_MODIFIER, true);
 			positionGroup.addPosition(rewrite.track(modifier), false);
 			positionGroup.addProposal(new ModifierLinkedModeProposal(selected, 10));
 			

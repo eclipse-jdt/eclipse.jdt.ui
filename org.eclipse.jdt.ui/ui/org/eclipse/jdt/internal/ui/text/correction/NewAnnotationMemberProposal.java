@@ -90,7 +90,7 @@ public class NewAnnotationMemberProposal extends LinkedCorrectionProposal {
 
 		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, evaluateModifiers(targetTypeDecl)));
 		
-		ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(this, rewrite, decl.modifiers(), true);
+		ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(getLinkedProposalModel(), rewrite, decl.modifiers(), true);
 
 		decl.setName(newNameNode);
 

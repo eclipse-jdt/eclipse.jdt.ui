@@ -380,7 +380,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			ListRewrite listRewriter= rewrite.getListRewrite(newTypeDecl, property);
 			listRewriter.insertAt(newDecl, insertIndex, null);
 
-			ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(this, rewrite, newDecl.modifiers(), fSenderBinding.isInterface());
+			ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(getLinkedProposalModel(), rewrite, newDecl.modifiers(), fSenderBinding.isInterface());
 			
 			addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
 			if (!isInDifferentCU) {
