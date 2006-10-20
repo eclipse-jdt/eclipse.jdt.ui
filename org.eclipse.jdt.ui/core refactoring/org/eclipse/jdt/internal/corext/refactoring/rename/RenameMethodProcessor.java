@@ -414,13 +414,12 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	
 	private SearchPattern createNewMethodPattern() throws JavaModelException {
 		StringBuffer stringPattern= new StringBuffer(getNewElementName()).append('(');
-		int paramCount= getMethod().getParameterNames().length;
-		while (paramCount > 1) {
-			stringPattern.append("*,"); //$NON-NLS-1$
-			--paramCount;
-		}
-		if (paramCount > 0)
+		int paramCount= getMethod().getNumberOfParameters();
+		for (int i= 0; i < paramCount; i++) {
+			if (i > 0)
+				stringPattern.append(',');
 			stringPattern.append('*');
+		}
 		stringPattern.append(')');
 		
 		return SearchPattern.createPattern(stringPattern.toString(), IJavaSearchConstants.METHOD,
