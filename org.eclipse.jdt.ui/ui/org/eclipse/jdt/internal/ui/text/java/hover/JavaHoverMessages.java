@@ -28,6 +28,7 @@ final class JavaHoverMessages extends NLS {
 	public static String JavaTextHover_makeStickyHint;
 	public static String NoBreakpointAnnotation_addBreakpoint;
 	public static String NLSStringHover_NLSStringHover_missingKeyWarning;
+	public static String NLSStringHover_NLSStringHover_PropertiesFileNotDetectedWarning;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaHoverMessages.class);
