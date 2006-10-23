@@ -948,7 +948,7 @@ public class StubUtility {
 				add(getVariableNameSuggestions(variableKind, project, nameFromParent, 0, newModifiers, excluded), res); // pass 0 as dimension, base name already contains plural.
 			}
 		}
-		if (res.isEmpty()) { // should nto happen, but make sure there's always at least one proposal
+		if (res.isEmpty()) { // should not happen, but make sure there's always at least one proposal
 			res.add("x"); //$NON-NLS-1$
 		}
 		return (String[]) res.toArray(new String[res.size()]);
@@ -1014,7 +1014,7 @@ public class StubUtility {
 				String curr= KNOWN_METHOD_NAME_PREFIXES[i];
 				if (name.startsWith(curr)) {
 					if (name.equals(curr)) {
-						return null; // don't sugget 'get' as variable name
+						return null; // don't suggest 'get' as variable name
 					} else if (Character.isUpperCase(name.charAt(curr.length()))) {
 						return name.substring(curr.length());
 					}
@@ -1160,7 +1160,7 @@ public class StubUtility {
 			} else if (ch == '_') {
 				lastWasUnderscore= true;
 			} else {
-				return string; // abord
+				return string; // abort
 			}
 		}
 		return result.toString();
