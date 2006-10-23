@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Nikolay Metchev - Fixed bug 29909
+ *     Nikolay Metchev - Fixed https://bugs.eclipse.org/bugs/show_bug.cgi?id=29909
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -239,7 +239,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			if (d.get(lineOffset, p - lineOffset).trim().length() != 0)
 				return;
 
-			// line of last javacode
+			// line of last Java code
 			int pos= scanner.findNonWhitespaceBackward(p, JavaHeuristicScanner.UNBOUND);
 			if (pos == -1)
 				return;
@@ -659,6 +659,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			int insertLength= 0;
 			int first= document.computeNumberOfLines(prefix) + firstLine; // don't format first line
 			int lines= temp.getNumberOfLines();
+			int tabLength= getVisualTabLengthPreference();
 			boolean changed= false;
 			for (int l= first; l < lines; l++) { // we don't change the number of lines while adding indents
 
@@ -677,7 +678,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 					if (correct == null)
 						return; // bail out
 
-					insertLength= subtractIndent(correct, current, addition);
+					insertLength= subtractIndent(correct, current, addition, tabLength);
 					if (l != first && temp.get(lineOffset, lineLength).trim().length() != 0) {
 						isIndentDetected= true;
 						if (insertLength == 0) {
@@ -699,9 +700,9 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 				// relatively indent all pasted lines
 				if (insertLength > 0)
-					addIndent(temp, l, addition);
+					addIndent(temp, l, addition, tabLength);
 				else if (insertLength < 0)
-					cutIndent(temp, l, -insertLength);
+					cutIndent(temp, l, -insertLength, tabLength);
 
 			}
 
@@ -721,7 +722,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	/**
 	 * Returns the indentation of the line <code>line</code> in <code>document</code>.
 	 * The returned string may contain pairs of leading slashes that are considered
-	 * part of the indentation. The space before the asterix in a javadoc-like
+	 * part of the indentation. The space before the asterisk in a javadoc-like
 	 * comment is not considered part of the indentation.
 	 *
 	 * @param document the document
@@ -746,7 +747,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			to++;
 		}
 
-		// don't count the space before javadoc like, asterix-style comment lines
+		// don't count the space before javadoc like, asterisk-style comment lines
 		if (to > from && to < endOffset - 1 && document.get(to - 1, 2).equals(" *")) { //$NON-NLS-1$
 			String type= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, to, true);
 			if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT))
@@ -762,13 +763,14 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * is initialized with a substring of that length of <code>correct</code>.
 	 *
 	 * @param correct the correct indentation
-	 * @param current the current indentation (migth contain non-whitespace)
+	 * @param current the current indentation (might contain non-whitespace)
 	 * @param difference a string buffer - if the return value is positive, it will be cleared and set to the substring of <code>current</code> of that length
-	 * @return the difference in lenght of <code>correct</code> and <code>current</code>
+	 * @param tabLength the length of a tab
+	 * @return the difference in length of <code>correct</code> and <code>current</code>
 	 */
-	private int subtractIndent(CharSequence correct, CharSequence current, StringBuffer difference) {
-		int c1= computeVisualLength(correct);
-		int c2= computeVisualLength(current);
+	private int subtractIndent(CharSequence correct, CharSequence current, StringBuffer difference, int tabLength) {
+		int c1= computeVisualLength(correct, tabLength);
+		int c2= computeVisualLength(current, tabLength);
 		int diff= c1 - c2;
 		if (diff <= 0)
 			return diff;
@@ -778,7 +780,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		while (len < diff) {
 			char c= correct.charAt(i++);
 			difference.append(c);
-			len += computeVisualLength(c);
+			len += computeVisualLength(c, tabLength);
 		}
 
 
@@ -792,18 +794,36 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * @param document the document
 	 * @param line the line
 	 * @param indent the indentation to insert
+	 * @param tabLength the length of a tab
 	 * @throws BadLocationException on concurrent document modification
 	 */
-	private static void addIndent(Document document, int line, CharSequence indent) throws BadLocationException {
+	private void addIndent(Document document, int line, CharSequence indent, int tabLength) throws BadLocationException {
 		IRegion region= document.getLineInformation(line);
 		int insert= region.getOffset();
 		int endOffset= region.getOffset() + region.getLength();
 
-		// go behind line comments
-		while (insert < endOffset - 2 && document.get(insert, 2).equals(LINE_COMMENT))
-			insert += 2;
+		// Compute insert after all leading line comment markers
+		int newInsert= insert;
+		while (newInsert < endOffset - 2 && document.get(newInsert, 2).equals(LINE_COMMENT))
+			newInsert += 2;
+		
+		// Heuristic to check whether it is commented code or just a comment
+		if (newInsert > insert) {
+			int whitespaceCount= 0;
+			int i= newInsert;
+			while (i < endOffset - 1) {
+				 char ch= document.get(i, 1).charAt(0);
+				 if (!Character.isWhitespace(ch))
+					 break;
+				 whitespaceCount= whitespaceCount + computeVisualLength(ch, tabLength);
+				 i++;
+			}
+			
+			if (whitespaceCount != 0 && whitespaceCount >= CodeFormatterUtil.getIndentWidth(fProject))
+				insert= newInsert;
+		}
 
-		// insert indent
+		// Insert indent
 		document.replace(insert, 0, indent.toString());
 	}
 
@@ -814,10 +834,11 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 *
 	 * @param document the document
 	 * @param line the line
-	 * @param toDelete the number of space equivalents to delete.
+	 * @param toDelete the number of space equivalents to delete
+	 * @param tabLength the length of a tab
 	 * @throws BadLocationException on concurrent document modification
 	 */
-	private void cutIndent(Document document, int line, int toDelete) throws BadLocationException {
+	private void cutIndent(Document document, int line, int toDelete, int tabLength) throws BadLocationException {
 		IRegion region= document.getLineInformation(line);
 		int from= region.getOffset();
 		int endOffset= region.getOffset() + region.getLength();
@@ -831,7 +852,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			char ch= document.getChar(to);
 			if (!Character.isWhitespace(ch))
 				break;
-			toDelete -= computeVisualLength(ch);
+			toDelete -= computeVisualLength(ch, tabLength);
 			if (toDelete >= 0)
 				to++;
 			else
@@ -846,17 +867,17 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * account the visual tabulator length.
 	 *
 	 * @param seq the string to measure
+	 * @param tabLength the length of a tab
 	 * @return the visual length of <code>seq</code>
 	 */
-	private int computeVisualLength(CharSequence seq) {
+	private int computeVisualLength(CharSequence seq, int tabLength) {
 		int size= 0;
-		int tablen= getVisualTabLengthPreference();
 
 		for (int i= 0; i < seq.length(); i++) {
 			char ch= seq.charAt(i);
 			if (ch == '\t') {
-				if (tablen != 0)
-					size += tablen - size % tablen;
+				if (tabLength != 0)
+					size += tabLength - size % tabLength;
 				// else: size stays the same
 			} else {
 				size++;
@@ -870,11 +891,12 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * account the visual tabulator length.
 	 *
 	 * @param ch the character to measure
+	 * @param tabLength the length of a tab
 	 * @return the visual length of <code>ch</code>
 	 */
-	private int computeVisualLength(char ch) {
+	private int computeVisualLength(char ch, int tabLength) {
 		if (ch == '\t')
-			return getVisualTabLengthPreference();
+			return tabLength;
 		else
 			return 1;
 	}
@@ -1055,7 +1077,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				if (d.get(lineOffset, p - lineOffset).trim().length() != 0)
 					return;
 
-				// line of last javacode
+				// line of last Java code
 				int pos= scanner.findNonWhitespaceBackward(p - 1, JavaHeuristicScanner.UNBOUND);
 				if (pos == -1)
 					return;
@@ -1093,7 +1115,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				if (d.get(lineOffset, p - lineOffset).trim().length() != 0)
 					return;
 
-				// line of last javacode
+				// line of last Java code
 				int pos= scanner.findNonWhitespaceBackward(p - 1, JavaHeuristicScanner.UNBOUND);
 				if (pos == -1)
 					return;
