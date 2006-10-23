@@ -54,7 +54,7 @@ This extension point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Prope
    <element name="quickAssistProcessor">
       <complexType>
          <sequence>
-            <element ref="enablement"/>
+            <element ref="enablement" minOccurs="0" maxOccurs="1"/>
          </sequence>
          <attribute name="id" type="string" use="required">
             <annotation>
