@@ -37,7 +37,7 @@ class MethodOccurenceCollector extends CollectingSearchRequestor {
 				return;
 			
 			if (match instanceof MethodReferenceMatch
-					&& ((MethodReferenceMatch) match).isPolymorphic()
+					&& ((MethodReferenceMatch) match).isSuperInvocation()
 					&& match.getAccuracy() == SearchMatch.A_INACCURATE) {
 				return; // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=156491
 			}

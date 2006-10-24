@@ -45,12 +45,12 @@ public class NewSearchResultCollector extends SearchRequestor {
 				isWriteAccess= localVarRef.isWriteAccess();
 				isReadAccess= localVarRef.isReadAccess();
 			}
-			boolean isPolymorphic= false;
+			boolean isSuperInvocation= false;
 			if (match instanceof MethodReferenceMatch) {
 				MethodReferenceMatch methodRef= (MethodReferenceMatch) match;
-				isPolymorphic= methodRef.isPolymorphic();
+				isSuperInvocation= methodRef.isSuperInvocation();
 			}
-			fSearch.addMatch(new JavaElementMatch(enclosingElement, match.getRule(), match.getOffset(), match.getLength(), match.getAccuracy(), isReadAccess, isWriteAccess, match.isInsideDocComment(), isPolymorphic));
+			fSearch.addMatch(new JavaElementMatch(enclosingElement, match.getRule(), match.getOffset(), match.getLength(), match.getAccuracy(), isReadAccess, isWriteAccess, match.isInsideDocComment(), isSuperInvocation));
 		}
 	}
 

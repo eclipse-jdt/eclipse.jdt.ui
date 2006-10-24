@@ -294,7 +294,7 @@ class JavadocFilter extends JavaMatchFilter {
 
 class PolymorphicFilter extends JavaMatchFilter {
     public boolean filters(JavaElementMatch match) {
-        return match.isPolymorphic();
+        return match.isSuperInvocation();
     }
 
     public String getName() {

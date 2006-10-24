@@ -21,16 +21,16 @@ public class JavaElementMatch extends Match {
 	private final boolean fIsWriteAccess;
 	private final boolean fIsReadAccess;
 	private final boolean fIsJavadoc;
-	private final boolean fIsPolymorphic;
+	private final boolean fIsSuperInvocation;
 	
-	JavaElementMatch(Object element, int matchRule, int offset, int length, int accuracy, boolean isReadAccess, boolean isWriteAccess, boolean isJavadoc, boolean isPolymorphic) {
+	JavaElementMatch(Object element, int matchRule, int offset, int length, int accuracy, boolean isReadAccess, boolean isWriteAccess, boolean isJavadoc, boolean isSuperInvocation) {
 		super(element, offset, length);
 		fAccuracy= accuracy;
 		fMatchRule= matchRule;
 		fIsWriteAccess= isWriteAccess;
 		fIsReadAccess= isReadAccess;
 		fIsJavadoc= isJavadoc;
-		fIsPolymorphic= isPolymorphic;
+		fIsSuperInvocation= isSuperInvocation;
 	}
 
 	public int getAccuracy() {
@@ -49,8 +49,8 @@ public class JavaElementMatch extends Match {
 		return fIsJavadoc;
 	}
 	
-	public boolean isPolymorphic() {
-		return fIsPolymorphic;
+	public boolean isSuperInvocation() {
+		return fIsSuperInvocation;
 	}
 	
 	public int getMatchRule() {
