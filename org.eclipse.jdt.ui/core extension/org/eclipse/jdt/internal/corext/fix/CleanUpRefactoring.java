@@ -51,7 +51,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -239,9 +238,11 @@ public class CleanUpRefactoring extends Refactoring {
 			} while (i < cleanUps.length && (solution == null || !cleanUps[i].needsFreshAST(ast)));
 			
 			if (solution != null) {
-				if (fLeaveFilesDirty)
-					solution.setSaveMode(TextFileChange.LEAVE_DIRTY);
-				integrateSolution(solution, source);
+				try {
+	                integrateSolution(solution, source);
+                } catch (JavaModelException e) {
+                	throw new FixCalculationException(e);
+                }
 			}
 			
 			for (; i < cleanUps.length; i++) {
@@ -297,7 +298,7 @@ public class CleanUpRefactoring extends Refactoring {
         	return result;
         }
 
-		private void integrateSolution(TextChange solution, ICompilationUnit source) {
+		private void integrateSolution(TextFileChange solution, ICompilationUnit source) throws JavaModelException {
 			if (fSolutions.containsKey(source)) {
 				Object obj= fSolutions.get(source);
 				if (obj instanceof MultiStateCompilationUnitChange) {
@@ -305,6 +306,7 @@ public class CleanUpRefactoring extends Refactoring {
 					change.addChange(solution);
 				} else {
 					MultiStateCompilationUnitChange mscuc= new MultiStateCompilationUnitChange(getChangeName(source), source);
+					mscuc.setSaveMode(((TextFileChange)obj).getSaveMode());
 					mscuc.setKeepPreviewEdits(true);
 					mscuc.addChange((TextChange)obj);
 					mscuc.addChange(solution);
@@ -312,6 +314,11 @@ public class CleanUpRefactoring extends Refactoring {
 					fSolutions.put(source, mscuc);
 				}
 			} else {
+                if (fLeaveFilesDirty || source.getBuffer().hasUnsavedChanges()) {
+                	solution.setSaveMode(TextFileChange.LEAVE_DIRTY);
+                } else {
+                	solution.setSaveMode(TextFileChange.FORCE_SAVE);
+                }
 				fSolutions.put(source, solution);
 			}
         }
@@ -406,7 +413,9 @@ public class CleanUpRefactoring extends Refactoring {
 
 		public void next(IProgressMonitor monitor) throws CoreException {
 			ICompilationUnit[] units= new ICompilationUnit[fParseList.size()];
-			List workingCopies= new ArrayList();
+			List primaryWorkingCopies= new ArrayList();
+			ArrayList secondaryWorkingCopies= new ArrayList();
+			ArrayList oldContents= new ArrayList();
 			try {
 				int i= 0;
 				for (Iterator iter= fParseList.iterator(); iter.hasNext();) {
@@ -414,12 +423,18 @@ public class CleanUpRefactoring extends Refactoring {
 		            
 					ICompilationUnit compilationUnit= element.getCompilationUnit();
 					if (fSolutions.containsKey(compilationUnit)) {
-						units[i]= createWorkingCopy(compilationUnit, (Change)fSolutions.get(compilationUnit));
-						workingCopies.add(units[i]);
-					} else {
-						units[i]= compilationUnit;
+						if (compilationUnit.isWorkingCopy()) {
+							oldContents.add(compilationUnit.getBuffer().getContents()); 
+							applyChange(compilationUnit, (Change)fSolutions.get(compilationUnit));
+							secondaryWorkingCopies.add(compilationUnit);
+						} else {
+							compilationUnit.becomeWorkingCopy(null, null);
+							applyChange(compilationUnit, (Change)fSolutions.get(compilationUnit));
+							primaryWorkingCopies.add(compilationUnit);
+						}
 					}
 
+					units[i]= compilationUnit;
 		            i++;
 	            }
 
@@ -445,9 +460,13 @@ public class CleanUpRefactoring extends Refactoring {
 				fParseList= requestor.getUndoneElements();
 				fIndex= cuMonitor.getIndex();
 			} finally {
-				for (Iterator iter= workingCopies.iterator(); iter.hasNext();) {
+				for (Iterator iter= primaryWorkingCopies.iterator(); iter.hasNext();) {
 					((ICompilationUnit)iter.next()).discardWorkingCopy();
 				}
+				for (int i= 0; i < secondaryWorkingCopies.size(); i++) {
+	                ICompilationUnit unit= (ICompilationUnit)secondaryWorkingCopies.get(i);
+	                unit.getBuffer().setContents((String)oldContents.get(i));
+                }
 			}
         }
 
@@ -456,10 +475,8 @@ public class CleanUpRefactoring extends Refactoring {
 			return (Change[])collection.toArray(new Change[collection.size()]);
         }
 		
-		private ICompilationUnit createWorkingCopy(ICompilationUnit compilationUnit, Change change) throws JavaModelException, CoreException {
-	        ICompilationUnit workingCopy= compilationUnit.getWorkingCopy(new WorkingCopyOwner() {}, null, null);
-	        
-	        IBuffer buffer= workingCopy.getBuffer();
+		private void applyChange(ICompilationUnit compilationUnit, Change change) throws JavaModelException, CoreException {
+			IBuffer buffer= compilationUnit.getBuffer();
 	        if (change instanceof TextChange) {
 	        	buffer.setContents(((TextChange)change).getPreviewContent(null));
 	        } else if (change instanceof MultiStateTextFileChange) {
@@ -467,7 +484,6 @@ public class CleanUpRefactoring extends Refactoring {
 	        } else {
 	        	Assert.isTrue(false);
 	        }
-	        return workingCopy;
         }
 	}
 
