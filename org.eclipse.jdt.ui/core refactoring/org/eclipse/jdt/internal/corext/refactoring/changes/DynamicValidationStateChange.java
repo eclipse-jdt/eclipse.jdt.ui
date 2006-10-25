@@ -14,8 +14,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
@@ -34,6 +36,7 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 	private boolean fListenerRegistered= false;
 	private RefactoringStatus fValidationState= null;
 	private long fTimeStamp;
+	private ISchedulingRule fSchedulingRule;
 	
 	// 30 minutes
 	private static final long LIFE_TIME= 30 * 60 * 1000;
@@ -42,16 +45,19 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 		super(change.getName());
 		add(change);
 		markAsSynthetic();
+		fSchedulingRule= ResourcesPlugin.getWorkspace().getRoot();
 	}
 	
 	public DynamicValidationStateChange(String name) {
 		super(name);
 		markAsSynthetic();
+		fSchedulingRule= ResourcesPlugin.getWorkspace().getRoot();
 	}
 	
 	public DynamicValidationStateChange(String name, Change[] changes) {
 		super(name, changes);
 		markAsSynthetic();
+		fSchedulingRule= ResourcesPlugin.getWorkspace().getRoot();
 	}
 	
 	/**
@@ -92,7 +98,7 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 				result[0]= DynamicValidationStateChange.super.perform(monitor);
 			}
 		};
-		JavaCore.run(runnable, pm);
+		JavaCore.run(runnable, fSchedulingRule, pm);
 		return result[0];
 	}
 
@@ -128,5 +134,13 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 				}
 			});
 		}
+	}
+	
+	public void setSchedulingRule(ISchedulingRule schedulingRule) {
+		fSchedulingRule= schedulingRule;	
+	}
+	
+	public ISchedulingRule getSchedulingRule() {
+		return fSchedulingRule;
 	}
 }

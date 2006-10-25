@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -106,6 +105,9 @@ public class RefactoringExecutionHelper {
 				
 				fPerformChangeOperation= RefactoringUI.createUIAwareChangeOperation(fChange);
 				fPerformChangeOperation.setUndoManager(RefactoringCore.getUndoManager(), fRefactoring.getName());
+				if (fRefactoring instanceof IScheduledRefactoring)
+					fPerformChangeOperation.setSchedulingRule(((IScheduledRefactoring)fRefactoring).getSchedulingRule());
+				
 				if (fApplyChanges)
 					fPerformChangeOperation.run(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 			} finally {
@@ -140,7 +142,12 @@ public class RefactoringExecutionHelper {
 	public void perform(boolean showPreview, boolean fork, boolean cancelable) throws InterruptedException, InvocationTargetException {
 		Assert.isTrue(Display.getCurrent() != null);
 		final IJobManager manager=  Platform.getJobManager();
-		final IWorkspaceRoot rule= ResourcesPlugin.getWorkspace().getRoot();
+		final ISchedulingRule rule;
+		if (fRefactoring instanceof IScheduledRefactoring) {
+			rule= ((IScheduledRefactoring)fRefactoring).getSchedulingRule();
+		} else {
+			rule= ResourcesPlugin.getWorkspace().getRoot();
+		}
 		class OperationRunner extends WorkbenchRunnableAdapter implements IThreadListener {
 			public OperationRunner(IWorkspaceRunnable runnable, ISchedulingRule schedulingRule) {
 				super(runnable, schedulingRule);

@@ -29,8 +29,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.Change;
@@ -67,8 +69,9 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.ui.refactoring.IScheduledRefactoring;
 
-public class CleanUpRefactoring extends Refactoring {
+public class CleanUpRefactoring extends Refactoring implements IScheduledRefactoring {
 	
 	private class FixCalculationException extends RuntimeException {
 
@@ -914,4 +917,11 @@ public class CleanUpRefactoring extends Refactoring {
 	protected RefactoringTickProvider doGetRefactoringTickProvider() {
 		return CLEAN_UP_REFACTORING_TICK_PROVIDER;
 	}
+
+	/**
+     * {@inheritDoc}
+     */
+    public ISchedulingRule getSchedulingRule() {
+	    return ResourcesPlugin.getWorkspace().getRoot();
+    }
 }
