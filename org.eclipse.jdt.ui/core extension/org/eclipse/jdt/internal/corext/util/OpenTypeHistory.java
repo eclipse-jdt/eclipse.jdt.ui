@@ -344,9 +344,11 @@ public class OpenTypeHistory extends History {
 				}
 			} else { // external JAR
 				IPackageFragmentRoot root= match.getPackageFragmentRoot();
-				IFileInfo info= EFS.getLocalFileSystem().getStore(root.getPath()).fetchInfo();
-				if (info.exists()) {
-					return info.getLastModified();
+				if (root.exists()) {
+					IFileInfo info= EFS.getLocalFileSystem().getStore(root.getPath()).fetchInfo();
+					if (info.exists()) {
+						return info.getLastModified();
+					}
 				}
 			}
 		} catch (CoreException e) {
