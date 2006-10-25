@@ -527,7 +527,7 @@ public class RenameLinkedMode {
 		shellLayout.marginWidth= 1;
 		shellLayout.marginHeight= 1;
 		fPopup.setLayout(shellLayout);
-		fPopup.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
+		fPopup.setBackground(viewer.getTextWidget().getForeground());
 		
 		createTable(fPopup);
 		
@@ -655,9 +655,9 @@ public class RenameLinkedMode {
 		hyperlinkGroup.add(refactorLink);
 		hyperlinkGroup.add(previewLink);
 		hyperlinkGroup.add(openDialogLink);
-		hyperlinkGroup.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+		hyperlinkGroup.setForeground(fEditor.getViewer().getTextWidget().getForeground());
 		
-		recursiveSetBackgroundColor(table, display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+		recursiveSetBackgroundColor(table, fEditor.getViewer().getTextWidget().getBackground());
 		
 		Point size= table.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		fPopup.setSize(size);
