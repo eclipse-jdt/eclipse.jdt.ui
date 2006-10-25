@@ -123,11 +123,11 @@ public class JUnit3TestFinder implements ITestFinder {
 		return result;
 	}
 	
-	private static class JUnitSearchResultCollector extends SearchRequestor {
+	private static class SuiteMethodTypesCollector extends SearchRequestor {
 
 		private Collection fResult;
 		
-		public JUnitSearchResultCollector(Collection result) {
+		public SuiteMethodTypesCollector(Collection result) {
 			fResult= result;
 		}
 
@@ -142,7 +142,7 @@ public class JUnit3TestFinder implements ITestFinder {
 			}
 			
 			IType declaringType= ((IMethod) enclosingElement).getDeclaringType();
-			if (!TestSearchEngine.isAccessibleClass(declaringType) && !Flags.isAbstract(declaringType.getFlags())) {
+			if (!TestSearchEngine.isAccessibleClass(declaringType)) {
 				return;
 			}
 			fResult.add(declaringType);
@@ -154,7 +154,7 @@ public class JUnit3TestFinder implements ITestFinder {
 		// [JUnit]
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element }, IJavaSearchScope.SOURCES);
 		
-		SearchRequestor requestor= new JUnitSearchResultCollector(result);
+		SearchRequestor requestor= new SuiteMethodTypesCollector(result);
 		int matchRule= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE | SearchPattern.R_ERASURE_MATCH;
 		SearchPattern suitePattern= SearchPattern.createPattern("suite() Test", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, matchRule); //$NON-NLS-1$
 		SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
