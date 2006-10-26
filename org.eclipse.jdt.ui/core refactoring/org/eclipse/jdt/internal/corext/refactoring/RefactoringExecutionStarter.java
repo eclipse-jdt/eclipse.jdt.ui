@@ -100,18 +100,7 @@ import org.eclipse.jdt.ui.refactoring.RenameSupport;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
-import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
-import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
-import org.eclipse.jdt.internal.ui.fix.CommentFormatCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
-import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
-import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeSignatureWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeTypeWizard;
@@ -243,20 +232,12 @@ public final class RefactoringExecutionStarter {
 			refactoring.addCompilationUnit(cus[i]);
 		}
 		
-		refactoring.addCleanUp(new CodeStyleCleanUp());
-		refactoring.addCleanUp(new ControlStatementsCleanUp());
-		refactoring.addCleanUp(new VariableDeclarationCleanUp());
-		refactoring.addCleanUp(new ExpressionsCleanUp());
-		refactoring.addCleanUp(new UnusedCodeCleanUp());
-		refactoring.addCleanUp(new Java50CleanUp());
-		refactoring.addCleanUp(new PotentialProgrammingProblemsCleanUp());
-		refactoring.addCleanUp(new UnnecessaryCodeCleanUp());
-		refactoring.addCleanUp(new StringCleanUp());
-		refactoring.addCleanUp(new ImportsCleanUp());
-		refactoring.addCleanUp(new CodeFormatCleanUp());
-		refactoring.addCleanUp(new CommentFormatCleanUp());
-		
 		if (!showWizard) {
+			ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps();
+			for (int i= 0; i < cleanUps.length; i++) {
+	            refactoring.addCleanUp(cleanUps[i]);
+            }
+			
     		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.ERROR, false, shell, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
     		try {
     	        helper.perform(true, true);

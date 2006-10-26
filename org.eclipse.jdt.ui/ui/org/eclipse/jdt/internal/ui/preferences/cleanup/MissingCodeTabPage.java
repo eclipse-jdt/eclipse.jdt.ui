@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
 
-final class MissingCodeTabPage extends ModifyDialogTabPage {
+public final class MissingCodeTabPage extends ModifyDialogTabPage {
 	
     private final Map fValues;
 

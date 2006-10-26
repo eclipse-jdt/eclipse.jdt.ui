@@ -22,11 +22,17 @@ public class MultiFixMessages extends NLS {
 	public static String CleanUpRefactoringWizard_CleaningUpN1_Title;
 	public static String CleanUpRefactoringWizard_CleaningUpNN_Title;
 	public static String CleanUpRefactoringWizard_CleanUpConfigurationPage_title;
+	public static String CleanUpRefactoringWizard_code_organizing_tab;
+	public static String CleanUpRefactoringWizard_code_style_tab;
 	public static String CleanUpRefactoringWizard_Configure_Button;
-	public static String CleanUpRefactoringWizard_ConfiguredProfiles_Label;
+	public static String CleanUpRefactoringWizard_member_accesses_tab;
+	public static String CleanUpRefactoringWizard_missing_code_tab;
 	public static String CleanUpRefactoringWizard_Profile_TableHeader;
 	public static String CleanUpRefactoringWizard_Project_TableHeader;
 	public static String CleanUpRefactoringWizard_unknownProfile_Name;
+	public static String CleanUpRefactoringWizard_unnecessary_code_tab;
+	public static String CleanUpRefactoringWizard_use_configured_radio;
+	public static String CleanUpRefactoringWizard_use_custom_radio;
 	public static String ImportsCleanUp_OrganizeImports_Description;
 	public static String StringMultiFix_AddMissingNonNls_description;
 	public static String StringMultiFix_RemoveUnnecessaryNonNls_description;

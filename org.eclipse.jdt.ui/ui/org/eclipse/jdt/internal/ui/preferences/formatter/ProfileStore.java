@@ -164,7 +164,7 @@ public class ProfileStore {
 	public void writeProfiles(Collection profiles, IScopeContext instanceScope) throws CoreException {
 		ByteArrayOutputStream stream= new ByteArrayOutputStream(2000);
 		try {
-			writeProfilesToStream(profiles, stream, ENCODING);
+			writeProfilesToStream(profiles, stream, ENCODING, fProfileVersioner);
 			String val;
 			try {
 				val= stream.toString(ENCODING);
@@ -231,7 +231,7 @@ public class ProfileStore {
 	 * @return returns a list of <code>CustomProfile</code> or <code>null</code>
 	 * @throws CoreException
 	 */
-	protected List readProfilesFromStream(InputSource inputSource) throws CoreException {
+	public static List readProfilesFromStream(InputSource inputSource) throws CoreException {
 		
 		final ProfileDefaultHandler handler= new ProfileDefaultHandler();
 		try {
@@ -260,7 +260,7 @@ public class ProfileStore {
 		try {
 			stream= new FileOutputStream(file);
 			try {
-				writeProfilesToStream(profiles, stream, encoding);
+				writeProfilesToStream(profiles, stream, encoding, fProfileVersioner);
 			} finally {
 				try { stream.close(); } catch (IOException e) { /* ignore */ }
 			}
@@ -276,7 +276,7 @@ public class ProfileStore {
 	 * @param encoding the encoding to use
 	 * @throws CoreException
 	 */
-	private void writeProfilesToStream(Collection profiles, OutputStream stream, String encoding) throws CoreException {
+	public static void writeProfilesToStream(Collection profiles, OutputStream stream, String encoding, IProfileVersioner profileVersioner) throws CoreException {
 
 		try {
 			final DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
@@ -284,14 +284,14 @@ public class ProfileStore {
 			final Document document= builder.newDocument();
 			
 			final Element rootElement = document.createElement(XML_NODE_ROOT);
-			rootElement.setAttribute(XML_ATTRIBUTE_VERSION, Integer.toString(fProfileVersioner.getCurrentVersion()));
+			rootElement.setAttribute(XML_ATTRIBUTE_VERSION, Integer.toString(profileVersioner.getCurrentVersion()));
 
 			document.appendChild(rootElement);
 			
 			for(final Iterator iter= profiles.iterator(); iter.hasNext();) {
 				final Profile profile= (Profile)iter.next();
 				if (profile.isProfileToSave()) {
-					final Element profileElement= createProfileElement(profile, document);
+					final Element profileElement= createProfileElement(profile, document, profileVersioner);
 					rootElement.appendChild(profileElement);
 				}
 			}
@@ -313,11 +313,11 @@ public class ProfileStore {
 	 * Create a new profile element in the specified document. The profile is not added
 	 * to the document by this method. 
 	 */
-	private Element createProfileElement(Profile profile, Document document) {
+	private static Element createProfileElement(Profile profile, Document document, IProfileVersioner profileVersioner) {
 		final Element element= document.createElement(XML_NODE_PROFILE);
 		element.setAttribute(XML_ATTRIBUTE_NAME, profile.getName());
 		element.setAttribute(XML_ATTRIBUTE_VERSION, Integer.toString(profile.getVersion()));
-		element.setAttribute(XML_ATTRIBUTE_PROFILE_KIND, fProfileVersioner.getProfileKind());
+		element.setAttribute(XML_ATTRIBUTE_PROFILE_KIND, profileVersioner.getProfileKind());
 		
 		final Iterator keyIter= profile.getSettings().keySet().iterator();
 		

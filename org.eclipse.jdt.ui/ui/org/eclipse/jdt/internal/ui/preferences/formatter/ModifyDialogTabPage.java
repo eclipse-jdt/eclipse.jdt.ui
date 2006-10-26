@@ -651,7 +651,8 @@ public abstract class ModifyDialogTabPage {
 	protected abstract void doUpdatePreview();
 	
 	protected void notifyValuesModified() {
-		fModifyDialog.valuesModified();
+		if (fModifyDialog != null)
+			fModifyDialog.valuesModified();
 	}
     /**
      * Each tab page should remember where its last focus was, and reset it
@@ -672,7 +673,8 @@ public abstract class ModifyDialogTabPage {
      * @param status Status describing the current page error state
      */
 	protected void updateStatus(IStatus status) {
-	    fModifyDialog.updateStatus(status);
+		if (fModifyDialog != null)
+		    fModifyDialog.updateStatus(status);
 	}
 	
 	/*

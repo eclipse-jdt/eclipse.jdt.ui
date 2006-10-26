@@ -67,7 +67,19 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
+import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
+import org.eclipse.jdt.internal.ui.fix.CommentFormatCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
+import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
+import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.refactoring.IScheduledRefactoring;
 
@@ -923,5 +935,39 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
      */
     public ISchedulingRule getSchedulingRule() {
 	    return ResourcesPlugin.getWorkspace().getRoot();
+    }
+
+    public static ICleanUp[] createCleanUps() {
+    	return new ICleanUp[] {
+    			new CodeStyleCleanUp(),
+    			new ControlStatementsCleanUp(),
+    			new VariableDeclarationCleanUp(),
+    			new ExpressionsCleanUp(),
+    			new UnusedCodeCleanUp(),
+    			new Java50CleanUp(),
+    			new PotentialProgrammingProblemsCleanUp(),
+    			new UnnecessaryCodeCleanUp(),
+    			new StringCleanUp(),
+    			new ImportsCleanUp(),
+    			new CodeFormatCleanUp(),
+    			new CommentFormatCleanUp()
+    	};	
+    }
+
+    public static ICleanUp[] createCleanUps(Map settings) {
+    	return new ICleanUp[] {
+    			new CodeStyleCleanUp(settings),
+    			new ControlStatementsCleanUp(settings),
+    			new VariableDeclarationCleanUp(settings),
+    			new ExpressionsCleanUp(settings),
+    			new UnusedCodeCleanUp(settings),
+    			new Java50CleanUp(settings),
+    			new PotentialProgrammingProblemsCleanUp(settings),
+    			new UnnecessaryCodeCleanUp(settings),
+    			new StringCleanUp(settings),
+    			new ImportsCleanUp(settings),
+    			new CodeFormatCleanUp(settings),
+    			new CommentFormatCleanUp(settings)
+    	};
     }
 }
