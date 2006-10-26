@@ -54,7 +54,7 @@ public class JavaFoldingStructureProviderRegistry {
 	 * all extension to the <code>foldingProviders</code> extension point.
 	 *
 	 * @return the list of extensions to the
-	 *         <code>quickDiffReferenceProvider</code> extension point.
+	 *         <code>quickDiffReferenceProvider</code> extension point
 	 */
 	public JavaFoldingStructureProviderDescriptor[] getFoldingProviderDescriptors() {
 		synchronized (this) {
