@@ -34,6 +34,7 @@ public class ExtractTempTests extends RefactoringTest {
 	private static final String REFACTORING_PATH= "ExtractTemp/";
 
 	private static final boolean BUG_82166_ImportRewrite_context= true;
+	private static final boolean BUG_161617_ASTRewrite_space= true;
 	
 	private Object fCompactPref; 
 		
@@ -625,6 +626,15 @@ public class ExtractTempTests extends RefactoringTest {
 	public void test99() throws Exception {
 		//test for bug 99963
 		helper1(7, 32, 7, 36, true, false, "temp", "a");
+	}
+	
+	public void test100() throws Exception {
+		//test for bug 161617
+		if (BUG_161617_ASTRewrite_space) {
+			printTestDisabledMessage("BUG_161617_ASTRewrite_space");
+			return;
+		}
+		helper1(5, 28, 5, 40, true, false, "temp", "object");
 	}
 	
 	public void testZeroLengthSelection0() throws Exception {
