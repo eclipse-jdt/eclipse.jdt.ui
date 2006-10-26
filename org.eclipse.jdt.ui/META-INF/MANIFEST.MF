@@ -55,6 +55,7 @@ Export-Package: org.eclipse.jdt.internal.corext;x-friends:="org.eclipse.jdt.juni
  org.eclipse.jdt.internal.ui.jarpackager;x-internal:=true,
  org.eclipse.jdt.internal.ui.javadocexport;x-internal:=true,
  org.eclipse.jdt.internal.ui.javaeditor;x-friends:="org.eclipse.jdt.junit",
+ org.eclipse.jdt.internal.ui.javaeditor.saveparticipant;x-internal:=true,
  org.eclipse.jdt.internal.ui.javaeditor.selectionactions;x-internal:=true,
  org.eclipse.jdt.internal.ui.model;x-internal:=true,
  org.eclipse.jdt.internal.ui.navigator;x-internal:=true,
