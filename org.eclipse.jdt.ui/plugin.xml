@@ -1324,6 +1324,13 @@
             id="org.eclipse.jdt.ui.preferences.SmartTypingPreferencePage">
          <keywordReference id="org.eclipse.jdt.ui.smarttyping"/>
       </page>
+      <page
+            name="%editorSaveParticipants"
+            category="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.SaveParticipantPreferencePage"
+            id="org.eclipse.jdt.ui.preferences.SaveParticipantPreferencePage">
+         <keywordReference id="org.eclipse.jdt.ui.saveparticipant"/>
+      </page>
 
       <page
             name="%codeTemplatePreferencePageName"
@@ -1424,6 +1431,9 @@
       <keyword
             label="%preferenceKeywords.smarttyping"
             id="org.eclipse.jdt.ui.smarttyping"/>
+     <keyword
+            label="%preferenceKeywords.saveparticipant"
+            id="org.eclipse.jdt.ui.saveparticipant"/>
    </extension>  
 <!-- =========================================================================== -->
 <!-- Work in Progress                                                            -->

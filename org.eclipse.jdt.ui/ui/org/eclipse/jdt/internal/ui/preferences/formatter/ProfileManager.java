@@ -759,7 +759,7 @@ public abstract class ProfileManager extends Observable {
 	}
 	
 	
-	private void updateProfilesWithName(String oldName, Profile newProfile, boolean applySettings) {
+	protected void updateProfilesWithName(String oldName, Profile newProfile, boolean applySettings) {
 		IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i= 0; i < projects.length; i++) {
 			IScopeContext projectScope= fPreferencesAccess.getProjectScope(projects[i]);

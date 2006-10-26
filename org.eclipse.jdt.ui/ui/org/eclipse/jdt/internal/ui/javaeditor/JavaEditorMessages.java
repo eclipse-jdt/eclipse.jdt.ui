@@ -52,6 +52,9 @@ final class JavaEditorMessages extends NLS {
 	public static String ClassFileMarkerAnnotationModel_error_isAcceptable;
 	public static String ClassFileMarkerAnnotationModel_error_isAffected;
 	public static String ClassFileMarkerAnnotationModel_error_resourceChanged;
+	public static String CompilationUnitDocumentProvider_progressNotifyingSaveParticipants;
+	public static String CompilationUnitDocumentProvider_error_saveParticipantSavedFile;
+	public static String CompilationUnitDocumentProvider_error_saveParticipantFailed;
 	public static String CompilationUnitEditor_error_saving_message1;
 	public static String CompilationUnitEditor_error_saving_message2;
 	public static String CompilationUnitEditor_error_saving_title1;

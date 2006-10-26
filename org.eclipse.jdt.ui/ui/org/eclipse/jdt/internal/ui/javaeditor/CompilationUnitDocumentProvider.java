@@ -96,6 +96,7 @@ import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.launching.JavaRuntime;
 
@@ -105,6 +106,8 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
+import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantRegistry;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 import org.eclipse.jdt.internal.ui.text.spelling.JavaSpellingReconcileStrategy;
@@ -1147,7 +1150,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 
-		monitor.beginTask("", 100); //$NON-NLS-1$
+		monitor.beginTask("", 120); //$NON-NLS-1$
 
 		try {
 			final IProgressMonitor subMonitor1= getSubProgressMonitor(monitor, 50);
@@ -1186,7 +1189,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 
 			if (!resource.exists()) {
 				// underlying resource has been deleted, just recreate file, ignore the rest
-				IProgressMonitor subMonitor2= getSubProgressMonitor(monitor, 50);
+				IProgressMonitor subMonitor2= getSubProgressMonitor(monitor, 70);
 				try {
 					createFileFromDocument(subMonitor2, (IFile) resource, document);
 				} finally {
@@ -1202,6 +1205,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			try {
 				fIsAboutToSave= true;
 				info.fCopy.commitWorkingCopy(isSynchronized || overwrite, subMonitor3);
+				notifyPostSaveListeners(info.fCopy, info, getSubProgressMonitor(monitor, 20));
 			} catch (CoreException x) {
 				// inform about the failure
 				fireElementStateChangeFailed(element);
@@ -1279,6 +1283,57 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				}
 			};
 		}
+		
+		// XXX: Work in progress 'Save As' case
+//		return new DocumentProviderOperation() {
+//
+//			protected void execute(IProgressMonitor monitor) throws CoreException {
+//				if (monitor == null)
+//					monitor= new NullProgressMonitor();
+//				
+//				monitor.beginTask("", 120); //$NON-NLS-1$
+//				
+//				try {
+//					getParentProvider().saveDocument(getSubProgressMonitor(monitor, 100), element, document, overwrite);
+//					
+//					if (!(element instanceof IFileEditorInput))
+//						return;
+//					
+//					ICompilationUnit unit= createCompilationUnit(((IFileEditorInput)element).getFile());
+//					if (unit == null)
+//						return;
+//					
+//					//Can't open non Java Project?
+////					if (!unit.isOpen())
+////						unit.open(getProgressMonitor());
+//		
+////					//Pkgexpl not correctly updated...
+//					boolean primary= JavaModelUtil.isPrimary(unit);
+//					try {
+//						if (primary)
+//							unit.becomeWorkingCopy(null, getProgressMonitor());
+//					
+//						notifyPostSaveListeners(unit, null, getSubProgressMonitor(monitor, 20));
+//					} finally {
+//						if (primary)
+//							unit.commitWorkingCopy(true, null);
+//					}
+//				} finally {
+//					monitor.done();
+//				}
+//            }
+//			
+//			/*
+//			 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider.DocumentProviderOperation#getSchedulingRule()
+//			 */
+//			public ISchedulingRule getSchedulingRule() {
+//				if (element instanceof IFileEditorInput) {
+//					IFile file= ((IFileEditorInput) element).getFile();
+//					return computeSchedulingRule(file);
+//				} else
+//					return null;
+//			}
+//		};
 		return null;
 	}
 
@@ -1368,4 +1423,101 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		return new DefaultLineTracker();
 	}
 
+    /**
+     * Notify post save listeners.
+     * <p>
+     * <strong>Note:</strong> <em>Post save listeners are not
+     * allowed to save the file and they must not assumed to be
+     * called in the UI thread i.e. if they open a dialog they
+     * must ensure it ends up in the UI thread.
+     * </p>
+     *
+     * @see IPostSaveListener
+     * @since 3.3
+     */
+	protected void notifyPostSaveListeners(final ICompilationUnit unit, final CompilationUnitInfo info, final IProgressMonitor monitor) throws CoreException {
+		final IBuffer buffer= unit.getBuffer();
+		final SaveParticipantRegistry saveParticipantRegistry= JavaPlugin.getDefault().getSaveParticipantRegistry();
+		IPostSaveListener[] listeners= saveParticipantRegistry.getEnabledPostSaveListeners();
+		final StringBuffer errorMessages= new StringBuffer();
+		monitor.beginTask(JavaEditorMessages.CompilationUnitDocumentProvider_progressNotifyingSaveParticipants, listeners.length * 5);
+		try {
+			for (int i= 0; i < listeners.length; i++) {
+				final IPostSaveListener listener= listeners[i];
+				final String participantName= listener.getName();
+				SafeRunner.run(new ISafeRunnable() {
+					public void run() {
+						try {
+							long stamp= unit.getResource().getModificationStamp();
+
+							listener.saved(unit, getSubProgressMonitor(monitor, 4));
+
+							if (stamp != unit.getResource().getModificationStamp()) {
+								String message= Messages.format(JavaEditorMessages.CompilationUnitDocumentProvider_error_saveParticipantSavedFile, participantName);
+								if (errorMessages.length() > 0)
+									errorMessages.append("\n\n"); //$NON-NLS-1$
+								errorMessages.append(message);
+								
+								saveParticipantRegistry.disablePostSaveListener(listener);
+							}
+
+							if (buffer.hasUnsavedChanges())
+								buffer.save(getSubProgressMonitor(monitor, 1), true);
+
+						} catch (CoreException ex) {
+							handleException(ex);
+						} finally {
+							monitor.worked(1);
+						}
+					}
+
+					public void handleException(Throwable ex) {
+						String message= Messages.format("The save participant ''{0}'' has been disabled because it caused an exception: {1}", new String[] { listener.getId(), ex.toString()}); //$NON-NLS-1$
+						JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, null));
+						
+						message= Messages.format(JavaEditorMessages.CompilationUnitDocumentProvider_error_saveParticipantFailed, participantName);
+						if (errorMessages.length() > 0)
+							errorMessages.append("\n\n"); //$NON-NLS-1$
+						errorMessages.append(message);
+						
+						saveParticipantRegistry.disablePostSaveListener(listener);
+						
+						// Revert the changes
+						if (info != null && buffer.hasUnsavedChanges()) {
+							try {
+								info.fTextFileBuffer.revert(getSubProgressMonitor(monitor, 1));
+							} catch (CoreException e) {
+								message= Messages.format("Error on revert after failure of save participant ''{0}''.", participantName);  //$NON-NLS-1$
+								IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, ex); 
+								JavaPlugin.getDefault().getLog().log(status);
+							}
+
+							if (info.fModel instanceof AbstractMarkerAnnotationModel) {
+								AbstractMarkerAnnotationModel markerModel= (AbstractMarkerAnnotationModel)info.fModel;
+								markerModel.resetMarkers();
+							}
+						}
+						
+						// XXX: Work in progress 'Save As' case
+//						else if (buffer.hasUnsavedChanges()) {
+//							try {
+//								buffer.save(getSubProgressMonitor(monitor, 1), true);
+//							} catch (JavaModelException e) {
+//								message= Messages.format("Error reverting changes after failure of save participant ''{0}''.", participantName); //$NON-NLS-1$
+//								IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, ex);
+//								JavaPlugin.getDefault().getLog().log(status);
+//							}
+//						}
+					}
+				});
+			}
+		} finally {
+			monitor.done();
+			// Propagate errors - XXX: should set specific error code and handel it in the editor
+			if (errorMessages.length() > 0) {
+				IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, errorMessages.toString(), null); 
+				throw new CoreException(status);
+			}
+		}
+	}
 }

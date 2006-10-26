@@ -84,6 +84,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.DocumentAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
+import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantRegistry;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileStore;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentProvider;
@@ -218,6 +219,13 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @since 3.2
 	 */
 	private ContentAssistHistory fContentAssistHistory;
+	
+	/**
+	 * The save participant registry.
+	 * 
+	 * @since 3.3
+	 */
+	private SaveParticipantRegistry fSaveParticipantRegistry;
 
 	public static JavaPlugin getDefault() {
 		return fgJavaPlugin;
@@ -545,6 +553,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 				fMembersOrderPreferenceCache= null;
 			}
 			
+			if (fSaveParticipantRegistry != null) {
+				fSaveParticipantRegistry.dispose();
+				fSaveParticipantRegistry= null;
+			}
+			
 			QualifiedTypeNameHistory.getDefault().save();
 			
 			// must add here to guarantee that it is the first in the listener list
@@ -856,6 +869,18 @@ public class JavaPlugin extends AbstractUIPlugin {
 		if (fFoldingStructureProviderRegistry == null)
 			fFoldingStructureProviderRegistry= new JavaFoldingStructureProviderRegistry();
 		return fFoldingStructureProviderRegistry;
+	}
+	
+	/**
+	 * Returns the save participant registry.
+	 * 
+	 * @return the save participant registry, not null
+	 * @since 3.3
+	 */
+	public synchronized SaveParticipantRegistry getSaveParticipantRegistry() {
+		if (fSaveParticipantRegistry == null)
+			fSaveParticipantRegistry= new SaveParticipantRegistry();
+		return fSaveParticipantRegistry;
 	}
 
 	/**

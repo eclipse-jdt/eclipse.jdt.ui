@@ -18,6 +18,10 @@ public final class FixMessages extends NLS {
 	private FixMessages() {
 	}
 
+	public static String CleanUpPostSaveListener_could_not_find_profile_error;
+	public static String CleanUpPostSaveListener_exception_error;
+	public static String CleanUpPostSaveListener_name;
+	
 	public static String CleanUpRefactoring_checkingPostConditions_message;
 	public static String CleanUpRefactoring_Parser_Startup_message;
 	public static String CleanUpRefactoring_Refactoring_name;

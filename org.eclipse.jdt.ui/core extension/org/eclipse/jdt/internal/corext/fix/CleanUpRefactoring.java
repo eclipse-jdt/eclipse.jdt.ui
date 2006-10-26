@@ -625,7 +625,8 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		
 		pm.beginTask("", cuCount * 2 * fCleanUps.size() + 4 * fCleanUps.size()); //$NON-NLS-1$
 		try {
-			CompositeChange change= new DynamicValidationStateChange(getName());
+			DynamicValidationStateChange change= new DynamicValidationStateChange(getName());
+			change.setSchedulingRule(getSchedulingRule());
 			for (Iterator projectIter= fProjects.keySet().iterator(); projectIter.hasNext();) {
 				IJavaProject project= (IJavaProject)projectIter.next();
 				

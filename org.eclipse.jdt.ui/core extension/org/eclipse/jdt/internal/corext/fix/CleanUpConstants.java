@@ -22,6 +22,8 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileManager;
+
 public class CleanUpConstants {
 	
 	/**
@@ -757,6 +759,15 @@ public class CleanUpConstants {
 	 */
 	public static final String CLEANUP_PROFILES= "org.eclipse.jdt.ui.cleanupprofiles"; //$NON-NLS-1$
 
+	/**
+	 * Stores the id of the clean up profile used when executing clean up on save.<br><br>
+	 * Possible values: String value<br>
+	 * Default value: {@link CleanUpProfileManager#DEFAULT_SAVE_PARTICIPANT_PROFILE}
+	 * <br>
+	 * @since 3.3
+	 */
+	public static final String CLEANUP_ON_SAVE_PROFILE= "cleanup.on_save_profile_id"; //$NON-NLS-1$
+
     public static Map getEclipseDefaultSettings() {
     	HashMap result= new HashMap();
 
@@ -831,6 +842,80 @@ public class CleanUpConstants {
 	    return result;
     }
     
+    public static Map getSaveParticipantSettings() {
+    	HashMap result= new HashMap();
+
+    	//Member Accesses
+    	result.put(MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS, FALSE);
+    		result.put(MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS, FALSE);
+    		result.put(MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY, TRUE);
+    		
+    	result.put(MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS, FALSE);
+    		result.put(MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS, FALSE);
+    		result.put(MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY, TRUE);
+    		
+    	result.put(MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, FALSE);
+    		result.put(MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD, FALSE);
+    		result.put(MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_METHOD, FALSE);
+    		result.put(MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS, TRUE);
+    		result.put(MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, TRUE);
+    		
+    	//Control Statements
+    	result.put(CONTROL_STATEMENTS_USE_BLOCKS, FALSE);
+    		result.put(CONTROL_STATMENTS_USE_BLOCKS_ALWAYS, TRUE);
+    		result.put(CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW, FALSE);
+    		result.put(CONTROL_STATMENTS_USE_BLOCKS_NEVER, FALSE);
+    		
+    	result.put(CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, FALSE);
+    	
+    	//Expressions
+    	result.put(EXPRESSIONS_USE_PARENTHESES, FALSE);
+    		result.put(EXPRESSIONS_USE_PARENTHESES_NEVER, TRUE);
+    		result.put(EXPRESSIONS_USE_PARENTHESES_ALWAYS, FALSE);
+    		
+    	//Variable Declarations
+    	result.put(VARIABLE_DECLARATIONS_USE_FINAL, FALSE);
+    		result.put(VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES, TRUE);
+    		result.put(VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS, FALSE);
+    		result.put(VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, TRUE);
+    		
+    	//Unused Code
+    	result.put(REMOVE_UNUSED_CODE_IMPORTS, FALSE);
+    	result.put(REMOVE_UNUSED_CODE_PRIVATE_MEMBERS, FALSE);
+    		result.put(REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS, TRUE);
+    		result.put(REMOVE_UNUSED_CODE_PRIVATE_FELDS, TRUE);
+    		result.put(REMOVE_UNUSED_CODE_PRIVATE_METHODS, TRUE);
+    		result.put(REMOVE_UNUSED_CODE_PRIVATE_TYPES, TRUE);
+    	result.put(REMOVE_UNUSED_CODE_LOCAL_VARIABLES, FALSE);
+    	
+    	//Unnecessary Code
+    	result.put(REMOVE_UNNECESSARY_CASTS, FALSE);
+    	result.put(REMOVE_UNNECESSARY_NLS_TAGS, FALSE);
+    	
+    	//Missing Code
+    	result.put(ADD_MISSING_ANNOTATIONS, FALSE);
+    		result.put(ADD_MISSING_ANNOTATIONS_OVERRIDE, TRUE);
+    		result.put(ADD_MISSING_ANNOTATIONS_DEPRECATED, TRUE);
+    		
+    	result.put(ADD_MISSING_SERIAL_VERSION_ID, FALSE);
+    		result.put(ADD_MISSING_SERIAL_VERSION_ID_GENERATED, FALSE);
+    		result.put(ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, TRUE);
+    		
+    	result.put(ADD_MISSING_NLS_TAGS, FALSE);
+
+    	//Code Organising
+    	result.put(FORMAT_SOURCE_CODE, TRUE);
+    	
+    	result.put(FORMAT_COMMENT, TRUE);
+    		result.put(FORMAT_SINGLE_LINE_COMMENT, TRUE);
+    		result.put(FORMAT_MULTI_LINE_COMMENT, TRUE);
+    		result.put(FORMAT_JAVADOC, TRUE);
+    		
+    	result.put(ORGANIZE_IMPORTS, TRUE);
+    	
+	    return result;
+    }
+    
 	public static Map loadOptions(IScopeContext context) {
 		Map result= new Hashtable();
 		
@@ -854,6 +939,7 @@ public class CleanUpConstants {
         }
     	
     	store.setDefault(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, true);
+    	store.setDefault(CLEANUP_ON_SAVE_PROFILE, CleanUpProfileManager.DEFAULT_SAVE_PARTICIPANT_PROFILE);
     }
 
 }
