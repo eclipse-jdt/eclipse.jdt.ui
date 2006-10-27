@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.fix;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -84,7 +83,7 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 	}
 
 	public Map getRequiredOptions() {
-		return new Hashtable();
+		return null;
 	}
 
 	public void saveSettings(IDialogSettings settings) {
