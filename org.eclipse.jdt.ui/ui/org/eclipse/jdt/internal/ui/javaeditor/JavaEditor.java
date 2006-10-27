@@ -3809,19 +3809,21 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.1
 	 */
 	protected String[] collectContextMenuPreferencePages() {
-		String[] ids= super.collectContextMenuPreferencePages();
-		String[] more= new String[ids.length + 9];
-		more[0]= "org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"; //$NON-NLS-1$
-		more[1]= "org.eclipse.jdt.ui.preferences.JavaTemplatePreferencePage"; //$NON-NLS-1$
-		more[2]= "org.eclipse.jdt.ui.preferences.CodeAssistPreferencePage"; //$NON-NLS-1$
-		more[3]= "org.eclipse.jdt.ui.preferences.JavaEditorHoverPreferencePage"; //$NON-NLS-1$
-		more[4]= "org.eclipse.jdt.ui.preferences.JavaEditorColoringPreferencePage"; //$NON-NLS-1$
-		more[5]= "org.eclipse.jdt.ui.preferences.FoldingPreferencePage"; //$NON-NLS-1$
-		more[6]= "org.eclipse.jdt.ui.preferences.MarkOccurrencesPreferencePage"; //$NON-NLS-1$
-		more[7]= "org.eclipse.jdt.ui.preferences.SmartTypingPreferencePage"; //$NON-NLS-1$
-		more[8]= "org.eclipse.jdt.ui.preferences.LinkedModePreferencePage"; //$NON-NLS-1$
-		System.arraycopy(ids, 0, more, 9, ids.length);
-		return more;
+		String[] inheritedPages= super.collectContextMenuPreferencePages();
+		int length= 10;
+		String[] result= new String[inheritedPages.length + length];
+		result[0]= "org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"; //$NON-NLS-1$
+		result[1]= "org.eclipse.jdt.ui.preferences.JavaTemplatePreferencePage"; //$NON-NLS-1$
+		result[2]= "org.eclipse.jdt.ui.preferences.CodeAssistPreferencePage"; //$NON-NLS-1$
+		result[3]= "org.eclipse.jdt.ui.preferences.CodeAssistPreferenceAdvanced"; //$NON-NLS-1$
+		result[4]= "org.eclipse.jdt.ui.preferences.JavaEditorHoverPreferencePage"; //$NON-NLS-1$
+		result[5]= "org.eclipse.jdt.ui.preferences.JavaEditorColoringPreferencePage"; //$NON-NLS-1$
+		result[6]= "org.eclipse.jdt.ui.preferences.FoldingPreferencePage"; //$NON-NLS-1$
+		result[7]= "org.eclipse.jdt.ui.preferences.MarkOccurrencesPreferencePage"; //$NON-NLS-1$
+		result[8]= "org.eclipse.jdt.ui.preferences.SmartTypingPreferencePage"; //$NON-NLS-1$
+		result[9]= "org.eclipse.jdt.ui.preferences.SaveParticipantPreferencePage"; //$NON-NLS-1$
+		System.arraycopy(inheritedPages, 0, result, length, inheritedPages.length);
+		return result;
 	}
 	
 	/*
