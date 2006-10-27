@@ -28,19 +28,18 @@ import org.eclipse.jdt.internal.ui.fix.CleanUpSaveParticipantPreferenceConfigura
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 
 /**
- * A registry for save participants. The registry contains
- * {@link SaveParticipantDescriptor}s. The registry keeps track
- * of enabled save participants. Save participants can be enabled
- * and disabled on the Java &gt; Editor &gt; Save Participants
- * preference page. An instance of this registry can be received 
- * through a call to {@link JavaPlugin#getSaveParticipantRegistry()}.
- * Enabled save participants are notified through a call to 
- * {@link IPostSaveListener#saved(org.eclipse.jdt.core.ICompilationUnit, org.eclipse.core.runtime.IProgressMonitor)}
- * whenever the {@link CompilationUnitDocumentProvider} does save
- * a compilation unit.
+ * A registry for save participants. This registry manages
+ * {@link SaveParticipantDescriptor}s and keeps track of enabled save
+ * participants.
  * <p>
- * This class is not intended to be subclassed.
- * </p>
+ * Save participants can be enabled and disabled on the Java &gt; Editor &gt;
+ * Save Participants preference page. Enabled save participants are notified
+ * through a call to
+ * {@link IPostSaveListener#saved(org.eclipse.jdt.core.ICompilationUnit, org.eclipse.core.runtime.IProgressMonitor)}
+ * whenever the {@link CompilationUnitDocumentProvider} saves a compilation unit
+ * that is in the workspace.</p>
+ * <p>
+ * An instance of this registry can be received through a call to {@link JavaPlugin#getSaveParticipantRegistry()}.</p>
  * 
  * @since 3.3
  */

@@ -13,28 +13,23 @@ package org.eclipse.jdt.internal.ui.javaeditor.saveparticipant;
 import org.eclipse.core.runtime.Assert;
 
 /**
- * Describes a save participant contribution. Connects an
- * {@link IPostSaveListener} with an {@link ISaveParticipantPreferenceConfiguration}.
- * If the described post save listener does not provide additional
- * preference UI then the preference configuration is null.
- * <p>
- * This class is not intended to be subclassed.
- * </p>
+ * Describes a save participant contribution.
  *
  * @since 3.3
  */
 public final class SaveParticipantDescriptor {
 
-	/** The listener, not null */
+	/** The listener */
 	private final IPostSaveListener fPostSaveListener;
 	/** The preference configuration block, if any */
 	private final ISaveParticipantPreferenceConfiguration fPreferenceConfiguration;
 
 	/**
-	 * Creates a new descriptor.
+	 * Creates a new descriptor which connects a {@link IPostSaveListener}
+	 * with an {@link ISaveParticipantPreferenceConfiguration}.
 	 * 
-	 * @param listener the listener, not null
-	 * @param preferenceConfiguration additional preference configuration UI or null
+	 * @param listener the listener
+	 * @param preferenceConfiguration preference configuration or <code>null</code> if none
 	 */
 	SaveParticipantDescriptor(IPostSaveListener listener, ISaveParticipantPreferenceConfiguration preferenceConfiguration) {
 		Assert.isNotNull(listener);
@@ -47,7 +42,7 @@ public final class SaveParticipantDescriptor {
 	 * Returns the post save listener of the described
 	 * save participant
 	 * 
-	 * @return the listener, not null
+	 * @return the listener
 	 */
 	public IPostSaveListener getPostSaveListener()  {
 		return fPostSaveListener;
@@ -67,7 +62,7 @@ public final class SaveParticipantDescriptor {
 	/**
 	 * Returns the identifier of the described save participant.
 	 *
-	 * @return Returns the id, not null, not empty
+	 * @return the non-empty id of this descriptor
 	 */
 	public String getId() {
 		return fPostSaveListener.getId();
