@@ -21,6 +21,7 @@ import java.util.Stack;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
 
@@ -29,13 +30,19 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -80,6 +87,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -104,6 +112,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
@@ -111,6 +120,7 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AddBlockCommentAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
@@ -1395,6 +1405,34 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			} else
 				performSave(false, progressMonitor);
 		}
+	}
+	
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#openSaveErrorDialog(java.lang.String, java.lang.String, org.eclipse.core.runtime.CoreException)
+	 * @since 3.3
+	 */
+	protected void openSaveErrorDialog(String title, String message, CoreException exception) {
+		IStatus status= exception.getStatus();
+		if (JavaUI.ID_PLUGIN.equals(status.getPlugin()) && status.getCode() == IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION) {
+			int mask= IStatus.OK | IStatus.INFO | IStatus.WARNING | IStatus.ERROR;
+			ErrorDialog dialog = new ErrorDialog(getSite().getShell(), title, message, status, mask) {
+				protected Control createDialogArea(Composite parent) {
+					parent= (Composite)super.createDialogArea(parent);
+					Link link= new Link(parent, SWT.NONE);
+					link.setText(JavaEditorMessages.CompilationUnitEditor_error_saving_saveParticipant);
+					link.addSelectionListener(new SelectionAdapter() {
+						public void widgetSelected(SelectionEvent e) {
+							PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.SaveParticipantPreferencePage", null, null).open(); //$NON-NLS-1$
+						}
+					});
+					GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+					link.setLayoutData(gridData);
+					return parent;
+				}
+			};
+			dialog.open();
+		} else
+			super.openSaveErrorDialog(title, message, exception);
 	}
 
 	public boolean isSaveAsAllowed() {
