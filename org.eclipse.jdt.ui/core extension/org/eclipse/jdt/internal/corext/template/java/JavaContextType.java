@@ -253,7 +253,7 @@ public class JavaContextType extends CompilationUnitContextType {
 	    }
 	}
 
-	protected static class Collection extends VarResolver {
+	protected static class Collection extends LocalVarResolver {
 	    public Collection() {
 	    	super("java.util.Collection"); //$NON-NLS-1$
 	    	setType("collection"); //$NON-NLS-1$
