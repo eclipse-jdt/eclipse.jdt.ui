@@ -46,7 +46,7 @@ public class ImportsFix extends AbstractFix {
 		return new IFix() {
 			
 			public TextChange createChange() throws CoreException {
-				CompilationUnitChange result= new CompilationUnitChange("", getCompilationUnit()); //$NON-NLS-1$
+				CompilationUnitChange result= new CompilationUnitChange(getDescription(), getCompilationUnit());
 				result.setEdit(edit);
 				String label= getDescription();
 				result.addTextEditGroup(new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label))));

@@ -85,7 +85,7 @@ import org.eclipse.jdt.internal.ui.refactoring.IScheduledRefactoring;
 
 public class CleanUpRefactoring extends Refactoring implements IScheduledRefactoring {
 	
-	private class FixCalculationException extends RuntimeException {
+	private static class FixCalculationException extends RuntimeException {
 
 		private static final long serialVersionUID= 3807273310144726165L;
 		
@@ -100,7 +100,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		}		
 	}
 	
-	private class ParseListElement {
+	private static class ParseListElement {
 
 		private final ICompilationUnit fUnit;
 		private ICleanUp[] fCleanUpsArray;
@@ -167,15 +167,17 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		}
 	}
 	
-	private class CleanUpASTRequestor extends ASTRequestor {
+	private static class CleanUpASTRequestor extends ASTRequestor {
 	
 		private final List/*<ParseListElement>*/ fUndoneElements;
 		private final Hashtable/*<ICompilationUnit, Change>*/ fSolutions;
 		private final Hashtable/*<ICompilationUnit, ICleanUp[]>*/ fCompilationUnitCleanUpMap;
 		private final CleanUpRefactoringProgressMonitor fMonitor;
+		private final boolean fLeaveFilesDirty2;
 
-		public CleanUpASTRequestor(List parseList, Hashtable solutions, CleanUpRefactoringProgressMonitor monitor) {
+		public CleanUpASTRequestor(List parseList, Hashtable solutions, boolean leavFilesDirty, CleanUpRefactoringProgressMonitor monitor) {
 			fSolutions= solutions;
+			fLeaveFilesDirty2= leavFilesDirty;
 			fMonitor= monitor;
 			fUndoneElements= new ArrayList();
 			fCompilationUnitCleanUpMap= new Hashtable(parseList.size());
@@ -197,7 +199,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			
 			ICleanUp[] rejectedCleanUps= calculateSolutions(primarySource, ast, cleanUps);
 			
-			if (rejectedCleanUps != null) {
+			if (rejectedCleanUps.length > 0) {
 				fUndoneElements.add(new ParseListElement(primarySource, rejectedCleanUps));
 				fMonitor.reset();
 			} else {
@@ -210,47 +212,13 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
         }
 
 		private ICleanUp[] calculateSolutions(ICompilationUnit source, CompilationUnit ast, ICleanUp[] cleanUps) {
-			if (cleanUps.length == 0)
-				return null;
-			
-			CompilationUnitChange solution= null;
-			List/*<ICleanUp>*/ result= null;
-			int i= 0;
-			do {
-				ICleanUp cleanUp= cleanUps[i];
-				try {
-					IFix fix= cleanUp.createFix(ast);
-					if (fix != null) {
-						TextChange current= fix.createChange();
-						TextEdit currentEdit= pack(current.getEdit());
-						
-						if (solution != null) {
-							if (intersects(currentEdit, solution.getEdit())) {
-								if (result == null) {
-									result= new ArrayList();
-								}
-								result.add(cleanUp);
-							} else {
-								CompilationUnitChange merge= new CompilationUnitChange(solution.getName(), source);
-								merge.setEdit(merge(currentEdit, solution.getEdit()));
-								
-								copyChangeGroups(merge, solution);
-								copyChangeGroups(merge, current);
-                                
-                                solution= merge;
-							}
-						} else {
-							solution= new CompilationUnitChange(current.getName(), source);
-                            solution.setEdit(currentEdit);
-                            
-                            copyChangeGroups(solution, current);
-						}
-					}
-				} catch (CoreException e) {
-					throw new FixCalculationException(e);
-				}
-				i++;
-			} while (i < cleanUps.length && (solution == null || !cleanUps[i].needsFreshAST(ast)));
+			List/*<ICleanUp>*/ result= new ArrayList();
+			CompilationUnitChange solution;
+            try {
+	            solution= calculateChange(ast, source, cleanUps, result);
+            } catch (CoreException e) {
+	            throw new FixCalculationException(e);
+            }
 			
 			if (solution != null) {
 				try {
@@ -260,58 +228,8 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
                 }
 			}
 			
-			for (; i < cleanUps.length; i++) {
-	            if (result == null) {
-	            	result= new ArrayList();
-	            }
-	            result.add(cleanUps[i]);
-            }
-			
-			if (result == null) {
-				return null;
-			} else {
-				return (ICleanUp[])result.toArray(new ICleanUp[result.size()]);
-			}
+			return (ICleanUp[])result.toArray(new ICleanUp[result.size()]);
 		}
-
-        private void copyChangeGroups(CompilationUnitChange target, TextChange source) {
-            TextEditBasedChangeGroup[] changeGroups= source.getChangeGroups();
-    		for (int i= 0; i < changeGroups.length; i++) {
-    			TextEditGroup textEditGroup= changeGroups[i].getTextEditGroup();
-    			TextEditGroup newGroup;
-    			if (textEditGroup instanceof CategorizedTextEditGroup) {
-    				String label= textEditGroup.getName();
-    				newGroup= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
-    			} else {
-    				newGroup= new TextEditGroup(textEditGroup.getName());
-    			}
-    			TextEdit[] textEdits= textEditGroup.getTextEdits();
-    			for (int j= 0; j < textEdits.length; j++) {
-    				newGroup.addTextEdit(textEdits[j]);
-    			}
-    			target.addTextEditGroup(newGroup);
-    		}
-        }
-
-		private TextEdit pack(TextEdit edit) {
-        	final List edits= new ArrayList();
-        	edit.accept(new TextEditVisitor() {
-        		public boolean visitNode(TextEdit node) {
-    				if (node instanceof MultiTextEdit)
-    					return true;
-    					
-    				edits.add(node);
-    				return false;
-    			}
-        	});
-        	MultiTextEdit result= new MultiTextEdit();
-        	for (Iterator iterator= edits.iterator(); iterator.hasNext();) {
-	            TextEdit child= (TextEdit)iterator.next();
-	            child.getParent().removeChild(child);
-	            TextChangeCompatibility.insert(result, child);
-            }
-        	return result;
-        }
 
 		private void integrateSolution(TextFileChange solution, ICompilationUnit source) throws JavaModelException {
 			if (fSolutions.containsKey(source)) {
@@ -329,7 +247,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 					fSolutions.put(source, mscuc);
 				}
 			} else {
-                if (fLeaveFilesDirty || source.getBuffer().hasUnsavedChanges()) {
+                if (fLeaveFilesDirty2 || source.getBuffer().hasUnsavedChanges()) {
                 	solution.setSaveMode(TextFileChange.LEAVE_DIRTY);
                 } else {
                 	solution.setSaveMode(TextFileChange.FORCE_SAVE);
@@ -454,7 +372,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 	            }
 
 				CleanUpRefactoringProgressMonitor cuMonitor= new CleanUpRefactoringProgressMonitor(monitor, units.length, fSize, fIndex);
-				CleanUpASTRequestor requestor= new CleanUpASTRequestor(fParseList, fSolutions, cuMonitor);
+				CleanUpASTRequestor requestor= new CleanUpASTRequestor(fParseList, fSolutions, fLeaveFilesDirty, cuMonitor);
 				CleanUpParser parser= new CleanUpParser() {
 					protected ASTParser createParser() {
 	                    ASTParser result= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
@@ -730,7 +648,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		return result;
 	}
 
-	private String getChangeName(ICompilationUnit compilationUnit) {
+	private static String getChangeName(ICompilationUnit compilationUnit) {
 		StringBuffer buf= new StringBuffer();
 		JavaElementLabels.getCompilationUnitLabel(compilationUnit, JavaElementLabels.ALL_DEFAULT, buf);
 		buf.append(JavaElementLabels.CONCAT_STRING);
@@ -741,6 +659,86 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		
 		return buf.toString();
 	}
+	
+	public static CompilationUnitChange calculateChange(CompilationUnit ast, ICompilationUnit source, ICleanUp[] cleanUps, List undoneCleanUps) throws CoreException {
+		if (cleanUps.length == 0)
+			return null;
+		
+        CompilationUnitChange solution= null;
+		int i= 0;
+		do {
+			ICleanUp cleanUp= cleanUps[i];				
+			IFix fix= cleanUp.createFix(ast);
+			if (fix != null) {
+				TextChange current= fix.createChange();
+				TextEdit currentEdit= pack(current.getEdit());
+
+				if (solution != null) {
+					if (intersects(currentEdit, solution.getEdit())) {
+						undoneCleanUps.add(cleanUp);
+					} else {
+						CompilationUnitChange merge= new CompilationUnitChange(FixMessages.CleanUpRefactoring_clean_up_multi_chang_name, source);
+						merge.setEdit(merge(currentEdit, solution.getEdit()));
+
+						copyChangeGroups(merge, solution);
+						copyChangeGroups(merge, current);
+
+						solution= merge;
+					}
+				} else {
+					solution= new CompilationUnitChange(current.getName(), source);
+					solution.setEdit(currentEdit);
+
+					copyChangeGroups(solution, current);
+				}
+			}
+			i++;
+		} while (i < cleanUps.length && (solution == null || !cleanUps[i].needsFreshAST(ast)));
+		
+		for (; i < cleanUps.length; i++) {
+            undoneCleanUps.add(cleanUps[i]);
+        }
+        return solution;
+    }
+
+    private static void copyChangeGroups(CompilationUnitChange target, TextChange source) {
+        TextEditBasedChangeGroup[] changeGroups= source.getChangeGroups();
+		for (int i= 0; i < changeGroups.length; i++) {
+			TextEditGroup textEditGroup= changeGroups[i].getTextEditGroup();
+			TextEditGroup newGroup;
+			if (textEditGroup instanceof CategorizedTextEditGroup) {
+				String label= textEditGroup.getName();
+				newGroup= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
+			} else {
+				newGroup= new TextEditGroup(textEditGroup.getName());
+			}
+			TextEdit[] textEdits= textEditGroup.getTextEdits();
+			for (int j= 0; j < textEdits.length; j++) {
+				newGroup.addTextEdit(textEdits[j]);
+			}
+			target.addTextEditGroup(newGroup);
+		}
+    }
+
+	private static TextEdit pack(TextEdit edit) {
+    	final List edits= new ArrayList();
+    	edit.accept(new TextEditVisitor() {
+    		public boolean visitNode(TextEdit node) {
+				if (node instanceof MultiTextEdit)
+					return true;
+					
+				edits.add(node);
+				return false;
+			}
+    	});
+    	MultiTextEdit result= new MultiTextEdit();
+    	for (Iterator iterator= edits.iterator(); iterator.hasNext();) {
+            TextEdit child= (TextEdit)iterator.next();
+            child.getParent().removeChild(child);
+            TextChangeCompatibility.insert(result, child);
+        }
+    	return result;
+    }
 
 	private static boolean intersects(TextEdit edit1, TextEdit edit2) {
 		if (edit1 instanceof MultiTextEdit && edit2 instanceof MultiTextEdit) {

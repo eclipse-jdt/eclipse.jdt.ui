@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -22,19 +21,22 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
-import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
+import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -42,13 +44,12 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
-import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 public class CleanUpPostSaveListener implements IPostSaveListener {
 	
@@ -59,22 +60,11 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		
-		monitor.beginTask(getName(), 1);
+		monitor.beginTask(getName(), IProgressMonitor.UNKNOWN);
 		
 		try {
     		if (!ActionUtil.isOnBuildPath(unit))
     			return;
-    		
-    		final IResource resource= unit.getCorrespondingResource();
-    		CleanUpRefactoring refactoring= new CleanUpRefactoring() {
-    			public ISchedulingRule getSchedulingRule() {
-    			    return resource;
-    			}
-    		};
-    		
-    		refactoring.addCompilationUnit(unit);
-    		
-    		refactoring.setLeaveFilesDirty(true);
 
     		IEclipsePreferences node= new InstanceScope().getNode(JavaUI.ID_PLUGIN);
     		String id= node.get(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, null);
@@ -91,26 +81,55 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     		
     		Map settings= selectedProfile.getSettings();
     		
-    		ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps(settings);
-    		for (int i= 0; i < cleanUps.length; i++) {
-	            refactoring.addCleanUp(cleanUps[i]);
-            }
+    		ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps(settings);    		
     		
-    		Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-    		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.ERROR, false, shell, new BusyIndicatorRunnableContext());
-    		try {
-    	        helper.perform(false, true);
-            } catch (InterruptedException e) {
-            } catch (InvocationTargetException e) {
-            	if (e.getCause() instanceof CoreException) {
-            		throw (CoreException)e.getCause();
-            	} else {
-            		throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, Messages.format(FixMessages.CleanUpPostSaveListener_exception_error, getName()), e));
-            	}
-            }
+    		do {
+    			for (int i= 0; i < cleanUps.length; i++) {
+	                cleanUps[i].checkPreConditions(unit.getJavaProject(), new ICompilationUnit[] {unit}, new SubProgressMonitor(monitor, 5));
+                }
+    			
+    			Map options= RefactoringASTParser.getCompilerOptions(unit.getJavaProject());
+    			for (int i= 0; i < cleanUps.length; i++) {
+	                Map map= cleanUps[i].getRequiredOptions();
+	                if (map != null) {
+	                	options.putAll(map);
+	                }
+                }
+    			
+        		CompilationUnit ast= createAst(unit, options, new SubProgressMonitor(monitor, 10));
+        		
+        		List undoneCleanUps= new ArrayList();
+    			CompilationUnitChange change= CleanUpRefactoring.calculateChange(ast, unit, cleanUps, undoneCleanUps);
+    			if (change != null) {
+        			change.setSaveMode(TextFileChange.LEAVE_DIRTY);
+        			change.initializeValidationData(new NullProgressMonitor());
+        			
+        			PerformChangeOperation performChangeOperation= RefactoringUI.createUIAwareChangeOperation(change);
+    				performChangeOperation.setUndoManager(RefactoringCore.getUndoManager(), getName());
+    				performChangeOperation.setSchedulingRule(unit.getSchedulingRule());
+    				
+    				performChangeOperation.run(new SubProgressMonitor(monitor, 5));
+    			}
+    			
+    			for (int i= 0; i < cleanUps.length; i++) {
+	                cleanUps[i].checkPostConditions(new SubProgressMonitor(monitor, 1));
+                }
+    			
+    			cleanUps= (ICleanUp[])undoneCleanUps.toArray(new ICleanUp[undoneCleanUps.size()]);
+    		} while (cleanUps.length > 0);
 		} finally {
 			monitor.done();
 		}
+    }
+
+	private CompilationUnit createAst(ICompilationUnit unit, Map options, IProgressMonitor monitor) {
+        ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+        parser.setResolveBindings(true);
+        parser.setProject(unit.getJavaProject());
+        parser.setSource(unit);
+        parser.setCompilerOptions(options);
+        
+        return (CompilationUnit)parser.createAST(monitor);
     }
 
 	/**

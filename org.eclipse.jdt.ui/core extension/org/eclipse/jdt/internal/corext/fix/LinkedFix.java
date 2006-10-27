@@ -77,7 +77,7 @@ public class LinkedFix extends AbstractFix {
 			}
 		}
 		
-		CompilationUnitChange result= cuRewrite.createChange();
+		CompilationUnitChange result= cuRewrite.createChange(getDescription(), true, null);
 		
 		for (Iterator iter= groups.iterator(); iter.hasNext();) {
 			TextEditGroup group= (TextEditGroup)iter.next();

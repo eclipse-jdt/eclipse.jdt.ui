@@ -71,7 +71,7 @@ public class CommentFormatFix implements IFix {
 		MultiTextEdit resultEdit= new MultiTextEdit();
 		resultEdit.addChildren((TextEdit[])edits.toArray(new TextEdit[edits.size()]));
 
-		TextChange change= new CompilationUnitChange("", cu); //$NON-NLS-1$
+		TextChange change= new CompilationUnitChange(MultiFixMessages.CommentFormatFix_description, cu);
 		change.setEdit(resultEdit);
 
 		String label= MultiFixMessages.CommentFormatFix_description;

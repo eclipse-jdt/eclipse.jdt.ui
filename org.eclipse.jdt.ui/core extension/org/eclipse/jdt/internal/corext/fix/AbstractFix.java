@@ -100,7 +100,7 @@ public abstract class AbstractFix implements IFix {
 			fFixRewrites[i].rewriteAST(cuRewrite, groups);
 		}
 		
-		CompilationUnitChange result= cuRewrite.createChange();
+		CompilationUnitChange result= cuRewrite.createChange(getDescription(), true, null);
 		if (result == null)
 			return null;
 		

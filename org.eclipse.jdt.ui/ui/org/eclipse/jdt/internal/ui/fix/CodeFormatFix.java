@@ -53,7 +53,7 @@ public class CodeFormatFix implements IFix {
 		if (edit == null || !edit.hasChildren())
 			return null;
 		
-		TextChange change= new CompilationUnitChange("", cu); //$NON-NLS-1$
+		TextChange change= new CompilationUnitChange(MultiFixMessages.CodeFormatFix_description, cu);
     	change.setEdit(edit);
     	
     	String label= MultiFixMessages.CodeFormatFix_description;
