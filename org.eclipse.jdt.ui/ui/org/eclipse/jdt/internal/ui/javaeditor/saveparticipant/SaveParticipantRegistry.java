@@ -106,8 +106,10 @@ public final class SaveParticipantRegistry {
 		Assert.isNotNull(listener);
 		
 		final IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-		if (fPropertyListener != null)
+		if (fPropertyListener != null) {
 			preferenceStore.removePropertyChangeListener(fPropertyListener);
+			fPropertyListener= null;
+		}
 		preferenceStore.setValue(EDITOR_SAVE_PARTICIPANT_PREFIX + listener.getId(), false);
     	fEnabledPostSaveListeners= null;
 	}
