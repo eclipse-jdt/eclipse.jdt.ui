@@ -15,8 +15,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -95,23 +93,6 @@ public final class SaveParticipantRegistry {
 	public synchronized SaveParticipantDescriptor getSaveParticipantDescriptor(String id) {
 		ensureRegistered();
 		return (SaveParticipantDescriptor) fDescriptors.get(id);
-	}
-	
-	/**
-	 * Disables the given listener. 
-	 * 
-	 * @param listener the listener to disable, not null
-	 */
-	public synchronized void disablePostSaveListener(IPostSaveListener listener) {
-		Assert.isNotNull(listener);
-		
-		final IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-		if (fPropertyListener != null) {
-			preferenceStore.removePropertyChangeListener(fPropertyListener);
-			fPropertyListener= null;
-		}
-		preferenceStore.setValue(EDITOR_SAVE_PARTICIPANT_PREFIX + listener.getId(), false);
-    	fEnabledPostSaveListeners= null;
 	}
 
 	/**

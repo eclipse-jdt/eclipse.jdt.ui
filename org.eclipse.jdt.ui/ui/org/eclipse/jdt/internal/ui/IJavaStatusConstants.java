@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
+import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
+
 /**
  * Defines status codes relevant to the Java UI plug-in. When a 
  * Core exception is thrown, it contain a status object describing
@@ -46,4 +48,14 @@ public interface IJavaStatusConstants {
 	 * parsing template file.
 	 */
 	public static final int TEMPLATE_PARSE_EXCEPTION = 10005;
+	
+	/**
+	 * Status constant indicating that a problem occurred while notifying a post
+	 * save listener.
+	 * 
+	 * @see IPostSaveListener
+	 * @since 3.3
+	 */
+	public static final int EDITOR_POST_SAVE_NOTIFICATION= 10006;
+	
  }

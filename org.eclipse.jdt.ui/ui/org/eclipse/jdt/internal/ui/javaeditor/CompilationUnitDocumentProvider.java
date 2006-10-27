@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SafeRunner;
@@ -104,6 +105,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
@@ -1439,7 +1441,10 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		final IBuffer buffer= unit.getBuffer();
 		final SaveParticipantRegistry saveParticipantRegistry= JavaPlugin.getDefault().getSaveParticipantRegistry();
 		IPostSaveListener[] listeners= saveParticipantRegistry.getEnabledPostSaveListeners();
-		final StringBuffer errorMessages= new StringBuffer();
+		
+		String message= JavaEditorMessages.CompilationUnitDocumentProvider_error_saveParticipantProblem;
+		final MultiStatus errorStatus= new MultiStatus(JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, message, null);
+		
 		monitor.beginTask(JavaEditorMessages.CompilationUnitDocumentProvider_progressNotifyingSaveParticipants, listeners.length * 5);
 		try {
 			for (int i= 0; i < listeners.length; i++) {
@@ -1449,16 +1454,12 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 					public void run() {
 						try {
 							long stamp= unit.getResource().getModificationStamp();
-
+							
 							listener.saved(unit, getSubProgressMonitor(monitor, 4));
-
+							
 							if (stamp != unit.getResource().getModificationStamp()) {
-								String message= Messages.format(JavaEditorMessages.CompilationUnitDocumentProvider_error_saveParticipantSavedFile, participantName);
-								if (errorMessages.length() > 0)
-									errorMessages.append("\n\n"); //$NON-NLS-1$
-								errorMessages.append(message);
-								
-								saveParticipantRegistry.disablePostSaveListener(listener);
+								String msg= Messages.format(JavaEditorMessages.CompilationUnitDocumentProvider_error_saveParticipantSavedFile, participantName);
+								errorStatus.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, msg, null));
 							}
 
 							if (buffer.hasUnsavedChanges())
@@ -1472,23 +1473,19 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 					}
 
 					public void handleException(Throwable ex) {
-						String message= Messages.format("The save participant ''{0}'' has been disabled because it caused an exception: {1}", new String[] { listener.getId(), ex.toString()}); //$NON-NLS-1$
-						JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, null));
+						String msg= Messages.format("The save participant ''{0}'' caused an exception: {1}", new String[] { listener.getId(), ex.toString()}); //$NON-NLS-1$
+						JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, msg, null));
 						
-						message= Messages.format(JavaEditorMessages.CompilationUnitDocumentProvider_error_saveParticipantFailed, participantName);
-						if (errorMessages.length() > 0)
-							errorMessages.append("\n\n"); //$NON-NLS-1$
-						errorMessages.append(message);
-						
-						saveParticipantRegistry.disablePostSaveListener(listener);
+						msg= Messages.format(JavaEditorMessages.CompilationUnitDocumentProvider_error_saveParticipantFailed, new String[] { participantName, ex.toString()});
+						errorStatus.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, msg, null));
 						
 						// Revert the changes
 						if (info != null && buffer.hasUnsavedChanges()) {
 							try {
 								info.fTextFileBuffer.revert(getSubProgressMonitor(monitor, 1));
 							} catch (CoreException e) {
-								message= Messages.format("Error on revert after failure of save participant ''{0}''.", participantName);  //$NON-NLS-1$
-								IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, ex); 
+								msg= Messages.format("Error on revert after failure of save participant ''{0}''.", participantName);  //$NON-NLS-1$
+								IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, msg, ex); 
 								JavaPlugin.getDefault().getLog().log(status);
 							}
 
@@ -1513,11 +1510,9 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			}
 		} finally {
 			monitor.done();
-			// Propagate errors - XXX: should set specific error code and handel it in the editor
-			if (errorMessages.length() > 0) {
-				IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, errorMessages.toString(), null); 
-				throw new CoreException(status);
-			}
+			if (!errorStatus.isOK())
+				throw new CoreException(errorStatus);
 		}
 	}
+
 }
