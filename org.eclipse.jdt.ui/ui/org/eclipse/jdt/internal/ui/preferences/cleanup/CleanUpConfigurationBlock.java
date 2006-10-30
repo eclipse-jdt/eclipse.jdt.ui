@@ -18,9 +18,11 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 
 import org.eclipse.core.resources.IProject;
 
@@ -34,6 +36,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CommentFormatCleanUp;
@@ -53,6 +56,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -69,6 +73,8 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 
 	private final IScopeContext fCurrContext;
 	private SelectionButtonDialogField fShowCleanUpWizardDialogField;
+	private CleanUpProfileManager fProfileManager;
+	private ProfileStore fProfileStore;
     
     public CleanUpConfigurationBlock(IProject project, PreferencesAccess access) {
 	    super(project, access, DIALOGSTORE_LASTSAVELOADPATH);
@@ -85,11 +91,13 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
     }
 	
 	protected ProfileStore createProfileStore(IProfileVersioner versioner) {
-	    return new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, versioner);
+	    fProfileStore= new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, versioner);
+		return fProfileStore;
     }
 	
 	protected ProfileManager createProfileManager(List profiles, IScopeContext context, PreferencesAccess access, IProfileVersioner profileVersioner) {
-	    return new CleanUpProfileManager(profiles, context, access, profileVersioner);
+	    fProfileManager= new CleanUpProfileManager(profiles, context, access, profileVersioner);
+		return fProfileManager;
     }
 	
 	/**
@@ -223,5 +231,50 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 				doShowCleanUpWizard(fShowCleanUpWizardDialogField.isSelected());
             }
 	    });
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void preferenceChanged(PreferenceChangeEvent event) {
+		if (CleanUpConstants.CLEANUP_PROFILES.equals(event.getKey())) {
+			try {
+				String id= fCurrContext.getNode(JavaUI.ID_PLUGIN).get(CleanUpProfileManager.PROFILE_KEY, null);
+				if (id == null)
+					fProfileManager.getDefaultProfile().getID();
+				
+				List oldProfiles= fProfileManager.getSortedProfiles();
+				Profile[] oldProfilesArray= (Profile[])oldProfiles.toArray(new Profile[oldProfiles.size()]);
+				for (int i= 0; i < oldProfilesArray.length; i++) {
+					if (oldProfilesArray[i] instanceof CustomProfile) {
+						fProfileManager.deleteProfile((CustomProfile)oldProfilesArray[i]);
+					}
+				}
+
+				List newProfiles= fProfileStore.readProfilesFromString((String)event.getNewValue());
+				for (Iterator iterator= newProfiles.iterator(); iterator.hasNext();) {
+					CustomProfile profile= (CustomProfile)iterator.next();
+					fProfileManager.addProfile(profile);
+				}
+
+				Profile profile= fProfileManager.getProfile(id);
+				if (profile != null) {
+					fProfileManager.setSelected(profile);
+				} else {
+					fProfileManager.setSelected(fProfileManager.getDefaultProfile());
+				}
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
+		} else if (CleanUpProfileManager.PROFILE_KEY.equals(event.getKey())) {
+			if (event.getNewValue() == null) {
+				fProfileManager.setSelected(fProfileManager.getDefaultProfile());
+			} else {
+				Profile profile= fProfileManager.getProfile((String)event.getNewValue());
+				if (profile != null) {
+					fProfileManager.setSelected(profile);
+				}
+			}
+		}
 	}
 }

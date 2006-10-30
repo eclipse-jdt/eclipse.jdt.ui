@@ -18,6 +18,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.preference.PreferencePage;
+
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -39,12 +41,14 @@ class SaveParticipantConfigurationBlock implements IPreferenceConfigurationBlock
 	private final OverlayPreferenceStore fStore;
 	private SaveParticipantDescriptor[] fRegisteredDescriptors;
 	private SelectionButtonDialogField fEnableField;
+	private final PreferencePage fPreferencePage;
 
-	public SaveParticipantConfigurationBlock(OverlayPreferenceStore store) {
+	public SaveParticipantConfigurationBlock(OverlayPreferenceStore store, PreferencePage preferencePage) {
 		Assert.isNotNull(store);
 		fStore= store;
 		fRegisteredDescriptors= JavaPlugin.getDefault().getSaveParticipantRegistry().getSaveParticipantDescriptors();
-		
+
+		fPreferencePage= preferencePage;
 		fStore.addKeys(createOverlayStoreKeys());
     }
 	
@@ -79,7 +83,7 @@ class SaveParticipantConfigurationBlock implements IPreferenceConfigurationBlock
 			ISaveParticipantPreferenceConfiguration configurationBlock= fRegisteredDescriptors[0].getPreferenceConfiguration();
 			final Control configControl;
 			if (configurationBlock != null) {
-				configControl= configurationBlock.createControl(composite);
+				configControl= configurationBlock.createControl(composite, fPreferencePage);
 				if (!isActive)
 					setEnabled(configControl, false);
 			} else {

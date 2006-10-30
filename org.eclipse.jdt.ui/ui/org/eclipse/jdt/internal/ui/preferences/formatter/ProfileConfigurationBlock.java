@@ -20,6 +20,8 @@ import java.util.Observer;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
@@ -65,22 +67,27 @@ public abstract class ProfileConfigurationBlock {
 		}
 
 		public void update(Observable o, Object arg) {
-			final int value= ((Integer)arg).intValue();
-			switch (value) {
-			case ProfileManager.PROFILE_DELETED_EVENT:
-			case ProfileManager.PROFILE_RENAMED_EVENT:
-			case ProfileManager.PROFILE_CREATED_EVENT:
-			case ProfileManager.SETTINGS_CHANGED_EVENT:
-				try {
-					fProfileStore.writeProfiles(fProfileManager.getSortedProfiles(), fInstanceScope); // update profile store
-					fProfileManager.commitChanges(fCurrContext); // update formatter settings with curently selected profile 
-				} catch (CoreException x) {
-					JavaPlugin.log(x);
-				}
-				break;
-			case ProfileManager.SELECTION_CHANGED_EVENT:
-				fProfileManager.commitChanges(fCurrContext); // update formatter settings with curently selected profile
-				break;
+			try {
+				fPreferenceListenerEnabled= false;
+    			final int value= ((Integer)arg).intValue();
+    			switch (value) {
+    			case ProfileManager.PROFILE_DELETED_EVENT:
+    			case ProfileManager.PROFILE_RENAMED_EVENT:
+    			case ProfileManager.PROFILE_CREATED_EVENT:
+    			case ProfileManager.SETTINGS_CHANGED_EVENT:
+    				try {
+    					fProfileStore.writeProfiles(fProfileManager.getSortedProfiles(), fInstanceScope); // update profile store
+    					fProfileManager.commitChanges(fCurrContext); 
+    				} catch (CoreException x) {
+    					JavaPlugin.log(x);
+    				}
+    				break;
+    			case ProfileManager.SELECTION_CHANGED_EVENT:
+    				fProfileManager.commitChanges(fCurrContext);
+    				break;
+    			}
+			} finally {
+				fPreferenceListenerEnabled= true;
 			}
 		}
 	}
@@ -255,9 +262,13 @@ public abstract class ProfileConfigurationBlock {
 	private final ProfileStore fProfileStore;
 	private final IProfileVersioner fProfileVersioner;
 	private final String fLastSaveLoadPathKey;
+	private IPreferenceChangeListener fPreferenceListener;
+	private final PreferencesAccess fPreferenceAccess;
+	private boolean fPreferenceListenerEnabled;
 
-	public ProfileConfigurationBlock(IProject project, PreferencesAccess access, String lastSaveLoadPathKey) {
+	public ProfileConfigurationBlock(IProject project, final PreferencesAccess access, String lastSaveLoadPathKey) {
 
+		fPreferenceAccess= access;
 		fLastSaveLoadPathKey= lastSaveLoadPathKey;
 
 		fProfileVersioner= createProfileVersioner();
@@ -290,6 +301,21 @@ public abstract class ProfileConfigurationBlock {
 		fProfileManager= createProfileManager(profiles, fCurrContext, access, fProfileVersioner);
 
 		new StoreUpdater();
+		
+		fPreferenceListenerEnabled= true;
+		fPreferenceListener= new IPreferenceChangeListener() {
+			public void preferenceChange(PreferenceChangeEvent event) {
+				if (fPreferenceListenerEnabled) {
+					preferenceChanged(event);
+				}
+			}
+		};
+		access.getInstanceScope().getNode(JavaUI.ID_PLUGIN).addPreferenceChangeListener(fPreferenceListener);
+
+	}
+
+	protected void preferenceChanged(PreferenceChangeEvent event) {
+		
 	}
 
 	protected abstract IProfileVersioner createProfileVersioner();
@@ -410,6 +436,10 @@ public abstract class ProfileConfigurationBlock {
 	}
 
 	public void dispose() {
+		if (fPreferenceListener != null) {
+			fPreferenceAccess.getInstanceScope().getNode(JavaUI.ID_PLUGIN).removePreferenceChangeListener(fPreferenceListener);
+			fPreferenceListener= null;
+		}
 	}
 
 	public void enableProjectSpecificSettings(boolean useProjectSpecificSettings) {

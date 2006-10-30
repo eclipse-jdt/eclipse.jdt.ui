@@ -34,6 +34,7 @@ public class MultiFixMessages extends NLS {
 	public static String CleanUpRefactoringWizard_use_configured_radio;
 	public static String CleanUpRefactoringWizard_use_custom_radio;
 	public static String CleanUpSaveParticipantPreferenceConfiguration_clean_up_preference_link;
+	public static String CleanUpSaveParticipantPreferenceConfiguration_edit_button_label;
 	public static String CleanUpSaveParticipantPreferenceConfiguration_unknown_profile_name;
 	public static String CleanUpSaveParticipantPreferenceConfiguration_use_clean_up_profile_label;
 	public static String ImportsCleanUp_OrganizeImports_Description;

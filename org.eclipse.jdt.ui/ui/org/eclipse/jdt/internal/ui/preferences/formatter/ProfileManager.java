@@ -701,26 +701,29 @@ public abstract class ProfileManager extends Observable {
 		if (!(fSelected instanceof CustomProfile)) 
 			return false;
 		
-		Profile removedProfile= fSelected;
+		return deleteProfile((CustomProfile)fSelected);
+	}
+
+	public boolean deleteProfile(CustomProfile profile) {
+	    int index= fProfilesByName.indexOf(profile);
 		
-		int index= fProfilesByName.indexOf(removedProfile);
+		fProfiles.remove(profile.getID());
+		fProfilesByName.remove(profile);
 		
-		fProfiles.remove(removedProfile.getID());
-		fProfilesByName.remove(removedProfile);
-		
-		((CustomProfile)removedProfile).setManager(null);
+		profile.setManager(null);
 		
 		if (index >= fProfilesByName.size())
 			index--;
 		fSelected= (Profile) fProfilesByName.get(index);
 
-		if (!removedProfile.isSharedProfile()) {
-			updateProfilesWithName(removedProfile.getID(), null, false);
+		if (!profile.isSharedProfile()) {
+			updateProfilesWithName(profile.getID(), null, false);
 		}
 		
 		notifyObservers(PROFILE_DELETED_EVENT);
 		return true;
-	}
+    }
+
 	
 	public void profileRenamed(CustomProfile profile, String oldID) {
 		fProfiles.remove(oldID);

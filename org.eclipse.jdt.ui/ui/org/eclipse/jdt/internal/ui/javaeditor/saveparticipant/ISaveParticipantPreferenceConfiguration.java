@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.javaeditor.saveparticipant;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.preference.PreferencePage;
+
 /**
  * Preference UI to configure details of a save participant on the  the
  * Java &gt; Editor &gt; Save Participants preference page.
@@ -29,9 +31,10 @@ public interface ISaveParticipantPreferenceConfiguration {
 	 * preference page to edit the details of a save participant.
 	 *
 	 * @param parent the parent composite to which to add the preferences control
+	 * @param page the preference page on which this is displayed, or null
 	 * @return the control that was added to the <code>parent</code>
 	 */
-	Control createControl(Composite parent);
+	Control createControl(Composite parent, PreferencePage page);
 
 	/**
 	 * Called after creating the control.

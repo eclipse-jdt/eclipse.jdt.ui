@@ -158,7 +158,7 @@ public class ProfileStore {
 	 * @throws CoreException
 	 */
 	public List readProfiles(IScopeContext scope) throws CoreException {
-		return readProfilesFromPreferences(scope);
+		return readProfilesFromString(scope.getNode(JavaUI.ID_PLUGIN).get(fProfilesKey, null));
 	}
 	
 	public void writeProfiles(Collection profiles, IScopeContext instanceScope) throws CoreException {
@@ -179,14 +179,13 @@ public class ProfileStore {
 		}
 	}
 	
-	private List readProfilesFromPreferences(IScopeContext scope) throws CoreException {
-		String string= scope.getNode(JavaUI.ID_PLUGIN).get(fProfilesKey, null);
-		if (string != null && string.length() > 0) {
+	public List readProfilesFromString(String profiles) throws CoreException {
+	    if (profiles != null && profiles.length() > 0) {
 			byte[] bytes;
 			try {
-				bytes= string.getBytes(ENCODING);
+				bytes= profiles.getBytes(ENCODING);
 			} catch (UnsupportedEncodingException e) {
-				bytes= string.getBytes();
+				bytes= profiles.getBytes();
 			}
 			InputStream is= new ByteArrayInputStream(bytes);
 			try {
@@ -202,7 +201,7 @@ public class ProfileStore {
 			}
 		}
 		return null;
-	}	
+    }	
 	
 	
 	/**

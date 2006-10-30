@@ -53,6 +53,6 @@ public final class SaveParticipantPreferencePage extends AbstractConfigurationBl
 	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigureationBlockPreferencePage#createConfigurationBlock(org.eclipse.ui.internal.editors.text.OverlayPreferenceStore)
 	 */
 	protected IPreferenceConfigurationBlock createConfigurationBlock(OverlayPreferenceStore overlayPreferenceStore) {
-		return new SaveParticipantConfigurationBlock(overlayPreferenceStore);
+		return new SaveParticipantConfigurationBlock(overlayPreferenceStore, this);
 	}
 }
