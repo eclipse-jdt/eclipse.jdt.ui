@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.ui.javaeditor.saveparticipant;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.ui.preferences.IWorkingCopyManager;
 
 /**
  * Preference UI to configure details of a save participant on the  the
@@ -31,10 +31,10 @@ public interface ISaveParticipantPreferenceConfiguration {
 	 * preference page to edit the details of a save participant.
 	 *
 	 * @param parent the parent composite to which to add the preferences control
-	 * @param page the preference page on which this is displayed, or null
+	 * @param manager the working copy manager used to manage the working copy of the preferences 
 	 * @return the control that was added to the <code>parent</code>
 	 */
-	Control createControl(Composite parent, PreferencePage page);
+	Control createControl(Composite parent, IWorkingCopyManager manager);
 
 	/**
 	 * Called after creating the control.

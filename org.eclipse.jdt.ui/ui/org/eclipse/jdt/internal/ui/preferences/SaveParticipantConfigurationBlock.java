@@ -18,7 +18,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.preference.IPreferencePageContainer;
 import org.eclipse.jface.preference.PreferencePage;
+
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+import org.eclipse.ui.preferences.IWorkingCopyManager;
+import org.eclipse.ui.preferences.WorkingCopyManager;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -83,7 +88,15 @@ class SaveParticipantConfigurationBlock implements IPreferenceConfigurationBlock
 			ISaveParticipantPreferenceConfiguration configurationBlock= fRegisteredDescriptors[0].getPreferenceConfiguration();
 			final Control configControl;
 			if (configurationBlock != null) {
-				configControl= configurationBlock.createControl(composite, fPreferencePage);
+				IPreferencePageContainer container= fPreferencePage.getContainer();
+				IWorkingCopyManager manager;
+				if (container instanceof IWorkbenchPreferenceContainer) {
+					manager= ((IWorkbenchPreferenceContainer)container).getWorkingCopyManager();
+				} else {
+					manager= new WorkingCopyManager(); // non shared
+				}
+				
+				configControl= configurationBlock.createControl(composite, manager);
 				if (!isActive)
 					setEnabled(configControl, false);
 			} else {

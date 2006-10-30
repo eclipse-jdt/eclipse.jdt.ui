@@ -32,13 +32,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.preference.IPreferencePageContainer;
-import org.eclipse.jface.preference.PreferencePage;
-
 import org.eclipse.ui.dialogs.PreferencesUtil;
-import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.preferences.IWorkingCopyManager;
-import org.eclipse.ui.preferences.WorkingCopyManager;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
@@ -81,15 +76,8 @@ public class CleanUpSaveParticipantPreferenceConfiguration implements ISaveParti
 	/**
 	 * {@inheritDoc}
 	 */
-	public Control createControl(Composite parent, PreferencePage page) {
-		IPreferencePageContainer container= page.getContainer();
-		IWorkingCopyManager workingCopyManager;
-		if (container instanceof IWorkbenchPreferenceContainer) {
-			workingCopyManager= ((IWorkbenchPreferenceContainer)container).getWorkingCopyManager();
-		} else {
-			workingCopyManager= new WorkingCopyManager(); // non shared
-		}
-		fPreferencesAccess= PreferencesAccess.getWorkingCopyPreferences(workingCopyManager);
+	public Control createControl(Composite parent, IWorkingCopyManager manager) {
+		fPreferencesAccess= PreferencesAccess.getWorkingCopyPreferences(manager);
 
 		CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
 		fProfileStore= new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, versioner);
