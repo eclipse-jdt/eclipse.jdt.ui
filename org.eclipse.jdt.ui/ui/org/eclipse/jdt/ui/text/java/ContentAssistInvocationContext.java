@@ -182,7 +182,7 @@ public class ContentAssistInvocationContext {
 		if (!getClass().equals(obj.getClass()))
 			return false;
 		ContentAssistInvocationContext other= (ContentAssistInvocationContext) obj;
-		return (fViewer == null && other.fViewer == null || fViewer.equals(other.fViewer)) && fOffset == other.fOffset && (fDocument == null && other.fDocument == null || fDocument.equals(other.fDocument));
+		return (fViewer == null && other.fViewer == null || fViewer != null && fViewer.equals(other.fViewer)) && fOffset == other.fOffset && (fDocument == null && other.fDocument == null || fDocument != null && fDocument.equals(other.fDocument));
 	}
 	
 	/*
