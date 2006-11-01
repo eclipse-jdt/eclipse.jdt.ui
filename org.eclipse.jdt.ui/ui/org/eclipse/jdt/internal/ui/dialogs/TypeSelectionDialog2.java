@@ -260,7 +260,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		for (int i= 0; i < selected.length; i++) {
 			TypeNameMatch typeInfo= selected[i];
 			IType type= typeInfo.getType();
-			if (type == null) {
+			if (type == null || ! type.exists()) {
 				String title= JavaUIMessages.TypeSelectionDialog_errorTitle; 
 				String message= Messages.format(JavaUIMessages.TypeSelectionDialog_dialogMessage, typeInfo.getFullyQualifiedName()); 
 				MessageDialog.openError(getShell(), title, message);
