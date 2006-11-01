@@ -68,6 +68,7 @@ import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
 
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
+import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -78,6 +79,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator;
@@ -210,9 +212,19 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * The CSS used to format javadoc information.
 	 * @since 3.3
 	 */
-	private static String fgCSSStyles;	
+	private static String fgCSSStyles;
+	
+	/**
+	 * The invocation context of this completion proposal. Can be <code>null</code>.
+	 */
+	protected final JavaContentAssistInvocationContext fInvocationContext;
 
 	protected AbstractJavaCompletionProposal() {
+		fInvocationContext= null;
+	}
+	
+	protected AbstractJavaCompletionProposal(JavaContentAssistInvocationContext context) {
+		fInvocationContext= context;
 	}
 
 	/*
@@ -278,6 +290,25 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#apply(org.eclipse.jface.text.IDocument, char, int)
 	 */
 	public void apply(IDocument document, char trigger, int offset) {
+		
+		if (isSupportingRequiredProposals()) {
+			CompletionProposal coreProposal= ((MemberProposalInfo)fProposalInfo).fProposal;
+			CompletionProposal[] requiredProposals= coreProposal.getRequiredProposals();
+			for (int i= 0; requiredProposals != null &&  i < requiredProposals.length; i++) {
+				
+				/*
+				 * In 3.3 we only support to add missing types, see
+				 * CompletionProposal#getRequiredProposals()
+				 */
+				Assert.isTrue(requiredProposals[i].getKind() == CompletionProposal.TYPE_REF);
+				
+				int oldLen= document.getLength();
+				LazyJavaCompletionProposal proposal= new LazyJavaTypeCompletionProposal(requiredProposals[i], fInvocationContext);
+				proposal.apply(document);
+				setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
+			}
+		}
+		
 		try {
 			// patch replacement length
 			int delta= offset - (getReplacementOffset() + getReplacementLength());
@@ -955,4 +986,20 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			}
 		return null;
 	}
+	
+	/**
+	 * Tells whether required proposals are supported by this proposal.
+	 * 
+	 * @return <code>true</code> if required proposals are supported by this proposal
+	 * @see CompletionProposal#getRequiredProposals()
+	 * @since 3.3
+	 */
+	protected boolean isSupportingRequiredProposals() {
+		if (fInvocationContext == null || !(fProposalInfo instanceof MemberProposalInfo))
+			return false;
+		
+		CompletionProposal proposal= ((MemberProposalInfo)fProposalInfo).fProposal;
+		return proposal != null && (proposal.getKind() == CompletionProposal.METHOD_REF || proposal.getKind() == CompletionProposal.FIELD_REF);
+	}
+	
 }

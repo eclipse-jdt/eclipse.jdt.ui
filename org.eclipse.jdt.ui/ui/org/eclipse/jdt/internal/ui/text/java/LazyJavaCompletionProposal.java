@@ -102,17 +102,13 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * The core proposal wrapped by this completion proposal.
 	 */
 	protected final CompletionProposal fProposal;
-	/**
-	 * The invocation context of this completion proposal.
-	 */
-	protected final JavaContentAssistInvocationContext fInvocationContext;
 	protected int fContextInformationPosition;
 	
 	public LazyJavaCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
+		super(context);
 		Assert.isNotNull(proposal);
 		Assert.isNotNull(context);
 		Assert.isNotNull(context.getCoreContext());
-		fInvocationContext= context;
 		fProposal= proposal;
 	}
 
@@ -434,41 +430,5 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 */
 	public void setContextInformationPosition(int contextInformationPosition) {
 		fContextInformationPosition= contextInformationPosition;
-	}
-	
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#apply(org.eclipse.jface.text.IDocument, char, int)
-	 * @since 3.3
-	 */
-	public void apply(IDocument document, char trigger, int offset) {
-		if (isSupportingRequiredProposals()) {
-			CompletionProposal[] requiredProposals= fProposal.getRequiredProposals();
-			for (int i= 0; requiredProposals != null &&  i < requiredProposals.length; i++) {
-				
-				/*
-				 * In 3.3 we only support to add missing types, see
-				 * CompletionProposal#getRequiredProposals()
-				 */
-				Assert.isTrue(requiredProposals[i].getKind() == CompletionProposal.TYPE_REF);
-				
-				int oldLen= document.getLength();
-				LazyJavaCompletionProposal proposal= new LazyJavaTypeCompletionProposal(requiredProposals[i], fInvocationContext);
-				proposal.apply(document);
-				setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
-			}
-		}
-		
-		super.apply(document, trigger, offset);
-	}
-	
-	/**
-	 * Tells whether required proposals are supported by this proposal.
-	 * 
-	 * @return <code>true</code> if required proposals are supported by this proposal
-	 * @see CompletionProposal#getRequiredProposals()
-	 * @since 3.3
-	 */
-	protected boolean isSupportingRequiredProposals() {
-		return fProposal != null && (fProposal.getKind() == CompletionProposal.METHOD_REF || fProposal.getKind() == CompletionProposal.FIELD_REF);
 	}
 }
