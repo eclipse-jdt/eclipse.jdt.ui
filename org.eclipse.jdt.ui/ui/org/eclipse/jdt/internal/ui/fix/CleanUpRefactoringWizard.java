@@ -393,6 +393,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			}
 
 			CleanUpRefactoring refactoring= (CleanUpRefactoring)getRefactoring();
+			refactoring.clearCleanUps();
 			for (int i= 0; i < cleanups.length; i++) {
 	            refactoring.addCleanUp(cleanups[i]);
             }
