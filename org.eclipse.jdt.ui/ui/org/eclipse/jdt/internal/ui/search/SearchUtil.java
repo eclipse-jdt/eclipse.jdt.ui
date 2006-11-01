@@ -205,7 +205,7 @@ public class SearchUtil {
 	}
 
 	public static void warnIfBinaryConstant(IJavaElement element, Shell shell) {
-		if (isBinaryPrimitveConstantOrString(element))
+		if (isBinaryPrimitiveConstantOrString(element))
 			OptionalMessageDialog.open(
 				BIN_PRIM_CONST_WARN_DIALOG_ID,
 				shell,
@@ -217,7 +217,7 @@ public class SearchUtil {
 				0);
 	}
 	
-	private static boolean isBinaryPrimitveConstantOrString(IJavaElement element) {
+	private static boolean isBinaryPrimitiveConstantOrString(IJavaElement element) {
 		if (element != null && element.getElementType() == IJavaElement.FIELD) {
 			IField field= (IField)element;
 			int flags;
