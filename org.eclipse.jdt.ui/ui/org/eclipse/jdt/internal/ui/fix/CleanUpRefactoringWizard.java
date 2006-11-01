@@ -35,11 +35,11 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
+import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -226,6 +226,8 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		private Map fCustomSettings;
 		private SelectionButtonDialogField fUseCustomField;
 
+		private ControlEnableState fEnableState;
+
 		public CleanUpConfigurationPage(CleanUpRefactoring refactoring) {
 			super(MultiFixMessages.CleanUpRefactoringWizard_CleanUpConfigurationPage_title);
 			fCleanUpRefactoring= refactoring;
@@ -309,15 +311,22 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			});
 			
 			settingsField.getListControl(null).setEnabled(!isCustom);
-			setEnabled(settingsField.getButtonBox(null), !isCustom);
-			setEnabled(tabFolder, isCustom);
+			if (isCustom) {
+				fEnableState= ControlEnableState.disable(settingsField.getButtonBox(null));
+			} else {
+				fEnableState= ControlEnableState.disable(tabFolder);
+			}
 			
 			fUseCustomField.setDialogFieldListener(new IDialogFieldListener() {
 				public void dialogFieldChanged(DialogField field) {
-					boolean selected= fUseCustomField.isSelected();
-					settingsField.getListControl(null).setEnabled(!selected);
-					setEnabled(settingsField.getButtonBox(null), !selected);
-					setEnabled(tabFolder, selected);
+					fEnableState.restore();
+					boolean isCustomSelected= fUseCustomField.isSelected();
+					settingsField.getListControl(null).setEnabled(!isCustomSelected);
+					if (isCustomSelected) {
+						fEnableState= ControlEnableState.disable(settingsField.getButtonBox(null));
+					} else {
+						fEnableState= ControlEnableState.disable(tabFolder);
+					}
                 }				
 			});
 			
@@ -353,16 +362,6 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
     		tabItem.setData(tabPage);
     		tabItem.setControl(tabPage.createContents(tabFolder));
     	}
-
-        private void setEnabled(Control control, boolean enabled) {
-        	control.setEnabled(enabled);
-        	if (control instanceof Composite) {
-        		Control[] children= ((Composite)control).getChildren();
-        		for (int i= 0; i < children.length; i++) {
-	                setEnabled(children[i], enabled);
-                }
-        	}
-        }
 		
         protected boolean performFinish() {
 			initializeRefactoring();
