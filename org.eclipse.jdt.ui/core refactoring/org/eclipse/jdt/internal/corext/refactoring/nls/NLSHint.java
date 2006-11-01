@@ -194,11 +194,9 @@ public class NLSHint {
 		}
 		
 		try {
-			if (manager != null) {
-				ITextFileBuffer buffer= manager.getTextFileBuffer(path);
-				if (buffer != null)
-					return buffer.getDocument();
-			}
+			ITextFileBuffer buffer= manager.getTextFileBuffer(path);
+			if (buffer != null)
+				return buffer.getDocument();
 		} finally {
 			try {
 				manager.disconnect(path, null);

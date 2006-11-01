@@ -346,7 +346,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 			String tag= buffer.toString();
 
 			buffer.setLength(0);
-			if (c != -1 & c!= '}') {
+			if (c != -1 && c != '}') {
 				buffer.append((char) c);
 				c= getContent(buffer, '}');
 			}

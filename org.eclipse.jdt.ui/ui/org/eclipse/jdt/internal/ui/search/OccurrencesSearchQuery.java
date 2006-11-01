@@ -57,7 +57,7 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 	 */
 	public IStatus run(IProgressMonitor monitor) {
 		if (fFinder == null) {
-			new StatusInfo(IStatus.ERROR, "Query has already been running"); //$NON-NLS-1$
+			return new StatusInfo(IStatus.ERROR, "Query has already been running"); //$NON-NLS-1$
 		}
 		try {
 			fFinder.perform();

@@ -1420,9 +1420,10 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
 			ICompilationUnit cu= group.getCompilationUnit();
-			if (cu != null)
+			if (cu != null) {
 				result.add(cu);
 				fCuToSearchResultGroup.put(cu, group);
+			}
 		}
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}

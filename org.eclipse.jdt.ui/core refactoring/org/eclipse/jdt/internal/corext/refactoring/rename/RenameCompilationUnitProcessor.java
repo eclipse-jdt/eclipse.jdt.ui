@@ -392,13 +392,10 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 			return new DynamicValidationStateChange(new RenameResourceChange(descriptor, resource, newName, comment));
 		}
 		String label= null;
-		if (fCu != null) {
-			final IPackageFragment fragment= (IPackageFragment) fCu.getParent();
-			if (!fragment.isDefaultPackage())
-				label= fragment.getElementName() + "." + fCu.getElementName(); //$NON-NLS-1$
-			else
-				label= fCu.getElementName();
-		} else
+		final IPackageFragment fragment= (IPackageFragment) fCu.getParent();
+		if (!fragment.isDefaultPackage())
+			label= fragment.getElementName() + "." + fCu.getElementName(); //$NON-NLS-1$
+		else
 			label= fCu.getElementName();
 		final String name= fCu.getJavaProject().getElementName();
 		final String description= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description_short, fCu.getElementName());
