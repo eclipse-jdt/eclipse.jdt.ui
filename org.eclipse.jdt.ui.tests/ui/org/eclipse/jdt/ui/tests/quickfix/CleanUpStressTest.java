@@ -13,9 +13,11 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
@@ -23,8 +25,6 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.Preferences;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.swt.widgets.Shell;
@@ -57,6 +57,10 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileManager;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -5280,8 +5284,7 @@ public class CleanUpStressTest extends TestCase {
 		List cus= new ArrayList();
 		addAllCUs(MyTestSetup.fJProject1.getChildren(), cus);
 		
-		IScopeContext context= new InstanceScope();
-		IEclipsePreferences node= context.getNode(JavaUI.ID_PLUGIN);
+		Map node= new HashMap();
 		
 		Collection keys= CleanUpConstants.getEclipseDefaultSettings().keySet();
 		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
@@ -5339,6 +5342,17 @@ public class CleanUpStressTest extends TestCase {
 		node.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpConstants.TRUE);
 		
 		node.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpConstants.TRUE);
+		
+		CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
+		ProfileManager.CustomProfile profile= new ProfileManager.CustomProfile("testProfile", node, versioner.getCurrentVersion(), versioner.getProfileKind());
+		new InstanceScope().getNode(JavaUI.ID_PLUGIN).put(CleanUpProfileManager.PROFILE_KEY, profile.getID());
+		
+		ArrayList profiles= new ArrayList();
+		profiles.add(profile);
+		CleanUpProfileManager.addBuiltInProfiles(profiles, versioner);
+		
+		ProfileStore profileStore= new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, versioner);
+		profileStore.writeProfiles(profiles, new InstanceScope());
 	
 		ICompilationUnit[] units= (ICompilationUnit[])cus.toArray(new ICompilationUnit[cus.size()]);	
 		Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();

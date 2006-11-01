@@ -10,13 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.preferences.DefaultScope;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
@@ -32,9 +29,6 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-
-import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileManager;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.KeySet;
 
 public abstract class AbstractCleanUp implements ICleanUp {
 
@@ -141,21 +135,6 @@ public abstract class AbstractCleanUp implements ICleanUp {
 		return new RefactoringStatus();
 	}
 	
-	private static boolean hasSettingsInContext(IScopeContext context, KeySet[] keySets) {
-		for (int i= 0; i < keySets.length; i++) {
-	        KeySet keySet= keySets[i];
-	        IEclipsePreferences preferences= context.getNode(keySet.getNodeName());
-	        for (final Iterator keyIter= keySet.getKeys().iterator(); keyIter.hasNext();) {
-	            final String key= (String)keyIter.next();
-	            Object val= preferences.get(key, null);
-	            if (val != null) {
-	            	return true;
-	            }
-            }
-        }
-		return false;
-	}
-	
     private int getFlags() {
     	if (fOptions != null)
     		return createFlag(fOptions);
@@ -165,23 +144,15 @@ public abstract class AbstractCleanUp implements ICleanUp {
     
     protected abstract int createFlag(Map options);
 
-    private void loadSettings(IJavaProject project) {
-    	
+    private void loadSettings(IJavaProject project) {    	
     	IScopeContext context;
     	if (project != null) {
     		context= new ProjectScope(project.getProject());
-    		
-    		if (!hasSettingsInContext(context, CleanUpProfileManager.KEY_SETS))
-    			context= new InstanceScope();
     	} else {
 			context= new InstanceScope();
     	}
-		
-		if (!hasSettingsInContext(context, CleanUpProfileManager.KEY_SETS))
-			context= new DefaultScope();
-		
-		Map options= CleanUpConstants.loadOptions(context);
-		fFlags= createFlag(options);
+    	
+		fFlags= createFlag(CleanUpConstants.loadOptions(context));
     }
     
     /**

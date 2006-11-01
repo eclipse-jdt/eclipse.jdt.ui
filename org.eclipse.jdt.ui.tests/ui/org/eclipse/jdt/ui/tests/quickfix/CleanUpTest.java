@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -20,10 +21,9 @@ import java.util.regex.Pattern;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -49,6 +49,11 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileManager;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -63,6 +68,8 @@ public class CleanUpTest extends QuickFixTest {
 	
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
+
+	private CustomProfile fProfile;
 
 	public CleanUpTest(String name) {
 		super(name);
@@ -112,6 +119,11 @@ public class CleanUpTest extends QuickFixTest {
 		fJProject1= ProjectTestSetup.getProject();
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
+		Map settings= new Hashtable();		
+		fProfile= new ProfileManager.CustomProfile("testProfile", settings, versioner.getCurrentVersion(), versioner.getProfileKind());
+		new InstanceScope().getNode(JavaUI.ID_PLUGIN).put(CleanUpProfileManager.PROFILE_KEY, fProfile.getID());
 		
 		disableAll();
 	}
@@ -121,21 +133,29 @@ public class CleanUpTest extends QuickFixTest {
 		disableAll();
 	}
 	
-	private void disableAll() {
-	    IScopeContext context= new InstanceScope();
-		IEclipsePreferences node= context.getNode(JavaUI.ID_PLUGIN);
-		
+	private void disableAll() throws CoreException {
+		Map settings= fProfile.getSettings();
 		Collection keys= CleanUpConstants.getEclipseDefaultSettings().keySet();
 		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
 	        String key= (String)iterator.next();
-	        node.put(key, CleanUpConstants.FALSE);
-        }
+	        settings.put(key, CleanUpConstants.FALSE);
+		}
+		commitProfile();
     }
 
-	private void enable(String key) {
-		IScopeContext context= new InstanceScope();
-		IEclipsePreferences node= context.getNode(JavaUI.ID_PLUGIN);
-		node.put(key, CleanUpConstants.TRUE);
+	private void enable(String key) throws CoreException {
+		fProfile.getSettings().put(key, CleanUpConstants.TRUE);
+		commitProfile();
+    }
+	
+	private void commitProfile() throws CoreException {
+	    CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
+		ArrayList profiles= new ArrayList();
+		profiles.add(fProfile);
+		CleanUpProfileManager.addBuiltInProfiles(profiles, versioner);
+		
+		ProfileStore profileStore= new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, versioner);
+		profileStore.writeProfiles(profiles, new InstanceScope());
     }
 	
     private void assertRefactoringResultAsExpected(ICompilationUnit[] cus, String[] expected) throws InvocationTargetException, JavaModelException {

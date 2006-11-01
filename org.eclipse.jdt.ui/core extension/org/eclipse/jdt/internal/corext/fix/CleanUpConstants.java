@@ -10,19 +10,30 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+
+import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileManager;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 
 public class CleanUpConstants {
 	
@@ -916,20 +927,13 @@ public class CleanUpConstants {
 	    return result;
     }
     
-	public static Map loadOptions(IScopeContext context) {
-		Map result= new Hashtable();
-		
-		IEclipsePreferences node= context.getNode(JavaUI.ID_PLUGIN);
-		Map defaultSettings= getEclipseDefaultSettings();
-		for (Iterator iterator= defaultSettings.keySet().iterator(); iterator.hasNext();) {
-	        String key= (String)iterator.next();
-	        String value= node.get(key, FALSE);
-	        
-	        result.put(key, value);
-        }
-				
-		return result;
-	}
+    public static Map loadOptions(IScopeContext context) {
+    	return loadOptions(context, CleanUpProfileManager.PROFILE_KEY, CleanUpProfileManager.DEFAULT_PROFILE);
+    }
+    
+    public static Map loadSaveParticipantOptions(IScopeContext context) {
+    	return loadOptions(context, CLEANUP_ON_SAVE_PROFILE, CleanUpProfileManager.DEFAULT_SAVE_PARTICIPANT_PROFILE);
+    }
 
     public static void initDefaults(IPreferenceStore store) {
     	Map settings= getEclipseDefaultSettings();
@@ -940,6 +944,52 @@ public class CleanUpConstants {
     	
     	store.setDefault(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, true);
     	store.setDefault(CLEANUP_ON_SAVE_PROFILE, CleanUpProfileManager.DEFAULT_SAVE_PARTICIPANT_PROFILE);
+    }
+
+	private static Map loadOptions(IScopeContext context, String profileIdKey, String defaultProfileId) {
+		IEclipsePreferences contextNode= context.getNode(JavaUI.ID_PLUGIN);
+		String id= contextNode.get(profileIdKey, null);
+		if (id == null) {
+			if (ProjectScope.SCOPE.equals(context.getName())) {
+				id= new InstanceScope().getNode(JavaUI.ID_PLUGIN).get(profileIdKey, null);
+			}
+			if (id == null) {
+				id= new DefaultScope().getNode(JavaUI.ID_PLUGIN).get(profileIdKey, defaultProfileId);
+			}
+		}
+		
+		Hashtable profiles= loadProfiles();
+		Profile profile= (Profile)profiles.get(id);
+		if (profile == null)
+			profile= (Profile)profiles.get(defaultProfileId);
+		
+		return profile.getSettings();
+	}
+    
+    private static Hashtable loadProfiles() {
+		InstanceScope instanceScope= new InstanceScope();
+		
+        CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
+		ProfileStore profileStore= new ProfileStore(CLEANUP_PROFILES, versioner);
+		
+		List list= null;
+        try {
+            list= profileStore.readProfiles(instanceScope);
+        } catch (CoreException e1) {
+            JavaPlugin.log(e1);
+        }
+        if (list == null)
+        	list= new ArrayList();
+        
+		CleanUpProfileManager.addBuiltInProfiles(list, versioner);
+		
+		Hashtable profileIdsTable= new Hashtable();
+		for (Iterator iterator= list.iterator(); iterator.hasNext();) {
+            Profile profile= (Profile)iterator.next();
+            profileIdsTable.put(profile.getID(), profile);
+        }
+     
+		return profileIdsTable;
     }
 
 }
