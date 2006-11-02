@@ -34,12 +34,12 @@ public class PackageExplorerOpenActionProvider extends CommonActionProvider {
 	private boolean fInViewPart = false;
 
 	public void fillActionBars(IActionBars actionBars) { 
-		if(fInViewPart) { 
+		if (fInViewPart) { 
 			fOpenGroup.fillActionBars(actionBars); 
 			
-			if(fOpenAndExpand == null && fOpenGroup.getOpenAction().isEnabled()) // TODO: is not updated!
+			if (fOpenAndExpand == null && fOpenGroup.getOpenAction().isEnabled()) // TODO: is not updated!
 				actionBars.setGlobalActionHandler(ICommonActionConstants.OPEN, fOpenGroup.getOpenAction());
-			else if(fOpenAndExpand.isEnabled())
+			else if (fOpenAndExpand != null && fOpenAndExpand.isEnabled())
 				actionBars.setGlobalActionHandler(ICommonActionConstants.OPEN, fOpenAndExpand);
 		}
 

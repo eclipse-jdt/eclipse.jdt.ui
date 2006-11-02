@@ -276,7 +276,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	//----------- preconditions ------------------
 
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
-		if (fMethod == null || ! fMethod.exists()){
+		if (! fMethod.exists()){
 			String message= Messages.format(RefactoringCoreMessages.RenameMethodRefactoring_deleted, 
 								fMethod.getCompilationUnit().getElementName());
 			return RefactoringStatus.createFatalErrorStatus(message);
