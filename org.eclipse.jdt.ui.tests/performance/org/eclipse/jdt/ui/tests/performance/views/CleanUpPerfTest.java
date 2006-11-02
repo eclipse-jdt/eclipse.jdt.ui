@@ -11,6 +11,10 @@
 package org.eclipse.jdt.ui.tests.performance.views;
 
 import java.io.File;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import junit.extensions.TestSetup;
@@ -20,6 +24,7 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
@@ -33,9 +38,12 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
@@ -48,6 +56,9 @@ import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -101,6 +112,30 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 			}
 		}
 	}
+	
+	private static Map getNullSettings() {
+		Map result= new HashMap();
+		
+		Collection keys= CleanUpConstants.getEclipseDefaultSettings().keySet();
+		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
+	        String key= (String)iterator.next();
+	        result.put(key, CleanUpConstants.FALSE);
+        }
+		
+		return result;
+    }
+
+	private static void storeSettings(Map node) throws CoreException {
+	    ProfileManager.CustomProfile profile= new ProfileManager.CustomProfile("testProfile", node, CleanUpProfileVersioner.CURRENT_VERSION, CleanUpProfileVersioner.PROFILE_KIND);
+		new InstanceScope().getNode(JavaUI.ID_PLUGIN).put(CleanUpConstants.CLEANUP_PROFILE, profile.getID());
+		
+		List profiles= CleanUpPreferenceUtil.getBuiltInProfiles();
+		profiles.add(profile);
+
+		CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
+		ProfileStore profileStore= new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, versioner);
+		profileStore.writeProfiles(profiles, new InstanceScope());
+    }
 	
 	public void testNullCleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
@@ -157,48 +192,68 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 		
-		cleanUpRefactoring.addCleanUp(new CodeStyleCleanUp(
-				CodeStyleCleanUp.QUALIFY_FIELD_ACCESS |
-				CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC |
-				CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS |
-				CodeStyleCleanUp.CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT |
-				CodeStyleCleanUp.QUALIFY_METHOD_ACCESS |
-				CodeStyleCleanUp.QUALIFY_STATIC_METHOD_ACCESS));
+		Map node= getNullSettings();
 		
-		cleanUpRefactoring.addCleanUp(new ControlStatementsCleanUp(
-				ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS |
-				ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP |
-				ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS));
+		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_METHOD, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS, CleanUpConstants.TRUE);
 		
-		cleanUpRefactoring.addCleanUp(new ExpressionsCleanUp(
-				ExpressionsCleanUp.ADD_PARANOIC_PARENTHESIS));
+		node.put(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpConstants.TRUE);
 		
-		cleanUpRefactoring.addCleanUp(new Java50CleanUp(
-				Java50CleanUp.ADD_DEPRECATED_ANNOTATION | 
-				Java50CleanUp.ADD_OVERRIDE_ANNOATION));
+		node.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpConstants.TRUE);
 		
-		cleanUpRefactoring.addCleanUp(new PotentialProgrammingProblemsCleanUp(
-				PotentialProgrammingProblemsCleanUp.ADD_DEFAULT_SERIAL_VERSION_ID));
+		node.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE, CleanUpConstants.TRUE);
 		
-		cleanUpRefactoring.addCleanUp(new StringCleanUp(
-				StringCleanUp.ADD_MISSING_NLS_TAG |
-				StringCleanUp.REMOVE_UNNECESSARY_NLS_TAG));
+		node.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, CleanUpConstants.TRUE);
 		
-		cleanUpRefactoring.addCleanUp(new UnnecessaryCodeCleanUp(
-				UnnecessaryCodeCleanUp.REMOVE_UNUSED_CAST));
+		node.put(CleanUpConstants.ADD_MISSING_NLS_TAGS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNNECESSARY_CASTS, CleanUpConstants.TRUE);
+
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES, CleanUpConstants.TRUE);
 		
-		cleanUpRefactoring.addCleanUp(new UnusedCodeCleanUp(
-				UnusedCodeCleanUp.REMOVE_UNUSED_IMPORTS |
-				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_CONSTRUCTORS |
-				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_METHODS |
-				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_TYPES |
-				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS |
-				UnusedCodeCleanUp.REMOVE_UNUSED_LOCAL_VARIABLES));
+		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, CleanUpConstants.TRUE);				
+
+		node.put(CleanUpConstants.FORMAT_COMMENT, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.FORMAT_JAVADOC, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.FORMAT_MULTI_LINE_COMMENT, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT, CleanUpConstants.TRUE);
 		
-		cleanUpRefactoring.addCleanUp(new VariableDeclarationCleanUp(
-				VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_FIELDS |
-				VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_PARAMETERS |
-				VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_LOCAL_VARIABLES));
+		node.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpConstants.TRUE);
+		
+		node.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpConstants.TRUE);
+		
+		storeSettings(node);
+		
+		cleanUpRefactoring.addCleanUp(new CodeStyleCleanUp());
+		cleanUpRefactoring.addCleanUp(new ControlStatementsCleanUp());
+		cleanUpRefactoring.addCleanUp(new ExpressionsCleanUp());
+		cleanUpRefactoring.addCleanUp(new Java50CleanUp());
+		cleanUpRefactoring.addCleanUp(new PotentialProgrammingProblemsCleanUp());
+		cleanUpRefactoring.addCleanUp(new StringCleanUp());
+		cleanUpRefactoring.addCleanUp(new UnnecessaryCodeCleanUp());
+		cleanUpRefactoring.addCleanUp(new UnusedCodeCleanUp());
+		cleanUpRefactoring.addCleanUp(new VariableDeclarationCleanUp());
 		
 		//See https://bugs.eclipse.org/bugs/show_bug.cgi?id=135219
 //		tagAsSummary("Code Clean Up - 25 clean-ups", Dimension.ELAPSED_PROCESS);
@@ -219,13 +274,21 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 		
-		cleanUpRefactoring.addCleanUp(new CodeStyleCleanUp(
-				CodeStyleCleanUp.QUALIFY_FIELD_ACCESS |
-				CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC |
-				CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS |
-				CodeStyleCleanUp.CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT |
-				CodeStyleCleanUp.QUALIFY_METHOD_ACCESS |
-				CodeStyleCleanUp.QUALIFY_STATIC_METHOD_ACCESS));
+		Map node= getNullSettings();
+		
+		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_METHOD, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS, CleanUpConstants.TRUE);
+		
+		storeSettings(node);
+		
+		cleanUpRefactoring.addCleanUp(new CodeStyleCleanUp());
 		
 		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
 		cleanUpRefactoring.createChange(null);
@@ -243,11 +306,16 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 		
-		cleanUpRefactoring.addCleanUp(new ControlStatementsCleanUp(
-				ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS |
-				ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP |
-				ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS));
+		Map node= getNullSettings();
 		
+		node.put(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpConstants.TRUE);
+		
+		storeSettings(node);
+		
+		cleanUpRefactoring.addCleanUp(new ControlStatementsCleanUp());
+
 		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
 		cleanUpRefactoring.createChange(null);
 		
@@ -264,8 +332,14 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 		
-		cleanUpRefactoring.addCleanUp(new ExpressionsCleanUp(
-				ExpressionsCleanUp.ADD_PARANOIC_PARENTHESIS));
+		Map node= getNullSettings();
+		
+		node.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpConstants.TRUE);
+				
+		storeSettings(node);
+		
+		cleanUpRefactoring.addCleanUp(new ExpressionsCleanUp());
 		
 		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
 		cleanUpRefactoring.createChange(null);
@@ -283,9 +357,15 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 		
-		cleanUpRefactoring.addCleanUp(new Java50CleanUp(
-				Java50CleanUp.ADD_DEPRECATED_ANNOTATION | 
-				Java50CleanUp.ADD_OVERRIDE_ANNOATION));
+		Map node= getNullSettings();
+		
+		node.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE, CleanUpConstants.TRUE);
+		
+		storeSettings(node);
+		
+		cleanUpRefactoring.addCleanUp(new Java50CleanUp());
 		
 		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
 		cleanUpRefactoring.createChange(null);
@@ -303,9 +383,13 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 		
-		cleanUpRefactoring.addCleanUp(new StringCleanUp(
-				StringCleanUp.ADD_MISSING_NLS_TAG |
-				StringCleanUp.REMOVE_UNNECESSARY_NLS_TAG));
+		Map node= getNullSettings();
+				
+		node.put(CleanUpConstants.ADD_MISSING_NLS_TAGS, CleanUpConstants.TRUE);
+
+		storeSettings(node);
+		
+		cleanUpRefactoring.addCleanUp(new StringCleanUp());
 		
 		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
 		cleanUpRefactoring.createChange(null);
@@ -341,14 +425,20 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 	public void testUnusedCodeCleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+		
+		Map node= getNullSettings();
+		
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES, CleanUpConstants.TRUE);
+		
+		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new UnusedCodeCleanUp(
-				UnusedCodeCleanUp.REMOVE_UNUSED_IMPORTS |
-				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_CONSTRUCTORS |
-				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_METHODS |
-				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_TYPES |
-				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS |
-				UnusedCodeCleanUp.REMOVE_UNUSED_LOCAL_VARIABLES));
+		cleanUpRefactoring.addCleanUp(new UnusedCodeCleanUp());
 	
 		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
 		cleanUpRefactoring.createChange(null);
@@ -366,10 +456,16 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 		
-		cleanUpRefactoring.addCleanUp(new VariableDeclarationCleanUp(
-				VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_FIELDS |
-				VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_PARAMETERS |
-				VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_LOCAL_VARIABLES));
+		Map node= getNullSettings();
+		
+		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, CleanUpConstants.TRUE);				
+
+		storeSettings(node);
+		
+		cleanUpRefactoring.addCleanUp(new VariableDeclarationCleanUp());
 		
 		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
 		cleanUpRefactoring.createChange(null);
