@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -68,7 +69,8 @@ import org.eclipse.jdt.ui.CodeGeneration;
 public final class StubUtility2 {
 
 	public static void addOverrideAnnotation(ASTRewrite rewrite, MethodDeclaration decl, IMethodBinding binding) {
-		if (!binding.getDeclaringClass().isInterface()) {
+		String version= binding.getJavaElement().getJavaProject().getOption(JavaCore.COMPILER_COMPLIANCE, true);
+		if (!binding.getDeclaringClass().isInterface() || !JavaModelUtil.isVersionLessThan(version, JavaCore.VERSION_1_6)) {
 			final Annotation marker= rewrite.getAST().newMarkerAnnotation();
 			marker.setTypeName(rewrite.getAST().newSimpleName("Override")); //$NON-NLS-1$
 			rewrite.getListRewrite(decl, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(marker, null);
