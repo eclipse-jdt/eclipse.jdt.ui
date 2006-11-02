@@ -16,8 +16,12 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.preferences.DefaultScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
@@ -31,6 +35,9 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
@@ -52,7 +59,16 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     		if (!ActionUtil.isOnBuildPath(unit))
     			return;
 
-    		Map settings= CleanUpConstants.loadSaveParticipantOptions(new InstanceScope());    		
+    		Map settings= CleanUpPreferenceUtil.loadSaveParticipantOptions(new InstanceScope());
+    		if (settings == null) {
+    			IEclipsePreferences contextNode= new InstanceScope().getNode(JavaUI.ID_PLUGIN);
+    	    	String id= contextNode.get(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, null);
+    	    	if (id == null) {
+    	    		id= new DefaultScope().getNode(JavaUI.ID_PLUGIN).get(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, CleanUpConstants.DEFAULT_SAVE_PARTICIPANT_PROFILE);
+    	    	}
+    	    	throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, Messages.format(FixMessages.CleanUpPostSaveListener_unknown_profile_error_message, id)));
+    		}
+    		
     		ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps(settings);    		
     		
     		do {

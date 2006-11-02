@@ -49,6 +49,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
@@ -57,7 +58,6 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
@@ -5343,14 +5343,13 @@ public class CleanUpStressTest extends TestCase {
 		
 		node.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpConstants.TRUE);
 		
-		CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
-		ProfileManager.CustomProfile profile= new ProfileManager.CustomProfile("testProfile", node, versioner.getCurrentVersion(), versioner.getProfileKind());
-		new InstanceScope().getNode(JavaUI.ID_PLUGIN).put(CleanUpProfileManager.PROFILE_KEY, profile.getID());
+		ProfileManager.CustomProfile profile= new ProfileManager.CustomProfile("testProfile", node, CleanUpProfileVersioner.CURRENT_VERSION, CleanUpProfileVersioner.PROFILE_KIND);
+		new InstanceScope().getNode(JavaUI.ID_PLUGIN).put(CleanUpConstants.CLEANUP_PROFILE, profile.getID());
 		
-		ArrayList profiles= new ArrayList();
+		List profiles= CleanUpPreferenceUtil.getBuiltInProfiles();
 		profiles.add(profile);
-		CleanUpProfileManager.addBuiltInProfiles(profiles, versioner);
-		
+
+		CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
 		ProfileStore profileStore= new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, versioner);
 		profileStore.writeProfiles(profiles, new InstanceScope());
 	

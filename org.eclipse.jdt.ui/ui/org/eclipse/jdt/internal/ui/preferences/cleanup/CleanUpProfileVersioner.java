@@ -21,12 +21,12 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomPr
 
 public class CleanUpProfileVersioner implements IProfileVersioner {
 	
-	private static final String CLEAN_UP_PROFILE_KIND= "CleanUpProfile"; //$NON-NLS-1$
+	public static final String PROFILE_KIND= "CleanUpProfile"; //$NON-NLS-1$
 
 	private static final int VERSION_1= 1; // 3.3M2
 	private static final int VERSION_2= 2; // 3.3M3 Added ORGANIZE_IMPORTS
 	
-	private static final int CURRENT_VERSION= VERSION_2;
+	public static final int CURRENT_VERSION= VERSION_2;
 	
 	/* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.preferences.cleanup.IProfileVersioner#getFirstVersion()
@@ -56,7 +56,7 @@ public class CleanUpProfileVersioner implements IProfileVersioner {
      * {@inheritDoc}
      */
     public String getProfileKind() {
-	    return CLEAN_UP_PROFILE_KIND;
+	    return PROFILE_KIND;
     }
     
 	private static void updateFrom1To2(CustomProfile profile) {

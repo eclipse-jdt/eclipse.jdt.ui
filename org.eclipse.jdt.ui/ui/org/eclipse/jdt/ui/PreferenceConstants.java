@@ -29,11 +29,12 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
-import org.eclipse.jdt.internal.ui.preferences.CleanUpPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
@@ -3712,7 +3713,7 @@ public class PreferenceConstants {
 		store.setToDefault(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED); // removed
 		
 		//Code Clean Up
-		CleanUpPreferencePage.initDefaults(store);
+		CleanUpConstants.initDefaults(store);
 	}
 
 	/**

@@ -11,10 +11,10 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
@@ -49,7 +50,6 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
@@ -120,10 +120,9 @@ public class CleanUpTest extends QuickFixTest {
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
 		Map settings= new Hashtable();		
-		fProfile= new ProfileManager.CustomProfile("testProfile", settings, versioner.getCurrentVersion(), versioner.getProfileKind());
-		new InstanceScope().getNode(JavaUI.ID_PLUGIN).put(CleanUpProfileManager.PROFILE_KEY, fProfile.getID());
+		fProfile= new ProfileManager.CustomProfile("testProfile", settings, CleanUpProfileVersioner.CURRENT_VERSION, CleanUpProfileVersioner.PROFILE_KIND);
+		new InstanceScope().getNode(JavaUI.ID_PLUGIN).put(CleanUpConstants.CLEANUP_PROFILE, fProfile.getID());
 		
 		disableAll();
 	}
@@ -149,11 +148,10 @@ public class CleanUpTest extends QuickFixTest {
     }
 	
 	private void commitProfile() throws CoreException {
-	    CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
-		ArrayList profiles= new ArrayList();
+		List profiles= CleanUpPreferenceUtil.getBuiltInProfiles();
 		profiles.add(fProfile);
-		CleanUpProfileManager.addBuiltInProfiles(profiles, versioner);
 		
+		CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
 		ProfileStore profileStore= new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, versioner);
 		profileStore.writeProfiles(profiles, new InstanceScope());
     }

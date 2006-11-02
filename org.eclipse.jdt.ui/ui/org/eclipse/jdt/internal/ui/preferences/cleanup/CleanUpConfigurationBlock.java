@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -96,6 +97,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
     }
 	
 	protected ProfileManager createProfileManager(List profiles, IScopeContext context, PreferencesAccess access, IProfileVersioner profileVersioner) {
+		profiles.addAll(CleanUpPreferenceUtil.getBuiltInProfiles());
 	    fProfileManager= new CleanUpProfileManager(profiles, context, access, profileVersioner);
 		return fProfileManager;
     }
@@ -239,7 +241,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 	protected void preferenceChanged(PreferenceChangeEvent event) {
 		if (CleanUpConstants.CLEANUP_PROFILES.equals(event.getKey())) {
 			try {
-				String id= fCurrContext.getNode(JavaUI.ID_PLUGIN).get(CleanUpProfileManager.PROFILE_KEY, null);
+				String id= fCurrContext.getNode(JavaUI.ID_PLUGIN).get(CleanUpConstants.CLEANUP_PROFILE, null);
 				if (id == null)
 					fProfileManager.getDefaultProfile().getID();
 				
@@ -266,7 +268,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
-		} else if (CleanUpProfileManager.PROFILE_KEY.equals(event.getKey())) {
+		} else if (CleanUpConstants.CLEANUP_PROFILE.equals(event.getKey())) {
 			if (event.getNewValue() == null) {
 				fProfileManager.setSelected(fProfileManager.getDefaultProfile());
 			} else {

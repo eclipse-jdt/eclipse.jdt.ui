@@ -10,30 +10,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.preferences.DefaultScope;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IScopeContext;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 
-import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 
 public class CleanUpConstants {
 	
@@ -769,15 +755,65 @@ public class CleanUpConstants {
 	 * @since 3.3
 	 */
 	public static final String CLEANUP_PROFILES= "org.eclipse.jdt.ui.cleanupprofiles"; //$NON-NLS-1$
+	
+	/**
+	 * Stores the id of the clean up profile used when executing clean up.<br><br>
+	 * Possible values: String value<br>
+	 * Default value: {@link #DEFAULT_PROFILE}
+	 * <br>
+	 * @since 3.3
+	 */
+	public final static String CLEANUP_PROFILE= "cleanup_profile"; //$NON-NLS-1$$
 
 	/**
 	 * Stores the id of the clean up profile used when executing clean up on save.<br><br>
 	 * Possible values: String value<br>
-	 * Default value: {@link CleanUpProfileManager#DEFAULT_SAVE_PARTICIPANT_PROFILE}
+	 * Default value: {@link #DEFAULT_SAVE_PARTICIPANT_PROFILE}
 	 * <br>
 	 * @since 3.3
 	 */
 	public static final String CLEANUP_ON_SAVE_PROFILE= "cleanup.on_save_profile_id"; //$NON-NLS-1$
+	
+	/**
+	 * A key to the version of the profile stored in the preferences.<br><br>
+	 * Possible values: Integer value<br>
+	 * Default value: {@link CleanUpProfileVersioner#CURRENT_VERSION}
+	 * <br>
+	 * @since 3.3
+	 */
+	public final static String CLEANUP_SETTINGS_VERSION_KEY= "cleanup_settings_version";  //$NON-NLS-1$
+	
+	/**
+	 * Id of the 'Eclipse [built-in]' profile.<br>
+	 * <br>
+	 * @since 3.3
+	 */
+	public final static String ECLIPSE_PROFILE= "org.eclipse.jdt.ui.default.eclipse_clean_up_profile"; //$NON-NLS-1$
+	
+	/**
+	 * Id of the 'Save Participant [built-in]' profile.<br>
+	 * <br>
+	 * @since 3.3
+	 */	
+	public final static String SAVE_PARTICIPANT_PROFILE= "org.eclipse.jdt.ui.default.save_participant_clean_up_profile"; //$NON-NLS-1$
+
+	/**
+	 * The id of the profile used as a default profile when executing clean up.<br><br>
+	 * Possible values: String value<br>
+	 * Default value: {@link #ECLIPSE_PROFILE}
+	 * <br>
+	 * @since 3.3
+	 */
+	public final static String DEFAULT_PROFILE= ECLIPSE_PROFILE;
+	
+	/**
+	 * The id of the profile used as a default profile when executing clean up on save.<br><br>
+	 * Possible values: String value<br>
+	 * Default value: {@link #SAVE_PARTICIPANT_PROFILE}
+	 * <br>
+	 * @since 3.3
+	 */
+	public final static String DEFAULT_SAVE_PARTICIPANT_PROFILE= SAVE_PARTICIPANT_PROFILE;
 
     public static Map getEclipseDefaultSettings() {
     	HashMap result= new HashMap();
@@ -927,14 +963,6 @@ public class CleanUpConstants {
 	    return result;
     }
     
-    public static Map loadOptions(IScopeContext context) {
-    	return loadOptions(context, CleanUpProfileManager.PROFILE_KEY, CleanUpProfileManager.DEFAULT_PROFILE);
-    }
-    
-    public static Map loadSaveParticipantOptions(IScopeContext context) {
-    	return loadOptions(context, CLEANUP_ON_SAVE_PROFILE, CleanUpProfileManager.DEFAULT_SAVE_PARTICIPANT_PROFILE);
-    }
-
     public static void initDefaults(IPreferenceStore store) {
     	Map settings= getEclipseDefaultSettings();
     	for (Iterator iterator= settings.keySet().iterator(); iterator.hasNext();) {
@@ -942,54 +970,9 @@ public class CleanUpConstants {
 	        store.setDefault(key, (String)settings.get(key));
         }
     	
-    	store.setDefault(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, true);
-    	store.setDefault(CLEANUP_ON_SAVE_PROFILE, CleanUpProfileManager.DEFAULT_SAVE_PARTICIPANT_PROFILE);
-    }
-
-	private static Map loadOptions(IScopeContext context, String profileIdKey, String defaultProfileId) {
-		IEclipsePreferences contextNode= context.getNode(JavaUI.ID_PLUGIN);
-		String id= contextNode.get(profileIdKey, null);
-		if (id == null) {
-			if (ProjectScope.SCOPE.equals(context.getName())) {
-				id= new InstanceScope().getNode(JavaUI.ID_PLUGIN).get(profileIdKey, null);
-			}
-			if (id == null) {
-				id= new DefaultScope().getNode(JavaUI.ID_PLUGIN).get(profileIdKey, defaultProfileId);
-			}
-		}
-		
-		Hashtable profiles= loadProfiles();
-		Profile profile= (Profile)profiles.get(id);
-		if (profile == null)
-			profile= (Profile)profiles.get(defaultProfileId);
-		
-		return profile.getSettings();
-	}
-    
-    private static Hashtable loadProfiles() {
-		InstanceScope instanceScope= new InstanceScope();
-		
-        CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
-		ProfileStore profileStore= new ProfileStore(CLEANUP_PROFILES, versioner);
-		
-		List list= null;
-        try {
-            list= profileStore.readProfiles(instanceScope);
-        } catch (CoreException e1) {
-            JavaPlugin.log(e1);
-        }
-        if (list == null)
-        	list= new ArrayList();
-        
-		CleanUpProfileManager.addBuiltInProfiles(list, versioner);
-		
-		Hashtable profileIdsTable= new Hashtable();
-		for (Iterator iterator= list.iterator(); iterator.hasNext();) {
-            Profile profile= (Profile)iterator.next();
-            profileIdsTable.put(profile.getID(), profile);
-        }
-     
-		return profileIdsTable;
+    	store.setDefault(SHOW_CLEAN_UP_WIZARD, true);
+    	store.setDefault(CLEANUP_PROFILE, DEFAULT_PROFILE);
+    	store.setDefault(CLEANUP_ON_SAVE_PROFILE, DEFAULT_SAVE_PARTICIPANT_PROFILE);
     }
 
 }

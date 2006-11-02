@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -65,7 +66,6 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.CleanUpPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CodeFormatingTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CodeStyleTabPage;
@@ -117,10 +117,10 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 	    		IEclipsePreferences instancePreferences= instanceScope.getNode(JavaUI.ID_PLUGIN);
 	
 	    		final String workbenchProfileId;
-	    		if (instancePreferences.get(CleanUpProfileManager.PROFILE_KEY, null) != null) {
-	    			workbenchProfileId= instancePreferences.get(CleanUpProfileManager.PROFILE_KEY, null);
+	    		if (instancePreferences.get(CleanUpConstants.CLEANUP_PROFILE, null) != null) {
+	    			workbenchProfileId= instancePreferences.get(CleanUpConstants.CLEANUP_PROFILE, null);
 	    		} else {
-	    			workbenchProfileId= CleanUpProfileManager.DEFAULT_PROFILE;
+	    			workbenchProfileId= CleanUpConstants.DEFAULT_PROFILE;
 	    		}
 	    		
 				return getProjectProfileName((IJavaProject)element, fProfileIdsTable, workbenchProfileId);
@@ -129,21 +129,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		}
 		
 		private Hashtable loadProfiles() {
-			InstanceScope instanceScope= new InstanceScope();
-			
-	        CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
-			ProfileStore profileStore= new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, versioner);
-			
-    		List list= null;
-            try {
-	            list= profileStore.readProfiles(instanceScope);
-            } catch (CoreException e1) {
-	            JavaPlugin.log(e1);
-            }
-            if (list == null)
-            	list= new ArrayList();
-            
-    		CleanUpProfileManager.addBuiltInProfiles(list, versioner);
+    		List list= CleanUpPreferenceUtil.loadProfiles(new InstanceScope());
     		
     		Hashtable profileIdsTable= new Hashtable();
     		for (Iterator iterator= list.iterator(); iterator.hasNext();) {
@@ -157,10 +143,10 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		private Profile getProjectProfile(final IJavaProject project, Hashtable profileIdsTable) {
 			ProjectScope projectScope= new ProjectScope(project.getProject());
 	        IEclipsePreferences node= projectScope.getNode(JavaUI.ID_PLUGIN);
-	        if (node.get(CleanUpProfileManager.PROFILE_KEY, null) == null)
+	        if (node.get(CleanUpConstants.CLEANUP_PROFILE, null) == null)
 	        	return null;
 	        
-	        String id= node.get(CleanUpProfileManager.PROFILE_KEY, null);
+	        String id= node.get(CleanUpConstants.CLEANUP_PROFILE, null);
 	        return (Profile)profileIdsTable.get(id);
         }
 

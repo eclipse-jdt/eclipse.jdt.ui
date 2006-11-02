@@ -26,39 +26,22 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 
 public class CleanUpProfileManager extends ProfileManager {
 	
-	private final static String ECLIPSE_PROFILE= "org.eclipse.jdt.ui.default.eclipse_clean_up_profile"; //$NON-NLS-1$
-	private final static String SAVE_PARTICIPANT_PROFILE= "org.eclipse.jdt.ui.default.save_participant_clean_up_profile"; //$NON-NLS-1$
-	public final static String DEFAULT_PROFILE= ECLIPSE_PROFILE;
-	public final static String DEFAULT_SAVE_PARTICIPANT_PROFILE= SAVE_PARTICIPANT_PROFILE;
-  
 	public static KeySet[] KEY_SETS= {
 		new KeySet(JavaUI.ID_PLUGIN, new ArrayList(CleanUpConstants.getEclipseDefaultSettings().keySet()))		
 	};
 	
-	public final static String PROFILE_KEY= "cleanup_profile"; //$NON-NLS-1$
-	private final static String FORMATTER_SETTINGS_VERSION= "cleanup_settings_version";  //$NON-NLS-1$
 	private final PreferencesAccess fPreferencesAccess;
 
 	public CleanUpProfileManager(List profiles, IScopeContext context, PreferencesAccess preferencesAccess, IProfileVersioner profileVersioner) {
-	    super(addBuiltInProfiles(profiles, profileVersioner), context, preferencesAccess, profileVersioner, KEY_SETS, PROFILE_KEY, FORMATTER_SETTINGS_VERSION);
+	    super(profiles, context, preferencesAccess, profileVersioner, KEY_SETS, CleanUpConstants.CLEANUP_PROFILE, CleanUpConstants.CLEANUP_SETTINGS_VERSION_KEY);
 		fPreferencesAccess= preferencesAccess;
     }
-	
-	public static List addBuiltInProfiles(List profiles, IProfileVersioner profileVersioner) {
-		final Profile eclipseProfile= new BuiltInProfile(ECLIPSE_PROFILE, CleanUpMessages.CleanUpProfileManager_ProfileName_EclipseBuildIn, CleanUpConstants.getEclipseDefaultSettings(), 2, profileVersioner.getCurrentVersion(), profileVersioner.getProfileKind());
-		profiles.add(eclipseProfile);
-		
-		final Profile saveParticipantProfile= new BuiltInProfile(SAVE_PARTICIPANT_PROFILE, CleanUpMessages.CleanUpProfileManager_save_participant_profileName, CleanUpConstants.getSaveParticipantSettings(), 1, profileVersioner.getCurrentVersion(), profileVersioner.getProfileKind());
-		profiles.add(saveParticipantProfile);
-		
-		return profiles;
-	}
 	
 	/* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.preferences.cleanup.ProfileManager#getDefaultProfile()
      */
     public Profile getDefaultProfile() {
-    	return getProfile(DEFAULT_PROFILE);
+    	return getProfile(CleanUpConstants.DEFAULT_PROFILE);
     }
     
     /**

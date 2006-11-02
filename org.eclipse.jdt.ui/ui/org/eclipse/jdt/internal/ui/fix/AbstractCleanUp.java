@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 
 public abstract class AbstractCleanUp implements ICleanUp {
 
@@ -152,7 +152,7 @@ public abstract class AbstractCleanUp implements ICleanUp {
 			context= new InstanceScope();
     	}
     	
-		fFlags= createFlag(CleanUpConstants.loadOptions(context));
+		fFlags= createFlag(CleanUpPreferenceUtil.loadOptions(context));
     }
     
     /**

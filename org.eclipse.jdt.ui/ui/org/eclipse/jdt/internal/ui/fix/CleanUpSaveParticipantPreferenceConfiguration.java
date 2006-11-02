@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
@@ -36,6 +35,7 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.preferences.IWorkingCopyManager;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -79,21 +79,11 @@ public class CleanUpSaveParticipantPreferenceConfiguration implements ISaveParti
 	public Control createControl(Composite parent, IWorkingCopyManager manager) {
 		fPreferencesAccess= PreferencesAccess.getWorkingCopyPreferences(manager);
 
-		CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
-		fProfileStore= new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, versioner);
-		List profiles= null;
-		try {
-			profiles= fProfileStore.readProfiles(new InstanceScope());
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		}
-		if (profiles == null)
-			profiles= new ArrayList();
-		CleanUpProfileManager.addBuiltInProfiles(profiles, versioner);
+		List profiles= CleanUpPreferenceUtil.loadProfiles(fPreferencesAccess.getInstanceScope());
 
-		fProfileManager= new ProfileManager(profiles, new InstanceScope(), fPreferencesAccess, versioner, CleanUpProfileManager.KEY_SETS, CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, "cleanup_settings_version") { //$NON-NLS-1$
+		fProfileManager= new ProfileManager(profiles, new InstanceScope(), fPreferencesAccess, new CleanUpProfileVersioner(), CleanUpProfileManager.KEY_SETS, CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, "cleanup_settings_version") { //$NON-NLS-1$
 			public Profile getDefaultProfile() {
-				return getProfile(CleanUpProfileManager.DEFAULT_SAVE_PARTICIPANT_PROFILE);
+				return getProfile(CleanUpConstants.DEFAULT_SAVE_PARTICIPANT_PROFILE);
 			}
 		};
 
@@ -132,7 +122,9 @@ public class CleanUpSaveParticipantPreferenceConfiguration implements ISaveParti
 				editSelectedProfile();
 			}
 		});
-
+		
+		fProfileStore= new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, new CleanUpProfileVersioner());
+		
 		final boolean[] listenerEnabled= new boolean[] {true};
 		fProfileManager.addObserver(new Observer() {
 			public void update(Observable o, Object arg) {

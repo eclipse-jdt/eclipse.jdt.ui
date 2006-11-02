@@ -13,12 +13,7 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.swt.widgets.Composite;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-
-import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpConfigurationBlock;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileConfigurationBlock;
 
 /*
@@ -61,12 +56,4 @@ public class CleanUpPreferencePage extends ProfilePreferencePage {
 	protected String getPropertyPageID() {
 		return PROP_ID;
 	}
-
-	/**
-     * @param store
-     */
-    public static void initDefaults(IPreferenceStore store) {
-    	store.setDefault(CleanUpProfileManager.PROFILE_KEY, CleanUpProfileManager.DEFAULT_PROFILE);
-    	CleanUpConstants.initDefaults(store);
-    }
 }
