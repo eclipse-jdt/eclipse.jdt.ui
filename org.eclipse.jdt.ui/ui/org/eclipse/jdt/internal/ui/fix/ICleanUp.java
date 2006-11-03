@@ -15,8 +15,6 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jface.dialogs.IDialogSettings;
-
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -74,14 +72,6 @@ public interface ICleanUp {
 	 * @return true if the caller needs an up to date AST
 	 */
 	public abstract boolean needsFreshAST(CompilationUnit compilationUnit);
-
-	/**
-	 * Persist current settings of this in <code>settings</code>
-	 * 
-	 * @param settings The settings to store to, not null
-	 * @deprecated
-	 */
-	public abstract void saveSettings(IDialogSettings settings);
 	
 	/**
 	 * Description for each operation this clean up will execute
@@ -89,6 +79,8 @@ public interface ICleanUp {
 	 * @return descriptions or null
 	 */
 	public String[] getDescriptions();
+	
+	public void initialize(Map settings) throws CoreException;
 	
 	/**
 	 * After call to checkPreConditions clients will start creating fixes for <code>compilationUnits</code>
@@ -131,31 +123,6 @@ public interface ICleanUp {
 	 * @return The maximal number of fixes or -1 if unknown.
 	 */
 	public abstract int maximalNumberOfFixes(CompilationUnit compilationUnit);
-
-	/**
-	 * Default flags for this clean up.
-	 * 
-	 * @return Default flags for this clean up >= 0
-	 * @deprecated
-	 */
-	public abstract int getDefaultFlag();
-
-	/**
-	 * Set flag with id to b.
-	 * 
-	 * @param id The id of the flag to set
-	 * @param b The value for the flag
-	 * @deprecated
-	 */
-	public void setFlag(int id, boolean b);
-
-	/**
-	 * Is flag with id enabled?
-	 * 
-	 * @return True if flag with id is enabled
-	 * @deprecated
-	 */
-	public boolean isFlag(int id);
 
 	/**
 	 * A code snippet which complies to the

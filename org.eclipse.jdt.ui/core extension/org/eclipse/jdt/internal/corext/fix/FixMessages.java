@@ -24,6 +24,7 @@ public final class FixMessages extends NLS {
 	
 	public static String CleanUpRefactoring_checkingPostConditions_message;
 	public static String CleanUpRefactoring_clean_up_multi_chang_name;
+	public static String CleanUpRefactoring_could_not_retrive_profile;
 	public static String CleanUpRefactoring_Parser_Startup_message;
 	public static String CleanUpRefactoring_Refactoring_name;
 	public static String CleanUpRefactoring_ProcessingCompilationUnit_message;

@@ -476,6 +476,20 @@ public class CleanUpConstants {
 	 * @since 3.3
 	 */
 	public static final String VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES= "cleanup.make_local_variable_final"; //$NON-NLS-1$
+	
+	/**
+	 * Adds type parameters to raw type references.<p>
+	 * i.e.:<pre><code>
+	 * List l; -> List<Object> l;</code></pre>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * Default value: Not set<br>
+	 * <br>
+	 * @see #TRUE
+	 * @see #FALSE
+	 * @since 3.3
+	 */
+	public static final String VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES= "cleanup.use_arguments_for_raw_type_references"; //$NON-NLS-1$
 
 	/**
 	 * Removes unused imports.

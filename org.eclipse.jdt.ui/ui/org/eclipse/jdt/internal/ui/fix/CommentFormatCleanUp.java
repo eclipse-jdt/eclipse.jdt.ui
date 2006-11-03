@@ -16,8 +16,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jface.dialogs.IDialogSettings;
-
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -26,33 +24,7 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class CommentFormatCleanUp extends AbstractCleanUp {
-	
-	/**
-	 * Format single line comment in java code.
-	 */
-	public static final int SINGLE_LINE_COMMENT= 1;
-	
-	/**
-	 * Format multi line comment in java code.
-	 */
-	public static final int MULTI_LINE_COMMENT= 2;
-	
-	/**
-	 * Format java doc comments
-	 */
-	public static final int JAVA_DOC= 4;
-	
-	private static final int DEFAULT_FLAG= 0;
-	private static final String SECTION_NAME= "CleanUp_CommentFormat"; //$NON-NLS-1$
-	
-	public CommentFormatCleanUp(int flag) {
-		super(flag);
-	}
-
-	public CommentFormatCleanUp(IDialogSettings settings) {
-		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
-	}
-	
+		
 	public CommentFormatCleanUp(Map options) {
 		super(options);
 	}
@@ -65,10 +37,11 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 		if (compilationUnit == null)
 			return null;
 		
-		return CommentFormatFix.createCleanUp(compilationUnit, 
-				isFlag(SINGLE_LINE_COMMENT),
-				isFlag(MULTI_LINE_COMMENT),
-				isFlag(JAVA_DOC));
+		boolean formatComment= isEnabled(CleanUpConstants.FORMAT_COMMENT);
+		return CommentFormatFix.createCleanUp(compilationUnit,
+				formatComment && isEnabled(CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT),
+				formatComment && isEnabled(CleanUpConstants.FORMAT_MULTI_LINE_COMMENT),
+				formatComment && isEnabled(CleanUpConstants.FORMAT_JAVADOC));
 	}
 	
 	/**
@@ -84,21 +57,17 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 	public Map getRequiredOptions() {
 		return null;
 	}
-
-	public void saveSettings(IDialogSettings settings) {
-		super.saveSettings(getSection(settings, SECTION_NAME));
-	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	public String[] getDescriptions() {
 		List result= new ArrayList();
-		if (isFlag(MULTI_LINE_COMMENT))
+		if (isEnabled(CleanUpConstants.FORMAT_COMMENT) && isEnabled(CleanUpConstants.FORMAT_MULTI_LINE_COMMENT))
 			result.add(MultiFixMessages.CommentFormatCleanUp_multiLineComments);
-		if (isFlag(SINGLE_LINE_COMMENT))
+		if (isEnabled(CleanUpConstants.FORMAT_COMMENT) && isEnabled(CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT))
 			result.add(MultiFixMessages.CommentFormatCleanUp_singleLineComments);
-		if (isFlag(JAVA_DOC))
+		if (isEnabled(CleanUpConstants.FORMAT_COMMENT) && isEnabled(CleanUpConstants.FORMAT_JAVADOC))
 			result.add(MultiFixMessages.CommentFormatCleanUp_javadocComments);
 		return (String[])result.toArray(new String[result.size()]);
 	}
@@ -116,9 +85,9 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 		buf.append("\n"); //$NON-NLS-1$
 		buf.append("//A single line comment\n"); //$NON-NLS-1$
 		return CommentFormatFix.format(buf.toString(),
-				isFlag(SINGLE_LINE_COMMENT),
-				isFlag(MULTI_LINE_COMMENT),
-				isFlag(JAVA_DOC));
+				isEnabled(CleanUpConstants.FORMAT_COMMENT) && isEnabled(CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT),
+				isEnabled(CleanUpConstants.FORMAT_COMMENT) && isEnabled(CleanUpConstants.FORMAT_MULTI_LINE_COMMENT),
+				isEnabled(CleanUpConstants.FORMAT_COMMENT) && isEnabled(CleanUpConstants.FORMAT_JAVADOC));
 	}
 
 	/**
@@ -128,30 +97,8 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 		return -1;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public int getDefaultFlag() {
-		return DEFAULT_FLAG;
-	}
-
     public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
 	    return false;
     }
     
-    protected int createFlag(Map options) {
-	    int flag= 0;
-		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.FORMAT_COMMENT))) {
-			if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT))) {
-				flag|= SINGLE_LINE_COMMENT;
-			}
-			if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.FORMAT_MULTI_LINE_COMMENT))) {
-				flag|= MULTI_LINE_COMMENT;
-			}
-			if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.FORMAT_JAVADOC))) {
-				flag|= JAVA_DOC;
-			}
-		}
-		return flag;
-    }
 }

@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -352,7 +353,9 @@ public class UnusedCodeFix extends AbstractFix {
 			if (node != null) {
 				String label= FixMessages.UnusedCodeFix_RemoveImport_description;
 				RemoveImportOperation operation= new RemoveImportOperation(node);
-				return new UnusedCodeFix(label, compilationUnit, new IFixRewriteOperation[] {operation}, UnusedCodeCleanUp.REMOVE_UNUSED_IMPORTS);
+				Map options= new Hashtable();
+				options.put(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpConstants.TRUE);
+				return new UnusedCodeFix(label, compilationUnit, new IFixRewriteOperation[] {operation}, options);
 			}
 		}
 		return null;
@@ -372,7 +375,7 @@ public class UnusedCodeFix extends AbstractFix {
 						
 					String label= getDisplayString(name, binding);
 					RemoveUnusedMemberOperation operation= new RemoveUnusedMemberOperation(new SimpleName[] {name});
-					return new UnusedCodeFix(label, compilationUnit, new IFixRewriteOperation[] {operation}, getCleanUpFlag(binding));
+					return new UnusedCodeFix(label, compilationUnit, new IFixRewriteOperation[] {operation}, getCleanUpOptions(binding));
 				}
 			}
 		}
@@ -551,15 +554,12 @@ public class UnusedCodeFix extends AbstractFix {
 	private static SimpleName getUnusedName(CompilationUnit compilationUnit, IProblemLocation problem) {
 		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
 
-		SimpleName name= null;
 		if (selectedNode instanceof MethodDeclaration) {
-			name= ((MethodDeclaration) selectedNode).getName();
+			return ((MethodDeclaration) selectedNode).getName();
 		} else if (selectedNode instanceof SimpleName) {
-			name= (SimpleName) selectedNode;
+			return (SimpleName) selectedNode;
 		}
-		if (name != null) {
-			return name;
-		}
+		
 		return null;
 	}
 	
@@ -585,21 +585,28 @@ public class UnusedCodeFix extends AbstractFix {
 		}
 	}
 	
-	private static int getCleanUpFlag(IBinding binding) {
+	private static Map getCleanUpOptions(IBinding binding) {
+		Map result= new Hashtable();
+		
+		result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS, CleanUpConstants.TRUE);		
 		switch (binding.getKind()) {
 			case IBinding.TYPE:
-				return UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_TYPES;
+				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES, CleanUpConstants.TRUE);
+				break;
 			case IBinding.METHOD:
 				if (((IMethodBinding) binding).isConstructor()) {
-					return UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_CONSTRUCTORS;
+					result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS, CleanUpConstants.TRUE);
 				} else {
-					return UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_METHODS;
+					result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS, CleanUpConstants.TRUE);
 				}
+				break;
 			case IBinding.VARIABLE:
-					return UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS |UnusedCodeCleanUp.REMOVE_UNUSED_LOCAL_VARIABLES;
-			default:
-				return 0;
+				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS, CleanUpConstants.TRUE);
+				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES, CleanUpConstants.TRUE);
+				break;
 		}
+
+		return result;
 	}
 	
 	private static ImportDeclaration getImportDeclaration(IProblemLocation problem, CompilationUnit compilationUnit) {
@@ -613,19 +620,23 @@ public class UnusedCodeFix extends AbstractFix {
 		return null;
 	}
 	
-	private final int fCleanUpFlags;
+	private final Map fCleanUpOptions;
 	
 	private UnusedCodeFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations) {
-		this(name, compilationUnit, fixRewriteOperations, 0);
+		this(name, compilationUnit, fixRewriteOperations, null);
 	}
 	
-	private UnusedCodeFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations, int cleanUpFlag) {
+	private UnusedCodeFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations, Map options) {
 		super(name, compilationUnit, fixRewriteOperations);
-		fCleanUpFlags= cleanUpFlag;
+		if (options == null) {
+			fCleanUpOptions= new Hashtable();			
+		} else {
+			fCleanUpOptions= options;
+		}
 	}
 
 	public UnusedCodeCleanUp getCleanUp() {
-		return new UnusedCodeCleanUp(fCleanUpFlags);
+		return new UnusedCodeCleanUp(fCleanUpOptions);
 	}
 
 }

@@ -18,8 +18,6 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jface.dialogs.IDialogSettings;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -38,37 +36,21 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CodeFormatCleanUp extends AbstractCleanUp {
 	
-	/**
-	 * Format Java Source Code
-	 */
-	public static final int FORMAT_CODE= 1;
-	
-	private static final int DEFAULT_FLAG= 0;
-	private static final String SECTION_NAME= "CleanUp_CodeFormat"; //$NON-NLS-1$
-
-	public CodeFormatCleanUp(int flag) {
-		super(flag);
-	}
-
-	public CodeFormatCleanUp(IDialogSettings settings) {
-		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
-	}
-
-	public CodeFormatCleanUp(Map options) {
-		super(options);
-	}
-	
 	public CodeFormatCleanUp() {
 		super();
     }
+	
+	public CodeFormatCleanUp(Map options) {
+		super(options);
+	}
 
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 		
-		return CodeFormatFix.createCleanUp(compilationUnit, isFlag(FORMAT_CODE));
+		return CodeFormatFix.createCleanUp(compilationUnit, isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE));
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -82,16 +64,12 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 	public Map getRequiredOptions() {
 		return null;
 	}
-
-	public void saveSettings(IDialogSettings settings) {
-		super.saveSettings(getSection(settings, SECTION_NAME));
-	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	public String[] getDescriptions() {
-		if (isFlag(FORMAT_CODE))
+		if (isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE))
 			return new String[] {MultiFixMessages.CodeFormatCleanUp_description};
 		
 		return null;
@@ -108,7 +86,7 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 		buf.append("}\n"); //$NON-NLS-1$
 		
 		String original= buf.toString();
-		if (!isFlag(FORMAT_CODE))
+		if (!isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE))
 			return original;
 		
 		HashMap preferences= new HashMap(JavaCore.getOptions());
@@ -134,24 +112,7 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 		return -1;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public int getDefaultFlag() {
-		return DEFAULT_FLAG;
-	}
-
     public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
 	    return false;
-    }
-    
-	protected int createFlag(Map options) {
-	    int flag= 0;
-		
-		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.FORMAT_SOURCE_CODE))) {
-			flag|= FORMAT_CODE;
-		}
-		
-		return flag;
-    }
+    }    
 }

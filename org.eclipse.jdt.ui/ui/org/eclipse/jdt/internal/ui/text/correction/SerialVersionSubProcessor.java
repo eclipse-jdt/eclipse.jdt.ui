@@ -11,12 +11,15 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Collection;
+import java.util.Hashtable;
+import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.PotentialProgrammingProblemsFix;
 
@@ -53,9 +56,15 @@ public final class SerialVersionSubProcessor {
 		IFix[] fixes= PotentialProgrammingProblemsFix.createMissingSerialVersionFixes(context.getASTRoot(), location);
 		if (fixes != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
-			FixCorrectionProposal prop1= new SerialVersionDefaultProposal(fixes[0], new PotentialProgrammingProblemsCleanUp(PotentialProgrammingProblemsCleanUp.ADD_DEFAULT_SERIAL_VERSION_ID), 9, image, context);
+			Map options= new Hashtable();
+			options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID, CleanUpConstants.TRUE);
+			options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, CleanUpConstants.TRUE);
+			FixCorrectionProposal prop1= new SerialVersionDefaultProposal(fixes[0], new PotentialProgrammingProblemsCleanUp(options), 9, image, context);
 			proposals.add(prop1);
-			FixCorrectionProposal prop2= new SerialVersionHashProposal(fixes[1], new PotentialProgrammingProblemsCleanUp(PotentialProgrammingProblemsCleanUp.ADD_CALCULATED_SERIAL_VERSION_ID), 9, image, context);
+			options= new Hashtable();
+			options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID, CleanUpConstants.TRUE);
+			options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED, CleanUpConstants.TRUE);
+			FixCorrectionProposal prop2= new SerialVersionHashProposal(fixes[1], new PotentialProgrammingProblemsCleanUp(options), 9, image, context);
 			proposals.add(prop2);
 		}
 	}

@@ -16,8 +16,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jface.dialogs.IDialogSettings;
-
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -28,39 +26,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class VariableDeclarationCleanUp extends AbstractCleanUp {
 
-	/**
-	 * Add a final modifier to private fields where possible
-	 * i.e.:<pre><code>
-	 * private int field= 0; -> private final int field= 0;</code></pre>
-	 */
-	public static final int ADD_FINAL_MODIFIER_FIELDS= 1;
-	
-	/**
-	 * Add a final modifier to method parameters where possible
-	 * i.e.:<pre><code>
-	 * void foo(int i) {} -> void foo(final int i) {}</code></pre>
-	 */
-	public static final int ADD_FINAL_MODIFIER_PARAMETERS= 2;
-	
-	/**
-	 * Add a final modifier to local variables where possible
-	 * i.e.:<pre><code>
-	 * int i= 0; -> final int i= 0;</code></pre>
-	 */
-	public static final int ADD_FINAL_MODIFIER_LOCAL_VARIABLES= 4;
-	
-
-	private static final int DEFAULT_FLAG= 0;
-	private static final String SECTION_NAME= "CleanUp_VariableDeclarations"; //$NON-NLS-1$
-
-	public VariableDeclarationCleanUp(int flag) {
-		super(flag);
-	}
-
-	public VariableDeclarationCleanUp(IDialogSettings settings) {
-		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
-	}
-	
 	public VariableDeclarationCleanUp(Map options) {
 		super(options);
 	}
@@ -76,10 +41,11 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 		if (compilationUnit == null)
 			return null;
 		
-		return VariableDeclarationFix.createCleanUp(compilationUnit, 
-				isFlag(ADD_FINAL_MODIFIER_FIELDS),
-				isFlag(ADD_FINAL_MODIFIER_PARAMETERS),
-				isFlag(ADD_FINAL_MODIFIER_LOCAL_VARIABLES));
+		boolean addFinal= isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		return VariableDeclarationFix.createCleanUp(compilationUnit,
+				addFinal && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS),
+				addFinal && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS),
+				addFinal && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES));
 	}
 
 	/**
@@ -96,21 +62,17 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 	public Map getRequiredOptions() {
 		return null;
 	}
-	
-	public void saveSettings(IDialogSettings settings) {
-		super.saveSettings(getSection(settings, SECTION_NAME));
-	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public String[] getDescriptions() {
 		List result= new ArrayList();
-		if (isFlag(ADD_FINAL_MODIFIER_FIELDS))
+		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS))
 			result.add(MultiFixMessages.VariableDeclarationCleanUp_AddFinalField_description);
-		if (isFlag(ADD_FINAL_MODIFIER_PARAMETERS))
+		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS))
 			result.add(MultiFixMessages.VariableDeclarationCleanUp_AddFinalParameters_description);
-		if (isFlag(ADD_FINAL_MODIFIER_LOCAL_VARIABLES))
+		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES))
 			result.add(MultiFixMessages.VariableDeclarationCleanUp_AddFinalLocals_description);
 		
 		return (String[])result.toArray(new String[result.size()]);
@@ -119,17 +81,17 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 		
-		if (isFlag(ADD_FINAL_MODIFIER_FIELDS)) {
+		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS)) {
 			buf.append("private final int i= 0;\n"); //$NON-NLS-1$
 		} else {
 			buf.append("private int i= 0;\n"); //$NON-NLS-1$
 		}
-		if (isFlag(ADD_FINAL_MODIFIER_PARAMETERS)) {
+		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS)) {
 			buf.append("public void foo(final int j) {\n"); //$NON-NLS-1$
 		} else {
 			buf.append("public void foo(int j) {\n"); //$NON-NLS-1$
 		}
-		if (isFlag(ADD_FINAL_MODIFIER_LOCAL_VARIABLES)) {
+		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES)) {
 			buf.append("    final int k;\n"); //$NON-NLS-1$
 			buf.append("    int h;\n"); //$NON-NLS-1$
 			buf.append("    h= 0;\n"); //$NON-NLS-1$
@@ -155,31 +117,4 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
 		return -1;
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public int getDefaultFlag() {
-		return DEFAULT_FLAG;
-	}
-	
-    protected int createFlag(Map options) {
-    	int result= 0;
-    	
-    	if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL))) {
-    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES))) {
-    			result|= ADD_FINAL_MODIFIER_LOCAL_VARIABLES;
-    		}
-    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS))) {
-    			result|= ADD_FINAL_MODIFIER_PARAMETERS;
-    		}
-    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS))) {
-    			result|= ADD_FINAL_MODIFIER_FIELDS;
-    		}
-    	}
-    	
-	    return result;
-    }
-
-
 }

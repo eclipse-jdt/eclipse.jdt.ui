@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.Hashtable;
+import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -33,6 +34,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
@@ -111,6 +113,13 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(previews, expected);
 	}
 	
+	private CodeStyleCleanUp createCleanUp() {
+		Map options= new Hashtable();
+		options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpConstants.TRUE);
+		options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpConstants.TRUE);
+	    return new CodeStyleCleanUp(options);
+    }
+	
 	public void testNonStaticAccessTest01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -126,7 +135,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
+		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -157,7 +166,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
+		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -188,7 +197,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
+		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -232,7 +241,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
+		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -283,7 +292,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
+		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -330,7 +339,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
+		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -378,7 +387,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
+		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -429,7 +438,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
+		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -483,7 +492,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
+		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -528,7 +537,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
+		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -568,7 +577,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
+		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -615,7 +624,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
+		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();

@@ -16,8 +16,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jface.dialogs.IDialogSettings;
-
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -28,47 +26,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class ControlStatementsCleanUp extends AbstractCleanUp {
 	
-	/**
-	 * Adds block to control statement body if the body is not a block.<p>
-	 * i.e.:<pre><code>
-	 * 	 if (b) foo(); -> if (b) {foo();}</code></pre>
-	 */
-	public static final int ADD_BLOCK_TO_CONTROL_STATEMENTS= 1;
-	
-	/**
-	 * Convert for loops to enhanced for loops.<p>
-	 * i.e.:<pre><code>
-	 * for (int i = 0; i < array.length; i++) {} -> for (int element : array) {}</code></pre>
-	 */
-	public static final int CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP= 2;
-	
-	/**
-	 * Remove unnecessary blocks in control statement bodies.<p>
-	 * i.e.:<pre><code>
-	 *   if (b) {foo();} -> if (b) foo();</code></pre>
-	 */
-	public static final int REMOVE_UNNECESSARY_BLOCKS= 4;
-	
-	/**
-	 * Remove unnecessary blocks in control statement bodies if they contain
-	 * a single return or throw statement.<p>
-	 * i.e.:<pre><code>
-	 *   if (b) {return;} -> if (b) return;</code></pre>
-	 */
-	public static final int REMOVE_UNNECESSARY_BLOCKS_CONTAINING_RETURN_OR_THROW= 8;
-
-	private static final int DEFAULT_FLAG= 0;
-	private static final String SECTION_NAME= "CleanUp_ControlStatements"; //$NON-NLS-1$
-
-
-	public ControlStatementsCleanUp(int flag) {
-		super(flag);
-	}
-
-	public ControlStatementsCleanUp(IDialogSettings settings) {
-		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
-	}
-
 	public ControlStatementsCleanUp(Map options) {
 		super(options);
     }
@@ -85,10 +42,10 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 			return null;
 		
 		return ControlStatementsFix.createCleanUp(compilationUnit,
-				isFlag(ADD_BLOCK_TO_CONTROL_STATEMENTS),
-				isFlag(REMOVE_UNNECESSARY_BLOCKS),
-				isFlag(REMOVE_UNNECESSARY_BLOCKS_CONTAINING_RETURN_OR_THROW),
-				isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP));
+				isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS),
+				isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER),
+				isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW),
+				isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED));
 	}
 
 	/**
@@ -105,23 +62,19 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	public Map getRequiredOptions() {
 		return null;
 	}
-	
-	public void saveSettings(IDialogSettings settings) {
-		super.saveSettings(getSection(settings, SECTION_NAME));
-	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public String[] getDescriptions() {
 		List result= new ArrayList();
-		if (isFlag(ADD_BLOCK_TO_CONTROL_STATEMENTS))
+		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS))
 			result.add(MultiFixMessages.CodeStyleMultiFix_ConvertSingleStatementInControlBodeyToBlock_description);
-		if (isFlag(REMOVE_UNNECESSARY_BLOCKS))
+		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER))
 			result.add(MultiFixMessages.ControlStatementsCleanUp_RemoveUnnecessaryBlocks_description);
-		if (isFlag(REMOVE_UNNECESSARY_BLOCKS_CONTAINING_RETURN_OR_THROW))
+		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW))
 			result.add(MultiFixMessages.ControlStatementsCleanUp_RemoveUnnecessaryBlocksWithReturnOrThrow_description);
-		if (isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP))
+		if (isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED))
 			result.add(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description);
 		
 		return (String[])result.toArray(new String[result.size()]);
@@ -130,7 +83,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 		
-		if (isFlag(ADD_BLOCK_TO_CONTROL_STATEMENTS)) {
+		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS)) {
 			buf.append("if (obj == null) {\n"); //$NON-NLS-1$
 			buf.append("    throw new IllegalArgumentException();\n"); //$NON-NLS-1$
 			buf.append("}\n"); //$NON-NLS-1$
@@ -140,7 +93,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 			buf.append("} else {\n"); //$NON-NLS-1$
 			buf.append("    return;\n"); //$NON-NLS-1$
 			buf.append("}\n"); //$NON-NLS-1$
-		} else if (isFlag(REMOVE_UNNECESSARY_BLOCKS)){
+		} else if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER)){
 			buf.append("if (obj == null)\n"); //$NON-NLS-1$
 			buf.append("    throw new IllegalArgumentException();\n"); //$NON-NLS-1$
 			buf.append("\n"); //$NON-NLS-1$
@@ -150,7 +103,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 			buf.append("else\n"); //$NON-NLS-1$
 			buf.append("    return;\n"); //$NON-NLS-1$
 			buf.append("\n"); //$NON-NLS-1$
-		} else if (isFlag(REMOVE_UNNECESSARY_BLOCKS_CONTAINING_RETURN_OR_THROW)) {
+		} else if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW)) {
 			buf.append("if (obj == null)\n"); //$NON-NLS-1$
 			buf.append("    throw new IllegalArgumentException();\n"); //$NON-NLS-1$
 			buf.append("\n"); //$NON-NLS-1$
@@ -172,7 +125,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 			buf.append("\n"); //$NON-NLS-1$
 		}
 		buf.append("\n"); //$NON-NLS-1$
-		if (isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP)) {
+		if (isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED)) {
 			buf.append("for (int element : ids) {\n"); //$NON-NLS-1$
 			buf.append("    double value= element / 2; \n"); //$NON-NLS-1$
 			buf.append("    System.out.println(value);\n"); //$NON-NLS-1$
@@ -200,32 +153,4 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
 		return -1;
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public int getDefaultFlag() {
-		return DEFAULT_FLAG;
-	}
-
-    protected int createFlag(Map options) {
-    	int result= 0;
-    	
-    	if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS))) {
-    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS))) {
-    			result|= ADD_BLOCK_TO_CONTROL_STATEMENTS;
-    		}
-    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER))) {
-    			result|= REMOVE_UNNECESSARY_BLOCKS;
-    		}
-    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW))) {
-    			result|= REMOVE_UNNECESSARY_BLOCKS_CONTAINING_RETURN_OR_THROW;
-    		}
-    	}
-    	if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED))) {
-    		result|= CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP;
-    	}
-    	
-	    return result;
-    }
 }

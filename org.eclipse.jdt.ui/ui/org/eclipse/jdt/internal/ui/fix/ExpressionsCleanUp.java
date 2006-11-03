@@ -16,8 +16,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jface.dialogs.IDialogSettings;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -28,36 +26,7 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class ExpressionsCleanUp extends AbstractCleanUp {
-	
-	/**
-	 * Add paranoic parenthesis around conditional expressions.<p>
-	 * i.e.:<pre><code>
-	 * boolean b= i > 10 && i < 100 || i > 20;
-	 * ->
-	 * boolean b= ((i > 10) && (i < 100)) || (i > 20);</pre></code>
-	 */
-	public static final int ADD_PARANOIC_PARENTHESIS= 1;
-	
-	/**
-	 * Remove unnecessary parenthesis around conditional expressions.<p>
-	 * i.e.:<pre><code>
-	 * boolean b= ((i > 10) && (i < 100)) || (i > 20);
-	 * ->
-	 * boolean b= i > 10 && i < 100 || i > 20;</pre></code>
-	 */
-	public static final int REMOVE_UNNECESSARY_PARENTHESIS= 2;
-
-	private static final int DEFAULT_FLAG= 0;
-	private static final String SECTION_NAME= "CleanUp_Expressions"; //$NON-NLS-1$
-
-	public ExpressionsCleanUp(int flag) {
-		super(flag);
-	}
-
-	public ExpressionsCleanUp(IDialogSettings settings) {
-		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
-	}
-	
+		
 	public ExpressionsCleanUp(Map options) {
 		super(options);
 	}
@@ -70,9 +39,10 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 		if (compilationUnit == null)
 			return null;
 		
+		boolean usePrentheses= isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		return ExpressionsFix.createCleanUp(compilationUnit, 
-				isFlag(ADD_PARANOIC_PARENTHESIS),
-				isFlag(REMOVE_UNNECESSARY_PARENTHESIS));
+				usePrentheses && isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS),
+				usePrentheses && isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER));
 	}
 	
 	/**
@@ -85,20 +55,16 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 	public Map getRequiredOptions() {
 		return null;
 	}
-
-	public void saveSettings(IDialogSettings settings) {
-		super.saveSettings(getSection(settings, SECTION_NAME));
-	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	public String[] getDescriptions() {
 		List result= new ArrayList();
-		if (isFlag(ADD_PARANOIC_PARENTHESIS)) 
+		if (isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES) && isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS)) 
 			result.add(MultiFixMessages.ExpressionsCleanUp_addParanoiac_description);
 		
-		if (isFlag(REMOVE_UNNECESSARY_PARENTHESIS)) 
+		if (isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES) && isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER)) 
 			result.add(MultiFixMessages.ExpressionsCleanUp_removeUnnecessary_description);
 		
 		return (String[])result.toArray(new String[result.size()]);
@@ -107,9 +73,9 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 		
-		if (isFlag(ADD_PARANOIC_PARENTHESIS)) {
+		if (isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES) && isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS)) {
 			buf.append("boolean b= (((i > 0) && (i < 10)) || (i == 50));\n"); //$NON-NLS-1$
-		} else if (isFlag(REMOVE_UNNECESSARY_PARENTHESIS)) {
+		} else if (isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES) && isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER)) {
 			buf.append("boolean b= i > 0 && i < 10 || i == 50;\n"); //$NON-NLS-1$
 		} else {
 			buf.append("boolean b= (i > 0 && i < 10 || i == 50);\n"); //$NON-NLS-1$
@@ -122,12 +88,12 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 	 * {@inheritDoc}
 	 */
 	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-		if (isFlag(ADD_PARANOIC_PARENTHESIS)) {
+		if (isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES) && isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS)) {
 			IFix fix= ExpressionsFix.createAddParanoidalParenthesisFix(compilationUnit, new ASTNode[] {problem.getCoveredNode(compilationUnit)});
 			if (fix != null)
 				return true;
 		}
-		if (isFlag(REMOVE_UNNECESSARY_PARENTHESIS)) {
+		if (isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES) && isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER)) {
 			IFix fix= ExpressionsFix.createRemoveUnnecessaryParenthesisFix(compilationUnit, new ASTNode[] {problem.getCoveredNode(compilationUnit)});
 			if (fix != null)
 				return true;
@@ -141,27 +107,4 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
 		return -1;
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public int getDefaultFlag() {
-		return DEFAULT_FLAG;
-	}
-
-    protected int createFlag(Map options) {
-    	int result= 0;
-    	
-    	if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES))) {
-    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER))) {
-    			result|= REMOVE_UNNECESSARY_PARENTHESIS;
-    		}
-    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS))) {
-    			result|= ADD_PARANOIC_PARENTHESIS;
-    		}
-    	}
-    	
-	    return result;
-    }
-
 }

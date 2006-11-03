@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
@@ -103,7 +104,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 	private static class ParseListElement {
 
 		private final ICompilationUnit fUnit;
-		private ICleanUp[] fCleanUpsArray;
+		private final ICleanUp[] fCleanUpsArray;
 
 		public ParseListElement(ICompilationUnit unit) {
 			fUnit= unit;
@@ -128,8 +129,8 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 
 		private double fRealWork;
 		private int fFlushCount;
-		private int fSize;
-		private int fIndex;
+		private final int fSize;
+		private final int fIndex;
 
 		private CleanUpRefactoringProgressMonitor(IProgressMonitor monitor, int ticks, int size, int index) {
 			super(monitor, ticks);
@@ -422,8 +423,8 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 
 	private static final RefactoringTickProvider CLEAN_UP_REFACTORING_TICK_PROVIDER= new RefactoringTickProvider(0, 1, 0, 0);
 	
-	private List/*<ICleanUp>*/ fCleanUps;
-	private Hashtable/*<IJavaProject, List<ICompilationUnit>*/ fProjects;
+	private final List/*<ICleanUp>*/ fCleanUps;
+	private final Hashtable/*<IJavaProject, List<ICompilationUnit>*/ fProjects;
 
 	private Change fChange;
 
@@ -552,6 +553,9 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				ICompilationUnit[] cus= (ICompilationUnit[])compilationUnits.toArray(new ICompilationUnit[compilationUnits.size()]);
 				
 				ICleanUp[] cleanUps= (ICleanUp[])fCleanUps.toArray(new ICleanUp[fCleanUps.size()]);
+				result.merge(initialize(project));
+				if (result.hasFatalError())
+					return result;
 				
 				result.merge(checkPreConditions(project, cus, new SubProgressMonitor(pm, 3 * cleanUps.length)));
 				if (result.hasFatalError())
@@ -609,6 +613,20 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			subMonitor.done();			
 		}
 		return iter.getResult();
+	}
+	
+	private RefactoringStatus initialize(IJavaProject javaProject) throws CoreException {
+		Map options= CleanUpPreferenceUtil.loadOptions(new ProjectScope(javaProject.getProject()));
+		if (options == null) {
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(FixMessages.CleanUpRefactoring_could_not_retrive_profile, javaProject.getElementName()));
+		}
+		
+		ICleanUp[] cleanUps= getCleanUps();
+		for (int j= 0; j < cleanUps.length; j++) {
+			cleanUps[j].initialize(options);
+		}
+		
+		return new RefactoringStatus();
 	}
 
 	private RefactoringStatus checkPreConditions(IJavaProject javaProject, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {

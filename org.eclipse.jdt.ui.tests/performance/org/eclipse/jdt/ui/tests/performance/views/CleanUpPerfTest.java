@@ -26,8 +26,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
-import org.eclipse.jface.dialogs.IDialogSettings;
-
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -143,7 +141,6 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		cleanUpRefactoring.addCleanUp(new ICleanUp() {
 			public IFix createFix(CompilationUnit compilationUnit) throws CoreException {return null;}
 			public Map getRequiredOptions() {return null;}
-			public void saveSettings(IDialogSettings settings) {}
 			public String[] getDescriptions() {return null;}
 			public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
 				return true;
@@ -160,19 +157,13 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 			public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
 				return 0;
 			}
-			public int getDefaultFlag() {
-				return 0;
-			}
-			public void setFlag(int flag, boolean b) {
-			}
-			public boolean isFlag(int flag) {
-				return true;
-			}
 			public String getPreview() {
 				return null;
 			}
 			public boolean needsFreshAST(CompilationUnit compilationUnit) {
 	            return false;
+            }
+			public void initialize(Map settings) throws CoreException {
             }
 		});
 		
@@ -407,8 +398,11 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 		
-		cleanUpRefactoring.addCleanUp(new UnnecessaryCodeCleanUp(
-				UnnecessaryCodeCleanUp.REMOVE_UNUSED_CAST));
+		Map node= getNullSettings();
+		node.put(CleanUpConstants.REMOVE_UNNECESSARY_CASTS, CleanUpConstants.TRUE);		
+		storeSettings(node);
+		
+		cleanUpRefactoring.addCleanUp(new UnnecessaryCodeCleanUp());
 		
 		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
 		cleanUpRefactoring.createChange(null);

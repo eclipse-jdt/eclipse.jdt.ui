@@ -32,7 +32,6 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class ImportsCleanUp extends AbstractCleanUp {
 	
-	private static int ORGANIZE_IMPORTS= 1;
 	private CodeGenerationSettings fCodeGeneratorSettings;
 
 	public ImportsCleanUp(Map options) {
@@ -41,19 +40,6 @@ public class ImportsCleanUp extends AbstractCleanUp {
 	
 	public ImportsCleanUp() {
 		super();
-    }
-
-	/**
-     * {@inheritDoc}
-     */
-    protected int createFlag(Map options) {
-		int result= 0;
-    	
-		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.ORGANIZE_IMPORTS))) {
-			result |= ORGANIZE_IMPORTS;	
-		}
-    	
-	    return result;
     }
 
 	/**
@@ -68,7 +54,7 @@ public class ImportsCleanUp extends AbstractCleanUp {
      */
     public IFix createFix(final CompilationUnit compilationUnit) throws CoreException {
 		return ImportsFix.createCleanUp(compilationUnit, fCodeGeneratorSettings,
-				isFlag(ORGANIZE_IMPORTS));
+				isEnabled(CleanUpConstants.ORGANIZE_IMPORTS));
 	}
 
 	/**
@@ -84,7 +70,7 @@ public class ImportsCleanUp extends AbstractCleanUp {
     public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
 		RefactoringStatus result= super.checkPreConditions(project, compilationUnits, monitor);
     	
-		if (isFlag(ORGANIZE_IMPORTS))
+		if (isEnabled(CleanUpConstants.ORGANIZE_IMPORTS))
     		fCodeGeneratorSettings= JavaPreferencesSettings.getCodeGenerationSettings(project);
     	
     	return result;
@@ -98,18 +84,12 @@ public class ImportsCleanUp extends AbstractCleanUp {
     	
         return super.checkPostConditions(monitor);
     }
-	/**
-     * {@inheritDoc}
-     */
-    public int getDefaultFlag() {
-	    return 0;
-    }
 
 	/**
      * {@inheritDoc}
      */
     public String[] getDescriptions() {
-    	if (isFlag(ORGANIZE_IMPORTS))
+    	if (isEnabled(CleanUpConstants.ORGANIZE_IMPORTS))
     		return new String[] {MultiFixMessages.ImportsCleanUp_OrganizeImports_Description};
     		
 	    return null;
@@ -121,7 +101,7 @@ public class ImportsCleanUp extends AbstractCleanUp {
     public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 		
-		if (isFlag(ORGANIZE_IMPORTS)) {
+		if (isEnabled(CleanUpConstants.ORGANIZE_IMPORTS)) {
 			buf.append("import org.model.Engine;\n"); //$NON-NLS-1$
 		} else {
 			buf.append("import org.model.*;\n"); //$NON-NLS-1$
@@ -148,7 +128,7 @@ public class ImportsCleanUp extends AbstractCleanUp {
      * {@inheritDoc}
      */
     public boolean needsFreshAST(CompilationUnit compilationUnit) {
-    	if (isFlag(ORGANIZE_IMPORTS))
+    	if (isEnabled(CleanUpConstants.ORGANIZE_IMPORTS))
 	    	return true;
     	
     	return super.needsFreshAST(compilationUnit);

@@ -17,8 +17,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jface.dialogs.IDialogSettings;
-
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -35,47 +33,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  *
  */
 public class Java50CleanUp extends AbstractCleanUp {
-	
-	/**
-	 * Add '@Deprecated' annotation in front of deprecated members.<p>
-	 * i.e.:<pre><code>
-	 *      &#x2f;**@deprecated*&#x2f;
-	 *      int i;
-	 *  ->
-	 *      &#x2f;**@deprecated*&#x2f;
-	 *      &#x40;Deprecated
-	 *      int i;</pre></code>  
-	 */
-	public static final int ADD_DEPRECATED_ANNOTATION= 1;
-	
-	/**
-	 * Add '@Override' annotation in front of overriding methods.<p>
-	 * i.e.:<pre><code>
-	 * class E1 {void foo();}
-	 * class E2 extends E1 {
-	 * 	 void foo(); -> &#x40;Override void foo();
-	 * }</pre></code>  
-	 */
-	public static final int ADD_OVERRIDE_ANNOATION= 2;
-	
-	/**
-	 * Adds type parameters to raw type references.<p>
-	 * i.e.:<pre><code>
-	 * List l; -> List<Object> l;
-	 */
-	public static final int ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE= 8;
-	
-	private static final int DEFAULT_FLAG= ADD_DEPRECATED_ANNOTATION | ADD_OVERRIDE_ANNOATION;
-	private static final String SECTION_NAME= "CleanUp_Java50"; //$NON-NLS-1$
-	
-	public Java50CleanUp(int flag) {
-		super(flag);
-	}
-
-	public Java50CleanUp(IDialogSettings settings) {
-		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
-	}
-	
+		
 	public Java50CleanUp(Map options) {
 		super(options);
 	}
@@ -88,10 +46,11 @@ public class Java50CleanUp extends AbstractCleanUp {
 		if (compilationUnit == null)
 			return null;
 		
+		boolean addAnotations= isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		return Java50Fix.createCleanUp(compilationUnit, 
-				isFlag(ADD_OVERRIDE_ANNOATION), 
-				isFlag(ADD_DEPRECATED_ANNOTATION), 
-				isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE));
+				addAnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE), 
+				addAnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED), 
+				isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES));
 	}
 	
 	/**
@@ -102,27 +61,23 @@ public class Java50CleanUp extends AbstractCleanUp {
 			return null;
 		
 		return Java50Fix.createCleanUp(compilationUnit, problems,
-				isFlag(ADD_OVERRIDE_ANNOATION), 
-				isFlag(ADD_DEPRECATED_ANNOTATION),
-				isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE));
+				isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE), 
+				isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED),
+				isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES));
 	}
 
 	public Map getRequiredOptions() {
 		Map options= new Hashtable();
-		if (isFlag(ADD_OVERRIDE_ANNOATION))
+		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE))
 			options.put(JavaCore.COMPILER_PB_MISSING_OVERRIDE_ANNOTATION, JavaCore.WARNING);
 		
-		if (isFlag(ADD_DEPRECATED_ANNOTATION))
+		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED))
 			options.put(JavaCore.COMPILER_PB_MISSING_DEPRECATED_ANNOTATION, JavaCore.WARNING);
 		
-		if (isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE))
+		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES))
 			options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 				
 		return options;
-	}
-	
-	public void saveSettings(IDialogSettings settings) {
-		super.saveSettings(getSection(settings, SECTION_NAME));
 	}
 	
 	/**
@@ -130,11 +85,11 @@ public class Java50CleanUp extends AbstractCleanUp {
 	 */
 	public String[] getDescriptions() {
 		List result= new ArrayList();
-		if (isFlag(ADD_OVERRIDE_ANNOATION))
+		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE))
 			result.add(MultiFixMessages.Java50MultiFix_AddMissingOverride_description);
-		if (isFlag(ADD_DEPRECATED_ANNOTATION))
+		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED))
 			result.add(MultiFixMessages.Java50MultiFix_AddMissingDeprecated_description);
-		if (isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE))
+		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES))
 			result.add(MultiFixMessages.Java50CleanUp_AddTypeParameters_description);
 		return (String[])result.toArray(new String[result.size()]);
 	}
@@ -149,13 +104,13 @@ public class Java50CleanUp extends AbstractCleanUp {
 		buf.append("    /**\n"); //$NON-NLS-1$
 		buf.append("     * @deprecated\n"); //$NON-NLS-1$
 		buf.append("     */\n"); //$NON-NLS-1$
-		if (isFlag(ADD_DEPRECATED_ANNOTATION)) {
+		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED)) {
 			buf.append("    @Deprecated\n"); //$NON-NLS-1$
 		}
 		buf.append("    public void foo() {}\n"); //$NON-NLS-1$
 		buf.append("}\n"); //$NON-NLS-1$
 		buf.append("class ESub extends E {\n"); //$NON-NLS-1$
-		if (isFlag(ADD_OVERRIDE_ANNOATION)) {
+		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE)) {
 			buf.append("    @Override\n"); //$NON-NLS-1$
 		}
 		buf.append("    public void foo() {}\n"); //$NON-NLS-1$
@@ -168,17 +123,17 @@ public class Java50CleanUp extends AbstractCleanUp {
 	 * {@inheritDoc}
 	 */
 	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-		if (isFlag(ADD_OVERRIDE_ANNOATION)) {
+		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE)) {
 			Java50Fix fix= Java50Fix.createAddOverrideAnnotationFix(compilationUnit, problem);
 			if (fix != null)
 				return true;
 		}
-		if (isFlag(ADD_DEPRECATED_ANNOTATION)) {
+		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED)) {
 			Java50Fix fix= Java50Fix.createAddDeprectatedAnnotation(compilationUnit, problem);
 			if (fix != null)
 				return true;
 		}
-		if (isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE)) {
+		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES)) {
 			Java50Fix fix= Java50Fix.createRawTypeReferenceFix(compilationUnit, problem);
 			if (fix != null)
 				return true;
@@ -192,17 +147,17 @@ public class Java50CleanUp extends AbstractCleanUp {
 	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
 		int result= 0;
 		IProblem[] problems= compilationUnit.getProblems();
-		if (isFlag(ADD_OVERRIDE_ANNOATION)) {
+		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE)) {
 			result+= getNumberOfProblems(problems, IProblem.MissingOverrideAnnotation);
 		}
-		if (isFlag(ADD_DEPRECATED_ANNOTATION)) {
+		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED)) {
 			for (int i=0;i<problems.length;i++) {
 				int id= problems[i].getID();
 				if (id == IProblem.FieldMissingDeprecatedAnnotation || id == IProblem.MethodMissingDeprecatedAnnotation || id == IProblem.TypeMissingDeprecatedAnnotation)
 					result++;
 			}
 		}
-		if (isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE)) {
+		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES)) {
 			for (int i=0;i<problems.length;i++) {
 				int id= problems[i].getID();
 				if (id == IProblem.UnsafeTypeConversion || id == IProblem.RawTypeReference || id == IProblem.UnsafeRawMethodInvocation)
@@ -211,28 +166,5 @@ public class Java50CleanUp extends AbstractCleanUp {
 		}
 		return result;
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public int getDefaultFlag() {
-		return DEFAULT_FLAG;
-	}
-
-	protected int createFlag(Map options) {
-    	int result= 0;
-    	
-    	if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.ADD_MISSING_ANNOTATIONS))) {
-    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE))) {
-    			result|= ADD_OVERRIDE_ANNOATION;
-    		}
-    		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED))) {
-    			result|= ADD_DEPRECATED_ANNOTATION;
-    		}
-    	}
-    	
-	    return result;
-    }
-
 	
 }

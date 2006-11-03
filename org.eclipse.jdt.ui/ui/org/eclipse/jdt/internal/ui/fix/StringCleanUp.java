@@ -17,8 +17,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jface.dialogs.IDialogSettings;
-
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -36,31 +34,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  */
 public class StringCleanUp extends AbstractCleanUp {
 	
-	/**
-	 * Add '$NON-NLS$' tags to non externalized strings.<p>
-	 * i.e.:<pre><code>
-	 * 	 String s= ""; -> String s= ""; //$NON-NLS-1$</code></pre>  
-	 */
-	public static final int ADD_MISSING_NLS_TAG= 1;
-	
-	/**
-	 * Remove unnecessary '$NON-NLS$' tags.<p>
-	 * i.e.:<pre><code>
-	 *   String s; //$NON-NLS-1$ -> String s;</code></pre>
-	 */
-	public static final int REMOVE_UNNECESSARY_NLS_TAG= 2;
-	
-	private static final int DEFAULT_FLAG= REMOVE_UNNECESSARY_NLS_TAG;
-	private static final String SECTION_NAME= "CleanUp_NLSTag"; //$NON-NLS-1$
-
-	public StringCleanUp(int flag) {
-		super(flag);
-	}
-
-	public StringCleanUp(IDialogSettings settings) {
-		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
-	}
-	
 	public StringCleanUp(Map options) {
 		super(options);
 	}
@@ -74,8 +47,8 @@ public class StringCleanUp extends AbstractCleanUp {
 			return null;
 
 		return StringFix.createCleanUp(compilationUnit, 
-				isFlag(ADD_MISSING_NLS_TAG), 
-				isFlag(REMOVE_UNNECESSARY_NLS_TAG));
+				isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS), 
+				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS));
 	}
 	
 	/**
@@ -86,21 +59,17 @@ public class StringCleanUp extends AbstractCleanUp {
 			return null;
 		
 		return StringFix.createCleanUp(compilationUnit, problems,
-				isFlag(ADD_MISSING_NLS_TAG), 
-				isFlag(REMOVE_UNNECESSARY_NLS_TAG));
+				isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS), 
+				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS));
 	}
 
 	public Map getRequiredOptions() {
 		Map result= new Hashtable();
 		
-		if (isFlag(ADD_MISSING_NLS_TAG) || isFlag(REMOVE_UNNECESSARY_NLS_TAG))
+		if (isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS) || isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS))
 			result.put(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.WARNING);
 		
 		return result;
-	}
-	
-	public void saveSettings(IDialogSettings settings) {
-		super.saveSettings(getSection(settings, SECTION_NAME));
 	}
 
 	/**
@@ -108,9 +77,9 @@ public class StringCleanUp extends AbstractCleanUp {
 	 */
 	public String[] getDescriptions() {
 		List result= new ArrayList();
-		if (isFlag(ADD_MISSING_NLS_TAG))
+		if (isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS))
 			result.add(MultiFixMessages.StringMultiFix_AddMissingNonNls_description);
-		if (isFlag(REMOVE_UNNECESSARY_NLS_TAG))
+		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS))
 			result.add(MultiFixMessages.StringMultiFix_RemoveUnnecessaryNonNls_description);
 		return (String[])result.toArray(new String[result.size()]);
 	}
@@ -121,7 +90,7 @@ public class StringCleanUp extends AbstractCleanUp {
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 		
-		if (isFlag(REMOVE_UNNECESSARY_NLS_TAG)) {
+		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS)) {
 			buf.append("public String s;"); //$NON-NLS-1$
 		} else {
 			buf.append("public String s; //$NON-NLS-1$"); //$NON-NLS-1$
@@ -135,7 +104,7 @@ public class StringCleanUp extends AbstractCleanUp {
 	 * @throws CoreException 
 	 */
 	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-		return StringFix.createFix(compilationUnit, problem, isFlag(REMOVE_UNNECESSARY_NLS_TAG), isFlag(ADD_MISSING_NLS_TAG)) != null;
+		return StringFix.createFix(compilationUnit, problem, isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS), isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS)) != null;
 	}
 
 	/**
@@ -144,33 +113,12 @@ public class StringCleanUp extends AbstractCleanUp {
 	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
 		int result= 0;
 		IProblem[] problems= compilationUnit.getProblems();
-		if (isFlag(ADD_MISSING_NLS_TAG))
+		if (isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS))
 			result+= getNumberOfProblems(problems, IProblem.NonExternalizedStringLiteral);
 		
-		if (isFlag(REMOVE_UNNECESSARY_NLS_TAG))
+		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS))
 			result+= getNumberOfProblems(problems, IProblem.UnnecessaryNLSTag);
 		
 		return result;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public int getDefaultFlag() {
-		return DEFAULT_FLAG;
-	}
-	
-	protected int createFlag(Map options) {
-    	int result= 0;
-    	
-    	if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS))) {
-    		result|= REMOVE_UNNECESSARY_NLS_TAG;
-    	}
-    	if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.ADD_MISSING_NLS_TAGS))) {
-    		result|= ADD_MISSING_NLS_TAG;
-    	}
-    	
-	    return result;
-    }
-	
+	}	
 }

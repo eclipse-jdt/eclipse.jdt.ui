@@ -17,8 +17,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jface.dialogs.IDialogSettings;
-
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -30,23 +28,7 @@ import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
-	
-	/**
-	 * Removes unused casts.
-	 */
-	public static final int REMOVE_UNUSED_CAST= 1;
-	
-	private static final int DEFAULT_FLAG= REMOVE_UNUSED_CAST;
-	private static final String SECTION_NAME= "CleanUp_UnnecessaryCode"; //$NON-NLS-1$
-
-	public UnnecessaryCodeCleanUp(int flag) {
-		super(flag);
-	}
-
-	public UnnecessaryCodeCleanUp(IDialogSettings settings) {
-		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
-	}
-	
+		
 	public UnnecessaryCodeCleanUp(Map options) {
 		super(options);
 	}
@@ -66,7 +48,7 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 				false, 
 				false, 
 				false,
-				isFlag(REMOVE_UNUSED_CAST));
+				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS));
 	}
 	
 
@@ -84,20 +66,16 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 				false, 
 				false, 
 				false,
-				isFlag(REMOVE_UNUSED_CAST));
+				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS));
 	}
 
 	public Map getRequiredOptions() {
 		Map options= new Hashtable();
 
-		if (isFlag(REMOVE_UNUSED_CAST))
+		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS))
 			options.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, JavaCore.WARNING);
 
 		return options;
-	}
-
-	public void saveSettings(IDialogSettings settings) {
-		super.saveSettings(getSection(settings, SECTION_NAME));
 	}
 	
 	/**
@@ -105,7 +83,7 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 	 */
 	public String[] getDescriptions() {
 		List result= new ArrayList();
-		if (isFlag(REMOVE_UNUSED_CAST))
+		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS))
 			result.add(MultiFixMessages.UnusedCodeCleanUp_RemoveUnusedCasts_description);
 		return (String[])result.toArray(new String[result.size()]);
 	}
@@ -116,7 +94,7 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 		
-		if (isFlag(REMOVE_UNUSED_CAST)) {
+		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS)) {
 			buf.append("Boolean b= Boolean.TRUE;\n"); //$NON-NLS-1$
 		} else {
 			buf.append("Boolean b= (Boolean) Boolean.TRUE;\n"); //$NON-NLS-1$
@@ -129,7 +107,7 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 	 * {@inheritDoc}
 	 */
 	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-		if (isFlag(REMOVE_UNUSED_CAST)) {
+		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS)) {
 			IFix fix= UnusedCodeFix.createRemoveUnusedCastFix(compilationUnit, problem);
 			if (fix != null)
 				return true;
@@ -143,26 +121,8 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
 		int result= 0;
 		IProblem[] problems= compilationUnit.getProblems();
-		if (isFlag(REMOVE_UNUSED_CAST))
+		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS))
 			result+= getNumberOfProblems(problems, IProblem.UnnecessaryCast);
 		return result;
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public int getDefaultFlag() {
-		return DEFAULT_FLAG;
-	}
-	
-	protected int createFlag(Map options) {
-		int result= 0;
-		
-		if (CleanUpConstants.TRUE.equals(options.get(CleanUpConstants.REMOVE_UNNECESSARY_CASTS))) {
-			result|= REMOVE_UNUSED_CAST;
-		}
-		
-	    return result;
-    }
-
 }
