@@ -29,15 +29,22 @@ public final class FixMessages extends NLS {
 	public static String CleanUpRefactoring_Refactoring_name;
 	public static String CleanUpRefactoring_ProcessingCompilationUnit_message;
 	public static String CleanUpRefactoring_Initialize_message;
+	public static String CodeStyleFix_change_name;
+	public static String ControlStatementsFix_change_name;
 	
 	public static String ConvertIterableLoopOperation_RemoveUpdateExpression_Warning;
 	public static String ConvertIterableLoopOperation_RemoveUpdateExpressions_Warning;
 	public static String ConvertIterableLoopOperation_semanticChangeWarning;
+	public static String ExpressionsFix_add_parenthesis_change_name;
+	public static String ExpressionsFix_remove_parenthesis_change_name;
 	public static String ImportsFix_OrganizeImports_Description;
+	public static String Java50Fix_add_annotations_change_name;
+	public static String PotentialProgrammingProblemsFix_add_id_change_name;
 	
 	public static String PotentialProgrammingProblemsFix_calculatingUIDFailed_binding;
 	public static String PotentialProgrammingProblemsFix_calculatingUIDFailed_exception;
 	public static String PotentialProgrammingProblemsFix_calculatingUIDFailed_unknown;
+	public static String UnusedCodeFix_change_name;
 	
 	public static String UnusedCodeFix_RemoveFieldOrLocal_description;
 	public static String UnusedCodeFix_RemoveMethod_description;
@@ -90,6 +97,7 @@ public final class FixMessages extends NLS {
 
 	public static String ExpressionsFix_addParanoiacParenthesis_description;
 	public static String ExpressionsFix_removeUnnecessaryParenthesis_description;
+	public static String VariableDeclarationFix_add_final_change_name;
 	
 	public static String VariableDeclarationFix_changeModifierOfUnknownToFinal_description;
 	public static String VariableDeclarationFix_ChangeMidifiersToFinalWherPossible_description;

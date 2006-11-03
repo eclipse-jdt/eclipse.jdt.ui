@@ -72,7 +72,7 @@ public class UnusedCodeFix extends AbstractFix {
 	
 	private static class SideEffectFinder extends ASTVisitor {
 
-		private ArrayList fSideEffectNodes;
+		private final ArrayList fSideEffectNodes;
 
 		public SideEffectFinder(ArrayList res) {
 			fSideEffectNodes= res;
@@ -504,7 +504,7 @@ public class UnusedCodeFix extends AbstractFix {
 		if (result.size() == 0)
 			return null;
 		
-		return new UnusedCodeFix("", compilationUnit, (IFixRewriteOperation[])result.toArray(new IFixRewriteOperation[result.size()])); //$NON-NLS-1$
+		return new UnusedCodeFix(FixMessages.UnusedCodeFix_change_name, compilationUnit, (IFixRewriteOperation[])result.toArray(new IFixRewriteOperation[result.size()]));
 	}
 	
 	private static boolean isFormalParameterInEnhancedForStatement(SimpleName name) {

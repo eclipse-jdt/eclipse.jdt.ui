@@ -229,7 +229,7 @@ public class Java50Fix extends LinkedFix {
 			return null;
 		
 		IFixRewriteOperation[] operationsArray= (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]);
-		return new Java50Fix("", compilationUnit, operationsArray); //$NON-NLS-1$
+		return new Java50Fix(FixMessages.Java50Fix_add_annotations_change_name, compilationUnit, operationsArray);
 	}
 
 	public static IFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems,
@@ -260,7 +260,7 @@ public class Java50Fix extends LinkedFix {
 			return null;
 		
 		IFixRewriteOperation[] operationsArray= (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]);
-		return new Java50Fix("", compilationUnit, operationsArray); //$NON-NLS-1$
+		return new Java50Fix(FixMessages.Java50Fix_add_annotations_change_name, compilationUnit, operationsArray);
 	}
 	
 	private static void createAddDeprecatedAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List result) {

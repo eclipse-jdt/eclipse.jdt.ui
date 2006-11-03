@@ -614,7 +614,7 @@ public class ControlStatementsFix extends AbstractFix {
 		flattenOperations(operations);
 		
 		IFixRewriteOperation[] ops= (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]);
-		return new ControlStatementsFix("", compilationUnit, ops); //$NON-NLS-1$
+		return new ControlStatementsFix(FixMessages.ControlStatementsFix_change_name, compilationUnit, ops);
 	}	
 
     private static void flattenOperations(List operations) {

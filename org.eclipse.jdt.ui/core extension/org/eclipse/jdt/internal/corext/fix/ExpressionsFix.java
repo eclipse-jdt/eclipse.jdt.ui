@@ -358,7 +358,7 @@ public class ExpressionsFix extends AbstractFix {
 				return null;
 			
 			IFixRewriteOperation op= new AddParenthesisOperation((Expression[])changedNodes.toArray(new Expression[changedNodes.size()]));
-			return new ExpressionsFix(FixMessages.ExpressionsFix_addParanoiacParenthesis_description, compilationUnit, new IFixRewriteOperation[] {op});
+			return new ExpressionsFix(FixMessages.ExpressionsFix_add_parenthesis_change_name, compilationUnit, new IFixRewriteOperation[] {op});
 		} else if (removeUnnecessaryParenthesis) {
 			final ArrayList changedNodes = new ArrayList();
 			compilationUnit.accept(new UnnecessaryParenthesisVisitor(changedNodes));
@@ -368,7 +368,7 @@ public class ExpressionsFix extends AbstractFix {
 			
 			HashSet expressions= new HashSet(changedNodes);
 			IFixRewriteOperation op= new RemoveParenthesisOperation(expressions);
-			return new ExpressionsFix(FixMessages.ExpressionsFix_removeUnnecessaryParenthesis_description, compilationUnit, new IFixRewriteOperation[] {op});
+			return new ExpressionsFix(FixMessages.ExpressionsFix_remove_parenthesis_change_name, compilationUnit, new IFixRewriteOperation[] {op});
 		}
 		return null;
 	}

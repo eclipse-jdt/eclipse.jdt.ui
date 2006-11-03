@@ -402,7 +402,7 @@ public class PotentialProgrammingProblemsFix extends LinkedFix {
 	            ASTNode declarationNode= (ASTNode)iter.next();
 	            if (fCurrentContext.hasSerialVersionId(getQualifiedName(declarationNode))) {
 	            	SerialVersionHashBatchOperation op= new SerialVersionHashBatchOperation(unit, (ASTNode[])declarationNodes.toArray(new ASTNode[declarationNodes.size()]), fCurrentContext);
-	    			return new PotentialProgrammingProblemsFix("", compilationUnit, new IFixRewriteOperation[] {op}); //$NON-NLS-1$	            	
+	    			return new PotentialProgrammingProblemsFix(FixMessages.PotentialProgrammingProblemsFix_add_id_change_name, compilationUnit, new IFixRewriteOperation[] {op});	            	
 	            }
             }
 		}

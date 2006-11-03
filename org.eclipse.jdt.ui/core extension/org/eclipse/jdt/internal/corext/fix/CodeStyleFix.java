@@ -502,7 +502,7 @@ public class CodeStyleFix extends AbstractFix {
 			return null;
 		
 		IFixRewriteOperation[] operationsArray= (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]);
-		return new CodeStyleFix("", compilationUnit, operationsArray); //$NON-NLS-1$
+		return new CodeStyleFix(FixMessages.CodeStyleFix_change_name, compilationUnit, operationsArray);
 	}
 	
 	public static CodeStyleFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, 
@@ -531,7 +531,7 @@ public class CodeStyleFix extends AbstractFix {
 			return null;
 		
 		IFixRewriteOperation[] operationsArray= (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]);
-		return new CodeStyleFix("", compilationUnit, operationsArray); //$NON-NLS-1$
+		return new CodeStyleFix(FixMessages.CodeStyleFix_change_name, compilationUnit, operationsArray);
 	}
 	
 	private static void addToStaticAccessOperations(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean changeNonStaticAccessToStatic, boolean changeIndirectStaticAccessToDirect, List result) {

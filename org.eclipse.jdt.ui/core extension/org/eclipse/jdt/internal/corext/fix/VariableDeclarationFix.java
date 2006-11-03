@@ -336,7 +336,7 @@ public class VariableDeclarationFix extends AbstractFix {
 		if (operations.isEmpty())
 			return null;
 			
-		return new VariableDeclarationFix(FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description, compilationUnit, (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]));
+		return new VariableDeclarationFix(FixMessages.VariableDeclarationFix_add_final_change_name, compilationUnit, (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]));
 	}
 	
 	private static ModifierChangeOperation createAddFinalOperation(SimpleName name, CompilationUnit compilationUnit, ASTNode decl) {
