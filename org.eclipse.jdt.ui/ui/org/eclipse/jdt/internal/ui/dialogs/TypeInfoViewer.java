@@ -1255,7 +1255,7 @@ public class TypeInfoViewer {
 					TableItem item= fTable.getItem(fNextElement - 1);
 					String label= item.getText();
 					String newLabel= fLabelProvider.getText(null, (TypeNameMatch)item.getData(), next);
-					if (newLabel.length() > label.length())
+					if (newLabel.length() != label.length())
 						item.setText(newLabel);
 					if (fLastSelection != null && fLastSelection.length > 0) {
 						TableItem last= fLastSelection[fLastSelection.length - 1];
