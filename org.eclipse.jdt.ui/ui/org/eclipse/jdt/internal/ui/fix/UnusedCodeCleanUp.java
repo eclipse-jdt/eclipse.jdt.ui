@@ -53,7 +53,7 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS), 
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES), 
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES),
-				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS),
+				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS),
 				false);
 	}
 	
@@ -72,14 +72,14 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 				removeMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS),
 				removeMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES),
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES), 
-				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS),
+				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS),
 				false);
 	}
 
 	public Map getRequiredOptions() {
 		Map options= new Hashtable();
 		
-		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS))
+		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS))
 			options.put(JavaCore.COMPILER_PB_UNUSED_IMPORT, JavaCore.WARNING);
 
 		boolean removeMembers= isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
@@ -182,7 +182,7 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
 		int result= 0;
 		IProblem[] problems= compilationUnit.getProblems();
-		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS)) {
+		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS)) {
 			for (int i=0;i<problems.length;i++) {
 				int id= problems[i].getID();
 				if (id == IProblem.UnusedImport || id == IProblem.DuplicateImport || id == IProblem.ConflictingImport ||
