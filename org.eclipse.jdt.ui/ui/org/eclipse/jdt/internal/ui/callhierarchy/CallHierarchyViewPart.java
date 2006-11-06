@@ -168,6 +168,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private HistoryDropDownAction fHistoryDropDownAction;
     private RefreshAction fRefreshAction;
     private OpenLocationAction fOpenLocationAction;
+	private LocationCopyAction fLocationCopyAction;
     private FocusOnSelectionAction fFocusOnSelectionAction;
     private CopyCallHierarchyAction fCopyAction;
     private CancelSearchAction fCancelSearchAction;
@@ -689,6 +690,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
         menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fOpenLocationAction);
         menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fRefreshAction);
+        menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fLocationCopyAction);
     }
 
     protected void handleKeyEvent(KeyEvent event) {
@@ -827,6 +829,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
                     fOpenLocationAction.run();
                 }
             });
+        
+        fLocationCopyAction= fLocationViewer.initCopyAction(getViewSite(), fClipboard);
         
         fFocusOnSelectionAction = new FocusOnSelectionAction(this);
         fCopyAction= new CopyCallHierarchyAction(this, fClipboard, fCallHierarchyViewer);

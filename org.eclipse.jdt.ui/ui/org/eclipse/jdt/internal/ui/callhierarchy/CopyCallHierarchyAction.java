@@ -110,15 +110,19 @@ class CopyCallHierarchyAction extends Action {
         }        
     }
 
-    private String convertLineTerminators(String in) {
+    static String convertLineTerminators(String in) {
 		StringWriter stringWriter= new StringWriter();
 		PrintWriter printWriter= new PrintWriter(stringWriter);
 		StringReader stringReader= new StringReader(in);
 		BufferedReader bufferedReader= new BufferedReader(stringReader);		
-		String line;
 		try {
-			while ((line= bufferedReader.readLine()) != null) {
-				printWriter.println(line);
+			String line= bufferedReader.readLine();
+			while (line != null) {
+				printWriter.print(line);
+				line= bufferedReader.readLine();
+				if (line != null && line.length() != 0)
+					printWriter.println();
+					
 			}
 		} catch (IOException e) {
 			return in; // return the call hierarchy unfiltered

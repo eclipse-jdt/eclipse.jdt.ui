@@ -14,11 +14,15 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -28,7 +32,12 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.actions.ActionFactory;
+
+
 
 class LocationViewer extends TableViewer {
     private final String columnHeaders[] = {
@@ -81,6 +90,34 @@ class LocationViewer extends TableViewer {
         Menu menu= menuMgr.createContextMenu(getControl());
         getControl().setMenu(menu);
         viewSite.registerContextMenu(popupId, menuMgr, this);
+    }
+    
+    /**
+     * Initializes and returns the Copy action for the location viewer.
+     */
+    LocationCopyAction initCopyAction(final IViewSite viewSite, final Clipboard clipboard) {
+    	final LocationCopyAction copyAction= new LocationCopyAction(viewSite, clipboard, this);
+    	
+        getTable().addFocusListener(new FocusListener() {
+        	IAction fViewCopyHandler;
+			public void focusLost(FocusEvent e) {
+				if (fViewCopyHandler != null) {
+					IActionBars actionBars= viewSite.getActionBars();
+					actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), fViewCopyHandler);
+					actionBars.updateActionBars();
+					fViewCopyHandler= null;
+				}
+			}
+			
+			public void focusGained(FocusEvent e) {
+				IActionBars actionBars= viewSite.getActionBars();
+				fViewCopyHandler= actionBars.getGlobalActionHandler(ActionFactory.COPY.getId());
+				actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), copyAction);
+				actionBars.updateActionBars();
+			}
+		});
+        
+        return copyAction;
     }
 
     /**

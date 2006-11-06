@@ -21,6 +21,7 @@ public final class CallHierarchyMessages extends NLS {
 	}
 
 	public static String HistoryDropDownAction_clearhistory_label;
+	public static String LocationCopyAction_copy;
 	public static String ToggleCallModeAction_callers_label;
 	public static String ToggleCallModeAction_callers_tooltip;
 	public static String ToggleCallModeAction_callers_description;
