@@ -65,7 +65,7 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
  *
  * @since 3.0
  */
-abstract class AbstractInfoView extends ViewPart implements ISelectionListener, IMenuListener, IPropertyChangeListener {
+public abstract class AbstractInfoView extends ViewPart implements ISelectionListener, IMenuListener, IPropertyChangeListener {
 
 
 	/** JavaElementLabels flags used for the title */

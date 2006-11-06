@@ -125,6 +125,7 @@ import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
@@ -701,7 +702,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	protected boolean needsToProcessSelectionChanged(IWorkbenchPart part, ISelection selection) {
-		if (!fProcessSelectionEvents || part == this || isSearchResultView(part)){
+		if (!fProcessSelectionEvents || part == this || isSearchResultView(part) || part instanceof AbstractInfoView){
 			if (part == this)
 				fPreviousSelectionProvider= part;
 			return false;
