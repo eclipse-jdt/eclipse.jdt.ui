@@ -524,8 +524,8 @@ public class JavaElementLabels {
 				int nParams= 0;
 				boolean renderVarargs= false;
 				if (getFlag(flags, M_PARAMETER_TYPES)) {
-					if (resolvedKey != null) {
-						types= Signature.getParameterTypes(resolvedKey.toSignature());
+					if (resolvedSig != null) {
+						types= Signature.getParameterTypes(resolvedSig);
 					} else {
 						types= method.getParameterTypes();
 					}
@@ -580,8 +580,8 @@ public class JavaElementLabels {
 					
 			if (getFlag(flags, M_EXCEPTIONS)) {
 				String[] types;
-				if (resolvedSig != null) {
-					types= Signature.getThrownExceptionTypes(resolvedSig);
+				if (resolvedKey != null) {
+					types= resolvedKey.getThrownExceptions();
 				} else {
 					types= method.exists() ? method.getExceptionTypes() : new String[0];
 				}
