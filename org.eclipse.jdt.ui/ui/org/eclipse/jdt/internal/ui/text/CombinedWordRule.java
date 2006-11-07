@@ -113,7 +113,7 @@ public class CombinedWordRule implements IRule {
 		/**
 		 * Initialize with the given content.
 		 *
-		 * @param string the initial content
+		 * @param content the initial content
 		 */
 		public CharacterBuffer(String content) {
 			fContent= content.toCharArray();
@@ -245,7 +245,7 @@ public class CombinedWordRule implements IRule {
 	 *
 	 * @param detector the word detector to be used by this rule, may not be <code>null</code>
 	 *
-	 * @see #addWord(String, IToken)
+	 * @see WordMatcher#addWord(String, IToken)
 	 */
 	public CombinedWordRule(IWordDetector detector) {
 		this(detector, null, Token.UNDEFINED);
@@ -260,7 +260,7 @@ public class CombinedWordRule implements IRule {
 	 * @param defaultToken the default token to be returned on success
 	 *		if nothing else is specified, may not be <code>null</code>
 	 *
-	 * @see #addWord(String, IToken)
+	 * @see WordMatcher#addWord(String, IToken)
 	 */
 	public CombinedWordRule(IWordDetector detector, IToken defaultToken) {
 		this(detector, null, defaultToken);
@@ -275,7 +275,7 @@ public class CombinedWordRule implements IRule {
 	 * @param detector the word detector to be used by this rule, may not be <code>null</code>
 	 * @param matcher the initial word matcher
 	 *
-	 * @see #addWord(String, IToken)
+	 * @see WordMatcher#addWord(String, IToken)
 	 */
 	public CombinedWordRule(IWordDetector detector, WordMatcher matcher) {
 		this(detector, matcher, Token.UNDEFINED);
@@ -291,7 +291,7 @@ public class CombinedWordRule implements IRule {
 	 * @param defaultToken the default token to be returned on success
 	 *		if nothing else is specified, may not be <code>null</code>
 	 *
-	 * @see #addWord(String, IToken)
+	 * @see WordMatcher#addWord(String, IToken)
 	 */
 	public CombinedWordRule(IWordDetector detector, WordMatcher matcher, IToken defaultToken) {
 
