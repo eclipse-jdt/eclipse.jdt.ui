@@ -67,9 +67,6 @@ import org.eclipse.jdt.internal.ui.text.correction.SerialVersionLaunchConfigurat
 
 public class PotentialProgrammingProblemsFix extends LinkedFix {
 	
-	/** Name of the externalizable class */
-	private static final String EXTERNALIZABLE_NAME= "java.io.Externalizable"; //$NON-NLS-1$
-	
 	/** Name of the serializable class */
 	private static final String SERIALIZABLE_NAME= "java.io.Serializable"; //$NON-NLS-1$
 	
@@ -178,10 +175,9 @@ public class PotentialProgrammingProblemsFix extends LinkedFix {
 		
 		private IType[] findTypesWithMissingUID(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
 			try {
-				monitor.beginTask("", compilationUnits.length * 2); //$NON-NLS-1$
+				monitor.beginTask("", compilationUnits.length); //$NON-NLS-1$
 				
 				IType serializable= project.findType(SERIALIZABLE_NAME);
-				IType externalizable= project.findType(EXTERNALIZABLE_NAME);
 				
 				List types= new ArrayList();
 				
@@ -198,19 +194,13 @@ public class PotentialProgrammingProblemsFix extends LinkedFix {
 					ITypeHierarchy hierarchy1= serializable.newTypeHierarchy(project, new SubProgressMonitor(monitor, compilationUnits.length));
 					IType[] allSubtypes1= hierarchy1.getAllSubtypes(serializable);
 					addTypes(allSubtypes1, cus, types);
-
-					monitor.subTask(Messages.format(FixMessages.Java50Fix_SerialVersion_CalculateHierarchy_description, EXTERNALIZABLE_NAME));
-					ITypeHierarchy hierarchy2= externalizable.newTypeHierarchy(project, new SubProgressMonitor(monitor, compilationUnits.length));
-					IType[] allSubtypes2= hierarchy2.getAllSubtypes(externalizable);
-					addTypes(allSubtypes2, cus, types);
-
 				} else {
 					monitor.subTask(FixMessages.Java50Fix_InitializeSerialVersionId_subtask_description);
                     for (int i= 0; i < compilationUnits.length; i++) {
-                    	collectChildrenWithMissingSerialVersionId(compilationUnits[i].getChildren(), serializable, externalizable, types);
+                    	collectChildrenWithMissingSerialVersionId(compilationUnits[i].getChildren(), serializable, types);
                     	if (monitor.isCanceled())
                     		throw new OperationCanceledException();
-                    	monitor.worked(2);
+                    	monitor.worked(1);
                     }
 				}
 				
@@ -233,7 +223,7 @@ public class PotentialProgrammingProblemsFix extends LinkedFix {
 			}
 		}
 		
-		private void collectChildrenWithMissingSerialVersionId(IJavaElement[] children, IType serializable, IType externalizable, List result) throws JavaModelException {
+		private void collectChildrenWithMissingSerialVersionId(IJavaElement[] children, IType serializable, List result) throws JavaModelException {
 			for (int i= 0; i < children.length; i++) {
 				IJavaElement child= children[i];
 				if (child instanceof IType) {
@@ -244,18 +234,18 @@ public class PotentialProgrammingProblemsFix extends LinkedFix {
 						ITypeHierarchy hierarchy= type.newSupertypeHierarchy(new NullProgressMonitor());
 						IType[] interfaces= hierarchy.getAllSuperInterfaces(type);
 						for (int j= 0; j < interfaces.length; j++) {
-							if (interfaces[j].equals(serializable) || interfaces[j].equals(externalizable)) {
+							if (interfaces[j].equals(serializable)) {
 								result.add(type);
 								break;
 							}
 						}
 					}
 
-					collectChildrenWithMissingSerialVersionId(type.getChildren(), serializable, externalizable, result);
+					collectChildrenWithMissingSerialVersionId(type.getChildren(), serializable, result);
 				} else if (child instanceof IMethod) {
-					collectChildrenWithMissingSerialVersionId(((IMethod)child).getChildren(), serializable, externalizable, result);
+					collectChildrenWithMissingSerialVersionId(((IMethod)child).getChildren(), serializable, result);
 				} else if (child instanceof IField) {
-					collectChildrenWithMissingSerialVersionId(((IField)child).getChildren(), serializable, externalizable, result);
+					collectChildrenWithMissingSerialVersionId(((IField)child).getChildren(), serializable, result);
 				}
 			}
 		}
