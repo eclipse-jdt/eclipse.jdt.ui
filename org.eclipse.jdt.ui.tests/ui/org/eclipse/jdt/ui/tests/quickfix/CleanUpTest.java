@@ -3998,6 +3998,12 @@ public class CleanUpTest extends QuickFixTest {
 	        buf.append("public class E1 implements Serializable {\n");
 	        buf.append("}\n");
 	        ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+	        buf= new StringBuffer();
+	        buf.append("package test1;\n");
+	        buf.append("import java.io.Externalizable;\n");
+	        buf.append("public class E2 implements Externalizable {\n");
+	        buf.append("}\n");
+	        ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 	        
 	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
@@ -4010,9 +4016,15 @@ public class CleanUpTest extends QuickFixTest {
 	        buf.append("    " + FIELD_COMMENT + "\n");
 	        buf.append("    private static final long serialVersionUID = 1L;\n");
 	        buf.append("}\n");
+	        String expected2= buf.toString();
+	        buf= new StringBuffer();
+	        buf.append("package test1;\n");
+	        buf.append("import java.io.Externalizable;\n");
+	        buf.append("public class E2 implements Externalizable {\n");
+	        buf.append("}\n");
 	        String expected1= buf.toString();
 	        
-	        assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	        assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
         } finally {
         	JavaProjectHelper.set15CompilerOptions(fJProject1);   
         }
