@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.corext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * Facade for JavaPlugin to not conterminate corext classes.
+ * Facade for JavaPlugin to not contaminate corext classes.
  */
 public class Corext {
 
