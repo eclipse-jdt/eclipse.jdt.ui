@@ -17,7 +17,6 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
@@ -116,7 +115,7 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 					};
 					try {
 						ISchedulingRule rule= null;
-						Job job= Platform.getJobManager().currentJob();
+						Job job= Job.getJobManager().currentJob();
 						if (job != null)
 							rule= job.getRule();
 						IRunnableWithProgress runnable= null;

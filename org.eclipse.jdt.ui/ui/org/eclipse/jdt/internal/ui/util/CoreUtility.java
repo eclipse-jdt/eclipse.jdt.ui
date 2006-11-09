@@ -125,7 +125,7 @@ public class CoreUtility {
 				if (monitor.isCanceled()) {
 					return Status.CANCEL_STATUS;
 				}
-		        Job[] buildJobs = Platform.getJobManager().find(ResourcesPlugin.FAMILY_MANUAL_BUILD);
+		        Job[] buildJobs = Job.getJobManager().find(ResourcesPlugin.FAMILY_MANUAL_BUILD);
 		        for (int i= 0; i < buildJobs.length; i++) {
 		        	Job curr= buildJobs[i];
 		        	if (curr != this && curr instanceof BuildJob) {

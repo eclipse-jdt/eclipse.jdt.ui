@@ -15,7 +15,6 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 
@@ -122,7 +121,7 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 		};
 		try {
 			ISchedulingRule rule= null;
-			Job job= Platform.getJobManager().currentJob();
+			Job job= Job.getJobManager().currentJob();
 			if (job != null)
 				rule= job.getRule();
 			IRunnableWithProgress runnable= null;

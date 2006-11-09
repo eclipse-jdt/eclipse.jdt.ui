@@ -16,10 +16,10 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -281,7 +281,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				if (fgFirstTime) {
 					// Join the initialize after load job.
-					IJobManager manager= Platform.getJobManager();
+					IJobManager manager= Job.getJobManager();
 					manager.join(JavaUI.ID_PLUGIN, monitor);
 				}
 				OpenTypeHistory history= OpenTypeHistory.getInstance();

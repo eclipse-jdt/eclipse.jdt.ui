@@ -16,10 +16,10 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -141,7 +141,7 @@ public class RefactoringExecutionHelper {
 	
 	public void perform(boolean showPreview, boolean fork, boolean cancelable) throws InterruptedException, InvocationTargetException {
 		Assert.isTrue(Display.getCurrent() != null);
-		final IJobManager manager=  Platform.getJobManager();
+		final IJobManager manager=  Job.getJobManager();
 		final ISchedulingRule rule;
 		if (fRefactoring instanceof IScheduledRefactoring) {
 			rule= ((IScheduledRefactoring)fRefactoring).getSchedulingRule();
