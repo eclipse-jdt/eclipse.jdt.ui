@@ -356,13 +356,16 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	private ICompilationUnit fCompilationUnit;
 	
 	private CompilationUnit fASTRoot;
+
+	private final boolean fAllowSyntaxErrors;
 	
-	public OrganizeImportsOperation(ICompilationUnit cu, CompilationUnit astRoot, boolean ignoreLowerCaseNames, boolean save, boolean doResolve, IChooseImportQuery chooseImportQuery) throws CoreException {
+	public OrganizeImportsOperation(ICompilationUnit cu, CompilationUnit astRoot, boolean ignoreLowerCaseNames, boolean save, boolean allowSyntaxErrors, IChooseImportQuery chooseImportQuery) throws CoreException {
 		fCompilationUnit= cu;
 		fASTRoot= astRoot;
 
 		fDoSave= save;
 		fIgnoreLowerCaseNames= ignoreLowerCaseNames;
+		fAllowSyntaxErrors= allowSyntaxErrors;
 		fChooseImportQuery= chooseImportQuery;
 
 		fNumberOfImportsAdded= 0;
@@ -491,12 +494,14 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	
 	// find type references in a compilation unit
 	private boolean collectReferences(CompilationUnit astRoot, List typeReferences, List staticReferences, Set oldSingleImports, Set oldDemandImports) {
-		IProblem[] problems= astRoot.getProblems();
-		for (int i= 0; i < problems.length; i++) {
-			IProblem curr= problems[i];
-			if (curr.isError() && (curr.getID() & IProblem.Syntax) != 0) {
-				fParsingError= problems[i];
-				return false;
+		if (!fAllowSyntaxErrors) {
+			IProblem[] problems= astRoot.getProblems();
+			for (int i= 0; i < problems.length; i++) {
+				IProblem curr= problems[i];
+				if (curr.isError() && (curr.getID() & IProblem.Syntax) != 0) {
+					fParsingError= problems[i];
+					return false;
+				}
 			}
 		}
 		List imports= astRoot.imports();

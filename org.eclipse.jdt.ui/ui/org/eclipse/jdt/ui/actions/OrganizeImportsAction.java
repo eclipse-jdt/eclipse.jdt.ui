@@ -394,7 +394,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 							save= textFileBuffer != null && !textFileBuffer.isDirty(); // save when not dirty
 						}
 						
-						OrganizeImportsOperation op= new OrganizeImportsOperation(cu, null, settings.importIgnoreLowercase, save, true, query);
+						OrganizeImportsOperation op= new OrganizeImportsOperation(cu, null, settings.importIgnoreLowercase, save, false, query);
 						runInSync(op, cuLocation, status, monitor);
 
 						IProblem parseError= op.getParseError();
