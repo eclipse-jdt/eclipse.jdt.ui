@@ -229,8 +229,7 @@
          name="TestModelProvider"
          point="org.eclipse.core.resources.modelProviders">
       <modelProvider
-            class="org.eclipse.jdt.ui.tests.refactoring.TestModelProvider"
-            name="TestModelProvider"/>
+            class="org.eclipse.jdt.ui.tests.refactoring.TestModelProvider"/>
       <extends-model id="org.eclipse.core.resources.modelProvider"/>
       <enablement>
           <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature" />
