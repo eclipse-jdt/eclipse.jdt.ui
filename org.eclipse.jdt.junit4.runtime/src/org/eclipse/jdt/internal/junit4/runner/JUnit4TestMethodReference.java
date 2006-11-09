@@ -20,7 +20,7 @@ import org.junit.runner.Request;
 public class JUnit4TestMethodReference extends JUnit4TestReference {
 	private final Description fDescription;
 
-	public JUnit4TestMethodReference(Class clazz, String methodName) {
+	public JUnit4TestMethodReference(Class<?> clazz, String methodName) {
 		super(Request.method(clazz, methodName));
 		fDescription = Description.createTestDescription(clazz, methodName);
 	}

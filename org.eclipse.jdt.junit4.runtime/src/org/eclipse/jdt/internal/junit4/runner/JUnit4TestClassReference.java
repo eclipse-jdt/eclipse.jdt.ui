@@ -20,7 +20,7 @@ import org.junit.runner.Request;
 public class JUnit4TestClassReference extends JUnit4TestReference {
 	protected final Class<?> fClass;
 
-	public JUnit4TestClassReference(Class clazz) {
+	public JUnit4TestClassReference(Class<?> clazz) {
 		super(Request.aClass(clazz));
 		fClass= clazz;
 	}
