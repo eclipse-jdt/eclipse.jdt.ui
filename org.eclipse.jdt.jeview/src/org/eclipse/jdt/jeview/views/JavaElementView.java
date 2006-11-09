@@ -164,7 +164,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		public ISelection getSelection() {
 			IStructuredSelection selection= (IStructuredSelection) fViewer.getSelection();
 			ArrayList<IAdaptable> externalSelection= new ArrayList<IAdaptable>();
-			for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 				Object element= iter.next();
 				if (element instanceof JavaElement) {
 					IJavaElement javaElement= ((JavaElement) element).getJavaElement();
@@ -700,7 +700,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			IStructuredSelection structuredSelection= ((IStructuredSelection) selection);
 			if (structuredSelection.size() >= 1) {
 				Set<Object> input= new LinkedHashSet<Object>();
-				for (Iterator iter = structuredSelection.iterator(); iter.hasNext();) {
+				for (Iterator<?> iter = structuredSelection.iterator(); iter.hasNext();) {
 					Object first= iter.next();
 					if (first instanceof IJavaElement) {
 						input.add(first);
@@ -750,6 +750,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		return null;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySheetPage.class) {
