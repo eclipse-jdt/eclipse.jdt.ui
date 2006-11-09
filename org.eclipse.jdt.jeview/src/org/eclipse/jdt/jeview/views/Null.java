@@ -11,7 +11,8 @@
 
 package org.eclipse.jdt.jeview.views;
 
-import org.eclipse.jface.util.Assert;
+import org.eclipse.core.runtime.Assert;
+
 
 
 public class Null extends JEAttribute {

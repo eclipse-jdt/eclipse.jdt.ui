@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.jeview.views;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IMarker;
 
-import org.eclipse.jface.util.Assert;
 
 public class JEMarker extends JEAttribute {
 

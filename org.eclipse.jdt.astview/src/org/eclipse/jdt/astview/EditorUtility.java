@@ -11,7 +11,7 @@
 package org.eclipse.jdt.astview;
 
 
-import org.eclipse.jface.util.Assert;
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;

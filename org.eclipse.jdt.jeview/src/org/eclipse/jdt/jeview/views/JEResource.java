@@ -14,13 +14,12 @@ package org.eclipse.jdt.jeview.views;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.core.JavaCore;
 
