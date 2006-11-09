@@ -62,8 +62,8 @@ public interface ITestSessionListener {
 	 * 
 	 * @param testElement the test
 	 * @param status the outcome of the test; one of 
-	 * {@link Status#ERROR} or
-	 * {@link Status#FAILURE}
+	 * {@link TestElement.Status#ERROR} or
+	 * {@link TestElement.Status#FAILURE}
 	 * @param trace the stack trace
 	 * @param expected expected value
 	 * @param actual actual value
@@ -74,7 +74,7 @@ public interface ITestSessionListener {
 	 * 
 	 * @param testCaseElement the test
 	 * @param status the outcome of the test that was rerun; one of 
-	 * {@link Status#OK}, {@link Status#ERROR}, or {@link Status#FAILURE}
+	 * {@link TestElement.Status#OK}, {@link TestElement.Status#ERROR}, or {@link TestElement.Status#FAILURE}
 	 * @param trace the stack trace in the case of abnormal termination,
 	 * or the empty string if none
 	 * @param expectedResult expected value
