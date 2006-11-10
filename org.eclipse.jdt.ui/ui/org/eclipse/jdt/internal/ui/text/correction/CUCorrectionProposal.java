@@ -510,7 +510,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 					try {
 						TextEdit edit= fProposal.computeEdits(offset, position, trigger, stateMask, fLinkedPositionModel);
 						if (edit != null) {
-							edit.apply(position.getDocument());
+							edit.apply(position.getDocument(), 0);
 						}
 					} catch (MalformedTreeException e) {
 						throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, "Unexpected exception applying edit", e)); //$NON-NLS-1$
