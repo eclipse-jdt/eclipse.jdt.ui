@@ -38,9 +38,11 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -209,7 +211,17 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	}	
 			
 	// ----------- validation ----------
-			
+	
+	private IStatus validatePackageName(String text) {
+		IJavaProject project= getJavaProject();
+		if (project == null || !project.exists()) {
+			return JavaConventions.validatePackageName(text, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
+		}
+		String sourceLevel= project.getOption(JavaCore.COMPILER_SOURCE, true);
+		String compliance= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+		return JavaConventions.validatePackageName(text, sourceLevel, compliance);
+	}
+	
 	/*
 	 * Verifies the input for the package field.
 	 */
@@ -217,7 +229,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		StatusInfo status= new StatusInfo();
 		String packName= getPackageText();
 		if (packName.length() > 0) {
-			IStatus val= JavaConventions.validatePackageName(packName);
+			IStatus val= validatePackageName(packName);
 			if (val.getSeverity() == IStatus.ERROR) {
 				status.setError(Messages.format(NewWizardMessages.NewPackageWizardPage_error_InvalidPackageName, val.getMessage())); 
 				return status;

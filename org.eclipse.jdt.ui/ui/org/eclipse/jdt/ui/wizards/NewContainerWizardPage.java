@@ -392,7 +392,22 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	 */ 
 	protected IWorkspaceRoot getWorkspaceRoot() {
 		return fWorkspaceRoot;
-	}	
+	}
+	
+	/**
+	 * Returns the Java project of the currently selected package fragment root or <code>null</code>
+	 * if no package fragment root is configured.
+	 * 
+	 * @return The current Java project or <code>null</code>.
+	 * @since 3.3
+	 */
+	public IJavaProject getJavaProject() {
+		IPackageFragmentRoot root= getPackageFragmentRoot();
+		if (root != null) {
+			return root.getJavaProject();
+		}
+		return null;
+	}
 	
 	/**
 	 * Returns the <code>IPackageFragmentRoot</code> that corresponds to the current
@@ -484,7 +499,7 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT); 
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, provider);
 		dialog.setValidator(validator);
-		dialog.setSorter(new JavaElementSorter());
+		dialog.setComparator(new JavaElementSorter());
 		dialog.setTitle(NewWizardMessages.NewContainerWizardPage_ChooseSourceContainerDialog_title); 
 		dialog.setMessage(NewWizardMessages.NewContainerWizardPage_ChooseSourceContainerDialog_description); 
 		dialog.addFilter(filter);

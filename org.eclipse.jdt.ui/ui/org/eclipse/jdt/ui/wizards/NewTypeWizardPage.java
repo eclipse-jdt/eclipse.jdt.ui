@@ -83,6 +83,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
@@ -560,7 +561,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		ITextSelection selection= getCurrentTextSelection();
 		if (selection != null) {
 			String text= selection.getText();
-			if (text != null && JavaConventions.validateJavaTypeName(text).isOK()) {
+			if (text != null && validateJavaTypeName(text, project).isOK()) {
 				typeName= text;
 			}
 		}
@@ -574,7 +575,25 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		setSuperInterfaces(initSuperinterfaces, true);
 		
 		setAddComments(StubUtility.doAddComments(project), true); // from project or workspace
-	}		
+	}
+	
+	private static IStatus validateJavaTypeName(String text, IJavaProject project) {
+		if (project == null || !project.exists()) {
+			return JavaConventions.validateJavaTypeName(text, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
+		}
+		String sourceLevel= project.getOption(JavaCore.COMPILER_SOURCE, true);
+		String compliance= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+		return JavaConventions.validateJavaTypeName(text, sourceLevel, compliance);
+	}
+	
+	private static IStatus validatePackageName(String text, IJavaProject project) {
+		if (project == null || !project.exists()) {
+			return JavaConventions.validatePackageName(text, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
+		}
+		String sourceLevel= project.getOption(JavaCore.COMPILER_SOURCE, true);
+		String compliance= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+		return JavaConventions.validatePackageName(text, sourceLevel, compliance);
+	}
 	
 	// -------- UI Creation ---------
 	
@@ -905,9 +924,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 	
 	private void typePageLinkActivated(SelectionEvent e) {
-		IPackageFragmentRoot root= getPackageFragmentRoot();
-		if (root != null) {
-			PreferenceDialog dialog= PreferencesUtil.createPropertyDialogOn(getShell(), root.getJavaProject().getProject(), CodeTemplatePreferencePage.PROP_ID, null, null);
+		IJavaProject project= getJavaProject();
+		if (project != null) {
+			PreferenceDialog dialog= PreferencesUtil.createPropertyDialogOn(getShell(), project.getProject(), CodeTemplatePreferencePage.PROP_ID, null, null);
 			dialog.open();
 		} else {
 			String title= NewWizardMessages.NewTypeWizardPage_configure_templates_title; 
@@ -1310,9 +1329,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		if (fUseAddCommentButtonValue) {
 			return fAddCommentButton.isSelected();
 		}
-		IPackageFragmentRoot root= getPackageFragmentRoot();
-		IJavaProject project= (root != null) ? root.getJavaProject() : null; // use project settings 
-		return StubUtility.doAddComments(project); 
+		return StubUtility.doAddComments(getJavaProject()); 
 	}
 			
 	/**
@@ -1341,8 +1358,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	protected IStatus containerChanged() {
 		IStatus status= super.containerChanged();
-	    if ((fTypeKind == ANNOTATION_TYPE || fTypeKind == ENUM_TYPE) && !status.matches(IStatus.ERROR)) {
-	    	IPackageFragmentRoot root= getPackageFragmentRoot();
+	    IPackageFragmentRoot root= getPackageFragmentRoot();
+		if ((fTypeKind == ANNOTATION_TYPE || fTypeKind == ENUM_TYPE) && !status.matches(IStatus.ERROR)) {
 	    	if (root != null && !JavaModelUtil.is50OrHigher(root.getJavaProject())) {
 	    		// error as createType will fail otherwise (bug 96928)
 				return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewTypeWizardPage_warning_NotJDKCompliant, root.getJavaProject().getElementName()));  
@@ -1358,9 +1375,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	    	}
 	    }
 		
-		fCurrPackageCompletionProcessor.setPackageFragmentRoot(getPackageFragmentRoot());
-		if (getPackageFragmentRoot() != null) {
-			fEnclosingTypeCompletionProcessor.setPackageFragment(getPackageFragmentRoot().getPackageFragment("")); //$NON-NLS-1$
+		fCurrPackageCompletionProcessor.setPackageFragmentRoot(root);
+		if (root != null) {
+			fEnclosingTypeCompletionProcessor.setPackageFragment(root.getPackageFragment("")); //$NON-NLS-1$
 		}
 		return status;
 	}
@@ -1377,11 +1394,14 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	protected IStatus packageChanged() {
 		StatusInfo status= new StatusInfo();
-		fPackageDialogField.enableButton(getPackageFragmentRoot() != null);
+		IPackageFragmentRoot root= getPackageFragmentRoot();
+		fPackageDialogField.enableButton(root != null);
+		
+		IJavaProject project= root != null ? root.getJavaProject() : null;
 		
 		String packName= getPackageText();
 		if (packName.length() > 0) {
-			IStatus val= JavaConventions.validatePackageName(packName);
+			IStatus val= validatePackageName(packName, project);
 			if (val.getSeverity() == IStatus.ERROR) {
 				status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidPackageName, val.getMessage())); 
 				return status;
@@ -1393,12 +1413,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			status.setWarning(NewWizardMessages.NewTypeWizardPage_warning_DefaultPackageDiscouraged); 
 		}
 		
-		IPackageFragmentRoot root= getPackageFragmentRoot();
-		if (root != null) {
-			if (root.getJavaProject().exists() && packName.length() > 0) {
+		if (project != null) {
+			if (project.exists() && packName.length() > 0) {
 				try {
 					IPath rootPath= root.getPath();
-					IPath outputPath= root.getJavaProject().getOutputLocation();
+					IPath outputPath= project.getOutputLocation();
 					if (rootPath.isPrefixOf(outputPath) && !rootPath.equals(outputPath)) {
 						// if the bin folder is inside of our root, don't allow to name a package
 						// like the bin folder
@@ -1558,7 +1577,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			status.setError(NewWizardMessages.NewTypeWizardPage_error_QualifiedName); 
 			return status;
 		}
-		IStatus val= JavaConventions.validateJavaTypeName(typeName);
+		
+		IJavaProject project= getJavaProject();	
+		IStatus val= validateJavaTypeName(typeName, project);
 		if (val.getSeverity() == IStatus.ERROR) {
 			status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidTypeName, val.getMessage())); 
 			return status;
@@ -1605,23 +1626,20 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 		}
 		
-		if (typeNameWithParameters != typeName) {
-			IPackageFragmentRoot root= getPackageFragmentRoot();
-			if (root != null) {
-				if (!JavaModelUtil.is50OrHigher(root.getJavaProject())) {
-					status.setError(NewWizardMessages.NewTypeWizardPage_error_TypeParameters); 
-					return status;
-				}
-				String typeDeclaration= "class " + typeNameWithParameters + " {}"; //$NON-NLS-1$//$NON-NLS-2$
-				ASTParser parser= ASTParser.newParser(AST.JLS3);
-				parser.setSource(typeDeclaration.toCharArray());
-				parser.setProject(root.getJavaProject());
-				CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
-				IProblem[] problems= compilationUnit.getProblems();
-				if (problems.length > 0) {
-					status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidTypeName, problems[0].getMessage())); 
-					return status;
-				}
+		if (!typeNameWithParameters.equals(typeName) && project != null) {
+			if (!JavaModelUtil.is50OrHigher(project)) {
+				status.setError(NewWizardMessages.NewTypeWizardPage_error_TypeParameters); 
+				return status;
+			}
+			String typeDeclaration= "class " + typeNameWithParameters + " {}"; //$NON-NLS-1$//$NON-NLS-2$
+			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			parser.setSource(typeDeclaration.toCharArray());
+			parser.setProject(project);
+			CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
+			IProblem[] problems= compilationUnit.getProblems();
+			if (problems.length > 0) {
+				status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidTypeName, problems[0].getMessage())); 
+				return status;
 			}
 		}
 		return status;
@@ -1832,12 +1850,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @since 3.2
 	 */
 	protected IType chooseSuperClass() {
-		IPackageFragmentRoot root= getPackageFragmentRoot();
-		if (root == null) {
+		IJavaProject project= getJavaProject();
+		if (project == null) {
 			return null;
-		}	
+		}
 		
-		IJavaElement[] elements= new IJavaElement[] { root.getJavaProject() };
+		IJavaElement[] elements= new IJavaElement[] { project };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 
 		TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(), false,
@@ -1863,12 +1881,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @since 3.2
 	 */
 	protected void chooseSuperInterfaces() {
-		IPackageFragmentRoot root= getPackageFragmentRoot();
-		if (root == null) {
+		IJavaProject project= getJavaProject();
+		if (project == null) {
 			return;
 		}	
 
-		IJavaProject project= root.getJavaProject();
 		SuperInterfaceSelectionDialog dialog= new SuperInterfaceSelectionDialog(getShell(), getWizard().getContainer(), this, project);
 		dialog.setTitle(getInterfaceDialogTitle());
 		dialog.setMessage(NewWizardMessages.NewTypeWizardPage_InterfacesDialog_message); 
