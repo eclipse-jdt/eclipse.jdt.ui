@@ -32,7 +32,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ContainerCheckedTreeViewer;
@@ -199,11 +199,11 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		}
 	}
 
-	private static class OverrideMethodSorter extends ViewerSorter {
+	private static class OverrideMethodComparator extends ViewerComparator {
 
 		private ITypeBinding[] fAllTypes= new ITypeBinding[0];
 
-		public OverrideMethodSorter(ITypeBinding curr) {
+		public OverrideMethodComparator(ITypeBinding curr) {
 			if (curr != null) {
 				ITypeBinding[] superTypes= Bindings.getAllSuperTypes(curr);
 				fAllTypes= new ITypeBinding[superTypes.length + 1];
@@ -332,9 +332,9 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		}
 
 		ITypeBinding[] typesArrays= (ITypeBinding[]) types.toArray(new ITypeBinding[types.size()]);
-		ViewerSorter sorter= new OverrideMethodSorter(binding);
+		OverrideMethodComparator comparator= new OverrideMethodComparator(binding);
 		if (expanded.isEmpty() && typesArrays.length > 0) {
-			sorter.sort(null, typesArrays);
+			comparator.sort(null, typesArrays);
 			expanded.add(typesArrays[0]);
 		}
 		setExpandedElements(expanded.toArray());
@@ -344,7 +344,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		setTitle(JavaUIMessages.OverrideMethodDialog_dialog_title);
 		setMessage(null);
 		setValidator(new OverrideMethodValidator(overridable.length));
-		setSorter(sorter);
+		setComparator(comparator);
 		setContainerMode(true);
 		setSize(60, 18);
 		setInput(new Object());

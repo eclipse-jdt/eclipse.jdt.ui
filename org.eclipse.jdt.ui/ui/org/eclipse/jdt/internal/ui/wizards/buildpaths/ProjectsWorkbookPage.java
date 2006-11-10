@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.JavaElementComparator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
@@ -403,7 +403,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 				selectable.remove(proj);
 			}
 			Object[] selectArr= selectable.toArray();
-			new JavaElementSorter().sort(null, selectArr);
+			new JavaElementComparator().sort(null, selectArr);
 					
 			ListSelectionDialog dialog= new ListSelectionDialog(getShell(), Arrays.asList(selectArr), new ArrayContentProvider(), new JavaUILabelProvider(), NewWizardMessages.ProjectsWorkbookPage_chooseProjects_message); 
 			dialog.setTitle(NewWizardMessages.ProjectsWorkbookPage_chooseProjects_title); 

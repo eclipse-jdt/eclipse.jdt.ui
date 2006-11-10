@@ -59,8 +59,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.filters.LibraryFilter;
@@ -244,7 +244,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
      * folder (if any) as first child of a source folder. The other java elements
      * are sorted in the normal way.
      */
-    private final class ExtendedJavaElementSorter extends JavaElementSorter {
+    private final class ExtendedJavaElementSorter extends JavaElementComparator {
         public ExtendedJavaElementSorter() {
             super();
         }

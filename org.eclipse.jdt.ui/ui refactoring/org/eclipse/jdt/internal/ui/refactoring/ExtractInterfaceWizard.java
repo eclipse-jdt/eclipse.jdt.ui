@@ -46,8 +46,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRef
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -194,7 +194,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 					ExtractInterfaceInputPage.this.updateUIElementEnablement();
 				}
 			});
-			fTableViewer.setComparator(new JavaElementSorter());
+			fTableViewer.setComparator(new JavaElementComparator());
 			fTableViewer.getControl().setEnabled(anyMembersToExtract());
 
 			createButtonComposite(composite);

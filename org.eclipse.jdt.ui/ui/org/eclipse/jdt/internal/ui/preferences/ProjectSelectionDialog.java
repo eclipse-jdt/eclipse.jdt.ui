@@ -42,8 +42,8 @@ import org.eclipse.ui.dialogs.SelectionStatusDialog;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -110,7 +110,7 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 
 		fTableViewer.setLabelProvider(new JavaElementLabelProvider());
 		fTableViewer.setContentProvider(new StandardJavaElementContentProvider());
-		fTableViewer.setComparator(new JavaElementSorter());
+		fTableViewer.setComparator(new JavaElementComparator());
 		fTableViewer.getControl().setFont(font);
 
 		Button checkbox= new Button(composite, SWT.CHECK);

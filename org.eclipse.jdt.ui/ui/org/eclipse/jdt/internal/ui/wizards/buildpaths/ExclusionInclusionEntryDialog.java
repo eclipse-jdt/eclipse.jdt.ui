@@ -41,7 +41,7 @@ import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
-import org.eclipse.ui.views.navigator.ResourceSorter;
+import org.eclipse.ui.views.navigator.ResourceComparator;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -266,7 +266,7 @@ public class ExclusionInclusionEntryDialog extends StatusDialog {
 		dialog.addFilter(filter);
 		dialog.setInput(currentSourceFolder);
 		dialog.setInitialSelection(initialElement);
-		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
+		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
 		dialog.setHelpAvailable(false);
 		
 		if (dialog.open() == Window.OK) {

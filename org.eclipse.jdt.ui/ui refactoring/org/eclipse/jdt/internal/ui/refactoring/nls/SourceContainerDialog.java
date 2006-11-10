@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.nls;
 
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.resources.IWorkspaceRoot;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -26,8 +27,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -86,7 +87,7 @@ public class SourceContainerDialog extends ElementTreeSelectionDialog {
 	private SourceContainerDialog(Shell shell) {
 		super(shell,new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT),new StandardJavaElementContentProvider());
 		setValidator(new PackageAndProjectSelectionValidator());
-		setSorter(new JavaElementSorter());
+		setComparator(new JavaElementComparator());
 		setTitle(NewWizardMessages.NewContainerWizardPage_ChooseSourceContainerDialog_title); 
 		setMessage(NewWizardMessages.NewContainerWizardPage_ChooseSourceContainerDialog_description); 
 		addFilter(new JavaTypedViewerFilter());

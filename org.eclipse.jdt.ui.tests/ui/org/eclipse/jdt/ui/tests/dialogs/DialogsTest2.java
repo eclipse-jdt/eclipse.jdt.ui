@@ -30,8 +30,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
@@ -69,7 +69,7 @@ public class DialogsTest2 extends TestCase {
 		StandardJavaElementContentProvider provider= new StandardJavaElementContentProvider();
 		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT); 
 		CheckedTreeSelectionDialog dialog= new CheckedTreeSelectionDialog(getShell(), labelProvider, provider);
-		dialog.setSorter(new JavaElementSorter());
+		dialog.setComparator(new JavaElementComparator());
 		dialog.setTitle("Title"); //$NON-NLS-1$
 		dialog.setMessage("Select the elements"); //$NON-NLS-1$
 		

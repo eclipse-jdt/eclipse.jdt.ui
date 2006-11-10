@@ -63,8 +63,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -154,7 +154,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 			);
 		
 		fTree.setLabelProvider(new DecoratingJavaLabelProvider(fJavaElementLabelProvider));
-		fTree.setComparator(new JavaElementSorter());
+		fTree.setComparator(new JavaElementComparator());
 		fTree.addFilter(new EmptyInnerPackageFilter());
 		fTree.setUseHashlookup(true);
 		

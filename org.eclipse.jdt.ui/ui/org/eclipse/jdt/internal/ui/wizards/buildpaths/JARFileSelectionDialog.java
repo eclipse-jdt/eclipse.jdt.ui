@@ -20,8 +20,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
@@ -43,7 +43,7 @@ public class JARFileSelectionDialog extends ElementTreeSelectionDialog {
 	 */
 	public JARFileSelectionDialog(Shell parent, boolean multiSelect, boolean acceptFolders) {
 		super(parent, new FileLabelProvider(), new FileContentProvider());
-		setSorter(new FileViewerSorter());
+		setComparator(new FileViewerComparator());
 		addFilter(new FileArchiveFileFilter());
 		setValidator(new FileSelectionValidator(multiSelect, acceptFolders));
 		setHelpAvailable(false);
@@ -130,7 +130,7 @@ public class JARFileSelectionDialog extends ElementTreeSelectionDialog {
 		}		
 	}
 	
-	private static class FileViewerSorter extends ViewerSorter {
+	private static class FileViewerComparator extends ViewerComparator {
 		public int category(Object element) {
 			if (element instanceof File) {
 				if (((File) element).isFile()) {

@@ -40,7 +40,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.ISharedImages;
@@ -49,9 +49,10 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.wizards.datatransfer.ZipFileStructureProvider;
 
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+
 import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -461,14 +462,13 @@ public class JavadocConfigurationBlock {
 			
 			ILabelProvider lp= new ZipDialogLabelProvider(provider);
 			ZipDialogContentProvider cp= new ZipDialogContentProvider(provider);
-			ViewerSorter sorter= new ViewerSorter();
 						
 			ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(fShell, lp, cp);
 			dialog.setAllowMultiple(false);
 			dialog.setValidator(new ZipDialogValidator());
 			dialog.setTitle(PreferencesMessages.JavadocConfigurationBlock_browse_jarorzip_path_title); 
 			dialog.setMessage(PreferencesMessages.JavadocConfigurationBlock_location_in_jarorzip_message); 
-			dialog.setSorter(sorter);
+			dialog.setComparator(new ViewerComparator());
 			
 			String init= fArchivePathField.getText();
 			if (init.length() == 0) {

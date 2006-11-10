@@ -77,10 +77,10 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -286,7 +286,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		}
 		AddGetterSetterContentProvider cp= new AddGetterSetterContentProvider(entries);
 		GetterSetterTreeSelectionDialog dialog= new GetterSetterTreeSelectionDialog(getShell(), lp, cp, fEditor, type);
-		dialog.setSorter(new JavaElementSorter());
+		dialog.setComparator(new JavaElementComparator());
 		dialog.setTitle(DIALOG_TITLE);
 		String message= ActionMessages.AddGetterSetterAction_dialog_label;
 		dialog.setMessage(message);

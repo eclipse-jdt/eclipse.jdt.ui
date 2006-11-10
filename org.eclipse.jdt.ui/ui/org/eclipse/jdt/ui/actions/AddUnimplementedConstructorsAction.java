@@ -71,7 +71,7 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -511,7 +511,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		dialog.setTitle(ActionMessages.AddUnimplementedConstructorsAction_dialog_title); 
 		dialog.setInitialSelections(constructors);
 		dialog.setContainerMode(true);
-		dialog.setSorter(new JavaElementSorter());
+		dialog.setComparator(new JavaElementComparator());
 		dialog.setSize(60, 18);
 		dialog.setInput(new Object());
 		dialog.setMessage(ActionMessages.AddUnimplementedConstructorsAction_dialog_label); 

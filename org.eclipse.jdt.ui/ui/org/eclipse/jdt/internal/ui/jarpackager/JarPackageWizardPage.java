@@ -73,9 +73,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
-
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
@@ -519,8 +518,8 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 						}
 		};
 		fInputGroup.addTreeFilter(new EmptyInnerPackageFilter());
-		fInputGroup.setTreeComparator(new JavaElementSorter());
-		fInputGroup.setListComparator(new JavaElementSorter());
+		fInputGroup.setTreeComparator(new JavaElementComparator());
+		fInputGroup.setListComparator(new JavaElementComparator());
 		fInputGroup.addTreeFilter(new ContainerFilter(ContainerFilter.FILTER_NON_CONTAINERS));
 		fInputGroup.addTreeFilter(new LibraryFilter());
 		fInputGroup.addListFilter(new ContainerFilter(ContainerFilter.FILTER_CONTAINERS));

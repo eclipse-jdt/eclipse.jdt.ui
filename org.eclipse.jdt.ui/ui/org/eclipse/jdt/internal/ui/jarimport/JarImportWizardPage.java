@@ -61,9 +61,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
-
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
@@ -216,7 +215,7 @@ public final class JarImportWizardPage extends WizardPage {
 		fTreeViewer.setLabelProvider(labelProvider);
 		fTreeViewer.setContentProvider(contentProvider);
 		fTreeViewer.addFilter(new EmptyPackageFilter());
-		fTreeViewer.setComparator(new JavaElementSorter());
+		fTreeViewer.setComparator(new JavaElementComparator());
 		fTreeViewer.setAutoExpandLevel(2);
 		fTreeViewer.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
 		final IPackageFragmentRoot root= fWizard.getPackageFragmentRoot();

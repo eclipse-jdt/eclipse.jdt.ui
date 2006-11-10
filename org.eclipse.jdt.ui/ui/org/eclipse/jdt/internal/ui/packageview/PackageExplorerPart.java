@@ -128,8 +128,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.IPackagesViewPart;
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
@@ -1193,7 +1193,7 @@ public class PackageExplorerPart extends ViewPart
 
 	private void restoreFilterAndSorter() {
 		fViewer.addFilter(new OutputFolderFilter());
-		setSorter();
+		setComparator();
 		if (fMemento != null)	
 			fActionSet.restoreFilterAndSorterState(fMemento);
 	}
@@ -1722,7 +1722,7 @@ public class PackageExplorerPart extends ViewPart
 				fViewer.setInput(null);
 			}
 			setProviders();
-			setSorter();
+			setComparator();
 			fActionSet.getWorkingSetActionGroup().fillFilters(fViewer);
 			if (isRootInputChange) {
 				fViewer.setInput(findInputElement());
@@ -1769,11 +1769,11 @@ public class PackageExplorerPart extends ViewPart
 		return fRootMode == ViewActionGroup.SHOW_WORKING_SETS;
 	}
 	
-	private void setSorter() {
+	private void setComparator() {
 		if (showWorkingSets()) {
 			fViewer.setComparator(new WorkingSetAwareJavaElementSorter());
 		} else {
-			fViewer.setComparator(new JavaElementSorter());
+			fViewer.setComparator(new JavaElementComparator());
 		}
 	}
 	

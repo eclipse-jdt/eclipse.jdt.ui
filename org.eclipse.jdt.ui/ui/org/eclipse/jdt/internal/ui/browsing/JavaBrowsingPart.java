@@ -104,9 +104,9 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.actions.BuildActionGroup;
@@ -339,7 +339,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		fLabelProvider= createLabelProvider();
 		fViewer.setLabelProvider(createDecoratingLabelProvider(fLabelProvider));
 
-		fViewer.setComparator(createJavaElementSorter());
+		fViewer.setComparator(createJavaElementComparator());
 		fViewer.setUseHashlookup(true);
 		fTitleProvider= createTitleProvider();
 
@@ -417,8 +417,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		return new DecoratingJavaLabelProvider(provider);
 	}
 
-	protected JavaElementSorter createJavaElementSorter() {
-		return new JavaElementSorter();
+	protected JavaElementComparator createJavaElementComparator() {
+		return new JavaElementComparator();
 	}
 
 	protected StatusBarUpdater createStatusBarUpdater(IStatusLineManager slManager) {

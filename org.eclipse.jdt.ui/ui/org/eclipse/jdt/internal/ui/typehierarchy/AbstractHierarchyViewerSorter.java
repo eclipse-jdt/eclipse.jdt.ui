@@ -22,9 +22,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 
-import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.JavaElementComparator;
 
-import org.eclipse.jdt.internal.ui.viewsupport.SourcePositionSorter;
+import org.eclipse.jdt.internal.ui.viewsupport.SourcePositionComparator;
 
 /**
   */
@@ -35,12 +35,12 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerComparator {
 	private static final int INTERFACE= 3;
 	private static final int ANONYM= 4;
 	
-	private JavaElementSorter fNormalSorter;
-	private SourcePositionSorter fSourcePositonSorter;
+	private JavaElementComparator fNormalSorter;
+	private SourcePositionComparator fSourcePositonSorter;
 	
 	public AbstractHierarchyViewerSorter() {
-		fNormalSorter= new JavaElementSorter();
-		fSourcePositonSorter= new SourcePositionSorter();
+		fNormalSorter= new JavaElementComparator();
+		fSourcePositonSorter= new SourcePositionComparator();
 	}
 	
 	protected abstract ITypeHierarchy getHierarchy(IType type);

@@ -30,7 +30,7 @@ import org.eclipse.jdt.core.JavaModelException;
  * 
  * @since 3.2
  */
-public class SourcePositionSorter extends ViewerComparator {
+public class SourcePositionComparator extends ViewerComparator {
 
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerSorter#compare(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)

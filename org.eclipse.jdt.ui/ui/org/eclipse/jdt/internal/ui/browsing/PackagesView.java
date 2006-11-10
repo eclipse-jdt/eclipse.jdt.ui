@@ -58,8 +58,8 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -360,7 +360,7 @@ public class PackagesView extends JavaBrowsingPart{
 		JavaUILabelProvider labelProvider= createLabelProvider();
 		viewer.setLabelProvider(createDecoratingLabelProvider(labelProvider));
 
-		viewer.setComparator(createJavaElementSorter());
+		viewer.setComparator(createJavaElementComparator());
 		viewer.setUseHashlookup(true);
 
 		createContextMenu();
@@ -380,8 +380,8 @@ public class PackagesView extends JavaBrowsingPart{
 	}
 
 	//alter sorter to include LogicalPackages
-	protected JavaElementSorter createJavaElementSorter() {
-		return new JavaElementSorter(){
+	protected JavaElementComparator createJavaElementComparator() {
+		return new JavaElementComparator(){
 			public int category(Object element) {
 				if (element instanceof LogicalPackage) {
 					LogicalPackage cp= (LogicalPackage) element;

@@ -69,8 +69,8 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
@@ -942,7 +942,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 						| JavaElementLabelProvider.SHOW_SMALL_ICONS;
 		final DecoratingLabelProvider provider= new DecoratingLabelProvider(new JavaElementLabelProvider(labelFlags), new ProblemsLabelDecorator());
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), provider, new StandardJavaElementContentProvider()); 
-		dialog.setSorter(new JavaElementSorter());
+		dialog.setComparator(new JavaElementComparator());
 		dialog.setAllowMultiple(false);
 		dialog.setValidator(new ISelectionStatusValidator() {
 			public IStatus validate(Object[] selection) {

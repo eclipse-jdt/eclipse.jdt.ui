@@ -38,9 +38,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -140,7 +140,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		treeViewer.getTree().setLayoutData(gd);
 		treeViewer.setLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS));
 		treeViewer.setContentProvider(new DestinationContentProvider(getDestinationValidator()));
-		treeViewer.setComparator(new JavaElementSorter());
+		treeViewer.setComparator(new JavaElementComparator());
 		treeViewer.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
 		return treeViewer;
 	}

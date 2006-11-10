@@ -17,21 +17,21 @@ import org.eclipse.jface.viewers.StructuredViewer;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.JavaElementComparator;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.browsing.JavaBrowsingMessages;
-import org.eclipse.jdt.internal.ui.viewsupport.SourcePositionSorter;
+import org.eclipse.jdt.internal.ui.viewsupport.SourcePositionComparator;
 
 /*
  * XXX: This class should become part of the MemberFilterActionGroup
  *      which should be renamed to MemberActionsGroup
  */
 public class LexicalSortingAction extends Action {
-	private JavaElementSorter fSorter= new JavaElementSorter();
-	private SourcePositionSorter fSourcePositonSorter= new SourcePositionSorter();
+	private JavaElementComparator fComparator= new JavaElementComparator();
+	private SourcePositionComparator fSourcePositonComparator= new SourcePositionComparator();
 	private StructuredViewer fViewer;
 	private String fPreferenceKey;
 
@@ -57,9 +57,9 @@ public class LexicalSortingAction extends Action {
 		BusyIndicator.showWhile(fViewer.getControl().getDisplay(), new Runnable() {
 			public void run() {
 				if (on)
-					fViewer.setComparator(fSorter);
+					fViewer.setComparator(fComparator);
 				else
-					fViewer.setComparator(fSourcePositonSorter);
+					fViewer.setComparator(fSourcePositonComparator);
 			}
 		});
 		

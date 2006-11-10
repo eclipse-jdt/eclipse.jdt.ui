@@ -63,7 +63,7 @@ import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
-import org.eclipse.ui.views.navigator.ResourceSorter;
+import org.eclipse.ui.views.navigator.ResourceComparator;
 
 import org.eclipse.ui.ide.IDE;
 
@@ -895,7 +895,7 @@ public class BuildPathsBlock {
 		dialog.addFilter(filter);
 		dialog.setInput(fWorkspaceRoot);
 		dialog.setInitialSelection(initSelection);
-		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
+		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
 		
 		if (dialog.open() == Window.OK) {
 			return (IContainer)dialog.getFirstResult();

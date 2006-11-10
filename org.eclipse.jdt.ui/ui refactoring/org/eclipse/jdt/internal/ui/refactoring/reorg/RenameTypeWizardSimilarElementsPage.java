@@ -83,9 +83,9 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitP
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -356,7 +356,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		
 	}
 	
-	private static class SimilarElementSorter extends JavaElementSorter {
+	private static class SimilarElementComparator extends JavaElementComparator {
 
 		/*
 		 * (non-Javadoc)
@@ -473,7 +473,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
 		fTreeViewer= new ContainerCheckedTreeViewer(tree);
 		fTreeViewer.setUseHashlookup(true);
-		fTreeViewer.setComparator(new SimilarElementSorter());
+		fTreeViewer.setComparator(new SimilarElementComparator());
 		fTreeViewer.setContentProvider(new SimilarElementTreeContentProvider());
 		fTreeViewerLabelProvider= new SimilarLabelProvider();
 		fTreeViewer.setLabelProvider(fTreeViewerLabelProvider);

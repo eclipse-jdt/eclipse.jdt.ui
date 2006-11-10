@@ -82,8 +82,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
@@ -810,7 +810,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT); 
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, provider);
 		dialog.setValidator(validator);
-		dialog.setSorter(new JavaElementSorter());
+		dialog.setComparator(new JavaElementComparator());
 		dialog.setTitle(JUnitMessages.JUnitMainTab_folderdialog_title);  
 		dialog.setMessage(JUnitMessages.JUnitMainTab_folderdialog_message);  
 		dialog.addFilter(filter);

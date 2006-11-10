@@ -14,9 +14,9 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.IWorkingSet;
 
-import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.JavaElementComparator;
 
-public class WorkingSetAwareJavaElementSorter extends JavaElementSorter {
+public class WorkingSetAwareJavaElementSorter extends JavaElementComparator {
 	
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		if (e1 instanceof IWorkingSet || e2 instanceof IWorkingSet)

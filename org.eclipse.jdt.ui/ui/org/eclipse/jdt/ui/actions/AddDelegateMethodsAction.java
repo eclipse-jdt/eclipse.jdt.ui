@@ -40,7 +40,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.IRewriteTarget;
@@ -303,7 +303,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		}
 	}
 
-	private static class AddDelegateMethodsViewerSorter extends ViewerSorter {
+	private static class AddDelegateMethodsViewerComparator extends ViewerComparator {
 
 		private final BindingLabelProvider fProvider= new BindingLabelProvider();
 		private final Collator fCollator= Collator.getInstance();
@@ -548,8 +548,8 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			AddDelegateMethodsContentProvider provider= new AddDelegateMethodsContentProvider(type, fields);
 			SourceActionDialog dialog= new AddDelegateMethodsDialog(getShell(), new AddDelegateMethodsLabelProvider(), provider, fEditor, type, false);
 			dialog.setValidator(new AddDelegateMethodsActionStatusValidator(provider.getCount()));
-			AddDelegateMethodsViewerSorter sorter= new AddDelegateMethodsViewerSorter();
-			dialog.setSorter(sorter);
+			AddDelegateMethodsViewerComparator comparator= new AddDelegateMethodsViewerComparator();
+			dialog.setComparator(comparator);
 			dialog.setInput(new Object());
 			dialog.setContainerMode(true);
 			dialog.setMessage(ActionMessages.AddDelegateMethodsAction_message); 
@@ -560,7 +560,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			} else {
 				Object[] elements= provider.getElements(null);
 				if (elements.length > 0) {
-					sorter.sort(null, elements);
+					comparator.sort(null, elements);
 					Object[] expand= { elements[0]};
 					dialog.setExpandedElements(expand);
 				}

@@ -101,8 +101,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
@@ -128,7 +128,7 @@ import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.SourcePositionSorter;
+import org.eclipse.jdt.internal.ui.viewsupport.SourcePositionComparator;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 
@@ -769,8 +769,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 			class LexicalSortingAction extends Action {
 
-				private JavaElementSorter fSorter= new JavaElementSorter();
-				private SourcePositionSorter fSourcePositonSorter= new SourcePositionSorter();
+				private JavaElementComparator fComparator= new JavaElementComparator();
+				private SourcePositionComparator fSourcePositonComparator= new SourcePositionComparator();
 
 				public LexicalSortingAction() {
 					super();
@@ -793,9 +793,9 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), new Runnable() {
 						public void run() {
 							if (on)
-								fOutlineViewer.setComparator(fSorter);
+								fOutlineViewer.setComparator(fComparator);
 							else
-								fOutlineViewer.setComparator(fSourcePositonSorter);
+								fOutlineViewer.setComparator(fSourcePositonComparator);
 						}
 					});
 
