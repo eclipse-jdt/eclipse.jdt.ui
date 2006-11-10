@@ -87,6 +87,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 	private String fPartitioning;
 	private final IJavaProject fProject;
+	private static IScanner fgScanner= ToolFactory.createScanner(false, false, false, false);
 
 	/**
 	 * Creates a new Java auto indent strategy for the given document partitioning.
@@ -1273,18 +1274,17 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 			final String source= document.get(scanRegion.getOffset(), scanRegion.getLength());
 
-			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
-			scanner.setSource(source.toCharArray());
+			fgScanner.setSource(source.toCharArray());
 
-			int id= scanner.getNextToken();
+			int id= fgScanner.getNextToken();
 			while (id != ITerminalSymbols.TokenNameEOF && id != tokenId)
-				id= scanner.getNextToken();
+				id= fgScanner.getNextToken();
 
 			if (id == ITerminalSymbols.TokenNameEOF)
 				return null;
 
-			int tokenOffset= scanner.getCurrentTokenStartPosition();
-			int tokenLength= scanner.getCurrentTokenEndPosition() + 1 - tokenOffset; // inclusive end
+			int tokenOffset= fgScanner.getCurrentTokenStartPosition();
+			int tokenLength= fgScanner.getCurrentTokenEndPosition() + 1 - tokenOffset; // inclusive end
 			return new Region(tokenOffset + scanRegion.getOffset(), tokenLength);
 
 		} catch (InvalidInputException x) {
