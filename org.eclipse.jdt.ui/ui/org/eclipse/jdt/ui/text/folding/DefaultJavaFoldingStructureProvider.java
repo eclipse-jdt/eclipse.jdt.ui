@@ -97,16 +97,18 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		private IType fFirstType;
 		private boolean fHasHeaderComment;
 		private LinkedHashMap fMap= new LinkedHashMap();
+		private IScanner fScanner;
 
-		FoldingStructureComputationContext(IDocument document, ProjectionAnnotationModel model, boolean allowCollapsing) {
+		private FoldingStructureComputationContext(IDocument document, ProjectionAnnotationModel model, boolean allowCollapsing, IScanner scanner) {
 			Assert.isNotNull(document);
 			Assert.isNotNull(model);
 			fDocument= document;
 			fModel= model;
 			fAllowCollapsing= allowCollapsing;
+			fScanner= scanner;
 		}
 		
-		void setFirstType(IType type) {
+		private void setFirstType(IType type) {
 			if (hasFirstType())
 				throw new IllegalStateException();
 			fFirstType= type;
@@ -116,15 +118,15 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			return fFirstType != null;
 		}
 		
-		IType getFirstType() {
+		private IType getFirstType() {
 			return fFirstType;
 		}
 
-		boolean hasHeaderComment() {
+		private boolean hasHeaderComment() {
 			return fHasHeaderComment;
 		}
 
-		void setHasHeaderComment() {
+		private void setHasHeaderComment() {
 			fHasHeaderComment= true;
 		}
 		
@@ -146,12 +148,18 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		 * 
 		 * @return the document which contains the code being folded
 		 */
-		IDocument getDocument() {
+		private IDocument getDocument() {
 			return fDocument;
 		}
 
-		ProjectionAnnotationModel getModel() {
+		private ProjectionAnnotationModel getModel() {
 			return fModel;
+		}
+		
+		private IScanner getScanner() {
+			if (fScanner == null)
+				fScanner= ToolFactory.createScanner(true, false, false, false);
+			return fScanner;
 		}
 		
 		/**
@@ -342,8 +350,14 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				return;
 			
 			IJavaElementDelta delta= findElement(fInput, e.getDelta());
-			if (delta != null && (delta.getFlags() & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_CHILDREN)) != 0)
-	            update(createContext(false));
+			if (delta != null && (delta.getFlags() & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_CHILDREN)) != 0) {
+				fUpdatingCount++;
+				try {
+					update(createContext(false));
+				} finally {
+					fUpdatingCount--;
+				}
+			}
 		}
 
 		private boolean hasErrorOnCaretLine(CompilationUnit ast) {
@@ -663,6 +677,14 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	private final Filter fMemberFilter = new MemberFilter();
 	/** Comment filter, matches comments. */
 	private final Filter fCommentFilter = new CommentFilter();
+	
+	/**
+	 * Reusable scanner.
+	 * @since 3.3
+	 */
+	private IScanner fSharedScanner= ToolFactory.createScanner(true, false, false, false);
+	
+	private volatile int fUpdatingCount= 0;
 
 	/**
 	 * Creates a new folding provider. It must be
@@ -772,7 +794,12 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 * @see org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider#initialize()
 	 */
 	public final void initialize() {
-		update(createInitialContext());
+		fUpdatingCount++;
+		try {
+			update(createInitialContext());
+		} finally {
+			fUpdatingCount--;
+		}
 	}
 
 	private FoldingStructureComputationContext createInitialContext() {
@@ -794,7 +821,11 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		if (doc == null)
 			return null;
 		
-		return new FoldingStructureComputationContext(doc, model, allowCollapse);
+		IScanner scanner= null;
+		if (fUpdatingCount == 1)
+			scanner= fSharedScanner; // reuse scanner
+		
+		return new FoldingStructureComputationContext(doc, model, allowCollapse, scanner);
 	}
 	
 	private IJavaElement getInputElement() {
@@ -813,13 +844,13 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private void update(FoldingStructureComputationContext ctx) {
-	    if (ctx == null)
+		if (ctx == null)
 			return;
 
 		Map additions= new HashMap();
 		List deletions= new ArrayList();
 		List updates= new ArrayList();
-		
+
 		computeFoldingStructure(ctx);
 		Map newStructure= ctx.fMap;
 		Map oldStructure= computeCurrentStructure(ctx);
@@ -894,6 +925,13 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	private void computeFoldingStructure(FoldingStructureComputationContext ctx) {
 		IParent parent= (IParent) fInput;
 		try {
+			if (!(fInput instanceof ISourceReference))
+				return;
+			String source= ((ISourceReference)fInput).getSource();
+			if (source == null)
+				return;
+			
+			ctx.getScanner().setSource(source.toCharArray());
 			computeFoldingStructure(parent.getChildren(), ctx);
 		} catch (JavaModelException x) {
 		}
@@ -1043,19 +1081,20 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 					}
 				}
 
-				IScanner scanner= ToolFactory.createScanner(true, false, false, false);
-				scanner.setSource(contents.toCharArray());
 				final int shift= range.getOffset();
+				IScanner scanner= ctx.getScanner();
+				scanner.resetTo(shift, shift + range.getLength());
+				
 				int start= shift;
 				while (true) {
 
 					int token= scanner.getNextToken();
-					start= shift + scanner.getCurrentTokenStartPosition();
+					start= scanner.getCurrentTokenStartPosition();
 
 					switch (token) {
 						case ITerminalSymbols.TokenNameCOMMENT_JAVADOC:
 						case ITerminalSymbols.TokenNameCOMMENT_BLOCK: {
-							int end= shift + scanner.getCurrentTokenEndPosition() + 1;
+							int end= scanner.getCurrentTokenEndPosition() + 1;
 							regions.add(new Region(start, end - start));
 						}
 						case ITerminalSymbols.TokenNameCOMMENT_LINE:
@@ -1085,12 +1124,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		int start= 0;
 		int end= range.getOffset();
 
-		String content;
-		try {
-			content= ctx.getDocument().get(start, end - start);
-		} catch (BadLocationException e) {
-			return null; // ignore header comment in that case
-		}
 
 		/* code adapted from CommentFormattingStrategy:
 		 * scan the header content up to the first type. Once a comment is
@@ -1098,8 +1131,8 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		 * The stop condition is reaching a package declaration, import container,
 		 * or the end of the input.
 		 */
-		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
-		scanner.setSource(content.toCharArray());
+		IScanner scanner= ctx.getScanner();
+		scanner.resetTo(start, end);
 
 		int headerStart= -1;
 		int headerEnd= -1;
@@ -1209,7 +1242,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		
 		return provider.getDocument(editor.getEditorInput());
 	}
-
+	
 	/**
 	 * Matches deleted annotations to changed or added ones. A deleted
 	 * annotation/position tuple that has a matching addition / change
