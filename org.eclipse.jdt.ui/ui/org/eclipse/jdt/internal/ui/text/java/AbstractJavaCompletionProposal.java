@@ -91,6 +91,23 @@ import org.osgi.framework.Bundle;
  * @since 3.2
  */
 public abstract class AbstractJavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension5 {
+	
+	
+	/**
+	 * The control creator.
+	 * 
+	 * @since 3.3
+	 */
+	private static final class ControlCreator extends AbstractReusableInformationControlCreator {
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
+		 */
+		public IInformationControl doCreateInformationControl(Shell parent) {
+			return new BrowserInformationControl(parent, SWT.NO_TRIM | SWT.TOOL, SWT.NONE, null);
+		}
+	}
+
+	
 	/**
 	 * A class to simplify tracking a reference position in a document.
 	 */
@@ -895,15 +912,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			return null;
 		
 		if (fCreator == null) {
-			fCreator= new AbstractReusableInformationControlCreator() {
-				
-				/*
-				 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
-				 */
-				public IInformationControl doCreateInformationControl(Shell parent) {
-					return new BrowserInformationControl(parent, SWT.NO_TRIM | SWT.TOOL, SWT.NONE, null);
-				}
-			};
+			fCreator= new ControlCreator();
 		}
 		return fCreator;
 	}
