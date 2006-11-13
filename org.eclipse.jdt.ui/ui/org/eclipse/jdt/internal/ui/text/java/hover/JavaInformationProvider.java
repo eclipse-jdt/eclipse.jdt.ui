@@ -39,6 +39,27 @@ import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
 public class JavaInformationProvider implements IInformationProvider, IInformationProviderExtension2 {
 
+	
+	/**
+	 * Control creator.
+	 *  
+	 * @since 3.3
+	 */
+	private static final class ControlCreator extends AbstractReusableInformationControlCreator {
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
+		 */
+		public IInformationControl doCreateInformationControl(Shell parent) {
+			int shellStyle= SWT.RESIZE | SWT.TOOL;
+			int style= SWT.V_SCROLL | SWT.H_SCROLL;
+			if (BrowserInformationControl.isAvailable(parent))
+				return new BrowserInformationControl(parent, shellStyle, style);
+			else
+				return new DefaultInformationControl(parent, shellStyle, style, new HTMLTextPresenter(false));
+		}
+	}
+	
+
 	class EditorWatcher implements IPartListener {
 
 		/**
@@ -154,22 +175,8 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 	 * @since 3.1
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {
-		if (fPresenterControlCreator == null) {
-			fPresenterControlCreator= new AbstractReusableInformationControlCreator() {
-
-				/*
-				 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
-				 */
-				public IInformationControl doCreateInformationControl(Shell parent) {
-					int shellStyle= SWT.RESIZE | SWT.TOOL;
-					int style= SWT.V_SCROLL | SWT.H_SCROLL;
-					if (BrowserInformationControl.isAvailable(parent))
-						return new BrowserInformationControl(parent, shellStyle, style);
-					else
-						return new DefaultInformationControl(parent, shellStyle, style, new HTMLTextPresenter(false));
-				}
-			};
-		}
+		if (fPresenterControlCreator == null)
+			fPresenterControlCreator= new ControlCreator();
 		return fPresenterControlCreator;
 	}
 }

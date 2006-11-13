@@ -67,10 +67,6 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	 */
 	private static String fgStyleSheet;
 	private IEditorPart fEditor;
-	private IBindingService fBindingService;
-	{
-		fBindingService= (IBindingService)PlatformUI.getWorkbench().getAdapter(IBindingService.class);
-	}
 
 	/*
 	 * @see IJavaEditorTextHover#setEditor(IEditorPart)
@@ -167,11 +163,13 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	 * @return the affordance string or <code>null</code> if disabled or no key binding is defined
 	 * @since 3.0
 	 */
-	protected String getTooltipAffordanceString() {
-		if (fBindingService == null || !JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE))
+	protected static String getTooltipAffordanceString() {
+		IBindingService bindingService= (IBindingService)PlatformUI.getWorkbench().getAdapter(IBindingService.class);
+		
+		if (bindingService == null || !JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE))
 			return null;
 
-		String keySequence= fBindingService.getBestActiveBindingFormattedFor(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
+		String keySequence= bindingService.getBestActiveBindingFormattedFor(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
 		if (keySequence == null)
 			return null;
 		

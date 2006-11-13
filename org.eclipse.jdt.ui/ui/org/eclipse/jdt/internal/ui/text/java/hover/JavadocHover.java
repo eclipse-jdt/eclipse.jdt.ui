@@ -43,6 +43,55 @@ import org.eclipse.jdt.internal.ui.text.IInformationControlExtension4;
  */
 public class JavadocHover extends AbstractJavaEditorTextHover implements IInformationProviderExtension2, ITextHoverExtension {
 
+	
+	/**
+	 * Presenter control creator.
+	 * 
+	 * @since 3.3
+	 */
+	private static final class PresenterControlCreator extends AbstractReusableInformationControlCreator {
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
+		 */
+		public IInformationControl doCreateInformationControl(Shell parent) {
+			int shellStyle= SWT.RESIZE | SWT.TOOL;
+			int style= SWT.V_SCROLL | SWT.H_SCROLL;
+			if (BrowserInformationControl.isAvailable(parent))
+				return new BrowserInformationControl(parent, shellStyle, style);
+			else
+				return new DefaultInformationControl(parent, shellStyle, style, new HTMLTextPresenter(false));
+		}
+	}
+
+	
+	/**
+	 * Hover control creator.
+	 * 
+	 * @since 3.3
+	 */
+	private static final class HoverControlCreator extends AbstractReusableInformationControlCreator {
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
+		 */
+		public IInformationControl doCreateInformationControl(Shell parent) {
+			if (BrowserInformationControl.isAvailable(parent))
+				return new BrowserInformationControl(parent, SWT.TOOL | SWT.NO_TRIM, SWT.NONE, getTooltipAffordanceString());
+			else
+				return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true), getTooltipAffordanceString());
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#canReuse(org.eclipse.jface.text.IInformationControl)
+		 */
+		public boolean canReuse(IInformationControl control) {
+			boolean canReuse= super.canReuse(control);
+			if (canReuse && control instanceof IInformationControlExtension4)
+				((IInformationControlExtension4)control).setStatusText(getTooltipAffordanceString());
+			return canReuse;
+				
+		}
+	}
+
 	private final long LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
 		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS
 		| JavaElementLabels.F_PRE_TYPE_SIGNATURE | JavaElementLabels.M_PRE_TYPE_PARAMETERS | JavaElementLabels.T_TYPE_PARAMETERS
@@ -69,22 +118,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 	 * @since 3.1
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {
-		if (fPresenterControlCreator == null) {
-			fPresenterControlCreator= new AbstractReusableInformationControlCreator() {
-
-				/*
-				 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
-				 */
-				public IInformationControl doCreateInformationControl(Shell parent) {
-					int shellStyle= SWT.RESIZE | SWT.TOOL;
-					int style= SWT.V_SCROLL | SWT.H_SCROLL;
-					if (BrowserInformationControl.isAvailable(parent))
-						return new BrowserInformationControl(parent, shellStyle, style);
-					else
-						return new DefaultInformationControl(parent, shellStyle, style, new HTMLTextPresenter(false));
-				}
-			};
-		}
+		if (fPresenterControlCreator == null)
+			fPresenterControlCreator= new PresenterControlCreator();
 		return fPresenterControlCreator;
 	}
 
@@ -93,31 +128,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 	 * @since 3.2
 	 */
 	public IInformationControlCreator getHoverControlCreator() {
-		if (fHoverControlCreator == null) {
-			fHoverControlCreator= new AbstractReusableInformationControlCreator() {
-				
-				/*
-				 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
-				 */
-				public IInformationControl doCreateInformationControl(Shell parent) {
-					if (BrowserInformationControl.isAvailable(parent))
-						return new BrowserInformationControl(parent, SWT.TOOL | SWT.NO_TRIM, SWT.NONE, getTooltipAffordanceString());
-					else
-						return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true), getTooltipAffordanceString());
-				}
-				
-				/*
-				 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#canReuse(org.eclipse.jface.text.IInformationControl)
-				 */
-				public boolean canReuse(IInformationControl control) {
-					boolean canReuse= super.canReuse(control);
-					if (canReuse && control instanceof IInformationControlExtension4)
-						((IInformationControlExtension4)control).setStatusText(getTooltipAffordanceString());
-					return canReuse;
-						
-				}
-			};
-		}
+		if (fHoverControlCreator == null)
+			fHoverControlCreator= new HoverControlCreator();
 		return fHoverControlCreator;
 	}
 
