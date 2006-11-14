@@ -146,12 +146,16 @@ public class CompareResultDialog extends TrayDialog {
 	
 	public CompareResultDialog(Shell parentShell, TestElement element) {
 		super(parentShell);
-		fgThis= this;
-		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX);
-        fTestName= element.getTestName();
-        fExpected= element.getExpected();
-        fActual= element.getActual();
-        computePrefixSuffix();
+		fgThis= this; //TODO: leak! Straightforward fix did not work (bug 164497). 
+		setShellStyle(SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MAX);
+		setFailedTest(element);
+	}
+	
+	private void setFailedTest(TestElement failedTest) {
+		fTestName= failedTest.getTestName();
+		fExpected= failedTest.getExpected();
+		fActual= failedTest.getActual();
+		computePrefixSuffix();
 	}
 	
 	/* (non-Javadoc)
@@ -220,9 +224,7 @@ public class CompareResultDialog extends TrayDialog {
 	    compareConfiguration.setProperty(CompareConfiguration.IGNORE_WHITESPACE, Boolean.FALSE);
 
 	    fViewer= new CompareResultMergeViewer(parent, SWT.NONE, compareConfiguration);
-	    fViewer.setInput(new DiffNode( 
-        new CompareElement(fExpected), 
-        new CompareElement(fActual)));
+	    setCompareViewerInput();
 
 	    Control control= fViewer.getControl();
 	    control.addDisposeListener(new DisposeListener() {
@@ -231,5 +233,14 @@ public class CompareResultDialog extends TrayDialog {
 	        }
 	    });
 	    return  control;
-	}	
+	}
+
+	private void setCompareViewerInput() {
+		fViewer.setInput(new DiffNode(new CompareElement(fExpected), new CompareElement(fActual)));
+	}
+
+	public void setInput(TestElement failedTest) {
+		setFailedTest(failedTest);
+		setCompareViewerInput();
+	}
 }

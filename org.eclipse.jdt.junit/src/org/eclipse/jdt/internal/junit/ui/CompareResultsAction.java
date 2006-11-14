@@ -11,14 +11,20 @@
 package org.eclipse.jdt.internal.junit.ui;
 
 
+import org.eclipse.swt.events.ShellAdapter;
+import org.eclipse.swt.events.ShellEvent;
+
 import org.eclipse.jface.action.Action;
+
+import org.eclipse.jdt.internal.junit.model.TestElement;
 
 /**
  * Action to enable/disable stack trace filtering.
  */
 public class CompareResultsAction extends Action {
 
-	private FailureTrace fView;	
+	private FailureTrace fView;
+	private CompareResultDialog fOpenDialog;
 	
 	public CompareResultsAction(FailureTrace view) {
 		super(JUnitMessages.CompareResultsAction_label);   
@@ -36,8 +42,27 @@ public class CompareResultsAction extends Action {
 	 * @see Action#actionPerformed
 	 */		
 	public void run() {
-		CompareResultDialog dialog= new CompareResultDialog(fView.getShell(), fView.getFailedTest());
-		dialog.create();
-		dialog.open();
+		TestElement failedTest= fView.getFailedTest();
+		if (fOpenDialog != null) {
+			fOpenDialog.setInput(failedTest);
+			fOpenDialog.getShell().setActive();
+				
+		} else {
+			fOpenDialog= new CompareResultDialog(fView.getShell(), failedTest);
+			fOpenDialog.create();
+			fOpenDialog.getShell().addShellListener(new ShellAdapter() {
+					public void shellClosed(ShellEvent e) {
+						fOpenDialog= null;
+					}
+				});
+			fOpenDialog.setBlockOnOpen(false);
+			fOpenDialog.open();
+		}
+	}
+	
+	public void updateOpenDialog(TestElement failedTest) {
+		if (fOpenDialog != null) {
+			fOpenDialog.setInput(failedTest);
+		}
 	}
 }

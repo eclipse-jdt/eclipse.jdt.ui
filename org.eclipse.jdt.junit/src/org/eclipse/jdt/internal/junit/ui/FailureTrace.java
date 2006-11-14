@@ -68,7 +68,7 @@ public class FailureTrace implements IMenuListener {
 		handler.addOpenListener(new IOpenEventListener() {
 			public void handleOpen(SelectionEvent e) {
 				if (fTable.getSelectionIndex() == 0 && fFailure.isComparisonFailure()) {
-					(new CompareResultsAction(FailureTrace.this)).run();
+					fCompareAction.run();
 				}
 				if (fTable.getSelection().length != 0) {
 					Action a = createOpenEditorAction(getSelectedText());
@@ -100,7 +100,7 @@ public class FailureTrace implements IMenuListener {
 		}
 		// fix for bug 68058
 		if (fFailure != null && fFailure.isComparisonFailure()) 
-			manager.add(new CompareResultsAction(FailureTrace.this));
+			manager.add(fCompareAction);
 	}
 
 	public String getTrace() {
@@ -166,7 +166,11 @@ public class FailureTrace implements IMenuListener {
 	}
 
 	public void updateEnablement(TestElement test) {
-		fCompareAction.setEnabled(test != null && test.isComparisonFailure());
+		boolean enableCompare= test != null && test.isComparisonFailure();
+		fCompareAction.setEnabled(enableCompare);
+		if (enableCompare) {
+			fCompareAction.updateOpenDialog(test);
+		}
 	}
 
 	private void updateTable(String trace) {
