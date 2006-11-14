@@ -244,6 +244,14 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		invalidSelectionTest();
 	}
 	
+	public void test015() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	public void test016() throws Exception {
+		invalidSelectionTest();
+	}
+	
 	//---- Switch / Case
 	
 	public void test020() throws Exception {
