@@ -13,18 +13,16 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.dom.AST;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class InlineTempTests extends RefactoringTest {
 
@@ -73,7 +71,7 @@ public class InlineTempTests extends RefactoringTest {
 	
 	private void helper1(ICompilationUnit cu, ISourceRange selection) throws Exception{
 		InlineTempRefactoring ref= new InlineTempRefactoring(cu, selection.getOffset(), selection.getLength());
-		if (ref.checkIfTempSelected(new RefactoringASTParser(AST.JLS3).parse(cu, true)).hasFatalError())
+		if (ref.checkIfTempSelected().hasFatalError())
 			ref= null;
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -98,7 +96,7 @@ public class InlineTempTests extends RefactoringTest {
 	
 	private void helper2(ICompilationUnit cu, ISourceRange selection) throws Exception{
 		InlineTempRefactoring ref= new InlineTempRefactoring(cu, selection.getOffset(), selection.getLength());
-		if (ref.checkIfTempSelected(new RefactoringASTParser(AST.JLS3).parse(cu, true)).hasFatalError())
+		if (ref.checkIfTempSelected().hasFatalError())
 			ref= null;
 		if (ref != null){
 			RefactoringStatus result= performRefactoring(ref);
@@ -175,13 +173,13 @@ public class InlineTempTests extends RefactoringTest {
 	}	
 	
 	public void test14() throws Exception{
-		printTestDisabledMessage("regression for bug 11664");		
-//		helper1(4, 13, 4, 14);
+//		printTestDisabledMessage("regression for bug 11664");		
+		helper1(4, 13, 4, 14);
 	}	
 	
 	public void test15() throws Exception{
-		printTestDisabledMessage("regression for bug 11664");		
-//		helper1(4, 19, 4, 20);
+//		printTestDisabledMessage("regression for bug 11664");		
+		helper1(4, 19, 4, 20);
 	}	
 	
 	public void test16() throws Exception{
