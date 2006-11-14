@@ -328,7 +328,7 @@ public final class RefactoringExecutionStarter {
 
 	public static boolean startInlineTempRefactoring(final ICompilationUnit unit, final CompilationUnit node, final ITextSelection selection, final Shell shell, final boolean activate) throws JavaModelException {
 		final InlineTempRefactoring refactoring= new InlineTempRefactoring(unit, selection.getOffset(), selection.getLength());
-		if (!refactoring.checkIfTempSelected(node).hasFatalError()) {
+		if (!refactoring.checkIfTempSelected().hasFatalError()) {
 			if (activate)
 				new RefactoringStarter().activate(refactoring, new InlineTempWizard(refactoring), shell, RefactoringMessages.InlineTempAction_inline_temp, false);
 			return true;

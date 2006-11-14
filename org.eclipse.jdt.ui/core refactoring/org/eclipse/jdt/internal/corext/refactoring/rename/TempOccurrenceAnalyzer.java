@@ -75,6 +75,10 @@ public class TempOccurrenceAnalyzer extends ASTVisitor {
 			offsets[i]= node.getStartPosition();
 		}
 	}
+	
+	public int getNumberOfReferences() {
+		return fReferenceNodes.size();
+	}
 
 	public SimpleName[] getReferenceNodes() {
 		return (SimpleName[]) fReferenceNodes.toArray(new SimpleName[fReferenceNodes.size()]);

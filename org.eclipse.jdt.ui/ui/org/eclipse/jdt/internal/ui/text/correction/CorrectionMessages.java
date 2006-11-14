@@ -32,6 +32,7 @@ public final class CorrectionMessages extends NLS {
 	public static String ModifierCorrectionSubProcessor_removefinal_description;
 	public static String ModifierCorrectionSubProcessor_removevolatile_description;
 	public static String QuickAssistProcessor_convert_anonym_to_nested;
+	public static String QuickAssistProcessor_inline_local_description;
 	public static String QuickAssistProcessor_name_extension_from_class;
 	public static String QuickAssistProcessor_name_extension_from_interface;
 	public static String SerialVersionSubProcessor_createdefault_description;

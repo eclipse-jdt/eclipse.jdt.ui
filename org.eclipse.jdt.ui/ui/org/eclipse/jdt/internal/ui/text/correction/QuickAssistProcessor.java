@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.Flags;
@@ -87,9 +88,11 @@ import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFix;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -138,6 +141,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getInvertEqualsProposal(context, coveringNode, null)
 				|| getConvertForLoopProposal(context, coveringNode, null)
 				|| getExtractLocalProposal(context, coveringNode, null)
+				|| getInlineTempProposal(context, coveringNode, null)
 				|| getConvertAnonymousToNestedProposal(context, coveringNode, null)
 				|| getConvertIterableLoopProposal(context, coveringNode, null)
 				|| getRemoveBlockProposals(context, coveringNode, null)
@@ -169,6 +173,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getArrayInitializerToArrayCreation(context, coveringNode, resultingCollections);
 				getCreateInSuperClassProposals(context, coveringNode, resultingCollections);
 				getExtractLocalProposal(context, coveringNode, resultingCollections);
+				getInlineTempProposal(context, coveringNode, resultingCollections);
 				getConvertAnonymousToNestedProposal(context, coveringNode, resultingCollections);
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
@@ -206,7 +211,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (proposals == null) {
 			return true;
 		}
-
+		
 		final ICompilationUnit cu= context.getCompilationUnit();
 		final ExtractTempRefactoring refactoring= new ExtractTempRefactoring(cu, expression.getStartPosition(), expression.getLength());
 		if (refactoring.checkActivationBasics(context.getASTRoot(), new NullProgressMonitor()).isOK()) {
@@ -214,7 +219,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, 5, image) {
 				protected TextChange createTextChange() throws CoreException {
-					refactoring.setTempName(refactoring.guessTempName());
+					refactoring.setTempName(refactoring.guessTempName()); // expensive
 					refactoring.setLinkedProposalModel(getLinkedProposalModel());
 					return refactoring.createTextChange(new NullProgressMonitor());
 				}
@@ -244,22 +249,21 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		final ICompilationUnit cu= context.getCompilationUnit();
 		final ConvertAnonymousToNestedRefactoring refactoring= new ConvertAnonymousToNestedRefactoring(anonymTypeDecl);
-		
+		String extTypeName= ASTNodes.getSimpleNameIdentifier((Name) node);
+		if (anonymTypeDecl.resolveBinding().getInterfaces().length == 0) {
+			refactoring.setClassName(Messages.format(CorrectionMessages.QuickAssistProcessor_name_extension_from_interface, extTypeName));
+		} else {
+			refactoring.setClassName(Messages.format(CorrectionMessages.QuickAssistProcessor_name_extension_from_class, extTypeName));
+		}
+
 		if (refactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
+			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			refactoring.setLinkedProposalModel(linkedProposalModel);
+			
 			String label= CorrectionMessages.QuickAssistProcessor_convert_anonym_to_nested;
 			Image image= JavaPlugin.getImageDescriptorRegistry().get(JavaElementImageProvider.getTypeImageDescriptor(true, false, Flags.AccPrivate, false));
-			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, 5, image) {
-				protected TextChange createTextChange() throws CoreException {
-					String extTypeName= ASTNodes.getSimpleNameIdentifier((Name) node);
-					if (anonymTypeDecl.resolveBinding().getInterfaces().length == 0) {
-						refactoring.setClassName(Messages.format(CorrectionMessages.QuickAssistProcessor_name_extension_from_interface, extTypeName));
-					} else {
-						refactoring.setClassName(Messages.format(CorrectionMessages.QuickAssistProcessor_name_extension_from_class, extTypeName));
-					}
-					refactoring.setLinkedProposalModel(getLinkedProposalModel());
-					return refactoring.createCompilationUnitChange(new NullProgressMonitor());
-				}
-			};
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, refactoring, 5, image);
+			proposal.setLinkedProposalModel(linkedProposalModel);
 			proposals.add(proposal);
 		}
 		return false;
@@ -1275,5 +1279,47 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 5, image, context);
 		resultingCollections.add(proposal);
 		return true;
+	}
+		
+	private static boolean getInlineTempProposal(IInvocationContext context, final ASTNode node, Collection proposals) throws CoreException {
+		if (!(node instanceof SimpleName))
+			return false;
+		
+		SimpleName name= (SimpleName) node;
+		IBinding binding= name.resolveBinding();
+		if (!(binding instanceof IVariableBinding))
+			return false;
+		IVariableBinding varBinding= (IVariableBinding) binding;
+		if (varBinding.isField() || varBinding.isParameter())
+			return false;
+		ASTNode decl= context.getASTRoot().findDeclaringNode(varBinding);
+		if (!(decl instanceof VariableDeclarationFragment) || decl.getLocationInParent() != VariableDeclarationStatement.FRAGMENTS_PROPERTY)
+			return false;
+		
+		if (proposals == null) {
+			return true;
+		}
+			
+		InlineTempRefactoring refactoring= new InlineTempRefactoring((VariableDeclaration) decl);
+		if (refactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
+			String label= CorrectionMessages.QuickAssistProcessor_inline_local_description;
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);		
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, context.getCompilationUnit(), refactoring, 5, image);
+			proposals.add(proposal);
+		}
+		return true;
+	}
+	
+	private static class RefactoringCorrectionProposal extends CUCorrectionProposal {
+		private final Refactoring fRefactoring;
+
+		public RefactoringCorrectionProposal(String name, ICompilationUnit cu, Refactoring refactoring, int relevance, Image image) {
+			super(name, cu, null, relevance, image);
+			fRefactoring= refactoring;
+		}
+		
+		protected TextChange createTextChange() throws CoreException {
+			return (TextChange) fRefactoring.createChange(new NullProgressMonitor());
+		}
 	}
 }
