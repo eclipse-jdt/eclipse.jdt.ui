@@ -146,9 +146,17 @@ public class CompareResultDialog extends TrayDialog {
 	
 	public CompareResultDialog(Shell parentShell, TestElement element) {
 		super(parentShell);
-		fgThis= this; //TODO: leak! Straightforward fix did not work (bug 164497). 
+		fgThis= this; //TODO: Straightforward fix did not work (bug 164497).
 		setShellStyle(SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MAX);
 		setFailedTest(element);
+	}
+	
+	/*
+	 * workaround to avoid leak of workaround above
+	 */
+	public boolean close() {
+		fgThis= null;
+		return super.close();
 	}
 	
 	private void setFailedTest(TestElement failedTest) {
