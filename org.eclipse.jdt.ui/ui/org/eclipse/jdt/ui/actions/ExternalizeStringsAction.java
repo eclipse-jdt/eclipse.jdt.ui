@@ -181,7 +181,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	 * Note: this method is for internal use only. Clients should not call this method.
 	 */
 	public void run(final ICompilationUnit unit) {
-		if (!ActionUtil.isProcessable(getShell(), unit))
+		if (!ActionUtil.isEditable(fEditor, getShell(), unit))
 			return;
 		
 		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {

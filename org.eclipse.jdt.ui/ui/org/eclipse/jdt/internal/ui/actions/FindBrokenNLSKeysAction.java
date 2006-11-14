@@ -111,8 +111,15 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void run(IStructuredSelection selection) {
-		if (selection.size() == 1 && !ActionUtil.isProcessable(getShell(), selection.getFirstElement()))
-			return;
+		if (selection.size() == 1) {
+			Object firstElement= selection.getFirstElement();
+			if (firstElement instanceof IJavaElement) {
+				IJavaElement javaElement= (IJavaElement) firstElement;
+				if (!ActionUtil.isProcessable(getShell(), javaElement)) {
+					return;
+				}
+			}
+		}
 		
 		SearchPatternData[] data= getNLSFiles(selection);
 		if (data == null || data.length == 0) {

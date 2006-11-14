@@ -107,6 +107,9 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 	public void run(IStructuredSelection selection) {
 		IJavaElement[] elements= getSelectedElements(selection);
 		try {
+			if (! ActionUtil.areProcessable(getShell(), elements))
+				return;
+
 			if (RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(elements)) {
 				RefactoringExecutionStarter.startInferTypeArgumentsRefactoring(elements, getShell());
 			} else {
@@ -121,7 +124,7 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.text.ITextSelection)
 	 */
 	public void run(ITextSelection selection) {
-		if (!ActionUtil.isProcessable(getShell(), fEditor))
+		if (!ActionUtil.isEditable(fEditor))
 			return;
 		IJavaElement element= SelectionConverter.getInput(fEditor);
 		IJavaElement[] array= new IJavaElement[] {element};

@@ -225,7 +225,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 	 * Method declared on SelectionChangedAction.
 	 */
 	public void run(ITextSelection selection) {
-		if (!ActionUtil.isProcessable(getShell(), fEditor))
+		if (!ActionUtil.isProcessable(fEditor))
 			return;
 		try {
 			String title= SearchMessages.SearchElementSelectionDialog_title; 

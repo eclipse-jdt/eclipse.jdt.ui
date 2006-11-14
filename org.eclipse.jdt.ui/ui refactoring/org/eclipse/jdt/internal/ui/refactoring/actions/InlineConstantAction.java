@@ -136,7 +136,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
 		Assert.isNotNull(cu);
 		Assert.isTrue(offset >= 0);
 		Assert.isTrue(length >= 0);
-		if (!ActionUtil.isProcessable(getShell(), cu))
+		if (!ActionUtil.isEditable(fEditor, getShell(), cu))
 			return;
 		try {
 			RefactoringExecutionStarter.startInlineConstantRefactoring(cu, new RefactoringASTParser(AST.JLS3).parse(cu, true), offset, length, getShell(), true);

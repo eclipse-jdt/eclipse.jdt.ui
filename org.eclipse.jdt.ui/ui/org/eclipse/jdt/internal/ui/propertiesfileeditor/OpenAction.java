@@ -19,8 +19,6 @@ import org.eclipse.ui.IFileEditorInput;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
-import org.eclipse.jdt.internal.ui.actions.ActionUtil;
-
 /**
  * This action opens a tool (internal editor or view or an external
  * application) for the element at the given location.
@@ -74,9 +72,6 @@ public class OpenAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 
 		if (!checkEnabled(selection))
-			return;
-
-		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 
 		IRegion region= new Region(selection.getOffset(), selection.getLength());

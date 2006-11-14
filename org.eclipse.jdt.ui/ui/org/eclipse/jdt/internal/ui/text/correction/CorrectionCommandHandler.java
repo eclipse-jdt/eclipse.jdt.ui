@@ -34,7 +34,6 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.keys.IBindingService;
-import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -43,6 +42,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
@@ -50,11 +50,11 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  */
 public class CorrectionCommandHandler extends AbstractHandler {
 		
-	private final ITextEditor fEditor;
+	private final JavaEditor fEditor;
 	private final String fId;
 	private final boolean fIsAssist;
 
-	public CorrectionCommandHandler(ITextEditor editor, String id, boolean isAssist) {
+	public CorrectionCommandHandler(JavaEditor editor, String id, boolean isAssist) {
 		fEditor= editor;
 		fId= id;
 		fIsAssist= isAssist;
@@ -68,6 +68,9 @@ public class CorrectionCommandHandler extends AbstractHandler {
 		ICompilationUnit cu= JavaUI.getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
 		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
 		if (selection instanceof ITextSelection && cu != null && model != null) {
+			if (! ActionUtil.isEditable(fEditor)) {
+				return null;
+			}
 			ICompletionProposal proposal= findCorrection(fId, fIsAssist, (ITextSelection) selection, cu, model);
 			if (proposal != null) {
 				invokeProposal(proposal, ((ITextSelection) selection).getOffset());
@@ -118,13 +121,6 @@ public class CorrectionCommandHandler extends AbstractHandler {
 		return null;
 	}
 
-	private ITextViewer getTextViewer() {
-		if (fEditor instanceof JavaEditor) {
-			return ((JavaEditor) fEditor).getViewer();
-		}
-		return null;
-	}
-	
 	private IDocument getDocument() {
 		return JavaUI.getDocumentProvider().getDocument(fEditor.getEditorInput());
 	}
@@ -132,7 +128,7 @@ public class CorrectionCommandHandler extends AbstractHandler {
 	
 	private void invokeProposal(ICompletionProposal proposal, int offset) {
 		if (proposal instanceof ICompletionProposalExtension2) {
-			ITextViewer viewer= getTextViewer();
+			ITextViewer viewer= fEditor.getViewer();
 			if (viewer != null) {
 				((ICompletionProposalExtension2) proposal).apply(viewer, (char) 0, 0, offset);
 				return;

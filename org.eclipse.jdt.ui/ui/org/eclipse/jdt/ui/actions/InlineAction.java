@@ -99,7 +99,7 @@ public class InlineAction extends SelectionDispatchAction {
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.text.ITextSelection)
 	 */
 	public void run(ITextSelection selection) {
-		if (!ActionUtil.isProcessable(getShell(), fEditor))
+		if (!ActionUtil.isEditable(fEditor))
 			return;
 
 		IClassFile cf= null;

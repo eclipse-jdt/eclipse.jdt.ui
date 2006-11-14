@@ -96,7 +96,7 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 	public void run(IStructuredSelection selection) {
 		try {
 			IMember member= getMember(selection);
-			if (member == null || !ActionUtil.isProcessable(getShell(), member))
+			if (member == null || !ActionUtil.isEditable(getShell(), member))
 				return;
 			ISourceRange range= member.getNameRange();
 			RefactoringExecutionStarter.startChangeTypeRefactoring(member.getCompilationUnit(), getShell(), range.getOffset(), range.getLength());
@@ -150,7 +150,7 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
 	public void run(ITextSelection selection) {
-		if (!ActionUtil.isProcessable(getShell(), fEditor))
+		if (!ActionUtil.isEditable(fEditor))
 			return;
 		try {
 			RefactoringExecutionStarter.startChangeTypeRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), getShell(), selection.getOffset(), selection.getLength());

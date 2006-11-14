@@ -88,7 +88,7 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		try {
 			IMember[] members= getSelectedMembers(selection);
 			for (int index= 0; index < members.length; index++) {
-				if (!ActionUtil.isProcessable(getShell(), members[index]))
+				if (!ActionUtil.isEditable(getShell(), members[index]))
 					return;
 			}
 			if (RefactoringAvailabilityTester.isMoveStaticMembersAvailable(members))
@@ -100,9 +100,9 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 
 	public void run(ITextSelection selection) {
 		try {
-			if (!ActionUtil.isProcessable(getShell(), fEditor))
+			IMember member= getSelectedMemberFromEditor();
+			if (!ActionUtil.isEditable(fEditor, getShell(), member))
 				return;
-			IMember member= getSelectedMember();
 			IMember[] array= new IMember[]{member};
 			if (member != null && RefactoringAvailabilityTester.isMoveStaticMembersAvailable(array)){
 				RefactoringExecutionStarter.startMoveStaticMembersRefactoring(array, getShell());	
@@ -127,7 +127,7 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		return (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
 	}
 
-	private IMember getSelectedMember() throws JavaModelException{
+	private IMember getSelectedMemberFromEditor() throws JavaModelException{
 		IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
 		if (element == null || ! (element instanceof IMember))
 			return null;

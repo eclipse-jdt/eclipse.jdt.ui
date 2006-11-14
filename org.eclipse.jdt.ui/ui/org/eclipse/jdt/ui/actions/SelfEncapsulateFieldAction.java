@@ -104,8 +104,6 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void run(ITextSelection selection) {
-		if (!ActionUtil.isProcessable(getShell(), fEditor))
-			return;
 		try {
 			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor); 
 			if (elements.length != 1 || !(elements[0] instanceof IField)) {
@@ -161,6 +159,8 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	 * breaking API change.
 	 */
 	public void run(IField field) {
+		if (! ActionUtil.isEditable(fEditor, getShell(), field))
+			return;
 		RefactoringExecutionStarter.startSelfEncapsulateRefactoring(field, getShell());
 	}
 }

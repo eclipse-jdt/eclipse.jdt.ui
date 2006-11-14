@@ -20,6 +20,9 @@ public final class ActionMessages extends NLS {
 		// Do not instantiate
 	}
 
+	public static String ActionUtil_warning_derived_dontShowAgain;
+	public static String ActionUtil_warning_derived_message;
+	public static String ActionUtil_warning_derived_title;
 	public static String CopyQualifiedNameAction_ActionName;
 	public static String CopyQualifiedNameAction_ErrorDescription;
 	public static String CopyQualifiedNameAction_ErrorTitle;

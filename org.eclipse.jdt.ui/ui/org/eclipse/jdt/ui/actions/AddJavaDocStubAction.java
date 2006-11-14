@@ -110,7 +110,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 		
 		try {
 			ICompilationUnit cu= members[0].getCompilationUnit();
-			if (!ActionUtil.isProcessable(getShell(), cu)) {
+			if (!ActionUtil.isEditable(getShell(), cu)) {
 				return;
 			}
 			
@@ -145,7 +145,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		try {
 			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
-			if (!ActionUtil.isProcessable(getShell(), element))
+			if (!ActionUtil.isEditable(fEditor, getShell(), element))
 				return;
 			int type= element != null ? element.getElementType() : -1;
 			if (type != IJavaElement.METHOD && type != IJavaElement.TYPE && type != IJavaElement.FIELD) {

@@ -137,19 +137,19 @@ public class IntroduceIndirectionAction extends SelectionDispatchAction {
 	}
 
 	private void run(int offset, int length, ICompilationUnit unit) throws JavaModelException {
-		if (!ActionUtil.isProcessable(getShell(), unit))
+		if (!ActionUtil.isEditable(fEditor, getShell(), unit))
 			return;
 		RefactoringExecutionStarter.startIntroduceIndirectionRefactoring(unit, offset, length, getShell());
 	}
 
 	private void run(int offset, int length, IClassFile file) throws JavaModelException {
-		if (!ActionUtil.isProcessable(getShell(), file))
+		if (!ActionUtil.isEditable(fEditor, getShell(), file))
 			return;
 		RefactoringExecutionStarter.startIntroduceIndirectionRefactoring(file, offset, length, getShell());
 	}
 
 	private void run(IMethod method) throws JavaModelException {
-		if (!ActionUtil.isProcessable(getShell(), method))
+		if (!ActionUtil.isEditable(fEditor, getShell(), method))
 			return;
 		RefactoringExecutionStarter.startIntroduceIndirectionRefactoring(method, getShell());
 	}

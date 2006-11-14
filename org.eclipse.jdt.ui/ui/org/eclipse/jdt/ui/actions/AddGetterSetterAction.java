@@ -271,7 +271,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			notifyResult(false);
 			return;
 		}
-		if (!ActionUtil.isProcessable(getShell(), type)) {
+		if (!ActionUtil.isEditable(fEditor, getShell(), type)) {
 			notifyResult(false);
 			return;
 		}
@@ -537,7 +537,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	 */
 	public void run(ITextSelection selection) {
 		try {
-			if (!ActionUtil.isProcessable(getShell(), fEditor)) {
+			if (!ActionUtil.isProcessable(fEditor)) {
 				notifyResult(false);
 				return;
 			}

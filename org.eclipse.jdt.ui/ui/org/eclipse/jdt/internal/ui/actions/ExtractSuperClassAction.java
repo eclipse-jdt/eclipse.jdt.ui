@@ -124,7 +124,7 @@ public class ExtractSuperClassAction extends SelectionDispatchAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.EXTRACT_SUPERTYPE_ACTION);
 	}
 
-	private IMember getSelectedMember() throws JavaModelException {
+	private IMember getSelectedMemberFromEditor() throws JavaModelException {
 		final IJavaElement element= SelectionConverter.resolveEnclosingElement(fEditor, (ITextSelection) fEditor.getSelectionProvider().getSelection());
 		if (element == null || !(element instanceof IMember))
 			return null;
@@ -137,7 +137,7 @@ public class ExtractSuperClassAction extends SelectionDispatchAction {
 	public void run(final IStructuredSelection selection) {
 		try {
 			final IMember[] members= getSelectedMembers(selection);
-			if (RefactoringAvailabilityTester.isExtractSupertypeAvailable(members))
+			if (RefactoringAvailabilityTester.isExtractSupertypeAvailable(members) && ActionUtil.isEditable(getShell(), members[0]))
 				RefactoringExecutionStarter.startExtractSupertypeRefactoring(members, getShell());
 		} catch (final JavaModelException exception) {
 			ExceptionHandler.handle(exception, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
@@ -149,9 +149,9 @@ public class ExtractSuperClassAction extends SelectionDispatchAction {
 	 */
 	public void run(final ITextSelection selection) {
 		try {
-			if (!ActionUtil.isProcessable(getShell(), fEditor))
+			if (! ActionUtil.isEditable(fEditor))
 				return;
-			final IMember member= getSelectedMember();
+			final IMember member= getSelectedMemberFromEditor();
 			final IMember[] array= new IMember[] { member};
 			if (member != null && RefactoringAvailabilityTester.isExtractSupertypeAvailable(array)) {
 				RefactoringExecutionStarter.startExtractSupertypeRefactoring(array, getShell());

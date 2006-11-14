@@ -137,7 +137,7 @@ public class MoveAction extends SelectionDispatchAction{
 	 */
 	public void run(ITextSelection selection) {
 		try {
-			if (!ActionUtil.isProcessable(getShell(), fEditor))
+			if (!ActionUtil.isEditable(fEditor))
 				return;
 			if (fMoveStaticMembersAction.isEnabled() && tryMoveStaticMembers(selection))
 				return;

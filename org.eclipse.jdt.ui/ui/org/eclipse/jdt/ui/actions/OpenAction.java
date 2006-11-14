@@ -164,7 +164,7 @@ public class OpenAction extends SelectionDispatchAction {
 			if (je instanceof ICompilationUnit && !JavaModelUtil.isPrimary((ICompilationUnit)je))
 				return true; // can process non-primary working copies
 		}
-		return ActionUtil.isProcessable(getShell(), fEditor);
+		return ActionUtil.isProcessable(fEditor);
 	}
 	
 	/* (non-Javadoc)

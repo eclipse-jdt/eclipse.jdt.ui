@@ -152,7 +152,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 				notifyResult(false);
 				return;
 			}
-			if (!ElementValidator.check(type, getShell(), getDialogTitle(), false) || !ActionUtil.isProcessable(getShell(), type)) {
+			if (!ElementValidator.check(type, getShell(), getDialogTitle(), false) || !ActionUtil.isEditable(getShell(), type)) {
 				notifyResult(false);
 				return;
 			}
@@ -169,7 +169,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		try {
 			final IType type= SelectionConverter.getTypeAtOffset(fEditor);
 			if (type != null) {
-				if (!ElementValidator.check(type, getShell(), getDialogTitle(), false) || !ActionUtil.isProcessable(getShell(), type)) {
+				if (!ElementValidator.check(type, getShell(), getDialogTitle(), false) || !ActionUtil.isEditable(fEditor, getShell(), type)) {
 					notifyResult(false);
 					return;
 				}

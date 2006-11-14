@@ -168,7 +168,7 @@ public class CleanUpAction extends SelectionDispatchAction {
 	public void run(ICompilationUnit cu) {
 		if (!ElementValidator.check(cu, getShell(), ActionMessages.CleanUpAction_ErrorDialogTitle, fEditor != null)) 
 			return;
-		if (!ActionUtil.isProcessable(getShell(), cu))
+		if (!ActionUtil.isEditable(fEditor, getShell(), cu))
 			return;
 		
 		try {

@@ -21,7 +21,6 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RenameJavaElementAction;
@@ -44,8 +43,6 @@ public class RenameAction extends SelectionDispatchAction {
 	private RenameJavaElementAction fRenameJavaElement;
 	private RenameResourceAction fRenameResource;
 
-	private JavaEditor fEditor;
-	
 	/**
 	 * Creates a new <code>RenameAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
@@ -69,7 +66,6 @@ public class RenameAction extends SelectionDispatchAction {
 	 */
 	public RenameAction(JavaEditor editor) {
 		this(editor.getEditorSite());
-		fEditor= editor;
 		fRenameJavaElement= new RenameJavaElementAction(editor);
 	}
 	
@@ -111,9 +107,7 @@ public class RenameAction extends SelectionDispatchAction {
 	}
 
 	public void run(ITextSelection selection) {
-		if (!ActionUtil.isProcessable(getShell(), fEditor))
-			return;
-		if (fRenameJavaElement.canRun())
+		if (fRenameJavaElement.canRunInEditor())
 			fRenameJavaElement.run(selection);
 		else
 			MessageDialog.openInformation(getShell(), RefactoringMessages.RenameAction_rename, RefactoringMessages.RenameAction_unavailable);  

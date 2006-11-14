@@ -100,7 +100,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 	}
 
 	public void run(ITextSelection selection) {
-		if (!ActionUtil.isProcessable(getShell(), fEditor))
+		if (!ActionUtil.isEditable(fEditor))
 			return;
 		ICompilationUnit cu= SelectionConverter.getInputAsCompilationUnit(fEditor);
 		if (cu == null || !ElementValidator.checkValidateEdit(cu, getShell(), getDialogTitle()))

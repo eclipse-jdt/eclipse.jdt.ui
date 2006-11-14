@@ -94,7 +94,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		try{
 			ICompilationUnit input= SelectionConverter.getInputAsCompilationUnit(fEditor);
-			if (!ActionUtil.isProcessable(getShell(), input))
+			if (!ActionUtil.isEditable(fEditor))
 				return;
 			RefactoringExecutionStarter.startInlineTempRefactoring(input, new RefactoringASTParser(AST.JLS3).parse(input, true), selection, getShell(), true);
 		} catch (JavaModelException e){

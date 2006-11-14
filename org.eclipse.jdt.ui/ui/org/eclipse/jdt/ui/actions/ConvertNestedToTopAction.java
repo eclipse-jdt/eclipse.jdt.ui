@@ -101,8 +101,12 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 		try {
 			//we have to call this here - no selection changed event is sent
 			// after a refactoring but it may still invalidate enablement
-			if (RefactoringAvailabilityTester.isMoveInnerAvailable(selection))
-				RefactoringExecutionStarter.startMoveInnerRefactoring(getSingleSelectedType(selection), getShell());
+			if (RefactoringAvailabilityTester.isMoveInnerAvailable(selection)) {
+				IType singleSelectedType= getSingleSelectedType(selection);
+				if (! ActionUtil.isEditable(getShell(), singleSelectedType))
+					return;
+				RefactoringExecutionStarter.startMoveInnerRefactoring(singleSelectedType, getShell());
+			}
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, 
 				RefactoringMessages.OpenRefactoringWizardAction_refactoring, 
@@ -147,10 +151,10 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 	 */
 	public void run(ITextSelection selection) {
 		try {
-			if (!ActionUtil.isProcessable(getShell(), fEditor))
-				return;
 			IType type= RefactoringAvailabilityTester.getDeclaringType(SelectionConverter.resolveEnclosingElement(fEditor, selection));
 			if (type != null && RefactoringAvailabilityTester.isMoveInnerAvailable(type)) {
+				if (! ActionUtil.isEditable(fEditor, getShell(), type))
+					return;
 				RefactoringExecutionStarter.startMoveInnerRefactoring(type, getShell());
 			} else {
 				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.ConvertNestedToTopAction_To_activate); 

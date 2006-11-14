@@ -78,7 +78,7 @@ public class ConvertLocalToFieldAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */		
 	public void run(ITextSelection selection) {
-		if (!ActionUtil.isProcessable(getShell(), fEditor))
+		if (!ActionUtil.isEditable(fEditor))
 			return;
 		try{
 			ICompilationUnit cunit= SelectionConverter.getInputAsCompilationUnit(fEditor);

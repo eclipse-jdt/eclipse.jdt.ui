@@ -133,7 +133,7 @@ public class ReplaceInvocationsAction extends SelectionDispatchAction {
 		try {
 			Object editorInput= SelectionConverter.getInput(fEditor);
 			if ((editorInput instanceof ICompilationUnit || editorInput instanceof IClassFile)
-					&& ActionUtil.isProcessable(getShell(), editorInput)) {
+					&& ActionUtil.isProcessable(getShell(), (IJavaElement) editorInput)) {
 				IJavaElement unit= (IJavaElement) editorInput;
 				RefactoringExecutionStarter.startReplaceInvocationsRefactoring(unit, selection.getOffset(), selection.getLength(), getShell());
 			}

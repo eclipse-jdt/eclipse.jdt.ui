@@ -252,7 +252,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
 	public void run(ITextSelection selection) {
-		if (!ActionUtil.isProcessable(getShell(), fEditor)) {
+		if (!ActionUtil.isProcessable(fEditor)) {
 			notifyResult(false);
 			return;
 		}
@@ -292,7 +292,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			notifyResult(false);
 			return;
 		}
-		if (!ActionUtil.isProcessable(getShell(), type)) {
+		if (!ActionUtil.isEditable(fEditor, getShell(), type)) {
 			notifyResult(false);
 			return;
 		}

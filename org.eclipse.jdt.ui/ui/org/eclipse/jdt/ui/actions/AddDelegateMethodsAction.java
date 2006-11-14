@@ -480,7 +480,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	 */
 	public void run(ITextSelection selection) {
 		try {
-			if (!ActionUtil.isProcessable(getShell(), fEditor))
+			if (!ActionUtil.isProcessable(fEditor))
 				return;
 
 			IJavaElement[] elements= SelectionConverter.codeResolveForked(fEditor, true);
@@ -512,7 +512,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	private void run(IType type, IField[] preselected, boolean editor) throws CoreException {
 		if (!ElementValidator.check(type, getShell(), DIALOG_TITLE, editor))
 			return;
-		if (!ActionUtil.isProcessable(getShell(), type))
+		if (!ActionUtil.isEditable(fEditor, getShell(), type))
 			return;
 		if (!canRunOn(type))
 			return;

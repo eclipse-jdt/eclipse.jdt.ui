@@ -106,7 +106,7 @@ public class PullUpAction extends SelectionDispatchAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.PULL_UP_ACTION);
 	}
 
-	private IMember getSelectedMember() throws JavaModelException {
+	private IMember getSelectedMemberFromEditor() throws JavaModelException {
 		IJavaElement element= SelectionConverter.resolveEnclosingElement(fEditor, (ITextSelection) fEditor.getSelectionProvider().getSelection());
 		if (element == null || !(element instanceof IMember))
 			return null;
@@ -119,7 +119,7 @@ public class PullUpAction extends SelectionDispatchAction {
 	public void run(IStructuredSelection selection) {
 		try {
 			IMember[] members= getSelectedMembers(selection);
-			if (RefactoringAvailabilityTester.isPullUpAvailable(members))
+			if (RefactoringAvailabilityTester.isPullUpAvailable(members) && ActionUtil.isEditable(getShell(), members[0]))
 				RefactoringExecutionStarter.startPullUpRefactoring(members, getShell());
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
@@ -131,9 +131,9 @@ public class PullUpAction extends SelectionDispatchAction {
 	 */
 	public void run(ITextSelection selection) {
 		try {
-			if (!ActionUtil.isProcessable(getShell(), fEditor))
+			if (!ActionUtil.isEditable(fEditor))
 				return;
-			IMember member= getSelectedMember();
+			IMember member= getSelectedMemberFromEditor();
 			IMember[] array= new IMember[] { member};
 			if (member != null && RefactoringAvailabilityTester.isPullUpAvailable(array)) {
 				RefactoringExecutionStarter.startPullUpRefactoring(array, getShell());

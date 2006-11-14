@@ -226,7 +226,7 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 			notifyResult(false);
 		}
 		if (!ElementValidator.check(type, getShell(), ActionMessages.GenerateHashCodeEqualsAction_error_caption, false)
-				|| !ActionUtil.isProcessable(getShell(), type)) {
+				|| ! ActionUtil.isEditable(fEditor, getShell(), type)) {
 			notifyResult(false);
 			return;
 		}

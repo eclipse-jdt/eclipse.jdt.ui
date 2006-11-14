@@ -94,8 +94,12 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 	 */
 	public void run(IStructuredSelection selection) {
 		try {
-			if (RefactoringAvailabilityTester.isExtractInterfaceAvailable(selection))
-				RefactoringExecutionStarter.startExtractInterfaceRefactoring(RefactoringAvailabilityTester.getSingleSelectedType(selection), getShell());
+			if (RefactoringAvailabilityTester.isExtractInterfaceAvailable(selection)) {
+				IType singleSelectedType= RefactoringAvailabilityTester.getSingleSelectedType(selection);
+				if (! ActionUtil.isEditable(getShell(), singleSelectedType))
+					return;
+				RefactoringExecutionStarter.startExtractInterfaceRefactoring(singleSelectedType, getShell());
+			}
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}
@@ -124,10 +128,10 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
      */
 	public void run(ITextSelection selection) {
 		try {
-			if (!ActionUtil.isProcessable(getShell(), fEditor))
-				return;
 			IType type= RefactoringActions.getEnclosingOrPrimaryType(fEditor);
-			if (RefactoringAvailabilityTester.isExtractInterfaceAvailable(type)){
+			if (RefactoringAvailabilityTester.isExtractInterfaceAvailable(type)) {
+				if (! ActionUtil.isEditable(fEditor, getShell(), type))
+					return;
 				RefactoringExecutionStarter.startExtractInterfaceRefactoring(type, getShell());
 			} else {
 				String unavailable= RefactoringMessages.ExtractInterfaceAction_To_activate; 

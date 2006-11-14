@@ -136,7 +136,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		}
 		
 		try {
-			IJavaElement element= getJavaElement();
+			IJavaElement element= getJavaElementFromEditor();
 			if (element != null && isRenameAvailable(element)) {
 				IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 				run(element, store.getBoolean(PreferenceConstants.REFACTOR_LIGHTWEIGHT));
@@ -148,9 +148,9 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		MessageDialog.openInformation(getShell(), RefactoringMessages.RenameJavaElementAction_name, RefactoringMessages.RenameJavaElementAction_not_available);
 	}
 	
-	public boolean canRun() {
+	public boolean canRunInEditor() {
 		try {
-			IJavaElement element= getJavaElement();
+			IJavaElement element= getJavaElementFromEditor();
 			if (element == null)
 				return false;
 
@@ -164,7 +164,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		return false;
 	}
 	
-	private IJavaElement getJavaElement() throws JavaModelException {
+	private IJavaElement getJavaElementFromEditor() throws JavaModelException {
 		IJavaElement[] elements= SelectionConverter.codeResolve(fEditor); 
 		if (elements == null || elements.length != 1)
 			return null;
@@ -175,8 +175,8 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 
 	private void run(IJavaElement element, boolean lightweight) throws CoreException {
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104		
-		if (!ActionUtil.isProcessable(getShell(), element))
-			return;
+		if (! ActionUtil.isEditable(fEditor, getShell(), element))
+			return;		
 		//XXX workaround bug 31998
 		if (ActionUtil.mustDisableJavaModelAction(getShell(), element))
 			return;

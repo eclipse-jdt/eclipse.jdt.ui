@@ -156,7 +156,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 	//---- helpers -------------------------------------------------------------------
 	
 	private void run(ICompilationUnit unit, int offset, int length) throws JavaModelException {
-		if (!ActionUtil.isProcessable(getShell(), unit))
+		if (!ActionUtil.isEditable(fEditor, getShell(), unit))
 			return;
 		RefactoringExecutionStarter.startConvertAnonymousRefactoring(unit, offset, length, getShell());
 	}

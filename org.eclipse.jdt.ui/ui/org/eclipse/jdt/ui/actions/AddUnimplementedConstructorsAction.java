@@ -470,10 +470,10 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
 	public void run(ITextSelection selection) {
-		Shell shell= getShell();
-		if (!ActionUtil.isProcessable(shell, fEditor))
+		if (!ActionUtil.isProcessable(fEditor))
 			return;
 		try {
+			Shell shell= getShell();
 			IType type= SelectionConverter.getTypeAtOffset(fEditor);
 			if (type != null)
 				run(shell, type, true);
@@ -493,7 +493,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			notifyResult(false);
 			return;
 		}
-		if (!ActionUtil.isProcessable(getShell(), type)) {
+		if (!ActionUtil.isEditable(fEditor, getShell(), type)) {
 			notifyResult(false);
 			return;
 		}

@@ -121,7 +121,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			return;
 		if (!ElementValidator.checkValidateEdit(cu, getShell(), JavaEditorMessages.AddImportOnSelection_error_title))
 			return;
-		if (!ActionUtil.isProcessable(getShell(), cu))
+		if (!ActionUtil.isEditable(fEditor))
 			return;
 
 		ISelection selection= fEditor.getSelectionProvider().getSelection();

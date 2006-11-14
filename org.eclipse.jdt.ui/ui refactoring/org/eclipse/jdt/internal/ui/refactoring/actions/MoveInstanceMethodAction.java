@@ -107,7 +107,7 @@ public final class MoveInstanceMethodAction extends SelectionDispatchAction {
 			Assert.isTrue(RefactoringAvailabilityTester.isMoveMethodAvailable(selection));
 			IMethod method= getSingleSelectedMethod(selection);
 			Assert.isNotNull(method);
-			if (!ActionUtil.isProcessable(getShell(), method))
+			if (!ActionUtil.isEditable(fEditor, getShell(), method))
 				return;
 			RefactoringExecutionStarter.startMoveMethodRefactoring(method, getShell());
 		} catch (JavaModelException e) {
@@ -131,7 +131,7 @@ public final class MoveInstanceMethodAction extends SelectionDispatchAction {
 		Assert.isTrue(selection.getOffset() >= 0);
 		Assert.isTrue(selection.getLength() >= 0);
 
-		if (!ActionUtil.isProcessable(getShell(), cu))
+		if (!ActionUtil.isEditable(fEditor, getShell(), cu))
 			return;
 
 		IMethod method= getMethod(cu, selection);

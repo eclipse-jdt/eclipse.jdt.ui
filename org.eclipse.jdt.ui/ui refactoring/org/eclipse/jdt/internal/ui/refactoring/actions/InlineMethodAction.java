@@ -134,7 +134,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 	}
 
 	private void run(int offset, int length, IJavaElement unit) {
-		if (!ActionUtil.isProcessable(getShell(), unit))
+		if (!ActionUtil.isEditable(fEditor, getShell(), unit))
 			return;
 		try {
 			RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);

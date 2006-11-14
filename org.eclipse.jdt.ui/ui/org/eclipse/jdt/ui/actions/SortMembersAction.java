@@ -130,7 +130,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.SortMembersAction_no_members); 
 				return;
 			}
-			if (!ActionUtil.isProcessable(getShell(), cu)) {
+			if (!ActionUtil.isEditable(getShell(), cu)) {
 				return;
 			}
 			
@@ -181,7 +181,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 		Shell shell= getShell();
 		IJavaElement input= SelectionConverter.getInput(fEditor);
 		if (input instanceof ICompilationUnit) {
-			if (!ActionUtil.isProcessable(getShell(), input)) {
+			if (!ActionUtil.isEditable(fEditor)) {
 				return;
 			}
 			SortMembersMessageDialog dialog= new SortMembersMessageDialog(getShell());

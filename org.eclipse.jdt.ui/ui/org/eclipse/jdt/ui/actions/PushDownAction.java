@@ -104,7 +104,7 @@ public class PushDownAction extends SelectionDispatchAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.PUSH_DOWN_ACTION);
 	}
 
-	private IMember getSelectedMember() throws JavaModelException {
+	private IMember getSelectedMemberFromEditor() throws JavaModelException {
 		IJavaElement element= SelectionConverter.resolveEnclosingElement(fEditor, (ITextSelection) fEditor.getSelectionProvider().getSelection());
 		if (element == null || !(element instanceof IMember))
 			return null;
@@ -117,7 +117,7 @@ public class PushDownAction extends SelectionDispatchAction {
 	public void run(IStructuredSelection selection) {
 		try {
 			IMember[] members= getSelectedMembers(selection);
-			if (RefactoringAvailabilityTester.isPushDownAvailable(members))
+			if (RefactoringAvailabilityTester.isPushDownAvailable(members) && ActionUtil.isEditable(getShell(), members[0]))
 				RefactoringExecutionStarter.startPushDownRefactoring(members, getShell());
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
@@ -129,9 +129,9 @@ public class PushDownAction extends SelectionDispatchAction {
 	 */
 	public void run(ITextSelection selection) {
 		try {
-			if (!ActionUtil.isProcessable(getShell(), fEditor))
+			if (!ActionUtil.isEditable(fEditor))
 				return;
-			IMember member= getSelectedMember();
+			IMember member= getSelectedMemberFromEditor();
 			IMember[] array= new IMember[] { member};
 			if (member != null && RefactoringAvailabilityTester.isPushDownAvailable(array)) {
 				RefactoringExecutionStarter.startPushDownRefactoring(array, getShell());

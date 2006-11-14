@@ -98,8 +98,12 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 	 */
 	public void run(IStructuredSelection selection) {
 		try {
-			if (RefactoringAvailabilityTester.isUseSuperTypeAvailable(selection))
-				RefactoringExecutionStarter.startUseSupertypeRefactoring(getSingleSelectedType(selection), getShell());
+			if (RefactoringAvailabilityTester.isUseSuperTypeAvailable(selection)) {
+				IType singleSelectedType= getSingleSelectedType(selection);
+				if (! ActionUtil.isEditable(getShell(), singleSelectedType))
+					return;
+				RefactoringExecutionStarter.startUseSupertypeRefactoring(singleSelectedType, getShell());
+			}
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}
@@ -142,10 +146,10 @@ public class UseSupertypeAction extends SelectionDispatchAction{
      */
 	public void run(ITextSelection selection) {
 		try {
-			if (!ActionUtil.isProcessable(getShell(), fEditor))
-				return;
 			IType type= RefactoringActions.getEnclosingOrPrimaryType(fEditor);
-			if (RefactoringAvailabilityTester.isUseSuperTypeAvailable(type)){
+			if (RefactoringAvailabilityTester.isUseSuperTypeAvailable(type)) {
+				if (! ActionUtil.isEditable(fEditor, getShell(), type))
+					return;
 				RefactoringExecutionStarter.startUseSupertypeRefactoring(type, getShell());
 			} else {
 				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.UseSupertypeAction_to_activate); 

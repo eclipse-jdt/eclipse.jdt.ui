@@ -122,7 +122,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void run(ITextSelection selection) {
-		if (!ActionUtil.isProcessable(getShell(), fEditor))
+		if (!ActionUtil.isProcessable(fEditor))
 			return;
 		IJavaElement element= elementAtOffset();
 		if (element == null || !(element instanceof IMethod)) {

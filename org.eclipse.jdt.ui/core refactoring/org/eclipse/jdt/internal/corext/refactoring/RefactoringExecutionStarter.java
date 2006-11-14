@@ -98,7 +98,6 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.ui.refactoring.RenameSupport;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -178,8 +177,6 @@ public final class RefactoringExecutionStarter {
 		if (!RefactoringAvailabilityTester.isChangeSignatureAvailable(method))
 			return;
 		final ChangeSignatureRefactoring refactoring= new ChangeSignatureRefactoring(method);
-		if (!ActionUtil.isProcessable(shell, refactoring.getMethod()))
-			return;
 		final UserInterfaceStarter starter= new UserInterfaceStarter() {
 
 			public final boolean activate(final Refactoring ref, final Shell parent, final boolean save) throws CoreException {
@@ -281,8 +278,6 @@ public final class RefactoringExecutionStarter {
 
 	public static void startExtractInterfaceRefactoring(final IType type, final Shell shell) throws JavaModelException {
 		final ExtractInterfaceRefactoring refactoring= new ExtractInterfaceRefactoring(new ExtractInterfaceProcessor(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject())));
-		if (!ActionUtil.isProcessable(shell, refactoring.getExtractInterfaceProcessor().getType()))
-			return;
 		new RefactoringStarter().activate(refactoring, new ExtractInterfaceWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
 	}
 
@@ -293,14 +288,10 @@ public final class RefactoringExecutionStarter {
 		if (members != null && members.length > 0)
 			project= members[0].getJavaProject();
 		final ExtractSupertypeRefactoring refactoring= new ExtractSupertypeRefactoring(new ExtractSupertypeProcessor(members, JavaPreferencesSettings.getCodeGenerationSettings(project)));
-		if (!ActionUtil.isProcessable(shell, refactoring.getExtractSupertypeProcessor().getDeclaringType()))
-			return;
 		new RefactoringStarter().activate(refactoring, new ExtractSupertypeWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
 	}
 
 	public static void startInferTypeArgumentsRefactoring(final IJavaElement[] elements, final Shell shell) {
-		if (!ActionUtil.areProcessable(shell, elements))
-			return;
 		try {
 			if (!RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(elements))
 				return;
@@ -369,8 +360,6 @@ public final class RefactoringExecutionStarter {
 		if (!RefactoringAvailabilityTester.isMoveInnerAvailable(type))
 			return;
 		final MoveInnerToTopRefactoring refactoring= new MoveInnerToTopRefactoring(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject()));
-		if (!ActionUtil.isProcessable(shell, refactoring.getInputType()))
-			return;
 		new RefactoringStarter().activate(refactoring, new MoveInnerToTopWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
 	}
 
@@ -401,8 +390,7 @@ public final class RefactoringExecutionStarter {
 		if (elements.length > 0)
 			project= elements[0].getJavaProject();
 		final JavaMoveRefactoring refactoring= new JavaMoveRefactoring(new MoveStaticMembersProcessor(elements, JavaPreferencesSettings.getCodeGenerationSettings(project)));
-		if (ActionUtil.isProcessable(shell, ((MoveStaticMembersProcessor) refactoring.getAdapter(MoveStaticMembersProcessor.class)).getMembersToMove()[0].getCompilationUnit()))
-			new RefactoringStarter().activate(refactoring, new MoveMembersWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
+		new RefactoringStarter().activate(refactoring, new MoveMembersWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
 	}
 
 	public static void startPullUpRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
@@ -412,8 +400,6 @@ public final class RefactoringExecutionStarter {
 		if (members != null && members.length > 0)
 			project= members[0].getJavaProject();
 		final PullUpRefactoring refactoring= new PullUpRefactoring(new PullUpRefactoringProcessor(members, JavaPreferencesSettings.getCodeGenerationSettings(project)));
-		if (!ActionUtil.isProcessable(shell, refactoring.getPullUpProcessor().getDeclaringType()))
-			return;
 		new RefactoringStarter().activate(refactoring, new PullUpWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
 	}
 
@@ -421,8 +407,6 @@ public final class RefactoringExecutionStarter {
 		if (!RefactoringAvailabilityTester.isPushDownAvailable(members))
 			return;
 		final PushDownRefactoring refactoring= new PushDownRefactoring(new PushDownRefactoringProcessor(members));
-		if (!ActionUtil.isProcessable(shell, refactoring.getPushDownProcessor().getDeclaringType()))
-			return;
 		new RefactoringStarter().activate(refactoring, new PushDownWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
 	}
 
@@ -448,8 +432,6 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startSelfEncapsulateRefactoring(final IField field, final Shell shell) {
-		if (!ActionUtil.isProcessable(shell, field))
-			return;
 		try {
 			if (!RefactoringAvailabilityTester.isSelfEncapsulateAvailable(field))
 				return;
@@ -462,8 +444,6 @@ public final class RefactoringExecutionStarter {
 
 	public static void startUseSupertypeRefactoring(final IType type, final Shell shell) throws JavaModelException {
 		final UseSuperTypeRefactoring refactoring= new UseSuperTypeRefactoring(new UseSuperTypeProcessor(type));
-		if (!ActionUtil.isProcessable(shell, refactoring.getUseSuperTypeProcessor().getSubType()))
-			return;
 		new RefactoringStarter().activate(refactoring, new UseSupertypeWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
 	}
 

@@ -19,13 +19,11 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
-
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
-import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -45,9 +43,6 @@ public class RenameResourceAction extends SelectionDispatchAction {
 
 	public void run(IStructuredSelection selection) {
 		IResource resource = getResource(selection);
-		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104		
-		if (!ActionUtil.isProcessable(getShell(), resource))
-			return;
 		if (!RefactoringAvailabilityTester.isRenameAvailable(resource))
 			return;
 		try {

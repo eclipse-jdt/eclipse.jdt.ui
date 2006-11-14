@@ -461,7 +461,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	public void run(ICompilationUnit cu) {
 		if (!ElementValidator.check(cu, getShell(), ActionMessages.OrganizeImportsAction_error_title, fEditor != null)) 
 			return;
-		if (!ActionUtil.isProcessable(getShell(), cu))
+		if (!ActionUtil.isEditable(fEditor, getShell(), cu))
 			return;
 		
 		IEditingSupport helper= createViewerHelper();

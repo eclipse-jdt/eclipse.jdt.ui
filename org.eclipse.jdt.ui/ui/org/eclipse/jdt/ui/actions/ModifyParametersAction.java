@@ -113,8 +113,12 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 	public void run(IStructuredSelection selection) {
 		try {
 			// we have to call this here - no selection changed event is sent after a refactoring but it may still invalidate enablement
-			if (RefactoringAvailabilityTester.isChangeSignatureAvailable(selection))
-				RefactoringExecutionStarter.startChangeSignatureRefactoring(getSingleSelectedMethod(selection), this, getShell());
+			if (RefactoringAvailabilityTester.isChangeSignatureAvailable(selection)) {
+				IMethod method= getSingleSelectedMethod(selection);
+				if (! ActionUtil.isEditable(getShell(), method))
+					return;
+				RefactoringExecutionStarter.startChangeSignatureRefactoring(method, this, getShell());
+			}
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		}
@@ -125,7 +129,7 @@ public class ModifyParametersAction extends SelectionDispatchAction {
      */
 	public void run(ITextSelection selection) {
 		try {
-			if (!ActionUtil.isProcessable(getShell(), fEditor))
+			if (! ActionUtil.isEditable(fEditor))
 				return;
 			IMethod method= getSingleSelectedMethod(selection);
 			if (RefactoringAvailabilityTester.isChangeSignatureAvailable(method)){
