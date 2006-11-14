@@ -12,33 +12,31 @@ package org.eclipse.jdt.internal.corext.refactoring.util;
 
 import org.eclipse.core.runtime.Assert;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
-import org.eclipse.jdt.internal.corext.dom.CompilationUnitBuffer;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class CommentAnalyzer {
 	
 	private CommentAnalyzer() {
 	}
 	
-	public static RefactoringStatus perform(Selection selection, CompilationUnitBuffer source, int start, int length) {
+	public static RefactoringStatus perform(Selection selection, IScanner scanner, int start, int length) {
 		RefactoringStatus result= new RefactoringStatus();
 		if (length <= 0)
 			return result;
-		new CommentAnalyzer().check(result, selection, source, start, start + length - 1);
+		new CommentAnalyzer().check(result, selection, scanner, start, start + length - 1);
 		return result;
 	}
 	
-	private void check(RefactoringStatus result, Selection selection, CompilationUnitBuffer source, int start, int end) {
-		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
-		char[] characters= source.getCharacters();
-		scanner.setSource(characters);
+	private void check(RefactoringStatus result, Selection selection, IScanner scanner, int start, int end) {
+		char[] characters= scanner.getSource();
 		selection= adjustSelection(characters, selection, end);
 		scanner.resetTo(start, end);
 		

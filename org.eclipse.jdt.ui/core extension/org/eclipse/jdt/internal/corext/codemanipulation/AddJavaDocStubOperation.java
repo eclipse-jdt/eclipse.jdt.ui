@@ -179,7 +179,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 
 	private int getMemberStartOffset(IMember curr, IDocument document) throws JavaModelException {
 		int offset= curr.getSourceRange().getOffset();
-		TokenScanner scanner= new TokenScanner(document);
+		TokenScanner scanner= new TokenScanner(document, curr.getJavaProject());
 		try {
 			return scanner.getNextStartOffset(offset, true); // read to the first real non comment token
 		} catch (CoreException e) {

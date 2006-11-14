@@ -17,6 +17,10 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
@@ -61,12 +65,29 @@ public class TokenScanner {
 	 * Creates a TokenScanner
 	 * @param document The textbuffer to create the scanner on
 	 */
-	public TokenScanner(IDocument document) {
-		fScanner= ToolFactory.createScanner(true, false, false, false);
+	public TokenScanner(IDocument document, IJavaProject project) {
+		String sourceLevel= project.getOption(JavaCore.COMPILER_SOURCE, true);
+		String complianceLevel= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+		fScanner= ToolFactory.createScanner(true, false, false, sourceLevel, complianceLevel); // no line info required
 		fScanner.setSource(document.get().toCharArray());
 		fDocument= document;
 		fEndPosition= fScanner.getSource().length - 1;
-	}		
+	}
+	
+	/**
+	 * Creates a TokenScanner
+	 * @param cu The compliation unit to can on
+	 * @throws JavaModelException thorwn if the buffer cannot be accessed
+	 */
+	public TokenScanner(ICompilationUnit cu) throws JavaModelException {
+		IJavaProject project= cu.getJavaProject();
+		String sourceLevel= project.getOption(JavaCore.COMPILER_SOURCE, true);
+		String complianceLevel= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+		fScanner= ToolFactory.createScanner(true, false, true, sourceLevel, complianceLevel); // line info required
+		fScanner.setSource(cu.getBuffer().getCharacters());
+		fDocument= null; // use scanner for line information
+		fEndPosition= fScanner.getSource().length - 1;
+	}	
 		
 	/**
 	 * Returns the wrapped scanner
@@ -371,7 +392,7 @@ public class TokenScanner {
 		return res;
 	}
 	
-	private int getLineOfOffset(int offset) throws CoreException {
+	public int getLineOfOffset(int offset) throws CoreException {
 		if (fDocument != null) {
 			try {
 				return fDocument.getLineOfOffset(offset);
@@ -383,7 +404,7 @@ public class TokenScanner {
 		return getScanner().getLineNumber(offset);
 	}
 	
-	private int getLineEnd(int line) throws CoreException {
+	public int getLineEnd(int line) throws CoreException {
 		if (fDocument != null) {
 			try {
 				IRegion region= fDocument.getLineInformation(line);

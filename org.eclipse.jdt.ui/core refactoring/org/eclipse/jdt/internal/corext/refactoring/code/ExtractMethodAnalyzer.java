@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -616,10 +618,14 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 	public boolean visit(DoStatement node) {
 		boolean result= super.visit(node);
 		
-		int actionStart= getBuffer().indexAfter(ITerminalSymbols.TokenNamedo, node.getStartPosition());
-		if (getSelection().getOffset() == actionStart) {
-			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_after_do_keyword, JavaStatusContext.create(fCUnit, getSelection())); 
-			return false;
+		try {
+			int actionStart= getTokenScanner().getTokenEndOffset(ITerminalSymbols.TokenNamedo, node.getStartPosition());
+			if (getSelection().getOffset() == actionStart) {
+				invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_after_do_keyword, JavaStatusContext.create(fCUnit, getSelection())); 
+				return false;
+			}
+		} catch (CoreException e) {
+			// ignore
 		}
 		
 		return result;

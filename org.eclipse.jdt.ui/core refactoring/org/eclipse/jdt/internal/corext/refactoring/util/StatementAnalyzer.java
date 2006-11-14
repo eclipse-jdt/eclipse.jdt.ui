@@ -15,6 +15,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
@@ -32,13 +36,11 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.CompilationUnitBuffer;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
+import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 /**
  * Analyzer to check if a selection covers a valid set of statements of an abstract syntax
@@ -51,7 +53,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 public class StatementAnalyzer extends SelectionAnalyzer {
 
 	protected ICompilationUnit fCUnit;
-	private CompilationUnitBuffer fBuffer;
+	private TokenScanner fScanner;
 	private RefactoringStatus fStatus;
 
 	public StatementAnalyzer(ICompilationUnit cunit, Selection selection, boolean traverseSelectedNode) throws JavaModelException {
@@ -59,42 +61,46 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		Assert.isNotNull(cunit);
 		fCUnit= cunit;
 		fStatus= new RefactoringStatus();
-		fBuffer= new CompilationUnitBuffer(fCUnit);
+		fScanner= new TokenScanner(fCUnit);
 	}
 	
 	protected void checkSelectedNodes() {
 		ASTNode[] nodes= getSelectedNodes();
-		int selectionOffset= getSelection().getOffset();
-		int pos= fBuffer.indexOfNextToken(selectionOffset, false);
-		ASTNode node= nodes[0];
-		if (node.getStartPosition() != pos) {
-			ISourceRange range= new SourceRange(selectionOffset, node.getStartPosition() - selectionOffset + 1);
-			invalidSelection(
-				RefactoringCoreMessages.StatementAnalyzer_beginning_of_selection,  
-				JavaStatusContext.create(fCUnit, range));
+		if (nodes.length == 0)
 			return;
-		}	
 		
-		node= nodes[nodes.length - 1];
-		pos= fBuffer.indexOfNextToken(node.getStartPosition() + node.getLength(), false);
-		if (pos != -1 && pos <= getSelection().getInclusiveEnd()) {
-			ISourceRange range= new SourceRange(ASTNodes.getExclusiveEnd(node), pos - ASTNodes.getExclusiveEnd(node));
-			invalidSelection(
-				RefactoringCoreMessages.StatementAnalyzer_end_of_selection, 	
-				JavaStatusContext.create(fCUnit, range)); 
+		ASTNode node= nodes[0];
+		int selectionOffset= getSelection().getOffset();
+		try {
+			int pos= fScanner.getNextStartOffset(selectionOffset, true);
+			if (pos == node.getStartPosition()) {
+				int lastNodeEnd= ASTNodes.getExclusiveEnd(nodes[nodes.length - 1]);
+				
+				pos= fScanner.getNextStartOffset(lastNodeEnd, true);
+				int selectionEnd= getSelection().getInclusiveEnd();
+				if (pos <= selectionEnd) {
+					ISourceRange range= new SourceRange(lastNodeEnd, pos - lastNodeEnd);
+					invalidSelection(RefactoringCoreMessages.StatementAnalyzer_end_of_selection, JavaStatusContext.create(fCUnit, range)); 
+				}
+				return; // success
+			}
+		} catch (CoreException e) {
+			// fall through
 		}
+		ISourceRange range= new SourceRange(selectionOffset, node.getStartPosition() - selectionOffset + 1);
+		invalidSelection(RefactoringCoreMessages.StatementAnalyzer_beginning_of_selection, JavaStatusContext.create(fCUnit, range));
 	}
 	
 	public RefactoringStatus getStatus() {
 		return fStatus;
 	}
 	
-	protected CompilationUnitBuffer getBuffer() {
-		return fBuffer;
-	}
-	
 	protected ICompilationUnit getCompilationUnit() {
 		return fCUnit;
+	}
+	
+	protected TokenScanner getTokenScanner() {
+		return fScanner;
 	}
 	
 	/* (non-Javadoc)
@@ -109,7 +115,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		Selection selection= getSelection();
 		if (node != selectedNode) {
 			ASTNode parent= selectedNode.getParent();
-			fStatus.merge(CommentAnalyzer.perform(selection, fBuffer, parent.getStartPosition(), parent.getLength()));
+			fStatus.merge(CommentAnalyzer.perform(selection, fScanner.getScanner(), parent.getStartPosition(), parent.getLength()));
 		}
 		if (!fStatus.hasFatalError())
 			checkSelectedNodes();
