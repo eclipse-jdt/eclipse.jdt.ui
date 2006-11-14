@@ -151,8 +151,8 @@ public final class SignatureUtil {
 		if (signature.length < 1)
 			return signature;
 		
-		if (signature[0] == Signature.C_STAR)
-			return NULL_TYPE_SIGNATURE_ARRAY;
+		if (signature.length == 1 && signature[0] == Signature.C_STAR)
+			return signature;
 		
 		int superIndex= indexOf(signature, Signature.C_EXTENDS);
 		if (superIndex == 0)
