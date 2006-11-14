@@ -557,13 +557,15 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 			}
 			fEnclosingBodyDeclaration= (BodyDeclaration)ASTNodes.getParent(getFirstSelectedNode(), BodyDeclaration.class);
 			if (fEnclosingBodyDeclaration == null || 
-				(fEnclosingBodyDeclaration.getNodeType() != ASTNode.METHOD_DECLARATION && 
-				 fEnclosingBodyDeclaration.getNodeType() != ASTNode.INITIALIZER)) {
+					(fEnclosingBodyDeclaration.getNodeType() != ASTNode.METHOD_DECLARATION && 
+					 fEnclosingBodyDeclaration.getNodeType() != ASTNode.INITIALIZER)) {
 				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_only_method_body); 
 				break superCall;
-			} else {
-				if (fEnclosingBodyDeclaration.getNodeType() == ASTNode.METHOD_DECLARATION)
-					fEnclosingMethodBinding= ((MethodDeclaration)fEnclosingBodyDeclaration).resolveBinding();
+			} else if (ASTNodes.getEnclosingType(fEnclosingBodyDeclaration) == null) {
+				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_compile_errors_no_parent_binding);
+				break superCall;
+			} else if (fEnclosingBodyDeclaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
+				fEnclosingMethodBinding= ((MethodDeclaration)fEnclosingBodyDeclaration).resolveBinding();
 			}
 			if (!isSingleExpressionOrStatementSet()) {
 				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_single_expression_or_set); 
