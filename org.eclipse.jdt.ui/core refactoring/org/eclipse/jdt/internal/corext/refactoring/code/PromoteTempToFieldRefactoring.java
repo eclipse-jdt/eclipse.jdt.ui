@@ -68,7 +68,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -119,7 +118,6 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 	//------ fields used for computations ---------//
     private CompilationUnit fCompilationUnitNode;
     private VariableDeclaration fTempDeclarationNode;
-    private final CodeGenerationSettings fCodeGenerationSettings;
 	//------ analysis ---------//
 	private boolean fInitializerUsesLocalTypes;
 	private boolean fTempTypeUsesClassTypeVariables;
@@ -131,9 +129,8 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
 	 * @param selectionStart
 	 * @param selectionLength
-	 * @param settings the code generation settings, or <code>null</code> if invoked by scripting
 	 */
-	public PromoteTempToFieldRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength, CodeGenerationSettings settings){
+	public PromoteTempToFieldRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength){
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		fSelectionStart= selectionStart;
@@ -145,7 +142,34 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
         fDeclareStatic= false;
         fDeclareFinal= false;
         fInitializeIn= INITIALIZE_IN_METHOD;
-        fCodeGenerationSettings= settings;
+	}
+	
+	/**
+	 * Creates a new promote temp to field refactoring.
+	 * @param declaration the variable declaration node to convert to a field
+	 */
+	public PromoteTempToFieldRefactoring(VariableDeclaration declaration) {
+		Assert.isTrue(declaration != null);
+		
+		IVariableBinding resolveBinding= declaration.resolveBinding();
+		Assert.isTrue(resolveBinding != null && !resolveBinding.isParameter() && !resolveBinding.isField());
+
+		ASTNode root= declaration.getRoot();
+		Assert.isTrue(root instanceof CompilationUnit);
+		fCompilationUnitNode= (CompilationUnit) root;
+		
+		IJavaElement input= fCompilationUnitNode.getJavaElement();
+		Assert.isTrue(input instanceof ICompilationUnit);
+		fCu= (ICompilationUnit) input;
+
+		fSelectionStart= declaration.getStartPosition();
+		fSelectionLength= declaration.getLength();
+		
+        fFieldName= ""; //$NON-NLS-1$
+        fVisibility= Modifier.PRIVATE;
+        fDeclareStatic= false;
+        fDeclareFinal= false;
+        fInitializeIn= INITIALIZE_IN_METHOD;
 	}
 
     public String getName() {
@@ -215,7 +239,9 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 			return  canEnableSettingDeclareInConstructors() && ! tempHasAssignmentsOtherThanInitialization();
 		else if (fInitializeIn == INITIALIZE_IN_FIELD)	
 			return  canEnableSettingDeclareInFieldDeclaration() && ! tempHasAssignmentsOtherThanInitialization();
-		else	
+		else	if (getMethodDeclaration().isConstructor())
+			return  !tempHasAssignmentsOtherThanInitialization();
+		else 
 			return false;
 	}
 	
@@ -400,8 +426,10 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
     }
     
 	private void initAST(IProgressMonitor pm){
-		fCompilationUnitNode= RefactoringASTParser.parseWithASTProvider(fCu, true, pm);
-		fTempDeclarationNode= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
+		if (fCompilationUnitNode == null) {
+			fCompilationUnitNode= RefactoringASTParser.parseWithASTProvider(fCu, true, pm);
+			fTempDeclarationNode= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
+		}
 	}
 
 	public RefactoringStatus validateInput(){
@@ -536,7 +564,8 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
     }
 
     private void addNewConstructorWithInitializing(ASTRewrite rewrite, AbstractTypeDeclaration declaration) throws CoreException {
-		String constructorSource= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, getNewConstructorSource(declaration), 0, null, StubUtility.getLineDelimiterUsed(fCu), fCu.getJavaProject());
+    	String lineDelimiter= StubUtility.getLineDelimiterUsed(fCu);
+		String constructorSource= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, getNewConstructorSource(declaration, lineDelimiter), 0, null, lineDelimiter, fCu.getJavaProject());
 		BodyDeclaration newConstructor= (BodyDeclaration) rewrite.createStringPlaceholder(constructorSource, ASTNode.METHOD_DECLARATION);
 		rewrite.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newConstructor, computeInsertIndexForNewConstructor(declaration), null);
 	}
@@ -549,18 +578,17 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 		return (AbstractTypeDeclaration)ASTNodes.getParent(getTempDeclarationStatement(), AbstractTypeDeclaration.class);
 	}
 	
-	private String getNewConstructorSource(AbstractTypeDeclaration declaration) throws CoreException {
-		String lineDelimiter= StubUtility.getLineDelimiterUsed(fCu);
-		return getNewConstructorComment() + JdtFlags.getVisibilityString(declaration.getModifiers()) + ' ' + getEnclosingTypeName() + "(){" +  //$NON-NLS-1$
+	private String getNewConstructorSource(AbstractTypeDeclaration declaration, String lineDelimiter) throws CoreException {
+		return getNewConstructorComment(lineDelimiter) + JdtFlags.getVisibilityString(declaration.getModifiers()) + ' ' + getEnclosingTypeName() + "(){" +  //$NON-NLS-1$
 		lineDelimiter + (fFieldName + '=' + getTempInitializerCode() + ';') + lineDelimiter + '}';
 	}
 
-	private String getNewConstructorComment() throws CoreException {
-		if (fCodeGenerationSettings.createComments){
-			String comment= CodeGeneration.getMethodComment(fCu, getEnclosingTypeName(), getEnclosingTypeName(), new String[0], new String[0], null, null, StubUtility.getLineDelimiterUsed(fCu));
+	private String getNewConstructorComment(String lineDelimiter) throws CoreException {
+		if (StubUtility.doAddComments(fCu.getJavaProject())){
+			String comment= CodeGeneration.getMethodComment(fCu, getEnclosingTypeName(), getEnclosingTypeName(), new String[0], new String[0], null, null, lineDelimiter);
 			if (comment == null)
 				return ""; //$NON-NLS-1$
-			return comment + StubUtility.getLineDelimiterUsed(fCu);
+			return comment + lineDelimiter;
 		} else
 			return "";//$NON-NLS-1$
 	}

@@ -17,6 +17,8 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
@@ -24,12 +26,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class PromoteTempToFieldTests extends RefactoringTest{
 	
@@ -114,7 +113,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 						  	
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);						  	
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-        PromoteTempToFieldRefactoring ref= new PromoteTempToFieldRefactoring(cu, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
+        PromoteTempToFieldRefactoring ref= new PromoteTempToFieldRefactoring(cu, selection.getOffset(), selection.getLength());
 
 		RefactoringStatus activationResult= ref.checkInitialConditions(new NullProgressMonitor());	
 		assertTrue("activation was supposed to be successful", activationResult.isOK());
@@ -146,7 +145,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 						  int expectedSeverity) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);						  	
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-        PromoteTempToFieldRefactoring ref= new PromoteTempToFieldRefactoring(cu, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
+        PromoteTempToFieldRefactoring ref= new PromoteTempToFieldRefactoring(cu, selection.getOffset(), selection.getLength());
 		
 		RefactoringStatus result= ref.checkInitialConditions(new NullProgressMonitor());	
         ref.setFieldName(newName);
@@ -175,7 +174,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
   						  boolean expectedCanEnableInitInConstructors) throws Exception{
 		ICompilationUnit cu= createCUfromEnablementTestFile(getPackageP());
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-        PromoteTempToFieldRefactoring ref= new PromoteTempToFieldRefactoring(cu, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
+        PromoteTempToFieldRefactoring ref= new PromoteTempToFieldRefactoring(cu, selection.getOffset(), selection.getLength());
 		RefactoringStatus result= ref.checkInitialConditions(new NullProgressMonitor());
 		ref.setFieldName(newName);
         ref.setDeclareFinal(declareFinal);
@@ -611,7 +610,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 	public void test22() throws Exception{ //test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=54444
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);						  	
 		ISourceRange selection= TextRangeUtil.getSelection(cu, 4, 34, 4, 37);
-        PromoteTempToFieldRefactoring ref= new PromoteTempToFieldRefactoring(cu, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
+        PromoteTempToFieldRefactoring ref= new PromoteTempToFieldRefactoring(cu, selection.getOffset(), selection.getLength());
 		ref.checkInitialConditions(new NullProgressMonitor());
         assertEquals("sortByDefiningTypeAction", ref.getFieldName());
 	}

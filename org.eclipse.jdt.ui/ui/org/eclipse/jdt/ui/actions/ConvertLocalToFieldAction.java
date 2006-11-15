@@ -25,7 +25,6 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.PromoteTempWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
@@ -82,7 +81,7 @@ public class ConvertLocalToFieldAction extends SelectionDispatchAction {
 			return;
 		try{
 			ICompilationUnit cunit= SelectionConverter.getInputAsCompilationUnit(fEditor);
-			final PromoteTempToFieldRefactoring refactoring= new PromoteTempToFieldRefactoring(cunit, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings(cunit.getJavaProject()));
+			final PromoteTempToFieldRefactoring refactoring= new PromoteTempToFieldRefactoring(cunit, selection.getOffset(), selection.getLength());
 			new RefactoringStarter().activate(refactoring, new PromoteTempWizard(refactoring), getShell(), RefactoringMessages.ConvertLocalToField_title, false);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, RefactoringMessages.ConvertLocalToField_title, RefactoringMessages.NewTextRefactoringAction_exception); 

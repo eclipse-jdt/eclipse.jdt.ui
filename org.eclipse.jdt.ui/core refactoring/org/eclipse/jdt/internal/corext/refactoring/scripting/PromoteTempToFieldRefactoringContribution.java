@@ -29,6 +29,6 @@ public final class PromoteTempToFieldRefactoringContribution extends JDTRefactor
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(final RefactoringDescriptor descriptor) throws CoreException {
-		return new PromoteTempToFieldRefactoring(null, 0, 0, null);
+		return new PromoteTempToFieldRefactoring(null, 0, 0);
 	}
 }
