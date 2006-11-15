@@ -60,7 +60,9 @@ import org.eclipse.compare.structuremergeviewer.DiffNode;
 import org.eclipse.jdt.internal.junit.model.TestElement;
 
 public class CompareResultDialog extends TrayDialog {
-    private static class CompareResultMergeViewer extends TextMergeViewer {
+    private static final String PREFIX_SUFFIX_PROPERTY= "org.eclipse.jdt.internal.junit.ui.CompareResultDialog.prefixSuffix"; //$NON-NLS-1$
+
+	private static class CompareResultMergeViewer extends TextMergeViewer {
          private CompareResultMergeViewer(Composite parent, int style, CompareConfiguration configuration) {
              super(parent, style, configuration);
          }
@@ -72,16 +74,22 @@ public class CompareResultDialog extends TrayDialog {
          
         protected void configureTextViewer(TextViewer textViewer) {
             if (textViewer instanceof SourceViewer) {
-                ((SourceViewer)textViewer).configure(new CompareResultViewerConfiguration());   
+                int[] prefixSuffixOffsets= (int[]) getCompareConfiguration().getProperty(PREFIX_SUFFIX_PROPERTY);
+				((SourceViewer)textViewer).configure(new CompareResultViewerConfiguration(prefixSuffixOffsets));   
             }
         }
     }
     
-    public static class CompareResultViewerConfiguration extends SourceViewerConfiguration {
-        public static class SimpleDamagerRepairer implements IPresentationDamager, IPresentationRepairer {
+    private static class CompareResultViewerConfiguration extends SourceViewerConfiguration {
+    	private static class SimpleDamagerRepairer implements IPresentationDamager, IPresentationRepairer {
             private IDocument fDocument;
+			private final int[] fPrefixSuffixOffsets2;
 
-            public void setDocument(IDocument document) {
+			public SimpleDamagerRepairer(int[] prefixSuffixOffsets) {
+				fPrefixSuffixOffsets2= prefixSuffixOffsets;
+			}
+
+			public void setDocument(IDocument document) {
                 fDocument= document;
             }
 
@@ -90,16 +98,22 @@ public class CompareResultDialog extends TrayDialog {
             }
 
             public void createPresentation(TextPresentation presentation, ITypedRegion damage) {
-                int suffix= CompareResultDialog.fgThis.fSuffix;
-                int prefix= CompareResultDialog.fgThis.fPrefix;
+            	int prefix= fPrefixSuffixOffsets2[0];
+                int suffix= fPrefixSuffixOffsets2[1];
                 TextAttribute attr= new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_RED), null, SWT.BOLD);
                 presentation.addStyleRange(new StyleRange(prefix, fDocument.getLength()-suffix-prefix, attr.getForeground(), attr.getBackground(), attr.getStyle()));
             }
         }
+		
+		private final int[] fPrefixSuffixOffsets;
         
-        public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
+		public CompareResultViewerConfiguration(int[] prefixSuffixOffsets) {
+			fPrefixSuffixOffsets= prefixSuffixOffsets;
+		}
+
+		public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
             PresentationReconciler reconciler= new PresentationReconciler();
-            SimpleDamagerRepairer dr= new SimpleDamagerRepairer();
+            SimpleDamagerRepairer dr= new SimpleDamagerRepairer(fPrefixSuffixOffsets);
             reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
             reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
             return reconciler;
@@ -138,25 +152,13 @@ public class CompareResultDialog extends TrayDialog {
     private String fActual;
     private String fTestName;
     
-    /* workaround - to make prefix and suffix accessible to the CompareResultViewerConfiguration */
-    private static CompareResultDialog fgThis;
-    
     private int fPrefix;
     private int fSuffix;
 	
 	public CompareResultDialog(Shell parentShell, TestElement element) {
 		super(parentShell);
-		fgThis= this; //TODO: Straightforward fix did not work (bug 164497).
 		setShellStyle(SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MAX);
 		setFailedTest(element);
-	}
-	
-	/*
-	 * workaround to avoid leak of workaround above
-	 */
-	public boolean close() {
-		fgThis= null;
-		return super.close();
 	}
 	
 	private void setFailedTest(TestElement failedTest) {
@@ -230,6 +232,7 @@ public class CompareResultDialog extends TrayDialog {
 	    compareConfiguration.setRightLabel(JUnitMessages.CompareResultDialog_actualLabel);	 
 	    compareConfiguration.setRightEditable(false);
 	    compareConfiguration.setProperty(CompareConfiguration.IGNORE_WHITESPACE, Boolean.FALSE);
+	    compareConfiguration.setProperty(PREFIX_SUFFIX_PROPERTY, new int[] {fPrefix, fSuffix});
 
 	    fViewer= new CompareResultMergeViewer(parent, SWT.NONE, compareConfiguration);
 	    setCompareViewerInput();
@@ -240,7 +243,7 @@ public class CompareResultDialog extends TrayDialog {
                 compareConfiguration.dispose();
 	        }
 	    });
-	    return  control;
+	    return control;
 	}
 
 	private void setCompareViewerInput() {
