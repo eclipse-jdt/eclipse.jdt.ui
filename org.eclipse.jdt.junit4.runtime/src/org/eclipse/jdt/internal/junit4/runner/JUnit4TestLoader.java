@@ -17,7 +17,13 @@ import org.eclipse.jdt.internal.junit.runner.ITestReference;
 import org.eclipse.jdt.internal.junit.runner.RemoteTestRunner;
 
 public class JUnit4TestLoader implements ITestLoader {
-	public ITestReference[] loadTests(final Class[] testClasses, String testName, String[] failureNames, final RemoteTestRunner listener) {
+	
+	public ITestReference[] loadTests(
+			@SuppressWarnings("unchecked") Class[] testClasses, // https://bugs.eclipse.org/bugs/show_bug.cgi?id=164472
+			String testName,
+			String[] failureNames,
+			RemoteTestRunner listener) {
+		
 		ITestReference[] refs= new ITestReference[testClasses.length];
 		for (int i= 0; i < testClasses.length; i++) {
 			Class<?> clazz= testClasses[i];
