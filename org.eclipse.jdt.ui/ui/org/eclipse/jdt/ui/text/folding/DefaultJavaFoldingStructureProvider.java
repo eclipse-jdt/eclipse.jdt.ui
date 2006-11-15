@@ -920,6 +920,8 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		Annotation[] deletedArray= (Annotation[]) deletions.toArray(new Annotation[deletions.size()]);
 		Annotation[] changedArray= (Annotation[]) updates.toArray(new Annotation[updates.size()]);
 		ctx.getModel().modifyAnnotations(deletedArray, additions, changedArray);
+		
+		ctx.fScanner.setSource(null);
     }
 	
 	private void computeFoldingStructure(FoldingStructureComputationContext ctx) {
