@@ -44,7 +44,6 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
@@ -56,6 +55,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
@@ -312,9 +312,8 @@ public class InlineTempRefactoring extends ScriptableRefactoring {
 		VariableDeclaration varDecl= getVariableDeclaration();
 		
 		Expression copy= (Expression) rewrite.getASTRewrite().createCopyTarget(varDecl.getInitializer());
-		if (copy instanceof ArrayInitializer) {
-			ITypeBinding typeBinding= varDecl.resolveBinding().getType();
-			ArrayType newType= (ArrayType) rewrite.getImportRewrite().addImport(typeBinding, rewrite.getAST());
+		if (copy instanceof ArrayInitializer && ASTNodes.getDimensions(varDecl) > 0) {
+			ArrayType newType= (ArrayType) ASTNodeFactory.newType(rewrite.getAST(), varDecl);
 			
 			ArrayCreation newArrayCreation= rewrite.getAST().newArrayCreation();
 			newArrayCreation.setType(newType);

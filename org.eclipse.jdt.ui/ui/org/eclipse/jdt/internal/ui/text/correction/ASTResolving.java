@@ -210,7 +210,7 @@ public class ASTResolving {
 			} else if (initializerParent instanceof VariableDeclaration) {
 				VariableDeclaration varDecl= (VariableDeclaration) initializerParent;
 				creationType= ASTNodes.getType(varDecl);
-				dim-= ASTNodes.getExtraDimensions(varDecl);
+				dim-= varDecl.getExtraDimensions();
 			} else if (initializerParent instanceof MemberValuePair) {
 				String name= ((MemberValuePair) initializerParent).getName().getIdentifier();
 				IMethodBinding annotMember= findAnnotationMember((Annotation) initializerParent.getParent(), name);

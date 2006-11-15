@@ -220,20 +220,14 @@ public class ASTNodes {
 		Assert.isTrue(false, "Unknown VariableDeclaration"); //$NON-NLS-1$
 		return null;
 	}
-	
-	/**
-	 * Returns the extra dimensions for the given declaration. 
-	 * @param declaration the declaration
-	 * @return the extra dimensions
-	 */
-	public static int getExtraDimensions(VariableDeclaration declaration) {
-		if (declaration instanceof SingleVariableDeclaration) {
-			return ((SingleVariableDeclaration)declaration).getExtraDimensions();
-		} else if (declaration instanceof VariableDeclarationFragment) {
-			return ((VariableDeclarationFragment)declaration).getExtraDimensions();
+		
+	public static int getDimensions(VariableDeclaration declaration) {
+		int dim= declaration.getExtraDimensions();
+		Type type= getType(declaration);
+		if (type instanceof ArrayType) {
+			dim += ((ArrayType) type).getDimensions();
 		}
-		Assert.isTrue(false, "Unknown VariableDeclaration"); //$NON-NLS-1$
-		return 0;
+		return dim;
 	}
 		
 	public static List getModifiers(VariableDeclaration declaration) {

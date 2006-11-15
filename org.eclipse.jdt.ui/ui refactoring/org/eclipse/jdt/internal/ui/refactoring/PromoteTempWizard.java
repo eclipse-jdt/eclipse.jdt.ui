@@ -98,9 +98,11 @@ public class PromoteTempWizard extends RefactoringWizard {
 			Label nameLabel= new Label(result, SWT.NONE);
 			nameLabel.setText(RefactoringMessages.PromoteTempInputPage_Field_name); 
 			nameLabel.setLayoutData(new GridData());
+			
+			String[] guessedFieldNames= getPromoteTempRefactoring().guessFieldNames();
         
 			fNameField = new Text(result, SWT.BORDER | SWT.SINGLE);
-			fNameField.setText(getPromoteTempRefactoring().getFieldName());
+			fNameField.setText(guessedFieldNames[0]);
 			fNameField.selectAll();
 			fNameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fNameField.addModifyListener(new ModifyListener(){
@@ -109,7 +111,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 					PromoteTempInputPage.this.updateStatus();
 				}
 			});
-			IContentAssistProcessor processor= new FieldNameProcessor(getPromoteTempRefactoring());
+			IContentAssistProcessor processor= new FieldNameProcessor(guessedFieldNames, getPromoteTempRefactoring());
 			ControlContentAssistHelper.createTextContentAssistant(fNameField, processor);
 			TextFieldNavigationHandler.install(fNameField);
 		}

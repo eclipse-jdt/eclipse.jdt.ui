@@ -42,7 +42,7 @@ public class FieldNameProcessor implements IContentAssistProcessor, ISubjectCont
 	private ImageDescriptorRegistry fImageRegistry= JavaPlugin.getImageDescriptorRegistry();
 	private PromoteTempToFieldRefactoring fRefactoring;
 
-	public FieldNameProcessor(PromoteTempToFieldRefactoring refactoring) {
+	public FieldNameProcessor(String[] guessedFieldNames, PromoteTempToFieldRefactoring refactoring) {
 		fRefactoring= refactoring;
 		fFieldNameProposals= refactoring.guessFieldNames();
 		Arrays.sort(fFieldNameProposals);

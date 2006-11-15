@@ -115,7 +115,7 @@ public class ASTNodeFactory {
 	 */
 	public static Type newType(AST ast, VariableDeclaration declaration) {
 		Type type= ASTNodes.getType(declaration);
-		int extraDim= ASTNodes.getExtraDimensions(declaration);
+		int extraDim= declaration.getExtraDimensions();
 	
 		type= (Type) ASTNode.copySubtree(ast, type);
 		for (int i= 0; i < extraDim; i++) {

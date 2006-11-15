@@ -35,16 +35,15 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -55,6 +54,7 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -65,13 +65,15 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
+import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
@@ -84,7 +86,6 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -108,6 +109,8 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 	public static final int INITIALIZE_IN_METHOD= 1;
 	public static final int INITIALIZE_IN_CONSTRUCTOR= 2;
 	
+	private static final String LINKED_NAME= "name"; //$NON-NLS-1$
+	
 	//------ settings ---------//
 	private String fFieldName;
 	private int fVisibility; 	/*see Modifier*/
@@ -123,6 +126,7 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 	private boolean fTempTypeUsesClassTypeVariables;
 	//------ scripting --------//
 	private boolean fSelfInitializing= false;
+	private LinkedProposalModel fLinkedProposalModel;
 
 	/**
 	 * Creates a new promote temp to field refactoring.
@@ -142,6 +146,7 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
         fDeclareStatic= false;
         fDeclareFinal= false;
         fInitializeIn= INITIALIZE_IN_METHOD;
+        fLinkedProposalModel= null;
 	}
 	
 	/**
@@ -150,7 +155,7 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 	 */
 	public PromoteTempToFieldRefactoring(VariableDeclaration declaration) {
 		Assert.isTrue(declaration != null);
-		
+		fTempDeclarationNode= declaration;
 		IVariableBinding resolveBinding= declaration.resolveBinding();
 		Assert.isTrue(resolveBinding != null && !resolveBinding.isParameter() && !resolveBinding.isField());
 
@@ -170,6 +175,7 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
         fDeclareStatic= false;
         fDeclareFinal= false;
         fInitializeIn= INITIALIZE_IN_METHOD;
+        fLinkedProposalModel= null;
 	}
 
     public String getName() {
@@ -190,10 +196,6 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 
     public boolean getDeclareStatic() {
         return fDeclareStatic;
-    }
-
-    public String getFieldName() {
-        return fFieldName;
     }
 
     public int getInitializeIn() {
@@ -333,26 +335,25 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 	        fInitializeIn= INITIALIZE_IN_FIELD;
 	    else if (canEnableSettingDeclareInConstructors())    
 	        fInitializeIn= INITIALIZE_IN_CONSTRUCTOR;
-		fFieldName= getInitialFieldName();
     }
     
 	public String[] guessFieldNames() {
-		String tempName= fTempDeclarationNode.getName().getIdentifier();
-		String rawTempName= NamingConventions.removePrefixAndSuffixForLocalVariableName(fCu.getJavaProject(), tempName);
+		String rawTempName= StubUtility.removePrefixAndSuffixForVariable(fCu.getJavaProject(), fTempDeclarationNode.resolveBinding());
 		String[] excludedNames= getNamesOfFieldsInDeclaringType();
-		int dim= getTempTypeArrayDimensions();
-		String[] suggestedNames= StubUtility.getFieldNameSuggestions(fCu.getJavaProject(), rawTempName, dim, getModifiers(), excludedNames);
-		return suggestedNames;
+		int dim= ASTNodes.getDimensions(fTempDeclarationNode);
+		return StubUtility.getFieldNameSuggestions(fCu.getJavaProject(), rawTempName, dim, getModifiers(), excludedNames);
 	}
 
     private String getInitialFieldName() {
     	String[] suggestedNames= guessFieldNames();
 		if (suggestedNames.length > 0) {
-			String longest= suggestedNames[0];
-			for (int i= 1; i < suggestedNames.length; i++)
-				if (suggestedNames[i].length() > longest.length())
-					longest= suggestedNames[i];
-			return longest;
+			if (fLinkedProposalModel != null) {
+				LinkedProposalPositionGroup nameGroup= fLinkedProposalModel.getPositionGroup(LINKED_NAME, true);
+				for (int i= 0; i < suggestedNames.length; i++) {
+					nameGroup.addProposal(suggestedNames[i], null, suggestedNames.length - i);
+				}
+			}
+			return suggestedNames[0];
 		} else {
 			return fTempDeclarationNode.getName().getIdentifier();
 		}
@@ -372,15 +373,6 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 			return (String[]) result.toArray(new String[result.size()]);
 		}
 		return new String[] {};
-	}
-
-	private int getTempTypeArrayDimensions() {
-		int dim= 0;
-		Type tempType= getTempDeclarationStatement().getType();
-		if (tempType.isArrayType())
-			dim += ((ArrayType)tempType).getDimensions();
-		dim += fTempDeclarationNode.getExtraDimensions();	
-		return dim;
 	}
         
     private void checkTempInitializerForLocalTypeUsage() {
@@ -522,6 +514,10 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
     public Change createChange(IProgressMonitor pm) throws CoreException {
     	pm.beginTask("", 1); //$NON-NLS-1$
     	try {
+    		if (fFieldName.length() == 0) {
+    			fFieldName= getInitialFieldName();
+    		}
+    		
     		ASTRewrite rewrite= ASTRewrite.create(fCompilationUnitNode.getAST());
     		if (fInitializeIn == INITIALIZE_IN_METHOD && tempHasInitializer())
     			addLocalDeclarationSplit(rewrite);
@@ -545,6 +541,7 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 		for (int j= 0; j < tempRefs.length; j++) {
 			SimpleName occurence= tempRefs[j];
 			SimpleName newName= getAST().newSimpleName(fFieldName);
+			addLinkedName(rewrite, newName, false);
 			rewrite.replace(occurence, newName, null);
 		}
     }
@@ -553,8 +550,19 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
     	Assert.isTrue(! isDeclaredInAnonymousClass());
     	final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration)getMethodDeclaration().getParent();
     	final MethodDeclaration[] constructors= getAllConstructors(declaration);
-    	if (constructors.length == 0){
-            addNewConstructorWithInitializing(rewrite, declaration);
+    	if (constructors.length == 0) {
+    		AST ast= rewrite.getAST();
+    		MethodDeclaration newConstructor= ast.newMethodDeclaration();
+    		newConstructor.setConstructor(true);
+    		newConstructor.modifiers().addAll(ast.newModifiers(declaration.getModifiers() & ModifierRewrite.VISIBILITY_MODIFIERS));
+    		newConstructor.setName(ast.newSimpleName(declaration.getName().getIdentifier()));
+    		newConstructor.setJavadoc(getNewConstructorComment(rewrite));
+    		newConstructor.setBody(ast.newBlock());
+    		
+    		addFieldInitializationToConstructor(rewrite, newConstructor);
+    		
+    		int insertionIndex= computeInsertIndexForNewConstructor(declaration);
+			rewrite.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newConstructor, insertionIndex, null);
     	} else {
     		for (int index= 0; index < constructors.length; index++) {
                 if (shouldInsertTempInitialization(constructors[index]))
@@ -563,13 +571,6 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
     	}
     }
 
-    private void addNewConstructorWithInitializing(ASTRewrite rewrite, AbstractTypeDeclaration declaration) throws CoreException {
-    	String lineDelimiter= StubUtility.getLineDelimiterUsed(fCu);
-		String constructorSource= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, getNewConstructorSource(declaration, lineDelimiter), 0, null, lineDelimiter, fCu.getJavaProject());
-		BodyDeclaration newConstructor= (BodyDeclaration) rewrite.createStringPlaceholder(constructorSource, ASTNode.METHOD_DECLARATION);
-		rewrite.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newConstructor, computeInsertIndexForNewConstructor(declaration), null);
-	}
-
 	private String getEnclosingTypeName() {
 		return getEnclosingType().getName().getIdentifier();
 	}
@@ -577,20 +578,15 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 	private AbstractTypeDeclaration getEnclosingType() {
 		return (AbstractTypeDeclaration)ASTNodes.getParent(getTempDeclarationStatement(), AbstractTypeDeclaration.class);
 	}
-	
-	private String getNewConstructorSource(AbstractTypeDeclaration declaration, String lineDelimiter) throws CoreException {
-		return getNewConstructorComment(lineDelimiter) + JdtFlags.getVisibilityString(declaration.getModifiers()) + ' ' + getEnclosingTypeName() + "(){" +  //$NON-NLS-1$
-		lineDelimiter + (fFieldName + '=' + getTempInitializerCode() + ';') + lineDelimiter + '}';
-	}
 
-	private String getNewConstructorComment(String lineDelimiter) throws CoreException {
+	private Javadoc getNewConstructorComment(ASTRewrite rewrite) throws CoreException {
 		if (StubUtility.doAddComments(fCu.getJavaProject())){
-			String comment= CodeGeneration.getMethodComment(fCu, getEnclosingTypeName(), getEnclosingTypeName(), new String[0], new String[0], null, null, lineDelimiter);
-			if (comment == null)
-				return ""; //$NON-NLS-1$
-			return comment + lineDelimiter;
-		} else
-			return "";//$NON-NLS-1$
+			String comment= CodeGeneration.getMethodComment(fCu, getEnclosingTypeName(), getEnclosingTypeName(), new String[0], new String[0], null, null, StubUtility.getLineDelimiterUsed(fCu));
+			if (comment != null && comment.length() > 0) {
+				return (Javadoc) rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC);
+			}
+		}
+		return null;
 	}
 
 	private int computeInsertIndexForNewConstructor(AbstractTypeDeclaration declaration) {
@@ -615,7 +611,8 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
     private void addFieldInitializationToConstructor(ASTRewrite rewrite, MethodDeclaration constructor) throws JavaModelException {
     	if (constructor.getBody() == null)
 	    	constructor.setBody(getAST().newBlock());
-        rewrite.getListRewrite(constructor.getBody(), Block.STATEMENTS_PROPERTY).insertLast(createExpressionStatementThatInitializesField(rewrite), null);
+        ExpressionStatement newStatement= createExpressionStatementThatInitializesField(rewrite);
+		rewrite.getListRewrite(constructor.getBody(), Block.STATEMENTS_PROPERTY).insertLast(newStatement, null);
     }
     
     private static boolean shouldInsertTempInitialization(MethodDeclaration constructor){
@@ -735,30 +732,29 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
     }
     
     private ExpressionStatement createExpressionStatementThatInitializesField(ASTRewrite rewrite) throws JavaModelException{
-        Assignment assignment= getAST().newAssignment();
-        SimpleName fieldName= getAST().newSimpleName(fFieldName);
-        assignment.setLeftHandSide(fieldName);
-        String initializerCode= getTempInitializerCode();
-        Expression tempInitializerCopy= (Expression)rewrite.createStringPlaceholder(initializerCode, ASTNode.METHOD_INVOCATION);
-        ///XXX workaround for bug 25178
-        ///(Expression)rewrite.createCopy(getTempInitializer());
-        assignment.setRightHandSide(tempInitializerCopy);
-        ExpressionStatement assignmentStatement= getAST().newExpressionStatement(assignment);
-        return assignmentStatement;
+		AST ast= getAST();
+		Assignment assignment= ast.newAssignment();
+		SimpleName fieldName= ast.newSimpleName(fFieldName);
+		addLinkedName(rewrite, fieldName, true);
+		assignment.setLeftHandSide(fieldName);
+		assignment.setRightHandSide(getTempInitializerCopy(rewrite));
+		return ast.newExpressionStatement(assignment);
     }
-	private String getTempInitializerCode() throws JavaModelException {
-		final StringBuffer buffer= new StringBuffer(128);
-		final Expression initializer= getTempInitializer();
-		if (initializer instanceof ArrayInitializer) {
-			final ArrayInitializer extended= (ArrayInitializer) initializer;
-			final ITypeBinding binding= extended.resolveTypeBinding();
-			if (binding != null) {
-				buffer.append("new "); //$NON-NLS-1$
-				buffer.append(binding.getName());
-			}
+
+	private void addLinkedName(ASTRewrite rewrite, SimpleName fieldName, boolean isFirst) {
+		if (fLinkedProposalModel != null) {
+			fLinkedProposalModel.getPositionGroup(LINKED_NAME, true).addPosition(rewrite.track(fieldName), isFirst);
 		}
-		buffer.append(fCu.getBuffer().getText(initializer.getStartPosition(), initializer.getLength()));
-		return buffer.toString();
+	}
+	
+	private Expression getTempInitializerCopy(ASTRewrite rewrite) throws JavaModelException {
+		final Expression initializer= (Expression) rewrite.createCopyTarget(getTempInitializer());
+		if (initializer instanceof ArrayInitializer && ASTNodes.getDimensions(fTempDeclarationNode) > 0) {
+			ArrayCreation arrayCreation= rewrite.getAST().newArrayCreation();
+			arrayCreation.setType((ArrayType) ASTNodeFactory.newType(rewrite.getAST(), fTempDeclarationNode));
+			arrayCreation.setInitializer((ArrayInitializer) initializer);
+		}
+		return initializer;
 	}
 
     private void addLocalDeclarationRemoval(ASTRewrite rewrite) {
@@ -788,21 +784,23 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
     }
     
     private FieldDeclaration createNewFieldDeclaration(ASTRewrite rewrite) {
-    	VariableDeclarationFragment fragment= getAST().newVariableDeclarationFragment();
-        SimpleName variableName= getAST().newSimpleName(fFieldName);
-        fragment.setName(variableName);
-        fragment.setExtraDimensions(fTempDeclarationNode.getExtraDimensions());
-        if (fInitializeIn == INITIALIZE_IN_FIELD && tempHasInitializer()){
-	        Expression initializer= (Expression)rewrite.createCopyTarget(getTempInitializer());
-	        fragment.setInitializer(initializer);
-        }
-    	FieldDeclaration fieldDeclaration= getAST().newFieldDeclaration(fragment);
-    	
-    	VariableDeclarationStatement vds= getTempDeclarationStatement();
-    	Type type= (Type)rewrite.createCopyTarget(vds.getType());
-    	fieldDeclaration.setType(type);
-	    fieldDeclaration.modifiers().addAll(ASTNodeFactory.newModifiers(getAST(), getModifiers()));	
-    	return fieldDeclaration;
+		AST ast= getAST();
+		VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
+		SimpleName variableName= ast.newSimpleName(fFieldName);
+		fragment.setName(variableName);
+		addLinkedName(rewrite, variableName, false);
+		fragment.setExtraDimensions(fTempDeclarationNode.getExtraDimensions());
+		if (fInitializeIn == INITIALIZE_IN_FIELD && tempHasInitializer()){
+		    Expression initializer= (Expression)rewrite.createCopyTarget(getTempInitializer());
+		    fragment.setInitializer(initializer);
+		}
+		FieldDeclaration fieldDeclaration= ast.newFieldDeclaration(fragment);
+		
+		VariableDeclarationStatement vds= getTempDeclarationStatement();
+		Type type= (Type)rewrite.createCopyTarget(vds.getType());
+		fieldDeclaration.setType(type);
+		fieldDeclaration.modifiers().addAll(ASTNodeFactory.newModifiers(ast, getModifiers()));	
+		return fieldDeclaration;
     }
     
     private int getModifiers() {
@@ -931,5 +929,10 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
+	}
+
+
+	public void setLinkedProposalModel(LinkedProposalModel model) {
+		fLinkedProposalModel= model;
 	}    
 }

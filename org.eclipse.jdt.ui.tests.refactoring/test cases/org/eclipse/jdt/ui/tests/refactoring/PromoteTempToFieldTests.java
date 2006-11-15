@@ -612,7 +612,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		ISourceRange selection= TextRangeUtil.getSelection(cu, 4, 34, 4, 37);
         PromoteTempToFieldRefactoring ref= new PromoteTempToFieldRefactoring(cu, selection.getOffset(), selection.getLength());
 		ref.checkInitialConditions(new NullProgressMonitor());
-        assertEquals("sortByDefiningTypeAction", ref.getFieldName());
+        assertEquals("sortByDefiningTypeAction", ref.guessFieldNames()[0]);
 	}
 	
 	public void test23() throws Exception{ //syntax error

@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
  */
 public class ModifierRewrite {
 	
-	private static final int VISIBILITY_MODIFIERS= Modifier.PUBLIC | Modifier.PRIVATE | Modifier.PROTECTED;
+	public static final int VISIBILITY_MODIFIERS= Modifier.PUBLIC | Modifier.PRIVATE | Modifier.PROTECTED;
 	
 	private ListRewrite fModifierRewrite;
 	private AST fAst;
