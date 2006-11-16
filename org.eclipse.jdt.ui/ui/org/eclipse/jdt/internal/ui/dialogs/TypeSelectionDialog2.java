@@ -41,8 +41,10 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -54,6 +56,7 @@ import org.eclipse.jdt.core.search.TypeNameRequestor;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
 
@@ -215,7 +218,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 					String text= ((ITextSelection)selection).getText();
 					if (text != null) {
 						text= text.trim();
-						if (text.length() > 0 && JavaConventions.validateJavaTypeName(text).isOK()) {
+						if (text.length() > 0 && JavaConventions.validateJavaTypeName(text, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3).isOK()) {
 							fInitialFilter= text;
 							fSelectionMode= FULL_SELECTION;
 						}
@@ -260,9 +263,11 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		for (int i= 0; i < selected.length; i++) {
 			TypeNameMatch typeInfo= selected[i];
 			IType type= typeInfo.getType();
-			if (type == null || ! type.exists()) {
+			if (!type.exists()) {
 				String title= JavaUIMessages.TypeSelectionDialog_errorTitle; 
-				String message= Messages.format(JavaUIMessages.TypeSelectionDialog_dialogMessage, typeInfo.getFullyQualifiedName()); 
+				IPackageFragmentRoot root= typeInfo.getPackageFragmentRoot();
+				String containerName= JavaElementLabels.getElementLabel(root, JavaElementLabels.ROOT_QUALIFIED);
+				String message= Messages.format(JavaUIMessages.TypeSelectionDialog_dialogMessage, new String[] { typeInfo.getFullyQualifiedName(), containerName }); 
 				MessageDialog.openError(getShell(), title, message);
 				history.remove(typeInfo);
 				setResult(null);
