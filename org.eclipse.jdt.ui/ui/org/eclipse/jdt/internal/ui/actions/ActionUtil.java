@@ -120,18 +120,15 @@ public class ActionUtil {
 	}
 	
 	/**
-	 * Check whether <code>element</code> is processable and editable. If
-	 * necessary, ask the user whether the file should be edited.
-	 * <p>
-	 * If <code>editor</code> is not null and <code>editor</code> is an
-	 * editor for <code>element</code>, then the editor is validated.
-	 * Otherwise, the editor is disregarded, <code>element</code> is
-	 * validated, and message dialogs are parented on <code>shell</code>.
+	 * Check whether <code>editor</code> and <code>element</code> are
+	 * processable and editable. If the editor edits the element, the validation
+	 * is only performed once. If necessary, ask the user whether the file(s)
+	 * should be edited.
 	 * 
 	 * @param editor an editor, or <code>null</code> iff the action was not
 	 *        executed from an editor
 	 * @param shell a shell to serve as parent for a dialog
-	 * @param element the element to check
+	 * @param element the element to check, cannot be <code>null</code>
 	 * @return <code>true</code> if the element can be edited,
 	 *         <code>false</code> otherwise
 	 */
@@ -140,7 +137,8 @@ public class ActionUtil {
 			IJavaElement input= SelectionConverter.getInput(editor);
 			if (input != null && input.equals(element.getAncestor(IJavaElement.COMPILATION_UNIT)))
 				return isEditable(editor);
-			// if the element is not in the input of the editor, then don't validate the editor
+			else
+				return isEditable(editor) && isEditable(shell, element);
 		}
 		return isEditable(shell, element);
 	}
