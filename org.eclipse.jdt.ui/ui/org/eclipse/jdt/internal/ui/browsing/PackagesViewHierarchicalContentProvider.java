@@ -138,12 +138,24 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 							if (packageFragment.isDefaultPackage())
 								return NO_CHILDREN;
 							
-							IResource resource= packageFragment.getUnderlyingResource();
-							if (resource != null && resource instanceof IFolder) {
-								List folders= getFoldersAndElements(((IFolder)resource).members());
-								addFragmentsToMap(folders);
-								return folders.toArray();
+							IPackageFragmentRoot parent= (IPackageFragmentRoot) packageFragment.getParent();
+							IPackageFragment[] fragments= findNextLevelChildrenByElementName(parent, packageFragment);
+							
+							addFragmentsToMap(fragments);
+							
+							Object[] nonJavaResources= packageFragment.getNonJavaResources();
+							if (nonJavaResources.length == 0) {
+								return fragments;
 							}
+							ArrayList combined= new ArrayList();
+							combined.addAll(Arrays.asList(fragments));
+							for (int i= 0; i < nonJavaResources.length; i++) {
+								Object curr= nonJavaResources[i];
+								if (curr instanceof IFolder) {
+									combined.add(curr);
+								}
+							}
+							return combined.toArray();
 						}
 				}
 
