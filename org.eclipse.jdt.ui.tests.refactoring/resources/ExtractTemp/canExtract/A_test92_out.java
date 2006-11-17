@@ -1,6 +1,7 @@
 package p;
 
 import static java.util.Arrays.*;
+
 import java.util.List;
 
 class Bug {
