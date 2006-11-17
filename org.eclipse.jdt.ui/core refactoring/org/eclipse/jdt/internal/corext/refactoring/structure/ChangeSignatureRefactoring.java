@@ -685,12 +685,10 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			RefactoringStatus result= Checks.checkIfCuBroken(fMethod);
 			if (result.hasFatalError())
 				return result;
-			IMethod orig= (IMethod) JavaModelUtil.toOriginal(fMethod);
-			if (orig == null || !orig.exists()) {
+			if (fMethod == null || !fMethod.exists()) {
 				String message= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_method_deleted, getCu().getElementName());
 				return RefactoringStatus.createFatalErrorStatus(message);
 			}
-			fMethod= orig;
 			if (fMethod.getDeclaringType().isInterface()) {
 				fTopMethod= MethodChecks.overridesAnotherMethod(fMethod, fMethod.getDeclaringType().newSupertypeHierarchy(new SubProgressMonitor(monitor, 1)));
 				monitor.worked(1);
@@ -2536,8 +2534,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 					}
 				} else
 					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_KIND));
-				if (info != null)
-					fExceptionInfos.add(info);
+				fExceptionInfos.add(info);
 				count++;
 				attribute= JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 			}
