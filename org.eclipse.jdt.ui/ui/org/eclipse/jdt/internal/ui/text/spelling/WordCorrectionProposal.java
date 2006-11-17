@@ -81,18 +81,12 @@ public class WordCorrectionProposal implements IJavaCompletionProposal, IHtmlTag
 	/**
 	 * Creates a new word correction proposal.
 	 *
-	 * @param word
-	 *                   The corrected word
-	 * @param arguments
-	 *                   The problem arguments associated with the spelling problem
-	 * @param offset
-	 *                   The offset in the document where to apply the proposal
-	 * @param length
-	 *                   The lenght in the document to apply the proposal
-	 * @param context
-	 *                   The invocation context for this proposal
-	 * @param relevance
-	 *                   The relevance of this proposal
+	 * @param word the corrected word
+	 * @param arguments the problem arguments associated with the spelling problem
+	 * @param offset the offset in the document where to apply the proposal
+	 * @param length the lenght in the document to apply the proposal
+	 * @param context the invocation context for this proposal
+	 * @param relevance the relevance of this proposal
 	 */
 	public WordCorrectionProposal(final String word, final String[] arguments, final int offset, final int length, final IInvocationContext context, final int relevance) {
 

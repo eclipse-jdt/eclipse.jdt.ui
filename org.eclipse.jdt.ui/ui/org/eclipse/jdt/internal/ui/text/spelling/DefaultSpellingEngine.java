@@ -30,6 +30,11 @@ import org.eclipse.jdt.core.JavaCore;
 
 /**
  * Default spelling engine.
+ * <p>
+ * Internally this spelling engine uses a different spelling engine depending on
+ * the {@linkplain IContentType content type}. Currently this engine supports
+ * the text, Java and Java properties file content types.
+ * </p>
  *
  * @since 3.1
  */
