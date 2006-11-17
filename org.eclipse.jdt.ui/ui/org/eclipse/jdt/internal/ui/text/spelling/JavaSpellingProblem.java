@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.ui.text.spelling;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
@@ -22,16 +21,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.text.source.IAnnotationModelExtension;
 
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.spelling.SpellingAnnotation;
 import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -40,7 +30,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
@@ -232,76 +221,6 @@ public class JavaSpellingProblem extends SpellingProblem {
 	 */
 	public boolean isSentenceStart() {
 		return fSpellEvent.isStart();
-	}
-
-	/**
-	 * Removes all spelling problems that are reported
-	 * for the given <code>word</code> in the active editor.
-	 * <p>
-	 * <em>This a workaround to fix bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=134338
-	 * for 3.2 at the time where spelling still resides in JDT Text.
-	 * Once we move the spell check engine along with its quick fixes
-	 * down to Platform Text we need to provide the proposals with
-	 * a way to access the annotation model.</em>
-	 * </p>
-	 * 
-	 * @param word the word for which to remove the problems
-	 * @since 3.2
-	 */
-	public static void removeAllInActiveEditor(String word) {
-		if (word == null)
-			return;
-		
-		IWorkbenchPage activePage= JavaPlugin.getActivePage();
-		if (activePage == null)
-			return;
-
-		IEditorPart editor= activePage.getActiveEditor();
-		if (activePage.getActivePart() != editor ||  !(editor instanceof ITextEditor))
-			return;
-		
-		IDocumentProvider documentProvider= ((ITextEditor)editor).getDocumentProvider();
-		if (documentProvider == null)
-			return;
-
-		IEditorInput editorInput= editor.getEditorInput();
-		if (editorInput == null)
-			return;
-		
-		IAnnotationModel model= documentProvider.getAnnotationModel(editorInput);
-		if (model == null)
-			return;
-		
-		IDocument document= documentProvider.getDocument(editorInput);
-		if (document == null)
-			return;
-
-		boolean supportsBatchReplace= (model instanceof IAnnotationModelExtension);
-		List toBeRemovedAnnotations= new ArrayList();
-		Iterator iter= model.getAnnotationIterator();
-		while (iter.hasNext()) {
-			Annotation annotation= (Annotation) iter.next();
-			if (SpellingAnnotation.TYPE.equals(annotation.getType())) {
-				org.eclipse.jface.text.Position pos= model.getPosition(annotation);
-				String annotationWord;
-				try {
-					annotationWord= document.get(pos.getOffset(), pos.getLength());
-				} catch (BadLocationException e) {
-					continue;
-				}
-				if (word.equals(annotationWord)) {
-					if (supportsBatchReplace)
-						toBeRemovedAnnotations.add(annotation);
-					else
-						model.removeAnnotation(annotation);
-				}
-			}
-		}
-
-		if (supportsBatchReplace && !toBeRemovedAnnotations.isEmpty()) {
-			Annotation[] annotationArray= (Annotation[])toBeRemovedAnnotations.toArray(new Annotation[toBeRemovedAnnotations.size()]);
-			((IAnnotationModelExtension)model).replaceAnnotations(annotationArray, null);
-		}
 	}
 
 }

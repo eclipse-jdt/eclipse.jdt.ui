@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.content.IContentType;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 
@@ -24,6 +25,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
 import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 import org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy;
+import org.eclipse.ui.texteditor.spelling.SpellingService;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 
@@ -112,6 +114,18 @@ public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 	public JavaSpellingReconcileStrategy(ISourceViewer viewer, ITextEditor editor) {
 		super(viewer, EditorsUI.getSpellingService());
 		fEditor= editor;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.IRegion)
+	 */
+	public void reconcile(IRegion region) {
+		if (fRequestor != null && isSpellingEnabled())
+			super.reconcile(region);
+	}
+	
+	private boolean isSpellingEnabled() {
+		return EditorsUI.getPreferenceStore().getBoolean(SpellingService.PREFERENCE_SPELLING_ENABLED);
 	}
 
 	/*
