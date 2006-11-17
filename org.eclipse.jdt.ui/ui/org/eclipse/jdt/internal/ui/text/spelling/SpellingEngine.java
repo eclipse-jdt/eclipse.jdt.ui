@@ -46,22 +46,29 @@ public abstract class SpellingEngine implements ISpellingEngine {
 
 		/** Spelling problem collector */
 		private ISpellingProblemCollector fCollector;
+		
+		/**
+		 * The document.
+		 * @since 3.3
+		 */
+		private IDocument fDocument;
 
 		/**
 		 * Initialize with the given spelling problem collector.
 		 *
 		 * @param collector the spelling problem collector
+		 * @param document the document
 		 */
-		public SpellEventListener(ISpellingProblemCollector collector) {
-			super();
+		public SpellEventListener(ISpellingProblemCollector collector, IDocument document) {
 			fCollector= collector;
+			fDocument= document;
 		}
 
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener#handle(org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent)
 		 */
 		public void handle(ISpellEvent event) {
-			fCollector.accept(new JavaSpellingProblem(event));
+			fCollector.accept(new JavaSpellingProblem(event, fDocument));
 		}
 	}
 

@@ -40,7 +40,7 @@ public class JavaSpellingEngine extends SpellingEngine {
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.newapi.SpellingEngine#check(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IRegion[], org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker, java.util.Locale, org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	protected void check(IDocument document, IRegion[] regions, ISpellChecker checker, Locale locale, ISpellingProblemCollector collector, IProgressMonitor monitor) {
-		ISpellEventListener listener= new SpellEventListener(collector);
+		ISpellEventListener listener= new SpellEventListener(collector, document);
 		try {
 			checker.addListener(listener);
 			try {

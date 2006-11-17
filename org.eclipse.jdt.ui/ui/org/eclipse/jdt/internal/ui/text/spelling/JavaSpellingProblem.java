@@ -12,26 +12,43 @@
 package org.eclipse.jdt.internal.ui.text.spelling;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
 
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.spelling.SpellingAnnotation;
 import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider.ProblemAnnotation;
+import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
+import org.eclipse.jdt.internal.ui.text.javadoc.IJavaDocTagConstants;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.RankedWordProposal;
 
 /**
  * A {@link SpellingProblem} that adapts a {@link ISpellEvent}.
@@ -45,13 +62,22 @@ public class JavaSpellingProblem extends SpellingProblem {
 	private ISpellEvent fSpellEvent;
 
 	/**
+	 * The associated document.
+	 * 
+	 * @since 3.3
+	 */
+	private IDocument fDocument;
+
+	/**
 	 * Initialize with the given spell event.
-	 *
+	 * 
 	 * @param spellEvent the spell event
 	 */
-	public JavaSpellingProblem(ISpellEvent spellEvent) {
-		super();
+	public JavaSpellingProblem(ISpellEvent spellEvent, IDocument document) {
+		Assert.isLegal(document != null);
+		Assert.isLegal(spellEvent != null);
 		fSpellEvent= spellEvent;
+		fDocument= document;
 	}
 
 	/*
@@ -82,12 +108,106 @@ public class JavaSpellingProblem extends SpellingProblem {
 	 * @see org.eclipse.ui.texteditor.spelling.SpellingProblem#getProposals()
 	 */
 	public ICompletionProposal[] getProposals() {
-		/*
-		 * TODO: implement, see WordQuickFixProcessor
-		 * isDictionaryMatch() and isSentenceStart() are workarounds
-		 * that could be removed once getProposals() is implemented
-		 */
-		return new ICompletionProposal[0];
+		String[] arguments= getArguments();
+		if (arguments == null)
+			return new ICompletionProposal[0];
+
+		final int threshold= PreferenceConstants.getPreferenceStore().getInt(
+				PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD);
+		int size= 0;
+		List proposals= null;
+
+		RankedWordProposal proposal= null;
+		IJavaCompletionProposal[] result= null;
+		int index= 0;
+
+		boolean fixed= false;
+		boolean match= false;
+		boolean sentence= false;
+
+		final ISpellCheckEngine engine= SpellCheckEngine.getInstance();
+		final ISpellChecker checker= engine.createSpellChecker(engine
+				.getLocale(), PreferenceConstants.getPreferenceStore());
+
+		if (checker != null) {
+
+			IInvocationContext context= new AssistContext(null, getOffset(),
+					getLength());
+
+			// FIXME: this is a pretty ugly hack
+			fixed= arguments[0].charAt(0) == IHtmlTagConstants.HTML_TAG_PREFIX
+					|| arguments[0].charAt(0) == IJavaDocTagConstants.JAVADOC_TAG_PREFIX;
+
+			if ((sentence && match) && !fixed)
+				result= new IJavaCompletionProposal[] { new ChangeCaseProposal(
+						arguments, getOffset(), getLength(), context, engine
+								.getLocale()) };
+			else {
+
+				proposals= new ArrayList(checker.getProposals(arguments[0],
+						sentence));
+				size= proposals.size();
+
+				if (threshold > 0 && size > threshold) {
+
+					Collections.sort(proposals);
+					proposals= proposals
+							.subList(size - threshold - 1, size - 1);
+					size= proposals.size();
+				}
+
+				boolean extendable= !fixed ? checker.acceptsWords() : false;
+				result= new IJavaCompletionProposal[size + (extendable ? 2 : 1)];
+
+				for (index= 0; index < size; index++) {
+
+					proposal= (RankedWordProposal) proposals.get(index);
+					result[index]= new WordCorrectionProposal(proposal
+							.getText(), arguments, getOffset(), getLength(),
+							context, proposal.getRank());
+				}
+
+				if (extendable)
+					result[index++]= new AddWordProposal(arguments[0], context);
+
+				result[index++]= new WordIgnoreProposal(arguments[0], context);
+			}
+		}
+
+		return result;
+	}
+
+	public String[] getArguments() {
+
+		String prefix= ""; //$NON-NLS-1$
+		String postfix= ""; //$NON-NLS-1$
+		String word;
+		try {
+			word= fDocument.get(getOffset(), getLength());
+		} catch (BadLocationException e) {
+			return null;
+		}
+
+		try {
+
+			IRegion line= fDocument.getLineInformationOfOffset(getOffset());
+			int end= getOffset() + getLength();
+			prefix= fDocument.get(line.getOffset(), getOffset()
+					- line.getOffset());
+			postfix= fDocument.get(end + 1, line.getOffset() + line.getLength()
+					- end);
+
+		} catch (BadLocationException exception) {
+			// Do nothing
+		}
+		return new String[] {
+				word,
+				prefix,
+				postfix,
+				isSentenceStart() ? Boolean.toString(true) : Boolean
+						.toString(false),
+				isDictionaryMatch() ? Boolean.toString(true) : Boolean
+						.toString(false) };
 	}
 
 	/**
@@ -113,7 +233,7 @@ public class JavaSpellingProblem extends SpellingProblem {
 	public boolean isSentenceStart() {
 		return fSpellEvent.isStart();
 	}
-	
+
 	/**
 	 * Removes all spelling problems that are reported
 	 * for the given <code>word</code> in the active editor.
@@ -143,26 +263,41 @@ public class JavaSpellingProblem extends SpellingProblem {
 		IDocumentProvider documentProvider= ((ITextEditor)editor).getDocumentProvider();
 		if (documentProvider == null)
 			return;
+
+		IEditorInput editorInput= editor.getEditorInput();
+		if (editorInput == null)
+			return;
 		
-		IAnnotationModel model= documentProvider.getAnnotationModel(editor.getEditorInput());
+		IAnnotationModel model= documentProvider.getAnnotationModel(editorInput);
 		if (model == null)
 			return;
 		
+		IDocument document= documentProvider.getDocument(editorInput);
+		if (document == null)
+			return;
+
 		boolean supportsBatchReplace= (model instanceof IAnnotationModelExtension);
 		List toBeRemovedAnnotations= new ArrayList();
 		Iterator iter= model.getAnnotationIterator();
 		while (iter.hasNext()) {
-			Annotation annotation= (Annotation)iter.next();
-			if (ProblemAnnotation.SPELLING_ANNOTATION_TYPE.equals(annotation.getType()) && annotation instanceof ProblemAnnotation) {
-				String[] arguments= ((ProblemAnnotation)annotation).getArguments();
-				if (arguments != null && arguments.length > 0 && word.equals(arguments[0]))
+			Annotation annotation= (Annotation) iter.next();
+			if (SpellingAnnotation.TYPE.equals(annotation.getType())) {
+				org.eclipse.jface.text.Position pos= model.getPosition(annotation);
+				String annotationWord;
+				try {
+					annotationWord= document.get(pos.getOffset(), pos.getLength());
+				} catch (BadLocationException e) {
+					continue;
+				}
+				if (word.equals(annotationWord)) {
 					if (supportsBatchReplace)
 						toBeRemovedAnnotations.add(annotation);
 					else
 						model.removeAnnotation(annotation);
+				}
 			}
 		}
-		
+
 		if (supportsBatchReplace && !toBeRemovedAnnotations.isEmpty()) {
 			Annotation[] annotationArray= (Annotation[])toBeRemovedAnnotations.toArray(new Annotation[toBeRemovedAnnotations.size()]);
 			((IAnnotationModelExtension)model).replaceAnnotations(annotationArray, null);
