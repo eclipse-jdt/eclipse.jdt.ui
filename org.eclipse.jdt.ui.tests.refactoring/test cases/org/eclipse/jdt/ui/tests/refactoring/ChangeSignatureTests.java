@@ -94,10 +94,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 			return new ParameterInfo[0];
 		ParameterInfo[] result= new ParameterInfo[newTypes.length];
 		for (int i= 0; i < newDefaultValues.length; i++) {
-			result[i]= ParameterInfo.createInfoForAddedParameter();
-			result[i].setNewName(newNames[i]);
-			result[i].setNewTypeName(newTypes[i]);
-			result[i].setDefaultValue(newDefaultValues[i]);
+			result[i]= ParameterInfo.createInfoForAddedParameter(newTypes[i], newNames[i], newDefaultValues[i]);
 		}
 		return result;
 	}

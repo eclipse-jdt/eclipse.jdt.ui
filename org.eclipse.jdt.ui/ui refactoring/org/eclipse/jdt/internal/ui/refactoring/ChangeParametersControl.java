@@ -55,6 +55,9 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.contentassist.ContentAssistHandler;
 
+import org.eclipse.jdt.core.IJavaProject;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 
@@ -477,7 +480,14 @@ public class ChangeParametersControl extends Composite {
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				ParameterInfo newInfo= ParameterInfo.createInfoForAddedParameter();
+				String[] excludedParamNames= new String[fParameterInfos.size()];
+				for (int i= 0; i < fParameterInfos.size(); i++) {
+					ParameterInfo info= (ParameterInfo) fParameterInfos.get(i);
+					excludedParamNames[i]= info.getNewName();
+				}
+				IJavaProject javaProject= fTypeContext.getCuHandle().getJavaProject();
+				String newParamName= StubUtility.suggestArgumentName(javaProject, RefactoringMessages.ChangeParametersControl_new_parameter_default_name, excludedParamNames);
+				ParameterInfo newInfo= ParameterInfo.createInfoForAddedParameter("Object", newParamName, "null"); //$NON-NLS-1$ //$NON-NLS-2$
 				int insertIndex= fParameterInfos.size();
 				for (int i= fParameterInfos.size() - 1;  i >= 0; i--) {
 					ParameterInfo info= (ParameterInfo) fParameterInfos.get(i);

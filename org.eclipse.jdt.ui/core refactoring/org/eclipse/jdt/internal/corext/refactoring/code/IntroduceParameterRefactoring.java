@@ -241,9 +241,8 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 		ITypeBinding typeBinding= Bindings.normalizeForDeclarationUse(fSelectedExpression.resolveTypeBinding(), fSelectedExpression.getAST());
 		String typeName= cuRewrite.getImportRewrite().addImport(typeBinding);
 		String name= fParameterName != null ? fParameterName : guessedParameterName();
-		fParameter= ParameterInfo.createInfoForAddedParameter(typeBinding, typeName, name);
 		String defaultValue= fSourceCU.getBuffer().getText(fSelectedExpression.getStartPosition(), fSelectedExpression.getLength());
-		fParameter.setDefaultValue(defaultValue);
+		fParameter= ParameterInfo.createInfoForAddedParameter(typeBinding, typeName, name, defaultValue);
 		if (fArguments == null) {
 			List parameterInfos= fChangeSignatureRefactoring.getParameterInfos();
 			int parametersCount= parameterInfos.size();

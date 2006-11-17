@@ -36,6 +36,8 @@ public final class RefactoringMessages extends NLS {
 
 	public static String ChangeParametersControl_buttons_remove;
 
+	public static String ChangeParametersControl_new_parameter_default_name;
+
 	public static String ChangeParametersControl_table_defaultValue;
 
 	public static String ChangeParametersControl_table_name;

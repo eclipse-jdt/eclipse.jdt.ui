@@ -54,14 +54,20 @@ public class ParameterInfo {
 		fIsDeleted= false;
 	}
 
-	public static ParameterInfo createInfoForAddedParameter() {
-		ParameterInfo info= new ParameterInfo("Object", "newParam", INDEX_FOR_ADDED); //$NON-NLS-1$ //$NON-NLS-2$
-		info.setDefaultValue("null"); //$NON-NLS-1$
+	public static ParameterInfo createInfoForAddedParameter(String type, String name, String defaultValue) {
+		ParameterInfo info= new ParameterInfo("", "", INDEX_FOR_ADDED); //$NON-NLS-1$ //$NON-NLS-2$
+		info.setNewTypeName(type);
+		info.setNewName(name);
+		info.setDefaultValue(defaultValue);
 		return info;
 	}
 	
-	public static ParameterInfo createInfoForAddedParameter(ITypeBinding typeBinding, String type, String name) {
-		return new ParameterInfo(null, typeBinding, type, name, INDEX_FOR_ADDED);
+	public static ParameterInfo createInfoForAddedParameter(ITypeBinding typeBinding, String type, String name, String defaultValue) {
+		ParameterInfo info= new ParameterInfo(null, typeBinding, "", "", INDEX_FOR_ADDED); //$NON-NLS-1$ //$NON-NLS-2$
+		info.setNewTypeName(type);
+		info.setNewName(name);
+		info.setDefaultValue(defaultValue);
+		return info;
 	}
 	
 	public int getOldIndex() {
