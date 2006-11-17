@@ -383,6 +383,13 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return count;
 	}
 
+	/*
+	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor#needsSavedEditors()
+	 */
+	public boolean needsSavedEditors() {
+		return false;
+	}
+	
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		IField primary= (IField) fField.getPrimaryElement();
 		if (primary == null || !primary.exists()) {

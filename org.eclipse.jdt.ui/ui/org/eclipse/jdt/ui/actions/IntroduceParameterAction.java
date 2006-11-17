@@ -16,17 +16,17 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
-import org.eclipse.jdt.internal.ui.refactoring.IntroduceParameterWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -75,8 +75,8 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 		if (!ActionUtil.isEditable(fEditor))
 			return;
 		try{
-			final IntroduceParameterRefactoring refactoring= new IntroduceParameterRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
-			new RefactoringStarter().activate(refactoring, new IntroduceParameterWizard(refactoring), getShell(), RefactoringMessages.IntroduceParameterAction_dialog_title, true);
+			ICompilationUnit unit= SelectionConverter.getInputAsCompilationUnit(fEditor);
+			RefactoringExecutionStarter.startIntroduceParameter(unit, selection.getOffset(), selection.getLength(), getShell());
 		} catch (CoreException e){
 			ExceptionHandler.handle(e, RefactoringMessages.IntroduceParameterAction_dialog_title, RefactoringMessages.NewTextRefactoringAction_exception); 
 		}

@@ -193,7 +193,11 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 	}
 	
-	//---- IRenameProcessor -------------------------------------
+	public boolean needsSavedEditors() {
+		return false;
+	}
+	
+	//---- INameUpdating -------------------------------------
 	
 	public final String getCurrentElementName(){
 		return fMethod.getElementName();
