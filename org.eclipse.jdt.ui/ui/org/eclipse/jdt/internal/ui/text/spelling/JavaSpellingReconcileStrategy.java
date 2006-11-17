@@ -11,24 +11,19 @@
 
 package org.eclipse.jdt.internal.ui.text.spelling;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.content.IContentType;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.reconciler.DirtyRegion;
-import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
-import org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
-import org.eclipse.ui.texteditor.spelling.SpellingContext;
 import org.eclipse.ui.texteditor.spelling.SpellingProblem;
-import org.eclipse.ui.texteditor.spelling.SpellingService;
+import org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 
@@ -41,7 +36,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
  *
  * @since 3.1
  */
-public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
+public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 
 	/**
 	 * Spelling problem collector that forwards {@link SpellingProblem}s as
@@ -56,8 +51,8 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 			IProblemRequestor requestor= fRequestor;
 			if (requestor != null) {
 				try {
-					int line= fDocument.getLineOfOffset(problem.getOffset()) + 1;
-					String word= fDocument.get(problem.getOffset(), problem.getLength());
+					int line= getDocument().getLineOfOffset(problem.getOffset()) + 1;
+					String word= getDocument().get(problem.getOffset(), problem.getLength());
 					boolean dictionaryMatch= false;
 					boolean sentenceStart= false;
 					if (problem instanceof JavaSpellingProblem) {
@@ -67,7 +62,7 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 					// see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=81514
 					IEditorInput editorInput= fEditor.getEditorInput();
 					if (editorInput != null) {
-						CoreSpellingProblem iProblem= new CoreSpellingProblem(problem.getOffset(), problem.getOffset() + problem.getLength() - 1, line, problem.getMessage(), word, dictionaryMatch, sentenceStart, fDocument, editorInput.getName());
+						CoreSpellingProblem iProblem= new CoreSpellingProblem(problem.getOffset(), problem.getOffset() + problem.getLength() - 1, line, problem.getMessage(), word, dictionaryMatch, sentenceStart, getDocument(), editorInput.getName());
 						requestor.acceptProblem(iProblem);
 					}
 				} catch (BadLocationException x) {
@@ -93,90 +88,54 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 		}
 	}
 
+	
 	/** The id of the problem */
 	public static final int SPELLING_PROBLEM_ID= 0x80000000;
+
+	/** Properties file content type */
+	private static final IContentType JAVA_CONTENT_TYPE= Platform.getContentTypeManager().getContentType(JavaCore.JAVA_SOURCE_CONTENT_TYPE);
 
 	/** The text editor to operate on. */
 	private ITextEditor fEditor;
 
-	/** The document to operate on. */
-	private IDocument fDocument;
-
-	/** The progress monitor. */
-	private IProgressMonitor fProgressMonitor;
-
 	/** The problem requester. */
 	private IProblemRequestor fRequestor;
-
-	/** The spelling problem collector. */
-	private ISpellingProblemCollector fCollector;
-	
-	/**
-	 * The spelling context containing the Java source
-	 * content type.
-	 * <p>
-	 * Since his reconcile strategy is for the Compilation Unit
-	 * editor which normally edits Java source files we always
-	 * use the Java properties file content type for performance
-	 * reasons.
-	 * </p>
-	 * @since 3.2
-	 */
-	private SpellingContext fSpellingContext;
 
 	
 	/**
 	 * Creates a new comment reconcile strategy.
 	 *
+	 * @param viewer the source viewer
 	 * @param editor the text editor to operate on
 	 */
-	public JavaSpellingReconcileStrategy(ITextEditor editor) {
+	public JavaSpellingReconcileStrategy(ISourceViewer viewer, ITextEditor editor) {
+		super(viewer, EditorsUI.getSpellingService());
 		fEditor= editor;
-		fCollector= new SpellingProblemCollector();
-		fSpellingContext= new SpellingContext();
-		fSpellingContext.setContentType(Platform.getContentTypeManager().getContentType(JavaCore.JAVA_SOURCE_CONTENT_TYPE));
 		updateProblemRequester();
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension#initialReconcile()
+	 * @see org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy#createSpellingProblemCollector()
+	 * @since 3.3
 	 */
-	public void initialReconcile() {
-		reconcile(new Region(0, fDocument.getLength()));
-	}
-
-	/*
-	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.reconciler.DirtyRegion,org.eclipse.jface.text.IRegion)
-	 */
-	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
-		reconcile(subRegion);
-	}
-
-	/*
-	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.IRegion)
-	 */
-	public void reconcile(IRegion region) {
-		if (fRequestor != null && isSpellingEnabled())
-			EditorsUI.getSpellingService().check(fDocument, fSpellingContext, fCollector, fProgressMonitor);
+	protected ISpellingProblemCollector createSpellingProblemCollector() {
+		return new SpellingProblemCollector();
 	}
 	
-	private boolean isSpellingEnabled() {
-		return EditorsUI.getPreferenceStore().getBoolean(SpellingService.PREFERENCE_SPELLING_ENABLED);
+	/*
+	 * @see org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy#getContentType()
+	 * @since 3.3
+	 */
+	protected IContentType getContentType() {
+		return JAVA_CONTENT_TYPE;
 	}
 
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#setDocument(org.eclipse.jface.text.IDocument)
 	 */
 	public void setDocument(IDocument document) {
-		fDocument= document;
+		super.setDocument(document);
 		updateProblemRequester();
-	}
-
-	/*
-	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension#setProgressMonitor(org.eclipse.core.runtime.IProgressMonitor)
-	 */
-	public void setProgressMonitor(IProgressMonitor monitor) {
-		fProgressMonitor= monitor;
 	}
 
 	/**

@@ -438,7 +438,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		final ITextEditor editor= getEditor();
 		if (editor != null && editor.isEditable()) {
 
-			JavaCompositeReconcilingStrategy strategy= new JavaCompositeReconcilingStrategy(editor, getConfiguredDocumentPartitioning(sourceViewer));
+			JavaCompositeReconcilingStrategy strategy= new JavaCompositeReconcilingStrategy(sourceViewer, editor, getConfiguredDocumentPartitioning(sourceViewer));
 			JavaReconciler reconciler= new JavaReconciler(editor, strategy, false);
 			reconciler.setIsIncrementalReconciler(false);
 			reconciler.setIsAllowedToModifyDocument(false);

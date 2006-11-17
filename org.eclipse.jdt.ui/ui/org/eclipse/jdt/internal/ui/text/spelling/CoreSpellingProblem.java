@@ -104,7 +104,7 @@ public class CoreSpellingProblem extends CategorizedProblem {
 	 * @see org.eclipse.jdt.core.compiler.IProblem#getID()
 	 */
 	public int getID() {
-		return PropertiesSpellingReconcileStrategy.SPELLING_PROBLEM_ID;
+		return JavaSpellingReconcileStrategy.SPELLING_PROBLEM_ID;
 	}
 
 	/*

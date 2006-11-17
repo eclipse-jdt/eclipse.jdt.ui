@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
@@ -27,10 +25,6 @@ import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
-import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
-import org.eclipse.jface.text.reconciler.IReconciler;
-import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
-import org.eclipse.jface.text.reconciler.MonoReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.source.Annotation;
@@ -49,9 +43,7 @@ import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
 import org.eclipse.jdt.internal.ui.text.HTMLAnnotationHover;
 import org.eclipse.jdt.internal.ui.text.JavaPresentationReconciler;
 import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
-import org.eclipse.jdt.internal.ui.text.correction.PropertiesFileCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
-import org.eclipse.jdt.internal.ui.text.spelling.PropertiesSpellingReconcileStrategy;
 
 /**
  * Configuration for a source viewer which shows a properties file.
@@ -215,16 +207,6 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 		return super.getConfiguredDocumentPartitioning(sourceViewer);
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getQuickAssistAssistant(org.eclipse.jface.text.source.ISourceViewer)
-	 * @since 3.2
-	 */
-	public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
-		if (getEditor() != null)
-			return new PropertiesFileCorrectionAssistant(getEditor());
-		return null;
-	}
-
 	/**
 	 * Determines whether the preference change encoded by the given event
 	 * changes the behavior of one of its contained components.
@@ -273,21 +255,6 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 			detectors[i+1]= inheritedDetectors[i];
 
 		return detectors;
-	}
-
-	/*
-	 * @see SourceViewerConfiguration#getReconciler(ISourceViewer)
-	 */
-	public IReconciler getReconciler(ISourceViewer sourceViewer) {
-		if (getEditor() != null && getEditor().isEditable() && fPreferenceStore != null) {
-			IReconcilingStrategy strategy= new PropertiesSpellingReconcileStrategy(getEditor());
-			MonoReconciler reconciler= new MonoReconciler(strategy, false);
-			reconciler.setIsIncrementalReconciler(false);
-			reconciler.setProgressMonitor(new NullProgressMonitor());
-			reconciler.setDelay(500);
-			return reconciler;
-		}
-		return null;
 	}
 
 	/*

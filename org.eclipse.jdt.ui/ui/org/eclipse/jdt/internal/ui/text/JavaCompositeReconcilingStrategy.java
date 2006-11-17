@@ -14,6 +14,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -37,15 +38,16 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 	/**
 	 * Creates a new Java reconciling strategy.
 	 *
+	 * @param viewer the source viewer
 	 * @param editor the editor of the strategy's reconciler
 	 * @param documentPartitioning the document partitioning this strategy uses for configuration
 	 */
-	public JavaCompositeReconcilingStrategy(ITextEditor editor, String documentPartitioning) {
+	public JavaCompositeReconcilingStrategy(ISourceViewer viewer, ITextEditor editor, String documentPartitioning) {
 		fEditor= editor;
 		fJavaStrategy= new JavaReconcilingStrategy(editor);
 		setReconcilingStrategies(new IReconcilingStrategy[] {
 			fJavaStrategy,
-			new JavaSpellingReconcileStrategy(editor)
+			new JavaSpellingReconcileStrategy(viewer, editor)
 		});
 	}
 
