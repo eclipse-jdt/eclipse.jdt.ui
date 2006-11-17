@@ -103,7 +103,8 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 		try {
 			for (Iterator iter= fCompilationUnitGroups.iterator(); iter.hasNext();) {
 				CompilationUnitEntry element= (CompilationUnitEntry)iter.next();
-				if (file.equals(element.getCompilationUnit().getCorrespondingResource())) {
+				ICompilationUnit cu= element.getCompilationUnit();
+				if (cu.exists() && file.equals(cu.getCorrespondingResource())) {
 					matches.addAll(Arrays.asList(getMatches(element)));
 				}
 			}
