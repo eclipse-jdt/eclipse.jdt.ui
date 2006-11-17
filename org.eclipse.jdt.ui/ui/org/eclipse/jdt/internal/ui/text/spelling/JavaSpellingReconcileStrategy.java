@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
  */
 public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 
+	
 	/**
 	 * Spelling problem collector that forwards {@link SpellingProblem}s as
 	 * {@link IProblem}s to the {@link IProblemRequestor}.
@@ -111,7 +112,6 @@ public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 	public JavaSpellingReconcileStrategy(ISourceViewer viewer, ITextEditor editor) {
 		super(viewer, EditorsUI.getSpellingService());
 		fEditor= editor;
-		updateProblemRequester();
 	}
 
 	/*
@@ -142,7 +142,15 @@ public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 	 * Update the problem requester based on the current editor
 	 */
 	private void updateProblemRequester() {
-		IAnnotationModel model= fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
+		IAnnotationModel model= getAnnotationModel();
 		fRequestor= (model instanceof IProblemRequestor) ? (IProblemRequestor) model : null;
+	}
+	
+	/*
+	 * @see org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy#getAnnotationModel()
+	 * @since 3.3
+	 */
+	protected IAnnotationModel getAnnotationModel() {
+		return fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
 	}
 }
