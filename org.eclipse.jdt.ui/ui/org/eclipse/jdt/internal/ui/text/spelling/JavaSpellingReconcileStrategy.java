@@ -21,6 +21,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
 import org.eclipse.ui.texteditor.spelling.SpellingProblem;
@@ -165,6 +166,9 @@ public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 	 * @since 3.3
 	 */
 	protected IAnnotationModel getAnnotationModel() {
-		return fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
+		final IDocumentProvider documentProvider= fEditor.getDocumentProvider();
+		if (documentProvider == null)
+			return null;
+		return documentProvider.getAnnotationModel(fEditor.getEditorInput());
 	}
 }
