@@ -12,6 +12,9 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -388,11 +391,67 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	 */
 	public void save(IProgressMonitor progress, boolean force) throws JavaModelException {
 		try {
-			if (fTextFileBuffer != null)
-				fTextFileBuffer.commit(progress, force);
+			if (fTextFileBuffer != null) {
+				if (fFile != null && !fFile.exists())
+					saveNewFile(progress, force);
+				else
+					fTextFileBuffer.commit(progress, force);
+			}
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		}
+	}
+
+	/**
+	 * Saves a new workspace file.
+	 * 
+	 * @param progress the progress monitor
+	 * @param force a <code> boolean </code> flag indicating how to deal with resource
+	 *			inconsistencies. 
+	 * @since 3.3
+	 */
+	private void saveNewFile(IProgressMonitor progress, boolean force) throws JavaModelException {
+		String oldContent= getContents();
+		
+		// Disconnect the old buffer
+		IDocument d= fDocument;
+		fDocument= null;
+		d.removePrenotifiedDocumentListener(this);
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		try {
+			manager.disconnect(fPath, progress);
+		} catch (CoreException ex) {
+			fStatus= ex.getStatus();
+		}
+
+		// Create the file in the workspace
+		InputStream stream= new ByteArrayInputStream(new byte[0]);
+		try {
+			fFile.create(stream, force, progress);
+		} catch (CoreException e) {
+		} finally {
+			try {
+				stream.close();
+			} catch (IOException e) {
+				// ignore
+			}
+		}
+
+		try {
+			manager.connect(fPath, progress);
+			fTextFileBuffer= manager.getTextFileBuffer(fPath);
+			fDocument= fTextFileBuffer.getDocument();
+		} catch (CoreException x) {
+			fStatus= x.getStatus();
+			fDocument= manager.createEmptyDocument(fPath);
+			if (fDocument instanceof ISynchronizable)
+				((ISynchronizable)fDocument).setLockObject(new Object());
+		}
+		
+		fDocument.set(oldContent);
+		fDocument.addPrenotifiedDocumentListener(this);
+		
+		save(progress, force);
 	}
 
 	/*

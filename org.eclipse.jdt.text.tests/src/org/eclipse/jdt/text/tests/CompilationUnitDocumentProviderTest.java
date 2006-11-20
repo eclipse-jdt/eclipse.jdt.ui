@@ -12,24 +12,27 @@ package org.eclipse.jdt.text.tests;
 
 import junit.framework.TestCase;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.filebuffers.tests.ResourceHelper;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -96,6 +99,25 @@ public class CompilationUnitDocumentProviderTest extends TestCase {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		IFile file= root.getFile(new Path("/P2/test1/test2/C.java"));
 		checkFile(file);
+	}
+	
+	public void testNewFile() throws Exception {
+		setupProject();
+		String source= "// some source";
+		
+		IFolder folder= ResourcesPlugin.getWorkspace().getRoot().getFolder(new Path("/P/src/testA/testB/"));
+		IPackageFragment frag= (IPackageFragment)JavaCore.create(folder);
+		ICompilationUnit cu= frag.getCompilationUnit("New.java");
+		cu.becomeWorkingCopy(null, null);
+		IBuffer b= cu.getBuffer();
+		b.setContents(source);
+		cu.reconcile(ICompilationUnit.NO_AST, true, null, null);
+		cu.commitWorkingCopy(true, null);
+		cu.discardWorkingCopy();
+		
+		cu= frag.getCompilationUnit("New.java");
+		
+		assertEquals(source, cu.getSource());
 	}
 	
 	private void checkFile(IFile file) throws CoreException {
