@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.ui.text.spelling;
 
 import com.ibm.icu.text.BreakIterator;
+
 import java.util.LinkedList;
 import java.util.Locale;
 
@@ -19,12 +20,12 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
 
-import org.eclipse.jdt.internal.ui.text.spelling.engine.DefaultSpellChecker;
-import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckIterator;
-
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
+
 import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
 import org.eclipse.jdt.internal.ui.text.javadoc.IJavaDocTagConstants;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.DefaultSpellChecker;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckIterator;
 
 /**
  * Iterator to spell-check javadoc comment regions.
@@ -65,6 +66,8 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 
 	/** The word iterator */
 	private final BreakIterator fWordIterator;
+
+	private boolean fIsIgnoringSingleLetters;
 
 	/**
 	 * Creates a new spell check iterator.
@@ -116,6 +119,14 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 			offset= iterator.next();
 		}
 	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckIterator#setIgnoreSingleLetters(boolean)
+	 * @since 3.3
+	 */
+	public void setIgnoreSingleLetters(boolean state) {
+		fIsIgnoringSingleLetters= state;
+	}
 
 	/*
 	 * @see org.eclipse.spelling.done.ISpellCheckIterator#getBegin()
@@ -165,19 +176,30 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 	}
 
 	/**
-	 * Was the last token a Javadoc tag tag?
+	 * Checks the last token against the given tags?
 	 *
-	 * @param tags the javadoc tags to check
-	 * @return <code>true</code> iff the last token was a Javadoc tag,
-	 *         <code>false</code> otherwise
+	 * @param tags the tags to check
+	 * @return <code>true</code> iff the last token is in the given array
 	 */
-	protected final boolean isJavadocToken(final String[] tags) {
+	protected final boolean isToken(final String[] tags) {
+		return isToken(fLastToken, tags);
+	}
+	
+	/**
+	 * Checks the given  token against the given tags?
+	 *
+	 * @param token the token to check
+	 * @param tags the tags to check
+	 * @return <code>true</code> iff the last token is in the given array
+	 * @since 3.3
+	 */
+	protected final boolean isToken(final String token, final String[] tags) {
 
-		if (fLastToken != null) {
+		if (token != null) {
 
 			for (int index= 0; index < tags.length; index++) {
 
-				if (fLastToken.equals(tags[index]))
+				if (token.equals(tags[index]))
 					return true;
 			}
 		}
@@ -193,11 +215,16 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 	 *         <code>false</code> otherwise
 	 */
 	protected final boolean isSingleLetter(final int begin) {
+		if (!Character.isLetter(fContent.charAt(begin)))
+			return false;
 
-		if (begin > 0 && begin < fContent.length() - 1)
-			return Character.isWhitespace(fContent.charAt(begin - 1)) && Character.isLetter(fContent.charAt(begin)) && Character.isWhitespace(fContent.charAt(begin + 1));
+		if (begin > 0 && !Character.isWhitespace(fContent.charAt(begin - 1)))
+			return false;
 
-		return false;
+		if (begin < fContent.length() - 1 && !Character.isWhitespace(fContent.charAt(begin + 1)))
+			return false;
+		
+		return true;
 	}
 
 	/**
@@ -311,16 +338,29 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 						token= fContent.substring(fPrevious, fNext);
 					}
 				}
+			} else if (fSuccessor != BreakIterator.DONE && fContent.charAt(fPrevious) == HTML_ENTITY_START && (Character.isLetter(fContent.charAt(fNext)))) {
+				nextBreak();
+				if (fSuccessor != BreakIterator.DONE && fContent.charAt(fNext) == HTML_ENTITY_END) {
+					nextBreak();
+					if (isToken(fContent.substring(fPrevious, fNext), HTML_ENTITY_CODES)) {
+						skipTokens(fPrevious, HTML_ENTITY_END);
+						update= true;
+					} else
+						token= fContent.substring(fPrevious, fNext);
+				} else
+					token= fContent.substring(fPrevious, fNext);
+				
+				update= true;
 			} else if (!isWhitespace(fPrevious, fNext) && isAlphaNumeric(fPrevious, fNext)) {
 
 				if (isUrlToken(fPrevious))
 					skipTokens(fPrevious, ' ');
-				else if (isJavadocToken(JAVADOC_PARAM_TAGS))
+				else if (isToken(JAVADOC_PARAM_TAGS))
 					fLastToken= null;
-				else if (isJavadocToken(JAVADOC_REFERENCE_TAGS)) {
+				else if (isToken(JAVADOC_REFERENCE_TAGS)) {
 					fLastToken= null;
 					skipTokens(fPrevious, fDelimiter.charAt(0));
-				} else if (fNext - fPrevious > 1 || isSingleLetter(fPrevious))
+				} else if (fNext - fPrevious > 1 || isSingleLetter(fPrevious) && !fIsIgnoringSingleLetters)
 					token= fContent.substring(fPrevious, fNext);
 
 				update= true;
