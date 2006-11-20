@@ -16,29 +16,6 @@
 
 <extension
 	point="org.eclipse.ui.decorators">
-	<!---
-	<decorator
-		label="%ProblemsLabelDecorator.label"
-		state="false"
-		lightweight="true"
-		location="BOTTOM_LEFT"
-		class="org.eclipse.jdt.ui.ProblemsLabelDecorator"
-		id="org.eclipse.jdt.ui.problem.decorator">
-		<description>
-			%ProblemsLabelDecorator.description
-		</description>
-		<enablement>
-			<or>
-				<objectClass
-					name="org.eclipse.core.resources.IResource">
-				</objectClass>         
-				<objectClass
-					name="org.eclipse.jdt.core.IJavaElement">
-				</objectClass>
-			</or>                
-		</enablement>
-	</decorator>
-	-->
 	<decorator
 		label="%OverrideIndicatorLabelDecorator.label"
 		lightweight="true"
@@ -4949,7 +4926,7 @@
       </view>
    </extension>
 
-<!--- classpath container -->
+<!-- classpath container -->
    
    <extension
          point="org.eclipse.jdt.ui.classpathContainerPage">
