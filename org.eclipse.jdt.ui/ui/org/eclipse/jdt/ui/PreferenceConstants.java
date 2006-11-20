@@ -2531,6 +2531,28 @@ public class PreferenceConstants {
 	public final static String SPELLING_IGNORE_UPPER= ISpellCheckPreferenceKeys.SPELLING_IGNORE_UPPER;
 
 	/**
+	 * A named preference that controls whether non-letters at word boundaries
+	 * should be ignored during spell-checking.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.3
+	 */
+	public final static String SPELLING_IGNORE_NON_LETTERS= ISpellCheckPreferenceKeys.SPELLING_IGNORE_NON_LETTERS;
+
+	/**
+	 * A named preference that controls whether single letters
+	 * should be ignored during spell-checking.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.3
+	 */
+
+	public final static String SPELLING_IGNORE_SINGLE_LETTERS= ISpellCheckPreferenceKeys.SPELLING_IGNORE_SINGLE_LETTERS;
+	/**
 	 * A named preference that controls whether URLs should be ignored during
 	 * spell-checking.
 	 * <p>
