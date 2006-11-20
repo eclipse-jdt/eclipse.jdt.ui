@@ -64,6 +64,28 @@ public interface ISpellCheckPreferenceKeys {
 	public final static String SPELLING_IGNORE_URLS= "spelling_ignore_urls"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls whether non-letters at word boundaries
+	 * should be ignored during spell-checking.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.3
+	 */
+	public static final String SPELLING_IGNORE_NON_LETTERS= "spelling_ignore_non_letters"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that controls whether single letters
+	 * should be ignored during spell-checking.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.3
+	 */
+	public static final String SPELLING_IGNORE_SINGLE_LETTERS= "spelling_ignore_single_letters"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls the locale used for spell-checking.
 	 * <p>
 	 * Value is of type <code>String</code>.

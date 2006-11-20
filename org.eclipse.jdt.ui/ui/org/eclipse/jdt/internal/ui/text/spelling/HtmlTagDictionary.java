@@ -56,4 +56,13 @@ public class HtmlTagDictionary extends AbstractSpellDictionary implements IHtmlT
 		}
 		return true;
 	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary#stripNonLetters(java.lang.String)
+	 * @since 3.3
+	 */
+	protected String stripNonLetters(String word) {
+		return word;
+	}
+
 }

@@ -66,6 +66,8 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_SPELLING_IGNORE_MIXED= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_MIXED);
 	private static final Key PREF_SPELLING_IGNORE_SENTENCE= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_SENTENCE);
 	private static final Key PREF_SPELLING_IGNORE_UPPER= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_UPPER);
+	private static final Key PREF_SPELLING_IGNORE_SINGLE_LETTERS= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_SINGLE_LETTERS);
+	private static final Key PREF_SPELLING_IGNORE_NON_LETTERS= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_NON_LETTERS);
 	private static final Key PREF_SPELLING_IGNORE_URLS= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_URLS);
 	private static final Key PREF_SPELLING_LOCALE= getJDTUIKey(PreferenceConstants.SPELLING_LOCALE);
 	private static final Key PREF_SPELLING_PROPOSAL_THRESHOLD= getJDTUIKey(PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD);
@@ -313,6 +315,14 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.SpellingPreferencePage_ignore_url_label; 
 		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_URLS, trueFalse, 0);
 		allControls.add(slave);
+		
+		label= PreferencesMessages.SpellingPreferencePage_ignore_non_letters_label; 
+		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_NON_LETTERS, trueFalse, 0);
+		allControls.add(slave);
+		
+		label= PreferencesMessages.SpellingPreferencePage_ignore_single_letters_label; 
+		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_SINGLE_LETTERS, trueFalse, 0);
+		allControls.add(slave);
 
 		final Group engine= new Group(composite, SWT.NONE);
 		engine.setText(PreferencesMessages.SpellingPreferencePage_preferences_engine); 
@@ -377,7 +387,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	private static Key[] getAllKeys() {
-		return new Key[] { PREF_SPELLING_USER_DICTIONARY, PREF_SPELLING_IGNORE_DIGITS, PREF_SPELLING_IGNORE_MIXED, PREF_SPELLING_IGNORE_SENTENCE, PREF_SPELLING_IGNORE_UPPER, PREF_SPELLING_IGNORE_URLS, PREF_SPELLING_LOCALE, PREF_SPELLING_PROPOSAL_THRESHOLD, PREF_SPELLING_ENABLE_CONTENTASSIST };
+		return new Key[] { PREF_SPELLING_USER_DICTIONARY, PREF_SPELLING_IGNORE_DIGITS, PREF_SPELLING_IGNORE_MIXED, PREF_SPELLING_IGNORE_SENTENCE, PREF_SPELLING_IGNORE_UPPER, PREF_SPELLING_IGNORE_URLS, PREF_SPELLING_IGNORE_NON_LETTERS, PREF_SPELLING_IGNORE_SINGLE_LETTERS, PREF_SPELLING_LOCALE, PREF_SPELLING_PROPOSAL_THRESHOLD, PREF_SPELLING_ENABLE_CONTENTASSIST };
 	}
 
 	/*

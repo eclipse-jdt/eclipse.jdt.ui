@@ -40,4 +40,13 @@ public interface ISpellCheckIterator extends Iterator {
 	 * @return <code>true<code> iff the current word starts a new sentence, <code>false</code> otherwise
 	 */
 	public boolean startsSentence();
+
+	/**
+	 * Tells whether to ignore single letters
+	 * from being checked.
+	 * 
+	 * @since 3.3
+	 * @param state <code>true</code> if single letters should be ignored
+	 */
+	public void setIgnoreSingleLetters(boolean state);
 }

@@ -69,4 +69,12 @@ public interface ISpellDictionary {
 	 * Empties the dictionary.
 	 */
 	public void unload();
+
+	/**
+	 * Tells whether to strip non-letters from word boundaries.
+	 * 
+	 * @param state <code>true</code> if non-letters should be stripped
+	 * @since 3.3
+	 */
+	public void setStripNonLetters(boolean state);
 }

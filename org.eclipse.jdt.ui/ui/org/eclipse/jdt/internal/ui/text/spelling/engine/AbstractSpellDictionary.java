@@ -63,6 +63,12 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	private boolean fMustLoad= true;
 
 	/**
+	 * Tells whether to strip non-letters at word boundaries.
+	 * @since 3.3
+	 */
+	boolean fIsStrippingNonLetters= true;
+
+	/**
 	 * Returns all candidates with the same phonetic hash.
 	 *
 	 * @param hash
@@ -204,8 +210,8 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 		try {
 
-			if (fMustLoad)
-				load(getURL());
+			if (!fLoaded && fMustLoad)
+				fLoaded= load(getURL());
 
 		} catch (MalformedURLException exception) {
 			// Do nothing
@@ -337,12 +343,15 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellDictionary#isCorrect(java.lang.String)
 	 */
-	public boolean isCorrect(final String word) {
-
+	public boolean isCorrect(String word) {
+		word= stripNonLetters(word);
 		try {
-
-			if (fMustLoad)
-				load(getURL());
+			
+			// Ignore non-word characters.
+			// ....
+			
+			if (!fLoaded && fMustLoad)
+				fLoaded= load(getURL());
 
 		} catch (MalformedURLException exception) {
 			// Do nothing
@@ -354,6 +363,41 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 			return true;
 
 		return false;
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellDictionary#setStripNonLetters(boolean)
+	 * @since 3.3
+	 */
+	public void setStripNonLetters(boolean state) {
+		fIsStrippingNonLetters= state;
+	}
+	
+	/**
+	 * Strips non-letter characters from the given word.
+	 * <p>
+	 * This will only happen if the corresponding preference is enabled.
+	 * </p>
+	 * 
+	 * @param word the word to strip
+	 * @return the stripped word
+	 * @since 3.3
+	 */
+	protected String stripNonLetters(String word) {
+		if (!fIsStrippingNonLetters)
+			return word;
+		
+		int i= 0;
+		int j= word.length() - 1;
+		while (i <= j && !Character.isLetter(word.charAt(i)))
+			i++;
+		if (i > j)
+			return ""; //$NON-NLS-1$
+		
+		while (j > i && !Character.isLetter(word.charAt(j)))
+			j--;
+		
+		return word.substring(i, j+1);
 	}
 
 	/*
@@ -387,7 +431,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 					while ((word= reader.readLine()) != null)
 						hashWord(word);
 
-					return fLoaded= true;
+					return true;
 				}
 			} catch (IOException exception) {
 				JavaPlugin.log(exception);

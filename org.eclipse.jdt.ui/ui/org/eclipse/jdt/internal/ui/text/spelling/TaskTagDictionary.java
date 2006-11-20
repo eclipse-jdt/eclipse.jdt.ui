@@ -89,4 +89,12 @@ public class TaskTagDictionary extends AbstractSpellDictionary implements IPrope
 		}
 		return false;
 	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary#stripNonLetters(java.lang.String)
+	 * @since 3.3
+	 */
+	protected String stripNonLetters(String word) {
+		return word;
+	}
 }

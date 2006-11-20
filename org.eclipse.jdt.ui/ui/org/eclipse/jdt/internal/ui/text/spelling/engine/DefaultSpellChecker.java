@@ -227,6 +227,14 @@ public class DefaultSpellChecker implements ISpellChecker {
 		final boolean ignoreSentence= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_SENTENCE);
 		final boolean ignoreUpper= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_UPPER);
 		final boolean ignoreURLS= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_URLS);
+		final boolean ignoreNonLetters= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_NON_LETTERS);
+		final boolean ignoreSingleLetters= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_SINGLE_LETTERS);
+		
+		iterator.setIgnoreSingleLetters(ignoreSingleLetters);
+		
+		Iterator iter= fDictionaries.iterator();
+		while (iter.hasNext())
+			((ISpellDictionary)iter.next()).setStripNonLetters(ignoreNonLetters);
 
 		String word= null;
 		boolean starts= false;
