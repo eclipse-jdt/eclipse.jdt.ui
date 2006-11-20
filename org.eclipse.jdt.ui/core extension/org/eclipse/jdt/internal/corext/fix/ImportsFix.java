@@ -35,7 +35,7 @@ public class ImportsFix extends AbstractFix {
 		if (!organizeImports)
 			return null;
 		
-		OrganizeImportsOperation op= new OrganizeImportsOperation((ICompilationUnit)cu.getJavaElement(), cu, settings.importIgnoreLowercase, false, true, null);
+		OrganizeImportsOperation op= new OrganizeImportsOperation((ICompilationUnit)cu.getJavaElement(), cu, settings.importIgnoreLowercase, false, false, null);
 		final TextEdit edit= op.createTextEdit(null);
 		if (edit == null)
 			return null;
