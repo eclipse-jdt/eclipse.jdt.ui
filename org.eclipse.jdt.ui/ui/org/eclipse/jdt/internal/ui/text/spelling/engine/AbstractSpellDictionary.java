@@ -210,8 +210,11 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 		try {
 
-			if (!fLoaded && fMustLoad)
-				fLoaded= load(getURL());
+			if (!fLoaded && fMustLoad) {
+				synchronized (this) {
+					fLoaded= load(getURL());
+				}
+			}
 
 		} catch (MalformedURLException exception) {
 			// Do nothing
@@ -347,11 +350,11 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		word= stripNonLetters(word);
 		try {
 			
-			// Ignore non-word characters.
-			// ....
-			
-			if (!fLoaded && fMustLoad)
-				fLoaded= load(getURL());
+			if (!fLoaded && fMustLoad) {
+				synchronized (this) {
+					fLoaded= load(getURL());
+				}
+			}
 
 		} catch (MalformedURLException exception) {
 			// Do nothing

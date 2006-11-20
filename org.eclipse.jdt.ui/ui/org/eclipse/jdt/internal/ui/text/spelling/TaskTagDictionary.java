@@ -39,7 +39,7 @@ public class TaskTagDictionary extends AbstractSpellDictionary implements IPrope
 	/*
 	 * @see org.eclipse.jdt.ui.text.spelling.engine.AbstractSpellDictionary#load(java.net.URL)
 	 */
-	protected boolean load(final URL url) {
+	protected synchronized boolean load(final URL url) {
 
 		final Plugin plugin= JavaCore.getPlugin();
 		if (plugin != null) {
@@ -62,7 +62,7 @@ public class TaskTagDictionary extends AbstractSpellDictionary implements IPrope
 	/*
 	 * @see org.eclipse.jdt.ui.text.spelling.engine.ISpellDictionary#unload()
 	 */
-	public void unload() {
+	public synchronized void unload() {
 
 		final Plugin plugin= JavaCore.getPlugin();
 		if (plugin != null)

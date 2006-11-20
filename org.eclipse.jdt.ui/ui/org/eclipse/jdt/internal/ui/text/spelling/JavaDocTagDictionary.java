@@ -45,7 +45,7 @@ public class JavaDocTagDictionary extends AbstractSpellDictionary implements IJa
 	/*
 	 * @see org.eclipse.jdt.ui.text.spelling.engine.AbstractSpellDictionary#load(java.net.URL)
 	 */
-	protected boolean load(final URL url) {
+	protected synchronized boolean load(final URL url) {
 
 		unload();
 
