@@ -464,7 +464,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			private int fStateCount= 0;
 
 			private ICompilationUnit fCompilationUnit;
-			private List fGeneratedAnnotations;
+			private List fGeneratedAnnotations= new ArrayList();
 			private IProgressMonitor fProgressMonitor;
 			private boolean fIsActive= false;
 			private boolean fIsHandlingTemporaryProblems;
@@ -548,7 +548,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			 * @see IProblemRequestor#acceptProblem(IProblem)
 			 */
 			public void acceptProblem(IProblem problem) {
-				if (fIsHandlingTemporaryProblems) {
+				if (fIsHandlingTemporaryProblems || problem.getID() == JavaSpellingReconcileStrategy.SPELLING_PROBLEM_ID) {
 					ProblemRequestorState state= (ProblemRequestorState) fProblemRequestorState.get();
 					if (state != null)
 						state.fReportedProblems.add(problem);
@@ -581,7 +581,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 					fProblemRequestorState.set(null);
 				}
 
-				if (stateCount == 0 && fIsHandlingTemporaryProblems)
+				if (stateCount == 0 && fIsHandlingTemporaryProblems || state.fReportedProblems.size() > 0)
 					reportProblems(state.fReportedProblems);
 			}
 
@@ -686,7 +686,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			 * Tells this annotation model to collect temporary problems from now on.
 			 */
 			private void startCollectingProblems() {
-				fGeneratedAnnotations= new ArrayList();
+				fGeneratedAnnotations.clear();
 			}
 
 			/**
@@ -695,7 +695,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			private void stopCollectingProblems() {
 				if (fGeneratedAnnotations != null)
 					removeAnnotations(fGeneratedAnnotations, true, true);
-				fGeneratedAnnotations= null;
+				fGeneratedAnnotations.clear();
 			}
 
 			/*
