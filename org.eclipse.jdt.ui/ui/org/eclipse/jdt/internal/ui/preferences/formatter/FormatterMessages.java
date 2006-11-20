@@ -150,6 +150,7 @@ final class FormatterMessages extends NLS {
 	public static String WhiteSpaceTabPage_before_parenthesized_expressions;
 	public static String WhiteSpaceTabPage_insert_space;
 	public static String WhiteSpaceOptions_return;
+	public static String WhiteSpaceOptions_throw;
 	public static String WhiteSpaceOptions_before;
 	public static String WhiteSpaceOptions_after;
 	public static String WhiteSpaceOptions_operator;
@@ -254,6 +255,7 @@ final class FormatterMessages extends NLS {
 	public static String WhiteSpaceOptions_before_ellipsis;
 	public static String WhiteSpaceOptions_after_ellipsis;
 	public static String WhiteSpaceOptions_return_with_parenthesized_expression;
+	public static String WhiteSpaceOptions_throw_with_parenthesized_expression;
 	public static String LineWrappingTabPage_compact_if_else;
 	public static String LineWrappingTabPage_extends_clause;
 	public static String LineWrappingTabPage_enum_constant_arguments;
