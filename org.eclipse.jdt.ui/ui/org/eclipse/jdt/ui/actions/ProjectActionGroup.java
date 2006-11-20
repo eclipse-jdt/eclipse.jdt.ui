@@ -104,7 +104,7 @@ public class ProjectActionGroup extends ActionGroup {
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		if (fOpenAction.isEnabled())
+		if (fOpenAction.isEnabled() && areOnlyClosedProjectsSelected(fOpenAction.getSelection()))
 			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fOpenAction);
 		if (fCloseAction.isEnabled())
 			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fCloseAction);
@@ -121,6 +121,22 @@ public class ProjectActionGroup extends ActionGroup {
 			Object obj= iter.next();
 			if (obj instanceof IAdaptable) {
 				if (((IAdaptable)obj).getAdapter(IProject.class) == null)
+					return false;
+			}
+		}
+		return true;
+	}
+	
+	private boolean areOnlyClosedProjectsSelected(ISelection selection) {
+		if (selection.isEmpty() || !(selection instanceof IStructuredSelection))
+			return false;
+		
+		Iterator iter= ((IStructuredSelection) selection).iterator();
+		while (iter.hasNext()) {
+			Object obj= iter.next();
+			if (obj instanceof IAdaptable) {
+				IProject project= (IProject) ((IAdaptable)obj).getAdapter(IProject.class);
+				if (project == null || project.isOpen())
 					return false;
 			}
 		}

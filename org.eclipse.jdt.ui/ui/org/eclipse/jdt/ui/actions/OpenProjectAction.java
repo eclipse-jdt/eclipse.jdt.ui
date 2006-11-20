@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -29,6 +30,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbenchSite;
@@ -57,12 +59,8 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
  */
 public class OpenProjectAction extends SelectionDispatchAction implements IResourceChangeListener {
 	
-	private static final int EMPTY_SELECTION= 1;
-	private static final int ELEMENT_SELECTION= 2;
-	
-	private int fMode;
 	private OpenResourceAction fWorkbenchAction;
-	
+
 	/**
 	 * Creates a new <code>OpenProjectAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
@@ -76,24 +74,13 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 		setText(fWorkbenchAction.getText());
 		setToolTipText(fWorkbenchAction.getToolTipText());
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_PROJECT_ACTION);
+		setEnabled(hasCloseProjects());
 	}
 	
 	/*
 	 * @see IResourceChangeListener#resourceChanged(IResourceChangeEvent)
 	 */
 	public void resourceChanged(IResourceChangeEvent event) {
-		fWorkbenchAction.resourceChanged(event);
-		switch (fMode) {
-			case ELEMENT_SELECTION:
-				setEnabled(fWorkbenchAction.isEnabled());
-				break;
-			case EMPTY_SELECTION:
-				internalResourceChanged(event);
-				break;
-		}
-	}
-	
-	private void internalResourceChanged(IResourceChangeEvent event) {
 		IResourceDelta delta = event.getDelta();
 		if (delta != null) {
 			IResourceDelta[] projDeltas = delta.getAffectedChildren(IResourceDelta.CHANGED);
@@ -113,51 +100,52 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.ISelection)
 	 */
 	public void selectionChanged(ISelection selection) {
-		setEnabled(hasCloseProjects());
-		fMode= EMPTY_SELECTION;
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.ISelection)
 	 */
 	public void run(ISelection selection) {
-		internalRun();
+		internalRun(null);
 	}
 	
 	//---- structured selection ---------------------------------------
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
-	 */
-	public void selectionChanged(IStructuredSelection selection) {
-		if (selection.isEmpty()) {
-			setEnabled(hasCloseProjects());
-			fMode= EMPTY_SELECTION;
-			return;
-		}
-		fWorkbenchAction.selectionChanged(selection);
-		setEnabled(fWorkbenchAction.isEnabled());
-		fMode= ELEMENT_SELECTION;
-	}
-
-	
+		
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
 	public void run(IStructuredSelection selection) {
-		if (selection.isEmpty()) {
-			internalRun();
-			return;
+		Object[] array= selection.toArray();
+		ArrayList allClosedProjects= new ArrayList();
+		boolean otherElementsSelected= false;
+		for (int i= 0; i < array.length; i++) {
+			Object curr= array[i];
+			if (curr instanceof IAdaptable) {
+				IProject project= (IProject) ((IAdaptable) curr).getAdapter(IProject.class);
+				if (project != null && !project.isOpen()) {
+					allClosedProjects.add(project);
+				} else {
+					otherElementsSelected= true;
+				}
+			}
 		}
-		fWorkbenchAction.run();
+		if (!otherElementsSelected && !allClosedProjects.isEmpty()) {
+			fWorkbenchAction.selectionChanged(new StructuredSelection(allClosedProjects));
+			fWorkbenchAction.run();
+		} else {
+			internalRun(allClosedProjects);
+		}
 	}
 	
-	private void internalRun() {
+	private void internalRun(List initialSelection) {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider());
 		dialog.setTitle(ActionMessages.OpenProjectAction_dialog_title); 
 		dialog.setMessage(ActionMessages.OpenProjectAction_dialog_message); 
 		dialog.setElements(getClosedProjects());
 		dialog.setMultipleSelection(true);
+		if (initialSelection != null && !initialSelection.isEmpty()) {
+			dialog.setInitialElementSelections(initialSelection);
+		}
 		int result= dialog.open();
 		if (result != Window.OK)
 			return;
