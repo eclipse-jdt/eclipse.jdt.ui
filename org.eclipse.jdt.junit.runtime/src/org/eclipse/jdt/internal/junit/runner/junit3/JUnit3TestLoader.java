@@ -101,6 +101,9 @@ public class JUnit3TestLoader implements ITestLoader {
 			// try to extract a test suite automatically
 			return new TestSuite(testClass);
 		}
+		if (!Modifier.isStatic(suiteMethod.getModifiers())) {
+			return warning(JUnitMessages.getString("RemoteTestRunner.error.suite.notstatic"));//$NON-NLS-1$
+		}
 		try {
 			Test test= (Test) suiteMethod.invoke(null, new Class[0]); // static
 			if (test != null) {
