@@ -118,7 +118,7 @@ public class SpellCheckEngineTestCase extends TestCase {
 	}
 
 	public void testAvailableLocales() {
-		final Set result= SpellCheckEngine.getAvailableLocales();
+		final Set result= SpellCheckEngine.getSupportedLocales();
 		assertTrue(result.size() >= 0);
 	}
 
