@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 public class BlankLinesTabPage extends ModifyDialogTabPage {
 
-	private final static String PREVIEW=
+	private final String PREVIEW=
 	createPreviewHeader(FormatterMessages.BlankLinesTabPage_preview_header) + 
 	"package foo.bar.baz;" + //$NON-NLS-1$
 	"import java.util.List;\n" + //$NON-NLS-1$

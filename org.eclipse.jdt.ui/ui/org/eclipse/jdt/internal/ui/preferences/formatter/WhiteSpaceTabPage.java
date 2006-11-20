@@ -75,7 +75,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 
 	    public SyntaxComponent() {
 	        fIndexedNodeList= new ArrayList();
-			fTree= WhiteSpaceOptions.createAltTree(fWorkingValues);
+			fTree= new WhiteSpaceOptions().createAltTree(fWorkingValues);
 			WhiteSpaceOptions.makeIndexForNodes(fTree, fIndexedNodeList);
 		}
 	    
@@ -201,7 +201,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 	    
 	    public JavaElementComponent() {
 			fIndexedNodeList= new ArrayList();
-			fTree= WhiteSpaceOptions.createTreeByJavaElement(fWorkingValues);
+			fTree= new WhiteSpaceOptions().createTreeByJavaElement(fWorkingValues);
 			WhiteSpaceOptions.makeIndexForNodes(fTree, fIndexedNodeList);
 	    }
 

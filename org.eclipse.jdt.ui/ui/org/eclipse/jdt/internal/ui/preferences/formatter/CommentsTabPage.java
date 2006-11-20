@@ -81,7 +81,7 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 	}
 	
 	
-	private final static String PREVIEW=
+	private final String PREVIEW=
 		createPreviewHeader("An example for comment formatting. This example is meant to illustrate the various possibilities offered by <i>Eclipse</i> in order to format comments.") +	//$NON-NLS-1$
 		"package mypackage;\n" + //$NON-NLS-1$
 		"/**\n" + //$NON-NLS-1$

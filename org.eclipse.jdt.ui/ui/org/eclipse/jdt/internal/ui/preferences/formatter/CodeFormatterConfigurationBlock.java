@@ -43,7 +43,7 @@ public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock {
 	/**
      * Some Java source code used for preview.
      */
-    protected static final String PREVIEW= "/**\n* " + //$NON-NLS-1$
+    protected final String PREVIEW= "/**\n* " + //$NON-NLS-1$
     		FormatterMessages.CodingStyleConfigurationBlock_preview_title + 
     		"\n*/\n\n" + //$NON-NLS-1$
     		"package mypackage; import java.util.LinkedList; public class MyIntStack {" + //$NON-NLS-1$
