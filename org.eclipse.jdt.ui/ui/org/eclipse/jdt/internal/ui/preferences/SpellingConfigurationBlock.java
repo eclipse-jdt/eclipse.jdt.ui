@@ -393,6 +393,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	protected void handleBrowseButtonSelected() {
 
 		final FileDialog dialog= new FileDialog(fDictionaryPath.getShell(), SWT.OPEN);
+		dialog.setFilterPath(fDictionaryPath.getText());
 		dialog.setText(PreferencesMessages.SpellingPreferencePage_filedialog_title); 
 		dialog.setFilterExtensions(new String[] { PreferencesMessages.SpellingPreferencePage_filter_dictionary_extension, PreferencesMessages.SpellingPreferencePage_filter_all_extension }); 
 		dialog.setFilterNames(new String[] { PreferencesMessages.SpellingPreferencePage_filter_dictionary_label, PreferencesMessages.SpellingPreferencePage_filter_all_label }); 
