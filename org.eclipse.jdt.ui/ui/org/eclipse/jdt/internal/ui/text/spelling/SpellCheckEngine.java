@@ -134,7 +134,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 		return fgEngine;
 	}
 
-	/** The registered locale insenitive dictionaries */
+	/** The registered locale insensitive dictionaries */
 	private final Set fGlobalDictionaries= new HashSet();
 
 	/** The current locale */
