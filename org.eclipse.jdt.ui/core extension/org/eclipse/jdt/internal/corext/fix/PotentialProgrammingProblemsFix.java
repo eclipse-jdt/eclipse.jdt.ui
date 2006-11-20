@@ -229,15 +229,17 @@ public class PotentialProgrammingProblemsFix extends LinkedFix {
 				if (child instanceof IType) {
 					IType type= (IType)child;
 					
-					IField field= type.getField(NAME_FIELD);
-					if (!field.exists()) {
-						ITypeHierarchy hierarchy= type.newSupertypeHierarchy(new NullProgressMonitor());
-						IType[] interfaces= hierarchy.getAllSuperInterfaces(type);
-						for (int j= 0; j < interfaces.length; j++) {
-							if (interfaces[j].equals(serializable)) {
-								result.add(type);
-								break;
-							}
+					if (type.isClass()) {
+    					IField field= type.getField(NAME_FIELD);
+    					if (!field.exists()) {
+    						ITypeHierarchy hierarchy= type.newSupertypeHierarchy(new NullProgressMonitor());
+    						IType[] interfaces= hierarchy.getAllSuperInterfaces(type);
+    						for (int j= 0; j < interfaces.length; j++) {
+    							if (interfaces[j].equals(serializable)) {
+    								result.add(type);
+    								break;
+    							}
+    						}
 						}
 					}
 
