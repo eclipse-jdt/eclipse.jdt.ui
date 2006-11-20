@@ -49,11 +49,12 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	private static ISpellCheckEngine fgEngine= null;
 
 	/**
-	 * Returns the available locales for this spell check engine.
+	 * Returns the locales for which this
+	 * spell check engine has dictionaries.
 	 *
 	 * @return The available locales for this engine
 	 */
-	public static Set getAvailableLocales() {
+	public static Set getSupportedLocales() {
 
 		URL url= null;
 		Locale locale= null;
@@ -165,7 +166,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 			Locale locale= null;
 			final URL location= getDictionaryLocation();
 
-			for (final Iterator iterator= getAvailableLocales().iterator(); iterator.hasNext();) {
+			for (final Iterator iterator= getSupportedLocales().iterator(); iterator.hasNext();) {
 
 				locale= (Locale)iterator.next();
 				fLocaleDictionaries.put(locale, new SpellReconcileDictionary(locale, location));

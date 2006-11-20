@@ -172,7 +172,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	protected static IStatus validateLocale(final String locale) {
 
 		final StatusInfo status= new StatusInfo(IStatus.ERROR, PreferencesMessages.SpellingPreferencePage_locale_error); 
-		final Set locales= SpellCheckEngine.getAvailableLocales();
+		final Set locales= SpellCheckEngine.getSupportedLocales();
 
 		Locale current= null;
 		for (final Iterator iterator= locales.iterator(); iterator.hasNext();) {
@@ -331,7 +331,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		allControls.add(engine);
 
 		label= PreferencesMessages.SpellingPreferencePage_dictionary_label; 
-		final Set locales= SpellCheckEngine.getAvailableLocales();
+		final Set locales= SpellCheckEngine.getSupportedLocales();
 
 		Combo combo= addComboBox(engine, label, PREF_SPELLING_LOCALE, getDictionaryCodes(locales), getDictionaryLabels(locales), 0);
 		combo.setEnabled(locales.size() > 1);
