@@ -24,7 +24,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * Partial implementation of a spell dictionary.
@@ -421,23 +429,27 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	protected synchronized boolean load(final URL url) {
 
 		if (url != null) {
-
 			InputStream stream= null;
+			int line= 0;
 			try {
-
 				stream= url.openStream();
 				if (stream != null) {
-
 					String word= null;
-
 					final BufferedReader reader= new BufferedReader(new InputStreamReader(stream));
-					while ((word= reader.readLine()) != null)
+					line++;
+					while ((word= reader.readLine()) != null) {
+						line++;
 						hashWord(word);
-
+					}
 					return true;
 				}
 			} catch (IOException exception) {
-				JavaPlugin.log(exception);
+				if (line > 0) {
+					String message= Messages.format(JavaUIMessages.AbstractSpellingDictionary_encodingError, new Object[] { new Integer(line), url.toString() });
+					IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, exception);
+					JavaPlugin.log(status);
+				} else
+					JavaPlugin.log(exception);
 			} finally {
 				fMustLoad= false;
 				try {
