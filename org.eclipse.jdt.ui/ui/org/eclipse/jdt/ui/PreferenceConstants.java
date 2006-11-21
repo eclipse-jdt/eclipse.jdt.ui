@@ -2531,28 +2531,6 @@ public class PreferenceConstants {
 	public final static String SPELLING_IGNORE_UPPER= ISpellCheckPreferenceKeys.SPELLING_IGNORE_UPPER;
 
 	/**
-	 * A named preference that controls whether non-letters at word boundaries
-	 * should be ignored during spell-checking.
-	 * <p>
-	 * Value is of type <code>Boolean</code>.
-	 * </p>
-	 * 
-	 * @since 3.3
-	 */
-	public final static String SPELLING_IGNORE_NON_LETTERS= ISpellCheckPreferenceKeys.SPELLING_IGNORE_NON_LETTERS;
-
-	/**
-	 * A named preference that controls whether single letters
-	 * should be ignored during spell-checking.
-	 * <p>
-	 * Value is of type <code>Boolean</code>.
-	 * </p>
-	 * 
-	 * @since 3.3
-	 */
-
-	public final static String SPELLING_IGNORE_SINGLE_LETTERS= ISpellCheckPreferenceKeys.SPELLING_IGNORE_SINGLE_LETTERS;
-	/**
 	 * A named preference that controls whether URLs should be ignored during
 	 * spell-checking.
 	 * <p>
@@ -2562,6 +2540,27 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public final static String SPELLING_IGNORE_URLS= ISpellCheckPreferenceKeys.SPELLING_IGNORE_URLS;
+	/**
+	 * A named preference that controls whether single letters
+	 * should be ignored during spell-checking.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.3
+	 */
+	public final static String SPELLING_IGNORE_SINGLE_LETTERS= ISpellCheckPreferenceKeys.SPELLING_IGNORE_SINGLE_LETTERS;
+	
+	/**
+	 * A named preference that controls whether non-letters at word boundaries
+	 * should be ignored during spell-checking.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.3
+	 */
+	public final static String SPELLING_IGNORE_NON_LETTERS= ISpellCheckPreferenceKeys.SPELLING_IGNORE_NON_LETTERS;
 
 	/**
 	 * A named preference that controls the locale used for spell-checking.
@@ -3679,6 +3678,8 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_SENTENCE, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_UPPER, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_URLS, true);
+		store.setDefault(PreferenceConstants.SPELLING_IGNORE_SINGLE_LETTERS, true);
+		store.setDefault(PreferenceConstants.SPELLING_IGNORE_NON_LETTERS, true);
 		store.setDefault(PreferenceConstants.SPELLING_USER_DICTIONARY, ""); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD, 20);
 		store.setDefault(PreferenceConstants.SPELLING_ENABLE_CONTENTASSIST, false);
