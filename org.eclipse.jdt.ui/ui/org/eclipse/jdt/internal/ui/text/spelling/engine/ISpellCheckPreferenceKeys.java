@@ -12,7 +12,7 @@
 package org.eclipse.jdt.internal.ui.text.spelling.engine;
 
 /**
- * Preference keys for the comment spell-checker.
+ * Preference keys for the comment spell checker.
  *
  * @since 3.0
  */
@@ -20,7 +20,7 @@ public interface ISpellCheckPreferenceKeys {
 
 	/**
 	 * A named preference that controls whether words containing digits should
-	 * be skipped during spell-checking.
+	 * be skipped during spell checking.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -29,7 +29,7 @@ public interface ISpellCheckPreferenceKeys {
 
 	/**
 	 * A named preference that controls whether mixed case words should be
-	 * skipped during spell-checking.
+	 * skipped during spell checking.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -38,7 +38,7 @@ public interface ISpellCheckPreferenceKeys {
 
 	/**
 	 * A named preference that controls whether sentence capitalization should
-	 * be ignored during spell-checking.
+	 * be ignored during spell checking.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -47,7 +47,7 @@ public interface ISpellCheckPreferenceKeys {
 
 	/**
 	 * A named preference that controls whether upper case words should be
-	 * skipped during spell-checking.
+	 * skipped during spell checking.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -55,8 +55,8 @@ public interface ISpellCheckPreferenceKeys {
 	public final static String SPELLING_IGNORE_UPPER= "spelling_ignore_upper"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls whether urls should be ignored during
-	 * spell-checking.
+	 * A named preference that controls whether URLs should be ignored during
+	 * spell checking.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -65,7 +65,7 @@ public interface ISpellCheckPreferenceKeys {
 
 	/**
 	 * A named preference that controls whether non-letters at word boundaries
-	 * should be ignored during spell-checking.
+	 * should be ignored during spell checking.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -76,7 +76,7 @@ public interface ISpellCheckPreferenceKeys {
 	
 	/**
 	 * A named preference that controls whether single letters
-	 * should be ignored during spell-checking.
+	 * should be ignored during spell checking.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -86,7 +86,7 @@ public interface ISpellCheckPreferenceKeys {
 	public static final String SPELLING_IGNORE_SINGLE_LETTERS= "spelling_ignore_single_letters"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls the locale used for spell-checking.
+	 * A named preference that controls the locale used for spell checking.
 	 * <p>
 	 * Value is of type <code>String</code>.
 	 * </p>
@@ -95,7 +95,7 @@ public interface ISpellCheckPreferenceKeys {
 
 	/**
 	 * A named preference that controls the number of proposals offered during
-	 * spell-checking.
+	 * spell checking.
 	 * <p>
 	 * Value is of type <code>Integer</code>.
 	 * </p>

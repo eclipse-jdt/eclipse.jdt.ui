@@ -2465,7 +2465,7 @@ public class PreferenceConstants {
 
 	/**
 	 * A named preference that controls whether Java comments should be
-	 * spell-checked.
+	 * spell checked.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -2478,7 +2478,7 @@ public class PreferenceConstants {
 
 	/**
 	 * A named preference that controls whether words containing digits should
-	 * be skipped during spell-checking.
+	 * be skipped during spell checking.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -2489,7 +2489,7 @@ public class PreferenceConstants {
 
 	/**
 	 * A named preference that controls whether mixed case words should be
-	 * skipped during spell-checking.
+	 * skipped during spell checking.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -2500,7 +2500,7 @@ public class PreferenceConstants {
 
 	/**
 	 * A named preference that controls whether sentence capitalization should
-	 * be ignored during spell-checking.
+	 * be ignored during spell checking.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -2511,7 +2511,7 @@ public class PreferenceConstants {
 
 	/**
 	 * A named preference that controls whether upper case words should be
-	 * skipped during spell-checking.
+	 * skipped during spell checking.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -2522,7 +2522,7 @@ public class PreferenceConstants {
 
 	/**
 	 * A named preference that controls whether URLs should be ignored during
-	 * spell-checking.
+	 * spell checking.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -2533,7 +2533,7 @@ public class PreferenceConstants {
 	
 	/**
 	 * A named preference that controls whether single letters
-	 * should be ignored during spell-checking.
+	 * should be ignored during spell checking.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -2544,7 +2544,7 @@ public class PreferenceConstants {
 	
 	/**
 	 * A named preference that controls whether non-letters at word boundaries
-	 * should be ignored during spell-checking.
+	 * should be ignored during spell checking.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -2554,7 +2554,7 @@ public class PreferenceConstants {
 	public final static String SPELLING_IGNORE_NON_LETTERS= ISpellCheckPreferenceKeys.SPELLING_IGNORE_NON_LETTERS;
 
 	/**
-	 * A named preference that controls the locale used for spell-checking.
+	 * A named preference that controls the locale used for spell checking.
 	 * <p>
 	 * Value is of type <code>String</code>.
 	 * </p>
@@ -2565,7 +2565,7 @@ public class PreferenceConstants {
 
 	/**
 	 * A named preference that controls the number of proposals offered during
-	 * spell-checking.
+	 * spell checking.
 	 * <p>
 	 * Value is of type <code>Integer</code>.
 	 * </p>

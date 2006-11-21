@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.ui.text.spelling.engine;
 import java.util.Set;
 
 /**
- * Interface for spell-checkers.
+ * Interface for spell checkers.
  *
  * @since 3.0
  */
@@ -60,11 +60,11 @@ public interface ISpellChecker {
 	public void checkWord(String word);
 
 	/**
-	 * Checks the spelling with the spell-check iterator. Implementations must
+	 * Checks the spelling with the spell check iterator. Implementations must
 	 * be thread safe as this may be called inside a reconciler thread.
 	 *
 	 * @param iterator
-	 *                   The iterator to use for spell-checking
+	 *                   The iterator to use for spell checking
 	 */
 	public void execute(ISpellCheckIterator iterator);
 

@@ -86,7 +86,7 @@ public abstract class SpellingEngine implements ISpellingEngine {
 	}
 
 	/**
-	 * Spell-checks the given document regions with the given arguments.
+	 * Spell checks the given document regions with the given arguments.
 	 *
 	 * @param document the document
 	 * @param regions the regions

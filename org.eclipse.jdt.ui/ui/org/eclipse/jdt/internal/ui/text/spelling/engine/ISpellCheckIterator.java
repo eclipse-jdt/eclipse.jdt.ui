@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.ui.text.spelling.engine;
 import java.util.Iterator;
 
 /**
- * Interface for iterators used for spell-checking.
+ * Interface for iterators used for spell checking.
  *
  * @since 3.0
  */

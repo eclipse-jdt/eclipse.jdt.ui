@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 /**
- * Options configuration block for spell-check related settings.
+ * Options configuration block for spell check related settings.
  * 
  * @since 3.0
  */

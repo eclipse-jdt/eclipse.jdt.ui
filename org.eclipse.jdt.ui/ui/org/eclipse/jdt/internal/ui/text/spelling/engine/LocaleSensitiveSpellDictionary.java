@@ -18,7 +18,7 @@ import java.util.Locale;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
- * Platform wide read-only locale sensitive dictionary for spell-checking.
+ * Platform wide read-only locale sensitive dictionary for spell checking.
  *
  * @since 3.0
  */

@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.ui.text.spelling.engine;
 import java.util.Set;
 
 /**
- * Event fired by spell-checkers.
+ * Event fired by spell checkers.
  *
  * @since 3.0
  */

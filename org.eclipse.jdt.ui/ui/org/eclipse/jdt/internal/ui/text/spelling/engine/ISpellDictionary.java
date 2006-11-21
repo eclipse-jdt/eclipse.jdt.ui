@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.ui.text.spelling.engine;
 import java.util.Set;
 
 /**
- * Interface of dictionaries to use for spell-checking.
+ * Interface of dictionaries to use for spell checking.
  *
  * @since 3.0
  */
@@ -50,18 +50,15 @@ public interface ISpellDictionary {
 	/**
 	 * Is the specified word correctly spelled?
 	 *
-	 * @param word
-	 *                   The word to spell-check
-	 * @return <code>true</code> iff this word is correctly spelled, <code>false</code>
-	 *               otherwise.
+	 * @param word the word to spell check
+	 * @return <code>true</code> iff this word is correctly spelled, <code>false</code> otherwise
 	 */
 	public boolean isCorrect(String word);
 
 	/**
 	 * Is the dictionary loaded?
 	 *
-	 * @return <code>true</code> iff it is loaded, <code>false</code>
-	 *               otherwise
+	 * @return <code>true</code> iff it is loaded, <code>false</code> otherwise
 	 */
 	public boolean isLoaded();
 

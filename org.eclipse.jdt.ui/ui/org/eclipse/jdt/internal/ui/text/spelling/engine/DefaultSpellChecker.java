@@ -118,7 +118,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 	}
 
 	/**
-	 * The dictionaries to use for spell-checking. Synchronized to avoid
+	 * The dictionaries to use for spell checking. Synchronized to avoid
 	 * concurrent modifications.
 	 */
 	private final Set fDictionaries= Collections.synchronizedSet(new HashSet());
@@ -141,10 +141,10 @@ public class DefaultSpellChecker implements ISpellChecker {
 	private final IPreferenceStore fPreferences;
 
 	/**
-	 * Creates a new default spell-checker.
+	 * Creates a new default spell checker.
 	 *
 	 * @param store
-	 *                   The preference store for this spell-checker
+	 *                   The preference store for this spell checker
 	 */
 	public DefaultSpellChecker(final IPreferenceStore store) {
 		fPreferences= store;

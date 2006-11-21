@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.DefaultSpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckIterator;
 
 /**
- * Iterator to spell-check javadoc comment regions.
+ * Iterator to spell check javadoc comment regions.
  *
  * @since 3.0
  */
@@ -73,8 +73,8 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	 * Creates a new spell check iterator.
 	 *
 	 * @param document the document containing the specified partition
-	 * @param region the region to spell-check
-	 * @param locale the locale to use for spell-checking
+	 * @param region the region to spell check
+	 * @param locale the locale to use for spell checking
 	 */
 	public SpellCheckIterator(IDocument document, IRegion region, Locale locale) {
 		this(document, region, locale, BreakIterator.getWordInstance(locale));
@@ -84,8 +84,8 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	 * Creates a new spell check iterator.
 	 *
 	 * @param document the document containing the specified partition
-	 * @param region the region to spell-check
-	 * @param locale the locale to use for spell-checking
+	 * @param region the region to spell check
+	 * @param locale the locale to use for spell checking
 	 * @param breakIterator the break-iterator
 	 */
 	public SpellCheckIterator(IDocument document, IRegion region, Locale locale, BreakIterator breakIterator) {
@@ -297,10 +297,10 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	}
 
 	/**
-	 * Determines the next token to be spell-checked.
+	 * Determines the next token to be spell checked.
 	 *
-	 * @return the next token to be spell-checked, or <code>null</code>
-	 *         iff the next token is not a candidate for spell-checking.
+	 * @return the next token to be spell checked, or <code>null</code>
+	 *         iff the next token is not a candidate for spell checking.
 	 */
 	protected String nextToken() {
 

@@ -16,20 +16,20 @@ import java.util.Locale;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 /**
- * Interface for spell-check engines.
+ * Interface for spell check engines.
  *
  * @since 3.0
  */
 public interface ISpellCheckEngine {
 
 	/**
-	 * Creates a configured instance of a spell-checker that uses the
+	 * Creates a configured instance of a spell checker that uses the
 	 * appropriate dictionaries.
 	 *
 	 * @param locale
 	 *                   The locale to get the spell checker for
 	 * @param store
-	 *                   The preference store for the spell-checker
+	 *                   The preference store for the spell checker
 	 * @return A configured instance of a spell checker, or <code>null</code>
 	 *               iff no dictionary could be found for that locale
 	 */
