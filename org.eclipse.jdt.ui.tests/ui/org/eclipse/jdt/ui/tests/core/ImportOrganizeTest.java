@@ -2765,9 +2765,9 @@ public class ImportOrganizeTest extends CoreTests {
 	}
 
 	
-	private OrganizeImportsOperation createOperation(ICompilationUnit cu, String[] order, int threshold, boolean ignoreLowerCaseNames, boolean save, boolean doResolve, IChooseImportQuery chooseImportQuery) throws CoreException, BackingStoreException {
+	private OrganizeImportsOperation createOperation(ICompilationUnit cu, String[] order, int threshold, boolean ignoreLowerCaseNames, boolean save, boolean allowSyntaxErrors, IChooseImportQuery chooseImportQuery) throws CoreException, BackingStoreException {
 		setOrganizeImportSettings(order, threshold, threshold, cu.getJavaProject());
-		return new OrganizeImportsOperation(cu, null, ignoreLowerCaseNames, save, doResolve, chooseImportQuery);
+		return new OrganizeImportsOperation(cu, null, ignoreLowerCaseNames, save, allowSyntaxErrors, chooseImportQuery);
 	}
 	
 	private  void setOrganizeImportSettings(String[] order, int threshold, int staticThreshold, IJavaProject project) throws BackingStoreException {
