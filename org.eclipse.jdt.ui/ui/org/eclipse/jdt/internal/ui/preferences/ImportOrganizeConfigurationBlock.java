@@ -67,7 +67,6 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	private static final Key PREF_ONDEMANDTHRESHOLD= getJDTUIKey(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD);
 	private static final Key PREF_IGNORELOWERCASE= getJDTUIKey(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE);
 	private static final Key PREF_STATICONDEMANDTHRESHOLD= getJDTUIKey(PreferenceConstants.ORGIMPORTS_STATIC_ONDEMANDTHRESHOLD);
-	private static final Key PREF_EMPTYLINEBETWEENGROUPS= getJDTUIKey(PreferenceConstants.ORGIMPORTS_EMPTY_LINES_BETWEEN_GROUPS);
 	
 	private static final String DIALOGSETTING_LASTLOADPATH= JavaUI.ID_PLUGIN + ".importorder.loadpath"; //$NON-NLS-1$
 	private static final String DIALOGSETTING_LASTSAVEPATH= JavaUI.ID_PLUGIN + ".importorder.savepath"; //$NON-NLS-1$
@@ -165,7 +164,6 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	private ListDialogField fOrderListField;
 	private StringDialogField fThresholdField;
 	private StringDialogField fStaticThresholdField;
-	private StringDialogField fEmptyLinesBetweenGroups;
 	private SelectionButtonDialogField fIgnoreLowerCaseTypesField;
 	private SelectionButtonDialogField fExportButton;
 	private SelectionButtonDialogField fImportButton;
@@ -212,10 +210,6 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		fStaticThresholdField.setDialogFieldListener(adapter);
 		fStaticThresholdField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_staticthreshold_label); 
 
-		fEmptyLinesBetweenGroups= new StringDialogField();
-		fEmptyLinesBetweenGroups.setDialogFieldListener(adapter);
-		fEmptyLinesBetweenGroups.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_emptylines_between_groups_label);
-		
 		fIgnoreLowerCaseTypesField= new SelectionButtonDialogField(SWT.CHECK);
 		fIgnoreLowerCaseTypesField.setDialogFieldListener(adapter);
 		fIgnoreLowerCaseTypesField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_ignoreLowerCase_label); 
@@ -258,8 +252,6 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		fThresholdField.doFillIntoGrid(composite, 2);
 		((GridData) fThresholdField.getTextControl(null).getLayoutData()).grabExcessHorizontalSpace= false;
 		fStaticThresholdField.doFillIntoGrid(composite, 2);
-		
-		fEmptyLinesBetweenGroups.doFillIntoGrid(composite, 2);
 		fIgnoreLowerCaseTypesField.doFillIntoGrid(composite, 2);
 		
 		Dialog.applyDialogFont(composite);
@@ -280,21 +272,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		updateStatus(status);
 		return status.isOK();
 	}
-	
-	private boolean doEmptyLinesChange(String emptyLines) {
-		StatusInfo status= new StatusInfo();
-		try {
-			int lines= Integer.parseInt(emptyLines);
-			if (lines < 0) {
-				status.setError(PreferencesMessages.ImportOrganizeConfigurationBlock_error_invalidnumberofemptylines); 
-			}
-		} catch (NumberFormatException e) {
-			status.setError(PreferencesMessages.ImportOrganizeConfigurationBlock_error_invalidnumberofemptylines); 
-		}
-		updateStatus(status);
-		return status.isOK();
-	}
-	
+		
 	private void doButtonPressed(int index) {
 		if (index == IDX_ADD || index == IDX_ADD_STATIC) { // add new
 			List existing= fOrderListField.getElements();
@@ -443,7 +421,6 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		int threshold= getImportNumberThreshold(PREF_ONDEMANDTHRESHOLD);
 		int staticThreshold= getImportNumberThreshold(PREF_STATICONDEMANDTHRESHOLD);
 		boolean ignoreLowerCase= Boolean.valueOf(getValue(PREF_IGNORELOWERCASE)).booleanValue();
-		int emptyLines= getEmptyLines();
 		
 		fOrderListField.removeAllElements();
 		for (int i= 0; i < importOrder.length; i++) {
@@ -452,7 +429,6 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		fThresholdField.setText(String.valueOf(threshold));
 		fStaticThresholdField.setText(String.valueOf(staticThreshold));
 		fIgnoreLowerCaseTypesField.setSelection(ignoreLowerCase);
-		fEmptyLinesBetweenGroups.setText(String.valueOf(emptyLines));
 	}	
 	
 	
@@ -470,10 +446,6 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	  		}
 		} else if (field == fIgnoreLowerCaseTypesField) {
 	  		setValue(PREF_IGNORELOWERCASE, fIgnoreLowerCaseTypesField.isSelected());
-		} else if (field == fEmptyLinesBetweenGroups) {
-			if (doEmptyLinesChange(fEmptyLinesBetweenGroups.getText())) {
-		  		setValue(PREF_EMPTYLINEBETWEENGROUPS, fEmptyLinesBetweenGroups.getText());
-			}
 		} else if (field == fImportButton) {
 			List order= loadImportOrder();
 			if (order != null) {
@@ -537,20 +509,6 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 			return Integer.MAX_VALUE;
 		}
 	}
-	
-	private int getEmptyLines() {
-		String emptyLines= getValue(PREF_EMPTYLINEBETWEENGROUPS);
-		try {
-			int num= Integer.parseInt(emptyLines);
-			if (num < 0) {
-				num= 1;
-			}
-			return num;
-		} catch (NumberFormatException e) {
-			return 1;
-		}
-	}
-
 
 }
 

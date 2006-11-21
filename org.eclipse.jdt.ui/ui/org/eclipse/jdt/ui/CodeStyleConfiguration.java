@@ -87,15 +87,6 @@ public class CodeStyleConfiguration {
 		} catch (NumberFormatException e) {
 			// ignore
 		}
-		String emptyLines= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_EMPTY_LINES_BETWEEN_GROUPS, project);
-		try {
-			int num= Integer.parseInt(emptyLines);
-			if (num < 0)
-				num= 1;
-			rewrite.setEmptyLinesBetweenGroups(num);
-		} catch (NumberFormatException e) {
-			// ignore
-		}
 		return rewrite;
 	}
 

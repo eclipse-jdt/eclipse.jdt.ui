@@ -367,16 +367,6 @@ public class PreferenceConstants {
 	public static final String ORGIMPORTS_IGNORELOWERCASE= "org.eclipse.jdt.ui.ignorelowercasenames"; //$NON-NLS-1$
 	
 	/**
-	 * A named preferences that controls if import groups are separated by an empty line.
-	 * <p>
-	 * Value is of type <code>Integer</code>. <code>0</code> stands for no empty lines between groups, <code>1</code> for an
-	 * an empty line between groups. 
-	 * </p>
-	 * @since 3.3
-	 */
-	public static final String ORGIMPORTS_EMPTY_LINES_BETWEEN_GROUPS= "org.eclipse.jdt.ui.organizeimports.linesbetweengroups"; //$NON-NLS-1$
-
-	/**
 	 * A named preference that specifies whether children of a compilation unit are shown in the package explorer.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -3488,7 +3478,6 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.ORGIMPORTS_IMPORTORDER, "java;javax;org;com"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, 99);
 		store.setDefault(PreferenceConstants.ORGIMPORTS_STATIC_ONDEMANDTHRESHOLD, 99);
-		store.setDefault(PreferenceConstants.ORGIMPORTS_EMPTY_LINES_BETWEEN_GROUPS, 1);
 		store.setDefault(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE, true);
 
 		// TypeFilterPreferencePage
