@@ -17,6 +17,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.MalformedInputException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -435,11 +439,33 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 				stream= url.openStream();
 				if (stream != null) {
 					String word= null;
-					final BufferedReader reader= new BufferedReader(new InputStreamReader(stream));
-					line++;
-					while ((word= reader.readLine()) != null) {
-						line++;
-						hashWord(word);
+					
+					// Setup a reader with a decoder in order to read over malformed input if needed.
+					CharsetDecoder decoder= Charset.forName(System.getProperty("file.encoding")).newDecoder(); //$NON-NLS-1$
+					decoder.onMalformedInput(CodingErrorAction.REPORT);
+					decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+					final BufferedReader reader= new BufferedReader(new InputStreamReader(stream, decoder));
+					
+					boolean doRead= true;
+					while (doRead) {
+						try {
+							word= reader.readLine();
+						} catch (MalformedInputException ex) {
+							// Tell the decoder to replace malformed input in order to read the line.
+							decoder.onMalformedInput(CodingErrorAction.REPLACE);
+							word= reader.readLine();
+							decoder.onMalformedInput(CodingErrorAction.REPORT);
+							
+							String message= Messages.format(JavaUIMessages.AbstractSpellingDictionary_encodingError, new String[] { word, decoder.replacement(), url.toString() });
+							IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, ex);
+							JavaPlugin.log(status);
+							
+							doRead= word != null;
+							continue;
+						}
+						doRead= word != null;
+						if (doRead)
+							hashWord(word);
 					}
 					return true;
 				}
