@@ -52,7 +52,7 @@ public class JavaSpellingEngine extends SpellingEngine {
 							return;
 
 						ITypedRegion partition= partitions[index];
-						if (!partition.getType().equals(IDocument.DEFAULT_CONTENT_TYPE))
+						if (!partition.getType().equals(IDocument.DEFAULT_CONTENT_TYPE) && !partition.getType().equals(IJavaPartitions.JAVA_CHARACTER))
 							checker.execute(new SpellCheckIterator(document, partition, locale));
 					}
 				}
