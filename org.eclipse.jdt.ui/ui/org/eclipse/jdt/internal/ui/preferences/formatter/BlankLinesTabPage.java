@@ -24,15 +24,17 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
 	createPreviewHeader(FormatterMessages.BlankLinesTabPage_preview_header) + 
 	"package foo.bar.baz;" + //$NON-NLS-1$
 	"import java.util.List;\n" + //$NON-NLS-1$
-	"// Between here...\n" + //$NON-NLS-1$
-	"\n\n\n\n\n\n\n\n\n\n" + //$NON-NLS-1$
-	"// ...and here are 10 blank lines\n" + //$NON-NLS-1$
-	"import java.util.Vector;" + //$NON-NLS-1$
+	"import java.util.Vector;\n" + //$NON-NLS-1$
+	"\n" + //$NON-NLS-1$
+	"import java.net.Socket;\n" + //$NON-NLS-1$
 	"public class Another {}" + //$NON-NLS-1$
 	"public class Example {" + //$NON-NLS-1$
 	"public static class Pair {" + //$NON-NLS-1$
 	"public String first;" + //$NON-NLS-1$
-	"public String second;" + //$NON-NLS-1$
+	"public String second;\n" + //$NON-NLS-1$
+	"// Between here...\n" + //$NON-NLS-1$
+	"\n\n\n\n\n\n\n\n\n\n" + //$NON-NLS-1$
+	"// ...and here are 10 blank lines\n" + //$NON-NLS-1$
 	"};" + //$NON-NLS-1$
 	"private LinkedList fList;" + //$NON-NLS-1$
 	"public int counter;" + //$NON-NLS-1$
@@ -74,9 +76,9 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
 		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_compilation_unit_option_before_package, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_PACKAGE); 
 		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_compilation_unit_option_after_package, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_PACKAGE); 
 		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_compilation_unit_option_before_import, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_IMPORTS); 
+		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_compilation_unit_option_between_import_groups, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BETWEEN_IMPORT_GROUPS); 
 		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_compilation_unit_option_after_import, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_IMPORTS); 
 		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_compilation_unit_option_between_type_declarations, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BETWEEN_TYPE_DECLARATIONS); 
-		
 		
 		group= createGroup(numColumns, composite, FormatterMessages.BlankLinesTabPage_class_group_title); 
 		createBlankLineTextField(group, numColumns, FormatterMessages.BlankLinesTabPage_class_option_before_first_decl, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIRST_CLASS_BODY_DECLARATION); 

@@ -310,6 +310,7 @@ final class FormatterMessages extends NLS {
 	public static String BlankLinesTabPage_compilation_unit_option_after_package;
 	public static String BlankLinesTabPage_compilation_unit_option_before_import;
 	public static String BlankLinesTabPage_compilation_unit_option_after_import;
+	public static String BlankLinesTabPage_compilation_unit_option_between_import_groups;
 	public static String BlankLinesTabPage_compilation_unit_option_between_type_declarations;
 	public static String BlankLinesTabPage_class_group_title;
 	public static String BlankLinesTabPage_class_option_before_first_decl;
