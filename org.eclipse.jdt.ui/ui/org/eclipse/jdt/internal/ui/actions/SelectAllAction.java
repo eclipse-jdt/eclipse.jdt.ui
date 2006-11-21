@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -60,9 +61,12 @@ public class SelectAllAction extends Action {
 	private void collectExpandedAndVisible(TreeItem[] items, List result) {
 		for (int i= 0; i < items.length; i++) {
 			TreeItem item= items[i];
-			result.add(item);
-			if (item.getExpanded()) {
-				collectExpandedAndVisible(item.getItems(), result);
+			Object data= item.getData();
+			if (data != null) {
+				result.add(data);
+				if (item.getExpanded()) {
+					collectExpandedAndVisible(item.getItems(), result);
+				}
 			}
 		}
 	}
@@ -75,7 +79,7 @@ public class SelectAllAction extends Action {
 			ArrayList allVisible= new ArrayList();
 			Tree tree= ((TreeViewer) fViewer).getTree();
 			collectExpandedAndVisible(tree.getItems(), allVisible);
-			tree.setSelection((TreeItem[]) allVisible.toArray(new TreeItem[allVisible.size()]));
+			fViewer.setSelection(new StructuredSelection(allVisible));
 		} else if (fViewer instanceof TableViewer) {
 			((TableViewer) fViewer).getTable().selectAll();
 			// force viewer selection change
