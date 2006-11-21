@@ -2540,6 +2540,7 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public final static String SPELLING_IGNORE_URLS= ISpellCheckPreferenceKeys.SPELLING_IGNORE_URLS;
+	
 	/**
 	 * A named preference that controls whether single letters
 	 * should be ignored during spell-checking.
