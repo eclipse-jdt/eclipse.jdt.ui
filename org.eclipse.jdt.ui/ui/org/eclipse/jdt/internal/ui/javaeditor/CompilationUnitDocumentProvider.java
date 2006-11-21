@@ -581,7 +581,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 					fProblemRequestorState.set(null);
 				}
 
-				if (stateCount == 0 && fIsHandlingTemporaryProblems || state.fReportedProblems.size() > 0)
+				if (stateCount == 0)
 					reportProblems(state.fReportedProblems);
 			}
 
