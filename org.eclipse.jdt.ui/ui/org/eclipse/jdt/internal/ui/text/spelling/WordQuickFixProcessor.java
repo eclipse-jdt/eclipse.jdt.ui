@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.IJavaDocTagConstants;
  *
  * @since 3.0
  */
-public class WordQuickFixProcessor implements IQuickFixProcessor, IHtmlTagConstants, IJavaDocTagConstants {
+public class WordQuickFixProcessor implements IQuickFixProcessor {
 
 	/**
 	 * Creates a new word quick fix processor.
@@ -79,7 +79,7 @@ public class WordQuickFixProcessor implements IQuickFixProcessor, IHtmlTagConsta
 
 						sentence= Boolean.valueOf(arguments[3]).booleanValue();
 						match= Boolean.valueOf(arguments[4]).booleanValue();
-						fixed= arguments[0].charAt(0) == HTML_TAG_PREFIX || arguments[0].charAt(0) == JAVADOC_TAG_PREFIX;
+						fixed= arguments[0].charAt(0) == IHtmlTagConstants.HTML_TAG_PREFIX || arguments[0].charAt(0) == IJavaDocTagConstants.JAVADOC_TAG_PREFIX;
 
 						if ((sentence && match) && !fixed)
 							result= new IJavaCompletionProposal[] { new ChangeCaseProposal(arguments, location.getOffset(), location.getLength(), context, engine.getLocale())};

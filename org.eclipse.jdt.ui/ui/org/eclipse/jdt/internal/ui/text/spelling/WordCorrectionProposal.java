@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
  *
  * @since 3.0
  */
-public class WordCorrectionProposal implements IJavaCompletionProposal, IHtmlTagConstants {
+public class WordCorrectionProposal implements IJavaCompletionProposal {
 
 	/**
 	 * Returns the html representation of the specified string.
@@ -48,11 +48,11 @@ public class WordCorrectionProposal implements IJavaCompletionProposal, IHtmlTag
 
 		for (int offset= length - 1; offset >= 0; offset--) {
 
-			for (int index= 0; index < HTML_ENTITY_CHARACTERS.length; index++) {
+			for (int index= 0; index < IHtmlTagConstants.HTML_ENTITY_CHARACTERS.length; index++) {
 
-				if (string.charAt(offset) == HTML_ENTITY_CHARACTERS[index]) {
+				if (string.charAt(offset) == IHtmlTagConstants.HTML_ENTITY_CHARACTERS[index]) {
 
-					buffer.replace(offset, offset + 1, String.valueOf(HTML_ENTITY_CODES[index]));
+					buffer.replace(offset, offset + 1, String.valueOf(IHtmlTagConstants.HTML_ENTITY_CODES[index]));
 					break;
 				}
 			}

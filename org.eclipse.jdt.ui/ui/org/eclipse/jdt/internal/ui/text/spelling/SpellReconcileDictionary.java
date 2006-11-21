@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.IJavaDocTagConstants;
  *
  * @since 3.0
  */
-public class SpellReconcileDictionary extends LocaleSensitiveSpellDictionary implements IJavaDocTagConstants, IHtmlTagConstants {
+public class SpellReconcileDictionary extends LocaleSensitiveSpellDictionary {
 
 	/**
 	 * Creates a new locale sensitive spell dictionary.
@@ -44,7 +44,7 @@ public class SpellReconcileDictionary extends LocaleSensitiveSpellDictionary imp
 	public boolean isCorrect(final String word) {
 
 		final char character= word.charAt(0);
-		if (character != JAVADOC_TAG_PREFIX && character != HTML_TAG_PREFIX)
+		if (character != IJavaDocTagConstants.JAVADOC_TAG_PREFIX && character != IHtmlTagConstants.HTML_TAG_PREFIX)
 			return super.isCorrect(word);
 
 		return false;

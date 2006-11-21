@@ -42,9 +42,9 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 /**
  * @since 3.2 (renamed from JavaDocCompletionEvaluator which got introduced in 2.0)
  */
-public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposalComputer, IJavaDocTagConstants, IHtmlTagConstants {
+public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposalComputer {
 
-	private static final String[] fgHTMLProposals= new String[HTML_GENERAL_TAGS.length * 2];
+	private static final String[] fgHTMLProposals= new String[IHtmlTagConstants.HTML_GENERAL_TAGS.length * 2];
 	{
 		String tag= null;
 
@@ -53,9 +53,9 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 
 		while (index < fgHTMLProposals.length) {
 
-			tag= HTML_GENERAL_TAGS[offset];
-			fgHTMLProposals[index++]= HTML_TAG_PREFIX + tag + HTML_TAG_POSTFIX;
-			fgHTMLProposals[index++]= HTML_CLOSE_PREFIX + tag + HTML_TAG_POSTFIX;
+			tag= IHtmlTagConstants.HTML_GENERAL_TAGS[offset];
+			fgHTMLProposals[index++]= IHtmlTagConstants.HTML_TAG_PREFIX + tag + IHtmlTagConstants.HTML_TAG_POSTFIX;
+			fgHTMLProposals[index++]= IHtmlTagConstants.HTML_CLOSE_PREFIX + tag + IHtmlTagConstants.HTML_TAG_POSTFIX;
 			offset++;
 		}
 	}
@@ -216,7 +216,7 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 			length= findReplaceEndPos(fDocument, newText, oldText, fCurrentPos) - offset;
 
 		// bump opening over closing tags
-		if (!newText.startsWith(HTML_CLOSE_PREFIX))
+		if (!newText.startsWith(IHtmlTagConstants.HTML_CLOSE_PREFIX))
 			severity++;
 		JavaCompletionProposal proposal= new JavaCompletionProposal(newText, offset, length, image, labelText, severity, true);
 		proposal.setTriggerCharacters( new char[] { '>' });

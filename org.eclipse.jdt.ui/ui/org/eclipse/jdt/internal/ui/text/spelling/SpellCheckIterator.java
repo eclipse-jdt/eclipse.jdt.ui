@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckIterator;
  *
  * @since 3.0
  */
-public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConstants, IHtmlTagConstants {
+public class SpellCheckIterator implements ISpellCheckIterator {
 
 	/** The content of the region */
 	private final String fContent;
@@ -314,7 +314,7 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 		boolean update= false;
 		if (fNext - fPrevious > 0) {
 
-			if (fSuccessor != BreakIterator.DONE && fContent.charAt(fPrevious) == JAVADOC_TAG_PREFIX) {
+			if (fSuccessor != BreakIterator.DONE && fContent.charAt(fPrevious) == IJavaDocTagConstants.JAVADOC_TAG_PREFIX) {
 
 				nextBreak();
 				if (Character.isLetter(fContent.charAt(fPrevious + 1))) {
@@ -323,14 +323,14 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 				} else
 					fPredecessor= fNext;
 
-			} else if (fSuccessor != BreakIterator.DONE && fContent.charAt(fPrevious) == HTML_TAG_PREFIX && (Character.isLetter(fContent.charAt(fNext)) || fContent.charAt(fNext) == '/')) {
+			} else if (fSuccessor != BreakIterator.DONE && fContent.charAt(fPrevious) == IHtmlTagConstants.HTML_TAG_PREFIX && (Character.isLetter(fContent.charAt(fNext)) || fContent.charAt(fNext) == '/')) {
 
-				if (fContent.startsWith(HTML_CLOSE_PREFIX, fPrevious))
+				if (fContent.startsWith(IHtmlTagConstants.HTML_CLOSE_PREFIX, fPrevious))
 					nextBreak();
 
 				nextBreak();
 
-				if (fSuccessor != BreakIterator.DONE && fContent.charAt(fNext) == HTML_TAG_POSTFIX) {
+				if (fSuccessor != BreakIterator.DONE && fContent.charAt(fNext) == IHtmlTagConstants.HTML_TAG_POSTFIX) {
 
 					nextBreak();
 					if (fSuccessor != BreakIterator.DONE) {
@@ -338,12 +338,12 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 						token= fContent.substring(fPrevious, fNext);
 					}
 				}
-			} else if (fSuccessor != BreakIterator.DONE && fContent.charAt(fPrevious) == HTML_ENTITY_START && (Character.isLetter(fContent.charAt(fNext)))) {
+			} else if (fSuccessor != BreakIterator.DONE && fContent.charAt(fPrevious) == IHtmlTagConstants.HTML_ENTITY_START && (Character.isLetter(fContent.charAt(fNext)))) {
 				nextBreak();
-				if (fSuccessor != BreakIterator.DONE && fContent.charAt(fNext) == HTML_ENTITY_END) {
+				if (fSuccessor != BreakIterator.DONE && fContent.charAt(fNext) == IHtmlTagConstants.HTML_ENTITY_END) {
 					nextBreak();
-					if (isToken(fContent.substring(fPrevious, fNext), HTML_ENTITY_CODES)) {
-						skipTokens(fPrevious, HTML_ENTITY_END);
+					if (isToken(fContent.substring(fPrevious, fNext), IHtmlTagConstants.HTML_ENTITY_CODES)) {
+						skipTokens(fPrevious, IHtmlTagConstants.HTML_ENTITY_END);
 						update= true;
 					} else
 						token= fContent.substring(fPrevious, fNext);
@@ -355,9 +355,9 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 
 				if (isUrlToken(fPrevious))
 					skipTokens(fPrevious, ' ');
-				else if (isToken(JAVADOC_PARAM_TAGS))
+				else if (isToken(IJavaDocTagConstants.JAVADOC_PARAM_TAGS))
 					fLastToken= null;
-				else if (isToken(JAVADOC_REFERENCE_TAGS)) {
+				else if (isToken(IJavaDocTagConstants.JAVADOC_REFERENCE_TAGS)) {
 					fLastToken= null;
 					skipTokens(fPrevious, fDelimiter.charAt(0));
 				} else if (fNext - fPrevious > 1 || isSingleLetter(fPrevious) && !fIsIgnoringSingleLetters)

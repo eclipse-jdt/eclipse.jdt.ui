@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
  *
  * @since 3.0
  */
-public class HtmlTagDictionary extends AbstractSpellDictionary implements IHtmlTagConstants {
+public class HtmlTagDictionary extends AbstractSpellDictionary {
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary#getName()
@@ -36,7 +36,7 @@ public class HtmlTagDictionary extends AbstractSpellDictionary implements IHtmlT
 	 */
 	public boolean isCorrect(final String word) {
 
-		if (word.charAt(0) == HTML_TAG_PREFIX)
+		if (word.charAt(0) == IHtmlTagConstants.HTML_TAG_PREFIX)
 			return super.isCorrect(word);
 
 		return false;
@@ -49,10 +49,10 @@ public class HtmlTagDictionary extends AbstractSpellDictionary implements IHtmlT
 
 		unload();
 
-		for (int index= 0; index < HTML_GENERAL_TAGS.length; index++) {
+		for (int index= 0; index < IHtmlTagConstants.HTML_GENERAL_TAGS.length; index++) {
 
-			hashWord(HTML_TAG_PREFIX + HTML_GENERAL_TAGS[index] + HTML_TAG_POSTFIX);
-			hashWord(HTML_CLOSE_PREFIX + HTML_GENERAL_TAGS[index] + HTML_TAG_POSTFIX);
+			hashWord(IHtmlTagConstants.HTML_TAG_PREFIX + IHtmlTagConstants.HTML_GENERAL_TAGS[index] + IHtmlTagConstants.HTML_TAG_POSTFIX);
+			hashWord(IHtmlTagConstants.HTML_CLOSE_PREFIX + IHtmlTagConstants.HTML_GENERAL_TAGS[index] + IHtmlTagConstants.HTML_TAG_POSTFIX);
 		}
 		return true;
 	}
