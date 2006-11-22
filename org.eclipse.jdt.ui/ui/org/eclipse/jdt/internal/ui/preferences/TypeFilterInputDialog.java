@@ -28,6 +28,7 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
@@ -133,7 +134,7 @@ public class TypeFilterInputDialog extends StatusDialog {
 			status.setError(PreferencesMessages.TypeFilterInputDialog_error_enterName); 
 		} else {
 			newText= newText.replace('*', 'X').replace('?', 'Y');
-			IStatus val= JavaConventions.validatePackageName(newText);
+			IStatus val= JavaConventions.validatePackageName(newText, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
 			if (val.matches(IStatus.ERROR)) {
 				status.setError(Messages.format(PreferencesMessages.TypeFilterInputDialog_error_invalidName, val.getMessage())); 
 			} else {

@@ -109,6 +109,10 @@ public class ReorgCorrectionsSubProcessor {
 		ICompilationUnit cu= context.getCompilationUnit();
 		boolean isLinked= cu.getResource().isLinked();
 
+		IJavaProject javaProject= cu.getJavaProject();
+		String sourceLevel= javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
+		String compliance= javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+		
 		IBuffer buffer= cu.getBuffer();
 		if (buffer == null) {
 			return;
@@ -116,13 +120,13 @@ public class ReorgCorrectionsSubProcessor {
 			
 		String currTypeName= buffer.getText(problem.getOffset(), problem.getLength());
 		String newTypeName= JavaCore.removeJavaLikeExtension(cu.getElementName());
-		if (!JavaConventions.validateJavaTypeName(newTypeName).matches(IStatus.ERROR)) {
+		if (!JavaConventions.validateJavaTypeName(newTypeName, sourceLevel, compliance).matches(IStatus.ERROR)) {
 			proposals.add(new CorrectMainTypeNameProposal(cu, context, currTypeName, newTypeName, 5));
 		}			
 
 		String newCUName= JavaModelUtil.getRenamedCUName(cu, currTypeName);
 		ICompilationUnit newCU= ((IPackageFragment) (cu.getParent())).getCompilationUnit(newCUName);
-		if (!newCU.exists() && !isLinked && !JavaConventions.validateCompilationUnitName(newCUName).matches(IStatus.ERROR)) {
+		if (!newCU.exists() && !isLinked && !JavaConventions.validateCompilationUnitName(newCUName, sourceLevel, compliance).matches(IStatus.ERROR)) {
 			RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);
 
 			// rename CU

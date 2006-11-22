@@ -17,10 +17,10 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.filebuffers.FileBuffers;
@@ -98,7 +98,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		final String[] entries= computeUserAndBootClasspath(project);
 		final IRuntimeClasspathEntry[] classpath= new IRuntimeClasspathEntry[entries.length + 2];
 		classpath[0]= JavaRuntime.newRuntimeContainerClasspathEntry(new Path(JavaRuntime.JRE_CONTAINER), IRuntimeClasspathEntry.STANDARD_CLASSES, project);
-		classpath[1]= JavaRuntime.newArchiveRuntimeClasspathEntry(Path.fromOSString(Platform.asLocalURL(JavaPlugin.getDefault().getBundle().getEntry(SERIAL_SUPPORT_JAR)).getFile()));
+		classpath[1]= JavaRuntime.newArchiveRuntimeClasspathEntry(Path.fromOSString(FileLocator.toFileURL(JavaPlugin.getDefault().getBundle().getEntry(SERIAL_SUPPORT_JAR)).getFile()));
 		for (int index= 2; index < classpath.length; index++)
 			classpath[index]= JavaRuntime.newArchiveRuntimeClasspathEntry(Path.fromOSString(entries[index - 2]));
 		return SerialVersionComputationHelper.computeSerialIDs(classpath, project, qualifiedNames, monitor);

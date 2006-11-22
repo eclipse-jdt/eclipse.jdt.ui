@@ -54,7 +54,7 @@ class GotoTypeAction extends Action {
 		SelectionDialog dialog= null;
 		try {
 			dialog= JavaUI.createTypeDialog(shell, new ProgressMonitorDialog(shell),
-				SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_TYPES, false);
+				SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_ALL_TYPES, false);
 		} catch (JavaModelException e) {
 			String title= getDialogTitle();
 			String message= PackagesMessages.GotoType_error_message; 

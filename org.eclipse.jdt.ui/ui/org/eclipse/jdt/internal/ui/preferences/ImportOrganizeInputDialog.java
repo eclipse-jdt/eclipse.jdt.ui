@@ -32,6 +32,7 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -209,7 +210,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 					status.setError(PreferencesMessages.ImportOrganizeInputDialog_error_entryExists); 
 				}
 			} else {
-				IStatus val= JavaConventions.validateJavaTypeName(newText);
+				IStatus val= JavaConventions.validateJavaTypeName(newText, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
 				if (val.matches(IStatus.ERROR)) {
 					status.setError(PreferencesMessages.ImportOrganizeInputDialog_error_invalidName); 
 				} else {
