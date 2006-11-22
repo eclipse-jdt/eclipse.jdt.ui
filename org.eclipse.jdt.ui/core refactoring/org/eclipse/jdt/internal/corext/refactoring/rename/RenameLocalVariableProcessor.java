@@ -70,6 +70,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 
 public class RenameLocalVariableProcessor extends JavaRenameProcessor implements IReferenceUpdating {
 
@@ -121,13 +122,6 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		fCategorySet= categorySet;
 		fCompilationUnitNode= node;
 		fIsComposite= true;
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor#needsSavedEditors()
-	 */
-	public boolean needsSavedEditors() {
-		return false;
 	}
 	
 	/*
@@ -250,6 +244,10 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	
 	protected IFile[] getChangedFiles() throws CoreException {
 		return new IFile[] {ResourceUtil.getFile(fCu)};
+	}
+	
+	public int getSaveMode() {
+		return RefactoringSaveHelper.SAVE_NOTHING;
 	}
 	
 	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context)

@@ -100,6 +100,7 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 
 public class RenamePackageProcessor extends JavaRenameProcessor implements
 		IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating, IResourceMapper, IJavaElementMapper {
@@ -177,6 +178,10 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 		if (fQualifiedNameSearchResult != null)
 			combined.addAll(Arrays.asList(fQualifiedNameSearchResult.getAllFiles()));
 		return (IFile[]) combined.toArray(new IFile[combined.size()]);
+	}
+	
+	public int getSaveMode() {
+		return RefactoringSaveHelper.SAVE_ALL;
 	}
 	
 	//---- ITextUpdating -------------------------------------------------

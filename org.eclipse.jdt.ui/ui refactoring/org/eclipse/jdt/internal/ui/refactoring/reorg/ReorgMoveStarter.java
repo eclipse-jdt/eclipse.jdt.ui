@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.JavaMoveRefactoring
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -79,7 +80,7 @@ public class ReorgMoveStarter {
 				IRunnableContext context= new ProgressMonitorDialog(parent);
 				fMoveProcessor.setCreateTargetQueries(new CreateTargetQueries(parent));
 				fMoveProcessor.setReorgQueries(new ReorgQueries(parent));
-				new RefactoringExecutionHelper(ref, RefactoringCore.getConditionCheckingFailedSeverity(), true, parent, context).perform(false, false);
+				new RefactoringExecutionHelper(ref, RefactoringCore.getConditionCheckingFailedSeverity(), RefactoringSaveHelper.SAVE_ALL, parent, context).perform(false, false);
 			} else  {
 				RefactoringWizard wizard= new ReorgMoveWizard(ref);
 				/*
@@ -88,7 +89,7 @@ public class ReorgMoveStarter {
 				 */
 				fMoveProcessor.setCreateTargetQueries(new CreateTargetQueries(wizard));
 				fMoveProcessor.setReorgQueries(new ReorgQueries(wizard));
-				new RefactoringStarter().activate(ref, wizard, parent, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true); 
+				new RefactoringStarter().activate(ref, wizard, parent, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_ALL); 
 			}
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 

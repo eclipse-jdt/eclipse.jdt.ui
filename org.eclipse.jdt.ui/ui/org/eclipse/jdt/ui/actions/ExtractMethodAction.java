@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.code.ExtractMethodWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -79,7 +80,7 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 			return;
 		try{
 			final ExtractMethodRefactoring refactoring= new ExtractMethodRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
-			new RefactoringStarter().activate(refactoring, new ExtractMethodWizard(refactoring), getShell(), RefactoringMessages.ExtractMethodAction_dialog_title, false);
+			new RefactoringStarter().activate(refactoring, new ExtractMethodWizard(refactoring), getShell(), RefactoringMessages.ExtractMethodAction_dialog_title, RefactoringSaveHelper.SAVE_NOTHING);
 		} catch (CoreException e){
 			ExceptionHandler.handle(e, RefactoringMessages.ExtractMethodAction_dialog_title, RefactoringMessages.NewTextRefactoringAction_exception); 
 		}

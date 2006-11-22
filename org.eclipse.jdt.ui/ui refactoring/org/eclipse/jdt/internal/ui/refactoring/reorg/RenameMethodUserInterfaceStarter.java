@@ -33,7 +33,7 @@ public class RenameMethodUserInterfaceStarter extends RenameUserInterfaceStarter
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceStarter#activate(org.eclipse.jdt.internal.corext.refactoring.base.Refactoring, org.eclipse.swt.widgets.Shell)
 	 */
-	public boolean activate(Refactoring refactoring, Shell parent, boolean save) throws CoreException {
+	public boolean activate(Refactoring refactoring, Shell parent, int saveMode) throws CoreException {
 		RenameVirtualMethodProcessor processor= (RenameVirtualMethodProcessor)refactoring.getAdapter(RenameVirtualMethodProcessor.class);
 		if (processor != null) {
 			RefactoringStatus status= processor.checkInitialConditions(new NullProgressMonitor());
@@ -65,6 +65,6 @@ public class RenameMethodUserInterfaceStarter extends RenameUserInterfaceStarter
 				}
 			}
 		}
-		return super.activate(refactoring, parent, save);
+		return super.activate(refactoring, parent, saveMode);
 	}
 }

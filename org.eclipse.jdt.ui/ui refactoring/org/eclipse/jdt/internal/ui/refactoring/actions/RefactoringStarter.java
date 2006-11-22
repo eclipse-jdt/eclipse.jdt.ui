@@ -28,11 +28,20 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
  */
 public class RefactoringStarter {
 	
-	private RefactoringSaveHelper fSaveHelper= new RefactoringSaveHelper();
 	private RefactoringStatus fStatus;
 
-	public boolean activate(Refactoring refactoring, RefactoringWizard wizard, Shell parent, String dialogTitle, boolean mustSaveEditors) throws JavaModelException {
-		if (! canActivate(mustSaveEditors, parent))
+	/**
+	 * @param refactoring
+	 * @param wizard
+	 * @param parent
+	 * @param dialogTitle
+	 * @param saveMode a save mode from {@link RefactoringSaveHelper}
+	 * @return <code>true</code> if the refactoring was executed, <code>false</code> otherwise
+	 * @throws JavaModelException
+	 */
+	public boolean activate(Refactoring refactoring, RefactoringWizard wizard, Shell parent, String dialogTitle, int saveMode) throws JavaModelException {
+		RefactoringSaveHelper saveHelper= new RefactoringSaveHelper(saveMode);
+		if (! canActivate(saveHelper, parent))
 			return false;
 
 		try {
@@ -40,7 +49,7 @@ public class RefactoringStarter {
 			int result= op.run(parent, dialogTitle);
 			fStatus= op.getInitialConditionCheckingStatus();
 			if (result == IDialogConstants.CANCEL_ID || result == RefactoringWizardOpenOperation.INITIAL_CONDITION_CHECKING_FAILED) {
-				fSaveHelper.triggerBuild();
+				saveHelper.triggerBuild();
 				return false;
 			} else {
 				return true;
@@ -54,7 +63,7 @@ public class RefactoringStarter {
 		return fStatus;
 	}
 		
-	private boolean canActivate(boolean mustSaveEditors, Shell shell) {
-		return ! mustSaveEditors || fSaveHelper.saveEditors(shell);
+	private boolean canActivate(RefactoringSaveHelper saveHelper, Shell shell) {
+		return saveHelper.saveEditors(shell);
 	}
 }

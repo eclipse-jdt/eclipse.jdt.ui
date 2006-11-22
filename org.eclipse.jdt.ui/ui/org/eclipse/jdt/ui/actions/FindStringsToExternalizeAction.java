@@ -67,6 +67,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.refactoring.actions.ListDialog;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
@@ -409,7 +410,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 				if (unit != null && unit.exists()) {
 					NLSRefactoring refactoring= NLSRefactoring.create(unit);
 					if (refactoring != null)
-						new RefactoringStarter().activate(refactoring, new ExternalizeWizard(refactoring), getShell(), ActionMessages.ExternalizeStringsAction_dialog_title, true); 
+						new RefactoringStarter().activate(refactoring, new ExternalizeWizard(refactoring), getShell(), ActionMessages.ExternalizeStringsAction_dialog_title, RefactoringSaveHelper.SAVE_NON_JAVA_UPDATES); 
 				}
 			} catch (JavaModelException e) {
 				ExceptionHandler.handle(e, 

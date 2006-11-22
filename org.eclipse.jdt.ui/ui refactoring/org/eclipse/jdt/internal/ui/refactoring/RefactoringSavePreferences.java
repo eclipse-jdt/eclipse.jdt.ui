@@ -28,6 +28,6 @@ public class RefactoringSavePreferences {
 	
 	public static void setSaveAllEditors(boolean save) {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(RefactoringSavePreferences.PREF_SAVE_ALL_EDITORS, save);
+		store.setValue(PREF_SAVE_ALL_EDITORS, save);
 	}	
 }

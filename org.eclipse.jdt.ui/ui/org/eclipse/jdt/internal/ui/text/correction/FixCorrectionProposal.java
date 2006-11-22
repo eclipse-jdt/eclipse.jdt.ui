@@ -46,6 +46,7 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
 
 /**
@@ -154,7 +155,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 			int stopSeverity= RefactoringCore.getConditionCheckingFailedSeverity();
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
 			ProgressMonitorDialog context= new ProgressMonitorDialog(shell);
-			RefactoringExecutionHelper executer= new RefactoringExecutionHelper(refactoring, stopSeverity, false, shell, context);
+			RefactoringExecutionHelper executer= new RefactoringExecutionHelper(refactoring, stopSeverity, RefactoringSaveHelper.SAVE_NOTHING, shell, context);
 			try {
 				executer.perform(true, true);
 			} catch (InterruptedException e) {

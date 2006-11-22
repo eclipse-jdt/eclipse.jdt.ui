@@ -333,30 +333,30 @@ public class RenameLinkedMode {
 		final IDocument document= viewer.getDocument();
 		
 		try {
-			fEditor.getSite().getWorkbenchWindow().run(false, true, new IRunnableWithProgress() {
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					LinkedPosition[] positions= fLinkedPositionGroup.getPositions();
-					Arrays.sort(positions, new Comparator() {
-						public int compare(Object o1, Object o2) {
-							return ((LinkedPosition) o1).offset - ((LinkedPosition) o2).offset;
-						}
-					
-					});
-					int correction= 0;
-					int originalLength= fOriginalName.length();
-					for (int i= 0; i < positions.length; i++) {
-						LinkedPosition position= positions[i];
-						try {
-							int length= position.getLength();
-							document.replace(position.getOffset() + correction, length, fOriginalName);
-							correction= correction - length + originalLength;
-						} catch (BadLocationException e) {
-							throw new InvocationTargetException(e);
+			if (! fOriginalName.equals(newName)) {
+				fEditor.getSite().getWorkbenchWindow().run(false, true, new IRunnableWithProgress() {
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						LinkedPosition[] positions= fLinkedPositionGroup.getPositions();
+						Arrays.sort(positions, new Comparator() {
+							public int compare(Object o1, Object o2) {
+								return ((LinkedPosition) o1).offset - ((LinkedPosition) o2).offset;
+							}
+						});
+						int correction= 0;
+						int originalLength= fOriginalName.length();
+						for (int i= 0; i < positions.length; i++) {
+							LinkedPosition position= positions[i];
+							try {
+								int length= position.getLength();
+								document.replace(position.getOffset() + correction, length, fOriginalName);
+								correction= correction - length + originalLength;
+							} catch (BadLocationException e) {
+								throw new InvocationTargetException(e);
+							}
 						}
 					}
-					fEditor.doSave(monitor);
-				}
-			});
+				});
+			}
 		} catch (InvocationTargetException e) {
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), ReorgMessages.RenameLinkedMode_error_saving_editor, e));
 		} catch (InterruptedException e) {

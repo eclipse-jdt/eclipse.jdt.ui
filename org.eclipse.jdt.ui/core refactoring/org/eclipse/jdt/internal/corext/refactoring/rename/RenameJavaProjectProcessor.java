@@ -50,6 +50,8 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
+
 public final class RenameJavaProjectProcessor extends JavaRenameProcessor implements IReferenceUpdating {
 
 	private IJavaProject fProject;
@@ -105,6 +107,10 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 			return new IFile[] {projectFile};
 		}
 		return new IFile[0];
+	}
+	
+	public int getSaveMode() {
+		return RefactoringSaveHelper.SAVE_ALL;
 	}
 	
 	//---- IReferenceUpdating --------------------------------------

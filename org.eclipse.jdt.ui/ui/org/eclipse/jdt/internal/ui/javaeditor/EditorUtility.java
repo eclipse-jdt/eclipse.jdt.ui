@@ -24,6 +24,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -36,6 +39,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextSelection;
 
@@ -51,6 +55,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextEditorAction;
@@ -526,4 +531,71 @@ public class EditorUtility {
 		}
 		return (IEditorPart[])result.toArray(new IEditorPart[result.size()]);
 	}
+	
+	/**
+	 * Returns the editors to save before performing global Java-related
+	 * operations.
+	 * 
+	 * @param saveUnknownEditors <code>true</code> iff editors with unknown
+	 *        buffer management should also be saved
+	 * @return the editors to save
+	 */
+	public static IEditorPart[] getDirtyEditorsToSave(boolean saveUnknownEditors) {
+		Set inputs= new HashSet();
+		List result= new ArrayList(0);
+		IWorkbench workbench= PlatformUI.getWorkbench();
+		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
+		for (int i= 0; i < windows.length; i++) {
+			IWorkbenchPage[] pages= windows[i].getPages();
+			for (int x= 0; x < pages.length; x++) {
+				IEditorPart[] editors= pages[x].getDirtyEditors();
+				for (int z= 0; z < editors.length; z++) {
+					IEditorPart ep= editors[z];
+					IEditorInput input= ep.getEditorInput();
+					if (!mustSaveEditor(ep, input, saveUnknownEditors))
+						continue;
+					
+					if (!inputs.contains(input)) {
+						inputs.add(input);
+						result.add(ep);
+					}
+				}
+			}
+		}
+		return (IEditorPart[])result.toArray(new IEditorPart[result.size()]);
+	}
+
+	private static boolean mustSaveEditor(IEditorPart ep, IEditorInput input, boolean saveUnknownEditors) {
+		IResource resource= (IResource) input.getAdapter(IResource.class);
+		if (resource == null)
+			return saveUnknownEditors;
+
+		ITextFileBuffer fileBuffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(resource.getFullPath());
+		if (fileBuffer == null)
+			return saveUnknownEditors;
+
+		if (! (ep instanceof ITextEditor))
+			return saveUnknownEditors;
+
+		ITextEditor textEditor= (ITextEditor) ep;
+		IDocumentProvider documentProvider= textEditor.getDocumentProvider();
+		if (documentProvider == null)
+			return saveUnknownEditors;
+
+		IDocument fileBufferDocument= fileBuffer.getDocument();
+		IDocument documentProviderDocument= documentProvider.getDocument(input);
+		if (!fileBufferDocument.equals(documentProviderDocument)) {
+			return saveUnknownEditors;
+		} else {
+			IJavaElement javaElement= JavaCore.create(resource);
+			if (javaElement instanceof ICompilationUnit) {
+				ICompilationUnit cu= (ICompilationUnit) javaElement;
+				if (!cu.isWorkingCopy())
+					return true;
+			}
+		}
+
+		return false;
+	}
+
 }

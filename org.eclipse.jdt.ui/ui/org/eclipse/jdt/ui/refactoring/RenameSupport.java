@@ -114,7 +114,7 @@ public class RenameSupport {
 			return; 
 		}
 		UserInterfaceStarter starter= RenameUserInterfaceManager.getDefault().getStarter(fRefactoring);
-		starter.activate(fRefactoring, parent, getJavaRenameProcessor().needsSavedEditors());
+		starter.activate(fRefactoring, parent, getJavaRenameProcessor().getSaveMode());
 	}
 	
 	/**
@@ -200,7 +200,7 @@ public class RenameSupport {
 		}
 		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(fRefactoring,
 				RefactoringCore.getConditionCheckingFailedSeverity(),
-				getJavaRenameProcessor().needsSavedEditors(),
+				getJavaRenameProcessor().getSaveMode(),
 				parent,
 				context);
 		return helper;

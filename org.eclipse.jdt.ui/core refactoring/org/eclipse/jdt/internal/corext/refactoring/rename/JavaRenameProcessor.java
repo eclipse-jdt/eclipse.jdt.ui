@@ -30,6 +30,8 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
+
 public abstract class JavaRenameProcessor extends RenameProcessor implements IScriptableRefactoring, INameUpdating, ICommentProvider {
 	
 	private String fNewElementName;
@@ -80,14 +82,11 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements ISc
 	}
 	
 	/**
-	 * <code>true</code> by default, subclasses may override.
+	 * @return a save mode from {@link RefactoringSaveHelper}
 	 * 
-	 * @return <code>true</code> iff this refactoring needs all editors to be saved,
-	 *  <code>false</code> otherwise
+	 * @see RefactoringSaveHelper
 	 */
-	public boolean needsSavedEditors() {
-		return true;
-	}
+	public abstract int getSaveMode();
 
 	public final boolean canEnableComment() {
 		return true;

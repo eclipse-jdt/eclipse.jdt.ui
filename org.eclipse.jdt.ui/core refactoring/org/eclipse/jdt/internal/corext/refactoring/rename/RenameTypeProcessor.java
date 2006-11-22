@@ -46,6 +46,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.IParticipantDescriptorFilter;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -120,6 +121,7 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 
 public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpdating, IReferenceUpdating, IQualifiedNameUpdating, ISimilarDeclarationUpdating, IResourceMapper, IJavaElementMapper {
 
@@ -307,6 +309,10 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		if (willRenameCU())
 			result.add(ResourceUtil.getFile(fType.getCompilationUnit()));
 		return (IFile[]) result.toArray(new IFile[result.size()]);
+	}
+	
+	public int getSaveMode() {
+		return RefactoringSaveHelper.SAVE_NON_JAVA_UPDATES;
 	}
 	
 	//---- ITextUpdating -------------------------------------------------
@@ -1022,6 +1028,13 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			descriptor.setUpdateSimilarDeclarations(fUpdateSimilarElements);
 			descriptor.setMatchStrategy(fRenamingStrategy);
 			final DynamicValidationRefactoringChange result= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.RenameTypeProcessor_change_name);
+			
+			if (fChangeManager.containsChangesIn(fType.getCompilationUnit())) {
+				TextChange textChange= fChangeManager.get(fType.getCompilationUnit());
+				if (textChange instanceof TextFileChange) {
+					((TextFileChange) textChange).setSaveMode(TextFileChange.FORCE_SAVE);
+				}
+			}
 			result.addAll(fChangeManager.getAllChanges());
 			if (willRenameCU()) {
 				IResource resource= fType.getCompilationUnit().getResource();

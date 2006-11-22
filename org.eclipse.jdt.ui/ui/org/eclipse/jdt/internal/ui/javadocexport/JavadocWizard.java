@@ -146,7 +146,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		fStore.updateDialogSettings(getDialogSettings(), checkedProjects);
 
 		// Wizard should not run with dirty editors
-		if (!new RefactoringSaveHelper(false).saveEditors(getShell())) {
+		if (!new RefactoringSaveHelper(RefactoringSaveHelper.SAVE_ALL_ALWAYS_ASK).saveEditors(getShell())) {
 			return false;
 		}
 

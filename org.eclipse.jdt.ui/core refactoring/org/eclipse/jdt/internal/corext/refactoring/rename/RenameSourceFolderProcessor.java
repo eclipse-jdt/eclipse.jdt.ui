@@ -44,6 +44,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
+
 public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 	
 	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
@@ -90,6 +92,10 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 				return roots[i];	
 		}
 		return null;
+	}
+	
+	public int getSaveMode() {
+		return RefactoringSaveHelper.SAVE_ALL;
 	}
 	
 	protected RenameModifications computeRenameModifications() throws CoreException {

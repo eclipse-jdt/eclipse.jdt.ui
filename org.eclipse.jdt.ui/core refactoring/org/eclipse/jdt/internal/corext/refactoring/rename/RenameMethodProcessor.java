@@ -92,6 +92,7 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 
 public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating, IDelegateUpdating {
 
@@ -193,8 +194,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 	}
 	
-	public boolean needsSavedEditors() {
-		return false;
+	public int getSaveMode() {
+		return RefactoringSaveHelper.SAVE_NON_JAVA_UPDATES;
 	}
 	
 	//---- INameUpdating -------------------------------------

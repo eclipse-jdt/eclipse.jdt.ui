@@ -24,11 +24,11 @@ import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
 
 public class RenameUserInterfaceStarter extends UserInterfaceStarter {
 	
-	public boolean activate(Refactoring refactoring, Shell parent, boolean save) throws CoreException {
+	public boolean activate(Refactoring refactoring, Shell parent, int saveMode) throws CoreException {
 		RenameProcessor processor= (RenameProcessor)refactoring.getAdapter(RenameProcessor.class);
 		Object[] elements= processor.getElements();
 		RenameSelectionState state= elements.length == 1 ? new RenameSelectionState(elements[0]) : null;
-		boolean executed= super.activate(refactoring, parent, save);
+		boolean executed= super.activate(refactoring, parent, saveMode);
 		INameUpdating nameUpdating= (INameUpdating)refactoring.getAdapter(INameUpdating.class);
 		if (executed && nameUpdating != null && state != null) {
 			Object newElement= nameUpdating.getNewElement();

@@ -68,6 +68,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 
 /**
  * Rename processor to rename type parameters.
@@ -201,6 +202,10 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 
 	protected IFile[] getChangedFiles() throws CoreException {
 		return new IFile[] {ResourceUtil.getFile(fTypeParameter.getDeclaringMember().getCompilationUnit())};
+	}
+	
+	public int getSaveMode() {
+		return RefactoringSaveHelper.SAVE_NOTHING;
 	}
 	
 	protected final RefactoringStatus doCheckFinalConditions(final IProgressMonitor monitor, final CheckConditionsContext context) throws CoreException, OperationCanceledException {
@@ -405,10 +410,6 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 
 	public final boolean isApplicable() throws CoreException {
 		return RefactoringAvailabilityTester.isRenameAvailable(fTypeParameter);
-	}
-
-	public boolean needsSavedEditors() {
-		return false;
 	}
 
 	public final void setUpdateReferences(final boolean update) {

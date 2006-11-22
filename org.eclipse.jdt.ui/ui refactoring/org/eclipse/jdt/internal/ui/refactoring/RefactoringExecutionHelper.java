@@ -59,7 +59,7 @@ public class RefactoringExecutionHelper {
 	private final Shell fParent;
 	private final IRunnableContext fExecContext;
 	private final int fStopSeverity;
-	private final boolean fNeedsSavedEditors;
+	private final int fSaveMode;
 
 	private class Operation implements IWorkspaceRunnable {
 		public Change fChange;
@@ -123,7 +123,14 @@ public class RefactoringExecutionHelper {
 		}
 	}
 	
-	public RefactoringExecutionHelper(Refactoring refactoring, int stopSevertity, boolean needsSavedEditors, Shell parent, IRunnableContext context) {
+	/**
+	 * @param refactoring
+	 * @param stopSevertity a refactoring status constant from {@link RefactoringStatus}
+	 * @param saveMode a save mode from {@link RefactoringSaveHelper}
+	 * @param parent
+	 * @param context
+	 */
+	public RefactoringExecutionHelper(Refactoring refactoring, int stopSevertity, int saveMode, Shell parent, IRunnableContext context) {
 		super();
 		Assert.isNotNull(refactoring);
 		Assert.isNotNull(parent);
@@ -132,7 +139,7 @@ public class RefactoringExecutionHelper {
 		fStopSeverity= stopSevertity;
 		fParent= parent;
 		fExecContext= context;
-		fNeedsSavedEditors= needsSavedEditors;
+		fSaveMode= saveMode;
 	}
 	
 	public void perform(boolean fork, boolean cancelable) throws InterruptedException, InvocationTargetException {
@@ -168,8 +175,8 @@ public class RefactoringExecutionHelper {
 				throw new InterruptedException(e.getMessage());
 			}
 			
-			RefactoringSaveHelper saveHelper= new RefactoringSaveHelper();
-			if (fNeedsSavedEditors && !saveHelper.saveEditors(fParent))
+			RefactoringSaveHelper saveHelper= new RefactoringSaveHelper(fSaveMode);
+			if (!saveHelper.saveEditors(fParent))
 				throw new InterruptedException();
 			final Operation op= new Operation(showPreview, !fork);
 			fRefactoring.setValidationContext(fParent);
