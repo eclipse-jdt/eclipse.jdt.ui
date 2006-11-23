@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -41,8 +38,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.ScrollBar;
-import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
 
@@ -96,8 +91,6 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.WorkbenchException;
-import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.IShowInSource;
@@ -174,26 +167,20 @@ public class PackageExplorerPart extends ViewPart
 	private static final String PERF_CREATE_PART_CONTROL= "org.eclipse.jdt.ui/perf/explorer/createPartControl"; //$NON-NLS-1$
 	private static final String PERF_MAKE_ACTIONS= "org.eclipse.jdt.ui/perf/explorer/makeActions"; //$NON-NLS-1$
 	
-	private boolean fIsCurrentLayoutFlat; // true means flat, false means hierachical
-
 	private static final int HIERARCHICAL_LAYOUT= 0x1;
 	private static final int FLAT_LAYOUT= 0x2;
 	
-	public final static String VIEW_ID= JavaUI.ID_PACKAGES;
+	private final static String VIEW_ID= JavaUI.ID_PACKAGES;
 				
 	// Persistance tags.
-	static final String TAG_SELECTION= "selection"; //$NON-NLS-1$
-	static final String TAG_EXPANDED= "expanded"; //$NON-NLS-1$
-	static final String TAG_ELEMENT= "element"; //$NON-NLS-1$
-	static final String TAG_PATH= "path"; //$NON-NLS-1$
-	static final String TAG_VERTICAL_POSITION= "verticalPosition"; //$NON-NLS-1$
-	static final String TAG_HORIZONTAL_POSITION= "horizontalPosition"; //$NON-NLS-1$
-	static final String TAG_FILTERS = "filters"; //$NON-NLS-1$
-	static final String TAG_FILTER = "filter"; //$NON-NLS-1$
-	static final String TAG_LAYOUT= "layout"; //$NON-NLS-1$
-	static final String TAG_CURRENT_FRAME= "currentFramge"; //$NON-NLS-1$
-	static final String TAG_ROOT_MODE= "rootMode"; //$NON-NLS-1$
-	static final String SETTING_MEMENTO= "memento"; //$NON-NLS-1$
+	private static final String TAG_LAYOUT= "layout"; //$NON-NLS-1$
+	private static final String TAG_GROUP_LIBRARIES= "group_libraries"; //$NON-NLS-1$
+	private static final String TAG_ROOT_MODE= "rootMode"; //$NON-NLS-1$
+	private static final String TAG_LINK_EDITOR= "linkWithEditor"; //$NON-NLS-1$
+	
+	private boolean fIsCurrentLayoutFlat; // true means flat, false means hierachical
+	private boolean fShowLibrariesNode;
+	private boolean fLinkingEnabled;
 	
 	private int fRootMode;
 	private WorkingSetModel fWorkingSetModel;
@@ -209,9 +196,11 @@ public class PackageExplorerPart extends ViewPart
 	private IMemento fMemento;
 	
 	private ISelection fLastOpenSelection;
-	private ISelectionChangedListener fPostSelectionListener;
+	private final ISelectionChangedListener fPostSelectionListener;
 	
 	private String fWorkingSetLabel;
+	private IDialogSettings fDialogSettings;
+	
 	
 	private IPartListener2 fLinkWithEditorListener= new IPartListener2() {
 		public void partVisible(IWorkbenchPartReference partRef) {}
@@ -472,67 +461,60 @@ public class PackageExplorerPart extends ViewPart
 			return result;
 		}
 	}
- 
-	/* (non-Javadoc)
-	 * Method declared on IViewPart.
-	 */
-	private boolean fLinkingEnabled;
-
+	
+	public PackageExplorerPart() { 
+		fPostSelectionListener= new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				handlePostSelectionChanged(event);
+			}
+		};
+		
+		// exception: initialize from preference
+		fDialogSettings= JavaPlugin.getDefault().getDialogSettingsSection(getClass().getName());
+		
+		fShowLibrariesNode= fDialogSettings.getBoolean(TAG_GROUP_LIBRARIES);
+		fLinkingEnabled= fDialogSettings.getBoolean(TAG_LINK_EDITOR);
+		
+		try {
+			fIsCurrentLayoutFlat= fDialogSettings.getInt(TAG_LAYOUT) == FLAT_LAYOUT;
+		} catch (NumberFormatException e) {
+			fIsCurrentLayoutFlat= true;
+		}
+		
+		try {
+			fRootMode= fDialogSettings.getInt(TAG_ROOT_MODE);
+		} catch (NumberFormatException e) {
+			fRootMode= ViewActionGroup.SHOW_PROJECTS;
+		}
+		
+	}
+	
     public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
 		fMemento= memento;
-		if (fMemento == null) {
-			IDialogSettings section= JavaPlugin.getDefault().getDialogSettings().getSection(getSectionName());
-			if (section != null) {
-				String settings= section.get(SETTING_MEMENTO);
-				if (settings != null) {
-					try {
-						fMemento= XMLMemento.createReadRoot(new StringReader(settings));
-					} catch (WorkbenchException e) {
-						// don't restore the memento when the settings can't be read.
-					}
-				}
-			}
+		if (memento != null) {
+			restoreLayoutState(memento);
+			restoreLinkingEnabled(memento);
+			restoreRootMode(memento);
 		}
-		restoreRootMode(fMemento);
 		if (showWorkingSets()) {
 			createWorkingSetModel();
 		}
-		restoreLayoutState(memento);
 	}
-    
-    private String getSectionName() {
-    	return "org.eclipse.jdt.ui.internal.packageExplorer"; //$NON-NLS-1$
-    }
 
 	private void restoreRootMode(IMemento memento) {
-		if (memento != null) {
-			Integer value= fMemento.getInteger(TAG_ROOT_MODE);
-			fRootMode= value == null ? ViewActionGroup.SHOW_PROJECTS : value.intValue();
-			if (fRootMode != ViewActionGroup.SHOW_PROJECTS && fRootMode != ViewActionGroup.SHOW_WORKING_SETS)
-				fRootMode= ViewActionGroup.SHOW_PROJECTS;
-		} else {
+		Integer value= memento.getInteger(TAG_ROOT_MODE);
+		fRootMode= value == null ? ViewActionGroup.SHOW_PROJECTS : value.intValue();
+		if (fRootMode != ViewActionGroup.SHOW_PROJECTS && fRootMode != ViewActionGroup.SHOW_WORKING_SETS)
 			fRootMode= ViewActionGroup.SHOW_PROJECTS;
-		}
 	}
 
 	private void restoreLayoutState(IMemento memento) {
-		Integer state= null;
-		if (memento != null)
-			state= memento.getInteger(TAG_LAYOUT);
-
-		// If no memento try an restore from preference store
-		if(state == null) {
-			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-			state= new Integer(store.getInt(TAG_LAYOUT));
-		}
-
-		if (state.intValue() == FLAT_LAYOUT)
-			fIsCurrentLayoutFlat= true;
-		else if (state.intValue() == HIERARCHICAL_LAYOUT)
-			fIsCurrentLayoutFlat= false;
-		else
-			fIsCurrentLayoutFlat= true;
+		Integer layoutState= memento.getInteger(TAG_LAYOUT);
+		fIsCurrentLayoutFlat= layoutState == null || layoutState.intValue() == FLAT_LAYOUT;
+		
+		Integer groupLibraries= memento.getInteger(TAG_GROUP_LIBRARIES);
+		fShowLibrariesNode= groupLibraries != null && groupLibraries.intValue() != 0;
 	}
 	
 	/**
@@ -571,20 +553,6 @@ public class PackageExplorerPart extends ViewPart
 		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
 		if (fViewer != null) {
 			fViewer.removeTreeListener(fExpansionListener);
-			XMLMemento memento= XMLMemento.createWriteRoot("packageexplorer"); //$NON-NLS-1$
-			saveState(memento);
-			StringWriter writer= new StringWriter();
-			try {
-				memento.save(writer);
-				String sectionName= getSectionName();
-				IDialogSettings section= JavaPlugin.getDefault().getDialogSettings().getSection(sectionName);
-				if (section == null) {
-					section= JavaPlugin.getDefault().getDialogSettings().addNewSection(sectionName);
-				}
-				section.put(SETTING_MEMENTO, writer.getBuffer().toString());
-			} catch (IOException e) {
-				// don't do anythiung. Simply don't store the settings
-			}
 		}
 		
 		if (fActionSet != null)	
@@ -625,10 +593,6 @@ public class PackageExplorerPart extends ViewPart
 		site.registerContextMenu(menuMgr, fViewer);
 		site.setSelectionProvider(fViewer);
 		
-		if (fMemento != null) {
-			restoreLinkingEnabled(fMemento);
-		}
-		
 		makeActions(); // call before registering for selection changes
 		
 		// Set input after filter and sorter has been set. This avoids resorting and refiltering.
@@ -656,10 +620,6 @@ public class PackageExplorerPart extends ViewPart
 		IStatusLineManager slManager= getViewSite().getActionBars().getStatusLineManager();
 		fViewer.addSelectionChangedListener(new StatusBarUpdater(slManager));
 		fViewer.addTreeListener(fExpansionListener);
-	
-		if (fMemento != null)
-			restoreUIState(fMemento);
-		fMemento= null;
 	
 		// Set help for the view 
 		JavaUIHelp.setHelp(fViewer, IJavaHelpContextIds.PACKAGES_VIEW);
@@ -708,20 +668,36 @@ public class PackageExplorerPart extends ViewPart
 		//content provider must be set before the label provider
 		fContentProvider= createContentProvider();
 		fContentProvider.setIsFlatLayout(fIsCurrentLayoutFlat);
-		fViewer.setComparer(createElementComparer());
+		fContentProvider.setShowLibrariesNode(fShowLibrariesNode);
 		fViewer.setContentProvider(fContentProvider);
-	
+
+		fViewer.setComparer(createElementComparer());
+		
 		fLabelProvider= createLabelProvider();
 		fLabelProvider.setIsFlatLayout(fIsCurrentLayoutFlat);
 		fViewer.setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, false, fIsCurrentLayoutFlat));
 		// problem decoration provided by PackageLabelProvider
 	}
 	
+	void setShowLibrariesNode(boolean enabled) {
+		fShowLibrariesNode= enabled;
+		saveDialogSettings();
+		
+		fContentProvider.setShowLibrariesNode(enabled);
+		fViewer.getControl().setRedraw(false);
+		fViewer.refresh();
+		fViewer.getControl().setRedraw(true);
+	}
+	
+	boolean isLibrariesNodeShown() {
+		return fShowLibrariesNode;
+	}
+	
+	
 	void toggleLayout() {
-
 		// Update current state and inform content and label providers
 		fIsCurrentLayoutFlat= !fIsCurrentLayoutFlat;
-		saveLayoutState(null);
+		saveDialogSettings();
 		
 		fContentProvider.setIsFlatLayout(isFlatLayout());
 		fLabelProvider.setIsFlatLayout(isFlatLayout());
@@ -1058,14 +1034,6 @@ public class PackageExplorerPart extends ViewPart
 	}
 	
 	/**
-	 * Initializes the linking enabled setting from the preference store.
-	 */
-	private void initLinkingEnabled() {
-		fLinkingEnabled= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.LINK_PACKAGES_TO_EDITOR);
-	}
-
-
-	/**
 	 * Links to editor (if option enabled)
 	 */
 	private void linkToEditor(IStructuredSelection selection) {
@@ -1089,61 +1057,34 @@ public class PackageExplorerPart extends ViewPart
 	private boolean isActivePart() {
 		return this == getSite().getPage().getActivePart();
 	}
-
-
 	
 	public void saveState(IMemento memento) {
-		if (fViewer == null) {
-			// part has not been created
-			if (fMemento != null) //Keep the old state;
-				memento.putMemento(fMemento);
-			return;
-		}
-		
 		memento.putInteger(TAG_ROOT_MODE, fRootMode);
 		if (fWorkingSetModel != null)
 			fWorkingSetModel.saveState(memento);
 		
-		// disable the persisting of state which can trigger expensive operations as
-		// a side effect: see bug 52474 and 53958
-		// saveCurrentFrame(memento);
-		// saveExpansionState(memento);
-		// saveSelectionState(memento);
 		saveLayoutState(memento);
 		saveLinkingEnabled(memento);
-		// commented out because of http://bugs.eclipse.org/bugs/show_bug.cgi?id=4676
-		// saveScrollState(memento, fViewer.getTree());
+
 		fActionSet.saveFilterAndSorterState(memento);
 	}
-	
-	/*
-	private void saveCurrentFrame(IMemento memento) {
-        FrameAction action = fActionSet.getUpAction();
-        FrameList frameList= action.getFrameList();
-
-		if (frameList.getCurrentIndex() > 0) {
-			TreeFrame currentFrame = (TreeFrame) frameList.getCurrentFrame();
-			// don't persist the working set model as the current frame
-			if (currentFrame.getInput() instanceof WorkingSetModel)
-				return;
-			IMemento frameMemento = memento.createChild(TAG_CURRENT_FRAME);
-			currentFrame.saveState(frameMemento);
-		}
-	}
-	*/
 
 	private void saveLinkingEnabled(IMemento memento) {
-		memento.putInteger(PreferenceConstants.LINK_PACKAGES_TO_EDITOR, fLinkingEnabled ? 1 : 0);
+		memento.putInteger(TAG_LINK_EDITOR, fLinkingEnabled ? 1 : 0);
 	}
 
 	private void saveLayoutState(IMemento memento) {
 		if (memento != null) {	
 			memento.putInteger(TAG_LAYOUT, getLayoutAsInt());
-		} else {
-		//if memento is null save in preference store
-			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-			store.setValue(TAG_LAYOUT, getLayoutAsInt());
+			memento.putInteger(TAG_GROUP_LIBRARIES, fShowLibrariesNode ? 1 : 0);
 		}
+	}
+	
+	private void saveDialogSettings() {
+		fDialogSettings.put(TAG_GROUP_LIBRARIES, fShowLibrariesNode);
+		fDialogSettings.put(TAG_LAYOUT, getLayoutAsInt());
+		fDialogSettings.put(TAG_ROOT_MODE, fRootMode);
+		fDialogSettings.put(TAG_LINK_EDITOR, fLinkingEnabled);
 	}
 
 	private int getLayoutAsInt() {
@@ -1153,44 +1094,6 @@ public class PackageExplorerPart extends ViewPart
 			return HIERARCHICAL_LAYOUT;
 	}
 
-	protected void saveScrollState(IMemento memento, Tree tree) {
-		ScrollBar bar= tree.getVerticalBar();
-		int position= bar != null ? bar.getSelection() : 0;
-		memento.putString(TAG_VERTICAL_POSITION, String.valueOf(position));
-		//save horizontal position
-		bar= tree.getHorizontalBar();
-		position= bar != null ? bar.getSelection() : 0;
-		memento.putString(TAG_HORIZONTAL_POSITION, String.valueOf(position));
-	}
-
-	protected void saveSelectionState(IMemento memento) {
-		Object elements[]= ((IStructuredSelection) fViewer.getSelection()).toArray();
-		if (elements.length > 0) {
-			IMemento selectionMem= memento.createChild(TAG_SELECTION);
-			for (int i= 0; i < elements.length; i++) {
-				IMemento elementMem= selectionMem.createChild(TAG_ELEMENT);
-				// we can only persist JavaElements for now
-				Object o= elements[i];
-				if (o instanceof IJavaElement)
-					elementMem.putString(TAG_PATH, ((IJavaElement) elements[i]).getHandleIdentifier());
-			}
-		}
-	}
-
-	protected void saveExpansionState(IMemento memento) {
-		Object expandedElements[]= fViewer.getVisibleExpandedElements();
-		if (expandedElements.length > 0) {
-			IMemento expandedMem= memento.createChild(TAG_EXPANDED);
-			for (int i= 0; i < expandedElements.length; i++) {
-				IMemento elementMem= expandedMem.createChild(TAG_ELEMENT);
-				// we can only persist JavaElements for now
-				Object o= expandedElements[i];
-				if (o instanceof IJavaElement)
-					elementMem.putString(TAG_PATH, ((IJavaElement) expandedElements[i]).getHandleIdentifier());
-			}
-		}
-	}
-
 	private void restoreFilterAndSorter() {
 		fViewer.addFilter(new OutputFolderFilter());
 		setComparator();
@@ -1198,90 +1101,9 @@ public class PackageExplorerPart extends ViewPart
 			fActionSet.restoreFilterAndSorterState(fMemento);
 	}
 
-	private void restoreUIState(IMemento memento) {
-		// see comment in save state
-		// restoreCurrentFrame(memento);
-		// restoreExpansionState(memento);
-		// restoreSelectionState(memento);
-		// commented out because of http://bugs.eclipse.org/bugs/show_bug.cgi?id=4676
-		// restoreScrollState(memento, fViewer.getTree());
-	}
-
-	/*
-	private void restoreCurrentFrame(IMemento memento) {
-		IMemento frameMemento = memento.getChild(TAG_CURRENT_FRAME);
-		
-		if (frameMemento != null) {
-	        FrameAction action = fActionSet.getUpAction();
-	        FrameList frameList= action.getFrameList();
-			TreeFrame frame = new TreeFrame(fViewer);
-			frame.restoreState(frameMemento);
-			frame.setName(getFrameName(frame.getInput()));
-			frame.setToolTipText(getToolTipText(frame.getInput()));
-			frameList.gotoFrame(frame);
-		}
-	}
-	*/
-
 	private void restoreLinkingEnabled(IMemento memento) {
-		Integer val= memento.getInteger(PreferenceConstants.LINK_PACKAGES_TO_EDITOR);
-		if (val != null) {
-			fLinkingEnabled= val.intValue() != 0;
-		}
-	}
-
-	protected void restoreScrollState(IMemento memento, Tree tree) {
-		ScrollBar bar= tree.getVerticalBar();
-		if (bar != null) {
-			try {
-				String posStr= memento.getString(TAG_VERTICAL_POSITION);
-				int position;
-				position= new Integer(posStr).intValue();
-				bar.setSelection(position);
-			} catch (NumberFormatException e) {
-				// ignore, don't set scrollposition
-			}
-		}
-		bar= tree.getHorizontalBar();
-		if (bar != null) {
-			try {
-				String posStr= memento.getString(TAG_HORIZONTAL_POSITION);
-				int position;
-				position= new Integer(posStr).intValue();
-				bar.setSelection(position);
-			} catch (NumberFormatException e) {
-				// ignore don't set scroll position
-			}
-		}
-	}
-
-	protected void restoreSelectionState(IMemento memento) {
-		IMemento childMem;
-		childMem= memento.getChild(TAG_SELECTION);
-		if (childMem != null) {
-			ArrayList list= new ArrayList();
-			IMemento[] elementMem= childMem.getChildren(TAG_ELEMENT);
-			for (int i= 0; i < elementMem.length; i++) {
-				Object element= JavaCore.create(elementMem[i].getString(TAG_PATH));
-				if (element != null)
-					list.add(element);
-			}
-			fViewer.setSelection(new StructuredSelection(list));
-		}
-	}
-
-	protected void restoreExpansionState(IMemento memento) {
-		IMemento childMem= memento.getChild(TAG_EXPANDED);
-		if (childMem != null) {
-			ArrayList elements= new ArrayList();
-			IMemento[] elementMem= childMem.getChildren(TAG_ELEMENT);
-			for (int i= 0; i < elementMem.length; i++) {
-				Object element= JavaCore.create(elementMem[i].getString(TAG_PATH));
-				if (element != null)
-					elements.add(element);
-			}
-			fViewer.setExpandedElements(elements.toArray());
-		}
+		Integer val= memento.getInteger(TAG_LINK_EDITOR);
+		fLinkingEnabled= val != null && val.intValue() != 0;
 	}
 	
 	/**
@@ -1521,14 +1343,7 @@ public class PackageExplorerPart extends ViewPart
 		}
 	}
 	
-	public PackageExplorerPart() { 
-		initLinkingEnabled();
-		fPostSelectionListener= new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				handlePostSelectionChanged(event);
-			}
-		};
-	}
+
 
 	public boolean show(ShowInContext context) {
 
@@ -1573,7 +1388,7 @@ public class PackageExplorerPart extends ViewPart
 	 */
 	public void setLinkingEnabled(boolean enabled) {
 		fLinkingEnabled= enabled;
-		PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.LINK_PACKAGES_TO_EDITOR, enabled);
+		saveDialogSettings();
 		
 		IWorkbenchPage page= getSite().getPage();
 		if (enabled) {
@@ -1602,16 +1417,6 @@ public class PackageExplorerPart extends ViewPart
 		}
 	}
 	
-	void projectStateChanged(Object root) {
-		Control ctrl= fViewer.getControl();
-		if (ctrl != null && !ctrl.isDisposed()) {
-			fViewer.refresh(root, true);
-			// trigger a syntetic selection change so that action refresh their
-			// enable state.
-			fViewer.setSelection(fViewer.getSelection());
-		}
-	}
-
     public boolean tryToReveal(Object element) {
 		if (revealElementOrParent(element))
             return true;
@@ -1705,6 +1510,8 @@ public class PackageExplorerPart extends ViewPart
 
 	public void rootModeChanged(int newMode) {
 		fRootMode= newMode;
+		saveDialogSettings();
+		
 		if (showWorkingSets() && fWorkingSetModel == null) {
 			createWorkingSetModel();
 			if (fActionSet != null) {

@@ -65,8 +65,8 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.filters.LibraryFilter;
 import org.eclipse.jdt.internal.ui.filters.OutputFolderFilter;
-import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
+import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -275,7 +275,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
                     IClasspathEntry cpe= ((IPackageFragmentRoot)element).getRawClasspathEntry();
                     if (cpe == null || cpe.getEntryKind() == IClasspathEntry.CPE_CONTAINER || cpe.getEntryKind() == IClasspathEntry.CPE_LIBRARY || cpe.getEntryKind() == IClasspathEntry.CPE_VARIABLE)
                         return false;
-                } else if (element instanceof ClassPathContainer) {
+                } else if (element instanceof PackageFragmentRootContainer) {
                 	return false;
                 }
             } catch (JavaModelException e) {

@@ -72,6 +72,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	private TreeViewer fViewer;
 	private Object fInput;
 	private boolean fIsFlatLayout;
+	private boolean fShowLibrariesNode;
 	private PackageFragmentProvider fPackageFragmentProvider;
 	
 	private int fPendingChanges;
@@ -82,6 +83,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	public PackageExplorerContentProvider(boolean provideMembers) {
 		super(provideMembers);
 		fPackageFragmentProvider= new PackageFragmentProvider();
+		fShowLibrariesNode= true;
+		fIsFlatLayout= false;
 	}
 		
 	/* package */ PackageFragmentProvider getPackageFragmentProvider() {
@@ -199,8 +202,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			if (parentElement instanceof IJavaModel) 
 				return concatenate(getJavaProjects((IJavaModel)parentElement), getNonJavaProjects((IJavaModel)parentElement));
 
-			if (parentElement instanceof ClassPathContainer)
-				return getContainerPackageFragmentRoots((ClassPathContainer)parentElement);
+			if (parentElement instanceof PackageFragmentRootContainer)
+				return getContainerPackageFragmentRoots((PackageFragmentRootContainer)parentElement);
 				
 			if (parentElement instanceof IProject) 
 				return ((IProject)parentElement).members();
@@ -220,11 +223,18 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			
 		List result= new ArrayList();
 
+		boolean addJARContainer= false;
+		
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 		for (int i= 0; i < roots.length; i++) {
 			IPackageFragmentRoot root= roots[i];
 			IClasspathEntry classpathEntry= root.getRawClasspathEntry();
-			if (classpathEntry.getEntryKind() != IClasspathEntry.CPE_CONTAINER) {
+			int entryKind= classpathEntry.getEntryKind();
+			if (entryKind == IClasspathEntry.CPE_CONTAINER) {
+				// all ClassPathContainers are added later 
+			} else if (fShowLibrariesNode && (entryKind == IClasspathEntry.CPE_LIBRARY || entryKind == IClasspathEntry.CPE_VARIABLE)) {
+				addJARContainer= true;
+			} else {
 				if (isProjectPackageFragmentRoot(root)) {
 					// filter out package fragments that correspond to projects and
 					// replace them with the package fragments directly
@@ -236,6 +246,10 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 					result.add(root);
 				}
 			}
+		}
+		
+		if (addJARContainer) {
+			result.add(new LibraryContainer(project));
 		}
 		
 		// separate loop to make sure all containers are on the classpath
@@ -253,8 +267,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		return result.toArray();
 	}
 
-	private Object[] getContainerPackageFragmentRoots(ClassPathContainer container) {
-		return container.getChildren(container);
+	private Object[] getContainerPackageFragmentRoots(PackageFragmentRootContainer container) {
+		return container.getChildren();
 	}
 
 	private Object[] getNonJavaProjects(IJavaModel model) throws JavaModelException {
@@ -270,21 +284,20 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			// up the parent for package fragment roots so that they refer
 			// to the container and containers refere to the project
 			IPackageFragmentRoot root= (IPackageFragmentRoot)element;
-			IJavaProject project= root.getJavaProject();
+			
 			try {
-				IClasspathEntry[] entries= project.getRawClasspath();
-				for (int i= 0; i < entries.length; i++) {
-					IClasspathEntry entry= entries[i];
-					if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-						if (ClassPathContainer.contains(project, entry, root)) 
-							return new ClassPathContainer(project, entry);
-					}
+				IClasspathEntry entry= root.getRawClasspathEntry();
+				int entryKind= entry.getEntryKind();
+				if (entryKind == IClasspathEntry.CPE_CONTAINER) {
+					return new ClassPathContainer(root.getJavaProject(), entry);
+				} else if (fShowLibrariesNode && (entryKind == IClasspathEntry.CPE_LIBRARY || entryKind == IClasspathEntry.CPE_VARIABLE)) {
+					return new LibraryContainer(root.getJavaProject());
 				}
 			} catch (JavaModelException e) {
 				// fall through
 			}
-		} else if (element instanceof ClassPathContainer) {
-			return ((ClassPathContainer)element).getJavaProject();
+		} else if (element instanceof PackageFragmentRootContainer) {
+			return ((PackageFragmentRootContainer)element).getJavaProject();
 		}
 		return super.internalGetParent(element);
 	}
@@ -582,6 +595,11 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	public void setIsFlatLayout(boolean state) {
 		fIsFlatLayout= state;
 	}
+	
+	public void setShowLibrariesNode(boolean state) {
+		fShowLibrariesNode= state;
+	}
+	
 	/**
 	 * Process resource deltas.
 	 *

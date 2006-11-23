@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,22 +17,29 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.ActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.actions.MultiActionGroup;
 
 /**
  * Adds view menus to switch between flat and hierarchical layout.
  * 
  * @since 2.1
  */
-class LayoutActionGroup extends MultiActionGroup {
+class LayoutActionGroup extends ActionGroup {
 
+	public static final String VIEWMENU_LAYOUT_GROUP= "layout"; //$NON-NLS-1$
+	
+	private IAction fFlatLayoutAction;
+	private IAction fHierarchicalLayoutAction;
+	private IAction fShowLibrariesNode;
+	
 	LayoutActionGroup(PackageExplorerPart packageExplorer) {
-		super(createActions(packageExplorer), getSelectedState(packageExplorer));
+		fFlatLayoutAction= new LayoutAction(packageExplorer, true);
+		fHierarchicalLayoutAction= new LayoutAction(packageExplorer, false);
+		fShowLibrariesNode= new ShowLibrariesNodeAction(packageExplorer);
 	}
 
 	/* (non-Javadoc)
@@ -44,37 +51,16 @@ class LayoutActionGroup extends MultiActionGroup {
 	}
 	
 	private void contributeToViewMenu(IMenuManager viewMenu) {
-		viewMenu.add(new Separator());
+		viewMenu.add(new Separator(VIEWMENU_LAYOUT_GROUP));
 
 		// Create layout sub menu
 		
-		IMenuManager layoutSubMenu= new MenuManager(PackagesMessages.LayoutActionGroup_label); 
-		final String layoutGroupName= "layout"; //$NON-NLS-1$
-		Separator marker= new Separator(layoutGroupName);
-
-		viewMenu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-		viewMenu.add(marker);
-		viewMenu.appendToGroup(layoutGroupName, layoutSubMenu);
-		viewMenu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$		
-		addActions(layoutSubMenu);
-	}
-
-	static int getSelectedState(PackageExplorerPart packageExplorer) {
-		if (packageExplorer.isFlatLayout())
-			return 0;
-		else
-			return 1;
-	}
-	
-	static IAction[] createActions(PackageExplorerPart packageExplorer) {
-		IAction flatLayoutAction= new LayoutAction(packageExplorer, true);
-		flatLayoutAction.setText(PackagesMessages.LayoutActionGroup_flatLayoutAction_label); 
-		JavaPluginImages.setLocalImageDescriptors(flatLayoutAction, "flatLayout.gif"); //$NON-NLS-1$
-		IAction hierarchicalLayout= new LayoutAction(packageExplorer, false);
-		hierarchicalLayout.setText(PackagesMessages.LayoutActionGroup_hierarchicalLayoutAction_label);	  
-		JavaPluginImages.setLocalImageDescriptors(hierarchicalLayout, "hierarchicalLayout.gif"); //$NON-NLS-1$
+		IMenuManager layoutSubMenu= new MenuManager(PackagesMessages.LayoutActionGroup_label);
+		layoutSubMenu.add(fFlatLayoutAction);
+		layoutSubMenu.add(fHierarchicalLayoutAction);
 		
-		return new IAction[]{flatLayoutAction, hierarchicalLayout};
+		viewMenu.add(layoutSubMenu);
+		viewMenu.add(fShowLibrariesNode);
 	}
 }
 
@@ -88,10 +74,16 @@ class LayoutAction extends Action implements IAction {
 
 		fIsFlatLayout= flat;
 		fPackageExplorer= packageExplorer;
-		if (fIsFlatLayout)
+		if (fIsFlatLayout) {
+			setText(PackagesMessages.LayoutActionGroup_flatLayoutAction_label); 
+			JavaPluginImages.setLocalImageDescriptors(this, "flatLayout.gif"); //$NON-NLS-1$
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LAYOUT_FLAT_ACTION);
-		else
+		} else {
+			setText(PackagesMessages.LayoutActionGroup_hierarchicalLayoutAction_label);	  
+			JavaPluginImages.setLocalImageDescriptors(this, "hierarchicalLayout.gif"); //$NON-NLS-1$
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LAYOUT_HIERARCHICAL_ACTION);
+		}
+		setChecked(packageExplorer.isFlatLayout() == fIsFlatLayout);
 	}
 
 	/*
@@ -100,5 +92,23 @@ class LayoutAction extends Action implements IAction {
 	public void run() {
 		if (fPackageExplorer.isFlatLayout() != fIsFlatLayout)
 			fPackageExplorer.toggleLayout();
+	}
+}
+
+class ShowLibrariesNodeAction extends Action implements IAction {
+
+	private PackageExplorerPart fPackageExplorer;
+
+	public ShowLibrariesNodeAction(PackageExplorerPart packageExplorer) {
+		super(PackagesMessages.LayoutActionGroup_show_libraries_in_group, AS_CHECK_BOX);
+		fPackageExplorer= packageExplorer;
+		setChecked(packageExplorer.isLibrariesNodeShown());
+	}
+
+	/*
+	 * @see org.eclipse.jface.action.IAction#run()
+	 */
+	public void run() {
+		fPackageExplorer.setShowLibrariesNode(isChecked());
 	}
 }

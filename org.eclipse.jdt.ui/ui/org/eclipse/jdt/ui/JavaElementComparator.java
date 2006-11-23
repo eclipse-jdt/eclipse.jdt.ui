@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
+import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 
 
@@ -164,7 +164,7 @@ public class JavaElementComparator extends ViewerComparator {
 			return RESOURCEFOLDERS;
 		} else if (element instanceof IStorage) {
 			return STORAGE;
-		} else if (element instanceof ClassPathContainer) {
+		} else if (element instanceof PackageFragmentRootContainer) {
 			return PACKAGEFRAGMENTROOTS;
 		}
 		return OTHERS;
@@ -270,11 +270,10 @@ public class JavaElementComparator extends ViewerComparator {
 		return 0;
 	}
 	
-
 	private IPackageFragmentRoot getPackageFragmentRoot(Object element) {
-		if (element instanceof ClassPathContainer) {
+		if (element instanceof PackageFragmentRootContainer) {
 			// return first package fragment root from the container
-			ClassPathContainer cp= (ClassPathContainer)element;
+			PackageFragmentRootContainer cp= (PackageFragmentRootContainer)element;
 			Object[] roots= cp.getPackageFragmentRoots();
 			if (roots.length > 0)
 				return (IPackageFragmentRoot)roots[0];
@@ -334,8 +333,8 @@ public class JavaElementComparator extends ViewerComparator {
 	private IJavaProject getJavaProject(Object element) {
 		if (element instanceof IJavaElement) {
 			return ((IJavaElement)element).getJavaProject();
-		} else if (element instanceof ClassPathContainer) {
-			return ((ClassPathContainer)element).getJavaProject();
+		} else if (element instanceof PackageFragmentRootContainer) {
+			return ((PackageFragmentRootContainer)element).getJavaProject();
 		}
 		return null;
 	}
@@ -343,8 +342,8 @@ public class JavaElementComparator extends ViewerComparator {
 	private String getElementName(Object element) {
 		if (element instanceof IJavaElement) {
 			return ((IJavaElement)element).getElementName();
-		} else if (element instanceof ClassPathContainer) {
-			return ((ClassPathContainer)element).getLabel(element);
+		} else if (element instanceof PackageFragmentRootContainer) {
+			return ((PackageFragmentRootContainer)element).getLabel();
 		} else {
 			return element.toString();
 		}

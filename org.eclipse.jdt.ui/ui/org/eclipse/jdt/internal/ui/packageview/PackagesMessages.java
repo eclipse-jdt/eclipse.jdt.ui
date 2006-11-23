@@ -49,6 +49,8 @@ public final class PackagesMessages extends NLS {
 	public static String GotoType_error_message;
 	public static String GotoResource_action_label;
 	public static String GotoResource_dialog_title;
+	public static String LayoutActionGroup_show_libraries_in_group;
+	public static String LibraryContainer_name;
 	public static String OpenResource_action_description;
 	public static String OpenResource_action_label;
 	public static String OpenResource_error_message;

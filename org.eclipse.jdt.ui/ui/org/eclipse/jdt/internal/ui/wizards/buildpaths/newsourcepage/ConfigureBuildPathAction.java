@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
+import java.util.HashMap;
+
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -20,14 +23,18 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
+import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
 import org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
@@ -53,15 +60,28 @@ public class ConfigureBuildPathAction extends BuildpathModifierAction {
 	public void run() {
 		IProject project= null;
 		Object firstElement= getSelectedElements().get(0);
+		HashMap data= new HashMap();
+		
 		if (firstElement instanceof IJavaElement) {
-			IJavaElement element= (IJavaElement)firstElement;
+			IJavaElement element= (IJavaElement) firstElement;
+			IPackageFragmentRoot root= (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+			if (root != null) {
+				try {
+					data.put(BuildPathsPropertyPage.DATA_REVEAL_ENTRY, root.getRawClasspathEntry());
+				} catch (JavaModelException e) {
+					// ignore
+				}
+			}
 			project= element.getJavaProject().getProject();
-		} else if (firstElement instanceof ClassPathContainer) {
-			project= ((ClassPathContainer)firstElement).getJavaProject().getProject();
+		} else if (firstElement instanceof PackageFragmentRootContainer) {
+			PackageFragmentRootContainer container= (PackageFragmentRootContainer) firstElement;
+			project= container.getJavaProject().getProject();
+			IClasspathEntry entry= container instanceof ClassPathContainer ? ((ClassPathContainer) container).getClasspathEntry() : JavaCore.newLibraryEntry(new Path("/x/y"), null, null); //$NON-NLS-1$
+			data.put(BuildPathsPropertyPage.DATA_REVEAL_ENTRY, entry);
 		} else {
 			project= ((IResource) ((IAdaptable) firstElement).getAdapter(IResource.class)).getProject();
 		}
-		PreferencesUtil.createPropertyDialogOn(getShell(), project, BuildPathsPropertyPage.PROP_ID, null, null).open();
+		PreferencesUtil.createPropertyDialogOn(getShell(), project, BuildPathsPropertyPage.PROP_ID, null, data).open();
 	}
 
 	protected boolean canHandle(IStructuredSelection elements) {
@@ -81,8 +101,8 @@ public class ConfigureBuildPathAction extends BuildpathModifierAction {
 				return false;
 			
 			return project.getProject() != null;
-		} else if (firstElement instanceof ClassPathContainer) {
-			return ((ClassPathContainer) firstElement).getJavaProject().getProject() != null;
+		} else if (firstElement instanceof PackageFragmentRootContainer) {
+			return true;
 		} else if (firstElement instanceof IAdaptable) {
 			IResource res= (IResource) ((IAdaptable) firstElement).getAdapter(IResource.class);
 			if (res == null)

@@ -58,7 +58,7 @@ public class ConfigureContainerAction implements IObjectActionDelegate {
 	public void run(IAction action) {
 		if (fCurrentSelection instanceof IStructuredSelection) {
 			ClassPathContainer container= (ClassPathContainer) ((IStructuredSelection) fCurrentSelection).getFirstElement();
-			openWizard(container.getClasspathEntry(), container.getLabel(container), container.getJavaProject());
+			openWizard(container.getClasspathEntry(), container.getLabel(), container.getJavaProject());
 		}
 	}
 	

@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
+import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
 
 /**
  * Working set filter for Java viewers.
@@ -68,8 +68,8 @@ public class WorkingSetFilter extends ViewerFilter {
 		if (element instanceof IResource)
 			return isEnclosing(((IResource)element).getFullPath());
 		
-		if (element instanceof ClassPathContainer) {
-			return isEnclosing((ClassPathContainer)element);
+		if (element instanceof PackageFragmentRootContainer) {
+			return isEnclosing((PackageFragmentRootContainer)element);
 		}
 			
 		if (element instanceof IAdaptable) {
@@ -86,7 +86,7 @@ public class WorkingSetFilter extends ViewerFilter {
 		return true;
 	}
 
-	private boolean isEnclosing(ClassPathContainer container) {
+	private boolean isEnclosing(PackageFragmentRootContainer container) {
 		// check whether the containing packagefragment root is enclosed
 		Object[] roots= container.getPackageFragmentRoots();
 		if (roots.length > 0)

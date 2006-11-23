@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
+import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
 
 /**
  * Add the <code>StatusBarUpdater</code> to your ViewPart to have the statusbar
@@ -71,9 +71,9 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 					return formatJavaElementMessage((IJavaElement) elem);
 				} else if (elem instanceof IResource) {
 					return formatResourceMessage((IResource) elem);
-				} else if (elem instanceof ClassPathContainer) {
-					ClassPathContainer container= (ClassPathContainer) elem;
-					return container.getLabel(container) + JavaElementLabels.CONCAT_STRING + container.getJavaProject().getElementName();
+				} else if (elem instanceof PackageFragmentRootContainer) {
+					PackageFragmentRootContainer container= (PackageFragmentRootContainer) elem;
+					return container.getLabel() + JavaElementLabels.CONCAT_STRING + container.getJavaProject().getElementName();
 				} else if (elem instanceof IAdaptable) {
 					IWorkbenchAdapter wbadapter= (IWorkbenchAdapter) ((IAdaptable)elem).getAdapter(IWorkbenchAdapter.class);
 					if (wbadapter != null) {

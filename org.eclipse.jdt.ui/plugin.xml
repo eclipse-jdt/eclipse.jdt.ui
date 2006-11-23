@@ -5141,7 +5141,7 @@
 					<instanceof
 							value="org.eclipse.jdt.core.IClassFile" />
 					<instanceof
-							value="org.eclipse.jdt.internal.ui.packageview.ClassPathContainer" />
+							value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" />
 <!--
 					<instanceof
 							value="org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel" />
@@ -5170,7 +5170,7 @@
 					<instanceof
 							value="org.eclipse.jdt.core.IClassFile" />
 					<instanceof
-							value="org.eclipse.jdt.internal.ui.packageview.ClassPathContainer" />
+							value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" />
 				</or>
 			</possibleChildren>
 			<actionProvider
@@ -5199,7 +5199,7 @@
 					<instanceof
 							value="org.eclipse.jdt.core.IClassFile" />
 					<instanceof
-							value="org.eclipse.jdt.internal.ui.packageview.ClassPathContainer" /> 
+							value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" /> 
 					<adapt type="java.util.Collection"> 
 						<count value="0" />
 					</adapt>				
@@ -5473,7 +5473,7 @@
 					<instanceof
 							value="org.eclipse.jdt.core.IClassFile" />
 					<instanceof
-							value="org.eclipse.jdt.internal.ui.packageview.ClassPathContainer" />
+							value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" />
 				</or>
 	         </selectionEnablement>
       	</linkHelper>          

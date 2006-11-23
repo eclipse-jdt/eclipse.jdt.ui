@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,8 +45,8 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 /**
  * Representation of class path containers in Java UI.
  */
-public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
-	private IJavaProject fProject;
+public class ClassPathContainer extends PackageFragmentRootContainer {
+
 	private IClasspathEntry fClassPathEntry;
 	private IClasspathContainer fContainer;
 
@@ -91,7 +91,7 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 	}
 
 	public ClassPathContainer(IJavaProject parent, IClasspathEntry entry) {
-		fProject= parent;
+		super(parent);
 		fClassPathEntry= entry;
 		try {
 			fContainer= JavaCore.getClasspathContainer(entry.getPath(), parent);
@@ -103,7 +103,7 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 	public boolean equals(Object obj) {
 		if (obj instanceof ClassPathContainer) {
 			ClassPathContainer other = (ClassPathContainer)obj;
-			if (fProject.equals(other.fProject) &&
+			if (getJavaProject().equals(other.getJavaProject()) &&
 				fClassPathEntry.equals(other.fClassPathEntry)) {
 				return true;	
 			}
@@ -113,22 +113,14 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 	}
 
 	public int hashCode() {
-		return fProject.hashCode()*17+fClassPathEntry.hashCode();
+		return getJavaProject().hashCode()*17+fClassPathEntry.hashCode();
 	}
 
-	public Object[] getPackageFragmentRoots() {
-		return fProject.findPackageFragmentRoots(fClassPathEntry);
+	public IPackageFragmentRoot[] getPackageFragmentRoots() {
+		return getJavaProject().findPackageFragmentRoots(fClassPathEntry);
 	}
 
-	public Object getAdapter(Class adapter) {
-		if (adapter == IWorkbenchAdapter.class) 
-			return this;
-		if ((adapter == IResource.class) && (fContainer instanceof IAdaptable))
-			return ((IAdaptable)fContainer).getAdapter(IResource.class);
-		return null;
-	}
-
-	public Object[] getChildren(Object o) {
+	public Object[] getChildren() {
 		return concatenate(getPackageFragmentRoots(), getRequiredProjects());
 	}
 
@@ -155,7 +147,7 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 		return list.toArray();
 	}
 
-	protected static Object[] concatenate(Object[] a1, Object[] a2) {
+	private static Object[] concatenate(Object[] a1, Object[] a2) {
 		int a1Len= a1.length;
 		int a2Len= a2.length;
 		Object[] res= new Object[a1Len + a2Len];
@@ -164,11 +156,11 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 		return res;
 	}
 
-	public ImageDescriptor getImageDescriptor(Object object) {
+	public ImageDescriptor getImageDescriptor() {
 		return JavaPluginImages.DESC_OBJS_LIBRARY;
 	}
 
-	public String getLabel(Object o) {
+	public String getLabel() {
 		if (fContainer != null)
 			return fContainer.getDescription();
 		
@@ -176,18 +168,10 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 		String containerId= path.segment(0);
 		ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerId);
 		if (initializer != null) {
-			String description= initializer.getDescription(path, fProject);
+			String description= initializer.getDescription(path, getJavaProject());
 			return Messages.format(PackagesMessages.ClassPathContainer_unbound_label, description); 
 		}
 		return Messages.format(PackagesMessages.ClassPathContainer_unknown_label, path.toString()); 
-	}
-
-	public Object getParent(Object o) {
-		return getJavaProject();
-	}
-
-	public IJavaProject getJavaProject() {
-		return fProject;
 	}
 	
 	public IClasspathEntry getClasspathEntry() {
@@ -202,4 +186,5 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 		}
 		return false;
 	}
+
 }

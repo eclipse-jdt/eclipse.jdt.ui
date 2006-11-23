@@ -257,6 +257,7 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 						return false;
 					}
 				} else if (element instanceof ClassPathContainer) {
+					return true;
 				} else {
 					return false;
 				}
