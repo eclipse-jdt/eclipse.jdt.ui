@@ -1,6 +1,0 @@
-#Tue Oct 11 12:03:39 EDT 2005
-eclipse.preferences.version=1
-internal.default.compliance=user
-org.eclipse.jdt.ui.ignorelowercasenames=true
-org.eclipse.jdt.ui.importorder=junit;
-org.eclipse.jdt.ui.ondemandthreshold=99
