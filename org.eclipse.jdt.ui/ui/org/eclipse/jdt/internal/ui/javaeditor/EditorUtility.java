@@ -522,10 +522,8 @@ public class EditorUtility {
 				for (int z= 0; z < editors.length; z++) {
 					IEditorPart ep= editors[z];
 					IEditorInput input= ep.getEditorInput();
-					if (!inputs.contains(input)) {
-						inputs.add(input);
+					if (inputs.add(input))
 						result.add(ep);
-					}
 				}
 			}
 		}
@@ -536,9 +534,9 @@ public class EditorUtility {
 	 * Returns the editors to save before performing global Java-related
 	 * operations.
 	 * 
-	 * @param saveUnknownEditors <code>true</code> iff editors with unknown
-	 *        buffer management should also be saved
+	 * @param saveUnknownEditors <code>true</code> iff editors with unknown buffer management should also be saved
 	 * @return the editors to save
+	 * @since 3.3
 	 */
 	public static IEditorPart[] getDirtyEditorsToSave(boolean saveUnknownEditors) {
 		Set inputs= new HashSet();
@@ -555,17 +553,27 @@ public class EditorUtility {
 					if (!mustSaveEditor(ep, input, saveUnknownEditors))
 						continue;
 					
-					if (!inputs.contains(input)) {
-						inputs.add(input);
+					if (inputs.add(input))
 						result.add(ep);
-					}
 				}
 			}
 		}
 		return (IEditorPart[])result.toArray(new IEditorPart[result.size()]);
 	}
 
+	/**
+	 * FIXME: needs work:
+	 * - assumes file that file buffer and document provider sit on same saved state
+	 * - ignores dirty state of file buffer
+	 * - neither connects nor disconnects the file buffer 
+	 * - is bad related to performance
+	 * 
+	 * @since 3.3
+	 */
 	private static boolean mustSaveEditor(IEditorPart ep, IEditorInput input, boolean saveUnknownEditors) {
+		
+
+		
 		IResource resource= (IResource) input.getAdapter(IResource.class);
 		if (resource == null)
 			return saveUnknownEditors;
