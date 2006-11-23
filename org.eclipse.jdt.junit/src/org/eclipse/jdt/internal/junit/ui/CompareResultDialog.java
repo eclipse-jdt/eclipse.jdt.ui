@@ -247,7 +247,8 @@ public class CompareResultDialog extends TrayDialog {
 	}
 
 	private void setCompareViewerInput() {
-		fViewer.setInput(new DiffNode(new CompareElement(fExpected), new CompareElement(fActual)));
+		if (! fViewer.getControl().isDisposed())
+			fViewer.setInput(new DiffNode(new CompareElement(fExpected), new CompareElement(fActual)));
 	}
 
 	public void setInput(TestElement failedTest) {

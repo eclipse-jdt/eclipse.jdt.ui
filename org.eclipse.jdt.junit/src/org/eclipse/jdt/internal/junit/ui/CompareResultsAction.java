@@ -11,8 +11,8 @@
 package org.eclipse.jdt.internal.junit.ui;
 
 
-import org.eclipse.swt.events.ShellAdapter;
-import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 
 import org.eclipse.jface.action.Action;
 
@@ -50,11 +50,11 @@ public class CompareResultsAction extends Action {
 		} else {
 			fOpenDialog= new CompareResultDialog(fView.getShell(), failedTest);
 			fOpenDialog.create();
-			fOpenDialog.getShell().addShellListener(new ShellAdapter() {
-					public void shellClosed(ShellEvent e) {
-						fOpenDialog= null;
-					}
-				});
+			fOpenDialog.getShell().addDisposeListener(new DisposeListener() {
+				public void widgetDisposed(DisposeEvent e) {
+					fOpenDialog= null;
+				}
+			});
 			fOpenDialog.setBlockOnOpen(false);
 			fOpenDialog.open();
 		}
