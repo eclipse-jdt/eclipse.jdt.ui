@@ -55,81 +55,7 @@ public class AbstractDocumentLineDifferTest extends TextPerformanceTestCase {
 
 	}
 	
-	private abstract class Runner implements Runnable {
 
-		public final void run() {
-			try {
-				runProtected();
-			} catch (Exception x) {
-				reportException(x);
-			}
-		}
-
-		abstract void runProtected() throws Exception;
-		
-	}
-
-	protected static final class BooleanFuture {
-		private final Object fLock= new Object();
-		private Boolean fResult= null;
-		private Thread fThread;
-		private boolean fIsCanceled= false;
-		
-		/**
-		 * Returns the value of the future variable, waiting for
-		 * completion if not yet done.
-		 * 
-		 * @return the boolean value of the future variable
-		 * @throws InterruptedException
-		 */
-		public boolean get() throws InterruptedException {
-			synchronized (fLock) {
-				while (fResult == null && !fIsCanceled)
-					fLock.wait();
-				return fResult.booleanValue();
-			}
-		}
-		
-		void set(boolean b) {
-			synchronized (fLock) {
-				fResult= Boolean.valueOf(b);
-				fLock.notifyAll();
-			}
-		}
-
-		/**
-		 * Returns <code>true</code> if the future has completed
-		 * (computed, cancelled, interrupted), <code>false</code> if
-		 * not.
-		 * 
-		 * @return <code>true</code> if <code>get()</code> will
-		 *         return without blocking, <code>false</code> if it
-		 *         may block
-		 */
-		public boolean isDone() {
-			synchronized (fLock) {
-				return fResult != null || fIsCanceled;
-			}
-		}
-
-		/**
-		 * Cancels waiting for this future variable.
-		 */
-		public void cancel() {
-			synchronized (fLock) {
-				if (fResult != null)
-					return;
-				if (fThread != null)
-					fThread.interrupt();
-				fIsCanceled= true;
-			}
-		}
-
-		void setThread(Thread thread) {
-			fThread= thread;
-		}
-	}
-	
 	protected static final String FAUST1;
 	protected static final String FAUST_FEW_CHANGES;
 	protected static final String SMALL_FAUST1;
@@ -153,7 +79,7 @@ public class AbstractDocumentLineDifferTest extends TextPerformanceTestCase {
 		SMALL_FAUST_MANY_CHANGES_SAME_SIZE= SMALL_FAUST1.replaceAll(".\n", "_\n");
 		
 	}
-	private static final long MAX_WAIT= 10000; // wait 10 seconds at most
+	protected static final long MAX_WAIT= 10000; // wait 10 seconds at most
 	
 	private Exception fFirstException;
 	private TestReferenceProvider fReferenceProvider;
@@ -185,36 +111,4 @@ public class AbstractDocumentLineDifferTest extends TextPerformanceTestCase {
 		differ.setReferenceProvider(fReferenceProvider);
 	}
 
-	/**
-	 * Immediately returns a future variable for the synchronization
-	 * state of the differ. The caller is responsible for setting up the
-	 * reference provider and connecting the differ to a document.
-	 * 
-	 * @param differ the document line differ.
-	 * @return a future variable for the differ's synchronization state
-	 */
-	protected final BooleanFuture waitForSynchronization(final DocumentLineDiffer differ) {
-		final BooleanFuture future= new BooleanFuture();
-		Thread thread= new Thread(new Runner() {
-			void runProtected() {
-				synchronized (differ) {
-					try {
-						differ.wait(MAX_WAIT); // the initialization job notifies waiters upon finishing
-					} catch (InterruptedException x) {
-						return;
-					}
-				}
-				future.set(differ.isSynchronized());
-			}
-		});
-		future.setThread(thread);
-		thread.start();
-		
-		return future;
-	}
-
-	private synchronized void reportException(Exception x) {
-		if (fFirstException == null)
-			fFirstException= x;
-	}
 }
