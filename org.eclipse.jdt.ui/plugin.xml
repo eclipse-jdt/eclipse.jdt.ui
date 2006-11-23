@@ -261,13 +261,27 @@
 			<partition type="__java_javadoc"/>
 		</javaCompletionProposalComputer>
 	</extension>
-	<!-- hippie word completions -->   
+	<!-- hippie word completions -->
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="HippieCompletionProposalComputer">
 		<javaCompletionProposalComputer
 			class="org.eclipse.jdt.internal.ui.text.java.HippieProposalComputer"
 			categoryId="org.eclipse.jdt.ui.textProposalCategory">
+			<partition type="__java_singleline_comment"/>
+			<partition type="__java_multiline_comment"/>
+			<partition type="__java_string"/>
+			<partition type="__java_javadoc"/>
+		</javaCompletionProposalComputer>
+	</extension>
+	
+	<!-- spelling completions --> 
+	<extension
+		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+		id="SpellingCompletionProposalComputer">
+		<javaCompletionProposalComputer
+			class="org.eclipse.jdt.internal.ui.text.spelling.WordCompletionProposalComputer"
+			categoryId="org.eclipse.jdt.ui.defaultProposalCategory">
 			<partition type="__java_singleline_comment"/>
 			<partition type="__java_multiline_comment"/>
 			<partition type="__java_string"/>
