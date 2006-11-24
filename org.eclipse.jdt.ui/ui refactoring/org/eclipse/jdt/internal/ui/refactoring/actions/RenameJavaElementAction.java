@@ -180,10 +180,12 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		//XXX workaround bug 31998
 		if (ActionUtil.mustDisableJavaModelAction(getShell(), element))
 			return;
-		if (lightweight && fEditor instanceof CompilationUnitEditor)
+		
+		if (lightweight && fEditor instanceof CompilationUnitEditor && ! (element instanceof IPackageFragment)) {
 			new RenameLinkedMode(element, (CompilationUnitEditor) fEditor).start();
-		else
+		} else {
 			RefactoringExecutionStarter.startRenameRefactoring(element, getShell());
+		}
 	}
 
 	private static boolean isRenameAvailable(IJavaElement element) throws CoreException {
