@@ -65,7 +65,7 @@ public class WordQuickFixProcessor implements IQuickFixProcessor {
 		boolean sentence= false;
 
 		final ISpellCheckEngine engine= SpellCheckEngine.getInstance();
-		final ISpellChecker checker= engine.createSpellChecker(engine.getLocale(), PreferenceConstants.getPreferenceStore());
+		final ISpellChecker checker= engine.getSpellChecker();
 
 		if (checker != null) {
 

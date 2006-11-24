@@ -14,9 +14,14 @@ package org.eclipse.jdt.internal.ui.text.spelling.engine;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
  * Default spell checker for standard text.
@@ -25,16 +30,14 @@ import org.eclipse.jface.preference.IPreferenceStore;
  */
 public class DefaultSpellChecker implements ISpellChecker {
 
-	/** Array of url prefixes */
+	/** Array of URL prefixes */
 	public static final String[] URL_PREFIXES= new String[] { "http://", "https://", "www.", "ftp://", "ftps://", "news://", "mailto://" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
 
 	/**
 	 * Does this word contain digits?
 	 *
-	 * @param word
-	 *                   The word to check
-	 * @return <code>true</code> iff this word contains digits, <code>false></code>
-	 *               otherwise
+	 * @param word the word to check
+	 * @return <code>true</code> iff this word contains digits, <code>false></code> otherwise
 	 */
 	protected static boolean isDigits(final String word) {
 
@@ -141,13 +144,23 @@ public class DefaultSpellChecker implements ISpellChecker {
 	private final IPreferenceStore fPreferences;
 
 	/**
+	 * The locale of this checker.
+	 * @since 3.3
+	 */
+	private Locale fLocale;
+
+	/**
 	 * Creates a new default spell checker.
 	 *
 	 * @param store
 	 *                   The preference store for this spell checker
 	 */
-	public DefaultSpellChecker(final IPreferenceStore store) {
+	public DefaultSpellChecker(IPreferenceStore store, Locale locale) {
+		Assert.isLegal(store != null);
+		Assert.isLegal(locale != null);
+		
 		fPreferences= store;
+		fLocale= locale;
 	}
 
 	/*
@@ -222,13 +235,13 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 */
 	public void execute(final ISpellCheckIterator iterator) {
 
-		final boolean ignoreDigits= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_DIGITS);
-		final boolean ignoreMixed= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_MIXED);
-		final boolean ignoreSentence= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_SENTENCE);
-		final boolean ignoreUpper= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_UPPER);
-		final boolean ignoreURLS= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_URLS);
-		final boolean ignoreNonLetters= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_NON_LETTERS);
-		final boolean ignoreSingleLetters= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_SINGLE_LETTERS);
+		final boolean ignoreDigits= fPreferences.getBoolean(PreferenceConstants.SPELLING_IGNORE_DIGITS);
+		final boolean ignoreMixed= fPreferences.getBoolean(PreferenceConstants.SPELLING_IGNORE_MIXED);
+		final boolean ignoreSentence= fPreferences.getBoolean(PreferenceConstants.SPELLING_IGNORE_SENTENCE);
+		final boolean ignoreUpper= fPreferences.getBoolean(PreferenceConstants.SPELLING_IGNORE_UPPER);
+		final boolean ignoreURLS= fPreferences.getBoolean(PreferenceConstants.SPELLING_IGNORE_URLS);
+		final boolean ignoreNonLetters= fPreferences.getBoolean(PreferenceConstants.SPELLING_IGNORE_NON_LETTERS);
+		final boolean ignoreSingleLetters= fPreferences.getBoolean(PreferenceConstants.SPELLING_IGNORE_SINGLE_LETTERS);
 		
 		iterator.setIgnoreSingleLetters(ignoreSingleLetters);
 		
@@ -354,5 +367,13 @@ public class DefaultSpellChecker implements ISpellChecker {
 	public final void removeListener(final ISpellEventListener listener) {
 		// synchronizing is necessary as this is a write access
 		fListeners.remove(listener);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker#getLocale()
+	 * @since 3.3
+	 */
+	public Locale getLocale() {
+		return fLocale;
 	}
 }

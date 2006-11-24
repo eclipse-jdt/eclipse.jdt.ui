@@ -11,8 +11,6 @@
 
 package org.eclipse.jdt.internal.ui.text.spelling;
 
-import java.util.Locale;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.IDocument;
@@ -31,16 +29,16 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener;
 public class TextSpellingEngine extends SpellingEngine {
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.spelling.newapi.SpellingEngine#check(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IRegion[], org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker, java.util.Locale, org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector, org.eclipse.core.runtime.IProgressMonitor)
+	 * @see org.eclipse.jdt.internal.ui.text.spelling.SpellingEngine#check(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IRegion[], org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker, org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	protected void check(IDocument document, IRegion[] regions, ISpellChecker checker, Locale locale, ISpellingProblemCollector collector, IProgressMonitor monitor) {
+	protected void check(IDocument document, IRegion[] regions, ISpellChecker checker, ISpellingProblemCollector collector, IProgressMonitor monitor) {
 		ISpellEventListener listener= new SpellEventListener(collector, document);
 		try {
 			checker.addListener(listener);
 			for (int i= 0; i < regions.length; i++) {
 				if (monitor != null && monitor.isCanceled())
 					return;
-				checker.execute(new SpellCheckIterator(document, regions[i], locale));
+				checker.execute(new SpellCheckIterator(document, regions[i], checker.getLocale()));
 			}
 		} finally {
 			checker.removeListener(listener);

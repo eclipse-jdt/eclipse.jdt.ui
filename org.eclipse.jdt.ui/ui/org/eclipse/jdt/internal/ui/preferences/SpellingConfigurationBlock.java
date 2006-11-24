@@ -18,8 +18,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -61,6 +62,16 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
  */
 public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 
+	/**
+	 * Tells whether content assist proposal block should be shown.
+	 * Currently the spelling engine cannot return word proposals but
+	 * only correction proposals and hence this is disabled.
+	 * 
+	 * @since 3.3
+	 */
+	private static final boolean SUPPORT_CONTENT_ASSIST_PROPOSALS= false;
+	
+	
 	/** Preference keys for the preferences in this block */
 	private static final Key PREF_SPELLING_IGNORE_DIGITS= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_DIGITS);
 	private static final Key PREF_SPELLING_IGNORE_MIXED= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_MIXED);
@@ -74,6 +85,13 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_SPELLING_USER_DICTIONARY= getJDTUIKey(PreferenceConstants.SPELLING_USER_DICTIONARY);
 	private static final Key PREF_SPELLING_ENABLE_CONTENTASSIST= getJDTUIKey(PreferenceConstants.SPELLING_ENABLE_CONTENTASSIST);
 
+	/**
+	 * The value for no platform dictionary.
+	 * @since 3.3
+	 */
+	private static final String PREF_VALUE_NO_LOCALE= ""; //$NON-NLS-1$
+
+	
 	/**
 	 * Creates a selection dependency between a master and a slave control.
 	 * 
@@ -110,12 +128,12 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		int index= 0;
 		Locale locale= null;
 
-		final String[] codes= new String[locales.size()];
+		final String[] codes= new String[locales.size() + 1];
 		for (final Iterator iterator= locales.iterator(); iterator.hasNext();) {
-
 			locale= (Locale)iterator.next();
 			codes[index++]= locale.toString();
 		}
+		codes[index++]= PREF_VALUE_NO_LOCALE;
 		return codes;
 	}
 
@@ -131,12 +149,13 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		int index= 0;
 		Locale locale= null;
 
-		final String[] labels= new String[locales.size()];
+		final String[] labels= new String[locales.size() + 1];
 		for (final Iterator iterator= locales.iterator(); iterator.hasNext();) {
 
 			locale= (Locale)iterator.next();
 			labels[index++]= locale.getDisplayName();
 		}
+		labels[index++]= PreferencesMessages.SpellingPreferencePage_dictionary_none;
 		return labels;
 	}
 
@@ -165,23 +184,19 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	/**
 	 * Validates that the specified locale is available.
 	 * 
-	 * @param locale
-	 *                   The locale to validate
+	 * @param localeString the locale to validate
 	 * @return The status of the validation
 	 */
-	protected static IStatus validateLocale(final String locale) {
+	private static IStatus validateLocale(final String localeString) {
+		if (PREF_VALUE_NO_LOCALE.equals(localeString))
+			return new StatusInfo(); 
 
-		final StatusInfo status= new StatusInfo(IStatus.ERROR, PreferencesMessages.SpellingPreferencePage_locale_error); 
-		final Set locales= SpellCheckEngine.getSupportedLocales();
-
-		Locale current= null;
-		for (final Iterator iterator= locales.iterator(); iterator.hasNext();) {
-
-			current= (Locale)iterator.next();
-			if (current.toString().equals(locale))
-				return new StatusInfo();
-		}
-		return status;
+		Locale locale= SpellCheckEngine.convertToLocale(localeString);
+		
+		if (SpellCheckEngine.findClosestLocale(locale) != null)
+			return new StatusInfo();
+		
+		return new StatusInfo(IStatus.ERROR, PreferencesMessages.SpellingPreferencePage_locale_error);
 	}
 
 	/**
@@ -270,7 +285,13 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		
 		fLabels.put(comboBox, labelControl);
 		
-		String currValue= getValue(key);	
+		String currValue= getValue(key);
+		
+		Locale locale= SpellCheckEngine.convertToLocale(currValue);
+		locale= SpellCheckEngine.findClosestLocale(locale);
+		if (locale != null)
+			currValue= locale.toString();
+		
 		comboBox.select(data.getSelection(currValue));
 		
 		fComboBoxes.add(comboBox);
@@ -291,7 +312,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		final String[] trueFalse= new String[] { IPreferenceStore.TRUE, IPreferenceStore.FALSE };
 
 		Group user= new Group(composite, SWT.NONE);
-		user.setText(PreferencesMessages.SpellingPreferencePage_preferences_user); 
+		user.setText(PreferencesMessages.SpellingPreferencePage_group_user); 
 		user.setLayout(new GridLayout());		
 		user.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		allControls.add(user);
@@ -324,22 +345,28 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_SINGLE_LETTERS, trueFalse, 0);
 		allControls.add(slave);
 
+		final Set locales= SpellCheckEngine.getLocalesWithInstalledDictionaries();
+		boolean hasPlaformDictionaries= locales.size() > 0;
+		
 		final Group engine= new Group(composite, SWT.NONE);
-		engine.setText(PreferencesMessages.SpellingPreferencePage_preferences_engine); 
+		if (hasPlaformDictionaries)
+			engine.setText(PreferencesMessages.SpellingPreferencePage_group_dictionaries);
+		else
+			engine.setText(PreferencesMessages.SpellingPreferencePage_group_dictionary);
 		engine.setLayout(new GridLayout(4, false));
 		engine.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		allControls.add(engine);
 
-		label= PreferencesMessages.SpellingPreferencePage_dictionary_label; 
-		final Set locales= SpellCheckEngine.getSupportedLocales();
-
-		Combo combo= addComboBox(engine, label, PREF_SPELLING_LOCALE, getDictionaryCodes(locales), getDictionaryLabels(locales), 0);
-		combo.setEnabled(locales.size() > 1);
-		allControls.add(combo);
-		allControls.add(fLabels.get(combo));
+		if (hasPlaformDictionaries) {
+			label= PreferencesMessages.SpellingPreferencePage_dictionary_label; 
+			Combo combo= addComboBox(engine, label, PREF_SPELLING_LOCALE, getDictionaryCodes(locales), getDictionaryLabels(locales), 0);
+			combo.setEnabled(locales.size() > 0);
+			allControls.add(combo);
+			allControls.add(fLabels.get(combo));
+			
+			new Label(engine, SWT.NONE); // placeholder
+		}
 		
-		new Label(engine, SWT.NONE); // placeholder
-
 		label= PreferencesMessages.SpellingPreferencePage_workspace_dictionary_label; 
 		fDictionaryPath= addTextField(engine, label, PREF_SPELLING_USER_DICTIONARY, 0, 0);
 		GridData gd= (GridData) fDictionaryPath.getLayoutData();
@@ -361,12 +388,22 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		SWTUtil.setButtonDimensionHint(button);
 		allControls.add(button);
 		
+		// Description for user dictionary
+		new Label(engine, SWT.NONE); // filler
+		Label description= new Label(engine, SWT.NONE);
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 3;
+		description.setLayoutData(gd);
+		description.setText(PreferencesMessages.SpellingPreferencePage_user_dictionary_description);
+		allControls.add(description);
+		
+
 		Group advanced= new Group(composite, SWT.NONE);
-		advanced.setText(PreferencesMessages.SpellingPreferencePage_preferences_advanced); 
+		advanced.setText(PreferencesMessages.SpellingPreferencePage_group_advanced); 
 		advanced.setLayout(new GridLayout(3, false));
 		advanced.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		allControls.add(advanced);
-		
+
 		label= PreferencesMessages.SpellingPreferencePage_proposals_threshold; 
 		Text text= addTextField(advanced, label, PREF_SPELLING_PROPOSAL_THRESHOLD, 0, 0);
 		text.setTextLimit(3);
@@ -375,10 +412,12 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		text.setLayoutData(gd);
 		allControls.add(text);
 		allControls.add(fLabels.get(text));
-		
-		label= PreferencesMessages.SpellingPreferencePage_enable_contentassist_label; 
-		button= addCheckBox(advanced, label, PREF_SPELLING_ENABLE_CONTENTASSIST, trueFalse, 0);
-		allControls.add(button);
+
+		if (SUPPORT_CONTENT_ASSIST_PROPOSALS) {
+			label= PreferencesMessages.SpellingPreferencePage_enable_contentassist_label; 
+			button= addCheckBox(advanced, label, PREF_SPELLING_ENABLE_CONTENTASSIST, trueFalse, 0);
+			allControls.add(button);
+		}
 
 		fAllControls= (Control[]) allControls.toArray(new Control[allControls.size()]);
 		
@@ -387,7 +426,10 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	private static Key[] getAllKeys() {
-		return new Key[] { PREF_SPELLING_USER_DICTIONARY, PREF_SPELLING_IGNORE_DIGITS, PREF_SPELLING_IGNORE_MIXED, PREF_SPELLING_IGNORE_SENTENCE, PREF_SPELLING_IGNORE_UPPER, PREF_SPELLING_IGNORE_URLS, PREF_SPELLING_IGNORE_NON_LETTERS, PREF_SPELLING_IGNORE_SINGLE_LETTERS, PREF_SPELLING_LOCALE, PREF_SPELLING_PROPOSAL_THRESHOLD, PREF_SPELLING_ENABLE_CONTENTASSIST };
+		if (SUPPORT_CONTENT_ASSIST_PROPOSALS)
+			return new Key[] { PREF_SPELLING_USER_DICTIONARY, PREF_SPELLING_IGNORE_DIGITS, PREF_SPELLING_IGNORE_MIXED, PREF_SPELLING_IGNORE_SENTENCE, PREF_SPELLING_IGNORE_UPPER, PREF_SPELLING_IGNORE_URLS, PREF_SPELLING_IGNORE_NON_LETTERS, PREF_SPELLING_IGNORE_SINGLE_LETTERS, PREF_SPELLING_LOCALE, PREF_SPELLING_PROPOSAL_THRESHOLD, PREF_SPELLING_ENABLE_CONTENTASSIST };
+		else
+			return new Key[] { PREF_SPELLING_USER_DICTIONARY, PREF_SPELLING_IGNORE_DIGITS, PREF_SPELLING_IGNORE_MIXED, PREF_SPELLING_IGNORE_SENTENCE, PREF_SPELLING_IGNORE_UPPER, PREF_SPELLING_IGNORE_URLS, PREF_SPELLING_IGNORE_NON_LETTERS, PREF_SPELLING_IGNORE_SINGLE_LETTERS, PREF_SPELLING_LOCALE, PREF_SPELLING_PROPOSAL_THRESHOLD };
 	}
 
 	/*
@@ -401,12 +443,9 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 * Handles selections of the browse button.
 	 */
 	protected void handleBrowseButtonSelected() {
-
 		final FileDialog dialog= new FileDialog(fDictionaryPath.getShell(), SWT.OPEN);
-		dialog.setFilterPath(fDictionaryPath.getText());
 		dialog.setText(PreferencesMessages.SpellingPreferencePage_filedialog_title); 
-		dialog.setFilterExtensions(new String[] { PreferencesMessages.SpellingPreferencePage_filter_dictionary_extension, PreferencesMessages.SpellingPreferencePage_filter_all_extension }); 
-		dialog.setFilterNames(new String[] { PreferencesMessages.SpellingPreferencePage_filter_dictionary_label, PreferencesMessages.SpellingPreferencePage_filter_all_label }); 
+		dialog.setFilterPath(fDictionaryPath.getText());
 
 		final String path= dialog.open();
 		if (path != null)

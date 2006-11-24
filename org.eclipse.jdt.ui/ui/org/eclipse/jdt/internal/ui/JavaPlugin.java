@@ -92,6 +92,7 @@ import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.folding.JavaFoldingStructureProviderRegistry;
 import org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
+import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
 
@@ -557,6 +558,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 				fSaveParticipantRegistry.dispose();
 				fSaveParticipantRegistry= null;
 			}
+			
+			SpellCheckEngine.shutdownInstance();
 			
 			QualifiedTypeNameHistory.getDefault().save();
 			

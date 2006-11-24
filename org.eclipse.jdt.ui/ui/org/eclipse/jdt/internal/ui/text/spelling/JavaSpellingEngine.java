@@ -11,8 +11,6 @@
 
 package org.eclipse.jdt.internal.ui.text.spelling;
 
-import java.util.Locale;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -37,9 +35,9 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener;
 public class JavaSpellingEngine extends SpellingEngine {
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.spelling.newapi.SpellingEngine#check(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IRegion[], org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker, java.util.Locale, org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector, org.eclipse.core.runtime.IProgressMonitor)
+	 * @see org.eclipse.jdt.internal.ui.text.spelling.SpellingEngine#check(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IRegion[], org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker, org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	protected void check(IDocument document, IRegion[] regions, ISpellChecker checker, Locale locale, ISpellingProblemCollector collector, IProgressMonitor monitor) {
+	protected void check(IDocument document, IRegion[] regions, ISpellChecker checker, ISpellingProblemCollector collector, IProgressMonitor monitor) {
 		ISpellEventListener listener= new SpellEventListener(collector, document);
 		try {
 			checker.addListener(listener);
@@ -53,7 +51,7 @@ public class JavaSpellingEngine extends SpellingEngine {
 
 						ITypedRegion partition= partitions[index];
 						if (!partition.getType().equals(IDocument.DEFAULT_CONTENT_TYPE) && !partition.getType().equals(IJavaPartitions.JAVA_CHARACTER))
-							checker.execute(new SpellCheckIterator(document, partition, locale));
+							checker.execute(new SpellCheckIterator(document, partition, checker.getLocale()));
 					}
 				}
 			} catch (BadLocationException x) {

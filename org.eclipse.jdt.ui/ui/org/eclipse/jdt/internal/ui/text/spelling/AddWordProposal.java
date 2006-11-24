@@ -24,7 +24,6 @@ import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
@@ -66,7 +65,7 @@ public class AddWordProposal implements IJavaCompletionProposal {
 	public final void apply(final IDocument document) {
 
 		final ISpellCheckEngine engine= SpellCheckEngine.getInstance();
-		final ISpellChecker checker= engine.createSpellChecker(engine.getLocale(), PreferenceConstants.getPreferenceStore());
+		final ISpellChecker checker= engine.getSpellChecker();
 
 		if (checker != null) {
 			checker.addWord(fWord);

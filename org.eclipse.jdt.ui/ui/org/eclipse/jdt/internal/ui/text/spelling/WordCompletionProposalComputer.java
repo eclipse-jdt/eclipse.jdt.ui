@@ -37,13 +37,20 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.RankedWordProposal;
 
 /**
  * Content assist processor to complete words.
+ * <strong>Note:</strong> This is currently not supported because the spelling engine
+ * cannot return word proposals but only correction proposals.
+ * <p>
+ * If we enable this again we must register the computer in <code>plugin.xml</code>:
+ * <pre>
+ * </pre>
+ * </p>
  *
  * @since 3.0
  */
 public final class WordCompletionProposalComputer implements IJavaCompletionProposalComputer {
 
 	/** The prefix rank shift */
-	private static final int PREFIX_RANK_SHIFT= 4096;
+	private static final int PREFIX_RANK_SHIFT= 500;
 
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
@@ -67,7 +74,7 @@ public final class WordCompletionProposalComputer implements IJavaCompletionProp
 				if (candidate.length() > 0) {
 			
 					final ISpellCheckEngine engine= SpellCheckEngine.getInstance();
-					final ISpellChecker checker= engine.createSpellChecker(engine.getLocale(), PreferenceConstants.getPreferenceStore());
+					final ISpellChecker checker= engine.getSpellChecker();
 			
 					if (checker != null) {
 			

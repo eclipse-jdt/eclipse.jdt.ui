@@ -13,46 +13,45 @@ package org.eclipse.jdt.internal.ui.text.spelling.engine;
 
 import java.util.Locale;
 
-import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
- * Interface for spell check engines.
+ * Interface for a spell check engine.
+ * <p>
+ * This engine can be configured with multiple
+ * dictionaries.
+ * </p>
  *
  * @since 3.0
  */
 public interface ISpellCheckEngine {
 
 	/**
-	 * Creates a configured instance of a spell checker that uses the
-	 * appropriate dictionaries.
+	 * Returns a spell checker configured with the global
+	 * dictionaries and the locale dictionary that correspond to the current
+	 * {@linkplain PreferenceConstants#SPELLING_LOCALE locale preference}.
+	 * <p>
+	 * <strong>Note:</strong> Changes to the spelling engine dictionaries
+	 * are not propagated to this spell checker.</p>
 	 *
-	 * @param locale
-	 *                   The locale to get the spell checker for
-	 * @param store
-	 *                   The preference store for the spell checker
-	 * @return A configured instance of a spell checker, or <code>null</code>
-	 *               iff no dictionary could be found for that locale
+	 * @return a configured instance of the spell checker
+	 * @throws IllegalStateException if called after being shut down
 	 */
-	ISpellChecker createSpellChecker(Locale locale, IPreferenceStore store);
+	ISpellChecker getSpellChecker() throws IllegalStateException;
 
 	/**
-	 * Returns the current locale of the spell check engine.
+	 * Returns the locale of the current spell check engine.
 	 *
-	 * @return The current locale of the engine
+	 * @return the locale of the current spell check engine
 	 */
 	Locale getLocale();
 
 	/**
-	 * Registers a dictionary for all locales available on the platform.
-	 * <p>
-	 * This call is equivalent to calling <code>registerDictionary(Locale,ISpellDictionary)</code>
-	 * for each of the locales returned by <code>Locale.getAvailableLocales()</code>.
-	 * </p>
+	 * Registers a global dictionary.
 	 *
-	 * @param dictionary
-	 *                   The dictionary to register
+	 * @param dictionary the global dictionary to register
 	 */
-	void registerDictionary(ISpellDictionary dictionary);
+	void registerGlobalDictionary(ISpellDictionary dictionary);
 
 	/**
 	 * Registers a dictionary tuned for the specified locale with this engine.
@@ -65,23 +64,21 @@ public interface ISpellCheckEngine {
 	void registerDictionary(Locale locale, ISpellDictionary dictionary);
 
 	/**
-	 * Unloads the spell check engine and its associated components.
+	 * Shuts down this spell check engine and its associated components.
 	 * <p>
-	 * All registered dictionaries are unloaded and the engine unregisters for
-	 * preference changes. After a new call to <code>getSpellChecker(Locale)</code>,
-	 * it registers again for preference changes. The dictionaries perform lazy
-	 * loading, that is to say on the next query they reload their associated
-	 * word lists.
+	 * Further calls to this engine result in exceptions.
+	 * </p>
 	 */
-	void unload();
+	void shutdown();
 
 	/**
 	 * Unregisters a dictionary previously registered either by a call to
 	 * <code>registerDictionary(Locale,ISpellDictionary)</code> or <code>registerDictionary(ISpellDictionary)</code>.
-	 * If the dictionary was not registered before, nothing happens.
+	 * <p>
+	 * If the dictionary was not registered before, nothing happens.</p>
 	 *
-	 * @param dictionary
-	 *                   The dictionary to unregister
+	 * @param dictionary the dictionary to unregister
 	 */
 	void unregisterDictionary(ISpellDictionary dictionary);
+	
 }

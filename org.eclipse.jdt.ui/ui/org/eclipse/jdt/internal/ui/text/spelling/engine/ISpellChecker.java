@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.text.spelling.engine;
 
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -26,7 +27,7 @@ public interface ISpellChecker {
 	 * @param dictionary
 	 *                   The dictionary to add
 	 */
-	public void addDictionary(ISpellDictionary dictionary);
+	void addDictionary(ISpellDictionary dictionary);
 
 	/**
 	 * Adds a spell event listener to the active listeners.
@@ -34,14 +35,14 @@ public interface ISpellChecker {
 	 * @param listener
 	 *                   The listener to add
 	 */
-	public void addListener(ISpellEventListener listener);
+	void addListener(ISpellEventListener listener);
 
 	/**
 	 * Returns whether this spell checker accepts word additions.
 	 *
 	 * @return <code>true</code> if word additions are accepted, <code>false</code> otherwise
 	 */
-	public boolean acceptsWords();
+	boolean acceptsWords();
 
 	/**
 	 * Adds the specified word to the set of correct words.
@@ -49,7 +50,7 @@ public interface ISpellChecker {
 	 * @param word
 	 *                   The word to add to the set of correct words
 	 */
-	public void addWord(String word);
+	void addWord(String word);
 
 	/**
 	 * Checks the specified word until calling <code>ignoreWord(String)</code>.
@@ -57,7 +58,7 @@ public interface ISpellChecker {
 	 * @param word
 	 *                   The word to check
 	 */
-	public void checkWord(String word);
+	void checkWord(String word);
 
 	/**
 	 * Checks the spelling with the spell check iterator. Implementations must
@@ -66,7 +67,7 @@ public interface ISpellChecker {
 	 * @param iterator
 	 *                   The iterator to use for spell checking
 	 */
-	public void execute(ISpellCheckIterator iterator);
+	void execute(ISpellCheckIterator iterator);
 
 	/**
 	 * Returns the ranked proposals for a word.
@@ -78,7 +79,7 @@ public interface ISpellChecker {
 	 *                   sentence, <code>false</code> otherwise
 	 * @return Set of ranked proposals for the word
 	 */
-	public Set getProposals(String word, boolean sentence);
+	Set getProposals(String word, boolean sentence);
 
 	/**
 	 * Ignores the specified word until calling <code>checkWord(String)</code>.
@@ -86,7 +87,7 @@ public interface ISpellChecker {
 	 * @param word
 	 *                   The word to ignore
 	 */
-	public void ignoreWord(String word);
+	void ignoreWord(String word);
 
 	/**
 	 * Is the specified word correctly spelled? Implementations must be thread
@@ -97,7 +98,7 @@ public interface ISpellChecker {
 	 * @return <code>true</code> iff the word is correctly spelled, <code>false</code>
 	 *               otherwise
 	 */
-	public boolean isCorrect(String word);
+	boolean isCorrect(String word);
 
 	/**
 	 * Remove a dictionary from the list of active dictionaries.
@@ -105,7 +106,7 @@ public interface ISpellChecker {
 	 * @param dictionary
 	 *                   The dictionary to remove
 	 */
-	public void removeDictionary(ISpellDictionary dictionary);
+	void removeDictionary(ISpellDictionary dictionary);
 
 	/**
 	 * Removes a spell event listener from the active listeners.
@@ -113,5 +114,13 @@ public interface ISpellChecker {
 	 * @param listener
 	 *                   The listener to remove
 	 */
-	public void removeListener(ISpellEventListener listener);
+	void removeListener(ISpellEventListener listener);
+	
+	/**
+	 * Returns the current locale of the spell check engine.
+	 *
+	 * @return The current locale of the engine
+	 * @since 3.3
+	 */
+	Locale getLocale();
 }

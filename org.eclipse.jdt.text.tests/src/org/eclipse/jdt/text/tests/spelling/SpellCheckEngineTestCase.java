@@ -21,7 +21,8 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceStore;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary;
@@ -63,7 +64,7 @@ public class SpellCheckEngineTestCase extends TestCase {
 	private final TestDictionary fDEDictionary= new TestDictionary();
 	private final ISpellCheckEngine fEngine= SpellCheckEngine.getInstance();
 	private final TestDictionary fGlobalDictionary= new TestDictionary();
-	private final IPreferenceStore fPreferences= new PreferenceStore();
+	private final IPreferenceStore fPreferences= PreferenceConstants.getPreferenceStore();
 	private final TestDictionary fUKDictionary= new TestDictionary();
 	private final TestDictionary fUSDictionary= new TestDictionary();
 
@@ -97,7 +98,7 @@ public class SpellCheckEngineTestCase extends TestCase {
 		fEngine.registerDictionary(Locale.US, fUSDictionary);
 		fEngine.registerDictionary(Locale.UK, fUKDictionary);
 		fEngine.registerDictionary(Locale.GERMANY, fDEDictionary);
-		fEngine.registerDictionary(fGlobalDictionary);
+		fEngine.registerGlobalDictionary(fGlobalDictionary);
 	}
 
 	/*
@@ -118,7 +119,7 @@ public class SpellCheckEngineTestCase extends TestCase {
 	}
 
 	public void testAvailableLocales() {
-		final Set result= SpellCheckEngine.getSupportedLocales();
+		final Set result= SpellCheckEngine.getLocalesWithInstalledDictionaries();
 		assertTrue(result.size() >= 0);
 	}
 
@@ -127,14 +128,14 @@ public class SpellCheckEngineTestCase extends TestCase {
 	}
 
 	public void testDefaultSpellChecker() {
-
+		fPreferences.setValue(PreferenceConstants.SPELLING_LOCALE, SpellCheckEngine.getDefaultLocale().toString());
 		fEngine.unregisterDictionary(fUSDictionary);
 
-		final ISpellChecker checker= fEngine.createSpellChecker(SpellCheckEngine.getDefaultLocale(), fPreferences);
+		final ISpellChecker checker= fEngine.getSpellChecker();
 		assertNotNull(checker);
 
 		assertFalse(checker.isCorrect(TRUCK));
-		assertFalse(checker.isCorrect(LORRY));
+		assertTrue(checker.isCorrect(LORRY)); // us in UK dictionary
 		assertFalse(checker.isCorrect(LASTWAGEN));
 		assertTrue(checker.isCorrect(GLOBAL));
 		fEngine.registerDictionary(Locale.US, fUSDictionary);
@@ -142,14 +143,14 @@ public class SpellCheckEngineTestCase extends TestCase {
 		assertFalse(checker.isCorrect(TRUCK));
 		fUSDictionary.addWord(TRUCK);
 
-		assertFalse(checker.isCorrect(LORRY));
+		assertTrue(checker.isCorrect(LORRY)); // is in UK dictionary
 		assertFalse(checker.isCorrect(LASTWAGEN));
 		assertTrue(checker.isCorrect(GLOBAL));
 	}
 
 	public void testDESpellChecker() {
-
-		final ISpellChecker checker= fEngine.createSpellChecker(Locale.GERMANY, fPreferences);
+		fPreferences.setValue(PreferenceConstants.SPELLING_LOCALE, Locale.GERMANY.toString());
+		final ISpellChecker checker= fEngine.getSpellChecker();
 		assertNotNull(checker);
 
 		assertFalse(checker.isCorrect(TRUCK));
@@ -162,8 +163,8 @@ public class SpellCheckEngineTestCase extends TestCase {
 	}
 
 	public void testIgnoredWord() {
-
-		final ISpellChecker checker= fEngine.createSpellChecker(Locale.US, fPreferences);
+		fPreferences.setValue(PreferenceConstants.SPELLING_LOCALE, Locale.US.toString());
+		final ISpellChecker checker= fEngine.getSpellChecker();
 		assertNotNull(checker);
 
 		assertFalse(checker.isCorrect(LORRY));
@@ -174,8 +175,8 @@ public class SpellCheckEngineTestCase extends TestCase {
 	}
 
 	public void testUKSpellChecker() {
-
-		final ISpellChecker checker= fEngine.createSpellChecker(Locale.UK, fPreferences);
+		fPreferences.setValue(PreferenceConstants.SPELLING_LOCALE, Locale.UK.toString());
+		final ISpellChecker checker= fEngine.getSpellChecker();
 		assertNotNull(checker);
 
 		assertFalse(checker.isCorrect(TRUCK));
@@ -188,14 +189,15 @@ public class SpellCheckEngineTestCase extends TestCase {
 	}
 
 	public void testUnknownSpellChecker() {
-
-		final ISpellChecker checker= fEngine.createSpellChecker(Locale.CHINA, fPreferences);
-		assertNull(checker);
+		fPreferences.setValue(PreferenceConstants.SPELLING_LOCALE, Locale.CHINA.toString());
+		final ISpellChecker checker= fEngine.getSpellChecker();
+		assertNotNull(checker);
+		assertEquals(Locale.CHINA, checker.getLocale());
 	}
 
 	public void testUSSpellChecker() {
-
-		final ISpellChecker checker= fEngine.createSpellChecker(Locale.US, fPreferences);
+		fPreferences.setValue(PreferenceConstants.SPELLING_LOCALE, Locale.US.toString());
+		final ISpellChecker checker= fEngine.getSpellChecker();
 		assertNotNull(checker);
 
 		assertTrue(checker.isCorrect(TRUCK));
@@ -208,8 +210,8 @@ public class SpellCheckEngineTestCase extends TestCase {
 	}
 
 	public void testWordProposals() {
-
-		final ISpellChecker checker= fEngine.createSpellChecker(Locale.US, fPreferences);
+		fPreferences.setValue(PreferenceConstants.SPELLING_LOCALE, Locale.US.toString());
+		final ISpellChecker checker= fEngine.getSpellChecker();
 		assertNotNull(checker);
 
 		fUSDictionary.addWord(SENTENCESTART);

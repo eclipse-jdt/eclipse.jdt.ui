@@ -512,7 +512,6 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	 * @see org.eclipse.jdt.ui.text.spelling.engine.ISpellDictionary#unload()
 	 */
 	public synchronized void unload() {
-
 		fLoaded= false;
 		fHashBuckets.clear();
 	}

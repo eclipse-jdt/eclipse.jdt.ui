@@ -40,7 +40,6 @@ import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
 import org.eclipse.jdt.internal.ui.text.java.ProposalSorterRegistry;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
-import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckPreferenceKeys;
 
 /**
  * Preference constants used in the JDT-UI preference store. Clients should only read the
@@ -2487,7 +2486,7 @@ public class PreferenceConstants {
 	 * 
 	 * @since 3.0
 	 */
-	public final static String SPELLING_IGNORE_DIGITS= ISpellCheckPreferenceKeys.SPELLING_IGNORE_DIGITS;
+	public final static String SPELLING_IGNORE_DIGITS= "spelling_ignore_digits"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether mixed case words should be
@@ -2498,7 +2497,7 @@ public class PreferenceConstants {
 	 * 
 	 * @since 3.0
 	 */
-	public final static String SPELLING_IGNORE_MIXED= ISpellCheckPreferenceKeys.SPELLING_IGNORE_MIXED;
+	public final static String SPELLING_IGNORE_MIXED= "spelling_ignore_mixed"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether sentence capitalization should
@@ -2509,7 +2508,7 @@ public class PreferenceConstants {
 	 * 
 	 * @since 3.0
 	 */
-	public final static String SPELLING_IGNORE_SENTENCE= ISpellCheckPreferenceKeys.SPELLING_IGNORE_SENTENCE;
+	public final static String SPELLING_IGNORE_SENTENCE= "spelling_ignore_sentence"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether upper case words should be
@@ -2520,7 +2519,7 @@ public class PreferenceConstants {
 	 * 
 	 * @since 3.0
 	 */
-	public final static String SPELLING_IGNORE_UPPER= ISpellCheckPreferenceKeys.SPELLING_IGNORE_UPPER;
+	public final static String SPELLING_IGNORE_UPPER= "spelling_ignore_upper"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether URLs should be ignored during
@@ -2531,7 +2530,7 @@ public class PreferenceConstants {
 	 * 
 	 * @since 3.0
 	 */
-	public final static String SPELLING_IGNORE_URLS= ISpellCheckPreferenceKeys.SPELLING_IGNORE_URLS;
+	public final static String SPELLING_IGNORE_URLS= "spelling_ignore_urls"; //$NON-NLS-1$
 	
 	/**
 	 * A named preference that controls whether single letters
@@ -2542,7 +2541,7 @@ public class PreferenceConstants {
 	 * 
 	 * @since 3.3
 	 */
-	public final static String SPELLING_IGNORE_SINGLE_LETTERS= ISpellCheckPreferenceKeys.SPELLING_IGNORE_SINGLE_LETTERS;
+	public final static String SPELLING_IGNORE_SINGLE_LETTERS= "spelling_ignore_single_letters"; //$NON-NLS-1$
 	
 	/**
 	 * A named preference that controls whether non-letters at word boundaries
@@ -2553,7 +2552,7 @@ public class PreferenceConstants {
 	 * 
 	 * @since 3.3
 	 */
-	public final static String SPELLING_IGNORE_NON_LETTERS= ISpellCheckPreferenceKeys.SPELLING_IGNORE_NON_LETTERS;
+	public final static String SPELLING_IGNORE_NON_LETTERS= "spelling_ignore_non_letters"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls the locale used for spell checking.
@@ -2563,7 +2562,7 @@ public class PreferenceConstants {
 	 * 
 	 * @since 3.0
 	 */
-	public final static String SPELLING_LOCALE= ISpellCheckPreferenceKeys.SPELLING_LOCALE;
+	public final static String SPELLING_LOCALE= "spelling_locale"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls the number of proposals offered during
@@ -2574,7 +2573,7 @@ public class PreferenceConstants {
 	 * 
 	 * @since 3.0
 	 */
-	public final static String SPELLING_PROPOSAL_THRESHOLD= ISpellCheckPreferenceKeys.SPELLING_PROPOSAL_THRESHOLD;
+	public final static String SPELLING_PROPOSAL_THRESHOLD= "spelling_proposal_threshold"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that specifies the workspace user dictionary.
@@ -2584,17 +2583,20 @@ public class PreferenceConstants {
 	 * 
 	 * @since 3.0
 	 */
-	public final static String SPELLING_USER_DICTIONARY= ISpellCheckPreferenceKeys.SPELLING_USER_DICTIONARY;
+	public final static String SPELLING_USER_DICTIONARY= "spelling_user_dictionary"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that specifies whether spelling dictionaries are available to content assist.
+	 * 
+	 * <strong>Note:</strong> This is currently not supported because the spelling engine
+	 * cannot return word proposals but only correction proposals.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 * 
 	 * @since 3.0
 	 */
-	public final static String SPELLING_ENABLE_CONTENTASSIST= ISpellCheckPreferenceKeys.SPELLING_ENABLE_CONTENTASSIST;
+	public final static String SPELLING_ENABLE_CONTENTASSIST= "spelling_enable_contentassist"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether code snippets are formatted
@@ -3662,6 +3664,8 @@ public class PreferenceConstants {
 		
 		// spell checking
 		store.setDefault(PreferenceConstants.SPELLING_LOCALE, SpellCheckEngine.getDefaultLocale().toString());
+		store.setToDefault(PreferenceConstants.SPELLING_LOCALE);
+		
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_DIGITS, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_MIXED, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_SENTENCE, true);
@@ -3671,7 +3675,11 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_NON_LETTERS, true);
 		store.setDefault(PreferenceConstants.SPELLING_USER_DICTIONARY, ""); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD, 20);
-		store.setDefault(PreferenceConstants.SPELLING_ENABLE_CONTENTASSIST, false);
+		/*
+		 * XXX: This is currently disabled because the spelling engine
+		 * cannot return word proposals but only correction proposals.
+		 */
+		store.setToDefault(PreferenceConstants.SPELLING_ENABLE_CONTENTASSIST);
 		
 		// folding
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_ENABLED, true);

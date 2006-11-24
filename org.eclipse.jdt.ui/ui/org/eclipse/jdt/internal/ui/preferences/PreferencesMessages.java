@@ -594,6 +594,7 @@ public final class PreferencesMessages extends NLS {
 	public static String SpellingPreferencePage_workspace_dictionary_label;
 	public static String SpellingPreferencePage_browse_label;
 	public static String SpellingPreferencePage_dictionary_error;
+	public static String SpellingPreferencePage_dictionary_none;
 	public static String SpellingPreferencePage_locale_error;
 	public static String SpellingPreferencePage_filedialog_title;
 	public static String SpellingPreferencePage_filter_dictionary_extension;
@@ -601,9 +602,11 @@ public final class PreferencesMessages extends NLS {
 	public static String SpellingPreferencePage_filter_dictionary_label;
 	public static String SpellingPreferencePage_filter_all_label;
 	public static String SpellingPreferencePage_enable_contentassist_label;
-	public static String SpellingPreferencePage_preferences_user;
-	public static String SpellingPreferencePage_preferences_engine;
-	public static String SpellingPreferencePage_preferences_advanced;
+	public static String SpellingPreferencePage_group_user;
+	public static String SpellingPreferencePage_group_dictionary;
+	public static String SpellingPreferencePage_group_dictionaries;
+	public static String SpellingPreferencePage_group_advanced;
+	public static String SpellingPreferencePage_user_dictionary_description;
 	public static String BuildPathPreferencePage_title;
 	public static String BuildPathPreferencePage_description;
 	public static String UserLibraryPreferencePage_title;

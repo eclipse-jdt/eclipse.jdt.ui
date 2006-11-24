@@ -11,11 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.text.spelling;
 
-import java.util.Locale;
-
 import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -24,9 +20,7 @@ import org.eclipse.ui.texteditor.spelling.ISpellingEngine;
 import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
 import org.eclipse.ui.texteditor.spelling.SpellingContext;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckPreferenceKeys;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener;
@@ -76,12 +70,11 @@ public abstract class SpellingEngine implements ISpellingEngine {
 	 * @see org.eclipse.ui.texteditor.spelling.ISpellingEngine#check(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IRegion[], org.eclipse.ui.texteditor.spelling.SpellingContext, org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void check(IDocument document, IRegion[] regions, SpellingContext context, ISpellingProblemCollector collector, IProgressMonitor monitor) {
-		IPreferenceStore preferences= PreferenceConstants.getPreferenceStore();
 		if (collector != null) {
-			Locale locale= getLocale(preferences);
-			ISpellChecker checker= SpellCheckEngine.getInstance().createSpellChecker(locale, preferences);
+			final ISpellCheckEngine spellingEngine= SpellCheckEngine.getInstance();
+			ISpellChecker checker= spellingEngine.getSpellChecker();
 			if (checker != null)
-				check(document, regions, checker, locale, collector, monitor);
+				check(document, regions, checker, collector, monitor);
 		}
 	}
 
@@ -91,26 +84,9 @@ public abstract class SpellingEngine implements ISpellingEngine {
 	 * @param document the document
 	 * @param regions the regions
 	 * @param checker the spell checker
-	 * @param locale the locale
 	 * @param collector the spelling problem collector
 	 * @param monitor the progress monitor, can be <code>null</code>
 	 */
-	protected abstract void check(IDocument document, IRegion[] regions, ISpellChecker checker, Locale locale, ISpellingProblemCollector collector, IProgressMonitor monitor);
+	protected abstract void check(IDocument document, IRegion[] regions, ISpellChecker checker, ISpellingProblemCollector collector, IProgressMonitor monitor);
 
-	/**
-	 * Returns the current locale of the spelling preferences.
-	 *
-	 * @return The current locale of the spelling preferences
-	 */
-	private Locale getLocale(IPreferenceStore preferences) {
-		Locale defaultLocale= SpellCheckEngine.getDefaultLocale();
-		String locale= preferences.getString(ISpellCheckPreferenceKeys.SPELLING_LOCALE);
-		if (locale.equals(defaultLocale.toString()))
-			return defaultLocale;
-
-		if (locale.length() >= 5)
-			return new Locale(locale.substring(0, 2), locale.substring(3, 5));
-
-		return defaultLocale;
-	}
 }
