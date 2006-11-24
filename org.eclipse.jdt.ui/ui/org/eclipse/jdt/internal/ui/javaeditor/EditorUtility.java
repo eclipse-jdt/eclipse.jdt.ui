@@ -20,12 +20,15 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -565,21 +568,27 @@ public class EditorUtility {
 	 * FIXME: needs work:
 	 * - assumes file that file buffer and document provider sit on same saved state
 	 * - ignores dirty state of file buffer
-	 * - neither connects nor disconnects the file buffer 
 	 * - is bad related to performance
 	 * 
 	 * @since 3.3
 	 */
 	private static boolean mustSaveEditor(IEditorPart ep, IEditorInput input, boolean saveUnknownEditors) {
-		
-
-		
+		/*
+		 * Goal: save all editors that could interfere with refactoring operations.
+		 * 
+		 * If <code>saveUnknownEditors</code> is <code>false</code>, save all editors
+		 * for compilation units that are not working copies.
+		 * 
+		 * If <code>saveUnknownEditors</code> is <code>true</code>, save all editors
+		 * whose buffer management cannot be determined.
+		 */
 		IResource resource= (IResource) input.getAdapter(IResource.class);
 		if (resource == null)
 			return saveUnknownEditors;
 
-		ITextFileBuffer fileBuffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(resource.getFullPath());
-		if (fileBuffer == null)
+		IPath location= resource.getFullPath();
+		ITextFileBufferManager textFileBufferManager= FileBuffers.getTextFileBufferManager();
+		if (textFileBufferManager.getTextFileBuffer(location) == null)
 			return saveUnknownEditors;
 
 		if (! (ep instanceof ITextEditor))
@@ -589,18 +598,28 @@ public class EditorUtility {
 		IDocumentProvider documentProvider= textEditor.getDocumentProvider();
 		if (documentProvider == null)
 			return saveUnknownEditors;
-
-		IDocument fileBufferDocument= fileBuffer.getDocument();
-		IDocument documentProviderDocument= documentProvider.getDocument(input);
-		if (!fileBufferDocument.equals(documentProviderDocument)) {
-			return saveUnknownEditors;
-		} else {
-			IJavaElement javaElement= JavaCore.create(resource);
-			if (javaElement instanceof ICompilationUnit) {
-				ICompilationUnit cu= (ICompilationUnit) javaElement;
-				if (!cu.isWorkingCopy())
-					return true;
+		
+		try {
+			textFileBufferManager.connect(location, new NullProgressMonitor());
+			try {
+				ITextFileBuffer fileBuffer= textFileBufferManager.getTextFileBuffer(location);
+				IDocument fileBufferDocument= fileBuffer.getDocument();
+				IDocument documentProviderDocument= documentProvider.getDocument(input);
+				if (!fileBufferDocument.equals(documentProviderDocument)) {
+					return saveUnknownEditors;
+				} else {
+					IJavaElement javaElement= JavaCore.create(resource);
+					if (javaElement instanceof ICompilationUnit) {
+						ICompilationUnit cu= (ICompilationUnit) javaElement;
+						if (!cu.isWorkingCopy())
+							return true;
+					}
+				}
+			} finally {
+				textFileBufferManager.disconnect(location, new NullProgressMonitor());
 			}
+		} catch (CoreException e) {
+			return true;
 		}
 
 		return false;
