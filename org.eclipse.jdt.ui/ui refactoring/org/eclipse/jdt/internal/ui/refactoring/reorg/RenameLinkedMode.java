@@ -315,10 +315,11 @@ public class RenameLinkedMode {
 			} else {
 				renameSupport.perform(shell, workbenchWindow);
 			}
+			JavaModelUtil.reconcile(getCompilationUnit());
 		} catch (CoreException ex) {
 			JavaPlugin.log(ex);
 		} catch (InterruptedException ex) {
-			// cancelling is OK
+			// canceling is OK
 		} catch (InvocationTargetException ex) {
 			JavaPlugin.log(ex);
 		} catch (BadLocationException e) {
