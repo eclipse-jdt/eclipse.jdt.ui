@@ -83,7 +83,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	public PackageExplorerContentProvider(boolean provideMembers) {
 		super(provideMembers);
 		fPackageFragmentProvider= new PackageFragmentProvider();
-		fShowLibrariesNode= true;
+		fShowLibrariesNode= false;
 		fIsFlatLayout= false;
 	}
 		
