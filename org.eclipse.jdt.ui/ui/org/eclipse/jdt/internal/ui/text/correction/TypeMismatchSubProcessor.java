@@ -271,10 +271,13 @@ public class TypeMismatchSubProcessor {
 	public static void addIncompatibleReturnTypeProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws JavaModelException {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
-		if (!(selectedNode instanceof MethodDeclaration)) {
+		if (selectedNode == null) {
 			return;
 		}
-		MethodDeclaration decl= (MethodDeclaration) selectedNode;
+		MethodDeclaration decl= ASTResolving.findParentMethodDeclaration(selectedNode);
+		if (decl == null) {
+			return;
+		}
 		IMethodBinding methodDeclBinding= decl.resolveBinding();
 		if (methodDeclBinding == null) {
 			return;
