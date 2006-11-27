@@ -492,7 +492,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fUseAddCommentButtonValue= false; // only used when enabled
 		
 		fCurrPackageCompletionProcessor= new JavaPackageCompletionProcessor();
-		fEnclosingTypeCompletionProcessor= new JavaTypeCompletionProcessor(false, false);
+		fEnclosingTypeCompletionProcessor= new JavaTypeCompletionProcessor(false, false, true);
 		
 		fPackageStatus= new StatusInfo();
 		fEnclosingTypeStatus= new StatusInfo();
@@ -778,7 +778,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		Text text= fSuperClassDialogField.getTextControl(null);
 		LayoutUtil.setWidthHint(text, getMaxFieldWidth());
 		
-		JavaTypeCompletionProcessor superClassCompletionProcessor= new JavaTypeCompletionProcessor(false, false);
+		JavaTypeCompletionProcessor superClassCompletionProcessor= new JavaTypeCompletionProcessor(false, false, true);
 		superClassCompletionProcessor.setCompletionContextRequestor(new CompletionContextRequestor() {
 			public StubTypeContext getStubTypeContext() {
 				return getSuperClassStubTypeContext();
@@ -813,7 +813,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		        }
 		    }
 		};
-		JavaTypeCompletionProcessor superInterfaceCompletionProcessor= new JavaTypeCompletionProcessor(false, false);
+		JavaTypeCompletionProcessor superInterfaceCompletionProcessor= new JavaTypeCompletionProcessor(false, false, true);
 		superInterfaceCompletionProcessor.setCompletionContextRequestor(new CompletionContextRequestor() {
 			public StubTypeContext getStubTypeContext() {
 				return getSuperInterfacesStubTypeContext();
