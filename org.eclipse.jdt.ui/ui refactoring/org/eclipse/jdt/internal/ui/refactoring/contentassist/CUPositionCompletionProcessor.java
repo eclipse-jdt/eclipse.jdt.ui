@@ -46,6 +46,7 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 
 
@@ -251,14 +252,10 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 		
 		protected final void addAdjustedTypeCompletion(String name, String completion,
 				int start, int end, int relevance, ImageDescriptor descriptor, String fullyQualifiedName) {
-			JavaCompletionProposal javaCompletionProposal= new JavaCompletionProposal(
-					fullyQualifiedName == null ? completion : fullyQualifiedName,
+			JavaTypeCompletionProposal javaCompletionProposal= new JavaTypeCompletionProposal(
+					fullyQualifiedName == null ? completion : fullyQualifiedName, null,
 					fullyQualifiedName == null ? start - fOffsetReduction : 0,
-					end - start, getImage(descriptor), name, relevance);
-//			JavaTypeCompletionProposal javaCompletionProposal= new JavaTypeCompletionProposal(
-//					fullyQualifiedName == null ? completion : fullyQualifiedName, null,
-//					fullyQualifiedName == null ? start - fOffsetReduction : 0,
-//					end - start, getImage(descriptor), name, relevance, completion);
+					end - start, getImage(descriptor), name, relevance, completion);
 			javaCompletionProposal.setTriggerCharacters(TRIGGER_CHARACTERS);
 			fProposals.add(javaCompletionProposal);
 		}
