@@ -178,7 +178,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		fMethodStubsButtons= new MethodStubsSelectionButtonGroup(SWT.CHECK, buttonNames, 2);
 		fMethodStubsButtons.setLabelText(WizardMessages.NewTestCaseWizardPageOne_method_Stub_label); 
 		
-		fClassToTestCompletionProcessor= new JavaTypeCompletionProcessor(false, false); 
+		fClassToTestCompletionProcessor= new JavaTypeCompletionProcessor(false, false, true); 
 
 		fClassUnderTestStatus= new JUnitStatus();
 		
