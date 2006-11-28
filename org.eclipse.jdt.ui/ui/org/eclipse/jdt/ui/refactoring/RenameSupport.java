@@ -21,6 +21,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 
+import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
+
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
@@ -60,6 +62,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameRefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameSelectionState;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceManager;
 
@@ -127,19 +130,32 @@ public class RenameSupport {
 	 * </p>
 	 * 
 	 * @param parent a shell used as a parent for the preview and error dialogs.
-	 * @param context a {@link IRunnableContext} to execute the operation.
 	 * 
 	 * @throws InterruptedException if the operation has been canceled by the
 	 * user.
-	 * @throws InvocationTargetException if an error occurred while executing the
+	 * @throws CoreException if an error occurred while executing the
 	 * operation.
 	 * 
 	 * @see #openDialog(Shell)
-	 * @see IRunnableContext#run(boolean, boolean, org.eclipse.jface.operation.IRunnableWithProgress)
 	 * @since 3.3
 	 */
-	public void openPreview(Shell parent, IRunnableContext context) throws InterruptedException, InvocationTargetException {
-		perform(true, parent, context);
+	public void openPreview(Shell parent) throws InterruptedException, CoreException {
+		ensureChecked();
+		if (fPreCheckStatus.hasFatalError()) {
+			showInformation(parent, fPreCheckStatus);
+			return; 
+		}
+		RenameSelectionState state= createSelectionState();
+		
+		RenameRefactoringWizard wizard= new RenameRefactoringWizard(fRefactoring, fRefactoring.getName(), null, null, null) {
+			protected void addUserInputPages() {
+				// nothing to add
+			}
+		};
+		RefactoringWizardOpenOperation op= new RefactoringWizardOpenOperation(wizard);
+		op.run(parent, fRefactoring.getName());
+		
+		restoreSelectionState(state);
 	}
 
 	/**
@@ -163,49 +179,28 @@ public class RenameSupport {
 	 * @see IRunnableContext#run(boolean, boolean, org.eclipse.jface.operation.IRunnableWithProgress)
 	 */
 	public void perform(Shell parent, IRunnableContext context) throws InterruptedException, InvocationTargetException {
-		perform(false, parent, context);
-	}
-	
-	private void perform(boolean showPreview, Shell parent, IRunnableContext context) throws InvocationTargetException, InterruptedException {
-		RenameProcessor processor= (RenameProcessor) fRefactoring.getAdapter(RenameProcessor.class);
-		Object[] elements= processor.getElements();
-		RenameSelectionState state= elements.length == 1 ? new RenameSelectionState(elements[0]) : null;
-		
-		RefactoringExecutionHelper helper= createExecutionHelper(parent, context);
-		if (helper != null) {
-			helper.perform(showPreview, false, true);
-			INameUpdating nameUpdating= (INameUpdating) fRefactoring.getAdapter(INameUpdating.class);
-			if (nameUpdating != null && state != null) {
-				try {
-					Object newElement= nameUpdating.getNewElement();
-					if (newElement != null) {
-						state.restore(newElement);
-					}			
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
-				}
-			}
-		}
-	}
-	
-	private RefactoringExecutionHelper createExecutionHelper(Shell parent, IRunnableContext context) throws InvocationTargetException {
 		try {
 			ensureChecked();
 			if (fPreCheckStatus.hasFatalError()) {
 				showInformation(parent, fPreCheckStatus);
-				return null;
+				return;
 			}
-		} catch (CoreException e){
+			
+			RenameSelectionState state= createSelectionState();
+		
+			RefactoringExecutionHelper helper= new RefactoringExecutionHelper(fRefactoring,
+					RefactoringCore.getConditionCheckingFailedSeverity(),
+					getJavaRenameProcessor().getSaveMode(),
+					parent,
+					context);
+			helper.perform(true, true);
+		
+			restoreSelectionState(state);
+		} catch (CoreException e) {
 			throw new InvocationTargetException(e);
 		}
-		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(fRefactoring,
-				RefactoringCore.getConditionCheckingFailedSeverity(),
-				getJavaRenameProcessor().getSaveMode(),
-				parent,
-				context);
-		return helper;
 	}
-	
+
 	/** Flag indication that no additional update is to be performed. */
 	public static final int NONE= 0;
 	
@@ -499,5 +494,22 @@ public class RenameSupport {
 	private void showInformation(Shell parent, RefactoringStatus status) {
 		String message= status.getMessageMatchingSeverity(RefactoringStatus.FATAL);
 		MessageDialog.openInformation(parent, JavaUIMessages.RenameSupport_dialog_title, message); 
+	}
+	
+	private RenameSelectionState createSelectionState() {
+		RenameProcessor processor= (RenameProcessor) fRefactoring.getAdapter(RenameProcessor.class);
+		Object[] elements= processor.getElements();
+		RenameSelectionState state= elements.length == 1 ? new RenameSelectionState(elements[0]) : null;
+		return state;
+	}
+	
+	private void restoreSelectionState(RenameSelectionState state) throws CoreException {
+		INameUpdating nameUpdating= (INameUpdating) fRefactoring.getAdapter(INameUpdating.class);
+		if (nameUpdating != null && state != null) {
+			Object newElement= nameUpdating.getNewElement();
+			if (newElement != null) {
+				state.restore(newElement);
+			}			
+		}
 	}
 }

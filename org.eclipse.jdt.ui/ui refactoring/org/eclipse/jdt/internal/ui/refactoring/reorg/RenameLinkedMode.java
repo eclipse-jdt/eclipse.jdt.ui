@@ -57,7 +57,6 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
@@ -309,17 +308,16 @@ public class RenameLinkedMode {
 				return;
 			
 			Shell shell= fEditor.getSite().getShell();
-			IWorkbenchWindow workbenchWindow= fEditor.getSite().getWorkbenchWindow();
 			if (showPreview) {
-				renameSupport.openPreview(shell, workbenchWindow);
+				renameSupport.openPreview(shell);
 			} else {
-				renameSupport.perform(shell, workbenchWindow);
+				renameSupport.perform(shell, fEditor.getSite().getWorkbenchWindow());
 			}
 			JavaModelUtil.reconcile(getCompilationUnit());
 		} catch (CoreException ex) {
 			JavaPlugin.log(ex);
 		} catch (InterruptedException ex) {
-			// canceling is OK
+			// canceling is OK -> redo text changes in that case?
 		} catch (InvocationTargetException ex) {
 			JavaPlugin.log(ex);
 		} catch (BadLocationException e) {

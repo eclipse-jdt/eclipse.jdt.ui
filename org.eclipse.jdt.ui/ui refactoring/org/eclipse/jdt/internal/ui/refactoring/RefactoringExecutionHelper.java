@@ -40,13 +40,11 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler;
-import org.eclipse.ltk.internal.ui.refactoring.RefactoringWizardDialog2;
 import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameRefactoringWizard;
 
 /**
  * A helper class to execute a refactoring. The class takes care of pushing the
@@ -64,89 +62,81 @@ public class RefactoringExecutionHelper {
 	private class Operation implements IWorkspaceRunnable {
 		public Change fChange;
 		public PerformChangeOperation fPerformChangeOperation;
-		private final boolean fShowPreview;
-		private final boolean fApplyChanges;
+		private final boolean fForked;
 		
-		public Operation(boolean showPreview, boolean applyChanges) {
-			fShowPreview= showPreview;
-			fApplyChanges= applyChanges;
+		public Operation(boolean forked) {
+			fForked= forked;
         }
 		
 		public void run(IProgressMonitor pm) throws CoreException {
 			try {
-				pm.beginTask("", fApplyChanges?11:7); //$NON-NLS-1$
+				pm.beginTask("", fForked ? 7 : 11); //$NON-NLS-1$
 				pm.subTask(""); //$NON-NLS-1$
 				
-				RefactoringStatus status= fRefactoring.checkAllConditions(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
-				int severity= status.getSeverity();
-				if (fShowPreview) {
-					if (severity == RefactoringStatus.FATAL) {
-						showStatusDialog(status);
+				final RefactoringStatus status= fRefactoring.checkAllConditions(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
+				if (status.getSeverity() >= fStopSeverity) {
+					final boolean[] canceled= { false };
+					if (fForked) {
+						fParent.getDisplay().syncExec(new Runnable() {
+							public void run() {
+								canceled[0]= showStatusDialog(status);
+							}
+						});
+					} else {
+						canceled[0]= showStatusDialog(status);
 					}
-				} else if (severity >= fStopSeverity) {
-					showStatusDialog(status);
+					if (canceled[0]) {
+						throw new OperationCanceledException();
+					}
 				}
 
 				fChange= fRefactoring.createChange(new SubProgressMonitor(pm, 2, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 				fChange.initializeValidationData(new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
-				if (fShowPreview) {
-					RenameRefactoringWizard wizard= new RenameRefactoringWizard(fRefactoring, fRefactoring.getName(), null, null, null) {
-						protected void addUserInputPages() {
-							// nothing to add
-						}
-					};
-					RefactoringWizardDialog2 dialog= new RefactoringWizardDialog2(fParent, wizard);
-					if (dialog.open() == IDialogConstants.CANCEL_ID) {
-						throw new OperationCanceledException();
-					} else {
-						return;
-					}
-				}
 				
 				fPerformChangeOperation= RefactoringUI.createUIAwareChangeOperation(fChange);
 				fPerformChangeOperation.setUndoManager(RefactoringCore.getUndoManager(), fRefactoring.getName());
 				if (fRefactoring instanceof IScheduledRefactoring)
 					fPerformChangeOperation.setSchedulingRule(((IScheduledRefactoring)fRefactoring).getSchedulingRule());
 				
-				if (fApplyChanges)
+				if (! fForked)
 					fPerformChangeOperation.run(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 			} finally {
 				pm.done();
 			}
 		}
 
-		private void showStatusDialog(RefactoringStatus status) throws OperationCanceledException {
+		/**
+		 * @return <code>true</code> iff the operation should be cancelled
+		 */
+		private boolean showStatusDialog(RefactoringStatus status) {
 			Dialog dialog= RefactoringUI.createRefactoringStatusDialog(status, fParent, fRefactoring.getName(), false);
-			if (dialog.open() == IDialogConstants.CANCEL_ID) {
-				throw new OperationCanceledException();
-			}
+			return dialog.open() == IDialogConstants.CANCEL_ID;
 		}
 	}
 	
 	/**
 	 * @param refactoring
-	 * @param stopSevertity a refactoring status constant from {@link RefactoringStatus}
+	 * @param stopSeverity a refactoring status constant from {@link RefactoringStatus}
 	 * @param saveMode a save mode from {@link RefactoringSaveHelper}
 	 * @param parent
 	 * @param context
 	 */
-	public RefactoringExecutionHelper(Refactoring refactoring, int stopSevertity, int saveMode, Shell parent, IRunnableContext context) {
+	public RefactoringExecutionHelper(Refactoring refactoring, int stopSeverity, int saveMode, Shell parent, IRunnableContext context) {
 		super();
 		Assert.isNotNull(refactoring);
 		Assert.isNotNull(parent);
 		Assert.isNotNull(context);
 		fRefactoring= refactoring;
-		fStopSeverity= stopSevertity;
+		fStopSeverity= stopSeverity;
 		fParent= parent;
 		fExecContext= context;
 		fSaveMode= saveMode;
 	}
 	
+	/**
+	 * Must be called in the UI thread.
+	 */
 	public void perform(boolean fork, boolean cancelable) throws InterruptedException, InvocationTargetException {
-		perform(false, fork, cancelable);
-	}
-	
-	public void perform(boolean showPreview, boolean fork, boolean cancelable) throws InterruptedException, InvocationTargetException {
 		Assert.isTrue(Display.getCurrent() != null);
 		final IJobManager manager=  Job.getJobManager();
 		final ISchedulingRule rule;
@@ -178,7 +168,7 @@ public class RefactoringExecutionHelper {
 			RefactoringSaveHelper saveHelper= new RefactoringSaveHelper(fSaveMode);
 			if (!saveHelper.saveEditors(fParent))
 				throw new InterruptedException();
-			final Operation op= new Operation(showPreview, !fork);
+			final Operation op= new Operation(fork);
 			fRefactoring.setValidationContext(fParent);
 			try{
 				fExecContext.run(fork, cancelable, new OperationRunner(op, rule));
@@ -210,7 +200,7 @@ public class RefactoringExecutionHelper {
 				} else {
 					throw e;
 				}
-			}catch (OperationCanceledException e) {
+			} catch (OperationCanceledException e) {
 				throw new InterruptedException(e.getMessage());
 			} finally {
 				saveHelper.triggerBuild();
