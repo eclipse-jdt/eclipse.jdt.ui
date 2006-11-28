@@ -39,6 +39,9 @@ public class RefactoringScanner {
 			fQualified= qualified;
 		}
 
+		/**
+		 * @return the offset where the unqualified name starts
+		 */
 		public int getStartPosition() {
 			return fStartPosition;
 		}
@@ -168,10 +171,24 @@ public class RefactoringScanner {
 		int beforeQualifierPos= qualifierAfter - fQualifier.length() - 1;
 		if (beforeQualifierPos >= 0) {
 			char beforeQualifierChar= value.charAt(beforeQualifierPos);
-			boolean charBeforeQualifierIsQualifierPart= isQualifierPart(beforeQualifierChar);
-			// true if the char before the qualifier is a normal letter
-			// (and therefore invalidates the whole string)
-			return charBeforeQualifierIsQualifierPart ? NO_MATCH : MATCH_QUALIFIED;
+			if (Character.isJavaIdentifierPart(beforeQualifierChar)) {
+				return NO_MATCH;
+			}
+			if (isQualifierSeparator(beforeQualifierChar)) {
+				if (beforeQualifierPos > 0) {
+					/*
+					 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=142508 :
+					 * If the character before the qualifier separator is not
+					 * an identifier part, then accept the match.
+					 */
+					char precedingOne= value.charAt(beforeQualifierPos - 1);
+					if (Character.isJavaIdentifierPart(precedingOne)) {
+						return NO_MATCH;
+					}
+				}
+			}
+			return MATCH_QUALIFIED;
+			
 		}
 		return MATCH_QUALIFIED;
 	}

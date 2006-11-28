@@ -79,7 +79,7 @@ public class RefactoringScannerTests extends RefactoringTest{
 			matchesList.add(new Integer(element.getStartPosition()));
 		}
 		Collections.sort(matchesList);
-		assertEquals("results", expectedMatchesList, matchesList);
+		assertEquals("results", expectedMatchesList.toString(), matchesList.toString());
 	}
 	
 	//-- tests
@@ -98,7 +98,18 @@ public class RefactoringScannerTests extends RefactoringTest{
 	}
 	
 	public void testQualifier() throws Exception{
-		helper2("C.java", new Position[] { new Position(4, 21), new Position(17, 21) });
+		helper2("C.java", new Position[] {
+				new Position(4, 21),
+				new Position(17, 21),
+				
+				new Position(28, 21),
+				new Position(29, 20),
+				
+				new Position(32, 20),
+				
+				new Position(37, 21),
+				new Position(38, 20),
+		});
 	}
 }
 

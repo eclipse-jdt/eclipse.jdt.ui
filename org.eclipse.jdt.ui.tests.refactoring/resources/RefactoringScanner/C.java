@@ -24,5 +24,17 @@ class B{
 		String g2= "org.eklipse.TestPattern";
 		String g3= "org.eclipse.TestPatternMatching";
 	}
-	
+	/*
+	 * #org.eclipse.TestPattern
+	 * org.eclipse.TestPattern#
+	 * 
+	 * $org.eclipse.TestPattern
+	 * org.eclipse.TestPattern$
+	 * 
+	 * 1org.eclipse.TestPattern
+	 * org.eclipse.TestPattern1
+	 * 
+	 * *org.eclipse.TestPattern
+	 * org.eclipse.TestPattern*
+	 */
 }
