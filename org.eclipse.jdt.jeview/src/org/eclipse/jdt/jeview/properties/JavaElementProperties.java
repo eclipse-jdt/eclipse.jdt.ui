@@ -23,6 +23,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 
+import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -89,6 +90,25 @@ public class JavaElementProperties implements IPropertySource {
 	}
 	
 	static {
+		addJavaElementProperties();
+		addClassFileProperties();
+		addCompilationUnitProperties();
+		addImportDeclarationProperties();
+		addJavaProjectProperties();
+		addLocalVariableProperties();
+		addMemberProperties();
+		addFieldProperties();
+		addMethodProperties();
+		addTypeProperties();
+		addPackageFragmentProperties();
+		addPackageFragmentRootProperties();
+		addTypeParammeterProperties();
+		addParentProperties();
+		addSourceReferenceProperties();
+		addOpenableProperties();
+	}
+
+	private static void addJavaElementProperties() {
 		addProperty(new Property(IJavaElement.class, "elementName") {
 			@Override public Object compute(IJavaElement element) {
 				return element.getElementName();
@@ -129,7 +149,9 @@ public class JavaElementProperties implements IPropertySource {
 				return getSchedulingRuleString(element.getSchedulingRule());
 			}
 		});
-		
+	}
+
+	private static void addClassFileProperties() {
 		addProperty(new Property(IClassFile.class, "isClass") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
 				return ((IClassFile) element).isClass();
@@ -140,7 +162,9 @@ public class JavaElementProperties implements IPropertySource {
 				return ((IClassFile) element).isInterface();
 			}
 		});
-		
+	}
+
+	private static void addCompilationUnitProperties() {
 		addProperty(new Property(ICompilationUnit.class, "hasResourceChanged") {
 			@Override public Object compute(IJavaElement element) {
 				return ((ICompilationUnit) element).hasResourceChanged();
@@ -151,7 +175,9 @@ public class JavaElementProperties implements IPropertySource {
 				return ((ICompilationUnit) element).isWorkingCopy();
 			}
 		});
-		
+	}
+
+	private static void addImportDeclarationProperties() {
 		addProperty(new Property(IImportDeclaration.class, "flags") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
 				return getFlagsString(((IImportDeclaration) element).getFlags(), IImportDeclaration.class);
@@ -162,7 +188,9 @@ public class JavaElementProperties implements IPropertySource {
 				return ((IImportDeclaration) element).isOnDemand();
 			}
 		});
-		
+	}
+
+	private static void addJavaProjectProperties() {
 		addProperty(new Property(IJavaProject.class, "hasBuildState") {
 			@Override public Object compute(IJavaElement element) {
 				return ((IJavaProject) element).hasBuildState();
@@ -178,7 +206,9 @@ public class JavaElementProperties implements IPropertySource {
 				return ((IJavaProject) element).readOutputLocation();
 			}
 		});
-		
+	}
+
+	private static void addLocalVariableProperties() {
 		addProperty(new Property(ILocalVariable.class, "nameRange") {
 			@Override public Object compute(IJavaElement element) {
 				return getSourceRangeString(((ILocalVariable) element).getNameRange());
@@ -189,7 +219,9 @@ public class JavaElementProperties implements IPropertySource {
 				return ((ILocalVariable) element).getTypeSignature();
 			}
 		});
-		
+	}
+
+	private static void addMemberProperties() {
 		addProperty(new Property(IMember.class, "nameRange") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
 				return getSourceRangeString(((IMember) element).getNameRange());
@@ -215,7 +247,9 @@ public class JavaElementProperties implements IPropertySource {
 				return ((IMember) element).getOccurrenceCount();
 			}
 		});
-		
+	}
+
+	private static void addFieldProperties() {
 		addProperty(new Property(IField.class, "isResolved") {
 			@Override public Object compute(IJavaElement element) {
 				return ((IField) element).isResolved();
@@ -241,7 +275,9 @@ public class JavaElementProperties implements IPropertySource {
 				return ((IField) element).isEnumConstant();
 			}
 		});
-		
+	}
+
+	private static void addMethodProperties() {
 		addProperty(new Property(IMethod.class, "isResolved") {
 			@Override public Object compute(IJavaElement element) {
 				return ((IMethod) element).isResolved();
@@ -250,6 +286,15 @@ public class JavaElementProperties implements IPropertySource {
 		addProperty(new Property(IMethod.class, "key") {
 			@Override public Object compute(IJavaElement element) {
 				return ((IMethod) element).getKey();
+			}
+		});
+		addProperty(new Property(IMethod.class, "key - signature") {
+			@Override public Object compute(IJavaElement element) {
+				String key= ((IMethod) element).getKey();
+				if (key != null)
+					return new BindingKey(key).toSignature();
+				else
+					return "<no key>";
 			}
 		});
 		addProperty(new Property(IMethod.class, "numberOfParameters") {
@@ -277,7 +322,9 @@ public class JavaElementProperties implements IPropertySource {
 				return ((IMethod) element).isMainMethod();
 			}
 		});
-		
+	}
+
+	private static void addTypeProperties() {
 		addProperty(new Property(IType.class, "isResolved") {
 			@Override public Object compute(IJavaElement element) {
 				return ((IType) element).isResolved();
@@ -348,7 +395,9 @@ public class JavaElementProperties implements IPropertySource {
 				return ((IType) element).isMember();
 			}
 		});
-		
+	}
+
+	private static void addPackageFragmentProperties() {
 		addProperty(new Property(IPackageFragment.class, "containsJavaResources") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
 				return ((IPackageFragment) element).containsJavaResources();
@@ -369,7 +418,9 @@ public class JavaElementProperties implements IPropertySource {
 				return ((IPackageFragment) element).isDefaultPackage();
 			}
 		});
-		
+	}
+
+	private static void addPackageFragmentRootProperties() {
 		addProperty(new Property(IPackageFragmentRoot.class, "kind") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
 				return getPFRKindString(((IPackageFragmentRoot) element).getKind());
@@ -395,26 +446,33 @@ public class JavaElementProperties implements IPropertySource {
 				return ((IPackageFragmentRoot) element).isExternal();
 			}
 		});
-		
+	}
+
+	private static void addTypeParammeterProperties() {
 		addProperty(new Property(ITypeParameter.class, "nameRange") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
 				return getSourceRangeString(((ITypeParameter) element).getNameRange());
 			}
 		});
-		
-		
+	}
+
+	private static void addParentProperties() {
 		addProperty(new Property(IParent.class, "hasChildren") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
 				return ((IParent) element).hasChildren();
 			}
 		});
-		
+	}
+
+	private static void addSourceReferenceProperties() {
 		addProperty(new Property(ISourceReference.class, "sourceRange") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
 				return getSourceRangeString(((ISourceReference) element).getSourceRange());
 			}
 		});
-		
+	}
+
+	private static void addOpenableProperties() {
 		addProperty(new Property(IOpenable.class, "hasUnsavedChanges") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
 				return ((IOpenable) element).hasUnsavedChanges();
