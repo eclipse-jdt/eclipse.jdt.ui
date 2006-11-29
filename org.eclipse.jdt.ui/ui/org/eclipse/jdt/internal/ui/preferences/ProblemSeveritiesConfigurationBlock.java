@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
   */
 public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlock {
 
-	private static final String SETTINGS_SECTION_NAME= null; //"ProblemSeveritiesConfigurationBlock"; 
+	private static final String SETTINGS_SECTION_NAME= "ProblemSeveritiesConfigurationBlock";  //$NON-NLS-1$
 	
 	// Preference store keys, see JavaCore.getOptions
 	private static final Key PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD= getJDTCoreKey(JavaCore.COMPILER_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD);
