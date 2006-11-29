@@ -215,7 +215,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (ifIndex == -1) {
 			return false;
 		}
-		// ok, we could produce quick assist
+		//  we could produce quick assist
 		if (resultingCollections == null) {
 			return true;
 		}
@@ -258,7 +258,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (ifStatement.getElseStatement() == null) {
 			return false;
 		}
-		// ok, we could produce quick assist
+		//  we could produce quick assist
 		if (resultingCollections == null) {
 			return true;
 		}
@@ -269,7 +269,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		Statement elseStatement= ifStatement.getElseStatement();
 		
 		// prepare original nodes
-		Expression inversedExpression = getInversedBooleanExpression(ast, rewrite, ifStatement.getExpression());
+		Expression inversedExpression = getInversedBooleanExpression(rewrite, ifStatement.getExpression());
 		
 		Statement newElseStatement = (Statement) rewrite.createMoveTarget(thenStatement);
 		Statement newThenStatement = (Statement) rewrite.createMoveTarget(elseStatement);
@@ -321,8 +321,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		//
 		AST ast = coveringStatement.getAST();
 		ASTRewrite rewrite = ASTRewrite.create(ast);
-		// create inversed 'if' statement
-		Expression inversedExpression = getInversedBooleanExpression(ast, rewrite, ifStatement.getExpression());
+		// create inverted 'if' statement
+		Expression inversedExpression = getInversedBooleanExpression(rewrite, ifStatement.getExpression());
 		IfStatement newIf = ast.newIfStatement();
 		newIf.setExpression(inversedExpression);
 		// prepare 'then' for new 'if'
@@ -343,8 +343,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		resultingCollections.add(proposal);
 		return true;
 	}
-	private static boolean getInverseIfIntoContinueInLoopsProposals(IInvocationContext context, ASTNode covering,
-			Collection resultingCollections) {
+	private static boolean getInverseIfIntoContinueInLoopsProposals(IInvocationContext context, ASTNode covering, Collection resultingCollections) {
 		Statement coveringStatement = ASTResolving.findParentStatement(covering);
 		if (!(coveringStatement instanceof IfStatement)) {
 			return false;
@@ -365,19 +364,18 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (!(ifParentStructure instanceof ForStatement) && !(ifParentStructure instanceof WhileStatement)) {
 			return false;
 		}
-		if ((ifParentBlock != null)
-				&& (ifParentBlock.statements().indexOf(ifStatement) != ifParentBlock.statements().size() - 1)) {
+		if ((ifParentBlock != null) && (ifParentBlock.statements().indexOf(ifStatement) != ifParentBlock.statements().size() - 1)) {
 			return false;
 		}
-		// ok, we could produce quick assist
+		//  we could produce quick assist
 		if (resultingCollections == null) {
 			return true;
 		}
 		//
 		AST ast = coveringStatement.getAST();
 		ASTRewrite rewrite = ASTRewrite.create(ast);
-		// create inversed 'if' statement
-		Expression inversedExpression = getInversedBooleanExpression(ast, rewrite, ifStatement.getExpression());
+		// create inverted 'if' statement
+		Expression inversedExpression = getInversedBooleanExpression(rewrite, ifStatement.getExpression());
 		IfStatement newIf = ast.newIfStatement();
 		newIf.setExpression(inversedExpression);
 		newIf.setThenStatement(ast.newContinueStatement());
@@ -386,8 +384,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			// if there is no block, create it
 			ifParentBlock = ast.newBlock();
 			ifParentBlock.statements().add(newIf);
-			for (Iterator I = getUnwrappedStatements(ifStatement.getThenStatement()).iterator(); I.hasNext();) {
-				Statement statement = (Statement) I.next();
+			for (Iterator iter = getUnwrappedStatements(ifStatement.getThenStatement()).iterator(); iter.hasNext();) {
+				Statement statement = (Statement) iter.next();
 				ifParentBlock.statements().add(rewrite.createMoveTarget(statement));
 			}
 			// replace 'if' statement as body with new block
@@ -402,8 +400,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				(ChildListPropertyDescriptor) ifStatement.getLocationInParent());
 			listRewriter.replace(ifStatement, newIf, null);
 			// add statements from 'then' to the end of block
-			for (Iterator I = getUnwrappedStatements(ifStatement.getThenStatement()).iterator(); I.hasNext();) {
-				Statement statement = (Statement) I.next();
+			for (Iterator iter = getUnwrappedStatements(ifStatement.getThenStatement()).iterator(); iter.hasNext();) {
+				Statement statement = (Statement) iter.next();
 				listRewriter.insertLast(rewrite.createMoveTarget(statement), null);
 			}
 		}
@@ -418,8 +416,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	private static ArrayList getUnwrappedStatements(Statement body) {
 		ArrayList statements = new ArrayList();
 		if (body instanceof Block) {
-			for (Iterator I = ((Block) body).statements().iterator(); I.hasNext();) {
-				Statement statement = (Statement) I.next();
+			for (Iterator iter = ((Block) body).statements().iterator(); iter.hasNext();) {
+				Statement statement = (Statement) iter.next();
 				statements.add(statement);
 			}
 		} else {
@@ -436,11 +434,11 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		final ASTRewrite rewrite = ASTRewrite.create(ast);
 		// check sub-expressions in fully covered nodes
 		boolean hasChanges = false;
-		for (Iterator I = coveredNodes.iterator(); I.hasNext();) {
-			ASTNode covered = (ASTNode) I.next();
+		for (Iterator iter = coveredNodes.iterator(); iter.hasNext();) {
+			ASTNode covered = (ASTNode) iter.next();
 			Expression coveredExpression= getBooleanExpression(covered);
 			if (coveredExpression != null) {
-				Expression inversedExpression = getInversedBooleanExpression(ast, rewrite, coveredExpression);
+				Expression inversedExpression = getInversedBooleanExpression(rewrite, coveredExpression);
 				rewrite.replace(coveredExpression, inversedExpression, null);
 				hasChanges = true;
 			}
@@ -460,8 +458,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		resultingCollections.add(proposal);
 		return true;
 	}
-	private static Expression getInversedBooleanExpression(AST ast, ASTRewrite rewrite, Expression expression) {
-		return getInversedBooleanExpression(ast, rewrite, expression, null);
+	private static Expression getInversedBooleanExpression(ASTRewrite rewrite, Expression expression) {
+		return getInversedBooleanExpression(rewrite, expression, null);
 	}
 	private interface SimpleNameRenameProvider {
 		SimpleName getRenamed(SimpleName name);
@@ -480,82 +478,47 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		return (Expression) rewrite.createCopyTarget(expression);
 	}
-	private static Expression getInversedBooleanExpression(AST ast,
-			ASTRewrite rewrite,
-			Expression expression,
-			SimpleNameRenameProvider provider) {
+	private static Expression getInversedBooleanExpression(ASTRewrite rewrite, Expression expression, SimpleNameRenameProvider provider) {
 		if (!isBoolean(expression)) {
 			return (Expression) rewrite.createCopyTarget(expression);
 		}
+		AST ast= rewrite.getAST();
 		//
 		if (expression instanceof BooleanLiteral) {
-			BooleanLiteral booleanLiteral= (BooleanLiteral) expression;
-			if (booleanLiteral.booleanValue()) {
-				return ast.newBooleanLiteral(false);
-			} else {
-				return ast.newBooleanLiteral(true);
-			}
+			return ast.newBooleanLiteral(!((BooleanLiteral) expression).booleanValue());
 		}
 		if (expression instanceof InfixExpression) {
 			InfixExpression infixExpression= (InfixExpression) expression;
 			InfixExpression.Operator operator= infixExpression.getOperator();
 			if (operator == InfixExpression.Operator.LESS) {
-				return getInversedInfixBooleanExpression(ast,
-					rewrite,
-					infixExpression,
-					InfixExpression.Operator.GREATER_EQUALS,
-					provider);
+				return getInversedInfixBooleanExpression(rewrite, infixExpression, InfixExpression.Operator.GREATER_EQUALS, provider);
 			}
 			if (operator == InfixExpression.Operator.GREATER) {
-				return getInversedInfixBooleanExpression(ast,
-					rewrite,
-					infixExpression,
-					InfixExpression.Operator.LESS_EQUALS,
-					provider);
+				return getInversedInfixBooleanExpression(rewrite, infixExpression, InfixExpression.Operator.LESS_EQUALS, provider);
 			}
 			if (operator == InfixExpression.Operator.LESS_EQUALS) {
-				return getInversedInfixBooleanExpression(ast,
-					rewrite,
-					infixExpression,
-					InfixExpression.Operator.GREATER,
-					provider);
+				return getInversedInfixBooleanExpression(rewrite, infixExpression, InfixExpression.Operator.GREATER, provider);
 			}
 			if (operator == InfixExpression.Operator.GREATER_EQUALS) {
-				return getInversedInfixBooleanExpression(ast,
-					rewrite,
-					infixExpression,
-					InfixExpression.Operator.LESS,
-					provider);
+				return getInversedInfixBooleanExpression(rewrite, infixExpression, InfixExpression.Operator.LESS, provider);
 			}
 			if (operator == InfixExpression.Operator.EQUALS) {
-				return getInversedInfixBooleanExpression(ast,
-					rewrite,
-					infixExpression,
-					InfixExpression.Operator.NOT_EQUALS,
-					provider);
+				return getInversedInfixBooleanExpression(rewrite, infixExpression, InfixExpression.Operator.NOT_EQUALS, provider);
 			}
 			if (operator == InfixExpression.Operator.NOT_EQUALS) {
-				return getInversedInfixBooleanExpression(ast,
-					rewrite,
-					infixExpression,
-					InfixExpression.Operator.EQUALS,
-					provider);
+				return getInversedInfixBooleanExpression(rewrite, infixExpression, InfixExpression.Operator.EQUALS, provider);
 			}
 			if (operator == InfixExpression.Operator.CONDITIONAL_AND) {
-				Operator newOperator= InfixExpression.Operator.CONDITIONAL_OR;
-				return getInversedAndOrExpression(ast, rewrite, infixExpression, newOperator, provider);
+				return getInversedAndOrExpression(rewrite, infixExpression, InfixExpression.Operator.CONDITIONAL_OR, provider);
 			}
 			if (operator == InfixExpression.Operator.CONDITIONAL_OR) {
-				Operator newOperator= InfixExpression.Operator.CONDITIONAL_AND;
-				return getInversedAndOrExpression(ast, rewrite, infixExpression, newOperator, provider);
+				return getInversedAndOrExpression(rewrite, infixExpression, InfixExpression.Operator.CONDITIONAL_AND, provider);
 			}
 			if (operator == InfixExpression.Operator.AND) {
-				Operator newOperator= InfixExpression.Operator.OR;
-				return getInversedAndOrExpression(ast, rewrite, infixExpression, newOperator, provider);
+				return getInversedAndOrExpression(rewrite, infixExpression, InfixExpression.Operator.OR, provider);
 			}
 			if (operator == InfixExpression.Operator.OR) {
-				Operator newOperator= InfixExpression.Operator.AND;
-				return getInversedAndOrExpression(ast, rewrite, infixExpression, newOperator, provider);
+				return getInversedAndOrExpression(rewrite, infixExpression, InfixExpression.Operator.AND, provider);
 			}
 		}
 		if (expression instanceof PrefixExpression) {
@@ -579,10 +542,10 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				innerExpression= ((ParenthesizedExpression) innerExpression).getExpression();
 			}
 			if (innerExpression instanceof InstanceofExpression) {
-				return getInversedBooleanExpression(ast, rewrite, innerExpression, provider);
+				return getInversedBooleanExpression(rewrite, innerExpression, provider);
 			}
 			parenthesizedExpression= ast.newParenthesizedExpression();
-			parenthesizedExpression.setExpression(getInversedBooleanExpression(ast, rewrite, innerExpression, provider));
+			parenthesizedExpression.setExpression(getInversedBooleanExpression(rewrite, innerExpression, provider));
 			return parenthesizedExpression;
 		}
 		//
@@ -594,34 +557,39 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	private static boolean isBoolean(Expression expression) {
 		return expression.resolveTypeBinding() == expression.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
 	}
-	private static Expression getInversedInfixBooleanExpression(AST ast, ASTRewrite rewrite,
-			InfixExpression expression, InfixExpression.Operator newOperator, SimpleNameRenameProvider provider) {
-		InfixExpression newExpression = ast.newInfixExpression();
+	private static Expression getInversedInfixBooleanExpression(ASTRewrite rewrite, InfixExpression expression, InfixExpression.Operator newOperator, SimpleNameRenameProvider provider) {
+		InfixExpression newExpression = rewrite.getAST().newInfixExpression();
 		newExpression.setOperator(newOperator);
-		newExpression.setLeftOperand(getInversedBooleanExpression(ast, rewrite, expression.getLeftOperand(), provider));
-		newExpression.setRightOperand(getInversedBooleanExpression(ast, rewrite, expression.getRightOperand(), provider));
+		newExpression.setLeftOperand(getInversedBooleanExpression(rewrite, expression.getLeftOperand(), provider));
+		newExpression.setRightOperand(getInversedBooleanExpression(rewrite, expression.getRightOperand(), provider));
 		return newExpression;
 	}
-	private static Expression getInversedAndOrExpression(AST ast, ASTRewrite rewrite, InfixExpression infixExpression,
-			Operator newOperator, SimpleNameRenameProvider provider) {
+	
+	private static Expression parenthesizeIfRequired(Expression operand, int newOperatorPrecedence) {
+		if (newOperatorPrecedence < getExpressionPrecedence(operand)) {
+			return getParenthesizedExpression(operand.getAST(), operand);
+		}
+		return operand;
+	}
+	
+	private static Expression getInversedAndOrExpression(ASTRewrite rewrite, InfixExpression infixExpression, Operator newOperator, SimpleNameRenameProvider provider) {
+		InfixExpression newExpression = rewrite.getAST().newInfixExpression();
+		newExpression.setOperator(newOperator);
+		
 		int newOperatorPrecedence = getInfixOperatorPrecedence(newOperator);
 		//
-		Expression leftOperand = getInversedBooleanExpression(ast, rewrite, infixExpression.getLeftOperand(), provider);
-		int leftPrecedence = getExpressionPrecedence(leftOperand);
-		if (newOperatorPrecedence < leftPrecedence) {
-			leftOperand = getParenthesizedExpression(ast, leftOperand);
+		Expression leftOperand = getInversedBooleanExpression(rewrite, infixExpression.getLeftOperand(), provider);
+		newExpression.setLeftOperand(parenthesizeIfRequired(leftOperand, newOperatorPrecedence));
+		
+		Expression rightOperand = getInversedBooleanExpression(rewrite, infixExpression.getRightOperand(), provider);
+		newExpression.setRightOperand(parenthesizeIfRequired(rightOperand, newOperatorPrecedence));
+		
+		List extraOperands= infixExpression.extendedOperands();
+		List newExtraOperands= newExpression.extendedOperands();
+		for (int i= 0; i < extraOperands.size(); i++) {
+			Expression extraOperand = getInversedBooleanExpression(rewrite, (Expression) extraOperands.get(i), provider);
+			newExtraOperands.add(parenthesizeIfRequired(extraOperand, newOperatorPrecedence));
 		}
-		//
-		Expression rightOperand = getInversedBooleanExpression(ast, rewrite, infixExpression.getRightOperand(), provider);
-		int rightPrecedence = getExpressionPrecedence(rightOperand);
-		if (newOperatorPrecedence < rightPrecedence) {
-			rightOperand = getParenthesizedExpression(ast, rightOperand);
-		}
-		//
-		InfixExpression newExpression = ast.newInfixExpression();
-		newExpression.setOperator(newOperator);
-		newExpression.setLeftOperand(leftOperand);
-		newExpression.setRightOperand(rightOperand);
 		return newExpression;
 	}
 	private static boolean getRemoveExtraParenthesisProposals(IInvocationContext context, ASTNode covering, ArrayList coveredNodes,
@@ -676,7 +644,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return 14;
 		}
 		if (expression instanceof MethodInvocation) {
-			return 15;
+			return 2;
 		}
 		return -1;
 	}
@@ -938,7 +906,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		
 		// replace condition in inner IfStatement
 		rewrite.set(ifStatement, IfStatement.EXPRESSION_PROPERTY, rightCondition, null);
-		// prepare outter IfStatement
+		// prepare outer IfStatement
 		IfStatement outerIfStatement = ast.newIfStatement();
 		outerIfStatement.setExpression(leftCondition);
 		Block outerBlock = ast.newBlock();
@@ -995,8 +963,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		// check that all covered nodes are IfStatement's with same 'then' statement and without 'else'
 		String commonThenSource = null;
-		for (Iterator I = coveredNodes.iterator(); I.hasNext();) {
-			ASTNode node = (ASTNode) I.next();
+		for (Iterator iter = coveredNodes.iterator(); iter.hasNext();) {
+			ASTNode node = (ASTNode) iter.next();
 			if (!(node instanceof IfStatement))
 				return false;
 			//
@@ -1028,8 +996,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		InfixExpression condition = null;
 		boolean hasRightOperand = false;
 		Statement thenStatement = null;
-		for (Iterator I = coveredNodes.iterator(); I.hasNext();) {
-			IfStatement ifStatement = (IfStatement) I.next();
+		for (Iterator iter = coveredNodes.iterator(); iter.hasNext();) {
+			IfStatement ifStatement = (IfStatement) iter.next();
 			if (thenStatement == null)
 				thenStatement = (Statement) rewrite.createCopyTarget(ifStatement.getThenStatement());
 			Expression ifCondition = getParenthesizedForOrIfNeeded(ast, rewrite, ifStatement.getExpression());
@@ -1054,8 +1022,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		newIf.setThenStatement(thenStatement);
 		//
 		ListRewrite listRewriter = null;
-		for (Iterator I = coveredNodes.iterator(); I.hasNext();) {
-			IfStatement ifStatement = (IfStatement) I.next();
+		for (Iterator iter = coveredNodes.iterator(); iter.hasNext();) {
+			IfStatement ifStatement = (IfStatement) iter.next();
 			if (listRewriter == null) {
 				Block sourceBlock = (Block) ifStatement.getParent();
 				//int insertIndex = sourceBlock.statements().indexOf(ifStatement);
@@ -1170,16 +1138,16 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		ConditionalExpression expression = (ConditionalExpression) covering;
-		// ok, we could produce quick assist
+		//  we could produce quick assist
 		if (resultingCollections == null) {
 			return true;
 		}
 		//
 		AST ast = covering.getAST();
 		ASTRewrite rewrite = ASTRewrite.create(ast);
-		// prepare new conditional expresion
+		// prepare new conditional expression
 		ConditionalExpression newExpression = ast.newConditionalExpression();
-		newExpression.setExpression(getInversedBooleanExpression(ast, rewrite, expression.getExpression()));
+		newExpression.setExpression(getInversedBooleanExpression(rewrite, expression.getExpression()));
 		newExpression.setThenExpression((Expression) rewrite.createCopyTarget(expression.getElseExpression()));
 		newExpression.setElseExpression((Expression) rewrite.createCopyTarget(expression.getThenExpression()));
 		// replace old expression with new
@@ -1292,7 +1260,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		
-		// ok, we could produce quick assist
+		//  we could produce quick assist
 		if (resultingCollections == null) {
 			return true;
 		}
@@ -1308,8 +1276,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		} else {
 			rightExpression= combineOperands(rewrite, rightExpression, infixExpression.getRightOperand(), true, operator);
 		}
-		for (Iterator I= currentExpression.extendedOperands().iterator(); I.hasNext();) {
-			Expression extendedOperand= (Expression) I.next();
+		for (Iterator iter= currentExpression.extendedOperands().iterator(); iter.hasNext();) {
+			Expression extendedOperand= (Expression) iter.next();
 			if (extendedOperand.getStartPosition() <= context.getSelectionOffset()) {
 				leftExpression= combineOperands(rewrite, leftExpression, extendedOperand, true, operator);
 			} else {
@@ -1425,7 +1393,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
-		// ok, we could produce quick assist
+		//  we could produce quick assist
 		if (resultingCollections == null) {
 			return true;
 		}
@@ -1637,7 +1605,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
-		// ok, we could produce quick assist
+		//  we could produce quick assist
 		if (resultingCollections == null) {
 			return true;
 		}
@@ -1733,7 +1701,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		ConditionalExpression conditional= (ConditionalExpression) covering;
-		// ok, we could produce quick assist
+		//  we could produce quick assist
 		if (resultingCollections == null) {
 			return true;
 		}
@@ -1810,7 +1778,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (!isBoolean(coveringName)) {
 			return false;
 		}
-		// ok, we could produce quick assist
+		//  we could produce quick assist
 		if (resultingCollections == null) {
 			return true;
 		}
@@ -1877,7 +1845,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 						overlapNames.add(name2);
 					}
 				}
-				// prepare inversed expression
+				// prepare inverted expression
 				SimpleNameRenameProvider provider= new SimpleNameRenameProvider() {
 					public SimpleName getRenamed(SimpleName simpleName) {
 						if (simpleName.resolveBinding() == variableBinding) {
@@ -1887,10 +1855,10 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 						return null;
 					}
 				};
-				Expression inversedExpression= getInversedBooleanExpression(ast, rewrite, expression, provider);
-				// if any name was not renamed during expression inversing, we can not already renate it, so fail to create assist
-				for (Iterator I= overlapNames.iterator(); I.hasNext();) {
-					Object o= I.next();
+				Expression inversedExpression= getInversedBooleanExpression(rewrite, expression, provider);
+				// if any name was not renamed during expression inverting, we can not already rename it, so fail to create assist
+				for (Iterator iter= overlapNames.iterator(); iter.hasNext();) {
+					Object o= iter.next();
 					if (!renamedNames.contains(o)) {
 						return false;
 					}
@@ -1919,7 +1887,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				VariableDeclarationFragment vdf= (VariableDeclarationFragment) name.getParent();
 				Expression expression= vdf.getInitializer();
 				if (expression != null) {
-					rewrite.replace(expression, getInversedBooleanExpression(ast, rewrite, expression), null);
+					rewrite.replace(expression, getInversedBooleanExpression(rewrite, expression), null);
 				}
 				// set new name
 				rewrite.replace(name, newName, null);
@@ -1962,17 +1930,15 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (negationExpression == null) {
 			return false;
 		}
-		// ok, we could produce quick assist
+		//  we could produce quick assist
 		if (resultingCollections == null) {
 			return true;
 		}
 		//
 		final AST ast= covering.getAST();
 		final ASTRewrite rewrite= ASTRewrite.create(ast);
-		// prepared inversed expression
-		Expression inversedExpression= getInversedBooleanExpression(ast,
-			rewrite,
-			parenthesizedExpression.getExpression());
+		// prepared inverted expression
+		Expression inversedExpression= getInversedBooleanExpression(rewrite, parenthesizedExpression.getExpression());
 		// check, may be we should keep parentheses
 		boolean keepParentheses= false;
 		if (negationExpression.getParent() instanceof Expression) {
@@ -1980,7 +1946,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			int inversedExpressionPrecedence= getExpressionPrecedence(inversedExpression);
 			keepParentheses= parentPrecedence < inversedExpressionPrecedence;
 		}
-		// replace negated expression with inversed one
+		// replace negated expression with inverted one
 		if (keepParentheses) {
 			ParenthesizedExpression pe= ast.newParenthesizedExpression();
 			pe.setExpression(inversedExpression);
@@ -2050,15 +2016,15 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (expression == null) {
 			return false;
 		}
-		// ok, we could produce quick assist
+		//  we could produce quick assist
 		if (resultingCollections == null) {
 			return true;
 		}
 		//
 		AST ast= expression.getAST();
 		final ASTRewrite rewrite= ASTRewrite.create(ast);
-		// prepared inversed expression
-		Expression inversedExpression= getInversedBooleanExpression(ast, rewrite, expression);
+		// prepared inverted expression
+		Expression inversedExpression= getInversedBooleanExpression(rewrite, expression);
 		// prepare ParenthesizedExpression
 		ParenthesizedExpression parenthesizedExpression = ast.newParenthesizedExpression();
 		parenthesizedExpression.setExpression(inversedExpression);
@@ -2066,7 +2032,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		PrefixExpression prefixExpression = ast.newPrefixExpression();
 		prefixExpression.setOperator(PrefixExpression.Operator.NOT);
 		prefixExpression.setOperand(parenthesizedExpression);
-		// replace old expresson
+		// replace old expression
 		rewrite.replace(expression, prefixExpression, null);
 		// add correction proposal
 		String label= CorrectionMessages.AdvancedQuickAssistProcessor_pullNegationUp;
@@ -2087,8 +2053,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		// check that all selected nodes are 'if' statements with only 'then' statement
-		for (Iterator I= coveredNodes.iterator(); I.hasNext();) {
-			ASTNode node= (ASTNode) I.next();
+		for (Iterator iter= coveredNodes.iterator(); iter.hasNext();) {
+			ASTNode node= (ASTNode) iter.next();
 			if (!(node instanceof IfStatement)) {
 				return false;
 			}
@@ -2097,7 +2063,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				return false;
 			}
 		}
-		// ok, we could produce quick assist
+		//  we could produce quick assist
 		if (resultingCollections == null) {
 			return true;
 		}
@@ -2109,8 +2075,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		IfStatement firstNewIfStatement= null;
 		//
 		IfStatement prevIfStatement= null;
-		for (Iterator I= coveredNodes.iterator(); I.hasNext();) {
-			IfStatement ifStatement= (IfStatement) I.next();
+		for (Iterator iter= coveredNodes.iterator(); iter.hasNext();) {
+			IfStatement ifStatement= (IfStatement) iter.next();
 			// prepare new 'if' statement
 			IfStatement newIfStatement= ast.newIfStatement();
 			newIfStatement.setExpression((Expression) rewrite.createMoveTarget(ifStatement.getExpression()));
@@ -2148,7 +2114,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (!(covering instanceof SwitchStatement)) {
 			return false;
 		}
-		// ok, we could produce quick assist (if all 'case' statements end with 'break')
+		//  we could produce quick assist (if all 'case' statements end with 'break')
 		if (resultingCollections == null) {
 			return true;
 		}
@@ -2169,12 +2135,12 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		
 		ArrayList allBlocks= new ArrayList();
 		//
-		for (Iterator I= switchStatement.statements().iterator(); I.hasNext();) {
-			Statement statement= (Statement) I.next();
+		for (Iterator iter= switchStatement.statements().iterator(); iter.hasNext();) {
+			Statement statement= (Statement) iter.next();
 			if (statement instanceof SwitchCase) {
 				SwitchCase switchCase= (SwitchCase) statement;
 				caseCount++;
-				// special case: passthrough
+				// special case: pass through
 				if (currentBlock != null) {
 					if (!hasStopAsLastExecutableStatement) {
 						return false;
@@ -2233,7 +2199,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 						// delay adding of default block
 					}
 				}
-				// add current statement in currect block
+				// add current statement in current block
 				{
 					hasStopAsLastExecutableStatement = hasStopAsLastExecutableStatement(statement);
 					Statement copyStatement= copyStatementExceptBreak(ast, rewrite, statement);
@@ -2313,8 +2279,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (source instanceof Block) {
 			Block block= (Block) source;
 			Block newBlock= ast.newBlock();
-			for (Iterator I= block.statements().iterator(); I.hasNext();) {
-				Statement statement= (Statement) I.next();
+			for (Iterator iter= block.statements().iterator(); iter.hasNext();) {
+				Statement statement= (Statement) iter.next();
 				if (statement instanceof BreakStatement) {
 					continue;
 				}

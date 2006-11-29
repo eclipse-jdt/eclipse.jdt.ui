@@ -783,6 +783,91 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	}
 	
+	public void testInverseIfCondition_bug119251() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=119251
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    private boolean a() { return false; }\n");
+		buf.append("    private void foo(int i) {}\n");
+		buf.append("    public void b() {\n");
+		buf.append("        if (!a() && !a() && !a() && !a())\n");
+		buf.append("            foo(1);\n");
+		buf.append("        else\n");
+		buf.append("            foo(2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    private boolean a() { return false; }\n");
+		buf.append("    private void foo(int i) {}\n");
+		buf.append("    public void b() {\n");
+		buf.append("        if (a() || a() || a() || a())\n");
+		buf.append("            foo(2);\n");
+		buf.append("        else\n");
+		buf.append("            foo(1);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
+	
+	public void testInverseIfCondition6() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=119251
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    private boolean a() { return false; }\n");
+		buf.append("    private void foo(int i) {}\n");
+		buf.append("    public void b() {\n");
+		buf.append("        if (!a() && !a() || !a() && !a())\n");
+		buf.append("            foo(1);\n");
+		buf.append("        else\n");
+		buf.append("            foo(2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    private boolean a() { return false; }\n");
+		buf.append("    private void foo(int i) {}\n");
+		buf.append("    public void b() {\n");
+		buf.append("        if ((a() || a()) && (a() || a()))\n");
+		buf.append("            foo(2);\n");
+		buf.append("        else\n");
+		buf.append("            foo(1);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
+
+	
+	
+
+	
+	
 	public void testInverseConditionalStatement1() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=74746
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
