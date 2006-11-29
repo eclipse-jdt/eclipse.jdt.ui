@@ -272,7 +272,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 
 
 	private static boolean isInside(int offset, int start, int end) {
-		return offset == start || (offset > start && offset < end); // make sure to handle 0-length ranges
+		return offset == start || offset == end || (offset > start && offset < end); // make sure to handle 0-length ranges
 	}
 
 	/**
