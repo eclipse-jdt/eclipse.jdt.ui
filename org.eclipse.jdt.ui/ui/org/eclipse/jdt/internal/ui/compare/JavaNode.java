@@ -10,15 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
-import org.eclipse.core.runtime.IAdaptable;
-
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.compare.ISharedDocumentAdapter;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.structuremergeviewer.DocumentRangeNode;
 
@@ -30,7 +27,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * Comparable Java elements are represented as JavaNodes.
  * Extends the DocumentRangeNode with method signature information.
  */
-class JavaNode extends DocumentRangeNode implements ITypedElement, IAdaptable {
+class JavaNode extends DocumentRangeNode implements ITypedElement {
 	
 	public static final int CU= 0;
 	public static final int PACKAGE= 1;
@@ -46,9 +43,6 @@ class JavaNode extends DocumentRangeNode implements ITypedElement, IAdaptable {
 	public static final int METHOD= 11;
 
 	private int fInitializerCount= 1;
-	private boolean fIsEditable;
-	private JavaNode fParent;
-
 
 	/**
 	 * Creates a JavaNode under the given parent.
@@ -58,11 +52,9 @@ class JavaNode extends DocumentRangeNode implements ITypedElement, IAdaptable {
 	 * @param length the number of characters of the java element in the underlying document
 	 */
 	public JavaNode(JavaNode parent, int type, String name, int start, int length) {
-		super(type, JavaCompareUtilities.buildID(type, name), parent.getDocument(), start, length);
-		fParent= parent;
+		super(parent, type, JavaCompareUtilities.buildID(type, name), parent.getDocument(), start, length);
 		if (parent != null) {
 			parent.addChild(this);
-			fIsEditable= parent.isEditable();
 		}
 	}	
 	
@@ -70,11 +62,9 @@ class JavaNode extends DocumentRangeNode implements ITypedElement, IAdaptable {
 	 * Creates a JavaNode for a CU. It represents the root of a
 	 * JavaNode tree, so its parent is null.
 	 * @param document the document which contains the Java element
-	 * @param editable whether the document can be modified
 	 */
-	public JavaNode(IDocument document, boolean editable) {
+	public JavaNode(IDocument document) {
 		super(CU, JavaCompareUtilities.buildID(CU, "root"), document, 0, document.getLength()); //$NON-NLS-1$
-		fIsEditable= editable;
 	}	
 
 	public String getInitializerCount() {
@@ -130,13 +120,6 @@ class JavaNode extends DocumentRangeNode implements ITypedElement, IAdaptable {
 	public String getType() {
 		return "java2"; //$NON-NLS-1$
 	}
-	
-	/* (non Javadoc)
-	 * see IEditableContent.isEditable
-	 */
-	public boolean isEditable() {
-		return fIsEditable;
-	}
 		
 	/**
 	 * Returns a shared image for this Java element.
@@ -184,28 +167,6 @@ class JavaNode extends DocumentRangeNode implements ITypedElement, IAdaptable {
 			break;
 		}
 		return JavaPlugin.getImageDescriptorRegistry().get(id);
-	}
-
-	public void setContent(byte[] content) {
-		super.setContent(content);
-		nodeChanged(this);
-	}
-	
-	public ITypedElement replace(ITypedElement child, ITypedElement other) {
-		nodeChanged(this);
-		return child;
-	}
-
-	void nodeChanged(JavaNode node) {
-		if (fParent != null)
-			fParent.nodeChanged(node);
-	}
-	
-	public Object getAdapter(Class adapter) {
-		if (adapter == ISharedDocumentAdapter.class && fParent != null)
-			return fParent.getAdapter(adapter);
-		
-		return null;
 	}
 }
 

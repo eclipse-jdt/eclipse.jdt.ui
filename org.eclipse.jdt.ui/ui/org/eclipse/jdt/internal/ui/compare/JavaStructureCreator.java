@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
@@ -24,7 +25,6 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.services.IDisposable;
 
 import org.eclipse.compare.CompareUI;
@@ -40,8 +40,8 @@ import org.eclipse.compare.structuremergeviewer.ICompareInput;
 import org.eclipse.compare.structuremergeviewer.IDiffContainer;
 import org.eclipse.compare.structuremergeviewer.IDiffElement;
 import org.eclipse.compare.structuremergeviewer.IStructureComparator;
-import org.eclipse.compare.structuremergeviewer.SharedDocumentAdapterWrapper;
 import org.eclipse.compare.structuremergeviewer.StructureCreator;
+import org.eclipse.compare.structuremergeviewer.StructureRootNode;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -65,42 +65,53 @@ public class JavaStructureCreator extends StructureCreator {
 	
 	private Map fDefaultCompilerOptions;
 	
+	/**
+	 * A root node for the structure. It is similar to {@link StructureRootNode} but needed
+	 * to be a subclass of {@link JavaNode} because of the code used to build the structure.
+	 */
 	private final class RootJavaNode extends JavaNode implements IDisposable {
 		
 		private final Object fInput;
-		private final IDisposable fDisposable;
+		private final boolean fEditable;
+		private final ISharedDocumentAdapter fAdapter;
 
-		private RootJavaNode(IDocument document, boolean editable, Object input, IDisposable disposable) {
-			super(document, editable);
+		private RootJavaNode(IDocument document, boolean editable, Object input, ISharedDocumentAdapter adapter) {
+			super(document);
+			this.fEditable = editable;
 			fInput= input;
-			fDisposable= disposable;
+			fAdapter= adapter;
 		}
 
-		void nodeChanged(JavaNode node) {
+		/* (non-Javadoc)
+		 * @see org.eclipse.compare.structuremergeviewer.DocumentRangeNode#isEditable()
+		 */
+		public boolean isEditable() {
+			return fEditable;
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.compare.structuremergeviewer.DocumentRangeNode#nodeChanged(org.eclipse.compare.structuremergeviewer.DocumentRangeNode)
+		 */
+		protected void nodeChanged(DocumentRangeNode node) {
 			save(this, fInput);
 		}
 
+		/* (non-Javadoc)
+		 * @see org.eclipse.ui.services.IDisposable#dispose()
+		 */
 		public void dispose() {
-			if (fDisposable != null)
-				fDisposable.dispose();
+			if (fAdapter != null) {
+				fAdapter.disconnect(fInput);
+			}
 		}
 
+		/* (non-Javadoc)
+		 * @see org.eclipse.compare.structuremergeviewer.DocumentRangeNode#getAdapter(java.lang.Class)
+		 */
 		public Object getAdapter(Class adapter) {
 			if (adapter == ISharedDocumentAdapter.class) {
-				ISharedDocumentAdapter elementAdapter= SharedDocumentAdapterWrapper.getAdapter(fInput);
-				if (elementAdapter == null)
-					return null;
-				
-				return new SharedDocumentAdapterWrapper(elementAdapter) {
-					public IEditorInput getDocumentKey(Object element) {
-						if (element instanceof JavaNode)
-							return getWrappedAdapter().getDocumentKey(fInput);
-
-						return super.getDocumentKey(element);
-					}
-				};
+				return fAdapter;
 			}
-			
 			return super.getAdapter(adapter);
 		}
 	}
@@ -204,17 +215,19 @@ public class JavaStructureCreator extends StructureCreator {
 			}
 		}
 		
-		return createStructureComparator(input, buffer, doc, null);
+		return createStructureComparator(input, buffer, doc, null, null);
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.compare.structuremergeviewer.DocumentStructureCreator#createStructureComparator(java.lang.Object, org.eclipse.jface.text.IDocument, org.eclipse.ui.services.IDisposable)
+	 * @see org.eclipse.compare.structuremergeviewer.StructureCreator#createStructureComparator(java.lang.Object, org.eclipse.jface.text.IDocument, org.eclipse.compare.ISharedDocumentAdapter, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	protected IStructureComparator createStructureComparator(Object input, IDocument doc, IDisposable disposable) throws CoreException {
-		return createStructureComparator(input, null, doc, disposable);
+	protected IStructureComparator createStructureComparator(Object element,
+			IDocument document, ISharedDocumentAdapter sharedDocumentAdapter,
+			IProgressMonitor monitor) throws CoreException {
+		return createStructureComparator(element, null, document, sharedDocumentAdapter, monitor);
 	}
 	
-	private IStructureComparator createStructureComparator(final Object input, char[] buffer, IDocument doc, IDisposable disposable) {
+	private IStructureComparator createStructureComparator(final Object input, char[] buffer, IDocument doc, ISharedDocumentAdapter adapter, IProgressMonitor monitor) {
 		String contents;
 		Map compilerOptions= null;
 		
@@ -238,7 +251,7 @@ public class JavaStructureCreator extends StructureCreator {
 				isEditable= ((IEditableContent) input).isEditable();
 			
 			// we hook into the root node to intercept all node changes
-			JavaNode root= new RootJavaNode(doc, isEditable, input, disposable);
+			JavaNode root= new RootJavaNode(doc, isEditable, input, adapter);
 			
 			if (buffer == null) {
 				contents= doc.get();
@@ -252,7 +265,7 @@ public class JavaStructureCreator extends StructureCreator {
 				parser.setCompilerOptions(compilerOptions);
 			parser.setSource(buffer);
 			parser.setFocalPosition(0);
-			CompilationUnit cu= (CompilationUnit) parser.createAST(null);
+			CompilationUnit cu= (CompilationUnit) parser.createAST(monitor);
 			cu.accept(new JavaParseTreeBuilder(root, buffer, true));
 			
 			return root;

@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.compare;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.widgets.*;
@@ -171,7 +173,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer {
 		toolBarManager.appendToGroup("modes", fSmartActionItem); //$NON-NLS-1$
 	}
 	
-	protected void postDiffHook(Differencer differencer, IDiffContainer root) {
+	protected void postDiffHook(Differencer differencer, IDiffContainer root, IProgressMonitor monitor) {
 		if (fStructureCreator.canRewriteTree()) {
 			boolean smart= JavaCompareUtilities.getBoolean(getCompareConfiguration(), SMART, false);
 			if (smart && root != null)

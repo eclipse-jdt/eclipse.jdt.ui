@@ -14,18 +14,20 @@ import java.io.IOException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.rules.FastPartitioner;
-
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.services.IDisposable;
 
 import org.eclipse.compare.CompareUI;
 import org.eclipse.compare.IEditableContent;
@@ -34,8 +36,8 @@ import org.eclipse.compare.IStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.structuremergeviewer.DocumentRangeNode;
 import org.eclipse.compare.structuremergeviewer.IStructureComparator;
-import org.eclipse.compare.structuremergeviewer.SharedDocumentAdapterWrapper;
 import org.eclipse.compare.structuremergeviewer.StructureCreator;
+import org.eclipse.compare.structuremergeviewer.StructureRootNode;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
@@ -51,24 +53,13 @@ public class PropertiesStructureCreator extends StructureCreator {
 	 */
 	static class PropertyNode extends DocumentRangeNode implements ITypedElement, IAdaptable {
 		
-		private boolean fIsEditable;
-		private PropertyNode fParent;
-		
-		
-		public PropertyNode(PropertyNode parent, int type, String id, String value, IDocument doc, int start, int length) {
-			super(type, id, doc, start, length);
-			fParent= parent;
+		public PropertyNode(DocumentRangeNode parent, int type, String id, String value, IDocument doc, int start, int length) {
+			super(parent, type, id, doc, start, length);
 			if (parent != null) {
 				parent.addChild(this);
-				fIsEditable= parent.isEditable();	// propagate editability
 			}
 		}
-						
-		public PropertyNode(IDocument doc, boolean editable) {
-			super(0, "root", doc, 0, doc.getLength()); //$NON-NLS-1$
-			fIsEditable= editable;
-		}
-				
+							
 		/* (non Java doc)
 		 * see ITypedElement#getName
 		 */
@@ -89,80 +80,6 @@ public class PropertiesStructureCreator extends StructureCreator {
 		public Image getImage() {
 			return CompareUI.getImage(getType());
 		}
-		
-		/* (non Java doc)
-		 * see IEditableContent.isEditable
-		 */
-		public boolean isEditable() {
-			return fIsEditable;
-		}
-		
-		public void setContent(byte[] content) {
-			super.setContent(content);
-			nodeChanged(this);
-		}
-		
-		public ITypedElement replace(ITypedElement child, ITypedElement other) {
-			/* commented out for #34745
-			ITypedElement e= super.replace(child, other);
-			nodeChanged(this);
-			return e;
-			*/
-			nodeChanged(this);
-			return child;
-		}
-
-		void nodeChanged(PropertyNode node) {
-			if (fParent != null)
-				fParent.nodeChanged(node);
-		}
-		
-		public Object getAdapter(Class adapter) {
-			if (adapter == ISharedDocumentAdapter.class && fParent != null)
-				return fParent.getAdapter(adapter);
-
-			return null;
-		}
-	}
-	
-	class RootPropertyNode extends PropertyNode implements IDisposable {
-
-		private final IDisposable fDisposable;
-		private final Object fInput;
-
-		public RootPropertyNode(Object input, IDocument doc, boolean editable, IDisposable disposable) {
-			super(doc, editable);
-			fInput = input;
-			fDisposable = disposable;
-		}
-		
-		public void dispose() {
-			if (fDisposable != null)
-				fDisposable.dispose();
-		}
-		
-		void nodeChanged(PropertyNode node) {
-			save(this, fInput);
-		}
-		
-		public Object getAdapter(Class adapter) {
-			if (adapter == ISharedDocumentAdapter.class) {
-				ISharedDocumentAdapter elementAdapter = SharedDocumentAdapterWrapper.getAdapter(fInput);
-				if (elementAdapter == null)
-					return null;
-
-				return new SharedDocumentAdapterWrapper(elementAdapter) {
-					public IEditorInput getDocumentKey(Object element) {
-						if (element instanceof PropertyNode)
-							return getWrappedAdapter().getDocumentKey(fInput);
-						
-						return super.getDocumentKey(element);
-					}
-				};
-			}
-			
-			return super.getAdapter(adapter);
-		}
 	}
 	
 	private static final String WHITESPACE= " \t\r\n\f"; //$NON-NLS-1$
@@ -176,35 +93,32 @@ public class PropertiesStructureCreator extends StructureCreator {
 	public String getName() {
 		return CompareMessages.PropertyCompareViewer_title; 
 	}
-
-	public IStructureComparator getStructure(final Object input) {
-		
-		String content= null;
-		if (input instanceof IStreamContentAccessor) {
-			try {
-				content= JavaCompareUtilities.readString(((IStreamContentAccessor) input));
-			} catch(CoreException ex) {
-				// returning null indicates error
-				return null;
-			}
-		}
-			
-		Document doc= new Document(content != null ? content : ""); //$NON-NLS-1$
-		setupDocument(doc);
-		return createStructureComparator(input, doc, null);
-	}
 	
-	protected IStructureComparator createStructureComparator(final Object input, IDocument doc, IDisposable disposable) {
-		boolean isEditable= false;
+	protected IStructureComparator createStructureComparator(Object input,
+			IDocument document, ISharedDocumentAdapter sharedDocumentAdapter,
+			IProgressMonitor monitor) throws CoreException {
+		
+		final boolean isEditable;
 		if (input instanceof IEditableContent)
 			isEditable= ((IEditableContent) input).isEditable();
+		else
+			isEditable= false;
 
-		PropertyNode root= new RootPropertyNode(input, doc, isEditable, disposable);
+		DocumentRangeNode root= new StructureRootNode(document, input, this, sharedDocumentAdapter) {
+			public boolean isEditable() {
+				return isEditable;
+			}
+		};
 				
 		try {
-			parsePropertyFile(root, doc);
+			monitor = beginWork(monitor);
+			parsePropertyFile(root, document, monitor);
 		} catch (IOException ex) {
-			JavaPlugin.log(ex);
+			if (sharedDocumentAdapter != null)
+				sharedDocumentAdapter.disconnect(input);
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "An error occurred while creating the input structure.", ex));
+		} finally {
+			monitor.done();
 		}
 		
 		return root;
@@ -247,7 +161,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 		return null;
 	}
 			
-	private void parsePropertyFile(PropertyNode root, IDocument doc) throws IOException {
+	private void parsePropertyFile(DocumentRangeNode root, IDocument doc, IProgressMonitor monitor) throws IOException {
 		
 		int start= -1;
 		int lineStart= 0;
@@ -257,7 +171,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 		args[1]= 0;	// and here the offset of the first character of the line 
 		
 		for (;;) {
-			
+			worked(monitor);
 			lineStart= args[1];	// start of current line
             String line= readLine(args, doc);
 			if (line == null)
@@ -421,6 +335,18 @@ public class PropertiesStructureCreator extends StructureCreator {
 	
 	protected String getDocumentPartitioning() {
 		return IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING;
+	}
+	
+	private void worked(IProgressMonitor monitor) {
+		if (monitor.isCanceled())
+			throw new OperationCanceledException();
+		monitor.worked(1);
+	}
+
+	private IProgressMonitor beginWork(IProgressMonitor monitor) {
+		if (monitor == null)
+			return new NullProgressMonitor();
+		return new SubProgressMonitor(monitor, IProgressMonitor.UNKNOWN);
 	}
 	
 }
