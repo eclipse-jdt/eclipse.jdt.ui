@@ -222,6 +222,8 @@ public final class NewWizardMessages extends NLS {
 	public static String BuildPathsBlock_classpath_label;
 	public static String BuildPathsBlock_classpath_up_button;
 	public static String BuildPathsBlock_classpath_down_button;
+	public static String BuildPathsBlock_classpath_top_button;
+	public static String BuildPathsBlock_classpath_bottom_button;
 	public static String BuildPathsBlock_classpath_checkall_button;
 	public static String BuildPathsBlock_classpath_uncheckall_button;
 	public static String BuildPathsBlock_buildpath_label;

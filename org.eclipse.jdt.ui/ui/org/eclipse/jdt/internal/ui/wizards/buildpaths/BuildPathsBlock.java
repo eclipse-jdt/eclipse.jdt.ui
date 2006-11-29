@@ -91,7 +91,9 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.NewSourceCon
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
 public class BuildPathsBlock {
@@ -142,7 +144,14 @@ public class BuildPathsBlock {
     private boolean fUseNewPage;
 
 	private final IWorkbenchPreferenceContainer fPageContainer; // null when invoked from a non-property page context
-		
+	
+	private final static int IDX_UP= 0;
+	private final static int IDX_DOWN= 1;
+	private final static int IDX_TOP= 3;
+	private final static int IDX_BOTTOM= 4;
+	private final static int IDX_SELECT_ALL= 6;
+	private final static int IDX_UNSELECT_ALL= 7;
+	
 	public BuildPathsBlock(IRunnableContext runnableContext, IStatusChangeListener context, int pageToShow, boolean useNewPage, IWorkbenchPreferenceContainer pageContainer) {
 		fPageContainer= pageContainer;
 		fWorkspaceRoot= JavaPlugin.getWorkspace().getRoot();
@@ -160,22 +169,25 @@ public class BuildPathsBlock {
 		BuildPathAdapter adapter= new BuildPathAdapter();			
 	
 		String[] buttonLabels= new String[] {
-			NewWizardMessages.BuildPathsBlock_classpath_up_button, 
-			NewWizardMessages.BuildPathsBlock_classpath_down_button, 
+			/* IDX_UP */ NewWizardMessages.BuildPathsBlock_classpath_up_button, 
+			/* IDX_DOWN */ NewWizardMessages.BuildPathsBlock_classpath_down_button, 
 			/* 2 */ null,
-			NewWizardMessages.BuildPathsBlock_classpath_checkall_button, 
-			NewWizardMessages.BuildPathsBlock_classpath_uncheckall_button
+			/* IDX_TOP */ NewWizardMessages.BuildPathsBlock_classpath_top_button, 
+			/* IDX_BOTTOM */ NewWizardMessages.BuildPathsBlock_classpath_bottom_button, 
+			/* 5 */ null,
+			/* IDX_SELECT_ALL */ NewWizardMessages.BuildPathsBlock_classpath_checkall_button, 
+			/* IDX_UNSELECT_ALL */ NewWizardMessages.BuildPathsBlock_classpath_uncheckall_button
 		
 		};
 		
-		fClassPathList= new CheckedListDialogField(null, buttonLabels, new CPListLabelProvider());
+		fClassPathList= new CheckedListDialogField(adapter, buttonLabels, new CPListLabelProvider());
 		fClassPathList.setDialogFieldListener(adapter);
 		fClassPathList.setLabelText(NewWizardMessages.BuildPathsBlock_classpath_label);  
-		fClassPathList.setUpButtonIndex(0);
-		fClassPathList.setDownButtonIndex(1);
-		fClassPathList.setCheckAllButtonIndex(3);
-		fClassPathList.setUncheckAllButtonIndex(4);		
-			
+		fClassPathList.setUpButtonIndex(IDX_UP);
+		fClassPathList.setDownButtonIndex(IDX_DOWN);
+		fClassPathList.setCheckAllButtonIndex(IDX_SELECT_ALL);
+		fClassPathList.setUncheckAllButtonIndex(IDX_UNSELECT_ALL);	
+		
 		fBuildPathDialogField= new StringButtonDialogField(adapter);
 		fBuildPathDialogField.setButtonLabel(NewWizardMessages.BuildPathsBlock_buildpath_button); 
 		fBuildPathDialogField.setDialogFieldListener(adapter);
@@ -323,6 +335,8 @@ public class BuildPathsBlock {
 		fClassPathList.setElements(newClassPath);
 		fClassPathList.setCheckedElements(exportedEntries);
 		
+		fClassPathList.selectFirstElement();
+		
 		if (fSourceContainerPage != null) {
 			fSourceContainerPage.init(fCurrJProject);
 			fProjectsPage.init(fCurrJProject);
@@ -466,7 +480,7 @@ public class BuildPathsBlock {
 		}
 	}	
 		
-	private class BuildPathAdapter implements IStringButtonAdapter, IDialogFieldListener {
+	private class BuildPathAdapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter {
 
 		// -------- IStringButtonAdapter --------
 		public void changeControlPressed(DialogField field) {
@@ -476,6 +490,18 @@ public class BuildPathsBlock {
 		// ---------- IDialogFieldListener --------
 		public void dialogFieldChanged(DialogField field) {
 			buildPathDialogFieldChanged(field);
+		}
+
+		// ---------- IListAdapter --------
+		public void customButtonPressed(ListDialogField field, int index) {
+			buildPathCustomButtonPressed(field, index);
+		}
+
+		public void doubleClicked(ListDialogField field) {
+		}
+
+		public void selectionChanged(ListDialogField field) {
+			updateTopButtonEnablement();
 		}
 	}
 	
@@ -488,9 +514,25 @@ public class BuildPathsBlock {
 		}
 	}
 	
+	public void updateTopButtonEnablement() {
+		fClassPathList.enableButton(IDX_BOTTOM, fClassPathList.canMoveDown());
+		fClassPathList.enableButton(IDX_TOP, fClassPathList.canMoveUp());
+	}
+
+	public void buildPathCustomButtonPressed(ListDialogField field, int index) {
+		List elems= field.getSelectedElements();
+		field.removeElements(elems);
+		if (index == IDX_BOTTOM) {
+			field.addElements(elems);
+		} else if (index == IDX_TOP) {
+			field.addElements(elems, 0);
+		}
+	}
+
 	private void buildPathDialogFieldChanged(DialogField field) {
 		if (field == fClassPathList) {
 			updateClassPathStatus();
+			updateTopButtonEnablement();
 		} else if (field == fBuildPathDialogField) {
 			updateOutputLocationStatus();
 		}
