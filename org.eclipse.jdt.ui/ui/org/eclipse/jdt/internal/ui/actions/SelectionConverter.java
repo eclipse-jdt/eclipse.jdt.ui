@@ -210,11 +210,7 @@ public class SelectionConverter {
 				if (input instanceof ICompilationUnit) {
 					JavaModelUtil.reconcile((ICompilationUnit) input);
 				}
-				IJavaElement[] elements= ((ICodeAssist)input).codeSelect(selection.getOffset(), 0);
-				if (elements.length == 1) {
-					return elements;
-				}
-				elements= ((ICodeAssist)input).codeSelect(selection.getOffset(), selection.getLength());
+				IJavaElement[] elements= ((ICodeAssist)input).codeSelect(selection.getOffset() + selection.getLength(), 0);
 				if (elements.length > 0) {
 					return elements;
 				}
