@@ -47,7 +47,6 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -241,11 +240,9 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 	private String[] getExcludedVariableNames() {
 		if (fExcludedVariableNames == null) {
 			try {
-				IBinding[] bindings= new ScopeAnalyzer(fCuRewrite.getRoot()).getDeclarationsInScope(getSelectedExpression().getStartPosition(), ScopeAnalyzer.VARIABLES);
-				fExcludedVariableNames= new String[bindings.length];
-				for (int i= 0; i < bindings.length; i++) {
-					fExcludedVariableNames[i]= bindings[i].getName();
-				}
+				IExpressionFragment expr= getSelectedExpression();
+				Collection takenNames= new ScopeAnalyzer(fCuRewrite.getRoot()).getUsedVariableNames(expr.getStartPosition(), expr.getLength());
+				fExcludedVariableNames= (String[]) takenNames.toArray(new String[takenNames.size()]);
 			} catch (JavaModelException e) {
 				fExcludedVariableNames= new String[0];
 			}

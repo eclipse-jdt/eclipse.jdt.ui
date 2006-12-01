@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -30,6 +31,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -793,4 +795,23 @@ public class ScopeAnalyzer {
 		return false;
 	}
 	
+	public Collection getUsedVariableNames(int offset, int length) {
+		HashSet result= new HashSet();
+		IBinding[] bindingsBefore= getDeclarationsInScope(offset, VARIABLES);
+		for (int i= 0; i < bindingsBefore.length; i++) {
+			result.add(bindingsBefore[i].getName());
+		}
+		IBinding[] bindingsAfter= getDeclarationsInScope(offset + length, VARIABLES);
+		for (int i= 0; i < bindingsAfter.length; i++) {
+			result.add(bindingsAfter[i].getName());
+		}
+		List imports= fRoot.imports();
+		for (int i= 0; i < imports.size(); i++) {
+			ImportDeclaration decl= (ImportDeclaration) imports.get(i);
+			if (decl.isStatic() && !decl.isOnDemand()) {
+				result.add(ASTNodes.getSimpleNameIdentifier(decl.getName()));
+			}
+		}
+		return result;
+	}
 }

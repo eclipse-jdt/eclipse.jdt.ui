@@ -964,17 +964,8 @@ public class ASTResolving {
 	
 	public static String[] getUsedVariableNames(ASTNode node) {
 		CompilationUnit root= (CompilationUnit) node.getRoot();
-		IBinding[] varsBefore= (new ScopeAnalyzer(root)).getDeclarationsInScope(node.getStartPosition(), ScopeAnalyzer.VARIABLES);
-		IBinding[] varsAfter= (new ScopeAnalyzer(root)).getDeclarationsAfter(node.getStartPosition() + node.getLength(), ScopeAnalyzer.VARIABLES);
-
-		String[] names= new String[varsBefore.length + varsAfter.length];
-		for (int i= 0; i < varsBefore.length; i++) {
-			names[i]= varsBefore[i].getName();
-		}
-		for (int i= 0; i < varsAfter.length; i++) {
-			names[i + varsBefore.length]= varsAfter[i].getName();
-		}
-		return names;
+		Collection res= (new ScopeAnalyzer(root)).getUsedVariableNames(node.getStartPosition(), node.getLength());
+		return (String[]) res.toArray(new String[res.size()]);
 	}
 
 	private static boolean isVariableDefinedInContext(IBinding binding, ITypeBinding typeVariable) {
