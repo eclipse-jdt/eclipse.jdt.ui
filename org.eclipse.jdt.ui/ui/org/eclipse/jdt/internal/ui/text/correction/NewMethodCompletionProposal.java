@@ -248,8 +248,7 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 
 	private String evaluateParameterName(List takenNames, Expression argNode, Type type, String key) {
 		IJavaProject project= getCompilationUnit().getJavaProject();
-		String[] excludedNames= (String[]) takenNames.toArray(new String[takenNames.size()]);
-		String[] names= StubUtility.getVariableNameSuggestions(StubUtility.ARGUMENT, project, type, argNode, 0, excludedNames);
+		String[] names= StubUtility.getVariableNameSuggestions(StubUtility.PARAMETER, project, type, argNode, takenNames);
 		for (int i= 0; i < names.length; i++) {
 			addLinkedPositionProposal(key, names[i], null);
 		}

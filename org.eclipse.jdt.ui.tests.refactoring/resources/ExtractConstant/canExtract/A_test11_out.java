@@ -9,6 +9,6 @@ class A {
 		int c= 3 * (2 + 1) + CONSTANT + 28;
 
 
-		int e= (2 + 2) * (27 + 2 * (CONSTANT+1*2));
+		int e= (2 + 2) * (27 + 2 * (CONSTANT + 1*2));
 	}
 }

@@ -906,6 +906,19 @@ public class ASTResolving {
 
 	private static final Code[] CODE_ORDER= { PrimitiveType.CHAR, PrimitiveType.SHORT, PrimitiveType.INT, PrimitiveType.LONG, PrimitiveType.FLOAT, PrimitiveType.DOUBLE };
 
+	public static ITypeBinding[] getNarrowingTypes(AST ast, ITypeBinding type) {
+		ArrayList res= new ArrayList();
+		res.add(type);
+		if (type.isPrimitive()) {
+			Code code= PrimitiveType.toCode(type.getName());
+			for (int i= 0; i < CODE_ORDER.length && code != CODE_ORDER[i]; i++) {
+				String typeName= CODE_ORDER[i].toString();
+				res.add(ast.resolveWellKnownType(typeName));
+			}
+		}
+		return (ITypeBinding[]) res.toArray(new ITypeBinding[res.size()]);
+	}
+	
 	public static ITypeBinding[] getRelaxingTypes(AST ast, ITypeBinding type) {
 		ArrayList res= new ArrayList();
 		res.add(type);

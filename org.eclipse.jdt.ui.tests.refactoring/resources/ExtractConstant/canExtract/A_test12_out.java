@@ -8,6 +8,6 @@ class A {
 		
 		int e= (2 + 2) * CONSTANT;
 		
-		int f= 5 *CONSTANT *(1 + 1);
+		int f= 5 * CONSTANT * (1 + 1);
 	}
 }

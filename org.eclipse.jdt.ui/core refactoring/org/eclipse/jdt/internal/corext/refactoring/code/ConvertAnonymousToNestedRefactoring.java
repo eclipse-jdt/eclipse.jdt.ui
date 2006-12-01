@@ -36,7 +36,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -625,12 +624,11 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 		
 		IVariableBinding[] bindings= getUsedLocalVariables();
 		ArrayList fieldNames= new ArrayList();
-		String[] allFieldNames= new String[0];
 		for (int i= 0; i < bindings.length; i++) {
 			String name= StubUtility.removePrefixAndSuffixForVariable(project, bindings[i]);
-			String[] fieldNameProposals= StubUtility.getVariableNameSuggestions(StubUtility.FIELD, project, name, 0, Flags.AccPrivate, allFieldNames);
+			String[] fieldNameProposals= StubUtility.getVariableNameSuggestions(StubUtility.INSTANCE_FIELD, project, name, 0, fieldNames, true);
 			fieldNames.add(fieldNameProposals[0]);
-			allFieldNames= (String[]) fieldNames.toArray(new String[fieldNames.size()]);
+			
 			
 			if (fLinkedProposalModel != null) {
 				LinkedProposalPositionGroup positionGroup= fLinkedProposalModel.getPositionGroup(KEY_FIELD_NAME_EXT + i, true);
@@ -639,6 +637,7 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 				}
 			}
 		}
+		String[] allFieldNames= (String[]) fieldNames.toArray(new String[fieldNames.size()]);
 		
 		List newBodyDeclarations= newDeclaration.bodyDeclarations();
 		
@@ -859,7 +858,7 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
         boolean useThisAccess= useThisForFieldAccess();
         for (int i= 0; i < bindings.length; i++) {
         	String baseName= StubUtility.removePrefixAndSuffixForVariable(project, bindings[i]);
-        	String[] paramNameProposals= StubUtility.getVariableNameSuggestions(StubUtility.ARGUMENT, project, baseName, 0, 0, (String[]) newParameterNames.toArray(new String[newParameterNames.size()]));
+        	String[] paramNameProposals= StubUtility.getVariableNameSuggestions(StubUtility.PARAMETER, project, baseName, 0, newParameterNames, true);
         	String paramName= paramNameProposals[0];
         	
         	SingleVariableDeclaration param= newParameterDeclaration(ast, importRewrite, paramName, bindings[i].getType());

@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.corext.refactoring.scripting;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 
@@ -29,6 +31,6 @@ public final class ExtractTempRefactoringContribution extends JDTRefactoringCont
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(final RefactoringDescriptor descriptor) throws CoreException {
-		return new ExtractTempRefactoring(null, 0, 0);
+		return new ExtractTempRefactoring((ICompilationUnit) null, 0, 0);
 	}
 }

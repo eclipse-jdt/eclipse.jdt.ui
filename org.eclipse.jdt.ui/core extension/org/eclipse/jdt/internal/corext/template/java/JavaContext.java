@@ -409,7 +409,7 @@ public class JavaContext extends CompilationUnitContext {
 		
 		IJavaProject project= getJavaProject();
 		if (project != null)
-			return StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, project, type, dim, 0, excludes);
+			return StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, project, type, dim, Arrays.asList(excludes), true);
 		
 		// fallback if we lack proper context: roll-our own lowercasing
 		return new String[] {Signature.getSimpleName(type).toLowerCase()};

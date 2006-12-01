@@ -13,16 +13,12 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.Assert;
@@ -37,7 +33,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -47,7 +42,6 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -58,16 +52,15 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
-import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
@@ -81,16 +74,17 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RefactoringDescriptorChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -102,6 +96,8 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class ExtractConstantRefactoring extends ScriptableRefactoring {
@@ -111,7 +107,9 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
 
 	private static final String MODIFIER= "static final"; //$NON-NLS-1$
-	private static final String[] KNOWN_METHOD_NAME_PREFIXES= {"get", "is"}; //$NON-NLS-2$ //$NON-NLS-1$
+	
+	private static final String KEY_NAME= "name"; //$NON-NLS-1$
+	private static final String KEY_TYPE= "type"; //$NON-NLS-1$
 	
 	private CompilationUnitRewrite fCuRewrite;
 	private int fSelectionStart;
@@ -125,7 +123,7 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 
 	private String fVisibility= JdtFlags.VISIBILITY_STRING_PRIVATE; //default value
 	private boolean fTargetIsInterface= false;
-	private String fConstantName= ""; //$NON-NLS-1$;
+	private String fConstantName;
 	private String[] fExcludedVariableNames;
 
 	private boolean fSelectionAllStaticFinal;
@@ -138,6 +136,9 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 	private boolean fInsertFirst;
 	
 	private CompilationUnitChange fChange;
+	private String[] fGuessedConstNames;
+	
+	private LinkedProposalModel fLinkedProposalModel;
 
 	/**
 	 * Creates a new extract constant refactoring
@@ -151,6 +152,26 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fCu= unit;
+		fCuRewrite= null;
+		fLinkedProposalModel= null;
+		fConstantName= ""; //$NON-NLS-1$
+	}
+	
+	public ExtractConstantRefactoring(CompilationUnit astRoot, int selectionStart, int selectionLength) {
+		Assert.isTrue(selectionStart >= 0);
+		Assert.isTrue(selectionLength >= 0);
+		Assert.isTrue(astRoot.getTypeRoot() instanceof ICompilationUnit);
+		
+		fSelectionStart= selectionStart;
+		fSelectionLength= selectionLength;
+		fCu= (ICompilationUnit) astRoot.getTypeRoot();
+		fCuRewrite= new CompilationUnitRewrite(fCu, astRoot);
+		fLinkedProposalModel= null;
+		fConstantName= ""; //$NON-NLS-1$
+	}
+		
+	public void setLinkedProposalModel(LinkedProposalModel linkedProposalModel) {
+		fLinkedProposalModel= linkedProposalModel;
 	}
 	
 	public String getName() {
@@ -193,7 +214,7 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 		if (proposals.length > 0)
 			return proposals[0];
 		else
-			return ""; //$NON-NLS-1$
+			return fConstantName;
 	}
 	
 	/**
@@ -201,38 +222,21 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 	 * The first proposal should be used as "best guess" (if it exists).
 	 */
 	public String[] guessConstantNames() {
-		LinkedHashSet proposals= new LinkedHashSet(); // retain ordering, but prevent duplicates
-		try {
-			String[] excludedVariableNames= getExcludedVariableNames();
-			ASTNode associatedNode= getSelectedExpression().getAssociatedNode();
-			if (associatedNode instanceof StringLiteral) {
-				String literal= ((StringLiteral) associatedNode).getLiteralValue();
-				String guess= guessConstantNameFromString(literal, excludedVariableNames);
-				return guess.length() == 0 ? new String[0] : new String[] { guess };
-			} else if (associatedNode instanceof NumberLiteral) {
-				String literal= ((NumberLiteral) associatedNode).getToken();
-				String guess= guessConstantNameFromString(literal, excludedVariableNames);
-				return guess.length() == 0 ? new String[0] : new String[] { guess };
+		if (fGuessedConstNames == null) {
+			try {
+				Expression expression= getSelectedExpression().getAssociatedExpression();
+				if (expression != null) {
+					ITypeBinding binding= expression.resolveTypeBinding();
+					fGuessedConstNames= StubUtility.getVariableNameSuggestions(StubUtility.CONSTANT_FIELD, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()));
+				} 
+			} catch (JavaModelException e) {
 			}
-				
-			if (associatedNode instanceof MethodInvocation) {
-				proposals.addAll(guessConstNamesFromMethodInvocation((MethodInvocation) associatedNode, excludedVariableNames));
-			} else if (associatedNode instanceof CastExpression) {
-				Expression expression= ((CastExpression) associatedNode).getExpression();
-				if (expression instanceof MethodInvocation) {
-					proposals.addAll(guessConstNamesFromMethodInvocation((MethodInvocation) expression, excludedVariableNames));
-				}
-			}
-			if (associatedNode instanceof Expression) {
-				proposals.addAll(guessConstNamesFromExpression((Expression) associatedNode, excludedVariableNames));
-			}
-		} catch (JavaModelException e) {
-			// too bad ... no proposals this time
-			JavaPlugin.log(e); //no ui here, just log
-			return new String[0];
+			if (fGuessedConstNames == null)
+				fGuessedConstNames= new String[0];
 		}
-		return (String[]) proposals.toArray(new String[proposals.size()]);
+		return fGuessedConstNames;
 	}
+	
 	
 	private String[] getExcludedVariableNames() {
 		if (fExcludedVariableNames == null) {
@@ -248,96 +252,7 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 		}
 		return fExcludedVariableNames;
 	}
-	
-	private static String guessConstantNameFromString(String string, String[] excludedNames) {
-		StringBuffer result= new StringBuffer();
-		int i= 0;
-		char ch= '_';
-
-		// run to first valid identifier part:
-		for (; i < string.length(); i++) {
-			ch= string.charAt(i);
-			if (Character.isJavaIdentifierStart(ch)) {
-				result.append(Character.toUpperCase(ch));
-				i++;
-				break;
-			} else if (Character.isJavaIdentifierPart(ch)) {
-				result.append('_').append(Character.toUpperCase(ch));
-				i++;
-				break;
-			}
-		}
-
-		// add remaining characters, replacing titleCase by TITLE_CASE and sequences of invalid characters by _:
-		boolean wasLastCharLowerCase= Character.isLowerCase(ch);
-		boolean wasJavaIdentifierPart= Character.isJavaIdentifierPart(ch);
-		for (; i < string.length(); i++) {
-			ch= string.charAt(i);
-			if (Character.isJavaIdentifierPart(ch)) {
-				if (wasLastCharLowerCase && Character.isUpperCase(ch))
-					result.append('_').append(Character.toUpperCase(ch));
-				else
-					result.append(Character.toUpperCase(ch));
-				wasLastCharLowerCase= Character.isLowerCase(ch);
-				wasJavaIdentifierPart= true;
-				
-			} else {
-				if (wasLastCharLowerCase || wasJavaIdentifierPart)
-					result.append('_');
-				wasLastCharLowerCase= false;
-				wasJavaIdentifierPart= false;
-			}
-		}
 		
-		if (result.length() > 0 && result.charAt(result.length() - 1) == '_')
-			result.deleteCharAt(result.length() - 1);
-		
-		return result.toString();
-	}
-	
-	private List guessConstNamesFromMethodInvocation(MethodInvocation selectedMethodInvocation, String[] excludedVariableNames) {
-		String methodName= selectedMethodInvocation.getName().getIdentifier();
-		for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
-			String prefix= KNOWN_METHOD_NAME_PREFIXES[i];
-			if (!methodName.startsWith(prefix))
-				continue; // not this prefix
-			if (methodName.length() == prefix.length())
-				return Collections.EMPTY_LIST;
-			char firstAfterPrefix= methodName.charAt(prefix.length());
-			if (!Character.isUpperCase(firstAfterPrefix))
-				continue;
-			String proposal= Character.toLowerCase(firstAfterPrefix) + methodName.substring(prefix.length() + 1);
-			methodName= proposal;
-			break;
-		}
-		return getConstantNameSuggestions(methodName, 0, excludedVariableNames);
-	}
-
-	private List guessConstNamesFromExpression(Expression selectedExpression, String[] excludedVariableNames) {
-		ITypeBinding expressionBinding= selectedExpression.resolveTypeBinding();
-		ITypeBinding normalizedBinding= Bindings.normalizeTypeBinding(expressionBinding).getTypeDeclaration();
-		if (normalizedBinding.isArray())
-			normalizedBinding= normalizedBinding.getElementType();
-		
-		if (normalizedBinding.isPrimitive())
-			return Collections.EMPTY_LIST;
-		
-		String typeName= normalizedBinding.getName();
-		if (typeName.length() == 0)
-			return Collections.EMPTY_LIST;
-		int typeParamStart= typeName.indexOf("<"); //$NON-NLS-1$
-		if (typeParamStart != -1)
-			typeName= typeName.substring(0, typeParamStart);
-		
-		return getConstantNameSuggestions(typeName, expressionBinding.getDimensions(), excludedVariableNames);
-	}
-
-	private List getConstantNameSuggestions(String baseName, int dimensions, String[] excludedVariableNames) {
-		int staticFinal= Flags.AccStatic | Flags.AccFinal;
-		String[] proposals= StubUtility.getFieldNameSuggestions(fCu.getJavaProject(), baseName, dimensions, staticFinal, excludedVariableNames);
-		return Arrays.asList(proposals);
-	}
-
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 7); //$NON-NLS-1$
@@ -346,11 +261,15 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 			if (result.hasFatalError())
 				return result;
 			pm.worked(1);
-	
-			CompilationUnit cuNode= RefactoringASTParser.parseWithASTProvider(fCu, true, new SubProgressMonitor(pm, 3));
-			fCuRewrite= new CompilationUnitRewrite(fCu, cuNode);
-	
+			
+			if (fCuRewrite == null) {
+				CompilationUnit cuNode= RefactoringASTParser.parseWithASTProvider(fCu, true, new SubProgressMonitor(pm, 3));
+				fCuRewrite= new CompilationUnitRewrite(fCu, cuNode);
+			} else {
+				pm.worked(3);
+			}
 			result.merge(checkSelection(new SubProgressMonitor(pm, 3)));
+	
 			if (result.hasFatalError())
 				return result;
 			
@@ -489,6 +408,13 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 		String space= " "; //$NON-NLS-1$
 		return getVisibility() + space + MODIFIER + space + getConstantTypeName() + space + fConstantName;
 	}
+	
+	public CompilationUnitChange createTextChange(IProgressMonitor pm) throws CoreException {
+		createConstantDeclaration();
+		replaceExpressionsWithConstant();
+		return fCuRewrite.createChange(true, pm);
+	}
+	
 
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.ExtractConstantRefactoring_checking_preconditions, 4); 
@@ -502,16 +428,7 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 		
 		try {
 			RefactoringStatus result= new RefactoringStatus();
-			
-			createConstantDeclaration();
-			fChange= fCuRewrite.createChange();
-			pm.worked(1);
-			
-			TextEdit[] replaceEdits= createReplaceExpressionWithConstantEdits();
-			for (int i= 0; i < replaceEdits.length; i++) {
-				TextChangeCompatibility.addTextEdit(fChange, RefactoringCoreMessages.ExtractConstantRefactoring_replace, replaceEdits[i]); 
-			}
-			pm.worked(1);
+			fChange= createTextChange(new SubProgressMonitor(pm, 2));
 			
 			String newCuSource= fChange.getPreviewContent(new NullProgressMonitor());
 			CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, fCu, true, true, null);
@@ -568,6 +485,33 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 		} else {
 			listRewrite.insertAfter(fieldDeclaration, getNodeToInsertConstantDeclarationAfter(), msg);
 		}
+		
+		if (fLinkedProposalModel != null) {
+			ASTRewrite rewrite= fCuRewrite.getASTRewrite();
+			LinkedProposalPositionGroup nameGroup= fLinkedProposalModel.getPositionGroup(KEY_NAME, true);
+			nameGroup.addPosition(rewrite.track(variableDeclarationFragment.getName()), true);
+			
+			String[] nameSuggestions= guessConstantNames();
+			if (nameSuggestions.length > 0 && !nameSuggestions[0].equals(fConstantName)) {
+				nameGroup.addProposal(fConstantName, null, nameSuggestions.length + 1);
+			}
+			for (int i= 0; i < nameSuggestions.length; i++) {
+				nameGroup.addProposal(nameSuggestions[i], null, nameSuggestions.length - i);
+			}
+			
+			LinkedProposalPositionGroup typeGroup= fLinkedProposalModel.getPositionGroup(KEY_TYPE, true);
+			typeGroup.addPosition(rewrite.track(type), true);
+			
+			ITypeBinding typeBinding= fragment.getAssociatedExpression().resolveTypeBinding();
+			if (typeBinding != null) {
+				ITypeBinding[] relaxingTypes= ASTResolving.getNarrowingTypes(ast, typeBinding);
+				for (int i= 0; i < relaxingTypes.length; i++) {
+					typeGroup.addProposal(relaxingTypes[i], fCuRewrite.getCu(), relaxingTypes.length - i);
+				}
+			}
+			boolean isInterface= parent.resolveBinding() != null && parent.resolveBinding().isInterface();
+			ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(fLinkedProposalModel, rewrite, fieldDeclaration.modifiers(), isInterface);
+		}
 	}
 
 	private Type getConstantType() throws JavaModelException {
@@ -620,30 +564,27 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 		return new RefactoringDescriptorChange(descriptor, RefactoringCoreMessages.ExtractConstantRefactoring_name, new Change[] { fChange});
 	}
 
-	private TextEdit[] createReplaceExpressionWithConstantEdits() throws JavaModelException {
-		IASTFragment[] fragmentsToReplace= getFragmentsToReplace();
-		TextEdit[] result= new TextEdit[fragmentsToReplace.length];
-		for (int i= 0; i < fragmentsToReplace.length; i++)
-			result[i]= createReplaceEdit(fragmentsToReplace[i]);
+	private void replaceExpressionsWithConstant() throws JavaModelException {
+		ASTRewrite astRewrite= fCuRewrite.getASTRewrite();
+		AST ast= astRewrite.getAST();
 		
-		return result;
-	}
-
-	private ReplaceEdit createReplaceEdit(IASTFragment fragment) throws JavaModelException {
-		int offset= fragment.getStartPosition();
-		int length= fragment.getLength();
-		String constantReference= getNewConstantReference();
-		ReplaceEdit replaceEdit= new ReplaceEdit(offset, length, constantReference);
-		return replaceEdit;
+		IASTFragment[] fragmentsToReplace= getFragmentsToReplace();
+		for (int i= 0; i < fragmentsToReplace.length; i++) {
+			IASTFragment fragment= fragmentsToReplace[i];
+			
+			SimpleName ref= ast.newSimpleName(fConstantName);
+			Name replacement= ref;
+			if (qualifyReferencesWithDeclaringClassName()) {
+				replacement= ast.newQualifiedName(ast.newSimpleName(getContainingTypeBinding().getName()), ref);
+			}
+			TextEditGroup description= fCuRewrite.createGroupDescription(RefactoringCoreMessages.ExtractConstantRefactoring_replace);
+			
+			fragment.replace(astRewrite, replacement, description);
+			if (fLinkedProposalModel != null)
+				fLinkedProposalModel.getPositionGroup(KEY_NAME, true).addPosition(astRewrite.track(ref), false);
+		}
 	}
 	
-	private String getNewConstantReference() throws JavaModelException {
-		if(qualifyReferencesWithDeclaringClassName())
-			return getContainingTypeBinding().getName() + "." + fConstantName; //$NON-NLS-1$
-		else
-			return fConstantName; 
-	}
-
 	private void computeConstantDeclarationLocation() throws JavaModelException {
 		if (isDeclarationLocationComputed())
 			return;

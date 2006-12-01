@@ -353,6 +353,24 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fCu= unit;
+		fCompilationUnitNode= null;
+
+		fReplaceAllOccurrences= true; // default
+		fDeclareFinal= false; // default
+		fTempName= ""; //$NON-NLS-1$
+		
+		fLinkedProposalModel= null;
+	}
+	
+	public ExtractTempRefactoring(CompilationUnit astRoot, int selectionStart, int selectionLength) {
+		Assert.isTrue(selectionStart >= 0);
+		Assert.isTrue(selectionLength >= 0);
+		Assert.isTrue(astRoot.getTypeRoot() instanceof ICompilationUnit);
+		
+		fSelectionStart= selectionStart;
+		fSelectionLength= selectionLength;
+		fCu= (ICompilationUnit) astRoot.getTypeRoot();
+		fCompilationUnitNode= astRoot;
 
 		fReplaceAllOccurrences= true; // default
 		fDeclareFinal= false; // default
@@ -509,12 +527,7 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 				result.addEntry(new RefactoringStatusEntry((problem.isError() ? RefactoringStatus.ERROR : RefactoringStatus.WARNING), problem.getMessage(), new JavaStringStatusContext(newCuSource, new SourceRange(problem))));
 		}
 	}
-	
-	public RefactoringStatus checkActivationBasics(CompilationUnit rootNode, IProgressMonitor pm) throws JavaModelException {
-		fCompilationUnitNode= rootNode;
-		return checkSelection(pm);
-	}
-	
+		
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 6); //$NON-NLS-1$
@@ -523,10 +536,14 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 			if (result.hasFatalError())
 				return result;
 
-			CompilationUnit rootNode= RefactoringASTParser.parseWithASTProvider(fCu, true, new SubProgressMonitor(pm, 3));
+			if (fCompilationUnitNode == null) {
+				fCompilationUnitNode= RefactoringASTParser.parseWithASTProvider(fCu, true, new SubProgressMonitor(pm, 3));
+			} else {
+				pm.worked(3);
+			}
 			
-			result.merge(checkActivationBasics(rootNode, new SubProgressMonitor(pm, 3)));
-			if ((!result.hasFatalError()) && isLiteralNodeSelected())
+			result.merge(checkSelection(new SubProgressMonitor(pm, 3)));
+			if (!result.hasFatalError() && isLiteralNodeSelected())
 				fReplaceAllOccurrences= false;
 			return result;
 
@@ -832,7 +849,7 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 			LinkedProposalPositionGroup typeGroup= fLinkedProposalModel.getPositionGroup(KEY_TYPE, true);
 			typeGroup.addPosition(rewrite.track(resultingType), false);
 			if (typeBinding != null) {
-				ITypeBinding[] relaxingTypes= ASTResolving.getRelaxingTypes(ast, typeBinding);
+				ITypeBinding[] relaxingTypes= ASTResolving.getNarrowingTypes(ast, typeBinding);
 				for (int i= 0; i < relaxingTypes.length; i++) {
 					typeGroup.addProposal(relaxingTypes[i], fCURewrite.getCu(), relaxingTypes.length - i);
 				}
@@ -858,7 +875,7 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 				Expression expression= getSelectedExpression().getAssociatedExpression();
 				if (expression != null) {
 					ITypeBinding binding= expression.resolveTypeBinding();
-					fGuessedTempNames= StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, fCu.getJavaProject(), binding, expression, 0, getExcludedVariableNames());
+					fGuessedTempNames= StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()));
 				} 
 			} catch (JavaModelException e) {
 			}

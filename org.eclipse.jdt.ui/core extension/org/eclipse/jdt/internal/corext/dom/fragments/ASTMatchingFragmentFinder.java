@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom.fragments;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -25,7 +25,7 @@ class ASTMatchingFragmentFinder extends GenericVisitor {
 	}
 
 	private ASTFragment fFragmentToMatch;
-	private List fMatches= new ArrayList();
+	private Set fMatches= new HashSet();
 
 	private ASTMatchingFragmentFinder(ASTFragment toMatch) {
 		super(true);

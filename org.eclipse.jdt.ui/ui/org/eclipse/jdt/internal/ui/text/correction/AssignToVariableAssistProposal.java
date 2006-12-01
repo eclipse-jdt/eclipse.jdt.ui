@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -273,16 +275,17 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 	private String[] suggestLocalVariableNames(ITypeBinding binding, Expression expression) {
 		IJavaProject project= getCompilationUnit().getJavaProject();
-		return StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, project, binding, expression, 0, getUsedVariableNames());
+		return StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, project, binding, expression, getUsedVariableNames());
 	}
 
 	private String[] suggestFieldNames(ITypeBinding binding, Expression expression, int modifiers) {
 		IJavaProject project= getCompilationUnit().getJavaProject();
-		return StubUtility.getVariableNameSuggestions(StubUtility.FIELD, project, binding, expression, modifiers, getUsedVariableNames());
+		int varKind= Modifier.isStatic(modifiers) ? StubUtility.STATIC_FIELD : StubUtility.INSTANCE_FIELD;
+		return StubUtility.getVariableNameSuggestions(varKind, project, binding, expression, getUsedVariableNames());
 	}
 
-	private String[] getUsedVariableNames() {
-		return ASTResolving.getUsedVariableNames(fNodeToAssign);
+	private Collection getUsedVariableNames() {
+		return Arrays.asList(ASTResolving.getUsedVariableNames(fNodeToAssign));
 	}
 
 	private int findAssignmentInsertIndex(List statements) {

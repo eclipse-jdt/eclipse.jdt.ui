@@ -91,6 +91,7 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFix;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
@@ -216,15 +217,28 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		
 		final ICompilationUnit cu= context.getCompilationUnit();
-		final ExtractTempRefactoring refactoring= new ExtractTempRefactoring(cu, expression.getStartPosition(), expression.getLength());
-		if (refactoring.checkActivationBasics(context.getASTRoot(), new NullProgressMonitor()).isOK()) {
+		final ExtractTempRefactoring extractTempRefactoring= new ExtractTempRefactoring(context.getASTRoot(), expression.getStartPosition(), expression.getLength());
+		if (extractTempRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
 			String label= CorrectionMessages.QuickAssistProcessor_extract_to_local_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, 5, image) {
 				protected TextChange createTextChange() throws CoreException {
-					refactoring.setTempName(refactoring.guessTempName()); // expensive
-					refactoring.setLinkedProposalModel(getLinkedProposalModel());
-					return refactoring.createTextChange(new NullProgressMonitor());
+					extractTempRefactoring.setTempName(extractTempRefactoring.guessTempName()); // expensive
+					extractTempRefactoring.setLinkedProposalModel(getLinkedProposalModel());
+					return extractTempRefactoring.createTextChange(new NullProgressMonitor());
+				}
+			};
+			proposals.add(proposal);
+		}
+		final ExtractConstantRefactoring extractConstRefactoring= new ExtractConstantRefactoring(context.getASTRoot(), expression.getStartPosition(), expression.getLength());
+		if (extractConstRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
+			String label= CorrectionMessages.QuickAssistProcessor_extract_to_constant_description;
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, 5, image) {
+				protected TextChange createTextChange() throws CoreException {
+					extractConstRefactoring.setConstantName(extractConstRefactoring.guessConstantName()); // expensive
+					extractConstRefactoring.setLinkedProposalModel(getLinkedProposalModel());
+					return extractConstRefactoring.createTextChange(new NullProgressMonitor());
 				}
 			};
 			proposals.add(proposal);

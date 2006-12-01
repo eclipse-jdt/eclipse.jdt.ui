@@ -178,19 +178,19 @@ public class ExtractConstantTests extends RefactoringTest {
 	}
 	
 	public void test1() throws Exception {
-		helper1(5, 16, 5, 21, false, false, "CONSTANT", "");
+		helper1(5, 16, 5, 21, false, false, "CONSTANT", "INT");
 	}
 	
 	public void test2() throws Exception {
-		helper1(8, 16, 8, 27, false, false, "CONSTANT", "");
+		helper1(8, 16, 8, 27, false, false, "CONSTANT", "INT");
 	}
 	
 	public void test3() throws Exception {
-		helper1(8, 16, 8, 27, true, false, "CONSTANT", "");
+		helper1(8, 16, 8, 27, true, false, "CONSTANT", "INT");
 	}
 		
 	public void test4() throws Exception {
-		helper1(5, 23, 5, 34, true, false, "CONSTANT", "");
+		helper1(5, 23, 5, 34, true, false, "CONSTANT", "INT");
 	}
 	
 	public void test5() throws Exception {
@@ -206,23 +206,23 @@ public class ExtractConstantTests extends RefactoringTest {
 	}
 		
 	public void test8() throws Exception {
-		helper1(8, 16, 8, 22, true, true, "CONSTANT", "");
+		helper1(8, 16, 8, 22, true, true, "CONSTANT", "INT");
 	}
 	
 	public void test9() throws Exception {
-		helper1(6, 24, 6, 29, true, true, "CONSTANT", "");
+		helper1(6, 24, 6, 29, true, true, "CONSTANT", "INT");
 	}
 
 	public void test10() throws Exception {
-		helper1(8, 17, 8, 22, true, true, "CONSTANT", "");
+		helper1(8, 17, 8, 22, true, true, "CONSTANT", "INT");
 	}			
 	
 	public void test11() throws Exception {
-		helper1(10, 37, 10, 43, true, true, "CONSTANT", "");
+		helper1(10, 37, 10, 43, true, true, "CONSTANT", "INT");
 	}
 	
 	public void test12() throws Exception {
-		helper1(9, 19, 9, 24, true, true, "CONSTANT", "");
+		helper1(9, 19, 9, 24, true, true, "CONSTANT", "INT");
 	}
 	
 	public void test13() throws Exception{
@@ -230,7 +230,7 @@ public class ExtractConstantTests extends RefactoringTest {
 	}
 		
 	public void test14() throws Exception{
-		helper1(10, 28, 10, 44, true, true, "CONSTANT", "");
+		helper1(10, 28, 10, 44, true, true, "CONSTANT", "INT");
 	}	
 
 	public void test15() throws Exception{
@@ -266,7 +266,7 @@ public class ExtractConstantTests extends RefactoringTest {
 	}
 	
 	public void test23() throws Exception {
-		helper1(14, 12, 14, 15, true, false, "COLOR");	
+		helper1(14, 12, 14, 15, true, false, "COLOR");
 	}
 
 	public void test24() throws Exception {
