@@ -1051,11 +1051,10 @@ public class StubUtility {
 		if (assignedExpression instanceof Name) {
 			Name simpleNode= (Name) assignedExpression;
 			IBinding binding= simpleNode.resolveBinding();
-			String res= binding instanceof IVariableBinding ? removePrefixAndSuffixForVariable(project, (IVariableBinding) binding) : ASTNodes.getSimpleNameIdentifier(simpleNode);
-			if (simpleNode.isSimpleName() && res.equals(simpleNode.getFullyQualifiedName())) {
-				return null;
-			}
-			return res;
+			if (binding instanceof IVariableBinding)
+				return removePrefixAndSuffixForVariable(project, (IVariableBinding) binding);
+			
+			return ASTNodes.getSimpleNameIdentifier(simpleNode);
 		} else if (assignedExpression instanceof MethodInvocation) {
 			name= ((MethodInvocation) assignedExpression).getName().getIdentifier();
 		} else if (assignedExpression instanceof SuperMethodInvocation) {
