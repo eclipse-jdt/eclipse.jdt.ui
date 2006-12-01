@@ -801,7 +801,7 @@ public class ScopeAnalyzer {
 		for (int i= 0; i < bindingsBefore.length; i++) {
 			result.add(bindingsBefore[i].getName());
 		}
-		IBinding[] bindingsAfter= getDeclarationsInScope(offset + length, VARIABLES);
+		IBinding[] bindingsAfter= getDeclarationsAfter(offset + length, VARIABLES);
 		for (int i= 0; i < bindingsAfter.length; i++) {
 			result.add(bindingsAfter[i].getName());
 		}
