@@ -28,6 +28,7 @@ public final class CompareMessages extends NLS {
 	public static String JavaNode_importDeclarations;
 	public static String JavaNode_initializer;
 	public static String JavaNode_packageDeclaration;
+	public static String PropertiesStructureCreator_error_occurred;
 	public static String PropertyCompareViewer_title;
 	public static String PropertyCompareViewer_malformedEncoding;
 	public static String CompareWithHistory_title;

@@ -116,7 +116,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 		} catch (IOException ex) {
 			if (sharedDocumentAdapter != null)
 				sharedDocumentAdapter.disconnect(input);
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "An error occurred while creating the input structure.", ex));
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, CompareMessages.PropertiesStructureCreator_error_occurred, ex));
 		} finally {
 			monitor.done();
 		}
