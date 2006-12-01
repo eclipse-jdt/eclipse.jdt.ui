@@ -46,6 +46,7 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 
 	/**
 	 * Creates a JavaNode under the given parent.
+	 * @param parent the parent node
 	 * @param type the Java elements type. Legal values are from the range CU to METHOD of this class.
 	 * @param name the name of the Java element
 	 * @param start the starting position of the java element in the underlying document
@@ -53,9 +54,7 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	 */
 	public JavaNode(JavaNode parent, int type, String name, int start, int length) {
 		super(parent, type, JavaCompareUtilities.buildID(type, name), parent.getDocument(), start, length);
-		if (parent != null) {
-			parent.addChild(this);
-		}
+		parent.addChild(this);
 	}	
 	
 	/**

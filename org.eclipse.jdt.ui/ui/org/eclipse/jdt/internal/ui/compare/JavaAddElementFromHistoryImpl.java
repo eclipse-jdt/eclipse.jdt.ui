@@ -104,11 +104,8 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 			input= getEditionElement(selection);
 			if (input != null) {
 				cu= input.getCompilationUnit();
-			
-				if (input != null) {
-					parent= input;
-					input= null;
-				}
+				parent= input;
+				input= null;
 
 			} else {
 				if (selection instanceof IStructuredSelection) {
