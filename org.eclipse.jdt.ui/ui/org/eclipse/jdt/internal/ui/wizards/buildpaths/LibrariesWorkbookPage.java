@@ -11,8 +11,6 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -373,13 +371,17 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
 				String key= attrib.getKey();
-				Object value= null;
-				if (key.equals(CPListElement.ACCESSRULES)) {
-					value= new IAccessRule[0];
+				if (attrib.isBuiltIn()) {
+					Object value= null;
+					if (key.equals(CPListElement.ACCESSRULES)) {
+						value= new IAccessRule[0];
+					}
+					attrib.getParent().setAttribute(key, value);
+					selElements.remove(i);
+				} else {
+					removeCustomAttribute(attrib);
 				}
-				attrib.getParent().setAttribute(key, value);
 				selElements.remove(i);
-				
 				if (attrib.getParent().getParentContainer() instanceof CPListElement) { // inside a container: apply changes right away
 					CPListElement containerEntry= attrib.getParent();
 					HashSet changedAttributes= (HashSet) containerEntriesToUpdate.get(containerEntry);
@@ -418,11 +420,17 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				if (attrib.isInNonModifiableContainer()) {
 					return false;
 				}
-				if (attrib.getKey().equals(CPListElement.ACCESSRULES)) {
-					return ((IAccessRule[]) attrib.getValue()).length > 0;
-				}
-				if (attrib.getValue() == null) {
-					return false;
+				if (attrib.isBuiltIn()) {
+					if (attrib.getKey().equals(CPListElement.ACCESSRULES)) {
+						return ((IAccessRule[]) attrib.getValue()).length > 0;
+					}
+					if (attrib.getValue() == null) {
+						return false;
+					}
+				} else {
+					if (!canRemoveCustomAttribute(attrib)) {
+						return false;
+					}
 				}
 			} else if (elem instanceof CPListElement) {
 				CPListElement curr= (CPListElement) elem;
@@ -467,26 +475,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				fClassPathList.refresh(); // images
 				updateEnabledState();
 			}
-		} else if (key.equals(CPListElement.JAVADOC)) {
-			String initialLocation= (String) selElement.getAttribute(CPListElement.JAVADOC);
-			
-			String elementName= new CPListLabelProvider().getText(selElement);
-			try {
-				URL url= initialLocation != null ? new URL(initialLocation) : null;
-				URL[] result= BuildPathDialogAccess.configureJavadocLocation(getShell(), elementName, url);
-				if (result != null) {
-					URL newURL= result[0];
-					selElement.setAttribute(CPListElement.JAVADOC, newURL != null ? newURL.toExternalForm() : null);
-					String[] changedAttributes= { CPListElement.JAVADOC };
-					attributeUpdated(selElement, changedAttributes);
-
-					fLibrariesList.refresh(elem);
-					fClassPathList.dialogFieldChanged(); // validate
-					updateEnabledState();
-				}
-			} catch (MalformedURLException e) {
-				// ignore
-			}
 		} else if (key.equals(CPListElement.ACCESSRULES)) {
 			AccessRulesDialog dialog= new AccessRulesDialog(getShell(), selElement, fCurrJProject, fPageContainer != null);
 			int res= dialog.open();
@@ -503,13 +491,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 					dialog.performPageSwitch(fPageContainer);
 				}
 			}
-		} else if (key.equals(CPListElement.NATIVE_LIB_PATH)) {
-			NativeLibrariesDialog dialog= new NativeLibrariesDialog(getShell(), selElement);
-			if (dialog.open() == Window.OK) {
-				selElement.setAttribute(CPListElement.NATIVE_LIB_PATH, dialog.getNativeLibraryPath());
-				String[] changedAttributes= { CPListElement.NATIVE_LIB_PATH };
+		} else {
+			if (editCustomAttribute(getShell(), elem)) {
+				String[] changedAttributes= { key };
 				attributeUpdated(selElement, changedAttributes);
-				
 				fLibrariesList.refresh(elem);
 				fClassPathList.dialogFieldChanged(); // validate
 				updateEnabledState();
@@ -611,6 +596,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			CPListElementAttribute attrib= (CPListElementAttribute) elem;
 			if (attrib.isInNonModifiableContainer()) {
 				return false;
+			}
+			if (!attrib.isBuiltIn()) {
+				return canEditCustomAttribute(attrib);
 			}
 			return true;
 		}

@@ -21,6 +21,8 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.StatusDialog;
 
+import org.eclipse.jdt.core.IClasspathEntry;
+
 import org.eclipse.jdt.internal.ui.preferences.NativeLibrariesConfigurationBlock;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -32,7 +34,7 @@ public class NativeLibrariesDialog extends StatusDialog {
 
 	private final NativeLibrariesConfigurationBlock fConfigurationBlock;
 	
-	public NativeLibrariesDialog(Shell parent, CPListElement selElement) {
+	public NativeLibrariesDialog(Shell parent, String nativeLibPath, IClasspathEntry parentEntry) {
 		super(parent);
 		setTitle(NewWizardMessages.NativeLibrariesDialog_title);
 		
@@ -44,7 +46,7 @@ public class NativeLibrariesDialog extends StatusDialog {
 			}
 		};	
 		
-		fConfigurationBlock= new NativeLibrariesConfigurationBlock(listener, parent, selElement);
+		fConfigurationBlock= new NativeLibrariesConfigurationBlock(listener, parent, nativeLibPath, parentEntry);
 		setHelpAvailable(false);
 	}
 	

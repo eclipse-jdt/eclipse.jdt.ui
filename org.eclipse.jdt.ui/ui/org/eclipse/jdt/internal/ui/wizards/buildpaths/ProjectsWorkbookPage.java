@@ -270,12 +270,16 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
-				String key= attrib.getKey();
-				Object value= null;
-				if (key.equals(CPListElement.ACCESSRULES)) {
-					value= new IAccessRule[0];
+				if (attrib.isBuiltIn()) {
+					String key= attrib.getKey();
+					Object value= null;
+					if (key.equals(CPListElement.ACCESSRULES)) {
+						value= new IAccessRule[0];
+					}
+					attrib.getParent().setAttribute(key, value);
+				} else {
+					removeCustomAttribute(attrib);
 				}
-				attrib.getParent().setAttribute(key, value);
 				selElements.remove(i);
 			}
 		}
@@ -291,24 +295,27 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		if (selElements.size() == 0) {
 			return false;
 		}
-		int elements= 0;
-		int attributes= 0;
+
 		for (int i= 0; i < selElements.size(); i++) {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
-				if (attrib.getKey().equals(CPListElement.ACCESSRULES)) {
-					return ((IAccessRule[]) attrib.getValue()).length > 0;
+				if (attrib.isBuiltIn()) {
+					if (CPListElement.ACCESSRULES.equals(attrib.getKey())) {
+						if (((IAccessRule[]) attrib.getValue()).length == 0) {
+							return false;
+						}
+					} else if (attrib.getValue() == null) {
+						return false;
+					}
+				} else {
+					if  (!canRemoveCustomAttribute(attrib)) {
+						return false;
+					}
 				}
-				if (attrib.getValue() == null) {
-					return false;
-				}
-				attributes++;
-			} else if (elem instanceof CPListElement) {
-				elements++;
 			}
 		}
-		return attributes == selElements.size() || elements == selElements.size();
+		return true;
 	}	
 
 	private boolean canEdit(List selElements) {
@@ -320,7 +327,12 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			return false;
 		}
 		if (elem instanceof CPListElementAttribute) {
-			return true;
+			CPListElementAttribute attrib= (CPListElementAttribute) elem;
+			if (attrib.isBuiltIn()) {
+				return true;
+			} else {
+				return canEditCustomAttribute(attrib);
+			}
 		}
 		return false;
 	}
@@ -345,11 +357,8 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		String key= elem.getKey();
 		if (key.equals(CPListElement.ACCESSRULES)) {
 			showAccessRestrictionDialog(elem.getParent());
-		} else if (key.equals(CPListElement.NATIVE_LIB_PATH)) {
-			CPListElement selElement=  elem.getParent();
-			NativeLibrariesDialog dialog= new NativeLibrariesDialog(getShell(), selElement);
-			if (dialog.open() == Window.OK) {
-				selElement.setAttribute(CPListElement.NATIVE_LIB_PATH, dialog.getNativeLibraryPath());
+		} else {
+			if (editCustomAttribute(getShell(), elem)) {
 				fProjectsList.refresh();
 				fClassPathList.dialogFieldChanged(); // validate
 			}

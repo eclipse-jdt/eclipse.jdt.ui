@@ -18,16 +18,70 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 public abstract class BuildPathBasePage {
+	
+	private ClasspathAttributeConfigurationDescriptors fAttributeDescriptors;
+	
+	public BuildPathBasePage() {
+		fAttributeDescriptors= JavaPlugin.getDefault().getClasspathAttributeConfigurationDescriptors();
+	}
+		
+	protected boolean editCustomAttribute(Shell shell, CPListElementAttribute elem) {
+		ClasspathAttributeConfiguration config= fAttributeDescriptors.get(elem.getKey());
+		if (config != null) {
+			IClasspathAttribute result= config.performEdit(shell, elem.getClasspathAttributeAccess());
+			if (result != null) {
+				elem.setValue(result.getValue());
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	protected boolean removeCustomAttribute(CPListElementAttribute elem) {
+		ClasspathAttributeConfiguration config= fAttributeDescriptors.get(elem.getKey());
+		if (config != null) {
+			IClasspathAttribute result= config.performRemove(elem.getClasspathAttributeAccess());
+			if (result != null) {
+				elem.setValue(result.getValue());
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	protected boolean canEditCustomAttribute(CPListElementAttribute elem) {
+		ClasspathAttributeConfiguration config= fAttributeDescriptors.get(elem.getKey());
+		if (config != null) {
+			return config.canEdit(elem.getClasspathAttributeAccess());
+		}
+		return false;
+	}
+	
+	protected boolean canRemoveCustomAttribute(CPListElementAttribute elem) {
+		ClasspathAttributeConfiguration config= fAttributeDescriptors.get(elem.getKey());
+		if (config != null) {
+			return config.canRemove(elem.getClasspathAttributeAccess());
+		}
+		return false;
+	}
+	
 	
 	public abstract List getSelection();
 	public abstract void setSelection(List selection, boolean expand);
+	
 	
 	public void addElement(CPListElement element) {
 		

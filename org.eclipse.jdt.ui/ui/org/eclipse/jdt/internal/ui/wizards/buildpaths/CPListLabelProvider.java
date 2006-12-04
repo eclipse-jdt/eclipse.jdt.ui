@@ -32,13 +32,14 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration;
+import org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -55,6 +56,9 @@ public class CPListLabelProvider extends LabelProvider {
 
 	private ImageDescriptor fProjectImage;
 	
+	private ClasspathAttributeConfigurationDescriptors fAttributeDescriptors;
+	
+	
 	public CPListLabelProvider() {
 		fNewLabel= NewWizardMessages.CPListLabelProvider_new; 
 		fClassLabel= NewWizardMessages.CPListLabelProvider_classcontainer; 
@@ -66,6 +70,7 @@ public class CPListLabelProvider extends LabelProvider {
 		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
 		
 		fProjectImage= workbench.getSharedImages().getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT);
+		fAttributeDescriptors= JavaPlugin.getDefault().getClasspathAttributeConfigurationDescriptors();
 	}
 	
 	public String getText(Object element) {
@@ -111,27 +116,6 @@ public class CPListLabelProvider extends LabelProvider {
 				arg= notAvailable;
 			}
 			return Messages.format(NewWizardMessages.CPListLabelProvider_source_attachment_label, new String[] { arg }); 
-		} else if (key.equals(CPListElement.JAVADOC)) {
-			String arg= null;
-			String str= (String) attrib.getValue();
-			if (str != null) {
-				String prefix= JavaDocLocations.ARCHIVE_PREFIX;
-				if (str.startsWith(prefix)) {
-					int sepIndex= str.lastIndexOf("!/"); //$NON-NLS-1$
-					if (sepIndex == -1) {
-						arg= str.substring(prefix.length());
-					} else {
-						String archive= str.substring(prefix.length(), sepIndex);
-						String root= str.substring(sepIndex + 2);
-						arg= Messages.format(NewWizardMessages.CPListLabelProvider_twopart, new String[] { archive, root }); 
-					}
-				} else {
-					arg= str;
-				}
-			} else {
-				arg= notAvailable;
-			}
-			return Messages.format(NewWizardMessages.CPListLabelProvider_javadoc_location_label, new String[] { arg }); 
 		} else if (key.equals(CPListElement.OUTPUT)) {
 			String arg= null;
 			IPath path= (IPath) attrib.getValue();
@@ -220,14 +204,20 @@ public class CPListLabelProvider extends LabelProvider {
 					return NewWizardMessages.CPListLabelProvider_access_rules_disabled; 
 				}
 			}
-		} else if (key.equals(CPListElement.NATIVE_LIB_PATH)) {
+		} else {
+			ClasspathAttributeConfiguration config= fAttributeDescriptors.get(key);
+			if (config != null) {
+				ClasspathAttributeAccess access= attrib.getClasspathAttributeAccess();
+				String nameLabel= config.getNameLabel(access);
+				String valueLabel= config.getValueLabel(access);
+				return Messages.format(NewWizardMessages.CPListLabelProvider_attribute_label, new String[] { nameLabel, valueLabel }); 
+			}
 			String arg= (String) attrib.getValue();
 			if (arg == null) {
 				arg= notAvailable; 
 			}
-			return Messages.format(NewWizardMessages.CPListLabelProvider_native_library_path, new String[] { arg });
-		} 
-		return notAvailable;
+			return Messages.format(NewWizardMessages.CPListLabelProvider_attribute_label, new String[] { key, arg }); 
+		}
 	}
 	
 	public String getCPListElementText(CPListElement cpentry) {
@@ -375,11 +365,10 @@ public class CPListLabelProvider extends LabelProvider {
 				return fRegistry.get(imageDescriptor);
 			}
 		} else if (element instanceof CPListElementAttribute) {
-			String key= ((CPListElementAttribute) element).getKey();
+			CPListElementAttribute attribute= (CPListElementAttribute) element;
+			String key= (attribute).getKey();
 			if (key.equals(CPListElement.SOURCEATTACHMENT)) {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_SOURCE_ATTACH_ATTRIB);
-			} else if (key.equals(CPListElement.JAVADOC)) {
-				return fRegistry.get(JavaPluginImages.DESC_OBJS_JAVADOC_LOCATION_ATTRIB);
 			} else if (key.equals(CPListElement.OUTPUT)) {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_OUTPUT_FOLDER_ATTRIB);
 			} else if (key.equals(CPListElement.EXCLUSION)) {
@@ -388,8 +377,11 @@ public class CPListLabelProvider extends LabelProvider {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_INCLUSION_FILTER_ATTRIB);
 			} else if (key.equals(CPListElement.ACCESSRULES)) {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_ACCESSRULES_ATTRIB);
-			} else if (key.equals(CPListElement.NATIVE_LIB_PATH)) {
-				return fRegistry.get(JavaPluginImages.DESC_OBJS_NATIVE_LIB_PATH_ATTRIB);
+			} else {
+				ClasspathAttributeConfiguration config= fAttributeDescriptors.get(key);
+				if (config != null) {
+					return fRegistry.get(config.getImageDescriptor(attribute.getClasspathAttributeAccess()));
+				}
 			}
 			return  fSharedImages.getImage(ISharedImages.IMG_OBJS_CLASSPATH_VAR_ENTRY);
 		} else if (element instanceof CPUserLibraryElement) {

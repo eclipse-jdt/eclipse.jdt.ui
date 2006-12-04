@@ -39,6 +39,8 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
+import org.eclipse.jdt.core.IClasspathEntry;
+
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -47,7 +49,6 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
@@ -65,14 +66,14 @@ public class NativeLibrariesConfigurationBlock {
 	private StringDialogField fPathField;
 	private SelectionButtonDialogField fBrowseWorkspace;
 	private SelectionButtonDialogField fBrowseExternal;
-	private final CPListElement fEntry;
+	private final IClasspathEntry fEntry;
 	private Shell fShell;
 	private final IStatusChangeListener fListener;
 	private final String fOrginalValue;
 	
-	public NativeLibrariesConfigurationBlock(IStatusChangeListener listener, Shell parent, CPListElement selElement) {
+	public NativeLibrariesConfigurationBlock(IStatusChangeListener listener, Shell parent, String nativeLibPath, IClasspathEntry parentEntry) {
 		fListener= listener;
-		fEntry= selElement;
+		fEntry= parentEntry;
 		
 		NativeLibrariesAdapter adapter= new NativeLibrariesAdapter();
 		
@@ -88,10 +89,9 @@ public class NativeLibrariesConfigurationBlock {
 		fBrowseExternal.setLabelText(NewWizardMessages.NativeLibrariesDialog_external_browse);
 		fBrowseExternal.setDialogFieldListener(adapter);
 	
-		String val= (String) selElement.getAttribute(CPListElement.NATIVE_LIB_PATH);
-		if (val != null) {
-			fPathField.setText(Path.fromPortableString(val).toString());
-			fOrginalValue= val;
+		if (nativeLibPath != null) {
+			fPathField.setText(Path.fromPortableString(nativeLibPath).toString());
+			fOrginalValue= nativeLibPath;
 		} else {
 			fOrginalValue= ""; //$NON-NLS-1$
 		}

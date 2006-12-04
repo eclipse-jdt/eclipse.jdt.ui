@@ -17,8 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -78,6 +76,7 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IAccessRule;
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -88,6 +87,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
+import org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IUIConstants;
@@ -101,7 +101,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementSorter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListLabelProvider;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPUserLibraryElement;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.NativeLibrariesDialog;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathAttributeConfigurationDescriptors;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -734,6 +734,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	private IDialogSettings fDialogSettings;
 	private TreeListDialogField fLibraryList;
 	private IJavaProject fDummyProject;
+	private ClasspathAttributeConfigurationDescriptors fAttributeDescriptors;
 		
 	private static final int IDX_NEW= 0;
 	private static final int IDX_EDIT= 1;
@@ -750,6 +751,8 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	public UserLibraryPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		fDummyProject= createPlaceholderProject();
+		
+		fAttributeDescriptors= JavaPlugin.getDefault().getClasspathAttributeConfigurationDescriptors();
 	
 		// title only used when page is shown programatically
 		setTitle(PreferencesMessages.UserLibraryPreferencePage_title); 
@@ -971,20 +974,6 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				fLibraryList.refresh(elem);
 				fLibraryList.update(selElement);
 			}
-		} else if (key.equals(CPListElement.JAVADOC)) {
-			String initialLocation= (String) selElement.getAttribute(CPListElement.JAVADOC);
-			String elementName= new CPListLabelProvider().getText(selElement);
-			try {
-				URL locationURL= initialLocation != null ? new URL(initialLocation) : null;
-				URL[] result= BuildPathDialogAccess.configureJavadocLocation(getShell(), elementName, locationURL);
-				if (result != null) {
-					URL newURL= result[0];
-					selElement.setAttribute(CPListElement.JAVADOC, newURL != null ? newURL.toExternalForm() : null);
-					fLibraryList.refresh(elem);
-				}
-			} catch (MalformedURLException e) {
-				// todo
-			}
 		} else if (key.equals(CPListElement.ACCESSRULES)) {
 			AccessRulesDialog dialog= new AccessRulesDialog(getShell(), selElement, null, false);
 			if (dialog.open() == Window.OK) {
@@ -992,11 +981,14 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				fLibraryList.refresh(elem);
 				fLibraryList.expandElement(elem, 2);
 			}
-		} else if (key.equals(CPListElement.NATIVE_LIB_PATH)) {
-			NativeLibrariesDialog dialog= new NativeLibrariesDialog(getShell(), selElement);
-			if (dialog.open() == Window.OK) {
-				selElement.setAttribute(CPListElement.NATIVE_LIB_PATH, dialog.getNativeLibraryPath());
-				fLibraryList.refresh(elem);
+		} else if (!elem.isBuiltIn()) {
+			ClasspathAttributeConfiguration config= fAttributeDescriptors.get(key);
+			if (config != null) {
+				IClasspathAttribute result= config.performEdit(getShell(), elem.getClasspathAttributeAccess());
+				if (result != null) {
+					elem.setValue(result.getValue());
+					fLibraryList.refresh(elem);
+				}
 			}
 		}
 	}
@@ -1109,13 +1101,24 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				}
 			} else if (curr instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) curr;
-				Object value= null;
-				String key= attrib.getKey();
-				if (key.equals(CPListElement.ACCESSRULES)) {
-					value= new IAccessRule[0];
+				if (attrib.isBuiltIn()) {
+					Object value= null;
+					String key= attrib.getKey();
+					if (key.equals(CPListElement.ACCESSRULES)) {
+						value= new IAccessRule[0];
+					}
+					attrib.getParent().setAttribute(key, value);
+					fLibraryList.refresh(attrib);
+				} else {
+					ClasspathAttributeConfiguration config= fAttributeDescriptors.get(attrib.getKey());
+					if (config != null) {
+						IClasspathAttribute result= config.performRemove(attrib.getClasspathAttributeAccess());
+						if (result != null) {
+							attrib.setValue(result.getValue());
+							fLibraryList.refresh(attrib);
+						}
+					}
 				}
-				attrib.getParent().setAttribute(key, value);
-				fLibraryList.refresh(attrib);
 			}
 		}
 		if (fLibraryList.getSelectedElements().isEmpty()) {
@@ -1178,7 +1181,13 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		Object firstElement= list.get(0);
 		if (firstElement instanceof IAccessRule)
 			return false;
-			
+		if (firstElement instanceof CPListElementAttribute) {
+			CPListElementAttribute attrib= (CPListElementAttribute) firstElement;
+			if (!attrib.isBuiltIn()) {
+				ClasspathAttributeConfiguration config= fAttributeDescriptors.get(attrib.getKey());
+				return config != null && config.canEdit(attrib.getClasspathAttributeAccess());
+			}
+		}
 		return true;
 	}
 
@@ -1193,16 +1202,23 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				if (attrib.isInNonModifiableContainer()) {
 					return false;
 				}
-				if (attrib.getKey().equals(CPListElement.ACCESSRULES)) {
-					return ((IAccessRule[]) attrib.getValue()).length > 0;
-				}
-				if (attrib.getValue() == null) {
-					return false;
+				if (attrib.isBuiltIn()) {
+					if (attrib.getKey().equals(CPListElement.ACCESSRULES)) {
+						return ((IAccessRule[]) attrib.getValue()).length > 0;
+					}
+					if (attrib.getValue() == null) {
+						return false;
+					}
+				} else {
+					ClasspathAttributeConfiguration config= fAttributeDescriptors.get(attrib.getKey());
+					if (config == null || !config.canRemove(attrib.getClasspathAttributeAccess()) ) {
+						return false;
+					}
 				}
 			} else if (elem instanceof CPListElement) {
-				return true;
+				// ok to remove
 			} else if (elem instanceof CPUserLibraryElement) {
-				return true;
+				// ok to remove
 			} else { // unknown element
 				return false;
 			}

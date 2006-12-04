@@ -13,7 +13,11 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess;
 
 
 /**
@@ -24,6 +28,8 @@ public class CPListElementAttribute {
 	private String fKey;
 	private Object fValue;
 	private final boolean fBuiltIn;
+	
+	private ClasspathAttributeAccess fCachedAccess;
 	
 	public CPListElementAttribute(CPListElement parent, String key, Object value, boolean builtIn) {
 		fKey= key;
@@ -39,12 +45,9 @@ public class CPListElementAttribute {
     	fBuiltIn= buildIn;
     }
 
-	public IClasspathAttribute newClasspathAttribute() {
+	public IClasspathAttribute getClasspathAttribute() {
 		Assert.isTrue(!fBuiltIn);
-		if (fValue != null) {
-			return JavaCore.newClasspathAttribute(fKey, (String) fValue);
-		}
-		return null;
+		return JavaCore.newClasspathAttribute(fKey, (String) fValue);
 	}
 	
 	public CPListElement getParent() {
@@ -86,6 +89,8 @@ public class CPListElementAttribute {
 	 */
 	public void setValue(Object value) {
 		fValue= value;
+		fCachedAccess= null;
+		getParent().attributeChanged(fKey);
 	}
 	
     public boolean equals(Object obj) {
@@ -102,4 +107,23 @@ public class CPListElementAttribute {
     	result.fValue= fValue;
 	    return result;
     }
+    
+    public ClasspathAttributeAccess getClasspathAttributeAccess() {
+    	if (fCachedAccess == null) {
+	    	fCachedAccess= new ClasspathAttributeAccess() {
+	    		public IClasspathAttribute getClasspathAttribute() {
+	 				return CPListElementAttribute.this.getClasspathAttribute();
+				}
+				public IJavaProject getJavaProject() {
+					return getParent().getJavaProject();
+				}
+				public IClasspathEntry getParentClasspassEntry() {
+					return getParent().getClasspathEntry();
+				}
+	    	};
+    	}
+    	return fCachedAccess;
+    }
+    
+    
 }

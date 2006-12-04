@@ -12,7 +12,7 @@
    <extension-point id="queryParticipants" name="%queryParticipantsExtensionPoint" schema="schema/queryParticipants.exsd"/>
    <extension-point id="javaCompletionProposalComputer" name="%javaCompletionProposalComputer" schema="schema/javaCompletionProposalComputer.exsd"/>
    <extension-point id="javaCompletionProposalSorters" name="%javaCompletionProposalSorters" schema="schema/javaCompletionProposalSorters.exsd"/>
-   
+   <extension-point id="classpathAttributeConfiguration" name="%classpathAttributeConfiguration" schema="schema/classpathAttributeConfiguration.exsd"/>
 
 <extension
 	point="org.eclipse.ui.decorators">
@@ -133,6 +133,18 @@
             id="*">
       </classpathContainerPage>
    </extension>
+   <extension
+         point="org.eclipse.jdt.ui.classpathAttributeConfiguration">
+      <classpathAttributeConfiguration
+      		key="javadoc_location"
+            class="org.eclipse.jdt.internal.ui.wizards.buildpaths.JavadocAttributeConfiguration">
+      </classpathAttributeConfiguration>
+      <classpathAttributeConfiguration
+      		key="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY"
+            class="org.eclipse.jdt.internal.ui.wizards.buildpaths.NativeLibAttributeConfiguration">
+      </classpathAttributeConfiguration>      
+   </extension>
+   
    <extension
          point="org.eclipse.jdt.ui.quickFixProcessors">
       <quickFixProcessor

@@ -158,7 +158,7 @@ public class CPListElement {
 			if (curr instanceof CPListElementAttribute) {
 				CPListElementAttribute elem= (CPListElementAttribute) curr;
 				if (!elem.isBuiltIn() && elem.getValue() != null) {
-					res.add(elem.newClasspathAttribute());
+					res.add(elem.getClasspathAttribute());
 				}
 			}
 		}
@@ -240,7 +240,6 @@ public class CPListElement {
 		}
 		
 		attribute.setValue(value);
-		attributeChanged(key);
 		return attribute;
 	}
 	
@@ -318,13 +317,26 @@ public class CPListElement {
 		return null;
 	}
 	
+	public CPListElementAttribute[] getAllAttributes() {
+		ArrayList res= new ArrayList();
+		for (int i= 0; i < fChildren.size(); i++) {
+			Object curr= fChildren.get(i);
+			if (curr instanceof CPListElementAttribute) {
+				res.add(curr);
+			}
+		}		
+		return (CPListElementAttribute[]) res.toArray(new CPListElementAttribute[res.size()]);
+	}
+	
+	
 	private void createAttributeElement(String key, Object value, boolean builtIn) {
 		fChildren.add(new CPListElementAttribute(this, key, value, builtIn));
 	}	
 	
 	private static boolean isFiltered(Object entry, String[] filteredKeys) {
 		if (entry instanceof CPListElementAttribute) {
-			String key= ((CPListElementAttribute) entry).getKey();
+			CPListElementAttribute curr= (CPListElementAttribute) entry;
+			String key= curr.getKey();
 			for (int i= 0; i < filteredKeys.length; i++) {
 				if (key.equals(filteredKeys[i])) {
 					return true;
@@ -361,14 +373,14 @@ public class CPListElement {
 		if (fEntryKind == IClasspathEntry.CPE_PROJECT) {
 			return getFilteredChildren(new String[] { COMBINE_ACCESSRULES });
 		}
-		return fChildren.toArray();
+		return getFilteredChildren(new String[0]);
 	}
 		
 	public Object getParentContainer() {
 		return fParentContainer;
 	}	
 	
-	private void attributeChanged(String key) {
+	protected void attributeChanged(String key) {
 		fCachedEntry= null;
 	}
 	
@@ -525,7 +537,12 @@ public class CPListElement {
 		IClasspathAttribute[] extraAttributes= curr.getExtraAttributes();
 		for (int i= 0; i < extraAttributes.length; i++) {
 			IClasspathAttribute attrib= extraAttributes[i];
-			elem.setAttribute(attrib.getName(), attrib.getValue());
+			CPListElementAttribute attribElem= elem.findAttributeElement(attrib.getName());
+			if (attribElem == null) {
+				elem.createAttributeElement(attrib.getName(), attrib.getValue(), false);
+			} else {
+				attribElem.setValue(attrib.getValue());
+			}
 		}
 		
 		if (project != null && project.exists()) {
@@ -724,9 +741,15 @@ public class CPListElement {
     
     public void setAttributesFromExisting(CPListElement existing) {
     	Assert.isTrue(existing.getEntryKind() == getEntryKind());
-		String[] allAttributes= { ACCESSRULES, NATIVE_LIB_PATH, SOURCEATTACHMENT, OUTPUT, INCLUSION, EXCLUSION, JAVADOC, COMBINE_ACCESSRULES };
-		for (int i= 0; i < allAttributes.length; i++) {
-			setAttribute(allAttributes[i], existing.getAttribute(allAttributes[i]));
+		CPListElementAttribute[] attributes= existing.getAllAttributes();
+		for (int i= 0; i < attributes.length; i++) {
+			CPListElementAttribute curr= attributes[i];
+			CPListElementAttribute elem= findAttributeElement(curr.getKey());
+			if (elem == null) {
+				createAttributeElement(curr.getKey(), curr.getValue(), false);
+			} else {
+				elem.setValue(curr.getValue());
+			}
 		}
     }
 

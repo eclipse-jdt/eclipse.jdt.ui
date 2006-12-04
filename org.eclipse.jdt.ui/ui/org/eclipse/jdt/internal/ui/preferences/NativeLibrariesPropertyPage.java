@@ -33,6 +33,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -41,6 +42,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
@@ -103,8 +106,15 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 		if (elem == null)
 			return new Composite(parent, SWT.NONE);
 		
-		CPListElement cpElement= CPListElement.createFromExisting(fEntry, elem.getJavaProject());
-		fConfigurationBlock= new NativeLibrariesConfigurationBlock(this, getShell(), cpElement);
+		String nativeLibPath= null;
+		IClasspathAttribute[] extraAttributes= fEntry.getExtraAttributes();
+		for (int i= 0; i < extraAttributes.length; i++) {
+			if (extraAttributes[i].getName().equals(JavaRuntime.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY)) {
+				nativeLibPath= extraAttributes[i].getValue();
+				break;
+			}
+		}
+		fConfigurationBlock= new NativeLibrariesConfigurationBlock(this, getShell(), nativeLibPath, fEntry);
 		Control control= fConfigurationBlock.createContents(parent);
 		control.setVisible(elem != null);
 

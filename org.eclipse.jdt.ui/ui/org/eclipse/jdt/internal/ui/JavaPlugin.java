@@ -95,6 +95,7 @@ import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathAttributeConfigurationDescriptors;
 
 import org.osgi.framework.BundleContext;
 
@@ -227,6 +228,14 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @since 3.3
 	 */
 	private SaveParticipantRegistry fSaveParticipantRegistry;
+	
+	/**
+	 * The descriptors from the 'classpathAttributeConfiguration' extension point.
+	 * 
+	 * @since 3.3
+	 */
+	private ClasspathAttributeConfigurationDescriptors fClasspathAttributeConfigurationDescriptors;
+	
 
 	public static JavaPlugin getDefault() {
 		return fgJavaPlugin;
@@ -921,4 +930,15 @@ public class JavaPlugin extends AbstractUIPlugin {
 		}
 		return section;
 	}
+	
+	/**
+	 * 	@since 3.3
+	 */
+	public ClasspathAttributeConfigurationDescriptors getClasspathAttributeConfigurationDescriptors() {
+		if (fClasspathAttributeConfigurationDescriptors == null) {
+			fClasspathAttributeConfigurationDescriptors= new ClasspathAttributeConfigurationDescriptors();
+		}
+		return fClasspathAttributeConfigurationDescriptors;
+	}
+	
 }

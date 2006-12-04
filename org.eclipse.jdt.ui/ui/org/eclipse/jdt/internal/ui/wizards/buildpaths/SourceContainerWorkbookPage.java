@@ -407,11 +407,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			EditFilterWizard wizard= newEditFilterWizard(elem.getParent(), fFoldersList.getElements(), fOutputLocationField.getText());
 			OpenBuildPathWizardAction action= new OpenBuildPathWizardAction(wizard);
 			action.run();
-		} else if (key.equals(CPListElement.NATIVE_LIB_PATH)) {
-			CPListElement selElement=  elem.getParent();
-			NativeLibrariesDialog dialog= new NativeLibrariesDialog(getShell(), selElement);
-			if (dialog.open() == Window.OK) {
-				selElement.setAttribute(CPListElement.NATIVE_LIB_PATH, dialog.getNativeLibraryPath());
+		} else {
+			if (editCustomAttribute(getShell(), elem)) {
 				fFoldersList.refresh();
 				fClassPathList.dialogFieldChanged(); // validate
 			}
@@ -433,11 +430,15 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
 				String key= attrib.getKey();
-				Object value= null;
-				if (key.equals(CPListElement.EXCLUSION) || key.equals(CPListElement.INCLUSION)) {
-					value= new Path[0];
+				if (attrib.isBuiltIn()) {
+					Object value= null;
+					if (key.equals(CPListElement.EXCLUSION) || key.equals(CPListElement.INCLUSION)) {
+						value= new Path[0];
+					}
+					attrib.getParent().setAttribute(key, value);
+				} else {
+					removeCustomAttribute(attrib);
 				}
-				attrib.getParent().setAttribute(key, value);
 				selElements.remove(i);
 			}
 		}
@@ -469,16 +470,22 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
 				String key= attrib.getKey();
-				if (CPListElement.INCLUSION.equals(key)) {
-					if (((IPath[]) attrib.getValue()).length == 0) {
+				if (attrib.isBuiltIn()) {
+					if (CPListElement.INCLUSION.equals(key)) {
+						if (((IPath[]) attrib.getValue()).length == 0) {
+							return false;
+						}
+					} else if (CPListElement.EXCLUSION.equals(key)) {
+						if (((IPath[]) attrib.getValue()).length == 0) {
+							return false;
+						}
+					} else if (attrib.getValue() == null) {
 						return false;
 					}
-				} else if (CPListElement.EXCLUSION.equals(key)) {
-					if (((IPath[]) attrib.getValue()).length == 0) {
+				} else {
+					if  (!canRemoveCustomAttribute(attrib)) {
 						return false;
 					}
-				} else if (attrib.getValue() == null) {
-					return false;
 				}
 			} else if (elem instanceof CPListElement) {
 				CPListElement curr= (CPListElement) elem;
@@ -503,7 +510,12 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			return true;
 		}
 		if (elem instanceof CPListElementAttribute) {
-			return true;
+			CPListElementAttribute attrib= (CPListElementAttribute) elem;
+			if (attrib.isBuiltIn()) {
+				return true;
+			} else {
+				return canEditCustomAttribute(attrib);
+			}
 		}
 		return false;
 	}	
