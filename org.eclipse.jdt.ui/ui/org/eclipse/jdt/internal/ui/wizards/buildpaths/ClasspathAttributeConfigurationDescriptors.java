@@ -83,6 +83,10 @@ public class ClasspathAttributeConfigurationDescriptors {
 		return fDescriptors;
 	}
 	
+	public boolean containsKey(String attributeKey) {
+		return getDescriptors().containsKey(attributeKey);
+	}
+	
 	public ClasspathAttributeConfiguration get(final String attributeKey) {
 		final Descriptor desc= (Descriptor) getDescriptors().get(attributeKey);
 		if (desc == null) {

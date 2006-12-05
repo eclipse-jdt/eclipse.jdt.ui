@@ -342,6 +342,9 @@ public class CPListElement {
 					return true;
 				}
 			}
+			if (!curr.isBuiltIn() && !key.equals(CPListElement.JAVADOC) && !key.equals(CPListElement.NATIVE_LIB_PATH)) {
+				return !JavaPlugin.getDefault().getClasspathAttributeConfigurationDescriptors().containsKey(key);
+			}
 		}
 		return false;
 	}
@@ -366,8 +369,7 @@ public class CPListElement {
 		if (fParentContainer instanceof CPListElement) {
 			IPath jreContainerPath= new Path(JavaRuntime.JRE_CONTAINER);
 			if (jreContainerPath.isPrefixOf(((CPListElement) fParentContainer).getPath())) {
-				// don't show access rules and native path for containers (bug 98710)
-				return getFilteredChildren(new String[] { ACCESSRULES, COMBINE_ACCESSRULES, NATIVE_LIB_PATH });
+				return getFilteredChildren(new String[] { COMBINE_ACCESSRULES });
 			}
 		}
 		if (fEntryKind == IClasspathEntry.CPE_PROJECT) {
