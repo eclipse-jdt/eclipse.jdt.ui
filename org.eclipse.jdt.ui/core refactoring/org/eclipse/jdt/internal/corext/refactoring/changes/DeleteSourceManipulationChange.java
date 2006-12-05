@@ -16,6 +16,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -24,10 +28,9 @@ import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.changes.undo.ResourceDescription;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 
@@ -80,7 +83,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	/*
 	 * @see DeleteChange#doDelete(IProgressMonitor)
 	 */
-	protected void doDelete(IProgressMonitor pm) throws CoreException {
+	protected Change doDelete(IProgressMonitor pm) throws CoreException {
 		ISourceManipulation element= getSourceModification();
 		// we have to save dirty compilation units before deleting them. Otherwise
 		// we will end up showing ghost compilation units in the package explorer
@@ -89,7 +92,13 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 			pm.beginTask("", 2); //$NON-NLS-1$
 			ICompilationUnit unit= (ICompilationUnit)element;
 			saveCUnitIfNeeded(unit, new SubProgressMonitor(pm, 1));
+			
+			IResource resource= unit.getResource();
+			ResourceDescription resourceDescription = ResourceDescription.fromResource(resource);
 			element.delete(false, new SubProgressMonitor(pm, 1));
+			resourceDescription.recordStateFromHistory(resource, new SubProgressMonitor(pm, 1));
+			return new UndoDeleteFileChange(resourceDescription);
+			
 		// begin fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66835
 		} else if (element instanceof IPackageFragment) {
 			ICompilationUnit[] units= ((IPackageFragment)element).getCompilationUnits();
@@ -99,8 +108,11 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 			}
 			element.delete(false, new SubProgressMonitor(pm, 1));
 		// end fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66835
+			return null; //TODO
+			
 		} else {
 			element.delete(false, pm);
+			return null; //should not happen
 		}
 	}
 		

@@ -19,7 +19,6 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 
@@ -65,12 +64,7 @@ class DeleteChangeCreator {
 	}
 	
 	static Change createDeleteChange(TextChangeManager manager, IResource[] resources, IJavaElement[] javaElements, String changeName) throws CoreException {
-		final DynamicValidationStateChange result= new DynamicValidationStateChange(changeName) {
-			public Change perform(IProgressMonitor pm) throws CoreException {
-				super.perform(pm);
-				return null;
-			}
-		};
+		DynamicValidationStateChange result= new DynamicValidationStateChange(changeName);
 		for (int i= 0; i < javaElements.length; i++) {
 			IJavaElement element= javaElements[i];
 			if (! ReorgUtils.isInsideCompilationUnit(element))

@@ -13,8 +13,13 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.NullChange;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -22,11 +27,10 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.changes.undo.ResourceDescription;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 	
@@ -68,12 +72,29 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 		}
 	}
 
-	protected void doDelete(IProgressMonitor pm) throws CoreException {
+	protected Change doDelete(IProgressMonitor pm) throws CoreException {
 		if (! confirmDeleteIfReferenced())
-			return;
+			return new NullChange();
 		int resourceUpdateFlags= IResource.KEEP_HISTORY;
 		int jCoreUpdateFlags= IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH | IPackageFragmentRoot.OTHER_REFERRING_PROJECTS_CLASSPATH;
-		getRoot().delete(resourceUpdateFlags, jCoreUpdateFlags, pm);
+		
+		pm.beginTask("", 2); //$NON-NLS-1$
+		IPackageFragmentRoot root= getRoot();
+		IResource rootResource= root.getResource();
+		ResourceDescription resourceDescription = ResourceDescription.fromResource(rootResource);
+		root.delete(resourceUpdateFlags, jCoreUpdateFlags, new SubProgressMonitor(pm, 1));
+		resourceDescription.recordStateFromHistory(rootResource, new SubProgressMonitor(pm, 1));
+		
+		pm.done();
+		switch (rootResource.getType()) {
+			//TODO: undo (and redo) all changed .classpath files
+			case IResource.FILE:
+				return new UndoDeleteFileChange(resourceDescription);
+			case IResource.FOLDER:
+				return new UndoDeleteFolderChange(resourceDescription);
+			default:
+				return null;
+		}
 	}
 
 	private boolean confirmDeleteIfReferenced() throws JavaModelException {

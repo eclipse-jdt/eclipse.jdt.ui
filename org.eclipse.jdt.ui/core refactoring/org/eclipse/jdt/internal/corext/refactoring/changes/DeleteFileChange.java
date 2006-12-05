@@ -17,10 +17,12 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.util.Messages;
-
+import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.changes.undo.ResourceDescription;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class DeleteFileChange extends AbstractDeleteChange {
 
@@ -64,14 +66,19 @@ public class DeleteFileChange extends AbstractDeleteChange {
 	/* non java-doc
 	 * @see DeleteChange#doDelete(IProgressMonitor)
 	 */
-	protected void doDelete(IProgressMonitor pm) throws CoreException {
+	protected Change doDelete(IProgressMonitor pm) throws CoreException {
 		IFile file= getFile();
 		Assert.isNotNull(file);
 		Assert.isTrue(file.exists());
-		pm.beginTask("", 2); //$NON-NLS-1$
+		pm.beginTask("", 3); //$NON-NLS-1$
 		saveFileIfNeeded(file, new SubProgressMonitor(pm, 1));
+		
+		ResourceDescription resourceDescription = ResourceDescription.fromResource(file);
 		file.delete(false, true, new SubProgressMonitor(pm, 1));
+		resourceDescription.recordStateFromHistory(file, new SubProgressMonitor(pm, 1));
 		pm.done();
+		
+		return new UndoDeleteFileChange(resourceDescription);
 	}
 }
 

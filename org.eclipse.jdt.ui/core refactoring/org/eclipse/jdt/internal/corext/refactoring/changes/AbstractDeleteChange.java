@@ -26,7 +26,7 @@ import org.eclipse.ltk.core.refactoring.Change;
 
 abstract class AbstractDeleteChange extends JDTChange {
 	
-	protected abstract void doDelete(IProgressMonitor pm) throws CoreException;
+	protected abstract Change doDelete(IProgressMonitor pm) throws CoreException;
 	
 	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
@@ -34,11 +34,11 @@ abstract class AbstractDeleteChange extends JDTChange {
 	public final Change perform(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.AbstractDeleteChange_deleting, 1); 
-			doDelete(pm);
+			Change undo= doDelete(pm);
+			return undo;
 		} finally {
 			pm.done();
 		}
-		return null;
 	}
 	
 	protected static void saveFileIfNeeded(IFile file, IProgressMonitor pm) throws CoreException {

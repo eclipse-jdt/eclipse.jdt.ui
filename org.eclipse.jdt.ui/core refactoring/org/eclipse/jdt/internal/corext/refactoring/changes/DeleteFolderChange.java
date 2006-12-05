@@ -23,10 +23,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.util.Messages;
-
+import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.changes.undo.ResourceDescription;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class DeleteFolderChange extends AbstractDeleteChange {
 	
@@ -70,10 +72,10 @@ public class DeleteFolderChange extends AbstractDeleteChange {
 		}
 	}
 
-	protected void doDelete(IProgressMonitor pm) throws CoreException{
+	protected Change doDelete(IProgressMonitor pm) throws CoreException{
 		IFolder folder= getFolder(fPath);
 		Assert.isTrue(folder.exists());
-		pm.beginTask("", 2); //$NON-NLS-1$
+		pm.beginTask("", 3); //$NON-NLS-1$
 		folder.accept(new IResourceVisitor() {
 			public boolean visit(IResource resource) throws CoreException {
 				if (resource instanceof IFile) {
@@ -84,8 +86,13 @@ public class DeleteFolderChange extends AbstractDeleteChange {
 			}
 		}, IResource.DEPTH_INFINITE, false);
 		pm.worked(1);
+		
+		ResourceDescription resourceDescription = ResourceDescription.fromResource(folder);
 		folder.delete(false, true, new SubProgressMonitor(pm, 1));
+		resourceDescription.recordStateFromHistory(folder, new SubProgressMonitor(pm, 1));
 		pm.done();
+		
+		return new UndoDeleteFolderChange(resourceDescription);
 	}
 }
 
