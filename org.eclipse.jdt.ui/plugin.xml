@@ -136,11 +136,11 @@
    <extension
          point="org.eclipse.jdt.ui.classpathAttributeConfiguration">
       <classpathAttributeConfiguration
-      		key="javadoc_location"
+      		attributeName="javadoc_location"
             class="org.eclipse.jdt.internal.ui.wizards.buildpaths.JavadocAttributeConfiguration">
       </classpathAttributeConfiguration>
       <classpathAttributeConfiguration
-      		key="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY"
+      		attributeName="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY"
             class="org.eclipse.jdt.internal.ui.wizards.buildpaths.NativeLibAttributeConfiguration">
       </classpathAttributeConfiguration>      
    </extension>

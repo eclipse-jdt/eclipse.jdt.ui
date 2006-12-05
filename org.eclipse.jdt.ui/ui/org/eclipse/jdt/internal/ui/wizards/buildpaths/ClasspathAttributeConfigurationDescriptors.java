@@ -33,21 +33,21 @@ public class ClasspathAttributeConfigurationDescriptors {
 		private IConfigurationElement fConfigElement;
 		private ClasspathAttributeConfiguration fInstance;
 	
-		private static final String ATT_KEY = "key"; //$NON-NLS-1$
+		private static final String ATT_NAME = "attributeName"; //$NON-NLS-1$
 		private static final String ATT_CLASS = "class"; //$NON-NLS-1$	
 	
 		public Descriptor(IConfigurationElement configElement) throws CoreException {
 			fConfigElement = configElement;
 			fInstance= null;
 	
-			String key = configElement.getAttribute(ATT_KEY);
+			String name = configElement.getAttribute(ATT_NAME);
 			String pageClassName = configElement.getAttribute(ATT_CLASS);
 	
-			if (key == null) {
-				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, 0, "Invalid extension (missing key)", null)); //$NON-NLS-1$
+			if (name == null) {
+				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, 0, "Invalid extension (missing attributeName)", null)); //$NON-NLS-1$
 			}
 			if (pageClassName == null) {
-				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, 0, "Invalid extension (missing class name): " + key, null)); //$NON-NLS-1$
+				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, 0, "Invalid extension (missing class name): " + name, null)); //$NON-NLS-1$
 			}
 		}
 	
@@ -64,7 +64,7 @@ public class ClasspathAttributeConfigurationDescriptors {
 		}
 		
 		public String getKey() {
-			return fConfigElement.getAttribute(ATT_KEY);
+			return fConfigElement.getAttribute(ATT_NAME);
 		}
 	}
 	

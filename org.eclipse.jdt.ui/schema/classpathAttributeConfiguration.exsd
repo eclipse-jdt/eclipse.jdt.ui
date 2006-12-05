@@ -44,14 +44,14 @@
 
    <element name="classpathAttributeConfiguration">
       <complexType>
-         <attribute name="key" type="string" use="required">
+         <attribute name="attributeName" type="string" use="required">
             <annotation>
                <documentation>
-                  identifies the key of the classpath attribute
+                  identifies the name of the classpath attribute as specified in IClasspathAttribute.getName()
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="class" type="string">
+         <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
                   the name of the class that implements this attribute configuration.  The
@@ -60,7 +60,7 @@ class must be public and extend
 with a public 0-argument constructor.
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn="org.eclipse.jface.wizard.ClasspathAttributeConfiguration"/>
+                  <meta.attribute kind="java" basedOn="org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration"/>
                </appInfo>
             </annotation>
          </attribute>
