@@ -82,7 +82,6 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -267,13 +266,13 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		 */
 		protected Control createLinkControl(Composite composite) {
 			Link link= new Link(composite, SWT.WRAP);
-			link.setText(JavaUIMessages.DelegateMethodDialog_link_message); 
+			link.setText(ActionMessages.AddDelegateMethodsAction_template_link_message); 
 			link.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					openCodeTempatePage(CodeTemplateContextType.OVERRIDECOMMENT_ID);
 				}
 			});
-			link.setToolTipText(JavaUIMessages.DelegateMethodDialog_link_tooltip); 
+			link.setToolTipText(ActionMessages.AddDelegateMethodsAction_template_link_tooltip); 
 			
 			GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 			gridData.widthHint= convertWidthInCharsToPixels(40); // only expand further if anyone else requires it
@@ -401,7 +400,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 	private boolean canRunOn(IType type) throws JavaModelException {
 		if (type == null || type.getCompilationUnit() == null) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_not_applicable); 
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_not_in_source_file); 
 			return false;
 		} else if (type.isAnnotation()) {
 			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_annotation_not_applicable); 

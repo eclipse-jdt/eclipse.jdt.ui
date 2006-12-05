@@ -23,6 +23,18 @@ public final class ActionMessages extends NLS {
 	public static String ActionUtil_warning_derived_dontShowAgain;
 	public static String ActionUtil_warning_derived_message;
 	public static String ActionUtil_warning_derived_title;
+	public static String AddDelegateMethodsAction_not_in_source_file;
+	
+	public static String AddDelegateMethodsAction_template_link_message;
+	public static String AddDelegateMethodsAction_template_link_tooltip;
+	public static String AddGetterSetterAction_error_not_in_source_file;
+	public static String AddGetterSetterAction_template_link_description;
+	public static String AddGetterSetterAction_template_link_tooltip;
+	public static String AddUnimplementedConstructorsAction_template_link_message;
+	public static String AddUnimplementedConstructorsAction_template_link_tooltip;
+	
+	public static String GenerateConstructorUsingFieldsSelectionDialog_template_link_message;
+	public static String GenerateConstructorUsingFieldsSelectionDialog_template_link_tooltip;
 	public static String CopyQualifiedNameAction_ActionName;
 	public static String CopyQualifiedNameAction_ErrorDescription;
 	public static String CopyQualifiedNameAction_ErrorTitle;
@@ -37,6 +49,7 @@ public final class ActionMessages extends NLS {
 	public static String FindNLSProblemsAction_ToolTip;
 	public static String FormatAllAction_problem_accessing;
 	public static String FormatAllAction_read_only_skipped;
+	public static String GenerateNewConstructorUsingFieldsAction_error_not_a_source_file;
 	public static String OpenAction_error_problem_opening_editor;
 	public static String OpenAction_multistatus_message;
 	public static String OpenWithMenu_label;

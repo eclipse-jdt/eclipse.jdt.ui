@@ -46,10 +46,8 @@ import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
@@ -253,13 +251,13 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 	 */
 	protected Control createLinkControl(Composite composite) {
 		Link link= new Link(composite, SWT.WRAP);
-		link.setText(JavaUIMessages.GenerateConstructorDialog_link_message); 
+		link.setText(ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_template_link_message); 
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				openCodeTempatePage(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID);
 			}
 		});
-		link.setToolTipText(JavaUIMessages.GenerateConstructorDialog_link_tooltip); 
+		link.setToolTipText(ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_template_link_tooltip); 
 		
 		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gridData.widthHint= convertWidthInCharsToPixels(40); // only expand further if anyone else requires it

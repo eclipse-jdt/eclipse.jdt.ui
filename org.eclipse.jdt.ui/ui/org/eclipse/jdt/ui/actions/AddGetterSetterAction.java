@@ -85,7 +85,6 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -266,12 +265,16 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_interface_not_applicable);
 			notifyResult(false);
 			return;
+		} else if (type.getCompilationUnit() == null) {
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_error_not_in_source_file);
+			notifyResult(false);
+			return;
 		}
 		if (!ElementValidator.check(type, getShell(), DIALOG_TITLE, editor)) {
 			notifyResult(false);
 			return;
 		}
-		if (!ActionUtil.isEditable(fEditor, getShell(), type)) {
+		if (!ActionUtil.isEditable(getShell(), type)) {
 			notifyResult(false);
 			return;
 		}
@@ -988,13 +991,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		 */
 		protected Control createLinkControl(Composite composite) {
 			Link link= new Link(composite, SWT.WRAP);
-			link.setText(JavaUIMessages.GetterSetterMethodDialog_link_message); 
+			link.setText(ActionMessages.AddGetterSetterAction_template_link_description); 
 			link.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					openCodeTempatePage(CodeTemplateContextType.GETTERCOMMENT_ID);
 				}
 			});
-			link.setToolTipText(JavaUIMessages.GetterSetterMethodDialog_link_tooltip); 
+			link.setToolTipText(ActionMessages.AddGetterSetterAction_template_link_tooltip); 
 			
 			GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 			gridData.widthHint= convertWidthInCharsToPixels(40); // only expand further if anyone else requires it

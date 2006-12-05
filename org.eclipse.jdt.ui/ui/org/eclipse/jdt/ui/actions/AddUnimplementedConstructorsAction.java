@@ -76,7 +76,6 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -281,13 +280,13 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		 */
 		protected Control createLinkControl(Composite composite) {
 			Link link= new Link(composite, SWT.WRAP);
-			link.setText(JavaUIMessages.GenerateConstructorDialog_link_message); 
+			link.setText(ActionMessages.AddUnimplementedConstructorsAction_template_link_message); 
 			link.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					openCodeTempatePage(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID);
 				}
 			});
-			link.setToolTipText(JavaUIMessages.GenerateConstructorDialog_link_tooltip); 
+			link.setToolTipText(ActionMessages.AddUnimplementedConstructorsAction_template_link_tooltip); 
 			
 			GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 			gridData.widthHint= convertWidthInCharsToPixels(40); // only expand further if anyone else requires it

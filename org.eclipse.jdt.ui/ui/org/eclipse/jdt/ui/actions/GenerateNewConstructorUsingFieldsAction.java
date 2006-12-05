@@ -296,6 +296,13 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			notifyResult(false);
 			return;
 		}
+		if (type.getCompilationUnit() == null) {
+			MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateNewConstructorUsingFieldsAction_error_not_a_source_file);
+			notifyResult(false);
+			return;
+			
+		}
+		
 		IField[] candidates= type.getFields();
 		ArrayList fields= new ArrayList();
 		for (int index= 0; index < candidates.length; index++) {

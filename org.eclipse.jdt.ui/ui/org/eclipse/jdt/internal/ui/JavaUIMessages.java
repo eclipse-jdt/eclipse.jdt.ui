@@ -74,16 +74,9 @@ public final class JavaUIMessages extends NLS {
 	public static String GenerateHashCodeEqualsDialog_no_entries;
 	public static String GenerateHashCodeEqualsDialog_select_at_least_one_field;
 	public static String GenerateHashCodeEqualsDialog_select_fields_to_include;
-	
-	public static String GetterSetterMethodDialog_link_tooltip;
-	public static String GetterSetterMethodDialog_link_message;
-	
-	public static String GenerateConstructorDialog_link_tooltip;
-	public static String GenerateConstructorDialog_link_message;
-	
-	public static String DelegateMethodDialog_link_tooltip;
-	public static String DelegateMethodDialog_link_message;
-	
+		
+
+		
 	public static String JavaImageLabelprovider_assert_wrongImage;
 	
 	public static String JavaElementLabels_default_package;
