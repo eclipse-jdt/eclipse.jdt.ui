@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
@@ -60,7 +61,7 @@ abstract class PackageFragmentRootReorgChange extends JDTChange {
 		return isValid(pm, NONE);
 	}
 	
-	public final Change perform(IProgressMonitor pm) throws CoreException {
+	public final Change perform(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		pm.beginTask(getName(), 2);
 		try {
 			String newName= getNewResourceName();
@@ -92,7 +93,7 @@ abstract class PackageFragmentRootReorgChange extends JDTChange {
 		return Utils.getProject(getDestinationProjectPath());
 	}
 	
-	private String getNewResourceName(){
+	private String getNewResourceName() throws OperationCanceledException {
 		if (fNewNameQuery == null)
 			return getRoot().getElementName();
 		String name= fNewNameQuery.getNewName();

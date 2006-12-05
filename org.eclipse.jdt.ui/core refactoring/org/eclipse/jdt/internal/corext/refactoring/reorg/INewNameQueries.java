@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
+import org.eclipse.core.runtime.OperationCanceledException;
+
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -17,10 +19,10 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 public interface INewNameQueries {
-	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu, String initialSuggestedName);
-	public INewNameQuery createNewResourceNameQuery(IResource res, String initialSuggestedName);
-	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack, String initialSuggestedName);
-	public INewNameQuery createNewPackageFragmentRootNameQuery(IPackageFragmentRoot root, String initialSuggestedName);
+	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu, String initialSuggestedName) throws OperationCanceledException;
+	public INewNameQuery createNewResourceNameQuery(IResource res, String initialSuggestedName) throws OperationCanceledException;
+	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack, String initialSuggestedName) throws OperationCanceledException;
+	public INewNameQuery createNewPackageFragmentRootNameQuery(IPackageFragmentRoot root, String initialSuggestedName) throws OperationCanceledException;
 	public INewNameQuery createNullQuery();
-	public INewNameQuery createStaticQuery(String newName);
+	public INewNameQuery createStaticQuery(String newName) throws OperationCanceledException;
 }

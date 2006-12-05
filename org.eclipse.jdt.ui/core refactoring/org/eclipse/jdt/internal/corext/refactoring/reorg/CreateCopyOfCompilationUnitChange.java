@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -129,7 +130,7 @@ public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChang
 		return Messages.format(RefactoringCoreMessages.CreateCopyOfCompilationUnitChange_create_copy, new String[] { fOldCu.getElementName(), getPathLabel(fOldCu.getResource())});
 	}
 
-	protected IFile getOldFile(IProgressMonitor monitor) {
+	protected IFile getOldFile(IProgressMonitor monitor) throws OperationCanceledException {
 		try {
 			monitor.beginTask("", 12); //$NON-NLS-1$
 			String oldSource= super.getSource();

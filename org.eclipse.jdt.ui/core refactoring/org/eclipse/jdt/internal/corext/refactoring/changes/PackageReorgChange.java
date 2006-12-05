@@ -14,6 +14,7 @@ import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 
 import org.eclipse.ltk.core.refactoring.Change;
@@ -41,7 +42,7 @@ abstract class PackageReorgChange extends JDTChange {
 		fNameQuery= nameQuery;
 	}
 
-	abstract Change doPerformReorg(IProgressMonitor pm) throws JavaModelException;
+	abstract Change doPerformReorg(IProgressMonitor pm) throws JavaModelException, OperationCanceledException;
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		// it is enough to check the package only since package reorg changes
@@ -52,7 +53,7 @@ abstract class PackageReorgChange extends JDTChange {
 		return isValid(pm, NONE);
 	}
 
-	public final Change perform(IProgressMonitor pm) throws CoreException {
+	public final Change perform(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		pm.beginTask(getName(), 1);
 		try {
 			IPackageFragment pack= getPackage();
@@ -77,7 +78,7 @@ abstract class PackageReorgChange extends JDTChange {
 		return (IPackageFragment)JavaCore.create(fPackageHandle);
 	}
 
-	String getNewName() {
+	String getNewName() throws OperationCanceledException {
 		if (fNameQuery == null)
 			return null;
 		return fNameQuery.getNewName();

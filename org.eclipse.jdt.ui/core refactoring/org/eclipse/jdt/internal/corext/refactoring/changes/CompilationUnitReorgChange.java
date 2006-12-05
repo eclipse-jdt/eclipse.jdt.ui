@@ -14,6 +14,7 @@ import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 
@@ -54,7 +55,7 @@ abstract class CompilationUnitReorgChange extends JDTChange {
 		fCuHandle= cuHandle;
 	}
 
-	public final Change perform(IProgressMonitor pm) throws CoreException {
+	public final Change perform(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		pm.beginTask(getName(), 1);
 		try {
 			ICompilationUnit unit= getCu();
@@ -67,7 +68,7 @@ abstract class CompilationUnitReorgChange extends JDTChange {
 		}
 	}
 
-	abstract Change doPerformReorg(IProgressMonitor pm) throws CoreException;
+	abstract Change doPerformReorg(IProgressMonitor pm) throws CoreException, OperationCanceledException;
 
 	public Object getModifiedElement() {
 		return getCu();
@@ -85,7 +86,7 @@ abstract class CompilationUnitReorgChange extends JDTChange {
 		return (IPackageFragment)JavaCore.create(fNewPackageHandle);
 	}
 
-	String getNewName() {
+	String getNewName() throws OperationCanceledException {
 		if (fNewNameQuery == null)
 			return null;
 		return fNewNameQuery.getNewName();

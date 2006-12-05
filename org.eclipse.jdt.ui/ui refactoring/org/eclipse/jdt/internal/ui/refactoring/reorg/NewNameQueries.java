@@ -118,7 +118,7 @@ public class NewNameQueries implements INewNameQueries {
 
 	private static INewNameQuery createStaticQuery(final IInputValidator validator, final String message, final String initial, final Shell shell){
 		return new INewNameQuery(){
-			public String getNewName() {
+			public String getNewName() throws OperationCanceledException {
 				InputDialog dialog= new InputDialog(shell, ReorgMessages.ReorgQueries_nameConflictMessage, message, initial, validator) {
 					/* (non-Javadoc)
 					 * @see org.eclipse.jface.dialogs.InputDialog#createDialogArea(org.eclipse.swt.widgets.Composite)

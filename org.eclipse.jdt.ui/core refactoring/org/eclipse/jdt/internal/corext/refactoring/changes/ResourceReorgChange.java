@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
@@ -53,7 +54,7 @@ abstract class ResourceReorgChange extends JDTChange {
 	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
-	public final Change perform(IProgressMonitor pm) throws CoreException {
+	public final Change perform(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		try{
 			pm.beginTask(getName(), 2);
 			
@@ -103,7 +104,7 @@ abstract class ResourceReorgChange extends JDTChange {
 	}
 	
 
-	private String getNewResourceName(){
+	private String getNewResourceName() throws OperationCanceledException {
 		if (fNewNameQuery == null)
 			return getResource().getName();
 		String name= fNewNameQuery.getNewName();

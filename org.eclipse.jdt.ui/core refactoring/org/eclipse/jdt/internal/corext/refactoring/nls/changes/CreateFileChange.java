@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.content.IContentType;
@@ -136,7 +137,7 @@ public class CreateFileChange extends JDTChange {
 		return result;
 	}
 
-	public Change perform(IProgressMonitor pm) throws CoreException {
+	public Change perform(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 
 		InputStream is= null;
 		try {
@@ -179,7 +180,7 @@ public class CreateFileChange extends JDTChange {
 		}
 	}
 
-	protected IFile getOldFile(IProgressMonitor pm) {
+	protected IFile getOldFile(IProgressMonitor pm) throws OperationCanceledException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try {
 			return ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);

@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -37,7 +38,7 @@ public class CopyCompilationUnitChange extends CompilationUnitReorgChange {
 		return super.isValid(pm, NONE);
 	}
 	
-	Change doPerformReorg(IProgressMonitor pm) throws CoreException {
+	Change doPerformReorg(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		getCu().copy(getDestinationPackage(), null, getNewName(), true, pm);
 		return null;
 	}

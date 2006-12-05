@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IResource;
 
@@ -48,7 +49,7 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 		return super.isValid(pm, READ_ONLY | SAVE_IF_DIRTY);
 	}
 	
-	Change doPerformReorg(IProgressMonitor pm) throws CoreException {
+	Change doPerformReorg(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		String name;
 		String newName= getNewName();
 		if (newName == null)

@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.ltk.core.refactoring.Change;
 
@@ -28,7 +29,7 @@ public class CopyPackageChange extends PackageReorgChange {
 		super(pack, dest, nameQuery);
 	}
 	
-	protected Change doPerformReorg(IProgressMonitor pm) throws JavaModelException{
+	protected Change doPerformReorg(IProgressMonitor pm) throws JavaModelException, OperationCanceledException {
 		getPackage().copy(getDestination(), null, getNewName(), true, pm);
 		return null;
 	}

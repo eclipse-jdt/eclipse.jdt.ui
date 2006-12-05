@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
+import org.eclipse.core.runtime.OperationCanceledException;
+
 import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.core.resources.IResource;
@@ -33,7 +35,7 @@ public class MonitoringNewNameQueries implements INewNameQueries {
 	}
 	public INewNameQuery createNewCompilationUnitNameQuery(final ICompilationUnit cu, final String initialSuggestedName) {
 		return new INewNameQuery() {
-			public String getNewName() {
+			public String getNewName() throws OperationCanceledException {
 				String result= fDelegate.createNewCompilationUnitNameQuery(cu, initialSuggestedName).getNewName();
 				String newName= JavaModelUtil.getRenamedCUName(cu, result);
 				fExecutionLog.setNewName(cu, newName);
@@ -47,7 +49,7 @@ public class MonitoringNewNameQueries implements INewNameQueries {
 	}
 	public INewNameQuery createNewPackageFragmentRootNameQuery(final IPackageFragmentRoot root, final String initialSuggestedName) {
 		return new INewNameQuery() {
-			public String getNewName() {
+			public String getNewName() throws OperationCanceledException {
 				String result= fDelegate.createNewPackageFragmentRootNameQuery(root, initialSuggestedName).getNewName();
 				fExecutionLog.setNewName(root, result);
 				ResourceMapping mapping= JavaElementResourceMapping.create(root);
@@ -60,7 +62,7 @@ public class MonitoringNewNameQueries implements INewNameQueries {
 	}
 	public INewNameQuery createNewPackageNameQuery(final IPackageFragment pack, final String initialSuggestedName) {
 		return new INewNameQuery() {
-			public String getNewName() {
+			public String getNewName() throws OperationCanceledException {
 				String result= fDelegate.createNewPackageNameQuery(pack, initialSuggestedName).getNewName();
 				fExecutionLog.setNewName(pack, result);
 				ResourceMapping mapping= JavaElementResourceMapping.create(pack);
@@ -75,7 +77,7 @@ public class MonitoringNewNameQueries implements INewNameQueries {
 	}
 	public INewNameQuery createNewResourceNameQuery(final IResource res, final String initialSuggestedName) {
 		return new INewNameQuery() {
-			public String getNewName() {
+			public String getNewName() throws OperationCanceledException {
 				String result= fDelegate.createNewResourceNameQuery(res, initialSuggestedName).getNewName();
 				fExecutionLog.setNewName(res, result);
 				return result;

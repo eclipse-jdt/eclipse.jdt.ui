@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
+import org.eclipse.core.runtime.OperationCanceledException;
+
 public interface INewNameQuery {
-	public	String getNewName();
+	public	String getNewName() throws OperationCanceledException;
 }
