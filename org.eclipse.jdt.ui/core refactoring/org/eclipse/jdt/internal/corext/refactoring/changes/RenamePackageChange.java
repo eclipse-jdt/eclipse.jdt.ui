@@ -137,30 +137,36 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		RefactoringStatus result= new RefactoringStatus();
-		IJavaElement element= (IJavaElement) getModifiedElement();
-		// don't check for read-only since we don't go through
-		// validate edit.
-		result.merge(isValid(DIRTY));
-		if (result.hasFatalError())
-			return result;
-		if (element != null && element.exists() && element instanceof IPackageFragment) {
-			IPackageFragment pack= (IPackageFragment) element;
-			if (fRenameSubpackages) {
-				IPackageFragment[] allPackages= JavaElementUtil.getPackageAndSubpackages(pack);
-				pm.beginTask("", allPackages.length); //$NON-NLS-1$
-				for (int i= 0; i < allPackages.length; i++) {
-					// don't check for read-only since we don't go through
-					// validate edit.
-					checkIfModifiable(result, allPackages[i], DIRTY);
-					if (result.hasFatalError())
-						return result;
-					isValid(result, allPackages[i], new SubProgressMonitor(pm, 1));
+		pm.beginTask("", 2); //$NON-NLS-1$
+		RefactoringStatus result;
+		try {
+			result= new RefactoringStatus();
+			IJavaElement element= (IJavaElement) getModifiedElement();
+			// don't check for read-only since we don't go through
+			// validate edit.
+			result.merge(isValid(new SubProgressMonitor(pm, 1), DIRTY));
+			if (result.hasFatalError())
+				return result;
+			if (element != null && element.exists() && element instanceof IPackageFragment) {
+				IPackageFragment pack= (IPackageFragment) element;
+				if (fRenameSubpackages) {
+					IPackageFragment[] allPackages= JavaElementUtil.getPackageAndSubpackages(pack);
+					SubProgressMonitor subPm= new SubProgressMonitor(pm, 1);
+					subPm.beginTask("", allPackages.length); //$NON-NLS-1$
+					for (int i= 0; i < allPackages.length; i++) {
+						// don't check for read-only since we don't go through
+						// validate edit.
+						checkIfModifiable(result, allPackages[i], DIRTY);
+						if (result.hasFatalError())
+							return result;
+						isValid(result, allPackages[i], new SubProgressMonitor(subPm, 1));
+					}
+				} else {
+					isValid(result, pack, new SubProgressMonitor(pm, 1));
 				}
-				pm.done();
-			} else {
-				isValid(result, pack, pm);
 			}
+		} finally {
+			pm.done();
 		}
 		return result;
 	}

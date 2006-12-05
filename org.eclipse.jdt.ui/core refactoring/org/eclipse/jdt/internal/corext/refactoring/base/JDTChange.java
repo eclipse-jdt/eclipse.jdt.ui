@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.corext.refactoring.base;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.filebuffers.FileBuffers;
@@ -186,10 +185,6 @@ public abstract class JDTChange extends Change {
 		} finally {
 			pm.done();
 		}
-	}
-
-	protected final RefactoringStatus isValid(int flags) throws CoreException {
-		return isValid(new NullProgressMonitor(), flags);
 	}
 
 	protected static void checkIfModifiable(RefactoringStatus status, Object element, int flags) {
