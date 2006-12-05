@@ -22,6 +22,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.commands.operations.IOperationHistory;
+import org.eclipse.core.commands.operations.IUndoContext;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
@@ -31,6 +34,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.operations.IWorkbenchOperationSupport;
+
+import org.eclipse.ltk.core.refactoring.IUndoManager;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
 
@@ -132,7 +140,7 @@ public class DeleteTest extends RefactoringTest{
 		try {
 			DeleteRefactoring refactoring= createRefactoring(elems);
 			assertNotNull(refactoring);
-			RefactoringStatus status= performRefactoring(refactoring, false);
+			RefactoringStatus status= performRefactoring(refactoring, true);
 			assertEquals("precondition was supposed to pass", null, status);
 
 			newCuA= getPackageP().getCompilationUnit(CU_NAME + ".java");
@@ -687,8 +695,9 @@ public class DeleteTest extends RefactoringTest{
 	public void testDeleteFile() throws Exception{
 		ParticipantTesting.reset();
 		IFolder folder= (IFolder)getPackageP().getResource();
+		String content= "123";
 		IFile file= folder.getFile("a.txt");
-		file.create(getStream("123"), true, null);
+		file.create(getStream(content), true, null);
 		assertTrue("file does not exist", file.exists());
 		Object[] elem= {file};
 		verifyEnabled(elem);			
@@ -697,10 +706,21 @@ public class DeleteTest extends RefactoringTest{
 		String[] handles= ParticipantTesting.createHandles(file);
 		
 		DeleteRefactoring ref= createRefactoring(elem);
-		RefactoringStatus status= performRefactoring(ref, false);
+		RefactoringStatus status= performRefactoring(ref, true);
 		assertEquals("expected to pass", null, status);
 		assertTrue("file not deleted", ! file.exists());
 		ParticipantTesting.testDelete(handles);
+		
+		IUndoManager undoManager= RefactoringCore.getUndoManager();
+		assertTrue(! undoManager.anythingToRedo());
+		assertTrue(undoManager.anythingToUndo());
+		undoManager.performUndo(null, new NullProgressMonitor());
+		assertTrue(file.exists());
+		assertEquals(content, getContents(file));
+		
+		assertTrue(undoManager.anythingToRedo());
+		undoManager.performRedo(null, new NullProgressMonitor());
+		assertTrue(! file.exists());
 	}
 
 	public void testDeleteFolder() throws Exception{
@@ -716,7 +736,7 @@ public class DeleteTest extends RefactoringTest{
 
 		String[] handles= ParticipantTesting.createHandles(subFolder);
 		DeleteRefactoring ref= createRefactoring(elements);
-		RefactoringStatus status= performRefactoring(ref, false);
+		RefactoringStatus status= performRefactoring(ref, true);
 		assertEquals("expected to pass", null, status);
 		assertTrue("folder not deleted", ! subFolder.exists());
 		ParticipantTesting.testDelete(handles);
@@ -738,16 +758,29 @@ public class DeleteTest extends RefactoringTest{
 
 		String[] handles= ParticipantTesting.createHandles(subFolder);
 		DeleteRefactoring ref= createRefactoring(elements);
-		RefactoringStatus status= performRefactoring(ref, false);
+		RefactoringStatus status= performRefactoring(ref, true);
 		assertEquals("expected to pass", null, status);
 		assertTrue("folder not deleted", ! subFolder.exists());
 		assertTrue("folder not deleted", ! subsubFolder.exists());
 		ParticipantTesting.testDelete(handles);
+		
+		IUndoManager undoManager= RefactoringCore.getUndoManager();
+		assertTrue(! undoManager.anythingToRedo());
+		assertTrue(undoManager.anythingToUndo());
+		undoManager.performUndo(null, new NullProgressMonitor());
+		assertTrue(subFolder.exists());
+		assertTrue(subsubFolder.exists());
+		
+		assertTrue(undoManager.anythingToRedo());
+		undoManager.performRedo(null, new NullProgressMonitor());
+		assertTrue(! subFolder.exists());
+		assertTrue(! subsubFolder.exists());
 	}
 	
 	public void testDeleteCu() throws Exception{
 		ParticipantTesting.reset();
-		ICompilationUnit newCU= getPackageP().createCompilationUnit("X.java", "package p; class X{}", true, new NullProgressMonitor());
+		final String contents= "package p; class X{}";
+		ICompilationUnit newCU= getPackageP().createCompilationUnit("X.java", contents, true, new NullProgressMonitor());
 		assertTrue("cu not created", newCU.exists());
 
 		Object[] elements= {newCU};
@@ -757,10 +790,24 @@ public class DeleteTest extends RefactoringTest{
 		performDummySearch();			
 		
 		DeleteRefactoring ref= createRefactoring(elements);
-		RefactoringStatus status= performRefactoring(ref, false);
+		RefactoringStatus status= performRefactoring(ref, true);
 		assertEquals("expected to pass", null, status);
 		assertTrue("cu not deleted", ! newCU.exists());
-		ParticipantTesting.testDelete(handles);		
+		ParticipantTesting.testDelete(handles);
+		
+		IWorkbenchOperationSupport operationSupport= PlatformUI.getWorkbench().getOperationSupport();
+		IOperationHistory operationHistory= operationSupport.getOperationHistory();
+		IUndoContext undoContext= operationSupport.getUndoContext();
+		
+		assertTrue(! operationHistory.canRedo(undoContext));
+		assertTrue(operationHistory.canUndo(undoContext));
+		operationHistory.undo(undoContext, null, null);
+		assertTrue(newCU.exists());
+		assertEquals(contents, newCU.getSource());
+		
+		assertTrue(operationHistory.canRedo(undoContext));
+		operationHistory.redo(undoContext, null, null);
+		assertTrue(! newCU.exists());
 	}
 	
 	public void testDeleteSourceFolder() throws Exception{
@@ -773,7 +820,7 @@ public class DeleteTest extends RefactoringTest{
 		performDummySearch();			
 		String[] handles= ParticipantTesting.createHandles(fredRoot, fredRoot.getResource());
 		DeleteRefactoring ref= createRefactoring(elements);
-		RefactoringStatus status= performRefactoring(ref, false);
+		RefactoringStatus status= performRefactoring(ref, true);
 		assertEquals("expected to pass", null, status);
 		assertTrue("not deleted", ! fredRoot.exists());
 		ParticipantTesting.testDelete(handles);
@@ -791,7 +838,7 @@ public class DeleteTest extends RefactoringTest{
 		String[] handles= ParticipantTesting.createHandles(internalJAR, internalJAR.getResource());
 
 		DeleteRefactoring ref= createRefactoring(elements);
-		RefactoringStatus status= performRefactoring(ref, false);
+		RefactoringStatus status= performRefactoring(ref, true);
 		assertEquals("expected to pass", null, status);
 		assertTrue("not deleted", ! internalJAR.exists());		
 		ParticipantTesting.testDelete(handles);
