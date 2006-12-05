@@ -11,10 +11,10 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringBufferInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -32,6 +32,16 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
+import org.eclipse.ltk.core.refactoring.CreateChangeOperation;
+import org.eclipse.ltk.core.refactoring.IUndoManager;
+import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -54,18 +64,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
-
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
-import org.eclipse.ltk.core.refactoring.CreateChangeOperation;
-import org.eclipse.ltk.core.refactoring.IUndoManager;
-import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public abstract class RefactoringTest extends TestCase {
 
@@ -277,7 +276,7 @@ public abstract class RefactoringTest extends TestCase {
 			assertNotNull("Undo doesn't exist", undo);
 			assertTrue("Undo manager is empty", undoManager.anythingToUndo());
 		} else {
-			//assertNull("Undo manager contains undo but shouldn't", undo);
+			assertNull("Undo manager contains undo but shouldn't", undo);
 		}
 		return null;
 	}
@@ -404,7 +403,7 @@ public abstract class RefactoringTest extends TestCase {
 	
 	//-----------------------
 	public static InputStream getStream(String content){
-		return new StringBufferInputStream(content);
+		return new ByteArrayInputStream(content.getBytes());
 	}
 	
 	public static IPackageFragmentRoot getSourceFolder(IJavaProject javaProject, String name) throws JavaModelException{
@@ -457,6 +456,7 @@ public abstract class RefactoringTest extends TestCase {
 	public static void performDummySearch(IJavaElement element) throws Exception{
 		new SearchEngine().searchAllTypeNames(
 			null, 
+			SearchPattern.R_EXACT_MATCH, 
 			"XXXXXXXXX".toCharArray(), // make sure we search a concrete name. This is faster according to Kent 
 			SearchPattern.R_EXACT_MATCH, 
 			IJavaSearchConstants.CLASS, 
