@@ -96,7 +96,6 @@ public abstract class ClasspathAttributeConfiguration {
 	 * Specifies if 'Remove' is a valid action on the given attribute. This will enable the <em>Remove</em> button. The action
 	 * will typically clear the attributes value. The method should only return <code>true</code> if the element isn't already cleared.
 	 * 
-	 * 	@shell the parent shell
 	 * @param attribute access to the attribute to answer the question of
 	 * @return returns true if the attribute can be edited.
 	 */
@@ -105,7 +104,7 @@ public abstract class ClasspathAttributeConfiguration {
 	/**
 	 * This method is invoked when the <em>Edit</em> is pressed. The method is expected to show a configuration dialog.
 	 * 
-	 * @shell the parent shell
+	 * @param shell the parent shell
 	 * @param attribute access to the attribute to configure
 	 * @return returns the configured attribute or <code>null</code> if the action has been cancelled.
 	 */
@@ -114,7 +113,6 @@ public abstract class ClasspathAttributeConfiguration {
 	/**
 	 * This method is invoked when the <em>Remove</em> is pressed. The method should not show a dialog.
 	 * 
-	 * @shell the parent shell
 	 * @param attribute access to the attribute to configure
 	 * @return returns the configured attribute
 	 */
