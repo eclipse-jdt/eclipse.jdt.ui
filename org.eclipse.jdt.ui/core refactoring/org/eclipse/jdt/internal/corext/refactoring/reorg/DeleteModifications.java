@@ -44,14 +44,14 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
  */
 public class DeleteModifications extends RefactoringModifications {
 	
-	private List fDelete;
+	private List/*<IJavaElement>*/ fDelete;
 	
 	/**
 	 * Contains the actual package when executing
 	 * <code>handlePackageFragmentDelete</code>. This is part of the
 	 * algorithm to check if a parent folder can be deleted.
 	 */
-	private List fPackagesToDelete;
+	private List/*<IPackageFragment>*/ fPackagesToDelete;
 	
 	public DeleteModifications() {
 		fDelete= new ArrayList();
@@ -59,7 +59,7 @@ public class DeleteModifications extends RefactoringModifications {
 	}
 	
 	public void delete(IResource resource) {
-		fDelete.add(resource);
+		getResourceModifications().addDelete(resource);
 	}
 	
 	public void delete(IResource[] resources) {
@@ -117,12 +117,6 @@ public class DeleteModifications extends RefactoringModifications {
 	}
 	
 	public void buildDelta(IResourceChangeDescriptionFactory deltaFactory) {
-		for (Iterator iter= fDelete.iterator(); iter.hasNext();) {
-			Object element= iter.next();
-			if (element instanceof IResource) {
-				deltaFactory.delete((IResource)element);
-			}
-		}
 		getResourceModifications().buildDelta(deltaFactory);
 	}
 	
