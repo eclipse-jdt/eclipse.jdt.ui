@@ -83,6 +83,7 @@ public class InlineTempRefactoring extends ScriptableRefactoring {
 	
 	//the following fields are set after the construction
 	private VariableDeclaration fVariableDeclaration;
+	private SimpleName[] fReferences;
 	private CompilationUnit fASTRoot;
 
 	/**
@@ -235,9 +236,7 @@ public class InlineTempRefactoring extends ScriptableRefactoring {
 			if (javaProject != null)
 				project= javaProject.getElementName();
 			
-			VariableDeclaration variableDeclaration= getVariableDeclaration();
-			
-			final IVariableBinding binding= variableDeclaration.resolveBinding();
+			final IVariableBinding binding= getVariableDeclaration().resolveBinding();
 			String text= null;
 			final IMethodBinding method= binding.getDeclaringMethod();
 			if (method != null)
@@ -254,8 +253,8 @@ public class InlineTempRefactoring extends ScriptableRefactoring {
 			
 			CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite(fCu, fASTRoot);
 			
-			inlineTemp(cuRewrite, variableDeclaration);
-			removeTemp(cuRewrite, variableDeclaration);
+			inlineTemp(cuRewrite);
+			removeTemp(cuRewrite);
 			
 			final CompilationUnitChange result= cuRewrite.createChange(RefactoringCoreMessages.InlineTempRefactoring_inline, false, new SubProgressMonitor(pm, 1));
 			result.setDescriptor(new RefactoringChangeDescriptor(descriptor));
@@ -265,8 +264,9 @@ public class InlineTempRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	private void inlineTemp(CompilationUnitRewrite cuRewrite, VariableDeclaration variableDeclaration) throws JavaModelException {
-		SimpleName[] references= getReferences(variableDeclaration);
+	private void inlineTemp(CompilationUnitRewrite cuRewrite) throws JavaModelException {
+		VariableDeclaration variableDeclaration= getVariableDeclaration();
+		SimpleName[] references= getReferences();
 
 		TextEditGroup groupDesc= cuRewrite.createGroupDescription(RefactoringCoreMessages.InlineTempRefactoring_inline_edit_name);
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
@@ -287,7 +287,8 @@ public class InlineTempRefactoring extends ScriptableRefactoring {
     }
     
 
-	private void removeTemp(CompilationUnitRewrite cuRewrite, VariableDeclaration variableDeclaration) throws JavaModelException {
+	private void removeTemp(CompilationUnitRewrite cuRewrite) throws JavaModelException {
+		VariableDeclaration variableDeclaration= getVariableDeclaration();
 		TextEditGroup groupDesc= cuRewrite.createGroupDescription(RefactoringCoreMessages.InlineTempRefactoring_remove_edit_name);
 		ASTNode parent= variableDeclaration.getParent();
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
@@ -323,10 +324,13 @@ public class InlineTempRefactoring extends ScriptableRefactoring {
 		return copy;
 	}
 
-	private SimpleName[] getReferences(VariableDeclaration varDecl) {
-		TempOccurrenceAnalyzer analyzer= new TempOccurrenceAnalyzer(varDecl, false);
+	public SimpleName[] getReferences() {
+		if (fReferences != null)
+			return fReferences;
+		TempOccurrenceAnalyzer analyzer= new TempOccurrenceAnalyzer(getVariableDeclaration(), false);
 		analyzer.perform();
-		return analyzer.getReferenceNodes();
+		fReferences= analyzer.getReferenceNodes();
+		return fReferences;
 	}
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {

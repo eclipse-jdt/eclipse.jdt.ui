@@ -14,12 +14,9 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.dom.VariableDeclaration;
-
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -54,12 +51,8 @@ public class InlineTempWizard extends RefactoringWizard {
 		
 		protected String getMessageString() {
 			InlineTempRefactoring refactoring= (InlineTempRefactoring) getRefactoring();
-			VariableDeclaration decl= refactoring.getVariableDeclaration();
-			
-			TempOccurrenceAnalyzer analyzer= new TempOccurrenceAnalyzer(decl, false);
-			analyzer.perform();
-			int occurences= analyzer.getNumberOfReferences();
-			final String identifier= decl.getName().getIdentifier();
+			int occurences= refactoring.getReferences().length;
+			final String identifier= refactoring.getVariableDeclaration().getName().getIdentifier();
 			if (occurences == 1) 
 				return Messages.format(RefactoringMessages.InlineTempInputPage_message_one,  identifier); 
 			else
