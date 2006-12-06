@@ -41,15 +41,16 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 /**
  * A modification collector for delete operations.
- * <p>
- * Note that the field <code>fPackagesToDelete</code> contains the actual package
- * when executing <code>handlePackageFragmentDelete</code>. This is part of the
- * algorithm to check if a parent folder can be deleted.
- * </p>
  */
 public class DeleteModifications extends RefactoringModifications {
 	
 	private List fDelete;
+	
+	/**
+	 * Contains the actual package when executing
+	 * <code>handlePackageFragmentDelete</code>. This is part of the
+	 * algorithm to check if a parent folder can be deleted.
+	 */
 	private List fPackagesToDelete;
 	
 	public DeleteModifications() {
@@ -101,19 +102,6 @@ public class DeleteModifications extends RefactoringModifications {
 				fDelete.addAll(Arrays.asList(types));
 				if (element.getResource() != null)
 					getResourceModifications().addDelete(element.getResource());
-				return;
-			case IJavaElement.TYPE:
-				fDelete.add(element);
-				IType type= (IType)element;
-				ICompilationUnit unit= type.getCompilationUnit();
-				//TODO: Looks like a bug: unit.getElementName().endsWith(type.getElementName())
-				if (type.getDeclaringType() == null && unit.getElementName().endsWith(type.getElementName())) {
-					if (unit.getTypes().length == 1) {
-						fDelete.add(unit);
-						if (unit.getResource() != null)
-							getResourceModifications().addDelete(unit.getResource());
-					}
-				}
 				return;
 			default:
 				fDelete.add(element);
