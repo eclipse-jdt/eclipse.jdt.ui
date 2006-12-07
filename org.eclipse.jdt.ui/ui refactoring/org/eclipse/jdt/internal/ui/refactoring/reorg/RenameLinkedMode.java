@@ -291,15 +291,40 @@ public class RenameLinkedMode {
 			JavaPlugin.log(e);
 		}
 		openSecondaryPopup();
+//		startAnimation();
 		fgActiveLinkedMode= this;
 	}
 	
+//	private void startAnimation() {
+//		Shell shell= fEditor.getSite().getShell();
+//		StyledText textWidget= fEditor.getViewer().getTextWidget();
+//		
+//		// from popup:
+////		Rectangle startRect= fPopup.getBounds();
+//		
+//		// from editor:
+//		Point startLoc= textWidget.getParent().toDisplay(textWidget.getLocation());
+//		Point startSize= textWidget.getSize();
+//		Rectangle startRect= new Rectangle(startLoc.x, startLoc.y, startSize.x, startSize.y);
+//		
+//		// from hell:
+////		Rectangle startRect= shell.getClientArea();
+//		
+//		Point caretLocation= textWidget.getLocationAtOffset(textWidget.getCaretOffset());
+//		Point displayLocation= textWidget.toDisplay(caretLocation);
+//		Rectangle targetRect= new Rectangle(displayLocation.x, displayLocation.y, 0, 0);
+//		
+//		RectangleAnimation anim= new RectangleAnimation(shell, startRect, targetRect);
+//		anim.schedule();
+//	}
+
 	void doRename(boolean showPreview) {
 		fLinkedModeModel.exit(ILinkedModeListener.NONE);
 		closePopup();
 		
 		String oldName= fJavaElement.getElementName();
 		try {
+			fEditor.getViewer().getTextWidget().setRedraw(false);
 			String newName= fNamePosition.getContent();
 			if (oldName.equals(newName))
 				return;
@@ -322,6 +347,8 @@ public class RenameLinkedMode {
 			JavaPlugin.log(ex);
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
+		} finally {
+			fEditor.getViewer().getTextWidget().setRedraw(true);
 		}
 	}
 	
