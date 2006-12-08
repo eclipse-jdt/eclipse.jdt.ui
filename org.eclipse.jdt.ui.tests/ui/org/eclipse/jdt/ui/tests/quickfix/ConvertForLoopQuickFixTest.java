@@ -1202,6 +1202,76 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 	
+	public void testBug163050_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Object[] x) {\n");
+		buf.append("        int i = 0;\n");
+		buf.append("        for (int j = 0; j < x.length; j++) {\n");
+		buf.append("            System.out.println(x[i]);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		List proposals= fetchConvertingProposal(buf, cu);
+		
+		assertNotNull(fConvertLoopProposal);
+		
+		assertCorrectLabels(proposals);
+		
+		String preview1= getPreviewContent(fConvertLoopProposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Object[] x) {\n");
+		buf.append("        int i = 0;\n");
+		buf.append("        for (Object element : x) {\n");
+		buf.append("            System.out.println(x[i]);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+	}
+	
+	public void testBug163050_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Object[] x) {\n");
+		buf.append("        for (int j = 0; j < x.length; j++) {\n");
+		buf.append("            System.out.println(x[0]);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		List proposals= fetchConvertingProposal(buf, cu);
+		
+		assertNotNull(fConvertLoopProposal);
+		
+		assertCorrectLabels(proposals);
+		
+		String preview1= getPreviewContent(fConvertLoopProposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Object[] x) {\n");
+		buf.append("        for (Object element : x) {\n");
+		buf.append("            System.out.println(x[0]);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+	}
+	
 	private List fetchConvertingProposal(StringBuffer buf, ICompilationUnit cu) throws Exception {
 		int offset= buf.toString().indexOf("for");
 		AssistContext context= getCorrectionContext(cu, offset, 0);

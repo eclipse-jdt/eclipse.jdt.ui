@@ -651,10 +651,13 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 			ArrayAccess arrayAccess= element instanceof ArrayAccess ? (ArrayAccess)element : (ArrayAccess)ASTNodes.getParent(
 				element, ArrayAccess.class);
 			if (arrayAccess != null) {
-				SimpleName elementReference= fAst.newSimpleName(fParameterDeclaration.getName().getIdentifier());
+				Expression index= arrayAccess.getIndex();
+				if (index instanceof SimpleName && Bindings.equals(fIndexBinding, ((SimpleName)index).resolveBinding())) {
+					SimpleName elementReference= fAst.newSimpleName(fParameterDeclaration.getName().getIdentifier());
 
-				rewrite.replace(arrayAccess, elementReference, group);
-				positionGroups.getPositionGroup(fParameterName, true).addPosition(rewrite.track(elementReference), false);
+					rewrite.replace(arrayAccess, elementReference, group);
+					positionGroups.getPositionGroup(fParameterName, true).addPosition(rewrite.track(elementReference), false);
+				}
 			}
 		}
 	}
