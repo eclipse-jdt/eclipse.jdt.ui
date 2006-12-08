@@ -120,7 +120,7 @@ public abstract class BuildPathBasePage {
 						if (addToExclusions(entryPath, curr)) {
 							modifiedEntries.add(curr);
 						}
-					} else if (entryPath.isPrefixOf(currPath)) {
+					} else if (entryPath.isPrefixOf(currPath) && newEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 						if (addToExclusions(currPath, newEntry)) {
 							modifiedEntries.add(curr);
 						}
