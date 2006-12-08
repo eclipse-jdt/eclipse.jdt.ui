@@ -38,19 +38,17 @@ import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class ConvertForLoopQuickFixTest extends QuickFixTest {
-
+	
 	private static final Class THIS= ConvertForLoopQuickFixTest.class;
-
+	
 	private IJavaProject fJProject1;
-
 	private IPackageFragmentRoot fSourceFolder;
-
 	private FixCorrectionProposal fConvertLoopProposal;
-
+	
 	public ConvertForLoopQuickFixTest(String name) {
 		super(name);
 	}
-
+	
 	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(THIS));
 	}
@@ -68,26 +66,26 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 			return new ProjectTestSetup(suite);
 		}
 	}
-
+	
 	protected void setUp() throws Exception {
 		Hashtable options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		JavaCore.setOptions(options);
-
+		
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
-
+		
 		fJProject1= ProjectTestSetup.getProject();
-
+		
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		fConvertLoopProposal= null;
 	}
-
+	
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
-
+	
 	public void testSimplestSmokeCase() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -100,15 +98,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNotNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
-
+		
 		String preview1= getPreviewContent(fConvertLoopProposal);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
@@ -121,7 +119,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
-
+	
 	public void testInferPrimitiveTypeElement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -134,15 +132,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNotNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
-
+		
 		String preview1= getPreviewContent(fConvertLoopProposal);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
@@ -155,7 +153,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
-
+	
 	public void testInferTypeElement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -168,15 +166,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNotNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
-
+		
 		String preview1= getPreviewContent(fConvertLoopProposal);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
@@ -189,7 +187,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
-
+	
 	public void testSimplestClean() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -203,15 +201,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNotNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
-
+		
 		String preview1= getPreviewContent(fConvertLoopProposal);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
@@ -225,7 +223,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
-
+	
 	public void testLotsOfRefereces() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -243,15 +241,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNotNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
-
+		
 		String preview1= getPreviewContent(fConvertLoopProposal);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
@@ -269,7 +267,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
-
+	
 	public void testInferCollectionFromInitializers() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -287,15 +285,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNotNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
-
+		
 		String preview1= getPreviewContent(fConvertLoopProposal);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
@@ -313,7 +311,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
-
+	
 	public void testNiceReduction() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -332,15 +330,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNotNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
-
+		
 		String preview1= getPreviewContent(fConvertLoopProposal);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("class Weirdy{}\n");
@@ -358,7 +356,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
-
+	
 	public void testNiceReductionArrayIsField() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -377,15 +375,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNotNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
-
+		
 		String preview1= getPreviewContent(fConvertLoopProposal);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("class Weirdy{}\n");
@@ -403,7 +401,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
-
+	
 	public void testArrayIsQualifiedByThis() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -422,15 +420,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNotNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
-
+		
 		String preview1= getPreviewContent(fConvertLoopProposal);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("class Weirdy{}\n");
@@ -448,7 +446,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
-
+	
 	public void testArrayIsAccessedByMethodInvocation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -470,14 +468,14 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
-
+	
 	public void testArrayIsAccessedByMethodInvocation2() throws Exception {
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -500,14 +498,14 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
-
+	
 	public void testMatrix() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -521,15 +519,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNotNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
-
+		
 		String preview1= getPreviewContent(fConvertLoopProposal);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
@@ -543,7 +541,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
-
+	
 	public void testMatrix2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -559,15 +557,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNotNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
-
+		
 		String preview1= getPreviewContent(fConvertLoopProposal);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
@@ -583,7 +581,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
-
+	
 	public void testArrayIsAssigned() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -597,14 +595,14 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
-
+	
 	public void testArrayIsAssigned2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -618,14 +616,14 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
-
+	
 	public void testArrayCannotBeInferred() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -639,14 +637,14 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
-
+	
 	public void testIndexBruteModified() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -661,14 +659,14 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
-
+	
 	public void testIndexBruteModified2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -682,14 +680,14 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
-
+	
 	public void testIndexReadOutsideArrayAccess() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -703,11 +701,11 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
 	
@@ -724,14 +722,14 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
-
+	
 	public void testIndexReadOutsideInferredArrayAccess() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -746,11 +744,11 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
 	
@@ -770,14 +768,14 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
-
+	
 	public void testReverseTraversalIsNotAllowed() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -791,14 +789,14 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
-
+	
 	public void testCollectionIsNotArray() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -813,14 +811,14 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
-
+	
 	public void testAdditionalLocalIsNotReferenced() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -834,14 +832,14 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
-
+	
 	public void testTwoIndexesNotAllowed() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -855,14 +853,14 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
-
+	
 	public void testAdditionalLocalIsNotReferenced2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -877,11 +875,11 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
 	
@@ -898,11 +896,11 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
 	
@@ -919,14 +917,14 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
-
+	
 	public void testCollectionsNotAcceptedYet() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -940,15 +938,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
 	
-	public void testIndexDoesNotStartFromZero() throws Exception{
+	public void testIndexDoesNotStartFromZero() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -959,11 +957,11 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
 	
@@ -978,11 +976,11 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
 	
@@ -999,11 +997,11 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
 	
@@ -1022,11 +1020,11 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
 	
@@ -1043,15 +1041,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNotNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
-
+		
 		String preview1= getPreviewContent(fConvertLoopProposal);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
@@ -1082,15 +1080,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNotNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
-
+		
 		String preview1= getPreviewContent(fConvertLoopProposal);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
@@ -1128,11 +1126,11 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
 	
@@ -1154,11 +1152,11 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
 	
@@ -1175,11 +1173,11 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
 	
@@ -1196,11 +1194,11 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-
+		
 		List proposals= fetchConvertingProposal(buf, cu);
-
+		
 		assertNull(fConvertLoopProposal);
-
+		
 		assertCorrectLabels(proposals);
 	}
 	
@@ -1208,8 +1206,8 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		int offset= buf.toString().indexOf("for");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
-
-		fConvertLoopProposal= (FixCorrectionProposal) findProposalByCommandId(QuickAssistProcessor.CONVERT_FOR_LOOP_ID, proposals);
+		
+		fConvertLoopProposal= (FixCorrectionProposal)findProposalByCommandId(QuickAssistProcessor.CONVERT_FOR_LOOP_ID, proposals);
 		return proposals;
 	}
 }
