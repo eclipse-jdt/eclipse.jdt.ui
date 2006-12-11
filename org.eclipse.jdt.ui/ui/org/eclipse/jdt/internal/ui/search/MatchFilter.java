@@ -61,10 +61,15 @@ abstract class MatchFilter {
 	
 	private static MatchFilter[] decodeFiltersString(String encodedString) {
 		StringTokenizer tokenizer= new StringTokenizer(encodedString, String.valueOf(';'));
-		int count= Integer.valueOf(tokenizer.nextToken()).intValue();
-		MatchFilter[] res= new MatchFilter[count];
-		for (int i= 0; i < count; i++) {
-			res[i]= findMatchFilter(tokenizer.nextToken());
+		MatchFilter[] res;
+		try {
+			int count= Integer.valueOf(tokenizer.nextToken()).intValue();
+			res= new MatchFilter[count];
+			for (int i= 0; i < count; i++) {
+				res[i]= findMatchFilter(tokenizer.nextToken());
+			}
+		} catch (NumberFormatException e) {
+			res= getDefaultFilters();
 		}
 		return res;
 	}
