@@ -366,6 +366,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String DeletePackageFragmentRootChange_delete;
 
+	public static String DeletePackageFragmentRootChange_restore_file;
+
 	public static String DeleteRefactoring_1;
 
 	public static String DeleteRefactoring_2;
@@ -2304,17 +2306,11 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String UndoCompilationUnitChange_no_resource;
 
-	public static String UndoDeleteFileChange_already_exists;
+	public static String UndoDeleteResourceChange_already_exists;
 
-	public static String UndoDeleteFileChange_cannot_restore;
+	public static String UndoDeleteResourceChange_cannot_restore;
 
-	public static String UndoDeleteFileChange_change_name;
-
-	public static String UndoDeleteFolderChange_already_exists;
-
-	public static String UndoDeleteFolderChange_cannot_restore;
-
-	public static String UndoDeleteFolderChange_change_name;
+	public static String UndoDeleteResourceChange_change_name;
 
 	public static String UseSuperTypeProcessor_checking;
 

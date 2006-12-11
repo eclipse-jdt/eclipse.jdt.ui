@@ -78,7 +78,7 @@ public class DeleteFileChange extends AbstractDeleteChange {
 		resourceDescription.recordStateFromHistory(file, new SubProgressMonitor(pm, 1));
 		pm.done();
 		
-		return new UndoDeleteFileChange(resourceDescription);
+		return new UndoDeleteResourceChange(resourceDescription);
 	}
 }
 

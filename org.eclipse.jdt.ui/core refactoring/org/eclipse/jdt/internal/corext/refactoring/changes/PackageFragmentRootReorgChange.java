@@ -122,7 +122,7 @@ abstract class PackageFragmentRootReorgChange extends JDTChange {
 			return replace | originating | destination;
 
 		IJavaProject[] referencingProjects= JavaElementUtil.getReferencingProjects(getRoot());
-		if (referencingProjects.length == 0)
+		if (referencingProjects.length <= 1)
 			return replace | originating | destination;
 
 		boolean updateOtherProjectsToo= fUpdateClasspathQuery.confirmManipulation(getRoot(), referencingProjects);	

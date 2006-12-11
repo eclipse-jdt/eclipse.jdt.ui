@@ -13,8 +13,11 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -24,11 +27,11 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.undo.ResourceDescript
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 
-public class UndoDeleteFolderChange extends Change {
+public class UndoDeleteResourceChange extends Change {
 
 	private final ResourceDescription fResourceDescription;
 
-	public UndoDeleteFolderChange(ResourceDescription resourceDescription) {
+	public UndoDeleteResourceChange(ResourceDescription resourceDescription) {
 		fResourceDescription= resourceDescription;
 	}
 	
@@ -41,21 +44,21 @@ public class UndoDeleteFolderChange extends Change {
 	}
 
 	public String getName() {
-		return Messages.format(RefactoringCoreMessages.UndoDeleteFolderChange_change_name, fResourceDescription.getName()); 
+		return Messages.format(RefactoringCoreMessages.UndoDeleteResourceChange_change_name, fResourceDescription.getName()); 
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		if (! fResourceDescription.isValid()) {
 			return RefactoringStatus.createFatalErrorStatus(
 					Messages.format(
-							RefactoringCoreMessages.UndoDeleteFolderChange_cannot_restore,
+							RefactoringCoreMessages.UndoDeleteResourceChange_cannot_restore,
 							fResourceDescription.getName()));
 		}
 		
 		if (fResourceDescription.verifyExistence(true)) {
 			return RefactoringStatus.createFatalErrorStatus(
 					Messages.format(
-							RefactoringCoreMessages.UndoDeleteFolderChange_already_exists,
+							RefactoringCoreMessages.UndoDeleteResourceChange_already_exists,
 							fResourceDescription.getName()));
 		}
 		
@@ -63,7 +66,18 @@ public class UndoDeleteFolderChange extends Change {
 	}
 
 	public Change perform(IProgressMonitor pm) throws CoreException {
-		IFolder folder= (IFolder) fResourceDescription.createResource(pm);
-		return new DeleteFolderChange(folder, false);
+		IResource created= fResourceDescription.createResource(pm);
+		created.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(pm, 1));
+		if (created instanceof IFile) {
+			return new DeleteFileChange((IFile) created, false);
+		} else if (created instanceof IFolder) {
+			return new DeleteFolderChange((IFolder) created, false);
+		} else {
+			return null; // should not happen
+		}
+	}
+	
+	public String toString() {
+		return "Remove " + fResourceDescription.getName(); //$NON-NLS-1$
 	}
 }

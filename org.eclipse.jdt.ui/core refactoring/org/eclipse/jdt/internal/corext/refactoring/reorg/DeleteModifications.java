@@ -32,7 +32,9 @@ import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -40,14 +42,14 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 /**
- * A modification collector for delete operations.
+ * A modification collector for Java element delete operations.
  */
 public class DeleteModifications extends RefactoringModifications {
 	
 	private List/*<IJavaElement>*/ fDelete;
 	
 	/**
-	 * Contains the actual package when executing
+	 * Contains the actual packages when executing
 	 * <code>handlePackageFragmentDelete</code>. This is part of the
 	 * algorithm to check if a parent folder can be deleted.
 	 */
@@ -91,6 +93,11 @@ public class DeleteModifications extends RefactoringModifications {
 				// change.
 				if (resource != null)
 					getResourceModifications().addDelete(resource);
+				IJavaProject[] referencingProjects= JavaElementUtil.getReferencingProjects((IPackageFragmentRoot) element);
+				for (int i= 0; i < referencingProjects.length; i++) {
+					IFile classpath= referencingProjects[i].getProject().getFile(".classpath"); //$NON-NLS-1$
+					getResourceModifications().addChanged(classpath);
+				}
 				return;
 			case IJavaElement.PACKAGE_FRAGMENT:
 				fDelete.add(element);
@@ -109,11 +116,16 @@ public class DeleteModifications extends RefactoringModifications {
 		
 	}
 	
-	public void postProcess() throws CoreException {
+	/**
+	 * @return a List of IResources that are removed by package deletes
+	 */
+	public List/*<IResource>*/ postProcess() throws CoreException {
+		ArrayList resourcesCollector= new ArrayList();
 		for (Iterator iter= fPackagesToDelete.iterator(); iter.hasNext();) {
 			IPackageFragment pack= (IPackageFragment) iter.next();
-			handlePackageFragmentDelete(pack);
+			handlePackageFragmentDelete(pack, resourcesCollector);
 		}
+		return resourcesCollector;
 	}
 	
 	public void buildDelta(IResourceChangeDescriptionFactory deltaFactory) {
@@ -141,8 +153,11 @@ public class DeleteModifications extends RefactoringModifications {
 	 * * deletion of the package folder if it is not only cleared and if its parent
 	 *   is not removed as well.
 	 *   
+	 * All deleted resources are added to <code>resourcesCollector</code>
+	 * 
+	 * @param resourcesCollector a collector for IResources to be deleted
 	 */
-	private void handlePackageFragmentDelete(IPackageFragment pack) throws CoreException {		
+	private void handlePackageFragmentDelete(IPackageFragment pack, ArrayList resourcesCollector) throws CoreException {		
 		final IContainer container= (IContainer)pack.getResource();
 		if (container == null)
 			return;
@@ -176,10 +191,12 @@ public class DeleteModifications extends RefactoringModifications {
 				} else {
 					// Parent cannot be removed completely, but as this folder
 					// can be removed, we notify the participant
+					resourcesCollector.add(container);
 					getResourceModifications().addDelete(container);
 				}
 			} else {
 				// Parent will not be removed, but we will 
+				resourcesCollector.add(container);
 				getResourceModifications().addDelete(container);
 			}
 		} else {
@@ -194,6 +211,7 @@ public class DeleteModifications extends RefactoringModifications {
 						continue;
 					if (pack.isDefaultPackage() && ! JavaCore.isJavaLikeFileName(file.getName()))
 						continue;
+					resourcesCollector.add(member);
 					getResourceModifications().addDelete(member);
 				}
 				if (!pack.isDefaultPackage() && member instanceof IFolder) {
@@ -201,8 +219,10 @@ public class DeleteModifications extends RefactoringModifications {
 					// as well, but in case they have been removed from the build
 					// path, notify the participant
 					IPackageFragment frag= (IPackageFragment) JavaCore.create(member);
-					if (frag == null)
+					if (frag == null) {
+						resourcesCollector.add(member);
 						getResourceModifications().addDelete(member);
+					}
 				}
 			}
 		}

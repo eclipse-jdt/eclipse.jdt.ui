@@ -167,13 +167,6 @@ public class DeleteTest extends RefactoringTest{
 	
 	// package helpers
 	
-	private void assertPackagesAreDeleted(IPackageFragment[] frags) {
-		for (int i= 0; i < frags.length; i++) { 
-			assertFalse(frags[i].exists());
-			assertFalse(frags[i].getResource().exists());
-		}
-	}
-
 	private IPackageFragment[] createPackagePath(int no) throws JavaModelException {
 		IPackageFragment[] frags= new IPackageFragment[no];
 		for (int i=0; i<no; i++) {
@@ -221,13 +214,55 @@ public class DeleteTest extends RefactoringTest{
 		performDummySearch();
 		DeleteRefactoring ref= createRefactoring(markedForDelete);
 		((JavaDeleteProcessor)ref.getProcessor()).setDeleteSubPackages(deleteSubs);
-		RefactoringStatus status= performRefactoring(ref, false);
+		RefactoringStatus status= performRefactoring(ref, true);
 		assertEquals("expected to pass", null, status);
 		
 		// assure participants got notified of everything.
 		ParticipantTesting.testDelete(deleteHandles);
 	}
 
+	private void doTestUndoRedo(Object[] dontExist, Object[] exist) throws CoreException {
+		assertExist(exist, true);
+		assertExist(dontExist, false);
+		
+		IUndoManager undoManager= RefactoringCore.getUndoManager();
+		undoManager.performUndo(null, new NullProgressMonitor());
+		assertExist(exist, true);
+		assertExist(dontExist, true);
+		
+		undoManager.performRedo(null, new NullProgressMonitor());
+		assertExist(exist, true);
+		assertExist(dontExist, false);
+	}
+
+	private void assertExist(Object[] resourceOrElements, boolean exists) {
+		if (resourceOrElements != null) {
+			for (int i= 0; i < resourceOrElements.length; i++) {
+				assertExists(resourceOrElements[i], exists);
+			}
+		}
+	}
+
+	private void assertExists(Object resourceOrElement, boolean exists) {
+		if (resourceOrElement instanceof IResource) {
+			IResource resource= (IResource) resourceOrElement;
+			if (exists) {
+				assertTrue("expected to exist: " + resource.getFullPath(), resource.exists());
+			} else {
+				assertTrue("expected NOT to exist: " + resource.getFullPath(), ! resource.exists());
+			}
+		} else 	if (resourceOrElement instanceof IJavaElement) {
+			IJavaElement javaElement= (IJavaElement) resourceOrElement;
+			if (exists) {
+				assertTrue("expected to exist: " + javaElement.getHandleIdentifier(), javaElement.exists());
+			} else {
+				assertTrue("expected NOT to exist: " + javaElement.getHandleIdentifier(), ! javaElement.exists());
+				IResource resource= javaElement.getResource();
+				assertTrue("expected NOT to exist: " + resource.getFullPath(), ! resource.exists());
+			}
+		}
+	}
+	
 	//---- tests
 	
 	private IReorgQueries createReorgQueries() {
@@ -857,7 +892,8 @@ public class DeleteTest extends RefactoringTest{
 		ParticipantTesting.reset();
 		IPackageFragment newPackage= getRoot().createPackageFragment("newPackage", true, new NullProgressMonitor());
 		assertTrue("package not created", newPackage.exists());
-		newPackage.createCompilationUnit("A.java", "public class A {}", false, null);
+		String cuContents= "public class A {}";
+		ICompilationUnit cu= newPackage.createCompilationUnit("A.java", cuContents, false, null);
 		IFile file= ((IContainer)newPackage.getResource()).getFile(new Path("Z.txt"));
 		file.create(getStream("123"), true, null);
 		
@@ -867,11 +903,19 @@ public class DeleteTest extends RefactoringTest{
 		String[] deleteHandles= ParticipantTesting.createHandles(newPackage, newPackage.getResource());
 		
 		DeleteRefactoring ref= createRefactoring(elements);
-		RefactoringStatus status= performRefactoring(ref, false);
+		RefactoringStatus status= performRefactoring(ref, true);
 		assertEquals("expected to pass", null, status);
 		assertTrue("package not deleted", ! newPackage.exists());
 		
 		ParticipantTesting.testDelete(deleteHandles);
+		
+		IUndoManager undoManager= RefactoringCore.getUndoManager();
+		undoManager.performUndo(null, new NullProgressMonitor());
+		assertTrue(newPackage.exists());
+		assertTrue(file.exists());
+		assertEquals(cuContents, cu.getSource());
+		undoManager.performRedo(null, new NullProgressMonitor());
+		assertTrue(! newPackage.exists());
 	}
 
 	public void testDeletePackage2() throws Exception{
@@ -881,25 +925,41 @@ public class DeleteTest extends RefactoringTest{
 		// p1.p2
 		// this tests cleaning of packages (p2 is not deleted)
 		ParticipantTesting.reset();
-		IPackageFragment newPackage= getRoot().createPackageFragment("p1", true, new NullProgressMonitor());
-		getRoot().createPackageFragment("p1.p2", true, new NullProgressMonitor());
-		assertTrue("package not created", newPackage.exists());
-		ICompilationUnit cu= newPackage.createCompilationUnit("A.java", "public class A {}", false, null);
-		IFile file= ((IContainer)newPackage.getResource()).getFile(new Path("Z.txt"));
+		IPackageFragment p1= getRoot().createPackageFragment("p1", true, new NullProgressMonitor());
+		IPackageFragment p1p2= getRoot().createPackageFragment("p1.p2", true, new NullProgressMonitor());
+		assertTrue("package not created", p1.exists());
+		String cuContents= "public class A {}";
+		ICompilationUnit cu= p1.createCompilationUnit("A.java", cuContents, false, null);
+		IFile file= ((IContainer)p1.getResource()).getFile(new Path("Z.txt"));
 		file.create(getStream("123"), true, null);
 		
-		Object[] elements= {newPackage};
+		Object[] elements= {p1};
 		verifyEnabled(elements);			
 		performDummySearch();			
-		String[] deleteHandles= ParticipantTesting.createHandles(newPackage, cu.getResource(), file);
+		String[] deleteHandles= ParticipantTesting.createHandles(p1, cu.getResource(), file);
 		
 		DeleteRefactoring ref= createRefactoring(elements);
-		RefactoringStatus status= performRefactoring(ref, false);
+		RefactoringStatus status= performRefactoring(ref, true);
 		assertEquals("expected to pass", null, status);
 		//Package is not delete since it had sub packages
-		assertTrue("package deleted", newPackage.exists());
+		assertTrue("package deleted", p1.exists());
+		assertEquals(0, p1.getChildren().length);
+		assertTrue(p1p2.exists());
+		assertTrue(! file.exists());
+		assertTrue(! cu.exists());
 		
 		ParticipantTesting.testDelete(deleteHandles);
+		
+		IUndoManager undoManager= RefactoringCore.getUndoManager();
+		undoManager.performUndo(null, new NullProgressMonitor());
+		assertTrue(p1.exists());
+		assertTrue(p1p2.exists());
+		assertTrue(file.exists());
+		assertEquals(cuContents, cu.getSource());
+		undoManager.performRedo(null, new NullProgressMonitor());
+		assertTrue(p1p2.exists());
+		assertTrue(! file.exists());
+		assertTrue(! cu.exists());
 	}
 	
 	public void testDeletePackage3() throws Exception {
@@ -909,8 +969,8 @@ public class DeleteTest extends RefactoringTest{
 		IPackageFragment[] frags= createPackagePath(4);
 		ICompilationUnit a= frags[3].createCompilationUnit("A.java", "public class A {}", false, null);
 		executeDeletePackage(new Object[] { frags[3] }, frags, new Object[] {  frags[0].getResource() } );
-		assertPackagesAreDeleted(frags);
-		assertFalse(a.exists());
+		Object[] deleted= new Object[]{frags[0], frags[1], frags[2], frags[3], a};
+		doTestUndoRedo(deleted, null);
 	}
 	
 	public void testDeletePackage4() throws Exception {
@@ -920,8 +980,8 @@ public class DeleteTest extends RefactoringTest{
 		IPackageFragment[] frags= createPackagePath(4);
 		ICompilationUnit a= frags[3].createCompilationUnit("A.java", "public class A {}", false, null);
 		executeDeletePackage(new Object[] { frags[3], a }, frags, new Object[] {  frags[0].getResource() } );
-		assertPackagesAreDeleted(frags);
-		assertFalse(a.exists());
+		Object[] deleted= new Object[]{frags[0], frags[1], frags[2], frags[3], a};
+		doTestUndoRedo(deleted, null);
 	}
 	
 	public void testDeletePackage5() throws Exception {
@@ -931,8 +991,9 @@ public class DeleteTest extends RefactoringTest{
 		IPackageFragment[] frags= createPackagePath(6);
 		ICompilationUnit a= frags[2].createCompilationUnit("A.java", "public class A {}", false, null);
 		executeDeletePackage(new Object[] { frags[5] }, new IPackageFragment[] { frags[5], frags[4], frags[3] }, new Object[] { frags[3].getResource() });
-		assertPackagesAreDeleted(new IPackageFragment[] { frags[5], frags[4], frags[3] });
-		assertTrue(a.exists());
+		Object[] deleted= new Object[]{frags[5], frags[4], frags[3]};
+		Object[] exist= new Object[]{frags[2], frags[1], frags[0], a};
+		doTestUndoRedo(deleted, exist);
 	}
 	
 	public void testDeletePackage6() throws Exception {
@@ -942,8 +1003,9 @@ public class DeleteTest extends RefactoringTest{
 		IPackageFragment[] frags= createPackagePath(6);
 		IPackageFragment another= getRoot().createPackageFragment("a0.a1.a2.anotherPackage", true, null);
 		executeDeletePackage(new Object[] { frags[5] }, new IPackageFragment[] { frags[5], frags[4], frags[3] }, new Object[] { frags[3].getResource() });
-		assertPackagesAreDeleted(new IPackageFragment[] { frags[5], frags[4], frags[3] });
-		assertTrue(another.exists());
+		Object[] deleted= new Object[]{frags[5], frags[4], frags[3]};
+		Object[] exist= new Object[]{frags[2], frags[1], frags[0], another};
+		doTestUndoRedo(deleted, exist);
 	}
 	
 	public void testDeletePackage7() throws Exception {
@@ -953,8 +1015,9 @@ public class DeleteTest extends RefactoringTest{
 		IPackageFragment[] frags= createPackagePath(6);
 		ICompilationUnit a= frags[2].createCompilationUnit("A.java", "public class A {}", false, null);
 		executeDeletePackage(new Object[] { frags[5], a }, frags, new Object[] { frags[0].getResource() });
-		assertPackagesAreDeleted(frags);
-		assertFalse(a.exists());
+		Object[] deleted= new Object[]{frags[5], frags[4], frags[3], frags[2], frags[1], frags[0], a};
+		Object[] exist= null;
+		doTestUndoRedo(deleted, exist);
 	}
 	
 	public void testDeletePackage8() throws Exception {
@@ -967,9 +1030,9 @@ public class DeleteTest extends RefactoringTest{
 		IFile file= ((IContainer)frags[3].getResource()).getFile(new Path("Z.txt"));
 		file.create(getStream("123"), true, null);
 		executeDeletePackage(new Object[] { frags[5], a }, new IPackageFragment[] { frags[5], frags[4] }, new Object[] { frags[4].getResource(), a.getResource(), a, a.getType("A") });
-		assertPackagesAreDeleted(new IPackageFragment[] { frags[5], frags[4] });
-		assertFalse(a.exists());
-		assertTrue(file.exists());
+		Object[] deleted= new Object[]{frags[5], frags[4], a};
+		Object[] exist= new Object[]{frags[3], frags[2], frags[1], frags[0], file};
+		doTestUndoRedo(deleted, exist);
 	}
 	
 	public void testDeletePackage9() throws Exception {
@@ -982,9 +1045,9 @@ public class DeleteTest extends RefactoringTest{
 		IFile file= ((IContainer)frags[3].getResource()).getFile(new Path("Z.txt"));
 		file.create(getStream("123"), true, null);
 		executeDeletePackage(new Object[] { frags[5], a, file }, frags, new Object[] {  frags[0].getResource() });
-		assertPackagesAreDeleted(frags);
-		assertFalse(a.exists());
-		assertFalse(file.exists());
+		Object[] deleted= new Object[]{frags[5], frags[4], frags[3], frags[2], frags[1], frags[0], a, file};
+		Object[] exist= null;
+		doTestUndoRedo(deleted, exist);
 	}
 	
 	public void testDeletePackage10() throws Exception {
@@ -1003,20 +1066,21 @@ public class DeleteTest extends RefactoringTest{
 		verifyEnabled(markedForDelete);
 		performDummySearch();
 		DeleteRefactoring ref= createRefactoring(markedForDelete);
-		RefactoringStatus status= performRefactoring(ref, false);
+		RefactoringStatus status= performRefactoring(ref, true);
 		assertEquals("expected to pass", null, status);
 
 		// test handles (!! only the package, not the resource)
 		ParticipantTesting.testDelete(deleteHandles);
 		// Package is not deleted since it had sub packages
-		assertTrue(frags[2].exists());
-		assertTrue(frags[2].getResource().exists());
-		assertFalse(a.exists());
+		Object[] deleted= new Object[]{a};
+		Object[] exist= new Object[]{frags[3], frags[2], frags[1], frags[0]};
+		doTestUndoRedo(deleted, exist);
 	}
 	
 	public void testDeletePackage11() throws Exception {
 		// Test deletion of default package of a project which is its own source folder
 		// (default) <- delete
+		// (default).A
 		// (default) x.txt <- don't delete
 		// expected: x.txt must not be deleted
 
@@ -1037,15 +1101,13 @@ public class DeleteTest extends RefactoringTest{
 		verifyEnabled(markedForDelete);
 		performDummySearch();
 		DeleteRefactoring ref= createRefactoring(markedForDelete);
-		RefactoringStatus status= performRefactoring(ref, false);
+		RefactoringStatus status= performRefactoring(ref, true);
 		assertEquals("expected to pass", null, status);
 
 		ParticipantTesting.testDelete(deleteHandles);
-		assertTrue(defaultP.exists());
-		assertTrue(defaultP.getResource().exists());
-		assertTrue(file.exists());
-		assertFalse(a.exists());
-		assertFalse(a.getResource().exists());
+		Object[] deleted= new Object[]{a};
+		Object[] exist= new Object[]{defaultP, file};
+		doTestUndoRedo(deleted, exist);
 	}
 	
 	public void testDeletePackage12() throws Exception {
@@ -1055,9 +1117,9 @@ public class DeleteTest extends RefactoringTest{
 		// a0 and a1 are to be cleaned, do not report any folder deletions
 		IPackageFragment[] frags= createPackagePath(3);
 		executeDeletePackage(new Object[] { frags[0], frags[1] }, new IPackageFragment[] { frags[0], frags[1] }, new Object[] { });
-		assertTrue(frags[0].exists());
-		assertTrue(frags[1].exists());
-		assertTrue(frags[2].exists());
+		Object[] deleted= null;
+		Object[] exist= new Object[]{frags[2], frags[1], frags[0]};
+		doTestUndoRedo(deleted, exist);
 	}
 	
 	/* Don't rename! See #suite() */
@@ -1073,9 +1135,9 @@ public class DeleteTest extends RefactoringTest{
 		IFile file= ((IContainer)frags[3].getResource()).getFile(new Path("Z.txt"));
 		file.create(getStream("123"), true, null);
 		executeDeletePackage(new Object[] { frags[2] }, frags, new Object[] {  frags[0].getResource() }, true);
-		assertPackagesAreDeleted(frags);
-		assertFalse(a.exists());
-		assertFalse(file.exists());
+		Object[] deleted= new Object[]{frags[3], frags[2], frags[1], frags[0], a, file};
+		Object[] exist= null;
+		doTestUndoRedo(deleted, exist);
 	}
 	
 	/* Don't rename! See #suite() */
@@ -1089,30 +1151,33 @@ public class DeleteTest extends RefactoringTest{
 		if (p.exists()) p.delete(true, null);
 		final IPackageFragment defaultPackage= getRoot().getPackageFragment("");
 		executeDeletePackage(new Object[] { defaultPackage }, new IPackageFragment[] { defaultPackage }, new Object[0], true);
-		for (int i= 0; i < frags.length; i++) {
-			assertTrue(frags[i].exists());
-		}
+		Object[] deleted= null;
+		Object[] exist= new Object[]{frags[1], frags[0], defaultPackage};
+		doTestUndoRedo(deleted, exist);
 	}
 	
 	/* Don't rename! See #suite() */
 	public void test_END_DeletePackageSub3() throws Exception {
 		// (default)	<- delete
 		// (default).A
+		// (default)/file.txt
 		// a0
 		// a0.a1
 		// expected: A deleted; notification about deletion of: 
 		// PackageFragments: <default>
 		// Folders: - 
-		// Files: A.java (NOT other files in root, like .classpath).
+		// Files: A.java (NOT other files in root, like file.txt).
 		IPackageFragment[] frags= createPackagePath(2);
 		final IPackageFragment defaultPackage= getRoot().getPackageFragment("");
 		IPackageFragment p= getRoot().getPackageFragment("p");
 		if (p.exists()) p.delete(true, null);
 		ICompilationUnit a= defaultPackage.createCompilationUnit("A.java", "public class A {}", false, null);
+		IFile file= ((IContainer)defaultPackage.getResource()).getFile(new Path("file.txt"));
+		file.create(getStream("123"), true, null);
 		executeDeletePackage(new Object[] { defaultPackage }, new IPackageFragment[0], new Object[] { defaultPackage, a.getResource() } , true);
-		for (int i= 0; i < frags.length; i++) {
-			assertTrue(frags[i].exists());
-		}
+		Object[] deleted= new Object[]{a};
+		Object[] exist= new Object[]{frags[1], frags[0], defaultPackage, file};
+		doTestUndoRedo(deleted, exist);
 	}
 	
 	/* Don't rename! See #suite() */
@@ -1127,7 +1192,9 @@ public class DeleteTest extends RefactoringTest{
 		IPackageFragment p= getRoot().getPackageFragment("p");
 		if (p.exists()) p.delete(true, null);
 		executeDeletePackage(new Object[] { frags[0] }, frags, new Object[] { frags[0].getResource() } , true);
-		assertPackagesAreDeleted(frags);
+		Object[] deleted= new Object[]{frags[1], frags[0]};
+		Object[] exist= null;
+		doTestUndoRedo(deleted, exist);
 	}
 	
 	/* Don't rename! See #suite() */
@@ -1146,7 +1213,9 @@ public class DeleteTest extends RefactoringTest{
 		if (p.exists()) p.delete(true, null);
 		ICompilationUnit a= defaultPackage.createCompilationUnit("A.java", "public class A {}", false, null);
 		executeDeletePackage(new Object[] { defaultPackage, frags[0] }, frags, new Object[] { defaultPackage, a.getResource(), frags[0].getResource() } , true);
-		assertPackagesAreDeleted(frags);
+		Object[] deleted= new Object[]{frags[1], frags[0], a};
+		Object[] exist= null;
+		doTestUndoRedo(deleted, exist);
 	}
 
 }

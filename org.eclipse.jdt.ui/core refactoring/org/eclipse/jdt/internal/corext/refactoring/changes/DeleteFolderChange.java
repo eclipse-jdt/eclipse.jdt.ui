@@ -92,7 +92,7 @@ public class DeleteFolderChange extends AbstractDeleteChange {
 		resourceDescription.recordStateFromHistory(folder, new SubProgressMonitor(pm, 1));
 		pm.done();
 		
-		return new UndoDeleteFolderChange(resourceDescription);
+		return new UndoDeleteResourceChange(resourceDescription);
 	}
 }
 

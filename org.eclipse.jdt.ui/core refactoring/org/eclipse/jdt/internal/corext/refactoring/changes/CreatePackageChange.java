@@ -14,6 +14,8 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.core.resources.IFolder;
+
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
@@ -49,7 +51,7 @@ public class CreatePackageChange extends JDTChange {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) fPackageFragment.getParent();
 				root.createPackageFragment(fPackageFragment.getElementName(), false, pm);
 				
-				return new DeleteSourceManipulationChange(fPackageFragment, false);
+				return new DeleteFolderChange((IFolder) fPackageFragment.getResource(), true); 
 			}		
 		} finally {
 			pm.done();

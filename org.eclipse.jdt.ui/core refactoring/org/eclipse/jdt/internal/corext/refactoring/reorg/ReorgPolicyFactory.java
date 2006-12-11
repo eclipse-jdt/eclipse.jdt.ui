@@ -1809,7 +1809,7 @@ public final class ReorgPolicyFactory {
 					result.markAsSynthetic();
 					result.add(targetCuChange);
 					if (Arrays.asList(getJavaElements()).containsAll(Arrays.asList(sourceCu.getTypes())))
-						result.add(DeleteChangeCreator.createDeleteChange(null, new IResource[0], new ICompilationUnit[] { sourceCu}, RefactoringCoreMessages.ReorgPolicy_move));
+						result.add(DeleteChangeCreator.createDeleteChange(null, new IResource[0], new ICompilationUnit[] {sourceCu}, RefactoringCoreMessages.ReorgPolicy_move, null));
 					else
 						result.add(createCompilationUnitChange(sourceCu, sourceRewriter));
 					return result;

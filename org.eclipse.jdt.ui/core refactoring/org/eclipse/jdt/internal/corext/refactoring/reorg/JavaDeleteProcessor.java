@@ -248,23 +248,20 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 
 			recalculateElementsToDelete();
 
-			TextChangeManager manager= new TextChangeManager();
-			fDeleteChange= DeleteChangeCreator.createDeleteChange(manager, fResources, fJavaElements, getProcessorName());
 			checkDirtyCompilationUnits(result);
 			checkDirtyResources(result);
 			fDeleteModifications= new DeleteModifications();
 			fDeleteModifications.delete(fResources);
 			fDeleteModifications.delete(fJavaElements);
-			fDeleteModifications.postProcess();
+			List/*<IResource>*/ packageDeletes= fDeleteModifications.postProcess();
+			
+			TextChangeManager manager= new TextChangeManager();
+			fDeleteChange= DeleteChangeCreator.createDeleteChange(manager, fResources, fJavaElements, getProcessorName(), packageDeletes);
 			
 			ResourceChangeChecker checker= (ResourceChangeChecker) context.getChecker(ResourceChangeChecker.class);
 			IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
 			fDeleteModifications.buildDelta(deltaFactory);
-			IFile[] files= getClassPathFiles();
-			for (int i= 0; i < files.length; i++) {
-				deltaFactory.change(files[i]);
-			}
-			files= ResourceUtil.getFiles(manager.getAllCompilationUnits());
+			IFile[] files= ResourceUtil.getFiles(manager.getAllCompilationUnits());
 			for (int i= 0; i < files.length; i++) {
 				deltaFactory.change(files[i]);
 			}
@@ -528,9 +525,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 			IPackageFragmentRoot root= project.findPackageFragmentRoot(resource.getFullPath());
 			if (root == null)
 				continue;
-			List referencingProjects= new ArrayList(1);
-			referencingProjects.add(root.getJavaProject());
-			referencingProjects.addAll(Arrays.asList(JavaElementUtil.getReferencingProjects(root)));
+			List referencingProjects= Arrays.asList(JavaElementUtil.getReferencingProjects(root));
 			if (skipDeletingReferencedRoot(query, root, referencingProjects))
 				filesToSkip.add(resource);
 		}
@@ -544,7 +539,8 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 			if (! (element instanceof IPackageFragmentRoot))
 				continue;
 			IPackageFragmentRoot root= (IPackageFragmentRoot)element;
-			List referencingProjects= Arrays.asList(JavaElementUtil.getReferencingProjects(root));
+			ArrayList referencingProjects= new ArrayList(Arrays.asList(JavaElementUtil.getReferencingProjects(root)));
+			referencingProjects.remove(root.getJavaProject());
 			if (skipDeletingReferencedRoot(query, root, referencingProjects))
 				rootsToSkip.add(root);
 		}
@@ -605,20 +601,6 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 		fJavaElements= parentUtil.getJavaElements();
 	}
 	
-	private IFile[] getClassPathFiles() {
-		List result= new ArrayList();
-		for (int i= 0; i < fJavaElements.length; i++) {
-			IJavaElement element= fJavaElements[i];
-			if (element instanceof IPackageFragmentRoot) {
-				IProject project= element.getJavaProject().getProject();
-				IFile classPathFile= project.getFile(".classpath"); //$NON-NLS-1$
-				if (classPathFile.exists())
-					result.add(classPathFile);
-			}
-		}
-		return (IFile[])result.toArray(new IFile[result.size()]);
-	}
-
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.JavaDeleteProcessor_creating_change, 1);

@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -32,6 +33,10 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.undo.ResourceDescript
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+/**
+ * Caveat: undo of package fragment deletes is provided by a wrapping
+ * UndoablePackageDeleteChange. This change returns a NullChange as undo for package fragments.
+ */
 public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 
 	private final String fHandle;
@@ -51,8 +56,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	}
 	
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		// delete changes don't provide an undo operation
-		ISourceManipulation element= getSourceModification();
+		ISourceManipulation element= getSourceManipulation();
 		if (fIsExecuteChange) {
 			if (element instanceof ICompilationUnit) {
 				// don't check anything in this case. We have a warning dialog
@@ -67,7 +71,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	}
 
 	private String getElementName() {
-		IJavaElement javaElement= getJavaElement(getSourceModification());
+		IJavaElement javaElement= getJavaElement(getSourceManipulation());
 		if (JavaElementUtil.isDefaultPackage(javaElement))
 			return RefactoringCoreMessages.DeleteSourceManipulationChange_1; 
 		return javaElement.getElementName();
@@ -84,7 +88,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	 * @see DeleteChange#doDelete(IProgressMonitor)
 	 */
 	protected Change doDelete(IProgressMonitor pm) throws CoreException {
-		ISourceManipulation element= getSourceModification();
+		ISourceManipulation element= getSourceManipulation();
 		// we have to save dirty compilation units before deleting them. Otherwise
 		// we will end up showing ghost compilation units in the package explorer
 		// since the primary working copy still exists.
@@ -97,18 +101,17 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 			ResourceDescription resourceDescription = ResourceDescription.fromResource(resource);
 			element.delete(false, new SubProgressMonitor(pm, 1));
 			resourceDescription.recordStateFromHistory(resource, new SubProgressMonitor(pm, 1));
-			return new UndoDeleteFileChange(resourceDescription);
+			return new UndoDeleteResourceChange(resourceDescription);
 			
-		// begin fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66835
 		} else if (element instanceof IPackageFragment) {
 			ICompilationUnit[] units= ((IPackageFragment)element).getCompilationUnits();
 			pm.beginTask("", units.length + 1); //$NON-NLS-1$
 			for (int i = 0; i < units.length; i++) {
+				// fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66835
 				saveCUnitIfNeeded(units[i], new SubProgressMonitor(pm, 1));
 			}
 			element.delete(false, new SubProgressMonitor(pm, 1));
-		// end fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66835
-			return null; //TODO
+			return new NullChange(); // caveat: real undo implemented by UndoablePackageDeleteChange
 			
 		} else {
 			element.delete(false, pm);
@@ -116,8 +119,8 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 		}
 	}
 		
-	private ISourceManipulation getSourceModification() {
-		return (ISourceManipulation)getModifiedElement();
+	private ISourceManipulation getSourceManipulation() {
+		return (ISourceManipulation) getModifiedElement();
 	}
 
 	private static IJavaElement getJavaElement(ISourceManipulation sm) {

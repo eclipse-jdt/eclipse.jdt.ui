@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DeletePackageFragment
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteSourceManipulationChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.changes.UndoablePackageDeleteChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
@@ -63,8 +64,28 @@ class DeleteChangeCreator {
 		//private
 	}
 	
-	static Change createDeleteChange(TextChangeManager manager, IResource[] resources, IJavaElement[] javaElements, String changeName) throws CoreException {
-		DynamicValidationStateChange result= new DynamicValidationStateChange(changeName);
+	/**
+	 * @param packageDeletes a list of {@link IResource}s that will be deleted
+	 *        by the delete operation of the {@link IPackageFragment}s in
+	 *        <code>javaElements</code>, or <code>null</code> iff
+	 *        <code>javaElements</code> does not contain package fragments
+	 */
+	static Change createDeleteChange(TextChangeManager manager, IResource[] resources,
+			IJavaElement[] javaElements, String changeName, List/*<IResource>*/ packageDeletes) throws CoreException {
+		/*
+		 * Problem: deleting a package and subpackages can result in
+		 * multiple package fragments in fJavaElements but only
+		 * one folder in packageDeletes. The way to handle this is to make the undo
+		 * change of individual package delete changes an empty change, and
+		 * add take care of the undo in UndoablePackageDeleteChange.
+		 */ 
+		DynamicValidationStateChange result;
+		if (packageDeletes.size() > 0) {
+			result= new UndoablePackageDeleteChange(changeName, packageDeletes);
+		} else {
+			result= new DynamicValidationStateChange(changeName);
+		}
+		
 		for (int i= 0; i < javaElements.length; i++) {
 			IJavaElement element= javaElements[i];
 			if (! ReorgUtils.isInsideCompilationUnit(element))

@@ -10,27 +10,50 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
+
+import org.eclipse.text.edits.ReplaceEdit;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.undo.ResourceDescription;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 	
@@ -81,19 +104,62 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		IPackageFragmentRoot root= getRoot();
 		IResource rootResource= root.getResource();
-		ResourceDescription resourceDescription = ResourceDescription.fromResource(rootResource);
+		CompositeChange result= new CompositeChange(getName());
+		
+		ResourceDescription rootDescription = ResourceDescription.fromResource(rootResource);
+		IJavaProject[] referencingProjects= JavaElementUtil.getReferencingProjects(root);
+		HashMap/*<IFile, String>*/ classpathFilesContents= new HashMap();
+		for (int i= 0; i < referencingProjects.length; i++) {
+			IJavaProject javaProject= referencingProjects[i];
+			IFile classpathFile= javaProject.getProject().getFile(".classpath"); //$NON-NLS-1$
+			if (classpathFile.exists()) {
+				classpathFilesContents.put(classpathFile, getFileContents(classpathFile));
+			}
+		}
+		
 		root.delete(resourceUpdateFlags, jCoreUpdateFlags, new SubProgressMonitor(pm, 1));
-		resourceDescription.recordStateFromHistory(rootResource, new SubProgressMonitor(pm, 1));
+		
+		rootDescription.recordStateFromHistory(rootResource, new SubProgressMonitor(pm, 1));
+		for (Iterator iterator= classpathFilesContents.entrySet().iterator(); iterator.hasNext();) {
+			Entry entry= (Entry) iterator.next();
+			IFile file= (IFile) entry.getKey();
+			String contents= (String) entry.getValue();
+			//Restore time stamps? This should probably be some sort of UndoTextFileChange.
+			TextFileChange classpathUndo= new TextFileChange(Messages.format(RefactoringCoreMessages.DeletePackageFragmentRootChange_restore_file, file.getFullPath().toOSString()), file);
+			classpathUndo.setEdit(new ReplaceEdit(0, getFileLength(file), contents));
+			result.add(classpathUndo);
+		}
+		result.add(new UndoDeleteResourceChange(rootDescription));
 		
 		pm.done();
-		switch (rootResource.getType()) {
-			//TODO: undo (and redo) all changed .classpath files
-			case IResource.FILE:
-				return new UndoDeleteFileChange(resourceDescription);
-			case IResource.FOLDER:
-				return new UndoDeleteFolderChange(resourceDescription);
-			default:
-				return null;
+		return result;
+	}
+
+	private static String getFileContents(IFile file) throws CoreException {
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		IPath path= file.getFullPath();
+		manager.connect(path, new NullProgressMonitor());
+		try {
+			return manager.getTextFileBuffer(path).getDocument().get();
+		} finally {
+			manager.disconnect(path, new NullProgressMonitor());
+		}
+	}
+	
+	private static int getFileLength(IFile file) throws CoreException {
+		// Cannot use file buffers here, since they are not yet in sync at this point.
+		InputStream contents= file.getContents();
+		InputStreamReader reader;
+		try {
+			reader= new InputStreamReader(contents, file.getCharset());
+		} catch (UnsupportedEncodingException e) {
+			JavaPlugin.log(e);
+			reader= new InputStreamReader(contents);
+		}
+		try {
+			return (int) reader.skip(Integer.MAX_VALUE);
+		} catch (IOException e) {
+			throw new CoreException(new Status(IStatus.ERROR, Corext.getPluginId(), e.getMessage(), e));
 		}
 	}
 
@@ -103,7 +169,7 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 		if (fUpdateClasspathQuery == null)
 			return true;
 		IJavaProject[] referencingProjects= JavaElementUtil.getReferencingProjects(getRoot());
-		if (referencingProjects.length == 0)
+		if (referencingProjects.length <= 1)
 			return true;
 		return fUpdateClasspathQuery.confirmManipulation(getRoot(), referencingProjects);
 	}

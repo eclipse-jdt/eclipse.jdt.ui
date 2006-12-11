@@ -147,13 +147,10 @@ public class JavaElementUtil {
 	 */
 	public static IJavaProject[] getReferencingProjects(IPackageFragmentRoot root) throws JavaModelException {
 		IClasspathEntry cpe= root.getRawClasspathEntry();
-		IJavaProject myProject= root.getJavaProject();
 		IJavaProject[] allJavaProjects= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProjects();
 		List result= new ArrayList(allJavaProjects.length);
 		for (int i= 0; i < allJavaProjects.length; i++) {
 			IJavaProject project= allJavaProjects[i];
-			if (project.equals(myProject))
-				continue;
 			IPackageFragmentRoot[] roots= project.findPackageFragmentRoots(cpe);
 			if (roots.length > 0)
 				result.add(project);
