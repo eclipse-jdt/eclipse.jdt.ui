@@ -18,8 +18,11 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -29,6 +32,7 @@ import org.eclipse.ui.services.IDisposable;
 
 import org.eclipse.compare.CompareUI;
 import org.eclipse.compare.IEditableContent;
+import org.eclipse.compare.IEditableContentExtension;
 import org.eclipse.compare.IResourceProvider;
 import org.eclipse.compare.ISharedDocumentAdapter;
 import org.eclipse.compare.IStreamContentAccessor;
@@ -113,6 +117,29 @@ public class JavaStructureCreator extends StructureCreator {
 				return fAdapter;
 			}
 			return super.getAdapter(adapter);
+		}
+		
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.compare.structuremergeviewer.DocumentRangeNode#isReadOnly()
+		 */
+		public boolean isReadOnly() {
+			if (fInput instanceof IEditableContentExtension) {
+				IEditableContentExtension ext = (IEditableContentExtension) fInput;
+				return ext.isReadOnly();
+			}
+			return super.isReadOnly();
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.compare.structuremergeviewer.DocumentRangeNode#validateEdit(org.eclipse.swt.widgets.Shell)
+		 */
+		public IStatus validateEdit(Shell shell) {
+			if (fInput instanceof IEditableContentExtension) {
+				IEditableContentExtension ext = (IEditableContentExtension) fInput;
+				return ext.validateEdit(shell);
+			}
+			return super.validateEdit(shell);
 		}
 	}
 
