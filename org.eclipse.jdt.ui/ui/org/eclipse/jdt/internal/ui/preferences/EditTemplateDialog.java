@@ -87,7 +87,7 @@ import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariablePro
 /**
  * Dialog to edit a template.
  */
-public class EditTemplateDialog extends StatusDialog {
+class EditTemplateDialog extends StatusDialog {
 
 	private static class TextViewerAction extends Action implements IUpdate {
 	

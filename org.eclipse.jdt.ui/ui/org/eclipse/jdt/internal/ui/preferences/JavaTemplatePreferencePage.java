@@ -84,7 +84,7 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage implement
 	 * @see org.eclipse.ui.texteditor.templates.TemplatePreferencePage#createTemplateEditDialog2(org.eclipse.jface.text.templates.Template, boolean, boolean)
 	 */
 	protected Template editTemplate(Template template, boolean edit, boolean isNameModifiable) {
-		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), template, edit, isNameModifiable, getContextTypeRegistry());
+		org.eclipse.jdt.internal.ui.preferences.EditTemplateDialog dialog= new org.eclipse.jdt.internal.ui.preferences.EditTemplateDialog(getShell(), template, edit, isNameModifiable, getContextTypeRegistry());
 		if (dialog.open() == Window.OK) {
 			return dialog.getTemplate();
 		}
