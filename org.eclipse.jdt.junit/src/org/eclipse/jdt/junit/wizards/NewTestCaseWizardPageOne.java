@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -640,7 +641,11 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		if (classToTestName.length() == 0) {
 			return status;
 		}
-		IStatus val= JavaConventions.validateJavaTypeName(classToTestName);
+		IJavaProject javaProject= root.getJavaProject();
+		String sourceLevel= javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
+		String compliance= javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+		
+		IStatus val= JavaConventions.validateJavaTypeName(classToTestName, sourceLevel, compliance);
 		if (val.getSeverity() == IStatus.ERROR) {
 			status.setError(WizardMessages.NewTestCaseWizardPageOne_error_class_to_test_not_valid); 
 			return status;

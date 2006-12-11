@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.junit;
 
+
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 /**
@@ -28,6 +29,7 @@ public class JUnitCore {
 	 * Adds a listener for test runs.
 	 * 
 	 * @param listener listener to be added
+	 * @deprecated Use the new listener support {@link #addTestRunListener(TestRunListener)}.
 	 */
 	public static void addTestRunListener(ITestRunListener listener) {
 		JUnitPlugin.getDefault().addTestRunListener(listener);
@@ -36,9 +38,28 @@ public class JUnitCore {
 	/**
 	 * Removes a listener for test runs.
 	 * 
-	 * @param listener listener to be removed 
+	 * @param listener listener to be removed
+	 * @deprecated Use the new listener support {@link #removeTestRunListener(TestRunListener)}.
 	 */
 	public static void removeTestRunListener(ITestRunListener listener) {
 		JUnitPlugin.getDefault().removeTestRunListener(listener);
+	}
+	
+	/**
+	 * Adds a listener for test runs.
+	 * 
+	 * @param listener the listener to be added
+	 */
+	public static void addTestRunListener(TestRunListener listener) {
+		JUnitPlugin.getDefault().getNewTestRunListeners().add(listener);
+	}
+
+	/**
+	 * Removes a listener for test runs.
+	 * 
+	 * @param listener the listener to be removed 
+	 */
+	public static void removeTestRunListener(TestRunListener listener) {
+		JUnitPlugin.getDefault().getNewTestRunListeners().remove(listener);
 	}
 }

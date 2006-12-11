@@ -16,8 +16,9 @@ import java.util.ArrayList;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
+import org.eclipse.jdt.junit.model.ITestElement;
+
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
-import org.eclipse.jdt.internal.junit.model.TestElement;
 import org.eclipse.jdt.internal.junit.model.TestRoot;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 
@@ -34,9 +35,9 @@ public class TestSessionTableContentProvider implements IStructuredContentProvid
 	}
 
 	private void addAll(ArrayList all, TestSuiteElement suite) {
-		TestElement[] children= suite.getChildren();
+		ITestElement[] children= suite.getChildren();
 		for (int i= 0; i < children.length; i++) {
-			TestElement element= children[i];
+			ITestElement element= children[i];
 			if (element instanceof TestSuiteElement) {
 				if (((TestSuiteElement) element).getSuiteStatus().isErrorOrFailure())
 					all.add(element); // add failed suite to flat list too

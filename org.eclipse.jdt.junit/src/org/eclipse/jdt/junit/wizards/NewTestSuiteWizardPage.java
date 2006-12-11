@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -450,7 +451,12 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 			status.setError(WizardMessages.NewTestSuiteWizPage_typeName_error_name_qualified); 
 			return status;
 		}
-		IStatus val= JavaConventions.validateJavaTypeName(typeName);
+		
+		IJavaProject javaProject= getJavaProject();
+		String sourceLevel= javaProject != null ? javaProject.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.VERSION_1_3;
+		String compliance= javaProject != null ? javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true) : JavaCore.VERSION_1_3;
+		
+		IStatus val= JavaConventions.validateJavaTypeName(typeName, sourceLevel, compliance);
 		if (val.getSeverity() == IStatus.ERROR) {
 			status.setError(WizardMessages.NewTestSuiteWizPage_typeName_error_name_not_valid+val.getMessage()); 
 			return status;

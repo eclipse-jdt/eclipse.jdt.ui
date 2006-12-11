@@ -46,6 +46,11 @@ public interface ITestSessionListener {
 	public void testAdded(TestElement testElement);
 	
 	/**
+	 * All test have been added and running begins
+	 */
+	public void runningBegins();
+	
+	/**
 	 * An individual test has started.
 	 * 
 	 * @param testCaseElement the test

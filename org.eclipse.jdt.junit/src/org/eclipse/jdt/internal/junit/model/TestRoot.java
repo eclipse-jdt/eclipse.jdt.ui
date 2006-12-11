@@ -10,13 +10,22 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.model;
 
+import org.eclipse.jdt.junit.model.ITestRunSession;
+
 public class TestRoot extends TestSuiteElement {
 
-	public TestRoot() {
+	private final ITestRunSession fSession;
+
+	public TestRoot(ITestRunSession session) {
 		super(null, "-1", "TESTROOT", 1); //$NON-NLS-1$//$NON-NLS-2$
+		fSession= session;
 	}
 
 	public TestRoot getRoot() {
 		return this;
+	}
+	
+	public ITestRunSession getTestRunSession() {
+		return fSession;
 	}
 }

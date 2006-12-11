@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -40,8 +41,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-
-import org.eclipse.jdt.junit.ITestRunListener;
 
 import org.eclipse.jdt.internal.junit.model.JUnitModel;
 
@@ -91,7 +90,12 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	/**
 	 * List storing the registered test run listeners
 	 */
-	private List/*<ITestRunListener>*/ fTestRunListeners;
+	private List/*<ITestRunListener>*/ fLegacyTestRunListeners;
+	
+	/**
+	 * List storing the registered test run listeners
+	 */
+	private ListenerList/*<TestRunListener>*/ fNewTestRunListeners;
 
 	/**
 	 * List storing the registered JUnit launch configuration types
@@ -105,6 +109,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 
 	public JUnitPlugin() {
 		fgPlugin= this;
+		fNewTestRunListeners= new ListenerList();
 	}
 	
 	public static JUnitPlugin getDefault() {
@@ -241,9 +246,10 @@ public class JUnitPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Initializes TestRun Listener extensions
+	 * @deprecated
 	 */
 	private void loadTestRunListeners() {
-		fTestRunListeners= new ArrayList();
+		fLegacyTestRunListeners= new ArrayList();
 		IExtensionPoint extensionPoint= Platform.getExtensionRegistry().getExtensionPoint(ID_EXTENSION_POINT_TESTRUN_LISTENERS);
 		if (extensionPoint == null) {
 			return;
@@ -253,8 +259,10 @@ public class JUnitPlugin extends AbstractUIPlugin {
 
 		for (int i= 0; i < configs.length; i++) {
 			try {
-				ITestRunListener testRunListener= (ITestRunListener) configs[i].createExecutableExtension("class"); //$NON-NLS-1$
-				fTestRunListeners.add(testRunListener);
+				Object testRunListener= configs[i].createExecutableExtension("class"); //$NON-NLS-1$
+				if (testRunListener instanceof org.eclipse.jdt.junit.ITestRunListener) {
+					fLegacyTestRunListeners.add(testRunListener);
+				}
 			} catch (CoreException e) {
 				status.add(e.getStatus());
 			}
@@ -283,12 +291,13 @@ public class JUnitPlugin extends AbstractUIPlugin {
 
 	/**
 	 * @return an array of all TestRun listeners
+	 * @deprecated
 	 */
-	public ITestRunListener[] getTestRunListeners() {
-		if (fTestRunListeners == null) {
+	public org.eclipse.jdt.junit.ITestRunListener[] getTestRunListeners() {
+		if (fLegacyTestRunListeners == null) {
 			loadTestRunListeners();
 		}
-		return (ITestRunListener[]) fTestRunListeners.toArray(new ITestRunListener[fTestRunListeners.size()]);
+		return (org.eclipse.jdt.junit.ITestRunListener[]) fLegacyTestRunListeners.toArray(new org.eclipse.jdt.junit.ITestRunListener[fLegacyTestRunListeners.size()]);
 	}
 
 	/**
@@ -326,26 +335,35 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	/**
 	 * Adds a TestRun listener to the collection of listeners
 	 * @param newListener the listener to add
+	 * @deprecated
 	 */
-	public void addTestRunListener(ITestRunListener newListener) {
-		if (fTestRunListeners == null) 
+	public void addTestRunListener(org.eclipse.jdt.junit.ITestRunListener newListener) {
+		if (fLegacyTestRunListeners == null) 
 			loadTestRunListeners();
 		
-		for (Iterator iter= fTestRunListeners.iterator(); iter.hasNext();) {
+		for (Iterator iter= fLegacyTestRunListeners.iterator(); iter.hasNext();) {
 			Object o= iter.next();
 			if (o == newListener)
 				return;
 		}
-		fTestRunListeners.add(newListener);
+		fLegacyTestRunListeners.add(newListener);
 	}
 
 	/**
 	 * Removes a TestRun listener to the collection of listeners
 	 * @param newListener the listener to remove
+	 * @deprecated
 	 */
-	public void removeTestRunListener(ITestRunListener newListener) {
-		if (fTestRunListeners != null) 
-			fTestRunListeners.remove(newListener);
+	public void removeTestRunListener(org.eclipse.jdt.junit.ITestRunListener newListener) {
+		if (fLegacyTestRunListeners != null) 
+			fLegacyTestRunListeners.remove(newListener);
+	}
+	
+	/**
+	 * @return an array of all TestRun listeners
+	 */
+	public ListenerList getNewTestRunListeners() {
+		return fNewTestRunListeners;
 	}
 
 	public static boolean isStopped() {

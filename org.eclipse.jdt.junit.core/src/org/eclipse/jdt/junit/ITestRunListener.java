@@ -10,6 +10,9 @@
  *******************************************************************************/
 
 package org.eclipse.jdt.junit;
+
+import org.eclipse.jdt.internal.junit.model.ITestRunListener2;
+
   
 /**
  * A listener interface for observing the execution of a test run.
@@ -18,6 +21,7 @@ package org.eclipse.jdt.junit;
  * <code>org.eclipse.jdt.junit.testRunListener</code>
  * extension point implement this interface.
  * </p>
+ * @deprecated Use {@link TestRunListener} instead.
  * 
  * @since 2.1
  */
@@ -27,21 +31,21 @@ package org.eclipse.jdt.junit;
  	 * 
      * @see #testFailed(int, String, String, String)
  	 */
- 	public static final int STATUS_OK= 0;
+ 	public static final int STATUS_OK= ITestRunListener2.STATUS_OK;
  	/**
 	 * Status constant indicating that a test had an error an unanticipated
 	 * exception (constant value 1).
  	 * 
 	 * @see #testFailed(int, String, String, String)
  	 */
- 	public static final int STATUS_ERROR= 1;
+ 	public static final int STATUS_ERROR= ITestRunListener2.STATUS_ERROR;
  	/**
 	 * Status constant indicating that a test failed an assertion
 	 * (constant value 2).
  	 * 
  	 * @see #testFailed(int, String, String, String)
 	 */
- 	public static final int STATUS_FAILURE= 2;
+ 	public static final int STATUS_FAILURE= ITestRunListener2.STATUS_FAILURE;
  	/**
  	 * A test run has started.
  	 * 

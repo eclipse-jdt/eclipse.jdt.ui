@@ -14,8 +14,11 @@ package org.eclipse.jdt.internal.junit.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.junit.model.ITestElement;
+import org.eclipse.jdt.junit.model.ITestSuiteElement;
 
-public class TestSuiteElement extends TestElement {
+
+public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 	
 	private List/*<TestElement>*/ fChildren;
 	private Status fChildrenStatus;
@@ -24,13 +27,34 @@ public class TestSuiteElement extends TestElement {
 		super(parent, id, testName);
 		fChildren= new ArrayList(childrenCount);
 	}
-
-	public void addChild(TestElement child) {
-		fChildren.add(child);
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.junit.ITestElement#getTestResult()
+	 */
+	public Result getTestResult(boolean includeChildren) {
+		if (includeChildren) {
+			return getStatus().convertToResult();
+		} else {
+			return super.getStatus().convertToResult();
+		}
 	}
 	
-	public TestElement[] getChildren() {
-		return (TestElement[]) fChildren.toArray(new TestElement[fChildren.size()]);
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.junit.ITestSuiteElement#getSuiteTypeName()
+	 */
+	public String getSuiteTypeName() {
+		return getClassName();
+	}
+		
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.junit.model.ITestSuiteElement#getChildren()
+	 */
+	public ITestElement[] getChildren() {
+		return (ITestElement[]) fChildren.toArray(new ITestElement[fChildren.size()]);
+	}
+	
+	public void addChild(TestElement child) {
+		fChildren.add(child);
 	}
 	
 	public Status getStatus() {
@@ -64,10 +88,6 @@ public class TestSuiteElement extends TestElement {
 		return super.getStatus();
 	}
 	
-	public String toString() {
-		return super.toString() + " (" + fChildren.size() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-	}
-
 	public void childChangedStatus(TestElement child, Status childStatus) {
 		int childCount= fChildren.size();
 		if (child == fChildren.get(0) && childStatus.isRunning()) {
@@ -113,4 +133,8 @@ public class TestSuiteElement extends TestElement {
 			parent.childChangedStatus(this, getStatus());
 	}
 
+	public String toString() {
+		return "TestSuite: " + getSuiteTypeName() + " : " + super.toString() + " (" + fChildren.size() + ")";   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	}
+	
 }

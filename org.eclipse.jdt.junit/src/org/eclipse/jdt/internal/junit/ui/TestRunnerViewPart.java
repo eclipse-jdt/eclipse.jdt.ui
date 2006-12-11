@@ -452,14 +452,16 @@ public class TestRunnerViewPart extends ViewPart {
 			registerInfoMessage(JUnitMessages.TestRunnerViewPart_message_terminated);
 			handleStopped(); 
 		}
+		
+		public void runningBegins() {
+			if (!fShowOnErrorOnly) 
+				postShowTestResultsView();
+		}
 
 		public void testStarted(TestCaseElement testCaseElement) {
 			fTestViewer.registerAutoScrollTarget(testCaseElement);
 			fTestViewer.registerViewerUpdate(testCaseElement);
 
-			if (!fShowOnErrorOnly && fTestRunSession.getStartedCount() == 1) 
-				postShowTestResultsView();
-				
 			String className= testCaseElement.getClassName();
 			String method= testCaseElement.getTestMethodName();		
 			String status= Messages.format(JUnitMessages.TestRunnerViewPart_message_started, new String[] { className, method }); 

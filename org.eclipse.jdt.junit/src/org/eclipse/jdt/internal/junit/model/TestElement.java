@@ -13,18 +13,20 @@ package org.eclipse.jdt.internal.junit.model;
 
 import org.eclipse.core.runtime.Assert;
 
-import org.eclipse.jdt.junit.ITestRunListener;
+import org.eclipse.jdt.junit.model.ITestElement;
+import org.eclipse.jdt.junit.model.ITestElementContainer;
+import org.eclipse.jdt.junit.model.ITestRunSession;
 
 
-public abstract class TestElement {
+public abstract class TestElement implements ITestElement {
 	public final static class Status {
 		public static final Status RUNNING_ERROR= new Status("RUNNING_ERROR", 5); //$NON-NLS-1$
 		public static final Status RUNNING_FAILURE= new Status("RUNNING_FAILURE", 6); //$NON-NLS-1$
 		public static final Status RUNNING= new Status("RUNNING", 3); //$NON-NLS-1$
 		
-		public static final Status ERROR=   new Status("ERROR",   /*1*/ITestRunListener.STATUS_ERROR); //$NON-NLS-1$
-		public static final Status FAILURE= new Status("FAILURE", /*2*/ITestRunListener.STATUS_FAILURE); //$NON-NLS-1$
-		public static final Status OK=      new Status("OK",      /*0*/ITestRunListener.STATUS_OK); //$NON-NLS-1$
+		public static final Status ERROR=   new Status("ERROR",   /*1*/ITestRunListener2.STATUS_ERROR); //$NON-NLS-1$
+		public static final Status FAILURE= new Status("FAILURE", /*2*/ITestRunListener2.STATUS_FAILURE); //$NON-NLS-1$
+		public static final Status OK=      new Status("OK",      /*0*/ITestRunListener2.STATUS_OK); //$NON-NLS-1$
 		public static final Status NOT_RUN= new Status("NOT_RUN", 4); //$NON-NLS-1$
 		
 		private static final Status[] OLD_CODE= { OK, ERROR, FAILURE};
@@ -127,12 +129,36 @@ public abstract class TestElement {
 		}
 		
 		/**
-		 * @param oldStatus one of {@link ITestRunListener}'s STATUS_* constants
+		 * @param oldStatus one of {@link ITestRunListener2}'s STATUS_* constants
 		 * @return the Status
 		 */
 		public static Status convert(int oldStatus) {
 			return OLD_CODE[oldStatus];
 		}
+		
+		public Result convertToResult() {
+			if (isNotRun())
+				return Result.UNDEFINED;
+			if (isError())
+				return Result.ERROR;
+			if (isFailure())
+				return Result.FAILURE;
+			if (isRunning()) {
+				return Result.UNDEFINED;
+			}
+			return Result.OK;
+		}
+		
+		public ProgressState convertToProgressState() {
+			if (isRunning()) {
+				return ProgressState.RUNNING;
+			}
+			if (isDone()) {
+				return ProgressState.COMPLETED;
+			}
+			return ProgressState.NOT_STARTED;
+		}
+		
 	}
 	
 	private final TestSuiteElement fParent;
@@ -160,6 +186,48 @@ public abstract class TestElement {
 			parent.addChild(this);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.junit.ITestElement#getProgressState()
+	 */
+	public ProgressState getProgressState() {
+		return getStatus().convertToProgressState();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.junit.ITestElement#getTestResult()
+	 */
+	public Result getTestResult(boolean includeChildren) {
+		return getStatus().convertToResult();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.junit.ITestElement#getTestRunSession()
+	 */
+	public ITestRunSession getTestRunSession() {
+		return getRoot().getTestRunSession();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.junit.ITestElement#getParentContainer()
+	 */
+	public ITestElementContainer getParentContainer() {
+		if (fParent instanceof TestRoot) {
+			return getTestRunSession();
+		}
+		return fParent;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.junit.model.ITestElement#getFailureTrace()
+	 */
+	public FailureTrace getFailureTrace() {
+		Result testResult= getTestResult(false);
+		if (testResult == Result.ERROR || testResult == Result.FAILURE) {
+			return new FailureTrace(fTrace, fExpected, fActual);
+		}
+		return null;
+	}
+	
 	/**
 	 * @return the parent suite, or <code>null</code> for the root
 	 */
@@ -182,6 +250,10 @@ public abstract class TestElement {
 	public void setStatus(Status status) {
 		//TODO: notify about change?
 		//TODO: multiple errors/failures per test https://bugs.eclipse.org/bugs/show_bug.cgi?id=125296
+		if (fStatus == Status.NOT_RUN) {
+			System.out.println();
+		}
+		
 		fStatus= status;
 		TestSuiteElement parent= getParent();
 		if (parent != null)
@@ -236,6 +308,6 @@ public abstract class TestElement {
 	}
 	
 	public String toString() {
-		return getTestName() + ": " + getStatus(); //$NON-NLS-1$
+		return getProgressState() + " - " + getTestResult(true); //$NON-NLS-1$
 	}
 }

@@ -48,6 +48,14 @@
    </element>
 
    <element name="testRunListener">
+      <annotation>
+         <appInfo>
+            <meta.element deprecated="true"/>
+         </appInfo>
+         <documentation>
+            Deprecated: Register the new test run listener directly at JUnitCore
+         </documentation>
+      </annotation>
       <complexType>
          <attribute name="class" type="string" use="required">
             <annotation>

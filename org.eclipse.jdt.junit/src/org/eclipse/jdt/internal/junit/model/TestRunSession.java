@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ListenerList;
 
-
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -29,7 +28,9 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
-import org.eclipse.jdt.junit.ITestRunListener;
+import org.eclipse.jdt.junit.model.ITestElement;
+import org.eclipse.jdt.junit.model.ITestElementContainer;
+import org.eclipse.jdt.junit.model.ITestRunSession;
 
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
@@ -40,7 +41,7 @@ import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 /**
  * 
  */
-public class TestRunSession {
+public class TestRunSession implements ITestRunSession {
 
 	private final IType fLaunchedType;
 	private final ILaunch fLaunch;
@@ -111,14 +112,64 @@ public class TestRunSession {
 		else
 			fLaunchConfigName= launchedType.getElementName();
 		
-		fTestRoot= new TestRoot();
+		fTestRoot= new TestRoot(this);
 		fIdToTest= new HashMap();
 		
 		fTestRunnerClient= new RemoteTestRunnerClient();
-		fTestRunnerClient.startListening(new ITestRunListener[] { new TestSessionNotifier() }, port);
+		fTestRunnerClient.startListening(new ITestRunListener2[] { new TestSessionNotifier() }, port);
 
 		fSessionListeners= new ListenerList();
+		fSessionListeners.add(new TestRunListenerAdapter(this));
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.junit.ITestRunSession#getProgressState()
+	 */
+	public ProgressState getProgressState() {
+		if (isRunning()) {
+			return ProgressState.RUNNING;
+		}
+		if (isStopped()) {
+			return ProgressState.STOPPED;
+		}
+		return ProgressState.COMPLETED;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.junit.model.ITestElement#getTestResult(boolean)
+	 */
+	public Result getTestResult(boolean includeChildren) {
+		return getTestRoot().getTestResult(true);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.junit.model.ITestElementContainer#getChildren()
+	 */
+	public ITestElement[] getChildren() {
+		return getTestRoot().getChildren();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.junit.model.ITestElement#getFailureTrace()
+	 */
+	public FailureTrace getFailureTrace() {
+		return null;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.junit.model.ITestElement#getParentContainer()
+	 */
+	public ITestElementContainer getParentContainer() {
+		return null;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.junit.model.ITestElement#getTestRunSession()
+	 */
+	public ITestRunSession getTestRunSession() {
+		return this;
+	}
+	
 	
 	public TestRoot getTestRoot() {
 		return fTestRoot;
@@ -318,7 +369,7 @@ public class TestRunSession {
 	 * {@link RemoteTestRunnerClient} and translates them into high-level model
 	 * events (broadcasted to {@link ITestSessionListener}s).
 	 */
-	private class TestSessionNotifier implements ITestRunListener, ITestRunListener2 {
+	private class TestSessionNotifier implements ITestRunListener2 {
 		
 		public void testRunStarted(int testCount) {
 			fIncompleteTestSuites= new ArrayList();
@@ -399,6 +450,12 @@ public class TestRunSession {
 		}
 
 		public void testStarted(String testId, String testName) {
+			if (fStartedCount == 0) {
+				Object[] listeners= fSessionListeners.getListeners();
+				for (int i= 0; i < listeners.length; ++i) {
+					((ITestSessionListener) listeners[i]).runningBegins();
+				}
+			}
 			TestElement testElement= getTestElement(testId);
 			if (testElement == null) {
 				testElement= createUnrootedTestElement(testId, testName);
@@ -458,7 +515,7 @@ public class TestRunSession {
 			Status status= Status.convert(statusCode);
 			setStatus(testElement, status, trace, nullifyEmpty(expected), nullifyEmpty(actual));
 			
-			if (statusCode == ITestRunListener.STATUS_ERROR) {
+			if (statusCode == ITestRunListener2.STATUS_ERROR) {
 				fErrorCount++;
 			} else {
 				fFailureCount++;
@@ -540,16 +597,19 @@ public class TestRunSession {
 		return (TestElement[]) failures.toArray(new TestElement[failures.size()]);
 	}
 
-	private void addFailures(ArrayList failures, TestElement testElement) {
-		if (testElement.getStatus().isErrorOrFailure()) {
+	private void addFailures(ArrayList failures, ITestElement testElement) {
+		Result testResult= testElement.getTestResult(true);
+		if (testResult == Result.ERROR || testResult == Result.FAILURE) {
 			failures.add(testElement);
 		}
 		if (testElement instanceof TestSuiteElement) {
 			TestSuiteElement testSuiteElement= (TestSuiteElement) testElement;
-			TestElement[] children= testSuiteElement.getChildren();
+			ITestElement[] children= testSuiteElement.getChildren();
 			for (int i= 0; i < children.length; i++) {
 				addFailures(failures, children[i]);
 			}
 		}
 	}
+
+
 }
