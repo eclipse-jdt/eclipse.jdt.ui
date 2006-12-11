@@ -234,7 +234,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (extractConstRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
 			String label= CorrectionMessages.QuickAssistProcessor_extract_to_constant_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, 5, image) {
+			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, 4, image) {
 				protected TextChange createTextChange() throws CoreException {
 					extractConstRefactoring.setConstantName(extractConstRefactoring.guessConstantName()); // expensive
 					extractConstRefactoring.setLinkedProposalModel(getLinkedProposalModel());
