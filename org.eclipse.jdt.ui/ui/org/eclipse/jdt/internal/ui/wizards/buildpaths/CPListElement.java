@@ -366,11 +366,8 @@ public class CPListElement {
 		if (hideOutputFolder && fEntryKind == IClasspathEntry.CPE_SOURCE) {
 			return getFilteredChildren(new String[] { OUTPUT });
 		}
-		if (fParentContainer instanceof CPListElement) {
-			IPath jreContainerPath= new Path(JavaRuntime.JRE_CONTAINER);
-			if (jreContainerPath.isPrefixOf(((CPListElement) fParentContainer).getPath())) {
-				return getFilteredChildren(new String[] { COMBINE_ACCESSRULES });
-			}
+		if (isInContainer(JavaRuntime.JRE_CONTAINER)) {
+			return getFilteredChildren(new String[] { COMBINE_ACCESSRULES, NATIVE_LIB_PATH });
 		}
 		if (fEntryKind == IClasspathEntry.CPE_PROJECT) {
 			return getFilteredChildren(new String[] { COMBINE_ACCESSRULES });
@@ -397,6 +394,14 @@ public class CPListElement {
 	public boolean isInNonModifiableContainer() {
 		if (fParentContainer instanceof CPListElement) {
 			return !((CPListElement) fParentContainer).canUpdateContainer();
+		}
+		return false;
+	}
+	
+	public boolean isInContainer(String containerName) {
+		if ( fParentContainer instanceof CPListElement) {
+			CPListElement elem= (CPListElement) fParentContainer;
+			return new Path(containerName).isPrefixOf(elem.getPath());
 		}
 		return false;
 	}

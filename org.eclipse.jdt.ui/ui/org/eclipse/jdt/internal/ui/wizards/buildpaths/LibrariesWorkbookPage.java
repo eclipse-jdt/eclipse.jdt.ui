@@ -56,6 +56,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -421,6 +423,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 					return false;
 				}
 				if (attrib.isBuiltIn()) {
+					if (attrib.getParent().isInContainer(JavaRuntime.JRE_CONTAINER) && CPListElement.ACCESSRULES.equals(attrib.getKey())) {
+						return false; // workaround for 166519 until we have full story
+					}
 					if (attrib.getKey().equals(CPListElement.ACCESSRULES)) {
 						return ((IAccessRule[]) attrib.getValue()).length > 0;
 					}
@@ -596,6 +601,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			CPListElementAttribute attrib= (CPListElementAttribute) elem;
 			if (attrib.isInNonModifiableContainer()) {
 				return false;
+			}
+			if (attrib.getParent().isInContainer(JavaRuntime.JRE_CONTAINER) && CPListElement.ACCESSRULES.equals(attrib.getKey())) {
+				return false; // workaround for 166519 until we have full story
 			}
 			if (!attrib.isBuiltIn()) {
 				return canEditCustomAttribute(attrib);
