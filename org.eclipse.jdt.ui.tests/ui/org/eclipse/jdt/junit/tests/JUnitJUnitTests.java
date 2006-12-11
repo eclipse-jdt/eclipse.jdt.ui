@@ -28,11 +28,19 @@ public class JUnitJUnitTests {
 		suite.addTestSuite(TestPriorization.class);
 		suite.addTestSuite(TestTestSearchEngine.class);
 		
+		addDeprecatedTests(suite);
+		
 		suite.addTestSuite(TestRunListenerTest.class);
+
 		suite.addTestSuite(JUnit3TestFinderTest.class);
 		suite.addTestSuite(JUnit4TestFinderTest.class);
 		//$JUnit-END$
 		return suite;
+	}
+	
+	/** @deprecated */
+	private static void addDeprecatedTests(TestSuite suite) {
+		suite.addTestSuite(LegacyTestRunListenerTest.class);
 	}
 
 }

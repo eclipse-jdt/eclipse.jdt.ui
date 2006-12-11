@@ -205,7 +205,7 @@
 </extension>
    <extension
          point="org.eclipse.jdt.junit.testRunListeners">
-      <testRunListener class="org.eclipse.jdt.junit.tests.TestRunListener"/>
+      <testRunListener class="org.eclipse.jdt.junit.tests.LegacyTestRunListener"/>
    </extension>
 
    <extension

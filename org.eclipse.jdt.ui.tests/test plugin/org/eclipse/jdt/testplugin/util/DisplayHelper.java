@@ -31,6 +31,12 @@ import org.eclipse.swt.widgets.Display;
  * @since 3.1
  */
 public abstract class DisplayHelper {
+
+	/**
+	 * Controls if the timeout is used. For debugging use true, false otherwise
+	 */
+	private static final boolean DISABLE_TIMEOUT= false;
+
 	/**
 	 * Creates a new instance.
 	 */
@@ -217,7 +223,7 @@ public abstract class DisplayHelper {
 				if (display.sleep())
 					driveEventQueue(display);
 				condition= condition();
-			} while (!condition && finalTimeout > System.currentTimeMillis());
+			} while (!condition && (DISABLE_TIMEOUT || finalTimeout > System.currentTimeMillis()));
 		} finally {
 			waiter.stop();
 		}
