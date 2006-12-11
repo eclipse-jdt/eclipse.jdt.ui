@@ -187,7 +187,16 @@
  <package name="org.eclipse.jdt.junit">
    <type name="JUnitCore" subclass="false" instantiate="false"/>
  </package>
-
+ <package name="org.eclipse.jdt.junit.launcher">
+   <type name="JUnitLaunchConfigurationTab" subclass="false"/>
+ </package>
+ <package name="org.eclipse.jdt.junit.model">
+   <type name="ITestCaseElement" subclass="false" implement="false"/>
+   <type name="ITestElement" subclass="false" implement="false"/>
+   <type name="ITestElementContainer" subclass="false" implement="false"/>
+   <type name="ITestRunSession" subclass="false" implement="false"/>
+   <type name="ITestSuiteElement" subclass="false" implement="false"/>
+ </package>
  <package name="org.eclipse.jdt.junit.wizards">
  </package>
 
