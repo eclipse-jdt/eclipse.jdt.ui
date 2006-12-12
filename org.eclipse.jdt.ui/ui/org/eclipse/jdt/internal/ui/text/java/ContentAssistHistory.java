@@ -350,7 +350,7 @@ public final class ContentAssistHistory {
 	
 	/**
 	 * Creates a new history, equivalent to
-	 * <code>ContentAssistHistory({@value #DEFAULT_TRACKED_LHS}, {@value #DEFAULT_TRACKED_RHS})</code>.
+	 * <code>ContentAssistHistory(DEFAULT_TRACKED_LHS, DEFAULT_TRACKED_RHS})</code>.
 	 */
 	public ContentAssistHistory() {
 		this(DEFAULT_TRACKED_LHS, DEFAULT_TRACKED_RHS);

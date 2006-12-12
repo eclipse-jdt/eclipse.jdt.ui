@@ -64,7 +64,9 @@ public class VariablePosition extends ProposalPosition {
 	}
 
 	/**
-	 * @return
+	 * Returns the variable.
+	 * 
+	 * @return the variable.
 	 */
 	public MultiVariable getVariable() {
 		return fVariable;
