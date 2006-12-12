@@ -472,7 +472,9 @@ public class PackageExplorerPart extends ViewPart
 		// exception: initialize from preference
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettingsSection(getClass().getName());
 		
-		fShowLibrariesNode= fDialogSettings.getBoolean(TAG_GROUP_LIBRARIES);
+		// on by default
+		fShowLibrariesNode= fDialogSettings.get(TAG_GROUP_LIBRARIES) == null || fDialogSettings.getBoolean(TAG_GROUP_LIBRARIES);
+		
 		fLinkingEnabled= fDialogSettings.getBoolean(TAG_LINK_EDITOR);
 		
 		try {
@@ -513,8 +515,9 @@ public class PackageExplorerPart extends ViewPart
 		Integer layoutState= memento.getInteger(TAG_LAYOUT);
 		fIsCurrentLayoutFlat= layoutState == null || layoutState.intValue() == FLAT_LAYOUT;
 		
+		// on by default
 		Integer groupLibraries= memento.getInteger(TAG_GROUP_LIBRARIES);
-		fShowLibrariesNode= groupLibraries != null && groupLibraries.intValue() != 0;
+		fShowLibrariesNode= groupLibraries == null || groupLibraries.intValue() != 0;
 	}
 	
 	/**
