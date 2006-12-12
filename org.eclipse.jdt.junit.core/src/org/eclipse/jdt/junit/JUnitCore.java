@@ -29,7 +29,7 @@ public class JUnitCore {
 	 * Adds a listener for test runs.
 	 * 
 	 * @param listener listener to be added
-	 * @deprecated Use the new listener support {@link #addTestRunListener(TestRunListener)}.
+	 * @deprecated As of 3.3, replaced by {@link #addTestRunListener(TestRunListener)}
 	 */
 	public static void addTestRunListener(ITestRunListener listener) {
 		JUnitPlugin.getDefault().addTestRunListener(listener);
@@ -39,7 +39,7 @@ public class JUnitCore {
 	 * Removes a listener for test runs.
 	 * 
 	 * @param listener listener to be removed
-	 * @deprecated Use the new listener support {@link #removeTestRunListener(TestRunListener)}.
+	 * @deprecated As of 3.3, replaced by {@link #removeTestRunListener(TestRunListener)}
 	 */
 	public static void removeTestRunListener(ITestRunListener listener) {
 		JUnitPlugin.getDefault().removeTestRunListener(listener);

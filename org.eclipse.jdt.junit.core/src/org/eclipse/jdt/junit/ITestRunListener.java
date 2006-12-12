@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.junit.model.ITestRunListener2;
  * <code>org.eclipse.jdt.junit.testRunListener</code>
  * extension point implement this interface.
  * </p>
- * @deprecated Use {@link TestRunListener} instead.
+ * @deprecated As of 3.3, replaced by {@link TestRunListener}
  * 
  * @since 2.1
  */
