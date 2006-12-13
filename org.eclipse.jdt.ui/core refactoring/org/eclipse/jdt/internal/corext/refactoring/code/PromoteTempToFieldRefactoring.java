@@ -525,8 +525,7 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 				addLocalDeclarationRemoval(rewrite);
     		if (fInitializeIn == INITIALIZE_IN_CONSTRUCTOR)
     			addInitializersToConstructors(rewrite);
-    		if (! fFieldName.equals(fTempDeclarationNode.getName().getIdentifier()))	
-    			addTempRenames(rewrite);
+   			addTempRenames(rewrite);
     		addFieldDeclaration(rewrite);
             return createChange(rewrite);
     	} finally {
@@ -535,14 +534,24 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
     }
     
     private void addTempRenames(ASTRewrite rewrite) {
-		TempOccurrenceAnalyzer analyzer= new TempOccurrenceAnalyzer(fTempDeclarationNode, false);
+    	boolean noNameChange= fFieldName.equals(fTempDeclarationNode.getName().getIdentifier());
+		if (fLinkedProposalModel == null && noNameChange) {
+			return; // no changes needed
+		}
+    	TempOccurrenceAnalyzer analyzer= new TempOccurrenceAnalyzer(fTempDeclarationNode, false);
 		analyzer.perform();
     	SimpleName[] tempRefs= analyzer.getReferenceNodes(); // no javadocs (refactoring not for parameters)
+    	
+    	
 		for (int j= 0; j < tempRefs.length; j++) {
 			SimpleName occurence= tempRefs[j];
-			SimpleName newName= getAST().newSimpleName(fFieldName);
-			addLinkedName(rewrite, newName, false);
-			rewrite.replace(occurence, newName, null);
+			if (noNameChange) {
+				addLinkedName(rewrite, occurence, false);
+			} else {
+				SimpleName newName= getAST().newSimpleName(fFieldName);
+				addLinkedName(rewrite, newName, false);
+				rewrite.replace(occurence, newName, null);
+			}
 		}
     }
     
