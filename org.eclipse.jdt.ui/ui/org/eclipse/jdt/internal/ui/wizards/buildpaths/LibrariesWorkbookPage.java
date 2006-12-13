@@ -378,8 +378,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 					if (key.equals(CPListElement.ACCESSRULES)) {
 						value= new IAccessRule[0];
 					}
-					attrib.getParent().setAttribute(key, value);
-					selElements.remove(i);
+					attrib.setValue(value);
 				} else {
 					removeCustomAttribute(attrib);
 				}
