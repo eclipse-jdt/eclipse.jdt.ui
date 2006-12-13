@@ -250,9 +250,6 @@ public abstract class TestElement implements ITestElement {
 	public void setStatus(Status status) {
 		//TODO: notify about change?
 		//TODO: multiple errors/failures per test https://bugs.eclipse.org/bugs/show_bug.cgi?id=125296
-		if (fStatus == Status.NOT_RUN) {
-			System.out.println();
-		}
 		
 		fStatus= status;
 		TestSuiteElement parent= getParent();
