@@ -123,6 +123,7 @@ public class ContentProviderTests5 extends TestCase{
 		IViewPart myPart= page.showView("org.eclipse.jdt.ui.PackageExplorer"); 
 		if (myPart instanceof PackageExplorerPart) {
 			PackageExplorerPart packageExplorerPart= (PackageExplorerPart) myPart;
+			packageExplorerPart.setShowLibrariesNode(false);
 			fProvider= (ITreeContentProvider) packageExplorerPart.getTreeViewer().getContentProvider();
 			setFolding(false);
 		} else {

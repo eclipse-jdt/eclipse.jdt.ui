@@ -682,7 +682,7 @@ public class PackageExplorerPart extends ViewPart
 		// problem decoration provided by PackageLabelProvider
 	}
 	
-	void setShowLibrariesNode(boolean enabled) {
+	public void setShowLibrariesNode(boolean enabled) {
 		fShowLibrariesNode= enabled;
 		saveDialogSettings();
 		
