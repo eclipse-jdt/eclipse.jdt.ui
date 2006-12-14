@@ -67,6 +67,7 @@ import org.eclipse.jdt.ui.actions.ImportActionGroup;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.NavigateActionGroup;
+import org.eclipse.jdt.ui.actions.OpenProjectAction;
 import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
@@ -101,7 +102,9 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 	
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;
 
-	private IAction fGotoRequiredProjectAction;	
+	private IAction fGotoRequiredProjectAction;
+
+	private ProjectActionGroup fProjectActionGroup;	
  	
 	public PackageExplorerActionGroup(PackageExplorerPart part) {
 		super();
@@ -125,7 +128,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 			new ImportActionGroup(fPart),
 			new BuildActionGroup(fPart),
 			new JavaSearchActionGroup(fPart),
-			new ProjectActionGroup(fPart), 
+			fProjectActionGroup= new ProjectActionGroup(fPart), 
 			fViewActionGroup= new ViewActionGroup(fPart.getRootMode(), workingSetListener, site),
 			fCustomFiltersActionGroup= new CustomFiltersActionGroup(fPart, viewer),
 			new LayoutActionGroup(fPart),
@@ -300,6 +303,11 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 				} else {
 					viewer.setExpandedState(element, !viewer.getExpandedState(element));
 				}
+			}
+		} else if (element instanceof IProject && !((IProject) element).isOpen()) {
+			OpenProjectAction openProjectAction= fProjectActionGroup.getOpenProjectAction();
+			if (openProjectAction.isEnabled()) {
+				openProjectAction.run();
 			}
 		}
 	}

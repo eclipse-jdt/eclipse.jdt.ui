@@ -111,6 +111,17 @@ public class ProjectActionGroup extends ActionGroup {
 		if (fCloseUnrelatedAction.isEnabled() && areOnlyProjectsSelected(fCloseUnrelatedAction.getStructuredSelection()))
 			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fCloseUnrelatedAction);
 	}
+	
+	/**
+	 * Returns the open project action contained in this project action group.
+	 * 
+	 * @return returns the open project action
+	 * 
+	 * @since 3.3
+	 */
+	public OpenProjectAction getOpenProjectAction() {
+		return fOpenAction;
+	}
 
 	private boolean areOnlyProjectsSelected(IStructuredSelection selection) {
 		if (selection.isEmpty())
