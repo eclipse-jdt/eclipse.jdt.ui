@@ -2801,5 +2801,137 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
-	
+	public void testMethodOverrideDeprecated1() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEPRECATION_WHEN_OVERRIDING_DEPRECATED_METHOD, JavaCore.ENABLED);
+		JavaCore.setOptions(options);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Deprecated\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}    \n");
+		buf.append("\n");
+		buf.append("class F extends E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Deprecated\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}    \n");
+		buf.append("\n");
+		buf.append("class F extends E {\n");
+		buf.append("    @Deprecated\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Deprecated\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}    \n");
+		buf.append("\n");
+		buf.append("class F extends E {\n");
+		buf.append("    @SuppressWarnings(\"deprecation\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testMethodOverrideDeprecated2() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEPRECATION_WHEN_OVERRIDING_DEPRECATED_METHOD, JavaCore.ENABLED);
+		JavaCore.setOptions(options);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Deprecated\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}    \n");
+		buf.append("\n");
+		buf.append("class F extends E {\n");
+		buf.append("    /**\n");
+		buf.append("     */\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Deprecated\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}    \n");
+		buf.append("\n");
+		buf.append("class F extends E {\n");
+		buf.append("    /**\n");
+		buf.append("     * @deprecated\n");
+		buf.append("     */\n");
+		buf.append("    @Deprecated\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Deprecated\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}    \n");
+		buf.append("\n");
+		buf.append("class F extends E {\n");
+		buf.append("    /**\n");
+		buf.append("     */\n");
+		buf.append("    @SuppressWarnings(\"deprecation\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 }

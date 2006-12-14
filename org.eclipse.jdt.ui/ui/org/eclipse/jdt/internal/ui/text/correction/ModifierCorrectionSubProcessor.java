@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -56,6 +57,7 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
@@ -70,6 +72,7 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -648,6 +651,40 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 	
+	public static void addOverridingDeprecatedMethodProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+		
+		ICompilationUnit cu= context.getCompilationUnit();
+
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (!(selectedNode instanceof MethodDeclaration)) {
+			return;
+		}
+		boolean is50OrHigher= JavaModelUtil.is50OrHigher(cu.getJavaProject());
+		MethodDeclaration methodDecl= (MethodDeclaration) selectedNode;
+		AST ast= methodDecl.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		if (is50OrHigher) {
+			Annotation annot= ast.newMarkerAnnotation();
+			annot.setTypeName(ast.newName("Deprecated")); //$NON-NLS-1$
+			rewrite.getListRewrite(methodDecl, methodDecl.getModifiersProperty()).insertFirst(annot, null);
+		}
+		Javadoc javadoc= methodDecl.getJavadoc();
+		if (javadoc != null || !is50OrHigher) {
+			if (!is50OrHigher) {
+				javadoc= ast.newJavadoc();
+				rewrite.set(methodDecl, MethodDeclaration.JAVADOC_PROPERTY, javadoc, null);
+			}
+			TagElement newTag= ast.newTagElement();
+			newTag.setTagName(TagElement.TAG_DEPRECATED);
+			JavadocTagsSubProcessor.insertTag(rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY), newTag, null);
+		}
+		
+		String label= CorrectionMessages.ModifierCorrectionSubProcessor_overrides_deprecated_description;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 15, image);
+		proposals.add(proposal);
+	}
+		
 	public static void removeOverrideAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
