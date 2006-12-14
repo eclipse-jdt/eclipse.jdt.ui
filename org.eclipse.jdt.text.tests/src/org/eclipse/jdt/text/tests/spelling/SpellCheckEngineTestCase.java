@@ -128,7 +128,7 @@ public class SpellCheckEngineTestCase extends TestCase {
 	}
 
 	public void testDefaultSpellChecker() {
-		fPreferences.setValue(PreferenceConstants.SPELLING_LOCALE, SpellCheckEngine.getDefaultLocale().toString());
+		fPreferences.setValue(PreferenceConstants.SPELLING_LOCALE, Locale.US.toString());
 		fEngine.unregisterDictionary(fUSDictionary);
 
 		final ISpellChecker checker= fEngine.getSpellChecker();
