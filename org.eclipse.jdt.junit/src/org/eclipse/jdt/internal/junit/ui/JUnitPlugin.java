@@ -360,9 +360,9 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	}
 	
 	/**
-	 * @return an array of all TestRun listeners
+	 * @return a <code>ListenerList</code> of all <code>TestRunListener</code>s
 	 */
-	public ListenerList getNewTestRunListeners() {
+	public ListenerList/*<TestRunListener>*/ getNewTestRunListeners() {
 		return fNewTestRunListeners;
 	}
 

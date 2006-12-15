@@ -28,7 +28,7 @@ package org.eclipse.jdt.junit.model;
 public interface ITestElement {
 	
 	/**
-	 * Running states of the test.
+	 * Running states of a test.
 	 */
 	public static final class ProgressState {
 		/** state that describes that the test element has not started */
@@ -50,7 +50,7 @@ public interface ITestElement {
 	}
 	
 	/**
-	 * Result states of the test.
+	 * Result states of a test.
 	 */
 	public static final class Result {
 		/** state that describes that the test result is undefined */
@@ -124,7 +124,7 @@ public interface ITestElement {
 	 * <li>{@link ITestElement.ProgressState#RUNNING}: the test is currently running</li>
 	 * <li>{@link ITestElement.ProgressState#STOPPED}: the test has stopped before being completed</li>
 	 * <li>{@link ITestElement.ProgressState#COMPLETED}: the test (and all its children) has completed</li>
-	 * 	</dl>
+	 * </dl>
 	 * @return returns one of {@link ITestElement.ProgressState#NOT_STARTED}, {@link ITestElement.ProgressState#RUNNING},
 	 * {@link ITestElement.ProgressState#STOPPED} or {@link ITestElement.ProgressState#COMPLETED}.
 	 */
@@ -136,10 +136,11 @@ public interface ITestElement {
 	 * <li>{@link ITestElement.Result#UNDEFINED}: the result is not yet evaluated</li>
 	 * <li>{@link ITestElement.Result#OK}: the test has succeeded</li>
 	 * <li>{@link ITestElement.Result#ERROR}: the test has returned an error</li>
-	 * 	<li>{@link ITestElement.Result#FAILURE}: the test has returned an failure</li>
-	 * 	<li>{@link ITestElement.Result#IGNORED}: the test has been ignored (skipped)</li>
-	 * 	</dl>
-	 * @param includeChildren if set, the returned result is the combined result of the test and its children (it it has any). If set to false,
+	 * <li>{@link ITestElement.Result#FAILURE}: the test has returned an failure</li>
+	 * <li>{@link ITestElement.Result#IGNORED}: the test has been ignored (skipped)</li>
+	 * </dl>
+	 * @param includeChildren if <code>true</code>, the returned result is the combined
+	 * result of the test and its children (if it has any). If <code>false</code>,
 	 * only the test's result is returned.
 	 * 
 	 * @return returns one of {@link ITestElement.Result#UNDEFINED}, {@link ITestElement.Result#OK}, {@link ITestElement.Result#ERROR}, 

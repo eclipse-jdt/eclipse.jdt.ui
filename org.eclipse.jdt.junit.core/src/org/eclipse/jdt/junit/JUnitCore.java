@@ -49,6 +49,7 @@ public class JUnitCore {
 	 * Adds a listener for test runs.
 	 * 
 	 * @param listener the listener to be added
+	 * @since 3.3
 	 */
 	public static void addTestRunListener(TestRunListener listener) {
 		JUnitPlugin.getDefault().getNewTestRunListeners().add(listener);
@@ -58,6 +59,7 @@ public class JUnitCore {
 	 * Removes a listener for test runs.
 	 * 
 	 * @param listener the listener to be removed 
+	 * @since 3.3
 	 */
 	public static void removeTestRunListener(TestRunListener listener) {
 		JUnitPlugin.getDefault().getNewTestRunListeners().remove(listener);
