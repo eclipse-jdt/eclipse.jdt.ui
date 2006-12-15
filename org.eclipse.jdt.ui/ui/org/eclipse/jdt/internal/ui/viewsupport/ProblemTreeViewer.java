@@ -21,11 +21,7 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.viewers.IBaseLabelProvider;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
@@ -192,18 +188,6 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	
 	protected Object[] addAditionalProblemParents(Object[] elements) {
 		return elements;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.StructuredViewer#handleInvalidSelection(org.eclipse.jface.viewers.ISelection, org.eclipse.jface.viewers.ISelection)
-	 */
-	protected void handleInvalidSelection(ISelection invalidSelection, ISelection newSelection) {
-		// workaround for bug 125708: TODO: Remove when bug 125708 is fixed
-		if (!invalidSelection.isEmpty() && newSelection.isEmpty() && invalidSelection instanceof ITreeSelection) {
-			newSelection= new StructuredSelection(((IStructuredSelection) invalidSelection).toArray());
-			setSelection(newSelection);
-		}
-		super.handleInvalidSelection(invalidSelection, newSelection);
 	}
 }
 
