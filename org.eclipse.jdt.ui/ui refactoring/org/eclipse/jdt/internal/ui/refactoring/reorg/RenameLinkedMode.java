@@ -319,8 +319,7 @@ public class RenameLinkedMode {
 //	}
 
 	void doRename(boolean showPreview) {
-		fLinkedModeModel.exit(ILinkedModeListener.NONE);
-		closePopup();
+		cancel();
 		
 		String oldName= fJavaElement.getElementName();
 		try {
@@ -356,6 +355,11 @@ public class RenameLinkedMode {
 			fEditor.getViewer().getTextWidget().setRedraw(true);
 		}
 	}
+
+	public void cancel() {
+		fLinkedModeModel.exit(ILinkedModeListener.NONE);
+		closePopup();
+	}
 	
 	private void restoreFullSelection() {
 		if (fOriginalSelection.y != 0) {
@@ -364,7 +368,7 @@ public class RenameLinkedMode {
 			for (int i= 0; i < positions.length; i++) {
 				LinkedPosition position= positions[i];
 				if (! position.isDeleted() && position.includes(originalOffset)) {
-					fEditor.getViewer().getTextWidget().setSelectionRange(position.offset, position.length);
+					fEditor.getViewer().setSelectedRange(position.offset, position.length);
 					return;
 				}
 			}
@@ -423,8 +427,7 @@ public class RenameLinkedMode {
 	}
 	
 	public void startFullDialog() {
-		fLinkedModeModel.exit(ILinkedModeListener.NONE);
-		closePopup();
+		cancel();
 		
 		try {
 			String newName= fNamePosition.getContent();
@@ -730,6 +733,17 @@ public class RenameLinkedMode {
 				recursiveSetBackgroundColor(children[i], color);
 			}
 		}
+	}
+
+	public boolean isCaretInLinkedPosition() {
+		Point selection= fEditor.getViewer().getSelectedRange();
+		LinkedPosition[] positions= fLinkedPositionGroup.getPositions();
+		for (int i= 0; i < positions.length; i++) {
+			LinkedPosition position= positions[i];
+			if (position.overlapsWith(selection.x, selection.y))
+				return true;
+		}
+		return false;
 	}
 
 }

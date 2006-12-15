@@ -131,8 +131,12 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		RenameLinkedMode activeLinkedMode= RenameLinkedMode.getActiveLinkedMode();
 		if (activeLinkedMode != null) {
-			activeLinkedMode.startFullDialog();
-			return;
+			if (activeLinkedMode.isCaretInLinkedPosition()) {
+				activeLinkedMode.startFullDialog();
+				return;
+			} else {
+				activeLinkedMode.cancel();
+			}
 		}
 		
 		try {
@@ -149,6 +153,9 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 	}
 	
 	public boolean canRunInEditor() {
+		if (RenameLinkedMode.getActiveLinkedMode() != null)
+			return true;
+		
 		try {
 			IJavaElement element= getJavaElementFromEditor();
 			if (element == null)
