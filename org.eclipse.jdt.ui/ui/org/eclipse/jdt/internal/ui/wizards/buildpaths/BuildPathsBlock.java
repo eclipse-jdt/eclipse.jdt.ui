@@ -396,13 +396,15 @@ public class BuildPathsBlock {
 		return fFileTimeStamp != file.getModificationStamp();
 	}
 	
+	public boolean isClassfileMissing() {
+		return !fCurrJProject.getProject().getFile(".classpath").exists(); //$NON-NLS-1$
+	}
+	
 	public void initializeTimeStamps() {
 		IFile file= fCurrJProject.getProject().getFile(".classpath"); //$NON-NLS-1$
 		fFileTimeStamp= file.getModificationStamp();
 		fUserSettingsTimeStamp= getEncodedSettings();
 	}
-	
-	
 
 	private ArrayList getExistingEntries(IClasspathEntry[] classpathEntries) {
 		ArrayList newClassPath= new ArrayList();

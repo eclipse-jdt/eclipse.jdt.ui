@@ -208,7 +208,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	public boolean performOk() {
 		if (fBuildPathsBlock != null) {
 			getSettings().put(INDEX, fBuildPathsBlock.getPageIndex());
-			if (fBuildPathsBlock.hasChangesInDialog()) {
+			if (fBuildPathsBlock.hasChangesInDialog() || fBuildPathsBlock.isClassfileMissing()) {
 				IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
 					public void run(IProgressMonitor monitor)	throws CoreException, OperationCanceledException {
 						fBuildPathsBlock.configureJavaProject(monitor);
