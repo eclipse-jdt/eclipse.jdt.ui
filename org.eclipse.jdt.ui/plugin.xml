@@ -3252,6 +3252,36 @@
             id="org.eclipse.jdt.ui.correction.splitJoinVariableDeclaration.assist">
       </command>
       <command
+            name="%ActionDefinition.corrections.extractLocal.name"
+            description="%ActionDefinition.corrections.extractLocal.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.extractLocal.assist">
+      </command>
+      <command
+            name="%ActionDefinition.corrections.extractConstant.name"
+            description="%ActionDefinition.corrections.extractConstant.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.extractConstant.assist">
+      </command>
+      <command
+            name="%ActionDefinition.corrections.convertLocalToField.name"
+            description="%ActionDefinition.corrections.convertLocalToField.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.convertLocalToField.assist">
+      </command>
+      <command
+            name="%ActionDefinition.corrections.inlineLocal.name"
+            description="%ActionDefinition.corrections.inlineLocal.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.inlineLocal.assist">
+      </command>
+      <command
+            name="%ActionDefinition.corrections.convertAnonymousToLocal.name"
+            description="%ActionDefinition.corrections.convertAnonymousToLocal.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.convertAnonymousToLocal.assist">
+      </command>  
+      <command
             name="%ActionDefinition.surroundWith.quickMenu.name"
             description="%ActionDefinition.surroundWith.quickMenu.description"
             categoryId="org.eclipse.jdt.ui.category.source"

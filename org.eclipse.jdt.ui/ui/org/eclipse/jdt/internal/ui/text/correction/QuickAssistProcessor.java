@@ -119,7 +119,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	public static final String ASSIGN_TO_FIELD_ID= "org.eclipse.jdt.ui.correction.assignToField.assist"; //$NON-NLS-1$
 	public static final String ASSIGN_PARAM_TO_FIELD_ID= "org.eclipse.jdt.ui.correction.assignParamToField.assist"; //$NON-NLS-1$
 	public static final String ADD_BLOCK_ID= "org.eclipse.jdt.ui.correction.addBlock.assist"; //$NON-NLS-1$
-	
+	public static final String EXTRACT_LOCAL_ID= "org.eclipse.jdt.ui.correction.extractLocal.assist"; //$NON-NLS-1$
+	public static final String EXTRACT_CONSTANT_ID= "org.eclipse.jdt.ui.correction.extractConstant.assist"; //$NON-NLS-1$
+	public static final String INLINE_LOCAL_ID= "org.eclipse.jdt.ui.correction.inlineLocal.assist"; //$NON-NLS-1$
+	public static final String CONVERT_LOCAL_TO_FIELD_ID= "org.eclipse.jdt.ui.correction.convertLocalToField.assist"; //$NON-NLS-1$
+	public static final String CONVERT_ANONYMOUS_TO_LOCAL_ID= "org.eclipse.jdt.ui.correction.convertAnonymousToLocal.assist"; //$NON-NLS-1$
 	
 	public QuickAssistProcessor() {
 		super();
@@ -143,8 +147,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getInvertEqualsProposal(context, coveringNode, null)
 				|| getConvertForLoopProposal(context, coveringNode, null)
 				|| getExtractLocalProposal(context, coveringNode, null)
-				|| getInlineTempProposal(context, coveringNode, null)
-				|| getPromoteTempToFieldProposal(context, coveringNode, null)
+				|| getInlineLocalProposal(context, coveringNode, null)
+				|| getConvertLocalToFieldProposal(context, coveringNode, null)
 				|| getConvertAnonymousToNestedProposal(context, coveringNode, null)
 				|| getConvertIterableLoopProposal(context, coveringNode, null)
 				|| getRemoveBlockProposals(context, coveringNode, null)
@@ -176,8 +180,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getArrayInitializerToArrayCreation(context, coveringNode, resultingCollections);
 				getCreateInSuperClassProposals(context, coveringNode, resultingCollections);
 				getExtractLocalProposal(context, coveringNode, resultingCollections);
-				getInlineTempProposal(context, coveringNode, resultingCollections);
-				getPromoteTempToFieldProposal(context, coveringNode, resultingCollections);				
+				getInlineLocalProposal(context, coveringNode, resultingCollections);
+				getConvertLocalToFieldProposal(context, coveringNode, resultingCollections);				
 				getConvertAnonymousToNestedProposal(context, coveringNode, resultingCollections);
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
@@ -228,6 +232,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					return extractTempRefactoring.createTextChange(new NullProgressMonitor());
 				}
 			};
+			proposal.setCommandId(EXTRACT_LOCAL_ID);
 			proposals.add(proposal);
 		}
 		final ExtractConstantRefactoring extractConstRefactoring= new ExtractConstantRefactoring(context.getASTRoot(), expression.getStartPosition(), expression.getLength());
@@ -241,6 +246,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					return extractConstRefactoring.createTextChange(new NullProgressMonitor());
 				}
 			};
+			proposal.setCommandId(EXTRACT_CONSTANT_ID);
 			proposals.add(proposal);
 		}
 		return false;
@@ -281,6 +287,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			Image image= JavaPlugin.getImageDescriptorRegistry().get(JavaElementImageProvider.getTypeImageDescriptor(true, false, Flags.AccPrivate, false));
 			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, refactoring, 5, image);
 			proposal.setLinkedProposalModel(linkedProposalModel);
+			proposal.setCommandId(CONVERT_ANONYMOUS_TO_LOCAL_ID);
 			proposals.add(proposal);
 		}
 		return false;
@@ -1298,7 +1305,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 		
-	private static boolean getInlineTempProposal(IInvocationContext context, final ASTNode node, Collection proposals) throws CoreException {
+	private static boolean getInlineLocalProposal(IInvocationContext context, final ASTNode node, Collection proposals) throws CoreException {
 		if (!(node instanceof SimpleName))
 			return false;
 		
@@ -1322,12 +1329,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			String label= CorrectionMessages.QuickAssistProcessor_inline_local_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);		
 			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, context.getCompilationUnit(), refactoring, 5, image);
+			proposal.setCommandId(INLINE_LOCAL_ID);
 			proposals.add(proposal);
+			
 		}
 		return true;
 	}
 	
-	private static boolean getPromoteTempToFieldProposal(IInvocationContext context, final ASTNode node, Collection proposals) throws CoreException {
+	private static boolean getConvertLocalToFieldProposal(IInvocationContext context, final ASTNode node, Collection proposals) throws CoreException {
 		if (!(node instanceof SimpleName))
 			return false;
 		
@@ -1355,6 +1364,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			
 			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, context.getCompilationUnit(), refactoring, 5, image);
 			proposal.setLinkedProposalModel(linkedProposalModel);
+			proposal.setCommandId(CONVERT_LOCAL_TO_FIELD_ID);
 			proposals.add(proposal);
 		}
 		return true;
