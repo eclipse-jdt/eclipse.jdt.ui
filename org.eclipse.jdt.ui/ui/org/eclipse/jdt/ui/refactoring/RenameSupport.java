@@ -21,8 +21,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 
-import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
-
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
@@ -65,6 +63,7 @@ import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameRefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameSelectionState;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceManager;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceStarter;
 
 /**
  * Central access point to execute rename refactorings.
@@ -109,53 +108,52 @@ public class RenameSupport {
 	 * @param parent a shell used as a parent for the refactoring dialog.
 	 * @throws CoreException if an unexpected exception occurs while opening the
 	 * dialog.
+	 * 
+	 * @see #openDialog(Shell, boolean)
 	 */
 	public void openDialog(Shell parent) throws CoreException {
-		ensureChecked();
-		if (fPreCheckStatus.hasFatalError()) {
-			showInformation(parent, fPreCheckStatus);
-			return; 
-		}
-		UserInterfaceStarter starter= RenameUserInterfaceManager.getDefault().getStarter(fRefactoring);
-		starter.activate(fRefactoring, parent, getJavaRenameProcessor().getSaveMode());
+		openDialog(parent, false);
 	}
 	
 	/**
-	 * Shows a preview of the rename refactoring without showing a dialog to gather
-	 * additional user input (for example the new name of the <tt>IJavaElement</tt>).
-	 * If necessary, an error dialog is shown to present the result
-	 * of the refactoring's full precondition checking.
+	 * Opens the refactoring dialog for this rename support. 
+	 * 
 	 * <p>
 	 * This method has to be called from within the UI thread. 
 	 * </p>
 	 * 
-	 * @param parent a shell used as a parent for the preview and error dialogs.
+	 * @param parent a shell used as a parent for the refactoring, preview, or error dialog
+	 * @param showPreviewOnly if <code>true</code>, the dialog skips all user input pages and
+	 * directly shows the preview or error page. Otherwise, shows all pages.
+	 * @return <code>true</code> if the refactoring has been executed successfully,
+	 * <code>false</code> if it has been canceled or if an error has happened during
+	 * initial conditions checking.
 	 * 
-	 * @throws InterruptedException if the operation has been canceled by the
-	 * user.
 	 * @throws CoreException if an error occurred while executing the
 	 * operation.
 	 * 
 	 * @see #openDialog(Shell)
 	 * @since 3.3
 	 */
-	public void openPreview(Shell parent) throws InterruptedException, CoreException {
+	public boolean openDialog(Shell parent, boolean showPreviewOnly) throws CoreException {
 		ensureChecked();
 		if (fPreCheckStatus.hasFatalError()) {
 			showInformation(parent, fPreCheckStatus);
-			return; 
+			return false; 
 		}
-		RenameSelectionState state= createSelectionState();
 		
-		RenameRefactoringWizard wizard= new RenameRefactoringWizard(fRefactoring, fRefactoring.getName(), null, null, null) {
-			protected void addUserInputPages() {
-				// nothing to add
-			}
-		};
-		RefactoringWizardOpenOperation op= new RefactoringWizardOpenOperation(wizard);
-		op.run(parent, fRefactoring.getName());
-		
-		restoreSelectionState(state);
+		UserInterfaceStarter starter;
+		if (! showPreviewOnly) {
+			starter= RenameUserInterfaceManager.getDefault().getStarter(fRefactoring);
+		} else {
+			starter= new RenameUserInterfaceStarter();
+			starter.initialize(new RenameRefactoringWizard(fRefactoring, fRefactoring.getName(), null, null, null) {
+				protected void addUserInputPages() {
+					// nothing to add
+				}
+			});
+		}
+		return starter.activate(fRefactoring, parent, getJavaRenameProcessor().getSaveMode());
 	}
 
 	/**

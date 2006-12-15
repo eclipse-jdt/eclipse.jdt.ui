@@ -333,10 +333,15 @@ public class RenameLinkedMode {
 				return;
 			
 			Shell shell= fEditor.getSite().getShell();
+			boolean executed;
 			if (showPreview) {
-				renameSupport.openPreview(shell);
+				executed= renameSupport.openDialog(shell, true);
 			} else {
 				renameSupport.perform(shell, fEditor.getSite().getWorkbenchWindow());
+				executed= true;
+			}
+			if (executed) {
+				restoreFullSelection();
 			}
 			JavaModelUtil.reconcile(getCompilationUnit());
 		} catch (CoreException ex) {
@@ -349,6 +354,20 @@ public class RenameLinkedMode {
 			JavaPlugin.log(e);
 		} finally {
 			fEditor.getViewer().getTextWidget().setRedraw(true);
+		}
+	}
+	
+	private void restoreFullSelection() {
+		if (fOriginalSelection.y != 0) {
+			int originalOffset= fOriginalSelection.x;
+			LinkedPosition[] positions= fLinkedPositionGroup.getPositions();
+			for (int i= 0; i < positions.length; i++) {
+				LinkedPosition position= positions[i];
+				if (! position.isDeleted() && position.includes(originalOffset)) {
+					fEditor.getViewer().getTextWidget().setSelectionRange(position.offset, position.length);
+					return;
+				}
+			}
 		}
 	}
 	
