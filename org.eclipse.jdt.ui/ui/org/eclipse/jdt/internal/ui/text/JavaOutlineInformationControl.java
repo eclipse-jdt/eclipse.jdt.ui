@@ -26,10 +26,10 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.action.Action;
@@ -213,12 +213,12 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		 * {@inheritDoc}
 		 */
 		protected void internalExpandToLevel(Widget node, int level) {
-			if (!fIsFiltering && node instanceof Item && getMatcher() == null) {
-				Item i= (Item) node;
-				if (i.getData() instanceof IJavaElement) {
-					IJavaElement je= (IJavaElement) i.getData();
+			if (!fIsFiltering && node instanceof TreeItem && getMatcher() == null) {
+				TreeItem treeItem= (TreeItem)node;
+				if (treeItem.getParentItem() != null && treeItem.getData() instanceof IJavaElement) {
+					IJavaElement je= (IJavaElement) treeItem.getData();
 					if (je.getElementType() == IJavaElement.IMPORT_CONTAINER || isInnerType(je)) {
-						setExpanded(i, false);
+						setExpanded(treeItem, false);
 						return;
 					}
 				}
