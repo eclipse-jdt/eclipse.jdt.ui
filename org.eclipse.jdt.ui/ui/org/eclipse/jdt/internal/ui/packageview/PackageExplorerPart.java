@@ -943,30 +943,13 @@ public class PackageExplorerPart extends ViewPart
 		}
 		fLastOpenSelection= null;
 	}
-
-	public void selectReveal(ISelection selection) {
-		selectReveal(selection, 0);
-	}
 	
-	private void selectReveal(final ISelection selection, final int count) {
+	public void selectReveal(final ISelection selection) {
 		Control ctrl= getViewer().getControl();
 		if (ctrl == null || ctrl.isDisposed())
 			return;
 		ISelection javaSelection= convertSelection(selection);
 		fViewer.setSelection(javaSelection, true);
-		PackageExplorerContentProvider provider= (PackageExplorerContentProvider)getViewer().getContentProvider();
-		ISelection cs= fViewer.getSelection();
-		// If we have Pending changes and the element could not be selected then
-		// we try it again on more time by posting the select and reveal asynchronously
-		// to the event queue. See PR http://bugs.eclipse.org/bugs/show_bug.cgi?id=30700
-		// for a discussion of the underlying problem.
-		if (count == 0 && provider.hasPendingChanges() && !javaSelection.equals(cs)) {
-			ctrl.getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					selectReveal(selection, count + 1);
-				}
-			});
-		}
 	}
 
 	public ISelection convertSelection(ISelection s) {

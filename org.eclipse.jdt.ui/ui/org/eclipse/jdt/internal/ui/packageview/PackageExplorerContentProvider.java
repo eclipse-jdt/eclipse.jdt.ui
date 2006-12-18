@@ -702,40 +702,11 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		Control ctrl= fViewer.getControl();
 		final Runnable trackedRunnable= new Runnable() {
 			public void run() {
-				try {
-					r.run();
-				} finally {
-					removePendingChange();
-				}
+				r.run();
 			}
 		};
 		if (ctrl != null && !ctrl.isDisposed()) {
-			addPendingChange();
-			try {
-				ctrl.getDisplay().asyncExec(trackedRunnable); 
-			} catch (RuntimeException e) {
-				removePendingChange();
-				throw e;
-			} catch (Error e) {
-				removePendingChange();
-				throw e; 
-			}
+			ctrl.getDisplay().syncExec(trackedRunnable); 
 		}
-	}
-
-	// ------ Pending change management due to the use of asyncExec in postRunnable.
-	
-	public synchronized boolean hasPendingChanges() {
-		return fPendingChanges > 0;  
-	}
-	
-	private synchronized void addPendingChange() {
-		fPendingChanges++;
-	}
-
-	synchronized void removePendingChange() {
-		fPendingChanges--;
-		if (fPendingChanges < 0)
-			fPendingChanges= 0;
 	}
 }
