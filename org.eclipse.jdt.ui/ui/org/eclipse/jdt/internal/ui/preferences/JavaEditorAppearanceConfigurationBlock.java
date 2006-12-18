@@ -19,6 +19,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -101,14 +102,23 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 	 */
 	public Control createControl(Composite parent) {
 		initializeDialogUnits(parent);
+		
+		ScrolledPageContent scrolled= new ScrolledPageContent(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+		scrolled.setExpandHorizontal(true);
+		scrolled.setExpandVertical(true);
+		
 
-		Composite composite= new Composite(parent, SWT.NONE);
+		Composite composite= new Composite(scrolled, SWT.NONE);
 		composite.setLayout(new GridLayout());
 		
 		createHeader(composite);
 		createAppearancePage(composite);
 		
-		return composite;
+		scrolled.setContent(composite);
+		final Point size= composite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		scrolled.setMinSize(size.x, size.y);
+		return scrolled;
+
 	}
 
 	private void createHeader(Composite contents) {

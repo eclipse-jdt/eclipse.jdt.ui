@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -59,6 +60,24 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage implement
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.TEMPLATE_PREFERENCE_PAGE);
+	}
+	
+	/*
+	 * @see org.eclipse.ui.texteditor.templates.TemplatePreferencePage#createContents(org.eclipse.swt.widgets.Composite)
+	 * @since 3.3
+	 */
+	protected Control createContents(Composite ancestor) {
+		ScrolledPageContent scrolled= new ScrolledPageContent(ancestor, SWT.H_SCROLL | SWT.V_SCROLL);
+		scrolled.setExpandHorizontal(true);
+		scrolled.setExpandVertical(true);
+		
+		Control control= super.createContents(scrolled);
+
+		scrolled.setContent(control);
+		final Point size= control.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		scrolled.setMinSize(size.x, size.y);
+		
+		return scrolled;
 	}
 
 

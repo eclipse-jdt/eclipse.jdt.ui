@@ -26,6 +26,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -417,7 +418,18 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 */
 	public Control createControl(Composite parent) {
 		initializeDialogUnits(parent);
-		return createSyntaxPage(parent);
+
+		ScrolledPageContent scrolled= new ScrolledPageContent(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+		scrolled.setExpandHorizontal(true);
+		scrolled.setExpandVertical(true);
+		
+		Control control= createSyntaxPage(scrolled);
+		
+		scrolled.setContent(control);
+		final Point size= control.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		scrolled.setMinSize(size.x, size.y);
+		
+		return scrolled;
 	}
 	
 	/**

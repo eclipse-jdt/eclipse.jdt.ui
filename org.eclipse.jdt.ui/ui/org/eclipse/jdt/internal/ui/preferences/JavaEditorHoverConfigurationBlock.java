@@ -210,8 +210,13 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 	 * @return the control for the preference page
 	 */
 	public Control createControl(Composite parent) {
+		
+		ScrolledPageContent scrolled= new ScrolledPageContent(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+		scrolled.setExpandHorizontal(true);
+		scrolled.setExpandVertical(true);
+		
 
-		Composite hoverComposite= new Composite(parent, SWT.NONE);
+		Composite hoverComposite= new Composite(scrolled, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		hoverComposite.setLayout(layout);
@@ -364,8 +369,14 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 		
 		initialize();
 
-		Dialog.applyDialogFont(hoverComposite);
-		return hoverComposite;
+		scrolled.setContent(hoverComposite);
+		final Point size= hoverComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		scrolled.setMinSize(size.x, size.y);
+		
+		Dialog.applyDialogFont(scrolled);
+		
+		return scrolled;
+		
 	}
 	
 	private void addColumnLayoutData(TableLayoutComposite layouter) {
