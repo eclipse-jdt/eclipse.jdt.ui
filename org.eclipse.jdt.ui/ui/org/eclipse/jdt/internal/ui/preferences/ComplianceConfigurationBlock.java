@@ -291,6 +291,9 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		
 		fJRE50InfoText= new Link(composite, SWT.WRAP);
 		fJRE50InfoText.setFont(composite.getFont());
+		// set a text: not the real one, just for layouting
+		fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project, new String[] { VERSION_1_3, VERSION_1_3 }));
+		fJRE50InfoText.setVisible(false);
 		fJRE50InfoText.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				if ("1".equals(e.text)) { //$NON-NLS-1$
@@ -376,31 +379,41 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		if (fJRE50InfoText != null && !fJRE50InfoText.isDisposed()) {
 			boolean isVisible= false;
 			String compliance= getStoredValue(PREF_COMPLIANCE); // get actual value
-			if (VERSION_1_5.equals(compliance) || VERSION_1_6.equals(compliance)) {
-				IVMInstall install= null;
-				if (fProject != null) { // project specific settings: only test if a 50 JRE is installed
-					try {
-						install= JavaRuntime.getVMInstall(JavaCore.create(fProject));
-					} catch (CoreException e) {
-						JavaPlugin.log(e);
-					}
-				} else {
-					install= JavaRuntime.getDefaultVMInstall();
+			IVMInstall install= null;
+			if (fProject != null) { // project specific settings: only test if a 50 JRE is installed
+				try {
+					install= JavaRuntime.getVMInstall(JavaCore.create(fProject));
+				} catch (CoreException e) {
+					JavaPlugin.log(e);
 				}
-				boolean matching= install instanceof IVMInstall2 && compliance.equals(JavaModelUtil.getCompilerCompliance((IVMInstall2) install, compliance));
-				isVisible= !matching;
-				if (isVisible) {
-					String complianceName= VERSION_1_5.equals(compliance) ? PreferencesMessages.ComplianceConfigurationBlock_version15 : PreferencesMessages.ComplianceConfigurationBlock_version16;
+			} else {
+				install= JavaRuntime.getDefaultVMInstall();
+			}
+			if (install instanceof IVMInstall2) {
+				String compilerCompliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) install, compliance);
+				if (JavaModelUtil.isVersionLessThan(compilerCompliance, compliance)) { // Discourage using compiler with version less than compliance
+					String[] args= { getVersionLabel(compliance), getVersionLabel(compilerCompliance) };
 					if (fProject == null) {
-						fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info, complianceName));
+						fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info, args));
 					} else {
-						fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project, complianceName));
+						fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project, args));
 					}
+					isVisible= true;
 				}
 			}
 			fJRE50InfoText.setVisible(isVisible);
 		}
 	}
+
+	private String getVersionLabel(String version) {
+		if (JavaModelUtil.isVersionLessThan(version, VERSION_1_5)) {
+			return version; // for version <= 1.4, we can use the version as is
+		}
+		if (VERSION_1_5.equals(version))
+			return PreferencesMessages.ComplianceConfigurationBlock_version15;
+		return PreferencesMessages.ComplianceConfigurationBlock_version16;
+	}
+
 	
 	private IStatus validateCompliance() {
 		StatusInfo status= new StatusInfo();
