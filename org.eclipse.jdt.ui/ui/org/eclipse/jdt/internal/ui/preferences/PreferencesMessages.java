@@ -280,6 +280,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavadocConfigurationBlock_error_archivepathnotabsolute;
 	public static String JavadocConfigurationBlock_browse_archive_button;
 	public static String JavadocConfigurationBlock_browse_archive_path_button;
+	public static String ProblemSeveritiesConfigurationBlock_treat_optional_as_fatal;
 	public static String SourceAttachmentPropertyPage_error_title;
 	public static String SourceAttachmentPropertyPage_error_message;
 	public static String SourceAttachmentPropertyPage_noarchive_message;
@@ -734,7 +735,6 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_jrecompliance_info;
 	public static String ComplianceConfigurationBlock_jrecompliance_info_project;
 	public static String ProblemSeveritiesConfigurationBlock_section_generics;
-	public static String JavaBuildConfigurationBlock_treat_optional_as_fatal;
 	public static String JavaBasePreferencePage_dialogs;
 	public static String JavaBasePreferencePage_do_not_hide_description;
 	public static String JavaBasePreferencePage_do_not_hide_button;

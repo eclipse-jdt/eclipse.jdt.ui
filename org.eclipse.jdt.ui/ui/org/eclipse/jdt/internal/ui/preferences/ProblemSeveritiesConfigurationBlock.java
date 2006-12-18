@@ -94,6 +94,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	
 	private static final Key PREF_PB_SUPPRESS_WARNINGS= getJDTCoreKey(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS);
 	private static final Key PREF_PB_UNHANDLED_WARNING_TOKEN= getJDTCoreKey(JavaCore.COMPILER_PB_UNHANDLED_WARNING_TOKEN);
+	private static final Key PREF_PB_FATAL_OPTIONAL_ERROR= getJDTCoreKey(JavaCore.COMPILER_PB_FATAL_OPTIONAL_ERROR);
 
 	
 	// values
@@ -135,7 +136,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_15_PB_UNCHECKED_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST,
 				PREF_15_PB_AUTOBOXING_PROBLEM, PREF_15_PB_MISSING_OVERRIDE_ANNOTATION, PREF_15_PB_ANNOTATION_SUPER_INTERFACE,
 				PREF_15_PB_TYPE_PARAMETER_HIDING, PREF_15_PB_INCOMPLETE_ENUM_SWITCH, PREF_PB_MISSING_DEPRECATED_ANNOTATION,
-				PREF_15_PB_RAW_TYPE_REFERENCE, 
+				PREF_15_PB_RAW_TYPE_REFERENCE, PREF_PB_FATAL_OPTIONAL_ERROR,
 				PREF_PB_FORBIDDEN_REFERENCE, PREF_PB_DISCOURRAGED_REFERENCE, PREF_PB_SUPPRESS_WARNINGS, PREF_PB_UNHANDLED_WARNING_TOKEN
 			};
 	}
@@ -394,7 +395,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		addComboBox(inner, label, PREF_15_PB_FINAL_PARAM_BOUND, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
 		
-		// --- 1.5
+		// --- annotations
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_section_annotations; 
 		excomposite= createStyleSection(composite, label, nColumns);
@@ -419,6 +420,12 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_enable_surpresswarning_annotation; 
 		addCheckBox(inner, label, PREF_PB_SUPPRESS_WARNINGS, enabledDisabled, 0);
+
+		new Label(composite, SWT.NONE);
+		
+		String[] enableDisableValues= new String[] { ENABLED, DISABLED };
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_treat_optional_as_fatal;
+		addCheckBox(composite, label, PREF_PB_FATAL_OPTIONAL_ERROR, enableDisableValues, 0);
 
 		
 		IDialogSettings section= JavaPlugin.getDefault().getDialogSettings().getSection(SETTINGS_SECTION_NAME);
