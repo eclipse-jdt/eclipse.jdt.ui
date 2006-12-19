@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.navigator;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -214,27 +215,25 @@ public class JavaNavigatorContentProvider extends
 		return convertToJavaElements(updateSynchronization.getRefreshTargets());
 	}
 
-	protected void postAdd(final Object parent, final Object element) {
+	protected void postAdd(final Object parent, final Object element, Collection runnables) {
 		if (parent instanceof IJavaModel)
-			super.postAdd(((IJavaModel) parent).getWorkspace(), element);
+			super.postAdd(((IJavaModel) parent).getWorkspace(), element, runnables);
 		else
-			super.postAdd(parent, element);
+			super.postAdd(parent, element, runnables);
 	}
 	
 
-	protected void postRefresh(final List toRefresh, final boolean updateLabels) {
+	protected void postRefresh(final List toRefresh, final boolean updateLabels, Collection runnables) {
 		for (Iterator iter = toRefresh.iterator(); iter.hasNext();) {
 			Object element = iter.next();
 			if(element instanceof IJavaModel) {
 				iter.remove();
 				toRefresh.add(fRealInput);
-				super.postRefresh(toRefresh, updateLabels);
+				super.postRefresh(toRefresh, updateLabels, runnables);
 				return;
 			}
 		} 
-		super.postRefresh(toRefresh, updateLabels);
-		
+		super.postRefresh(toRefresh, updateLabels, runnables);		
 	}
- 
 
 }

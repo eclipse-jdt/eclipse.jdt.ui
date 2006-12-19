@@ -227,7 +227,9 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 		} else if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
 			toRefresh.add(newValue);
 		}
-		postRefresh(toRefresh, true);
+		ArrayList runnables= new ArrayList();
+		postRefresh(toRefresh, true, runnables);
+		executeRunnables(runnables);
 	}
 	
 	private boolean isChildOf(Object element, List potentialParents) {

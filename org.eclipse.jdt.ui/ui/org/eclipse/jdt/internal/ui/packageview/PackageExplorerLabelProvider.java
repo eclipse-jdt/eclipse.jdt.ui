@@ -47,7 +47,7 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 	public String getText(Object element) {
 		if (!fIsFlatLayout && element instanceof IPackageFragment) {
 			IPackageFragment fragment = (IPackageFragment) element;
-			Object parent= fContentProvider.getPackageFragmentProvider().getHierarchicalPackageParent(fragment);
+			Object parent= fContentProvider.getHierarchicalPackageParent(fragment);
 			if (parent instanceof IPackageFragment) {
 				return getNameDelta((IPackageFragment) parent, fragment);
 			} else if (parent instanceof IFolder) { // bug 152735

@@ -24,6 +24,8 @@ import org.eclipse.core.resources.IResourceDelta;
 
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.IBasicPropertyConstants;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -47,6 +49,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -57,13 +60,12 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
  * 
  * <p>
  * Since 2.1 this content provider can provide the children for flat or hierarchical
- * layout. The hierarchical layout is done by delegating to the <code>PackageFragmentProvider</code>.
+ * layout.
  * </p>
  * 
  * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider
- * @see org.eclipse.jdt.internal.ui.packageview.PackageFragmentProvider
  */
-public class PackageExplorerContentProvider extends StandardJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
+public class PackageExplorerContentProvider extends StandardJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener, IPropertyChangeListener {
 	
 	protected static final int ORIGINAL= 0;
 	protected static final int PARENT= 1 << 0;
@@ -74,25 +76,23 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	private Object fInput;
 	private boolean fIsFlatLayout;
 	private boolean fShowLibrariesNode;
-	private PackageFragmentProvider fPackageFragmentProvider;
-	
-	
-	
-	
+	private boolean fFoldPackages;
+		
 	/**
 	 * Creates a new content provider for Java elements.
 	 */
 	public PackageExplorerContentProvider(boolean provideMembers) {
 		super(provideMembers);
-		fPackageFragmentProvider= new PackageFragmentProvider();
 		fShowLibrariesNode= false;
 		fIsFlatLayout= false;
-	}
-		
-	/* package */ PackageFragmentProvider getPackageFragmentProvider() {
-		return fPackageFragmentProvider;
+		fFoldPackages= arePackagesFoldedInHierarchicalLayout();
+		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 	}
 	
+	private boolean arePackagesFoldedInHierarchicalLayout(){
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER);
+	}
+			
 	protected Object getViewerInput() {
 		return fInput;
 	}
@@ -146,7 +146,6 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		while (runnableIterator.hasNext()){
 			((Runnable) runnableIterator.next()).run();
 		}
-		
 	}
 
 	private boolean inputDeleted(Collection runnables) {
@@ -170,7 +169,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	public void dispose() {
 		super.dispose();
 		JavaCore.removeElementChangedListener(this);
-		fPackageFragmentProvider.dispose();
+		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
 	}
 
 	/* (non-Javadoc)
@@ -183,7 +182,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		
 		// hierarchical package mode
 		ArrayList result= new ArrayList();
-		fPackageFragmentProvider.getHierarchicalPackageChildren(root, null, result);
+		getHierarchicalPackageChildren(root, null, result);
 		if (!isProjectPackageFragmentRoot(root)) {
 			Object[] nonJavaResources= root.getNonJavaResources();
 			for (int i= 0; i < nonJavaResources.length; i++) {
@@ -204,7 +203,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		// hierarchical package mode
 		ArrayList result= new ArrayList();
 		
-		fPackageFragmentProvider.getHierarchicalPackageChildren((IPackageFragmentRoot) fragment.getParent(), fragment, result);
+		getHierarchicalPackageChildren((IPackageFragmentRoot) fragment.getParent(), fragment, result);
 		Object[] nonPackages= super.getPackageContent(fragment);
 		if (result.isEmpty())
 			return nonPackages;
@@ -225,7 +224,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		// hierarchical package mode
 		ArrayList result= new ArrayList();
 		
-		fPackageFragmentProvider.getHierarchicalPackagesInFolder(folder, result);
+		getHierarchicalPackagesInFolder(folder, result);
 		Object[] others= super.getFolderContent(folder);
 		if (result.isEmpty())
 			return others;
@@ -315,9 +314,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	}
 
 	protected Object internalGetParent(Object element) {
-
 		if (!fIsFlatLayout && element instanceof IPackageFragment) {
-			return fPackageFragmentProvider.getHierarchicalPackageParent((IPackageFragment) element);
+			return getHierarchicalPackageParent((IPackageFragment) element);
 		} else if (element instanceof IPackageFragmentRoot) {
 			// since we insert logical package containers we have to fix
 			// up the parent for package fragment roots so that they refer
@@ -346,7 +344,6 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	 */
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		super.inputChanged(viewer, oldInput, newInput);
-		fPackageFragmentProvider.inputChanged(viewer, oldInput, newInput);
 		fViewer= (TreeViewer)viewer;
 		if (oldInput == null && newInput != null) {
 			JavaCore.addElementChangedListener(this); 
@@ -356,6 +353,119 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		fInput= newInput;
 	}
 
+	// hierarchical packages
+	/**
+	 * Returns the hierarchical packages inside a given fragment or root.
+	 * @param parent The parent package fragment root
+	 * @param fragment The package to get the children for or 'null' to get the children of the root.
+	 * @param result Collection where the resulting elements are added
+	 * @throws JavaModelException
+	 */
+	private void getHierarchicalPackageChildren(IPackageFragmentRoot parent, IPackageFragment fragment, Collection result) throws JavaModelException {
+		IJavaElement[] children= parent.getChildren();
+		String prefix= fragment != null ? fragment.getElementName() + '.' : ""; //$NON-NLS-1$
+		int prefixLen= prefix.length();
+		for (int i= 0; i < children.length; i++) {
+			IPackageFragment curr= (IPackageFragment) children[i];
+			String name= curr.getElementName();
+			if (name.startsWith(prefix) && name.length() > prefixLen && name.indexOf('.', prefixLen) == -1) {
+				if (fFoldPackages) {
+					curr= getFolded(children, curr);
+				}
+				result.add(curr);
+			} else if (fragment == null && curr.isDefaultPackage()) {
+				result.add(curr);
+			}
+		}
+	}
+	
+	/**
+	 * Returns the hierarchical packages inside a given folder.
+	 * @param folder The parent folder
+	 * @param result Collection where the resulting elements are added
+	 * @throws JavaModelException
+	 */
+	private void getHierarchicalPackagesInFolder(IFolder folder, Collection result) throws CoreException {
+		IResource[] resources= folder.members();
+		for (int i= 0; i < resources.length; i++) {
+			IResource resource= resources[i];
+			if (resource instanceof IFolder) {
+				IFolder curr= (IFolder) resource;
+				IJavaElement element= JavaCore.create(curr);
+				if (element instanceof IPackageFragment) {
+					if (fFoldPackages) {
+						IPackageFragment fragment= (IPackageFragment) element;
+						IPackageFragmentRoot root= (IPackageFragmentRoot) fragment.getParent();
+						element= getFolded(root.getChildren(), fragment);
+					}
+					result.add(element);	
+				} 
+			}	
+		}
+	}
+
+	public Object getHierarchicalPackageParent(IPackageFragment child) {
+		String name= child.getElementName();
+		IPackageFragmentRoot parent= (IPackageFragmentRoot) child.getParent();
+		int index= name.lastIndexOf('.');
+		if (index != -1) {
+			String realParentName= name.substring(0, index);
+			IPackageFragment element= parent.getPackageFragment(realParentName);
+			if (element.exists()) {
+				try {
+					if (fFoldPackages && isEmpty(element) && findSinglePackageChild(element, parent.getChildren()) != null) {
+						return getHierarchicalPackageParent(element);
+					}
+				} catch (JavaModelException e) {
+					// ignore
+				}
+				return element;
+			} else { // bug 65240
+				IResource resource= element.getResource();
+				if (resource != null) {
+					return resource;
+				}
+			}
+		}
+		if (parent.getResource() instanceof IProject) {
+			return parent.getJavaProject();
+		}
+		return parent;
+	}
+	
+	private static IPackageFragment getFolded(IJavaElement[] children, IPackageFragment pack) throws JavaModelException {
+		while (isEmpty(pack)) {
+			IPackageFragment collapsed= findSinglePackageChild(pack, children);
+			if (collapsed == null) {
+				return pack;
+			}
+			pack= collapsed;
+		}
+		return pack;
+	}
+		
+	private static boolean isEmpty(IPackageFragment fragment) throws JavaModelException {
+		return !fragment.containsJavaResources() && fragment.getNonJavaResources().length == 0;
+	}
+	
+	private static IPackageFragment findSinglePackageChild(IPackageFragment fragment, IJavaElement[] children) {
+		String prefix= fragment.getElementName() + '.';
+		int prefixLen= prefix.length();
+		IPackageFragment found= null;
+		for (int i= 0; i < children.length; i++) {
+			IJavaElement element= children[i];
+			String name= element.getElementName();
+			if (name.startsWith(prefix) && name.length() > prefixLen && name.indexOf('.', prefixLen) == -1) {
+				if (found == null) {
+					found= (IPackageFragment) element;
+				} else {
+					return null;
+				}
+			}
+		}
+		return found;
+	}
+	
 	// ------ delta processing ------
 
 	/**
@@ -378,7 +488,21 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		}
 		
 		if (!fIsFlatLayout && elementType == IJavaElement.PACKAGE_FRAGMENT) {
-			fPackageFragmentProvider.processDelta(delta, runnables);
+			if (kind == IJavaElementDelta.REMOVED) {
+				final Object parent = getHierarchicalPackageParent((IPackageFragment) element);
+				if (parent instanceof IPackageFragmentRoot) {
+					postRemove(element,  runnables);
+				} else {
+					postRefresh(internalGetParent(parent), GRANT_PARENT, element, runnables);
+				}
+			} else if (kind == IJavaElementDelta.ADDED) {
+				final Object parent = getHierarchicalPackageParent((IPackageFragment) element);
+				if (parent instanceof IPackageFragmentRoot) {
+					postAdd(parent, element,  runnables);
+				} else {
+					postRefresh(internalGetParent(parent), GRANT_PARENT, element, runnables);
+				}
+			} 
 			if (processResourceDeltas(delta.getResourceDeltas(), element, runnables))
 			    return;
 			handleAffectedChildren(delta, element, runnables);
@@ -722,5 +846,22 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				fViewer.setSelection(fViewer.getSelection());
 			}
 		});
+	}
+	
+	
+	/*
+	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+	 */
+	public void propertyChange(PropertyChangeEvent event) {
+		if (arePackagesFoldedInHierarchicalLayout() != fFoldPackages){
+			fFoldPackages= arePackagesFoldedInHierarchicalLayout();
+			if (fViewer != null && !fViewer.getControl().isDisposed()) {
+				fViewer.getControl().setRedraw(false);
+				Object[] expandedObjects= fViewer.getExpandedElements();
+				fViewer.refresh();	
+				fViewer.setExpandedElements(expandedObjects);
+				fViewer.getControl().setRedraw(true);
+			}
+		}
 	}
 }
