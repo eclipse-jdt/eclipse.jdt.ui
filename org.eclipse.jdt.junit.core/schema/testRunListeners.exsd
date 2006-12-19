@@ -12,6 +12,9 @@
 
    <element name="extension">
       <annotation>
+         <appInfo>
+            <meta.element deprecated="true"/>
+         </appInfo>
          <documentation>
             a fully qualified identifier of the target extension point
          </documentation>
@@ -49,9 +52,6 @@
 
    <element name="testRunListener">
       <annotation>
-         <appInfo>
-            <meta.element deprecated="true"/>
-         </appInfo>
          <documentation>
             Deprecated: Register the new test run listener directly at JUnitCore
          </documentation>
