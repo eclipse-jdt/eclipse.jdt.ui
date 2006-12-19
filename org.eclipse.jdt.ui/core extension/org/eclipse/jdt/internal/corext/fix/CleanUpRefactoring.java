@@ -72,6 +72,7 @@ import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CommentFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
@@ -958,6 +959,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
     	return new ICleanUp[] {
     			new CodeStyleCleanUp(),
     			new ControlStatementsCleanUp(),
+    			new ConvertLoopCleanUp(),
     			new VariableDeclarationCleanUp(),
     			new ExpressionsCleanUp(),
     			new UnusedCodeCleanUp(),
@@ -975,6 +977,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
     	return new ICleanUp[] {
     			new CodeStyleCleanUp(settings),
     			new ControlStatementsCleanUp(settings),
+    			new ConvertLoopCleanUp(settings),
     			new VariableDeclarationCleanUp(settings),
     			new ExpressionsCleanUp(settings),
     			new UnusedCodeCleanUp(settings),

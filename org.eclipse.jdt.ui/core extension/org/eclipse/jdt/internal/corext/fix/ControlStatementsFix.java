@@ -11,14 +11,11 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -27,7 +24,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
@@ -36,47 +32,28 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
-import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 public class ControlStatementsFix extends AbstractFix {
-	
-	public interface IChangeBlockOperation {
-
-		public void setSubOperation(IFixRewriteOperation op);
-
-		public Statement getSingleStatement();
-
-    }
-
-	private static final String FOR_LOOP_ELEMENT_IDENTIFIER= "element"; //$NON-NLS-1$
-	
+		
 	private final static class ControlStatementFinder extends GenericVisitor {
 		
 		private final List/*<IFixRewriteOperation>*/ fResult;
-		private final Hashtable fUsedNames;
-		private final CompilationUnit fCompilationUnit;
 		private final boolean fFindControlStatementsWithoutBlock;
-		private final boolean fFindForLoopsToConvert;
 		private final boolean fRemoveUnnecessaryBlocks;
 		private final boolean fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow;
 		
-		public ControlStatementFinder(CompilationUnit compilationUnit, 
-				boolean findControlStatementsWithoutBlock,
+		public ControlStatementFinder(boolean findControlStatementsWithoutBlock,
 				boolean removeUnnecessaryBlocks,
 				boolean removeUnnecessaryBlocksOnlyWhenReturnOrThrow,
-				boolean findForLoopsToConvert,
 				List resultingCollection) {
 			
 			fFindControlStatementsWithoutBlock= findControlStatementsWithoutBlock;
 			fRemoveUnnecessaryBlocks= removeUnnecessaryBlocks;
 			fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow= removeUnnecessaryBlocksOnlyWhenReturnOrThrow;
-			fFindForLoopsToConvert= findForLoopsToConvert;
 			fResult= resultingCollection;
-			fUsedNames= new Hashtable();
-			fCompilationUnit= compilationUnit;
 		}
 		
 		/* (non-Javadoc)
@@ -100,42 +77,7 @@ public class ControlStatementsFix extends AbstractFix {
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.ForStatement)
 		 */
 		public boolean visit(ForStatement node) {
-			if (fFindForLoopsToConvert) {
-				List usedVaribles= getUsedVariableNames(node);
-				usedVaribles.addAll(fUsedNames.values());
-				String[] used= (String[])usedVaribles.toArray(new String[usedVaribles.size()]);
-
-				String identifierName= FOR_LOOP_ELEMENT_IDENTIFIER;
-				int count= 0;
-				for (int i= 0; i < used.length; i++) {
-					if (used[i].equals(identifierName)) {
-						identifierName= FOR_LOOP_ELEMENT_IDENTIFIER + count;
-						count++;
-						i= 0;
-					}
-				}
-				
-				ConvertForLoopOperation forConverter= new ConvertForLoopOperation(fCompilationUnit, node, identifierName, fFindControlStatementsWithoutBlock, fRemoveUnnecessaryBlocks);
-				if (forConverter.satisfiesPreconditions()) {
-					fResult.add(forConverter);
-					fUsedNames.put(node, identifierName);
-				} else {
-					ConvertIterableLoopOperation iterableConverter= new ConvertIterableLoopOperation(fCompilationUnit, node, identifierName, fFindControlStatementsWithoutBlock, fRemoveUnnecessaryBlocks);
-					if (iterableConverter.isApplicable().isOK()) {
-						fResult.add(iterableConverter);
-						fUsedNames.put(node, identifierName);
-					} else if (fFindControlStatementsWithoutBlock) {
-						Statement forBody= node.getBody();
-						if (!(forBody instanceof Block)) {
-							fResult.add(new AddBlockOperation(ForStatement.BODY_PROPERTY, forBody, node));
-						}
-					} else if (fRemoveUnnecessaryBlocks || fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
-						if (RemoveBlockOperation.satisfiesCleanUpPrecondition(node, ForStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
-							fResult.add(new RemoveBlockOperation(node, ForStatement.BODY_PROPERTY));
-						}
-					}
-				}
-			} else if (fFindControlStatementsWithoutBlock) {
+			if (fFindControlStatementsWithoutBlock) {
 				Statement forBody= node.getBody();
 				if (!(forBody instanceof Block)) {
 					fResult.add(new AddBlockOperation(ForStatement.BODY_PROPERTY, forBody, node));
@@ -164,34 +106,7 @@ public class ControlStatementsFix extends AbstractFix {
 			}
 			return super.visit(node);
 		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#endVisit(org.eclipse.jdt.core.dom.ForStatement)
-		 */
-		public void endVisit(ForStatement node) {
-			if (fFindForLoopsToConvert) {
-				fUsedNames.remove(node);
-			}
-			super.endVisit(node);
-		}
 		
-		private List getUsedVariableNames(ASTNode node) {
-			CompilationUnit root= (CompilationUnit)node.getRoot();
-			IBinding[] varsBefore= (new ScopeAnalyzer(root)).getDeclarationsInScope(node.getStartPosition(),
-				ScopeAnalyzer.VARIABLES);
-			IBinding[] varsAfter= (new ScopeAnalyzer(root)).getDeclarationsAfter(node.getStartPosition()
-				+ node.getLength(), ScopeAnalyzer.VARIABLES);
-
-			List names= new ArrayList();
-			for (int i= 0; i < varsBefore.length; i++) {
-				names.add(varsBefore[i].getName());
-			}
-			for (int i= 0; i < varsAfter.length; i++) {
-				names.add(varsAfter[i].getName());
-			}
-			return names;
-		}
-
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.IfStatement)
 		 */
@@ -271,12 +186,11 @@ public class ControlStatementsFix extends AbstractFix {
         }
 	}
 	
-	private static final class AddBlockOperation extends AbstractFixRewriteOperation implements IChangeBlockOperation {
+	private static final class AddBlockOperation extends AbstractFixRewriteOperation {
 
 		private final ChildPropertyDescriptor fBodyProperty;
 		private final Statement fBody;
 		private final Statement fControlStatement;
-		private IFixRewriteOperation fOperation;
 
 		public AddBlockOperation(ChildPropertyDescriptor bodyProperty, Statement body, Statement controlStatement) {
 			fBodyProperty= bodyProperty;
@@ -301,48 +215,18 @@ public class ControlStatementsFix extends AbstractFix {
 			TextEditGroup group= createTextEditGroup(label);
 			textEditGroups.add(group);
 			
-			ASTNode moveTarget;
-			if (fOperation == null) {
-				moveTarget= rewrite.createMoveTarget(fBody);
-			} else {
-				if (fOperation instanceof ConvertForLoopOperation) {
-					ConvertForLoopOperation convertForLoopOperation= ((ConvertForLoopOperation)fOperation);
-					convertForLoopOperation.makePassive();
-					fOperation.rewriteAST(cuRewrite, textEditGroups);
-					moveTarget= convertForLoopOperation.getEnhancedForStatement();
-				} else  {
-					ConvertIterableLoopOperation convertIterableLoopOperation= ((ConvertIterableLoopOperation)fOperation);
-					convertIterableLoopOperation.makePassive();
-					fOperation.rewriteAST(cuRewrite, textEditGroups);
-					moveTarget= convertIterableLoopOperation.getEnhancedForStatement();
-				}
-			}
-			
+			ASTNode moveTarget= rewrite.createMoveTarget(fBody);
 			Block replacingBody= cuRewrite.getRoot().getAST().newBlock();
 			replacingBody.statements().add(moveTarget);
 			rewrite.set(fControlStatement, fBodyProperty, replacingBody, group);
 		}
 
-		/**
-         * {@inheritDoc}
-         */
-        public Statement getSingleStatement() {
-	        return fBody;
-        }
-
-		/**
-         * {@inheritDoc}
-         */
-        public void setSubOperation(IFixRewriteOperation op) {
-			fOperation= op;
-        }
 	}
 	
-	static class RemoveBlockOperation extends AbstractFixRewriteOperation implements IChangeBlockOperation {
+	static class RemoveBlockOperation extends AbstractFixRewriteOperation {
 
 		private final Statement fStatement;
 		private final ChildPropertyDescriptor fChild;
-		private IFixRewriteOperation fOperation;
 
 		public RemoveBlockOperation(Statement controlStatement, ChildPropertyDescriptor child) {
 			fStatement= controlStatement;
@@ -355,35 +239,14 @@ public class ControlStatementsFix extends AbstractFix {
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 
-			Statement moveTarget;
-			if (fOperation == null) {
-				moveTarget= (Statement)rewrite.createMoveTarget(getSingleStatement());
-			} else {
-				if (fOperation instanceof ConvertForLoopOperation) {
-					ConvertForLoopOperation convertForLoopOperation= ((ConvertForLoopOperation)fOperation);
-					convertForLoopOperation.makePassive();
-					fOperation.rewriteAST(cuRewrite, textEditGroups);
-					moveTarget= convertForLoopOperation.getEnhancedForStatement();
-				} else  {
-					ConvertIterableLoopOperation convertIterableLoopOperation= ((ConvertIterableLoopOperation)fOperation);
-					convertIterableLoopOperation.makePassive();
-					fOperation.rewriteAST(cuRewrite, textEditGroups);
-					moveTarget= convertIterableLoopOperation.getEnhancedForStatement();
-				}
-			}
+			Block block= (Block)fStatement.getStructuralProperty(fChild);
+			Statement statement= (Statement)block.statements().get(0);
+			Statement moveTarget= (Statement)rewrite.createMoveTarget(statement);
 			
 			TextEditGroup group= createTextEditGroup(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription);
 			textEditGroups.add(group);
 			rewrite.set(fStatement, fChild, moveTarget, group);
 		}
-		
-        public void setSubOperation(IFixRewriteOperation op) {
-        	fOperation= op;
-        }
-		
-        public Statement getSingleStatement() {
-	        return (Statement)((Block)fStatement.getStructuralProperty(fChild)).statements().get(0);
-        }
 		
 		public static boolean satisfiesCleanUpPrecondition(Statement controlStatement, ChildPropertyDescriptor childDescriptor, boolean onlyReturnAndThrows) {
 			return satisfiesPrecondition(controlStatement, childDescriptor, onlyReturnAndThrows, true);
@@ -503,25 +366,6 @@ public class ControlStatementsFix extends AbstractFix {
 
 	}
 
-	public static IFix createConvertForLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
-		ConvertForLoopOperation loopConverter= new ConvertForLoopOperation(compilationUnit, loop, FOR_LOOP_ELEMENT_IDENTIFIER, false, false);
-		if (!loopConverter.satisfiesPreconditions())
-			return null;
-		
-		return new ControlStatementsFix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new ILinkedFixRewriteOperation[] {loopConverter});
-	}
-	
-	public static IFix createConvertIterableLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
-		ConvertIterableLoopOperation loopConverter= new ConvertIterableLoopOperation(compilationUnit, loop, FOR_LOOP_ELEMENT_IDENTIFIER, false, false);
-		IStatus status= loopConverter.isApplicable();
-		if (status.getSeverity() == IStatus.ERROR)
-			return null;
-
-		ControlStatementsFix result= new ControlStatementsFix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new ILinkedFixRewriteOperation[] {loopConverter});
-		result.setStatus(status);
-		return result;
-	}
-		
 	public static IFix[] createRemoveBlockFix(CompilationUnit compilationUnit, ASTNode node) {
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (statement == null) {
@@ -598,58 +442,21 @@ public class ControlStatementsFix extends AbstractFix {
 	public static IFix createCleanUp(CompilationUnit compilationUnit, 
 			boolean convertSingleStatementToBlock, 
 			boolean removeUnnecessaryBlock,
-			boolean removeUnnecessaryBlockContainingReturnOrThrow,
-			boolean convertForLoopToEnhanced) throws CoreException {
+			boolean removeUnnecessaryBlockContainingReturnOrThrow) throws CoreException {
 		
-		if (!convertSingleStatementToBlock && !convertForLoopToEnhanced && !removeUnnecessaryBlock && !removeUnnecessaryBlockContainingReturnOrThrow)
+		if (!convertSingleStatementToBlock && !removeUnnecessaryBlock && !removeUnnecessaryBlockContainingReturnOrThrow)
 			return null;
 		
 		List operations= new ArrayList();
-		ControlStatementFinder finder= new ControlStatementFinder(compilationUnit, convertSingleStatementToBlock, removeUnnecessaryBlock, removeUnnecessaryBlockContainingReturnOrThrow, convertForLoopToEnhanced, operations);
+		ControlStatementFinder finder= new ControlStatementFinder(convertSingleStatementToBlock, removeUnnecessaryBlock, removeUnnecessaryBlockContainingReturnOrThrow, operations);
 		compilationUnit.accept(finder);
 		
 		if (operations.isEmpty())
 			return null;
 		
-		flattenOperations(operations);
-		
 		IFixRewriteOperation[] ops= (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]);
 		return new ControlStatementsFix(FixMessages.ControlStatementsFix_change_name, compilationUnit, ops);
-	}	
-
-    private static void flattenOperations(List operations) {
-    	Hashtable changeBlockOps= new Hashtable();
-    	for (Iterator iterator= operations.iterator(); iterator.hasNext();) {
-	        IFixRewriteOperation op= (IFixRewriteOperation)iterator.next();
-	        if (op instanceof IChangeBlockOperation) {
-	        	IChangeBlockOperation rOp= (IChangeBlockOperation)op;
-	        	Statement singleStatement= rOp.getSingleStatement();
-	        	if (singleStatement instanceof ForStatement)
-					changeBlockOps.put(singleStatement, rOp);
-	        }
-        }
-    	
-    	for (Iterator iterator= operations.iterator(); iterator.hasNext();) {
-	        IFixRewriteOperation op= (IFixRewriteOperation)iterator.next();
-	        if (op instanceof ConvertForLoopOperation) {
-	        	ConvertForLoopOperation convertOp= (ConvertForLoopOperation)op;
-	        	ForStatement forStatement= convertOp.getForLoop();
-	        	if (changeBlockOps.containsKey(forStatement)) {
-	        		IChangeBlockOperation changeOp= (IChangeBlockOperation)changeBlockOps.get(forStatement);
-	        		changeOp.setSubOperation(convertOp);
-	        		iterator.remove();
-	        	}
-	        } else if (op instanceof ConvertIterableLoopOperation) {
-	        	ConvertIterableLoopOperation convertOp= (ConvertIterableLoopOperation)op;
-	        	ForStatement forStatement= convertOp.getForLoop();
-	        	if (changeBlockOps.containsKey(forStatement)) {
-	        		IChangeBlockOperation changeOp= (IChangeBlockOperation)changeBlockOps.get(forStatement);
-	        		changeOp.setSubOperation(convertOp);
-	        		iterator.remove();
-	        	}
-	        }
-        }
-    }
+	}
 
 	protected ControlStatementsFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations) {
 		super(name, compilationUnit, fixRewriteOperations);

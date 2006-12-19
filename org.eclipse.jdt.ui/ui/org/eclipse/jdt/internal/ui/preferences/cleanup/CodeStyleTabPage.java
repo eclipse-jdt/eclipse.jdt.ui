@@ -23,12 +23,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage;
 
 public final class CodeStyleTabPage extends ModifyDialogTabPage {
 	
@@ -44,6 +45,7 @@ public final class CodeStyleTabPage extends ModifyDialogTabPage {
     protected JavaPreview doCreateJavaPreview(Composite parent) {
         fCleanUpPreview= new CleanUpPreview(parent, new ICleanUp[] {
         		new ControlStatementsCleanUp(fValues),
+        		new ConvertLoopCleanUp(fValues),
         		new ExpressionsCleanUp(fValues),
         		new VariableDeclarationCleanUp(fValues)
         }, false);

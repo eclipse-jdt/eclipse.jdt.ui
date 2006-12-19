@@ -34,23 +34,12 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
+import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
-import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
-import org.eclipse.jdt.internal.ui.fix.CommentFormatCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
-import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
-import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
-import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.preferences.PreferencesAccess;
 import org.eclipse.jdt.internal.ui.preferences.formatter.IProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
@@ -110,20 +99,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		final Map sharedSettings= new Hashtable();
 		fill(settings, sharedSettings);
 		
-		final ICleanUp[] cleanUps= new ICleanUp[]{
-                		new ControlStatementsCleanUp(sharedSettings),
-                		new ExpressionsCleanUp(sharedSettings),
-                		new VariableDeclarationCleanUp(sharedSettings),
-                		new CodeStyleCleanUp(sharedSettings),
-                		new UnusedCodeCleanUp(sharedSettings),
-                		new UnnecessaryCodeCleanUp(sharedSettings),
-                		new StringCleanUp(sharedSettings),
-                		new Java50CleanUp(sharedSettings),
-                		new PotentialProgrammingProblemsCleanUp(sharedSettings),
-                		new ImportsCleanUp(sharedSettings),
-                		new CodeFormatCleanUp(sharedSettings),
-                		new CommentFormatCleanUp(sharedSettings)
-                };
+		final ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps(sharedSettings);
 		
 		createLabel(composite, CleanUpMessages.CleanUpConfigurationBlock_SelectedCleanUps_label, numColumns);
 		

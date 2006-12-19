@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -53,7 +52,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -61,15 +59,12 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix.IChangeBlockOperation;
-import org.eclipse.jdt.internal.corext.fix.LinkedFix.AbstractLinkedFixRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
-public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation implements IChangeBlockOperation {
+public class ConvertForLoopOperation extends ConvertLoopOperation {
 
-	private ForStatement fOldForStatement;
 	private EnhancedForStatement fEnhancedForStatement;
 	private AST fAst;
 	private Name fCollectionName;
@@ -83,11 +78,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 	private final ICompilationUnit fCompilationUnit;
 	private FieldAccess fFieldAccess;
 	private final CompilationUnit fRoot;
-	private final boolean fAddBlock;
-	private final boolean fRemoveUnnecessaryBlocks;
-	private boolean fPassive;
-	private IFixRewriteOperation fOperation;
-
+	
 	/**
 	 * Visitor class for finding all references to a certain Name within the
 	 * specified scope (e.g. finds all references to a local variable within the
@@ -159,58 +150,15 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 		}
 	}
 
-	/**
-	 * @param forStatement The For statement to be converted
-	 * @param root 
-	 * @param addBlock 
-	 * @param removeUnnecessaryBlocks 
-	 */
-	public ConvertForLoopOperation(CompilationUnit root, ForStatement forStatement, String parameterName, boolean addBlock, boolean removeUnnecessaryBlocks) {
+	
+	public ConvertForLoopOperation(CompilationUnit root, ForStatement forStatement, String parameterName) {
+		super(forStatement);
+		
 		fRoot= root;
-		fAddBlock= addBlock;
-		fRemoveUnnecessaryBlocks= removeUnnecessaryBlocks;
 		fCompilationUnit= (ICompilationUnit)root.getJavaElement();
-		this.fOldForStatement= forStatement;
 		fAst= root.getAST();
 		fParameterName= parameterName;
-		fPassive= false;
 	}
-	
-	public void makePassive() {
-		fPassive= true;
-	}
-	
-    public ForStatement getForLoop() {
-	    return fOldForStatement;
-    }
-	
-	public EnhancedForStatement getEnhancedForStatement() {
-	    return fEnhancedForStatement;
-    }
-	
-
-	/**
-     * {@inheritDoc}
-     */
-    public Statement getSingleStatement() {
-    	if (fOldForStatement.getBody() instanceof Block) {
-    		List statements= ((Block)fOldForStatement.getBody()).statements();
-			if (statements.size() != 1)
-    			return null;
-    	
-	    	return (Statement)statements.get(0);
-    	} else {
-    		return fOldForStatement.getBody();
-    	}
-    }
-
-	/**
-     * {@inheritDoc}
-     */
-    public void setSubOperation(IFixRewriteOperation operation) {
-		fOperation= operation;
-    }
-
 
 	/**
 	 * Check if the OldFor can be converted to Enhanced For. Unless all
@@ -223,7 +171,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 	 */
 	public boolean satisfiesPreconditions() {
 		return JavaModelUtil.is50OrHigher(fCompilationUnit.getJavaProject())
-			&& fOldForStatement.getExpression() != null
+			&& getForStatement().getExpression() != null
 			&& arrayCanBeInferred()
 			&& typeBindingsAreNotNull()
 			&& bodySatifiesPreconditions()
@@ -242,7 +190,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 		final List writeAccesses= new ArrayList();
 		final boolean isIndexReferenced[]= {false};
 
-		fOldForStatement.getBody().accept(new ASTVisitor() {
+		getForStatement().getBody().accept(new ASTVisitor() {
 			public boolean visit(Assignment assignment) {
 				classifyWriteAccess(assignment.getLeftHandSide());
 				return true;
@@ -345,7 +293,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 	}
 
 	private boolean indexNotDecremented() {
-		ASTNode updater= (ASTNode)fOldForStatement.updaters().get(0);
+		ASTNode updater= (ASTNode)getForStatement().updaters().get(0);
 
 		if (updater instanceof PostfixExpression) {
 			if ("++".equals(((PostfixExpression)updater).getOperator().toString())) //$NON-NLS-1$
@@ -365,7 +313,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 
 		final List tempVarsInInitializers= new ArrayList();
 		final boolean startsFromZero[] = {false};
-		List initializers= fOldForStatement.initializers();
+		List initializers= getForStatement().initializers();
 
 		for (Iterator iter = initializers.iterator(); iter.hasNext();) {
 			Expression element = (Expression) iter.next();
@@ -439,7 +387,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 	private boolean additionalTempsNotReferenced(List localTemps) {
 		for (Iterator iter= localTemps.iterator(); iter.hasNext();) {
 			Name name= (Name)iter.next();
-			LocalOccurencesFinder finder= new LocalOccurencesFinder(name, fOldForStatement.getBody());
+			LocalOccurencesFinder finder= new LocalOccurencesFinder(name, getForStatement().getBody());
 			finder.perform();
 			if (!finder.getOccurences().isEmpty())
 				return false;
@@ -448,7 +396,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 	}
 
 	private boolean onlyOneIndexUsed() {
-		return fOldForStatement.updaters().size() == 1;
+		return getForStatement().updaters().size() == 1;
 	}
 
 	private boolean arrayCanBeInferred() {
@@ -460,7 +408,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 	}
 
 	private IBinding inferIndexBinding() {
-		List initializers= fOldForStatement.initializers();
+		List initializers= getForStatement().initializers();
 		if (initializers.size() == 0)
 			return null;
 		
@@ -488,24 +436,21 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 		TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
 		textEditGroups.add(group);
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
-		ImportRewrite importRewrite= cuRewrite.getImportRewrite();
+		
+		Statement statement= convert(cuRewrite, group, positionGroups);
+		rewrite.replace(getForStatement(), statement, group);
+	}
+
+	protected Statement convert(CompilationUnitRewrite cuRewrite, TextEditGroup group, LinkedProposalModel positionGroups) throws CoreException {
+		ASTRewrite rewrite= cuRewrite.getASTRewrite();
+	    ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 		doInferCollection();
 		doInferElement(importRewrite);
 		doFindAndReplaceInBody(rewrite, group, positionGroups);
 
-		AST ast= fOldForStatement.getAST();
+		AST ast= getForStatement().getAST();
 		fEnhancedForStatement= ast.newEnhancedForStatement();
-		if (fAddBlock && !(fOldForStatement.getBody() instanceof Block)) {
-			Block newBody= ast.newBlock();
-			ListRewrite listRewrite= rewrite.getListRewrite(newBody, Block.STATEMENTS_PROPERTY);
-			listRewrite.insertFirst(createBodyStatement(cuRewrite, textEditGroups), group);
-			fEnhancedForStatement.setBody(newBody);
-		} else if (fRemoveUnnecessaryBlocks && fOldForStatement.getBody() instanceof Block && ((Block)fOldForStatement.getBody()).statements().size() == 1) {			
-			fEnhancedForStatement.setBody(createBodyStatement(cuRewrite, textEditGroups));
-		} else {
-			Statement theBody= (Statement)rewrite.createMoveTarget(fOldForStatement.getBody());
-			fEnhancedForStatement.setBody(theBody);
-		}
+		fEnhancedForStatement.setBody(getBody(cuRewrite, group, positionGroups));
 		fEnhancedForStatement.setExpression(createExpression(rewrite, ast));
 		fEnhancedForStatement.setParameter(fParameterDeclaration);
 		LinkedProposalPositionGroup pg= positionGroups.getPositionGroup(fParameterName, true);
@@ -519,25 +464,8 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 
 		for (Iterator iterator= proposals.iterator(); iterator.hasNext();)
 			pg.addProposal((String) iterator.next(), null, 10);
-
-		if (!fPassive)
-			rewrite.replace(fOldForStatement, fEnhancedForStatement, group);
-	}
-
-	private Statement createBodyStatement(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
-    	if (fOperation instanceof ConvertForLoopOperation) {
-    		ConvertForLoopOperation convertForLoopOperation= ((ConvertForLoopOperation)fOperation);
-    		convertForLoopOperation.makePassive();
-    		fOperation.rewriteAST(cuRewrite, textEditGroups);
-    		return convertForLoopOperation.getEnhancedForStatement();
-    	} else if (fOperation instanceof ConvertIterableLoopOperation) {
-    		ConvertIterableLoopOperation convertIterableLoopOperation= ((ConvertIterableLoopOperation)fOperation);
-    		convertIterableLoopOperation.makePassive();
-    		fOperation.rewriteAST(cuRewrite, textEditGroups);
-    		return convertIterableLoopOperation.getEnhancedForStatement();
-    	} else {
-    		return (Statement)cuRewrite.getASTRewrite().createMoveTarget(getSingleStatement());
-    	}
+		
+		return fEnhancedForStatement;
     }
 
 	private Expression createExpression(ASTRewrite rewrite, AST ast) {
@@ -568,11 +496,11 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 	}
 
 	private List getUsedVariableNames() {
-		CompilationUnit root= (CompilationUnit)fOldForStatement.getRoot();
-		IBinding[] varsBefore= (new ScopeAnalyzer(root)).getDeclarationsInScope(fOldForStatement.getStartPosition(),
+		CompilationUnit root= (CompilationUnit)getForStatement().getRoot();
+		IBinding[] varsBefore= (new ScopeAnalyzer(root)).getDeclarationsInScope(getForStatement().getStartPosition(),
 			ScopeAnalyzer.VARIABLES);
-		IBinding[] varsAfter= (new ScopeAnalyzer(root)).getDeclarationsAfter(fOldForStatement.getStartPosition()
-			+ fOldForStatement.getLength(), ScopeAnalyzer.VARIABLES);
+		IBinding[] varsAfter= (new ScopeAnalyzer(root)).getDeclarationsAfter(getForStatement().getStartPosition()
+			+ getForStatement().getLength(), ScopeAnalyzer.VARIABLES);
 
 		List names= new ArrayList();
 		for (int i= 0; i < varsBefore.length; i++) {
@@ -586,7 +514,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 
 	private void doFindAndReplaceInBody(ASTRewrite rewrite, TextEditGroup group, LinkedProposalModel positionGroups) {
 		LocalOccurencesFinder finder= new LocalOccurencesFinder(fCollectionName, fOldCollectionBinding,
-			fOldCollectionTypeBinding, fOldForStatement.getBody());
+			fOldCollectionTypeBinding, getForStatement().getBody());
 		finder.perform();
 		List occurences= finder.getOccurences();
 
@@ -628,7 +556,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 		}
 		
 
-		LocalOccurencesFinder finder2= new LocalOccurencesFinder(theTempVariable.resolveBinding(), fOldForStatement.getBody());
+		LocalOccurencesFinder finder2= new LocalOccurencesFinder(theTempVariable.resolveBinding(), getForStatement().getBody());
 		finder2.perform();
 		List occurences2= finder2.getOccurences();
 
@@ -672,7 +600,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 				SimpleName name= fAst.newSimpleName(fParameterName);
 				fParameterDeclaration.setName(name);
 
-				Type theType= importType(elementType, fOldForStatement, importRewrite, fRoot);
+				Type theType= importType(elementType, getForStatement(), importRewrite, fRoot);
 				if (fOldCollectionTypeBinding.getDimensions() != 1) {
 					theType= fAst.newArrayType(theType, fOldCollectionTypeBinding.getDimensions() - 1);
 				}
@@ -703,7 +631,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 	}
 
 	private void doInferCollectionFromExpression() {
-		Expression stopCondition= fOldForStatement.getExpression();
+		Expression stopCondition= getForStatement().getExpression();
 		if (stopCondition.getNodeType() == ASTNode.INFIX_EXPRESSION) {
 			Expression rightOperand= ((InfixExpression)stopCondition).getRightOperand();
 			if (rightOperand.getNodeType() == ASTNode.QUALIFIED_NAME) {
@@ -746,7 +674,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation i
 	}
 
 	private void doInferCollectionFromInitializers() {
-		List initializers= fOldForStatement.initializers();
+		List initializers= getForStatement().initializers();
 		for (Iterator iter= initializers.iterator(); iter.hasNext();) {
 			Object next= iter.next();
 			if (next instanceof VariableDeclarationExpression) {

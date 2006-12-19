@@ -44,8 +44,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 		return ControlStatementsFix.createCleanUp(compilationUnit,
 				isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS),
 				isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER),
-				isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW),
-				isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED));
+				isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW));
 	}
 
 	/**
@@ -74,8 +73,6 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 			result.add(MultiFixMessages.ControlStatementsCleanUp_RemoveUnnecessaryBlocks_description);
 		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW))
 			result.add(MultiFixMessages.ControlStatementsCleanUp_RemoveUnnecessaryBlocksWithReturnOrThrow_description);
-		if (isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED))
-			result.add(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description);
 		
 		return (String[])result.toArray(new String[result.size()]);
 	}
@@ -123,18 +120,6 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 			buf.append("} else \n"); //$NON-NLS-1$
 			buf.append("    return;\n"); //$NON-NLS-1$
 			buf.append("\n"); //$NON-NLS-1$
-		}
-		buf.append("\n"); //$NON-NLS-1$
-		if (isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED)) {
-			buf.append("for (int element : ids) {\n"); //$NON-NLS-1$
-			buf.append("    double value= element / 2; \n"); //$NON-NLS-1$
-			buf.append("    System.out.println(value);\n"); //$NON-NLS-1$
-			buf.append("}\n"); //$NON-NLS-1$
-		} else {
-			buf.append("for (int i = 0; i < ids.length; i++) {\n"); //$NON-NLS-1$
-			buf.append("    double value= ids[i] / 2; \n"); //$NON-NLS-1$
-			buf.append("    System.out.println(value);\n"); //$NON-NLS-1$
-			buf.append("}\n"); //$NON-NLS-1$
 		}
 		
 		return buf.toString();

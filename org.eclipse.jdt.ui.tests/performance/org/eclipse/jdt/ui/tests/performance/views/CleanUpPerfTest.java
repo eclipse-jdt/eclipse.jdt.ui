@@ -46,10 +46,10 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
-import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
@@ -236,15 +236,10 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		
 		storeSettings(node);
 		
-		cleanUpRefactoring.addCleanUp(new CodeStyleCleanUp());
-		cleanUpRefactoring.addCleanUp(new ControlStatementsCleanUp());
-		cleanUpRefactoring.addCleanUp(new ExpressionsCleanUp());
-		cleanUpRefactoring.addCleanUp(new Java50CleanUp());
-		cleanUpRefactoring.addCleanUp(new PotentialProgrammingProblemsCleanUp());
-		cleanUpRefactoring.addCleanUp(new StringCleanUp());
-		cleanUpRefactoring.addCleanUp(new UnnecessaryCodeCleanUp());
-		cleanUpRefactoring.addCleanUp(new UnusedCodeCleanUp());
-		cleanUpRefactoring.addCleanUp(new VariableDeclarationCleanUp());
+		ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps();
+		for (int i= 0; i < cleanUps.length; i++) {
+	        cleanUpRefactoring.addCleanUp(cleanUps[i]);
+        }
 		
 		//See https://bugs.eclipse.org/bugs/show_bug.cgi?id=135219
 //		tagAsSummary("Code Clean Up - 25 clean-ups", Dimension.ELAPSED_PROCESS);
@@ -306,6 +301,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		storeSettings(node);
 		
 		cleanUpRefactoring.addCleanUp(new ControlStatementsCleanUp());
+		cleanUpRefactoring.addCleanUp(new ConvertLoopCleanUp());
 
 		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
 		cleanUpRefactoring.createChange(null);

@@ -87,6 +87,7 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
+import org.eclipse.jdt.internal.corext.fix.ConvertLoopFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFix;
@@ -105,6 +106,7 @@ import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -1221,14 +1223,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (resultingCollections == null)
 			return true;
 		
-		IFix fix= ControlStatementsFix.createConvertForLoopToEnhancedFix(context.getASTRoot(), forStatement);
+		IFix fix= ConvertLoopFix.createConvertForLoopToEnhancedFix(context.getASTRoot(), forStatement);
 		if (fix == null)
 			return false;
 		
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		Map options= new HashMap();
 		options.put(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpConstants.TRUE);
-		ICleanUp cleanUp= new ControlStatementsCleanUp(options);
+		ICleanUp cleanUp= new ConvertLoopCleanUp(options);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 1, image, context);
 		proposal.setCommandId(CONVERT_FOR_LOOP_ID);
 		
@@ -1244,14 +1246,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (resultingCollections == null)
 			return true;
 		
-		IFix fix= ControlStatementsFix.createConvertIterableLoopToEnhancedFix(context.getASTRoot(), forStatement);
+		IFix fix= ConvertLoopFix.createConvertIterableLoopToEnhancedFix(context.getASTRoot(), forStatement);
 		if (fix == null)
 			return false;
 		
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		Map options= new HashMap();
 		options.put(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpConstants.TRUE);
-		ICleanUp cleanUp= new ControlStatementsCleanUp(options);
+		ICleanUp cleanUp= new ConvertLoopCleanUp(options);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 1, image, context);
 		proposal.setCommandId(CONVERT_FOR_LOOP_ID);
 		

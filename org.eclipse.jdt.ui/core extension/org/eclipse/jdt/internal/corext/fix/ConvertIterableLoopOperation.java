@@ -51,8 +51,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix.IChangeBlockOperation;
-import org.eclipse.jdt.internal.corext.fix.LinkedFix.AbstractLinkedFixRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -66,7 +64,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
  * 
  * @since 3.1
  */
-public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewriteOperation implements IChangeBlockOperation {
+public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 
 	/**
 	 * Returns the supertype of the given type with the qualified name.
@@ -122,22 +120,12 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 	/** The compilation unit to operate on */
 	private final CompilationUnit fRoot;
 
-	/** The for statement to convert */
-	private final ForStatement fStatement;
-
 	private final ICompilationUnit fCompilationUnit;
 
 	private final String fIdentifierName;
 
 	private EnhancedForStatement fEnhancedForLoop;
 	
-	private boolean fPassive;
-
-	private final boolean fAddBlocks;
-
-	private final boolean fRemoveUnnecessaryBlocks;
-
-	private IFixRewriteOperation fOperation;
 
 	/**
 	 * Creates a new convert iterable loop proposal.
@@ -145,27 +133,14 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 	 * @param unit the compilation unit containing the for statement
 	 * @param statement the for statement to be converted
 	 */
-	public ConvertIterableLoopOperation(final CompilationUnit unit, final ForStatement statement, String identifierName, boolean addBlocks, boolean removeUnnecessaryBlocks) {
+	public ConvertIterableLoopOperation(final CompilationUnit unit, final ForStatement statement, String identifierName) {
+		super(statement);
+		
 		fIdentifierName= identifierName;
-		fAddBlocks= addBlocks;
-		fRemoveUnnecessaryBlocks= removeUnnecessaryBlocks;
 		fCompilationUnit= (ICompilationUnit)unit.getJavaElement();
-		fStatement= statement;
 		fRoot= (CompilationUnit) statement.getRoot();
-		fPassive= false;
-	}
-
-    public ForStatement getForLoop() {
-	    return fStatement;
-    }
-	
-	public EnhancedForStatement getEnhancedForStatement() {
-		return fEnhancedForLoop;
 	}
 	
-    public void makePassive() {
-    	fPassive= true;
-    }
 
 	private List computeElementNames() {
 		final List names= new ArrayList();
@@ -182,9 +157,9 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 	}
 
 	private List getExcludedNames() {
-		final CompilationUnit unit= (CompilationUnit) fStatement.getRoot();
-		final IBinding[] before= (new ScopeAnalyzer(unit)).getDeclarationsInScope(fStatement.getStartPosition(), ScopeAnalyzer.VARIABLES);
-		final IBinding[] after= (new ScopeAnalyzer(unit)).getDeclarationsAfter(fStatement.getStartPosition() + fStatement.getLength(), ScopeAnalyzer.VARIABLES);
+		final CompilationUnit unit= (CompilationUnit) getForStatement().getRoot();
+		final IBinding[] before= (new ScopeAnalyzer(unit)).getDeclarationsInScope(getForStatement().getStartPosition(), ScopeAnalyzer.VARIABLES);
+		final IBinding[] after= (new ScopeAnalyzer(unit)).getDeclarationsAfter(getForStatement().getStartPosition() + getForStatement().getLength(), ScopeAnalyzer.VARIABLES);
 		final List names= new ArrayList();
 		for (int index= 0; index < before.length; index++)
 			names.add(before[index].getName());
@@ -234,11 +209,18 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 		final TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
 		textEditGroups.add(group);
 		
+		final ASTRewrite astRewrite= cuRewrite.getASTRewrite();
+		
+		Statement statement= convert(cuRewrite, group, positionGroups);
+		astRewrite.replace(getForStatement(), statement, group);
+	}
+
+	protected Statement convert(CompilationUnitRewrite cuRewrite, final TextEditGroup group, final LinkedProposalModel positionGroups) throws CoreException {
 		final AST ast= cuRewrite.getAST();
 		final ASTRewrite astRewrite= cuRewrite.getASTRewrite();
-		final ImportRewrite importRewrite= cuRewrite.getImportRewrite();
+	    final ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 	
-		final ImportRemover remover= new ImportRemover(fCompilationUnit.getJavaProject(), (CompilationUnit) fStatement.getRoot());
+		final ImportRemover remover= new ImportRemover(fCompilationUnit.getJavaProject(), (CompilationUnit) getForStatement().getRoot());
 		
 		fEnhancedForLoop= ast.newEnhancedForStatement();
 		final List names= computeElementNames();
@@ -254,7 +236,7 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 		for (final Iterator iterator= names.iterator(); iterator.hasNext();)
 			positionGroups.getPositionGroup(fIdentifierName, true).addProposal((String) iterator.next(), null, 10);
 		
-		final Statement body= fStatement.getBody();
+		final Statement body= getForStatement().getBody();
 		if (body != null) {
 			final ListRewrite list;
 			if (body instanceof Block) {
@@ -310,35 +292,8 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 				}
 			});
 			
-			if (fAddBlocks && !(body instanceof Block)) {
-				Statement theBody= (Statement)astRewrite.createMoveTarget(body);
-				Block newBody= ast.newBlock();
-				ListRewrite listRewrite= astRewrite.getListRewrite(newBody, Block.STATEMENTS_PROPERTY);
-				listRewrite.insertFirst(theBody, group);
-				fEnhancedForLoop.setBody(newBody);
-			} else if (fRemoveUnnecessaryBlocks && body instanceof Block && ((Block)body).statements().size() == 1) {
-				Statement moveTarget;
-				
-				if (fOperation == null) {
-					moveTarget= (Statement)astRewrite.createMoveTarget(getSingleStatement());
-				} else {
-					if (fOperation instanceof ConvertForLoopOperation) {
-						ConvertForLoopOperation convertForLoopOperation= ((ConvertForLoopOperation)fOperation);
-						convertForLoopOperation.makePassive();
-						fOperation.rewriteAST(cuRewrite, textEditGroups);
-						moveTarget= convertForLoopOperation.getEnhancedForStatement();
-					} else  {
-						ConvertIterableLoopOperation convertIterableLoopOperation= ((ConvertIterableLoopOperation)fOperation);
-						convertIterableLoopOperation.makePassive();
-						fOperation.rewriteAST(cuRewrite, textEditGroups);
-						moveTarget= convertIterableLoopOperation.getEnhancedForStatement();
-					}
-				}
-				
-				fEnhancedForLoop.setBody(moveTarget);
-			} else {
-				fEnhancedForLoop.setBody((Statement)astRewrite.createMoveTarget(body));
-			}
+
+			fEnhancedForLoop.setBody(getBody(cuRewrite, group, positionGroups));
 		}
 		final SingleVariableDeclaration declaration= ast.newSingleVariableDeclaration();
 		final SimpleName simple= ast.newSimpleName(name);
@@ -346,16 +301,15 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 		declaration.setName(simple);
 		final ITypeBinding iterable= getIterableType(fIterator.getType());
 		final ImportRewrite imports= importRewrite;
-		declaration.setType(importType(iterable, fStatement, importRewrite, fRoot));
+		declaration.setType(importType(iterable, getForStatement(), importRewrite, fRoot));
 		remover.registerAddedImport(iterable.getQualifiedName());
 		fEnhancedForLoop.setParameter(declaration);
 		fEnhancedForLoop.setExpression(getExpression(astRewrite));
-		if (!fPassive)
-			astRewrite.replace(fStatement, fEnhancedForLoop, group);
-		
-		remover.registerRemovedNode(fStatement);
+		remover.registerRemovedNode(getForStatement());
 		remover.applyRemoves(imports);
-	}
+		
+		return fEnhancedForLoop;
+    }
 
 	/**
 	 * Is this proposal applicable?
@@ -369,14 +323,14 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 			if (resultStatus.getSeverity() == IStatus.ERROR)
 				return resultStatus;
 			
-			List updateExpressions= ((List)fStatement.getStructuralProperty(ForStatement.UPDATERS_PROPERTY));
+			List updateExpressions= ((List)getForStatement().getStructuralProperty(ForStatement.UPDATERS_PROPERTY));
 			if (updateExpressions.size() == 1) {
 				resultStatus= new StatusInfo(IStatus.WARNING, Messages.format(FixMessages.ConvertIterableLoopOperation_RemoveUpdateExpression_Warning, ((Expression)updateExpressions.get(0)).toString()));
 			} else if (updateExpressions.size() > 1) {
 				resultStatus= new StatusInfo(IStatus.WARNING, FixMessages.ConvertIterableLoopOperation_RemoveUpdateExpressions_Warning);
 			}
 			
-			for (final Iterator outer= fStatement.initializers().iterator(); outer.hasNext();) {
+			for (final Iterator outer= getForStatement().initializers().iterator(); outer.hasNext();) {
 				final Expression initializer= (Expression) outer.next();
 				if (initializer instanceof VariableDeclarationExpression) {
 					final VariableDeclarationExpression declaration= (VariableDeclarationExpression) initializer;
@@ -448,7 +402,7 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 					}
 				}
 			}
-			final Statement statement= fStatement.getBody();
+			final Statement statement= getForStatement().getBody();
 			final boolean[] otherInvocationThenNext= new boolean[] {false};
 			final int[] nextInvocationCount= new int[] {0};
 			if (statement != null && fIterator != null) {
@@ -556,7 +510,7 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 				if (nextInvocationCount[0] > 1)
 					return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 			}
-			final ASTNode root= fStatement.getRoot();
+			final ASTNode root= getForStatement().getRoot();
 			if (root != null) {
 				root.accept(new ASTVisitor() {
 
@@ -583,7 +537,7 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
     private IStatus checkExpressionCondition() {
 		String warningLable= FixMessages.ConvertIterableLoopOperation_semanticChangeWarning;
 		
-    	Expression expression= fStatement.getExpression();
+    	Expression expression= getForStatement().getExpression();
 		if (!(expression instanceof MethodInvocation))
 			return new StatusInfo(IStatus.WARNING, warningLable);
 		
@@ -609,27 +563,5 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 		}
 		
 	    return StatusInfo.OK_STATUS;
-    }
-
-	/**
-     * {@inheritDoc}
-     */
-    public Statement getSingleStatement() {
-    	if (fStatement.getBody() instanceof Block) {
-    		List statements= ((Block)fStatement.getBody()).statements();
-			if (statements.size() != 1)
-    			return null;
-    	
-	    	return (Statement)statements.get(0);
-    	} else {
-    		return fStatement.getBody();
-    	}
-    }
-
-	/**
-     * {@inheritDoc}
-     */
-    public void setSubOperation(IFixRewriteOperation op) {
-		fOperation= op;    	
     }
 }
