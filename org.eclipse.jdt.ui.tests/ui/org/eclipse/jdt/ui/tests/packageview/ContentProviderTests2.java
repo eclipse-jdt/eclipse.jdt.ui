@@ -269,8 +269,9 @@ public class ContentProviderTests2 extends TestCase{
 		if (myPart instanceof MockPluginView) {
 			fMyPart = (MockPluginView) myPart;
 			fMyPart.setFolding(false);
+			fMyPart.setFlatLayout(false);
 			// above call might cause a property change event being sent
-			fMyPart.fRefreshedObjects.clear();
+			fMyPart.clear();
 			fProvider = (ITreeContentProvider) fMyPart.getTreeViewer().getContentProvider();
 		} else
 			assertTrue("Unable to get view", false); //$NON-NLS-1$

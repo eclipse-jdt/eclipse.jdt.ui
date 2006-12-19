@@ -39,11 +39,13 @@ public class MockPluginView extends PackageExplorerPart {
 	TreeViewer fViewer;
 	private ITreeContentProvider contentProvider;
 	private boolean fRefreshHappened;
-	public List fRefreshedObjects;
+
 	private boolean fRemoveHappened;
 	private boolean fAddHappened;
 	
-	private List fRemovedObject;
+	private final List fRefreshedObjects;
+	private final List fRemovedObjects;
+	
 	private Object fAddedObject;
 	private Object fAddedParentObject;
 
@@ -53,7 +55,7 @@ public class MockPluginView extends PackageExplorerPart {
 	public MockPluginView() {
 		super();
 		fRefreshedObjects= new ArrayList();
-		fRemovedObject= new ArrayList();
+		fRemovedObjects= new ArrayList();
 	}
 	
 	/**
@@ -130,7 +132,7 @@ public class MockPluginView extends PackageExplorerPart {
 		
 		public void remove(Object object) {
 			fRemoveHappened= true;
-			fRemovedObject.add(object);
+			fRemovedObjects.add(object);
 		}
 		
 		public void add(Object parentObject, Object object){
@@ -179,8 +181,8 @@ public class MockPluginView extends PackageExplorerPart {
 	 * Returns the object removed from the viewer
 	 * @return Object
 	 */
-	public List getRemovedObject() {
-		return fRemovedObject;
+	public List getRemovedObjects() {
+		return fRemovedObjects;
 	}
 
 	/**
@@ -205,5 +207,17 @@ public class MockPluginView extends PackageExplorerPart {
 	 */
 	public void setFolding(boolean fold) {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, fold);
+	}
+
+	/**
+	 * 
+	 */
+	public void clear() {
+		fRefreshedObjects.clear();
+		fRemovedObjects.clear();
+		fAddHappened= false;
+		fRemoveHappened= false;
+		fRefreshHappened= false;
+		fAddedObject= null;
 	}		
 }

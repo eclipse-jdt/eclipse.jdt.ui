@@ -210,9 +210,9 @@ public class ContentProviderTests3 extends TestCase {
 		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
 		}
 
-		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
-		assertTrue("Correct Refresh", fMyPart.wasObjectRefreshed(fRoot1)); //$NON-NLS-1$
-		assertTrue("Single refreshe", fMyPart.getRefreshedObject().size() == 1); //$NON-NLS-1$
+		assertTrue("Add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
+		assertTrue("Correct Add", fMyPart.getAddedObject() == test); //$NON-NLS-1$
+		assertTrue("No refresh", fMyPart.getRefreshedObject().size() == 0); //$NON-NLS-1$
 	}
 
 	public void testChangedTopLevelPackageFragmentFolding() throws Exception {
@@ -268,7 +268,7 @@ public class ContentProviderTests3 extends TestCase {
 		}
 
 		assertTrue("Remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
-		assertTrue("Correct refresh", fMyPart.getRemovedObject().contains(fCU2)); //$NON-NLS-1$
+		assertTrue("Correct refresh", fMyPart.getRemovedObjects().contains(fCU2)); //$NON-NLS-1$
 		assertEquals("No refreshes", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 	
@@ -386,8 +386,9 @@ public class ContentProviderTests3 extends TestCase {
 			fMyPart= (MockPluginView) myPart;
 			//turn on folding
 			fMyPart.setFolding(true);
+			fMyPart.setFlatLayout(false);
 			// above call might cause a property change event being sent
-			fMyPart.fRefreshedObjects.clear();
+			fMyPart.clear();
 			fProvider= (ITreeContentProvider)fMyPart.getTreeViewer().getContentProvider();
 	
 		}else assertTrue("Unable to get view",false);//$NON-NLS-1$

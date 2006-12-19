@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.packageview;
 
-import java.util.ArrayList;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -185,14 +183,14 @@ public class ContentProviderTests1 extends TestCase {
 		
 		//send a delta indicating fragment deleted
 		IElementChangedListener listener= (IElementChangedListener)fProvider;
-		IJavaElementDelta delta= TestDelta.createDelta(fPack4, IJavaElementDelta.REMOVED);
+		IJavaElementDelta delta= TestDelta.createDelta(fPack2, IJavaElementDelta.REMOVED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 		
 		//force events from dispaly
 		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {}
 		
 		assertTrue("Remove happened", fMyPart.hasRemoveHappened());//$NON-NLS-1$
-		assertTrue("Correct Remove", fMyPart.getRemovedObject().contains(fPack4));//$NON-NLS-1$
+		assertTrue("Correct Remove", fMyPart.getRemovedObjects().contains(fPack2));//$NON-NLS-1$
 		assertEquals("No refreshes", 0, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
 	}
 	
@@ -226,7 +224,7 @@ public class ContentProviderTests1 extends TestCase {
 	
 	public void testChangeBottomLevelPackageFragment() throws Exception{
 		//send a delta indicating fragment deleted
-		fMyPart.fRefreshedObjects= new ArrayList();
+		fMyPart.clear();
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= TestDelta.createDelta(fPack6, IJavaElementDelta.CHANGED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
@@ -262,7 +260,7 @@ public class ContentProviderTests1 extends TestCase {
 		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {}
 
 		assertTrue("Remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
-		assertTrue("Correct refresh", fMyPart.getRemovedObject().contains(fCU2)); //$NON-NLS-1$
+		assertTrue("Correct refresh", fMyPart.getRemovedObjects().contains(fCU2)); //$NON-NLS-1$
 		assertEquals("No refreshes", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 	
@@ -414,8 +412,9 @@ public class ContentProviderTests1 extends TestCase {
 		if (myPart instanceof MockPluginView) {
 			fMyPart= (MockPluginView) myPart;
 			fMyPart.setFolding(false);
+			fMyPart.setFlatLayout(false);
 			// above call might cause a property change event being sent
-			fMyPart.fRefreshedObjects.clear();
+			fMyPart.clear();
 			fProvider= (ITreeContentProvider)fMyPart.getTreeViewer().getContentProvider();
 		}else assertTrue("Unable to get view",false);//$NON-NLS-1$
 	
