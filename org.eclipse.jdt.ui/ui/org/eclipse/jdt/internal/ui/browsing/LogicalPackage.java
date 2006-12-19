@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.browsing;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
@@ -19,6 +20,7 @@ import org.eclipse.core.runtime.PlatformObject;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * Contains a list of package fragments with the same name
@@ -87,6 +89,20 @@ public class LogicalPackage extends PlatformObject {
 
 		return false;
 	}
+	
+	public boolean hasSubpackages() throws JavaModelException {
+		for (Iterator iter= fPackages.iterator(); iter.hasNext();) {
+			IPackageFragment pack= (IPackageFragment) iter.next();
+			if (pack.hasSubpackages()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean isDefaultPackage() {
+		return fName.length() == 0;
+	}
 
 	public boolean equals(Object o){
 		if (!(o instanceof LogicalPackage))
@@ -124,5 +140,4 @@ public class LogicalPackage extends PlatformObject {
 			return fragments[0].hashCode() * 17;
 		else return fragments[index].hashCode() * 17 + getHash(fragments, index-1);
 	}
-
 }

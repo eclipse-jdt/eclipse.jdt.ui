@@ -10,14 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.browsing;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Widget;
 
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.IPackageFragment;
@@ -65,97 +63,33 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 		}
 		super.unmapElement(element, item);
 	}
-
-	/*
-	 * @see org.eclipse.jface.viewers.StructuredViewer#getFilteredChildren(java.lang.Object)
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer#isFiltered(java.lang.Object, java.lang.Object, org.eclipse.jface.viewers.ViewerFilter[])
 	 */
-	protected Object[] getFilteredChildren(Object parent) {
-		List list= new ArrayList();
-		Object[] result= getRawChildren(parent);
-		if (result != null)	{
-			Object[] toBeFiltered= new Object[1];
-			for (int i= 0; i < result.length; i++) {
-				Object object= result[i];
-				toBeFiltered[0]= object;
-				if(object instanceof LogicalPackage) {
-					if(filterLogicalPackages((LogicalPackage)object))
-						list.add(object);
-				} else if (isEssential(object) || filter(toBeFiltered).length == 1)
-					list.add(object);
-			}
+	protected boolean isFiltered(Object object, Object parent, ViewerFilter[] filters) {
+		boolean res= super.isFiltered(object, parent, filters);
+		if (res && isEssential(object)) {
+			return false;
 		}
-		return list.toArray();
-	}
-
-
-	/*
-	 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object[])
-	 * @since 3.0
-	 */
-	protected Object[] filter(Object[] elements) {
-		ViewerFilter[] filters= getFilters();
-		if (filters == null || filters.length == 0)
-			return elements;
-
-		ArrayList filtered= new ArrayList(elements.length);
-		Object root= getRoot();
-		for (int i= 0; i < elements.length; i++) {
-			boolean add= true;
-			if (!isEssential(elements[i])) {
-				for (int j = 0; j < filters.length; j++) {
-					add= filters[j].select(this, root,
-						elements[i]);
-					if (!add)
-						break;
-				}
-			}
-			if (add)
-				filtered.add(elements[i]);
-		}
-		return filtered.toArray();
-	}
-
-	/*
-	 * @see AbstractTreeViewer#isExpandable(java.lang.Object)
-	 */
-	public boolean isExpandable(Object parent) {
-		Object[] children= ((ITreeContentProvider)getContentProvider()).getChildren(parent);
-		Object[] toBeFiltered= new Object[1];
-		for (int i = 0; i < children.length; i++) {
-			Object object= children[i];
-
-			if (isEssential(object))
-				return true;
-
-			toBeFiltered[0]= object;
-			Object[] filtered= filter(toBeFiltered);
-			if (filtered.length > 0)
-				return true;
-		}
-		return false;
+		return res;
 	}
 
 	private boolean isEssential(Object object) {
 		try {
 			if (object instanceof IPackageFragment) {
-				IPackageFragment fragment= (IPackageFragment) object;
-				return !fragment.isDefaultPackage() && fragment.hasSubpackages();
+				IPackageFragment fragment = (IPackageFragment) object;
+				if (!fragment.isDefaultPackage() && fragment.hasSubpackages()) {
+					return hasFilteredChildren(fragment);
+				}
+			} else if (object instanceof LogicalPackage) {
+				LogicalPackage logicalPackage= (LogicalPackage) object;
+				if (!logicalPackage.isDefaultPackage() && logicalPackage.hasSubpackages()) {
+					return !hasFilteredChildren(object);
+				}
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
-		}
-
-		return false;
-	}
-
-	private boolean filterLogicalPackages(LogicalPackage logicalPackage) {
-		IPackageFragment[] fragments= logicalPackage.getFragments();
-		Object[] toBeFiltered= new Object[1];
-		for (int i= 0; i < fragments.length; i++) {
-			IPackageFragment fragment= fragments[i];
-			toBeFiltered[0]= fragment;
-			if(isEssential(fragment) || filter(toBeFiltered).length != 0)
-				return true;
 		}
 		return false;
 	}

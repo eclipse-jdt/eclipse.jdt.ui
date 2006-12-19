@@ -502,10 +502,11 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				} else {
 					postRefresh(internalGetParent(parent), GRANT_PARENT, element, runnables);
 				}
-			} 
-			if (processResourceDeltas(delta.getResourceDeltas(), element, runnables))
-			    return;
-			handleAffectedChildren(delta, element, runnables);
+			} else {
+				if (processResourceDeltas(delta.getResourceDeltas(), element, runnables))
+				    return;
+				handleAffectedChildren(delta, element, runnables);
+			}
 			return;
 		}
 		

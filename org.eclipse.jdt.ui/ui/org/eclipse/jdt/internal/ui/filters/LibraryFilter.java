@@ -17,6 +17,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 
 
@@ -30,8 +31,6 @@ public class LibraryFilter extends ViewerFilter {
 	 * Method declared on ViewerFilter.
 	 */
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
-		if (element instanceof ClassPathContainer)
-			return false;
 		if (element instanceof IPackageFragmentRoot) {
 			IPackageFragmentRoot root= (IPackageFragmentRoot)element;
 			if (root.isArchive()) {
@@ -44,6 +43,8 @@ public class LibraryFilter extends ViewerFilter {
 				}
 				return false;
 			}
+		} else if (element instanceof ClassPathContainer.RequiredProjectWrapper) {
+			return false;
 		}
 		return true;
 	}

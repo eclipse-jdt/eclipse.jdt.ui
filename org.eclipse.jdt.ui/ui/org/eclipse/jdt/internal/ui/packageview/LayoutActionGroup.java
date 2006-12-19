@@ -91,7 +91,7 @@ class LayoutAction extends Action implements IAction {
 	 */
 	public void run() {
 		if (fPackageExplorer.isFlatLayout() != fIsFlatLayout)
-			fPackageExplorer.toggleLayout();
+			fPackageExplorer.setFlatLayout(fIsFlatLayout);
 	}
 }
 

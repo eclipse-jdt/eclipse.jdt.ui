@@ -261,27 +261,7 @@ public class PackageExplorerPart extends ViewPart
 				fPendingRefreshes.remove(element);
 			}
 		}
-		
-		/*
-		 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object)
-		 */
-		protected Object[] getFilteredChildren(Object parent) {
-			Object[] children = getRawChildren(parent);
-			if (!hasFilters()) {
-				return children;
-			}
-			List list = new ArrayList();
-			ViewerFilter[] filters = getFilters();
-
-			for (int i = 0; i < children.length; i++) {
-				Object object = children[i];
-				if (!isFiltered(object, parent, filters)) {
-					list.add(object);
-				}
-			}
-			return list.toArray();
-		}
-		
+	    
 		protected boolean evaluateExpandableWithFilters(Object parent) {
 			if (parent instanceof IJavaProject
 					|| parent instanceof ICompilationUnit || parent instanceof IClassFile
@@ -295,30 +275,15 @@ public class PackageExplorerPart extends ViewPart
 		}
 
 		protected boolean isFiltered(Object object, Object parent, ViewerFilter[] filters) {
+			if (object instanceof PackageFragmentRootContainer) {
+				return !hasFilteredChildren(object);
+			}
+			
 			boolean res= super.isFiltered(object, parent, filters);
 			if (res && isEssential(object)) {
 				return false;
 			}
 			return res;
-		}
-		
-		/*
-		 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object[])
-		 * @since 3.0
-		 */
-		protected Object[] filter(Object[] elements) {
-			ViewerFilter[] filters= getFilters();
-			if (filters == null || filters.length == 0)
-				return elements;
-			
-			ArrayList filtered= new ArrayList(elements.length);
-			Object root= getRoot();
-			for (int i= 0; i < elements.length; i++) {
-				Object curr= elements[i];
-				if (!isFiltered(curr, root, filters))
-					filtered.add(curr);
-			}
-			return filtered.toArray();
 		}
 		
 		/* Checks if a filtered object in essential (ie. is a parent that
@@ -329,7 +294,7 @@ public class PackageExplorerPart extends ViewPart
 				if (!isFlatLayout() && object instanceof IPackageFragment) {
 					IPackageFragment fragment = (IPackageFragment) object;
 					if (!fragment.isDefaultPackage() && fragment.hasSubpackages()) {
-						return getFilteredChildren(fragment).length != 0;
+						return hasFilteredChildren(fragment);
 					}
 				}
 			} catch (JavaModelException e) {
@@ -697,18 +662,20 @@ public class PackageExplorerPart extends ViewPart
 	}
 	
 	
-	void toggleLayout() {
+	public void setFlatLayout(boolean enable) {
 		// Update current state and inform content and label providers
-		fIsCurrentLayoutFlat= !fIsCurrentLayoutFlat;
+		fIsCurrentLayoutFlat= enable;
 		saveDialogSettings();
 		
-		fContentProvider.setIsFlatLayout(isFlatLayout());
-		fLabelProvider.setIsFlatLayout(isFlatLayout());
-		((DecoratingJavaLabelProvider) fViewer.getLabelProvider()).setFlatPackageMode(isFlatLayout());
-		
-		fViewer.getControl().setRedraw(false);
-		fViewer.refresh();
-		fViewer.getControl().setRedraw(true);
+		if (fViewer != null) {
+			fContentProvider.setIsFlatLayout(isFlatLayout());
+			fLabelProvider.setIsFlatLayout(isFlatLayout());
+			((DecoratingJavaLabelProvider) fViewer.getLabelProvider()).setFlatPackageMode(isFlatLayout());
+			
+			fViewer.getControl().setRedraw(false);
+			fViewer.refresh();
+			fViewer.getControl().setRedraw(true);
+		}
 	}
 	
 	/**

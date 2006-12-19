@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 
@@ -176,6 +177,64 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		}
 		return super.isExpandable(parent);
 	}
+	
+    protected final boolean hasFilteredChildren(Object parent) {
+		Object[] children = getRawChildren(parent);
+		if (children.length == 0) {
+			return false;
+		}
+		if (!hasFilters()) {
+			return children.length > 0;
+		}
+		ViewerFilter[] filters = getFilters();
+
+		for (int i = 0; i < children.length; i++) {
+			Object object = children[i];
+			if (!isFiltered(object, parent, filters)) {
+				return true;
+			}
+		}
+		return false;
+    }
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.AbstractTreeViewer#getFilteredChildren(java.lang.Object)
+	 */
+	protected final Object[] getFilteredChildren(Object parent) {
+		Object[] children = getRawChildren(parent);
+		if (!hasFilters()) {
+			return children;
+		}
+		List list = new ArrayList();
+		ViewerFilter[] filters = getFilters();
+
+		for (int i = 0; i < children.length; i++) {
+			Object object = children[i];
+			if (!isFiltered(object, parent, filters)) {
+				list.add(object);
+			}
+		}
+		return list.toArray();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object[])
+	 */
+	protected final Object[] filter(Object[] elements) {
+		ViewerFilter[] filters= getFilters();
+		if (filters == null || filters.length == 0)
+			return elements;
+		
+		ArrayList filtered= new ArrayList(elements.length);
+		Object root= getRoot();
+		for (int i= 0; i < elements.length; i++) {
+			Object curr= elements[i];
+			if (!isFiltered(curr, root, filters))
+				filtered.add(curr);
+		}
+		return filtered.toArray();
+	}
+	
 	
 	protected boolean isFiltered(Object object, Object parent, ViewerFilter[] filters) {
 		for (int i = 0; i < filters.length; i++) {
