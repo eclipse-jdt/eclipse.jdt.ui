@@ -52,6 +52,7 @@ public final class ActionMessages extends NLS {
 	public static String GenerateNewConstructorUsingFieldsAction_error_not_a_source_file;
 	public static String OpenAction_error_problem_opening_editor;
 	public static String OpenAction_multistatus_message;
+	public static String OpenViewActionGroup_showInAction_label;
 	public static String OpenWithMenu_label;
 
 	public static String RefactorMenu_label;

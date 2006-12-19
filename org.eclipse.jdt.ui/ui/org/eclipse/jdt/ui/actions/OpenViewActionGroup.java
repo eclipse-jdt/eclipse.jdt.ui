@@ -12,6 +12,7 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -19,14 +20,21 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.actions.ContributionItemFactory;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
+import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
+import org.eclipse.osgi.util.NLS;
+
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.callhierarchy.OpenCallHierarchyAction;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
@@ -55,7 +63,8 @@ public class OpenViewActionGroup extends ActionGroup {
 	private PropertyDialogAction fOpenPropertiesDialog;
 	
 	private boolean fShowOpenPropertiesAction= true;
-
+	private boolean fShowShowInMenu= true;
+	
 	/**
 	 * Creates a new <code>OpenActionGroup</code>. The group requires
 	 * that the selection provided by the page's selection provider is 
@@ -133,6 +142,7 @@ public class OpenViewActionGroup extends ActionGroup {
 	 */
 	public OpenViewActionGroup(JavaEditor part) {
 		fEditorIsOwner= true;
+		fShowShowInMenu= false;
 
 		fOpenSuperImplementation= new OpenSuperImplementationAction(part);
 		fOpenSuperImplementation.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_SUPER_IMPLEMENTATION);
@@ -162,6 +172,17 @@ public class OpenViewActionGroup extends ActionGroup {
 	 */
 	public void containsOpenPropertiesAction(boolean enable) {
 		fShowOpenPropertiesAction= enable;
+	}
+	
+	/**
+	 * Specifies if this action group also contains the 'Show In' menu (See {@link ContributionItemFactory#VIEWS_SHOW_IN}).
+	 * By default, the action is  contained in the group except for editors.
+	 * 
+	 * @param enable If set, the 'Show In' menu is part of this action group
+	 * @since 3.3
+	 */
+	public void containsShowInMenu(boolean enable) {
+		fShowShowInMenu= enable;
 	}
 	
 	private void createSiteActions(IWorkbenchSite site, ISelectionProvider specialProvider) {
@@ -229,9 +250,30 @@ public class OpenViewActionGroup extends ActionGroup {
 			appendToGroup(menu, fOpenTypeHierarchy);
         if (!fIsCallHiararchyViewerOwner)
             appendToGroup(menu, fOpenCallHierarchy);
+        
+        if (fShowShowInMenu) {
+			MenuManager showInSubMenu= new MenuManager(getShowInMenuLabel());
+			IWorkbenchWindow workbenchWindow= fOpenSuperImplementation.getSite().getWorkbenchWindow();
+			showInSubMenu.add(ContributionItemFactory.VIEWS_SHOW_IN.create(workbenchWindow));
+			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, showInSubMenu);
+        }
+
 		IStructuredSelection selection= getStructuredSelection();
 		if (fShowOpenPropertiesAction && selection != null)
 			menu.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, fOpenPropertiesDialog);
+	}
+	
+	private String getShowInMenuLabel() {
+		String keyBinding= null;
+		
+		IBindingService bindingService= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
+		if (bindingService != null)
+			keyBinding= bindingService.getBestActiveBindingFormattedFor("org.eclipse.ui.navigate.showInQuickMenu"); //$NON-NLS-1$
+		
+		if (keyBinding == null)
+			keyBinding= ""; //$NON-NLS-1$
+		
+		return NLS.bind(ActionMessages.OpenViewActionGroup_showInAction_label, keyBinding);
 	}
 
 	/*
