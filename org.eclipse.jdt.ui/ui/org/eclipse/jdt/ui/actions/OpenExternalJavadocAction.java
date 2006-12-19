@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
@@ -188,16 +187,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 					showMessage(shell, Messages.format(message, new String[] { labelName, annotatedElement.getElementName() }), false);
 				}
 				return;
-			}
-			if ("file".equals(baseURL.getProtocol())) { //$NON-NLS-1$
-				URL noRefURL= JavaUI.getJavadocLocation(element, false);
-				if (!(new File(noRefURL.getFile())).isFile()) {
-					String message= ActionMessages.OpenExternalJavadocAction_no_entry; 
-					showMessage(shell, Messages.format(message, new String[] { labelName, noRefURL.toExternalForm() }), false);
-					return;
-				}
-			}
-		
+			}		
 			URL url= JavaUI.getJavadocLocation(element, true);
 			if (url != null) {
 				OpenBrowserUtil.open(url, shell.getDisplay(), getTitle());
