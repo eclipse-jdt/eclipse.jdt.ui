@@ -77,6 +77,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	private boolean fIsFlatLayout;
 	private boolean fShowLibrariesNode;
 	private boolean fFoldPackages;
+	
+	private Collection fPendingUpdates;
 		
 	/**
 	 * Creates a new content provider for Java elements.
@@ -86,6 +88,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		fShowLibrariesNode= false;
 		fIsFlatLayout= false;
 		fFoldPackages= arePackagesFoldedInHierarchicalLayout();
+		fPendingUpdates= null;
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 	}
 	
@@ -117,6 +120,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	}
 
 	protected final void executeRunnables(final Collection runnables) {
+
 		// now post all collected runnables
 		Control ctrl= fViewer.getControl();
 		if (ctrl != null && !ctrl.isDisposed()) {
@@ -124,29 +128,46 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			if (ctrl.getDisplay().getThread() == Thread.currentThread()) {
 				runUpdates(runnables);
 			} else {
+				synchronized (this) {
+					if (fPendingUpdates == null) {
+						fPendingUpdates= runnables;
+					} else {
+						fPendingUpdates.addAll(runnables);
+					}
+				}
 				ctrl.getDisplay().asyncExec(new Runnable(){
 					public void run() {
-						//Abort if this happens after disposes
-						Control control = fViewer.getControl();
-						if (control != null && !control.isDisposed()) {
-							runUpdates(runnables);
-						}
+						runPendingUpdates();
 					}
 				});
 			}
 		}
 	}
-
+	
 	/**
-	 * Run all of the runnables that are the widget updates
-	 * @param runnables
+	 * Run all of the runnables that are the widget updates. Must be called in the display thread.
 	 */
+	public void runPendingUpdates() {
+		Collection pendingUpdates;
+		synchronized (this) {
+			pendingUpdates= fPendingUpdates;
+			fPendingUpdates= null;
+		}
+		if (pendingUpdates != null && fViewer != null) {
+			Control control = fViewer.getControl();
+			if (control != null && !control.isDisposed()) {
+				runUpdates(pendingUpdates);
+			}
+		}
+	}
+	
 	private void runUpdates(Collection runnables) {
 		Iterator runnableIterator = runnables.iterator();
 		while (runnableIterator.hasNext()){
 			((Runnable) runnableIterator.next()).run();
 		}
 	}
+	
 
 	private boolean inputDeleted(Collection runnables) {
 		if (fInput == null)

@@ -915,8 +915,9 @@ public class PackageExplorerPart extends ViewPart
 		Control ctrl= getViewer().getControl();
 		if (ctrl == null || ctrl.isDisposed())
 			return;
-		ISelection javaSelection= convertSelection(selection);
-		fViewer.setSelection(javaSelection, true);
+		
+		fContentProvider.runPendingUpdates();
+		fViewer.setSelection(convertSelection(selection), true);
 	}
 
 	public ISelection convertSelection(ISelection s) {
