@@ -15,7 +15,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 
 public abstract class ConvertLoopOperation extends AbstractLinkedFixRewriteOperation {
 	
-	private ForStatement fStatement;
+	private final ForStatement fStatement;
 	private ConvertLoopOperation fOperation;
 	
 	public ConvertLoopOperation(ForStatement statement) {
@@ -36,8 +36,8 @@ public abstract class ConvertLoopOperation extends AbstractLinkedFixRewriteOpera
 		if (fOperation != null) {
 			return fOperation.convert(cuRewrite, group, positionGroups);
 		} else {
-    		return (Statement)cuRewrite.getASTRewrite().createMoveTarget(getForStatement().getBody());
-    	}
-    }
+			return (Statement)cuRewrite.getASTRewrite().createMoveTarget(getForStatement().getBody());
+		}
+	}
 	
 }
