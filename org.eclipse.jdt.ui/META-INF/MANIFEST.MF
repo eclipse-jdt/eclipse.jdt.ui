@@ -18,6 +18,7 @@ Export-Package: org.eclipse.jdt.internal.corext;x-friends:="org.eclipse.jdt.juni
  org.eclipse.jdt.internal.corext.refactoring.base;x-internal:=true,
  org.eclipse.jdt.internal.corext.refactoring.binary;x-internal:=true,
  org.eclipse.jdt.internal.corext.refactoring.changes;x-internal:=true,
+ org.eclipse.jdt.internal.corext.refactoring.changes.undo;x-internal:=true,
  org.eclipse.jdt.internal.corext.refactoring.code;x-internal:=true,
  org.eclipse.jdt.internal.corext.refactoring.code.flow;x-internal:=true,
  org.eclipse.jdt.internal.corext.refactoring.delegates;x-internal:=true,
