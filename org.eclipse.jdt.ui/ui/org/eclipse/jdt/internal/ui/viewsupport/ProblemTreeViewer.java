@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
 
+
 /**
  * Extends a  TreeViewer to allow more performance when showing error ticks.
  * A <code>ProblemItemMapper</code> is contained that maps all items in
@@ -207,14 +208,26 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		}
 		List list = new ArrayList();
 		ViewerFilter[] filters = getFilters();
-
-		for (int i = 0; i < children.length; i++) {
-			Object object = children[i];
-			if (!isFiltered(object, parent, filters)) {
-				list.add(object);
+		for (int i= 0; i < filters.length; i++) {
+			if (filters[i] instanceof JavaViewerFilter) {
+				((JavaViewerFilter) filters[i]).filteringStart();
 			}
 		}
-		return list.toArray();
+		try {
+			for (int i = 0; i < children.length; i++) {
+				Object object = children[i];
+				if (!isFiltered(object, parent, filters)) {
+					list.add(object);
+				}
+			}
+			return list.toArray();
+		} finally {
+			for (int i= 0; i < filters.length; i++) {
+				if (filters[i] instanceof JavaViewerFilter) {
+					((JavaViewerFilter) filters[i]).filteringEnd();
+				}
+			}
+		}
 	}
 	
 	/* (non-Javadoc)
