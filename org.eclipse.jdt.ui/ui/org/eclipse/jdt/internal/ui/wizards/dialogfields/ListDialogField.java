@@ -521,11 +521,13 @@ public class ListDialogField extends DialogField {
 		boolean enabled= isEnabled();
 		if (isOkToUse(fTableControl)) {
 			if (!enabled) {
-				fSelectionWhenEnabled= fTable.getSelection();
-				selectElements(null);
-			} else {
-				selectElements(fSelectionWhenEnabled);
-				fSelectionWhenEnabled= null;
+				if (fSelectionWhenEnabled == null) {
+					fSelectionWhenEnabled= fTable.getSelection();
+					selectElements(null);
+				}
+			} else if (fSelectionWhenEnabled != null) {
+					selectElements(fSelectionWhenEnabled);
+					fSelectionWhenEnabled= null;
 			}
 			fTableControl.setEnabled(enabled);
 		}

@@ -462,11 +462,12 @@ public class TreeListDialogField extends DialogField {
 		boolean enabled= isEnabled();
 		if (isOkToUse(fTreeControl)) {
 			if (!enabled) {
-				fSelectionWhenEnabled= fTree.getSelection();
-				selectElements(null);
-			} else {
-				selectElements(fSelectionWhenEnabled);
-				fSelectionWhenEnabled= null;
+				if (fSelectionWhenEnabled == null) {
+					fSelectionWhenEnabled= fTree.getSelection();
+					selectElements(null);
+				}
+			} else if (fSelectionWhenEnabled != null) {
+					selectElements(fSelectionWhenEnabled);
 			}
 			fTreeControl.setEnabled(enabled);
 		}
