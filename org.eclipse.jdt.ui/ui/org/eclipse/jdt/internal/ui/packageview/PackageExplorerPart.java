@@ -18,6 +18,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.PerformanceStats;
 import org.eclipse.core.runtime.SafeRunner;
 
@@ -172,13 +173,13 @@ public class PackageExplorerPart extends ViewPart
 	
 	private final static String VIEW_ID= JavaUI.ID_PACKAGES;
 				
-	// Persistance tags.
+	// Persistence tags.
 	private static final String TAG_LAYOUT= "layout"; //$NON-NLS-1$
 	private static final String TAG_GROUP_LIBRARIES= "group_libraries"; //$NON-NLS-1$
 	private static final String TAG_ROOT_MODE= "rootMode"; //$NON-NLS-1$
 	private static final String TAG_LINK_EDITOR= "linkWithEditor"; //$NON-NLS-1$
 	
-	private boolean fIsCurrentLayoutFlat; // true means flat, false means hierachical
+	private boolean fIsCurrentLayoutFlat; // true means flat, false means hierarchical
 	private boolean fShowLibrariesNode;
 	private boolean fLinkingEnabled;
 	
@@ -286,7 +287,7 @@ public class PackageExplorerPart extends ViewPart
 			return res;
 		}
 		
-		/* Checks if a filtered object in essential (ie. is a parent that
+		/* Checks if a filtered object in essential (i.e. is a parent that
 		 * should not be removed).
 		 */ 
 		private boolean isEssential(Object object) {
@@ -599,7 +600,7 @@ public class PackageExplorerPart extends ViewPart
 		fFilterUpdater= new FilterUpdater(fViewer);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(fFilterUpdater);
 		
-		// Syncing the package explorer has to be done here. It can't be done
+		// Sync'ing the package explorer has to be done here. It can't be done
 		// when restoring the link state since the package explorers input isn't
 		// set yet.
 		setLinkingEnabled(isLinkingEnabled());
@@ -911,6 +912,9 @@ public class PackageExplorerPart extends ViewPart
 		fLastOpenSelection= null;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.part.ISetSelectionTarget#selectReveal(org.eclipse.jface.viewers.ISelection)
+	 */
 	public void selectReveal(final ISelection selection) {
 		Control ctrl= getViewer().getControl();
 		if (ctrl == null || ctrl.isDisposed())
@@ -1297,17 +1301,20 @@ public class PackageExplorerPart extends ViewPart
 		}
 	}
 	
-
-
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.part.IShowInTarget#show(org.eclipse.ui.part.ShowInContext)
+	 */
 	public boolean show(ShowInContext context) {
-
 		ISelection selection= context.getSelection();
 		if (selection instanceof IStructuredSelection) {
 			// fix for 64634 Navigate/Show in/Package Explorer doesn't work 
 			IStructuredSelection structuredSelection= ((IStructuredSelection) selection);
 			if (structuredSelection.size() == 1) {
-				if (tryToReveal(structuredSelection.getFirstElement()))
+				int res= tryToReveal(structuredSelection.getFirstElement());
+				if (res == IStatus.OK)
 					return true;
+				if (res == IStatus.CANCEL)
+					return false;
 			} else if (structuredSelection.size() > 1) {
 				selectReveal(structuredSelection);
 				return true;
@@ -1317,7 +1324,7 @@ public class PackageExplorerPart extends ViewPart
 		Object input= context.getInput();
 		if (input instanceof IEditorInput) {
 			Object elementOfInput= getElementOfInput((IEditorInput)context.getInput());
-			return elementOfInput != null && tryToReveal(elementOfInput);
+			return elementOfInput != null && (tryToReveal(elementOfInput) == IStatus.OK);
 		}
 
 		return false;
@@ -1371,9 +1378,9 @@ public class PackageExplorerPart extends ViewPart
 		}
 	}
 	
-    public boolean tryToReveal(Object element) {
+    public int tryToReveal(Object element) {
 		if (revealElementOrParent(element))
-            return true;
+            return IStatus.OK;
         
         WorkingSetFilterActionGroup workingSetGroup= fActionSet.getWorkingSetActionGroup().getFilterGroup();
         if (workingSetGroup != null) {
@@ -1383,7 +1390,9 @@ public class PackageExplorerPart extends ViewPart
 		        if (MessageDialog.openQuestion(getSite().getShell(), PackagesMessages.PackageExplorer_filteredDialog_title, message)) { 
 		            workingSetGroup.setWorkingSet(null, true);		
 		            if (revealElementOrParent(element))
-		                return true;
+		                return IStatus.OK;
+		        } else {
+		            return IStatus.CANCEL;
 		        }
 		    }
         }
@@ -1396,7 +1405,9 @@ public class PackageExplorerPart extends ViewPart
             if (MessageDialog.openQuestion(getSite().getShell(), PackagesMessages.PackageExplorer_filteredDialog_title, message)) { 
                 filterGroup.setFilters(newFilters);		
                 if (revealElementOrParent(element))
-                    return true;
+	                return IStatus.OK;
+            } else {
+	            return IStatus.CANCEL;
             }
         }
         FrameAction action= fActionSet.getUpAction();
@@ -1407,9 +1418,9 @@ public class PackageExplorerPart extends ViewPart
         		break; 
             action.run();
             if (revealElementOrParent(element))
-                return true;
+	            return IStatus.OK;
         }
-        return false;
+        return IStatus.ERROR;
     }
     
     private boolean revealElementOrParent(Object element) {
