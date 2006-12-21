@@ -37,6 +37,7 @@ import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.IWorkingSetUpdater;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
 public class WorkingSetModel {
@@ -134,7 +135,12 @@ public class WorkingSetModel {
 			return (IWorkingSet)getFirstElement(fElementToWorkingSet, element);
 		}
 		public List getAllWorkingSets(Object element) {
-			return getAllElements(fElementToWorkingSet, element);
+			 List allElements= getAllElements(fElementToWorkingSet, element);
+			 if (allElements.isEmpty() && element instanceof IJavaElement) {
+				 // try a second time in case the working set was manually updated (bug 168032)
+				 allElements= getAllElements(fElementToWorkingSet, ((IJavaElement) element).getResource());
+			 }
+			 return allElements;
 		}
 		public IWorkingSet getFirstWorkingSetForResource(IResource resource) {
 			return (IWorkingSet)getFirstElement(fResourceToWorkingSet, resource);
