@@ -2924,6 +2924,7 @@
             name="%JavaWorkingSetPage.name"
             pageClass="org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetPage"
             updaterClass="org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater"
+            elementAdapterClass="org.eclipse.ui.BasicWorkingSetElementAdapter:org.eclipse.jdt.core.IJavaElement;adapt=true"
             icon="$nl$/icons/full/obj16/jworkingSet_obj.gif"
             id="org.eclipse.jdt.ui.JavaWorkingSetPage">
       </workingSet>
