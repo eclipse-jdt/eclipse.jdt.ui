@@ -209,6 +209,10 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			}
 		}
 		
+		public void acceptSource(ICompilationUnit source) {
+			acceptAST(source, null);
+		}
+		
 		public List getUndoneElements() {
 			return fUndoneElements;
 		}
@@ -347,12 +351,13 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		}
 		
 		public void next(IProgressMonitor monitor) throws CoreException {
-			ICompilationUnit[] units= new ICompilationUnit[fParseList.size()];
+			List parseList= new ArrayList();
+			List sourceList= new ArrayList();
+			
 			List primaryWorkingCopies= new ArrayList();
 			ArrayList secondaryWorkingCopies= new ArrayList();
 			ArrayList oldContents= new ArrayList();
 			try {
-				int i= 0;
 				for (Iterator iter= fParseList.iterator(); iter.hasNext();) {
 					ParseListElement element= (ParseListElement)iter.next();
 					
@@ -369,11 +374,14 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 						}
 					}
 					
-					units[i]= compilationUnit;
-					i++;
+					if (requiresAST(compilationUnit, element.getCleanUps())) {
+						parseList.add(compilationUnit);
+					} else {
+						sourceList.add(compilationUnit);
+					}
 				}
 				
-				CleanUpRefactoringProgressMonitor cuMonitor= new CleanUpRefactoringProgressMonitor(monitor, units.length, fSize, fIndex);
+				CleanUpRefactoringProgressMonitor cuMonitor= new CleanUpRefactoringProgressMonitor(monitor, parseList.size() + sourceList.size(), fSize, fIndex);
 				CleanUpASTRequestor requestor= new CleanUpASTRequestor(fParseList, fSolutions, fLeaveFilesDirty, cuMonitor);
 				CleanUpParser parser= new CleanUpParser() {
 					protected ASTParser createParser() {
@@ -388,10 +396,17 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 					}
 				};
 				try {
+					ICompilationUnit[] units= (ICompilationUnit[])parseList.toArray(new ICompilationUnit[parseList.size()]);
 					parser.createASTs(units, new String[0], requestor, cuMonitor);
 				} catch (FixCalculationException e) {
 					throw e.getException();
 				}
+				
+				for (Iterator iterator= sourceList.iterator(); iterator.hasNext();) {
+					ICompilationUnit cu= (ICompilationUnit)iterator.next();
+					requestor.acceptSource(cu);
+				}
+				
 				fParseList= requestor.getUndoneElements();
 				fIndex= cuMonitor.getIndex();
 			} finally {
@@ -403,6 +418,14 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 					unit.getBuffer().setContents((String)oldContents.get(i));
 				}
 			}
+		}
+		
+		private boolean requiresAST(ICompilationUnit compilationUnit, ICleanUp[] cleanUps) throws CoreException {
+			for (int i= 0; i < cleanUps.length; i++) {
+				if (cleanUps[i].requireAST(compilationUnit))
+					return true;
+			}
+			return false;
 		}
 		
 		public Change[] getResult() {
@@ -686,7 +709,12 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		int i= 0;
 		do {
 			ICleanUp cleanUp= cleanUps[i];
-			IFix fix= cleanUp.createFix(ast);
+			IFix fix;
+			if (ast == null || !cleanUp.requireAST(source)) {
+				fix= cleanUp.createFix(source);
+			} else {
+				fix= cleanUp.createFix(ast);
+			}
 			if (fix != null) {
 				TextChange current= fix.createChange();
 				TextEdit currentEdit= pack(current.getEdit());
@@ -711,7 +739,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				}
 			}
 			i++;
-		} while (i < cleanUps.length && (solution == null || !cleanUps[i].needsFreshAST(ast)));
+		} while (i < cleanUps.length && (solution == null || ast != null && !cleanUps[i].needsFreshAST(ast)));
 		
 		for (; i < cleanUps.length; i++) {
 			undoneCleanUps.add(cleanUps[i]);

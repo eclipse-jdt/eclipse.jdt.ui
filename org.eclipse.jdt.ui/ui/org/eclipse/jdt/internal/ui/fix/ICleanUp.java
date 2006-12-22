@@ -35,6 +35,10 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  */
 public interface ICleanUp {
 	
+	public abstract boolean requireAST(ICompilationUnit unit) throws CoreException;
+	
+	public abstract IFix createFix(ICompilationUnit unit) throws CoreException;
+	
 	/**
 	 * Create a <code>IFix</code> which fixes all problems which this
 	 * multi-fix can fix in <code>CompilationUnit</code>.

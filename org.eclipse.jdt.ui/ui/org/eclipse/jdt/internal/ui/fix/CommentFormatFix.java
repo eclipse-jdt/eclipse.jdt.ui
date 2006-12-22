@@ -38,7 +38,6 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
@@ -53,13 +52,12 @@ import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
 
 public class CommentFormatFix implements IFix {
 	
-	public static IFix createCleanUp(CompilationUnit compilationUnit, boolean singleLine, boolean multiLine, boolean javaDoc) throws CoreException {
+	public static IFix createCleanUp(ICompilationUnit unit, boolean singleLine, boolean multiLine, boolean javaDoc) throws CoreException {
 		if (!singleLine && !multiLine && !javaDoc)
 			return null;
 		
-		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
-		String content= cu.getBuffer().getContents();
-		HashMap preferences= new HashMap(cu.getJavaProject().getOptions(true));
+		String content= unit.getBuffer().getContents();
+		HashMap preferences= new HashMap(unit.getJavaProject().getOptions(true));
 		Document document= new Document(content);
 		
 		final List edits= format(document, singleLine, multiLine, javaDoc, preferences);
@@ -70,13 +68,13 @@ public class CommentFormatFix implements IFix {
 		MultiTextEdit resultEdit= new MultiTextEdit();
 		resultEdit.addChildren((TextEdit[])edits.toArray(new TextEdit[edits.size()]));
 		
-		TextChange change= new CompilationUnitChange(MultiFixMessages.CommentFormatFix_description, cu);
+		TextChange change= new CompilationUnitChange(MultiFixMessages.CommentFormatFix_description, unit);
 		change.setEdit(resultEdit);
 		
 		String label= MultiFixMessages.CommentFormatFix_description;
 		change.addTextEditGroup(new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label))));
 		
-		return new CommentFormatFix(change, cu);
+		return new CommentFormatFix(change, unit);
 	}
 	
 	static String format(String input, boolean singleLine, boolean multiLine, boolean javaDoc) {

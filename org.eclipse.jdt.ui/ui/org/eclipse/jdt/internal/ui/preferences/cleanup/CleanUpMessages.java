@@ -40,6 +40,12 @@ public class CleanUpMessages extends NLS {
 	public static String CodeFormatingTabPage_OrganizeImports_CheckBoxLable;
 	public static String CodeFormatingTabPage_OrganizeImportsSettings_Description;
 
+	public static String CodeFormatingTabPage_RemoveTrailingWhitespace_all_radio;
+
+	public static String CodeFormatingTabPage_RemoveTrailingWhitespace_checkbox_text;
+
+	public static String CodeFormatingTabPage_RemoveTrailingWhitespace_ignoreEmpty_radio;
+
 	public static String CodeStyleTabPage_CheckboxName_ConvertForLoopToEnhanced;
 	public static String CodeStyleTabPage_CheckboxName_UseBlocks;
 	public static String CodeStyleTabPage_CheckboxName_UseFinal;

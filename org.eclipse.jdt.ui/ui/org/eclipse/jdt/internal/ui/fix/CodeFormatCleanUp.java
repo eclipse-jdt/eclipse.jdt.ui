@@ -22,6 +22,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
@@ -44,11 +45,26 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 		super(options);
 	}
 	
-	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean requireAST(ICompilationUnit unit) throws CoreException {
+		return false;
+	}
+	
+	public IFix createFix(ICompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 		
-		return CodeFormatFix.createCleanUp(compilationUnit, isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE));
+		boolean removeWhitespaces= isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
+		return CodeFormatFix.createCleanUp(compilationUnit, isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE), removeWhitespaces && isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL), removeWhitespaces && isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
+		return null;
 	}
 	
 	/**

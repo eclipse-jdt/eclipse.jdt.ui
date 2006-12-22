@@ -106,6 +106,50 @@ public class CleanUpConstants {
 	public static final String FORMAT_JAVADOC= "cleanup.format_javadoc"; //$NON-NLS-1$
 	
 	/**
+	 * Removes trailing whitespace in compilation units<br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * Default value: Value returned by {@link #getEclipseDefaultSettings()}<br>
+	 * <br>
+	 * 
+	 * @see #TRUE
+	 * @see #FALSE
+	 * @since 3.3
+	 */
+	public static final String FORMAT_REMOVE_TRAILING_WHITESPACES= "cleanup.remove_trailing_whitespaces"; //$NON-NLS-1$
+	
+	/**
+	 * Removes trailing whitespace in compilation units on all lines<br>
+	 * Only has an effect if {@link #FORMAT_REMOVE_TRAILING_WHITESPACES} is TRUE
+	 * <br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * Default value: Value returned by {@link #getEclipseDefaultSettings()}<br>
+	 * <br>
+	 * 
+	 * @see #TRUE
+	 * @see #FALSE
+	 * @since 3.3
+	 */
+	public static final String FORMAT_REMOVE_TRAILING_WHITESPACES_ALL= "cleanup.remove_trailing_whitespaces_all"; //$NON-NLS-1$
+	
+	/**
+	 * Removes trailing whitespace in compilation units on all lines which
+	 * contain an other characters then whitespace<br>
+	 * Only has an effect if {@link #FORMAT_REMOVE_TRAILING_WHITESPACES} is TRUE
+	 * <br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * Default value: Value returned by {@link #getEclipseDefaultSettings()}<br>
+	 * <br>
+	 * 
+	 * @see #TRUE
+	 * @see #FALSE
+	 * @since 3.3
+	 */
+	public static final String FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY= "cleanup.remove_trailing_whitespaces_ignore_empty"; //$NON-NLS-1$
+	
+	/**
 	 * Controls access qualifiers for instance fields. For detailed settings use<br>
 	 * {@link #MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS}<br>
 	 * {@link #MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY} <br>
@@ -126,8 +170,8 @@ public class CleanUpConstants {
 	 * i.e.:
 	 * 
 	 * <pre><code>
-	 *        int fField;
-	 *        void foo() {fField= 10;} -&gt; void foo() {this.fField= 10;}
+	 *                     int fField;
+	 *                     void foo() {fField= 10;} -&gt; void foo() {this.fField= 10;}
 	 * </pre></code> <br>
 	 * Only has an effect if {@link #MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS}
 	 * is TRUE <br>
@@ -148,8 +192,8 @@ public class CleanUpConstants {
 	 * i.e.:
 	 * 
 	 * <pre><code>
-	 *        int fField;
-	 *        void foo() {this.fField= 10;} -&gt; void foo() {fField= 10;}
+	 *                     int fField;
+	 *                     void foo() {this.fField= 10;} -&gt; void foo() {fField= 10;}
 	 * </pre></code> <br>
 	 * Only has an effect if {@link #MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS}
 	 * is TRUE <br>
@@ -186,8 +230,8 @@ public class CleanUpConstants {
 	 * i.e.:
 	 * 
 	 * <pre><code>
-	 *        int method(){};
-	 *        void foo() {method()} -&gt; void foo() {this.method();}
+	 *                     int method(){};
+	 *                     void foo() {method()} -&gt; void foo() {this.method();}
 	 * </pre></code> <br>
 	 * Only has an effect if {@link #MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS}
 	 * is TRUE <br>
@@ -208,8 +252,8 @@ public class CleanUpConstants {
 	 * i.e.:
 	 * 
 	 * <pre><code>
-	 *        int fField;
-	 *        void foo() {this.fField= 10;} -&gt; void foo() {fField= 10;}
+	 *                     int fField;
+	 *                     void foo() {this.fField= 10;} -&gt; void foo() {fField= 10;}
 	 * </pre></code> <br>
 	 * Only has an effect if {@link #MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS}
 	 * is TRUE <br>
@@ -248,10 +292,10 @@ public class CleanUpConstants {
 	 * i.e.:
 	 * 
 	 * <pre><code>
-	 *      class E {
-	 *        public static int i;
-	 *        void foo() {i= 10;} -&gt; void foo() {E.i= 10;}
-	 *      }
+	 *                   class E {
+	 *                     public static int i;
+	 *                     void foo() {i= 10;} -&gt; void foo() {E.i= 10;}
+	 *                   }
 	 * </code></pre>
 	 * 
 	 * <br>
@@ -274,10 +318,10 @@ public class CleanUpConstants {
 	 * i.e.:
 	 * 
 	 * <pre><code>
-	 *      class E {
-	 *        public static int m();
-	 *        void foo() {m();} -&gt; void foo() {E.m();}
-	 *      }
+	 *                   class E {
+	 *                     public static int m();
+	 *                     void foo() {m();} -&gt; void foo() {E.m();}
+	 *                   }
 	 * </code></pre>
 	 * 
 	 * <br>
@@ -300,10 +344,10 @@ public class CleanUpConstants {
 	 * i.e.:
 	 * 
 	 * <pre><code>
-	 *      class E {public static int i;}
-	 *      class ESub extends E {
-	 *        void foo() {ESub.i= 10;} -&gt; void foo() {E.i= 10;}
-	 *      }
+	 *                   class E {public static int i;}
+	 *                   class ESub extends E {
+	 *                     void foo() {ESub.i= 10;} -&gt; void foo() {E.i= 10;}
+	 *                   }
 	 * </code></pre>
 	 * 
 	 * <br>
@@ -326,10 +370,10 @@ public class CleanUpConstants {
 	 * i.e.:
 	 * 
 	 * <pre><code>
-	 *      class E {
-	 *        public static int i;
-	 *        void foo() {(new E()).i= 10;} -&gt; void foo() {E.i= 10;}
-	 *      }
+	 *                   class E {
+	 *                     public static int i;
+	 *                     void foo() {(new E()).i= 10;} -&gt; void foo() {E.i= 10;}
+	 *                   }
 	 * </code></pre>
 	 * 
 	 * <br>
@@ -369,7 +413,7 @@ public class CleanUpConstants {
 	 * i.e.:
 	 * 
 	 * <pre><code>
-	 *      	 if (b) foo(); -&gt; if (b) {foo();}
+	 *                   	 if (b) foo(); -&gt; if (b) {foo();}
 	 * </code></pre>
 	 * 
 	 * <br>
@@ -392,7 +436,7 @@ public class CleanUpConstants {
 	 * i.e.:
 	 * 
 	 * <pre><code>
-	 *        if (b) {return;} -&gt; if (b) return;
+	 *                     if (b) {return;} -&gt; if (b) return;
 	 * </code></pre>
 	 * 
 	 * <br>
@@ -414,7 +458,7 @@ public class CleanUpConstants {
 	 * i.e.:
 	 * 
 	 * <pre><code>
-	 *        if (b) {foo();} -&gt; if (b) foo();
+	 *                     if (b) {foo();} -&gt; if (b) foo();
 	 * </code></pre>
 	 * 
 	 * <br>
@@ -436,7 +480,7 @@ public class CleanUpConstants {
 	 * i.e.:
 	 * 
 	 * <pre><code>
-	 *      for (int i = 0; i &lt; array.length; i++) {} -&gt; for (int element : array) {}
+	 *                   for (int i = 0; i &lt; array.length; i++) {} -&gt; for (int element : array) {}
 	 * </code></pre>
 	 * 
 	 * <br>
@@ -474,9 +518,9 @@ public class CleanUpConstants {
 	 * i.e.:
 	 * 
 	 * <pre><code>
-	 *      boolean b= i &gt; 10 &amp;&amp; i &lt; 100 || i &gt; 20;
-	 *      -&gt;
-	 *      boolean b= ((i &gt; 10) &amp;&amp; (i &lt; 100)) || (i &gt; 20);
+	 *                   boolean b= i &gt; 10 &amp;&amp; i &lt; 100 || i &gt; 20;
+	 *                   -&gt;
+	 *                   boolean b= ((i &gt; 10) &amp;&amp; (i &lt; 100)) || (i &gt; 20);
 	 * </pre></code> <br>
 	 * Only has an effect if {@link #EXPRESSIONS_USE_PARENTHESES} is TRUE <br>
 	 * <br>
@@ -496,9 +540,9 @@ public class CleanUpConstants {
 	 * i.e.:
 	 * 
 	 * <pre><code>
-	 *      boolean b= ((i &gt; 10) &amp;&amp; (i &lt; 100)) || (i &gt; 20);
-	 *      -&gt;
-	 *      boolean b= i &gt; 10 &amp;&amp; i &lt; 100 || i &gt; 20;
+	 *                   boolean b= ((i &gt; 10) &amp;&amp; (i &lt; 100)) || (i &gt; 20);
+	 *                   -&gt;
+	 *                   boolean b= i &gt; 10 &amp;&amp; i &lt; 100 || i &gt; 20;
 	 * </pre></code> <br>
 	 * Only has an effect if {@link #EXPRESSIONS_USE_PARENTHESES} is TRUE <br>
 	 * <br>
@@ -533,7 +577,7 @@ public class CleanUpConstants {
 	 * Add a final modifier to private fields where possible i.e.:
 	 * 
 	 * <pre><code>
-	 *      private int field= 0; -&gt; private final int field= 0;
+	 *                   private int field= 0; -&gt; private final int field= 0;
 	 * </code></pre>
 	 * 
 	 * <br>
@@ -554,7 +598,7 @@ public class CleanUpConstants {
 	 * Add a final modifier to method parameters where possible i.e.:
 	 * 
 	 * <pre><code>
-	 *      void foo(int i) {} -&gt; void foo(final int i) {}
+	 *                   void foo(int i) {} -&gt; void foo(final int i) {}
 	 * </code></pre>
 	 * 
 	 * <br>
@@ -575,7 +619,7 @@ public class CleanUpConstants {
 	 * Add a final modifier to local variables where possible i.e.:
 	 * 
 	 * <pre><code>
-	 *      int i= 0; -&gt; final int i= 0;
+	 *                   int i= 0; -&gt; final int i= 0;
 	 * </code></pre>
 	 * 
 	 * <br>
@@ -598,7 +642,7 @@ public class CleanUpConstants {
 	 * i.e.:
 	 * 
 	 * <pre><code>
-	 *      List l; -&gt; List&lt;Object&gt; l;
+	 *                   List l; -&gt; List&lt;Object&gt; l;
 	 * </code></pre>
 	 * 
 	 * <br>
@@ -772,10 +816,10 @@ public class CleanUpConstants {
 	 * i.e.:
 	 * 
 	 * <pre><code>
-	 *      class E1 {void foo();}
-	 *      class E2 extends E1 {
-	 *      	 void foo(); -&gt;  @Override void foo();
-	 *      }
+	 *                   class E1 {void foo();}
+	 *                   class E2 extends E1 {
+	 *                   	 void foo(); -&gt;  @Override void foo();
+	 *                   }
 	 * </pre></code> <br>
 	 *           Only has an effect if {@link #ADD_MISSING_ANNOTATIONS} is TRUE
 	 *           <br>
@@ -797,12 +841,12 @@ public class CleanUpConstants {
 	 * i.e.:
 	 * 
 	 * <pre><code>
-	 *            /**@deprecated* /
-	 *           int i;
-	 *       -&gt;
-	 *            /**@deprecated* /
-	 *            @Deprecated
-	 *           int i;
+	 *                         /**@deprecated* /
+	 *                        int i;
+	 *                    -&gt;
+	 *                         /**@deprecated* /
+	 *                         @Deprecated
+	 *                        int i;
 	 * </pre></code> <br>
 	 * Only has an effect if {@link #ADD_MISSING_ANNOTATIONS} is TRUE <br>
 	 * <br>
@@ -875,7 +919,7 @@ public class CleanUpConstants {
 	 * i.e.:
 	 * 
 	 * <pre><code>
-	 *      	 String s= &quot;&quot;; -&gt; String s= &quot;&quot;; //$NON-NLS-1$
+	 *                   	 String s= &quot;&quot;; -&gt; String s= &quot;&quot;; //$NON-NLS-1$
 	 * </code></pre>
 	 * 
 	 * <br>
@@ -1063,8 +1107,11 @@ public class CleanUpConstants {
 		
 		result.put(FORMAT_COMMENT, FALSE);
 		result.put(FORMAT_SINGLE_LINE_COMMENT, TRUE);
-		result.put(FORMAT_MULTI_LINE_COMMENT, TRUE);
-		result.put(FORMAT_JAVADOC, TRUE);
+		result.put(FORMAT_MULTI_LINE_COMMENT, FALSE);
+		result.put(FORMAT_JAVADOC, FALSE);
+		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES, FALSE);
+		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES_ALL, TRUE);
+		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY, FALSE);
 		
 		result.put(ORGANIZE_IMPORTS, FALSE);
 		
@@ -1139,6 +1186,9 @@ public class CleanUpConstants {
 		result.put(FORMAT_SINGLE_LINE_COMMENT, TRUE);
 		result.put(FORMAT_MULTI_LINE_COMMENT, TRUE);
 		result.put(FORMAT_JAVADOC, TRUE);
+		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES, FALSE);
+		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES_ALL, TRUE);
+		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY, FALSE);
 		
 		result.put(ORGANIZE_IMPORTS, TRUE);
 		

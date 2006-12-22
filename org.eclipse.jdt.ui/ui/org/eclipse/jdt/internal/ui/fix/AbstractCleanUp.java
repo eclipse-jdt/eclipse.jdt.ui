@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.IFix;
 
 public abstract class AbstractCleanUp implements ICleanUp {
 	
@@ -87,5 +88,19 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	 */
 	public boolean needsFreshAST(CompilationUnit compilationUnit) {
 		return false;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean requireAST(ICompilationUnit unit) throws CoreException {
+		return true;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public IFix createFix(ICompilationUnit unit) throws CoreException {
+		return null;
 	}
 }

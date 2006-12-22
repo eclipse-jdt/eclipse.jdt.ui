@@ -16,6 +16,7 @@ import java.util.Observer;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -76,6 +77,32 @@ public final class CodeFormatingTabPage extends ModifyDialogTabPage {
 		multiLinePref.setEnabled(formatCommentsPref.getChecked());
 		singleLinePref.setEnabled(formatCommentsPref.getChecked());
 		
+		final CheckboxPreference whiteSpace= createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_RemoveTrailingWhitespace_checkbox_text, CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES, CleanUpModifyDialog.FALSE_TRUE);
+		
+		Composite sub= new Composite(group, SWT.NONE);
+		GridData gridData= new GridData(SWT.FILL, SWT.TOP, true, false);
+		gridData.horizontalSpan= numColumns;
+		sub.setLayoutData(gridData);
+		GridLayout layout= new GridLayout(3, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		sub.setLayout(layout);
+		
+		intent(sub);
+		final RadioPreference allPref= createRadioPref(sub, 1, CleanUpMessages.CodeFormatingTabPage_RemoveTrailingWhitespace_all_radio, CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL, CleanUpModifyDialog.FALSE_TRUE);
+		final RadioPreference ignoreEmptyPref= createRadioPref(sub, 1, CleanUpMessages.CodeFormatingTabPage_RemoveTrailingWhitespace_ignoreEmpty_radio, CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY, CleanUpModifyDialog.FALSE_TRUE);
+		
+		whiteSpace.addObserver(new Observer() {
+			public void update(Observable o, Object arg) {
+				allPref.setEnabled(whiteSpace.getChecked());
+				ignoreEmptyPref.setEnabled(whiteSpace.getChecked());
+			}
+			
+		});
+		
+		allPref.setEnabled(whiteSpace.getChecked());
+		ignoreEmptyPref.setEnabled(whiteSpace.getChecked());
+		
 		PixelConverter pixelConverter= new PixelConverter(composite);
 		
 		createLabel(CleanUpMessages.CodeFormatingTabPage_FormatterSettings_Description, group, numColumns, pixelConverter).setFont(composite.getFont());
@@ -95,8 +122,8 @@ public final class CodeFormatingTabPage extends ModifyDialogTabPage {
 		return label;
 	}
 	
-	private void intent(Group group) {
-		Label l= new Label(group, SWT.NONE);
+	private void intent(Composite composite) {
+		Label l= new Label(composite, SWT.NONE);
 		GridData gd= new GridData();
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(4);
 		l.setLayoutData(gd);

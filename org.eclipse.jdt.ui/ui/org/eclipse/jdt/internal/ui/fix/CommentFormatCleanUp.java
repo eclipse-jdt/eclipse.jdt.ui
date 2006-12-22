@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -33,12 +34,26 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 		super();
 	}
 	
-	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
+	public IFix createFix(ICompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 		
 		boolean formatComment= isEnabled(CleanUpConstants.FORMAT_COMMENT);
 		return CommentFormatFix.createCleanUp(compilationUnit, formatComment && isEnabled(CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT), formatComment && isEnabled(CleanUpConstants.FORMAT_MULTI_LINE_COMMENT), formatComment && isEnabled(CleanUpConstants.FORMAT_JAVADOC));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
+		return null;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean requireAST(ICompilationUnit unit) throws CoreException {
+		return false;
 	}
 	
 	/**
