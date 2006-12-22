@@ -52,11 +52,10 @@ import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
 
 public class CommentFormatFix implements IFix {
-
+	
 	public static IFix createCleanUp(CompilationUnit compilationUnit, boolean singleLine, boolean multiLine, boolean javaDoc) throws CoreException {
 		if (!singleLine && !multiLine && !javaDoc)
 			return null;
-		
 		
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		String content= cu.getBuffer().getContents();
@@ -64,21 +63,21 @@ public class CommentFormatFix implements IFix {
 		Document document= new Document(content);
 		
 		final List edits= format(document, singleLine, multiLine, javaDoc, preferences);
-
+		
 		if (edits.size() == 0)
 			return null;
-
+		
 		MultiTextEdit resultEdit= new MultiTextEdit();
 		resultEdit.addChildren((TextEdit[])edits.toArray(new TextEdit[edits.size()]));
-
+		
 		TextChange change= new CompilationUnitChange(MultiFixMessages.CommentFormatFix_description, cu);
 		change.setEdit(resultEdit);
-
+		
 		String label= MultiFixMessages.CommentFormatFix_description;
 		change.addTextEditGroup(new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label))));
-
+		
 		return new CommentFormatFix(change, cu);
-    }
+	}
 	
 	static String format(String input, boolean singleLine, boolean multiLine, boolean javaDoc) {
 		if (!singleLine && !multiLine && !javaDoc)
@@ -95,25 +94,25 @@ public class CommentFormatFix implements IFix {
 		resultEdit.addChildren((TextEdit[])edits.toArray(new TextEdit[edits.size()]));
 		
 		try {
-	        resultEdit.apply(document);
-        } catch (MalformedTreeException e) {
-	        JavaPlugin.log(e);
-        } catch (BadLocationException e) {
-	        JavaPlugin.log(e);
-        }
+			resultEdit.apply(document);
+		} catch (MalformedTreeException e) {
+			JavaPlugin.log(e);
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+		}
 		return document.get();
 	}
-
+	
 	private static List format(IDocument document, boolean singleLine, boolean multiLine, boolean javaDoc, HashMap preferences) {
-	    final List edits= new ArrayList();
-	    
-	    if (DefaultCodeFormatterConstants.FALSE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT)))
-	    	preferences.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT, DefaultCodeFormatterConstants.TRUE);
+		final List edits= new ArrayList();
+		
+		if (DefaultCodeFormatterConstants.FALSE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT)))
+			preferences.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT, DefaultCodeFormatterConstants.TRUE);
 		
 		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 		
 		String content= document.get();
-
+		
 		CommentFormattingStrategy formattingStrategy= new CommentFormattingStrategy();
 		
 		IFormattingContext context= new CommentFormattingContext();
@@ -145,73 +144,73 @@ public class CommentFormatFix implements IFix {
 			context.dispose();
 		}
 		
-	    return edits;
-    }
+		return edits;
+	}
 	
 	private static TextEdit format(ITypedRegion region, IFormattingContext context, CommentFormattingStrategy formattingStrategy, String content) {
-	    TypedPosition typedPosition= new TypedPosition(region.getOffset(), region.getLength(), region.getType());
-	    context.setProperty(FormattingContextProperties.CONTEXT_PARTITION, typedPosition);
-	    formattingStrategy.formatterStarts(context);
-	    TextEdit edit= formattingStrategy.calculateTextEdit();
-	    formattingStrategy.formatterStops();
-	    if (edit == null)
-	    	return null;
-	    
-	    if (!edit.hasChildren())
-	    	return null;
-	    
-	    // Filter out noops
-	    TextEdit[] children= edit.getChildren();
-	    for (int i= 0; i < children.length; i++) {
-	        if (!(children[i] instanceof ReplaceEdit))
-	        	return edit;
-        }
-	    
-	    IDocument doc= new Document(content);
-	    try {
-	        edit.copy().apply(doc, TextEdit.NONE);
-	        if (content.equals(doc.get()))
-	        	return null;
-        } catch (MalformedTreeException e) {
-        } catch (BadLocationException e) {
-        }
-	    
-        return edit;
-    }
+		TypedPosition typedPosition= new TypedPosition(region.getOffset(), region.getLength(), region.getType());
+		context.setProperty(FormattingContextProperties.CONTEXT_PARTITION, typedPosition);
+		formattingStrategy.formatterStarts(context);
+		TextEdit edit= formattingStrategy.calculateTextEdit();
+		formattingStrategy.formatterStops();
+		if (edit == null)
+			return null;
+		
+		if (!edit.hasChildren())
+			return null;
+		
+		// Filter out noops
+		TextEdit[] children= edit.getChildren();
+		for (int i= 0; i < children.length; i++) {
+			if (!(children[i] instanceof ReplaceEdit))
+				return edit;
+		}
+		
+		IDocument doc= new Document(content);
+		try {
+			edit.copy().apply(doc, TextEdit.NONE);
+			if (content.equals(doc.get()))
+				return null;
+		} catch (MalformedTreeException e) {
+		} catch (BadLocationException e) {
+		}
+		
+		return edit;
+	}
 	
 	private final ICompilationUnit fCompilationUnit;
 	private final TextChange fChange;
-
+	
 	public CommentFormatFix(TextChange change, ICompilationUnit compilationUnit) {
 		fChange= change;
 		fCompilationUnit= compilationUnit;
-    }
-
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public TextChange createChange() throws CoreException {
 		return fChange;
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getDescription() {
 		return MultiFixMessages.CommentFormatFix_description;
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public IStatus getStatus() {
-	    return StatusInfo.OK_STATUS;
+		return StatusInfo.OK_STATUS;
 	}
 }

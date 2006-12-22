@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class CommentFormatCleanUp extends AbstractCleanUp {
-		
+	
 	public CommentFormatCleanUp(Map options) {
 		super(options);
 	}
@@ -32,16 +32,13 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 	public CommentFormatCleanUp() {
 		super();
 	}
-
+	
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 		
 		boolean formatComment= isEnabled(CleanUpConstants.FORMAT_COMMENT);
-		return CommentFormatFix.createCleanUp(compilationUnit,
-				formatComment && isEnabled(CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT),
-				formatComment && isEnabled(CleanUpConstants.FORMAT_MULTI_LINE_COMMENT),
-				formatComment && isEnabled(CleanUpConstants.FORMAT_JAVADOC));
+		return CommentFormatFix.createCleanUp(compilationUnit, formatComment && isEnabled(CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT), formatComment && isEnabled(CleanUpConstants.FORMAT_MULTI_LINE_COMMENT), formatComment && isEnabled(CleanUpConstants.FORMAT_JAVADOC));
 	}
 	
 	/**
@@ -53,7 +50,7 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 		
 		return null;
 	}
-
+	
 	public Map getRequiredOptions() {
 		return null;
 	}
@@ -84,21 +81,18 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 		buf.append("*/\n"); //$NON-NLS-1$
 		buf.append("\n"); //$NON-NLS-1$
 		buf.append("//A single line comment\n"); //$NON-NLS-1$
-		return CommentFormatFix.format(buf.toString(),
-				isEnabled(CleanUpConstants.FORMAT_COMMENT) && isEnabled(CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT),
-				isEnabled(CleanUpConstants.FORMAT_COMMENT) && isEnabled(CleanUpConstants.FORMAT_MULTI_LINE_COMMENT),
-				isEnabled(CleanUpConstants.FORMAT_COMMENT) && isEnabled(CleanUpConstants.FORMAT_JAVADOC));
+		return CommentFormatFix.format(buf.toString(), isEnabled(CleanUpConstants.FORMAT_COMMENT) && isEnabled(CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT), isEnabled(CleanUpConstants.FORMAT_COMMENT) && isEnabled(CleanUpConstants.FORMAT_MULTI_LINE_COMMENT), isEnabled(CleanUpConstants.FORMAT_COMMENT) && isEnabled(CleanUpConstants.FORMAT_JAVADOC));
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
 		return -1;
 	}
-
-    public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-	    return false;
-    }
-    
+	
+	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
+		return false;
+	}
+	
 }
