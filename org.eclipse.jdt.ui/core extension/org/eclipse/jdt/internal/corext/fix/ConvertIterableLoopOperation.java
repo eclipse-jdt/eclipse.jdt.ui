@@ -19,7 +19,6 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -50,7 +49,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -119,55 +117,49 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 	/** The nodes of the element variable occurrences */
 	private final List fOccurrences= new ArrayList(2);
 	
-	/** The compilation unit to operate on */
-	private final CompilationUnit fRoot;
-	
-	private final ICompilationUnit fCompilationUnit;
-	
-	private final String fIdentifierName;
-	
 	private EnhancedForStatement fEnhancedForLoop;
 	
-	/**
-	 * Creates a new convert iterable loop proposal.
-	 * 
-	 * @param unit
-	 *            the compilation unit containing the for statement
-	 * @param statement
-	 *            the for statement to be converted
-	 */
-	public ConvertIterableLoopOperation(final CompilationUnit unit, final ForStatement statement, String identifierName) {
-		super(statement);
+	public ConvertIterableLoopOperation(ForStatement statement) {
+		this(statement, new String[0]);
+	}
+	
+	public ConvertIterableLoopOperation(ForStatement statement, String[] usedNames) {
+		super(statement, usedNames);
+	}
+	
+	public String getIntroducedVariableName() {
+		if (fElement != null) {
+			return fElement.getName();
+		} else {
+			return getVariableNameProposals()[0];
+		}
+	}
+	
+	private String[] getVariableNameProposals() {
 		
-		fIdentifierName= identifierName;
-		fCompilationUnit= (ICompilationUnit)unit.getJavaElement();
-		fRoot= (CompilationUnit)statement.getRoot();
-	}
-	
-	private List computeElementNames() {
-		final List names= new ArrayList();
-		final IJavaProject project= fCompilationUnit.getJavaProject();
-		String name= fIdentifierName;
+		String[] variableNames= getUsedVariableNames();
+		String[] elementSuggestions= StubUtility.getLocalNameSuggestions(getJavaProject(), FOR_LOOP_ELEMENT_IDENTIFIER, 0, variableNames);
+		
 		final ITypeBinding binding= fIterator.getType();
-		if (binding != null && binding.isParameterizedType())
-			name= binding.getTypeArguments()[0].getName();
-		final List excluded= getExcludedNames();
-		final String[] suggestions= StubUtility.getLocalNameSuggestions(project, name, 0, (String[])excluded.toArray(new String[excluded.size()]));
-		for (int index= 0; index < suggestions.length; index++)
-			names.add(suggestions[index]);
-		return names;
+		if (binding != null && binding.isParameterizedType()) {
+			String type= binding.getTypeArguments()[0].getName();
+			String[] typeSuggestions= StubUtility.getLocalNameSuggestions(getJavaProject(), type, 0, variableNames);
+			
+			String[] result= new String[elementSuggestions.length + typeSuggestions.length];
+			System.arraycopy(typeSuggestions, 0, result, 0, typeSuggestions.length);
+			System.arraycopy(elementSuggestions, 0, result, typeSuggestions.length, elementSuggestions.length);
+			return result;
+		} else {
+			return elementSuggestions;
+		}
 	}
 	
-	private List getExcludedNames() {
-		final CompilationUnit unit= (CompilationUnit)getForStatement().getRoot();
-		final IBinding[] before= (new ScopeAnalyzer(unit)).getDeclarationsInScope(getForStatement().getStartPosition(), ScopeAnalyzer.VARIABLES);
-		final IBinding[] after= (new ScopeAnalyzer(unit)).getDeclarationsAfter(getForStatement().getStartPosition() + getForStatement().getLength(), ScopeAnalyzer.VARIABLES);
-		final List names= new ArrayList();
-		for (int index= 0; index < before.length; index++)
-			names.add(before[index].getName());
-		for (int index= 0; index < after.length; index++)
-			names.add(after[index].getName());
-		return names;
+	private IJavaProject getJavaProject() {
+		return getRoot().getJavaElement().getJavaProject();
+	}
+	
+	private CompilationUnit getRoot() {
+		return (CompilationUnit)getForStatement().getRoot();
 	}
 	
 	/**
@@ -198,12 +190,12 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			if (bindings.length > 0) {
 				ITypeBinding arg= bindings[0];
 				if (arg.isWildcardType()) {
-					arg= ASTResolving.normalizeWildcardType(arg, true, fRoot.getAST());
+					arg= ASTResolving.normalizeWildcardType(arg, true, getRoot().getAST());
 				}
 				return arg;
 			}
 		}
-		return fRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+		return getRoot().getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 	}
 	
 	/* (non-Javadoc)
@@ -224,21 +216,23 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		final ASTRewrite astRewrite= cuRewrite.getASTRewrite();
 		final ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 		
-		final ImportRemover remover= new ImportRemover(fCompilationUnit.getJavaProject(), (CompilationUnit)getForStatement().getRoot());
+		final ImportRemover remover= new ImportRemover(getJavaProject(), (CompilationUnit)getForStatement().getRoot());
 		
 		fEnhancedForLoop= ast.newEnhancedForStatement();
-		final List names= computeElementNames();
-		String name= fIdentifierName;
+		String[] names= getVariableNameProposals();
+		
+		String name;
 		if (fElement != null) {
 			name= fElement.getName();
-			if (!names.contains(name))
-				names.add(0, name);
 		} else {
-			if (!names.isEmpty())
-				name= (String)names.get(0);
+			name= names[0];
 		}
-		for (final Iterator iterator= names.iterator(); iterator.hasNext();)
-			positionGroups.getPositionGroup(fIdentifierName, true).addProposal((String)iterator.next(), null, 10);
+		final LinkedProposalPositionGroup pg= positionGroups.getPositionGroup(name, true);
+		if (fElement != null)
+			pg.addProposal(name, null, 10);
+		for (int i= 0; i < names.length; i++) {
+			pg.addProposal(names[i], null, 10);
+		}
 		
 		final Statement body= getForStatement().getBody();
 		if (body != null) {
@@ -262,7 +256,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 					final SimpleName node= ast.newSimpleName(text);
 					astRewrite.replace(expression, node, group);
 					remover.registerRemovedNode(expression);
-					positionGroups.getPositionGroup(fIdentifierName, true).addPosition(astRewrite.track(node), false);
+					pg.addPosition(astRewrite.track(node), false);
 					return false;
 				}
 				
@@ -289,7 +283,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 						if (binding != null && binding.equals(fElement)) {
 							final Statement parent= (Statement)ASTNodes.getParent(node, Statement.class);
 							if (parent != null && (list == null || list.getRewrittenList().contains(parent)))
-								positionGroups.getPositionGroup(fIdentifierName, true).addPosition(astRewrite.track(node), false);
+								pg.addPosition(astRewrite.track(node), false);
 						}
 					}
 					return false;
@@ -300,11 +294,11 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		}
 		final SingleVariableDeclaration declaration= ast.newSingleVariableDeclaration();
 		final SimpleName simple= ast.newSimpleName(name);
-		positionGroups.getPositionGroup(fIdentifierName, true).addPosition(astRewrite.track(simple), true);
+		pg.addPosition(astRewrite.track(simple), true);
 		declaration.setName(simple);
 		final ITypeBinding iterable= getIterableType(fIterator.getType());
 		final ImportRewrite imports= importRewrite;
-		declaration.setType(importType(iterable, getForStatement(), importRewrite, fRoot));
+		declaration.setType(importType(iterable, getForStatement(), importRewrite, getRoot()));
 		remover.registerAddedImport(iterable.getQualifiedName());
 		fEnhancedForLoop.setParameter(declaration);
 		fEnhancedForLoop.setExpression(getExpression(astRewrite));
@@ -320,9 +314,9 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 	 * @return A status with severity <code>IStatus.Error</code> if not
 	 *         applicable
 	 */
-	public final IStatus isApplicable() {
+	public final IStatus satisfiesPreconditions() {
 		IStatus resultStatus= StatusInfo.OK_STATUS;
-		if (JavaModelUtil.is50OrHigher(fCompilationUnit.getJavaProject())) {
+		if (JavaModelUtil.is50OrHigher(getJavaProject())) {
 			resultStatus= checkExpressionCondition();
 			if (resultStatus.getSeverity() == IStatus.ERROR)
 				return resultStatus;
@@ -568,4 +562,5 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		
 		return StatusInfo.OK_STATUS;
 	}
+	
 }

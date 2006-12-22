@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.fix.ConvertForLoopOperation;
+import org.eclipse.jdt.internal.corext.fix.ConvertLoopOperation;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -1804,8 +1805,8 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	
 	private boolean satisfiesPrecondition(ICompilationUnit cu) {
 		ForStatement statement= getForStatement(cu);
-		ConvertForLoopOperation op= new ConvertForLoopOperation(statement, "element");
-		return op.satisfiesPreconditions();
+		ConvertLoopOperation op= new ConvertForLoopOperation(statement);
+		return op.satisfiesPreconditions().isOK();
 	}
 	
 	private static ForStatement getForStatement(ICompilationUnit cu) {

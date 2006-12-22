@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -55,17 +55,15 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
-import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 
 public class ConvertForLoopOperation extends ConvertLoopOperation {
 	
 	private static final String LENGTH_QUERY= "length"; //$NON-NLS-1$
 	private static final String LITERAL_0= "0"; //$NON-NLS-1$
 	private static final String LITERAL_1= "1"; //$NON-NLS-1$
-	private static final String FOR_LOOP_ELEMENT_IDENTIFIER= "element"; //$NON-NLS-1$
-	
 	private static final class InvalidBodyError extends Error {
 		private static final long serialVersionUID= 1L;
 	}
@@ -74,41 +72,40 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	private IVariableBinding fLengthBinding;
 	private IBinding fArrayBinding;
 	private Expression fArrayAccess;
-	private final String fParameterName;
+	private VariableDeclarationFragment fElementDeclaration;
 	
 	public ConvertForLoopOperation(ForStatement forStatement) {
-		this(forStatement, null);
+		this(forStatement, new String[0]);
 	}
 	
-	public ConvertForLoopOperation(ForStatement forStatement, String parameterName) {
-		super(forStatement);
-		fParameterName= parameterName;
+	public ConvertForLoopOperation(ForStatement forStatement, String[] usedNames) {
+		super(forStatement, usedNames);
 	}
 	
-	public boolean satisfiesPreconditions() {
+	public IStatus satisfiesPreconditions() {
 		ForStatement statement= getForStatement();
 		CompilationUnit ast= (CompilationUnit)statement.getRoot();
 		
 		IJavaElement javaElement= ast.getJavaElement();
 		if (javaElement == null)
-			return false;
+			return ERROR_STATUS;
 		
 		if (!JavaModelUtil.is50OrHigher(javaElement.getJavaProject()))
-			return false;
+			return ERROR_STATUS;
 		
 		if (!validateInitializers(statement))
-			return false;
+			return ERROR_STATUS;
 		
 		if (!validateExpression(statement))
-			return false;
+			return ERROR_STATUS;
 		
 		if (!validateUpdaters(statement))
-			return false;
+			return ERROR_STATUS;
 		
 		if (!validateBody(statement))
-			return false;
+			return ERROR_STATUS;
 		
-		return true;
+		return Status.OK_STATUS;
 	}
 	
 	/**
@@ -437,6 +434,22 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 					return true;
 				}
 				
+				public boolean visit(ArrayAccess node) {
+					if (fElementDeclaration != null)
+						return super.visit(node);
+					
+					IBinding binding= getBinding(node.getArray());
+					if (fArrayBinding.equals(binding)) {
+						IBinding index= getBinding(node.getIndex());
+						if (fIndexBinding.equals(index)) {
+							if (node.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+								fElementDeclaration= (VariableDeclarationFragment)node.getParent();
+							}
+						}
+					}
+					return super.visit(node);
+				}
+				
 			});
 		} catch (InvalidBodyError e) {
 			return false;
@@ -453,6 +466,17 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		}
 		
 		return null;
+	}
+	
+	public String getIntroducedVariableName() {
+		if (fElementDeclaration != null) {
+			return fElementDeclaration.getName().getIdentifier();
+		} else {
+			ForStatement forStatement= getForStatement();
+			IJavaProject javaProject= ((CompilationUnit)forStatement.getRoot()).getJavaElement().getJavaProject();
+			String[] proposals= getVariableNameProposals(fArrayAccess.resolveTypeBinding(), javaProject);
+			return proposals[0];
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -473,26 +497,27 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		
 		ForStatement forStatement= getForStatement();
 		
-		VariableDeclarationFragment fragement= findArrayElementDeclaration(forStatement.getBody(), fIndexBinding, fArrayBinding);
-		
-		String[] proposals= getProposalsForElement(fArrayAccess.resolveTypeBinding(), cuRewrite.getCu().getJavaProject());
+		IJavaProject javaProject= ((CompilationUnit)forStatement.getRoot()).getJavaElement().getJavaProject();
+		String[] proposals= getVariableNameProposals(fArrayAccess.resolveTypeBinding(), javaProject);
 		
 		String parameterName;
-		if (fragement == null) {
-			if (fParameterName != null) {
-				parameterName= fParameterName;
-			} else {
-				parameterName= proposals[0];
-			}
+		if (fElementDeclaration != null) {
+			parameterName= fElementDeclaration.getName().getIdentifier();
 		} else {
-			parameterName= fragement.getName().getIdentifier();
+			parameterName= proposals[0];
 		}
+		
 		LinkedProposalPositionGroup pg= positionGroups.getPositionGroup(parameterName, true);
+		if (fElementDeclaration != null)
+			pg.addProposal(parameterName, null, 10);
+		for (int i= 0; i < proposals.length; i++) {
+			pg.addProposal(proposals[i], null, 10);
+		}
 		
 		AST ast= forStatement.getAST();
 		EnhancedForStatement result= ast.newEnhancedForStatement();
 		
-		SingleVariableDeclaration parameterDeclaration= createParameterDeclaration(parameterName, fragement, fArrayAccess, forStatement, importRewrite, rewrite, group, pg);
+		SingleVariableDeclaration parameterDeclaration= createParameterDeclaration(parameterName, fElementDeclaration, fArrayAccess, forStatement, importRewrite, rewrite, group, pg);
 		result.setParameter(parameterDeclaration);
 		
 		result.setExpression((Expression)rewrite.createCopyTarget(fArrayAccess));
@@ -500,39 +525,9 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		convertBody(forStatement.getBody(), fIndexBinding, fArrayBinding, parameterName, rewrite, group, pg);
 		result.setBody(getBody(cuRewrite, group, positionGroups));
 		
-		for (int i= 0; i < proposals.length; i++) {
-			pg.addProposal(proposals[i], null, 10);
-		}
-		
 		positionGroups.setEndPosition(rewrite.track(result));
 		
 		return result;
-	}
-	
-	/**
-	 * Finds the first fragment in the body looking like:
-	 * <code>variable= arrayBinding[indexBinding]</code> or null if no such
-	 * fragment
-	 */
-	private VariableDeclarationFragment findArrayElementDeclaration(Statement body, final IBinding indexBinding, final IBinding arrayBinding) {
-		final VariableDeclarationFragment[] result= new VariableDeclarationFragment[] {null};
-		body.accept(new GenericVisitor() {
-			public boolean visit(ArrayAccess node) {
-				IBinding binding= getBinding(node.getArray());
-				if (arrayBinding.equals(binding)) {
-					IBinding index= getBinding(node.getIndex());
-					if (indexBinding.equals(index)) {
-						if (node.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-							result[0]= (VariableDeclarationFragment)node.getParent();
-							return false;
-						}
-					}
-				}
-				return result[0] == null;
-			}
-		});
-		
-		return result[0];
 	}
 	
 	private void convertBody(Statement body, final IBinding indexBinding, final IBinding arrayBinding, final String parameterName, final ASTRewrite rewrite, final TextEditGroup editGroup, final LinkedProposalPositionGroup pg) {
@@ -615,7 +610,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		return result;
 	}
 	
-	private String[] getProposalsForElement(ITypeBinding arrayTypeBinding, IJavaProject project) {
+	private String[] getVariableNameProposals(ITypeBinding arrayTypeBinding, IJavaProject project) {
 		String[] variableNames= getUsedVariableNames();
 		String[] elementSuggestions= StubUtility.getLocalNameSuggestions(project, FOR_LOOP_ELEMENT_IDENTIFIER, 0, variableNames);
 		
@@ -626,30 +621,6 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		System.arraycopy(elementSuggestions, 0, result, 0, elementSuggestions.length);
 		System.arraycopy(typeSuggestions, 0, result, elementSuggestions.length, typeSuggestions.length);
 		return result;
-	}
-	
-	private String[] getUsedVariableNames() {
-		final List results= new ArrayList();
-		
-		ForStatement forStatement= getForStatement();
-		CompilationUnit root= (CompilationUnit)forStatement.getRoot();
-		
-		Collection variableNames= new ScopeAnalyzer(root).getUsedVariableNames(forStatement.getStartPosition(), forStatement.getLength());
-		results.addAll(variableNames);
-		
-		forStatement.accept(new GenericVisitor() {
-			public boolean visit(SingleVariableDeclaration node) {
-				results.add(node.getName().getIdentifier());
-				return super.visit(node);
-			}
-			
-			public boolean visit(VariableDeclarationFragment fragment) {
-				results.add(fragment.getName().getIdentifier());
-				return super.visit(fragment);
-			}
-		});
-		
-		return (String[])results.toArray(new String[results.size()]);
 	}
 	
 }
