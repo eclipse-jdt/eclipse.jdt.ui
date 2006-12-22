@@ -21,6 +21,7 @@ public final class CodeGenerationMessages extends NLS {
 	}
 
 	public static String AddGetterSetterOperation_description;
+	public static String AddGetterSetterOperation_error_input_type_not_found;
 	public static String AddImportsOperation_description;
 	public static String AddImportsOperation_error_not_visible_class;
 	public static String AddImportsOperation_error_notresolved_message;

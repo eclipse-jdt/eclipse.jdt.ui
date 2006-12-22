@@ -27,9 +27,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -42,10 +44,12 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.IRewriteTarget;
@@ -350,8 +354,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				try {
 					if (selection[i] instanceof GetterSetterEntry) {
 						Object key= selection[i];
-						IField getsetField= ((GetterSetterEntry) selection[i]).fField;
-						if (((GetterSetterEntry) selection[i]).fGetterEntry) {
+						IField getsetField= ((GetterSetterEntry) selection[i]).field;
+						if (((GetterSetterEntry) selection[i]).isGetter) {
 							if (!map.add(GetterSetterUtil.getGetterName(getsetField, null)))
 								return new StatusInfo(IStatus.WARNING, ActionMessages.AddGetterSetterAction_error_duplicate_methods); 
 						} else {
@@ -402,8 +406,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			each= result[i];
 			if ((each instanceof GetterSetterEntry)) {
 				entry= (GetterSetterEntry) each;
-				if (!entry.fGetterEntry) {
-					list.add(entry.fField);
+				if (!entry.isGetter) {
+					list.add(entry.field);
 				}
 			}
 		}
@@ -420,8 +424,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			each= result[i];
 			if ((each instanceof GetterSetterEntry)) {
 				entry= (GetterSetterEntry) each;
-				if (entry.fGetterEntry) {
-					list.add(entry.fField);
+				if (entry.isGetter) {
+					list.add(entry.field);
 				}
 			}
 		}
@@ -439,12 +443,12 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			each= result[i];
 			if ((each instanceof GetterSetterEntry)) {
 				entry= (GetterSetterEntry) each;
-				if (entry.fGetterEntry) {
-					list.add(entry.fField);
+				if (entry.isGetter) {
+					list.add(entry.field);
 					getterSet= true;
 				}
-				if ((!entry.fGetterEntry) && (getterSet == true)) {
-					list.remove(entry.fField);
+				if ((!entry.isGetter) && (getterSet == true)) {
+					list.remove(entry.field);
 					getterSet= false;
 				}
 			} else
@@ -464,11 +468,11 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			each= result[i];
 			if ((each instanceof GetterSetterEntry)) {
 				entry= (GetterSetterEntry) each;
-				if (entry.fGetterEntry) {
+				if (entry.isGetter) {
 					getterSet= true;
 				}
-				if ((!entry.fGetterEntry) && (getterSet != true)) {
-					list.add(entry.fField);
+				if ((!entry.isGetter) && (getterSet != true)) {
+					list.add(entry.field);
 					getterSet= false;
 				}
 			} else
@@ -488,11 +492,11 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			each= result[i];
 			if ((each instanceof GetterSetterEntry)) {
 				entry= (GetterSetterEntry) each;
-				if (entry.fGetterEntry) {
+				if (entry.isGetter) {
 					getterSet= true;
 				}
-				if ((!entry.fGetterEntry) && (getterSet == true)) {
-					list.add(entry.fField);
+				if ((!entry.isGetter) && (getterSet == true)) {
+					list.add(entry.field);
 					getterSet= false;
 				}
 			} else
@@ -583,7 +587,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
 			settings.createComments= fGenerateComment;
 
-			AddGetterSetterOperation op= new AddGetterSetterOperation(type, getterFields, setterFields, getterSetterFields, unit, skipSetterForFinalQuery(), skipReplaceQuery(), elementPosition, settings, true, false);
+			AddGetterSetterOperation op= new AddGetterSetterOperation(type, getterFields, setterFields, getterSetterFields, unit, skipReplaceQuery(), elementPosition, settings, true, false);
 			setOperationStatusFields(op);
 
 			IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
@@ -616,20 +620,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		}
 		op.setSort(fSort);
 		op.setVisibility(flags);
-	}
-
-	private IRequestQuery skipSetterForFinalQuery() {
-		return new IRequestQuery() {
-
-			public int doQuery(IMember field) {
-				// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19367
-				int[] returnCodes= { IRequestQuery.YES, IRequestQuery.YES_ALL, IRequestQuery.NO, IRequestQuery.CANCEL};
-				String[] options= { IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL};
-				String fieldName= JavaElementLabels.getElementLabel(field, 0);
-				String formattedMessage= Messages.format(ActionMessages.AddGetterSetterAction_SkipSetterForFinalDialog_message, fieldName); 
-				return showQueryDialog(formattedMessage, options, returnCodes);
-			}
-		};
 	}
 
 	private IRequestQuery skipReplaceQuery() {
@@ -723,10 +713,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			if (element instanceof GetterSetterEntry) {
 				GetterSetterEntry entry= (GetterSetterEntry) element;
 				try {
-					if (entry.fGetterEntry) {
-						return GetterSetterUtil.getGetterName(entry.fField, null) + "()"; //$NON-NLS-1$ 
+					if (entry.isGetter) {
+						return GetterSetterUtil.getGetterName(entry.field, null) + "()"; //$NON-NLS-1$ 
 					} else {
-						return GetterSetterUtil.getSetterName(entry.fField, null) + '(' + Signature.getSimpleName(Signature.toString(entry.fField.getTypeSignature())) + ')';
+						return GetterSetterUtil.getSetterName(entry.field, null) + '(' + Signature.getSimpleName(Signature.toString(entry.field.getTypeSignature())) + ')';
 					}
 				} catch (JavaModelException e) {
 					return ""; //$NON-NLS-1$
@@ -742,7 +732,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			if (element instanceof GetterSetterEntry) {
 				int flags= 0;
 				try {
-					flags= ((GetterSetterEntry) element).fField.getFlags();
+					flags= ((GetterSetterEntry) element).field.getFlags();
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
 				}
@@ -762,20 +752,22 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		IField[] fields= type.getFields();
 		Map result= new LinkedHashMap();
 		for (int i= 0; i < fields.length; i++) {
-			if (!JdtFlags.isEnum(fields[i])) {
+			IField field= fields[i];
+			int flags= field.getFlags();
+			if (!Flags.isEnum(flags)) {
 				List l= new ArrayList(2);
-				if (GetterSetterUtil.getGetter(fields[i]) == null) {
-					l.add(new GetterSetterEntry(fields[i], true));
+				if (GetterSetterUtil.getGetter(field) == null) {
+					l.add(new GetterSetterEntry(field, true, Flags.isFinal(flags)));
 					incNumEntries();
 				}
 
-				if (GetterSetterUtil.getSetter(fields[i]) == null) {
-					l.add(new GetterSetterEntry(fields[i], false));
+				if (GetterSetterUtil.getSetter(field) == null) {
+					l.add(new GetterSetterEntry(field, false, Flags.isFinal(flags)));
 					incNumEntries();
 				}
 
 				if (!l.isEmpty())
-					result.put(fields[i], l.toArray(new GetterSetterEntry[l.size()]));
+					result.put(field, l.toArray(new GetterSetterEntry[l.size()]));
 			}
 		}
 		return result;
@@ -803,7 +795,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		public Viewer getViewer() {
 			return fViewer;
 		}
-
+			
 		/*
 		 * @see ITreeContentProvider#getChildren(Object)
 		 */
@@ -820,7 +812,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			if (element instanceof IMember)
 				return ((IMember) element).getDeclaringType();
 			if (element instanceof GetterSetterEntry)
-				return ((GetterSetterEntry) element).fField;
+				return ((GetterSetterEntry) element).field;
 			return null;
 		}
 
@@ -846,22 +838,50 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			fGetterSetterEntries= null;
 		}
 	}
+	
+	private static class SettersForFinalFieldsFilter extends ViewerFilter {
+		
+		private final AddGetterSetterContentProvider fContentProvider;
+
+		public SettersForFinalFieldsFilter(AddGetterSetterContentProvider contentProvider) {
+			fContentProvider= contentProvider;
+		}
+
+		public boolean select(Viewer viewer, Object parentElement, Object element) {
+			if (element instanceof GetterSetterEntry) {
+				GetterSetterEntry getterSetterEntry= (GetterSetterEntry) element;
+				return getterSetterEntry.isGetter || !getterSetterEntry.isFinal;
+			} else if (element instanceof IField) {
+				Object[] children= fContentProvider.getChildren(element);
+				for (int i= 0; i < children.length; i++) {
+					GetterSetterEntry curr= (GetterSetterEntry) children[i];
+					if (curr.isGetter || !curr.isFinal) {
+						return true;
+					}
+				}
+				return false;
+			}
+			return true;
+		}
+	}
+	
 
 	private static class GetterSetterTreeSelectionDialog extends SourceActionDialog {
 
 		private AddGetterSetterContentProvider fContentProvider;
 
 		private static final int SELECT_GETTERS_ID= IDialogConstants.CLIENT_ID + 1;
-
 		private static final int SELECT_SETTERS_ID= IDialogConstants.CLIENT_ID + 2;
-
+		private final String SETTINGS_SECTION= "AddGetterSetterDialog"; //$NON-NLS-1$
+		private final String SORT_ORDER= "SortOrdering"; //$NON-NLS-1$
+		private final String ALLOW_SETTERS_FOR_FINALS= "RemoveFinal"; //$NON-NLS-1$
+		
 		private IDialogSettings fSettings;
+		private SettersForFinalFieldsFilter fSettersForFinalFieldsFilter;
 
 		private boolean fSortOrder;
+		private boolean fAllowSettersForFinals;
 
-		private final String SETTINGS_SECTION= "AddGetterSetterDialog"; //$NON-NLS-1$
-
-		private final String SORT_ORDER= "SortOrdering"; //$NON-NLS-1$
 
 		public GetterSetterTreeSelectionDialog(Shell parent, ILabelProvider labelProvider, AddGetterSetterContentProvider contentProvider, CompilationUnitEditor editor, IType type) throws JavaModelException {
 			super(parent, labelProvider, contentProvider, editor, type, false);
@@ -873,9 +893,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			if (fSettings == null) {
 				fSettings= dialogSettings.addNewSection(SETTINGS_SECTION);
 				fSettings.put(SORT_ORDER, false); 
+				fSettings.put(ALLOW_SETTERS_FOR_FINALS, false); 
 			}
 
 			fSortOrder= fSettings.getBoolean(SORT_ORDER);
+			fAllowSettersForFinals= fSettings.getBoolean(ALLOW_SETTERS_FOR_FINALS);
+			
+			fSettersForFinalFieldsFilter= new SettersForFinalFieldsFilter(contentProvider);
 		}
 
 		public boolean getSortOrder() {
@@ -886,10 +910,40 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			if (fSortOrder != sort) {
 				fSortOrder= sort;
 				fSettings.put(SORT_ORDER, sort);
-				if (fContentProvider.fViewer != null) {
-					fContentProvider.fViewer.refresh();
+				if (getTreeViewer() != null) {
+					getTreeViewer().refresh();
 				}
 			}
+		}
+		
+		private boolean allowSettersForFinals() {
+			return fAllowSettersForFinals;
+		}
+		
+		public void allowSettersForFinals(boolean allowSettersForFinals) {
+			if (fAllowSettersForFinals != allowSettersForFinals) {
+				fAllowSettersForFinals= allowSettersForFinals;
+				fSettings.put(ALLOW_SETTERS_FOR_FINALS, allowSettersForFinals);
+				if (getTreeViewer() != null) {
+					if (allowSettersForFinals) {
+						getTreeViewer().removeFilter(fSettersForFinalFieldsFilter);
+					} else {
+						getTreeViewer().addFilter(fSettersForFinalFieldsFilter);
+					}
+				}
+				updateOKStatus();
+			}
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.ui.dialogs.CheckedTreeSelectionDialog#createTreeViewer(org.eclipse.swt.widgets.Composite)
+		 */
+		protected CheckboxTreeViewer createTreeViewer(Composite parent) {
+			 CheckboxTreeViewer treeViewer= super.createTreeViewer(parent);
+			 if (!fAllowSettersForFinals) {
+				 treeViewer.addFilter(fSettersForFinalFieldsFilter);
+			 }
+			return treeViewer;
 		}
 
 		protected void configureShell(Shell shell) {
@@ -919,11 +973,31 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		}
 
 		protected Composite createInsertPositionCombo(Composite composite) {
+			Button addRemoveFinalCheckbox= addAllowSettersForFinalslCheckbox(composite);
+			addRemoveFinalCheckbox.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			
 			Composite entryComposite= super.createInsertPositionCombo(composite);
 			addSortOrder(entryComposite);
 			addVisibilityAndModifiersChoices(entryComposite);
-
 			return entryComposite;
+		}
+
+		private Button addAllowSettersForFinalslCheckbox(Composite entryComposite) {
+			Button allowSettersForFinalsButton= new Button(entryComposite, SWT.CHECK);
+			allowSettersForFinalsButton.setText(ActionMessages.AddGetterSetterAction_allow_setters_for_finals_description); 
+
+			allowSettersForFinalsButton.addSelectionListener(new SelectionListener() {
+				public void widgetSelected(SelectionEvent e) {
+					boolean isSelected= (((Button) e.widget).getSelection());
+					allowSettersForFinals(isSelected);
+				}
+
+				public void widgetDefaultSelected(SelectionEvent e) {
+					widgetSelected(e);
+				}
+			});
+			allowSettersForFinalsButton.setSelection(allowSettersForFinals());
+			return allowSettersForFinalsButton;
 		}
 
 		private Composite addSortOrder(Composite composite) {
@@ -959,7 +1033,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				GetterSetterEntry[] entries= getEntries(field);
 				for (int j= 0; j < entries.length; j++) {
 					AddGetterSetterAction.GetterSetterEntry entry= entries[j];
-					if (entry.fGetterEntry == isGetter)
+					if (entry.isGetter == isGetter)
 						result.add(entry);
 				}
 			}
@@ -1007,14 +1081,14 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	}
 
 	private static class GetterSetterEntry {
+		public final IField field;
+		public final boolean isGetter;
+		public final boolean isFinal;
 
-		public final IField fField;
-
-		public final boolean fGetterEntry;
-
-		GetterSetterEntry(IField field, boolean isGetterEntry) {
-			fField= field;
-			fGetterEntry= isGetterEntry;
+		GetterSetterEntry(IField field, boolean isGetterEntry, boolean isFinal) {
+			this.field= field;
+			this.isGetter= isGetterEntry;
+			this.isFinal= isFinal;
 		}
 	}
 }

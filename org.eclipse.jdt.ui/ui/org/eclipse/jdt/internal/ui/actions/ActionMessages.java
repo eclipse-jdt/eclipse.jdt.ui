@@ -27,6 +27,7 @@ public final class ActionMessages extends NLS {
 	
 	public static String AddDelegateMethodsAction_template_link_message;
 	public static String AddDelegateMethodsAction_template_link_tooltip;
+	public static String AddGetterSetterAction_allow_setters_for_finals_description;
 	public static String AddGetterSetterAction_error_not_in_source_file;
 	public static String AddGetterSetterAction_template_link_description;
 	public static String AddGetterSetterAction_template_link_tooltip;

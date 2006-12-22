@@ -86,7 +86,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 		CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);
 
-		AddGetterSetterOperation op= new AddGetterSetterOperation(type, getters, setters, gettersAndSetters, unit, allYes, allYes, sibling, fSettings, true, true);
+		AddGetterSetterOperation op= new AddGetterSetterOperation(type, getters, setters, gettersAndSetters, unit, allYes, sibling, fSettings, true, true);
 		op.setSort(sort);
 		op.setVisibility(visibility);
 
@@ -152,7 +152,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 		
 		String expected= "public class A {\r\n" + 
 				"\r\n" + 
-				"	final String field1 = null;\r\n" + 
+				"	String field1 = null;\r\n" + 
 				"\r\n" + 
 				"	/**\r\n" + 
 				"	 * @return Returns the field1.\r\n" + 
@@ -160,6 +160,13 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 				"	public String getField1() {\r\n" + 
 				"		return field1;\r\n" + 
 				"	}\r\n" + 
+				"\r\n" + 				
+				"	/**\r\n" + 
+				"	 * @param field1 The field1 to set.\r\n" + 
+				"	 */\r\n" + 
+				"	public void setField1(String field1) {\r\n" + 
+				"		this.field1 = field1;\r\n" + 
+				"	}\r\n" + 				
 				"}";
 	
 		compareSource(expected, fClassA.getSource());
