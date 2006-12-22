@@ -65,22 +65,24 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
  * @since 3.1
  */
 public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
-
+	
 	/**
 	 * Returns the supertype of the given type with the qualified name.
 	 * 
-	 * @param binding the binding of the type
-	 * @param name the qualified name of the supertype
+	 * @param binding
+	 *            the binding of the type
+	 * @param name
+	 *            the qualified name of the supertype
 	 * @return the supertype, or <code>null</code>
 	 */
 	private static ITypeBinding getSuperType(final ITypeBinding binding, final String name) {
-
+		
 		if (binding.isArray() || binding.isPrimitive())
 			return null;
-
+		
 		if (binding.getQualifiedName().startsWith(name))
 			return binding;
-
+		
 		final ITypeBinding type= binding.getSuperclass();
 		if (type != null) {
 			final ITypeBinding result= getSuperType(type, name);
@@ -95,53 +97,53 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		}
 		return null;
 	}
-
+	
 	/** Has the element variable been assigned outside the for statement? */
 	private boolean fAssigned= false;
-
+	
 	/** The binding of the element variable */
 	private IBinding fElement= null;
-
+	
 	/** The node of the iterable object used in the expression */
 	private Expression fExpression= null;
-
+	
 	/** The binding of the iterable object */
 	private IBinding fIterable= null;
-
+	
 	/** Is the iterator method invoked on <code>this</code>? */
 	private boolean fThis= false;
-
+	
 	/** The binding of the iterator variable */
 	private IVariableBinding fIterator= null;
-
+	
 	/** The nodes of the element variable occurrences */
-	private List fOccurrences= new ArrayList(2);
-
+	private final List fOccurrences= new ArrayList(2);
+	
 	/** The compilation unit to operate on */
 	private final CompilationUnit fRoot;
-
+	
 	private final ICompilationUnit fCompilationUnit;
-
+	
 	private final String fIdentifierName;
-
+	
 	private EnhancedForStatement fEnhancedForLoop;
 	
-
 	/**
 	 * Creates a new convert iterable loop proposal.
 	 * 
-	 * @param unit the compilation unit containing the for statement
-	 * @param statement the for statement to be converted
+	 * @param unit
+	 *            the compilation unit containing the for statement
+	 * @param statement
+	 *            the for statement to be converted
 	 */
 	public ConvertIterableLoopOperation(final CompilationUnit unit, final ForStatement statement, String identifierName) {
 		super(statement);
 		
 		fIdentifierName= identifierName;
 		fCompilationUnit= (ICompilationUnit)unit.getJavaElement();
-		fRoot= (CompilationUnit) statement.getRoot();
+		fRoot= (CompilationUnit)statement.getRoot();
 	}
 	
-
 	private List computeElementNames() {
 		final List names= new ArrayList();
 		final IJavaProject project= fCompilationUnit.getJavaProject();
@@ -150,14 +152,14 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		if (binding != null && binding.isParameterizedType())
 			name= binding.getTypeArguments()[0].getName();
 		final List excluded= getExcludedNames();
-		final String[] suggestions= StubUtility.getLocalNameSuggestions(project, name, 0, (String[]) excluded.toArray(new String[excluded.size()]));
+		final String[] suggestions= StubUtility.getLocalNameSuggestions(project, name, 0, (String[])excluded.toArray(new String[excluded.size()]));
 		for (int index= 0; index < suggestions.length; index++)
 			names.add(suggestions[index]);
 		return names;
 	}
-
+	
 	private List getExcludedNames() {
-		final CompilationUnit unit= (CompilationUnit) getForStatement().getRoot();
+		final CompilationUnit unit= (CompilationUnit)getForStatement().getRoot();
 		final IBinding[] before= (new ScopeAnalyzer(unit)).getDeclarationsInScope(getForStatement().getStartPosition(), ScopeAnalyzer.VARIABLES);
 		final IBinding[] after= (new ScopeAnalyzer(unit)).getDeclarationsAfter(getForStatement().getStartPosition() + getForStatement().getLength(), ScopeAnalyzer.VARIABLES);
 		final List names= new ArrayList();
@@ -167,25 +169,27 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			names.add(after[index].getName());
 		return names;
 	}
-
+	
 	/**
 	 * Returns the expression for the enhanced for statement.
 	 * 
-	 * @param rewrite the AST rewrite to use
+	 * @param rewrite
+	 *            the AST rewrite to use
 	 * @return the expression node, or <code>null</code>
 	 */
 	private Expression getExpression(final ASTRewrite rewrite) {
 		if (fThis)
 			return rewrite.getAST().newThisExpression();
 		if (fExpression instanceof MethodInvocation)
-			return (MethodInvocation) rewrite.createMoveTarget(fExpression);
-		return (Expression) ASTNode.copySubtree(rewrite.getAST(), fExpression);
+			return (MethodInvocation)rewrite.createMoveTarget(fExpression);
+		return (Expression)ASTNode.copySubtree(rewrite.getAST(), fExpression);
 	}
-
+	
 	/**
 	 * Returns the iterable type from the iterator type binding.
 	 * 
-	 * @param iterator the iterator type binding, or <code>null</code>
+	 * @param iterator
+	 *            the iterator type binding, or <code>null</code>
 	 * @return the iterable type
 	 */
 	private ITypeBinding getIterableType(final ITypeBinding iterator) {
@@ -201,7 +205,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		}
 		return fRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List, java.util.List)
 	 */
@@ -214,13 +218,13 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		Statement statement= convert(cuRewrite, group, positionGroups);
 		astRewrite.replace(getForStatement(), statement, group);
 	}
-
+	
 	protected Statement convert(CompilationUnitRewrite cuRewrite, final TextEditGroup group, final LinkedProposalModel positionGroups) throws CoreException {
 		final AST ast= cuRewrite.getAST();
 		final ASTRewrite astRewrite= cuRewrite.getASTRewrite();
-	    final ImportRewrite importRewrite= cuRewrite.getImportRewrite();
-	
-		final ImportRemover remover= new ImportRemover(fCompilationUnit.getJavaProject(), (CompilationUnit) getForStatement().getRoot());
+		final ImportRewrite importRewrite= cuRewrite.getImportRewrite();
+		
+		final ImportRemover remover= new ImportRemover(fCompilationUnit.getJavaProject(), (CompilationUnit)getForStatement().getRoot());
 		
 		fEnhancedForLoop= ast.newEnhancedForStatement();
 		final List names= computeElementNames();
@@ -231,10 +235,10 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 				names.add(0, name);
 		} else {
 			if (!names.isEmpty())
-				name= (String) names.get(0);
+				name= (String)names.get(0);
 		}
 		for (final Iterator iterator= names.iterator(); iterator.hasNext();)
-			positionGroups.getPositionGroup(fIdentifierName, true).addProposal((String) iterator.next(), null, 10);
+			positionGroups.getPositionGroup(fIdentifierName, true).addProposal((String)iterator.next(), null, 10);
 		
 		final Statement body= getForStatement().getBody();
 		if (body != null) {
@@ -242,7 +246,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			if (body instanceof Block) {
 				list= astRewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY);
 				for (final Iterator iterator= fOccurrences.iterator(); iterator.hasNext();) {
-					final Statement parent= (Statement) ASTNodes.getParent((ASTNode) iterator.next(), Statement.class);
+					final Statement parent= (Statement)ASTNodes.getParent((ASTNode)iterator.next(), Statement.class);
 					if (parent != null && list.getRewrittenList().contains(parent)) {
 						list.remove(parent, null);
 						remover.registerRemovedNode(parent);
@@ -253,7 +257,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			}
 			final String text= name;
 			body.accept(new ASTVisitor() {
-
+				
 				private boolean replace(final Expression expression) {
 					final SimpleName node= ast.newSimpleName(text);
 					astRewrite.replace(expression, node, group);
@@ -261,29 +265,29 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 					positionGroups.getPositionGroup(fIdentifierName, true).addPosition(astRewrite.track(node), false);
 					return false;
 				}
-
+				
 				public final boolean visit(final MethodInvocation node) {
 					final IMethodBinding binding= node.resolveMethodBinding();
 					if (binding != null && (binding.getName().equals("next") || binding.getName().equals("nextElement"))) { //$NON-NLS-1$ //$NON-NLS-2$
 						final Expression expression= node.getExpression();
 						if (expression instanceof Name) {
-							final IBinding result= ((Name) expression).resolveBinding();
+							final IBinding result= ((Name)expression).resolveBinding();
 							if (result != null && result.equals(fIterator))
 								return replace(node);
 						} else if (expression instanceof FieldAccess) {
-							final IBinding result= ((FieldAccess) expression).resolveFieldBinding();
+							final IBinding result= ((FieldAccess)expression).resolveFieldBinding();
 							if (result != null && result.equals(fIterator))
 								return replace(node);
 						}
 					}
 					return super.visit(node);
 				}
-
+				
 				public final boolean visit(final SimpleName node) {
 					if (fElement != null) {
 						final IBinding binding= node.resolveBinding();
 						if (binding != null && binding.equals(fElement)) {
-							final Statement parent= (Statement) ASTNodes.getParent(node, Statement.class);
+							final Statement parent= (Statement)ASTNodes.getParent(node, Statement.class);
 							if (parent != null && (list == null || list.getRewrittenList().contains(parent)))
 								positionGroups.getPositionGroup(fIdentifierName, true).addPosition(astRewrite.track(node), false);
 						}
@@ -292,7 +296,6 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 				}
 			});
 			
-
 			fEnhancedForLoop.setBody(getBody(cuRewrite, group, positionGroups));
 		}
 		final SingleVariableDeclaration declaration= ast.newSingleVariableDeclaration();
@@ -309,12 +312,13 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		remover.applyRemoves(imports);
 		
 		return fEnhancedForLoop;
-    }
-
+	}
+	
 	/**
 	 * Is this proposal applicable?
 	 * 
-	 * @return A status with severity <code>IStatus.Error</code> if not applicable
+	 * @return A status with severity <code>IStatus.Error</code> if not
+	 *         applicable
 	 */
 	public final IStatus isApplicable() {
 		IStatus resultStatus= StatusInfo.OK_STATUS;
@@ -323,7 +327,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			if (resultStatus.getSeverity() == IStatus.ERROR)
 				return resultStatus;
 			
-			List updateExpressions= ((List)getForStatement().getStructuralProperty(ForStatement.UPDATERS_PROPERTY));
+			List updateExpressions= (List)getForStatement().getStructuralProperty(ForStatement.UPDATERS_PROPERTY);
 			if (updateExpressions.size() == 1) {
 				resultStatus= new StatusInfo(IStatus.WARNING, Messages.format(FixMessages.ConvertIterableLoopOperation_RemoveUpdateExpression_Warning, ((Expression)updateExpressions.get(0)).toString()));
 			} else if (updateExpressions.size() > 1) {
@@ -331,13 +335,13 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			}
 			
 			for (final Iterator outer= getForStatement().initializers().iterator(); outer.hasNext();) {
-				final Expression initializer= (Expression) outer.next();
+				final Expression initializer= (Expression)outer.next();
 				if (initializer instanceof VariableDeclarationExpression) {
-					final VariableDeclarationExpression declaration= (VariableDeclarationExpression) initializer;
+					final VariableDeclarationExpression declaration= (VariableDeclarationExpression)initializer;
 					for (Iterator inner= declaration.fragments().iterator(); inner.hasNext();) {
-						final VariableDeclarationFragment fragment= (VariableDeclarationFragment) inner.next();
+						final VariableDeclarationFragment fragment= (VariableDeclarationFragment)inner.next();
 						fragment.accept(new ASTVisitor() {
-
+							
 							public final boolean visit(final MethodInvocation node) {
 								final IMethodBinding binding= node.resolveMethodBinding();
 								if (binding != null) {
@@ -353,13 +357,13 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 													if (iterable != null) {
 														fExpression= qualifier;
 														if (qualifier instanceof Name) {
-															final Name name= (Name) qualifier;
+															final Name name= (Name)qualifier;
 															fIterable= name.resolveBinding();
 														} else if (qualifier instanceof MethodInvocation) {
-															final MethodInvocation invocation= (MethodInvocation) qualifier;
+															final MethodInvocation invocation= (MethodInvocation)qualifier;
 															fIterable= invocation.resolveMethodBinding();
 														} else if (qualifier instanceof FieldAccess) {
-															final FieldAccess access= (FieldAccess) qualifier;
+															final FieldAccess access= (FieldAccess)qualifier;
 															fIterable= access.resolveFieldBinding();
 														} else if (qualifier instanceof ThisExpression)
 															fIterable= resolved;
@@ -380,7 +384,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 								}
 								return true;
 							}
-
+							
 							public final boolean visit(final VariableDeclarationFragment node) {
 								final IVariableBinding binding= node.resolveBinding();
 								if (binding != null) {
@@ -408,17 +412,17 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			if (statement != null && fIterator != null) {
 				final ITypeBinding iterable= getIterableType(fIterator.getType());
 				statement.accept(new ASTVisitor() {
-
+					
 					public final boolean visit(final Assignment node) {
 						return visit(node.getLeftHandSide(), node.getRightHandSide());
 					}
-
+					
 					private boolean visit(final Expression node) {
 						if (node != null) {
 							final ITypeBinding binding= node.resolveTypeBinding();
 							if (binding != null && iterable.equals(binding)) {
 								if (node instanceof Name) {
-									final Name name= (Name) node;
+									final Name name= (Name)node;
 									final IBinding result= name.resolveBinding();
 									if (result != null) {
 										fOccurrences.add(node);
@@ -426,7 +430,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 										return false;
 									}
 								} else if (node instanceof FieldAccess) {
-									final FieldAccess access= (FieldAccess) node;
+									final FieldAccess access= (FieldAccess)node;
 									final IBinding result= access.resolveFieldBinding();
 									if (result != null) {
 										fOccurrences.add(node);
@@ -438,22 +442,22 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 						}
 						return true;
 					}
-
+					
 					private boolean visit(final Expression left, final Expression right) {
 						if (right instanceof MethodInvocation) {
-							final MethodInvocation invocation= (MethodInvocation) right;
+							final MethodInvocation invocation= (MethodInvocation)right;
 							final IMethodBinding binding= invocation.resolveMethodBinding();
 							if (binding != null && (binding.getName().equals("next") || binding.getName().equals("nextElement"))) { //$NON-NLS-1$ //$NON-NLS-2$
 								final Expression expression= invocation.getExpression();
 								if (expression instanceof Name) {
-									final Name qualifier= (Name) expression;
+									final Name qualifier= (Name)expression;
 									final IBinding result= qualifier.resolveBinding();
 									if (result != null && result.equals(fIterator)) {
 										nextInvocationCount[0]++;
-										return visit(left);	
+										return visit(left);
 									}
 								} else if (expression instanceof FieldAccess) {
-									final FieldAccess qualifier= (FieldAccess) expression;
+									final FieldAccess qualifier= (FieldAccess)expression;
 									final IBinding result= qualifier.resolveFieldBinding();
 									if (result != null && result.equals(fIterator)) {
 										nextInvocationCount[0]++;
@@ -476,20 +480,20 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 						if (binding != null) {
 							final Expression expression= invocation.getExpression();
 							if (expression instanceof Name) {
-								final Name qualifier= (Name) expression;
+								final Name qualifier= (Name)expression;
 								final IBinding result= qualifier.resolveBinding();
 								if (result != null && result.equals(fIterator)) {
-									if (!binding.getName().equals("next") && !binding.getName().equals("nextElement")) {  //$NON-NLS-1$ //$NON-NLS-2$
+									if (!binding.getName().equals("next") && !binding.getName().equals("nextElement")) { //$NON-NLS-1$ //$NON-NLS-2$
 										otherInvocationThenNext[0]= true;
 									} else {
 										nextInvocationCount[0]++;
 									}
 								}
 							} else if (expression instanceof FieldAccess) {
-								final FieldAccess qualifier= (FieldAccess) expression;
+								final FieldAccess qualifier= (FieldAccess)expression;
 								final IBinding result= qualifier.resolveFieldBinding();
 								if (result != null && result.equals(fIterator)) {
-									if (!binding.getName().equals("next") && !binding.getName().equals("nextElement")) {  //$NON-NLS-1$ //$NON-NLS-2$
+									if (!binding.getName().equals("next") && !binding.getName().equals("nextElement")) { //$NON-NLS-1$ //$NON-NLS-2$
 										otherInvocationThenNext[0]= true;
 									} else {
 										nextInvocationCount[0]++;
@@ -499,25 +503,25 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 						}
 						return false;
 					}
-
+					
 					public final boolean visit(final VariableDeclarationFragment node) {
 						return visit(node.getName(), node.getInitializer());
 					}
 				});
 				if (otherInvocationThenNext[0])
 					return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
-				
+					
 				if (nextInvocationCount[0] > 1)
 					return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 			}
 			final ASTNode root= getForStatement().getRoot();
 			if (root != null) {
 				root.accept(new ASTVisitor() {
-
+					
 					public final boolean visit(final ForStatement node) {
 						return false;
 					}
-
+					
 					public final boolean visit(final SimpleName node) {
 						final IBinding binding= node.resolveBinding();
 						if (binding != null && binding.equals(fElement))
@@ -533,11 +537,11 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 		}
 	}
-
-    private IStatus checkExpressionCondition() {
+	
+	private IStatus checkExpressionCondition() {
 		String warningLable= FixMessages.ConvertIterableLoopOperation_semanticChangeWarning;
 		
-    	Expression expression= getForStatement().getExpression();
+		Expression expression= getForStatement().getExpression();
 		if (!(expression instanceof MethodInvocation))
 			return new StatusInfo(IStatus.WARNING, warningLable);
 		
@@ -545,11 +549,11 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		IMethodBinding methodBinding= invoc.resolveMethodBinding();
 		if (methodBinding == null)
 			return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
-		
+			
 		ITypeBinding declaringClass= methodBinding.getDeclaringClass();
 		if (declaringClass == null)
 			return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
-		
+			
 		String qualifiedName= declaringClass.getQualifiedName();
 		String methodName= invoc.getName().getIdentifier();
 		if (qualifiedName.startsWith("java.util.Enumeration")) { //$NON-NLS-1$
@@ -562,6 +566,6 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			return new StatusInfo(IStatus.WARNING, warningLable);
 		}
 		
-	    return StatusInfo.OK_STATUS;
-    }
+		return StatusInfo.OK_STATUS;
+	}
 }
