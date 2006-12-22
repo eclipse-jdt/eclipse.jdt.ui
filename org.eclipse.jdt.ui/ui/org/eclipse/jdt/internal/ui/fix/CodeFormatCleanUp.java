@@ -38,19 +38,19 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 	
 	public CodeFormatCleanUp() {
 		super();
-    }
+	}
 	
 	public CodeFormatCleanUp(Map options) {
 		super(options);
 	}
-
+	
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 		
 		return CodeFormatFix.createCleanUp(compilationUnit, isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE));
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -60,7 +60,7 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 		
 		return null;
 	}
-
+	
 	public Map getRequiredOptions() {
 		return null;
 	}
@@ -96,23 +96,23 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 		
 		IDocument doc= new Document(original);
 		try {
-	        edit.apply(doc);
-        } catch (MalformedTreeException e) {
-	        JavaPlugin.log(e);
-        } catch (BadLocationException e) {
-	        JavaPlugin.log(e);
-        }
+			edit.apply(doc);
+		} catch (MalformedTreeException e) {
+			JavaPlugin.log(e);
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+		}
 		return doc.get();
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
 		return -1;
 	}
-
-    public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-	    return false;
-    }    
+	
+	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
+		return false;
+	}
 }

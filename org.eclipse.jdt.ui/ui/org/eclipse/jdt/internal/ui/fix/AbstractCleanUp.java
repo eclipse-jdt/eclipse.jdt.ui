@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 public abstract class AbstractCleanUp implements ICleanUp {
-
+	
 	private Map fOptions;
 	private final boolean fCanReinitialize;
 	
@@ -38,10 +38,10 @@ public abstract class AbstractCleanUp implements ICleanUp {
 		fOptions= options;
 		fCanReinitialize= options == null;
 	}
-   	
+	
 	protected int getNumberOfProblems(IProblem[] problems, int problemId) {
 		int result= 0;
-		for (int i=0;i<problems.length;i++) {
+		for (int i= 0; i < problems.length; i++) {
 			if (problems[i].getID() == problemId)
 				result++;
 		}
@@ -56,7 +56,7 @@ public abstract class AbstractCleanUp implements ICleanUp {
 			monitor.done();
 		return new RefactoringStatus();
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -80,12 +80,12 @@ public abstract class AbstractCleanUp implements ICleanUp {
 		
 		Object value= fOptions.get(key);
 		return CleanUpConstants.TRUE == value || CleanUpConstants.TRUE.equals(value);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public boolean needsFreshAST(CompilationUnit compilationUnit) {
-        return false;
-    }
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean needsFreshAST(CompilationUnit compilationUnit) {
+		return false;
+	}
 }
