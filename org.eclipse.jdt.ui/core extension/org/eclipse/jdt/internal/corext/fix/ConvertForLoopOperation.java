@@ -11,18 +11,18 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -32,9 +32,8 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PostfixExpression;
@@ -44,19 +43,17 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -64,360 +61,398 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class ConvertForLoopOperation extends ConvertLoopOperation {
 	
-	private EnhancedForStatement fEnhancedForStatement;
-	private final AST fAst;
-	private Name fCollectionName;
-	private SingleVariableDeclaration fParameterDeclaration;
-	private ITypeBinding fOldCollectionTypeBinding;
-	private IBinding fOldCollectionBinding;
-	private IBinding fIndexBinding;
-	private boolean fCollectionIsMethodCall= false;
-	private MethodInvocation fMethodInvocation;
-	private final String fParameterName;
-	private final ICompilationUnit fCompilationUnit;
-	private FieldAccess fFieldAccess;
-	private final CompilationUnit fRoot;
+	private static final String LENGTH_QUERY= "length"; //$NON-NLS-1$
+	private static final String LITERAL_0= "0"; //$NON-NLS-1$
+	private static final String LITERAL_1= "1"; //$NON-NLS-1$
+	private static final String FOR_LOOP_ELEMENT_IDENTIFIER= "element"; //$NON-NLS-1$
 	
-	/**
-	 * Visitor class for finding all references to a certain Name within the
-	 * specified scope (e.g. finds all references to a local variable within the
-	 * Body of a For loop).
-	 */
-	private class LocalOccurencesFinder extends ASTVisitor {
-		
-		private final List fOccurences;
-		private ASTNode fScope;
-		private final IBinding fTempBinding;
-		private ITypeBinding fTempTypeBinding;
-		
-		/**
-		 * @param collectionName
-		 *            The inferred name of the collection to be iterated over
-		 * @param oldCollectionBinding
-		 *            The binding of the inferred collection
-		 * @param oldCollectionTypeBinding
-		 *            The type binding of the inferred collection
-		 * @param scope
-		 *            The scope of the search (i.e. the body of a For Statement
-		 */
-		public LocalOccurencesFinder(Name collectionName, IBinding oldCollectionBinding, ITypeBinding oldCollectionTypeBinding, ASTNode scope) {
-			this.fScope= scope;
-			fOccurences= new ArrayList();
-			fTempBinding= oldCollectionBinding;
-			fTempTypeBinding= oldCollectionTypeBinding;
-		}
-		
-		public LocalOccurencesFinder(Name name, ASTNode scope) {
-			this.fScope= scope;
-			fOccurences= new ArrayList();
-			fTempBinding= name.resolveBinding();
-		}
-		
-		public LocalOccurencesFinder(IBinding binding, ASTNode scope) {
-			this.fScope= scope;
-			fOccurences= new ArrayList();
-			fTempBinding= binding;
-		}
-		
-		public void perform() {
-			fScope.accept(this);
-		}
-		
-		public boolean visit(SimpleName node) {
-			if (node.getParent() instanceof VariableDeclaration) {
-				if (((VariableDeclaration)node.getParent()).getName() == node)
-					return true; //don't include declaration
-			}
-			if (fTempBinding != null && Bindings.equals(fTempBinding, node.resolveBinding())) {
-				fOccurences.add(node);
-			}
-			return true;
-		}
-		
-		public boolean visit(MethodInvocation methodInvocation) {
-			ArrayAccess arrayAccess= (ArrayAccess)ASTNodes.getParent(methodInvocation, ArrayAccess.class);
-			if (arrayAccess != null && fTempTypeBinding != null && Bindings.equals(fTempBinding, methodInvocation.resolveMethodBinding())) {
-				fOccurences.add(arrayAccess);
-				return false;
-			}
-			return true;
-		}
-		
-		public List getOccurences() {
-			return fOccurences;
-		}
+	private static final class InvalidBodyError extends Error {
+		private static final long serialVersionUID= 1L;
 	}
 	
-	public ConvertForLoopOperation(CompilationUnit root, ForStatement forStatement, String parameterName) {
+	private IVariableBinding fIndexBinding;
+	private IVariableBinding fLengthBinding;
+	private IBinding fArrayBinding;
+	private Expression fArrayAccess;
+	private final String fParameterName;
+	
+	public ConvertForLoopOperation(ForStatement forStatement) {
+		this(forStatement, null);
+	}
+	
+	public ConvertForLoopOperation(ForStatement forStatement, String parameterName) {
 		super(forStatement);
-		
-		fRoot= root;
-		fCompilationUnit= (ICompilationUnit)root.getJavaElement();
-		fAst= root.getAST();
 		fParameterName= parameterName;
 	}
 	
-	/**
-	 * Check if the OldFor can be converted to Enhanced For. Unless all
-	 * preconditions hold true, there is no reason for this QuickAssist to pop
-	 * up.
-	 * 
-	 * @return true if all preconditions (arrayCanBeInferred &&
-	 *         arrayOrIndexNotAssignedTo indexNotReferencedOutsideInferredArray &&
-	 *         onlyOneIndexUsed && additionalTempsNotReferenced) are satisfied
-	 */
 	public boolean satisfiesPreconditions() {
-		return JavaModelUtil.is50OrHigher(fCompilationUnit.getJavaProject()) && getForStatement().getExpression() != null && arrayCanBeInferred() && typeBindingsAreNotNull() && bodySatifiesPreconditions() && initializersSatisfyPreconditions() && updatersSatifyPreconditions();
-	}
-	
-	private boolean typeBindingsAreNotNull() {
-		fIndexBinding= getIndexBinding();
-		return fOldCollectionBinding != null && fOldCollectionTypeBinding != null && fIndexBinding != null;
-	}
-	
-	private boolean bodySatifiesPreconditions() {
-		// checks in a single pass through Loop's body that arrayOrIndexNotAssignedTo
-		// and indexNotReferencedOutsideInferredArray
-		final List writeAccesses= new ArrayList();
-		final boolean isIndexReferenced[]= { false };
+		ForStatement statement= getForStatement();
+		CompilationUnit ast= (CompilationUnit)statement.getRoot();
 		
-		getForStatement().getBody().accept(new ASTVisitor() {
-			public boolean visit(Assignment assignment) {
-				classifyWriteAccess(assignment.getLeftHandSide());
-				return true;
-			}
-			
-			public boolean visit(PostfixExpression node) {
-				classifyWriteAccess(node.getOperand());
-				return true;
-			}
-			
-			public boolean visit(PrefixExpression node) {
-				classifyWriteAccess(node.getOperand());
-				return true;
-			}
-			
-			public boolean visit(SimpleName name) {
-				IBinding binding= name.resolveBinding();
-				if (Bindings.equals(fIndexBinding, binding)) {
-					ASTNode parent= name.getParent();
-					// check if the direct parent is an ArrayAcces
-					if (parent instanceof ArrayAccess) {
-						// even if the Index is referenced within an ArrayAccess
-						// it could happen that the Array is not the same as the
-						// inferred Array
-						
-						// On fixing bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=73890
-						// had to treat the case when indexNotReferenced flag does not get overridden
-						// by subsequent passes through this loop
-						isIndexReferenced[0]= isIndexReferenced[0] || isAccessToADifferentArray((ArrayAccess)parent);
-					} else {
-						//otherwise the Index is referenced outside ArrayAccess
-						isIndexReferenced[0]= true;
-					}
-				}
-				return false;
-			}
-			
-			private void classifyWriteAccess(Expression expression) {
-				//check that
-				if (expression instanceof ArrayAccess) {
-					checkThatArrayIsNotAssigned(writeAccesses, expression);
-				} else if (expression instanceof Name) {
-					checkThatIndexIsNotAssigned(writeAccesses, expression);
-				}
-			}
-		});
-		return writeAccesses.isEmpty() && !isIndexReferenced[0];
-	}
-	
-	private void checkThatIndexIsNotAssigned(final List writeAccesses, Expression expression) {
-		Name name= (Name)expression;
-		IBinding binding= name.resolveBinding();
-		if (binding == fIndexBinding) {
-			writeAccesses.add(name);
-		}
-	}
-	
-	private void checkThatArrayIsNotAssigned(final List writeAccesses, Expression expression) {
-		ArrayAccess arrayAccess= (ArrayAccess)expression;
-		Expression array= arrayAccess.getArray();
-		IBinding binding= null;
-		if (array instanceof Name) {
-			binding= ((Name)array).resolveBinding();
-		} else if (array instanceof FieldAccess) {
-			binding= ((FieldAccess)array).resolveFieldBinding();
-		} else if (array instanceof SuperFieldAccess) {
-			binding= ((SuperFieldAccess)array).resolveFieldBinding();
-		}
-		if (binding == fOldCollectionBinding)
-			writeAccesses.add(arrayAccess);
-	}
-	
-	private boolean isAccessToADifferentArray(ArrayAccess arrayAccess) {
-		Expression expression= arrayAccess.getArray();
-		if (expression instanceof Name) {
-			return isNameDifferentThanInferredArray((Name)expression);
-		} else if (expression instanceof FieldAccess) {
-			FieldAccess fieldAccess= (FieldAccess)expression;
-			return isNameDifferentThanInferredArray(fieldAccess.getName());
-		} else if (expression instanceof MethodInvocation) {
-			//Be more conservative here, just because it's the same name
-			//does not imply that it is the same array. The method can
-			//return different arrays. It could even be a method call on
-			//a different object. https://bugs.eclipse.org/bugs/show_bug.cgi?id=138353
-			return true;
-		} else {
-			return true; //conservative approach: if it doesn't fall within the above cases
-			// I return that it's an access to a different Array (causing the precondition
-			// to fail)
-		}
-	}
-	
-	private boolean isNameDifferentThanInferredArray(Name name) {
-		IBinding arrayBinding= name.resolveBinding();
-		if (!Bindings.equals(fOldCollectionBinding, arrayBinding)) {
-			return true;
-		}
-		return false;
-	}
-	
-	private boolean updatersSatifyPreconditions() {
-		return onlyOneIndexUsed() && indexNotDecremented();
-	}
-	
-	private boolean indexNotDecremented() {
-		ASTNode updater= (ASTNode)getForStatement().updaters().get(0);
+		IJavaElement javaElement= ast.getJavaElement();
+		if (javaElement == null)
+			return false;
 		
-		if (updater instanceof PostfixExpression) {
-			if ("++".equals(((PostfixExpression)updater).getOperator().toString())) //$NON-NLS-1$
-				return true;
-		}
+		if (!JavaModelUtil.is50OrHigher(javaElement.getJavaProject()))
+			return false;
 		
-		if (updater instanceof PrefixExpression) {
-			if ("++".equals(((PrefixExpression)updater).getOperator().toString())) //$NON-NLS-1$
-				return true;
-		}
-		return false;
-	}
-	
-	private boolean initializersSatisfyPreconditions() {
-		// Only one pass through Initializers
-		// check if startsFromZero and additionalTempsNotReferenced
+		if (!validateInitializers(statement))
+			return false;
 		
-		final List tempVarsInInitializers= new ArrayList();
-		final boolean startsFromZero[]= { false };
-		List initializers= getForStatement().initializers();
+		if (!validateExpression(statement))
+			return false;
 		
-		for (Iterator iter= initializers.iterator(); iter.hasNext();) {
-			Expression element= (Expression)iter.next();
-			if (!(element instanceof VariableDeclarationExpression))
-				return false;
-			
-			element.accept(new ASTVisitor() {
-				public boolean visit(VariableDeclarationFragment declarationFragment) {
-					Name indexName= declarationFragment.getName();
-					tempVarsInInitializers.add(indexName);
-					startsFromZero[0]= doesIndexStartFromZero(indexName, declarationFragment);
-					return false;
-				}
-				
-				public boolean visit(Assignment assignment) {
-					if (assignment.getLeftHandSide() instanceof Name) {
-						Name indexName= (Name)assignment.getLeftHandSide();
-						tempVarsInInitializers.add(indexName);
-						startsFromZero[0]= doesIndexStartFromZero(indexName, assignment);
-					}
-					return false;
-				}
-			});
-		}
+		if (!validateUpdaters(statement))
+			return false;
 		
-		removeInferredIndexFrom(tempVarsInInitializers);
+		if (!validateBody(statement))
+			return false;
 		
-		return startsFromZero[0] && additionalTempsNotReferenced(tempVarsInInitializers);
-	}
-	
-	private boolean doesIndexStartFromZero(Name indexName, ASTNode declaringNode) {
-		IBinding binding= indexName.resolveBinding();
-		if (Bindings.equals(fIndexBinding, binding)) {
-			Expression initializer= null;
-			if (declaringNode instanceof VariableDeclarationFragment) {
-				initializer= ((VariableDeclarationFragment)declaringNode).getInitializer();
-			} else if (declaringNode instanceof Assignment) {
-				initializer= ((Assignment)declaringNode).getRightHandSide();
-			}
-			
-			if (initializer instanceof NumberLiteral) {
-				NumberLiteral number= (NumberLiteral)initializer;
-				if (!"0".equals(number.getToken())) { //$NON-NLS-1$
-					return false;
-				}
-			} else {
-				//variable or method call, most probably not 0...
-				//could also be a constant which is 0, but who would define such a constant?
-				return false;
-			}
-		}
-		return true; // we have to return true also for the cases when we test another variable besides
-		// Inferred Index
-	}
-	
-	private void removeInferredIndexFrom(List localTemps) {
-		Name indexName= null;
-		for (Iterator iter= localTemps.iterator(); iter.hasNext();) {
-			Name name= (Name)iter.next();
-			IBinding binding= name.resolveBinding();
-			//fIndexBinding has already been initialized via typeBindingsAreNotNull()
-			if (Bindings.equals(fIndexBinding, binding)) {
-				indexName= name;
-				break;
-			}
-		}
-		localTemps.remove(indexName);
-	}
-	
-	private boolean additionalTempsNotReferenced(List localTemps) {
-		for (Iterator iter= localTemps.iterator(); iter.hasNext();) {
-			Name name= (Name)iter.next();
-			LocalOccurencesFinder finder= new LocalOccurencesFinder(name, getForStatement().getBody());
-			finder.perform();
-			if (!finder.getOccurences().isEmpty())
-				return false;
-		}
 		return true;
 	}
 	
-	private boolean onlyOneIndexUsed() {
-		return getForStatement().updaters().size() == 1;
-	}
-	
-	private boolean arrayCanBeInferred() {
-		doInferCollection();
-		return fCollectionName != null && fOldCollectionTypeBinding != null
-		// for now, only iteration over Arrays are handled
-		        && fOldCollectionTypeBinding.isArray();
-	}
-	
-	private IBinding inferIndexBinding() {
-		List initializers= getForStatement().initializers();
-		if (initializers.size() == 0)
-			return null;
+	/**
+	 * Must be one of:
+	 * <ul>
+	 * <li>int [result]= 0;</li>
+	 * <li>int [result]= 0, [lengthBinding]= [arrayBinding].length;</li>
+	 * <li>int , [result]= 0;</li>
+	 * </ul>
+	 */
+	private boolean validateInitializers(ForStatement statement) {
+		List initializers= statement.initializers();
+		if (initializers.size() != 1)
+			return false;
 		
 		Expression expression= (Expression)initializers.get(0);
-		if (expression instanceof VariableDeclarationExpression) {
-			VariableDeclarationFragment declaration= (VariableDeclarationFragment)((VariableDeclarationExpression)expression).fragments().get(0);
-			Name indexName= declaration.getName();
-			fIndexBinding= indexName.resolveBinding();
-		} else if (expression instanceof Assignment) {
-			Assignment assignment= (Assignment)expression;
-			Expression lhs= assignment.getLeftHandSide();
-			if (lhs instanceof Name) {
-				Name indexName= (Name)lhs;
-				fIndexBinding= indexName.resolveBinding();
+		if (!(expression instanceof VariableDeclarationExpression))
+			return false;
+		
+		VariableDeclarationExpression declaration= (VariableDeclarationExpression)expression;
+		ITypeBinding declarationBinding= declaration.resolveTypeBinding();
+		if (declarationBinding == null)
+			return false;
+		
+		if (!declarationBinding.isPrimitive())
+			return false;
+		
+		if (!PrimitiveType.INT.toString().equals(declarationBinding.getQualifiedName()))
+			return false;
+		
+		List fragments= declaration.fragments();
+		if (fragments.size() == 1) {
+			IVariableBinding indexBinding= getIndexBindingFromFragment((VariableDeclarationFragment)fragments.get(0));
+			if (indexBinding == null)
+				return false;
+			
+			fIndexBinding= indexBinding;
+			return true;
+		} else if (fragments.size() == 2) {
+			IVariableBinding indexBinding= getIndexBindingFromFragment((VariableDeclarationFragment)fragments.get(0));
+			if (indexBinding == null) {
+				indexBinding= getIndexBindingFromFragment((VariableDeclarationFragment)fragments.get(1));
+				if (indexBinding == null)
+					return false;
+				
+				if (!validateLengthFragment((VariableDeclarationFragment)fragments.get(0)))
+					return false;
+			} else {
+				if (!validateLengthFragment((VariableDeclarationFragment)fragments.get(1)))
+					return false;
+			}
+			
+			fIndexBinding= indexBinding;
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * [lengthBinding]= [arrayBinding].length
+	 */
+	private boolean validateLengthFragment(VariableDeclarationFragment fragment) {
+		Expression initializer= fragment.getInitializer();
+		if (initializer == null)
+			return false;
+		
+		if (!validateLengthQuery(initializer))
+			return false;
+		
+		IVariableBinding lengthBinding= (IVariableBinding)fragment.getName().resolveBinding();
+		if (lengthBinding == null)
+			return false;
+		fLengthBinding= lengthBinding;
+		
+		return true;
+	}
+	
+	/**
+	 * Must be one of:
+	 * <ul>
+	 * <li>[result]= 0</li>
+	 * </ul>
+	 */
+	private IVariableBinding getIndexBindingFromFragment(VariableDeclarationFragment fragment) {
+		Expression initializer= fragment.getInitializer();
+		if (!(initializer instanceof NumberLiteral))
+			return null;
+		
+		NumberLiteral number= (NumberLiteral)initializer;
+		if (!LITERAL_0.equals(number.getToken()))
+			return null;
+		
+		return (IVariableBinding)fragment.getName().resolveBinding();
+	}
+	
+	/**
+	 * Must be one of:
+	 * <ul>
+	 * <li>[indexBinding] < [result].length;</li>
+	 * <li>[result].length > [indexBinding];</li>
+	 * <li>[indexBinding] < [lengthBinding];</li>
+	 * <li>[lengthBinding] > [indexBinding];</li>
+	 * </ul>
+	 */
+	private boolean validateExpression(ForStatement statement) {
+		Expression expression= statement.getExpression();
+		if (!(expression instanceof InfixExpression))
+			return false;
+		
+		InfixExpression infix= (InfixExpression)expression;
+		
+		Expression left= infix.getLeftOperand();
+		Expression right= infix.getRightOperand();
+		if (left instanceof SimpleName && right instanceof SimpleName) {
+			IVariableBinding lengthBinding= fLengthBinding;
+			if (lengthBinding == null)
+				return false;
+			
+			IBinding leftBinding= ((SimpleName)left).resolveBinding();
+			IBinding righBinding= ((SimpleName)right).resolveBinding();
+			
+			if (fIndexBinding.equals(leftBinding)) {
+				return lengthBinding.equals(righBinding);
+			} else if (fIndexBinding.equals(righBinding)) {
+				return lengthBinding.equals(leftBinding);
+			}
+			
+			return false;
+		} else if (left instanceof SimpleName) {
+			if (!fIndexBinding.equals(((SimpleName)left).resolveBinding()))
+				return false;
+			
+			if (!Operator.LESS.equals(infix.getOperator()))
+				return false;
+			
+			return validateLengthQuery(right);
+		} else if (right instanceof SimpleName) {
+			if (!fIndexBinding.equals(((SimpleName)right).resolveBinding()))
+				return false;
+			
+			if (!Operator.GREATER.equals(infix.getOperator()))
+				return false;
+			
+			return validateLengthQuery(left);
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Must be one of:
+	 * <ul>
+	 * <li>[result].length</li>
+	 * </ul>
+	 */
+	private boolean validateLengthQuery(Expression lengthQuery) {
+		if (lengthQuery instanceof QualifiedName) {
+			QualifiedName qualifiedName= (QualifiedName)lengthQuery;
+			SimpleName name= qualifiedName.getName();
+			if (!LENGTH_QUERY.equals(name.getIdentifier()))
+				return false;
+			
+			Name arrayAccess= qualifiedName.getQualifier();
+			ITypeBinding accessType= arrayAccess.resolveTypeBinding();
+			if (accessType == null)
+				return false;
+			
+			if (!accessType.isArray())
+				return false;
+			
+			IBinding arrayBinding= arrayAccess.resolveBinding();
+			if (arrayBinding == null)
+				return false;
+			
+			fArrayBinding= arrayBinding;
+			fArrayAccess= arrayAccess;
+			return true;
+		} else if (lengthQuery instanceof FieldAccess) {
+			FieldAccess fieldAccess= (FieldAccess)lengthQuery;
+			SimpleName name= fieldAccess.getName();
+			if (!LENGTH_QUERY.equals(name.getIdentifier()))
+				return false;
+			
+			Expression arrayAccess= fieldAccess.getExpression();
+			ITypeBinding accessType= arrayAccess.resolveTypeBinding();
+			if (accessType == null)
+				return false;
+			
+			if (!accessType.isArray())
+				return false;
+			
+			IBinding arrayBinding= getBinding(arrayAccess);
+			if (arrayBinding == null)
+				return false;
+			
+			fArrayBinding= arrayBinding;
+			fArrayAccess= arrayAccess;
+			return true;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Must be one of:
+	 * <ul>
+	 * <li>[indexBinding]++</li>
+	 * <li>[indexBinding]+= 1</li>
+	 * <li>[indexBinding]= [indexBinding] + 1</li>
+	 * <li>[indexBinding]= 1 + [indexBinding]</li>
+	 * <ul>
+	 */
+	private boolean validateUpdaters(ForStatement statement) {
+		List updaters= statement.updaters();
+		if (updaters.size() != 1)
+			return false;
+		
+		Expression updater= (Expression)updaters.get(0);
+		if (updater instanceof PostfixExpression) {
+			PostfixExpression postfix= (PostfixExpression)updater;
+			
+			if (!PostfixExpression.Operator.INCREMENT.equals(postfix.getOperator()))
+				return false;
+			
+			IBinding binding= getBinding(postfix.getOperand());
+			if (!fIndexBinding.equals(binding))
+				return false;
+			
+			return true;
+		} else if (updater instanceof Assignment) {
+			Assignment assignment= (Assignment)updater;
+			Expression left= assignment.getLeftHandSide();
+			IBinding binding= getBinding(left);
+			if (!fIndexBinding.equals(binding))
+				return false;
+			
+			if (Assignment.Operator.PLUS_ASSIGN.equals(assignment.getOperator())) {
+				return isOneLiteral(assignment.getRightHandSide());
+			} else if (Assignment.Operator.ASSIGN.equals(assignment.getOperator())) {
+				Expression right= assignment.getRightHandSide();
+				if (!(right instanceof InfixExpression))
+					return false;
+				
+				InfixExpression infixExpression= (InfixExpression)right;
+				Expression leftOperand= infixExpression.getLeftOperand();
+				IBinding leftBinding= getBinding(leftOperand);
+				Expression rightOperand= infixExpression.getRightOperand();
+				IBinding rightBinding= getBinding(rightOperand);
+				
+				if (fIndexBinding.equals(leftBinding)) {
+					return isOneLiteral(rightOperand);
+				} else if (fIndexBinding.equals(rightBinding)) {
+					return isOneLiteral(leftOperand);
+				}
 			}
 		}
-		return fIndexBinding;
+		return false;
+	}
+	
+	private boolean isOneLiteral(Expression expression) {
+		if (!(expression instanceof NumberLiteral))
+			return false;
+		
+		NumberLiteral literal= (NumberLiteral)expression;
+		return LITERAL_1.equals(literal.getToken());
+	}
+	
+	/**
+	 * returns false iff
+	 * <ul>
+	 * <li><code>indexBinding</code> is used for anything else then accessing
+	 * an element of <code>arrayBinding</code></li>
+	 * <li><code>arrayBinding</code> is assigned</li>
+	 * <li>an element of <code>arrayBinding</code> is assigned</li>
+	 * <li><code>lengthBinding</code> is referenced</li>
+	 * </ul>
+	 * within <code>body</code>
+	 */
+	private boolean validateBody(ForStatement statement) {
+		Statement body= statement.getBody();
+		try {
+			body.accept(new GenericVisitor() {
+				/**
+				 * {@inheritDoc}
+				 */
+				protected boolean visitNode(ASTNode node) {
+					if (node instanceof Name) {
+						Name name= (Name)node;
+						IBinding nameBinding= name.resolveBinding();
+						if (nameBinding == null)
+							throw new InvalidBodyError();
+						
+						if (nameBinding.equals(fIndexBinding)) {
+							if (node.getLocationInParent() != ArrayAccess.INDEX_PROPERTY)
+								throw new InvalidBodyError();
+							
+							ArrayAccess arrayAccess= (ArrayAccess)node.getParent();
+							Expression array= arrayAccess.getArray();
+							
+							IBinding binding= getBinding(array);
+							if (binding == null)
+								throw new InvalidBodyError();
+							
+							if (!fArrayBinding.equals(binding))
+								throw new InvalidBodyError();
+							
+						} else if (nameBinding.equals(fArrayBinding)) {
+							ASTNode current= node;
+							while (current != null && !(current instanceof Statement)) {
+								if (current.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY)
+									throw new InvalidBodyError();
+								
+								if (current instanceof PrefixExpression)
+									throw new InvalidBodyError();
+								
+								if (current instanceof PostfixExpression)
+									throw new InvalidBodyError();
+								
+								current= current.getParent();
+							}
+						} else if (nameBinding.equals(fLengthBinding)) {
+							throw new InvalidBodyError();
+						}
+					}
+					
+					return true;
+				}
+				
+			});
+		} catch (InvalidBodyError e) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private static IBinding getBinding(Expression expression) {
+		if (expression instanceof FieldAccess) {
+			return ((FieldAccess)expression).resolveFieldBinding();
+		} else if (expression instanceof Name) {
+			return ((Name)expression).resolveBinding();
+		}
+		
+		return null;
 	}
 	
 	/* (non-Javadoc)
@@ -435,322 +470,186 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	protected Statement convert(CompilationUnitRewrite cuRewrite, TextEditGroup group, LinkedProposalModel positionGroups) throws CoreException {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		ImportRewrite importRewrite= cuRewrite.getImportRewrite();
-		doInferCollection();
-		doInferElement(importRewrite);
-		doFindAndReplaceInBody(rewrite, group, positionGroups);
 		
-		AST ast= getForStatement().getAST();
-		fEnhancedForStatement= ast.newEnhancedForStatement();
-		fEnhancedForStatement.setBody(getBody(cuRewrite, group, positionGroups));
-		fEnhancedForStatement.setExpression(createExpression(rewrite, ast));
-		fEnhancedForStatement.setParameter(fParameterDeclaration);
-		LinkedProposalPositionGroup pg= positionGroups.getPositionGroup(fParameterName, true);
-		pg.addPosition(rewrite.track(fParameterDeclaration.getName()), true);
+		ForStatement forStatement= getForStatement();
 		
-		String name= fParameterDeclaration.getName().getIdentifier();
+		VariableDeclarationFragment fragement= findArrayElementDeclaration(forStatement.getBody(), fIndexBinding, fArrayBinding);
 		
-		List proposals= getProposalsForElement();
-		if (!proposals.contains(name))
-			proposals.add(0, name);
+		String[] proposals= getProposalsForElement(fArrayAccess.resolveTypeBinding(), cuRewrite.getCu().getJavaProject());
 		
-		for (Iterator iterator= proposals.iterator(); iterator.hasNext();)
-			pg.addProposal((String)iterator.next(), null, 10);
-		
-		return fEnhancedForStatement;
-	}
-	
-	private Expression createExpression(ASTRewrite rewrite, AST ast) {
-		if (fCollectionIsMethodCall) {
-			MethodInvocation methodCall= (MethodInvocation)rewrite.createMoveTarget(fMethodInvocation);
-			return methodCall;
-		} else if (fFieldAccess != null) {
-			return (FieldAccess)rewrite.createMoveTarget(fFieldAccess);
-		}
-		return fCollectionName;
-	}
-	
-	private List getProposalsForElement() {
-		List list= new ArrayList();
-		ICompilationUnit icu= fCompilationUnit;
-		IJavaProject javaProject= icu.getJavaProject();
-		int dimensions= fOldCollectionTypeBinding.getDimensions() - 1;
-		final List used= getUsedVariableNames();
-		String type= fOldCollectionTypeBinding.getName();
-		if (fOldCollectionTypeBinding.isArray())
-			type= fOldCollectionTypeBinding.getElementType().getName();
-		String[] proposals= StubUtility.getLocalNameSuggestions(javaProject, type, dimensions, (String[])used.toArray(new String[used.size()]));
-		for (int i= 0; i < proposals.length; i++) {
-			list.add(proposals[i]);
-		}
-		return list;
-	}
-	
-	private List getUsedVariableNames() {
-		CompilationUnit root= (CompilationUnit)getForStatement().getRoot();
-		IBinding[] varsBefore= (new ScopeAnalyzer(root)).getDeclarationsInScope(getForStatement().getStartPosition(), ScopeAnalyzer.VARIABLES);
-		IBinding[] varsAfter= (new ScopeAnalyzer(root)).getDeclarationsAfter(getForStatement().getStartPosition() + getForStatement().getLength(), ScopeAnalyzer.VARIABLES);
-		
-		List names= new ArrayList();
-		for (int i= 0; i < varsBefore.length; i++) {
-			names.add(varsBefore[i].getName());
-		}
-		for (int i= 0; i < varsAfter.length; i++) {
-			names.add(varsAfter[i].getName());
-		}
-		return names;
-	}
-	
-	private void doFindAndReplaceInBody(ASTRewrite rewrite, TextEditGroup group, LinkedProposalModel positionGroups) {
-		LocalOccurencesFinder finder= new LocalOccurencesFinder(fCollectionName, fOldCollectionBinding, fOldCollectionTypeBinding, getForStatement().getBody());
-		finder.perform();
-		List occurences= finder.getOccurences();
-		
-		// this might be the "ideal" case (exercised in testNiceReduction)
-		if (occurences.size() == 1) {
-			ASTNode soleOccurence= (ASTNode)occurences.get(0);
-			ArrayAccess arrayAccess= soleOccurence instanceof ArrayAccess ? (ArrayAccess)soleOccurence : (ArrayAccess)ASTNodes.getParent(soleOccurence, ArrayAccess.class);
-			if (arrayAccess != null) {
-				if (arrayAccess.getParent() instanceof VariableDeclarationFragment) {
-					replaceSingleVariableDeclaration(rewrite, arrayAccess, group, positionGroups);
-					return;
-				}
+		String parameterName;
+		if (fragement == null) {
+			if (fParameterName != null) {
+				parameterName= fParameterName;
+			} else {
+				parameterName= proposals[0];
 			}
-		}
-		
-		replaceMultipleOccurences(rewrite, occurences, group, positionGroups);
-	}
-	
-	private void replaceSingleVariableDeclaration(ASTRewrite rewrite, ArrayAccess arrayAccess, TextEditGroup group, LinkedProposalModel positionGroups) {
-		VariableDeclarationFragment declarationFragment= (VariableDeclarationFragment)arrayAccess.getParent();
-		VariableDeclarationStatement declarationStatement= (VariableDeclarationStatement)declarationFragment.getParent();
-		
-		// if could not infer THE_ELEMENT from infer step, we might
-		// be able to infer it from here
-		if (fParameterDeclaration == null) {
-			fParameterDeclaration= fAst.newSingleVariableDeclaration();
-		}
-		
-		SimpleName theTempVariable= declarationFragment.getName();
-		
-		SimpleName name= fAst.newSimpleName(theTempVariable.getIdentifier());
-		Type type= ASTNodeFactory.newType(getAst(), declarationFragment);
-		fParameterDeclaration.setName(name);
-		fParameterDeclaration.setType(type);
-		if (ASTNodes.findModifierNode(Modifier.FINAL, declarationStatement.modifiers()) != null) {
-			ModifierRewrite.create(rewrite, fParameterDeclaration).setModifiers(Modifier.FINAL, Modifier.NONE, group);
-		}
-		
-		LocalOccurencesFinder finder2= new LocalOccurencesFinder(theTempVariable.resolveBinding(), getForStatement().getBody());
-		finder2.perform();
-		List occurences2= finder2.getOccurences();
-		
-		linkAllReferences(rewrite, occurences2, positionGroups);
-		
-		rewrite.replace(declarationStatement, null, group);
-		return;
-	}
-	
-	private void linkAllReferences(ASTRewrite rewrite, List occurences, LinkedProposalModel positionGroups) {
-		for (Iterator iter= occurences.iterator(); iter.hasNext();) {
-			ASTNode variableRef= (ASTNode)iter.next();
-			positionGroups.getPositionGroup(fParameterName, true).addPosition(rewrite.track(variableRef), false);
-		}
-	}
-	
-	private void replaceMultipleOccurences(ASTRewrite rewrite, List occurences, TextEditGroup group, LinkedProposalModel positionGroups) {
-		for (Iterator iter= occurences.iterator(); iter.hasNext();) {
-			ASTNode element= (ASTNode)iter.next();
-			ArrayAccess arrayAccess= element instanceof ArrayAccess ? (ArrayAccess)element : (ArrayAccess)ASTNodes.getParent(element, ArrayAccess.class);
-			if (arrayAccess != null) {
-				Expression index= arrayAccess.getIndex();
-				if (index instanceof SimpleName && Bindings.equals(fIndexBinding, ((SimpleName)index).resolveBinding())) {
-					SimpleName elementReference= fAst.newSimpleName(fParameterDeclaration.getName().getIdentifier());
-					
-					rewrite.replace(arrayAccess, elementReference, group);
-					positionGroups.getPositionGroup(fParameterName, true).addPosition(rewrite.track(elementReference), false);
-				}
-			}
-		}
-	}
-	
-	private void doInferElement(ImportRewrite importRewrite) throws CoreException {
-		if (fCollectionName == null) {
-			createDefaultParameter();
 		} else {
-			if (fOldCollectionTypeBinding.isArray()) {
-				final ITypeBinding elementType= fOldCollectionTypeBinding.getElementType();
-				fParameterDeclaration= fAst.newSingleVariableDeclaration();
-				SimpleName name= fAst.newSimpleName(fParameterName);
-				fParameterDeclaration.setName(name);
-				
-				Type theType= importType(elementType, getForStatement(), importRewrite, fRoot);
-				if (fOldCollectionTypeBinding.getDimensions() != 1) {
-					theType= fAst.newArrayType(theType, fOldCollectionTypeBinding.getDimensions() - 1);
-				}
-				fParameterDeclaration.setType(theType);
-			}
+			parameterName= fragement.getName().getIdentifier();
 		}
-	}
-	
-	private void createDefaultParameter() {
-		fParameterDeclaration= fAst.newSingleVariableDeclaration();
-		SimpleName name= fAst.newSimpleName(fParameterName);
-		Type type= fAst.newPrimitiveType(PrimitiveType.INT);
-		fParameterDeclaration.setName(name);
-		fParameterDeclaration.setType(type);
-	}
-	
-	// Caches the inferred collection name and its bindings in local fields. These
-	// won't change during the whole operation of the QuickFix.
-	private void doInferCollection() {
-		if (fCollectionName != null)
-			return;
+		LinkedProposalPositionGroup pg= positionGroups.getPositionGroup(parameterName, true);
 		
-		doInferCollectionFromExpression();
+		AST ast= forStatement.getAST();
+		EnhancedForStatement result= ast.newEnhancedForStatement();
 		
-		if (fCollectionName == null)
-			doInferCollectionFromInitializers();
+		SingleVariableDeclaration parameterDeclaration= createParameterDeclaration(parameterName, fragement, fArrayAccess, forStatement, importRewrite, rewrite, group, pg);
+		result.setParameter(parameterDeclaration);
 		
-	}
-	
-	private void doInferCollectionFromExpression() {
-		Expression stopCondition= getForStatement().getExpression();
-		if (stopCondition.getNodeType() == ASTNode.INFIX_EXPRESSION) {
-			Expression rightOperand= ((InfixExpression)stopCondition).getRightOperand();
-			if (rightOperand.getNodeType() == ASTNode.QUALIFIED_NAME) {
-				Name qualifier= ((QualifiedName)rightOperand).getQualifier();
-				fCollectionName= ASTNodeFactory.newName(fAst, qualifier.getFullyQualifiedName());
-				fOldCollectionBinding= qualifier.resolveBinding();
-				fOldCollectionTypeBinding= qualifier.resolveTypeBinding();
-			} else if (rightOperand.getNodeType() == ASTNode.METHOD_INVOCATION) {
-				MethodInvocation methodCall= (MethodInvocation)rightOperand;
-				Expression exp= methodCall.getExpression();
-				if (exp instanceof Name) {
-					Name collectionName= (Name)exp;
-					fOldCollectionBinding= collectionName.resolveBinding();
-					fOldCollectionTypeBinding= collectionName.resolveTypeBinding();
-					fCollectionName= ASTNodeFactory.newName(fAst, collectionName.getFullyQualifiedName());
-				}
-			} else if (rightOperand instanceof FieldAccess) {
-				// this treats the case when the stop condition is a method call or field access
-				// which returns an Array on which the "length" field is queried
-				FieldAccess fieldAccess= (FieldAccess)rightOperand;
-				if ("length".equals(fieldAccess.getName().getIdentifier())) { //$NON-NLS-1$
-					if (fieldAccess.getExpression() instanceof MethodInvocation) {
-						fCollectionIsMethodCall= true;
-						MethodInvocation methodCall= (MethodInvocation)fieldAccess.getExpression();
-						fMethodInvocation= methodCall;
-						fOldCollectionBinding= methodCall.resolveMethodBinding();
-						fOldCollectionTypeBinding= methodCall.resolveTypeBinding();
-						fCollectionName= ASTNodeFactory.newName(fAst, methodCall.getName().getFullyQualifiedName());
-					} else if (fieldAccess.getExpression() instanceof FieldAccess) {
-						FieldAccess fieldCall= (FieldAccess)fieldAccess.getExpression();
-						fFieldAccess= fieldCall;
-						fOldCollectionBinding= fieldCall.resolveFieldBinding();
-						fOldCollectionTypeBinding= fieldCall.resolveTypeBinding();
-						fCollectionName= ASTNodeFactory.newName(fAst, fieldCall.getName().getFullyQualifiedName());
-					}
-				}
-				
-			}
+		result.setExpression((Expression)rewrite.createCopyTarget(fArrayAccess));
+		
+		convertBody(forStatement.getBody(), fIndexBinding, fArrayBinding, parameterName, rewrite, group, pg);
+		result.setBody(getBody(cuRewrite, group, positionGroups));
+		
+		for (int i= 0; i < proposals.length; i++) {
+			pg.addProposal(proposals[i], null, 10);
 		}
-	}
-	
-	private void doInferCollectionFromInitializers() {
-		List initializers= getForStatement().initializers();
-		for (Iterator iter= initializers.iterator(); iter.hasNext();) {
-			Object next= iter.next();
-			if (next instanceof VariableDeclarationExpression) {
-				VariableDeclarationExpression element= (VariableDeclarationExpression)next;
-				List declarationFragments= element.fragments();
-				for (Iterator iterator= declarationFragments.iterator(); iterator.hasNext();) {
-					VariableDeclarationFragment fragment= (VariableDeclarationFragment)iterator.next();
-					Expression initializer= fragment.getInitializer();
-					if (initializer != null)
-						doInferCollectionFromExpression(initializer);
-				}
-			} else if (next instanceof Assignment) {
-				Assignment assignemnt= (Assignment)next;
-				doInferCollectionFromExpression(assignemnt.getRightHandSide());
-			}
-		}
+		
+		positionGroups.setEndPosition(rewrite.track(result));
+		
+		return result;
 	}
 	
 	/**
-	 * @param expression
-	 *            Expression to visit. This helper method is useful for the
-	 *            IDIOM when the stop condition is expressed with another
-	 *            variable within loop: for (int i=0, max= array.length; i <
-	 *            max; i++){}
+	 * Finds the first fragment in the body looking like:
+	 * <code>variable= arrayBinding[indexBinding]</code> or null if no such
+	 * fragment
 	 */
-	private void doInferCollectionFromExpression(Expression expression) {
-		final boolean[] foundMoreThenOneArray= new boolean[1];
-		foundMoreThenOneArray[0]= false;
-		expression.accept(new ASTVisitor() {
-			public boolean visit(QualifiedName qualifiedName) {
-				initializeBindings(qualifiedName.getQualifier());
-				return false;
-			}
-			
-			public boolean visit(SimpleName simpleName) {
-				initializeBindings(simpleName);
-				return false;
-			}
-			
-			public boolean visit(MethodInvocation methodCall) {
-				ITypeBinding typeBinding= methodCall.resolveTypeBinding();
-				if (typeBinding != null && typeBinding.isArray()) {
-					fCollectionIsMethodCall= true;
-					fMethodInvocation= methodCall;
-					fOldCollectionTypeBinding= typeBinding;
-					fOldCollectionBinding= methodCall.resolveMethodBinding();
-					fCollectionName= ASTNodeFactory.newName(fAst, methodCall.getName().getFullyQualifiedName());
-				}
-				return false;
-			}
-			
-			public boolean visit(FieldAccess field) {
-				if (initializeBindings(field.getName())) {
-					fFieldAccess= field;
-				}
-				return true;
-			}
-			
-			private boolean initializeBindings(Name name) {
-				ITypeBinding typeBinding= name.resolveTypeBinding();
-				if (typeBinding != null && typeBinding.isArray()) {
-					fOldCollectionTypeBinding= typeBinding;
-					if (fOldCollectionBinding == null) {
-						fOldCollectionBinding= name.resolveBinding();
-						fCollectionName= ASTNodeFactory.newName(fAst, name.getFullyQualifiedName());
-						return true;
-					} else {
-						if (name.resolveBinding() != fOldCollectionBinding) {
-							foundMoreThenOneArray[0]= true;
+	private VariableDeclarationFragment findArrayElementDeclaration(Statement body, final IBinding indexBinding, final IBinding arrayBinding) {
+		final VariableDeclarationFragment[] result= new VariableDeclarationFragment[] {null};
+		body.accept(new GenericVisitor() {
+			public boolean visit(ArrayAccess node) {
+				IBinding binding= getBinding(node.getArray());
+				if (arrayBinding.equals(binding)) {
+					IBinding index= getBinding(node.getIndex());
+					if (indexBinding.equals(index)) {
+						if (node.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+							result[0]= (VariableDeclarationFragment)node.getParent();
+							return false;
 						}
-						return true;
 					}
 				}
-				return false;
+				return result[0] == null;
 			}
 		});
-		if (foundMoreThenOneArray[0]) {
-			fOldCollectionBinding= null;
-			fCollectionName= null;
+		
+		return result[0];
+	}
+	
+	private void convertBody(Statement body, final IBinding indexBinding, final IBinding arrayBinding, final String parameterName, final ASTRewrite rewrite, final TextEditGroup editGroup, final LinkedProposalPositionGroup pg) {
+		final AST ast= body.getAST();
+		
+		final HashSet assignedBindings= new HashSet();
+		
+		body.accept(new GenericVisitor() {
+			public boolean visit(ArrayAccess node) {
+				IBinding binding= getBinding(node.getArray());
+				if (arrayBinding.equals(binding)) {
+					IBinding index= getBinding(node.getIndex());
+					if (indexBinding.equals(index)) {
+						replaceAccess(node);
+					}
+				}
+				
+				return super.visit(node);
+			}
+			
+			public boolean visit(SimpleName node) {
+				if (assignedBindings.contains(node.resolveBinding())) {
+					replaceAccess(node);
+				}
+				return super.visit(node);
+			}
+			
+			private void replaceAccess(ASTNode node) {
+				if (node.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+					VariableDeclarationFragment fragment= (VariableDeclarationFragment)node.getParent();
+					IBinding targetBinding= fragment.getName().resolveBinding();
+					if (targetBinding != null) {
+						assignedBindings.add(targetBinding);
+						
+						VariableDeclarationStatement statement= (VariableDeclarationStatement)fragment.getParent();
+						
+						if (statement.fragments().size() == 1) {
+							rewrite.remove(statement, editGroup);
+						} else {
+							ListRewrite listRewrite= rewrite.getListRewrite(statement, VariableDeclarationStatement.FRAGMENTS_PROPERTY);
+							listRewrite.remove(fragment, editGroup);
+						}
+						
+					} else {
+						SimpleName name= ast.newSimpleName(parameterName);
+						rewrite.replace(node, name, editGroup);
+						pg.addPosition(rewrite.track(name), true);
+					}
+				} else {
+					SimpleName name= ast.newSimpleName(parameterName);
+					rewrite.replace(node, name, editGroup);
+					pg.addPosition(rewrite.track(name), true);
+				}
+			}
+		});
+	}
+	
+	private SingleVariableDeclaration createParameterDeclaration(String parameterName, VariableDeclarationFragment fragement, Expression arrayAccess, ForStatement statement, ImportRewrite importRewrite, ASTRewrite rewrite, TextEditGroup group, LinkedProposalPositionGroup pg) {
+		CompilationUnit compilationUnit= (CompilationUnit)arrayAccess.getRoot();
+		AST ast= compilationUnit.getAST();
+		
+		SingleVariableDeclaration result= ast.newSingleVariableDeclaration();
+		
+		SimpleName name= ast.newSimpleName(parameterName);
+		pg.addPosition(rewrite.track(name), true);
+		result.setName(name);
+		
+		ITypeBinding arrayTypeBinding= arrayAccess.resolveTypeBinding();
+		Type type= importType(arrayTypeBinding.getElementType(), statement, importRewrite, compilationUnit);
+		if (arrayTypeBinding.getDimensions() != 1) {
+			type= ast.newArrayType(type, arrayTypeBinding.getDimensions() - 1);
 		}
+		result.setType(type);
+		
+		if (fragement != null) {
+			VariableDeclarationStatement declaration= (VariableDeclarationStatement)fragement.getParent();
+			ModifierRewrite.create(rewrite, result).copyAllModifiers(declaration, group);
+		}
+		
+		return result;
 	}
 	
-	private AST getAst() {
-		return fAst;
+	private String[] getProposalsForElement(ITypeBinding arrayTypeBinding, IJavaProject project) {
+		String[] variableNames= getUsedVariableNames();
+		String[] elementSuggestions= StubUtility.getLocalNameSuggestions(project, FOR_LOOP_ELEMENT_IDENTIFIER, 0, variableNames);
+		
+		String type= arrayTypeBinding.getElementType().getName();
+		String[] typeSuggestions= StubUtility.getLocalNameSuggestions(project, type, arrayTypeBinding.getDimensions() - 1, variableNames);
+		
+		String[] result= new String[elementSuggestions.length + typeSuggestions.length];
+		System.arraycopy(elementSuggestions, 0, result, 0, elementSuggestions.length);
+		System.arraycopy(typeSuggestions, 0, result, elementSuggestions.length, typeSuggestions.length);
+		return result;
 	}
 	
-	// lazy load. Caches the binding of the For's index in a field since it cannot
-	// be change during the whole QuickFix
-	private IBinding getIndexBinding() {
-		if (fIndexBinding != null)
-			return fIndexBinding;
-		else
-			return inferIndexBinding();
+	private String[] getUsedVariableNames() {
+		final List results= new ArrayList();
+		
+		ForStatement forStatement= getForStatement();
+		CompilationUnit root= (CompilationUnit)forStatement.getRoot();
+		
+		Collection variableNames= new ScopeAnalyzer(root).getUsedVariableNames(forStatement.getStartPosition(), forStatement.getLength());
+		results.addAll(variableNames);
+		
+		forStatement.accept(new GenericVisitor() {
+			public boolean visit(SingleVariableDeclaration node) {
+				results.add(node.getName().getIdentifier());
+				return super.visit(node);
+			}
+			
+			public boolean visit(VariableDeclarationFragment fragment) {
+				results.add(fragment.getName().getIdentifier());
+				return super.visit(fragment);
+			}
+		});
+		
+		return (String[])results.toArray(new String[results.size()]);
 	}
 	
 }

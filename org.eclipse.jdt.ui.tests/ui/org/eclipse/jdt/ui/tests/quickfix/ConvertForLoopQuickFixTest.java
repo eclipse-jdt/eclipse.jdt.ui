@@ -16,6 +16,8 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -23,11 +25,18 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
+import org.eclipse.jdt.internal.corext.fix.ConvertForLoopOperation;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor;
@@ -1272,6 +1281,40 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 	
+	public void testBug163121() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo(Object[] x, Object[] y) {\n");
+		buf.append("        for (int i= 0; i < y.length; i++)\n");
+		buf.append("            for (Object element : x)\n");
+		buf.append("                System.out.println(y[i]);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		List proposals= fetchConvertingProposal(buf, cu);
+		
+		assertNotNull(fConvertLoopProposal);
+		
+		assertCorrectLabels(proposals);
+		
+		String preview1= getPreviewContent(fConvertLoopProposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo(Object[] x, Object[] y) {\n");
+		buf.append("        for (Object element2 : y)\n");
+		buf.append("            for (Object element : x)\n");
+		buf.append("                System.out.println(element2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+	}
+	
 	private List fetchConvertingProposal(StringBuffer buf, ICompilationUnit cu) throws Exception {
 		int offset= buf.toString().indexOf("for");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
@@ -1279,5 +1322,507 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		
 		fConvertLoopProposal= (FixCorrectionProposal)findProposalByCommandId(QuickAssistProcessor.CONVERT_FOR_LOOP_ID, proposals);
 		return proposals;
+	}
+	
+	public void testInitializerPrecondition01() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("        for (int i = 0; i < x.length; i++) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertTrue(satisfiesPrecondition(cu));
+	}
+	
+	public void testInitializerPrecondition02() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("        for (int i = 1; i < x.length; i++) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
+	public void testInitializerPrecondition03() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("        int i;");
+		buf.append("        for (i = 0; i < x.length; i++) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
+	public void testInitializerPrecondition04() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("        int i, f;\n");
+		buf.append("        for (i = 0, f= 0; i < x.length; i++) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
+	public void testInitializerPrecondition05() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("        for (int i = 0, length= x.length; i < x.length; i++) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertTrue(satisfiesPrecondition(cu));
+	}
+	
+	public void testInitializerPrecondition06() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo(Object[] x) {\n");
+		buf.append("        for (int j = 0, a = init(); j < x.length; j++) {\n");
+		buf.append("            System.out.println(x[j]);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    private int init() {return 0;}\n");
+		buf.append("}\n");
+		
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
+	public void testExpressionPrecondition01() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("        for (int i = 0; x.length > i; i++) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertTrue(satisfiesPrecondition(cu));
+	}
+	
+	public void testExpressionPrecondition02() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("        for (int i = 0; x.length <= i; i++) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
+	public void testExpressionPrecondition03() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("        for (int i = 0; x.length < j; i++) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
+	public void testExpressionPrecondition04() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static class MyClass {\n");
+		buf.append("        public int length;\n");
+		buf.append("    }\n");
+		buf.append("    public void foo(MyClass x) {\n");
+		buf.append("        for (int i = 0; i < x.length; i++) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
+	public void testExpressionPrecondition05() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    Object[] x;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int i = 0; i < x.length; i++) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertTrue(satisfiesPrecondition(cu));
+	}
+	
+	public void testExpressionPrecondition06() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    Object[] x;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int i = 0; i < this.x.length; i++) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertTrue(satisfiesPrecondition(cu));
+	}
+	
+	public void testExpressionPrecondition07() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("        for (int i = 0, length= x.length; i < length; i++) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertTrue(satisfiesPrecondition(cu));
+	}
+	
+	public void testExpressionPrecondition08() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("        for (int i = 0, length= x.length; length > i; i++) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertTrue(satisfiesPrecondition(cu));
+	}
+	
+	public void testUpdatePrecondition01() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("        for (int i = 0; i < x.length; i+= 1) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertTrue(satisfiesPrecondition(cu));
+	}
+	
+	public void testUpdatePrecondition02() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("        for (int i = 0; i < x.length; i= 1 + i) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertTrue(satisfiesPrecondition(cu));
+	}
+	
+	public void testUpdatePrecondition03() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("        for (int i = 0; i < x.length; i= i + 1) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertTrue(satisfiesPrecondition(cu));
+	}
+	
+	public void testUpdatePrecondition04() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("        for (int i = 0; i < x.length; i= i + 2) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
+	public void testUpdatePrecondition06() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("		int j= 0");
+		buf.append("        for (int i = 0; i < x.length; i= j + 1) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
+	public void testBodyPrecondition01() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("        for (int i = 0; i < x.length; i++) {\n");
+		buf.append("            System.out.println(x[i]);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertTrue(satisfiesPrecondition(cu));
+	}
+	
+	public void testBodyPrecondition02() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    Object[] x;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int i = 0; i < x.length; i++) {\n");
+		buf.append("            System.out.println(x[i]);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertTrue(satisfiesPrecondition(cu));
+	}
+	
+	public void testBodyPrecondition03() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    Object[] x;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int i = 0; i < x.length; i++) {\n");
+		buf.append("            System.out.println(this.x[i]);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertTrue(satisfiesPrecondition(cu));
+	}
+	
+	public void testBodyPrecondition04() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    Object[] x;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int i = 0; i < x.length; i++) {\n");
+		buf.append("			i++;");
+		buf.append("            System.out.println(this.x[i]);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
+	public void testBodyPrecondition05() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    Object[] x;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int i = 0; i < x.length; i++) {\n");
+		buf.append("			System.out.println(i);");
+		buf.append("            System.out.println(this.x[i]);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
+	public void testBodyPrecondition06() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    Object[] x;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int i = 0; i < x.length; i++) {\n");
+		buf.append("            this.x= null;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
+	public void testBodyPrecondition07() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("        for (int i = 0; i < x.length; i++) {\n");
+		buf.append("            x= null;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
+	public void testBodyPrecondition08() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    Object[] x;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int i = 0; i < x.length; i++) {\n");
+		buf.append("            x= null;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
+	public void testBodyPrecondition09() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("        for (int i = 0; i < x.length; i++) {\n");
+		buf.append("            x[i]= null;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
+	public void testBodyPreconditio10() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int[] x) {\n");
+		buf.append("        for (int i = 0; i < x.length; i++) {\n");
+		buf.append("            --x[i];\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
+	public void testBodyPrecondition11() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int[] x) {\n");
+		buf.append("        for (int i = 0; i < x.length; i++) {\n");
+		buf.append("            x[i]++;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
+	public void testBodyPrecondition12() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object[] x) {\n");
+		buf.append("        for (int i = 0, length= x.length; length > i; i++) {\n");
+		buf.append("            System.out.println(length);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
+	private boolean satisfiesPrecondition(ICompilationUnit cu) {
+		ForStatement statement= getForStatement(cu);
+		ConvertForLoopOperation op= new ConvertForLoopOperation(statement, "element");
+		return op.satisfiesPreconditions();
+	}
+	
+	private static ForStatement getForStatement(ICompilationUnit cu) {
+		CompilationUnit ast= ASTProvider.getASTProvider().getAST(cu, ASTProvider.WAIT_YES, new NullProgressMonitor());
+		
+		final ForStatement[] statement= new ForStatement[1];
+		ast.accept(new GenericVisitor() {
+			protected boolean visitNode(ASTNode node) {
+				if (node instanceof ForStatement) {
+					statement[0]= (ForStatement)node;
+					return false;
+				} else {
+					return super.visitNode(node);
+				}
+			}
+		});
+		
+		return statement[0];
 	}
 }

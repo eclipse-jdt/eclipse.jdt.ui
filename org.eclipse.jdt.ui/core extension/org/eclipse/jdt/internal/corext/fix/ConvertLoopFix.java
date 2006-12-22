@@ -1,6 +1,6 @@
 /**
-*
-**/
+ *
+ **/
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
@@ -18,22 +18,19 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-public class ConvertLoopFix extends AbstractFix {
+public class ConvertLoopFix extends LinkedFix {
 	
 	private static final String FOR_LOOP_ELEMENT_IDENTIFIER= "element"; //$NON-NLS-1$
 	
 	private final static class ControlStatementFinder extends GenericVisitor {
 		
-		private final List/*<IFixRewriteOperation>*/ fResult;
+		private final List/*<IFixRewriteOperation>*/fResult;
 		private final Hashtable fUsedNames;
 		private final CompilationUnit fCompilationUnit;
 		private final boolean fFindForLoopsToConvert;
 		private final boolean fConvertIterableForLoops;
 		
-		public ControlStatementFinder(CompilationUnit compilationUnit,
-				boolean findForLoopsToConvert,
-				boolean convertIterableForLoops, List resultingCollection) {
-			
+		public ControlStatementFinder(CompilationUnit compilationUnit, boolean findForLoopsToConvert, boolean convertIterableForLoops, List resultingCollection) {
 			
 			fFindForLoopsToConvert= findForLoopsToConvert;
 			fConvertIterableForLoops= convertIterableForLoops;
@@ -42,7 +39,6 @@ public class ConvertLoopFix extends AbstractFix {
 			fCompilationUnit= compilationUnit;
 		}
 		
-
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.ForStatement)
 		 */
@@ -53,7 +49,7 @@ public class ConvertLoopFix extends AbstractFix {
 				ConvertLoopOperation oldOperation= null;
 				while (operation != null) {
 					if (oldOperation == null) {
-						fResult.add(operation);						
+						fResult.add(operation);
 					} else {
 						oldOperation.setBodyConverter(operation);
 					}
@@ -72,44 +68,43 @@ public class ConvertLoopFix extends AbstractFix {
 			
 			return super.visit(node);
 		}
-
-
+		
 		private ConvertLoopOperation getConvertOperation(ForStatement node) {
-	        String identifierName= getFreeVariable(node);
-	        
-	        ConvertForLoopOperation forConverter= new ConvertForLoopOperation(fCompilationUnit, node, identifierName);
-	        if (forConverter.satisfiesPreconditions()) {
-	        	if (fFindForLoopsToConvert) {
-	        		fUsedNames.put(node, identifierName);
-	        		return forConverter;
-	        	}
-	        } else if (fConvertIterableForLoops) {
-	        	ConvertIterableLoopOperation iterableConverter= new ConvertIterableLoopOperation(fCompilationUnit, node, identifierName);
-	        	if (iterableConverter.isApplicable().isOK()) {
-	        		fUsedNames.put(node, identifierName);
-	        		return iterableConverter;
-	        	} 
-	        }
-	        
-	        return null;
-        }
-
+			String identifierName= getFreeVariable(node);
+			
+			ConvertForLoopOperation convertForLoopOperation= new ConvertForLoopOperation(node, identifierName);
+			if (convertForLoopOperation.satisfiesPreconditions()) {
+				if (fFindForLoopsToConvert) {
+					fUsedNames.put(node, identifierName);
+					return convertForLoopOperation;
+				}
+			} else if (fConvertIterableForLoops) {
+				ConvertIterableLoopOperation iterableConverter= new ConvertIterableLoopOperation(fCompilationUnit, node, identifierName);
+				if (iterableConverter.isApplicable().isOK()) {
+					fUsedNames.put(node, identifierName);
+					return iterableConverter;
+				}
+			}
+			
+			return null;
+		}
+		
 		private String getFreeVariable(ForStatement node) {
-	        List usedVaribles= getUsedVariableNames(node);
-	        usedVaribles.addAll(fUsedNames.values());
-	        String[] used= (String[])usedVaribles.toArray(new String[usedVaribles.size()]);
-
-	        String identifierName= FOR_LOOP_ELEMENT_IDENTIFIER;
-	        int count= 0;
-	        for (int i= 0; i < used.length; i++) {
-	        	if (used[i].equals(identifierName)) {
-	        		identifierName= FOR_LOOP_ELEMENT_IDENTIFIER + count;
-	        		count++;
-	        		i= 0;
-	        	}
-	        }
-	        return identifierName;
-        }
+			List usedVaribles= getUsedVariableNames(node);
+			usedVaribles.addAll(fUsedNames.values());
+			String[] used= (String[])usedVaribles.toArray(new String[usedVaribles.size()]);
+			
+			String identifierName= FOR_LOOP_ELEMENT_IDENTIFIER;
+			int count= 0;
+			for (int i= 0; i < used.length; i++) {
+				if (used[i].equals(identifierName)) {
+					identifierName= FOR_LOOP_ELEMENT_IDENTIFIER + count;
+					count++;
+					i= 0;
+				}
+			}
+			return identifierName;
+		}
 		
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#endVisit(org.eclipse.jdt.core.dom.ForStatement)
@@ -123,11 +118,9 @@ public class ConvertLoopFix extends AbstractFix {
 		
 		private List getUsedVariableNames(ASTNode node) {
 			CompilationUnit root= (CompilationUnit)node.getRoot();
-			IBinding[] varsBefore= (new ScopeAnalyzer(root)).getDeclarationsInScope(node.getStartPosition(),
-				ScopeAnalyzer.VARIABLES);
-			IBinding[] varsAfter= (new ScopeAnalyzer(root)).getDeclarationsAfter(node.getStartPosition()
-				+ node.getLength(), ScopeAnalyzer.VARIABLES);
-
+			IBinding[] varsBefore= (new ScopeAnalyzer(root)).getDeclarationsInScope(node.getStartPosition(), ScopeAnalyzer.VARIABLES);
+			IBinding[] varsAfter= (new ScopeAnalyzer(root)).getDeclarationsAfter(node.getStartPosition() + node.getLength(), ScopeAnalyzer.VARIABLES);
+			
 			List names= new ArrayList();
 			for (int i= 0; i < varsBefore.length; i++) {
 				names.add(varsBefore[i].getName());
@@ -137,7 +130,7 @@ public class ConvertLoopFix extends AbstractFix {
 			}
 			return names;
 		}
-
+		
 	}
 	
 	public static IFix createCleanUp(CompilationUnit compilationUnit, boolean convertForLoops, boolean convertIterableForLoops) {
@@ -146,7 +139,6 @@ public class ConvertLoopFix extends AbstractFix {
 		
 		if (!convertForLoops && !convertIterableForLoops)
 			return null;
-		
 		
 		List operations= new ArrayList();
 		ControlStatementFinder finder= new ControlStatementFinder(compilationUnit, convertForLoops, convertIterableForLoops, operations);
@@ -158,29 +150,28 @@ public class ConvertLoopFix extends AbstractFix {
 		IFixRewriteOperation[] ops= (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]);
 		return new ConvertLoopFix(FixMessages.ControlStatementsFix_change_name, compilationUnit, ops);
 	}
-
-
+	
 	public static IFix createConvertForLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
-    	ConvertForLoopOperation loopConverter= new ConvertForLoopOperation(compilationUnit, loop, FOR_LOOP_ELEMENT_IDENTIFIER);
-    	if (!loopConverter.satisfiesPreconditions())
-    		return null;
-    	
-    	return new ControlStatementsFix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new ILinkedFixRewriteOperation[] {loopConverter});
-    }
-
+		ConvertForLoopOperation convertForLoopOperation= new ConvertForLoopOperation(loop);
+		if (!convertForLoopOperation.satisfiesPreconditions())
+			return null;
+		
+		return new ConvertLoopFix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new ILinkedFixRewriteOperation[] { convertForLoopOperation });
+	}
+	
 	public static IFix createConvertIterableLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
-    	ConvertIterableLoopOperation loopConverter= new ConvertIterableLoopOperation(compilationUnit, loop, FOR_LOOP_ELEMENT_IDENTIFIER);
-    	IStatus status= loopConverter.isApplicable();
-    	if (status.getSeverity() == IStatus.ERROR)
-    		return null;
-    
-    	ControlStatementsFix result= new ControlStatementsFix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new ILinkedFixRewriteOperation[] {loopConverter});
-    	result.setStatus(status);
-    	return result;
-    }
+		ConvertIterableLoopOperation loopConverter= new ConvertIterableLoopOperation(compilationUnit, loop, FOR_LOOP_ELEMENT_IDENTIFIER);
+		IStatus status= loopConverter.isApplicable();
+		if (status.getSeverity() == IStatus.ERROR)
+			return null;
+		
+		ConvertLoopFix result= new ConvertLoopFix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new ILinkedFixRewriteOperation[] { loopConverter });
+		result.setStatus(status);
+		return result;
+	}
 	
 	protected ConvertLoopFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations) {
-	    super(name, compilationUnit, fixRewriteOperations);
-    }
-
+		super(name, compilationUnit, fixRewriteOperations);
+	}
+	
 }

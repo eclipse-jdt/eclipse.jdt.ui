@@ -68,9 +68,9 @@ public class CleanUpTest extends QuickFixTest {
 	
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
-
+	
 	private CustomProfile fProfile;
-
+	
 	public CleanUpTest(String name) {
 		super(name);
 	}
@@ -90,7 +90,7 @@ public class CleanUpTest extends QuickFixTest {
 		
 		return setUpTest(new CleanUpTest("testRemoveBlock05"));
 	}
-
+	
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
 	}
@@ -100,9 +100,8 @@ public class CleanUpTest extends QuickFixTest {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		
+		JavaCore.setOptions(options);
 		
-		JavaCore.setOptions(options);			
-
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 		store.setValue(PreferenceConstants.CODEGEN_KEYWORD_THIS, false);
@@ -114,19 +113,19 @@ public class CleanUpTest extends QuickFixTest {
 		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
 		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
 		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
-		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");	
+		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
 		
 		fJProject1= ProjectTestSetup.getProject();
-
+		
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-
-		Map settings= new Hashtable();		
+		
+		Map settings= new Hashtable();
 		fProfile= new ProfileManager.CustomProfile("testProfile", settings, CleanUpProfileVersioner.CURRENT_VERSION, CleanUpProfileVersioner.PROFILE_KIND);
 		new InstanceScope().getNode(JavaUI.ID_PLUGIN).put(CleanUpConstants.CLEANUP_PROFILE, fProfile.getID());
 		
 		disableAll();
 	}
-
+	
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 		disableAll();
@@ -136,16 +135,16 @@ public class CleanUpTest extends QuickFixTest {
 		Map settings= fProfile.getSettings();
 		Collection keys= CleanUpConstants.getEclipseDefaultSettings().keySet();
 		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
-	        String key= (String)iterator.next();
-	        settings.put(key, CleanUpConstants.FALSE);
+			String key= (String)iterator.next();
+			settings.put(key, CleanUpConstants.FALSE);
 		}
 		commitProfile();
-    }
-
+	}
+	
 	private void enable(String key) throws CoreException {
 		fProfile.getSettings().put(key, CleanUpConstants.TRUE);
 		commitProfile();
-    }
+	}
 	
 	private void commitProfile() throws CoreException {
 		List profiles= CleanUpPreferenceUtil.getBuiltInProfiles();
@@ -154,41 +153,41 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
 		ProfileStore profileStore= new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, versioner);
 		profileStore.writeProfiles(profiles, new InstanceScope());
-    }
+	}
 	
-    private void assertRefactoringResultAsExpected(ICompilationUnit[] cus, String[] expected) throws InvocationTargetException, JavaModelException {
-    	RefactoringExecutionStarter.startCleanupRefactoring(cus, false, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
-    	
-    	String[] previews= new String[cus.length];
-    	for (int i= 0; i < cus.length; i++) {
-	        ICompilationUnit cu= cus[i];
-	        previews[i]= cu.getBuffer().getContents();
-        }
-    	
-    	assertEqualStringsIgnoreOrder(previews, expected);
-    }
-    
-    private void assertRefactoringResultAsExpectedIgnoreHashValue(ICompilationUnit[] cus, String[] expected) throws InvocationTargetException, JavaModelException {
+	private void assertRefactoringResultAsExpected(ICompilationUnit[] cus, String[] expected) throws InvocationTargetException, JavaModelException {
 		RefactoringExecutionStarter.startCleanupRefactoring(cus, false, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
-
+		
+		String[] previews= new String[cus.length];
+		for (int i= 0; i < cus.length; i++) {
+			ICompilationUnit cu= cus[i];
+			previews[i]= cu.getBuffer().getContents();
+		}
+		
+		assertEqualStringsIgnoreOrder(previews, expected);
+	}
+	
+	private void assertRefactoringResultAsExpectedIgnoreHashValue(ICompilationUnit[] cus, String[] expected) throws InvocationTargetException, JavaModelException {
+		RefactoringExecutionStarter.startCleanupRefactoring(cus, false, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+		
 		Pattern regex= Pattern.compile("long serialVersionUID = .*L;");
 		
-    	String[] previews= new String[cus.length];
-    	for (int i= 0; i < cus.length; i++) {
-	        ICompilationUnit cu= cus[i];
-	        previews[i]= cu.getBuffer().getContents().replaceAll(regex.pattern(), "long serialVersionUID = 1L;");
-        }
-    	
-    	assertEqualStringsIgnoreOrder(previews, expected);
-    }
-
-    private void assertRefactoringHasNoChange(ICompilationUnit[] cus) throws JavaModelException, InvocationTargetException {
-    	String[] expected= new String[cus.length];
-    	for (int i= 0; i < cus.length; i++) {
-	        expected[i]= cus[i].getBuffer().getContents();
-        }
-    	assertRefactoringResultAsExpected(cus, expected);
-    }
+		String[] previews= new String[cus.length];
+		for (int i= 0; i < cus.length; i++) {
+			ICompilationUnit cu= cus[i];
+			previews[i]= cu.getBuffer().getContents().replaceAll(regex.pattern(), "long serialVersionUID = 1L;");
+		}
+		
+		assertEqualStringsIgnoreOrder(previews, expected);
+	}
+	
+	private void assertRefactoringHasNoChange(ICompilationUnit[] cus) throws JavaModelException, InvocationTargetException {
+		String[] expected= new String[cus.length];
+		for (int i= 0; i < cus.length; i++) {
+			expected[i]= cus[i].getBuffer().getContents();
+		}
+		assertRefactoringResultAsExpected(cus, expected);
+	}
 	
 	public void testAddNLSTag01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -211,7 +210,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
-
+		
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		buf= new StringBuffer();
 		buf.append("package test2;\n");
@@ -259,9 +258,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 		
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});	
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
-
+	
 	public void testRemoveNLSTag01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -330,10 +329,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});	
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
-
+	
 	public void testUnusedCode01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -386,8 +385,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("public class E3 extends E2 {\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});	
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
 	
 	public void testUnusedCode02() throws Exception {
@@ -450,8 +449,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});	
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
 	
 	public void testUnusedCode03() throws Exception {
@@ -509,8 +508,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});	
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
 	
 	public void testUnusedCode04() throws Exception {
@@ -622,8 +621,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});	
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
 	
 	public void testUnusedCode06() throws Exception {
@@ -969,8 +968,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    private int field2= 2;\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});	
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
 	}
 	
 	public void testJava5002() throws Exception {
@@ -1028,8 +1027,8 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    private int f2() {return 2;}\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});	
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
 	}
 	
 	public void testJava5003() throws Exception {
@@ -1085,7 +1084,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    private class E2Sub2 {}\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
 	}
 	
@@ -1397,7 +1396,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {cu1.getBuffer().getContents(), expected1});
 	}
 	
@@ -1476,7 +1475,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    public static int f= E1.f;\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
 	
@@ -1557,7 +1556,7 @@ public class CleanUpTest extends QuickFixTest {
 		String expected3= buf.toString();
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
-
+		
 	}
 	
 	public void testCodeStyle05() throws Exception {
@@ -1841,7 +1840,7 @@ public class CleanUpTest extends QuickFixTest {
 		String expected3= buf.toString();
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
-
+		
 	}
 	
 	public void testCodeStyle12() throws Exception {
@@ -2068,7 +2067,7 @@ public class CleanUpTest extends QuickFixTest {
 		String expected2= buf.toString();
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {cu1.getBuffer().getContents(), expected1, expected2});
-
+		
 	}
 	
 	public void testCodeStyle17() throws Exception {
@@ -2576,7 +2575,7 @@ public class CleanUpTest extends QuickFixTest {
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
-
+	
 	public void testCodeStyleBug114544() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2601,7 +2600,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    public static int i= 10;\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
@@ -2836,12 +2835,12 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-
+		
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("public class E<I> {\n");
@@ -2853,10 +2852,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
-
+	
 	public void testCodeStyleBug138325_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2874,12 +2873,12 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-
+		
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("public class E<I> {\n");
@@ -2895,7 +2894,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
@@ -2915,11 +2914,11 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-
+		
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
@@ -2933,7 +2932,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
@@ -2971,7 +2970,7 @@ public class CleanUpTest extends QuickFixTest {
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
-
+	
 	public void testJava50ForLoop01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -3366,13 +3365,13 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    public void foo() {};\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
-
+		
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		buf= new StringBuffer();
 		buf.append("package test2;\n");
 		buf.append("public class E2 {}\n");
 		pack2.createCompilationUnit("E2.java", buf.toString(), false, null);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test2;\n");
 		buf.append("public class E3 {\n");
@@ -3399,7 +3398,7 @@ public class CleanUpTest extends QuickFixTest {
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
-
+	
 	public void testJava50ForLoopBug154939() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -3435,7 +3434,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-
+		
 		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
@@ -3476,7 +3475,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-
+		
 		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
@@ -3504,7 +3503,7 @@ public class CleanUpTest extends QuickFixTest {
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
-
+	
 	public void testJava50ForLoop160283_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -3524,11 +3523,11 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-
+		
 		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.List;\n");
@@ -3543,10 +3542,10 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
-
+	
 	public void testJava50ForLoop160283_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -3564,11 +3563,11 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-
+		
 		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.List;\n");
@@ -3585,7 +3584,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
@@ -3601,11 +3600,11 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-
+		
 		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
@@ -3618,7 +3617,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
@@ -3647,9 +3646,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    private void bar() {}\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-
+		
 		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
@@ -3673,7 +3672,164 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    private void bar() {}\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+	
+	public void testJava50ForLoop163122_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo(Object[] x, Object[] y) {\n");
+		buf.append("        for (int i = 0; i < y.length; i++)\n");
+		buf.append("            for (int j = 0; j < x.length; j++)\n");
+		buf.append("                System.out.println(y[i]);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo(Object[] x, Object[] y) {\n");
+		buf.append("        for (Object element : y) {\n");
+		buf.append("            for (Object element0 : x) {\n");
+		buf.append("                System.out.println(element);\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+	
+	public void testJava50ForLoop163122_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo(Object[] x, Object[] y) {\n");
+		buf.append("        for (int i = 0; i < y.length; i++)\n");
+		buf.append("            for (int j = 0; j < x.length; j++)\n");
+		buf.append("                System.out.println(y[i]);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo(Object[] x, Object[] y) {\n");
+		buf.append("        for (Object element : y)\n");
+		buf.append("            for (Object element0 : x)\n");
+		buf.append("                System.out.println(element);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+	
+	public void testJava50ForLoop163122_3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo(Object[] x, Object[] y) {\n");
+		buf.append("        for (int i = 0; i < y.length; i++)\n");
+		buf.append("            for (int j = 0; j < x.length; j++)\n");
+		buf.append("                System.out.println(x[i]);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo(Object[] x, Object[] y) {\n");
+		buf.append("        for (int i = 0; i < y.length; i++) {\n");
+		buf.append("            for (Object element : x) {\n");
+		buf.append("                System.out.println(x[i]);\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+	
+	public void testJava50ForLoop163122_4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo(Object[] x, Object[] y) {\n");
+		buf.append("        for (int i = 0; i < y.length; i++)\n");
+		buf.append("            for (int j = 0; j < x.length; j++)\n");
+		buf.append("                System.out.println(x[i]);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo(Object[] x, Object[] y) {\n");
+		buf.append("        for (int i = 0; i < y.length; i++)\n");
+		buf.append("            for (Object element : x)\n");
+		buf.append("                System.out.println(x[i]);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+	
+	public void testJava50ForLoop163122_5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo(Object[] x, Object[] y) {\n");
+		buf.append("        for (int i = 0; i < y.length; i++)\n");
+		buf.append("            for (int j = 0; j < x.length; j++)\n");
+		buf.append("                System.out.println(x[j]);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo(Object[] x, Object[] y) {\n");
+		buf.append("        for (Object element : y) {\n");
+		buf.append("            for (Object element0 : x) {\n");
+		buf.append("                System.out.println(element0);\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
@@ -3888,9 +4044,9 @@ public class CleanUpTest extends QuickFixTest {
 		
 		Map eclipse21Settings= DefaultCodeFormatterConstants.getEclipseDefaultSettings();
 		for (Iterator iterator= eclipse21Settings.keySet().iterator(); iterator.hasNext();) {
-	        String key= (String)iterator.next();
-	        options.put(key, eclipse21Settings.get(key));
-        }
+			String key= (String)iterator.next();
+			options.put(key, eclipse21Settings.get(key));
+		}
 		
 		JavaCore.setOptions(options);
 		
@@ -3914,259 +4070,259 @@ public class CleanUpTest extends QuickFixTest {
 		
 		JavaProjectHelper.set14CompilerOptions(fJProject1);
 		
-        try {
-	        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-	        StringBuffer buf= new StringBuffer();
-	        buf.append("package test1;\n");
-	        buf.append("import java.io.Serializable;\n");
-	        buf.append("public class E1 implements Serializable {\n");
-	        buf.append("}\n");
-	        ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-	        fJProject1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
-	        
-	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
-	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
-	        
-	        buf= new StringBuffer();
-	        buf.append("package test1;\n");
-	        buf.append("import java.io.Serializable;\n");
-	        buf.append("public class E1 implements Serializable {\n");
-	        buf.append("\n");
-	        buf.append("    " + FIELD_COMMENT + "\n");
-	        buf.append("    private static final long serialVersionUID = 1L;\n");
-	        buf.append("}\n");
-	        String expected1= buf.toString();
-	        assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] { expected1 });
-        } finally {
-        	JavaProjectHelper.set15CompilerOptions(fJProject1);    
-        }
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.io.Serializable;\n");
+			buf.append("public class E1 implements Serializable {\n");
+			buf.append("}\n");
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+			fJProject1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+			
+			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
+			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
+			
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.io.Serializable;\n");
+			buf.append("public class E1 implements Serializable {\n");
+			buf.append("\n");
+			buf.append("    " + FIELD_COMMENT + "\n");
+			buf.append("    private static final long serialVersionUID = 1L;\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		} finally {
+			JavaProjectHelper.set15CompilerOptions(fJProject1);
+		}
 	}
 	
 	public void testSerialVersion02() throws Exception {
 		
 		JavaProjectHelper.set14CompilerOptions(fJProject1);
 		
-        try {
-	        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-	        StringBuffer buf= new StringBuffer();
-	        buf.append("package test1;\n");
-	        buf.append("import java.io.Serializable;\n");
-	        buf.append("public class E1 implements Serializable {\n");
-	        buf.append("    public class B1 implements Serializable {\n");
-	        buf.append("    }\n");
-	        buf.append("    public class B2 extends B1 {\n");
-	        buf.append("    }\n");
-	        buf.append("}\n");
-	        ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-
-	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
-	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
-	        
-	        buf= new StringBuffer();
-	        buf.append("package test1;\n");
-	        buf.append("import java.io.Serializable;\n");
-	        buf.append("public class E1 implements Serializable {\n");
-	        buf.append("    " + FIELD_COMMENT + "\n");
-	        buf.append("    private static final long serialVersionUID = 1L;\n");
-	        buf.append("    public class B1 implements Serializable {\n");
-	        buf.append("\n");
-	        buf.append("        " + FIELD_COMMENT + "\n");
-	        buf.append("        private static final long serialVersionUID = 1L;\n");
-	        buf.append("    }\n");
-	        buf.append("    public class B2 extends B1 {\n");
-	        buf.append("\n");
-	        buf.append("        " + FIELD_COMMENT + "\n");
-	        buf.append("        private static final long serialVersionUID = 1L;\n");
-	        buf.append("    }\n");
-	        buf.append("}\n");
-	        String expected1= buf.toString();
-	        assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] { expected1 });
-        } finally {
-        	JavaProjectHelper.set15CompilerOptions(fJProject1);   
-        }
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.io.Serializable;\n");
+			buf.append("public class E1 implements Serializable {\n");
+			buf.append("    public class B1 implements Serializable {\n");
+			buf.append("    }\n");
+			buf.append("    public class B2 extends B1 {\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+			
+			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
+			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
+			
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.io.Serializable;\n");
+			buf.append("public class E1 implements Serializable {\n");
+			buf.append("    " + FIELD_COMMENT + "\n");
+			buf.append("    private static final long serialVersionUID = 1L;\n");
+			buf.append("    public class B1 implements Serializable {\n");
+			buf.append("\n");
+			buf.append("        " + FIELD_COMMENT + "\n");
+			buf.append("        private static final long serialVersionUID = 1L;\n");
+			buf.append("    }\n");
+			buf.append("    public class B2 extends B1 {\n");
+			buf.append("\n");
+			buf.append("        " + FIELD_COMMENT + "\n");
+			buf.append("        private static final long serialVersionUID = 1L;\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		} finally {
+			JavaProjectHelper.set15CompilerOptions(fJProject1);
+		}
 	}
 	
 	public void testSerialVersion03() throws Exception {
 		
 		JavaProjectHelper.set14CompilerOptions(fJProject1);
 		
-        try {
-	        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-	        StringBuffer buf= new StringBuffer();
-	        buf.append("package test1;\n");
-	        buf.append("import java.io.Serializable;\n");
-	        buf.append("public class E1 implements Serializable {\n");
-	        buf.append("}\n");
-	        ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-	        buf= new StringBuffer();
-	        buf.append("package test1;\n");
-	        buf.append("import java.io.Externalizable;\n");
-	        buf.append("public class E2 implements Externalizable {\n");
-	        buf.append("}\n");
-	        ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
-	        
-	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
-	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
-	       
-	        buf= new StringBuffer();
-	        buf.append("package test1;\n");
-	        buf.append("import java.io.Serializable;\n");
-	        buf.append("public class E1 implements Serializable {\n");
-	        buf.append("\n");
-	        buf.append("    " + FIELD_COMMENT + "\n");
-	        buf.append("    private static final long serialVersionUID = 1L;\n");
-	        buf.append("}\n");
-	        String expected2= buf.toString();
-	        buf= new StringBuffer();
-	        buf.append("package test1;\n");
-	        buf.append("import java.io.Externalizable;\n");
-	        buf.append("public class E2 implements Externalizable {\n");
-	        buf.append("}\n");
-	        String expected1= buf.toString();
-	        
-	        assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
-        } finally {
-        	JavaProjectHelper.set15CompilerOptions(fJProject1);   
-        }
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.io.Serializable;\n");
+			buf.append("public class E1 implements Serializable {\n");
+			buf.append("}\n");
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.io.Externalizable;\n");
+			buf.append("public class E2 implements Externalizable {\n");
+			buf.append("}\n");
+			ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+			
+			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
+			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
+			
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.io.Serializable;\n");
+			buf.append("public class E1 implements Serializable {\n");
+			buf.append("\n");
+			buf.append("    " + FIELD_COMMENT + "\n");
+			buf.append("    private static final long serialVersionUID = 1L;\n");
+			buf.append("}\n");
+			String expected2= buf.toString();
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.io.Externalizable;\n");
+			buf.append("public class E2 implements Externalizable {\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+			
+			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
+		} finally {
+			JavaProjectHelper.set15CompilerOptions(fJProject1);
+		}
 	}
 	
 	public void testSerialVersion04() throws Exception {
 		
 		JavaProjectHelper.set14CompilerOptions(fJProject1);
 		
-        try {
-	        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-	        StringBuffer buf= new StringBuffer();
-	        buf.append("package test1;\n");
-	        buf.append("import java.io.Serializable;\n");
-	        buf.append("public class E1 implements Serializable {\n");
-	        buf.append("    public void foo() {\n");
-	        buf.append("        Serializable s= new Serializable() {\n");
-	        buf.append("        };\n");
-	        buf.append("    }\n");
-	        buf.append("}\n");
-	        ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-
-	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
-	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
-	        
-	        buf= new StringBuffer();
-	        buf.append("package test1;\n");
-	        buf.append("import java.io.Serializable;\n");
-	        buf.append("public class E1 implements Serializable {\n");
-	        buf.append("    " + FIELD_COMMENT + "\n");
-	        buf.append("    private static final long serialVersionUID = 1L;\n");
-	        buf.append("\n");
-	        buf.append("    public void foo() {\n");
-	        buf.append("        Serializable s= new Serializable() {\n");
-	        buf.append("\n");
-	        buf.append("            " + FIELD_COMMENT + "\n");
-	        buf.append("            private static final long serialVersionUID = 1L;\n");
-	        buf.append("        };\n");
-	        buf.append("    }\n");
-	        buf.append("}\n");
-	        String expected1= buf.toString();
-	        assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] { expected1 });
-        } finally {
-        	JavaProjectHelper.set15CompilerOptions(fJProject1);   
-        }
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.io.Serializable;\n");
+			buf.append("public class E1 implements Serializable {\n");
+			buf.append("    public void foo() {\n");
+			buf.append("        Serializable s= new Serializable() {\n");
+			buf.append("        };\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+			
+			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
+			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
+			
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.io.Serializable;\n");
+			buf.append("public class E1 implements Serializable {\n");
+			buf.append("    " + FIELD_COMMENT + "\n");
+			buf.append("    private static final long serialVersionUID = 1L;\n");
+			buf.append("\n");
+			buf.append("    public void foo() {\n");
+			buf.append("        Serializable s= new Serializable() {\n");
+			buf.append("\n");
+			buf.append("            " + FIELD_COMMENT + "\n");
+			buf.append("            private static final long serialVersionUID = 1L;\n");
+			buf.append("        };\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		} finally {
+			JavaProjectHelper.set15CompilerOptions(fJProject1);
+		}
 	}
 	
 	public void testSerialVersion05() throws Exception {
 		
 		JavaProjectHelper.set14CompilerOptions(fJProject1);
 		
-        try {
-	        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-	        StringBuffer buf= new StringBuffer();
-	        buf.append("package test1;\n");
-	        buf.append("import java.io.Serializable;\n");
-	        buf.append("public class E1 implements Serializable {\n");
-	        buf.append("\n");
-	        buf.append("    private Serializable s= new Serializable() {\n");
-	        buf.append("        \n");
-	        buf.append("    };\n");
-	        buf.append("}\n");
-	        ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-	        
-	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
-	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
-	        
-	        buf= new StringBuffer();
-	        buf.append("package test1;\n");
-	        buf.append("import java.io.Serializable;\n");
-	        buf.append("public class E1 implements Serializable {\n");
-	        buf.append("\n");
-	        buf.append("    " + FIELD_COMMENT + "\n");
-	        buf.append("    private static final long serialVersionUID = 1L;\n");
-	        buf.append("    private Serializable s= new Serializable() {\n");
-	        buf.append("\n");
-	        buf.append("        " + FIELD_COMMENT + "\n");
-	        buf.append("        private static final long serialVersionUID = 1L;\n");
-	        buf.append("        \n");
-	        buf.append("    };\n");
-	        buf.append("}\n");
-	        String expected1= buf.toString();
-	        assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] { expected1 });
-        } finally {
-        	JavaProjectHelper.set15CompilerOptions(fJProject1);   
-        }
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.io.Serializable;\n");
+			buf.append("public class E1 implements Serializable {\n");
+			buf.append("\n");
+			buf.append("    private Serializable s= new Serializable() {\n");
+			buf.append("        \n");
+			buf.append("    };\n");
+			buf.append("}\n");
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+			
+			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
+			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
+			
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.io.Serializable;\n");
+			buf.append("public class E1 implements Serializable {\n");
+			buf.append("\n");
+			buf.append("    " + FIELD_COMMENT + "\n");
+			buf.append("    private static final long serialVersionUID = 1L;\n");
+			buf.append("    private Serializable s= new Serializable() {\n");
+			buf.append("\n");
+			buf.append("        " + FIELD_COMMENT + "\n");
+			buf.append("        private static final long serialVersionUID = 1L;\n");
+			buf.append("        \n");
+			buf.append("    };\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		} finally {
+			JavaProjectHelper.set15CompilerOptions(fJProject1);
+		}
 	}
 	
 	public void testSerialVersionBug139381() throws Exception {
-
+		
 		JavaProjectHelper.set14CompilerOptions(fJProject1);
 		
-        try {
-	        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-	        StringBuffer buf= new StringBuffer();
-	        buf.append("package test1;\n");
-	        buf.append("import java.io.Serializable;\n");
-	        buf.append("public class E1 {\n");
-	        buf.append("    void foo1() {\n");
-	        buf.append("        new Serializable() {\n");
-	        buf.append("        };\n");
-	        buf.append("    }\n");
-	        buf.append("    void foo2() {\n");
-	        buf.append("        new Object() {\n");
-	        buf.append("        };\n");
-	        buf.append("        new Serializable() {\n");
-	        buf.append("        };\n");
-	        buf.append("    }\n");
-	        buf.append("}\n");
-	        ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-	        
-	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
-	        enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
-	        
-	        buf= new StringBuffer();
-	        buf.append("package test1;\n");
-	        buf.append("import java.io.Serializable;\n");
-	        buf.append("public class E1 {\n");
-	        buf.append("    void foo1() {\n");
-	        buf.append("        new Serializable() {\n");
-	        buf.append("\n");
-	        buf.append("            " + FIELD_COMMENT + "\n");
-	        buf.append("            private static final long serialVersionUID = 1L;\n");
-	        buf.append("        };\n");
-	        buf.append("    }\n");
-	        buf.append("    void foo2() {\n");
-	        buf.append("        new Object() {\n");
-	        buf.append("        };\n");
-	        buf.append("        new Serializable() {\n");
-	        buf.append("\n");
-	        buf.append("            " + FIELD_COMMENT + "\n");
-	        buf.append("            private static final long serialVersionUID = 1L;\n");
-	        buf.append("        };\n");
-	        buf.append("    }\n");
-	        buf.append("}\n");
-	        String expected1= buf.toString();
-	        assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] { expected1 });
-        } finally {
-    		JavaProjectHelper.set15CompilerOptions(fJProject1);
-        }
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.io.Serializable;\n");
+			buf.append("public class E1 {\n");
+			buf.append("    void foo1() {\n");
+			buf.append("        new Serializable() {\n");
+			buf.append("        };\n");
+			buf.append("    }\n");
+			buf.append("    void foo2() {\n");
+			buf.append("        new Object() {\n");
+			buf.append("        };\n");
+			buf.append("        new Serializable() {\n");
+			buf.append("        };\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+			
+			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
+			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
+			
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.io.Serializable;\n");
+			buf.append("public class E1 {\n");
+			buf.append("    void foo1() {\n");
+			buf.append("        new Serializable() {\n");
+			buf.append("\n");
+			buf.append("            " + FIELD_COMMENT + "\n");
+			buf.append("            private static final long serialVersionUID = 1L;\n");
+			buf.append("        };\n");
+			buf.append("    }\n");
+			buf.append("    void foo2() {\n");
+			buf.append("        new Object() {\n");
+			buf.append("        };\n");
+			buf.append("        new Serializable() {\n");
+			buf.append("\n");
+			buf.append("            " + FIELD_COMMENT + "\n");
+			buf.append("            private static final long serialVersionUID = 1L;\n");
+			buf.append("        };\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		} finally {
+			JavaProjectHelper.set15CompilerOptions(fJProject1);
+		}
 	}
-
+	
 	public void testRemoveBlock01() throws Exception {
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -4534,7 +4690,6 @@ public class CleanUpTest extends QuickFixTest {
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
-
 	
 	public void testUnnecessaryCodeBug127704_1() throws Exception {
 		
@@ -4561,7 +4716,7 @@ public class CleanUpTest extends QuickFixTest {
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
-
+	
 	public void testUnnecessaryCodeBug127704_2() throws Exception {
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -4770,7 +4925,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-
+		
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 		
@@ -4788,7 +4943,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-
+		
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 		
@@ -4806,7 +4961,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-
+		
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 		
@@ -5184,7 +5339,7 @@ public class CleanUpTest extends QuickFixTest {
 		String expected1= buf.toString();
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
-	}	
+	}
 	
 	public void testAddFinal04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -5344,7 +5499,7 @@ public class CleanUpTest extends QuickFixTest {
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
 	}
-
+	
 	public void testAddFinalBug145028() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
