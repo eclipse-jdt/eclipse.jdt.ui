@@ -737,10 +737,12 @@ public class RenameLinkedMode {
 
 	public boolean isCaretInLinkedPosition() {
 		Point selection= fEditor.getViewer().getSelectedRange();
+		int start= selection.x;
+		int end= start + selection.y;
 		LinkedPosition[] positions= fLinkedPositionGroup.getPositions();
 		for (int i= 0; i < positions.length; i++) {
 			LinkedPosition position= positions[i];
-			if (position.overlapsWith(selection.x, selection.y))
+			if (position.includes(start) || position.includes(end))
 				return true;
 		}
 		return false;
