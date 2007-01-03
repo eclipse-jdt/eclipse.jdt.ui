@@ -16,7 +16,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 
@@ -72,20 +72,14 @@ public class CleanUpSaveParticipantPreferenceConfiguration implements ISaveParti
 	private ProfileManager fProfileManager;
 	private ProfileStore fProfileStore;
 	private IPreferenceChangeListener fPreferenceListener;
+	private IScopeContext fContext;
+	private boolean fListening;
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public Control createControl(Composite parent, IWorkingCopyManager manager) {
 		fPreferencesAccess= PreferencesAccess.getWorkingCopyPreferences(manager);
-
-		List profiles= CleanUpPreferenceUtil.loadProfiles(fPreferencesAccess.getInstanceScope());
-
-		fProfileManager= new ProfileManager(profiles, new InstanceScope(), fPreferencesAccess, new CleanUpProfileVersioner(), CleanUpProfileManager.KEY_SETS, CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, "cleanup_settings_version") { //$NON-NLS-1$
-			public Profile getDefaultProfile() {
-				return getProfile(CleanUpConstants.DEFAULT_SAVE_PARTICIPANT_PROFILE);
-			}
-		};
 
 		final Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -105,12 +99,6 @@ public class CleanUpSaveParticipantPreferenceConfiguration implements ISaveParti
 		fProfileSelectionField= new ComboDialogField(SWT.READ_ONLY);
 		fProfileSelectionField.setLabelText(MultiFixMessages.CleanUpSaveParticipantPreferenceConfiguration_use_clean_up_profile_label);
 		fProfileSelectionField.doFillIntoGrid(composite, 2);
-		fillProfileListDialogField();
-		fProfileManager.addObserver(new Observer() {
-			public void update(Observable o, Object arg) {
-				fillProfileListDialogField();
-			}
-		});
 
 		Button edit= new Button(composite, SWT.NONE);
 		edit.setText(MultiFixMessages.CleanUpSaveParticipantPreferenceConfiguration_edit_button_label);
@@ -124,43 +112,14 @@ public class CleanUpSaveParticipantPreferenceConfiguration implements ISaveParti
 		});
 		
 		fProfileStore= new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, new CleanUpProfileVersioner());
-		
-		final boolean[] listenerEnabled= new boolean[] {true};
-		fProfileManager.addObserver(new Observer() {
-			public void update(Observable o, Object arg) {
-				try {
-					listenerEnabled[0]= false;
-					final int value= ((Integer)arg).intValue();
-					switch (value) {
-					case ProfileManager.PROFILE_DELETED_EVENT:
-					case ProfileManager.PROFILE_RENAMED_EVENT:
-					case ProfileManager.PROFILE_CREATED_EVENT:
-					case ProfileManager.SETTINGS_CHANGED_EVENT:
-						try {
-							fProfileStore.writeProfiles(fProfileManager.getSortedProfiles(), fPreferencesAccess.getInstanceScope());
-							fProfileManager.commitChanges(fPreferencesAccess.getInstanceScope());
-						} catch (CoreException x) {
-							JavaPlugin.log(x);
-						}
-						break;
-					case ProfileManager.SELECTION_CHANGED_EVENT:
-						fProfileManager.commitChanges(fPreferencesAccess.getInstanceScope());
-						break;
-					}
-				} finally {
-					listenerEnabled[0]= true;
-				}
-			}
-		});
-
 		fPreferenceListener= new IPreferenceChangeListener() {
 			public void preferenceChange(PreferenceChangeEvent event) {
-				if (listenerEnabled[0]) {
+				if (fListening) {
 					if (CleanUpConstants.CLEANUP_PROFILES.equals(event.getKey())) {
 						try {
 							String id= fPreferencesAccess.getInstanceScope().getNode(JavaUI.ID_PLUGIN).get(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, null);
 							if (id == null)
-								fProfileManager.getDefaultProfile().getID();
+								id= fProfileManager.getDefaultProfile().getID();
 							
 							List oldProfiles= fProfileManager.getSortedProfiles();
 							Profile[] oldProfilesArray= (Profile[])oldProfiles.toArray(new Profile[oldProfiles.size()]);
@@ -206,17 +165,61 @@ public class CleanUpSaveParticipantPreferenceConfiguration implements ISaveParti
 	/**
 	 * {@inheritDoc}
 	 */
-	public void dispose() {
-		if (fPreferenceListener != null) {
-			fPreferencesAccess.getInstanceScope().getNode(JavaUI.ID_PLUGIN).removePreferenceChangeListener(fPreferenceListener);
-			fPreferenceListener= null;
-		}
+	public void initialize(final IScopeContext context) {
+		fContext= context;
+		
+		List profiles= CleanUpPreferenceUtil.loadProfiles(fPreferencesAccess.getInstanceScope());
+
+		fProfileManager= new ProfileManager(profiles, context, fPreferencesAccess, new CleanUpProfileVersioner(), CleanUpProfileManager.KEY_SETS, CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, "cleanup_settings_version") { //$NON-NLS-1$
+			public Profile getDefaultProfile() {
+				return getProfile(CleanUpConstants.DEFAULT_SAVE_PARTICIPANT_PROFILE);
+			}
+		};
+
+		fillProfileListDialogField();
+		fProfileManager.addObserver(new Observer() {
+			public void update(Observable o, Object arg) {
+				fillProfileListDialogField();
+			}
+		});
+		
+		fListening= true;
+		fProfileManager.addObserver(new Observer() {
+			public void update(Observable o, Object arg) {
+				try {
+					fListening= false;
+					final int value= ((Integer)arg).intValue();
+					switch (value) {
+					case ProfileManager.PROFILE_DELETED_EVENT:
+					case ProfileManager.PROFILE_RENAMED_EVENT:
+					case ProfileManager.PROFILE_CREATED_EVENT:
+					case ProfileManager.SETTINGS_CHANGED_EVENT:
+						try {
+							fProfileStore.writeProfiles(fProfileManager.getSortedProfiles(), fPreferencesAccess.getInstanceScope());
+							fProfileManager.commitChanges(context);
+						} catch (CoreException x) {
+							JavaPlugin.log(x);
+						}
+						break;
+					case ProfileManager.SELECTION_CHANGED_EVENT:
+						fProfileManager.commitChanges(context);
+						break;
+					}
+				} finally {
+					fListening= true;
+				}
+			}
+		});
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void initialize() {
+	public void dispose() {
+		if (fPreferenceListener != null) {
+			fPreferencesAccess.getInstanceScope().getNode(JavaUI.ID_PLUGIN).removePreferenceChangeListener(fPreferenceListener);
+			fPreferenceListener= null;
+		}
 	}
 
 	/**
@@ -260,4 +263,18 @@ public class CleanUpSaveParticipantPreferenceConfiguration implements ISaveParti
 			}
 		});
 	}
+
+	/**
+     * {@inheritDoc}
+     */
+    public void enableProjectSettings() {
+    	fProfileManager.setSelected(fProfileManager.getSelected());
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void disableProjectSettings() {
+    	fProfileManager.clearAllSettings(fContext);
+    }
 }

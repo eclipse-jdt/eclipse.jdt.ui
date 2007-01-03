@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor.saveparticipant;
 
+import org.eclipse.core.runtime.preferences.IScopeContext;
+
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -39,9 +41,11 @@ public interface ISaveParticipantPreferenceConfiguration {
 	/**
 	 * Called after creating the control.
 	 * <p>
-	 * Implementations should load the preferences values and update the controls accordingly.</p>
+	 * Implementations should load the preferences values and update the controls accordingly.
+	 * </p>
+	 * @param context the context from which to load the preference values from
 	 */
-	void initialize();
+	void initialize(IScopeContext context);
 
 	/**
 	 * Called when the <code>OK</code> button is pressed on the preference
@@ -67,4 +71,14 @@ public interface ISaveParticipantPreferenceConfiguration {
 	 * Implementations should free any resources they are holding on to.</p>
 	 */
 	void dispose();
+	
+	/**
+	 * Called when project specific settings have been enabled
+	 */
+	void enableProjectSettings();
+	
+	/**
+	 * Called when project specific settings have been disabled
+	 */
+	void disableProjectSettings();
 }

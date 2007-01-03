@@ -24,6 +24,9 @@ import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
+
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
@@ -59,7 +62,8 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			if (!ActionUtil.isOnBuildPath(unit))
 				return;
 			
-			Map settings= CleanUpPreferenceUtil.loadSaveParticipantOptions(new InstanceScope());
+			IProject project= unit.getJavaProject().getProject();
+			Map settings= CleanUpPreferenceUtil.loadSaveParticipantOptions(new ProjectScope(project));
 			if (settings == null) {
 				IEclipsePreferences contextNode= new InstanceScope().getNode(JavaUI.ID_PLUGIN);
 				String id= contextNode.get(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, null);

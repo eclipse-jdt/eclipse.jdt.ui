@@ -109,7 +109,6 @@ import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
-import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantRegistry;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 import org.eclipse.jdt.internal.ui.text.spelling.JavaSpellingReconcileStrategy;
@@ -1439,8 +1438,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
      */
 	protected void notifyPostSaveListeners(final ICompilationUnit unit, final CompilationUnitInfo info, final IProgressMonitor monitor) throws CoreException {
 		final IBuffer buffer= unit.getBuffer();
-		final SaveParticipantRegistry saveParticipantRegistry= JavaPlugin.getDefault().getSaveParticipantRegistry();
-		IPostSaveListener[] listeners= saveParticipantRegistry.getEnabledPostSaveListeners();
+		IPostSaveListener[] listeners= JavaPlugin.getDefault().getSaveParticipantRegistry().getEnabledPostSaveListeners(unit.getJavaProject().getProject());
 		
 		String message= JavaEditorMessages.CompilationUnitDocumentProvider_error_saveParticipantProblem;
 		final MultiStatus errorStatus= new MultiStatus(JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, message, null);

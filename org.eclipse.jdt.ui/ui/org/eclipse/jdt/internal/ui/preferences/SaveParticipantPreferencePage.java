@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -21,38 +23,43 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 3.3
  */
-public final class SaveParticipantPreferencePage extends AbstractConfigurationBlockPreferencePage {
+public final class SaveParticipantPreferencePage extends AbstractConfigurationBlockPreferenceAndPropertyPage {
+	
+	private static final String PROPERTY_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.SaveParticipantPreferencePage"; //$NON-NLS-1$
+	private static final String PREFERENCE_PAGE_ID= "org.eclipse.jdt.ui.preferences.SaveParticipantPreferencePage"; //$NON-NLS-1$
 
-	/*
-	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigureationBlockPreferencePage#getHelpId()
+	/**
+	 * {@inheritDoc}
 	 */
 	protected String getHelpId() {
 		return IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE;
 	}
-
-	/*
-	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigurationBlockPreferencePage#setDescription()
+	
+	/**
+	 * {@inheritDoc}
 	 */
-	protected void setDescription() {
-		String description= PreferencesMessages.JavaEditorPreferencePage_saveParticipants_title;
-		setDescription(description);
+	protected IPreferenceAndPropertyConfigurationBlock createConfigurationBlock(IScopeContext context) {
+		return new SaveParticipantConfigurationBlock(context, this);
 	}
-
-	/*
-	 * @see org.org.eclipse.ui.internal.editors.text.AbstractConfigurationBlockPreferencePage#setPreferenceStore()
+	
+	/**
+	 * {@inheritDoc}
 	 */
-	protected void setPreferenceStore() {
-		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
+	protected String getPreferencePageID() {
+		return PREFERENCE_PAGE_ID;
 	}
-
-	protected Label createDescriptionLabel(Composite parent) {
-		return null; // no description for new look.
-	}
-
-	/*
-	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigureationBlockPreferencePage#createConfigurationBlock(org.eclipse.ui.internal.editors.text.OverlayPreferenceStore)
+	
+	/**
+	 * {@inheritDoc}
 	 */
-	protected IPreferenceConfigurationBlock createConfigurationBlock(OverlayPreferenceStore overlayPreferenceStore) {
-		return new SaveParticipantConfigurationBlock(overlayPreferenceStore, this);
+	protected String getPropertyPageID() {
+		return PROPERTY_PAGE_ID;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	protected boolean hasProjectSpecificOptions(IProject project) {
+		return JavaPlugin.getDefault().getSaveParticipantRegistry().hasSettingsInScope(new ProjectScope(project));
 	}
 }
