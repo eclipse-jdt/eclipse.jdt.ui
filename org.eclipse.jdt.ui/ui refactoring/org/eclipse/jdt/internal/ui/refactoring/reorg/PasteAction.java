@@ -311,27 +311,29 @@ public class PasteAction extends SelectionDispatchAction{
 				int start= 0;
 				boolean tokensScanned= false;
 				int tok;
-				try {
-					while (true) {
+				while (true) {
+					try {
 						tok= scanner.getNextToken();
-						if (tok == ITerminalSymbols.TokenNamepackage && tokensScanned) {
-							int packageStart= scanner.getCurrentTokenStartPosition();
-							ParsedCu cu= parseCu(javaProject, text.substring(start, packageStart));
-							if (cu != null) {
-								cus.add(cu);
-								start= packageStart;
-							}
-						} else if (tok == ITerminalSymbols.TokenNameEOF) {
-							ParsedCu cu= parseCu(javaProject, text.substring(start, text.length()));
-							if (cu != null) {
-								cus.add(cu);
-							}
-							break;
-						}
-						tokensScanned= true;
+					} catch (InvalidInputException e) {
+						// Handle gracefully to give the ASTParser a chance to recover,
+						// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=168691
+						tok= ITerminalSymbols.TokenNameEOF;
 					}
-				} catch (InvalidInputException e) {
-					return new ParsedCu[0];
+					if (tok == ITerminalSymbols.TokenNamepackage && tokensScanned) {
+						int packageStart= scanner.getCurrentTokenStartPosition();
+						ParsedCu cu= parseCu(javaProject, text.substring(start, packageStart));
+						if (cu != null) {
+							cus.add(cu);
+							start= packageStart;
+						}
+					} else if (tok == ITerminalSymbols.TokenNameEOF) {
+						ParsedCu cu= parseCu(javaProject, text.substring(start, text.length()));
+						if (cu != null) {
+							cus.add(cu);
+						}
+						break;
+					}
+					tokensScanned= true;
 				}
 
 				return (ParsedCu[]) cus.toArray(new ParsedCu[cus.size()]);
@@ -342,6 +344,7 @@ public class PasteAction extends SelectionDispatchAction{
 				ASTParser parser= ASTParser.newParser(AST.JLS3);
 				parser.setProject(javaProject);
 				parser.setSource(text.toCharArray());
+				parser.setStatementsRecovery(true);
 				CompilationUnit unit= (CompilationUnit) parser.createAST(null);
 				
 				if (unit == null)
