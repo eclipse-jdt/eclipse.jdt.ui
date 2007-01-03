@@ -13,6 +13,8 @@
 
 package org.eclipse.jdt.internal.junit.runner.junit3;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Iterator;
@@ -150,17 +152,23 @@ public class JUnit3TestReference implements ITestReference {
 		}
 	}
 
-	void sendFailure(Throwable throwable, IClassifiesThrowables classifier, IListensToTestExecutions notified) {
-		TestReferenceFailure failure= new TestReferenceFailure(getIdentifier(), MessageIds.TEST_FAILED, classifier.getTrace(throwable));
-		if (classifier.isComparisonFailure(throwable)) {
-			// transmit the expected and the actual string
-			Object expected= JUnit3TestReference.getField(throwable, "fExpected"); //$NON-NLS-1$
-			Object actual= JUnit3TestReference.getField(throwable, "fActual"); //$NON-NLS-1$
-			if (expected != null && actual != null) {
-				failure.setComparison(new FailedComparison((String) expected, (String) actual));
+	void sendFailure(Throwable throwable, IClassifiesThrowables classifier, String status, IListensToTestExecutions notified) {
+		TestReferenceFailure failure;
+		try {
+			failure= new TestReferenceFailure(getIdentifier(), status, classifier.getTrace(throwable));
+			if (classifier.isComparisonFailure(throwable)) {
+				// transmit the expected and the actual string
+				Object expected= JUnit3TestReference.getField(throwable, "fExpected"); //$NON-NLS-1$
+				Object actual= JUnit3TestReference.getField(throwable, "fActual"); //$NON-NLS-1$
+				if (expected != null && actual != null) {
+					failure.setComparison(new FailedComparison((String) expected, (String) actual));
+				}
 			}
+		} catch (RuntimeException e) {
+			StringWriter stringWriter= new StringWriter();
+			e.printStackTrace(new PrintWriter(stringWriter));
+			failure= new TestReferenceFailure(getIdentifier(), MessageIds.TEST_FAILED, stringWriter.getBuffer().toString(), null);
 		}
-
 		notified.notifyTestFailed(failure);
 	}
 

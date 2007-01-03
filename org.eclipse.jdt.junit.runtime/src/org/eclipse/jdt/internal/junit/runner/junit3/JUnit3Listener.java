@@ -11,21 +11,17 @@
  *             (bug 102632: [JUnit] Support for JUnit 4.)
  *******************************************************************************/
 
-/**
- * 
- */
 package org.eclipse.jdt.internal.junit.runner.junit3;
-
-import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
-import org.eclipse.jdt.internal.junit.runner.MessageIds;
-import org.eclipse.jdt.internal.junit.runner.TestExecution;
-import org.eclipse.jdt.internal.junit.runner.IListensToTestExecutions;
-import org.eclipse.jdt.internal.junit.runner.TestReferenceFailure;
-import org.eclipse.jdt.internal.junit.runner.IClassifiesThrowables;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestListener;
+
+import org.eclipse.jdt.internal.junit.runner.IClassifiesThrowables;
+import org.eclipse.jdt.internal.junit.runner.IListensToTestExecutions;
+import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
+import org.eclipse.jdt.internal.junit.runner.MessageIds;
+import org.eclipse.jdt.internal.junit.runner.TestExecution;
 
 public class JUnit3Listener implements TestListener {
 	private final IListensToTestExecutions fNotified;
@@ -42,12 +38,11 @@ public class JUnit3Listener implements TestListener {
 	}
 
 	public void addError(Test test, Throwable throwable) {
-		TestReferenceFailure failure= new TestReferenceFailure(id(test), MessageIds.TEST_ERROR, fClassifier.getTrace(throwable));
-		fNotified.notifyTestFailed(failure);
+		newReference(test).sendFailure(throwable, fClassifier, MessageIds.TEST_ERROR, fNotified);
 	}
 
 	public void addFailure(Test test, AssertionFailedError assertionFailedError) {
-		newReference(test).sendFailure(assertionFailedError, fClassifier, fNotified);
+		newReference(test).sendFailure(assertionFailedError, fClassifier, MessageIds.TEST_FAILED, fNotified);
 	}
 
 	public void endTest(Test test) {
