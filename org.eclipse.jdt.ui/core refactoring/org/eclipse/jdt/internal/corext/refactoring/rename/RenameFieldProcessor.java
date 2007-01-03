@@ -220,13 +220,13 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 					: RefactoringCoreMessages.RenameFieldRefactoring_should_start_lowercase);
 
 		if (Checks.isAlreadyNamed(fField, newName))
-			result.addFatalError(fIsComposite
+			result.addError(fIsComposite
 					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_another_name2, new String[] { newName, fField.getDeclaringType().getElementName() })
 					: RefactoringCoreMessages.RenameFieldRefactoring_another_name,
 					JavaStatusContext.create(fField));
 		
 		if (fField.getDeclaringType().getField(newName).exists())
-			result.addFatalError(fIsComposite 
+			result.addError(fIsComposite 
 					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_field_already_defined2, new String[] { newName, fField.getDeclaringType().getElementName() }) 
 					: RefactoringCoreMessages.RenameFieldRefactoring_field_already_defined,
 					JavaStatusContext.create(fField.getDeclaringType().getField(newName)));
