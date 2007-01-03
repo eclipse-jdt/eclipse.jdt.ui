@@ -536,7 +536,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 */
 	public void setVisible(boolean visible) {
 		if (visible) {
-			addHandlerAndKeyBindingSupport();
 			open();
 		} else {
 			removeHandlerAndKeyBindingSupport();
@@ -544,6 +543,15 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			getShell().setVisible(false);
 			removeHandlerAndKeyBindingSupport();
 		}
+	}
+	
+	/*
+	 * @see org.eclipse.jface.dialogs.PopupDialog#open()
+	 * @since 3.3
+	 */
+	public int open() {
+		addHandlerAndKeyBindingSupport();
+		return super.open();
 	}
 
 	/**
@@ -774,8 +782,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		};
 		fShowViewMenuAction.setEnabled(true);
 		fShowViewMenuAction.setActionDefinitionId("org.eclipse.ui.window.showViewMenu"); //$NON-NLS-1$
-
-		addHandlerAndKeyBindingSupport();
 
 		return fViewMenuButtonComposite;
 	}
