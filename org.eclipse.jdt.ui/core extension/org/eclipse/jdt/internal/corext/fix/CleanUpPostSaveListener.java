@@ -56,82 +56,82 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		monitor.beginTask(getName(), IProgressMonitor.UNKNOWN);
 		
 		try {
-    		if (!ActionUtil.isOnBuildPath(unit))
-    			return;
-
-    		Map settings= CleanUpPreferenceUtil.loadSaveParticipantOptions(new InstanceScope());
-    		if (settings == null) {
-    			IEclipsePreferences contextNode= new InstanceScope().getNode(JavaUI.ID_PLUGIN);
-    	    	String id= contextNode.get(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, null);
-    	    	if (id == null) {
-    	    		id= new DefaultScope().getNode(JavaUI.ID_PLUGIN).get(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, CleanUpConstants.DEFAULT_SAVE_PARTICIPANT_PROFILE);
-    	    	}
-    	    	throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, Messages.format(FixMessages.CleanUpPostSaveListener_unknown_profile_error_message, id)));
-    		}
-    		
-    		ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps(settings);    		
-    		
-    		do {
-    			for (int i= 0; i < cleanUps.length; i++) {
-	                cleanUps[i].checkPreConditions(unit.getJavaProject(), new ICompilationUnit[] {unit}, new SubProgressMonitor(monitor, 5));
-                }
-    			
-    			Map options= RefactoringASTParser.getCompilerOptions(unit.getJavaProject());
-    			for (int i= 0; i < cleanUps.length; i++) {
-	                Map map= cleanUps[i].getRequiredOptions();
-	                if (map != null) {
-	                	options.putAll(map);
-	                }
-                }
-    			
-        		CompilationUnit ast= createAst(unit, options, new SubProgressMonitor(monitor, 10));
-        		
-        		List undoneCleanUps= new ArrayList();
-    			CompilationUnitChange change= CleanUpRefactoring.calculateChange(ast, unit, cleanUps, undoneCleanUps);
-    			if (change != null) {
-        			change.setSaveMode(TextFileChange.LEAVE_DIRTY);
-        			change.initializeValidationData(new NullProgressMonitor());
-        			
-        			PerformChangeOperation performChangeOperation= RefactoringUI.createUIAwareChangeOperation(change);
-    				performChangeOperation.setUndoManager(RefactoringCore.getUndoManager(), getName());
-    				performChangeOperation.setSchedulingRule(unit.getSchedulingRule());
-    				
-    				performChangeOperation.run(new SubProgressMonitor(monitor, 5));
-    			}
-    			
-    			for (int i= 0; i < cleanUps.length; i++) {
-	                cleanUps[i].checkPostConditions(new SubProgressMonitor(monitor, 1));
-                }
-    			
-    			cleanUps= (ICleanUp[])undoneCleanUps.toArray(new ICleanUp[undoneCleanUps.size()]);
-    		} while (cleanUps.length > 0);
+			if (!ActionUtil.isOnBuildPath(unit))
+				return;
+			
+			Map settings= CleanUpPreferenceUtil.loadSaveParticipantOptions(new InstanceScope());
+			if (settings == null) {
+				IEclipsePreferences contextNode= new InstanceScope().getNode(JavaUI.ID_PLUGIN);
+				String id= contextNode.get(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, null);
+				if (id == null) {
+					id= new DefaultScope().getNode(JavaUI.ID_PLUGIN).get(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, CleanUpConstants.DEFAULT_SAVE_PARTICIPANT_PROFILE);
+				}
+				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, Messages.format(FixMessages.CleanUpPostSaveListener_unknown_profile_error_message, id)));
+			}
+			
+			ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps(settings);
+			
+			do {
+				for (int i= 0; i < cleanUps.length; i++) {
+					cleanUps[i].checkPreConditions(unit.getJavaProject(), new ICompilationUnit[] {unit}, new SubProgressMonitor(monitor, 5));
+				}
+				
+				Map options= RefactoringASTParser.getCompilerOptions(unit.getJavaProject());
+				for (int i= 0; i < cleanUps.length; i++) {
+					Map map= cleanUps[i].getRequiredOptions();
+					if (map != null) {
+						options.putAll(map);
+					}
+				}
+				
+				CompilationUnit ast= createAst(unit, options, new SubProgressMonitor(monitor, 10));
+				
+				List undoneCleanUps= new ArrayList();
+				CompilationUnitChange change= CleanUpRefactoring.calculateChange(ast, unit, cleanUps, undoneCleanUps);
+				if (change != null) {
+					change.setSaveMode(TextFileChange.LEAVE_DIRTY);
+					change.initializeValidationData(new NullProgressMonitor());
+					
+					PerformChangeOperation performChangeOperation= RefactoringUI.createUIAwareChangeOperation(change);
+					performChangeOperation.setUndoManager(RefactoringCore.getUndoManager(), getName());
+					performChangeOperation.setSchedulingRule(unit.getSchedulingRule());
+					
+					performChangeOperation.run(new SubProgressMonitor(monitor, 5));
+				}
+				
+				for (int i= 0; i < cleanUps.length; i++) {
+					cleanUps[i].checkPostConditions(new SubProgressMonitor(monitor, 1));
+				}
+				
+				cleanUps= (ICleanUp[])undoneCleanUps.toArray(new ICleanUp[undoneCleanUps.size()]);
+			} while (cleanUps.length > 0);
 		} finally {
 			monitor.done();
 		}
-    }
-
+	}
+	
 	private CompilationUnit createAst(ICompilationUnit unit, Map options, IProgressMonitor monitor) {
-        ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
-        parser.setResolveBindings(true);
-        parser.setProject(unit.getJavaProject());
-        parser.setSource(unit);
-        parser.setCompilerOptions(options);
-        
-        return (CompilationUnit)parser.createAST(monitor);
-    }
-
+		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		parser.setResolveBindings(true);
+		parser.setProject(unit.getJavaProject());
+		parser.setSource(unit);
+		parser.setCompilerOptions(options);
+		
+		return (CompilationUnit)parser.createAST(monitor);
+	}
+	
 	/**
-     * {@inheritDoc}
-     */
-    public String getName() {
-	    return FixMessages.CleanUpPostSaveListener_name;
-    }
-    
+	 * {@inheritDoc}
+	 */
+	public String getName() {
+		return FixMessages.CleanUpPostSaveListener_name;
+	}
+	
 	/**
-     * {@inheritDoc}
-     */
-    public String getId() {
-	    return "org.eclipse.jdt.ui.postsavelistener.cleanup"; //$NON-NLS-1$
-    }
-
+	 * {@inheritDoc}
+	 */
+	public String getId() {
+		return "org.eclipse.jdt.ui.postsavelistener.cleanup"; //$NON-NLS-1$
+	}
+	
 }
