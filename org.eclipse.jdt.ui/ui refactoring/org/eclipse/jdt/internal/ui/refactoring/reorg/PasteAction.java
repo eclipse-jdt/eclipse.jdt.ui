@@ -223,7 +223,10 @@ public class PasteAction extends SelectionDispatchAction{
 					return;// one is enough
 				}
 			}
-			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_disabled); 
+			String msg= resources.length + javaElements.length + workingSets.length == 0
+					? ReorgMessages.PasteAction_cannot_no_selection
+					: ReorgMessages.PasteAction_cannot_selection;
+			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), ReorgMessages.PasteAction_name, msg); 
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		} catch (InvocationTargetException e) {

@@ -149,6 +149,8 @@ public final class ReorgMessages extends NLS {
 	public static String PasteAction_wrong_destination;
 	public static String PasteAction_TextPaster_exists;
 	public static String PasteAction_TextPaster_confirmOverwriting;
+	public static String PasteAction_cannot_selection;
+	public static String PasteAction_cannot_no_selection;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, ReorgMessages.class);

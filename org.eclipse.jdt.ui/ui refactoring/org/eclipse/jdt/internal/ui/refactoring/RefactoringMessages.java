@@ -540,8 +540,6 @@ public final class RefactoringMessages extends NLS {
 
 	public static String NewTextRefactoringAction_exception;
 
-	public static String OpenRefactoringWizardAction_disabled;
-
 	public static String OpenRefactoringWizardAction_exception;
 
 	public static String OpenRefactoringWizardAction_refactoring;
