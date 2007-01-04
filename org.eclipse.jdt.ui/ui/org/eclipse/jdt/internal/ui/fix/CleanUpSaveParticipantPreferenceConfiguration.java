@@ -82,7 +82,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration implements ISaveParti
 		fPreferencesAccess= PreferencesAccess.getWorkingCopyPreferences(manager);
 
 		final Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		composite.setLayout(new GridLayout(3, false));
 
 		Link link= new Link(composite, SWT.NONE);

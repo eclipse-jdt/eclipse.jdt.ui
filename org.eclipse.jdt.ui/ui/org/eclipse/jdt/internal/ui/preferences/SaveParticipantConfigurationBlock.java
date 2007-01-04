@@ -10,7 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import com.ibm.icu.text.Collator;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashSet;
+
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
@@ -20,6 +27,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.preference.IPreferencePageContainer;
 import org.eclipse.jface.preference.PreferencePage;
 
@@ -46,44 +54,78 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
  * @since 3.3
  */
 class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigurationBlock {
-
-	private final SaveParticipantDescriptor[] fRegisteredDescriptors;
-	private SelectionButtonDialogField fEnableField;
+	
+	private static class ConfigurationDescription {
+		
+		SelectionButtonDialogField fEnableField;
+		ISaveParticipantPreferenceConfiguration fPreferenceConfiguration;
+		SaveParticipantDescriptor fDescriptior;
+		
+		public ConfigurationDescription(SaveParticipantDescriptor descriptor, ISaveParticipantPreferenceConfiguration preferenceConfiguration, SelectionButtonDialogField enableField) {
+			fDescriptior= descriptor;
+			fPreferenceConfiguration= preferenceConfiguration;
+			fEnableField= enableField;
+		}
+	}
+	
 	private final PreferencePage fPreferencePage;
 	private final IScopeContext fContext;
-	private ISaveParticipantPreferenceConfiguration fConfigurationBlock;
-
+	private ConfigurationDescription[] fConfigurationDescriptions;
+	
 	public SaveParticipantConfigurationBlock(IScopeContext context, PreferencePage preferencePage) {
-		fContext= context;
 		Assert.isNotNull(context);
-		fRegisteredDescriptors= JavaPlugin.getDefault().getSaveParticipantRegistry().getSaveParticipantDescriptors();
-
+		Assert.isNotNull(preferencePage);
+		
+		fContext= context;
 		fPreferencePage= preferencePage;
-    }
-
+	}
+	
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#createControl(org.eclipse.swt.widgets.Composite)
 	 * @since 3.3
 	 */
 	public Control createControl(Composite parent) {
-		if (fRegisteredDescriptors.length == 1) {
-			IPostSaveListener listener= fRegisteredDescriptors[0].getPostSaveListener();
-			boolean isActive= JavaPlugin.getDefault().getSaveParticipantRegistry().getEnabledPostSaveListeners(fContext).length == 1;
-			
-			Composite composite= new Composite(parent, SWT.NONE);
-			composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-			composite.setLayout(new GridLayout(2, false));
-			
-			fEnableField= new SelectionButtonDialogField(SWT.CHECK);
-			fEnableField.setLabelText(Messages.format(PreferencesMessages.JavaEditorPreferencePage_saveParticipant_cleanup, listener.getName()));
-			if (isActive) {
-				fEnableField.setSelection(true);
+		Composite composite= new Composite(parent, SWT.NONE);
+		composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		composite.setLayout(new GridLayout(2, false));
+		
+		SaveParticipantRegistry registry= JavaPlugin.getDefault().getSaveParticipantRegistry();
+		SaveParticipantDescriptor[] descriptors= registry.getSaveParticipantDescriptors();
+		
+		fConfigurationDescriptions= new ConfigurationDescription[descriptors.length];
+		if (descriptors.length == 0)
+			return composite;
+		
+		Arrays.sort(descriptors, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				SaveParticipantDescriptor d1= (SaveParticipantDescriptor)o1;
+				SaveParticipantDescriptor d2= (SaveParticipantDescriptor)o2;
+				return Collator.getInstance().compare(d1.getPostSaveListener().getName(), d2.getPostSaveListener().getName());
 			}
-			fEnableField.doFillIntoGrid(composite, 2);
+		});
+		
+		IPostSaveListener[] listeners= registry.getEnabledPostSaveListeners(fContext);
+		HashSet enabledListeners= new HashSet();
+		for (int i= 0; i < listeners.length; i++) {
+			enabledListeners.add(listeners[i].getId());
+		}
+		
+		for (int i= 0; i < descriptors.length; i++) {
+			final SaveParticipantDescriptor descriptor= descriptors[i];
 			
-			fConfigurationBlock= fRegisteredDescriptors[0].getPreferenceConfiguration();
+			boolean isActive= enabledListeners.contains(descriptor.getId());
+			
+			SelectionButtonDialogField enableField= new SelectionButtonDialogField(SWT.CHECK);
+			enableField.setLabelText(Messages.format(PreferencesMessages.JavaEditorPreferencePage_saveParticipant_cleanup, descriptor.getPostSaveListener().getName()));
+			if (isActive) {
+				enableField.setSelection(true);
+			}
+			enableField.doFillIntoGrid(composite, 2);
+			
+			ISaveParticipantPreferenceConfiguration preferenceConfiguration= descriptor.getPreferenceConfiguration();
 			final Control configControl;
-			if (fConfigurationBlock != null) {
+			final ControlEnableState[] state= new ControlEnableState[1];
+			if (preferenceConfiguration != null) {
 				IPreferencePageContainer container= fPreferencePage.getContainer();
 				IWorkingCopyManager manager;
 				if (container instanceof IWorkbenchPreferenceContainer) {
@@ -92,95 +134,103 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 					manager= new WorkingCopyManager(); // non shared
 				}
 				
-				configControl= fConfigurationBlock.createControl(composite, manager);
-				if (!isActive)
-					setEnabled(configControl, false);
+				configControl= preferenceConfiguration.createControl(composite, manager);
+				if (!isActive) {
+					state[0]= ControlEnableState.disable(configControl);
+				}
 			} else {
 				configControl= null;
 			}
 			
-			fEnableField.setDialogFieldListener(new IDialogFieldListener() {
+			enableField.setDialogFieldListener(new IDialogFieldListener() {
 				public void dialogFieldChanged(DialogField field) {
-					fContext.getNode(JavaUI.ID_PLUGIN).putBoolean(SaveParticipantRegistry.getPreferenceKey(fRegisteredDescriptors[0]), fEnableField.isSelected());
-					if (configControl != null)
-						setEnabled(configControl, fEnableField.isSelected());
-                }
+					fContext.getNode(JavaUI.ID_PLUGIN).putBoolean(SaveParticipantRegistry.getPreferenceKey(descriptor), ((SelectionButtonDialogField)field).isSelected());
+					if (configControl != null) {
+						if (state[0] != null) {
+							state[0].restore();
+							state[0]= null;
+						} else {
+							state[0]= ControlEnableState.disable(configControl);
+						}
+					}
+				}
 			});
 			
-			return composite;
-		} else {
-			Assert.isTrue(false, "TODO"); //$NON-NLS-1$
+			fConfigurationDescriptions[i]= new ConfigurationDescription(descriptor, preferenceConfiguration, enableField);
 		}
-		return null;
+		
+		return composite;
 	}
-
-	private void setEnabled(Control control, boolean enable) {
-		control.setEnabled(enable);
-		if (control instanceof Composite) {
-			Control[] children= ((Composite)control).getChildren();
-			for (int i= 0; i < children.length; i++) {
-	            setEnabled(children[i], enable);
-            }
-		}
-    }
-
+	
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#dispose()
 	 */
 	public void dispose() {
-		for (int i= 0; i < fRegisteredDescriptors.length; i++) {
-	        ISaveParticipantPreferenceConfiguration block= fRegisteredDescriptors[i].getPreferenceConfiguration();
-	        if (block != null)
-	        	block.dispose();
-        }
+		for (int i= 0; i < fConfigurationDescriptions.length; i++) {
+			ISaveParticipantPreferenceConfiguration block= fConfigurationDescriptions[i].fPreferenceConfiguration;
+			if (block != null)
+				block.dispose();
+		}
 	}
-
+	
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#initialize()
 	 */
 	public void initialize() {
-		for (int i= 0; i < fRegisteredDescriptors.length; i++) {
-	        ISaveParticipantPreferenceConfiguration block= fRegisteredDescriptors[i].getPreferenceConfiguration();
-	        if (block != null)
-	        	block.initialize(fContext);
-        }
+		for (int i= 0; i < fConfigurationDescriptions.length; i++) {
+			ISaveParticipantPreferenceConfiguration block= fConfigurationDescriptions[i].fPreferenceConfiguration;
+			if (block != null)
+				block.initialize(fContext);
+		}
 	}
-
+	
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#performDefaults()
 	 */
 	public void performDefaults() {
-		if (fEnableField.isSelected()) {
-			fContext.getNode(JavaUI.ID_PLUGIN).putBoolean(SaveParticipantRegistry.getPreferenceKey(fRegisteredDescriptors[0]), false);
-			fEnableField.setSelection(false);
-		}
+		IEclipsePreferences defaultNode= new DefaultScope().getNode(JavaUI.ID_PLUGIN);
+		IEclipsePreferences node= fContext.getNode(JavaUI.ID_PLUGIN);
 		
-		for (int i= 0; i < fRegisteredDescriptors.length; i++) {
-	        ISaveParticipantPreferenceConfiguration block= fRegisteredDescriptors[i].getPreferenceConfiguration();
-	        if (block != null)
-	        	block.performDefaults();
-        }
+		for (int i= 0; i < fConfigurationDescriptions.length; i++) {
+			ConfigurationDescription configurationDescription= fConfigurationDescriptions[i];
+			
+			String key= SaveParticipantRegistry.getPreferenceKey(configurationDescription.fDescriptior);
+			boolean enabled= defaultNode.getBoolean(key, false);
+			node.putBoolean(key, enabled);
+			configurationDescription.fEnableField.setSelection(enabled);
+			
+			ISaveParticipantPreferenceConfiguration block= configurationDescription.fPreferenceConfiguration;
+			if (block != null)
+				block.performDefaults();
+		}
 	}
-
+	
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#performOk()
 	 */
 	public void performOk() {
-		for (int i= 0; i < fRegisteredDescriptors.length; i++) {
-	        ISaveParticipantPreferenceConfiguration block= fRegisteredDescriptors[i].getPreferenceConfiguration();
-	        if (block != null)
-	        	block.performOk();
-        }
+		for (int i= 0; i < fConfigurationDescriptions.length; i++) {
+			ISaveParticipantPreferenceConfiguration block= fConfigurationDescriptions[i].fPreferenceConfiguration;
+			if (block != null)
+				block.performOk();
+		}
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	public void enableProjectSettings() {
-		String key= SaveParticipantRegistry.getPreferenceKey(fRegisteredDescriptors[0]);
-		fContext.getNode(JavaUI.ID_PLUGIN).putBoolean(key, fEnableField.isSelected());
+		IEclipsePreferences node= fContext.getNode(JavaUI.ID_PLUGIN);
 		
-		fConfigurationBlock.enableProjectSettings();
+		for (int i= 0; i < fConfigurationDescriptions.length; i++) {
+			ConfigurationDescription configurationDescription= fConfigurationDescriptions[i];
+			
+			node.putBoolean(SaveParticipantRegistry.getPreferenceKey(configurationDescription.fDescriptior), configurationDescription.fEnableField.isSelected());
+			
+			ISaveParticipantPreferenceConfiguration block= configurationDescription.fPreferenceConfiguration;
+			if (block != null)
+				block.enableProjectSettings();
+		}
 	}
 	
 	/**
@@ -188,10 +238,15 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 	 */
 	public void disableProjectSettings() {
 		IEclipsePreferences node= fContext.getNode(JavaUI.ID_PLUGIN);
-		for (int i= 0; i < fRegisteredDescriptors.length; i++) {
-			node.remove(SaveParticipantRegistry.getPreferenceKey(fRegisteredDescriptors[i]));
-		}
 		
-		fConfigurationBlock.disableProjectSettings();
+		for (int i= 0; i < fConfigurationDescriptions.length; i++) {
+			ConfigurationDescription configurationDescription= fConfigurationDescriptions[i];
+			
+			node.remove(SaveParticipantRegistry.getPreferenceKey(configurationDescription.fDescriptior));
+			
+			ISaveParticipantPreferenceConfiguration block= configurationDescription.fPreferenceConfiguration;
+			if (block != null)
+				block.disableProjectSettings();
+		}
 	}
 }
