@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -68,9 +69,9 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.binary.StubCreator;
@@ -78,7 +79,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -98,10 +98,7 @@ public class ReplaceInvocationsRefactoring extends ScriptableRefactoring {
 		public static final Mode REPLACE_SINGLE= new Mode();
 	}
 
-	/**
-	 * ICompilationUnit or IClassFile
-	 */
-	private final IJavaElement fSelectionUnit;
+	private final ITypeRoot fSelectionTypeRoot;
 	/**
 	 * only set if initial mode is REPLACE_SINGLE
 	 */
@@ -126,18 +123,15 @@ public class ReplaceInvocationsRefactoring extends ScriptableRefactoring {
 	private TextChangeManager fChangeManager;
 	private IMethodBinding fMethodBinding;
 	
-	public ReplaceInvocationsRefactoring(IJavaElement unit, int offset, int length) {
-		if (! JavaModelUtil.isTypeContainerUnit(unit))
-			throw new IllegalArgumentException(unit.toString());
-		
-		fSelectionUnit= unit;
+	public ReplaceInvocationsRefactoring(ITypeRoot typeRoot, int offset, int length) {
+		fSelectionTypeRoot= typeRoot;
 		fSelectionStart= offset;
 		fSelectionLength= length;
 	}
 
 	public ReplaceInvocationsRefactoring(IMethod method) {
 		fMethod= method;
-		fSelectionUnit= JavaModelUtil.getTypeContainerUnit(method);
+		fSelectionTypeRoot= method.getTypeRoot();
 		fSelectionStart= -1;
 		fSelectionLength= -1;
 	}
@@ -161,7 +155,7 @@ public class ReplaceInvocationsRefactoring extends ScriptableRefactoring {
 			return new RefactoringStatus();
 		Assert.isTrue(canReplaceSingle());
 		if (mode == Mode.REPLACE_SINGLE) {
-			fTargetProvider= TargetProvider.create((ICompilationUnit) fSelectionUnit, (MethodInvocation) fSelectionNode);
+			fTargetProvider= TargetProvider.create((ICompilationUnit) fSelectionTypeRoot, (MethodInvocation) fSelectionNode);
 		} else {
 			fTargetProvider= TargetProvider.create(fSourceProvider.getDeclaration());
 		}
@@ -181,10 +175,10 @@ public class ReplaceInvocationsRefactoring extends ScriptableRefactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		
 		if (fMethod == null) {
-			if (! (fSelectionUnit instanceof ICompilationUnit))
+			if (! (fSelectionTypeRoot instanceof ICompilationUnit))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReplaceInvocationsRefactoring_cannot_replace_in_binary);
 			
-			ICompilationUnit cu= (ICompilationUnit) fSelectionUnit;
+			ICompilationUnit cu= (ICompilationUnit) fSelectionTypeRoot;
 			CompilationUnit root= new RefactoringASTParser(AST.JLS3).parse(cu, true);
 			fSelectionNode= getTargetNode(cu, root, fSelectionStart, fSelectionLength);
 			if (fSelectionNode == null)
@@ -221,13 +215,13 @@ public class ReplaceInvocationsRefactoring extends ScriptableRefactoring {
 	private SourceProvider resolveSourceProvider(IMethodBinding methodBinding, RefactoringStatus status) throws JavaModelException {
 		final IMethod method= (IMethod) methodBinding.getJavaElement();
 		
-		IJavaElement unit;
+		ITypeRoot typeRoot;
 		IDocument source;
 		CompilationUnit methodDeclarationAstRoot;
 		
 		ICompilationUnit methodCu= (method).getCompilationUnit();
 		if (methodCu != null) {
-			unit= methodCu;
+			typeRoot= methodCu;
 			ASTParser parser= ASTParser.newParser(AST.JLS3);
 			parser.setSource(methodCu);
 			parser.setFocalPosition(method.getNameRange().getOffset());
@@ -282,11 +276,11 @@ public class ReplaceInvocationsRefactoring extends ScriptableRefactoring {
 			String stub= stubCreator.createStub(classFile.getType(), null);
 			source= new Document(stub);
 			methodDeclarationAstRoot= new RefactoringASTParser(AST.JLS3).parse(stub, classFile, true, true, null);
-			unit= classFile;
+			typeRoot= classFile;
 		}
 		ASTNode node= methodDeclarationAstRoot.findDeclaringNode(methodBinding.getKey());
 		if (node instanceof MethodDeclaration) {
-			return new SourceProvider(unit, source, (MethodDeclaration) node);
+			return new SourceProvider(typeRoot, source, (MethodDeclaration) node);
 		} else {
 			status.addFatalError(RefactoringCoreMessages.ReplaceInvocationsRefactoring_cannot_find_method_declaration);
 			return null;
@@ -424,7 +418,7 @@ public class ReplaceInvocationsRefactoring extends ScriptableRefactoring {
 		// TODO: update for fSelectionStart == -1
 		final Map arguments= new HashMap();
 		String project= null;
-		IJavaProject javaProject= fSelectionUnit.getJavaProject();
+		IJavaProject javaProject= fSelectionTypeRoot.getJavaProject();
 		if (javaProject != null)
 			project= javaProject.getElementName();
 		final IMethodBinding binding= fSourceProvider.getDeclaration().resolveBinding();
@@ -438,7 +432,7 @@ public class ReplaceInvocationsRefactoring extends ScriptableRefactoring {
 		if (!fTargetProvider.isSingle())
 			comment.addSetting(RefactoringCoreMessages.ReplaceInvocationsRefactoring_replace_references);
 		final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(ID_REPLACE_INVOCATIONS, project, description, comment.asString(), arguments, flags);
-		arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSelectionUnit));
+		arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSelectionTypeRoot));
 		arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 		arguments.put(ATTRIBUTE_MODE, new Integer(fTargetProvider.isSingle() ? 0 : 1).toString());
 		return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.ReplaceInvocationsRefactoring_change_name, fChangeManager.getAllChanges());

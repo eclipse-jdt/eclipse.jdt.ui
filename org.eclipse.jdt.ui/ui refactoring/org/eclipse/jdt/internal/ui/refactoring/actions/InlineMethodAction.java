@@ -21,12 +21,9 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -97,7 +94,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 			Assert.isTrue(RefactoringAvailabilityTester.isInlineMethodAvailable(selection));
 			IMethod method= (IMethod) selection.getFirstElement();
 			ISourceRange nameRange= method.getNameRange();
-			run(nameRange.getOffset(), nameRange.getLength(), JavaModelUtil.getTypeContainerUnit(method));
+			run(nameRange.getOffset(), nameRange.getLength(), method.getTypeRoot());
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), RefactoringMessages.InlineMethodAction_dialog_title, RefactoringMessages.InlineMethodAction_unexpected_exception); 
 		}
@@ -125,34 +122,29 @@ public class InlineMethodAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */		
 	public void run(ITextSelection selection) {
-		IJavaElement unit= SelectionConverter.getInput(fEditor);
-		if (! JavaModelUtil.isTypeContainerUnit(unit))
+		ITypeRoot typeRoot= SelectionConverter.getInputAsTypeRoot(fEditor);
+		if (typeRoot == null)
 			return;
-		if (! JavaElementUtil.isSourceAvailable((ISourceReference) unit))
+		if (! JavaElementUtil.isSourceAvailable(typeRoot))
 			return;
-		run(selection.getOffset(), selection.getLength(), unit);
+		run(selection.getOffset(), selection.getLength(), typeRoot);
 	}
 
-	private void run(int offset, int length, IJavaElement unit) {
-		if (!ActionUtil.isEditable(fEditor, getShell(), unit))
+	private void run(int offset, int length, ITypeRoot typeRoot) {
+		if (!ActionUtil.isEditable(fEditor, getShell(), typeRoot))
 			return;
 		try {
 			RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
-			CompilationUnit compilationUnit;
-			if (unit instanceof ICompilationUnit) {
-				compilationUnit= parser.parse((ICompilationUnit) unit, true);
-			} else {
-				compilationUnit= parser.parse((IClassFile) unit, true);
-			}
-			RefactoringExecutionStarter.startInlineMethodRefactoring(unit, compilationUnit, offset, length, getShell(), true);
+			CompilationUnit compilationUnit= parser.parse(typeRoot, true);
+			RefactoringExecutionStarter.startInlineMethodRefactoring(typeRoot, compilationUnit, offset, length, getShell(), true);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), RefactoringMessages.InlineMethodAction_dialog_title, RefactoringMessages.InlineMethodAction_unexpected_exception); 
 		}
 	}
 
-	public boolean tryInlineMethod(IJavaElement container, CompilationUnit node, ITextSelection selection, Shell shell) {
+	public boolean tryInlineMethod(ITypeRoot typeRoot, CompilationUnit node, ITextSelection selection, Shell shell) {
 		try {
-			if (RefactoringExecutionStarter.startInlineMethodRefactoring(container, node, selection.getOffset(), selection.getLength(), shell, false)) {
+			if (RefactoringExecutionStarter.startInlineMethodRefactoring(typeRoot, node, selection.getOffset(), selection.getLength(), shell, false)) {
 				run(selection);
 				return true;
 			}

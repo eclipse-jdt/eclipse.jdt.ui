@@ -21,9 +21,8 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -102,21 +101,14 @@ public class InlineAction extends SelectionDispatchAction {
 		if (!ActionUtil.isEditable(fEditor))
 			return;
 
-		IClassFile cf= null;
-		ICompilationUnit cu= SelectionConverter.getInputAsCompilationUnit(fEditor);
-		if (cu == null) {
-			cf= SelectionConverter.getInputAsClassFile(fEditor);
-			if (cf == null)
-				return;
-		}
+		ITypeRoot typeRoot= SelectionConverter.getInputAsTypeRoot(fEditor);
+		if (typeRoot == null)
+			return;
 
-		CompilationUnit node= null;
-		if (cu != null)
-			node= new RefactoringASTParser(AST.JLS3).parse(cu, true);
-		else
-			node= new RefactoringASTParser(AST.JLS3).parse(cf, true);
+		CompilationUnit node= new RefactoringASTParser(AST.JLS3).parse(typeRoot, true);
 		
-		if (cu != null) {
+		if (typeRoot instanceof ICompilationUnit) {
+			ICompilationUnit cu= (ICompilationUnit) typeRoot;
 			if (fInlineTemp.isEnabled() && fInlineTemp.tryInlineTemp(cu, node, selection, getShell()))
 				return;
 
@@ -124,7 +116,7 @@ public class InlineAction extends SelectionDispatchAction {
 				return;
 		}
 		//InlineMethod is last (also tries enclosing element):
-		if (fInlineMethod.isEnabled() && fInlineMethod.tryInlineMethod(cu != null ? (IJavaElement) cu : (IJavaElement) cf, node, selection, getShell()))
+		if (fInlineMethod.isEnabled() && fInlineMethod.tryInlineMethod(typeRoot, node, selection, getShell()))
 			return;
 
 		MessageDialog.openInformation(getShell(), RefactoringMessages.InlineAction_dialog_title, RefactoringMessages.InlineAction_select); 

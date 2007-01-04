@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -37,25 +38,25 @@ public class RefactoringASTParser {
 		fParser= ASTParser.newParser(level);
 	}
 	
-	public CompilationUnit parse(ICompilationUnit unit, boolean resolveBindings) {
-		return parse(unit, resolveBindings, null);
+	public CompilationUnit parse(ITypeRoot typeRoot, boolean resolveBindings) {
+		return parse(typeRoot, resolveBindings, null);
 	}
 
-	public CompilationUnit parse(ICompilationUnit unit, boolean resolveBindings, IProgressMonitor pm) {
-		return parse(unit, null, resolveBindings, pm);
+	public CompilationUnit parse(ITypeRoot typeRoot, boolean resolveBindings, IProgressMonitor pm) {
+		return parse(typeRoot, null, resolveBindings, pm);
 	}
 
-	public CompilationUnit parse(ICompilationUnit unit, WorkingCopyOwner owner, boolean resolveBindings, IProgressMonitor pm) {
-		return parse(unit, owner, resolveBindings, false, pm);
+	public CompilationUnit parse(ITypeRoot typeRoot, WorkingCopyOwner owner, boolean resolveBindings, IProgressMonitor pm) {
+		return parse(typeRoot, owner, resolveBindings, false, pm);
 	}
 
-	public CompilationUnit parse(ICompilationUnit unit, WorkingCopyOwner owner, boolean resolveBindings, boolean statementsRecovery, IProgressMonitor pm) {
+	public CompilationUnit parse(ITypeRoot typeRoot, WorkingCopyOwner owner, boolean resolveBindings, boolean statementsRecovery, IProgressMonitor pm) {
 		fParser.setResolveBindings(resolveBindings);
 		fParser.setStatementsRecovery(statementsRecovery);
-		fParser.setSource(unit);
+		fParser.setSource(typeRoot);
 		if (owner != null)
 			fParser.setWorkingCopyOwner(owner);
-		fParser.setCompilerOptions(getCompilerOptions(unit));
+		fParser.setCompilerOptions(getCompilerOptions(typeRoot));
 		CompilationUnit result= (CompilationUnit) fParser.createAST(pm);
 		return result;
 	}
@@ -77,14 +78,6 @@ public class RefactoringASTParser {
 		fParser.setCompilerOptions(getCompilerOptions(originalCu));
 		CompilationUnit newCUNode= (CompilationUnit) fParser.createAST(pm);
 		return newCUNode;
-	}
-	
-	public CompilationUnit parse(IClassFile unit, boolean resolveBindings) {
-		fParser.setResolveBindings(resolveBindings);
-		fParser.setSource(unit);
-		fParser.setCompilerOptions(getCompilerOptions(unit));
-		CompilationUnit result= (CompilationUnit) fParser.createAST(null);
-		return result;
 	}
 	
 	/**

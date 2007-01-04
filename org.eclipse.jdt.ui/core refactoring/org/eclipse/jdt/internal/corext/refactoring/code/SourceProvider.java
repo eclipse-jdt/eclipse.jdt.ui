@@ -41,8 +41,7 @@ import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -86,7 +85,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class SourceProvider {
 
-	private IJavaElement fUnit;
+	private ITypeRoot fTypeRoot;
 	private IDocument fDocument;
 	private MethodDeclaration fDeclaration;
 	private SourceAnalyzer fAnalyzer;
@@ -115,9 +114,9 @@ public class SourceProvider {
 		}
 	}
 
-	public SourceProvider(IJavaElement unit, MethodDeclaration declaration) {
+	public SourceProvider(ITypeRoot typeRoot, MethodDeclaration declaration) {
 		super();
-		fUnit= unit;
+		fTypeRoot= typeRoot;
 		fDeclaration= declaration;
 		List parameters= fDeclaration.parameters();
 		for (Iterator iter= parameters.iterator(); iter.hasNext();) {
@@ -125,7 +124,7 @@ public class SourceProvider {
 			ParameterData data= new ParameterData(element);
 			element.setProperty(ParameterData.PROPERTY, data);
 		}
-		fAnalyzer= new SourceAnalyzer(fUnit, fDeclaration);
+		fAnalyzer= new SourceAnalyzer(fTypeRoot, fDeclaration);
 		fReturnValueNeedsLocalVariable= true;
 		fReturnExpressions= new ArrayList();
 	}
@@ -133,8 +132,8 @@ public class SourceProvider {
 	/**
 	 * TODO: unit's source does not match contents of source document and declaration node.
 	 */
-	public SourceProvider(IJavaElement unit, IDocument source, MethodDeclaration declaration) {
-		this(unit, declaration);
+	public SourceProvider(ITypeRoot typeRoot, IDocument source, MethodDeclaration declaration) {
+		this(typeRoot, declaration);
 		fSource= source;
 	}
 
@@ -143,7 +142,7 @@ public class SourceProvider {
 	}
 	
 	public void initialize() throws JavaModelException {
-		fDocument= fSource == null ? new Document(((IOpenable) fUnit).getBuffer().getContents()) : fSource;
+		fDocument= fSource == null ? new Document(fTypeRoot.getBuffer().getContents()) : fSource;
 		fAnalyzer.initialize();
 		if (hasReturnValue()) {
 			ASTNode last= getLastStatement();
@@ -259,8 +258,8 @@ public class SourceProvider {
 		return (ParameterData)decl.getProperty(ParameterData.PROPERTY);
 	}
 	
-	public IJavaElement getTypeContainerUnit() {
-		return fUnit;
+	public ITypeRoot getTypeRoot() {
+		return fTypeRoot;
 	}
 	
 	public boolean needsReturnedExpressionParenthesis() {
@@ -294,7 +293,7 @@ public class SourceProvider {
 	public TextEdit getDeleteEdit() {
 		final ASTRewrite rewriter= ASTRewrite.create(fDeclaration.getAST());
 		rewriter.remove(fDeclaration, null);
-		return rewriter.rewriteAST(fDocument, fUnit.getJavaProject().getOptions(true));
+		return rewriter.rewriteAST(fDocument, fTypeRoot.getJavaProject().getOptions(true));
 	}
 	
 	public String[] getCodeBlocks(CallContext context) throws CoreException {
@@ -323,7 +322,7 @@ public class SourceProvider {
 			}
 		}
 
-		final TextEdit dummy= rewriter.rewriteAST(fDocument, fUnit.getJavaProject().getOptions(true));
+		final TextEdit dummy= rewriter.rewriteAST(fDocument, fTypeRoot.getJavaProject().getOptions(true));
 		int size= ranges.size();
 		RangeMarker[] markers= new RangeMarker[size];
 		for (int i= 0; i < markers.length; i++) {
@@ -607,9 +606,9 @@ public class SourceProvider {
 			RangeMarker marker= markers[i];
 			String content= fDocument.get(marker.getOffset(), marker.getLength());
 			String lines[]= Strings.convertIntoLines(content);
-			Strings.trimIndentation(lines, fUnit.getJavaProject(), false);
+			Strings.trimIndentation(lines, fTypeRoot.getJavaProject(), false);
 			if (fMarkerMode == STATEMENT_MODE && lines.length == 2 && isSingleControlStatementWithoutBlock()) {
-				lines[1]= CodeFormatterUtil.createIndentString(1, fUnit.getJavaProject()) + lines[1];
+				lines[1]= CodeFormatterUtil.createIndentString(1, fTypeRoot.getJavaProject()) + lines[1];
 			}
 			result[i]= Strings.concatenate(lines, TextUtilities.getDefaultLineDelimiter(fDocument));
 		}

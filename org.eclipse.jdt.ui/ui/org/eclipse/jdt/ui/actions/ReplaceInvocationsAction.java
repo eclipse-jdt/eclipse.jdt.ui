@@ -20,10 +20,9 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
@@ -131,11 +130,11 @@ public class ReplaceInvocationsAction extends SelectionDispatchAction {
 	 */
 	public void run(ITextSelection selection) {
 		try {
-			Object editorInput= SelectionConverter.getInput(fEditor);
-			if ((editorInput instanceof ICompilationUnit || editorInput instanceof IClassFile)
-					&& ActionUtil.isProcessable(getShell(), (IJavaElement) editorInput)) {
-				IJavaElement unit= (IJavaElement) editorInput;
-				RefactoringExecutionStarter.startReplaceInvocationsRefactoring(unit, selection.getOffset(), selection.getLength(), getShell());
+			IJavaElement editorInput= SelectionConverter.getInput(fEditor);
+			if ((editorInput instanceof ITypeRoot)
+					&& ActionUtil.isProcessable(getShell(), editorInput)) {
+				ITypeRoot typeRoot= (ITypeRoot) editorInput;
+				RefactoringExecutionStarter.startReplaceInvocationsRefactoring(typeRoot, selection.getOffset(), selection.getLength(), getShell());
 			}
 		} catch (JavaModelException e) {
 			handleException(e);

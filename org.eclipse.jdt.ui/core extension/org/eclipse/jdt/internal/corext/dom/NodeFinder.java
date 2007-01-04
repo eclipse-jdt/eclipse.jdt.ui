@@ -11,10 +11,8 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -87,18 +85,7 @@ public class NodeFinder extends GenericVisitor {
 	 * 
 	 * @since		3.0
 	 */
-	public static ASTNode perform(ASTNode root, int start, int length, ICompilationUnit source) throws JavaModelException {
-		return performOpenable(root, start, length, source);
-	}
-	
-	/**
-	 * @see #perform(ASTNode, int, int, ICompilationUnit)
-	 */
-	public static ASTNode perform(ASTNode root, int start, int length, IClassFile source) throws JavaModelException {
-		return performOpenable(root, start, length, source);
-	}
-	
-	private static ASTNode performOpenable(ASTNode root, int start, int length, IOpenable source) throws JavaModelException {
+	public static ASTNode perform(ASTNode root, int start, int length, ITypeRoot source) throws JavaModelException {
 		NodeFinder finder= new NodeFinder(start, length);
 		root.accept(finder);
 		ASTNode result= finder.getCoveredNode();

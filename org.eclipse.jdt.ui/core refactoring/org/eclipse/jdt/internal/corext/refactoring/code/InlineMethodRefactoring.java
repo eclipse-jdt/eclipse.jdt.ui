@@ -46,9 +46,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -68,9 +68,9 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -79,7 +79,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibili
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -107,10 +106,7 @@ public class InlineMethodRefactoring extends ScriptableRefactoring {
 		public static final Mode INLINE_SINGLE= new Mode();
 	}
 
-	/**
-	 * ICompilationUnit or IClassFile
-	 */
-	private IJavaElement fInitialUnit;
+	private ITypeRoot fInitialTypeRoot;
 	private ASTNode fInitialNode;
 	private TextChangeManager fChangeManager;
 	private SourceProvider fSourceProvider;
@@ -124,12 +120,11 @@ public class InlineMethodRefactoring extends ScriptableRefactoring {
 	private int fSelectionStart;
 	private int fSelectionLength;
 
-	private InlineMethodRefactoring(IJavaElement unit, ASTNode node, int offset, int length) {
-		Assert.isNotNull(unit);
-		Assert.isTrue(JavaModelUtil.isTypeContainerUnit(unit));
-		Assert.isTrue(JavaElementUtil.isSourceAvailable((ISourceReference) unit));
+	private InlineMethodRefactoring(ITypeRoot typeRoot, ASTNode node, int offset, int length) {
+		Assert.isNotNull(typeRoot);
+		Assert.isTrue(JavaElementUtil.isSourceAvailable(typeRoot));
 		Assert.isNotNull(node);
-		fInitialUnit= unit;
+		fInitialTypeRoot= typeRoot;
 		fInitialNode= node;
 		fSelectionStart= offset;
 		fSelectionLength= length;
@@ -156,9 +151,9 @@ public class InlineMethodRefactoring extends ScriptableRefactoring {
 		fDeleteSource= false;
 	}
 
-	private InlineMethodRefactoring(IJavaElement unit, MethodDeclaration node, int offset, int length) {
-		this(unit, (ASTNode)node, offset, length);
-		fSourceProvider= new SourceProvider(unit, node);
+	private InlineMethodRefactoring(ITypeRoot typeRoot, MethodDeclaration node, int offset, int length) {
+		this(typeRoot, (ASTNode)node, offset, length);
+		fSourceProvider= new SourceProvider(typeRoot, node);
 		fTargetProvider= TargetProvider.create(node);
 		fInitialMode= fCurrentMode= Mode.INLINE_ALL;
 		fDeleteSource= canEnableDeleteSource();
@@ -171,7 +166,7 @@ public class InlineMethodRefactoring extends ScriptableRefactoring {
 	 * @param selectionStart
 	 * @param selectionLength
 	 */
-	public static InlineMethodRefactoring create(IJavaElement unit, CompilationUnit node, int selectionStart, int selectionLength) {
+	public static InlineMethodRefactoring create(ITypeRoot unit, CompilationUnit node, int selectionStart, int selectionLength) {
 		ASTNode target= getTargetNode(unit, node, selectionStart, selectionLength);
 		if (target == null)
 			return null;
@@ -196,7 +191,7 @@ public class InlineMethodRefactoring extends ScriptableRefactoring {
 	}
 	
 	public boolean canEnableDeleteSource() {
-		return ! (fSourceProvider.getTypeContainerUnit() instanceof IClassFile);
+		return ! (fSourceProvider.getTypeRoot() instanceof IClassFile);
 	}
 	
 	public boolean getDeleteSource() {
@@ -220,11 +215,11 @@ public class InlineMethodRefactoring extends ScriptableRefactoring {
 		fCurrentMode= mode;
 		if (mode == Mode.INLINE_SINGLE) {
 			if (fInitialNode instanceof MethodInvocation)
-				fTargetProvider= TargetProvider.create((ICompilationUnit) fInitialUnit, (MethodInvocation)fInitialNode);
+				fTargetProvider= TargetProvider.create((ICompilationUnit) fInitialTypeRoot, (MethodInvocation)fInitialNode);
 			else if (fInitialNode instanceof SuperMethodInvocation)
-				fTargetProvider= TargetProvider.create((ICompilationUnit) fInitialUnit, (SuperMethodInvocation)fInitialNode);
+				fTargetProvider= TargetProvider.create((ICompilationUnit) fInitialTypeRoot, (SuperMethodInvocation)fInitialNode);
 			else if (fInitialNode instanceof ConstructorInvocation)
-				fTargetProvider= TargetProvider.create((ICompilationUnit) fInitialUnit, (ConstructorInvocation)fInitialNode);
+				fTargetProvider= TargetProvider.create((ICompilationUnit) fInitialTypeRoot, (ConstructorInvocation)fInitialNode);
 			else
 				throw new IllegalStateException(String.valueOf(fInitialNode));
 		} else {
@@ -236,7 +231,7 @@ public class InlineMethodRefactoring extends ScriptableRefactoring {
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		if (fSourceProvider == null && Invocations.isInvocation(fInitialNode)) {
-			fSourceProvider= resolveSourceProvider(result, fInitialUnit, fInitialNode);
+			fSourceProvider= resolveSourceProvider(result, fInitialTypeRoot, fInitialNode);
 			if (result.hasFatalError())
 				return result;
 		}
@@ -337,7 +332,7 @@ public class InlineMethodRefactoring extends ScriptableRefactoring {
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		if (fDeleteSource && fCurrentMode == Mode.INLINE_ALL) {
-			TextChange change= fChangeManager.get((ICompilationUnit) fSourceProvider.getTypeContainerUnit());
+			TextChange change= fChangeManager.get((ICompilationUnit) fSourceProvider.getTypeRoot());
 			TextEdit delete= fSourceProvider.getDeleteEdit();
 			TextEditGroup description= new TextEditGroup(
 				RefactoringCoreMessages.InlineMethodRefactoring_edit_delete, new TextEdit[] { delete }); 
@@ -356,7 +351,7 @@ public class InlineMethodRefactoring extends ScriptableRefactoring {
 		}
 		final Map arguments= new HashMap();
 		String project= null;
-		IJavaProject javaProject= fInitialUnit.getJavaProject();
+		IJavaProject javaProject= fInitialTypeRoot.getJavaProject();
 		if (javaProject != null)
 			project= javaProject.getElementName();
 		int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
@@ -373,14 +368,14 @@ public class InlineMethodRefactoring extends ScriptableRefactoring {
 		if (fCurrentMode == Mode.INLINE_ALL)
 			comment.addSetting(RefactoringCoreMessages.InlineMethodRefactoring_replace_references);
 		final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(IJavaRefactorings.INLINE_METHOD, project, description, comment.asString(), arguments, flags);
-		arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fInitialUnit));
+		arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fInitialTypeRoot));
 		arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 		arguments.put(ATTRIBUTE_DELETE, Boolean.valueOf(fDeleteSource).toString());
 		arguments.put(ATTRIBUTE_MODE, new Integer(fCurrentMode == Mode.INLINE_ALL ? 1 : 0).toString());
 		return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.InlineMethodRefactoring_edit_inlineCall, fChangeManager.getAllChanges());
 	}
 	
-	private static SourceProvider resolveSourceProvider(RefactoringStatus status, IJavaElement unit, ASTNode invocation) throws JavaModelException {
+	private static SourceProvider resolveSourceProvider(RefactoringStatus status, ITypeRoot typeRoot, ASTNode invocation) throws JavaModelException {
 		CompilationUnit root= (CompilationUnit)invocation.getRoot();
 		IMethodBinding methodBinding= Invocations.resolveBinding(invocation);
 		if (methodBinding == null) {
@@ -389,7 +384,7 @@ public class InlineMethodRefactoring extends ScriptableRefactoring {
 		}
 		MethodDeclaration declaration= (MethodDeclaration)root.findDeclaringNode(methodBinding);
 		if (declaration != null) {
-			return new SourceProvider(unit, declaration);
+			return new SourceProvider(typeRoot, declaration);
 		}
 		IMethod method= (IMethod)methodBinding.getJavaElement();
 		if (method != null) {
@@ -408,32 +403,25 @@ public class InlineMethodRefactoring extends ScriptableRefactoring {
 			}
 			ASTNode node= methodDeclarationAstRoot.findDeclaringNode(methodBinding.getMethodDeclaration().getKey());
 			if (node instanceof MethodDeclaration) {
-				return new SourceProvider(methodDeclarationAstRoot.getJavaElement(), (MethodDeclaration) node);
+				return new SourceProvider(methodDeclarationAstRoot.getTypeRoot(), (MethodDeclaration) node);
 			}
 		}
 		status.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_error_noMethodDeclaration); 
 		return null;
 	}
 	
-	private static ASTNode getTargetNode(IJavaElement unit, CompilationUnit root, int offset, int length) {
+	private static ASTNode getTargetNode(ITypeRoot typeRoot, CompilationUnit root, int offset, int length) {
 		ASTNode node= null;
 		try {
-			node= checkNode(findNode(unit, root, offset, length), unit);
+			node= checkNode(NodeFinder.perform(root, offset, length, typeRoot), typeRoot);
 		} catch(JavaModelException e) {
 			// Do nothing
 		}
 		if (node != null)
 			return node;
-		return checkNode(NodeFinder.perform(root, offset, length), unit);
+		return checkNode(NodeFinder.perform(root, offset, length), typeRoot);
 	}
 
-	private static ASTNode findNode(IJavaElement unit, CompilationUnit root, int offset, int length) throws JavaModelException {
-		if (unit instanceof ICompilationUnit)
-			return NodeFinder.perform(root, offset, length, (ICompilationUnit) unit);
-		else
-			return NodeFinder.perform(root, offset, length, (IClassFile) unit);
-	}
-	
 	private static ASTNode checkNode(ASTNode node, IJavaElement unit) {
 		if (node == null)
 			return null;
@@ -462,7 +450,7 @@ public class InlineMethodRefactoring extends ScriptableRefactoring {
 				result.add(file);
 		}
 		if (fDeleteSource) {
-			file= getFile((ICompilationUnit) fSourceProvider.getTypeContainerUnit());
+			file= getFile((ICompilationUnit) fSourceProvider.getTypeRoot());
 			if (file != null && !result.contains(file))
 				result.add(file);
 		}

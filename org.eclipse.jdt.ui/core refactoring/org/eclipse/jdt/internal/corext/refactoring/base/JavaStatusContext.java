@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -168,103 +169,64 @@ public abstract class JavaStatusContext extends RefactoringStatusContext {
 	}
 
 	/**
-	 * Creates an status entry context for the given compilation unit.
+	 * Creates an status entry context for the given type root.
 	 * 
-	 * @param cunit the compilation unit containing the error
+	 * @param typeRoot the type root containing the error
 	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
 	 * 	context cannot be created
 	 */
-	public static RefactoringStatusContext create(ICompilationUnit cunit) {
-		return create(cunit, (ISourceRange)null);
+	public static RefactoringStatusContext create(ITypeRoot typeRoot) {
+		return create(typeRoot, (ISourceRange)null);
 	}
 
 	/**
-	 * Creates an status entry context for the given compilation unit and source range.
+	 * Creates an status entry context for the given type root and source range.
 	 * 
-	 * @param cunit the compilation unit containing the error
+	 * @param typeRoot the type root containing the error
 	 * @param range the source range that has caused the error or 
 	 *  <code>null</code> if the source range is unknown
 	 * @return the status entry context or <code>null</code> if the
 	 * 	context cannot be created
 	 */
-	public static RefactoringStatusContext create(ICompilationUnit cunit, ISourceRange range) {
-		if (cunit == null)
+	public static RefactoringStatusContext create(ITypeRoot typeRoot, ISourceRange range) {
+		if (typeRoot instanceof ICompilationUnit)
+			return new CompilationUnitSourceContext((ICompilationUnit) typeRoot, range);
+		else if (typeRoot instanceof IClassFile)
+			return new ClassFileSourceContext((IClassFile) typeRoot, range);
+		else
 			return null;
-		return new CompilationUnitSourceContext(cunit, range);
 	}
 
 	/**
-	 * Creates an status entry context for the given compilation unit and AST node.
+	 * Creates an status entry context for the given type root and AST node.
 	 * 
-	 * @param cunit the compilation unit containing the error
+	 * @param typeRoot the type root containing the error
 	 * @param node an astNode denoting the source range that has caused the error
 	 * 
 	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
 	 * 	context cannot be created
 	 */
-	public static RefactoringStatusContext create(ICompilationUnit cunit, ASTNode node) {
+	public static RefactoringStatusContext create(ITypeRoot typeRoot, ASTNode node) {
 		ISourceRange range= null;
 		if (node != null)
 			range= new SourceRange(node.getStartPosition(), node.getLength());
-		return create(cunit, range);
+		return create(typeRoot, range);
 	}
 
 	/**
-	 * Creates an status entry context for the given compilation unit and selection.
+	 * Creates an status entry context for the given type root and selection.
 	 * 
-	 * @param cunit the compilation unit containing the error
+	 * @param typeRoot the type root containing the error
 	 * @param selection a selection denoting the source range that has caused the error
 	 * 
 	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
 	 * 	context cannot be created
 	 */
-	public static RefactoringStatusContext create(ICompilationUnit cunit, Selection selection) {
+	public static RefactoringStatusContext create(ITypeRoot typeRoot, Selection selection) {
 		ISourceRange range= null;
 		if (selection != null)
 			range= new SourceRange(selection.getOffset(), selection.getLength());
-		return create(cunit, range);
-	}
-
-	/**
-	 * Creates an status entry context for the given class file.
-	 * 
-	 * @param classFile the class file containing the error
-	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
-	 *  context cannot be created
-	 */
-	public static RefactoringStatusContext create(IClassFile classFile) {
-		return create(classFile, (ISourceRange)null);
-	}
-
-	/**
-	 * Creates an status entry context for the given class file and source range.
-	 * 
-	 * @param classFile the class file containing the error
-	 * @param range the source range that has caused the error or 
-	 *  <code>null</code> if the source range is unknown
-	 * @return the status entry context or <code>null</code> if the
-	 *  context cannot be created
-	 */
-	public static RefactoringStatusContext create(IClassFile classFile, ISourceRange range) {
-		if (classFile == null)
-			return null;
-		return new ClassFileSourceContext(classFile, range);
-	}
-
-	/**
-	 * Creates an status entry context for the given class file and AST node.
-	 * 
-	 * @param classFile the class file containing the error
-	 * @param node an astNode denoting the source range that has caused the error
-	 * 
-	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
-	 *  context cannot be created
-	 */
-	public static RefactoringStatusContext create(IClassFile classFile, ASTNode node) {
-		ISourceRange range= null;
-		if (node != null)
-			range= new SourceRange(node.getStartPosition(), node.getLength());
-		return create(classFile, range);
+		return create(typeRoot, range);
 	}
 
 	/**

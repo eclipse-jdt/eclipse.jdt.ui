@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -173,6 +174,13 @@ public class SelectionConverter {
 		if (editor == null)
 			return null;
 		return EditorUtility.getEditorInputJavaElement(editor, primaryOnly);
+	}
+	
+	public static ITypeRoot getInputAsTypeRoot(JavaEditor editor) {
+		Object editorInput= SelectionConverter.getInput(editor);
+		if (editorInput instanceof ITypeRoot)
+			return (ITypeRoot)editorInput;
+		return null;
 	}
 	
 	public static ICompilationUnit getInputAsCompilationUnit(JavaEditor editor) {
