@@ -28,10 +28,12 @@ import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -153,7 +155,8 @@ public class SuppressWarningsSubProcessor {
 				ListRewrite listRewrite= rewrite.getListRewrite(fNode, fProperty);
 				
 				SingleMemberAnnotation newAnnot= ast.newSingleMemberAnnotation();
-				newAnnot.setTypeName(ast.newSimpleName("SuppressWarnings")); //$NON-NLS-1$
+				String importString= createImportRewrite((CompilationUnit) fNode.getRoot()).addImport("java.lang.SuppressWarnings"); //$NON-NLS-1$
+				newAnnot.setTypeName(ast.newName(importString));
 
 				newAnnot.setValue(newStringLiteral);
 				
@@ -208,9 +211,16 @@ public class SuppressWarningsSubProcessor {
 				Object curr= modifiers.get(i);
 				if (curr instanceof NormalAnnotation || curr instanceof SingleMemberAnnotation) {
 					Annotation annotation= (Annotation) curr;
-					String fullyQualifiedName= annotation.getTypeName().getFullyQualifiedName();
-					if ("SuppressWarnings".equals(fullyQualifiedName) || "java.lang.SuppressWarnings".equals(fullyQualifiedName)) { //$NON-NLS-1$ //$NON-NLS-2$
-						return annotation;
+					ITypeBinding typeBinding= annotation.resolveTypeBinding();
+					if (typeBinding != null) {
+						if ("java.lang.SuppressWarnings".equals(typeBinding.getQualifiedName())) { //$NON-NLS-1$
+							return annotation;
+						}
+					} else {
+						String fullyQualifiedName= annotation.getTypeName().getFullyQualifiedName();
+						if ("SuppressWarnings".equals(fullyQualifiedName) || "java.lang.SuppressWarnings".equals(fullyQualifiedName)) { //$NON-NLS-1$ //$NON-NLS-2$
+							return annotation;
+						}
 					}
 				}
 			}
