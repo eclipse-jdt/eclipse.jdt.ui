@@ -227,6 +227,18 @@ public class SourceProvider {
 		return statements.get(statements.size() - 1) instanceof ReturnStatement;
 	}
 	
+	public boolean isDangligIf() {
+		List statements= fDeclaration.getBody().statements();
+		if (statements.size() != 1)
+			return false;
+		
+		Object statement= statements.get(0);
+		if (! (statement instanceof IfStatement))
+			return false;
+		
+		return ((IfStatement) statement).getElseStatement() == null;
+	}
+	
 	public MethodDeclaration getDeclaration() {
 		return fDeclaration;
 	}

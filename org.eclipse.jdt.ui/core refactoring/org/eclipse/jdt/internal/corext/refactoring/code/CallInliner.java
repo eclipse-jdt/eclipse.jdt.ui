@@ -817,7 +817,7 @@ public class CallInliner {
 			fInsertionIndex= fListRewrite.getRewrittenList().indexOf(parentStatement);
 		} else if (isControlStatement(container) || type == ASTNode.LABELED_STATEMENT) {
 			fNeedsStatement= true;
-			if (nos > 1) {
+			if (nos > 1 || needsBlockAroundDanglingIf()) {
 				Block block= fInvocation.getAST().newBlock();
 				fInsertionIndex= 0;
 				Statement currentStatement= null;
@@ -862,6 +862,28 @@ public class CallInliner {
 		}
 		// We only insert one new statement or we delete the existing call. 
 		// So there is no need to have an insertion index.
+	}
+
+	private boolean needsBlockAroundDanglingIf() {
+		/* see https://bugs.eclipse.org/bugs/show_bug.cgi?id=169331
+		 * 
+		 * Situation:
+		 * boolean a, b;
+		 * void toInline() {
+		 *     if (a)
+		 *         hashCode();
+		 * }
+		 * void m() {
+		 *     if (b)
+		 *         toInline();
+		 *     else
+		 *         toString();
+		 * }
+		 * => needs block around inlined "if (a)..." to avoid attaching else to wrong if.
+		 */
+		return fTargetNode.getLocationInParent() == IfStatement.THEN_STATEMENT_PROPERTY
+				&& fTargetNode.getParent().getStructuralProperty(IfStatement.ELSE_STATEMENT_PROPERTY) != null
+				&& fSourceProvider.isDangligIf();
 	}
 
 	private String getContent(ASTNode node) throws BadLocationException {
