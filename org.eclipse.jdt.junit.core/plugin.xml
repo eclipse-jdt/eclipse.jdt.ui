@@ -304,26 +304,14 @@
             class="org.eclipse.jdt.internal.junit.refactoring.TypeRenameParticipant"
             id="org.eclipse.jdt.junit.renameTypeParticipant">
          <enablement>
-            <with
-                  variable="affectedNatures">
-               <iterate operator="or">
-                  <equals
-                        value="org.eclipse.jdt.core.javanature">
-                  </equals>
-               </iterate>
-            </with>
-            <with
-                  variable="element">
-               <instanceof
-                     value="org.eclipse.jdt.core.IType">
-               </instanceof>
-               <or>
-                  <test property="org.eclipse.jdt.launching.extendsInterface" args="junit.framework.Test"/>
-                  <test property="org.eclipse.jdt.launching.hasMethod" args="suite, ()QTest;, public static"/>
-                  <test property="org.eclipse.jdt.launching.hasMethodWithAnnotation" args="Test, public"/>
-                  <test property="org.eclipse.jdt.launching.hasMethodWithAnnotation" args="Test, public final"/>
-                  <test property="org.eclipse.jdt.launching.hasTypeWithAnnotation" args="RunWith"/>
-               </or>
+           <with variable="affectedNatures">
+             <iterate operator="or">
+               <equals value="org.eclipse.jdt.core.javanature"/>
+             </iterate>
+           </with>
+           <with variable="element">
+             <instanceof value="org.eclipse.jdt.core.IType"/>
+ 	         <test property="org.eclipse.jdt.core.hasTypeOnClasspath" value="junit.framework.Test"/>
             </with>
          </enablement>
       </renameParticipant>
@@ -339,7 +327,7 @@
            </with>
            <with variable="element">
    	         <instanceof value="org.eclipse.jdt.core.IJavaProject"/>
-             <test property="org.eclipse.jdt.launching.buildpathReference" args="junit"/>
+	         <test property="org.eclipse.jdt.core.hasTypeOnClasspath" value="junit.framework.Test"/>
            </with>
          </enablement>
       </renameParticipant>
