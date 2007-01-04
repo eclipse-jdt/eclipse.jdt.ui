@@ -62,7 +62,7 @@ public interface IPostSaveListener {
 	 *   <li>it is not allowed to save the given <code>compilationUnit</code></li> 
 	 *   <li>it must be able to deal with unsaved resources and with compilation units which are not on the Java build path</li>
 	 *   <li>must not assume to be called in the UI thread</li>
-	 *   <li>should be as fast as possible since this code is executed whenever the <code>compilationUnit</code> is saved</li>
+	 *   <li>should be as fast as possible since this code is executed every time the <code>compilationUnit</code> is saved</li>
 	 * </ul>
 	 * The compilation unit document provider can disable a listener that violates any of the above rules.</p> 
 	 *
