@@ -25,8 +25,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public final class SaveParticipantPreferencePage extends AbstractConfigurationBlockPreferenceAndPropertyPage {
 	
-	private static final String PROPERTY_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.SaveParticipantPreferencePage"; //$NON-NLS-1$
-	private static final String PREFERENCE_PAGE_ID= "org.eclipse.jdt.ui.preferences.SaveParticipantPreferencePage"; //$NON-NLS-1$
+	public static final String PROPERTY_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.SaveParticipantPreferencePage"; //$NON-NLS-1$
+	public static final String PREFERENCE_PAGE_ID= "org.eclipse.jdt.ui.preferences.SaveParticipantPreferencePage"; //$NON-NLS-1$
 
 	/**
 	 * {@inheritDoc}

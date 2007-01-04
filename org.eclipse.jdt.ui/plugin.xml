@@ -788,9 +788,22 @@
             <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
          </enabledWhen>
       </page>
+      
+      <page
+            name="%editorPageName"
+            class="org.eclipse.jdt.internal.ui.preferences.JavaEditorPropertyPage"
+            id="org.eclipse.jdt.ui.propertyPages.JavaEditorPropertyPage">
+         <enabledWhen>
+		     <adapt type="org.eclipse.core.resources.IProject">
+		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+		     </adapt>         
+         </enabledWhen>
+         <keywordReference id="org.eclipse.jdt.ui.javaeditorproperty"/>
+      </page>
       <page
             name="%editorSaveParticipants"
             class="org.eclipse.jdt.internal.ui.preferences.SaveParticipantPreferencePage"
+            category="org.eclipse.jdt.ui.propertyPages.JavaEditorPropertyPage"
             id="org.eclipse.jdt.ui.propertyPages.SaveParticipantPreferencePage">
          <enabledWhen>
 		     <adapt type="org.eclipse.core.resources.IProject">

@@ -107,6 +107,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaBasePreferencePage_search;
 	public static String JavaBasePreferencePage_search_small_menu;
 	public static String JavaBuildConfigurationBlock_build_recreate_modified;
+	public static String JavaEditorPropertyPage_SaveActionLink_Text;
 	public static String NewJavaProjectPreferencePage_title;
 	public static String NewJavaProjectPreferencePage_description;
 	public static String NewJavaProjectPreferencePage_sourcefolder_label;
