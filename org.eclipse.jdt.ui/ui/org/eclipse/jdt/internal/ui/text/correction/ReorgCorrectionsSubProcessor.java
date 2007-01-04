@@ -206,7 +206,7 @@ public class ReorgCorrectionsSubProcessor {
 				return;
 			}
 			if (!importDeclaration.isOnDemand()) {
-				int kind= JavaModelUtil.is50OrHigher(cu.getJavaProject()) ? SimilarElementsRequestor.ALL_TYPES : SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES;
+				int kind= JavaModelUtil.is50OrHigher(cu.getJavaProject()) ? SimilarElementsRequestor.REF_TYPES : SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES;
 				UnresolvedElementsSubProcessor.addNewTypeProposals(cu, importDeclaration.getName(), kind, 5, proposals);
 			}
 			

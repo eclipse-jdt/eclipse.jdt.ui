@@ -888,7 +888,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 			
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 6);
+			assertNumberOfProposals(proposals, 7);
 			assertCorrectLabels(proposals);
 			
 			int nCreateCU= 0;
@@ -904,7 +904,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 					nCreateCU++;
 				}
 			}
-			assertEquals(3, nCreateCU);
+			assertEquals(4, nCreateCU);
 		} finally {
 			JavaProjectHelper.delete(otherProject);
 		}
@@ -928,7 +928,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 			
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 6);
+			assertNumberOfProposals(proposals, 7);
 			assertCorrectLabels(proposals);
 			
 			int nCreateCU= 0;
@@ -943,7 +943,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 					nCreateCU++;
 				}
 			}
-			assertEquals(3, nCreateCU);
+			assertEquals(4, nCreateCU);
 		} finally {
 			JavaProjectHelper.delete(otherProject);
 		}
@@ -969,7 +969,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 			
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 7);
+			assertNumberOfProposals(proposals, 8);
 			assertCorrectLabels(proposals);
 		} finally {
 			JavaProjectHelper.delete(otherProject);
@@ -1020,7 +1020,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 			
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 6);
+			assertNumberOfProposals(proposals, 7);
 			assertCorrectLabels(proposals);
 			
 			int nCreateCU= 0;
@@ -1035,7 +1035,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 					nCreateCU++;
 				}
 			}
-			assertEquals(3, nCreateCU);
+			assertEquals(4, nCreateCU);
 		} finally {
 			JavaProjectHelper.delete(otherProject);
 		}

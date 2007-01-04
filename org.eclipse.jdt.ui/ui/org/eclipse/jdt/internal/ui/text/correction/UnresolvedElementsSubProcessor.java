@@ -211,11 +211,13 @@ public class UnresolvedElementsSubProcessor {
 		// add type proposals
 		if (typeKind != 0) {
 			if (!JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
-				typeKind= typeKind & ~(SimilarElementsRequestor.ANNOTATIONS | SimilarElementsRequestor.ENUMS | SimilarElementsRequestor.VARIABLES);
+				typeKind &= ~(SimilarElementsRequestor.ANNOTATIONS | SimilarElementsRequestor.ENUMS | SimilarElementsRequestor.VARIABLES);
 			}
 
 			int relevance= Character.isUpperCase(ASTNodes.getSimpleNameIdentifier(node).charAt(0)) ? 5 : -2;
 			addSimilarTypeProposals(typeKind, cu, node, relevance + 1, proposals);
+			
+			typeKind &= ~SimilarElementsRequestor.ANNOTATIONS;
 			addNewTypeProposals(cu, node, typeKind, relevance, proposals);
 		}
 
@@ -543,6 +545,10 @@ public class UnresolvedElementsSubProcessor {
 		while (node.getParent() instanceof QualifiedName) {
 			node= (Name) node.getParent();
 		}
+		
+		if ((kind & (SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES)) != 0) {
+			kind &= ~SimilarElementsRequestor.ANNOTATIONS; // only propose annotations when there are no other suggestions
+		}		
 		addNewTypeProposals(cu, node, kind, 0, proposals);
 	}
 
@@ -708,18 +714,16 @@ public class UnresolvedElementsSubProcessor {
 					IJavaElement enclosing= enclosingPackage != null ? (IJavaElement) enclosingPackage : enclosingType;
 
 					if ((kind & SimilarElementsRequestor.CLASSES) != 0) {
-			            proposals.add(new NewCUCompletionUsingWizardProposal(cu, node, NewCUCompletionUsingWizardProposal.K_CLASS, enclosing, rel+2));
+			            proposals.add(new NewCUCompletionUsingWizardProposal(cu, node, NewCUCompletionUsingWizardProposal.K_CLASS, enclosing, rel+3));
 					}
 					if ((kind & SimilarElementsRequestor.INTERFACES) != 0) {
-			            proposals.add(new NewCUCompletionUsingWizardProposal(cu, node, NewCUCompletionUsingWizardProposal.K_INTERFACE, enclosing, rel+1));
+			            proposals.add(new NewCUCompletionUsingWizardProposal(cu, node, NewCUCompletionUsingWizardProposal.K_INTERFACE, enclosing, rel+2));
 					}
 					if ((kind & SimilarElementsRequestor.ENUMS) != 0) {
 			            proposals.add(new NewCUCompletionUsingWizardProposal(cu, node, NewCUCompletionUsingWizardProposal.K_ENUM, enclosing, rel));
 					}
-					if ((kind & SimilarElementsRequestor.ANNOTATIONS) != 0) { // only when in annotation
-						if ((kind & (SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES)) == 0) {
-							proposals.add(new NewCUCompletionUsingWizardProposal(cu, node, NewCUCompletionUsingWizardProposal.K_ANNOTATION, enclosing, rel+4));
-						}
+					if ((kind & SimilarElementsRequestor.ANNOTATIONS) != 0) {
+						proposals.add(new NewCUCompletionUsingWizardProposal(cu, node, NewCUCompletionUsingWizardProposal.K_ANNOTATION, enclosing, rel + 1));
 					}
 				}
 			}
