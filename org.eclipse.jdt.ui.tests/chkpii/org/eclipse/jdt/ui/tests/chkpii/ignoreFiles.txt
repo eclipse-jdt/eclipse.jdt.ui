@@ -41,8 +41,8 @@ org.eclipse.tomcat/conf/*
 org.eclipse.ui/plugin.xml
 org.eclipse.platform.source/*
 org.apache.ant/*
-org.eclipse.ant.core/buildfiles/*
-org.eclipse.ant.ui/buildfiles/*
+org.eclipse.ant.core/*
+org.eclipse.ant.ui/*
 org.eclipse.help.webapp/*
 org.eclipse.pde.ui/*
 org.eclipse.pde.build/*
