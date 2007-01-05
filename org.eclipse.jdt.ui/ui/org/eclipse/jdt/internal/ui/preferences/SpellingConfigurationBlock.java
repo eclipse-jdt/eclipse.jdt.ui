@@ -21,6 +21,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -38,16 +39,21 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceStore;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+
+import org.eclipse.ui.ide.dialogs.EncodingFieldEditor;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
@@ -83,6 +89,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_SPELLING_LOCALE= getJDTUIKey(PreferenceConstants.SPELLING_LOCALE);
 	private static final Key PREF_SPELLING_PROPOSAL_THRESHOLD= getJDTUIKey(PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD);
 	private static final Key PREF_SPELLING_USER_DICTIONARY= getJDTUIKey(PreferenceConstants.SPELLING_USER_DICTIONARY);
+	private static final Key PREF_SPELLING_USER_DICTIONARY_ENCODING= getJDTUIKey(PreferenceConstants.SPELLING_USER_DICTIONARY_ENCODING);
 	private static final Key PREF_SPELLING_ENABLE_CONTENTASSIST= getJDTUIKey(PreferenceConstants.SPELLING_ENABLE_CONTENTASSIST);
 
 	/**
@@ -232,6 +239,12 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 
 	/** The status for the proposal threshold */
 	private IStatus fThresholdStatus= new StatusInfo();
+	
+	/** The status for the encoding field editor */
+	private IStatus fEncodingFieldEditorStatus= new StatusInfo();
+	
+	/** The encoding field editor. */
+	EncodingFieldEditor fEncodingEditor;	
 
 	/**
 	 * All controls
@@ -397,6 +410,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		description.setText(PreferencesMessages.SpellingPreferencePage_user_dictionary_description);
 		allControls.add(description);
 		
+		createEncodingFieldEditor(composite);
 
 		Group advanced= new Group(composite, SWT.NONE);
 		advanced.setText(PreferencesMessages.SpellingPreferencePage_group_advanced); 
@@ -425,11 +439,48 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		return composite;
 	}
 
+	/**
+	 * Creates the encoding field editor.
+	 * 
+	 * @param composite the parent composite
+	 * @since 3.3
+	 */
+	private void createEncodingFieldEditor(Composite composite) {
+		fEncodingEditor= new EncodingFieldEditor(PREF_SPELLING_USER_DICTIONARY_ENCODING.getName(), "", composite); //$NON-NLS-1$
+		PreferenceStore store= new PreferenceStore();
+		String defaultEncoding= ResourcesPlugin.getEncoding();
+		store.setDefault(PREF_SPELLING_USER_DICTIONARY_ENCODING.getName(), defaultEncoding);
+		String encoding= getValue(PREF_SPELLING_USER_DICTIONARY_ENCODING);
+		if (encoding != null && encoding.length() > 0)
+			store.setValue(PREF_SPELLING_USER_DICTIONARY_ENCODING.getName(), encoding);
+
+		fEncodingEditor.setPreferenceStore(store);
+		fEncodingEditor.load();
+		
+		// XXX: Cannot load defaults due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=169694 
+//		if (encoding == null || encoding.equals(defaultEncoding) || encoding.length() == 0)
+//			fEncodingEditor.loadDefault();
+
+		// Redirect status messages from the field editor to the status change listener  
+		DialogPage fakePage= new DialogPage() {
+			public void createControl(Composite c) {
+			}
+			public void setErrorMessage(String newMessage) {
+				StatusInfo status= new StatusInfo();
+				if (newMessage != null)
+					status.setError(newMessage);
+				fEncodingFieldEditorStatus= status;
+				fContext.statusChanged(StatusUtil.getMostSevere(new IStatus[] { fThresholdStatus, fFileStatus, fEncodingFieldEditorStatus }));
+			}
+		};
+		fEncodingEditor.setPage(fakePage);
+	}
+
 	private static Key[] getAllKeys() {
 		if (SUPPORT_CONTENT_ASSIST_PROPOSALS)
-			return new Key[] { PREF_SPELLING_USER_DICTIONARY, PREF_SPELLING_IGNORE_DIGITS, PREF_SPELLING_IGNORE_MIXED, PREF_SPELLING_IGNORE_SENTENCE, PREF_SPELLING_IGNORE_UPPER, PREF_SPELLING_IGNORE_URLS, PREF_SPELLING_IGNORE_NON_LETTERS, PREF_SPELLING_IGNORE_SINGLE_LETTERS, PREF_SPELLING_LOCALE, PREF_SPELLING_PROPOSAL_THRESHOLD, PREF_SPELLING_ENABLE_CONTENTASSIST };
+			return new Key[] { PREF_SPELLING_USER_DICTIONARY, PREF_SPELLING_USER_DICTIONARY_ENCODING, PREF_SPELLING_IGNORE_DIGITS, PREF_SPELLING_IGNORE_MIXED, PREF_SPELLING_IGNORE_SENTENCE, PREF_SPELLING_IGNORE_UPPER, PREF_SPELLING_IGNORE_URLS, PREF_SPELLING_IGNORE_NON_LETTERS, PREF_SPELLING_IGNORE_SINGLE_LETTERS, PREF_SPELLING_LOCALE, PREF_SPELLING_PROPOSAL_THRESHOLD, PREF_SPELLING_ENABLE_CONTENTASSIST };
 		else
-			return new Key[] { PREF_SPELLING_USER_DICTIONARY, PREF_SPELLING_IGNORE_DIGITS, PREF_SPELLING_IGNORE_MIXED, PREF_SPELLING_IGNORE_SENTENCE, PREF_SPELLING_IGNORE_UPPER, PREF_SPELLING_IGNORE_URLS, PREF_SPELLING_IGNORE_NON_LETTERS, PREF_SPELLING_IGNORE_SINGLE_LETTERS, PREF_SPELLING_LOCALE, PREF_SPELLING_PROPOSAL_THRESHOLD };
+			return new Key[] { PREF_SPELLING_USER_DICTIONARY, PREF_SPELLING_USER_DICTIONARY_ENCODING, PREF_SPELLING_IGNORE_DIGITS, PREF_SPELLING_IGNORE_MIXED, PREF_SPELLING_IGNORE_SENTENCE, PREF_SPELLING_IGNORE_UPPER, PREF_SPELLING_IGNORE_URLS, PREF_SPELLING_IGNORE_NON_LETTERS, PREF_SPELLING_IGNORE_SINGLE_LETTERS, PREF_SPELLING_LOCALE, PREF_SPELLING_PROPOSAL_THRESHOLD };
 	}
 
 	/*
@@ -437,6 +488,49 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 */
 	protected final String[] getFullBuildDialogStrings(final boolean workspace) {
 		return null;
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performOk()
+	 * @since 3.3
+	 */
+	public boolean performOk() {
+		fEncodingEditor.store();
+		if (fEncodingEditor.presentsDefaultValue())
+			setValue(PREF_SPELLING_USER_DICTIONARY_ENCODING, ""); //$NON-NLS-1$
+		else
+			setValue(PREF_SPELLING_USER_DICTIONARY_ENCODING, fEncodingEditor.getPreferenceStore().getString(PREF_SPELLING_USER_DICTIONARY_ENCODING.getName()));
+		return super.performOk();
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performApply()
+	 * @since 3.3
+	 */
+	public boolean performApply() {
+		fEncodingEditor.store();
+		if (fEncodingEditor.presentsDefaultValue())
+			setValue(PREF_SPELLING_USER_DICTIONARY_ENCODING, ""); //$NON-NLS-1$
+		else
+			setValue(PREF_SPELLING_USER_DICTIONARY_ENCODING, fEncodingEditor.getPreferenceStore().getString(PREF_SPELLING_USER_DICTIONARY_ENCODING.getName()));
+		return super.performApply();
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performDefaults()
+	 * @since 3.3
+	 */
+	public void performDefaults() {
+		super.performDefaults();
+		
+		setValue(PREF_SPELLING_USER_DICTIONARY_ENCODING, ""); //$NON-NLS-1$
+		JavaPlugin.getDefault().getPreferenceStore().setValue(PREF_SPELLING_USER_DICTIONARY_ENCODING.getName(), ""); //$NON-NLS-1$
+		
+		fEncodingEditor.getPreferenceStore().setValue(fEncodingEditor.getPreferenceName(), ResourcesPlugin.getEncoding());
+		fEncodingEditor.load();
+		
+		// XXX: Cannot load defaults due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=169694 
+//		fEncodingEditor.loadDefault();
 	}
 
 	/**
@@ -463,7 +557,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		if (key == null || PREF_SPELLING_USER_DICTIONARY.equals(key))
 			fFileStatus= validateAbsoluteFilePath(getValue(PREF_SPELLING_USER_DICTIONARY));
 
-		fContext.statusChanged(StatusUtil.getMostSevere(new IStatus[] { fThresholdStatus, fFileStatus }));
+		fContext.statusChanged(StatusUtil.getMostSevere(new IStatus[] { fThresholdStatus, fFileStatus, fEncodingFieldEditorStatus }));
 	}
 	
 	/*
@@ -483,6 +577,13 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 * @since 3.1
 	 */
 	protected void setEnabled(boolean enabled) {
+		
+		/*
+		 * FIXME: Should update the enablement state of the
+		 * encoding field editor but this is not possible
+		 * due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=169696
+		 */
+		
 		if (enabled && fEnabledControls != null) {
 			for (int i= fEnabledControls.length - 1; i >= 0; i--)
 				fEnabledControls[i].setEnabled(true);
@@ -500,4 +601,6 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 			fEnabledControls= (Control[]) enabledControls.toArray(new Control[enabledControls.size()]);
 		}
 	}
+	
+	
 }
