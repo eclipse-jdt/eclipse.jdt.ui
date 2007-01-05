@@ -11,8 +11,9 @@
 
 package org.eclipse.jdt.internal.ui.text.spelling.engine;
 
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -52,12 +53,13 @@ public class PersistentSpellDictionary extends AbstractSpellDictionary {
 		if (!isCorrect(word)) {
 
 			hashWord(word);
-			FileWriter writer= null;
+
+			OutputStreamWriter writer= null;
 			try {
-				writer= new FileWriter(fLocation.getPath(), true);
+				FileOutputStream fileStream= new FileOutputStream(fLocation.getPath(), true);
+				writer= new OutputStreamWriter(fileStream, getEncoding());
 				writer.write(word);
 				writer.write("\n"); //$NON-NLS-1$
-
 			} catch (IOException exception) {
 				JavaPlugin.log(exception);
 			} finally {

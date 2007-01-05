@@ -31,9 +31,12 @@ import java.util.Set;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -441,7 +444,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 					String word= null;
 					
 					// Setup a reader with a decoder in order to read over malformed input if needed.
-					CharsetDecoder decoder= Charset.forName(System.getProperty("file.encoding")).newDecoder(); //$NON-NLS-1$
+					CharsetDecoder decoder= Charset.forName(getEncoding()).newDecoder();
 					decoder.onMalformedInput(CodingErrorAction.REPORT);
 					decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
 					final BufferedReader reader= new BufferedReader(new InputStreamReader(stream, decoder));
@@ -529,4 +532,18 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	public void addWord(final String word) {
 		// Do nothing
 	}
+	
+	/**
+	 * Returns the encoding of this dictionary.
+	 * 
+	 * @return the encoding of this dictionary
+	 * @since 3.3
+	 */
+	protected String getEncoding() {
+		String encoding= JavaPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.SPELLING_USER_DICTIONARY_ENCODING);
+		if (encoding == null || encoding.length() == 0)
+			encoding= ResourcesPlugin.getEncoding();
+		return encoding;
+	}
+	
 }

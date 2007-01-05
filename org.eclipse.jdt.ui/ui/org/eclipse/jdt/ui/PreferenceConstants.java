@@ -2584,6 +2584,16 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public final static String SPELLING_USER_DICTIONARY= "spelling_user_dictionary"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that specifies encoding of the workspace user dictionary.
+	 * <p>
+	 * Value is of type <code>String</code>.
+	 * </p>
+	 * 
+	 * @since 3.3
+	 */
+	public final static String SPELLING_USER_DICTIONARY_ENCODING= "spelling_user_dictionary_encoding"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that specifies whether spelling dictionaries are available to content assist.
@@ -3662,10 +3672,10 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_MARK_BREAK_CONTINUE_TARGETS, true);
 		store.setDefault(PreferenceConstants.EDITOR_MARK_IMPLEMENTORS, true);
 		
+		
 		// spell checking
 		store.setDefault(PreferenceConstants.SPELLING_LOCALE, SpellCheckEngine.getDefaultLocale().toString());
 		store.setToDefault(PreferenceConstants.SPELLING_LOCALE);
-		
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_DIGITS, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_MIXED, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_SENTENCE, true);
@@ -3674,12 +3684,17 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_SINGLE_LETTERS, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_NON_LETTERS, true);
 		store.setDefault(PreferenceConstants.SPELLING_USER_DICTIONARY, ""); //$NON-NLS-1$
+		
+		// Note: For backwards compatibility we must use the property and not the workspace default
+		store.setDefault(PreferenceConstants.SPELLING_USER_DICTIONARY_ENCODING, System.getProperty("file.encoding")); //$NON-NLS-1$
+		
 		store.setDefault(PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD, 20);
 		/*
 		 * XXX: This is currently disabled because the spelling engine
 		 * cannot return word proposals but only correction proposals.
 		 */
 		store.setToDefault(PreferenceConstants.SPELLING_ENABLE_CONTENTASSIST);
+		
 		
 		// folding
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_ENABLED, true);

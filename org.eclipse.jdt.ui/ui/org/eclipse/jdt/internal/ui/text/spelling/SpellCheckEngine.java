@@ -296,11 +296,20 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 	 */
 	public final void propertyChange(final PropertyChangeEvent event) {
-		if (event.getProperty().equals(PreferenceConstants.SPELLING_LOCALE))
+		if (event.getProperty().equals(PreferenceConstants.SPELLING_LOCALE)) {
 			resetSpellChecker();
+			return;
+		}
 		
-		if (event.getProperty().equals(PreferenceConstants.SPELLING_USER_DICTIONARY))
+		if (event.getProperty().equals(PreferenceConstants.SPELLING_USER_DICTIONARY)) {
 			resetUserDictionary();
+			return;
+		}
+		
+		if (event.getProperty().equals(PreferenceConstants.SPELLING_USER_DICTIONARY_ENCODING)) {
+			resetUserDictionary();
+			return;
+		}
 	}
 
 	/**
