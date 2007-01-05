@@ -23,21 +23,41 @@ public final class SaveParticipantDescriptor {
 	private final IPostSaveListener fPostSaveListener;
 	/** The preference configuration block, if any */
 	private final ISaveParticipantPreferenceConfiguration fPreferenceConfiguration;
+	
+	/**
+	 * Creates a new descriptor which connects a {@link IPostSaveListener}
+	 * with a default implementation of a {@link ISaveParticipantPreferenceConfiguration}.
+	 * @param listener the listener
+	 */
+	SaveParticipantDescriptor(final IPostSaveListener listener) {
+		this(listener, new AbstractSaveParticipantPreferenceConfiguration() {
+
+			protected String getPostSaveListenerId() {
+	            return listener.getId();
+            }
+
+			protected String getPostSaveListenerName() {
+	            return listener.getName();
+            }
+			
+		});
+	}
 
 	/**
 	 * Creates a new descriptor which connects a {@link IPostSaveListener}
 	 * with an {@link ISaveParticipantPreferenceConfiguration}.
 	 * 
 	 * @param listener the listener
-	 * @param preferenceConfiguration preference configuration or <code>null</code> if none
+	 * @param preferenceConfiguration preference configuration
 	 */
 	SaveParticipantDescriptor(IPostSaveListener listener, ISaveParticipantPreferenceConfiguration preferenceConfiguration) {
 		Assert.isNotNull(listener);
+		Assert.isNotNull(preferenceConfiguration);
 
 		fPostSaveListener= listener;
 		fPreferenceConfiguration= preferenceConfiguration;
 	}
-	
+
 	/**
 	 * Returns the post save listener of the described
 	 * save participant
@@ -50,10 +70,9 @@ public final class SaveParticipantDescriptor {
 
 	/**
 	 * Returns the preference configuration of the described
-	 * save participant. If the participant does not provide
-	 * additional preference UI the result is null.
+	 * save participant.
 	 * 
-	 * @return the preference configuration or null
+	 * @return the preference configuration
 	 */
 	public ISaveParticipantPreferenceConfiguration getPreferenceConfiguration() {
 		return fPreferenceConfiguration;

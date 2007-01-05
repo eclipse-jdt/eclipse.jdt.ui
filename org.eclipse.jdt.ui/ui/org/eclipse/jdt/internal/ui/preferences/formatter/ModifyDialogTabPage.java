@@ -199,6 +199,12 @@ public abstract class ModifyDialogTabPage {
 			return fValues[1].equals(getPreferences().get(getKey()));
 		}
 		
+		public void setChecked(boolean checked) {
+			getPreferences().put(getKey(), checked ? fValues[1] : fValues[0]);
+			updateWidget();
+			checkboxChecked(checked);	
+		}
+		
 		public Control getControl() {
 			return fCheckbox;
 		}

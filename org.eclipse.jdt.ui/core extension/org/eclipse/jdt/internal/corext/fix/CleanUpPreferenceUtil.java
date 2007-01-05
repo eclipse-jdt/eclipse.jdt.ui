@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -34,13 +35,11 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.BuiltInP
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 
 public class CleanUpPreferenceUtil {
+	
+	public static final String SAVE_PARTICIPANT_KEY_PREFIX= "sp_"; //$NON-NLS-1$
 
 	public static Map loadOptions(IScopeContext context) {
     	return loadOptions(context, CleanUpConstants.CLEANUP_PROFILE, CleanUpConstants.DEFAULT_PROFILE);
-    }
-
-	public static Map loadSaveParticipantOptions(IScopeContext context) {
-    	return loadOptions(context, CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, CleanUpConstants.DEFAULT_SAVE_PARTICIPANT_PROFILE);
     }
 
 	private static Map loadOptions(IScopeContext context, String profileIdKey, String defaultProfileId) {
@@ -82,6 +81,50 @@ public class CleanUpPreferenceUtil {
         }
     	
     	return null;
+    }
+	
+	public static Map loadSaveParticipantOptions(IScopeContext context) {
+		IEclipsePreferences node;
+		if (hasSettingsInScope(context)) {
+			node= context.getNode(JavaUI.ID_PLUGIN);
+		} else {
+			IScopeContext instanceScope= new InstanceScope();
+			if (hasSettingsInScope(instanceScope)) {
+				node= instanceScope.getNode(JavaUI.ID_PLUGIN);
+			} else {
+				return CleanUpConstants.getSaveParticipantSettings();
+			}
+		}
+		
+		Map result= new HashMap();
+		Map defaultSettings= CleanUpConstants.getSaveParticipantSettings();
+		for (Iterator iterator= defaultSettings.keySet().iterator(); iterator.hasNext();) {
+	        String key= (String)iterator.next();
+	        result.put(key, node.get(SAVE_PARTICIPANT_KEY_PREFIX + key, CleanUpConstants.FALSE));
+        }
+		
+		return result;
+	}
+	
+    public static void saveSaveParticipantOptions(IScopeContext context, Map settings) {
+    	IEclipsePreferences node= context.getNode(JavaUI.ID_PLUGIN);
+    	for (Iterator iterator= settings.keySet().iterator(); iterator.hasNext();) {
+	        String key= (String)iterator.next();
+	        node.put(SAVE_PARTICIPANT_KEY_PREFIX + key, (String)settings.get(key));
+        }
+    }
+
+    private static boolean hasSettingsInScope(IScopeContext context) {
+    	IEclipsePreferences node= context.getNode(JavaUI.ID_PLUGIN);
+    	
+		Map defaultSettings= CleanUpConstants.getSaveParticipantSettings();
+		for (Iterator iterator= defaultSettings.keySet().iterator(); iterator.hasNext();) {
+			String key= (String)iterator.next();
+			if (node.get(SAVE_PARTICIPANT_KEY_PREFIX + key, null) != null)
+				return true;
+        }
+    	
+    	return false;
     }
 
 	/**

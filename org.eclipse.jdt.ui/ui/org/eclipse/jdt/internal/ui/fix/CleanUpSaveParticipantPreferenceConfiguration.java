@@ -10,52 +10,50 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Link;
-import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.preference.IPreferencePageContainer;
 
 import org.eclipse.ui.dialogs.PreferencesUtil;
-import org.eclipse.ui.preferences.IWorkingCopyManager;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.ISaveParticipantPreferenceConfiguration;
-import org.eclipse.jdt.internal.ui.preferences.CleanUpPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.PreferencesAccess;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpModifyDialog;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileManager;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.ComboDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-
-import org.osgi.service.prefs.BackingStoreException;
+import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 /**
  * Preference configuration UI for the clean up save participant.
@@ -64,217 +62,348 @@ import org.osgi.service.prefs.BackingStoreException;
  */
 public class CleanUpSaveParticipantPreferenceConfiguration implements ISaveParticipantPreferenceConfiguration {
 	
-	private static final String CLEANUP_PAGE_SETTINGS_KEY= "cleanup_page"; //$NON-NLS-1$
-	private static final String DIALOGSTORE_LASTSAVELOADPATH= JavaUI.ID_PLUGIN + ".cleanup"; //$NON-NLS-1$
-
-	private ComboDialogField fProfileSelectionField;
-	private PreferencesAccess fPreferencesAccess;
-	private ProfileManager fProfileManager;
-	private ProfileStore fProfileStore;
-	private IPreferenceChangeListener fPreferenceListener;
-	private IScopeContext fContext;
-	private boolean fListening;
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Control createControl(Composite parent, IWorkingCopyManager manager) {
-		fPreferencesAccess= PreferencesAccess.getWorkingCopyPreferences(manager);
-
-		final Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		composite.setLayout(new GridLayout(3, false));
-
-		Link link= new Link(composite, SWT.NONE);
-		link.setText(MultiFixMessages.CleanUpSaveParticipantPreferenceConfiguration_clean_up_preference_link);
-		link.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				PreferencesUtil.createPreferenceDialogOn(composite.getShell(), CleanUpPreferencePage.PREF_ID, null, null);
-			}
-		});
-		GridData data= new GridData(SWT.FILL, SWT.FILL, true, false);
-		data.horizontalSpan= 3;
-		link.setLayoutData(data);
-
-		fProfileSelectionField= new ComboDialogField(SWT.READ_ONLY);
-		fProfileSelectionField.setLabelText(MultiFixMessages.CleanUpSaveParticipantPreferenceConfiguration_use_clean_up_profile_label);
-		fProfileSelectionField.doFillIntoGrid(composite, 2);
-
-		Button edit= new Button(composite, SWT.NONE);
-		edit.setText(MultiFixMessages.CleanUpSaveParticipantPreferenceConfiguration_edit_button_label);
-		GridData gd= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
-		gd.widthHint= SWTUtil.getButtonWidthHint(edit);
-		edit.setLayoutData(gd);
-		edit.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				editSelectedProfile();
-			}
-		});
+	private static final IEclipsePreferences INSTANCE_NODE= new InstanceScope().getNode(JavaUI.ID_PLUGIN);
+	
+	private static String[] TOP_LEVEL_KEYS= {
+		CleanUpConstants.FORMAT_SOURCE_CODE, 
+		CleanUpConstants.FORMAT_COMMENT, 
+		CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES, 
+		CleanUpConstants.ORGANIZE_IMPORTS,
+		CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS,
+		CleanUpConstants.EXPRESSIONS_USE_PARENTHESES
+	};
+	
+	private static class PreferenceModifyBlock extends ModifyDialogTabPage {
 		
-		fProfileStore= new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, new CleanUpProfileVersioner());
-		fPreferenceListener= new IPreferenceChangeListener() {
-			public void preferenceChange(PreferenceChangeEvent event) {
-				if (fListening) {
-					if (CleanUpConstants.CLEANUP_PROFILES.equals(event.getKey())) {
-						try {
-							String id= fPreferencesAccess.getInstanceScope().getNode(JavaUI.ID_PLUGIN).get(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, null);
-							if (id == null)
-								id= fProfileManager.getDefaultProfile().getID();
-							
-							List oldProfiles= fProfileManager.getSortedProfiles();
-							Profile[] oldProfilesArray= (Profile[])oldProfiles.toArray(new Profile[oldProfiles.size()]);
-							for (int i= 0; i < oldProfilesArray.length; i++) {
-								if (oldProfilesArray[i] instanceof CustomProfile) {
-									fProfileManager.deleteProfile((CustomProfile)oldProfilesArray[i]);
-								}
-							}
+		/**
+		 * Constant array for boolean selection
+		 */
+		private static String[] FALSE_TRUE= {CleanUpConstants.FALSE, CleanUpConstants.TRUE};
+		
+		private final ArrayList fPreferences;
+		private final IPreferencePageContainer fContainer;
+		private final Map fSettings;
+		private final ArrayList fJava50Preferences;
+		private IJavaProject fJavaProject;
+		
+		public PreferenceModifyBlock(Map settings, IPreferencePageContainer container) {
+			super(null, settings);
+			fSettings= settings;
+			
+			fContainer= container;
+			fPreferences= new ArrayList();
+			fJava50Preferences= new ArrayList();
+		}
+		
+		public void setProject(IJavaProject javaProject) {
+			fJavaProject= javaProject;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		protected JavaPreview doCreateJavaPreview(Composite parent) {
+			return null;
+		}
+		
+		public Composite createBlockContent(Composite parent) {
+			Composite composite= new Composite(parent, SWT.NONE);
+			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			GridLayout gridLayout= new GridLayout(3, false);
+			gridLayout.marginHeight= 0;
+			gridLayout.marginWidth= 0;
+			composite.setLayout(gridLayout);
+			
+			fPixelConverter= new PixelConverter(composite);
+			doCreatePreferences(composite, 3);
+			
+			return composite;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		protected void doCreatePreferences(Composite composite, int numColumns) {
+			createFormattingGroup(composite, numColumns);
+			createImportsGroup(composite, numColumns);
+			createDeclarationsGroup(composite, numColumns);
+			createExpressionsGroup(composite, numColumns);
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		protected CheckboxPreference createCheckboxPref(Composite composite, int numColumns, String name, String key, String[] values) {
+			CheckboxPreference result= super.createCheckboxPref(composite, numColumns, name, key, values);
+			fPreferences.add(result);
+			return result;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		protected RadioPreference createRadioPref(Composite composite, int numColumns, String name, String key, String[] values) {
+			RadioPreference result= super.createRadioPref(composite, numColumns, name, key, values);
+			fPreferences.add(result);
+			return result;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		protected void doUpdatePreview() {}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		protected void initializePage() {
+			for (int i= 0; i < fPreferences.size(); i++) {
+				ButtonPreference pref= (ButtonPreference)fPreferences.get(i);
+				pref.setChecked(CleanUpConstants.TRUE.equals(fSettings.get(pref.getKey())));
+			}
+			
+			if (fJavaProject != null && !JavaModelUtil.is50OrHigher(fJavaProject)) {
+				for (int i= 0; i < fJava50Preferences.size(); i++) {
+					Preference pref= (Preference)fJava50Preferences.get(i);
+					pref.setEnabled(false);
+				}
+			}
+		}
+		
+		private void createFormattingGroup(Composite parent, int numColumns) {
+			Group formatGroup= createGroup(numColumns, parent, SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_Formatter_Group);
+			
+			createCheckboxPref(formatGroup, numColumns - 1, SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_FormatSource_Checkbox, CleanUpConstants.FORMAT_SOURCE_CODE, FALSE_TRUE);
+			createConfigureLink(formatGroup, CodeFormatterPreferencePage.PREF_ID, CodeFormatterPreferencePage.PROP_ID);
+			
+			final CheckboxPreference formatJavadocPref= createCheckboxPref(formatGroup, numColumns - 1, SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_FormatJavaDoc_Checkbox, CleanUpConstants.FORMAT_COMMENT, FALSE_TRUE);
+			synchronizeOption(CleanUpConstants.FORMAT_JAVADOC, formatJavadocPref);
+			createConfigureLink(formatGroup, CodeFormatterPreferencePage.PREF_ID, CodeFormatterPreferencePage.PROP_ID);
+			
+			final CheckboxPreference whiteSpace= createCheckboxPref(formatGroup, numColumns, SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_RemoveTrailingWhitesapce_Checkbox, CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES, FALSE_TRUE);
+			
+			Composite whiteSpaceGroup= new Composite(formatGroup, SWT.NONE);
+			GridData gridData= new GridData(SWT.FILL, SWT.TOP, true, false);
+			gridData.horizontalSpan= numColumns;
+			gridData.horizontalIndent= fPixelConverter.convertWidthInCharsToPixels(4);
+			whiteSpaceGroup.setLayoutData(gridData);
+			GridLayout layout= new GridLayout(2, false);
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			whiteSpaceGroup.setLayout(layout);
+			
+			final RadioPreference allLines= createRadioPref(whiteSpaceGroup, 1, SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_AllLines_Radio, CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL, FALSE_TRUE);
+			final RadioPreference ignoreEmptyPref= createRadioPref(whiteSpaceGroup, 1, SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_IgnoreEmpty_Radio, CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY, FALSE_TRUE);
+			
+			whiteSpace.addObserver(new Observer() {
+				public void update(Observable o, Object arg) {
+					allLines.setEnabled(whiteSpace.getChecked());
+					ignoreEmptyPref.setEnabled(whiteSpace.getChecked());
+				}
+			});
+			
+			allLines.setEnabled(whiteSpace.getChecked());
+			ignoreEmptyPref.setEnabled(whiteSpace.getChecked());
+		}
+		
+		private void createImportsGroup(Composite parent, int numColumns) {
+			Group importsGroup= createGroup(numColumns, parent, SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_Imports_Group);
+			createCheckboxPref(importsGroup, numColumns - 1, SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_OrganizeImports_Checkbox, CleanUpConstants.ORGANIZE_IMPORTS, FALSE_TRUE);
+			
+			createConfigureLink(importsGroup, ImportOrganizePreferencePage.PREF_ID, ImportOrganizePreferencePage.PROP_ID);
+		}
+		
+		private void createDeclarationsGroup(Composite parent, int numColumns) {
+			Group declarationGroup= createGroup(numColumns, parent, SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_Declarations_Group);
+			
+			final CheckboxPreference useFinalPref= createCheckboxPref(declarationGroup, numColumns, SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_AddFinal_Checkbox, CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL, FALSE_TRUE);
+			synchronizeOption(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, useFinalPref);
+			
+			final CheckboxPreference annotationsPref= createCheckboxPref(declarationGroup, numColumns, SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_AddAnnotations_Checkbox, CleanUpConstants.ADD_MISSING_ANNOTATIONS, FALSE_TRUE);
+	    	
+			Composite annotationsGroup= new Composite(declarationGroup, SWT.NONE);
+			GridData gridData= new GridData(SWT.FILL, SWT.TOP, true, false);
+			gridData.horizontalSpan= numColumns;
+			gridData.horizontalIndent= fPixelConverter.convertWidthInCharsToPixels(4);
+			annotationsGroup.setLayoutData(gridData);
+			GridLayout layout= new GridLayout(2, false);
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			annotationsGroup.setLayout(layout);
+			
+			final CheckboxPreference overridePref= createCheckboxPref(annotationsGroup, 1, SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_Override_Checkbox, CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE, FALSE_TRUE);
+			final CheckboxPreference deprecatedPref= createCheckboxPref(annotationsGroup, 1, SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_Deprecated_Checkbox, CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED, FALSE_TRUE);
+			
+	    	annotationsPref.addObserver( new Observer() {
+	    		public void update(Observable o, Object arg) {
+	    			overridePref.setEnabled(annotationsPref.getChecked());
+	    			deprecatedPref.setEnabled(annotationsPref.getChecked());
+	    		}
+	    	});
 
-							List newProfiles= fProfileStore.readProfilesFromString((String)event.getNewValue());
-							for (Iterator iterator= newProfiles.iterator(); iterator.hasNext();) {
-								CustomProfile profile= (CustomProfile)iterator.next();
-								fProfileManager.addProfile(profile);
-							}
-
-							Profile profile= fProfileManager.getProfile(id);
-							if (profile != null) {
-								fProfileManager.setSelected(profile);
-							} else {
-								fProfileManager.setSelected(fProfileManager.getDefaultProfile());
-							}
-						} catch (CoreException e) {
-							JavaPlugin.log(e);
-						}
-					} else if (CleanUpConstants.CLEANUP_ON_SAVE_PROFILE.equals(event.getKey())) {
-						if (event.getNewValue() == null) {
-							fProfileManager.setSelected(fProfileManager.getDefaultProfile());
+			overridePref.setEnabled(annotationsPref.getChecked());
+			deprecatedPref.setEnabled(annotationsPref.getChecked());
+			
+			fJava50Preferences.add(deprecatedPref);
+			fJava50Preferences.add(overridePref);
+		}
+		
+		private void createExpressionsGroup(Composite composite, int numColumns) {
+	        Group expressionsGroup= createGroup(numColumns, composite, SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_Expressions_Group);
+			
+			final CheckboxPreference thisFieldPref= createCheckboxPref(expressionsGroup, numColumns, SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_AddThis_Checkbox, CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS, FALSE_TRUE);
+			synchronizeOption(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS, thisFieldPref);
+			
+	    	final CheckboxPreference useParenthesesPref= createCheckboxPref(expressionsGroup, numColumns, SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_AddParanoicalParanthesis_Checkbox, CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS, FALSE_TRUE);
+			synchronizeOption(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES, useParenthesesPref);
+        }
+		
+		private void createConfigureLink(final Composite parent, final String preferenceId, final String propertyId) {
+			Link link= new Link(parent, SWT.NONE);
+			link.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_Configure_Link);
+			link.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+			link.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					if (fContainer instanceof IWorkbenchPreferenceContainer) {
+						IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer)fContainer;
+						if (fJavaProject != null) {
+							container.openPage(propertyId, null);
 						} else {
-    						Profile profile= fProfileManager.getProfile((String)event.getNewValue());
-    						if (profile != null) {
-    							fProfileManager.setSelected(profile);
-    						}
+							container.openPage(preferenceId, null);
 						}
+					} else {
+						PreferencesUtil.createPreferenceDialogOn(parent.getShell(), preferenceId, null, null);
 					}
 				}
-			}
-		};
-		fPreferencesAccess.getInstanceScope().getNode(JavaUI.ID_PLUGIN).addPreferenceChangeListener(fPreferenceListener);
-
-		return composite;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void initialize(final IScopeContext context) {
-		fContext= context;
+			});
+		}
 		
-		List profiles= CleanUpPreferenceUtil.loadProfiles(fPreferencesAccess.getInstanceScope());
-
-		fProfileManager= new ProfileManager(profiles, context, fPreferencesAccess, new CleanUpProfileVersioner(), CleanUpProfileManager.KEY_SETS, CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, "cleanup_settings_version") { //$NON-NLS-1$
-			public Profile getDefaultProfile() {
-				return getProfile(CleanUpConstants.DEFAULT_SAVE_PARTICIPANT_PROFILE);
-			}
-		};
-
-		fillProfileListDialogField();
-		fProfileManager.addObserver(new Observer() {
-			public void update(Observable o, Object arg) {
-				fillProfileListDialogField();
-			}
-		});
-		
-		fListening= true;
-		fProfileManager.addObserver(new Observer() {
-			public void update(Observable o, Object arg) {
-				try {
-					fListening= false;
-					final int value= ((Integer)arg).intValue();
-					switch (value) {
-					case ProfileManager.PROFILE_DELETED_EVENT:
-					case ProfileManager.PROFILE_RENAMED_EVENT:
-					case ProfileManager.PROFILE_CREATED_EVENT:
-					case ProfileManager.SETTINGS_CHANGED_EVENT:
-						try {
-							fProfileStore.writeProfiles(fProfileManager.getSortedProfiles(), fPreferencesAccess.getInstanceScope());
-							fProfileManager.commitChanges(context);
-						} catch (CoreException x) {
-							JavaPlugin.log(x);
-						}
-						break;
-					case ProfileManager.SELECTION_CHANGED_EVENT:
-						fProfileManager.commitChanges(context);
-						break;
+		/**
+		 * keeps the option with key name synchronized with the checked state of
+		 * preference
+		 */
+		private void synchronizeOption(final String keyName, final ButtonPreference preference) {
+			preference.addObserver(new Observer() {
+				public void update(Observable o, Object arg) {
+					if (preference.getChecked()) {
+						fSettings.put(keyName, CleanUpConstants.TRUE);
+					} else {
+						fSettings.put(keyName, CleanUpConstants.FALSE);
 					}
-				} finally {
-					fListening= true;
 				}
-			}
-		});
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void dispose() {
-		if (fPreferenceListener != null) {
-			fPreferencesAccess.getInstanceScope().getNode(JavaUI.ID_PLUGIN).removePreferenceChangeListener(fPreferenceListener);
-			fPreferenceListener= null;
+			});
 		}
 	}
-
+	
+	private IScopeContext fContext;
+	private Map fSettings;
+	private PreferenceModifyBlock fBlock;
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public Control createControl(Composite parent, IPreferencePageContainer container) {
+		fSettings= CleanUpConstants.getSaveParticipantSettings();
+		fBlock= new PreferenceModifyBlock(fSettings, container);
+		return fBlock.createBlockContent(parent);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void initialize(final IScopeContext context, IAdaptable element) {
+		fContext= context;
+		copyMap(CleanUpPreferenceUtil.loadSaveParticipantOptions(context), fSettings);
+		if (element != null) {
+			IProject project= (IProject)element.getAdapter(IProject.class);
+			if (project != null) {
+				IJavaProject javaProject= JavaCore.create(project);
+				if (javaProject != null && javaProject.exists()) {
+					fBlock.setProject(javaProject);
+				}
+			}
+		}
+		fBlock.initializePage();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void dispose() {}
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public void performDefaults() {
-		Profile profile= fProfileManager.getDefaultProfile();
-		if (profile != null) {
-			int defaultIndex= fProfileManager.getSortedProfiles().indexOf(profile);
-			if (defaultIndex != -1) {
-				fProfileManager.setSelected(profile);
-			}
-		}
+		copyMap(CleanUpConstants.getSaveParticipantSettings(), fSettings);
+		fBlock.initializePage();
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public void performOk() {
-		dispose();
-		try {
-			fPreferencesAccess.applyChanges();
-		} catch (BackingStoreException e) {
-			JavaPlugin.log(e);
+		if (!ProjectScope.SCOPE.equals(fContext.getName()) || hasSettingsInScope(fContext))
+			CleanUpPreferenceUtil.saveSaveParticipantOptions(fContext, fSettings);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void enableProjectSettings() {
+		CleanUpPreferenceUtil.saveSaveParticipantOptions(fContext, fSettings);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void disableProjectSettings() {
+		IEclipsePreferences node= fContext.getNode(JavaUI.ID_PLUGIN);
+		
+		Map settings= CleanUpConstants.getSaveParticipantSettings();
+		for (Iterator iterator= settings.keySet().iterator(); iterator.hasNext();) {
+			String key= (String)iterator.next();
+			node.remove(CleanUpPreferenceUtil.SAVE_PARTICIPANT_KEY_PREFIX + key);
 		}
 	}
-
-	private void editSelectedProfile() {
-		Shell shell= JavaPlugin.getActiveWorkbenchShell();
-		CleanUpModifyDialog dialog= new CleanUpModifyDialog(shell, fProfileManager.getSelected(), fProfileManager, fProfileStore, false, CLEANUP_PAGE_SETTINGS_KEY, DIALOGSTORE_LASTSAVELOADPATH);
-		dialog.open();
-	}
-
-	private void fillProfileListDialogField() {
-		fProfileSelectionField.setDialogFieldListener(null);
-		fProfileSelectionField.setItems(fProfileManager.getSortedDisplayNames());
-		fProfileSelectionField.selectItem(fProfileManager.getSelected().getName());
-		fProfileSelectionField.setDialogFieldListener(new IDialogFieldListener() {
-			public void dialogFieldChanged(DialogField field) {
-				fProfileManager.setSelected((Profile)fProfileManager.getSortedProfiles().get(fProfileSelectionField.getSelectionIndex()));
-			}
-		});
-	}
-
+	
 	/**
-     * {@inheritDoc}
-     */
-    public void enableProjectSettings() {
-    	fProfileManager.setSelected(fProfileManager.getSelected());
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public void disableProjectSettings() {
-    	fProfileManager.clearAllSettings(fContext);
-    }
+	 * {@inheritDoc}
+	 */
+	public boolean hasSettingsInScope(IScopeContext context) {
+		IEclipsePreferences node= context.getNode(JavaUI.ID_PLUGIN);
+		for (int i= 0; i < TOP_LEVEL_KEYS.length; i++) {
+			if (node.get(CleanUpPreferenceUtil.SAVE_PARTICIPANT_KEY_PREFIX + TOP_LEVEL_KEYS[i], null) != null)
+				return true;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isEnabled(IScopeContext context) {
+		IEclipsePreferences node;
+		if (hasSettingsInScope(context)) {
+			node= context.getNode(JavaUI.ID_PLUGIN);
+		} else {
+			node= INSTANCE_NODE;
+		}
+		
+		for (int i= 0; i < TOP_LEVEL_KEYS.length; i++) {
+			String value= node.get(CleanUpPreferenceUtil.SAVE_PARTICIPANT_KEY_PREFIX + TOP_LEVEL_KEYS[i], null);
+			if (CleanUpConstants.TRUE.equals(value))
+				return true;
+		}
+		
+		return false;
+	}
+	
+	private void copyMap(Map source, Map target) {
+		for (Iterator iterator= source.keySet().iterator(); iterator.hasNext();) {
+			String key= (String)iterator.next();
+			target.put(key, source.get(key));
+		}
+	}
 }
