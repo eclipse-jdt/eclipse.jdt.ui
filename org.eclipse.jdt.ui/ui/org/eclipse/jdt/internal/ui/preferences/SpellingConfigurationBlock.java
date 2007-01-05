@@ -455,11 +455,6 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 			store.setValue(PREF_SPELLING_USER_DICTIONARY_ENCODING.getName(), encoding);
 
 		fEncodingEditor.setPreferenceStore(store);
-		fEncodingEditor.load();
-		
-		// XXX: Cannot load defaults due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=169694 
-//		if (encoding == null || encoding.equals(defaultEncoding) || encoding.length() == 0)
-//			fEncodingEditor.loadDefault();
 
 		// Redirect status messages from the field editor to the status change listener  
 		DialogPage fakePage= new DialogPage() {
@@ -474,6 +469,13 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 			}
 		};
 		fEncodingEditor.setPage(fakePage);
+		
+		fEncodingEditor.load();
+		
+		// XXX: Cannot load defaults due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=169694 
+//		if (encoding == null || encoding.equals(defaultEncoding) || encoding.length() == 0)
+//			fEncodingEditor.loadDefault();
+		
 	}
 
 	private static Key[] getAllKeys() {
