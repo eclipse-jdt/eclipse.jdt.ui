@@ -23,7 +23,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Finds implementors of the selected element in the workspace.
