@@ -31,6 +31,7 @@ public class MultiFixMessages extends NLS {
 	public static String CleanUpRefactoringWizard_Profile_TableHeader;
 	public static String CleanUpRefactoringWizard_Project_TableHeader;
 	public static String CleanUpRefactoringWizard_unknownProfile_Name;
+	public static String CleanUpRefactoringWizard_UnmanagedProfileWithName_Name;
 	public static String CleanUpRefactoringWizard_unnecessary_code_tab;
 	public static String CleanUpRefactoringWizard_use_configured_radio;
 	public static String CleanUpRefactoringWizard_use_custom_radio;

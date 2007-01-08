@@ -140,29 +140,26 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 	     
     		return profileIdsTable;
         }
-		
-		private Profile getProjectProfile(final IJavaProject project, Hashtable profileIdsTable) {
-			ProjectScope projectScope= new ProjectScope(project.getProject());
-	        IEclipsePreferences node= projectScope.getNode(JavaUI.ID_PLUGIN);
-	        if (node.get(CleanUpConstants.CLEANUP_PROFILE, null) == null)
-	        	return null;
-	        
-	        String id= node.get(CleanUpConstants.CLEANUP_PROFILE, null);
-	        return (Profile)profileIdsTable.get(id);
-        }
 
 		private String getProjectProfileName(final IJavaProject project, Hashtable profileIdsTable, String workbenchProfileId) {
-	        Profile profile= getProjectProfile(project, profileIdsTable); 
-	        if (profile == null)
-	        	profile= (Profile)profileIdsTable.get(workbenchProfileId);
-	        
-	        String profileName;
-	        if (profile != null) {
-	        	profileName= profile.getName();
+			ProjectScope projectScope= new ProjectScope(project.getProject());
+	        IEclipsePreferences node= projectScope.getNode(JavaUI.ID_PLUGIN);
+	        String id= node.get(CleanUpConstants.CLEANUP_PROFILE, null);
+			if (id == null) {
+	        	Profile profile= (Profile)profileIdsTable.get(workbenchProfileId);
+		        if (profile != null) {
+		        	return profile.getName();
+		        } else {
+		        	return MultiFixMessages.CleanUpRefactoringWizard_unknownProfile_Name;
+		        }
 	        } else {
-	        	profileName= MultiFixMessages.CleanUpRefactoringWizard_unknownProfile_Name;
+		        Profile profile= (Profile)profileIdsTable.get(id);
+		        if (profile != null) {
+		        	return profile.getName();
+		        } else {
+		        	return Messages.format(MultiFixMessages.CleanUpRefactoringWizard_UnmanagedProfileWithName_Name, id.substring(ProfileManager.ID_PREFIX.length()));
+		        }
 	        }
-	        return profileName;
         }
 
 		public void reset() {

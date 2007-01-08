@@ -64,7 +64,7 @@ public abstract class ProfileManager extends Observable {
      * A prefix which is prepended to every ID of a user-defined profile, in order
      * to differentiate it from a built-in profile.
      */
-	private final static String ID_PREFIX= "_"; //$NON-NLS-1$
+	public final static String ID_PREFIX= "_"; //$NON-NLS-1$
 	
 	/**
 	 * Represents a profile with a unique ID, a name and a map 
