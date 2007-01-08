@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -49,6 +50,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -118,13 +120,16 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 	private final List fOccurrences= new ArrayList(2);
 	
 	private EnhancedForStatement fEnhancedForLoop;
+
+	private final boolean fMakeFinal;
 	
 	public ConvertIterableLoopOperation(ForStatement statement) {
-		this(statement, new String[0]);
+		this(statement, new String[0], false);
 	}
 	
-	public ConvertIterableLoopOperation(ForStatement statement, String[] usedNames) {
+	public ConvertIterableLoopOperation(ForStatement statement, String[] usedNames, boolean makeFinal) {
 		super(statement, usedNames);
+		fMakeFinal= makeFinal;
 	}
 	
 	public String getIntroducedVariableName() {
@@ -299,6 +304,9 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		final ITypeBinding iterable= getIterableType(fIterator.getType());
 		final ImportRewrite imports= importRewrite;
 		declaration.setType(importType(iterable, getForStatement(), importRewrite, getRoot()));
+		if (fMakeFinal) {
+			ModifierRewrite.create(astRewrite, declaration).setModifiers(Modifier.FINAL, 0, group);
+		}
 		remover.registerAddedImport(iterable.getQualifiedName());
 		fEnhancedForLoop.setParameter(declaration);
 		fEnhancedForLoop.setExpression(getExpression(astRewrite));

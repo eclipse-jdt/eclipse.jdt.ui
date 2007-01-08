@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PostfixExpression;
@@ -73,13 +74,15 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	private IBinding fArrayBinding;
 	private Expression fArrayAccess;
 	private VariableDeclarationFragment fElementDeclaration;
+	private final boolean fMakeFinal;
 	
 	public ConvertForLoopOperation(ForStatement forStatement) {
-		this(forStatement, new String[0]);
+		this(forStatement, new String[0], false);
 	}
 	
-	public ConvertForLoopOperation(ForStatement forStatement, String[] usedNames) {
+	public ConvertForLoopOperation(ForStatement forStatement, String[] usedNames, boolean makeFinal) {
 		super(forStatement, usedNames);
+		fMakeFinal= makeFinal;
 	}
 	
 	public IStatus satisfiesPreconditions() {
@@ -517,7 +520,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		AST ast= forStatement.getAST();
 		EnhancedForStatement result= ast.newEnhancedForStatement();
 		
-		SingleVariableDeclaration parameterDeclaration= createParameterDeclaration(parameterName, fElementDeclaration, fArrayAccess, forStatement, importRewrite, rewrite, group, pg);
+		SingleVariableDeclaration parameterDeclaration= createParameterDeclaration(parameterName, fElementDeclaration, fArrayAccess, forStatement, importRewrite, rewrite, group, pg, fMakeFinal);
 		result.setParameter(parameterDeclaration);
 		
 		result.setExpression((Expression)rewrite.createCopyTarget(fArrayAccess));
@@ -585,7 +588,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		});
 	}
 	
-	private SingleVariableDeclaration createParameterDeclaration(String parameterName, VariableDeclarationFragment fragement, Expression arrayAccess, ForStatement statement, ImportRewrite importRewrite, ASTRewrite rewrite, TextEditGroup group, LinkedProposalPositionGroup pg) {
+	private SingleVariableDeclaration createParameterDeclaration(String parameterName, VariableDeclarationFragment fragement, Expression arrayAccess, ForStatement statement, ImportRewrite importRewrite, ASTRewrite rewrite, TextEditGroup group, LinkedProposalPositionGroup pg, boolean makeFinal) {
 		CompilationUnit compilationUnit= (CompilationUnit)arrayAccess.getRoot();
 		AST ast= compilationUnit.getAST();
 		
@@ -605,6 +608,9 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		if (fragement != null) {
 			VariableDeclarationStatement declaration= (VariableDeclarationStatement)fragement.getParent();
 			ModifierRewrite.create(rewrite, result).copyAllModifiers(declaration, group);
+		}
+		if (makeFinal) {
+			ModifierRewrite.create(rewrite, result).setModifiers(Modifier.FINAL, 0, group);
 		}
 		
 		return result;

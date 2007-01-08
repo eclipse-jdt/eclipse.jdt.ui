@@ -477,7 +477,7 @@ public class CleanUpStressTest extends TestCase {
         buf.append("                \"junit.textui.TestRunner\", //$NON-NLS-1$\n");
         buf.append("                \"java.lang.reflect.Method.invoke(\" //$NON-NLS-1$\n");
         buf.append("        };\n");
-        buf.append("        for (String element : patterns) {\n");
+        buf.append("        for (final String element : patterns) {\n");
         buf.append("            if (line.indexOf(element) > 0) {\n");
         buf.append("                return true;\n");
         buf.append("            }\n");
@@ -1821,7 +1821,7 @@ public class CleanUpStressTest extends TestCase {
         buf.append("\n");
         buf.append("    private void readExcludedPackages() {\n");
         buf.append("        this.fExcluded = new Vector(10);\n");
-        buf.append("        for (String element : this.defaultExclusions) {\n");
+        buf.append("        for (final String element : this.defaultExclusions) {\n");
         buf.append("            this.fExcluded.addElement(element);\n");
         buf.append("        }\n");
         buf.append("\n");
@@ -2081,7 +2081,7 @@ public class CleanUpStressTest extends TestCase {
         buf.append("    /**\n");
         buf.append("     * Constructs a TestSuite from the given class. Adds all the methods\n");
         buf.append("     * starting with \"test\" as test cases to the suite. Parts of this method was\n");
-        buf.append("     * written at 2337 meters in the Hüffih\u00FCtte, Kanton Uri\n");
+        buf.append("     * written at 2337 meters in the Hüffihütte, Kanton Uri\n");
         buf.append("     */\n");
         buf.append("    public TestSuite(final Class theClass) {\n");
         buf.append("        this.fName = theClass.getName();\n");
@@ -2105,7 +2105,7 @@ public class CleanUpStressTest extends TestCase {
         buf.append("        final Vector names = new Vector();\n");
         buf.append("        while (Test.class.isAssignableFrom(superClass)) {\n");
         buf.append("            final Method[] methods = superClass.getDeclaredMethods();\n");
-        buf.append("            for (Method element : methods) {\n");
+        buf.append("            for (final Method element : methods) {\n");
         buf.append("                this.addTestMethod(element, names, theClass);\n");
         buf.append("            }\n");
         buf.append("            superClass = superClass.getSuperclass();\n");
@@ -2762,7 +2762,7 @@ public class CleanUpStressTest extends TestCase {
         buf.append("        }\n");
         buf.append("        final String[] contents = thisRoot.list();\n");
         buf.append("        if (contents != null) {\n");
-        buf.append("            for (String element : contents) {\n");
+        buf.append("            for (final String element : contents) {\n");
         buf.append("                this.gatherFiles(classRoot, classFileName + File.separatorChar\n");
         buf.append("                        + element, result);\n");
         buf.append("            }\n");
@@ -3340,7 +3340,7 @@ public class CleanUpStressTest extends TestCase {
         buf.append("    private String expected(final String[] lines) {\n");
         buf.append("        final OutputStream expected = new ByteArrayOutputStream();\n");
         buf.append("        final PrintStream expectedWriter = new PrintStream(expected);\n");
-        buf.append("        for (String element : lines) {\n");
+        buf.append("        for (final String element : lines) {\n");
         buf.append("            expectedWriter.println(element);\n");
         buf.append("        }\n");
         buf.append("        return expected.toString();\n");

@@ -5737,6 +5737,48 @@ public class CleanUpTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
 	}
 	
+	public void testAddFinalBug158041() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(int[] ints, List<E1> es) {\n");
+		buf.append("        for (int j = 0; j < ints.length; j++) {\n");
+		buf.append("            System.out.println(ints[j]);\n");
+		buf.append("        }\n");
+		buf.append("        \n");
+		buf.append("        for (Iterator<E1> iterator = es.iterator(); iterator.hasNext();) {\n");
+		buf.append("            E1 e1 = iterator.next();\n");
+		buf.append("            System.out.println(e1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(int[] ints, List<E1> es) {\n");
+		buf.append("        for (final int element : ints) {\n");
+		buf.append("            System.out.println(element);\n");
+		buf.append("        }\n");
+		buf.append("        \n");
+		buf.append("        for (final E1 e1 : es) {\n");
+		buf.append("            System.out.println(e1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
+	}
+	
 	public void testRemoveBlockReturnThrows01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
