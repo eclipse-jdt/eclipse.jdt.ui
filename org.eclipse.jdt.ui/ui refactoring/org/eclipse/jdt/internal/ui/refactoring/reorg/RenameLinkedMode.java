@@ -10,41 +10,15 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseMoveListener;
-import org.eclipse.swt.events.ShellAdapter;
-import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.bindings.keys.IKeyLookup;
-import org.eclipse.jface.bindings.keys.KeyLookupFactory;
-import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IEditingSupport;
-import org.eclipse.jface.text.IEditingSupportRegistry;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
@@ -54,17 +28,7 @@ import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
-
-import org.eclipse.ui.forms.HyperlinkGroup;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizardPage;
@@ -84,7 +48,6 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.refactoring.RenameSupport;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -95,19 +58,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.refactoring.DelegateUIHelper;
 
 public class RenameLinkedMode {
-
-	private class FocusEditingSupport implements IEditingSupport {
-		public boolean ownsFocusShell() {
-			if (fPopup == null || fPopup.isDisposed())
-				return false;
-			Control focusControl= fPopup.getDisplay().getFocusControl();
-			return focusControl != null && focusControl.getShell() == fPopup;
-		}
-
-		public boolean isOriginator(DocumentEvent event, IRegion subjectRegion) {
-			return true;
-		}
-	}
 
 	private class EditorSynchronizer implements ILinkedModeListener {
 		public void left(LinkedModeModel model, int flags) {
@@ -131,88 +81,25 @@ public class RenameLinkedMode {
 		}
 	}
 	
-	private class PopupVisibilityManager implements IPartListener2, ControlListener {
-		public void start() {
-			fEditor.getSite().getWorkbenchWindow().getPartService().addPartListener(this);
-			fEditor.getViewer().getTextWidget().addControlListener(this);
-			fEditor.getSite().getShell().addControlListener(this);
-			fPopup.addDisposeListener(new DisposeListener() {
-				public void widgetDisposed(DisposeEvent e) {
-					fEditor.getSite().getWorkbenchWindow().getPartService().removePartListener(PopupVisibilityManager.this);
-					fEditor.getViewer().getTextWidget().removeControlListener(PopupVisibilityManager.this);
-					fEditor.getSite().getShell().removeControlListener(PopupVisibilityManager.this);
-					fPopup.removeDisposeListener(this);
-				}
-			});
-		}
-		
-		public void stop() {
-			fEditor.getSite().getWorkbenchWindow().getPartService().removePartListener(this);
-		}
-		
-		public void partActivated(IWorkbenchPartReference partRef) {
-			IWorkbenchPart fPart= fEditor.getEditorSite().getPart();
-			if (fPopup != null && ! fPopup.isDisposed() && partRef.getPart(false) == fPart) {
-				fPopup.setVisible(true);
-			}
-		}
-
-		public void partBroughtToTop(IWorkbenchPartReference partRef) {
-		}
-
-		public void partClosed(IWorkbenchPartReference partRef) {
-		}
-
-		public void partDeactivated(IWorkbenchPartReference partRef) {
-			IWorkbenchPart fPart= fEditor.getEditorSite().getPart();
-			if (fPopup != null && ! fPopup.isDisposed() && partRef.getPart(false) == fPart) {
-				fPopup.setVisible(false);
-			}
-		}
-
-		public void partHidden(IWorkbenchPartReference partRef) {
-		}
-
-		public void partInputChanged(IWorkbenchPartReference partRef) {
-		}
-
-		public void partOpened(IWorkbenchPartReference partRef) {
-		}
-
-		public void partVisible(IWorkbenchPartReference partRef) {
-		}
-
-		public void controlMoved(ControlEvent e) {
-			setPopupLocation(fEditor.getViewer());
-		}
-
-		public void controlResized(ControlEvent e) {
-			setPopupLocation(fEditor.getViewer());
-		}
-	}
-
+	
 	private static RenameLinkedMode fgActiveLinkedMode;
 	
 	private CompilationUnitEditor fEditor;
 	private IJavaElement fJavaElement;
 
-	private Shell fPopup;
-	private LinkedPosition fNamePosition;
+	private RenameInformationPopup fInfoPopup;
 	
-	private final IEditingSupport fFocusEditingSupport;
-
 	private Point fOriginalSelection;
 	private String fOriginalName;
 
+	private LinkedPosition fNamePosition;
 	private LinkedModeModel fLinkedModeModel;
 	private LinkedPositionGroup fLinkedPositionGroup;
 	private boolean fShowPreview;
 
-
 	public RenameLinkedMode(IJavaElement element, CompilationUnitEditor editor) {
 		fEditor= editor;
 		fJavaElement= element;
-		fFocusEditingSupport= new FocusEditingSupport();
 	}
 	
 	public static RenameLinkedMode getActiveLinkedMode() {
@@ -296,16 +183,19 @@ public class RenameLinkedMode {
 	}
 	
 //	private void startAnimation() {
+//		//TODO:
+//		// - switch off if animations disabled 
+//		// - show rectangle around target for 500ms after animation
 //		Shell shell= fEditor.getSite().getShell();
 //		StyledText textWidget= fEditor.getViewer().getTextWidget();
 //		
 //		// from popup:
-////		Rectangle startRect= fPopup.getBounds();
+//		Rectangle startRect= fPopup.getBounds();
 //		
 //		// from editor:
-//		Point startLoc= textWidget.getParent().toDisplay(textWidget.getLocation());
-//		Point startSize= textWidget.getSize();
-//		Rectangle startRect= new Rectangle(startLoc.x, startLoc.y, startSize.x, startSize.y);
+////		Point startLoc= textWidget.getParent().toDisplay(textWidget.getLocation());
+////		Point startSize= textWidget.getSize();
+////		Rectangle startRect= new Rectangle(startLoc.x, startLoc.y, startSize.x, startSize.y);
 //		
 //		// from hell:
 ////		Rectangle startRect= shell.getClientArea();
@@ -546,193 +436,12 @@ public class RenameLinkedMode {
 
 	private void closePopup() {
 		fgActiveLinkedMode= null;
-		if (fPopup != null) {
-			if (!fPopup.isDisposed()) {
-				fPopup.close();
-			}
-			fPopup= null;
-		}
-		ISourceViewer viewer= fEditor.getViewer();
-		if (viewer instanceof IEditingSupportRegistry) {
-			IEditingSupportRegistry registry= (IEditingSupportRegistry) viewer;
-			registry.unregister(fFocusEditingSupport);
-		}
+		fInfoPopup.close();
 	}
 
 	public void openSecondaryPopup() {
-		ISourceViewer viewer= fEditor.getViewer();
-		
-		if (viewer instanceof IEditingSupportRegistry) {
-			IEditingSupportRegistry registry= (IEditingSupportRegistry) viewer;
-			registry.register(fFocusEditingSupport);
-		}
-		
-		Shell workbenchShell= fEditor.getSite().getShell();
-		final Display display= workbenchShell.getDisplay();
-		
-		fPopup= new Shell(workbenchShell, SWT.ON_TOP | SWT.NO_TRIM);
-		GridLayout shellLayout= new GridLayout();
-		shellLayout.marginWidth= 1;
-		shellLayout.marginHeight= 1;
-		fPopup.setLayout(shellLayout);
-		fPopup.setBackground(viewer.getTextWidget().getForeground());
-		
-		createTable(fPopup);
-		
-		fPopup.pack();
-		setPopupLocation(viewer);
-		
-		addMoveSupport(fPopup, fPopup);
-		new PopupVisibilityManager().start();
-		fPopup.addShellListener(new ShellAdapter() {
-			public void shellDeactivated(ShellEvent e) {
-				final Shell editorShell= fEditor.getSite().getShell();
-				display.asyncExec(new Runnable() {
-					// post to UI thread since editor shell only gets activated after popup has lost focus
-					public void run() {
-						Shell activeShell= display.getActiveShell();
-						if (activeShell != editorShell) {
-							fLinkedModeModel.exit(ILinkedModeListener.NONE);
-						}
-					}
-				});
-			}
-		});
-		
-		fPopup.setVisible(true);
-	}
-
-	private void setPopupLocation(ISourceViewer sourceViewer) {
-		if (fPopup == null || fPopup.isDisposed())
-			return;
-		
-		StyledText eWidget= sourceViewer.getTextWidget();
-		Rectangle eBounds= eWidget.getClientArea();
-		Point eLowerRight= eWidget.toDisplay(eBounds.x + eBounds.width, eBounds.y + eBounds.height);
-		Point pSize= fPopup.getSize();
-		/*
-		 * possible improvement: try not to cover selection:
-		 */
-		fPopup.setLocation(eLowerRight.x - pSize.x - 5, eLowerRight.y - pSize.y - 5);
-	}
-
-	private static void addMoveSupport(final Shell shell, final Control control) {
-		control.addMouseListener(new MouseAdapter() {
-			private MouseMoveListener fMoveListener;
-
-			public void mouseDown(final MouseEvent downEvent) {
-				final Point location= shell.getLocation();
-				fMoveListener= new MouseMoveListener() {
-					public void mouseMove(MouseEvent moveEvent) {
-						Point down= control.toDisplay(downEvent.x, downEvent.y);
-						Point move= control.toDisplay(moveEvent.x, moveEvent.y);
-						location.x= location.x + move.x - down.x;
-						location.y= location.y + move.y - down.y;
-						shell.setLocation(location);
-					}
-				};
-				control.addMouseMoveListener(fMoveListener);
-			}
-			
-			public void mouseUp(MouseEvent e) {
-				control.removeMouseMoveListener(fMoveListener);
-				fMoveListener= null;
-			}
-		});
-	}
-	
-	private Control createTable(Composite parent) {
-		final Display display= parent.getDisplay();
-		
-		Composite table= new Composite(parent, SWT.NONE);
-		GridLayout tableLayout= new GridLayout(2, false);
-		tableLayout.marginHeight= 5; 
-		tableLayout.marginWidth= 5;
-		tableLayout.horizontalSpacing= 10;
-		table.setLayout(tableLayout);
-		table.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
-		
-		Hyperlink refactorLink= new Hyperlink(table, SWT.NONE);
-		refactorLink.setText(ReorgMessages.RenameLinkedMode_refactor_rename);
-		refactorLink.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
-		refactorLink.addHyperlinkListener(new HyperlinkAdapter() {
-			public void linkActivated(HyperlinkEvent e) {
-				display.asyncExec(new Runnable() { //TODO: workaround for 157196: [Forms] Hyperlink listener notification throws AIOOBE when listener removed in callback
-					public void run() {
-						doRename(false);
-					}
-				});
-			}
-		});
-		Label refactorBinding= new Label(table, SWT.NONE);
-		String refactorBindingText= KeyStroke.getInstance(KeyLookupFactory.getDefault().formalKeyLookup(IKeyLookup.CR_NAME)).format();
-		refactorBinding.setText(refactorBindingText);
-		
-		Hyperlink previewLink= new Hyperlink(table, SWT.NONE);
-		previewLink.setText(ReorgMessages.RenameLinkedMode_preview);
-		previewLink.addHyperlinkListener(new HyperlinkAdapter() {
-			public void linkActivated(HyperlinkEvent e) {
-				display.asyncExec(new Runnable() { //TODO: workaround for 157196: [Forms] Hyperlink listener notification throws AIOOBE when listener removed in callback
-					public void run() {
-						doRename(true);
-					}
-				});
-			}
-		});
-		Label previewBinding= new Label(table, SWT.NONE);
-		String previewBindingText= KeyStroke.getInstance(SWT.CTRL, KeyLookupFactory.getDefault().formalKeyLookup(IKeyLookup.CR_NAME)).format();
-		previewBinding.setText(previewBindingText);
-		
-		Hyperlink openDialogLink= new Hyperlink(table, SWT.NONE);
-		openDialogLink.setText(ReorgMessages.RenameLinkedMode_open_dialog);
-		openDialogLink.addHyperlinkListener(new HyperlinkAdapter() {
-			public void linkActivated(HyperlinkEvent e) {
-				display.asyncExec(new Runnable() { //TODO: workaround for 157196: [Forms] Hyperlink listener notification throws AIOOBE when listener removed in callback
-					public void run() {
-						startFullDialog();
-					}
-				});
-			}
-		});
-		Label openDialogBinding= new Label(table, SWT.NONE);
-		String openDialogBindingString= getOpenDialogBinding();
-		if (openDialogBindingString != null)
-			openDialogBinding.setText(openDialogBindingString); 
-		
-		HyperlinkGroup hyperlinkGroup= new HyperlinkGroup(display);
-		hyperlinkGroup.add(refactorLink);
-		hyperlinkGroup.add(previewLink);
-		hyperlinkGroup.add(openDialogLink);
-		hyperlinkGroup.setForeground(fEditor.getViewer().getTextWidget().getForeground());
-		
-		recursiveSetBackgroundColor(table, fEditor.getViewer().getTextWidget().getBackground());
-		
-		Point size= table.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-		fPopup.setSize(size);
-		
-		addMoveSupport(fPopup, table);
-		addMoveSupport(fPopup, refactorBinding);
-		addMoveSupport(fPopup, previewBinding);
-		addMoveSupport(fPopup, openDialogBinding);
-		
-		return table;
-	}
-	
-	private String getOpenDialogBinding() {
-		IBindingService bindingService= (IBindingService)PlatformUI.getWorkbench().getAdapter(IBindingService.class);
-		if (bindingService == null)
-			return null;
-		return bindingService.getBestActiveBindingFormattedFor(IJavaEditorActionDefinitionIds.RENAME_ELEMENT);
-	}
-	
-	private void recursiveSetBackgroundColor(Control control, Color color) {
-		control.setBackground(color);
-		if (control instanceof Composite) {
-			Control[] children= ((Composite) control).getChildren();
-			for (int i= 0; i < children.length; i++) {
-				recursiveSetBackgroundColor(children[i], color);
-			}
-		}
+		fInfoPopup= new RenameInformationPopup(fEditor, this);
+		fInfoPopup.open();
 	}
 
 	public boolean isCaretInLinkedPosition() {
