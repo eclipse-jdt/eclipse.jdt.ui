@@ -326,7 +326,7 @@ public abstract class ModifyDialog extends StatusDialog {
 	protected void updateButtonsEnableState(IStatus status) {
 	    super.updateButtonsEnableState(status);
 	    if (fApplyButton != null && !fApplyButton.isDisposed()) {
-			fApplyButton.setEnabled(!status.matches(IStatus.ERROR));
+	    	fApplyButton.setEnabled(hasChanges() && !status.matches(IStatus.ERROR));
 		}
 	    if (fSaveButton != null && !fSaveButton.isDisposed()) {
 	    	fSaveButton.setEnabled(!validateProfileName().matches(IStatus.ERROR));
@@ -334,11 +334,6 @@ public abstract class ModifyDialog extends StatusDialog {
 	}
 	
     private void doValidate() {
-    	if (!hasChanges()) {
-    		updateStatus(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, "")); //$NON-NLS-1$
-    		return;
-    	}
-    	
     	IStatus status= validateProfileName();
     	if (status.matches(IStatus.ERROR)) {
     		updateStatus(status);
