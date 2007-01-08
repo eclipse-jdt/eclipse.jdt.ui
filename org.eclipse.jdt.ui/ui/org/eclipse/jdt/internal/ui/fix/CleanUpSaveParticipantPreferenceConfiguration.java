@@ -70,7 +70,9 @@ public class CleanUpSaveParticipantPreferenceConfiguration implements ISaveParti
 		CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES, 
 		CleanUpConstants.ORGANIZE_IMPORTS,
 		CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS,
-		CleanUpConstants.EXPRESSIONS_USE_PARENTHESES
+		CleanUpConstants.EXPRESSIONS_USE_PARENTHESES,
+		CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL,
+		CleanUpConstants.ADD_MISSING_ANNOTATIONS
 	};
 	
 	private static class PreferenceModifyBlock extends ModifyDialogTabPage {
