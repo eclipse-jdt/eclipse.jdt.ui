@@ -124,10 +124,10 @@ public class CleanUpStressTest extends TestCase {
 			if (element instanceof ICompilationUnit) {
 				result.add(element);
 			} else if (element instanceof IPackageFragmentRoot) {
-				IPackageFragmentRoot root= ((IPackageFragmentRoot)element);
+				IPackageFragmentRoot root= (IPackageFragmentRoot)element;
 				addAllCUs(root.getChildren(), result);
 			} else if (element instanceof IPackageFragment) {
-				IPackageFragment pack= ((IPackageFragment)element);
+				IPackageFragment pack= (IPackageFragment)element;
 				addAllCUs(pack.getChildren(), result);
 			}
 		}
@@ -2969,7 +2969,7 @@ public class CleanUpStressTest extends TestCase {
         buf.append(" * A command line based tool to run tests.\n");
         buf.append(" * \n");
         buf.append(" * <pre>\n");
-        buf.append(" *  java junit.textui.TestRunner [-wait] TestCaseClass\n");
+        buf.append(" * java junit.textui.TestRunner [-wait] TestCaseClass\n");
         buf.append(" * </pre>\n");
         buf.append(" * \n");
         buf.append(" * TestRunner expects the name of a TestCase class as argument. If this class\n");
