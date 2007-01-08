@@ -44,7 +44,10 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
-public class MethodCompletionProposal extends JavaTypeCompletionProposal implements ICompletionProposalExtension4 {
+/**
+ * Method declaration proposal.
+ */
+public class MethodDeclarationCompletionProposal extends JavaTypeCompletionProposal implements ICompletionProposalExtension4 {
 
 
 	public static void evaluateProposals(IType type, String prefix, int offset, int length, int relevance, Set suggestedMethods, Collection result) throws CoreException {
@@ -52,13 +55,13 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal impleme
 		if (!type.isInterface()) {
 			String constructorName= type.getElementName();
 			if (constructorName.length() > 0 && constructorName.startsWith(prefix) && !hasMethod(methods, constructorName) && suggestedMethods.add(constructorName)) {
-				result.add(new MethodCompletionProposal(type, constructorName, null, offset, length, relevance + 500));
+				result.add(new MethodDeclarationCompletionProposal(type, constructorName, null, offset, length, relevance + 500));
 			}
 		}
 
 		if (prefix.length() > 0 && !"main".equals(prefix) && !hasMethod(methods, prefix) && suggestedMethods.add(prefix)) { //$NON-NLS-1$
 			if (!JavaConventions.validateMethodName(prefix).matches(IStatus.ERROR)) {
-				result.add(new MethodCompletionProposal(type, prefix, Signature.SIG_VOID, offset, length, relevance));
+				result.add(new MethodDeclarationCompletionProposal(type, prefix, Signature.SIG_VOID, offset, length, relevance));
 			}
 		}
 	}
@@ -77,7 +80,7 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal impleme
 	private final String fReturnTypeSig;
 	private final String fMethodName;
 
-	public MethodCompletionProposal(IType type, String methodName, String returnTypeSig, int start, int length, int relevance) {
+	public MethodDeclarationCompletionProposal(IType type, String methodName, String returnTypeSig, int start, int length, int relevance) {
 		super("", type.getCompilationUnit(), start, length, null, getDisplayName(methodName, returnTypeSig), relevance); //$NON-NLS-1$
 		Assert.isNotNull(type);
 		Assert.isNotNull(methodName);

@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaMethodCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.java.MethodCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.MethodDeclarationCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.MethodProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.OverrideCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.ProposalContextInformation;
@@ -598,7 +598,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 				IType type= (IType) element.getAncestor(IJavaElement.TYPE);
 				if (type != null) {
 					GetterSetterCompletionProposal.evaluateProposals(type, prefix, completionStart, completionEnd - completionStart, relevance + 1, fSuggestedMethodNames, fJavaProposals);
-					MethodCompletionProposal.evaluateProposals(type, prefix, completionStart, completionEnd - completionStart, relevance, fSuggestedMethodNames, fJavaProposals);
+					MethodDeclarationCompletionProposal.evaluateProposals(type, prefix, completionStart, completionEnd - completionStart, relevance, fSuggestedMethodNames, fJavaProposals);
 				}
 			}
 		} catch (CoreException e) {
