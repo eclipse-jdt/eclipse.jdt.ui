@@ -35,6 +35,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -234,7 +235,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
         public void createControl(Composite parent) {
         	boolean isCustom= getDialogSettings().getBoolean(USE_CUSTOM_PROFILE_KEY);
         	
-        	Composite composite= new Composite(parent, SWT.NONE);
+        	final Composite composite= new Composite(parent, SWT.NONE);
 			composite.setLayout(new GridLayout(2, false));
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
@@ -314,6 +315,21 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 						fEnableState= ControlEnableState.disable(tabFolder);
 					}
                 }				
+			});
+			
+			Link preferencePageLink= new Link(composite, SWT.WRAP);
+			preferencePageLink.setText(MultiFixMessages.CleanUpRefactoringWizard_HideWizard_Link);
+			GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, false);
+			gridData.widthHint= convertWidthInCharsToPixels(300);
+			gridData.horizontalSpan= 2;
+			preferencePageLink.setLayoutData(gridData);
+			preferencePageLink.addSelectionListener(new SelectionAdapter() {
+				/**
+				 * {@inheritDoc}
+				 */
+				public void widgetSelected(SelectionEvent e) {
+					PreferencesUtil.createPreferenceDialogOn(composite.getShell(), CleanUpPreferencePage.PREF_ID, null, null).open();
+				}
 			});
 			
 			setControl(composite);
