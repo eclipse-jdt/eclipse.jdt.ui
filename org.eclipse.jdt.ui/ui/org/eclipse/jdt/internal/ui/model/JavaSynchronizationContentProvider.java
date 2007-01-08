@@ -402,6 +402,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 //						}
 //					}
 				}
+			}
 		}
 		return list.toArray(new Object[list.size()]);
 	}
