@@ -27,9 +27,7 @@ public class CodeFormatterPreferencePage extends ProfilePreferencePage {
 	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.CodeFormatterPreferencePage"; //$NON-NLS-1$
 	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.CodeFormatterPreferencePage"; //$NON-NLS-1$
 	
-	public CodeFormatterPreferencePage() {
-		setDescription(PreferencesMessages.CodeFormatterPreferencePage_description); 
-		
+	public CodeFormatterPreferencePage() {		
 		// only used when page is shown programatically
 		setTitle(PreferencesMessages.CodeFormatterPreferencePage_title);		 
 	}

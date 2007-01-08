@@ -50,6 +50,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.PreferencesAccess;
+import org.eclipse.jdt.internal.ui.preferences.PreferencesMessages;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -351,6 +352,12 @@ public abstract class ProfileConfigurationBlock {
 		fPixConv = new PixelConverter(parent);
 		fComposite = createComposite(parent, numColumns);
 
+		Label profileLabel= new Label(fComposite, SWT.NONE);
+		profileLabel.setText(PreferencesMessages.CleanUpPreferencePage_Description);
+		GridData data= new GridData(SWT.FILL, SWT.FILL, true, false);
+		data.horizontalSpan= numColumns;
+		profileLabel.setLayoutData(data);
+		
 		fProfileCombo= createProfileCombo(fComposite, 3, fPixConv.convertWidthInCharsToPixels(20));
 		fEditButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_edit_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING);  
 		fDeleteButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_remove_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING); 

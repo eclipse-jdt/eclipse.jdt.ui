@@ -24,9 +24,7 @@ public class CleanUpPreferencePage extends ProfilePreferencePage {
 	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.CleanUpPreferencePage"; //$NON-NLS-1$
 	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.CleanUpPreferencePage"; //$NON-NLS-1$
 	
-	public CleanUpPreferencePage() {
-		setDescription(PreferencesMessages.CleanUpPreferencePage_Description); 
-		
+	public CleanUpPreferencePage() {		
 		// only used when page is shown programmatically
 		setTitle(PreferencesMessages.CleanUpPreferencePage_Title );		 
 	}
@@ -34,7 +32,7 @@ public class CleanUpPreferencePage extends ProfilePreferencePage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.ProfilePreferencePage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
-	public void createControl(Composite parent) {
+	public void createControl(Composite parent) { 
 	    super.createControl(parent);
 //    	PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.CODEFORMATTER_PREFERENCE_PAGE);
 	}
