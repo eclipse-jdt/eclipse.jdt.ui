@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +35,7 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -49,6 +52,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
 
 public class CleanUpPostSaveListener implements IPostSaveListener {
 	
+	private static final String WARNING_VALUE= "warning"; //$NON-NLS-1$
+	private static final String ERROR_VALUE= "error"; //$NON-NLS-1$
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -80,7 +86,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 					cleanUps[i].checkPreConditions(unit.getJavaProject(), new ICompilationUnit[] {unit}, new SubProgressMonitor(monitor, 5));
 				}
 				
-				Map options= RefactoringASTParser.getCompilerOptions(unit.getJavaProject());
+				Map options= new HashMap();
 				for (int i= 0; i < cleanUps.length; i++) {
 					Map map= cleanUps[i].getRequiredOptions();
 					if (map != null) {
@@ -113,17 +119,56 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			monitor.done();
 		}
 	}
-	
-	private CompilationUnit createAst(ICompilationUnit unit, Map options, IProgressMonitor monitor) {
+
+	private CompilationUnit createAst(ICompilationUnit unit, Map cleanUpOptions, IProgressMonitor monitor) {
+		IJavaProject project= unit.getJavaProject();
+		if (compatibleOptions(project, cleanUpOptions)) {
+			CompilationUnit ast= ASTProvider.getASTProvider().getAST(unit, ASTProvider.WAIT_NO, monitor);
+			if (ast != null)
+				return ast;
+		}
+		
 		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		parser.setResolveBindings(true);
-		parser.setProject(unit.getJavaProject());
+		parser.setProject(project);
 		parser.setSource(unit);
-		parser.setCompilerOptions(options);
+		Map compilerOptions= RefactoringASTParser.getCompilerOptions(unit.getJavaProject());
+		compilerOptions.putAll(cleanUpOptions);
+		parser.setCompilerOptions(compilerOptions);
 		
 		return (CompilationUnit)parser.createAST(monitor);
 	}
 	
+	private boolean compatibleOptions(IJavaProject project, Map cleanUpOptions) {
+		if (cleanUpOptions.size() == 0)
+			return true;
+		
+		Map projectOptions= project.getOptions(true);
+		
+		for (Iterator iterator= cleanUpOptions.keySet().iterator(); iterator.hasNext();) {
+	        String key= (String)iterator.next();
+	        String projectOption= (String)projectOptions.get(key);
+			String cleanUpOption= (String)cleanUpOptions.get(key);
+			if (!strongerEquals(projectOption, cleanUpOption))
+				return false;
+        }
+		
+	    return true;
+    }
+
+	private boolean strongerEquals(String projectOption, String cleanUpOption) {
+		if (projectOption == null)
+			return false;
+		
+		if (ERROR_VALUE.equals(cleanUpOption)) {
+			return ERROR_VALUE.equals(projectOption);
+		} else if (WARNING_VALUE.equals(cleanUpOption)) {
+			return ERROR_VALUE.equals(projectOption) || WARNING_VALUE.equals(projectOption);
+		}
+		
+	    return false;
+    }
+
 	/**
 	 * {@inheritDoc}
 	 */
