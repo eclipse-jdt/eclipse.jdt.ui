@@ -60,9 +60,8 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.junit.launcher.AssertionVMArg;
+import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
-import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
-import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfiguration;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
@@ -237,7 +236,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	 * @return the launch configuration type id of the launch configuration this shortcut will create
 	 */
 	protected String getLaunchConfigurationTypeId() {
-		return JUnitLaunchConfiguration.ID_JUNIT_APPLICATION;
+		return JUnitLaunchConfigurationConstants.ID_JUNIT_APPLICATION;
 	}
 	
 	/**
@@ -287,13 +286,13 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 			
 		wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, mainTypeQualifiedName);
 		wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, element.getJavaProject().getElementName());
-		wc.setAttribute(JUnitBaseLaunchConfiguration.ATTR_KEEPRUNNING, false);
-		wc.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, containerHandleId);
-		wc.setAttribute(JUnitBaseLaunchConfiguration.TEST_KIND_ATTR, testKindId);
+		wc.setAttribute(JUnitLaunchConfigurationConstants.ATTR_KEEPRUNNING, false);
+		wc.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, containerHandleId);
+		wc.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_RUNNER_KIND, testKindId);
 		wc.setMappedResources(new IResource[] { element.getJavaProject().getProject() });
 		AssertionVMArg.setArgDefault(wc);
 		if (element instanceof IMethod) {
-			wc.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, element.getElementName()); // only set for methods
+			wc.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME, element.getElementName()); // only set for methods
 		}
 		return wc;
 	}
@@ -306,8 +305,8 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	 */
 	protected String[] getAttributeNamesToCompare() {
 		return new String[] {
-			IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR,
-			IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, JUnitBaseLaunchConfiguration.TESTNAME_ATTR
+			IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER,
+			IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME
 		};
 	}
 	

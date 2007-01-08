@@ -103,8 +103,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.viewsupport.ViewHistory;
 
 import org.eclipse.jdt.internal.junit.Messages;
+import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
-import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.model.ITestRunSessionListener;
 import org.eclipse.jdt.internal.junit.model.ITestSessionListener;
@@ -892,11 +892,11 @@ public class TestRunnerViewPart extends ViewPart {
 
 	private ILaunchConfiguration prepareLaunchConfigForRelaunch(ILaunchConfiguration configuration) {
 		try {
-			String attribute= configuration.getAttribute(JUnitBaseLaunchConfiguration.FAILURES_FILENAME_ATTR, ""); //$NON-NLS-1$
+			String attribute= configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_FAILURES_NAMES, ""); //$NON-NLS-1$
 			if (attribute.length() != 0) {
 				String configName= Messages.format(JUnitMessages.TestRunnerViewPart_configName, configuration.getName()); 
 				ILaunchConfigurationWorkingCopy tmp= configuration.copy(configName); 
-				tmp.setAttribute(JUnitBaseLaunchConfiguration.FAILURES_FILENAME_ATTR, ""); //$NON-NLS-1$
+				tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_FAILURES_NAMES, ""); //$NON-NLS-1$
 				return tmp;
 			}
 		} catch (CoreException e) {
@@ -918,7 +918,7 @@ public class TestRunnerViewPart extends ViewPart {
 				if (launchConfiguration != null) {
 					try {
 						String oldName= launchConfiguration.getName(); 
-						String oldFailuresFilename= launchConfiguration.getAttribute(JUnitBaseLaunchConfiguration.FAILURES_FILENAME_ATTR, (String) null);
+						String oldFailuresFilename= launchConfiguration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_FAILURES_NAMES, (String) null);
 						String configName;
 						if (oldFailuresFilename != null) {
 							configName= oldName;
@@ -926,7 +926,7 @@ public class TestRunnerViewPart extends ViewPart {
 							configName= Messages.format(JUnitMessages.TestRunnerViewPart_rerunFailedFirstLaunchConfigName, oldName); 
 						}
 						ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy(configName); 
-						tmp.setAttribute(JUnitBaseLaunchConfiguration.FAILURES_FILENAME_ATTR, createFailureNamesFile());
+						tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_FAILURES_NAMES, createFailureNamesFile());
 						tmp.launch(fTestRunSession.getLaunch().getLaunchMode(), null);	
 						return;	
 					} catch (CoreException e) {
@@ -1132,26 +1132,18 @@ action enablement
 	    if (fTestRunSession == null)
 	    	return true; // optimistic
 	    
-		ILaunchConfiguration config= fTestRunSession.getLaunch().getLaunchConfiguration();
-		if (config == null)
-			return true;
-
-		ITestKind kind= TestKindRegistry.getDefault().getKind(config);
-		return kind.isNull() || TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(kind.getId());
+	    return TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(fTestRunSession.getTestRunnerKind().getId());
     }
 
     /**
      * @return the display name of the current test run sessions kind, or <code>null</code>
      */
     public String getTestKindDisplayName() {
-		String testKindDisplayStr= null;
-		ILaunchConfiguration config= fTestRunSession.getLaunch().getLaunchConfiguration();
-		if (config != null) {
-			ITestKind kind= TestKindRegistry.getDefault().getKind(config);
-			if (!kind.isNull())
-				testKindDisplayStr= kind.getDisplayName();
+    	ITestKind kind= fTestRunSession.getTestRunnerKind();
+		if (!kind.isNull()) {
+			return  kind.getDisplayName();
 		}
-		return testKindDisplayStr;
+		return null;
 	}
     
 	private void setTitleToolTip() {
@@ -1550,7 +1542,7 @@ action enablement
 	}
 
 	public IJavaProject getLaunchedProject() {
-		return fTestRunSession.getLaunchedType().getJavaProject();
+		return fTestRunSession.getLaunchedProject();
 	}
 	
 	public ILaunch getLastLaunch() {

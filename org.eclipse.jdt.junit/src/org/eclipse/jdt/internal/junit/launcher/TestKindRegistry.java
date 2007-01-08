@@ -18,16 +18,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Platform;
 
-import org.eclipse.debug.core.ILaunchConfiguration;
-
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
@@ -92,27 +88,6 @@ public class TestKindRegistry {
 			result.add(type.getDisplayName());
 		}
 		return result;
-	}
-
-	public ITestKind getKind(ILaunchConfiguration launchConfiguration) {
-		ITestKind configuredKind= ITestKind.NULL;
-		try {
-			String loaderId = launchConfiguration.getAttribute(JUnitBaseLaunchConfiguration.TEST_KIND_ATTR, (String) null);
-			if (loaderId != null) {
-				configuredKind= getKind(loaderId);
-			}
-		} catch (CoreException e) {
-		}
-		if (configuredKind.isNull()) {
-			try {
-				IJavaProject javaProject= new JUnitLaunchConfiguration().getJavaProject(launchConfiguration);
-				if (javaProject != null)
-					return getContainerTestKind(javaProject);
-			} catch (CoreException e) {
-				// fallback to default
-			}
-		}
-		return configuredKind;
 	}
 
 	/**

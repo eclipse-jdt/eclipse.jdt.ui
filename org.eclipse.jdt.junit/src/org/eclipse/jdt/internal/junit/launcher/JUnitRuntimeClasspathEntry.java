@@ -31,7 +31,7 @@ public class JUnitRuntimeClasspathEntry {
 		return fPluginRelativePath;
 	}
 
-	JUnitRuntimeClasspathEntry developmentModeEntry() {
+	public JUnitRuntimeClasspathEntry developmentModeEntry() {
 		return new JUnitRuntimeClasspathEntry(getPluginId(), "bin"); //$NON-NLS-1$
 	}
 

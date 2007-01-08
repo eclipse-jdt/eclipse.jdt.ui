@@ -1,6 +1,13 @@
-/**
- * 
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.jdt.junit.tests;
 
 import java.util.ArrayList;
@@ -31,7 +38,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
+import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
@@ -39,7 +46,7 @@ import org.eclipse.jdt.testplugin.util.DisplayHelper;
 import org.eclipse.jdt.junit.launcher.JUnitLaunchShortcut;
 
 
-public class AbtractTestRunListenerTest extends TestCase {
+public class AbstractTestRunListenerTest extends TestCase {
 	
 	public static class TestRunLog {
 		private ArrayList/*<String>*/ fLog;
@@ -180,9 +187,8 @@ public class AbtractTestRunListenerTest extends TestCase {
 			return false;
 		
 		// test whether the launch defines the JUnit attributes
-		String portStr= launch.getAttribute(JUnitBaseLaunchConfiguration.PORT_ATTR);
-		String typeStr= launch.getAttribute(JUnitBaseLaunchConfiguration.TESTTYPE_ATTR);
-		if (portStr == null || typeStr == null)
+		String portStr= launch.getAttribute(JUnitLaunchConfigurationConstants.ATTR_PORT);
+		if (portStr == null)
 			return false;
 		
 		return true;

@@ -30,11 +30,9 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchListener;
 import org.eclipse.debug.core.ILaunchManager;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.IJavaProject;
 
-import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
+import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.ui.JUnitPreferencesConstants;
@@ -87,27 +85,28 @@ public final class JUnitModel {
 			if (config == null)
 				return;
 			
+			final IJavaProject javaProject= JUnitLaunchConfigurationConstants.getJavaProject(config);
+			if (javaProject == null)
+				return;
+			
 			// test whether the launch defines the JUnit attributes
-			String portStr= launch.getAttribute(JUnitBaseLaunchConfiguration.PORT_ATTR);
-			String typeStr= launch.getAttribute(JUnitBaseLaunchConfiguration.TESTTYPE_ATTR);
-			if (portStr == null || typeStr == null)
+			String portStr= launch.getAttribute(JUnitLaunchConfigurationConstants.ATTR_PORT);
+			if (portStr == null)
 				return;
-			
-			IJavaElement element= JavaCore.create(typeStr);
-			if (! (element instanceof IType))
+			try {
+				final int port= Integer.parseInt(portStr);
+				fTrackedLaunches.remove(launch);
+				getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						connectTestRunner(launch, javaProject, port);
+					}
+				});
+			} catch (NumberFormatException e) {
 				return;
-			
-			final int port= Integer.parseInt(portStr);
-			final IType launchedType= (IType) element;
-			fTrackedLaunches.remove(launch);
-			getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					connectTestRunner(launch, launchedType, port);
-				}
-			});
+			}
 		}
 
-		private void connectTestRunner(ILaunch launch, IType launchedType, int port) {
+		private void connectTestRunner(ILaunch launch, IJavaProject javaProject, int port) {
 			showTestRunnerViewPartInActivePage(findTestRunnerViewPartInActivePage());
 			
 			//TODO: Do notifications have to be sent in UI thread? 
@@ -120,7 +119,7 @@ public final class JUnitModel {
 				notifyTestRunSessionRemoved(session);
 			}
 			
-			TestRunSession testRunSession= new TestRunSession(launchedType, port, launch);
+			TestRunSession testRunSession= new TestRunSession(launch, javaProject, port);
 			fTestRunSessions.addFirst(testRunSession);
 			notifyTestRunSessionAdded(testRunSession);
 		}

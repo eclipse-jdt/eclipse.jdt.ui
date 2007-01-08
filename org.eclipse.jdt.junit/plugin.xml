@@ -67,7 +67,7 @@
          point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
             name="%Launch.label"
-            delegate="org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfiguration"
+            delegate="org.eclipse.jdt.junit.launcher.JUnitLaunchConfigurationDelegate"
             modes="run, debug"
             id="org.eclipse.jdt.junit.launchconfig"
             sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"

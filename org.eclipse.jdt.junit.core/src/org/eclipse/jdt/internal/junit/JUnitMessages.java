@@ -58,19 +58,8 @@ public final class JUnitMessages extends NLS {
 	public static String JUnitAddLibraryProposal_junit4_info;
 	public static String JUnitAddLibraryProposal_label;
 	
-	public static String JUnitBaseLaunchConfiguration_dialog_title;
-
-	public static String JUnitBaseLaunchConfiguration_erro_unknowtestrunner;
-
-	public static String JUnitBaseLaunchConfiguration_error_input_element_deosn_not_exist;
-	public static String JUnitBaseLaunchConfiguration_error_invalidproject;
-	public static String JUnitBaseLaunchConfiguration_error_junitnotonpath;
-	public static String JUnitBaseLaunchConfiguration_error_junit4notonpath;
 	public static String JUnitBaseLaunchConfiguration_error_notests;
-	public static String JUnitBaseLaunchConfiguration_error_notests_kind;
 	public static String JUnitBaseLaunchConfiguration_error_novmrunner;
-
-	public static String JUnitBaseLaunchConfiguration_input_type_does_not_exist;
 
 	public static String JUnitContainerInitializer_description_initializer_junit3;
 
@@ -101,6 +90,30 @@ public final class JUnitMessages extends NLS {
 	public static String JUnitContainerWizardPage_wizard_description;
 
 	public static String JUnitContainerWizardPage_wizard_title;
+
+	public static String JUnitLaunchConfigurationDelegate_create_source_locator_description;
+
+	public static String JUnitLaunchConfigurationDelegate_dialog_title;
+
+	public static String JUnitLaunchConfigurationDelegate_erro_unknowtestrunner;
+
+	public static String JUnitLaunchConfigurationDelegate_error_input_element_deosn_not_exist;
+
+	public static String JUnitLaunchConfigurationDelegate_error_invalidproject;
+
+	public static String JUnitLaunchConfigurationDelegate_error_junit4notonpath;
+
+	public static String JUnitLaunchConfigurationDelegate_error_junitnotonpath;
+
+	public static String JUnitLaunchConfigurationDelegate_error_no_socket;
+
+	public static String JUnitLaunchConfigurationDelegate_error_notests_kind;
+
+	public static String JUnitLaunchConfigurationDelegate_error_wrong_input;
+
+	public static String JUnitLaunchConfigurationDelegate_input_type_does_not_exist;
+
+	public static String JUnitLaunchConfigurationDelegate_verifying_attriburtes_description;
 
 	public static String JUnitLaunchShortcut_dialog_title;
 

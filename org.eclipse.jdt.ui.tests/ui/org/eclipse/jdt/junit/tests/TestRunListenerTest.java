@@ -19,7 +19,7 @@ import org.eclipse.jdt.junit.model.ITestElement.FailureTrace;
 import org.eclipse.jdt.junit.model.ITestElement.ProgressState;
 import org.eclipse.jdt.junit.model.ITestElement.Result;
 
-public class TestRunListenerTest extends AbtractTestRunListenerTest {
+public class TestRunListenerTest extends AbstractTestRunListenerTest {
 
 	private String[] runSequenceTest(IType typeToLaunch) throws Exception {
 		TestRunLog log= new TestRunLog();

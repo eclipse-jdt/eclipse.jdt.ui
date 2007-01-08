@@ -19,7 +19,7 @@ import org.eclipse.jdt.junit.JUnitCore;
 /**
  * @deprecated
  */
-public class LegacyTestRunListenerTest extends AbtractTestRunListenerTest {
+public class LegacyTestRunListenerTest extends AbstractTestRunListenerTest {
 
 	private String[] runTest(String source) throws Exception {
 		IType aTestCase= createType(source, "pack", "ATestCase.java");

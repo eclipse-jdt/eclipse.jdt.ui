@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
-import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
+import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 
 public class ProjectRenameParticipant extends JUnitRenameParticipant {
 
@@ -48,7 +48,7 @@ public class ProjectRenameParticipant extends JUnitRenameParticipant {
 
 		IJavaProject newJavaProject= getNewJavaProject();
 
-		String container= config.getAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, (String) null);
+		String container= config.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, (String) null);
 		IJavaElement javaElement= getJavaElement(container);
 		if (javaElement == null)
 			return;
@@ -74,7 +74,7 @@ public class ProjectRenameParticipant extends JUnitRenameParticipant {
 			// shouldn't happen, but if it does, we silently fail.
 			return;
 		}
-		changeList.addAttributeChange(config, JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, newHandle);
+		changeList.addAttributeChange(config, JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, newHandle);
 
 		// rename change must come at the end
 		changeList.addRenameChangeIfNeeded(config, fProject.getElementName());

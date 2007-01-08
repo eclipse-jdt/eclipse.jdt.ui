@@ -24,7 +24,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 
-import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
@@ -33,7 +33,8 @@ import org.eclipse.jdt.junit.model.ITestElementContainer;
 import org.eclipse.jdt.junit.model.ITestRunSession;
 
 import org.eclipse.jdt.internal.junit.Messages;
-import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
+import org.eclipse.jdt.internal.junit.launcher.ITestKind;
+import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
@@ -43,10 +44,12 @@ import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
  */
 public class TestRunSession implements ITestRunSession {
 
-	private final IType fLaunchedType;
 	private final ILaunch fLaunch;
 	private final String fLaunchConfigName;
+	private final IJavaProject fProject;
 
+	private final ITestKind fTestRunnerKind;
+	
 	private final RemoteTestRunnerClient fTestRunnerClient;
 
 	private final ListenerList/*<ITestSessionListener>*/ fSessionListeners;
@@ -100,17 +103,20 @@ public class TestRunSession implements ITestRunSession {
 	volatile boolean fIsStopped;
 	
 
-	public TestRunSession(IType launchedType, int port, ILaunch launch) {
-		Assert.isNotNull(launchedType);
+	public TestRunSession(ILaunch launch, IJavaProject project, int port) {
 		Assert.isNotNull(launch);
 		
-		fLaunchedType= launchedType;
 		fLaunch= launch;
+		fProject= project;
+		
 		ILaunchConfiguration launchConfiguration= launch.getLaunchConfiguration();
-		if (launchConfiguration != null)
+		if (launchConfiguration != null) {
 			fLaunchConfigName= launchConfiguration.getName();
-		else
-			fLaunchConfigName= launchedType.getElementName();
+			fTestRunnerKind= JUnitLaunchConfigurationConstants.getTestRunnerKind(launchConfiguration);
+		} else {
+			fLaunchConfigName= project.getElementName();
+			fTestRunnerKind= ITestKind.NULL;
+		}
 		
 		fTestRoot= new TestRoot(this);
 		fIdToTest= new HashMap();
@@ -175,9 +181,14 @@ public class TestRunSession implements ITestRunSession {
 		return fTestRoot;
 	}
 
-	public IType getLaunchedType() {
-		return fLaunchedType;
+	public IJavaProject getLaunchedProject() {
+		return fProject;
 	}
+	
+	public ITestKind getTestRunnerKind() {
+		return fTestRunnerKind;
+	}
+	
 	
 	public ILaunch getLaunch() {
 		return fLaunch;
@@ -278,9 +289,9 @@ public class TestRunSession implements ITestRunSession {
 				// fix for bug: 64838  junit view run single test does not use correct class [JUnit] 
 				tmp.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, className);
 				// reset the container
-				tmp.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, ""); //$NON-NLS-1$
+				tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
 				if (testName != null) {
-					tmp.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, testName);
+					tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME, testName);
 					//	String args= "-rerun "+testId;
 					//	tmp.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, args);
 				}

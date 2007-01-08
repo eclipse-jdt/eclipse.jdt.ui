@@ -90,8 +90,8 @@ import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 
 import org.eclipse.jdt.internal.junit.Messages;
+import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
-import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
 import org.eclipse.jdt.internal.junit.launcher.TestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.launcher.TestSelectionDialog;
@@ -351,7 +351,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		updateProjectFromConfig(config);
 		String containerHandle= ""; //$NON-NLS-1$
 		try {
-			containerHandle = config.getAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, ""); //$NON-NLS-1$
+			containerHandle = config.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
 		} catch (CoreException ce) {			
 		}
 		
@@ -365,8 +365,8 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 
 
 	private void updateTestLoaderFromConfig(ILaunchConfiguration config) {
-		ITestKind testKind= TestKindRegistry.getDefault().getKind(config);
-		if (testKind == null || testKind.isNull())
+		ITestKind testKind= JUnitLaunchConfigurationConstants.getTestRunnerKind(config);
+		if (testKind.isNull())
 			testKind= TestKindRegistry.getDefault().getKind(TestKindRegistry.JUNIT3_TEST_KIND_ID);
 		fTestLoaderViewer.setSelection(new StructuredSelection(testKind));
 	}
@@ -379,7 +379,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	private void updateKeepRunning(ILaunchConfiguration config) {
 		boolean running= false;
 		try {
-			running= config.getAttribute(JUnitBaseLaunchConfiguration.ATTR_KEEPRUNNING, false);
+			running= config.getAttribute(JUnitLaunchConfigurationConstants.ATTR_KEEPRUNNING, false);
 		} catch (CoreException ce) {
 		}
 		fKeepRunning.setSelection(running);	 	
@@ -399,7 +399,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fOriginalTestMethodName= ""; //$NON-NLS-1$
 		try {
 			testTypeName = config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, ""); //$NON-NLS-1$
-			fOriginalTestMethodName = config.getAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, ""); //$NON-NLS-1$
+			fOriginalTestMethodName = config.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME, ""); //$NON-NLS-1$
 		} catch (CoreException ce) {			
 		}
 		fTestRadioButton.setSelection(true);
@@ -423,7 +423,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		String containerHandle= ""; //$NON-NLS-1$
 		IJavaElement containerElement = null;
 		try {
-			containerHandle = config.getAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, ""); //$NON-NLS-1$
+			containerHandle = config.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
 			if (containerHandle.length() > 0) {
 				containerElement= JavaCore.create(containerHandle);
 			}
@@ -447,24 +447,24 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	public void performApply(ILaunchConfigurationWorkingCopy config) {
 		if (fTestContainerRadioButton.getSelection() && fContainerElement != null) {
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, fContainerElement.getJavaProject().getElementName());
-			config.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, fContainerElement.getHandleIdentifier());
+			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, fContainerElement.getHandleIdentifier());
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, ""); //$NON-NLS-1$
 			 //workaround for bug 65399
-			config.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, ""); //$NON-NLS-1$
+			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME, ""); //$NON-NLS-1$
 			config.setMappedResources(new IResource[] { fContainerElement.getJavaProject().getProject() });
 		} else {
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, fProjText.getText());
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, fTestText.getText());
-			config.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, ""); //$NON-NLS-1$
-			config.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, fOriginalTestMethodName);
+			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
+			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME, fOriginalTestMethodName);
 			mapResources(config);
 		}
-		config.setAttribute(JUnitBaseLaunchConfiguration.ATTR_KEEPRUNNING, fKeepRunning.getSelection());
+		config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_KEEPRUNNING, fKeepRunning.getSelection());
 		
 		IStructuredSelection testKindSelection= (IStructuredSelection) fTestLoaderViewer.getSelection();
 		if (! testKindSelection.isEmpty()) {
 			TestKind testKind= (TestKind) testKindSelection.getFirstElement();
-			config.setAttribute(JUnitBaseLaunchConfiguration.TEST_KIND_ATTR, testKind.getId());
+			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_RUNNER_KIND, testKind.getId());
 		}
 	}
 	
@@ -720,7 +720,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			// for these attributes being set on a config if there is nothing in the
 			// corresponding text boxes)
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, ""); //$NON-NLS-1$
-			config.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, ""); //$NON-NLS-1$
+			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
 		}
 		initializeTestAttributes(javaElement, config);
 	}
@@ -733,7 +733,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	}
 
 	private void initializeTestContainer(IJavaElement javaElement, ILaunchConfigurationWorkingCopy config) {
-		config.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, javaElement.getHandleIdentifier());
+		config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, javaElement.getHandleIdentifier());
 		initializeName(config, javaElement.getElementName());
 	}
 
@@ -778,7 +778,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		}
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, name);
 		if (testKindId != null)
-			config.setAttribute(JUnitBaseLaunchConfiguration.TEST_KIND_ATTR, testKindId);
+			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_RUNNER_KIND, testKindId);
 		initializeName(config, name);
 	}
 	

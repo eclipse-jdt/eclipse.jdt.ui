@@ -13,7 +13,7 @@ package org.eclipse.jdt.junit.tests;
 
 import org.eclipse.jdt.junit.ITestRunListener;
 
-import org.eclipse.jdt.junit.tests.AbtractTestRunListenerTest.TestRunLog;
+import org.eclipse.jdt.junit.tests.AbstractTestRunListenerTest.TestRunLog;
 
 /**
  * @deprecated

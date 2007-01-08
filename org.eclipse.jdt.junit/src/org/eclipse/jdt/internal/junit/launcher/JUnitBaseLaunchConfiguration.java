@@ -46,6 +46,8 @@ import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
 
+import org.eclipse.jdt.junit.launcher.JUnitLaunchConfigurationDelegate;
+
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
@@ -53,15 +55,15 @@ import org.eclipse.jdt.internal.junit.util.IJUnitStatusConstants;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 /**
- * Abstract launch configuration delegate for a JUnit test.
+ * @deprecated Extend {@link JUnitLaunchConfigurationDelegate} instead
  */
 public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchConfigurationDelegate {
 
-	public static final String NO_DISPLAY_ATTR = JUnitPlugin.PLUGIN_ID + ".NO_DISPLAY"; //$NON-NLS-1$
+	public static final String NO_DISPLAY_ATTR = JUnitLaunchConfigurationConstants.ATTR_NO_DISPLAY;
 
-	public static final String RUN_QUIETLY_MODE = "runQuietly"; //$NON-NLS-1$
+	public static final String RUN_QUIETLY_MODE =JUnitLaunchConfigurationConstants.MODE_RUN_QUIETLY_MODE;
 	
-	public static final String PORT_ATTR= JUnitPlugin.PLUGIN_ID+".PORT"; //$NON-NLS-1$
+	public static final String PORT_ATTR= JUnitLaunchConfigurationConstants.ATTR_PORT;
 	/**
 	 * The single test type, or "" iff running a launch container.
 	 */
@@ -69,18 +71,18 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 	/**
 	 * The test method, or "" iff running the whole test type.
 	 */
-	public static final String TESTNAME_ATTR= JUnitPlugin.PLUGIN_ID+".TESTNAME"; //$NON-NLS-1$
-	public static final String ATTR_KEEPRUNNING = JUnitPlugin.PLUGIN_ID+ ".KEEPRUNNING_ATTR"; //$NON-NLS-1$
+	public static final String TESTNAME_ATTR= JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME;
+	public static final String ATTR_KEEPRUNNING = JUnitLaunchConfigurationConstants.ATTR_KEEPRUNNING;
 	/**
 	 * The launch container, or "" iff running a single test type.
 	 */
-	public static final String LAUNCH_CONTAINER_ATTR= JUnitPlugin.PLUGIN_ID+".CONTAINER"; //$NON-NLS-1$
+	public static final String LAUNCH_CONTAINER_ATTR= JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER;
 
 	/**
 	 * The name of the prioritized tests
 	 */
-	public static final String FAILURES_FILENAME_ATTR= JUnitPlugin.PLUGIN_ID+".FAILURENAMES"; //$NON-NLS-1$
-	public static final String TEST_KIND_ATTR = JUnitPlugin.PLUGIN_ID+".TEST_KIND"; //$NON-NLS-1$
+	public static final String FAILURES_FILENAME_ATTR= JUnitLaunchConfigurationConstants.ATTR_FAILURES_NAMES;
+	public static final String TEST_KIND_ATTR = JUnitLaunchConfigurationConstants.ATTR_TEST_RUNNER_KIND;
 	
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor pm) throws CoreException {		
 		if (mode.equals(RUN_QUIETLY_MODE)) {
@@ -107,27 +109,27 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 	protected final TestSearchResult findTestTypes(ILaunchConfiguration configuration, IProgressMonitor pm) throws CoreException {
 		IJavaProject javaProject= getJavaProject(configuration);
 		if ((javaProject == null) || !javaProject.exists()) {
-			informAndAbort(JUnitMessages.JUnitBaseLaunchConfiguration_error_invalidproject, null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT); 
+			informAndAbort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_invalidproject, null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT); 
 		}
 		if (!TestSearchEngine.hasTestCaseType(javaProject)) {
-			informAndAbort(JUnitMessages.JUnitBaseLaunchConfiguration_error_junitnotonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
+			informAndAbort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junitnotonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 		}
 
-		ITestKind testKind= TestKindRegistry.getDefault().getKind(configuration);
+		ITestKind testKind= JUnitLaunchConfigurationConstants.getTestRunnerKind(configuration);
 		if (testKind.isNull()) {
-			informAndAbort(JUnitMessages.JUnitBaseLaunchConfiguration_erro_unknowtestrunner, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
+			informAndAbort(JUnitMessages.JUnitLaunchConfigurationDelegate_erro_unknowtestrunner, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 		}
 				
 		boolean isJUnit4Configuration= TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId());
 		if (isJUnit4Configuration && ! TestSearchEngine.hasTestAnnotation(javaProject)) {
-			informAndAbort(JUnitMessages.JUnitBaseLaunchConfiguration_error_junit4notonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
+			informAndAbort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junit4notonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 		}
 		
 		IJavaElement testTarget= getTestTarget(configuration, javaProject);
 		HashSet result= new HashSet();
 		testKind.getFinder().findTestsInContainer(testTarget, result, pm);
 		if (result.isEmpty()) {
-			String msg= Messages.format(JUnitMessages.JUnitBaseLaunchConfiguration_error_notests_kind, testKind.getDisplayName());
+			String msg= Messages.format(JUnitMessages.JUnitLaunchConfigurationDelegate_error_notests_kind, testKind.getDisplayName());
 			informAndAbort(msg, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE); 
 		}
 		IType[] types= (IType[]) result.toArray(new IType[result.size()]);
@@ -171,7 +173,7 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		if (containerHandle.length() != 0) {
 			 IJavaElement element= JavaCore.create(containerHandle);
 			 if (element == null || !element.exists()) {
-				 informAndAbort(JUnitMessages.JUnitBaseLaunchConfiguration_error_input_element_deosn_not_exist, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE); 
+				 informAndAbort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_input_element_deosn_not_exist, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE); 
 			 }
 			 return element;
 		}
@@ -183,7 +185,7 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 				return type;
 			}
 		}
-		informAndAbort(JUnitMessages.JUnitBaseLaunchConfiguration_input_type_does_not_exist, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
+		informAndAbort(JUnitMessages.JUnitLaunchConfigurationDelegate_input_type_does_not_exist, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
 		return null; // not reachable
 	}
 	
@@ -200,7 +202,7 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 						if (shell == null)
 							shell= getDisplay().getActiveShell();
 						if (shell != null) {
-							MessageDialog.openInformation(shell, JUnitMessages.JUnitBaseLaunchConfiguration_dialog_title, status.getMessage());
+							MessageDialog.openInformation(shell, JUnitMessages.JUnitLaunchConfigurationDelegate_dialog_title, status.getMessage());
 							success[0]= true;
 						}
 					}

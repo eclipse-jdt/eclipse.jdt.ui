@@ -21,7 +21,7 @@ import org.eclipse.jdt.junit.model.ITestElement.FailureTrace;
 import org.eclipse.jdt.junit.model.ITestElement.ProgressState;
 import org.eclipse.jdt.junit.model.ITestElement.Result;
 
-import org.eclipse.jdt.junit.tests.AbtractTestRunListenerTest.TestRunLog;
+import org.eclipse.jdt.junit.tests.AbstractTestRunListenerTest.TestRunLog;
 
 
 public class TestRunListeners {
