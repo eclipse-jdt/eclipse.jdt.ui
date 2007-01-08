@@ -158,30 +158,27 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		return fMenu;
 	}
 
-	public static boolean fillMenu(IMenuManager menu, CompilationUnitEditor editor, SurroundWithTryCatchAction surroundWithTryCatchAction) {
+	public static void fillMenu(IMenuManager menu, CompilationUnitEditor editor, SurroundWithTryCatchAction surroundWithTryCatchAction) {
 		IAction[] actions= getTemplateActions(editor);
 		surroundWithTryCatchAction.update(editor.getSelectionProvider().getSelection());
 		
-		if (actions == null && !surroundWithTryCatchAction.isEnabled())
-			return false;
-		
-		menu.add(surroundWithTryCatchAction);
-		
-		menu.add(new Separator(TEMPLATE_GROUP));
-		
-		if (actions == null) {
+		if (actions == null && !surroundWithTryCatchAction.isEnabled()) {
 			menu.add(NONE_APPLICABLE_ACTION);
-		} else {
-			for (int i= 0; i < actions.length; i++) {
-				menu.add(actions[i]);
-			}
+		} else {		
+    		menu.add(surroundWithTryCatchAction);
+    		menu.add(new Separator(TEMPLATE_GROUP));
+    		
+    		if (actions == null) {
+    			menu.add(NONE_APPLICABLE_ACTION);
+    		} else {
+    			for (int i= 0; i < actions.length; i++) {
+    				menu.add(actions[i]);
+    			}
+    		}		
 		}
 		
 		menu.add(new Separator(CONFIG_GROUP));
-		
 		menu.add(new ConfigureTemplatesAction());
-		
-		return true;
 	}
 
 	/**

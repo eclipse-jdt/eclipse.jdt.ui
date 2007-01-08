@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -56,6 +57,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.InOutFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithAnalyzer;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
+
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public abstract class SurroundWith {
 
@@ -157,6 +160,20 @@ public abstract class SurroundWith {
 		fRootNode= root;
 		fSelectedStatements= selectedStatements;
 	}
+	
+
+	public static boolean isApplicable(IInvocationContext context) throws JavaModelException {
+		ICompilationUnit unit= context.getCompilationUnit();
+		CompilationUnit ast= ASTProvider.getASTProvider().getAST(unit, ASTProvider.WAIT_NO, null);
+		if (ast == null)
+			return true;
+		
+		Selection selection= Selection.createFromStartLength(context.getSelectionOffset(), context.getSelectionLength());
+		SurroundWithAnalyzer analyzer= new SurroundWithAnalyzer(unit, selection);
+		context.getASTRoot().accept(analyzer);
+	
+		return analyzer.getStatus().isOK() && analyzer.hasSelectedNodes();
+    }
 
 	/**
 	 * Selected nodes in <code>context</code> under <code>selection</code> or null if no valid selection.

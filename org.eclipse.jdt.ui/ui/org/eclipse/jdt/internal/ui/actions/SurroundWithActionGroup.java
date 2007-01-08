@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 
@@ -56,9 +58,14 @@ public class SurroundWithActionGroup extends ActionGroup {
 		}
 		
 		MenuManager subMenu = new MenuManager(menuText, SurroundWithTemplateMenuAction.SURROUND_WITH_QUICK_MENU_ACTION_ID);	
-				
-		if (SurroundWithTemplateMenuAction.fillMenu(subMenu, fEditor, fSurroundWithTryCatchAction))
-			menu.appendToGroup(fGroup, subMenu);
+		menu.appendToGroup(fGroup, subMenu);	
+		subMenu.add(new Action() {});
+		subMenu.addMenuListener(new IMenuListener() {
+			public void menuAboutToShow(IMenuManager manager) {
+				manager.removeAll();
+				SurroundWithTemplateMenuAction.fillMenu(manager, fEditor, fSurroundWithTryCatchAction);
+			}
+		});
 	}
 	
 	private String getShortcutString() {

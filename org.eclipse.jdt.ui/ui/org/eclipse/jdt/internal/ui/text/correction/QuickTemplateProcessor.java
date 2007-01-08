@@ -80,7 +80,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 			int startLine= document.getLineOfOffset(offset);
 			int endLine= document.getLineOfOffset(offset + length);
 			IRegion region= document.getLineInformation(endLine);
-			return ((startLine  < endLine) || (length > 0 && offset == region.getOffset() && length == region.getLength()));
+			return startLine  < endLine || length > 0 && offset == region.getOffset() && length == region.getLength();
 		} catch (BadLocationException e) {
 			return false;
 		}
@@ -117,8 +117,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 			if (startLine  == endLine) {
 				if (length == 0 || offset != endLineRegion.getOffset() || length != endLineRegion.getLength()) {
 					AssistContext invocationContext= new AssistContext(cu, offset, length);
-					Statement[] selectedStatements= SurroundWith.getSelectedStatements(invocationContext);
-					if (selectedStatements == null)
+					if (!SurroundWith.isApplicable(invocationContext))
 						return null;
 				}
 			} else {
