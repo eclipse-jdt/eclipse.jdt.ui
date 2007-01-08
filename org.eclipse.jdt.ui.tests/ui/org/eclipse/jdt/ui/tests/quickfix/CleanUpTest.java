@@ -2971,6 +2971,35 @@ public class CleanUpTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
+	public void testCodeStyleBug154787() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface E1 {String FOO = \"FOO\";}\n");
+		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 implements E1 {}\n");
+		pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("import test1.E2;\n");
+		buf.append("public class E3 {\n");
+		buf.append("    public String foo() {\n");
+		buf.append("        return E2.FOO;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack2.createCompilationUnit("E3.java", buf.toString(), false, null); 
+		
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS);
+		
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
+	}
+	
 	public void testJava50ForLoop01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
