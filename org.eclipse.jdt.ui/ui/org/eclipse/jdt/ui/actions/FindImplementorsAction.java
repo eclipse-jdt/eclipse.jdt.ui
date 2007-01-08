@@ -75,7 +75,6 @@ public class FindImplementorsAction extends FindAction {
 			try {
 				return ((IType) element).isInterface();
 			} catch (JavaModelException ex) {
-				ExceptionHandler.log(ex, SearchMessages.Search_Error_javaElementAccess_message); 
 				return false;
 			}
 		// should not happen: handled by super.canOperateOn
