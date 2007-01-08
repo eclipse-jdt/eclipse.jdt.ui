@@ -14,6 +14,10 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
@@ -49,6 +53,18 @@ public class SurroundWithActionGroup extends ActionGroup {
 	 * {@inheritDoc}
 	 */
 	public void fillContextMenu(IMenuManager menu) {
+		ISelectionProvider selectionProvider= fEditor.getSelectionProvider();
+		if (selectionProvider == null)
+			return;
+		
+		ISelection selection= selectionProvider.getSelection();
+		if (!(selection instanceof ITextSelection))
+			return;
+		
+		ITextSelection textSelection= (ITextSelection)selection;
+		if (textSelection.getLength() == 0)
+			return;
+		
 		String menuText= ActionMessages.SurroundWithTemplateMenuAction_SurroundWithTemplateSubMenuName;
 				
 		String shortcutString= getShortcutString();
