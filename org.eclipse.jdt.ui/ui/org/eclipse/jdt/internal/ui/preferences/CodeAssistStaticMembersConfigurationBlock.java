@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -245,10 +246,7 @@ class CodeAssistStaticMembersConfigurationBlock extends OptionsConfigurationBloc
 		}
 
 		public String getText(Object element) {
-			String label= (String)element;
-			if (label.endsWith(WILDCARD))
-				label= label.substring(0, label.length() - 2);
-			return label;
+			return (String)element;
 		}
 	}
 	
@@ -311,6 +309,7 @@ class CodeAssistStaticMembersConfigurationBlock extends OptionsConfigurationBloc
 		Composite control= new Composite(scrolled, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
+		layout.marginWidth= 0;
 		control.setLayout(layout);
 
 		createFavoriteList(control);
@@ -321,6 +320,8 @@ class CodeAssistStaticMembersConfigurationBlock extends OptionsConfigurationBloc
 		final Point size= control.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		scrolled.setMinSize(size.x, size.y);
 
+		Dialog.applyDialogFont(scrolled);
+		
 		return scrolled;
 	}
 	
@@ -349,14 +350,9 @@ class CodeAssistStaticMembersConfigurationBlock extends OptionsConfigurationBloc
 		LayoutUtil.setHorizontalGrabbing(fList.getListControl(null));
 		
 		Control listControl= fList.getListControl(null);
-		GridData gd= new GridData();
-		gd.horizontalAlignment= GridData.FILL;
-		gd.grabExcessHorizontalSpace= false;
+		GridData gd= (GridData)listControl.getLayoutData();
 		gd.verticalAlignment= GridData.BEGINNING;
-		gd.horizontalSpan= 1;
-		gd.widthHint= pixelConverter.convertWidthInCharsToPixels(50);
 		gd.heightHint= pixelConverter.convertHeightInCharsToPixels(7);
-		listControl.setLayoutData(gd);
 	}
 	
 	public void initialize() {
