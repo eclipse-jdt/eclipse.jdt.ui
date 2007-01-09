@@ -179,12 +179,13 @@ public class RenameInformationPopup {
 		private final Label fBindingLabel;
 
 		public InfoEntry(Composite table, HyperlinkGroup hyperlinkGroup, String info, final Runnable runnable, String keybinding) {
+			final Display display= table.getDisplay();
 			fLink= new DisableAwareHyperlink(table, SWT.NONE);
 			fLink.setText(info);
 			fLink.addHyperlinkListener(new HyperlinkAdapter() {
 				public void linkActivated(HyperlinkEvent e) {
 					//workaround for 157196: [Forms] Hyperlink listener notification throws AIOOBE when listener removed in callback
-					e.display.asyncExec(runnable);
+					display.asyncExec(runnable);
 				}
 			});
 			hyperlinkGroup.add(fLink);
