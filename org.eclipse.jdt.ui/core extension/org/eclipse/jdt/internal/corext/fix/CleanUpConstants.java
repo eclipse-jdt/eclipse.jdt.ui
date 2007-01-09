@@ -1042,7 +1042,7 @@ public class CleanUpConstants {
 	public final static String DEFAULT_SAVE_PARTICIPANT_PROFILE= SAVE_PARTICIPANT_PROFILE;
 	
 	public static Map getEclipseDefaultSettings() {
-		HashMap result= new HashMap();
+		final HashMap result= new HashMap();
 		
 		//Member Accesses
 		result.put(MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS, FALSE);
@@ -1119,7 +1119,7 @@ public class CleanUpConstants {
 	}
 	
 	public static Map getSaveParticipantSettings() {
-		HashMap result= new HashMap();
+		final HashMap result= new HashMap();
 		
 		//Member Accesses
 		result.put(MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS, FALSE);
@@ -1151,7 +1151,7 @@ public class CleanUpConstants {
 		
 		//Variable Declarations
 		result.put(VARIABLE_DECLARATIONS_USE_FINAL, FALSE);
-		result.put(VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES, TRUE);
+		result.put(VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES, FALSE);
 		result.put(VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS, FALSE);
 		result.put(VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, TRUE);
 		
@@ -1196,9 +1196,9 @@ public class CleanUpConstants {
 	}
 	
 	public static void initDefaults(IPreferenceStore store) {
-		Map settings= getEclipseDefaultSettings();
-		for (Iterator iterator= settings.keySet().iterator(); iterator.hasNext();) {
-			String key= (String)iterator.next();
+		final Map settings= getEclipseDefaultSettings();
+		for (final Iterator iterator= settings.keySet().iterator(); iterator.hasNext();) {
+			final String key= (String)iterator.next();
 			store.setDefault(key, (String)settings.get(key));
 		}
 		
