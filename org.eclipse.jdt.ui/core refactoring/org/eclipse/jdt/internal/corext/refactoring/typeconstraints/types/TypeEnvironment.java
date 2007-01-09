@@ -94,15 +94,15 @@ public class TypeEnvironment {
 	
 	private TType OBJECT_TYPE= null;
 	
-	private Map[] fArrayTypes= new Map[] { new HashMap() };
-	private Map fStandardTypes= new HashMap();
-	private Map fGenericTypes= new HashMap();
-	private Map fParameterizedTypes= new HashMap();
-	private Map fRawTypes= new HashMap();
-	private Map fTypeVariables= new HashMap();
-	private Map fCaptureTypes= new HashMap();
-	private Map fExtendsWildcardTypes= new HashMap();
-	private Map fSuperWildcardTypes= new HashMap();
+	private Map/*<TType, ArrayType>*/[]          fArrayTypes= new Map[] { new HashMap() };
+	private Map/*<IJavaElement, StandardType>*/  fStandardTypes= new HashMap();
+	private Map/*<IJavaElement, GenericType>*/   fGenericTypes= new HashMap();
+	private Map/*<ProjectKeyPair, ParameterizedType>*/ fParameterizedTypes= new HashMap();
+	private Map/*<IJavaElement, RawType>*/       fRawTypes= new HashMap();
+	private Map/*<IJavaElement, TypeVariable>*/  fTypeVariables= new HashMap();
+	private Map/*<ProjectKeyPair, CaptureType>*/ fCaptureTypes= new HashMap();
+	private Map/*<TType, ExtendsWildcardType>*/  fExtendsWildcardTypes= new HashMap();
+	private Map/*<TType, SuperWildcardType>*/    fSuperWildcardTypes= new HashMap();
 	private UnboundWildcardType fUnboundWildcardType= null;
 	
 	private static final int MAX_ENTRIES= 1024;
@@ -149,8 +149,6 @@ public class TypeEnvironment {
 		return result;
 	}
 	
-	private boolean fIdentityTest;
-	
 	public TypeEnvironment() {
 		this(false);
 	}
@@ -159,10 +157,6 @@ public class TypeEnvironment {
 		if (rememberSubtypes) {
 			fSubTypes= new HashMap();
 		}
-	}
-	
-	public boolean isIdentityTest() {
-		return fIdentityTest;
 	}
 	
 	Map/*<TypeTuple, Boolean>*/ getSubTypeCache() {
@@ -293,7 +287,7 @@ public class TypeEnvironment {
 	private ArrayType createArrayType(ITypeBinding binding) {
 		int index= binding.getDimensions() - 1;
 		TType elementType= create(binding.getElementType());
-		Map arrayTypes= getArrayTypesMap(index);
+		Map/*<TType, ArrayType>*/ arrayTypes= getArrayTypesMap(index);
 		ArrayType result= (ArrayType)arrayTypes.get(elementType);
 		if (result != null)
 			return result;
@@ -319,7 +313,7 @@ public class TypeEnvironment {
 		return result;
 	}
 
-	private Map getArrayTypesMap(int index) {
+	private Map/*<TType, ArrayType>*/ getArrayTypesMap(int index) {
 		int oldLength= fArrayTypes.length;
 		if (index >= oldLength) {
 			Map[] newArray= new Map[index + 1];
@@ -361,19 +355,15 @@ public class TypeEnvironment {
 	}
 	
 	private ParameterizedType createParameterizedType(ITypeBinding binding) {
-		ParameterizedType key= new ParameterizedType(this);
-		key.initialize(binding, (IType)binding.getJavaElement());
-		fIdentityTest= false;
-		ParameterizedType result= null;
-		try {
-			result= (ParameterizedType)fParameterizedTypes.get(key);
-		} finally {
-			fIdentityTest= true;
-		}
+		IJavaProject javaProject= binding.getJavaElement().getJavaProject();
+		String bindingKey= binding.getKey();
+		ProjectKeyPair pair= new ProjectKeyPair(javaProject, bindingKey);
+		ParameterizedType result= (ParameterizedType)fParameterizedTypes.get(pair);
 		if (result != null)
 			return result;
-		result= key;
-		fParameterizedTypes.put(key, result);
+		result= new ParameterizedType(this);
+		fParameterizedTypes.put(pair, result);
+		result.initialize(binding, (IType)binding.getJavaElement());
 		cacheSubType(result.getSuperclass(), result);
 		cacheSubTypes(result.getInterfaces(), result);
 		return result;
