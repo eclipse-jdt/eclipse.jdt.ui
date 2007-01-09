@@ -53,7 +53,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
@@ -526,7 +525,6 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		super.performDefaults();
 		
 		setValue(PREF_SPELLING_USER_DICTIONARY_ENCODING, ""); //$NON-NLS-1$
-		JavaPlugin.getDefault().getPreferenceStore().setValue(PREF_SPELLING_USER_DICTIONARY_ENCODING.getName(), ""); //$NON-NLS-1$
 		
 		fEncodingEditor.getPreferenceStore().setValue(fEncodingEditor.getPreferenceName(), ResourcesPlugin.getEncoding());
 		fEncodingEditor.load();
