@@ -749,5 +749,24 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_pb_null_reference;
 	public static String ProblemSeveritiesConfigurationBlock_pb_fall_through_case;
 	public static String CodeAssistConfigurationBlock_hideDeprecated_label;
+	
+	public static String CodeAssistStaticMembersConfigurationBlock_description;
+	public static String CodeAssistStaticMembersConfigurationBlock_newType_button; 
+	public static String CodeAssistStaticMembersConfigurationBlock_newMember_button; 
+	public static String CodeAssistStaticMembersConfigurationBlock_edit_button; 
+	public static String CodeAssistStaticMembersConfigurationBlock_remove_button; 
+
+	public static String FavoriteStaticMemberInputDialog_member_title;
+	public static String FavoriteStaticMemberInputDialog_member_labelText; 
+	public static String FavoriteStaticMemberInputDialog_type_title; 
+	public static String FavoriteStaticMemberInputDialog_type_labelText; 
+	public static String FavoriteStaticMemberInputDialog_browse_button; 
+	public static String FavoriteStaticMemberInputDialog_ChooseTypeDialog_title;
+	public static String FavoriteStaticMemberInputDialog_ChooseTypeDialog_description;
+	public static String FavoriteStaticMemberInputDialog_ChooseTypeDialog_error_message;
+	public static String FavoriteStaticMemberInputDialog_error_enterName;
+	public static String FavoriteStaticMemberInputDialog_error_invalidMemberName;
+	public static String FavoriteStaticMemberInputDialog_error_invalidTypeName;
+	public static String FavoriteStaticMemberInputDialog_error_entryExists;
 
 }

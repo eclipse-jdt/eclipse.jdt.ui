@@ -31,6 +31,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationExtension;
 
 import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.CompletionRequestor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -163,6 +164,9 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		collector.setAllowsRequiredProposals(CompletionProposal.FIELD_REF, CompletionProposal.TYPE_REF, true);
 		collector.setAllowsRequiredProposals(CompletionProposal.METHOD_REF, CompletionProposal.TYPE_REF, true);
 
+		// Set the favorite list to propose static members - since 3.3 
+		collector.setFavoriteReferences(getFavoriteStaticMembers());
+
 		try {
 			Point selection= viewer.getSelectedRange();
 			if (selection.y > 0)
@@ -195,6 +199,20 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 				fErrorMessage= error;
 		}
 		return proposals;
+	}
+
+	/**
+	 * Returns the array with favorite static members.
+	 * 
+	 * @return the <code>String</code> array with with favorite static members
+	 * @see CompletionRequestor#setFavoriteReferences(String[])
+	 * @since 3.3
+	 */
+	private String[] getFavoriteStaticMembers() {
+		String serializedFavorites= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
+		if (serializedFavorites != null && serializedFavorites.length() > 0)
+			return serializedFavorites.split(";"); //$NON-NLS-1$
+		return new String[0];
 	}
 
 	/**

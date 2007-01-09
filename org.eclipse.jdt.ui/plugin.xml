@@ -1297,6 +1297,13 @@
             <keywordReference id="org.eclipse.jdt.ui.contentassist"/>
       </page>
       <page
+            name="%contentAssistStaticMembersName"
+            category="org.eclipse.jdt.ui.preferences.CodeAssistPreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.CodeAssistStaticMembersPreferencePage"
+            id="org.eclipse.jdt.ui.preferences.CodeAssistPreferenceAdvanced">
+            <keywordReference id="org.eclipse.jdt.ui.contentassist"/>
+      </page>
+      <page
             name="%editorHoversPageName"
             category="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.JavaEditorHoverPreferencePage"
