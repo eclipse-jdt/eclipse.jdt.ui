@@ -454,9 +454,6 @@ public abstract class TType {
 		if (!(other instanceof TType))
 			return false;
 		TType otherType= (TType)other;
-		TypeEnvironment otherEnvironment= otherType.fEnvironment;
-		if (fEnvironment.isIdentityTest() && otherEnvironment.isIdentityTest() && fEnvironment == otherEnvironment)
-			return false;
 		if (getKind() != otherType.getKind())
 			return false;
 		return doEquals(otherType);
