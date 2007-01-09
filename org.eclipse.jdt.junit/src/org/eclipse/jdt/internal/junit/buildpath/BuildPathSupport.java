@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -89,7 +90,10 @@ public class BuildPathSupport {
 			IPath sourceBase= getSourceLocation(JUNIT3_PLUGIN_ID);
 			IPath srcLocation= sourceBase != null ? sourceBase.append("junitsrc.zip") : null; //$NON-NLS-1$
 			
-			return JavaCore.newLibraryEntry(jarLocation, srcLocation, null);
+			String javadocLocation= "http://www.junit.org/junit/javadoc/3.8.1"; //$NON-NLS-1$
+			IClasspathAttribute[] attributes= { JavaCore.newClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME, javadocLocation) };
+			
+			return JavaCore.newLibraryEntry(jarLocation, srcLocation, null, null, attributes, false);
 		}
 		return null;
 	}
@@ -102,7 +106,8 @@ public class BuildPathSupport {
 			IPath sourceBase= getSourceLocation(JUNIT4_PLUGIN_ID);
 			IPath srcLocation= sourceBase != null ? sourceBase.append("junit-4.1src.zip") : null; //$NON-NLS-1$
 			
-			return JavaCore.newLibraryEntry(jarLocation, srcLocation, null);
+			IClasspathAttribute[] attributes= null;// no complete reference found yet
+			return JavaCore.newLibraryEntry(jarLocation, srcLocation, null, null, attributes, false);
 		}
 		return null;
 	}
