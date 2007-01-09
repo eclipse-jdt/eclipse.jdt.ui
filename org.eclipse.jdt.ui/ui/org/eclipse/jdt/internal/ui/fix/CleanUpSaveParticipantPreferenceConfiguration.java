@@ -19,7 +19,6 @@ import java.util.Observer;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
@@ -43,12 +42,13 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.CleanUpPostSaveListener;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.ISaveParticipantPreferenceConfiguration;
+import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.AbstractSaveParticipantPreferenceConfiguration;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
@@ -60,20 +60,7 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
  * 
  * @since 3.3
  */
-public class CleanUpSaveParticipantPreferenceConfiguration implements ISaveParticipantPreferenceConfiguration {
-	
-	private static final IEclipsePreferences INSTANCE_NODE= new InstanceScope().getNode(JavaUI.ID_PLUGIN);
-	
-	private static String[] TOP_LEVEL_KEYS= {
-		CleanUpConstants.FORMAT_SOURCE_CODE, 
-		CleanUpConstants.FORMAT_COMMENT, 
-		CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES, 
-		CleanUpConstants.ORGANIZE_IMPORTS,
-		CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS,
-		CleanUpConstants.EXPRESSIONS_USE_PARENTHESES,
-		CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL,
-		CleanUpConstants.ADD_MISSING_ANNOTATIONS
-	};
+public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveParticipantPreferenceConfiguration {
 	
 	private static class PreferenceModifyBlock extends ModifyDialogTabPage {
 		
@@ -304,7 +291,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration implements ISaveParti
 	/**
 	 * {@inheritDoc}
 	 */
-	public Control createControl(Composite parent, IPreferencePageContainer container) {
+	public Control createConfigControl(Composite parent, IPreferencePageContainer container) {
 		fSettings= CleanUpConstants.getSaveParticipantSettings();
 		fBlock= new PreferenceModifyBlock(fSettings, container);
 		return fBlock.createBlockContent(parent);
@@ -313,7 +300,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration implements ISaveParti
 	/**
 	 * {@inheritDoc}
 	 */
-	public void initialize(final IScopeContext context, IAdaptable element) {
+	public void initialize(final IScopeContext context, IAdaptable element) {		
 		fContext= context;
 		copyMap(CleanUpPreferenceUtil.loadSaveParticipantOptions(context), fSettings);
 		if (element != null) {
@@ -326,17 +313,23 @@ public class CleanUpSaveParticipantPreferenceConfiguration implements ISaveParti
 			}
 		}
 		fBlock.initializePage();
+		
+		super.initialize(context, element);
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	public void dispose() {}
+	public void dispose() {
+		super.dispose();
+	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	public void performDefaults() {
+		super.performDefaults();
+		
 		copyMap(CleanUpConstants.getSaveParticipantSettings(), fSettings);
 		fBlock.initializePage();
 	}
@@ -345,6 +338,8 @@ public class CleanUpSaveParticipantPreferenceConfiguration implements ISaveParti
 	 * {@inheritDoc}
 	 */
 	public void performOk() {
+		super.performOk();
+		
 		if (!ProjectScope.SCOPE.equals(fContext.getName()) || hasSettingsInScope(fContext))
 			CleanUpPreferenceUtil.saveSaveParticipantOptions(fContext, fSettings);
 	}
@@ -353,6 +348,8 @@ public class CleanUpSaveParticipantPreferenceConfiguration implements ISaveParti
 	 * {@inheritDoc}
 	 */
 	public void enableProjectSettings() {
+		super.enableProjectSettings();
+		
 		CleanUpPreferenceUtil.saveSaveParticipantOptions(fContext, fSettings);
 	}
 	
@@ -360,6 +357,8 @@ public class CleanUpSaveParticipantPreferenceConfiguration implements ISaveParti
 	 * {@inheritDoc}
 	 */
 	public void disableProjectSettings() {
+		super.disableProjectSettings();
+		
 		IEclipsePreferences node= fContext.getNode(JavaUI.ID_PLUGIN);
 		
 		Map settings= CleanUpConstants.getSaveParticipantSettings();
@@ -370,38 +369,19 @@ public class CleanUpSaveParticipantPreferenceConfiguration implements ISaveParti
 	}
 	
 	/**
-	 * {@inheritDoc}
-	 */
-	public boolean hasSettingsInScope(IScopeContext context) {
-		IEclipsePreferences node= context.getNode(JavaUI.ID_PLUGIN);
-		for (int i= 0; i < TOP_LEVEL_KEYS.length; i++) {
-			if (node.get(CleanUpPreferenceUtil.SAVE_PARTICIPANT_KEY_PREFIX + TOP_LEVEL_KEYS[i], null) != null)
-				return true;
-		}
-		
-		return false;
-	}
-	
+     * {@inheritDoc}
+     */
+    protected String getPostSaveListenerId() {
+	    return CleanUpPostSaveListener.POSTSAVELISTENER_ID;
+    }
+
 	/**
-	 * {@inheritDoc}
-	 */
-	public boolean isEnabled(IScopeContext context) {
-		IEclipsePreferences node;
-		if (hasSettingsInScope(context)) {
-			node= context.getNode(JavaUI.ID_PLUGIN);
-		} else {
-			node= INSTANCE_NODE;
-		}
-		
-		for (int i= 0; i < TOP_LEVEL_KEYS.length; i++) {
-			String value= node.get(CleanUpPreferenceUtil.SAVE_PARTICIPANT_KEY_PREFIX + TOP_LEVEL_KEYS[i], null);
-			if (CleanUpConstants.TRUE.equals(value))
-				return true;
-		}
-		
-		return false;
-	}
-	
+     * {@inheritDoc}
+     */
+    protected String getPostSaveListenerName() {
+	    return SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_CleanUpActionsTopNodeName_Checkbox;
+    }
+    
 	private void copyMap(Map source, Map target) {
 		for (Iterator iterator= source.keySet().iterator(); iterator.hasNext();) {
 			String key= (String)iterator.next();

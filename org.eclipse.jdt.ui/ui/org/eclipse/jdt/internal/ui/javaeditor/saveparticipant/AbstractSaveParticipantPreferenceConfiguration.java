@@ -21,6 +21,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.preference.IPreferencePageContainer;
@@ -30,6 +31,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.preferences.PreferencesMessages;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
@@ -72,12 +74,21 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
 	 */
 	public Control createControl(Composite parent, IPreferencePageContainer container) {
 		Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		composite.setLayout(new GridLayout(2, false));
+		GridData gridData= new GridData(SWT.FILL, SWT.TOP, true, false);
+		composite.setLayoutData(gridData);
+		GridLayout layout= new GridLayout(3, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		composite.setLayout(layout);
 		
 		fEnableField= new SelectionButtonDialogField(SWT.CHECK);
 		fEnableField.setLabelText(Messages.format(PreferencesMessages.JavaEditorPreferencePage_saveParticipant_cleanup, getPostSaveListenerName()));
-		fEnableField.doFillIntoGrid(composite, 2);
+		fEnableField.doFillIntoGrid(composite, 3);
+		
+		Label label= new Label(composite, SWT.NONE);
+		GridData data= new GridData(SWT.FILL, SWT.TOP, false, false);
+		data.widthHint= new PixelConverter(composite).convertWidthInCharsToPixels(1);
+		label.setLayoutData(data);
 		
 		fConfigControl= createConfigControl(composite, container);
 		
@@ -88,10 +99,11 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
 	 * {@inheritDoc}
 	 */
 	public void initialize(final IScopeContext context, IAdaptable element) {
-		fEnableField.setSelection(isEnabled(context));
+		boolean enabled= isEnabled(context);
+		fEnableField.setSelection(enabled);
 		
 		final ControlEnableState[] state= new ControlEnableState[1];
-		if (fConfigControl != null && !fEnableField.isEnabled()) {
+		if (fConfigControl != null && !enabled) {
 			state[0]= ControlEnableState.disable(fConfigControl);
 		}
 		

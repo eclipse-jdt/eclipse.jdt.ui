@@ -14,6 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class SaveParticipantMessages extends NLS {
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.fix.SaveParticipantMessages"; //$NON-NLS-1$
+	public static String CleanUpSaveParticipantPreferenceConfiguration_CleanUpActionsTopNodeName_Checkbox;
 	public static String CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_AddAnnotations_Checkbox;
 	public static String CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_AddFinal_Checkbox;
 	public static String CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_AddParanoicalParanthesis_Checkbox;

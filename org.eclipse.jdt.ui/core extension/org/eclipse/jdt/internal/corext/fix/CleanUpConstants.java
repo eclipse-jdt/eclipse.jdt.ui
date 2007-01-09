@@ -1190,7 +1190,7 @@ public class CleanUpConstants {
 		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES_ALL, TRUE);
 		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY, FALSE);
 		
-		result.put(ORGANIZE_IMPORTS, FALSE);
+		result.put(ORGANIZE_IMPORTS, TRUE);
 		
 		return result;
 	}

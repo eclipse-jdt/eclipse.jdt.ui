@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
 
 public class CleanUpPostSaveListener implements IPostSaveListener {
 	
+	public static final String POSTSAVELISTENER_ID= "org.eclipse.jdt.ui.postsavelistener.cleanup"; //$NON-NLS-1$
 	private static final String WARNING_VALUE= "warning"; //$NON-NLS-1$
 	private static final String ERROR_VALUE= "error"; //$NON-NLS-1$
 
@@ -180,7 +181,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	 * {@inheritDoc}
 	 */
 	public String getId() {
-		return "org.eclipse.jdt.ui.postsavelistener.cleanup"; //$NON-NLS-1$
+		return POSTSAVELISTENER_ID;
 	}
 	
 }
