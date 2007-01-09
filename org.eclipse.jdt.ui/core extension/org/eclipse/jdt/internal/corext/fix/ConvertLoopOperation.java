@@ -31,7 +31,7 @@ public abstract class ConvertLoopOperation extends AbstractLinkedFixRewriteOpera
 	
 	protected static final String FOR_LOOP_ELEMENT_IDENTIFIER= "element"; //$NON-NLS-1$
 	
-	protected static final IStatus ERROR_STATUS= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), "");
+	protected static final IStatus ERROR_STATUS= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), ""); //$NON-NLS-1$
 	
 	private final ForStatement fStatement;
 	private ConvertLoopOperation fOperation;
