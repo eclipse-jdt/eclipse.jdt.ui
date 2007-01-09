@@ -1296,6 +1296,7 @@
             id="org.eclipse.jdt.ui.preferences.CodeAssistPreferenceAdvanced">
             <keywordReference id="org.eclipse.jdt.ui.contentassist"/>
       </page>
+      <!-- To be enabled once the full support is implemented
       <page
             name="%contentAssistStaticMembersName"
             category="org.eclipse.jdt.ui.preferences.CodeAssistPreferencePage"
@@ -1303,6 +1304,7 @@
             id="org.eclipse.jdt.ui.preferences.CodeAssistPreferenceAdvanced">
             <keywordReference id="org.eclipse.jdt.ui.contentassist"/>
       </page>
+      -->
       <page
             name="%editorHoversPageName"
             category="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
