@@ -26,11 +26,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.preference.IPreferencePageContainer;
 
-import org.eclipse.jdt.internal.corext.util.Messages;
-
 import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.ui.preferences.PreferencesMessages;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -82,7 +79,7 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
 		composite.setLayout(layout);
 		
 		fEnableField= new SelectionButtonDialogField(SWT.CHECK);
-		fEnableField.setLabelText(Messages.format(PreferencesMessages.JavaEditorPreferencePage_saveParticipant_cleanup, getPostSaveListenerName()));
+		fEnableField.setLabelText(getPostSaveListenerName());
 		fEnableField.doFillIntoGrid(composite, 3);
 		
 		Label label= new Label(composite, SWT.NONE);

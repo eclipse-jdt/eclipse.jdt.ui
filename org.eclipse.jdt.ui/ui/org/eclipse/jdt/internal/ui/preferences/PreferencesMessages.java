@@ -676,7 +676,6 @@ public final class PreferencesMessages extends NLS {
 	public static String EditTemplateDialog_select_all;
 	public static String EditTemplateDialog_content_assist;
 	public static String JavaEditorPreferencePage_folding_title;
-	public static String JavaEditorPreferencePage_saveParticipant_cleanup;
 	public static String FoldingConfigurationBlock_enable;
 	public static String FoldingConfigurationBlock_combo_caption;
 	public static String FoldingConfigurationBlock_info_no_preferences;
