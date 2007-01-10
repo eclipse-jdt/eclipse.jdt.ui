@@ -45,10 +45,6 @@ import org.eclipse.jface.viewers.IPostSelectionProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
-import org.eclipse.jface.text.DocumentEvent;
-import org.eclipse.jface.text.IEditingSupport;
-import org.eclipse.jface.text.IEditingSupportRegistry;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IPartListener2;
@@ -67,19 +63,6 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
 public class RenameInformationPopup {
-	
-	private class FocusEditingSupport implements IEditingSupport {
-		public boolean ownsFocusShell() {
-			if (fPopup == null || fPopup.isDisposed())
-				return false;
-			Control focusControl= fPopup.getDisplay().getFocusControl();
-			return focusControl != null && focusControl.getShell() == fPopup;
-		}
-
-		public boolean isOriginator(DocumentEvent event, IRegion subjectRegion) {
-			return true;
-		}
-	}
 	
 	private class PopupVisibilityManager implements IPartListener2, ControlListener {
 		public void start() {
@@ -155,6 +138,9 @@ public class RenameInformationPopup {
 					entry.setEnabled(newEnabled);
 				}
 			}
+//			//TODO: restore on finish
+//			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+//			store.setValue(PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, ! newEnabled);
 			fOldEnabled= newEnabled;
 		}
 	}
@@ -207,7 +193,6 @@ public class RenameInformationPopup {
 	
 	private final CompilationUnitEditor fEditor;
 	private final RenameLinkedMode fRenameLinkedMode;
-	private final FocusEditingSupport fFocusEditingSupport;
 	
 	private Shell fPopup;
 	private List/*<InfoEntry>*/ fRefactorEntries;
@@ -216,16 +201,10 @@ public class RenameInformationPopup {
 	public RenameInformationPopup(CompilationUnitEditor editor, RenameLinkedMode renameLinkedMode) {
 		fEditor= editor;
 		fRenameLinkedMode= renameLinkedMode;
-		fFocusEditingSupport= new FocusEditingSupport();
 	}
 
 	public void open() {
 		ISourceViewer viewer= fEditor.getViewer();
-		
-		if (viewer instanceof IEditingSupportRegistry) {
-			IEditingSupportRegistry registry= (IEditingSupportRegistry) viewer;
-			registry.register(fFocusEditingSupport);
-		}
 		
 		Shell workbenchShell= fEditor.getSite().getShell();
 		final Display display= workbenchShell.getDisplay();
@@ -282,12 +261,10 @@ public class RenameInformationPopup {
 			}
 			fPopup= null;
 		}
-		ISourceViewer viewer= fEditor.getViewer();
-		if (viewer instanceof IEditingSupportRegistry) {
-			IEditingSupportRegistry registry= (IEditingSupportRegistry) viewer;
-			registry.unregister(fFocusEditingSupport);
-		}
-		
+	}
+	
+	public Shell getShell() {
+		return fPopup;
 	}
 	
 	private void setPopupLocation(ISourceViewer sourceViewer) {

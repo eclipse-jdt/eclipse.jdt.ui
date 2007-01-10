@@ -12,13 +12,18 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IEditingSupport;
+import org.eclipse.jface.text.IEditingSupportRegistry;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
@@ -59,9 +64,25 @@ import org.eclipse.jdt.internal.ui.refactoring.DelegateUIHelper;
 
 public class RenameLinkedMode {
 
+	private class FocusEditingSupport implements IEditingSupport {
+		public boolean ownsFocusShell() {
+			if (fInfoPopup == null)
+				return false;
+			Shell popup= fInfoPopup.getShell();
+			if (popup == null || popup.isDisposed())
+				return false;
+			Control focusControl= popup.getDisplay().getFocusControl();
+			return focusControl != null && focusControl.getShell() == popup;
+		}
+
+		public boolean isOriginator(DocumentEvent event, IRegion subjectRegion) {
+			return false; //leave on external modification outside positions
+		}
+	}
+	
 	private class EditorSynchronizer implements ILinkedModeListener {
 		public void left(LinkedModeModel model, int flags) {
-			closePopup();
+			linkedModeLeft();
 			if ( (flags & ILinkedModeListener.UPDATE_CARET) != 0) {
 				doRename(fShowPreview);
 			}
@@ -95,11 +116,13 @@ public class RenameLinkedMode {
 	private LinkedPosition fNamePosition;
 	private LinkedModeModel fLinkedModeModel;
 	private LinkedPositionGroup fLinkedPositionGroup;
+	private final FocusEditingSupport fFocusEditingSupport;
 	private boolean fShowPreview;
 
 	public RenameLinkedMode(IJavaElement element, CompilationUnitEditor editor) {
 		fEditor= editor;
 		fJavaElement= element;
+		fFocusEditingSupport= new FocusEditingSupport();
 	}
 	
 	public static RenameLinkedMode getActiveLinkedMode() {
@@ -177,6 +200,12 @@ public class RenameLinkedMode {
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
+		
+		if (viewer instanceof IEditingSupportRegistry) {
+			IEditingSupportRegistry registry= (IEditingSupportRegistry) viewer;
+			registry.register(fFocusEditingSupport);
+		}
+
 		openSecondaryPopup();
 //		startAnimation();
 		fgActiveLinkedMode= this;
@@ -248,7 +277,7 @@ public class RenameLinkedMode {
 
 	public void cancel() {
 		fLinkedModeModel.exit(ILinkedModeListener.NONE);
-		closePopup();
+		linkedModeLeft();
 	}
 	
 	private void restoreFullSelection() {
@@ -434,12 +463,18 @@ public class RenameLinkedMode {
 		return descriptor;
 	}
 
-	private void closePopup() {
+	private void linkedModeLeft() {
 		fgActiveLinkedMode= null;
 		fInfoPopup.close();
+		
+		ISourceViewer viewer= fEditor.getViewer();
+		if (viewer instanceof IEditingSupportRegistry) {
+			IEditingSupportRegistry registry= (IEditingSupportRegistry) viewer;
+			registry.unregister(fFocusEditingSupport);
+		}
 	}
 
-	public void openSecondaryPopup() {
+	private void openSecondaryPopup() {
 		fInfoPopup= new RenameInformationPopup(fEditor, this);
 		fInfoPopup.open();
 	}
