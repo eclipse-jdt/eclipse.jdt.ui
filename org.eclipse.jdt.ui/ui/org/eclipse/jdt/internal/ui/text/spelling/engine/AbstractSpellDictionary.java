@@ -225,7 +225,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 		try {
 
-			if (!fLoaded && fMustLoad) {
+			if (!fLoaded) {
 				synchronized (this) {
 					fLoaded= load(getURL());
 				}
@@ -365,7 +365,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		word= stripNonLetters(word);
 		try {
 			
-			if (!fLoaded && fMustLoad) {
+			if (!fLoaded) {
 				synchronized (this) {
 					fLoaded= load(getURL());
 				}
@@ -434,6 +434,8 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	 *               otherwise
 	 */
 	protected synchronized boolean load(final URL url) {
+		 if (!fMustLoad)
+			 return fLoaded;
 
 		if (url != null) {
 			InputStream stream= null;
