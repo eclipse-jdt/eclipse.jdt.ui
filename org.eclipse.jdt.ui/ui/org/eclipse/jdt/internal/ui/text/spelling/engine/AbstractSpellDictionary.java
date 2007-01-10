@@ -516,6 +516,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	 */
 	public synchronized void unload() {
 		fLoaded= false;
+		fMustLoad= true;
 		fHashBuckets.clear();
 	}
 
