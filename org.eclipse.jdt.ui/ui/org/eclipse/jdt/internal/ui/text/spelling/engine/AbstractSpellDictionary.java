@@ -17,6 +17,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.MalformedInputException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,7 +28,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * Partial implementation of a spell dictionary.
@@ -204,8 +216,8 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 		try {
 
-			if (fMustLoad)
-				load(getURL());
+			if (!fLoaded)
+				fLoaded= load(getURL());
 
 		} catch (MalformedURLException exception) {
 			// Do nothing
@@ -341,8 +353,8 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 		try {
 
-			if (fMustLoad)
-				load(getURL());
+			if (!fLoaded)
+				fLoaded= load(getURL());
 
 		} catch (MalformedURLException exception) {
 			// Do nothing
@@ -372,25 +384,54 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	 *               otherwise
 	 */
 	protected synchronized boolean load(final URL url) {
+		 if (!fMustLoad)
+			 return fLoaded;
 
 		if (url != null) {
-
 			InputStream stream= null;
+			int line= 0;
 			try {
-
 				stream= url.openStream();
 				if (stream != null) {
-
 					String word= null;
-
-					final BufferedReader reader= new BufferedReader(new InputStreamReader(stream));
-					while ((word= reader.readLine()) != null)
-						hashWord(word);
-
-					return fLoaded= true;
+					
+					// Setup a reader with a decoder in order to read over malformed input if needed.
+					CharsetDecoder decoder= Charset.forName(System.getProperty("file.encoding")).newDecoder(); //$NON-NLS-1$
+					decoder.replaceWith("?"); //$NON-NLS-1$
+					decoder.onMalformedInput(CodingErrorAction.REPORT);
+					decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+					final BufferedReader reader= new BufferedReader(new InputStreamReader(stream, decoder));
+					
+					boolean doRead= true;
+					while (doRead) {
+						try {
+							word= reader.readLine();
+						} catch (MalformedInputException ex) {
+							// Tell the decoder to replace malformed input in order to read the line.
+							decoder.onMalformedInput(CodingErrorAction.REPLACE);
+							word= reader.readLine();
+							decoder.onMalformedInput(CodingErrorAction.REPORT);
+							
+							String message= Messages.format(JavaUIMessages.AbstractSpellingDictionary_encodingError, new String[] { word, decoder.replacement(), url.toString() });
+							IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, ex);
+							JavaPlugin.log(status);
+							
+							doRead= word != null;
+							continue;
+						}
+						doRead= word != null;
+						if (doRead)
+							hashWord(word);
+					}
+					return true;
 				}
 			} catch (IOException exception) {
-				JavaPlugin.log(exception);
+				if (line > 0) {
+					String message= Messages.format(JavaUIMessages.AbstractSpellingDictionary_encodingError, new Object[] { new Integer(line), url.toString() });
+					IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, exception);
+					JavaPlugin.log(status);
+				} else
+					JavaPlugin.log(exception);
 			} finally {
 				fMustLoad= false;
 				try {
@@ -427,8 +468,8 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	 * @see org.eclipse.jdt.ui.text.spelling.engine.ISpellDictionary#unload()
 	 */
 	public synchronized void unload() {
-
 		fLoaded= false;
+		fMustLoad= true;
 		fHashBuckets.clear();
 	}
 
