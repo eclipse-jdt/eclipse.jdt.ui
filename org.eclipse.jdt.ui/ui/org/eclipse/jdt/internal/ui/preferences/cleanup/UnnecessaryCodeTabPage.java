@@ -27,21 +27,24 @@ import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage;
 
 public final class UnnecessaryCodeTabPage extends ModifyDialogTabPage {
 	
     private final Map fValues;
-
     private CleanUpPreview fCleanUpPreview;
 
     public UnnecessaryCodeTabPage(ModifyDialog dialog, Map values) {
-	    super(dialog, values);
-	    fValues= values;
+	    this(dialog, values, false);
     }
 
-    protected JavaPreview doCreateJavaPreview(Composite parent) {
+    public UnnecessaryCodeTabPage(IModificationListener listener, Map values, boolean isSaveParticipantConfiguration) {
+    	super(listener, values);
+		fValues= values;
+    }
+
+	protected JavaPreview doCreateJavaPreview(Composite parent) {
         fCleanUpPreview= new CleanUpPreview(parent, new ICleanUp[] {
         		new UnusedCodeCleanUp(fValues),
         		new UnnecessaryCodeCleanUp(fValues),

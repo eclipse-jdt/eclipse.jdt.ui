@@ -52,6 +52,14 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 public abstract class ModifyDialogTabPage {
 	
+	public interface IModificationListener {
+
+		void updateStatus(IStatus status);
+
+		void valuesModified();
+
+    }
+
 	/**
 	 * This is the default listener for any of the Preference
 	 * classes. It is added by the respective factory methods and
@@ -537,15 +545,15 @@ public abstract class ModifyDialogTabPage {
 	/**
 	 * The modify dialog where we can display status messages.
 	 */
-	private final ModifyDialog fModifyDialog;
+	private final IModificationListener fModifyListener;
 
 
 	/*
 	 * Create a new <code>ModifyDialogTabPage</code>
 	 */
-	public ModifyDialogTabPage(ModifyDialog modifyDialog, Map workingValues) {
+	public ModifyDialogTabPage(IModificationListener modifyListener, Map workingValues) {
 		fWorkingValues= workingValues;
-		fModifyDialog= modifyDialog;
+		fModifyListener= modifyListener;
 		fDefaultFocusManager= new DefaultFocusManager();
 	}
 	
@@ -657,8 +665,7 @@ public abstract class ModifyDialogTabPage {
 	protected abstract void doUpdatePreview();
 	
 	protected void notifyValuesModified() {
-		if (fModifyDialog != null)
-			fModifyDialog.valuesModified();
+		fModifyListener.valuesModified();
 	}
     /**
      * Each tab page should remember where its last focus was, and reset it
@@ -679,8 +686,7 @@ public abstract class ModifyDialogTabPage {
      * @param status Status describing the current page error state
      */
 	protected void updateStatus(IStatus status) {
-		if (fModifyDialog != null)
-		    fModifyDialog.updateStatus(status);
+		fModifyListener.updateStatus(status);
 	}
 	
 	/*

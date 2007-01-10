@@ -32,15 +32,20 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
 public final class MissingCodeTabPage extends ModifyDialogTabPage {
 	
     private final Map fValues;
-
+    private final boolean fIsSaveParticipantConfiguration;
     private CleanUpPreview fCleanUpPreview;
 
     public MissingCodeTabPage(ModifyDialog dialog, Map values) {
-	    super(dialog, values);
-	    fValues= values;
+	    this(dialog, values, false);
     }
 
-    protected JavaPreview doCreateJavaPreview(Composite parent) {
+    public MissingCodeTabPage(IModificationListener listener, Map values, boolean isSaveParticipantConfiguration) {
+    	super(listener, values);
+		fValues= values;
+		fIsSaveParticipantConfiguration= isSaveParticipantConfiguration;
+    }
+
+	protected JavaPreview doCreateJavaPreview(Composite parent) {
         fCleanUpPreview= new CleanUpPreview(parent, new ICleanUp[] {
         		new Java50CleanUp(fValues),
         		new PotentialProgrammingProblemsCleanUp(fValues)
@@ -70,23 +75,25 @@ public final class MissingCodeTabPage extends ModifyDialogTabPage {
 		overridePref.setEnabled(annotationsPref.getChecked());
 		deprecatedPref.setEnabled(annotationsPref.getChecked());
 		
-		Group pppGroup= createGroup(numColumns, composite, CleanUpMessages.MissingCodeTabPage_GroupName_PotentialProgrammingProblems);
-    	final CheckboxPreference addSUIDPref= createCheckboxPref(pppGroup, numColumns, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddSUID, CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID, CleanUpModifyDialog.FALSE_TRUE);
-    	
-		intent(pppGroup);
-		final RadioPreference generatedPref= createRadioPref(pppGroup, 1, CleanUpMessages.MissingCodeTabPage_RadioName_AddGeneratedSUID, CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED, CleanUpModifyDialog.FALSE_TRUE);
-		final RadioPreference defaultPref= createRadioPref(pppGroup, 1, CleanUpMessages.MissingCodeTabPage_RadioName_AddDefaultSUID, CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, CleanUpModifyDialog.FALSE_TRUE);
-    	
-    	addSUIDPref.addObserver( new Observer() {
-    		public void update(Observable o, Object arg) {
-    			generatedPref.setEnabled(addSUIDPref.getChecked());
-    			defaultPref.setEnabled(addSUIDPref.getChecked());
-    		}
-    		
-    	});
-
-		generatedPref.setEnabled(addSUIDPref.getChecked());
-		defaultPref.setEnabled(addSUIDPref.getChecked());
+		if (!fIsSaveParticipantConfiguration) {
+			Group pppGroup= createGroup(numColumns, composite, CleanUpMessages.MissingCodeTabPage_GroupName_PotentialProgrammingProblems);
+			final CheckboxPreference addSUIDPref= createCheckboxPref(pppGroup, numColumns, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddSUID, CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID, CleanUpModifyDialog.FALSE_TRUE);
+			
+			intent(pppGroup);
+			final RadioPreference generatedPref= createRadioPref(pppGroup, 1, CleanUpMessages.MissingCodeTabPage_RadioName_AddGeneratedSUID, CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED, CleanUpModifyDialog.FALSE_TRUE);
+			final RadioPreference defaultPref= createRadioPref(pppGroup, 1, CleanUpMessages.MissingCodeTabPage_RadioName_AddDefaultSUID, CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, CleanUpModifyDialog.FALSE_TRUE);
+			
+			addSUIDPref.addObserver( new Observer() {
+				public void update(Observable o, Object arg) {
+					generatedPref.setEnabled(addSUIDPref.getChecked());
+					defaultPref.setEnabled(addSUIDPref.getChecked());
+				}
+				
+			});
+			
+			generatedPref.setEnabled(addSUIDPref.getChecked());
+			defaultPref.setEnabled(addSUIDPref.getChecked());
+		}
     }
 
     private void intent(Composite group) {

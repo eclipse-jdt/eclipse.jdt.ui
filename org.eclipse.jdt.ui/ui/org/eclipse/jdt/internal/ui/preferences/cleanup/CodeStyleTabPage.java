@@ -34,15 +34,18 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage;
 public final class CodeStyleTabPage extends ModifyDialogTabPage {
 	
     private final Map fValues;
-
     private CleanUpPreview fCleanUpPreview;
 
     public CodeStyleTabPage(ModifyDialog dialog, Map values) {
-	    super(dialog, values);
-	    fValues= values;
+	    this(dialog, values, false);
     }
 
-    protected JavaPreview doCreateJavaPreview(Composite parent) {
+    public CodeStyleTabPage(IModificationListener listener, Map values, boolean isSaveParticipantConfiguration) {
+    	super(listener, values);
+		fValues= values;
+    }
+
+	protected JavaPreview doCreateJavaPreview(Composite parent) {
         fCleanUpPreview= new CleanUpPreview(parent, new ICleanUp[] {
         		new ControlStatementsCleanUp(fValues),
         		new ConvertLoopCleanUp(fValues),

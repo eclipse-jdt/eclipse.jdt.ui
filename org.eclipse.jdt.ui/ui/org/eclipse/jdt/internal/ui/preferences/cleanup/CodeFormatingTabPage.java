@@ -35,14 +35,19 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
 public final class CodeFormatingTabPage extends ModifyDialogTabPage {
 	
 	private final Map fValues;
-	
+	private final boolean fIsSaveParticipantConfiguration;
 	private CleanUpPreview fCleanUpPreview;
 	
 	public CodeFormatingTabPage(ModifyDialog dialog, Map values) {
-		super(dialog, values);
-		fValues= values;
+		this(dialog, values, false);
 	}
 	
+	public CodeFormatingTabPage(IModificationListener listener, Map values, boolean isSaveParticipantConfiguration) {
+		super(listener, values);
+		fValues= values;
+		fIsSaveParticipantConfiguration= isSaveParticipantConfiguration;
+	}
+
 	protected JavaPreview doCreateJavaPreview(Composite parent) {
 		fCleanUpPreview= new CleanUpPreview(parent, new ICleanUp[] {new ImportsCleanUp(fValues), new CodeFormatCleanUp(fValues), new CommentFormatCleanUp(fValues)}, false);
 		return fCleanUpPreview;
@@ -51,7 +56,10 @@ public final class CodeFormatingTabPage extends ModifyDialogTabPage {
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 		
 		Group group= createGroup(numColumns, composite, CleanUpMessages.CodeFormatingTabPage_GroupName_Formatter);
-		createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_CheckboxName_FormatSourceCode, CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpModifyDialog.FALSE_TRUE);
+		
+		if (!fIsSaveParticipantConfiguration) {
+			createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_CheckboxName_FormatSourceCode, CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpModifyDialog.FALSE_TRUE);
+		}
 		
 		final CheckboxPreference formatCommentsPref= createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_CheckboxName_FormatComments, CleanUpConstants.FORMAT_COMMENT, CleanUpModifyDialog.FALSE_TRUE);
 		
@@ -105,12 +113,14 @@ public final class CodeFormatingTabPage extends ModifyDialogTabPage {
 		
 		PixelConverter pixelConverter= new PixelConverter(composite);
 		
-		createLabel(CleanUpMessages.CodeFormatingTabPage_FormatterSettings_Description, group, numColumns, pixelConverter).setFont(composite.getFont());
+		if (!fIsSaveParticipantConfiguration) {
+			createLabel(CleanUpMessages.CodeFormatingTabPage_FormatterSettings_Description, group, numColumns, pixelConverter).setFont(composite.getFont());
 		
-		Group importsGroup= createGroup(numColumns, composite, CleanUpMessages.CodeFormatingTabPage_Imports_GroupName);
-		createCheckboxPref(importsGroup, numColumns, CleanUpMessages.CodeFormatingTabPage_OrganizeImports_CheckBoxLable, CleanUpConstants.ORGANIZE_IMPORTS, CleanUpModifyDialog.FALSE_TRUE);
-		
-		createLabel(CleanUpMessages.CodeFormatingTabPage_OrganizeImportsSettings_Description, importsGroup, numColumns, pixelConverter).setFont(composite.getFont());
+			Group importsGroup= createGroup(numColumns, composite, CleanUpMessages.CodeFormatingTabPage_Imports_GroupName);
+			createCheckboxPref(importsGroup, numColumns, CleanUpMessages.CodeFormatingTabPage_OrganizeImports_CheckBoxLable, CleanUpConstants.ORGANIZE_IMPORTS, CleanUpModifyDialog.FALSE_TRUE);
+			
+			createLabel(CleanUpMessages.CodeFormatingTabPage_OrganizeImportsSettings_Description, importsGroup, numColumns, pixelConverter).setFont(composite.getFont());
+		}
 	}
 	
 	private Label createLabel(String text, Group group, int numColumns, PixelConverter pixelConverter) {

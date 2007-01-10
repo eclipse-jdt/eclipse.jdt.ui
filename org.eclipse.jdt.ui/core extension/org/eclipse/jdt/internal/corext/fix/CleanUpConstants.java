@@ -1020,6 +1020,8 @@ public class CleanUpConstants {
 	 */
 	public final static String SAVE_PARTICIPANT_PROFILE= "org.eclipse.jdt.ui.default.save_participant_clean_up_profile"; //$NON-NLS-1$
 	
+	public static final String CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS= "cleanup.on_save_use_additional_actions"; //$NON-NLS-1$
+	
 	/**
 	 * The id of the profile used as a default profile when executing clean up.<br>
 	 * <br>
@@ -1040,6 +1042,7 @@ public class CleanUpConstants {
 	 * @since 3.3
 	 */
 	public final static String DEFAULT_SAVE_PARTICIPANT_PROFILE= SAVE_PARTICIPANT_PROFILE;
+
 	
 	public static Map getEclipseDefaultSettings() {
 		final HashMap result= new HashMap();
@@ -1123,8 +1126,8 @@ public class CleanUpConstants {
 		
 		//Member Accesses
 		result.put(MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS, FALSE);
-		result.put(MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS, TRUE);
-		result.put(MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY, FALSE);
+		result.put(MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS, FALSE);
+		result.put(MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY, TRUE);
 		
 		result.put(MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS, FALSE);
 		result.put(MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS, FALSE);
@@ -1150,7 +1153,7 @@ public class CleanUpConstants {
 		result.put(EXPRESSIONS_USE_PARENTHESES_ALWAYS, FALSE);
 		
 		//Variable Declarations
-		result.put(VARIABLE_DECLARATIONS_USE_FINAL, FALSE);
+		result.put(VARIABLE_DECLARATIONS_USE_FINAL, TRUE);
 		result.put(VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES, FALSE);
 		result.put(VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS, FALSE);
 		result.put(VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, TRUE);
@@ -1165,11 +1168,11 @@ public class CleanUpConstants {
 		result.put(REMOVE_UNUSED_CODE_LOCAL_VARIABLES, FALSE);
 		
 		//Unnecessary Code
-		result.put(REMOVE_UNNECESSARY_CASTS, FALSE);
+		result.put(REMOVE_UNNECESSARY_CASTS, TRUE);
 		result.put(REMOVE_UNNECESSARY_NLS_TAGS, FALSE);
 		
 		//Missing Code
-		result.put(ADD_MISSING_ANNOTATIONS, FALSE);
+		result.put(ADD_MISSING_ANNOTATIONS, TRUE);
 		result.put(ADD_MISSING_ANNOTATIONS_OVERRIDE, TRUE);
 		result.put(ADD_MISSING_ANNOTATIONS_DEPRECATED, TRUE);
 		
@@ -1191,6 +1194,8 @@ public class CleanUpConstants {
 		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY, FALSE);
 		
 		result.put(ORGANIZE_IMPORTS, TRUE);
+		
+		result.put(CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS, FALSE);
 		
 		return result;
 	}

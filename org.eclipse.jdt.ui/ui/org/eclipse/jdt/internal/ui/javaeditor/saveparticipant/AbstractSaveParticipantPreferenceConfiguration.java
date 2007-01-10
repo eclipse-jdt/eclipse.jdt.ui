@@ -21,14 +21,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.preference.IPreferencePageContainer;
 
 import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
@@ -50,6 +48,7 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
 	private SelectionButtonDialogField fEnableField;
 	private Control fConfigControl;
 	private IScopeContext fContext;
+	private ControlEnableState fConfigControlEnabledState;
 
 	/**
 	 * The id of the post save listener managed by this configuration block, not null
@@ -73,19 +72,14 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridData gridData= new GridData(SWT.FILL, SWT.TOP, true, false);
 		composite.setLayoutData(gridData);
-		GridLayout layout= new GridLayout(3, false);
+		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		composite.setLayout(layout);
 		
 		fEnableField= new SelectionButtonDialogField(SWT.CHECK);
 		fEnableField.setLabelText(getPostSaveListenerName());
-		fEnableField.doFillIntoGrid(composite, 3);
-		
-		Label label= new Label(composite, SWT.NONE);
-		GridData data= new GridData(SWT.FILL, SWT.TOP, false, false);
-		data.widthHint= new PixelConverter(composite).convertWidthInCharsToPixels(1);
-		label.setLayoutData(data);
+		fEnableField.doFillIntoGrid(composite, 1);
 		
 		fConfigControl= createConfigControl(composite, container);
 		
@@ -99,22 +93,13 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
 		boolean enabled= isEnabled(context);
 		fEnableField.setSelection(enabled);
 		
-		final ControlEnableState[] state= new ControlEnableState[1];
 		if (fConfigControl != null && !enabled) {
-			state[0]= ControlEnableState.disable(fConfigControl);
+			fConfigControlEnabledState= ControlEnableState.disable(fConfigControl);
 		}
 		
 		fEnableField.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
-				context.getNode(JavaUI.ID_PLUGIN).putBoolean(getPreferenceKey(), fEnableField.isSelected());
-				if (fConfigControl != null) {
-					if (state[0] != null) {
-						state[0].restore();
-						state[0]= null;
-					} else {
-						state[0]= ControlEnableState.disable(fConfigControl);
-					}
-				}
+				enableConfigControl(fEnableField.isSelected());
 			}
 		});
 		
@@ -176,6 +161,18 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
 		
 		String key= getPreferenceKey();
 		return node.getBoolean(key, defaultNode.getBoolean(key, false));
+	}
+	
+	protected void enableConfigControl(boolean isEnabled) {
+		fContext.getNode(JavaUI.ID_PLUGIN).putBoolean(getPreferenceKey(), isEnabled);
+		if (fConfigControl != null) {
+			if (fConfigControlEnabledState != null) {
+				fConfigControlEnabledState.restore();
+				fConfigControlEnabledState= null;
+			} else {
+				fConfigControlEnabledState= ControlEnableState.disable(fConfigControl);
+			}
+		}
 	}
 	
 	private String getPreferenceKey() {

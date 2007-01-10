@@ -80,7 +80,15 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, Messages.format(FixMessages.CleanUpPostSaveListener_unknown_profile_error_message, id)));
 			}
 			
-			ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps(settings);
+			ICleanUp[] cleanUps;
+			if (CleanUpConstants.TRUE.equals(settings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS))) {
+				cleanUps= CleanUpRefactoring.createCleanUps(settings);
+			} else {
+				HashMap filteredSettins= new HashMap();
+				filteredSettins.put(CleanUpConstants.FORMAT_SOURCE_CODE, settings.get(CleanUpConstants.FORMAT_SOURCE_CODE));
+				filteredSettins.put(CleanUpConstants.ORGANIZE_IMPORTS, settings.get(CleanUpConstants.ORGANIZE_IMPORTS));
+				cleanUps= CleanUpRefactoring.createCleanUps(filteredSettins);
+			}
 			
 			do {
 				for (int i= 0; i < cleanUps.length; i++) {
