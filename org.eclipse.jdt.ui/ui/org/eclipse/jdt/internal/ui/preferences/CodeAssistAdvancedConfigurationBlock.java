@@ -358,6 +358,8 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		Composite composite= new Composite(scrolled, SWT.NONE);
 		int columns= 2;
 		GridLayout layout= new GridLayout(columns, false);
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
 		composite.setLayout(layout);
 		
 		
