@@ -858,6 +858,9 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 		} else if (parent.getNodeType() == ASTNode.SIMPLE_TYPE && (grandParent.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION)) {
 			ASTNode greatGrandParent= grandParent.getParent();
 			SingleVariableDeclaration singleVariableDeclaration= (SingleVariableDeclaration) grandParent;
+			if (singleVariableDeclaration.getExtraDimensions() > 0) {
+				return RefactoringCoreMessages.ChangeTypeRefactoring_arraysNotSupported;
+			}
 			if (greatGrandParent != null && greatGrandParent.getNodeType() == ASTNode.METHOD_DECLARATION) {
 				fMethodBinding= ((MethodDeclaration)greatGrandParent).resolveBinding();
 				fParamIndex= ((MethodDeclaration)greatGrandParent).parameters().indexOf(grandParent);

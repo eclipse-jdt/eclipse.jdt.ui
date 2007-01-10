@@ -124,7 +124,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 		assertEquals("status", expectedStatus, result.getSeverity());
 
-		String	canonAfterSrcName= getTestFileName(false, false);
+		String	canonAfterSrcName= getTestFileName(false, true);
 
 		assertEqualLines(getFileContents(canonAfterSrcName), cu.getSource());
 	}	
@@ -564,6 +564,9 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 	}
 	public void testArray() throws Exception {
 		failHelper1(5, 18, 5, 19, 4, "java.lang.Object");
+	}
+	public void testArray2() throws Exception {
+		failHelper1(4, 33, 4, 33, 4, "java.lang.Object");
 	}
 	public void testPrimitive() throws Exception {
 		failHelper1(5, 13, 5, 13, 4, "java.lang.Object");
