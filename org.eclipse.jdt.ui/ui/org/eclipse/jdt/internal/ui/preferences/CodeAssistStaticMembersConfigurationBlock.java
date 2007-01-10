@@ -310,8 +310,9 @@ class CodeAssistStaticMembersConfigurationBlock extends OptionsConfigurationBloc
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginWidth= 0;
+		layout.marginHeight= 0;
 		control.setLayout(layout);
-
+		
 		createFavoriteList(control);
 		
 		initialize();
@@ -374,10 +375,6 @@ class CodeAssistStaticMembersConfigurationBlock extends OptionsConfigurationBloc
 	
 	protected void validateSettings(Key key, String oldValue, String newValue) {
 		// no validation
-	}
-
-	public Control createControl(Composite parent) {
-		return createContents(parent);
 	}
 
 	protected void setControlEnabled(Key key, boolean enabled) {

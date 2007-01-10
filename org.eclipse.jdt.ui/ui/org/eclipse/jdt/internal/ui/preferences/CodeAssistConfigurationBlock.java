@@ -105,12 +105,13 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 
 	protected Control createContents(Composite parent) {
 		ScrolledPageContent scrolled= new ScrolledPageContent(parent, SWT.H_SCROLL | SWT.V_SCROLL);
-//		scrolled.setDelayedReflow(true);
 		scrolled.setExpandHorizontal(true);
 		scrolled.setExpandVertical(true);
 		
 		Composite control= new Composite(scrolled, SWT.NONE);
 		GridLayout layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
 		control.setLayout(layout);
 
 		Composite composite;
@@ -382,18 +383,6 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	protected void validateSettings(Key key, String oldValue, String newValue) {
 		if (key == null || PREF_CODEASSIST_AUTOACTIVATION_DELAY.equals(key))
 			fContext.statusChanged(validatePositiveNumber(getValue(PREF_CODEASSIST_AUTOACTIVATION_DELAY)));
-	}
-
-	public Control createControl(Composite parent) {
-		ScrolledPageContent scrolled= new ScrolledPageContent(parent, SWT.H_SCROLL | SWT.V_SCROLL);
-		scrolled.setDelayedReflow(true);
-		scrolled.setExpandHorizontal(true);
-		scrolled.setExpandVertical(true);
-		Control control= createContents(scrolled);
-		scrolled.setContent(control);
-		final Point size= control.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-		scrolled.setMinSize(size.x, size.y);
-		return scrolled;
 	}
 
 	protected void setControlEnabled(Key key, boolean enabled) {
