@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -85,10 +86,19 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 	 * {@inheritDoc}
 	 */
 	public String[] getDescriptions() {
+		ArrayList result= new ArrayList();
 		if (isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE))
-			return new String[] {MultiFixMessages.CodeFormatCleanUp_description};
+			result.add(MultiFixMessages.CodeFormatCleanUp_description);
 		
-		return null;
+		if (isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES)) {
+			if (isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL)) {
+				result.add(MultiFixMessages.CodeFormatCleanUp_RemoveTrailingAll_description);
+			} else if (isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY)) {
+				result.add(MultiFixMessages.CodeFormatCleanUp_RemoveTrailingNoEmpty_description);
+			}
+		}
+		
+		return (String[])result.toArray(new String[result.size()]);
 	}
 	
 	public String getPreview() {

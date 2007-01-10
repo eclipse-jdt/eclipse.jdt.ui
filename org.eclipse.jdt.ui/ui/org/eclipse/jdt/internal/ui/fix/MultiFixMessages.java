@@ -39,6 +39,8 @@ public class MultiFixMessages extends NLS {
 	public static String CleanUpSaveParticipantPreferenceConfiguration_edit_button_label;
 	public static String CleanUpSaveParticipantPreferenceConfiguration_unknown_profile_name;
 	public static String CleanUpSaveParticipantPreferenceConfiguration_use_clean_up_profile_label;
+	public static String CodeFormatCleanUp_RemoveTrailingAll_description;
+	public static String CodeFormatCleanUp_RemoveTrailingNoEmpty_description;
 	public static String CodeFormatFix_RemoveTrailingWhitespace_changeDescription;
 	public static String ImportsCleanUp_OrganizeImports_Description;
 	public static String StringMultiFix_AddMissingNonNls_description;
