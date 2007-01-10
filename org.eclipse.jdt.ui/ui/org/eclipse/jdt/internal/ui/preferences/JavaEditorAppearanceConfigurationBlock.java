@@ -109,7 +109,10 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		
 
 		Composite composite= new Composite(scrolled, SWT.NONE);
-		composite.setLayout(new GridLayout());
+		GridLayout layout= new GridLayout();
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
+		composite.setLayout(layout);
 		
 		createHeader(composite);
 		createAppearancePage(composite);

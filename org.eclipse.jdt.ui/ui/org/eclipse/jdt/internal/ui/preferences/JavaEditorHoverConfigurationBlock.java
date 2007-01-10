@@ -219,6 +219,8 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 		Composite hoverComposite= new Composite(scrolled, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
 		hoverComposite.setLayout(layout);
 
 		String rollOverLabel= PreferencesMessages.JavaEditorHoverConfigurationBlock_annotationRollover; 

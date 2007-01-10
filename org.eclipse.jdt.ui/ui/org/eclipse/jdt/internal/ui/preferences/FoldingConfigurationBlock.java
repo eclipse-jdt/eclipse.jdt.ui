@@ -159,6 +159,8 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 		composite.setLayoutData(gd);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
 		PixelConverter pc= new PixelConverter(composite);
 		layout.verticalSpacing= pc.convertHeightInCharsToPixels(1) / 2;
 		composite.setLayout(layout);

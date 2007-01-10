@@ -88,6 +88,8 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		
 		Composite control= new Composite(scrolled, SWT.NONE);
 		GridLayout layout= new GridLayout();
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
 		control.setLayout(layout);
 
 		Composite composite;

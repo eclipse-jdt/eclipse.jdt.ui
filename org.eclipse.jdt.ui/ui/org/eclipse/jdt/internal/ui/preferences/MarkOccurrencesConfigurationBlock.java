@@ -104,12 +104,16 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
 		composite.setLayout(layout);
 		
 		String label;
 		
 		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markOccurrences; 
-		Button master= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_OCCURRENCES, 0); 
+		Button master= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_OCCURRENCES, 0);
+		
+		addFiller(composite);
 		
 		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markTypeOccurrences; 
 		Button slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES, 0); 
@@ -198,7 +202,7 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 
 	private static void indent(Control control) {
 		GridData gridData= new GridData();
-		gridData.horizontalIndent= 20;
+		gridData.horizontalIndent= 10;
 		control.setLayoutData(gridData);		
 	}
 
