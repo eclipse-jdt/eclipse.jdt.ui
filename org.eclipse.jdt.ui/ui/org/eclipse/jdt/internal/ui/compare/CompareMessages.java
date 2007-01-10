@@ -21,7 +21,9 @@ public final class CompareMessages extends NLS {
 	}
 
 	public static String JarStructureCreator_name;
+	public static String JavaCompareWithEditionActionImpl_0;
 	public static String JavaMergeViewer_title;
+	public static String JavaReplaceWithEditionActionImpl_0;
 	public static String PropertiesFileMergeViewer_title;
 	public static String JavaStructureViewer_title;
 	public static String JavaNode_compilationUnit;

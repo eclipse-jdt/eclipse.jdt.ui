@@ -74,6 +74,7 @@
             <adapter type="org.eclipse.ui.views.tasklist.ITaskListResourceAdapter"/>
             
             <adapter type="org.eclipse.jdt.internal.ui.IResourceLocator"/>
+            <adapter type="org.eclipse.team.ui.history.IHistoryPageSource"/>
 		</factory>
 		
 		<factory 

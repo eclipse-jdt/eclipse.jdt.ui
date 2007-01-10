@@ -36,7 +36,6 @@ import org.eclipse.compare.IEditableContentExtension;
 import org.eclipse.compare.IResourceProvider;
 import org.eclipse.compare.ISharedDocumentAdapter;
 import org.eclipse.compare.IStreamContentAccessor;
-import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
 import org.eclipse.compare.structuremergeviewer.Differencer;
 import org.eclipse.compare.structuremergeviewer.DocumentRangeNode;
@@ -50,7 +49,6 @@ import org.eclipse.compare.structuremergeviewer.StructureRootNode;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -452,87 +450,6 @@ public class JavaStructureCreator extends StructureCreator {
 			}
 		}
 	}
-	
-	/**
-	 * If selector is an IJavaElement this method tries to return an
-	 * IStructureComparator object for it.
-	 * In case of error or if the given selector cannot be found
-	 * null is returned.
-	 * @param selector the IJavaElement to extract
-	 * @param input must implement the IStreamContentAccessor interface.
-	 */
-	public IStructureComparator locate(Object selector, Object input) {
-		if (!(selector instanceof IJavaElement))
-			return null;
-
-		// try to build the JavaNode tree from input
-		// TODO: Could make use of shared document
-		IStructureComparator structure= getStructure(input);
-		if (structure == null)	// we couldn't parse the structure 
-			return null;		// so we can't find anything
-			
-		// build a path
-		String[] path= createPath((IJavaElement) selector);
-			
-		// find the path in the JavaNode tree
-		return find(structure, path, 0);
-	}
-	
-	private static String[] createPath(IJavaElement je) {
-			
-		// build a path starting at the given Java element and walk
-		// up the parent chain until we reach a IWorkingCopy or ICompilationUnit
-		List args= new ArrayList();
-		while (je != null) {
-			// each path component has a name that uses the same
-			// conventions as a JavaNode name
-			String name= JavaCompareUtilities.getJavaElementID(je);
-			if (name == null)
-				return null;
-			args.add(name);
-			if (je instanceof ICompilationUnit)
-				break;
-			je= je.getParent();
-		}
-		
-		// revert the path
-		int n= args.size();
-		String[] path= new String[n];
-		for (int i= 0; i < n; i++)
-			path[i]= (String) args.get(n-1-i);
-			
-		return path;
-	}
-	
-	/**
-	 * Recursively extracts the given path from the tree.
-	 */
-	private static IStructureComparator find(IStructureComparator tree, String[] path, int index) {
-		if (tree != null) {
-			Object[] children= tree.getChildren();
-			if (children != null) {
-				for (int i= 0; i < children.length; i++) {
-					IStructureComparator child= (IStructureComparator) children[i];
-					if (child instanceof ITypedElement && child instanceof DocumentRangeNode) {
-						String n1= null;
-						if (child instanceof DocumentRangeNode)
-							n1= ((DocumentRangeNode)child).getId();
-						if (n1 == null)
-							n1= ((ITypedElement)child).getName();
-						String n2= path[index];
-						if (n1.equals(n2)) {
-							if (index == path.length-1)
-								return child;
-							IStructureComparator result= find(child, path, index+1);
-							if (result != null)
-								return result;
-						}	
-					}
-				}
-			}
-		}
-		return null;
-	}
 
 	/**
 	 * Returns true if the given IJavaElement maps to a JavaNode.
@@ -541,22 +458,7 @@ public class JavaStructureCreator extends StructureCreator {
 	 * code from the local history.
 	 */
 	static boolean hasEdition(IJavaElement je) {
-
-		if (je instanceof IMember && ((IMember)je).isBinary())
-			return false;
-			
-		switch (je.getElementType()) {
-		case IJavaElement.COMPILATION_UNIT:
-		case IJavaElement.TYPE:
-		case IJavaElement.FIELD:
-		case IJavaElement.METHOD:
-		case IJavaElement.INITIALIZER:
-		case IJavaElement.PACKAGE_DECLARATION:
-		case IJavaElement.IMPORT_CONTAINER:
-		case IJavaElement.IMPORT_DECLARATION:
-			return true;
-		}
-		return false;
+		return JavaElementHistoryPageSource.hasEdition(je);
 	}
 
 	/* (non-Javadoc)
@@ -571,5 +473,37 @@ public class JavaStructureCreator extends StructureCreator {
 	 */
 	protected String getDocumentPartitioning() {
 		return IJavaPartitions.JAVA_PARTITIONING;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.compare.structuremergeviewer.StructureCreator#getPath(java.lang.Object, java.lang.Object)
+	 */
+	protected String[] getPath(Object element, Object input) {
+		if (element instanceof IJavaElement) {
+			IJavaElement je = (IJavaElement) element;
+			// build a path starting at the given Java element and walk
+			// up the parent chain until we reach a IWorkingCopy or ICompilationUnit
+			List args= new ArrayList();
+			while (je != null) {
+				// each path component has a name that uses the same
+				// conventions as a JavaNode name
+				String name= JavaCompareUtilities.getJavaElementID(je);
+				if (name == null)
+					return null;
+				args.add(name);
+				if (je instanceof ICompilationUnit)
+					break;
+				je= je.getParent();
+			}
+			
+			// revert the path
+			int n= args.size();
+			String[] path= new String[n];
+			for (int i= 0; i < n; i++)
+				path[i]= (String) args.get(n-1-i);
+				
+			return path;
+		}
+		return null;
 	}
 }

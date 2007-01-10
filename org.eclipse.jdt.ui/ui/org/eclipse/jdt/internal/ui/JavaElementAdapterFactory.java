@@ -32,12 +32,15 @@ import org.eclipse.ui.ide.IContributorResourceAdapter2;
 
 import org.eclipse.search.ui.ISearchPageScoreComputer;
 
+import org.eclipse.team.ui.history.IHistoryPageSource;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
+import org.eclipse.jdt.internal.ui.compare.JavaElementHistoryPageSource;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.search.JavaSearchPageScoreComputer;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
@@ -57,7 +60,8 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 		IContributorResourceAdapter.class,
 		IContributorResourceAdapter2.class,
 		ITaskListResourceAdapter.class,
-		IContainmentAdapter.class
+		IContainmentAdapter.class,
+		IHistoryPageSource.class
 	};
 	
 	/*
@@ -99,6 +103,8 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 			return getTaskListAdapter();
 		} if (IContainmentAdapter.class.equals(key)) {
 			return getJavaElementContainmentAdapter();
+		} if (IHistoryPageSource.class.equals(key) && JavaElementHistoryPageSource.hasEdition(java)) {
+			return JavaElementHistoryPageSource.getInstance();
 		}
 		return null; 
 	}

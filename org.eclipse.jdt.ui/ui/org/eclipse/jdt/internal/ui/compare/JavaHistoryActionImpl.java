@@ -90,24 +90,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 	}
 		
 	final IFile getFile(Object input) {
-		// extract CU from input
-		ICompilationUnit cu= null;
-		if (input instanceof ICompilationUnit)
-			cu= (ICompilationUnit) input;
-		else if (input instanceof IMember)
-			cu= ((IMember)input).getCompilationUnit();
-			
-		if (cu == null || !cu.exists())
-			return null;
-			
-		// get to original CU
-		cu= cu.getPrimary();
-			
-		// find underlying file
-		IFile file= (IFile) cu.getResource();
-		if (file != null && file.exists())
-			return file;
-		return null;
+		return JavaElementHistoryPageSource.getInstance().getFile(input);
 	}
 	
 	final ITypedElement[] buildEditions(ITypedElement target, IFile file) {
