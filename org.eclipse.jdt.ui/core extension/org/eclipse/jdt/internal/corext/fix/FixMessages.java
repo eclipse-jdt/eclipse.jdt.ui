@@ -20,6 +20,7 @@ public final class FixMessages extends NLS {
 
 	public static String CleanUpPostSaveListener_exception_error;
 	public static String CleanUpPostSaveListener_name;
+	public static String CleanUpPostSaveListener_SaveAction_ChangeName;
 	public static String CleanUpPostSaveListener_unknown_profile_error_message;
 	
 	public static String CleanUpRefactoring_checkingPostConditions_message;

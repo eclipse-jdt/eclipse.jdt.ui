@@ -22,6 +22,7 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.text.edits.TextEditVisitor;
+import org.eclipse.text.edits.UndoEdit;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -38,6 +39,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.ContentStamp;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.MultiStateTextFileChange;
@@ -86,6 +88,27 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.refactoring.IScheduledRefactoring;
 
 public class CleanUpRefactoring extends Refactoring implements IScheduledRefactoring {
+	
+	public static class CleanUpChange extends CompilationUnitChange {
+
+		private UndoEdit fUndoEdit;
+
+		public CleanUpChange(String name, ICompilationUnit cunit) {
+	        super(name, cunit);
+        }
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		protected Change createUndoChange(UndoEdit edit, ContentStamp stampToRestore) {
+		    fUndoEdit= edit;
+			return super.createUndoChange(edit, stampToRestore);
+		}
+
+		public UndoEdit getUndoEdit() {
+        	return fUndoEdit;
+        }	
+	}
 	
 	private static class FixCalculationException extends RuntimeException {
 		
@@ -701,11 +724,11 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		return buf.toString();
 	}
 	
-	public static CompilationUnitChange calculateChange(CompilationUnit ast, ICompilationUnit source, ICleanUp[] cleanUps, List undoneCleanUps) throws CoreException {
+	public static CleanUpChange calculateChange(CompilationUnit ast, ICompilationUnit source, ICleanUp[] cleanUps, List undoneCleanUps) throws CoreException {
 		if (cleanUps.length == 0)
 			return null;
 		
-		CompilationUnitChange solution= null;
+		CleanUpChange solution= null;
 		int i= 0;
 		do {
 			ICleanUp cleanUp= cleanUps[i];
@@ -723,7 +746,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 					if (intersects(currentEdit, solution.getEdit())) {
 						undoneCleanUps.add(cleanUp);
 					} else {
-						CompilationUnitChange merge= new CompilationUnitChange(FixMessages.CleanUpRefactoring_clean_up_multi_chang_name, source);
+						CleanUpChange merge= new CleanUpChange(FixMessages.CleanUpRefactoring_clean_up_multi_chang_name, source);
 						merge.setEdit(merge(currentEdit, solution.getEdit()));
 						
 						copyChangeGroups(merge, solution);
@@ -732,7 +755,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 						solution= merge;
 					}
 				} else {
-					solution= new CompilationUnitChange(current.getName(), source);
+					solution= new CleanUpChange(current.getName(), source);
 					solution.setEdit(currentEdit);
 					
 					copyChangeGroups(solution, current);
