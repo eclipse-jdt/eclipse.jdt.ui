@@ -489,6 +489,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
+		buf.append("    private E1(int i) {}\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
@@ -503,6 +504,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("package test2;\n");
 		buf.append("public class E3 {\n");
 		buf.append("    public class E3Inner {\n");
+		buf.append("        private E3Inner(int i) {}\n");
 		buf.append("    }\n");
 		buf.append("    private void foo() {\n");
 		buf.append("    }\n");
