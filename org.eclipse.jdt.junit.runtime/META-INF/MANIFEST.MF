@@ -3,7 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.junit.runtime
 Bundle-Version: 3.2.100.qualifier
-Bundle-ClassPath: junitruntime.jar
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Export-Package: org.eclipse.jdt.internal.junit.runner;x-friends:="org.eclipse.jdt.junit,org.eclipse.jdt.junit4.runtime",

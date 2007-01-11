@@ -14,6 +14,7 @@
 		<delete file="${plugin_version_file}" />
 		
 		<property name="dest"  value="${destdir}/${plugin}${plugin_version}" />
+		<property name="destjar"	value="${destdir}/${plugin}${plugin_version}.jar" />
 	</target>
 
 	<target name="build" depends="init">
@@ -25,25 +26,29 @@
 		<delete dir="${dest}" />
 		<mkdir dir="${dest}" />
 		
-		<jar 
-			jarfile="${dest}/junitruntime.jar"
-			basedir="bin"
-		/>
-				
-		<jar 		
-			jarfile="${dest}/junitruntimesrc.jar"
-			basedir="src"
-		/>
-		
-		<copy file="plugin.xml" todir="${dest}"/>
-		<copy file="plugin.properties" todir="${dest}"/>
-		<copy file="about.html" todir="${dest}"/>
-		<copy todir= "${dest}/META-INF">
-			<fileset dir="META-INF"/>
-		</copy>
+		<copy todir="${dest}/META-INF">
+			<fileset dir="META-INF" />
+		</copy>		
 		
 		<replaceregexp file="${dest}/META-INF/MANIFEST.MF" match="Bundle-Version: ((\d)+\.(\d)+\.(\d)+\.)qualifier" replace="Bundle-Version: \1${qualifier}" byline="true" />
-		<replaceregexp file="${dest}/plugin.xml" match="version=&quot;((\d)+\.(\d)+\.(\d)+\.)qualifier" replace="version=&quot;\1${qualifier}" byline="true" />
 		
-	</target>
+		<delete file="${destjar}" />
+		<zip zipfile="${destjar}">
+			<fileset dir=".">
+			  <include name="plugin.xml" />
+			  <include name="plugin.properties" />
+		      <include name="about.html" />
+			</fileset>
+			<fileset dir="bin" />
+			
+		    <zipfileset dir="src" prefix="src" />
+		    
+			<fileset dir="${dest}">
+			  <include name="META-INF/**" />
+			</fileset>
+		</zip>
+		
+		<delete dir="${dest}" />
+		
+	</target>	
 </project>

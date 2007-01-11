@@ -428,8 +428,8 @@
             finderClass="org.eclipse.jdt.internal.junit.launcher.JUnit3TestFinder"
             loaderPluginId="org.eclipse.jdt.junit.runtime"
             loaderClass="org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestLoader">
-         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit" pathToJar="junitsupport.jar" />     	
-         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit.runtime" pathToJar="junitruntime.jar" />     	
+         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit"/>     	
+         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit.runtime"/>     	
       </kind>
    </extension>
    <extension
@@ -442,8 +442,8 @@
             loaderClass="org.eclipse.jdt.internal.junit4.runner.JUnit4TestLoader">
          <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit4.runtime" />
          <!-- TODO: do we need these? -->
-         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit" pathToJar="junitsupport.jar" />     	
-         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit.runtime" pathToJar="junitruntime.jar" />     	
+         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit" />     	
+         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit.runtime"/>     	
          <!-- END : do we need these? -->
       </kind>
    </extension>

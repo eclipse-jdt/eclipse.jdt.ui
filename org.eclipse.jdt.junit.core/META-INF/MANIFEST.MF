@@ -3,7 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.junit; singleton:=true
 Bundle-Version: 3.3.0.qualifier
-Bundle-ClassPath: junitsupport.jar
 Bundle-Activator: org.eclipse.jdt.internal.junit.ui.JUnitPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
