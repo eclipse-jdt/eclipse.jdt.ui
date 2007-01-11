@@ -266,6 +266,9 @@
          <perspective
                id="org.eclipse.debug.ui.DebugPerspective">
          </perspective>
+         <configurationType
+               id="org.eclipse.jdt.junit.launchconfig">
+         </configurationType>
       </shortcut>
    </extension>
    <extension
