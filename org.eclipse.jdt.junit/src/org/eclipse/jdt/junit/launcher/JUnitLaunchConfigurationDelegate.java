@@ -215,7 +215,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 
 			ITestKind testKind= JUnitLaunchConfigurationConstants.getTestRunnerKind(configuration);
 			if (testKind.isNull()) {
-				informAndAbort(JUnitMessages.JUnitLaunchConfigurationDelegate_erro_unknowtestrunner, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
+				testKind= TestKindRegistry.getDefault().getKind(TestKindRegistry.JUNIT3_TEST_KIND_ID); // backward compatible for launch configurations with no runner
 			}
 					
 			boolean isJUnit4Configuration= TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId());
