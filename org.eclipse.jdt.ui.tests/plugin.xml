@@ -204,11 +204,6 @@
     </wizard>	 
 </extension>
    <extension
-         point="org.eclipse.jdt.junit.testRunListeners">
-      <testRunListener class="org.eclipse.jdt.junit.tests.LegacyTestRunListener"/>
-   </extension>
-
-   <extension
          point="org.eclipse.ui.perspectives">
       <perspective
             name="Test Perspective (jdt.ui.tests)"
