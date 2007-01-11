@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
@@ -76,6 +77,7 @@ import org.eclipse.jdt.internal.ui.preferences.cleanup.UnnecessaryCodeTabPage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage.IModificationListener;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -167,7 +169,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
         }
 	}
 	
-	private static class CleanUpConfigurationPage extends UserInputWizardPage {
+	private static class CleanUpConfigurationPage extends UserInputWizardPage implements IModificationListener {
 
 		private static final class ProfileTableAdapter implements IListAdapter {
 	        private final ProjectProfileLableProvider fProvider;
@@ -340,11 +342,11 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			gridData.horizontalSpan= 2;
 			tabFolder.setLayoutData(gridData);
 			
-			addTabPage(tabFolder, MultiFixMessages.CleanUpRefactoringWizard_code_style_tab, new CodeStyleTabPage(null, settings));
-			addTabPage(tabFolder, MultiFixMessages.CleanUpRefactoringWizard_member_accesses_tab, new MemberAccessesTabPage(null, settings));
-			addTabPage(tabFolder, MultiFixMessages.CleanUpRefactoringWizard_unnecessary_code_tab, new UnnecessaryCodeTabPage(null, settings));
-			addTabPage(tabFolder, MultiFixMessages.CleanUpRefactoringWizard_missing_code_tab, new MissingCodeTabPage(null, settings));
-			addTabPage(tabFolder, MultiFixMessages.CleanUpRefactoringWizard_code_organizing_tab, new CodeFormatingTabPage(null, settings));
+			addTabPage(tabFolder, MultiFixMessages.CleanUpRefactoringWizard_code_style_tab, new CodeStyleTabPage(this, settings, false));
+			addTabPage(tabFolder, MultiFixMessages.CleanUpRefactoringWizard_member_accesses_tab, new MemberAccessesTabPage(this, settings, false));
+			addTabPage(tabFolder, MultiFixMessages.CleanUpRefactoringWizard_unnecessary_code_tab, new UnnecessaryCodeTabPage(this, settings, false));
+			addTabPage(tabFolder, MultiFixMessages.CleanUpRefactoringWizard_missing_code_tab, new MissingCodeTabPage(this, settings, false));
+			addTabPage(tabFolder, MultiFixMessages.CleanUpRefactoringWizard_code_organizing_tab, new CodeFormatingTabPage(this, settings, false));
 			
 			try {
 	            int lastTabIndex= getDialogSettings().getInt(LAST_SELECTED_TAB_PAGE_INDEX);
@@ -436,6 +438,16 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				try { is.close(); } catch (IOException e) { /* ignore */ }
 			}
 		}
+
+		/**
+         * {@inheritDoc}
+         */
+        public void updateStatus(IStatus status) {}
+
+		/**
+         * {@inheritDoc}
+         */
+        public void valuesModified() {}
 	}
 	
 	public CleanUpRefactoringWizard(CleanUpRefactoring refactoring, int flags) {
