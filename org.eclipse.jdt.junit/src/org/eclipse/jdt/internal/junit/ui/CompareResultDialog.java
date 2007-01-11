@@ -152,8 +152,12 @@ public class CompareResultDialog extends TrayDialog {
     private String fActual;
     private String fTestName;
     
-    private int fPrefix;
-    private int fSuffix;
+    /**
+     * Lengths of common prefix and suffix.
+     * Note: this array is passed to the DamagerRepairer and
+     * the lengths are updated on content change.
+     */
+    private final int[] fPrefixSuffix= new int[2];
 	
 	public CompareResultDialog(Shell parentShell, TestElement element) {
 		super(parentShell);
@@ -181,17 +185,17 @@ public class CompareResultDialog extends TrayDialog {
 		for(; i < end; i++) 
 			if (fExpected.charAt(i) != fActual.charAt(i))
 				break;
-		fPrefix= i;
+		fPrefixSuffix[0]= i;
 		
 		int j= fExpected.length()-1;
 		int k= fActual.length()-1;
 		int l= 0;
-		for (; k >= fPrefix && j >= fPrefix; k--,j--) {
+		for (; k >= i && j >= i; k--,j--) {
 			if (fExpected.charAt(j) != fActual.charAt(k))
 				break;
 			l++;
 		}
-		fSuffix= l;
+		fPrefixSuffix[1]= l;
 	}
 
     protected void configureShell(Shell newShell) {
@@ -232,7 +236,7 @@ public class CompareResultDialog extends TrayDialog {
 	    compareConfiguration.setRightLabel(JUnitMessages.CompareResultDialog_actualLabel);	 
 	    compareConfiguration.setRightEditable(false);
 	    compareConfiguration.setProperty(CompareConfiguration.IGNORE_WHITESPACE, Boolean.FALSE);
-	    compareConfiguration.setProperty(PREFIX_SUFFIX_PROPERTY, new int[] {fPrefix, fSuffix});
+	    compareConfiguration.setProperty(PREFIX_SUFFIX_PROPERTY, fPrefixSuffix);
 
 	    fViewer= new CompareResultMergeViewer(parent, SWT.NONE, compareConfiguration);
 	    setCompareViewerInput();
