@@ -1299,9 +1299,9 @@
       </page>
       <!-- To be enabled once the full support is implemented
       <page
-            name="%contentAssistStaticMembersName"
+            name="%contentAssistFavoritesName"
             category="org.eclipse.jdt.ui.preferences.CodeAssistPreferencePage"
-            class="org.eclipse.jdt.internal.ui.preferences.CodeAssistStaticMembersPreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.CodeAssistFavoritesPreferencePage"
             id="org.eclipse.jdt.ui.preferences.CodeAssistPreferenceAdvanced">
             <keywordReference id="org.eclipse.jdt.ui.contentassist"/>
       </page>

@@ -30,13 +30,13 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
  * 
  * @since 3.3
  */
-public class CodeAssistStaticMembersPreferencePage extends PropertyAndPreferencePage implements IWorkbenchPreferencePage {
+public class CodeAssistFavoritesPreferencePage extends PropertyAndPreferencePage implements IWorkbenchPreferencePage {
 
-	private CodeAssistStaticMembersConfigurationBlock fConfigurationBlock;
+	private CodeAssistFavoritesConfigurationBlock fConfigurationBlock;
 
 	public void createControl(Composite parent) {
 		IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer) getContainer();
-		fConfigurationBlock= new CodeAssistStaticMembersConfigurationBlock(getNewStatusChangedListener(), container);
+		fConfigurationBlock= new CodeAssistFavoritesConfigurationBlock(getNewStatusChangedListener(), container);
 		
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE);

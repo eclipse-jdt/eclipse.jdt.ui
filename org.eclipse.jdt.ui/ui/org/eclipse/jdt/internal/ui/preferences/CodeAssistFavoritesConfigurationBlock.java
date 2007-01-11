@@ -72,7 +72,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
  * 
  * @since 3.3
  */
-class CodeAssistStaticMembersConfigurationBlock extends OptionsConfigurationBlock {
+class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 	
 	
 	private static class FavoriteStaticMemberInputDialog extends StatusDialog {
@@ -297,7 +297,7 @@ class CodeAssistStaticMembersConfigurationBlock extends OptionsConfigurationBloc
 	}
 	
 
-	public CodeAssistStaticMembersConfigurationBlock(IStatusChangeListener statusListener, IWorkbenchPreferenceContainer workbenchcontainer) {
+	public CodeAssistFavoritesConfigurationBlock(IStatusChangeListener statusListener, IWorkbenchPreferenceContainer workbenchcontainer) {
 		super(statusListener, null, getAllKeys(), workbenchcontainer);
 	}
 
