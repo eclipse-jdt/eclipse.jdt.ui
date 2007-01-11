@@ -39,7 +39,6 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
-import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
@@ -323,23 +322,10 @@ public class JavaPlugin extends AbstractUIPlugin {
 	public static ImageDescriptorRegistry getImageDescriptorRegistry() {
 		return getDefault().internalGetImageDescriptorRegistry();
 	}
-	
-	/**
-	 * Creates a new instance.
-	 * <p>
-	 * Note that this plug-in still depends on
-	 * org.eclipse.core.runtime.compatibility.
-	 * Its startup and shutdown methods have been converted
-	 * into start and stop methods. However, there is at least one place
-	 * ({@link org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#isNavigationTarget(Annotation)})
-	 * that still depends on it.
-	 * </p>
-	 * @param descriptor the plug-in descriptor
-	 * @deprecated
-	 */
-	public JavaPlugin(org.eclipse.core.runtime.IPluginDescriptor descriptor) {
-		super(descriptor);
-		fgJavaPlugin= this;
+		
+	public JavaPlugin() {
+		super();
+		fgJavaPlugin = this;
 	}
 
 	/* (non - Javadoc)
