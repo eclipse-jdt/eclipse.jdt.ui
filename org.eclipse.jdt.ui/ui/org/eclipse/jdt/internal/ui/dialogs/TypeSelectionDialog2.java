@@ -62,9 +62,11 @@ import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
+/**
+ * @deprecated Use {@link FilteredTypesSelectionDialog} instead.
+ */
 public class TypeSelectionDialog2 extends SelectionStatusDialog {
 
 	private String fTitle;
@@ -92,7 +94,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 				getShell().setText(fTitle);
 			} else {
 				getShell().setText(Messages.format(
-					JavaUIMessages.TypeSelectionDialog2_title_format,
+					"{0} - {1}", //$NON-NLS-1$
 					new String[] { fTitle, text}));
 			}
 		}
@@ -185,7 +187,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 						jElements.add(type);
 					} else {
 			    		status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
-			    			Messages.format(JavaUIMessages.TypeSelectionDialog_error_type_doesnot_exist, selection[i].getFullyQualifiedName()),
+			    			Messages.format("Type {0} does not exist.", selection[i].getFullyQualifiedName()), //$NON-NLS-1$
 			    			null);
 			    		break;
 					}
@@ -204,7 +206,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		try {
 			ensureConsistency();
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, JavaUIMessages.TypeSelectionDialog_error3Title, JavaUIMessages.TypeSelectionDialog_error3Message); 
+			ExceptionHandler.handle(e, "Exception", "Unexpected exception. See log for details.");  //$NON-NLS-1$ //$NON-NLS-2$
 			return CANCEL;
 		} catch (InterruptedException e) {
 			// cancelled by user
@@ -264,10 +266,10 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 			TypeNameMatch typeInfo= selected[i];
 			IType type= typeInfo.getType();
 			if (!type.exists()) {
-				String title= JavaUIMessages.TypeSelectionDialog_errorTitle; 
+				String title= "Select Type";  //$NON-NLS-1$
 				IPackageFragmentRoot root= typeInfo.getPackageFragmentRoot();
 				String containerName= JavaElementLabels.getElementLabel(root, JavaElementLabels.ROOT_QUALIFIED);
-				String message= Messages.format(JavaUIMessages.TypeSelectionDialog_dialogMessage, new String[] { typeInfo.getFullyQualifiedName(), containerName }); 
+				String message= Messages.format("Type ''{0}'' could not be found in ''{1}''. Make sure all workspace resources are refreshed.", new String[] { typeInfo.getFullyQualifiedName(), containerName });  //$NON-NLS-1$
 				MessageDialog.openError(getShell(), title, message);
 				history.remove(typeInfo);
 				setResult(null);
@@ -291,7 +293,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 				}
 				OpenTypeHistory history= OpenTypeHistory.getInstance();
 				if (fgFirstTime || history.isEmpty()) {
-					monitor.beginTask(JavaUIMessages.TypeSelectionDialog_progress_consistency, 100);
+					monitor.beginTask("Initializing search indices...", 100); //$NON-NLS-1$
 					if (history.needConsistencyCheck()) {
 						refreshSearchIndices(new SubProgressMonitor(monitor, 90));
 						history.checkConsistency(new SubProgressMonitor(monitor, 10));

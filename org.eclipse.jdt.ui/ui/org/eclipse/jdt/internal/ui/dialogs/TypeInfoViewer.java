@@ -74,8 +74,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
-import org.eclipse.jdt.internal.corext.util.TypeInfoRequestorAdapter;
 import org.eclipse.jdt.internal.corext.util.TypeInfoFilter;
+import org.eclipse.jdt.internal.corext.util.TypeInfoRequestorAdapter;
 
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstallType;
@@ -88,7 +88,6 @@ import org.eclipse.jdt.ui.dialogs.ITypeInfoImageProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
@@ -96,7 +95,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  * search engine. All viewer updating takes place in the UI thread.
  * Therefore no synchronization of the methods is necessary.
  * 
- * @since 3.1
+ * @deprecated Use {@link FilteredTypesSelectionDialog} instead
  */
 public class TypeInfoViewer {
 	
@@ -271,7 +270,7 @@ public class TypeInfoViewer {
 			}
 		}
 		private String getFormattedLabel(String name) {
-			return Messages.format(JavaUIMessages.TypeInfoViewer_library_name_format, name);
+			return Messages.format("[{0}]", name); //$NON-NLS-1$
 		}
 		public String getText(Object element) {
 			return ((TypeNameMatch)element).getSimpleTypeName();
@@ -284,7 +283,7 @@ public class TypeInfoViewer {
 			if (containerName.length() > 0) {
 				result.append(containerName);
 			} else {
-				result.append(JavaUIMessages.TypeInfoViewer_default_package);
+				result.append("(default package)"); //$NON-NLS-1$
 			}
 			return result.toString();
 		}
@@ -377,7 +376,7 @@ public class TypeInfoViewer {
 			String result= info.getTypeContainerName();
 			if (result.length() > 0)
 				return result;
-			return JavaUIMessages.TypeInfoViewer_default_package;
+			return "(default package)"; //$NON-NLS-1$
 		}
 		
 		private String getContainerName(TypeNameMatch type) {
@@ -403,7 +402,7 @@ public class TypeInfoViewer {
 		private TypeInfoViewer fViewer;
 		private boolean fStopped;
 		public ProgressUpdateJob(Display display, TypeInfoViewer viewer) {
-			super(display, JavaUIMessages.TypeInfoViewer_progressJob_label);
+			super(display, "Progress Update Job"); //$NON-NLS-1$
 			fViewer= viewer;
 		}
 		public void stop() {
@@ -464,7 +463,7 @@ public class TypeInfoViewer {
 				return fName;
 			} else {
 				return Messages.format(
-					JavaUIMessages.TypeInfoViewer_progress_label,
+					"{0} ({1}%)", //$NON-NLS-1$
 					new Object[] { fName, new Integer((int)((fWorked * 100) / fTotalWork)) });
 			}
 		}
@@ -499,7 +498,7 @@ public class TypeInfoViewer {
 		protected OpenTypeHistory fHistory;
 		
 		protected AbstractSearchJob(int ticket, TypeInfoViewer viewer, TypeInfoFilter filter, OpenTypeHistory history, int numberOfVisibleItems, int mode) {
-			super(JavaUIMessages.TypeInfoViewer_job_label, viewer);
+			super("Searching for all types", viewer); //$NON-NLS-1$
 			fMode= mode;
 			fTicket= ticket;
 			fViewer= viewer;
@@ -519,7 +518,7 @@ public class TypeInfoViewer {
 				}
 			} catch (CoreException e) {
 				fViewer.searchJobFailed(fTicket, e);
-				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, JavaUIMessages.TypeInfoViewer_job_error, e);
+				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, "Searching for all types failed", e); //$NON-NLS-1$
 			} catch (InterruptedException e) {
 				return canceled(e, true);
 			} catch (OperationCanceledException e) {
@@ -636,7 +635,7 @@ public class TypeInfoViewer {
 		}
 		private IStatus canceled(Exception e, boolean removePendingItems) {
 			fViewer.searchJobCanceled(fTicket, removePendingItems);
-			return new Status(IStatus.CANCEL, JavaPlugin.getPluginId(), IStatus.CANCEL, JavaUIMessages.TypeInfoViewer_job_cancel, e);
+			return new Status(IStatus.CANCEL, JavaPlugin.getPluginId(), IStatus.CANCEL, "Operation got canceled", e); //$NON-NLS-1$
 		}
 		private IStatus ok() {
 			return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
@@ -665,7 +664,7 @@ public class TypeInfoViewer {
 			// consider primary working copies during searching
 			SearchEngine engine= new SearchEngine((WorkingCopyOwner)null);
 			String packPattern= fFilter.getPackagePattern();
-			monitor.setTaskName(JavaUIMessages.TypeInfoViewer_searchJob_taskName);
+			monitor.setTaskName("Searching..."); //$NON-NLS-1$
 			engine.searchAllTypeNames(
 				packPattern == null ? null : packPattern.toCharArray(), 
 				fFilter.getPackageFlags(),
@@ -713,14 +712,14 @@ public class TypeInfoViewer {
 	
 	private static class SyncJob extends AbstractJob {
 		public SyncJob(TypeInfoViewer viewer) {
-			super(JavaUIMessages.TypeInfoViewer_syncJob_label, viewer);
+			super("Synchronizing search tables", viewer); //$NON-NLS-1$
 		}
 		public void stop() {
 			cancel();
 		}
 		protected IStatus doRun(ProgressMonitor monitor) {
 			try {
-				monitor.setTaskName(JavaUIMessages.TypeInfoViewer_syncJob_taskName);
+				monitor.setTaskName("Refreshing indices..."); //$NON-NLS-1$
 				new SearchEngine().searchAllTypeNames(
 					null, 
 					0,
@@ -734,9 +733,9 @@ public class TypeInfoViewer {
 					monitor);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
-				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, JavaUIMessages.TypeInfoViewer_job_error, e);
+				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, "Searching for all types failed", e); //$NON-NLS-1$
 			} catch (OperationCanceledException e) {
-				return new Status(IStatus.CANCEL, JavaPlugin.getPluginId(), IStatus.CANCEL, JavaUIMessages.TypeInfoViewer_job_cancel, e);
+				return new Status(IStatus.CANCEL, JavaPlugin.getPluginId(), IStatus.CANCEL, "Operation got canceled", e); //$NON-NLS-1$
 			} finally {
 				fViewer.syncJobDone();
 			}
@@ -762,7 +761,7 @@ public class TypeInfoViewer {
 		}
 		public void initialize(GC gc) {
 			fSeparatorWidth= gc.getAdvanceWidth(SEPARATOR);
-			fMessage= " " + JavaUIMessages.TypeInfoViewer_separator_message + " ";  //$NON-NLS-1$ //$NON-NLS-2$
+			fMessage= " " + "Workspace matches" + " ";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			fMessageLength= gc.textExtent(fMessage).x;
 		}
 	}
@@ -1142,7 +1141,7 @@ public class TypeInfoViewer {
 		Menu menu= new Menu(fTable.getShell(), SWT.POP_UP);
 		fTable.setMenu(menu);
 		final MenuItem remove= new MenuItem(menu, SWT.NONE);
-		remove.setText(JavaUIMessages.TypeInfoViewer_remove_from_history);
+		remove.setText("&Remove from History"); //$NON-NLS-1$
 		menu.addMenuListener(new MenuAdapter() {
 			public void menuShown(MenuEvent e) {
 				TableItem[] selection= fTable.getSelection();

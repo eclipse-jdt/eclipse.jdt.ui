@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
+import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
 
 /**
  * Refocuses the type hierarchy on a type selection from a all types dialog.
@@ -47,7 +47,7 @@ public class FocusOnTypeAction extends Action {
 	 */
 	public void run() {
 		Shell parent= fViewPart.getSite().getShell();
-		TypeSelectionDialog2 dialog= new TypeSelectionDialog2(parent, false, 
+		FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(parent, false, 
 			PlatformUI.getWorkbench().getProgressService(), 
 			SearchEngine.createWorkspaceScope(), IJavaSearchConstants.TYPE);
 	

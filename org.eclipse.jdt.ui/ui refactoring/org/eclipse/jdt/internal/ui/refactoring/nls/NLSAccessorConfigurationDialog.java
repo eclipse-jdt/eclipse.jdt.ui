@@ -54,10 +54,10 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -240,11 +240,11 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		
 		IJavaSearchScope scope= root != null ? SearchEngine.createJavaSearchScope(new IJavaElement[] { root }) : SearchEngine.createWorkspaceScope();
 		
-		TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(), false, 
+		FilteredTypesSelectionDialog  dialog= new FilteredTypesSelectionDialog (getShell(), false, 
 			service, scope, IJavaSearchConstants.CLASS);
 		dialog.setTitle(NLSUIMessages.NLSAccessorConfigurationDialog_Accessor_Selection); 
 		dialog.setMessage(NLSUIMessages.NLSAccessorConfigurationDialog_Choose_the_accessor_file); 
-		dialog.setFilter("*Messages"); //$NON-NLS-1$
+		dialog.setInitialPattern("*Messages"); //$NON-NLS-1$
 		if (dialog.open() == Window.OK) {
 			IType selectedType= (IType) dialog.getFirstResult();
 			if (selectedType != null) {

@@ -39,8 +39,8 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
@@ -194,7 +194,7 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 		IJavaElement[] elements= new IJavaElement[] { proj };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 
-		TypeSelectionDialog2 dialog= new TypeSelectionDialog2(
+		FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(
 			getShell(), false, getWizard().getContainer(), scope, IJavaSearchConstants.CLASS);
 
 		dialog.setTitle(RefactoringMessages.IntroduceFactoryInputPage_chooseFactoryClass_title); 

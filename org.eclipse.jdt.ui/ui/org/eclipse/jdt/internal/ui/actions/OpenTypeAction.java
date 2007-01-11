@@ -36,53 +36,55 @@ import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class OpenTypeAction extends Action implements IWorkbenchWindowActionDelegate {
-	
+
 	public OpenTypeAction() {
 		super();
-		setText(JavaUIMessages.OpenTypeAction_label); 
-		setDescription(JavaUIMessages.OpenTypeAction_description); 
-		setToolTipText(JavaUIMessages.OpenTypeAction_tooltip); 
+		setText(JavaUIMessages.OpenTypeAction_label);
+		setDescription(JavaUIMessages.OpenTypeAction_description);
+		setToolTipText(JavaUIMessages.OpenTypeAction_tooltip);
 		setImageDescriptor(JavaPluginImages.DESC_TOOL_OPENTYPE);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_TYPE_ACTION);
 	}
 
 	public void run() {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
-		OpenTypeSelectionDialog2 dialog= new OpenTypeSelectionDialog2(parent, false, 
-			PlatformUI.getWorkbench().getProgressService(),
-			null, IJavaSearchConstants.TYPE);
-		dialog.setTitle(JavaUIMessages.OpenTypeAction_dialogTitle); 
-		dialog.setMessage(JavaUIMessages.OpenTypeAction_dialogMessage); 
-		
+		OpenTypeSelectionDialog2 dialog= new OpenTypeSelectionDialog2(parent, true, PlatformUI.getWorkbench().getProgressService(), null, IJavaSearchConstants.TYPE);
+		dialog.setTitle(JavaUIMessages.OpenTypeAction_dialogTitle);
+		dialog.setMessage(JavaUIMessages.OpenTypeAction_dialogMessage);
+
 		int result= dialog.open();
 		if (result != IDialogConstants.OK_ID)
 			return;
-		
+
 		Object[] types= dialog.getResult();
 		if (types != null && types.length > 0) {
-			IType type= (IType)types[0];
-			try {
-				JavaUI.openInEditor(type, true, true);
-			} catch (CoreException x) {
-				ExceptionHandler.handle(x, JavaUIMessages.OpenTypeAction_errorTitle, JavaUIMessages.OpenTypeAction_errorMessage);
+			IType type= null;
+			for (int i= 0; i < types.length; i++) {
+				type= (IType) types[i];
+				try {
+					JavaUI.openInEditor(type, true, true);
+				} catch (CoreException x) {
+					ExceptionHandler.handle(x, JavaUIMessages.OpenTypeAction_errorTitle, JavaUIMessages.OpenTypeAction_errorMessage);
+				}
 			}
 		}
 	}
 
-	//---- IWorkbenchWindowActionDelegate ------------------------------------------------
+	// ---- IWorkbenchWindowActionDelegate
+	// ------------------------------------------------
 
 	public void run(IAction action) {
 		run();
 	}
-	
+
 	public void dispose() {
 		// do nothing.
 	}
-	
+
 	public void init(IWorkbenchWindow window) {
 		// do nothing.
 	}
-	
+
 	public void selectionChanged(IAction action, ISelection selection) {
 		// do nothing. Action doesn't depend on selection.
 	}

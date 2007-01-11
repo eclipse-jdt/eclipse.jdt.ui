@@ -51,10 +51,10 @@ import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.SharedImages;
+import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MainTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiMainTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.PackageSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
@@ -569,10 +569,10 @@ public final class JavaUI {
 		} else {	
 			throw new IllegalArgumentException("Invalid style constant."); //$NON-NLS-1$
 		}
-		TypeSelectionDialog2 dialog= new TypeSelectionDialog2(parent, multipleSelection, 
+		FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(parent, multipleSelection, 
 			context, scope, elementKinds, extension);
 		dialog.setMessage(JavaUIMessages.JavaUI_defaultDialogMessage); 
-		dialog.setFilter(filter);
+		dialog.setInitialPattern(filter);
 		return dialog;
 	}
 

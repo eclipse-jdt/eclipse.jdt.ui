@@ -57,8 +57,8 @@ import org.eclipse.jdt.internal.corext.refactoring.ExceptionInfo;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
@@ -241,11 +241,11 @@ public class ChangeExceptionsControl extends Composite {
 		IJavaElement[] elements= new IJavaElement[] { fProject.getJavaProject() };
 		final IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 		
-		TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(), false,
+		FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(getShell(), false,
 				PlatformUI.getWorkbench().getProgressService(), scope, IJavaSearchConstants.CLASS);
 		dialog.setTitle(RefactoringMessages.ChangeExceptionsControl_choose_title); 
 		dialog.setMessage(RefactoringMessages.ChangeExceptionsControl_choose_message); 
-		dialog.setFilter("*Exception*"); //$NON-NLS-1$
+		dialog.setInitialPattern("*Exception*"); //$NON-NLS-1$
 		dialog.setValidator(new ISelectionStatusValidator() {
 			public IStatus validate(Object[] selection) {
 				if (selection.length == 0)

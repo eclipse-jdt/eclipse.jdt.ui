@@ -127,10 +127,10 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TableTextCellEditor;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.preferences.CodeTemplatePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.CompletionContextRequestor;
@@ -1826,11 +1826,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { root });
 	
-		TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(), 
+		FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(getShell(), 
 			false, getWizard().getContainer(), scope, IJavaSearchConstants.TYPE);
 		dialog.setTitle(NewWizardMessages.NewTypeWizardPage_ChooseEnclosingTypeDialog_title); 
 		dialog.setMessage(NewWizardMessages.NewTypeWizardPage_ChooseEnclosingTypeDialog_description); 
-		dialog.setFilter(Signature.getSimpleName(getEnclosingTypeText()));
+		dialog.setInitialPattern(Signature.getSimpleName(getEnclosingTypeText()));
 		
 		if (dialog.open() == Window.OK) {	
 			return (IType) dialog.getFirstResult();
@@ -1858,11 +1858,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		IJavaElement[] elements= new IJavaElement[] { project };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 
-		TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(), false,
+		FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(getShell(), false,
 			getWizard().getContainer(), scope, IJavaSearchConstants.CLASS);
 		dialog.setTitle(NewWizardMessages.NewTypeWizardPage_SuperClassDialog_title); 
 		dialog.setMessage(NewWizardMessages.NewTypeWizardPage_SuperClassDialog_message); 
-		dialog.setFilter(getSuperClass());
+		dialog.setInitialPattern(getSuperClass());
 
 		if (dialog.open() == Window.OK) {
 			return (IType) dialog.getFirstResult();

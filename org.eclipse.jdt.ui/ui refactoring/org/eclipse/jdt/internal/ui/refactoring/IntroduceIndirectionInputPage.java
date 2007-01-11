@@ -44,8 +44,8 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceIndirectionRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -193,7 +193,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 		IJavaElement[] elements= new IJavaElement[] { proj };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 
-		TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(), false, getWizard().getContainer(), scope, IJavaSearchConstants.CLASS);
+		FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(getShell(), false, getWizard().getContainer(), scope, IJavaSearchConstants.CLASS);
 
 		dialog.setTitle(RefactoringMessages.IntroduceIndirectionInputPage_dialog_choose_declaring_class);
 		dialog.setMessage(RefactoringMessages.IntroduceIndirectionInputPage_dialog_choose_declaring_class_long);

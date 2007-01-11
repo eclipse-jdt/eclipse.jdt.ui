@@ -58,8 +58,8 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -256,7 +256,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 		private void openTypeSelectionDialog(){
 			int elementKinds= IJavaSearchConstants.TYPE;
 			final IJavaSearchScope scope= createWorkspaceSourceScope();
-			TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(), false,
+			FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(getShell(), false,
 				getWizard().getContainer(), scope, elementKinds);
 			dialog.setTitle(RefactoringMessages.MoveMembersInputPage_choose_Type); 
 			dialog.setMessage(RefactoringMessages.MoveMembersInputPage_dialogMessage); 
@@ -272,7 +272,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 					return validateDestinationType(type, type.getElementName());
 				}
 			});
-			dialog.setFilter(createInitialFilter());
+			dialog.setInitialPattern(createInitialFilter());
 			if (dialog.open() == Window.CANCEL)
 				return;
 			IType firstResult= (IType)dialog.getFirstResult();		

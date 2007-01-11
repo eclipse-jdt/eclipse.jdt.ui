@@ -69,13 +69,15 @@ import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
+/**
+ * @deprecated Use {@link FilteredTypesSelectionDialog} instead
+ */
 public class TypeSelectionComponent extends Composite implements ITypeSelectionComponent {
 	
 	private IDialogSettings fSettings;
@@ -106,7 +108,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 	
 	private class ToggleStatusLineAction extends Action {
 		public ToggleStatusLineAction() {
-			super(JavaUIMessages.TypeSelectionComponent_show_status_line_label, IAction.AS_CHECK_BOX);
+			super("&Show Status Line", IAction.AS_CHECK_BOX); //$NON-NLS-1$
 		}
 		public void run() {
 			if (fForm == null)
@@ -122,7 +124,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 	
 	private class FullyQualifyDuplicatesAction extends Action {
 		public FullyQualifyDuplicatesAction() {
-			super(JavaUIMessages.TypeSelectionComponent_fully_qualify_duplicates_label, IAction.AS_CHECK_BOX);
+			super("Show &Container for Duplicates", IAction.AS_CHECK_BOX); //$NON-NLS-1$
 		}
 		public void run() {
 			boolean checked= isChecked();
@@ -221,7 +223,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		
 		Label label= new Label(this, SWT.NONE);
 		label.setFont(font);
-		label.setText(JavaUIMessages.TypeSelectionComponent_label);
+		label.setText("&Matching types:"); //$NON-NLS-1$
 		label.addTraverseListener(new TraverseListener() {
 			public void keyTraversed(TraverseEvent e) {
 				if (e.detail == SWT.TRAVERSE_MNEMONIC && e.doit) {
@@ -248,7 +250,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		table.getAccessible().addAccessibleListener(new AccessibleAdapter() {
 			public void getName(AccessibleEvent e) {
 				if (table.getSelectionCount() == 0) {
-					e.result= Strings.removeMnemonicIndicator(JavaUIMessages.TypeSelectionComponent_label);
+					e.result= Strings.removeMnemonicIndicator("&Matching types:"); //$NON-NLS-1$
 				}
 			}
 		});
@@ -355,7 +357,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 
 		fToolItem.setImage(JavaPluginImages.get(JavaPluginImages.IMG_ELCL_VIEW_MENU));
 		fToolItem.setDisabledImage(JavaPluginImages.get(JavaPluginImages.IMG_DLCL_VIEW_MENU));
-		fToolItem.setToolTipText(JavaUIMessages.TypeSelectionComponent_menu);
+		fToolItem.setToolTipText("Menu"); //$NON-NLS-1$
 		fToolItem.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				showViewMenu();

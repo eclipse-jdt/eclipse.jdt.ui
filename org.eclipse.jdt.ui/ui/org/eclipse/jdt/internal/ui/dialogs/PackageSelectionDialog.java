@@ -158,7 +158,7 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 		try {
 			fContext.run(true, true, runnable);
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, JavaUIMessages.PackageSelectionDialog_error_title, JavaUIMessages.TypeSelectionDialog_error3Message); 
+			ExceptionHandler.handle(e, JavaUIMessages.PackageSelectionDialog_error_title, JavaUIMessages.PackageSelectionDialog_error3Message); 
 			return CANCEL;
 		} catch (InterruptedException e) {
 			// cancelled by user
