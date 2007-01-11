@@ -17,7 +17,6 @@ import java.net.URL;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Plugin;
@@ -32,8 +31,7 @@ public class JavaTestPlugin extends Plugin {
 	
 	private static JavaTestPlugin fgDefault;
 	
-	public JavaTestPlugin(IPluginDescriptor descriptor) {
-		super(descriptor);
+	public JavaTestPlugin() {
 		fgDefault= this;
 	}
 	
@@ -64,7 +62,7 @@ public class JavaTestPlugin extends Plugin {
 	}
 	
 	public static String getPluginId() {
-		return getDefault().getDescriptor().getUniqueIdentifier();
+		return "org.eclipse.jdt.ui.tests";
 	}
 
 	public static void log(IStatus status) {

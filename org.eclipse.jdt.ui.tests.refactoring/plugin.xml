@@ -15,6 +15,7 @@
    <requires>
       <import plugin="org.junit"/>
       <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.core.filebuffers"/>
       <import plugin="org.eclipse.core.filesystem"/>
       <import plugin="org.eclipse.jface.text"/>
@@ -24,7 +25,6 @@
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.jdt.ui.tests"/>
-      <import plugin="org.eclipse.core.runtime.compatibility" optional="true"/>
 	  <import plugin="org.eclipse.ltk.core.refactoring"/>      
 	  <import plugin="org.eclipse.ltk.ui.refactoring"/>    
 	  <import plugin="org.eclipse.test.performance"/>

@@ -16,7 +16,6 @@ import java.net.URL;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
 
@@ -29,8 +28,7 @@ public class RefactoringTestPlugin extends Plugin {
 	
 	private static RefactoringTestPlugin fgDefault;
 	
-	public RefactoringTestPlugin(IPluginDescriptor descriptor) {
-		super(descriptor);
+	public RefactoringTestPlugin() {
 		fgDefault= this;
 	}
 	
