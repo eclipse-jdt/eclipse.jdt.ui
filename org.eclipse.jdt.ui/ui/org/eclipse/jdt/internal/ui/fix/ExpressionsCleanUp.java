@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -35,14 +36,29 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 		super();
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean requireAST(ICompilationUnit unit) throws CoreException {
+		boolean usePrentheses= isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		if (!usePrentheses)
+			return false;
+		
+		return isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS) ||
+		       isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+	}
+	
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 		
 		boolean usePrentheses= isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		if (!usePrentheses)
+			return null;
+		
 		return ExpressionsFix.createCleanUp(compilationUnit, 
-				usePrentheses && isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS),
-				usePrentheses && isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER));
+				isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS),
+				isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER));
 	}
 	
 	/**

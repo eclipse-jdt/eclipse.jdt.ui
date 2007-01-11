@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -33,6 +34,20 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	public ControlStatementsCleanUp() {
 		super();
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean requireAST(ICompilationUnit unit) throws CoreException {
+		boolean useBlocks= isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		
+		if (!useBlocks)
+			return false;
+		
+		return isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS) ||
+		       isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER) ||
+		       isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW);
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -41,10 +56,14 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 		if (compilationUnit == null)
 			return null;
 		
+		boolean useBlocks= isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		if (!useBlocks)
+			return null;
+		
 		return ControlStatementsFix.createCleanUp(compilationUnit,
-				isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS),
-				isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER),
-				isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW));
+				isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS),
+				isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER),
+				isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW));
 	}
 
 	/**

@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -35,6 +36,13 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 	
 	public UnnecessaryCodeCleanUp() {
 		super();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean requireAST(ICompilationUnit unit) throws CoreException {
+	    return isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
 	}
 	
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {

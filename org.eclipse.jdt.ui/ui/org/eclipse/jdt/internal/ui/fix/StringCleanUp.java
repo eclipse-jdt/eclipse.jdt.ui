@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -40,6 +41,14 @@ public class StringCleanUp extends AbstractCleanUp {
 	
 	public StringCleanUp() {
 		super();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean requireAST(ICompilationUnit unit) throws CoreException {
+	    return isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS) || 
+		       isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
 	}
 
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {

@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -33,6 +34,19 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 	public VariableDeclarationCleanUp() {
 		super();
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean requireAST(ICompilationUnit unit) throws CoreException {
+		boolean addFinal= isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		if (!addFinal)
+			return false;
+		
+		return isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS) ||
+				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS) ||
+				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -42,10 +56,13 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 			return null;
 		
 		boolean addFinal= isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		if (!addFinal)
+			return null;
+		
 		return VariableDeclarationFix.createCleanUp(compilationUnit,
-				addFinal && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS),
-				addFinal && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS),
-				addFinal && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES));
+				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS),
+				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS),
+				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES));
 	}
 
 	/**

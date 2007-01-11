@@ -102,8 +102,11 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 						options.putAll(map);
 					}
 				}
-				
-				CompilationUnit ast= createAst(unit, options, new SubProgressMonitor(monitor, 10));
+					
+				CompilationUnit ast= null;
+				if (requiresAST(cleanUps, unit)) {
+					ast= createAst(unit, options, new SubProgressMonitor(monitor, 10));
+				}
 				
 				List undoneCleanUps= new ArrayList();
 				CompilationUnitChange change= CleanUpRefactoring.calculateChange(ast, unit, cleanUps, undoneCleanUps);
@@ -128,6 +131,15 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			monitor.done();
 		}
 	}
+
+	private boolean requiresAST(ICleanUp[] cleanUps, ICompilationUnit unit) throws CoreException {
+		for (int i= 0; i < cleanUps.length; i++) {
+	        if (cleanUps[i].requireAST(unit))
+	        	return true;
+        }
+		
+	    return false;
+    }
 
 	private CompilationUnit createAst(ICompilationUnit unit, Map cleanUpOptions, IProgressMonitor monitor) {
 		IJavaProject project= unit.getJavaProject();

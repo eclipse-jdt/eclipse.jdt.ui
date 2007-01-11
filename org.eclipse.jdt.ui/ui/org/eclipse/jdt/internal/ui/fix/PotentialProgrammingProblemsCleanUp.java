@@ -45,13 +45,29 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
+	public boolean requireAST(ICompilationUnit unit) throws CoreException {
+		boolean addSUID= isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
+		if (!addSUID)
+			return false;
+		
+		return isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED) || 
+		       isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 		
+		boolean addSUID= isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
+		if (!addSUID)
+			return null;
+		
 		return PotentialProgrammingProblemsFix.createCleanUp(compilationUnit,
-				(isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)) || 
-				(isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT)));
+				isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED) || 
+				isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT));
 	}
 
 	/**

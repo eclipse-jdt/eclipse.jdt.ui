@@ -93,13 +93,6 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean requireAST(ICompilationUnit unit) throws CoreException {
-		return true;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
 	public IFix createFix(ICompilationUnit unit) throws CoreException {
 		return null;
 	}

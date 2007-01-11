@@ -43,11 +43,11 @@ public class ImportsCleanUp extends AbstractCleanUp {
     }
 
 	/**
-     * {@inheritDoc}
-     */
-    public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-	    return false;
-    }
+	 * {@inheritDoc}
+	 */
+	public boolean requireAST(ICompilationUnit unit) throws CoreException {
+	    return isEnabled(CleanUpConstants.ORGANIZE_IMPORTS);
+	}
 
 	/**
      * {@inheritDoc}
@@ -132,6 +132,13 @@ public class ImportsCleanUp extends AbstractCleanUp {
 	    	return true;
     	
     	return super.needsFreshAST(compilationUnit);
+    }
+    
+	/**
+     * {@inheritDoc}
+     */
+    public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
+	    return false;
     }
 
 }
