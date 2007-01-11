@@ -458,6 +458,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 						} catch (MalformedInputException ex) {
 							// Tell the decoder to replace malformed input in order to read the line.
 							decoder.onMalformedInput(CodingErrorAction.REPLACE);
+							decoder.reset();
 							word= reader.readLine();
 							decoder.onMalformedInput(CodingErrorAction.REPORT);
 							
