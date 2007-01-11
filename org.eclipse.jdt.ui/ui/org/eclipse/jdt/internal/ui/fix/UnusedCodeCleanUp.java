@@ -148,6 +148,7 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 		} else {
 			buf.append("    private class Sub {}\n"); //$NON-NLS-1$
 		}
+		buf.append("    public Example(boolean b) {}\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS)) {
 		} else {
 			buf.append("    private Example() {}\n"); //$NON-NLS-1$
