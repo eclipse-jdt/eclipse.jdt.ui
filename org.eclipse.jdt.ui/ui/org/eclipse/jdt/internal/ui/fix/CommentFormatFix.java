@@ -72,7 +72,9 @@ public class CommentFormatFix implements IFix {
 		change.setEdit(resultEdit);
 		
 		String label= MultiFixMessages.CommentFormatFix_description;
-		change.addTextEditGroup(new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label))));
+		CategorizedTextEditGroup group= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
+		group.addTextEdit(resultEdit);
+		change.addTextEditGroup(group);
 		
 		return new CommentFormatFix(change, unit);
 	}

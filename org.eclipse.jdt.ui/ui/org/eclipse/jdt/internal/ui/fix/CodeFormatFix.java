@@ -57,11 +57,14 @@ public class CodeFormatFix implements IFix {
 			if (edit == null || !edit.hasChildren())
 				return null;
 			
-			TextChange change= new CompilationUnitChange(MultiFixMessages.CodeFormatFix_description, cu);
+			String label= MultiFixMessages.CodeFormatFix_description;
+			TextChange change= new CompilationUnitChange(label, cu);
 			change.setEdit(edit);
 			
-			String label= MultiFixMessages.CodeFormatFix_description;
-			change.addTextEditGroup(new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label))));
+			CategorizedTextEditGroup group= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
+			group.addTextEdit(edit);
+			change.addTextEditGroup(group);
+			
 			return new CodeFormatFix(change, cu);
 		} else if (removeTrailingWhitespacesAll || removeTrailingWhitespacesIgnorEmpty) {
 			try {
@@ -95,7 +98,10 @@ public class CodeFormatFix implements IFix {
 				CompilationUnitChange change= new CompilationUnitChange(label, cu);
 				change.setEdit(multiEdit);
 				
-				change.addTextEditGroup(new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label))));
+				CategorizedTextEditGroup group= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
+				group.addTextEdit(multiEdit);
+				change.addTextEditGroup(group);
+				
 				return new CodeFormatFix(change, cu);
 			} catch (BadLocationException x) {
 				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "", x)); //$NON-NLS-1$
