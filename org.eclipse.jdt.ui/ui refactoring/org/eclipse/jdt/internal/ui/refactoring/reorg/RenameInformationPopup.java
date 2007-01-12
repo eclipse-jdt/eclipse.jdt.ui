@@ -54,6 +54,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.keys.IBindingService;
 
 import org.eclipse.ui.forms.HyperlinkGroup;
+import org.eclipse.ui.forms.HyperlinkSettings;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Hyperlink;
@@ -315,11 +316,13 @@ public class RenameInformationPopup {
 		tableLayout.marginHeight= 5; 
 		tableLayout.marginWidth= 5;
 		tableLayout.horizontalSpacing= 10;
+		tableLayout.verticalSpacing= 2;
 		table.setLayout(tableLayout);
 		table.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
 		
 		HyperlinkGroup refactorGroup= new HyperlinkGroup(display);
 		refactorGroup.setForeground(editorForeground);
+		refactorGroup.setHyperlinkUnderlineMode(HyperlinkSettings.UNDERLINE_HOVER);
 		fRefactorEntries= new ArrayList();
 		
 		InfoEntry refactorEntry= new InfoEntry(
@@ -361,6 +364,7 @@ public class RenameInformationPopup {
 		
 		HyperlinkGroup cancelGroup= new HyperlinkGroup(display);
 		cancelGroup.setForeground(editorForeground);
+		cancelGroup.setHyperlinkUnderlineMode(HyperlinkSettings.UNDERLINE_HOVER);
 		
 		new InfoEntry(
 				table,
