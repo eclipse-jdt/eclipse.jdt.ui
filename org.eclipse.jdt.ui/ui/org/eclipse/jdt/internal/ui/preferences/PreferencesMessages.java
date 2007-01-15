@@ -163,6 +163,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_coloring_element;
 	public static String JavaEditorPreferencePage_enableAutoActivation;
 	public static String JavaEditorPreferencePage_automaticallyAddImportInsteadOfQualifiedName;
+	public static String JavaEditorPreferencePage_suggestStaticImports;
 	public static String JavaEditorPreferencePage_completionInserts;
 	public static String JavaEditorPreferencePage_completionOverwrites;
 	public static String JavaEditorPreferencePage_completionToggleHint;

@@ -63,6 +63,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_CODEASSIST_SORTER= getJDTUIKey(PreferenceConstants.CODEASSIST_SORTER);
 	private static final Key PREF_CODEASSIST_CASE_SENSITIVITY= getJDTUIKey(PreferenceConstants.CODEASSIST_CASE_SENSITIVITY);
 	private static final Key PREF_CODEASSIST_ADDIMPORT= getJDTUIKey(PreferenceConstants.CODEASSIST_ADDIMPORT);
+	private static final Key PREF_CODEASSIST_SUGGEST_STATIC_IMPORTS= getJDTCoreKey(JavaCore.CODEASSIST_SUGGEST_STATIC_IMPORTS);
 	private static final Key PREF_CODEASSIST_INSERT_COMPLETION= getJDTUIKey(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
 	private static final Key PREF_CODEASSIST_FILL_ARGUMENT_NAMES= getJDTUIKey(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES);
 	private static final Key PREF_CODEASSIST_GUESS_METHOD_ARGUMENTS= getJDTUIKey(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS);
@@ -83,6 +84,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_CODEASSIST_SORTER,
 				PREF_CODEASSIST_CASE_SENSITIVITY,
 				PREF_CODEASSIST_ADDIMPORT,
+				PREF_CODEASSIST_SUGGEST_STATIC_IMPORTS,
 				PREF_CODEASSIST_INSERT_COMPLETION,
 				PREF_CODEASSIST_FILL_ARGUMENT_NAMES,
 				PREF_CODEASSIST_GUESS_METHOD_ARGUMENTS,
@@ -95,6 +97,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	}
 	
 	private static final String[] trueFalse= new String[] { IPreferenceStore.TRUE, IPreferenceStore.FALSE };
+	private static final String[] enabledDisabled= new String[] { JavaCore.ENABLED, JavaCore.DISABLED };
 
 	private Button fCompletionInsertsRadioButton;
 	private Button fCompletionOverwritesRadioButton;
@@ -156,13 +159,18 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		addCheckBox(composite, label, PREF_CODEASSIST_PREFIX_COMPLETION, trueFalse, 0);
 		
 		label= PreferencesMessages.JavaEditorPreferencePage_automaticallyAddImportInsteadOfQualifiedName; 
-		addCheckBox(composite, label, PREF_CODEASSIST_ADDIMPORT, trueFalse, 0);
+		Button master= addCheckBox(composite, label, PREF_CODEASSIST_ADDIMPORT, trueFalse, 0);
+		
+		label= PreferencesMessages.JavaEditorPreferencePage_suggestStaticImports; 
+		Button slave= addCheckBox(composite, label, PREF_CODEASSIST_SUGGEST_STATIC_IMPORTS, enabledDisabled, 20);
+		createSelectionDependency(master, slave);
+		
 		
 		label= PreferencesMessages.JavaEditorPreferencePage_fillArgumentNamesOnMethodCompletion; 
-		Button master= addCheckBox(composite, label, PREF_CODEASSIST_FILL_ARGUMENT_NAMES, trueFalse, 0);
+		master= addCheckBox(composite, label, PREF_CODEASSIST_FILL_ARGUMENT_NAMES, trueFalse, 0);
 		
 		label= PreferencesMessages.JavaEditorPreferencePage_guessArgumentNamesOnMethodCompletion; 
-		Button slave= addCheckBox(composite, label, PREF_CODEASSIST_GUESS_METHOD_ARGUMENTS, trueFalse, 20);
+		slave= addCheckBox(composite, label, PREF_CODEASSIST_GUESS_METHOD_ARGUMENTS, trueFalse, 20);
 		createSelectionDependency(master, slave);
 	}
 
@@ -206,8 +214,6 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		
 		label= PreferencesMessages.JavaEditorPreferencePage_showOnlyProposalsVisibleInTheInvocationContext; 
 		addCheckBox(composite, label, PREF_CODEASSIST_SHOW_VISIBLE_PROPOSALS, trueFalse, 0);
-		
-		String[] enabledDisabled= new String[] { JavaCore.ENABLED, JavaCore.DISABLED };
 		
 		label= PreferencesMessages.CodeAssistConfigurationBlock_matchCamelCase_label;
 		addCheckBox(composite, label, PREF_CODEASSIST_CAMEL_CASE_MATCH, enabledDisabled, 0);
