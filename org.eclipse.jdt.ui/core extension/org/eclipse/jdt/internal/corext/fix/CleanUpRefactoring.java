@@ -242,7 +242,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		
 		private ICleanUp[] calculateSolutions(ICompilationUnit source, CompilationUnit ast, ICleanUp[] cleanUps) {
 			List/*<ICleanUp>*/result= new ArrayList();
-			CompilationUnitChange solution;
+			CleanUpChange solution;
 			try {
 				solution= calculateChange(ast, source, cleanUps, result);
 			} catch (CoreException e) {
@@ -260,30 +260,38 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			return (ICleanUp[])result.toArray(new ICleanUp[result.size()]);
 		}
 		
-		private void integrateSolution(TextFileChange solution, ICompilationUnit source) throws JavaModelException {
+		private void integrateSolution(CleanUpChange solution, ICompilationUnit source) throws JavaModelException {
+			if (fLeaveFilesDirty2 || source.getBuffer().hasUnsavedChanges()) {
+				solution.setSaveMode(TextFileChange.LEAVE_DIRTY);
+			} else {
+				solution.setSaveMode(TextFileChange.FORCE_SAVE);
+			}
+			
 			if (fSolutions.containsKey(source)) {
 				Object obj= fSolutions.get(source);
 				if (obj instanceof MultiStateCompilationUnitChange) {
 					MultiStateCompilationUnitChange change= (MultiStateCompilationUnitChange)obj;
-					change.addChange(solution);
+					change.addChange(createGroupFreeChange(solution));
 				} else {
 					MultiStateCompilationUnitChange mscuc= new MultiStateCompilationUnitChange(getChangeName(source), source);
 					mscuc.setSaveMode(((TextFileChange)obj).getSaveMode());
 					mscuc.setKeepPreviewEdits(true);
-					mscuc.addChange((TextChange)obj);
-					mscuc.addChange(solution);
+					mscuc.addChange(createGroupFreeChange((CleanUpChange)obj));
+					mscuc.addChange(createGroupFreeChange(solution));
 					fSolutions.remove(source);
 					fSolutions.put(source, mscuc);
 				}
 			} else {
-				if (fLeaveFilesDirty2 || source.getBuffer().hasUnsavedChanges()) {
-					solution.setSaveMode(TextFileChange.LEAVE_DIRTY);
-				} else {
-					solution.setSaveMode(TextFileChange.FORCE_SAVE);
-				}
 				fSolutions.put(source, solution);
 			}
 		}
+
+		private TextChange createGroupFreeChange(CleanUpChange change) {
+			CleanUpChange result= new CleanUpChange(change.getName(), change.getCompilationUnit());
+			result.setEdit(change.getEdit());
+			result.setSaveMode(change.getSaveMode());
+	        return result;
+        }
 	}
 	
 	private static abstract class CleanUpParser {
