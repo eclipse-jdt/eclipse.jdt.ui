@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -196,6 +197,11 @@ public final class RefactoringPropertyPage extends PropertyPage {
 	 */
 	protected Control createContents(final Composite parent) {
 		initializeDialogUnits(parent);
+		
+		IProject currentProject= getCurrentProject();
+		if (currentProject == null) {
+			return new Composite(parent, SWT.NONE);
+		}
 
 		final IPreferencePageContainer container= getContainer();
 		if (container instanceof IWorkbenchPreferenceContainer)
@@ -314,7 +320,13 @@ public final class RefactoringPropertyPage extends PropertyPage {
 	 * @return the currently associated project, or <code>null</code>
 	 */
 	private IProject getCurrentProject() {
-		return (IProject) getElement().getAdapter(IProject.class);
+		IAdaptable elem= getElement();
+		if (elem == null)
+			return null;
+		IProject project= (IProject) elem.getAdapter(IProject.class);
+		if (project != null && project.isAccessible())
+			return project;
+		return null;
 	}
 
 	/**
