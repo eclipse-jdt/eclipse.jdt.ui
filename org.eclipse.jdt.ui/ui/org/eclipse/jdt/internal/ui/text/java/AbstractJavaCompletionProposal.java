@@ -312,17 +312,33 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			CompletionProposal coreProposal= ((MemberProposalInfo)fProposalInfo).fProposal;
 			CompletionProposal[] requiredProposals= coreProposal.getRequiredProposals();
 			for (int i= 0; requiredProposals != null &&  i < requiredProposals.length; i++) {
-				
-				/*
-				 * In 3.3 we only support to add missing types, see
-				 * CompletionProposal#getRequiredProposals()
-				 */
-				Assert.isTrue(requiredProposals[i].getKind() == CompletionProposal.TYPE_REF);
-				
 				int oldLen= document.getLength();
-				LazyJavaCompletionProposal proposal= new LazyJavaTypeCompletionProposal(requiredProposals[i], fInvocationContext);
-				proposal.apply(document);
-				setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
+				if (requiredProposals[i].getKind() == CompletionProposal.TYPE_REF) {
+					LazyJavaCompletionProposal proposal= new LazyJavaTypeCompletionProposal(requiredProposals[i], fInvocationContext);
+					proposal.apply(document);
+					setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
+				} else if (requiredProposals[i].getKind() == CompletionProposal.TYPE_IMPORT) {
+					ImportCompletionProposal proposal= new ImportCompletionProposal(requiredProposals[i], fInvocationContext, coreProposal.getKind());
+					proposal.setReplacementOffset(getReplacementOffset());
+					proposal.apply(document);
+					setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
+				} else if (requiredProposals[i].getKind() == CompletionProposal.METHOD_IMPORT) {
+					ImportCompletionProposal proposal= new ImportCompletionProposal(requiredProposals[i], fInvocationContext, coreProposal.getKind());
+					proposal.setReplacementOffset(getReplacementOffset());
+					proposal.apply(document);
+					setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
+				} else if (requiredProposals[i].getKind() == CompletionProposal.FIELD_IMPORT) {
+					ImportCompletionProposal proposal= new ImportCompletionProposal(requiredProposals[i], fInvocationContext, coreProposal.getKind());
+					proposal.setReplacementOffset(getReplacementOffset());
+					proposal.apply(document);
+					setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
+				} else {
+					/*
+					 * In 3.3 we only support the above required proposals, see
+					 * CompletionProposal#getRequiredProposals()
+					 */
+					 Assert.isTrue(false);
+				}
 			}
 		}
 		
@@ -368,6 +384,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			// ignore
 		}
 	}
+	
 
 	private boolean isSmartTrigger(char trigger) {
 		return trigger == ';' && JavaPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_SEMICOLON)
