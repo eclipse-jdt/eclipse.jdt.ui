@@ -335,7 +335,7 @@ public class RenameInformationPopup {
 					}
 				},
 				KeyStroke.getInstance(KeyLookupFactory.getDefault().formalKeyLookup(IKeyLookup.CR_NAME)).format());
-		refactorEntry.getLink().setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
+		refactorEntry.getLink().setFont(JFaceResources.getFontRegistry().getBold("")); //$NON-NLS-1$ // bold OS font
 		fRefactorEntries.add(refactorEntry);
 		
 		InfoEntry previewEntry= new InfoEntry(
