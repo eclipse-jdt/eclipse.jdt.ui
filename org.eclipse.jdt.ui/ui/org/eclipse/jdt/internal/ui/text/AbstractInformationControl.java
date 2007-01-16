@@ -28,8 +28,6 @@ import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.FontMetrics;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -322,14 +320,9 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 
 	protected Text createFilterText(Composite parent) {
 		fFilterText= new Text(parent, SWT.NONE);
+		Dialog.applyDialogFont(fFilterText);
 
 		GridData data= new GridData(GridData.FILL_HORIZONTAL);
-		GC gc= new GC(parent);
-		gc.setFont(parent.getFont());
-		FontMetrics fontMetrics= gc.getFontMetrics();
-		gc.dispose();
-
-		data.heightHint= Dialog.convertHeightInCharsToPixels(fontMetrics, 1);
 		data.horizontalAlignment= GridData.FILL;
 		data.verticalAlignment= GridData.CENTER;
 		fFilterText.setLayoutData(data);
