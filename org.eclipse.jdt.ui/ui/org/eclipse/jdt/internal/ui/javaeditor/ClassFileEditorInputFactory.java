@@ -42,27 +42,31 @@ public class ClassFileEditorInputFactory implements IElementFactory {
 	 */
 	public IAdaptable createElement(IMemento memento) {
 		String identifier= memento.getString(KEY);
-		if (identifier != null) {
-			IJavaElement element= JavaCore.create(identifier);
-			try {
-				if (!element.exists() && element instanceof IClassFile) {
-					/*
-					 * Let's try to find the class file,
-					 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=83221
-					 */ 
-					IClassFile cf= (IClassFile)element;
-					IType type= cf.getType(); // this will work, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=154667
-					IJavaProject project= element.getJavaProject();
-					if (project != null) {
-						type= JavaModelUtil.findType(project, type.getFullyQualifiedName());
-						element= type.getParent();
-					}
+		if (identifier == null)
+			return null;
+			
+		IJavaElement element= JavaCore.create(identifier);
+		try {
+			if (!element.exists() && element instanceof IClassFile) {
+				/*
+				 * Let's try to find the class file,
+				 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=83221
+				 */ 
+				IClassFile cf= (IClassFile)element;
+				IType type= cf.getType(); // this will work, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=154667
+				IJavaProject project= element.getJavaProject();
+				if (project != null) {
+					type= JavaModelUtil.findType(project, type.getFullyQualifiedName());
+					if (type == null)
+						return null;
+					element= type.getParent();
 				}
-				return EditorUtility.getEditorInput(element);
-			} catch (JavaModelException x) {
 			}
+			return EditorUtility.getEditorInput(element);
+		} catch (JavaModelException x) {
+			// Don't report but simply return null
+			return null;
 		}
-		return null;
 	}
 
 	public static void saveState(IMemento memento, InternalClassFileEditorInput input) {
