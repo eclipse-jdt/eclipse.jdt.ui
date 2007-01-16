@@ -16,7 +16,10 @@ import java.util.List;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuAdapter;
+import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 
@@ -76,7 +79,21 @@ import org.eclipse.jface.action.IMenuCreator;
 			if (clearAction != null) {
 				addActionToMenu(fMenu, clearAction);
 			}
-		
+			
+			//workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=129973
+			final Display display= parent.getDisplay();
+			fMenu.addMenuListener(new MenuAdapter() {
+				public void menuHidden(final MenuEvent e) {
+					display.asyncExec(new Runnable() {
+						public void run() {
+							if (fMenu != null) {
+								fMenu.dispose();
+								fMenu= null;
+							}
+						}
+					});
+				}
+			});
 			return fMenu;
 		}
 
