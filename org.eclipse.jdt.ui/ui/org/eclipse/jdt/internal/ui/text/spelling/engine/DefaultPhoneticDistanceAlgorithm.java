@@ -12,7 +12,7 @@
 package org.eclipse.jdt.internal.ui.text.spelling.engine;
 
 /**
- * Default phonetic distance algorithm for english words.
+ * Default phonetic distance algorithm for English words.
  * <p>
  * This algorithm implements the Levenshtein text edit distance.
  * </p>
