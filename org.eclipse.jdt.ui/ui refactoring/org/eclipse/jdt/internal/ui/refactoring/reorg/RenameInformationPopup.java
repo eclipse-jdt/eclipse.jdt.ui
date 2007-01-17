@@ -20,8 +20,11 @@ import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
@@ -40,9 +43,6 @@ import org.eclipse.jface.bindings.keys.IKeyLookup;
 import org.eclipse.jface.bindings.keys.KeyLookupFactory;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.viewers.IPostSelectionProvider;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.jface.text.source.ISourceViewer;
 
@@ -64,29 +64,30 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
 public class RenameInformationPopup {
 	
-	private class PopupVisibilityManager implements IPartListener2, ControlListener {
+	private class PopupVisibilityManager implements IPartListener2, ControlListener, MouseListener, KeyListener {
 		public void start() {
 			fEditor.getSite().getWorkbenchWindow().getPartService().addPartListener(this);
-			fEditor.getViewer().getTextWidget().addControlListener(this);
+			final StyledText textWidget= fEditor.getViewer().getTextWidget();
+			textWidget.addControlListener(this);
+			textWidget.addMouseListener(this);
+			textWidget.addKeyListener(this);
 			fEditor.getSite().getShell().addControlListener(this);
 			fPopup.addDisposeListener(new DisposeListener() {
 				public void widgetDisposed(DisposeEvent e) {
 					fEditor.getSite().getWorkbenchWindow().getPartService().removePartListener(PopupVisibilityManager.this);
-					fEditor.getViewer().getTextWidget().removeControlListener(PopupVisibilityManager.this);
+					textWidget.removeControlListener(PopupVisibilityManager.this);
+					textWidget.removeMouseListener(PopupVisibilityManager.this);
+					textWidget.removeKeyListener(PopupVisibilityManager.this);
 					fEditor.getSite().getShell().removeControlListener(PopupVisibilityManager.this);
 					fPopup.removeDisposeListener(this);
 				}
 			});
 		}
 		
-		public void stop() {
-			fEditor.getSite().getWorkbenchWindow().getPartService().removePartListener(this);
-		}
-		
 		public void partActivated(IWorkbenchPartReference partRef) {
 			IWorkbenchPart fPart= fEditor.getEditorSite().getPart();
-			if (fPopup != null && ! fPopup.isDisposed() && partRef.getPart(false) == fPart) {
-				fPopup.setVisible(true);
+			if (partRef.getPart(false) == fPart) {
+				updateVisibility();
 			}
 		}
 
@@ -115,6 +116,7 @@ public class RenameInformationPopup {
 		public void partVisible(IWorkbenchPartReference partRef) {
 		}
 
+
 		public void controlMoved(ControlEvent e) {
 			setPopupLocation(fEditor.getViewer());
 		}
@@ -122,27 +124,34 @@ public class RenameInformationPopup {
 		public void controlResized(ControlEvent e) {
 			setPopupLocation(fEditor.getViewer());
 		}
+		
+		
+		private void updateVisibility() {
+			if (fPopup != null && !fPopup.isDisposed()) {
+				boolean enable= fRenameLinkedMode.isCaretInLinkedPosition();
+				fPopup.setVisible(enable);
+			}
+		}
+
+		public void mouseDoubleClick(MouseEvent e) {
+		}
+
+		public void mouseDown(MouseEvent e) {
+		}
+
+		public void mouseUp(MouseEvent e) {
+			updateVisibility();
+		}
+
+		public void keyPressed(KeyEvent e) {
+			updateVisibility();
+		}
+
+		public void keyReleased(KeyEvent e) {
+		}
+		
 	}
 
-	private class PopupEnablementUpdater implements ISelectionChangedListener {
-		private boolean fOldEnabled= true;
-		
-		public void selectionChanged(SelectionChangedEvent event) {
-			boolean newEnabled= fRenameLinkedMode.isCaretInLinkedPosition();
-			if (fOldEnabled == newEnabled)
-				return;
-			
-			if (fPopup != null && !fPopup.isDisposed()) {
-				fPopup.setVisible(newEnabled);
-//				for (Iterator iterator= fRefactorEntries.iterator(); iterator.hasNext();) {
-//					InfoEntry entry= (InfoEntry) iterator.next();
-//					entry.setEnabled(newEnabled);
-//				}
-			}
-			fOldEnabled= newEnabled;
-		}
-	}
-	
 	private static class DisableAwareHyperlink extends Hyperlink {
 		//workaround for 169859: Hyperlink widget should be rendered gray when disabled
 		
@@ -243,18 +252,6 @@ public class RenameInformationPopup {
 		fPopup.moveBelow(workbenchShell.getShells()[0]);
 		
 		fPopup.setVisible(true);
-		
-		if (viewer instanceof IPostSelectionProvider) {
-			final PopupEnablementUpdater updater= new PopupEnablementUpdater();
-			final IPostSelectionProvider psp= (IPostSelectionProvider) viewer;
-			psp.addPostSelectionChangedListener(updater);
-			fPopup.addDisposeListener(new DisposeListener() {
-				public void widgetDisposed(DisposeEvent e) {
-					psp.removePostSelectionChangedListener(updater);
-				}
-			});
-		}
-		
 	}
 
 	public void close() {
