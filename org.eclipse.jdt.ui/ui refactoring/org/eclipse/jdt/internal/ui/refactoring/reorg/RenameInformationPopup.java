@@ -12,7 +12,6 @@
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -134,14 +133,12 @@ public class RenameInformationPopup {
 				return;
 			
 			if (fPopup != null && !fPopup.isDisposed()) {
-				for (Iterator iterator= fRefactorEntries.iterator(); iterator.hasNext();) {
-					InfoEntry entry= (InfoEntry) iterator.next();
-					entry.setEnabled(newEnabled);
-				}
+				fPopup.setVisible(newEnabled);
+//				for (Iterator iterator= fRefactorEntries.iterator(); iterator.hasNext();) {
+//					InfoEntry entry= (InfoEntry) iterator.next();
+//					entry.setEnabled(newEnabled);
+//				}
 			}
-//			//TODO: restore on finish
-//			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-//			store.setValue(PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, ! newEnabled);
 			fOldEnabled= newEnabled;
 		}
 	}
@@ -169,6 +166,7 @@ public class RenameInformationPopup {
 			final Display display= table.getDisplay();
 			fLink= new DisableAwareHyperlink(table, SWT.NONE);
 			fLink.setText(info);
+			fLink.setForeground(hyperlinkGroup.getForeground());
 			fLink.addHyperlinkListener(new HyperlinkAdapter() {
 				public void linkActivated(HyperlinkEvent e) {
 					//workaround for 157196: [Forms] Hyperlink listener notification throws AIOOBE when listener removed in callback
@@ -240,6 +238,10 @@ public class RenameInformationPopup {
 			}
 		});
 		
+//		fPopup.moveBelow(null); // make sure hovers overlap the info popup
+// XXX workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=170774
+		fPopup.moveBelow(workbenchShell.getShells()[0]);
+		
 		fPopup.setVisible(true);
 		
 		if (viewer instanceof IPostSelectionProvider) {
@@ -309,7 +311,10 @@ public class RenameInformationPopup {
 	
 	private Control createTable(Composite parent) {
 		final Display display= parent.getDisplay();
-		Color editorForeground= fEditor.getViewer().getTextWidget().getForeground();
+//		Color foreground= fEditor.getViewer().getTextWidget().getForeground();
+//		Color background= fEditor.getViewer().getTextWidget().getBackground();
+		Color foreground= display.getSystemColor(SWT.COLOR_INFO_FOREGROUND);
+		Color background= display.getSystemColor(SWT.COLOR_INFO_BACKGROUND);
 		
 		Composite table= new Composite(parent, SWT.NONE);
 		GridLayout tableLayout= new GridLayout(2, false);
@@ -321,7 +326,7 @@ public class RenameInformationPopup {
 		table.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
 		
 		HyperlinkGroup refactorGroup= new HyperlinkGroup(display);
-		refactorGroup.setForeground(editorForeground);
+		refactorGroup.setForeground(foreground);
 		refactorGroup.setHyperlinkUnderlineMode(HyperlinkSettings.UNDERLINE_HOVER);
 		fRefactorEntries= new ArrayList();
 		
@@ -363,7 +368,7 @@ public class RenameInformationPopup {
 		fRefactorEntries.add(openDialogEntry);
 		
 		HyperlinkGroup cancelGroup= new HyperlinkGroup(display);
-		cancelGroup.setForeground(editorForeground);
+		cancelGroup.setForeground(foreground);
 		cancelGroup.setHyperlinkUnderlineMode(HyperlinkSettings.UNDERLINE_HOVER);
 		
 		new InfoEntry(
@@ -378,7 +383,7 @@ public class RenameInformationPopup {
 				KeyStroke.getInstance(KeyLookupFactory.getDefault().formalKeyLookup(IKeyLookup.ESC_NAME)).format());
 		
 		
-		recursiveSetBackgroundColor(table, fEditor.getViewer().getTextWidget().getBackground());
+		recursiveSetBackgroundColor(table, background);
 		addMoveSupport(fPopup, table);
 		
 		Point size= table.computeSize(SWT.DEFAULT, SWT.DEFAULT);
