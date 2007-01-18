@@ -437,9 +437,18 @@ public class CompletionProposalLabelProvider {
 		return buf.toString();
 	}
 
+	private boolean isThisPrefix(char[] string) {
+		if (string == null || string.length < 5)
+			return false;
+		return string[0] == 't' && string[1] == 'h' && string[2] == 'i' && string[3] == 's' && string[4] == '.'; 		
+	}
 	String createLabelWithTypeAndDeclaration(CompletionProposal proposal) {
+		char[] name= proposal.getCompletion(); 
+		if (!isThisPrefix(name))
+			name= proposal.getName(); 
+		
 		StringBuffer buf= new StringBuffer();
-		buf.append(proposal.getCompletion());
+		buf.append(name);
 		char[] typeName= Signature.getSignatureSimpleName(proposal.getSignature());
 		if (typeName.length > 0) {
 			buf.append("    "); //$NON-NLS-1$

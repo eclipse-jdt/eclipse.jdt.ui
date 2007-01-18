@@ -105,9 +105,6 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 			}
 		} else if (word.indexOf("this.") != -1) { //$NON-NLS-1$
 			word= word.substring(word.indexOf("this.") + 5); //$NON-NLS-1$
-		} else if (word.lastIndexOf(".") != -1) { //$NON-NLS-1$
-			int i= word.lastIndexOf(".");//$NON-NLS-1$
-			word= word.substring(i + 1) ;
 		}
 		return isPrefix(prefix, word);
 	}
