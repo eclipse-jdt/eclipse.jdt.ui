@@ -2544,6 +2544,17 @@ public class PreferenceConstants {
 	public final static String SPELLING_IGNORE_SINGLE_LETTERS= "spelling_ignore_single_letters"; //$NON-NLS-1$
 	
 	/**
+	 * A named preference that controls whether '&' in
+	 * Java properties files are ignored.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.3
+	 */
+	public final static String SPELLING_IGNORE_AMPERSAND_IN_PROPERTIES= "spelling_ignore_ampersand_in_properties"; //$NON-NLS-1$
+	
+	/**
 	 * A named preference that controls whether non-letters at word boundaries
 	 * should be ignored during spell checking.
 	 * <p>
@@ -3695,6 +3706,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_UPPER, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_URLS, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_SINGLE_LETTERS, true);
+		store.setDefault(PreferenceConstants.SPELLING_IGNORE_AMPERSAND_IN_PROPERTIES, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_NON_LETTERS, true);
 		store.setDefault(PreferenceConstants.SPELLING_USER_DICTIONARY, ""); //$NON-NLS-1$
 		

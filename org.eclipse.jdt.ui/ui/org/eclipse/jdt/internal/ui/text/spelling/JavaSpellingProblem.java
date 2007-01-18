@@ -100,9 +100,11 @@ public class JavaSpellingProblem extends SpellingProblem {
 		String[] arguments= getArguments();
 		if (arguments == null)
 			return new ICompletionProposal[0];
-
-		final int threshold= PreferenceConstants.getPreferenceStore().getInt(
-				PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD);
+		
+		if (arguments[0].indexOf('&') != -1 && isIgnoringAmpersand())
+			return new ICompletionProposal[0]; // no proposals for now
+		
+		final int threshold= PreferenceConstants.getPreferenceStore().getInt(PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD);
 		int size= 0;
 		List proposals= null;
 
@@ -163,6 +165,10 @@ public class JavaSpellingProblem extends SpellingProblem {
 		}
 
 		return result;
+	}
+	
+	private boolean isIgnoringAmpersand() {
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SPELLING_IGNORE_AMPERSAND_IN_PROPERTIES);
 	}
 
 	public String[] getArguments() {

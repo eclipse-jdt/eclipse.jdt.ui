@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.text.spelling;
 
 import com.ibm.icu.text.BreakIterator;
@@ -27,6 +26,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.IJavaDocTagConstants;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.DefaultSpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckIterator;
 
+
 /**
  * Iterator to spell check javadoc comment regions.
  *
@@ -35,16 +35,16 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckIterator;
 public class SpellCheckIterator implements ISpellCheckIterator {
 
 	/** The content of the region */
-	private final String fContent;
+	protected final String fContent;
 
 	/** The line delimiter */
 	private final String fDelimiter;
 
 	/** The last token */
-	private String fLastToken= null;
+	protected String fLastToken= null;
 
 	/** The next break */
-	private int fNext= 1;
+	protected int fNext= 1;
 
 	/** The offset of the region */
 	private final int fOffset;
@@ -53,7 +53,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	private int fPredecessor;
 
 	/** The previous break */
-	private int fPrevious= 0;
+	protected int fPrevious= 0;
 
 	/** The sentence breaks */
 	private final LinkedList fSentenceBreaks= new LinkedList();
@@ -62,7 +62,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	private boolean fStartsSentence= false;
 
 	/** The successor break */
-	private int fSuccessor;
+	protected int fSuccessor;
 
 	/** The word iterator */
 	private final BreakIterator fWordIterator;
@@ -265,7 +265,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	/*
 	 * @see java.util.Iterator#next()
 	 */
-	public final Object next() {
+	public Object next() {
 
 		String token= nextToken();
 		while (token == null && fSuccessor != BreakIterator.DONE)

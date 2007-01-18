@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.content.IContentType;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
@@ -25,6 +29,9 @@ import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
+import org.eclipse.jface.text.reconciler.IReconciler;
+import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
+import org.eclipse.jface.text.reconciler.MonoReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.source.Annotation;
@@ -33,7 +40,10 @@ import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy;
+import org.eclipse.ui.texteditor.spelling.SpellingService;
 
+import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -55,6 +65,9 @@ import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
  */
 public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerConfiguration {
 
+	/** Properties file content type */
+	private static final IContentType PROPERTIES_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.jdt.core.javaProperties"); //$NON-NLS-1$
+	
 	/**
 	 * The text editor.
 	 */
@@ -289,4 +302,25 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 			}
 		};
 	}
+
+	/*
+	 * @see org.eclipse.ui.editors.text.TextSourceViewerConfiguration#getReconciler(org.eclipse.jface.text.source.ISourceViewer)
+	 */
+	public IReconciler getReconciler(ISourceViewer sourceViewer) {
+		if (!EditorsUI.getPreferenceStore().getBoolean(SpellingService.PREFERENCE_SPELLING_ENABLED))
+			return null;
+
+		IReconcilingStrategy strategy= new SpellingReconcileStrategy(sourceViewer, EditorsUI.getSpellingService()) {
+			protected IContentType getContentType() {
+				return PROPERTIES_CONTENT_TYPE;
+			}
+		}; 
+		
+		MonoReconciler reconciler= new MonoReconciler(strategy, false);
+		reconciler.setIsIncrementalReconciler(false);
+		reconciler.setProgressMonitor(new NullProgressMonitor());
+		reconciler.setDelay(500);
+		return reconciler;
+	}	
+
 }

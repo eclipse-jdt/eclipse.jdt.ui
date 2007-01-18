@@ -27,6 +27,8 @@ import org.eclipse.jface.text.TypedRegion;
 
 import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
@@ -44,6 +46,7 @@ public class PropertiesFileSpellingEngine extends SpellingEngine {
 	 */
 	protected void check(IDocument document, IRegion[] regions, ISpellChecker checker, ISpellingProblemCollector collector, IProgressMonitor monitor) {
 		ISpellEventListener listener= new SpellEventListener(collector, document);
+		boolean isIgnoringAmpersand= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SPELLING_IGNORE_AMPERSAND_IN_PROPERTIES);
 		try {
 			checker.addListener(listener);
 			List partitionList= new ArrayList();
@@ -64,9 +67,13 @@ public class PropertiesFileSpellingEngine extends SpellingEngine {
 							break;
 					}
 				}
-				if (IPropertiesFilePartitions.COMMENT.equals(partition.getType()) || IPropertiesFilePartitions.PROPERTY_VALUE.equals(partition.getType())) {
+				String partitionType= partition.getType();
+				if (IPropertiesFilePartitions.COMMENT.equals(partitionType) || (!isIgnoringAmpersand && IPropertiesFilePartitions.PROPERTY_VALUE.equals(partitionType))) {
 					Locale locale= checker.getLocale();
-					checker.execute(new SpellCheckIterator(document, partition, locale, new PropertiesValueBreakIterator(locale)));
+					checker.execute(new SpellCheckIterator(document, partition, locale));
+				} else if (isIgnoringAmpersand && IPropertiesFilePartitions.PROPERTY_VALUE.equals(partitionType)) {
+					Locale locale= checker.getLocale();
+					checker.execute(new PropertiesFileSpellCheckIterator(document, partition, locale));
 				}
 			}
 		} catch (BadLocationException x) {

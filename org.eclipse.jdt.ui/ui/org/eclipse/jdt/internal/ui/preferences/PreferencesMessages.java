@@ -592,6 +592,7 @@ public final class PreferencesMessages extends NLS {
 	public static String SpellingPreferencePage_ignore_url_label;
 	public static String SpellingPreferencePage_ignore_non_letters_label;
 	public static String SpellingPreferencePage_ignore_single_letters_label;
+	public static String SpellingPreferencePage_ignore_ampersand_in_properties_label;
 	public static String SpellingPreferencePage_proposals_threshold;
 	public static String SpellingPreferencePage_dictionary_label;
 	public static String SpellingPreferencePage_workspace_dictionary_label;
