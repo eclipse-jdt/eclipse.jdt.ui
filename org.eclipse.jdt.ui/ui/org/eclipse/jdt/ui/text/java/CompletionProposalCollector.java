@@ -633,7 +633,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		String completion= String.valueOf(proposal.getCompletion());
 		int start= proposal.getReplaceStart();
 		int length= getLength(proposal);
-		String label= fLabelProvider.createLabelWithTypeAndDeclaration(proposal);
+		String label= fLabelProvider.createLabel(proposal);
 		Image image= getImage(fLabelProvider.createFieldImageDescriptor(proposal));
 		int relevance= computeRelevance(proposal);
 
