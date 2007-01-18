@@ -416,9 +416,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		description.setText(PreferencesMessages.SpellingPreferencePage_user_dictionary_description);
 		allControls.add(description);
 		
-		// XXX: waiting for https://bugs.eclipse.org/bugs/show_bug.cgi?id=169697
-		createEncodingFieldEditor(composite);
-//		createEncodingFieldEditor(engine);
+		createEncodingFieldEditor(engine);
 
 		Group advanced= new Group(composite, SWT.NONE);
 		advanced.setText(PreferencesMessages.SpellingPreferencePage_group_advanced); 
@@ -454,33 +452,16 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 * @since 3.3
 	 */
 	private void createEncodingFieldEditor(Composite composite) {
-		fEncodingEditorParent= composite;
-//		fEncodingEditorParent= new Composite(composite, SWT.NONE);
-//		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-//		gd.horizontalSpan= 3;
-//		gd.horizontalIndent= 0;
-//		fEncodingEditorParent.setLayoutData(gd);
+		fEncodingEditorParent= new Composite(composite, SWT.NONE);
+		GridLayout layout= new GridLayout();
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
+		fEncodingEditorParent.setLayout(layout);
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 4;
+		fEncodingEditorParent.setLayoutData(gd);
 		
-		fEncodingEditor= new EncodingFieldEditor(PREF_SPELLING_USER_DICTIONARY_ENCODING.getName(), "", fEncodingEditorParent); //$NON-NLS-1$
-		
-		// XXX: waiting for https://bugs.eclipse.org/bugs/show_bug.cgi?id=169697
-//			/*
-//			 * @see org.eclipse.ui.ide.dialogs.AbstractEncodingFieldEditor#createEncodingGroup(org.eclipse.swt.widgets.Composite, int)
-//			 */
-//			protected Composite createEncodingGroup(Composite parent, int numColumns) {
-//				Composite group= super.createEncodingGroup(parent, 2);
-//				GridLayout layout= (GridLayout)group.getLayout();
-//				layout.marginWidth= 0;
-//				return group;
-//			}
-//			
-//			/*
-//			 * @see org.eclipse.ui.ide.dialogs.AbstractEncodingFieldEditor#useGroup()
-//			 */
-//			protected boolean useGroup() {
-//				return false;
-//			}
-//		};
+		fEncodingEditor= new EncodingFieldEditor(PREF_SPELLING_USER_DICTIONARY_ENCODING.getName(), "", null, fEncodingEditorParent); //$NON-NLS-1$
 		
 		PreferenceStore store= new PreferenceStore();
 		String defaultEncoding= ResourcesPlugin.getEncoding();
