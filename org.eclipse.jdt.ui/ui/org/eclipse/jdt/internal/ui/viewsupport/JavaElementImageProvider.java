@@ -149,9 +149,13 @@ public class JavaElementImageProvider {
 	 * Returns an image descriptor for a java element. The descriptor includes overlays, if specified.
 	 */
 	public ImageDescriptor getJavaImageDescriptor(IJavaElement element, int flags) {
-		int adornmentFlags= computeJavaAdornmentFlags(element, flags);
-		Point size= useSmallSize(flags) ? SMALL_SIZE : BIG_SIZE;
-		return new JavaElementImageDescriptor(getBaseImageDescriptor(element, flags), adornmentFlags, size);
+		ImageDescriptor baseDesc= getBaseImageDescriptor(element, flags);
+		if (baseDesc != null) {
+			int adornmentFlags= computeJavaAdornmentFlags(element, flags);
+			Point size= useSmallSize(flags) ? SMALL_SIZE : BIG_SIZE;
+			return new JavaElementImageDescriptor(baseDesc, adornmentFlags, size);
+		}
+		return null;
 	}
 
 	/**
@@ -283,7 +287,10 @@ public class JavaElementImageProvider {
 					// give an advanced IWorkbenchAdapter the chance
 					IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter) element.getAdapter(IWorkbenchAdapter.class);
 					if (wbAdapter != null && !(wbAdapter instanceof JavaWorkbenchAdapter)) { // avoid recursion
-						return wbAdapter.getImageDescriptor(element);
+						ImageDescriptor imageDescriptor= wbAdapter.getImageDescriptor(element);
+						if (imageDescriptor != null) {
+							return imageDescriptor;
+						}
 					}
 					return JavaPluginImages.DESC_OBJS_GHOST;
 			}
