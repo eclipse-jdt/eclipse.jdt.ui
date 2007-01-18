@@ -213,11 +213,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 				informAndAbort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junitnotonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 			}
 
-			ITestKind testKind= JUnitLaunchConfigurationConstants.getTestRunnerKind(configuration);
-			if (testKind.isNull()) {
-				testKind= TestKindRegistry.getDefault().getKind(TestKindRegistry.JUNIT3_TEST_KIND_ID); // backward compatible for launch configurations with no runner
-			}
-					
+			ITestKind testKind= getTestRunnerKind(configuration);
 			boolean isJUnit4Configuration= TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId());
 			if (isJUnit4Configuration && ! TestSearchEngine.hasTestAnnotation(javaProject)) {
 				informAndAbort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junit4notonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
@@ -225,6 +221,14 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		} finally {
 			monitor.done();
 		}
+	}
+
+	private ITestKind getTestRunnerKind(ILaunchConfiguration configuration) {
+		ITestKind testKind= JUnitLaunchConfigurationConstants.getTestRunnerKind(configuration);
+		if (testKind.isNull()) {
+			testKind= TestKindRegistry.getDefault().getKind(TestKindRegistry.JUNIT3_TEST_KIND_ID); // backward compatible for launch configurations with no runner
+		}
+		return testKind;
 	}
 	
 	/* (non-Javadoc)
@@ -255,7 +259,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			}
 		}
 		HashSet result= new HashSet();
-		ITestKind testKind= JUnitLaunchConfigurationConstants.getTestRunnerKind(configuration);
+		ITestKind testKind= getTestRunnerKind(configuration);
 		testKind.getFinder().findTestsInContainer(testTarget, result, monitor);
 		if (result.isEmpty()) {
 			String msg= Messages.format(JUnitMessages.JUnitLaunchConfigurationDelegate_error_notests_kind, testKind.getDisplayName());
@@ -299,7 +303,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		if (fKeepAlive)
 			programArguments.add(0, "-keepalive"); //$NON-NLS-1$
 		
-		ITestKind testRunnerKind= JUnitLaunchConfigurationConstants.getTestRunnerKind(configuration);
+		ITestKind testRunnerKind= getTestRunnerKind(configuration);
 		
 		programArguments.add("-testLoaderClass"); //$NON-NLS-1$
 		programArguments.add(testRunnerKind.getLoaderClassName());
@@ -366,7 +370,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 	public String[] getClasspath(ILaunchConfiguration configuration) throws CoreException {
 		String[] cp= super.getClasspath(configuration);
 		
-		ITestKind kind= JUnitLaunchConfigurationConstants.getTestRunnerKind(configuration);
+		ITestKind kind= getTestRunnerKind(configuration);
 		List junitEntries = new ClasspathLocalizer(Platform.inDevelopmentMode()).localizeClasspath(kind);
 				
 		String[] classPath= new String[cp.length + junitEntries.size()];
