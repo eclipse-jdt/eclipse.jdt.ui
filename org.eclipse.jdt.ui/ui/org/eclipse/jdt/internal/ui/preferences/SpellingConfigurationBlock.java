@@ -452,13 +452,22 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 * @since 3.3
 	 */
 	private void createEncodingFieldEditor(Composite composite) {
+		Label filler= new Label(composite, SWT.NONE);
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 4;
+		filler.setLayoutData(gd);
+		
+		Label label= new Label(composite, SWT.NONE);
+		label.setText(PreferencesMessages.SpellingPreferencePage_encoding_label);
+		label.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
+		
 		fEncodingEditorParent= new Composite(composite, SWT.NONE);
-		GridLayout layout= new GridLayout();
+		GridLayout layout= new GridLayout(2, false);
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
 		fEncodingEditorParent.setLayout(layout);
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= 4;
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 3;
 		fEncodingEditorParent.setLayoutData(gd);
 		
 		fEncodingEditor= new EncodingFieldEditor(PREF_SPELLING_USER_DICTIONARY_ENCODING.getName(), "", null, fEncodingEditorParent); //$NON-NLS-1$
