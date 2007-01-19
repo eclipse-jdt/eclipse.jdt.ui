@@ -40,7 +40,11 @@ public class PropertiesFileSpellCheckIterator extends SpellCheckIterator {
 			if (token != null) {
 				if (previous == -1)
 					previous= fPrevious;
-				token= token + nextToken().substring(1);
+				String nextToken= nextToken();
+				if (nextToken != null)
+					token= token + nextToken.substring(1);
+				else
+					token= token + '&';
 			} else
 				token= nextToken();
 
@@ -49,8 +53,16 @@ public class PropertiesFileSpellCheckIterator extends SpellCheckIterator {
 		if (previous != -1)
 			fPrevious= previous;
 
-		if (token != null && token.length() > 1 && token.startsWith("&")) //$NON-NLS-1$
+		if (token != null && token.length() > 1 && token.startsWith("&")) { //$NON-NLS-1$
 			token= token.substring(1);
+			
+			// Add characters in front of '&'
+			while (fPrevious > 0 && !Character.isWhitespace(fContent.charAt(fPrevious - 1)) && fContent.charAt(fPrevious - 1) != '=') {
+				token= fContent.charAt(fPrevious - 1) + token;
+				fPrevious--;
+			}
+				
+		}
 
 		fLastToken= token;
 

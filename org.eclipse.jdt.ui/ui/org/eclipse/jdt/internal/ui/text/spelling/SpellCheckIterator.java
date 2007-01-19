@@ -47,7 +47,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	protected int fNext= 1;
 
 	/** The offset of the region */
-	private final int fOffset;
+	protected final int fOffset;
 
 	/** The predecessor break */
 	private int fPredecessor;
