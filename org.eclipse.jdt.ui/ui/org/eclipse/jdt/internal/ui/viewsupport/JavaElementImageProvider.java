@@ -155,7 +155,7 @@ public class JavaElementImageProvider {
 			Point size= useSmallSize(flags) ? SMALL_SIZE : BIG_SIZE;
 			return new JavaElementImageDescriptor(baseDesc, adornmentFlags, size);
 		}
-		return null;
+		return JavaPluginImages.DESC_OBJS_GHOST;
 	}
 
 	/**
