@@ -40,7 +40,10 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizardPage;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -240,11 +243,10 @@ public class RenameLinkedMode {
 	void doRename(boolean showPreview) {
 		cancel();
 		
-		String oldName= fJavaElement.getElementName();
 		try {
 			fEditor.getViewer().getTextWidget().setRedraw(false);
 			String newName= fNamePosition.getContent();
-			if (oldName.equals(newName))
+			if (fOriginalName.equals(newName))
 				return;
 			RenameSupport renameSupport= undoAndCreateRenameSupport(newName);
 			if (renameSupport == null)
@@ -480,6 +482,10 @@ public class RenameLinkedMode {
 	}
 
 	public boolean isCaretInLinkedPosition() {
+		return getCurrentLinkedPosition() != null;
+	}
+
+	public LinkedPosition getCurrentLinkedPosition() {
 		Point selection= fEditor.getViewer().getSelectedRange();
 		int start= selection.x;
 		int end= start + selection.y;
@@ -487,9 +493,38 @@ public class RenameLinkedMode {
 		for (int i= 0; i < positions.length; i++) {
 			LinkedPosition position= positions[i];
 			if (position.includes(start) || position.includes(end))
-				return true;
+				return position;
 		}
-		return false;
+		return null;
+	}
+
+	public boolean isEnabled() {
+		try {
+			String newName= fNamePosition.getContent();
+			if (fOriginalName.equals(newName))
+				return false;
+			/* 
+			 * TODO: use JavaRenameProcessor#checkNewElementName(String)
+			 * but make sure implementations don't access outdated Java Model
+			 * (cache all necessary information before starting linked mode).
+			 */
+			IJavaProject project= fJavaElement.getJavaProject();
+			String sourceLevel= project.getOption(JavaCore.COMPILER_SOURCE, true);
+			String complianceLevel= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+			return JavaConventions.validateIdentifier(newName, sourceLevel, complianceLevel).isOK();
+		} catch (BadLocationException e) {
+			return false;
+		}
+		
+	}
+
+	public boolean isOriginalName() {
+		try {
+			String newName= fNamePosition.getContent();
+			return fOriginalName.equals(newName);
+		} catch (BadLocationException e) {
+			return false;
+		}
 	}
 
 }
