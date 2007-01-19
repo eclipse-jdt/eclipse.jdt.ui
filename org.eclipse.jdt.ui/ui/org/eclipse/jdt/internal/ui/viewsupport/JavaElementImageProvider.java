@@ -149,13 +149,14 @@ public class JavaElementImageProvider {
 	 * Returns an image descriptor for a java element. The descriptor includes overlays, if specified.
 	 */
 	public ImageDescriptor getJavaImageDescriptor(IJavaElement element, int flags) {
+		Point size= useSmallSize(flags) ? SMALL_SIZE : BIG_SIZE;
+
 		ImageDescriptor baseDesc= getBaseImageDescriptor(element, flags);
 		if (baseDesc != null) {
 			int adornmentFlags= computeJavaAdornmentFlags(element, flags);
-			Point size= useSmallSize(flags) ? SMALL_SIZE : BIG_SIZE;
 			return new JavaElementImageDescriptor(baseDesc, adornmentFlags, size);
 		}
-		return JavaPluginImages.DESC_OBJS_GHOST;
+		return new JavaElementImageDescriptor(JavaPluginImages.DESC_OBJS_GHOST, 0, size);
 	}
 
 	/**
