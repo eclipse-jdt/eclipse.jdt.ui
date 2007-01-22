@@ -1427,7 +1427,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
     /**
      * Notify post save listeners.
      * <p>
-     * <strong>Note:</strong> <em>Post save listeners are not
+     * <strong>Note:</strong> Post save listeners are not
      * allowed to save the file and they must not assumed to be
      * called in the UI thread i.e. if they open a dialog they
      * must ensure it ends up in the UI thread.
