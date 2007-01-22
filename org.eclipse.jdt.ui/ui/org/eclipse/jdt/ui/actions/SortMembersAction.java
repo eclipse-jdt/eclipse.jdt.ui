@@ -127,7 +127,6 @@ public class SortMembersAction extends SelectionDispatchAction {
 			}
 			IType[] types= cu.getTypes();
 			if (!hasMembersToSort(types)) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.SortMembersAction_no_members); 
 				return;
 			}
 			if (!ActionUtil.isEditable(getShell(), cu)) {

@@ -284,7 +284,6 @@ public final class ActionMessages extends NLS {
 	public static String SortMembersAction_description;
 	public static String SortMembersAction_not_applicable;
 	public static String SortMembersAction_containsmarkers;
-	public static String SortMembersAction_no_members;
 	public static String SortMembersAction_dialog_title;
 	public static String MemberFilterActionGroup_hide_fields_label;
 	public static String MemberFilterActionGroup_hide_fields_tooltip;
