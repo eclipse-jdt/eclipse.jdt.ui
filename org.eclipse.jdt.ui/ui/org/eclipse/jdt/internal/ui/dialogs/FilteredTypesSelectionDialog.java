@@ -495,7 +495,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	protected IStatus validateItem(Object item) {
 
 		if (item == null)
-			new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, "", null); //$NON-NLS-1$
+			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, "", null); //$NON-NLS-1$
 
 		if (fValidator != null) {
 			IType type= ((TypeNameMatch) item).getType();
@@ -1266,7 +1266,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 
 		private int compareName(String leftString, String rightString) {
 			int result= leftString.compareToIgnoreCase(rightString);
-			if (result != 0) {
+			if (result != 0 || rightString.length() == 0) {
 				return result;
 			} else if (Strings.isLowerCase(leftString.charAt(0)) && !Strings.isLowerCase(rightString.charAt(0))) {
 				return +1;
