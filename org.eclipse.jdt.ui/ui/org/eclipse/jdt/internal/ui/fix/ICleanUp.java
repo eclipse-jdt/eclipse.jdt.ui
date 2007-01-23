@@ -35,13 +35,43 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  */
 public interface ICleanUp {
 	
+	/**
+	 * Does this clean up require an AST for the given <code>unit</code>. If
+	 * true is returned an AST for unit is created by the clean up
+	 * infrastructure and {@link #createFix(CompilationUnit)} is executed,
+	 * otherwise {@link #createFix(ICompilationUnit)} is executed. The source
+	 * from which the AST is created may be differ from the source of
+	 * <code>unit</code>.
+	 * <p>
+	 * Implementors should return false whenever possible because creating an
+	 * AST is expensive.
+	 * 
+	 * @param unit
+	 *            the unit to create an ast for
+	 * @return true if {@link #createFix(CompilationUnit)} must be executed,
+	 *         false if {@link #createFix(ICompilationUnit)} must be executed
+	 */
 	public abstract boolean requireAST(ICompilationUnit unit) throws CoreException;
 	
+	/**
+	 * Create an <code>IFix</code> which fixes all problems in
+	 * <code>unit</code> or <code>null</code> if nothing to fix.
+	 * <p>
+	 * This is called iff {@link #requireAST(ICompilationUnit)} returns
+	 * <code>false</code>.
+	 * 
+	 * @param unit
+	 *            the ICompilationUnit to fix, not null
+	 * @return the fix for the problems or <code>null</code> if nothing to fix
+	 */
 	public abstract IFix createFix(ICompilationUnit unit) throws CoreException;
 	
 	/**
-	 * Create a <code>IFix</code> which fixes all problems which this
-	 * multi-fix can fix in <code>CompilationUnit</code>.
+	 * Create an <code>IFix</code> which fixes all problems in
+	 * <code>compilationUnit</code> or <code>null</code> if nothing to fix.
+	 * <p>
+	 * This is called iff {@link #requireAST(ICompilationUnit)} returns
+	 * <code>true</code>.
 	 * 
 	 * @param compilationUnit
 	 *            The compilation unit to fix, may be null
