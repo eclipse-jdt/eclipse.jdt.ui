@@ -544,7 +544,7 @@ public class RenameInformationPopup {
 				KeyStroke.getInstance(SWT.CTRL, KeyLookupFactory.getDefault().formalKeyLookup(IKeyLookup.CR_NAME)).format());
 		fRefactorEntries.add(previewEntry);
 
-		InfoEntry openDialogEntry= new InfoEntry(
+		new InfoEntry(
 				table,
 				refactorGroup,
 				ReorgMessages.RenameInformationPopup_open_dialog,
@@ -554,7 +554,6 @@ public class RenameInformationPopup {
 					}
 				},
 				getOpenDialogBinding());
-//		fRefactorEntries.add(openDialogEntry); can open dialog when unchanged
 		
 		HyperlinkGroup cancelGroup= new HyperlinkGroup(display);
 		cancelGroup.setForeground(foreground);
