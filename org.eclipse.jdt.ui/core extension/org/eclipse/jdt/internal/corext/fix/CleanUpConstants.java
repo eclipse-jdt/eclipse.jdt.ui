@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Alex Blewitt - https://bugs.eclipse.org/bugs/show_bug.cgi?id=168954
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
@@ -948,6 +949,37 @@ public class CleanUpConstants {
 	public static final String ORGANIZE_IMPORTS= "cleanup.organize_imports"; //$NON-NLS-1$
 	
 	/**
+	 * Should members be sorted?
+	 * <br><br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * Default value: Value returned by {@link #getEclipseDefaultSettings()}<br>
+	 * <br>
+	 * 
+	 * @see #SORT_MEMBERS_ALL
+	 * @see #TRUE
+	 * @see #FALSE
+	 * @since 3.3
+	 */
+	public static final String SORT_MEMBERS = "cleanup.sort_members"; //$NON-NLS-1$
+
+	/**
+	 * If sorting members, should fields, enum constants and initializers also be sorted?
+	 * <br>
+	 * This has only an effect if {@link #SORT_MEMBERS} is also enabled.
+	 * <br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * Default value: Value returned by {@link #getEclipseDefaultSettings()}<br>
+	 * <br>
+	 * 
+	 * @see #SORT_MEMBERS
+	 * @see #TRUE
+	 * @see #FALSE
+	 * @since 3.3
+	 */
+	public static final String SORT_MEMBERS_ALL = "cleanup.sort_members_all"; //$NON-NLS-1$
+
+	/**
 	 * Should the Clean Up Wizard be shown when executing the Clean Up Action?
 	 * <br>
 	 * <br>
@@ -1042,7 +1074,6 @@ public class CleanUpConstants {
 	 * @since 3.3
 	 */
 	public final static String DEFAULT_SAVE_PARTICIPANT_PROFILE= SAVE_PARTICIPANT_PROFILE;
-
 	
 	public static Map getEclipseDefaultSettings() {
 		final HashMap result= new HashMap();
@@ -1109,14 +1140,17 @@ public class CleanUpConstants {
 		result.put(FORMAT_SOURCE_CODE, FALSE);
 		
 		result.put(FORMAT_COMMENT, FALSE);
-		result.put(FORMAT_SINGLE_LINE_COMMENT, TRUE);
+		result.put(FORMAT_SINGLE_LINE_COMMENT, FALSE);
 		result.put(FORMAT_MULTI_LINE_COMMENT, FALSE);
-		result.put(FORMAT_JAVADOC, FALSE);
+		result.put(FORMAT_JAVADOC, TRUE);
 		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES, FALSE);
 		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES_ALL, TRUE);
 		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY, FALSE);
 		
 		result.put(ORGANIZE_IMPORTS, FALSE);
+
+		result.put(SORT_MEMBERS, FALSE);
+		result.put(SORT_MEMBERS_ALL, FALSE);
 		
 		return result;
 	}
@@ -1194,6 +1228,9 @@ public class CleanUpConstants {
 		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY, FALSE);
 		
 		result.put(ORGANIZE_IMPORTS, TRUE);
+
+		result.put(SORT_MEMBERS, FALSE);
+		result.put(SORT_MEMBERS_ALL, FALSE);
 		
 		result.put(CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS, FALSE);
 		

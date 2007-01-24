@@ -145,7 +145,7 @@ public class CleanUpTest extends QuickFixTest {
 		fProfile.getSettings().put(key, CleanUpConstants.TRUE);
 		commitProfile();
 	}
-	
+
 	private void commitProfile() throws CoreException {
 		List profiles= CleanUpPreferenceUtil.getBuiltInProfiles();
 		profiles.add(fProfile);
@@ -5913,6 +5913,61 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("package    test1;\n");
 		buf.append("   public class E1 {\n");
 		buf.append("                   \n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+
+	public void testSortMembers01() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("   public class SM01 {\n");
+		buf.append("   int b;\n");
+		buf.append("   int a;\n");
+		buf.append("   void d() {};\n");
+		buf.append("   void c() {};\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("SM01.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.SORT_MEMBERS);
+		enable(CleanUpConstants.SORT_MEMBERS_ALL);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("   public class SM01 {\n");
+		buf.append("   int a;\n");
+		buf.append("   int b;\n");
+		buf.append("   void c() {};\n");
+		buf.append("   void d() {};\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+	
+	public void testSortMembers02() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("   public class SM02 {\n");
+		buf.append("   int b;\n");
+		buf.append("   int a;\n");
+		buf.append("   void d() {};\n");
+		buf.append("   void c() {};\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("SM02.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.SORT_MEMBERS);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("   public class SM02 {\n");
+		buf.append("   int b;\n");
+		buf.append("   int a;\n");
+		buf.append("   void c() {};\n");
+		buf.append("   void d() {};\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
 		

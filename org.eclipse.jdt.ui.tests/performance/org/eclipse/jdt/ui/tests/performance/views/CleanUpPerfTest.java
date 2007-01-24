@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Alex Blewitt - https://bugs.eclipse.org/bugs/show_bug.cgi?id=168954
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.performance.views;
 
@@ -50,6 +51,7 @@ import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
@@ -400,6 +402,31 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		storeSettings(node);
 		
 		cleanUpRefactoring.addCleanUp(new StringCleanUp());
+		
+		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+		cleanUpRefactoring.createChange(null);
+		
+		joinBackgroudActivities();
+		for (int i= 0; i < 10; i++) {
+			startMeasuring();
+			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+			cleanUpRefactoring.createChange(null);
+			finishMeasurements();
+		}
+	}
+	
+	public void testSortMembersCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+		
+		Map node= getNullSettings();
+		
+		node.put(CleanUpConstants.SORT_MEMBERS, CleanUpConstants.TRUE);
+		node.put(CleanUpConstants.SORT_MEMBERS_ALL, CleanUpConstants.TRUE);
+		
+		storeSettings(node);
+		
+		cleanUpRefactoring.addCleanUp(new SortMembersCleanUp());
 		
 		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
 		cleanUpRefactoring.createChange(null);

@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Alex Blewitt - https://bugs.eclipse.org/bugs/show_bug.cgi?id=168954
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.cleanup;
 
@@ -27,6 +28,7 @@ import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CommentFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
 import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage;
@@ -49,7 +51,7 @@ public final class CodeFormatingTabPage extends ModifyDialogTabPage {
 	}
 
 	protected JavaPreview doCreateJavaPreview(Composite parent) {
-		fCleanUpPreview= new CleanUpPreview(parent, new ICleanUp[] {new ImportsCleanUp(fValues), new CodeFormatCleanUp(fValues), new CommentFormatCleanUp(fValues)}, false);
+		fCleanUpPreview= new CleanUpPreview(parent, new ICleanUp[] {new ImportsCleanUp(fValues), new CodeFormatCleanUp(fValues), new CommentFormatCleanUp(fValues), new SortMembersCleanUp(fValues)}, false);
 		return fCleanUpPreview;
 	}
 	
@@ -63,13 +65,13 @@ public final class CodeFormatingTabPage extends ModifyDialogTabPage {
 		
 		final CheckboxPreference formatCommentsPref= createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_CheckboxName_FormatComments, CleanUpConstants.FORMAT_COMMENT, CleanUpModifyDialog.FALSE_TRUE);
 		
-		intent(group);
+		indent(group);
 		final CheckboxPreference javadocPref= createCheckboxPref(group, numColumns - 1, CleanUpMessages.CodeFormatingTabPage_CheckboxName_FormatJavadocComments, CleanUpConstants.FORMAT_JAVADOC, CleanUpModifyDialog.FALSE_TRUE);
 		
-		intent(group);
+		indent(group);
 		final CheckboxPreference multiLinePref= createCheckboxPref(group, numColumns - 1, CleanUpMessages.CodeFormatingTabPage_CheckboxName_FormatMultiLineComments, CleanUpConstants.FORMAT_MULTI_LINE_COMMENT, CleanUpModifyDialog.FALSE_TRUE);
 		
-		intent(group);
+		indent(group);
 		final CheckboxPreference singleLinePref= createCheckboxPref(group, numColumns - 1, CleanUpMessages.CodeFormatingTabPage_CheckboxName_FormatSingleLineComments, CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT, CleanUpModifyDialog.FALSE_TRUE);
 		
 		formatCommentsPref.addObserver(new Observer() {
@@ -96,7 +98,7 @@ public final class CodeFormatingTabPage extends ModifyDialogTabPage {
 		layout.marginWidth= 0;
 		sub.setLayout(layout);
 		
-		intent(sub);
+		indent(sub);
 		final RadioPreference allPref= createRadioPref(sub, 1, CleanUpMessages.CodeFormatingTabPage_RemoveTrailingWhitespace_all_radio, CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL, CleanUpModifyDialog.FALSE_TRUE);
 		final RadioPreference ignoreEmptyPref= createRadioPref(sub, 1, CleanUpMessages.CodeFormatingTabPage_RemoveTrailingWhitespace_ignoreEmpty_radio, CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY, CleanUpModifyDialog.FALSE_TRUE);
 		
@@ -111,8 +113,8 @@ public final class CodeFormatingTabPage extends ModifyDialogTabPage {
 		allPref.setEnabled(whiteSpace.getChecked());
 		ignoreEmptyPref.setEnabled(whiteSpace.getChecked());
 		
-		PixelConverter pixelConverter= new PixelConverter(composite);
-		
+    	PixelConverter pixelConverter= new PixelConverter(composite);
+	    	
 		if (!fIsSaveParticipantConfiguration) {
 			createLabel(CleanUpMessages.CodeFormatingTabPage_FormatterSettings_Description, group, numColumns, pixelConverter).setFont(composite.getFont());
 		
@@ -121,7 +123,22 @@ public final class CodeFormatingTabPage extends ModifyDialogTabPage {
 			
 			createLabel(CleanUpMessages.CodeFormatingTabPage_OrganizeImportsSettings_Description, importsGroup, numColumns, pixelConverter).setFont(composite.getFont());
 		}
-	}
+		
+		Group sortMembersGroup = createGroup(numColumns, composite, CleanUpMessages.CodeFormatingTabPage_SortMembers_GroupName);
+		final CheckboxPreference sortMembersPref = createCheckboxPref(sortMembersGroup, numColumns, CleanUpMessages.CodeFormatingTabPage_SortMembers_CheckBoxLabel, CleanUpConstants.SORT_MEMBERS, CleanUpModifyDialog.FALSE_TRUE);
+		
+		indent(sortMembersGroup);
+		final CheckboxPreference sortMembersFieldsPref = createCheckboxPref(sortMembersGroup, numColumns - 1, CleanUpMessages.CodeFormatingTabPage_SortMembersFields_CheckBoxLabel, CleanUpConstants.SORT_MEMBERS_ALL, CleanUpModifyDialog.FALSE_TRUE);
+		
+		sortMembersPref.addObserver( new Observer() {
+			public void update(Observable o, Object arg) {
+				sortMembersFieldsPref.setEnabled(sortMembersPref.getChecked());
+			}	    		
+		});
+		sortMembersFieldsPref.setEnabled(sortMembersPref.getChecked());
+		
+		createLabel(CleanUpMessages.CodeFormatingTabPage_SortMembers_Description, sortMembersGroup, numColumns, pixelConverter).setFont(composite.getFont());
+    }
 	
 	private Label createLabel(String text, Group group, int numColumns, PixelConverter pixelConverter) {
 		Label label= new Label(group, SWT.WRAP);
@@ -132,7 +149,7 @@ public final class CodeFormatingTabPage extends ModifyDialogTabPage {
 		return label;
 	}
 	
-	private void intent(Composite composite) {
+	private void indent(Composite composite) {
 		Label l= new Label(composite, SWT.NONE);
 		GridData gd= new GridData();
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(4);

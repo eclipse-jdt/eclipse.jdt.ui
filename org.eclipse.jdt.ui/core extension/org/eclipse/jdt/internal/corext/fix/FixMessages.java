@@ -45,6 +45,8 @@ public final class FixMessages extends NLS {
 	public static String PotentialProgrammingProblemsFix_calculatingUIDFailed_binding;
 	public static String PotentialProgrammingProblemsFix_calculatingUIDFailed_exception;
 	public static String PotentialProgrammingProblemsFix_calculatingUIDFailed_unknown;
+	public static String SortMembersFix_Change_description;
+	public static String SortMembersFix_Fix_description;
 	public static String UnusedCodeFix_change_name;
 	
 	public static String UnusedCodeFix_RemoveFieldOrLocal_description;

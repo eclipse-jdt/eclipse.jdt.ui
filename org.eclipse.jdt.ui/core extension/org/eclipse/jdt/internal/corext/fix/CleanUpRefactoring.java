@@ -80,6 +80,7 @@ import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
@@ -1014,11 +1015,38 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 	}
 	
 	public static ICleanUp[] createCleanUps() {
-		return new ICleanUp[] {new CodeStyleCleanUp(), new ControlStatementsCleanUp(), new ConvertLoopCleanUp(), new VariableDeclarationCleanUp(), new ExpressionsCleanUp(), new UnusedCodeCleanUp(), new Java50CleanUp(), new PotentialProgrammingProblemsCleanUp(), new UnnecessaryCodeCleanUp(), new StringCleanUp(), new ImportsCleanUp(), new CodeFormatCleanUp(), new CommentFormatCleanUp()};
+		return new ICleanUp[] {
+				new CodeStyleCleanUp(), 
+				new ControlStatementsCleanUp(), 
+				new ConvertLoopCleanUp(), 
+				new VariableDeclarationCleanUp(), 
+				new ExpressionsCleanUp(), 
+				new UnusedCodeCleanUp(), 
+				new Java50CleanUp(), 
+				new PotentialProgrammingProblemsCleanUp(), 
+				new UnnecessaryCodeCleanUp(), 
+				new StringCleanUp(), 
+				new SortMembersCleanUp(), 
+				new ImportsCleanUp(), 
+				new CodeFormatCleanUp(), 
+				new CommentFormatCleanUp()};
 	}
 	
 	public static ICleanUp[] createCleanUps(Map settings) {
-		return new ICleanUp[] {new CodeStyleCleanUp(settings), new ControlStatementsCleanUp(settings), new ConvertLoopCleanUp(settings), new VariableDeclarationCleanUp(settings), new ExpressionsCleanUp(settings), new UnusedCodeCleanUp(settings), new Java50CleanUp(settings), new PotentialProgrammingProblemsCleanUp(settings), new UnnecessaryCodeCleanUp(settings), new StringCleanUp(settings),
-		        new ImportsCleanUp(settings), new CodeFormatCleanUp(settings), new CommentFormatCleanUp(settings)};
+		return new ICleanUp[] {
+				new CodeStyleCleanUp(settings), 
+				new ControlStatementsCleanUp(settings), 
+				new ConvertLoopCleanUp(settings), 
+				new VariableDeclarationCleanUp(settings), 
+				new ExpressionsCleanUp(settings), 
+				new UnusedCodeCleanUp(settings), 
+				new Java50CleanUp(settings), 
+				new PotentialProgrammingProblemsCleanUp(settings), 
+				new UnnecessaryCodeCleanUp(settings), 
+				new StringCleanUp(settings),
+				new SortMembersCleanUp(settings), 
+				new ImportsCleanUp(settings), 
+				new CodeFormatCleanUp(settings), 
+				new CommentFormatCleanUp(settings)};
 	}
 }
