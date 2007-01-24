@@ -2512,6 +2512,8 @@ public final class ReorgPolicyFactory {
 
 		private static final String ATTRIBUTE_DESTINATION= "destination"; //$NON-NLS-1$
 
+		private static final String ATTRIBUTE_TARGET= "target"; //$NON-NLS-1$
+
 		protected boolean fCheckDestination= true;
 
 		private IJavaElement fJavaElementDestination;
@@ -2628,9 +2630,10 @@ public final class ReorgPolicyFactory {
 			if (element != null)
 				arguments.put(ATTRIBUTE_DESTINATION, JDTRefactoringDescriptor.elementToHandle(project, element));
 			else {
+				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=157479
 				final IResource resource= getResourceDestination();
 				if (resource != null)
-					arguments.put(ATTRIBUTE_DESTINATION, JDTRefactoringDescriptor.resourceToHandle(project, resource));
+					arguments.put(ATTRIBUTE_TARGET, JDTRefactoringDescriptor.resourceToHandle(null, resource));
 			}
 			return arguments;
 		}
@@ -2664,7 +2667,7 @@ public final class ReorgPolicyFactory {
 		public RefactoringStatus initialize(RefactoringArguments arguments) {
 			if (arguments instanceof JavaRefactoringArguments) {
 				final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-				final String handle= extended.getAttribute(ATTRIBUTE_DESTINATION);
+				String handle= extended.getAttribute(ATTRIBUTE_DESTINATION);
 				if (handle != null) {
 					final IJavaElement element= JDTRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
 					if (element != null) {
@@ -2679,6 +2682,8 @@ public final class ReorgPolicyFactory {
 							}
 						}
 					} else {
+						// Leave for compatibility
+						// https://bugs.eclipse.org/bugs/show_bug.cgi?id=157479
 						final IResource resource= JDTRefactoringDescriptor.handleToResource(extended.getProject(), handle);
 						if (resource == null || (fCheckDestination && !resource.exists()))
 							return ScriptableRefactoring.createInputFatalStatus(resource, getProcessorId(), getRefactoringId());
@@ -2691,8 +2696,24 @@ public final class ReorgPolicyFactory {
 							}
 						}
 					}
-				} else
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_INPUT));
+				} else {
+					// https://bugs.eclipse.org/bugs/show_bug.cgi?id=157479
+					handle= extended.getAttribute(ATTRIBUTE_TARGET);
+					if (handle != null) {
+						final IResource resource= JDTRefactoringDescriptor.handleToResource(null, handle);
+						if (resource == null || (fCheckDestination && !resource.exists()))
+							return ScriptableRefactoring.createInputFatalStatus(resource, getProcessorId(), getRefactoringId());
+						else {
+							try {
+								return setDestination(resource);
+							} catch (JavaModelException exception) {
+								JavaPlugin.log(exception);
+								return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { handle, JDTRefactoringDescriptor.ATTRIBUTE_INPUT}));
+							}
+						}
+					} else
+						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_INPUT));
+				}
 			} else
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		}
