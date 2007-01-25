@@ -27,9 +27,12 @@ import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -39,6 +42,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tracker;
 
 import org.eclipse.jface.bindings.keys.IKeyLookup;
@@ -60,6 +65,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.keys.IBindingService;
+import org.eclipse.ui.part.PageBook;
 
 import org.eclipse.ui.forms.HyperlinkGroup;
 import org.eclipse.ui.forms.HyperlinkSettings;
@@ -70,6 +76,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
 public class RenameInformationPopup {
@@ -243,14 +250,19 @@ public class RenameInformationPopup {
 			});
 			hyperlinkGroup.add(fLink);
 			
-			fBindingLabel= new Label(table, SWT.NONE);
-			fBindingLabel.setText(keybinding);
-			addMoveSupport(fPopup, fBindingLabel);
+			if (keybinding != null) {
+				fBindingLabel= new Label(table, SWT.NONE);
+				fBindingLabel.setText(keybinding);
+				addMoveSupport(fPopup, fBindingLabel);
+			} else {
+				fBindingLabel= null;
+			}
 		}
 		
 		public void setEnabled(boolean enabled) {
 			fLink.setEnabled(enabled);
-			fBindingLabel.setEnabled(enabled);
+			if (fBindingLabel != null)
+				fBindingLabel.setEnabled(enabled);
 		}
 		
 		public Hyperlink getLink() {
@@ -258,8 +270,10 @@ public class RenameInformationPopup {
 		}
 	}
 	
-	private static final String SNAP_POSITION_KEY= "snap_position"; //$NON-NLS-1$
 	private static final String DIALOG_SETTINGS_SECTION= "RenameInformationPopup"; //$NON-NLS-1$
+	private static final String SNAP_POSITION_KEY= "snap_position"; //$NON-NLS-1$
+	private static final String SNAP_POSITION_MINIMIZED_KEY= "snap_position_minimized"; //$NON-NLS-1$
+	private static final String IS_MINIMIZED_KEY= "is_minimized"; //$NON-NLS-1$
 
 	private static final int SNAP_POSITION_UNDER_RIGHT_FIELD= 0;
 	private static final int SNAP_POSITION_OVER_RIGHT_FIELD= 1;
@@ -271,6 +285,7 @@ public class RenameInformationPopup {
 	private final RenameLinkedMode fRenameLinkedMode;
 	
 	private int fSnapPosition;
+	private boolean fIsMinimized;
 	private Shell fPopup;
 	private List/*<InfoEntry>*/ fRefactorEntries;
 	
@@ -278,12 +293,29 @@ public class RenameInformationPopup {
 	public RenameInformationPopup(CompilationUnitEditor editor, RenameLinkedMode renameLinkedMode) {
 		fEditor= editor;
 		fRenameLinkedMode= renameLinkedMode;
-		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettingsSection(DIALOG_SETTINGS_SECTION);
-		try {
-			fSnapPosition= settings.getInt(SNAP_POSITION_KEY);
-		} catch (NumberFormatException e) {
-			fSnapPosition= SNAP_POSITION_UNDER_LEFT_FIELD;
+		fIsMinimized= getDialogSettings().getBoolean(IS_MINIMIZED_KEY);
+		restoreSnapPosition();
+	}
+
+	private void restoreSnapPosition() {
+		IDialogSettings settings= getDialogSettings();
+		if (fIsMinimized) {
+			try {
+				fSnapPosition= settings.getInt(SNAP_POSITION_MINIMIZED_KEY);
+			} catch (NumberFormatException e) {
+				fSnapPosition= SNAP_POSITION_LOWER_RIGHT;
+			}
+		} else {
+			try {
+				fSnapPosition= settings.getInt(SNAP_POSITION_KEY);
+			} catch (NumberFormatException e) {
+				fSnapPosition= SNAP_POSITION_UNDER_LEFT_FIELD;
+			}
 		}
+	}
+
+	private IDialogSettings getDialogSettings() {
+		return JavaPlugin.getDefault().getDialogSettingsSection(DIALOG_SETTINGS_SECTION);
 	}
 
 	public void open() {
@@ -347,8 +379,11 @@ public class RenameInformationPopup {
 	
 	private void updatePopupLocation(boolean editorBoundsChanged) {
 		Point loc= computePopupLocation(fSnapPosition, editorBoundsChanged);
-		if (loc != null)
+		if (loc != null) {
 			fPopup.setLocation(loc);
+			// XXX workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=170774
+			fPopup.moveBelow(fEditor.getSite().getShell().getShells()[0]);
+		}
 	}
 
 	/**
@@ -490,8 +525,7 @@ public class RenameInformationPopup {
 				tracker.open();
 				tracker.close();
 				tracker.dispose();
-				IDialogSettings settings= JavaPlugin.getDefault().getDialogSettingsSection(DIALOG_SETTINGS_SECTION);
-				settings.put(SNAP_POSITION_KEY, fSnapPosition);
+				getDialogSettings().put(fIsMinimized ? SNAP_POSITION_MINIMIZED_KEY : SNAP_POSITION_KEY, fSnapPosition);
 				updatePopupLocation(true); //TODO: true?
 				//TODO: set focus back to editor
 			}
@@ -505,14 +539,16 @@ public class RenameInformationPopup {
 		Color foreground= display.getSystemColor(SWT.COLOR_INFO_FOREGROUND);
 		Color background= display.getSystemColor(SWT.COLOR_INFO_BACKGROUND);
 		
-		Composite table= new Composite(parent, SWT.NONE);
+		final PageBook book= new PageBook(parent, SWT.NONE);
+		final Composite table= new Composite(book, SWT.NONE);
+		final Composite minimized= new Composite(book, SWT.NONE);
+		
 		GridLayout tableLayout= new GridLayout(2, false);
-		tableLayout.marginHeight= 5; 
-		tableLayout.marginWidth= 5;
+		tableLayout.marginHeight= 4; 
+		tableLayout.marginWidth= 4;
 		tableLayout.horizontalSpacing= 10;
 		tableLayout.verticalSpacing= 2;
 		table.setLayout(tableLayout);
-		table.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
 		
 		HyperlinkGroup refactorGroup= new HyperlinkGroup(display);
 		refactorGroup.setForeground(foreground);
@@ -570,16 +606,92 @@ public class RenameInformationPopup {
 				},
 				KeyStroke.getInstance(KeyLookupFactory.getDefault().formalKeyLookup(IKeyLookup.ESC_NAME)).format());
 		
-		
-		recursiveSetBackgroundColor(table, background);
 		addMoveSupport(fPopup, table);
 		
-		Point size= table.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-		fPopup.setSize(size);
+		ToolBar toolBar= new ToolBar(table, SWT.FLAT);
+		GridData gridData= new GridData();
+		gridData.exclude= true;
+		toolBar.setLayoutData(gridData);
+		ToolItem minimizeButton = new ToolItem(toolBar, SWT.PUSH, 0);
+		final Image minimizeImage= JavaPluginImages.DESC_ELCL_THIN_MINIMIZE_VIEW.createImage();
+		minimizeButton.setImage(minimizeImage);
+		minimizeButton.setToolTipText(ReorgMessages.RenameInformationPopup_minimize);
+		minimizeButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				book.showPage(minimized);
+				fPopup.pack();
+				fIsMinimized= true;
+				getDialogSettings().put(IS_MINIMIZED_KEY, true);
+				restoreSnapPosition();
+				updatePopupLocation(true);
+			}
+		});
+		minimizeButton.addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				minimizeImage.dispose();
+			}
+		});
+		toolBar.pack();
 		
+		Point tableSize= table.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		// having the button overlap the keybinding for refactor is OK, since Ctrl+Enter is always wider than Enter...
+		toolBar.setLocation(tableSize.x - toolBar.getSize().x, 0); //TODO: BiDi
+		
+		// minimized:
+		GridLayout minimizedLayout= new GridLayout(2, false);
+		minimizedLayout.marginWidth= minimizedLayout.marginHeight= 0;
+		minimizedLayout.horizontalSpacing= 0;
+		minimized.setLayout(minimizedLayout);
+		
+		Composite minimizedBorder= new Composite(minimized, SWT.NONE);
+		GridLayout minimizedBorderLayout= new GridLayout(1, false);
+		minimizedBorderLayout.marginHeight= tableLayout.marginHeight; 
+		minimizedBorderLayout.marginWidth= tableLayout.marginWidth;
+		minimizedBorder.setLayout(minimizedBorderLayout);
+		
+		InfoEntry minRefactorEntry= new InfoEntry(
+				minimizedBorder,
+				refactorGroup,
+				ReorgMessages.RenameInformationPopup_refactor_rename,
+				new Runnable() {
+					public void run() {
+						fRenameLinkedMode.doRename(false);
+					}
+				},
+				null);
+		minRefactorEntry.getLink().setFont(JFaceResources.getFontRegistry().getBold("")); //$NON-NLS-1$ // bold OS font
+		fRefactorEntries.add(minRefactorEntry);
+		
+		addMoveSupport(fPopup, minimized);
+		addMoveSupport(fPopup, minimizedBorder);
+		
+		ToolBar restoreToolBar= new ToolBar(minimized, SWT.FLAT);
+		ToolItem restoreButton = new ToolItem(restoreToolBar, SWT.PUSH, 0);
+		final Image restoreImage= JavaPluginImages.DESC_ELCL_THIN_RESTORE_VIEW.createImage();
+		restoreButton.setImage(restoreImage);
+		restoreButton.setToolTipText(ReorgMessages.RenameInformationPopup_restore);
+		restoreButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				book.showPage(table);
+				fPopup.pack();
+				fIsMinimized= false;
+				getDialogSettings().put(IS_MINIMIZED_KEY, false);
+				restoreSnapPosition();
+				updatePopupLocation(true);
+			}
+		});
+		restoreButton.addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				restoreImage.dispose();
+			}
+		});
+		restoreToolBar.pack();
+		
+		recursiveSetBackgroundColor(book, background);
+		book.showPage(fIsMinimized ? minimized : table);
 		return table;
 	}
-	
+
 	private static String getOpenDialogBinding() {
 		IBindingService bindingService= (IBindingService)PlatformUI.getWorkbench().getAdapter(IBindingService.class);
 		if (bindingService == null)
