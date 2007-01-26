@@ -824,7 +824,7 @@
          id="javaeditor"
          point="org.eclipse.ui.editors">
       <editor
-            name="%JavaEditor.label"
+            name="%CompilationUnitEditorName"
             default="true"
             icon="$nl$/icons/full/obj16/jcu_obj.gif"
             contributorClass="org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditorActionContributor"
@@ -836,7 +836,7 @@
             /> 
       </editor>
       <editor
-            name="%classFileViewerName"
+            name="%ClassFileViewerName"
             default="true"
             icon="$nl$/icons/full/obj16/classf_obj.gif"
             contributorClass="org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorActionContributor"
@@ -848,7 +848,7 @@
             /> 
       </editor>
       <editor
-            name="%propertiesFileEditorName"
+            name="%PropertiesFileEditorName"
             icon="$nl$/icons/full/obj16/file_obj.gif"
             contributorClass="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditorActionContributor"
             class="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditor"
@@ -1153,6 +1153,42 @@
             contentTypeId="org.eclipse.jdt.core.javaProperties"
             class="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant">
       </participant>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.workbench.texteditor.hyperlinkDetectorTargets">
+      <target
+            id="org.eclipse.jdt.ui.javaCode"
+            name="%JavaEditorHyperlinkTarget">
+            <context type="org.eclipse.ui.texteditor.ITextEditor"/>
+      </target>
+      <target
+            id="org.eclipse.jdt.ui.PropertiesFileEditor"
+            name="%PropertiesFileEditorHyperlinkTarget">
+            <context type="org.eclipse.ui.texteditor.ITextEditor"/>
+      </target>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.workbench.texteditor.hyperlinkDetectors">
+      <hyperlinkDetector
+            class="org.eclipse.jdt.internal.ui.javaeditor.NLSKeyHyperlinkDetector"
+            id="org.eclipse.jdt.internal.ui.javaeditor.NLSKeyHyperlinkDetector"
+            name="%NLSHyperlinkDetector"
+            targetId="org.eclipse.jdt.ui.javaCode">
+      </hyperlinkDetector>
+      <hyperlinkDetector
+            class="org.eclipse.jdt.internal.ui.javaeditor.JavaElementHyperlinkDetector"
+            id="org.eclipse.jdt.internal.ui.javaeditor.JavaElementHyperlinkDetector"
+            name="%JavaElementHyperlinkDetector"
+            targetId="org.eclipse.jdt.ui.javaCode">
+      </hyperlinkDetector>
+      <hyperlinkDetector
+            class="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertyKeyHyperlinkDetector"
+            id="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertyKeyHyperlinkDetector"
+            name="%PropertyKeyHyperlinkDetector"
+            targetId="org.eclipse.jdt.ui.PropertiesFileEditor">
+      </hyperlinkDetector>
    </extension>
 
    <extension

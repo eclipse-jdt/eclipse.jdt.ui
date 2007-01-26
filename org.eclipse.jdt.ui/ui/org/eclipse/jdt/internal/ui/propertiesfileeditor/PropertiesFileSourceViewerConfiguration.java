@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
+
+import java.util.Map;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
@@ -26,7 +28,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
-import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.reconciler.IReconciler;
@@ -38,7 +39,6 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy;
 import org.eclipse.ui.texteditor.spelling.SpellingService;
@@ -250,24 +250,13 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getHyperlinkDetectors(org.eclipse.jface.text.source.ISourceViewer)
+	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getHyperlinkDetectorTargets(org.eclipse.jface.text.source.ISourceViewer)
+	 * @since 3.3
 	 */
-	public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
-		if (!fPreferenceStore.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_HYPERLINKS_ENABLED))
-			return null;
-
-		IHyperlinkDetector[] inheritedDetectors= super.getHyperlinkDetectors(sourceViewer);
-
-		if (fTextEditor == null)
-			return inheritedDetectors;
-
-		int inheritedDetectorsLength= inheritedDetectors != null ? inheritedDetectors.length : 0;
-		IHyperlinkDetector[] detectors= new IHyperlinkDetector[inheritedDetectorsLength + 2];
-		detectors[0]= new PropertyKeyHyperlinkDetector(fTextEditor);
-		for (int i= 0; i < inheritedDetectorsLength; i++)
-			detectors[i+1]= inheritedDetectors[i];
-
-		return detectors;
+	protected Map getHyperlinkDetectorTargets(ISourceViewer sourceViewer) {
+		Map targets= super.getHyperlinkDetectorTargets(sourceViewer);
+		targets.put("org.eclipse.jdt.ui.PropertiesFileEditor", fTextEditor); //$NON-NLS-1$
+		return targets;
 	}
 
 	/*

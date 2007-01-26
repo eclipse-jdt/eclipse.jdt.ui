@@ -120,7 +120,8 @@ public class NLSKeyHyperlink implements IHyperlink {
 			IDocument document= ((ITextEditor)editor).getDocumentProvider().getDocument(editorInput);
 			if (document != null) {
 				FindReplaceDocumentAdapter finder= new FindReplaceDocumentAdapter(document);
-				PropertyKeyHyperlinkDetector detector= new PropertyKeyHyperlinkDetector((ITextEditor)editor);
+				PropertyKeyHyperlinkDetector detector= new PropertyKeyHyperlinkDetector();
+				detector.setContext(editor);
 				String key= PropertyFileDocumentModel.unwindEscapeChars(fKeyName);
 				int offset= document.getLength() - 1;
 				try {

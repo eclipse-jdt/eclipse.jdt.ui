@@ -11,13 +11,11 @@
 
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.hyperlink.AbstractHyperlinkDetector;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
-import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -42,33 +40,22 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  *
  * @since 3.1
  */
-public class NLSKeyHyperlinkDetector implements IHyperlinkDetector {
+public class NLSKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 
-	private ITextEditor fTextEditor;
-
-
-	/**
-	 * Creates a new NLS hyperlink detector.
-	 *
-	 * @param editor the editor in which to detect the hyperlink
-	 */
-	public NLSKeyHyperlinkDetector(ITextEditor editor) {
-		Assert.isNotNull(editor);
-		fTextEditor= editor;
-	}
 
 	/*
 	 * @see org.eclipse.jface.text.hyperlink.IHyperlinkDetector#detectHyperlinks(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion, boolean)
 	 */
 	public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
-		if (region == null || fTextEditor == null || canShowMultipleHyperlinks)
+		ITextEditor textEditor= (ITextEditor)getAdapter(ITextEditor.class);
+		if (region == null || textEditor == null || canShowMultipleHyperlinks)
 			return null;
 
-		IEditorSite site= fTextEditor.getEditorSite();
+		IEditorSite site= textEditor.getEditorSite();
 		if (site == null)
 			return null;
 
-		IJavaElement javaElement= getInputJavaElement(fTextEditor);
+		IJavaElement javaElement= getInputJavaElement(textEditor);
 		if (javaElement == null)
 			return null;
 
@@ -94,7 +81,7 @@ public class NLSKeyHyperlinkDetector implements IHyperlinkDetector {
 			keyName= ((SimpleName)node).getIdentifier();
 		}
 		if (keyName != null)
-			return new IHyperlink[] {new NLSKeyHyperlink(nlsKeyRegion, keyName, ref, fTextEditor)};
+			return new IHyperlink[] {new NLSKeyHyperlink(nlsKeyRegion, keyName, ref, textEditor)};
 
 		return null;
 	}

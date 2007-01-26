@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,7 +75,9 @@ public class OpenAction extends SelectionDispatchAction {
 			return;
 
 		IRegion region= new Region(selection.getOffset(), selection.getLength());
-		IHyperlink[]hyperlinks= new PropertyKeyHyperlinkDetector(fEditor).detectHyperlinks(fEditor.internalGetSourceViewer(), region, false);
+		PropertyKeyHyperlinkDetector detector= new PropertyKeyHyperlinkDetector();
+		detector.setContext(fEditor);
+		IHyperlink[]hyperlinks= detector.detectHyperlinks(fEditor.internalGetSourceViewer(), region, false);
 
 		if (hyperlinks != null && hyperlinks.length == 1)
 			hyperlinks[0].open();
