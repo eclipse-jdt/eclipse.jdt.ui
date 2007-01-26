@@ -19,36 +19,84 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.dialogs.ResourceListSelectionDialog;
+
+import org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog;
 import org.eclipse.ui.PlatformUI;
 
 public class GotoResourceAction extends Action {
 
 	private PackageExplorerPart fPackageExplorer;
 
-	private static class GotoResourceDialog extends ResourceListSelectionDialog {
+	private static class GotoResourceDialog extends FilteredResourcesSelectionDialog {
 		private IJavaModel fJavaModel;
 		public GotoResourceDialog(Shell parentShell, IContainer container, StructuredViewer viewer) {
-			super(parentShell, container, IResource.FILE | IResource.FOLDER | IResource.PROJECT);
+			super(parentShell, false, container, IResource.FILE | IResource.FOLDER | IResource.PROJECT);
 			fJavaModel= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 			setTitle(PackagesMessages.GotoResource_dialog_title); 
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(parentShell, IJavaHelpContextIds.GOTO_RESOURCE_DIALOG);
 		}
-		protected boolean select(IResource resource) {
-			IProject project= resource.getProject();
-			try {
-				if (project.getNature(JavaCore.NATURE_ID) != null)
-					return fJavaModel.contains(resource);
-			} catch (CoreException e) {
-				// do nothing. Consider resource;
-			}
-			return true;
+		
+		protected ItemsFilter createFilter() {
+			return new GotoResourceFilter();
 		}
+		
+		private class GotoResourceFilter extends ResourceFilter {
+
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog.ResourceFilter#matchItem(java.lang.Object)
+			 */
+			public boolean matchItem(Object item) {
+				IResource resource = (IResource) item;
+				return super.matchItem(item) && select(resource);
+			}
+			
+			/**
+			 * This is the orignal <code>select</code> method. Since
+			 * <code>GotoResourceDialog</code> needs to extend
+			 * <code>FilteredResourcesSelectionDialog</code> result of this
+			 * method must be combined with the <code>matchItem</code> method
+			 * from super class (<code>ResourceFilter</code>).
+			 * 
+			 * @param resource
+			 *            A resource
+			 * @return <code>true</code> if item matches against given
+			 *         conditions <code>false</code> otherwise
+			 */
+			private boolean select(IResource resource) {
+				IProject project= resource.getProject();
+				try {
+					if (project.getNature(JavaCore.NATURE_ID) != null)
+						return fJavaModel.contains(resource);
+				} catch (CoreException e) {
+					// do nothing. Consider resource;
+				}
+				return true;
+			}
+
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog.ResourceFilter#equalsFilter(org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter)
+			 */
+			public boolean equalsFilter(ItemsFilter filter) {
+				if (!super.equalsFilter(filter)) {
+					return false;
+				}
+				if (!(filter instanceof GotoResourceFilter)) {
+					return false;
+				}
+				return true;
+			}
+		}
+		
 	}
 
 	public GotoResourceAction(PackageExplorerPart explorer) {
