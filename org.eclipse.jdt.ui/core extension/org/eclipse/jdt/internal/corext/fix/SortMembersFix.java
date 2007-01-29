@@ -39,21 +39,26 @@ public class SortMembersFix implements IFix {
 
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		cu.becomeWorkingCopy(null, null);
-
-        IProgressMonitor monitor = null;
-        
-        String label= FixMessages.SortMembersFix_Change_description;
-        CategorizedTextEditGroup group= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
-        
-        TextEdit edit = CompilationUnitSorter.sort(compilationUnit, new DefaultJavaElementComparator(!sortFields), 0, group, monitor);
-        if (edit == null)
-        	return null;
-
-        TextChange change= new CompilationUnitChange(label, cu);
-        change.setEdit(edit);
-		change.addTextEditGroup(group);
-
-		return new SortMembersFix(change, cu);
+		
+		try {
+	        IProgressMonitor monitor = null;
+	        
+	        String label= FixMessages.SortMembersFix_Change_description;
+	        CategorizedTextEditGroup group= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
+	        
+	        TextEdit edit = CompilationUnitSorter.sort(compilationUnit, new DefaultJavaElementComparator(!sortFields), 0, group, monitor);
+	        if (edit == null)
+	        	return null;
+	        
+	        TextChange change= new CompilationUnitChange(label, cu);
+	        change.setEdit(edit);
+			change.addTextEditGroup(group);
+	
+			return new SortMembersFix(change, cu);
+			
+		} finally {
+			cu.discardWorkingCopy();
+		}
     }
 		
 	private final ICompilationUnit fCompilationUnit;
