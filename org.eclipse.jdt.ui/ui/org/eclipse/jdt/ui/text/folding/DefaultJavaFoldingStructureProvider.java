@@ -32,6 +32,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.projection.IProjectionListener;
 import org.eclipse.jface.text.source.projection.IProjectionPosition;
@@ -46,6 +47,8 @@ import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IImportContainer;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IMember;
@@ -67,10 +70,10 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.DocumentCharacterIterator;
-
 
 /**
  * Updates the projection model of a class file or compilation unit.
@@ -92,6 +95,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	protected final class FoldingStructureComputationContext {
 		private final ProjectionAnnotationModel fModel;
 		private final IDocument fDocument;
+
 		private final boolean fAllowCollapsing;
 
 		private IType fFirstType;
@@ -346,11 +350,12 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
 		 */
 		public void elementChanged(ElementChangedEvent e) {
-			if (hasErrorOnCaretLine(e.getDelta().getCompilationUnitAST()))
-				return;
-			
 			IJavaElementDelta delta= findElement(fInput, e.getDelta());
 			if (delta != null && (delta.getFlags() & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_CHILDREN)) != 0) {
+			
+				if (shouldIgnoreDelta(e.getDelta().getCompilationUnitAST(), delta))
+					return;
+
 				fUpdatingCount++;
 				try {
 					update(createContext(false));
@@ -360,7 +365,18 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			}
 		}
 
-		private boolean hasErrorOnCaretLine(CompilationUnit ast) {
+		/**
+		 * Ignore the delta if there are errors on the caret line.
+		 * <p>
+		 * We don't ignore the delta if an import is added and the
+		 * caret isn't inside the import container.
+		 * </p> 
+		 *  
+		 * @param ast the compilation unit AST
+		 * @param delta the Java element delta for the given AST element
+		 * @return <code>true</code> if the delta should be ignored
+		 */
+		private boolean shouldIgnoreDelta(CompilationUnit ast, IJavaElementDelta delta) {
 			if (ast == null)
 				return false; // can't compute
 				
@@ -371,7 +387,18 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			JavaEditor editor= fEditor;
 			if (editor == null || editor.getCachedSelectedRange() == null)
 				return false; // can't compute
-				
+			
+			try {
+				if (delta.getAffectedChildren().length == 1 && delta.getAffectedChildren()[0].getElement() instanceof IImportContainer) {
+					IJavaElement elem= SelectionConverter.getElementAtOffset(ast.getJavaElement(), new TextSelection(editor.getCachedSelectedRange().x, editor.getCachedSelectedRange().y));
+					if (!(elem instanceof IImportDeclaration))
+						return false;
+					
+				}
+			} catch (JavaModelException e) {
+				return false; // can't compute
+			}
+			
 			int caretLine= 0;
 			try {
 				caretLine= document.getLineOfOffset(editor.getCachedSelectedRange().x) + 1; 
