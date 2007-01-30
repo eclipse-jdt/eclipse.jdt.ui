@@ -23,21 +23,21 @@
          <attribute name="point" type="string" use="required">
             <annotation>
                <documentation>
-                  The fully qualified identifier of the target extension point.
+                  a fully qualified identifier of the target extension point
                </documentation>
             </annotation>
          </attribute>
          <attribute name="id" type="string">
             <annotation>
                <documentation>
-                  The identifier of the extension instance, unique within the declaring plug-in (the plug-in&apos;s identifier will be prepended to form a platform-wide unique id).
+                  an optional identifier of the extension instance
                </documentation>
             </annotation>
          </attribute>
          <attribute name="name" type="string">
             <annotation>
                <documentation>
-                  The optional name of the extension instance.
+                  an optional name of the extension instance
                </documentation>
                <appInfo>
                   <meta.attribute translatable="true"/>
