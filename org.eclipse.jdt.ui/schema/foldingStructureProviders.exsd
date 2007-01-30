@@ -55,14 +55,14 @@ Extensions may optionally contribute a preference block which will appear on the
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  The unique identifier of this provider.
+                  the unique identifier of this provider
                </documentation>
             </annotation>
          </attribute>
          <attribute name="name" type="string">
             <annotation>
                <documentation>
-                  The name of this provider. If none is given, the id is used instead.
+                  the name of this provider. If none is given, the id is used instead.
                </documentation>
                <appInfo>
                   <meta.attribute translatable="true"/>
@@ -72,7 +72,7 @@ Extensions may optionally contribute a preference block which will appear on the
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  An implementation of org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider
+                  an implementation of &lt;code&gt;org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider&lt;/code&gt;
                </documentation>
                <appInfo>
                   <meta.attribute kind="java" basedOn="org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider"/>
@@ -82,7 +82,7 @@ Extensions may optionally contribute a preference block which will appear on the
          <attribute name="preferencesClass" type="string">
             <annotation>
                <documentation>
-                  An implementation of org.eclipse.jdt.ui.text.folding.IJavaFoldingPreferenceBlock
+                  an implementation of &lt;code&gt;org.eclipse.jdt.ui.text.folding.IJavaFoldingPreferenceBlock&lt;/code&gt;
                </documentation>
                <appInfo>
                   <meta.attribute kind="java" basedOn="org.eclipse.jdt.ui.text.folding.IJavaFoldingPreferenceBlock"/>

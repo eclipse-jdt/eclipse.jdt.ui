@@ -52,7 +52,7 @@
          <attribute name="id" type="string">
             <annotation>
                <documentation>
-                  a unique id that will be used to identify this filter.
+                  a unique id that will be used to identify this filter
                </documentation>
             </annotation>
          </attribute>
@@ -69,7 +69,7 @@
          <attribute name="description" type="string">
             <annotation>
                <documentation>
-                  a short description for this filter.  This attribute should be a translated string.
+                  a short description for this filter
                </documentation>
                <appInfo>
                   <meta.attribute translatable="true"/>
@@ -80,7 +80,7 @@
             <annotation>
                <documentation>
                   the id of the target where this filter is contributed.  If this attribute is missing, then the filter will
-be contributed to all views which use the &lt;samp&gt;org.eclipse.jdt.ui.actions.customFiltersActionGroup&lt;/samp&gt;. This
+be contributed to all views which use the &lt;code&gt;org.eclipse.jdt.ui.actions.customFiltersActionGroup&lt;/code&gt;. This
 replaces the deprecated attributed &quot;viewId&quot;.
                </documentation>
             </annotation>
@@ -102,7 +102,7 @@ replaces the deprecated attributed &quot;viewId&quot;.
          <attribute name="class" type="string">
             <annotation>
                <documentation>
-                  the name of the class used to filter the view.  The class must extend &lt;samp&gt;org.eclipse.jface.viewers.ViewerFilter&lt;/samp&gt;. If this attribute is here
+                  the name of the class used to filter the view.  The class must extend &lt;code&gt;org.eclipse.jface.viewers.ViewerFilter&lt;/code&gt;. If this attribute is here
 then the pattern attribute must not provided.
                </documentation>
                <appInfo>

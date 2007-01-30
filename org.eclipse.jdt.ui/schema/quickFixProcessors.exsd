@@ -66,14 +66,14 @@ This extension point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Prope
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  Unique identifier for the Quick Fix processor
+                  a unique identifier for the Quick Fix processor
                </documentation>
             </annotation>
          </attribute>
          <attribute name="name" type="string">
             <annotation>
                <documentation>
-                  Localized name of the Quick Fix processor.
+                  a localized name of the Quick Fix processor
                </documentation>
                <appInfo>
                   <meta.attribute translatable="true"/>
@@ -96,7 +96,7 @@ with a public 0-argument constructor.
          <attribute name="requiredSourceLevel" type="string">
             <annotation>
                <documentation>
-                  Optional attribute to specify the minimal source compliance this processor requires.
+                  an optional attribute to specify the minimal source compliance this processor requires
                </documentation>
             </annotation>
          </attribute>
@@ -122,7 +122,7 @@ If no handled marker type are specified, the processor will get problems of type
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  The marker type id of the marker that can be handled by this processor
+                  the marker type id of the marker that can be handled by this processor
                </documentation>
             </annotation>
          </attribute>

@@ -59,14 +59,14 @@ This extension point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Prope
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  Unique identifier for the Quick Assist processor
+                  a unique identifier for the Quick Assist processor
                </documentation>
             </annotation>
          </attribute>
          <attribute name="name" type="string">
             <annotation>
                <documentation>
-                  Localized name of the Quick Assist processor.
+                  a localized name of the Quick Assist processor
                </documentation>
                <appInfo>
                   <meta.attribute translatable="true"/>
@@ -89,7 +89,7 @@ with a public 0-argument constructor.
          <attribute name="requiredSourceLevel" type="string">
             <annotation>
                <documentation>
-                  Optional attribute to specify the minimal source compliance this processor requires.
+                  an optional attribute to specify the minimal source compliance this processor requires
                </documentation>
             </annotation>
          </attribute>

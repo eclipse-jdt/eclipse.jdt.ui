@@ -55,14 +55,14 @@ Deprecated as of 3.2. Extenders should rather contribute to the &lt;tt&gt;org.ec
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  Unique identifier for the Javadoc completion processor.
+                  a unique identifier for the Javadoc completion processor
                </documentation>
             </annotation>
          </attribute>
          <attribute name="name" type="string">
             <annotation>
                <documentation>
-                  Localized name of the Javadoc completion processor.
+                  a localized name of the Javadoc completion processor
                </documentation>
                <appInfo>
                   <meta.attribute translatable="true"/>
@@ -72,9 +72,9 @@ Deprecated as of 3.2. Extenders should rather contribute to the &lt;tt&gt;org.ec
          <attribute name="class" type="string">
             <annotation>
                <documentation>
-                  The name of the class that implements this Javadoc completion processor. The
+                  the name of the class that implements this Javadoc completion processor. The
 class must be public and implement
-&lt;samp&gt;org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor&lt;/samp&gt;
+&lt;code&gt;org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor&lt;/code&gt;
 with a public 0-argument constructor.
                </documentation>
                <appInfo>

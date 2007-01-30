@@ -55,7 +55,7 @@ edit a classpath container entry.
          <attribute name="name" type="string">
             <annotation>
                <documentation>
-                  Name of the classpath container used when selecting a new container.  This attribute should be a translated string.
+                  the name of the classpath container used when selecting a new container.  This attribute should be a translated string.
                </documentation>
                <appInfo>
                   <meta.attribute translatable="true"/>

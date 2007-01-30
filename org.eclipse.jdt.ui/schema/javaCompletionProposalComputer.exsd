@@ -61,9 +61,9 @@
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  The name of the class that implements the contributed computer. The
+                  the name of the class that implements the contributed computer. The
 class must be public and implement
-&lt;samp&gt;org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer&lt;/samp&gt;
+&lt;code&gt;org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer&lt;/code&gt;
 and must have a public 0-argument constructor.
                </documentation>
                <appInfo>
@@ -74,14 +74,14 @@ and must have a public 0-argument constructor.
          <attribute name="activate" type="boolean" use="default" value="false">
             <annotation>
                <documentation>
-                  If the attribute is set to &quot;true&quot; it will force this plug-in to be loaded on content assist invocation.
+                  if the attribute is set to &quot;true&quot; it will force this plug-in to be loaded on content assist invocation
                </documentation>
             </annotation>
          </attribute>
          <attribute name="categoryId" type="string" use="default" value="org.eclipse.jdt.ui.defaultProposalCategory">
             <annotation>
                <documentation>
-                  The id of a &lt;tt&gt;proposalCategory&lt;/tt&gt;
+                  the id of a &lt;tt&gt;proposalCategory&lt;/tt&gt;
                </documentation>
             </annotation>
          </attribute>
@@ -98,7 +98,7 @@ and must have a public 0-argument constructor.
          <attribute name="type" use="required">
             <annotation>
                <documentation>
-                  A Java partition type for which the specified computer can provide completion proposals. See &lt;code&gt;IDocument.DEFAULT_CONTENT_TYPE&lt;/code&gt; and &lt;code&gt;IJavaPartitions&lt;/code&gt; for valid values.
+                  a Java partition type for which the specified computer can provide completion proposals. See &lt;code&gt;IDocument.DEFAULT_CONTENT_TYPE&lt;/code&gt; and &lt;code&gt;IJavaPartitions&lt;/code&gt; for valid values.
                </documentation>
             </annotation>
             <simpleType>
@@ -131,7 +131,7 @@ and must have a public 0-argument constructor.
          <attribute name="icon" type="string">
             <annotation>
                <documentation>
-                  The optional icon of the category, which can be displayed in the user preferences.
+                  an optional icon of the category, which can be displayed in the user preferences
                </documentation>
                <appInfo>
                   <meta.attribute kind="resource"/>

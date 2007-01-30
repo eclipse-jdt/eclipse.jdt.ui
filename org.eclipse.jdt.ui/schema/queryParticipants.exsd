@@ -47,7 +47,7 @@
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  The class that implements this query participant. The class must be public and implement &lt;samp&gt;org.eclipse.jdt.ui.search.IQueryParticipant&lt;/samp&gt; with a zero-argument constructor.
+                  the class that implements this query participant. The class must be public and implement &lt;code&gt;org.eclipse.jdt.ui.search.IQueryParticipant&lt;/code&gt; with a zero-argument constructor.
                </documentation>
                <appInfo>
                   <meta.attribute kind="java" basedOn="org.eclipse.jdt.ui.search.IQueryParticipant"/>
@@ -57,21 +57,21 @@
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  The unique id of this query participant.
+                  the unique id of this query participant
                </documentation>
             </annotation>
          </attribute>
          <attribute name="nature" type="string" use="required">
             <annotation>
                <documentation>
-                  The project nature id this participant should be active for. If the participant should be active for multiple project natures, multiple participants must be defined.
+                  the project nature id this participant should be active for. If the participant should be active for multiple project natures, multiple participants must be defined.
                </documentation>
             </annotation>
          </attribute>
          <attribute name="name" type="string" use="required">
             <annotation>
                <documentation>
-                  A user readeable name for the participant.
+                  a user readeable name for the participant
                </documentation>
                <appInfo>
                   <meta.attribute translatable="true"/>

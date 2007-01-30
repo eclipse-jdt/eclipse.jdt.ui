@@ -47,14 +47,14 @@
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  the id, typically the same as the fully qualified class name.
+                  the id, typically the same as the fully qualified class name
                </documentation>
             </annotation>
          </attribute>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  the fully qualified class name implementing the interface &lt;b&gt;org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover&lt;/b&gt;.
+                  the fully qualified class name implementing the interface &lt;code&gt;org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover&lt;/code&gt;
                </documentation>
                <appInfo>
                   <meta.attribute kind="java" basedOn="org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover"/>
@@ -64,7 +64,7 @@
          <attribute name="label" type="string">
             <annotation>
                <documentation>
-                  the translatable label for this hover.
+                  the translatable label for this hover
                </documentation>
                <appInfo>
                   <meta.attribute translatable="true"/>
@@ -74,7 +74,7 @@
          <attribute name="description" type="string">
             <annotation>
                <documentation>
-                  the translatable description for this hover.
+                  the translatable description for this hover
                </documentation>
                <appInfo>
                   <meta.attribute translatable="true"/>
@@ -84,7 +84,7 @@
          <attribute name="activate" type="boolean" use="default" value="false">
             <annotation>
                <documentation>
-                  if the attribute is set to &quot;true&quot; it will force this plug-in to be loaded on hover activation.
+                  if the attribute is set to &quot;true&quot; it will force this plug-in to be loaded on hover activation
                </documentation>
             </annotation>
          </attribute>

@@ -60,14 +60,14 @@
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  The unique identifier of the sorter.
+                  the unique identifier of the sorter
                </documentation>
             </annotation>
          </attribute>
          <attribute name="name" type="string">
             <annotation>
                <documentation>
-                  The label of the sorter as shown in the preferences. It should be a continuation of the phrase &quot;Sort proposals...&quot;, for example &quot;by relevance&quot;.
+                  the label of the sorter as shown in the preferences. It should be a continuation of the phrase &quot;Sort proposals...&quot;, for example &quot;by relevance&quot;.
                </documentation>
                <appInfo>
                   <meta.attribute translatable="true"/>
@@ -77,9 +77,9 @@
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  The name of the class that implements the contributed sorter. The
+                  the name of the class that implements the contributed sorter. The
 class must be a public subclass of
-&lt;samp&gt;org.eclipse.jdt.ui.text.java.AbstractProposalSorter&lt;/samp&gt;
+&lt;code&gt;org.eclipse.jdt.ui.text.java.AbstractProposalSorter&lt;/code&gt;
 and must have a public 0-argument constructor.
                </documentation>
                <appInfo>
