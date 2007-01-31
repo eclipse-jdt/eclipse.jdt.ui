@@ -924,7 +924,13 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 			fIsWorkspaceScope= scope == null ? false : scope.equals(SearchEngine.createWorkspaceScope());
 			fElemKind= elementKind;
 			fFilterExt= extension;
-
+			String stringPackage= ((TypeSearchPattern) patternMatcher).getPackagePattern();
+			if (stringPackage != null) {
+				fPackageMatcher= new SearchPattern();
+				fPackageMatcher.setPattern(stringPackage);
+			} else {
+				fPackageMatcher= null;
+			}
 		}
 
 		/*
@@ -1070,6 +1076,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	 */
 	private static class TypeSearchPattern extends SearchPattern {
 
+		private String packagePattern;
+
 		/*
 		 * (non-Javadoc)
 		 * 
@@ -1077,14 +1085,16 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 		 */
 		public void setPattern(String stringPattern) {
 			String pattern= stringPattern;
+			String packPattern= null;
 			int index= stringPattern.lastIndexOf("."); //$NON-NLS-1$
 			if (index != -1) {
-				pattern= evaluatePackagePattern(stringPattern.substring(0, index));
+				packPattern= evaluatePackagePattern(stringPattern.substring(0, index));
 				pattern= stringPattern.substring(index + 1);
 				if (pattern.length() == 0)
-					pattern= "*"; //$NON-NLS-1$
+					pattern= "**"; //$NON-NLS-1$
 			}
 			super.setPattern(pattern);
+			packagePattern= packPattern;
 		}
 
 		/*
@@ -1136,6 +1146,13 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 		 */
 		protected boolean isValidCamelCaseChar(char ch) {
 			return super.isValidCamelCaseChar(ch);
+		}
+
+		/**
+		 * @return the packagePattern
+		 */
+		public String getPackagePattern() {
+			return packagePattern;
 		}
 
 	}
