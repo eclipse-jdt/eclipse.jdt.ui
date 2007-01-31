@@ -134,8 +134,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 
 	private TypeInfoUtil fTypeInfoUtil;
 
-	private boolean fNewSearch;
-
 	/**
 	 * Creates new FilteredTypesSelectionDialog instance
 	 * 
@@ -460,11 +458,15 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 		SearchEngine engine= new SearchEngine((WorkingCopyOwner) null);
 		String packPattern= typeSearchFilter.getPackagePattern();
 		progressMonitor.setTaskName(JavaUIMessages.FilteredTypesSelectionDialog_searchJob_taskName);
-		fNewSearch= true;
+		/*
+		 * Setting the filter into match everything mode avoids filtering twice by the same pattern
+		 * (the search engine only provides filtered matches).
+		 */ 
+		typeSearchFilter.setMatchEverythingMode(true);
 		try {
 			engine.searchAllTypeNames(packPattern == null ? null : packPattern.toCharArray(), typeSearchFilter.getPackageFlags(), typeSearchFilter.getPattern().toCharArray(), typeSearchFilter.getMatchRule(), typeSearchFilter.getElementKind(), typeSearchFilter.getSearchScope(), requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, progressMonitor);
 		} finally {
-			fNewSearch= false;
+			typeSearchFilter.setMatchEverythingMode(false);
 		}
 	}
 
@@ -910,6 +912,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 		private TypeInfoRequestorAdapter fAdapter= new TypeInfoRequestorAdapter();
 
 		private SearchPattern fPackageMatcher;
+		
+		private boolean fMatchEverything= false;
 
 		/**
 		 * Creates instance of TypeItemsFilter
@@ -1043,6 +1047,16 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 			}
 			return false;
 		}
+		
+		/**
+		 * Set filter to "match everything" mode.
+		 * 
+		 * @param matchEverything if <code>true</code>, {@link #matchItem(Object)} always returns true.
+		 * 					If <code>false</code>, the filter is enabled.
+		 */
+		public void setMatchEverythingMode(boolean matchEverything) {
+			this.fMatchEverything= matchEverything;
+		}
 
 		/*
 		 * (non-Javadoc)
@@ -1060,7 +1074,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 		 */
 		public boolean matchItem(Object item) {
 
-			if (fNewSearch)
+			if (fMatchEverything) 
 				return true;
 
 			TypeNameMatch type= (TypeNameMatch) item;
