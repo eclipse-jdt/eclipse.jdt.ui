@@ -416,7 +416,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		description.setText(PreferencesMessages.SpellingPreferencePage_user_dictionary_description);
 		allControls.add(description);
 		
-		createEncodingFieldEditor(engine);
+		createEncodingFieldEditor(engine, allControls);
 
 		Group advanced= new Group(composite, SWT.NONE);
 		advanced.setText(PreferencesMessages.SpellingPreferencePage_group_advanced); 
@@ -451,7 +451,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 * @param composite the parent composite
 	 * @since 3.3
 	 */
-	private void createEncodingFieldEditor(Composite composite) {
+	private void createEncodingFieldEditor(Composite composite, List allControls) {
 		Label filler= new Label(composite, SWT.NONE);
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 4;
@@ -460,6 +460,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		Label label= new Label(composite, SWT.NONE);
 		label.setText(PreferencesMessages.SpellingPreferencePage_encoding_label);
 		label.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
+		allControls.add(label);
 		
 		fEncodingEditorParent= new Composite(composite, SWT.NONE);
 		GridLayout layout= new GridLayout(2, false);
