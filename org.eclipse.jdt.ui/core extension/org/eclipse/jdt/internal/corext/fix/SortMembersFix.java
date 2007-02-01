@@ -14,7 +14,6 @@ package org.eclipse.jdt.internal.corext.fix;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
@@ -32,68 +31,60 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 public class SortMembersFix implements IFix {
-
+	
 	public static IFix createCleanUp(CompilationUnit compilationUnit, boolean sortMembers, boolean sortFields) throws CoreException {
 		if (!sortMembers && !sortFields)
 			return null;
-
+		
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
-		cu.becomeWorkingCopy(null, null);
 		
-		try {
-	        IProgressMonitor monitor = null;
-	        
-	        String label= FixMessages.SortMembersFix_Change_description;
-	        CategorizedTextEditGroup group= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
-	        
-	        TextEdit edit = CompilationUnitSorter.sort(compilationUnit, new DefaultJavaElementComparator(!sortFields), 0, group, monitor);
-	        if (edit == null)
-	        	return null;
-	        
-	        TextChange change= new CompilationUnitChange(label, cu);
-	        change.setEdit(edit);
-			change.addTextEditGroup(group);
+		String label= FixMessages.SortMembersFix_Change_description;
+		CategorizedTextEditGroup group= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
+		
+		TextEdit edit= CompilationUnitSorter.sort(compilationUnit, new DefaultJavaElementComparator(!sortFields), 0, group, null);
+		if (edit == null)
+			return null;
+		
+		TextChange change= new CompilationUnitChange(label, cu);
+		change.setEdit(edit);
+		change.addTextEditGroup(group);
+		
+		return new SortMembersFix(change, cu);
+	}
 	
-			return new SortMembersFix(change, cu);
-			
-		} finally {
-			cu.discardWorkingCopy();
-		}
-    }
-		
 	private final ICompilationUnit fCompilationUnit;
 	private final TextChange fChange;
-
+	
 	public SortMembersFix(TextChange change, ICompilationUnit compilationUnit) {
 		fChange= change;
 		fCompilationUnit= compilationUnit;
-    }
-
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public TextChange createChange() throws CoreException {
 		return fChange;
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getDescription() {
 		return FixMessages.SortMembersFix_Fix_description;
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public IStatus getStatus() {
-	    return StatusInfo.OK_STATUS;
+		return StatusInfo.OK_STATUS;
 	}
 }
