@@ -127,6 +127,8 @@ public class VariableBlock {
 		fWarning.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, fVariablesList.getNumberOfControls() - 1, 1));
 		
 		fControl= composite;
+		updateDeprecationWarning();
+		
 		return composite;
 	}
 	
