@@ -405,6 +405,12 @@ public class SourceAttachmentBlock {
 					return status;
 				}
 				
+				String deprecationMessage= BuildPathSupport.getDeprecationMessage(varName);
+				if (deprecationMessage != null) {
+					status.setWarning(deprecationMessage); 
+					return status;
+				}
+				
 			} else {
 				// JDT/Core only supports source attachments in archives on the
 				// local file system. So using getLocation is save here. 
