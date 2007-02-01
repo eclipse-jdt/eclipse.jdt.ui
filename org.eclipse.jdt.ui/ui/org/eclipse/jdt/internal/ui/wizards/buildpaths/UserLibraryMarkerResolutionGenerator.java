@@ -49,7 +49,9 @@ import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage;
 import org.eclipse.jdt.internal.ui.preferences.UserLibraryPreferencePage;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
@@ -61,8 +63,11 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 	 * @see org.eclipse.ui.IMarkerResolutionGenerator2#hasResolutions(org.eclipse.core.resources.IMarker)
 	 */
 	public boolean hasResolutions(IMarker marker) {
-		int id = marker.getAttribute(IJavaModelMarker.ID, -1);
-		if (id == IJavaModelStatusConstants.CP_CONTAINER_PATH_UNBOUND) {
+		int id= marker.getAttribute(IJavaModelMarker.ID, -1);
+		if (id == IJavaModelStatusConstants.CP_CONTAINER_PATH_UNBOUND
+				|| id == IJavaModelStatusConstants.CP_VARIABLE_PATH_UNBOUND
+				|| id == IJavaModelStatusConstants.INVALID_CP_CONTAINER_ENTRY
+				|| id == IJavaModelStatusConstants.INVALID_CLASSPATH) {
 			return true;
 		}
 		return false;
@@ -77,38 +82,46 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 			return NO_RESOLUTION;
 		}
 		
-		
 		ArrayList resolutions= new ArrayList();
 		
-		String[] arguments= CorrectionEngine.getProblemArguments(marker);
-		final IPath path= new Path(arguments[0]);
 		final IJavaProject project= getJavaProject(marker);
 		
-		if (path.segment(0).equals(JavaCore.USER_LIBRARY_CONTAINER_ID)) {
-			String label= NewWizardMessages.UserLibraryMarkerResolutionGenerator_changetouserlib_label; 
+		int id= marker.getAttribute(IJavaModelMarker.ID, -1);
+		if (id == IJavaModelStatusConstants.CP_CONTAINER_PATH_UNBOUND) {
+			String[] arguments= CorrectionEngine.getProblemArguments(marker);
+			final IPath path= new Path(arguments[0]);
+			
+			if (path.segment(0).equals(JavaCore.USER_LIBRARY_CONTAINER_ID)) {
+				String label= NewWizardMessages.UserLibraryMarkerResolutionGenerator_changetouserlib_label; 
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME);
+				resolutions.add(new UserLibraryMarkerResolution(label, image) {
+					public void run(IMarker m) {
+						changeToExistingLibrary(shell, path, false, project);
+					}
+				});
+				if (path.segmentCount() == 2) {
+					String label2= Messages.format(NewWizardMessages.UserLibraryMarkerResolutionGenerator_createuserlib_label, path.segment(1)); 
+					Image image2= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
+					resolutions.add(new UserLibraryMarkerResolution(label2, image2) {
+						public void run(IMarker m) {
+							createUserLibrary(shell, path, project);
+						}
+					});
+				}
+			}
+			String label= NewWizardMessages.UserLibraryMarkerResolutionGenerator_changetoother; 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME);
 			resolutions.add(new UserLibraryMarkerResolution(label, image) {
 				public void run(IMarker m) {
-					changeToExistingLibrary(shell, path, false, project);
+					changeToExistingLibrary(shell, path, true, project);
 				}
 			});
-			if (path.segmentCount() == 2) {
-				String label2= Messages.format(NewWizardMessages.UserLibraryMarkerResolutionGenerator_createuserlib_label, path.segment(1)); 
-				Image image2= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
-				resolutions.add(new UserLibraryMarkerResolution(label2, image2) {
-					public void run(IMarker m) {
-						createUserLibrary(shell, path, project);
-					}
-				});
-			}
 		}
-		String label= NewWizardMessages.UserLibraryMarkerResolutionGenerator_changetoother; 
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME);
-		resolutions.add(new UserLibraryMarkerResolution(label, image) {
-			public void run(IMarker m) {
-				changeToExistingLibrary(shell, path, true, project);
-			}
-		});
+		
+		if (project != null) {
+			resolutions.add(new OpenBuildPathMarkerResolution(project));
+		}
+		
 		return (IMarkerResolution[]) resolutions.toArray(new IMarkerResolution[resolutions.size()]);
 	}
 
@@ -221,7 +234,28 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 		}
 	}
 
+	private static class OpenBuildPathMarkerResolution implements IMarkerResolution2 {
+		private IJavaProject fProject;
 
-	
+		public OpenBuildPathMarkerResolution(IJavaProject project) {
+			fProject= project;
+		}
+
+		public String getDescription() {
+			return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_configure_buildpath_description, fProject.getElementName());
+		}
+
+		public Image getImage() {
+			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ACCESSRULES_ATTRIB);
+		}
+
+		public String getLabel() {
+			return CorrectionMessages.ReorgCorrectionsSubProcessor_configure_buildpath_label;
+		}
+
+		public void run(IMarker marker) {
+			PreferencesUtil.createPropertyDialogOn(JavaPlugin.getActiveWorkbenchShell(), fProject, BuildPathsPropertyPage.PROP_ID, null, null).open();
+		}
+	}
 
 }
