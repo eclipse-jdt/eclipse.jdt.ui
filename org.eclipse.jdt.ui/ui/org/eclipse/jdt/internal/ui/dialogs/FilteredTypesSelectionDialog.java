@@ -1082,6 +1082,16 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 				return false;
 			return matchesName(type);
 		}
+		
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter#matchesRawNamePattern(java.lang.Object)
+		 */
+		public boolean matchesRawNamePattern(Object item) {
+			TypeNameMatch type= (TypeNameMatch) item;
+			return matchesRawNamePattern(type); 
+		}
 
 	}
 
