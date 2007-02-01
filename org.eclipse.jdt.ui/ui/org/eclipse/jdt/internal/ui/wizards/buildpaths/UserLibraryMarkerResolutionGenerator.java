@@ -67,6 +67,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 		if (id == IJavaModelStatusConstants.CP_CONTAINER_PATH_UNBOUND
 				|| id == IJavaModelStatusConstants.CP_VARIABLE_PATH_UNBOUND
 				|| id == IJavaModelStatusConstants.INVALID_CP_CONTAINER_ENTRY
+				|| id == IJavaModelStatusConstants.DEPRECATED_VARIABLE
 				|| id == IJavaModelStatusConstants.INVALID_CLASSPATH) {
 			return true;
 		}
