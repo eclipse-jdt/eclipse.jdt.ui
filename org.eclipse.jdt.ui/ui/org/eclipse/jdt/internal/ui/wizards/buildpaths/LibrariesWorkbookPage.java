@@ -791,9 +791,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			if (paths != null) {
 				ArrayList result= new ArrayList();
 				for (int i = 0; i < paths.length; i++) {
-					CPListElement elem= new CPListElement(fCurrJProject, IClasspathEntry.CPE_VARIABLE, paths[i], null);
-					IPath resolvedPath= JavaCore.getResolvedVariablePath(paths[i]);
-					elem.setIsMissing((resolvedPath == null) || !resolvedPath.toFile().exists());
+					IPath path= paths[i];
+					CPListElement elem= createCPVariableElement(path);
 					if (!existingElements.contains(elem)) {
 						result.add(elem);
 					}
@@ -803,11 +802,17 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		} else {
 			IPath path= BuildPathDialogAccess.configureVariableEntry(getShell(), existing.getPath(), existingPathsArray);
 			if (path != null) {
-				CPListElement elem= new CPListElement(fCurrJProject, IClasspathEntry.CPE_VARIABLE, path, null);
-				return new CPListElement[] { elem };
+				return new CPListElement[] { createCPVariableElement(path) };
 			}
 		}
 		return null;
+	}
+
+	private CPListElement createCPVariableElement(IPath path) {
+		CPListElement elem= new CPListElement(fCurrJProject, IClasspathEntry.CPE_VARIABLE, path, null);
+		IPath resolvedPath= JavaCore.getResolvedVariablePath(path);
+		elem.setIsMissing((resolvedPath == null) || !resolvedPath.toFile().exists());
+		return elem;
 	}
 
 	private CPListElement[] openContainerSelectionDialog(CPListElement existing) {

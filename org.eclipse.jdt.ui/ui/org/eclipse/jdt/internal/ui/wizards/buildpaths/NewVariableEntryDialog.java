@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +22,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -28,9 +30,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.StatusDialog;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
@@ -97,6 +101,8 @@ public class NewVariableEntryDialog extends StatusDialog {
 	private IPath[] fResultPaths;
 
 	private SelectionButtonDialogField fConfigButton;
+
+	private CLabel fWarning;
 	
 	public NewVariableEntryDialog(Shell parent) {
 		super(parent);
@@ -150,7 +156,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 			String name= entries[i];
 			IPath entryPath= JavaCore.getClasspathVariable(name);
 			if (entryPath != null) {
-				elements.add(new CPVariableElement(name, entryPath, false));
+				elements.add(new CPVariableElement(name, entryPath));
 			}
 		}
 		
@@ -191,6 +197,9 @@ public class NewVariableEntryDialog extends StatusDialog {
 		listData.grabExcessHorizontalSpace= true;
 		listData.heightHint= convertHeightInCharsToPixels(10);
 		listData.widthHint= convertWidthInCharsToPixels(70);
+		
+		fWarning= new CLabel(composite, SWT.NONE);
+		fWarning.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, fVariablesList.getNumberOfControls() - 1, 1));
 		
 		Composite lowerComposite= new Composite(composite, SWT.NONE);
 		lowerComposite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
@@ -264,6 +273,24 @@ public class NewVariableEntryDialog extends StatusDialog {
 		if (okButton != null  && !okButton.isDisposed()) {
 			okButton.setEnabled(isValidSelection);
 		}
+		updateDeprecationWarning();
+	}
+
+	private void updateDeprecationWarning() {
+		if (fWarning == null || fWarning.isDisposed())
+			return;
+		
+		for (Iterator iter= fVariablesList.getSelectedElements().iterator(); iter.hasNext();) {
+			CPVariableElement element= (CPVariableElement) iter.next();
+			String deprecationMessage= element.getDeprecationMessage();
+			if (deprecationMessage != null) {
+				fWarning.setText(deprecationMessage);
+				fWarning.setImage(JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
+				return;
+			}
+		}
+		fWarning.setText(null);
+		fWarning.setImage(null);
 	}
 	
 	private IPath[] chooseExtensions(CPVariableElement elem) {

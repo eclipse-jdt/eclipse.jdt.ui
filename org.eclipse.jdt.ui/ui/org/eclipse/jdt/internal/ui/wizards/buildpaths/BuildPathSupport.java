@@ -33,6 +33,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -50,6 +52,23 @@ public class BuildPathSupport {
 		super();
 	}
 	
+	/**
+	 * Returns a deprecation message for a classpath variable name.
+	 * 
+	 * @param variableName classpath variable name
+	 * @return the deprecation message, or <code>null</code> iff
+	 *         <code>variableName</code> is not a classpath variable or the
+	 *         variable is not deprecated
+	 */
+	public static String getDeprecationMessage(String variableName) {
+		String deprecationMessage= JavaCore.getClasspathVariableDeprecationMessage(variableName);
+		if (deprecationMessage == null	)
+			return null;
+		else
+			return Messages.format(NewWizardMessages.BuildPathSupport_deprecated,
+					new Object[] {variableName, deprecationMessage});
+	}
+
 	/**
 	 * Finds a source attachment for a new archive in the existing classpaths.
 	 * @param elem The new classpath entry

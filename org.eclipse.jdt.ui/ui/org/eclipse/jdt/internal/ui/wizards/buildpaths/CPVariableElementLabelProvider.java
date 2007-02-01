@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
+import java.util.ArrayList;
+
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.swt.SWT;
@@ -18,11 +20,15 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IColorProvider;
+import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -31,17 +37,25 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 public class CPVariableElementLabelProvider extends LabelProvider implements IColorProvider {
 	
+	// shared, do not dispose:
 	private Image fJARImage;
 	private Image fFolderImage;
-	private boolean fShowResolvedVariables;
-	
 	private Color fResolvedBackground;
 	
-	public CPVariableElementLabelProvider(boolean showResolvedVariables) {
+	private Image fDeprecatedJARImage;
+	private Image fDeprecatedFolderImage;
+	
+	private boolean fHighlightReadOnly;
+	
+	public CPVariableElementLabelProvider(boolean highlightReadOnly) {
 		ImageRegistry reg= JavaPlugin.getDefault().getImageRegistry();
 		fJARImage= reg.get(JavaPluginImages.IMG_OBJS_EXTJAR);
 		fFolderImage= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
-		fShowResolvedVariables= showResolvedVariables;
+		
+		fDeprecatedJARImage= new DecorationOverlayIcon(fJARImage, JavaPluginImages.DESC_OVR_DEPRECATED, IDecoration.TOP_LEFT).createImage();
+		fDeprecatedFolderImage= new DecorationOverlayIcon(fFolderImage, JavaPluginImages.DESC_OVR_DEPRECATED, IDecoration.TOP_LEFT).createImage();
+		
+		fHighlightReadOnly= highlightReadOnly;
 		fResolvedBackground= null;
 	}
 	
@@ -53,9 +67,9 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 			CPVariableElement curr= (CPVariableElement) element;
 			IPath path= curr.getPath();
 			if (path.toFile().isFile()) {
-				return fJARImage;
+				return curr.isDeprecated() ? fDeprecatedJARImage : fJARImage;
 			}
-			return fFolderImage;
+			return curr.isDeprecated() ? fDeprecatedFolderImage : fFolderImage;
 		}
 		return super.getImage(element);
 	}
@@ -68,20 +82,33 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 			CPVariableElement curr= (CPVariableElement)element;
 			String name= curr.getName();
 			IPath path= curr.getPath();
-			StringBuffer buf= new StringBuffer(name);
-			if (curr.isReserved()) {
-				buf.append(' ');
-				buf.append(NewWizardMessages.CPVariableElementLabelProvider_reserved); 
+			
+			String result= name;
+			ArrayList restrictions= new ArrayList(2);
+			
+			if (curr.isReadOnly() && fHighlightReadOnly) {
+				restrictions.add(NewWizardMessages.CPVariableElementLabelProvider_read_only); 
 			}
+			if (curr.isDeprecated()) {
+				restrictions.add(NewWizardMessages.CPVariableElementLabelProvider_deprecated);
+			}
+			if (restrictions.size() == 1) {
+				result= Messages.format(NewWizardMessages.CPVariableElementLabelProvider_one_restriction, new Object[] {result, restrictions.get(0)});
+			} else if (restrictions.size() == 2) {
+				result= Messages.format(NewWizardMessages.CPVariableElementLabelProvider_two_restrictions, new Object[] {result, restrictions.get(0), restrictions.get(1)});
+			}
+			
 			if (path != null) {
-				buf.append(" - "); //$NON-NLS-1$
+				String appendix;
 				if (!path.isEmpty()) {
-					buf.append(path.toOSString());
+					appendix= path.toOSString();
 				} else {
-					buf.append(NewWizardMessages.CPVariableElementLabelProvider_empty); 
+					appendix= NewWizardMessages.CPVariableElementLabelProvider_empty; 
 				}
+				result= Messages.format(NewWizardMessages.CPVariableElementLabelProvider_appendix, new Object[] {result, appendix});
 			}
-			return buf.toString();
+			
+			return result;
 		}		
 		
 		
@@ -101,7 +128,7 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 	public Color getBackground(Object element) {
 		if (element instanceof CPVariableElement) {
 			CPVariableElement curr= (CPVariableElement) element;
-			if (!fShowResolvedVariables && curr.isReserved()) {
+			if (fHighlightReadOnly && curr.isReadOnly()) {
 				if (fResolvedBackground == null) {
 					Display display= Display.getCurrent();
 					fResolvedBackground= display.getSystemColor(SWT.COLOR_INFO_BACKGROUND);
@@ -117,6 +144,8 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 	 */
 	public void dispose() {
 		super.dispose();
+		fDeprecatedFolderImage.dispose();
+		fDeprecatedJARImage.dispose();
 	}
 
 }

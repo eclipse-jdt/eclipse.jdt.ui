@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -66,6 +67,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 	public EditVariableEntryDialog(Shell parent, IPath initialEntry, IPath[] existingEntries) {
 		super(parent);
 		setTitle(NewWizardMessages.EditVariableEntryDialog_title); 
+		setShellStyle(getShellStyle() | SWT.RESIZE);
 		
 		fExistingEntries= new HashSet();
 		if (existingEntries != null) {
@@ -249,18 +251,33 @@ public class EditVariableEntryDialog extends StatusDialog {
 				status.setError(NewWizardMessages.EditVariableEntryDialog_filename_error_varnotexists); 
 				return status;
 			}
-			resolvedPath= fFileVariablePath.append(filePath.removeFirstSegments(1));
 			
+			String deprecationMessage= BuildPathSupport.getDeprecationMessage(varName);
+			
+			resolvedPath= fFileVariablePath.append(filePath.removeFirstSegments(1));
 			if (resolvedPath.isEmpty()) {
-				status.setWarning(NewWizardMessages.EditVariableEntryDialog_filename_warning_varempty); 
+				String message= NewWizardMessages.EditVariableEntryDialog_filename_warning_varempty;
+				if (deprecationMessage != null) {
+					message= deprecationMessage + "\n" + message; //$NON-NLS-1$
+				}
+				status.setWarning(message); 
 				return status;
 			}
 			File file= resolvedPath.toFile();
 			if (!file.isFile()) {				
 				String message= Messages.format(NewWizardMessages.EditVariableEntryDialog_filename_error_filenotexists, resolvedPath.toOSString()); 
-				status.setInfo(message);
+				if (deprecationMessage != null) {
+					message= deprecationMessage + "\n" + message; //$NON-NLS-1$
+					status.setWarning(message);
+				} else {
+					status.setInfo(message);
+				}
 				return status;
-			}						
+			}
+			if (deprecationMessage != null) {
+				status.setWarning(deprecationMessage); 
+				return status;
+			}
 		}
 		return status;
 	}
@@ -298,8 +315,21 @@ public class EditVariableEntryDialog extends StatusDialog {
 			}
 		}
 		updateStatus(status);
-	}	
-		
-
-
+	}
+	
+	/*
+	 * overridden to ensure full message is visible
+	 * @see org.eclipse.jface.dialogs.StatusDialog#updateStatus(org.eclipse.core.runtime.IStatus)
+	 */
+	protected void updateStatus(IStatus status) {
+		super.updateStatus(status);
+		Shell shell= getShell();
+		if (shell != null && ! shell.isDisposed()) {
+			Point size= shell.getSize();
+			Point minSize= shell.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+			if (minSize.x > size.x || minSize.y > size.y) {
+				shell.setSize(minSize);
+			}
+		}
+	}
 }

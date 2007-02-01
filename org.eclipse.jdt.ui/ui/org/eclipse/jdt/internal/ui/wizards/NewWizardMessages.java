@@ -40,7 +40,13 @@ public final class NewWizardMessages extends NLS {
 	public static String AddSourceFolderWizardPage_conflictWarning;
 	public static String AddSourceFolderWizardPage_ignoreNestingConflicts;
 	public static String AddSourceFolderWizardPage_replaceSourceFolderInfo;
+	public static String BuildPathSupport_deprecated;
 	public static String CPListLabelProvider_attribute_label;
+	public static String CPVariableElementLabelProvider_appendix;
+	public static String CPVariableElementLabelProvider_deprecated;
+	public static String CPVariableElementLabelProvider_one_restriction;
+	public static String CPVariableElementLabelProvider_read_only;
+	public static String CPVariableElementLabelProvider_two_restrictions;
 	
 	public static String EditOutputFolderAction_DeleteOldOutputFolderQuestion;
 	public static String EditOutputFolderAction_ErrorDescription;
@@ -362,7 +368,6 @@ public final class NewWizardMessages extends NLS {
 	public static String VariableBlock_variableSettingError_message;
 	public static String VariablePathDialogField_variabledialog_title;
 	
-	public static String CPVariableElementLabelProvider_reserved;
 	public static String CPVariableElementLabelProvider_empty;
 	
 	public static String VariableCreationDialog_titlenew;

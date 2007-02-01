@@ -17,6 +17,10 @@ public final class JUnitMessages extends NLS {
 
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.junit.ui.JUnitMessages";//$NON-NLS-1$
 
+	public static String ClasspathVariableMarkerResolutionGenerator_use_JUnit3;
+
+	public static String ClasspathVariableMarkerResolutionGenerator_use_JUnit3_desc;
+
 	public static String CompareResultDialog_actualLabel;
 	public static String CompareResultDialog_expectedLabel;
 	public static String CompareResultDialog_labelOK;

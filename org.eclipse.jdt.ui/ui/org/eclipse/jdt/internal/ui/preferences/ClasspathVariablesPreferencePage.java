@@ -82,7 +82,8 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	 * @see PreferencePage#performDefaults()
 	 */
 	protected void performDefaults() {
-		fVariableBlock.performDefaults();
+		// not used (constructor calls noDefaultAndApplyButton())
+//		fVariableBlock.performDefaults();
 		super.performDefaults();
 	}
 

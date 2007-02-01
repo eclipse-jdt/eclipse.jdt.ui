@@ -566,6 +566,7 @@ public class BuildPathsBlock {
 		List elements= fClassPathList.getElements();
 	
 		CPListElement entryMissing= null;
+		CPListElement entryDeprecated= null;
 		int nEntriesMissing= 0;
 		IClasspathEntry[] entries= new IClasspathEntry[elements.size()];
 
@@ -590,6 +591,9 @@ public class BuildPathsBlock {
 					entryMissing= currElement;
 				}
 			}
+			if (entryDeprecated == null & currElement.isDeprecated()) {
+				entryDeprecated= currElement;
+			}
 		}
 				
 		if (nEntriesMissing > 0) {
@@ -598,6 +602,8 @@ public class BuildPathsBlock {
 			} else {
 				fClassPathStatus.setWarning(Messages.format(NewWizardMessages.BuildPathsBlock_warning_EntriesMissing, String.valueOf(nEntriesMissing))); 
 			}
+		} else if (entryDeprecated != null) {
+			fClassPathStatus.setInfo(entryDeprecated.getDeprecationMessage());
 		}
 				
 /*		if (fCurrJProject.hasClasspathCycle(entries)) {

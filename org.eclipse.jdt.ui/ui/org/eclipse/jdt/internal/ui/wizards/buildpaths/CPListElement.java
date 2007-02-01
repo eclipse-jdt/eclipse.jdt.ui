@@ -406,6 +406,26 @@ public class CPListElement {
 		return false;
 	}
 	
+	public boolean isDeprecated() {
+		if (fEntryKind != IClasspathEntry.CPE_VARIABLE) {
+			return false;
+		}
+		if (fPath.segmentCount() > 0) {
+			return JavaCore.getClasspathVariableDeprecationMessage(fPath.segment(0)) != null;
+		}
+		return false;
+	}
+	
+	public String getDeprecationMessage() {
+		if (fEntryKind != IClasspathEntry.CPE_VARIABLE) {
+			return null;
+		}
+		if (fPath.segmentCount() > 0) {
+			String varName= fPath.segment(0);
+			return BuildPathSupport.getDeprecationMessage(varName);
+		}
+		return null;
+	}
 	
 	/*
 	 * @see Object#equals(java.lang.Object)
@@ -489,7 +509,6 @@ public class CPListElement {
 		
 		switch (curr.getEntryKind()) {
 			case IClasspathEntry.CPE_CONTAINER:
-				res= null;
 				try {
 					isMissing= project != null && (JavaCore.getClasspathContainer(path, project) == null);
 				} catch (JavaModelException e) {
@@ -498,7 +517,6 @@ public class CPListElement {
 				break;
 			case IClasspathEntry.CPE_VARIABLE:
 				IPath resolvedPath= JavaCore.getResolvedVariablePath(path);
-				res= null;
 				isMissing=  root.findMember(resolvedPath) == null && !resolvedPath.toFile().isFile();
 				break;
 			case IClasspathEntry.CPE_LIBRARY:

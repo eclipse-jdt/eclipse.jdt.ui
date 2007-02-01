@@ -346,7 +346,11 @@ public class CPListLabelProvider extends LabelProvider {
 			case IClasspathEntry.CPE_PROJECT:
 				return fProjectImage;
 			case IClasspathEntry.CPE_VARIABLE:
-				return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_CLASSPATH_VAR_ENTRY);
+				ImageDescriptor variableImage= fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_CLASSPATH_VAR_ENTRY);
+				if (cpentry.isDeprecated()) {
+					return new JavaElementImageDescriptor(variableImage, JavaElementImageDescriptor.DEPRECATED, JavaElementImageProvider.SMALL_SIZE);
+				}
+				return variableImage;
 			case IClasspathEntry.CPE_CONTAINER:
 				return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_LIBRARY);
 			default:

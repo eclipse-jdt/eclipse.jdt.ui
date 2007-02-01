@@ -13,6 +13,10 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.jdt.core.JavaCore;
+
+
+import org.eclipse.jdt.launching.JavaRuntime;
 
 
 public class CPVariableElement {
@@ -20,14 +24,15 @@ public class CPVariableElement {
 	private String fName;
 	private IPath fPath;
 	
-	private boolean fIsReserved;
-
-	public CPVariableElement(String name, IPath path, boolean reserved) {
+	/**
+	 * @param name the variable name
+	 * @param path the path
+	 */
+	public CPVariableElement(String name, IPath path) {
 		Assert.isNotNull(name);
 		Assert.isNotNull(path);
 		fName= name;
 		fPath= path;
-		fIsReserved= reserved;
 	}
 	
 	/**
@@ -43,6 +48,7 @@ public class CPVariableElement {
 	 * @param path The path to set
 	 */
 	public void setPath(IPath path) {
+		Assert.isNotNull(path);
 		fPath= path;
 	}
 
@@ -59,6 +65,7 @@ public class CPVariableElement {
 	 * @param name The name to set
 	 */
 	public void setName(String name) {
+		Assert.isNotNull(name);
 		fName= name;
 	}
 	
@@ -81,20 +88,33 @@ public class CPVariableElement {
 	}	
 	
 	/**
-	 * Returns true if variable is reserved
-	 * @return Returns a boolean
+	 * @return <code>true</code> iff variable is read-only
 	 */
-	public boolean isReserved() {
-		return fIsReserved;
+	public boolean isReadOnly() {
+		if (isReserved())
+			return true;
+		
+		return JavaCore.isClasspathVariableReadOnly(fName);
+	}
+
+	private boolean isReserved() {
+		//TODO: remove when JDT/Debug uses the extension attribute
+		return fName.equals(JavaRuntime.JRELIB_VARIABLE)
+				|| fName.equals(JavaRuntime.JRESRC_VARIABLE)
+				|| fName.equals(JavaRuntime.JRESRCROOT_VARIABLE);
 	}
 
 	/**
-	 * Sets the isReserved
-	 * @param isReserved The state to set
+	 * @return whether this variable is deprecated
 	 */
-	public void setReserved(boolean isReserved) {
-		fIsReserved= isReserved;
+	public boolean isDeprecated() {
+		return JavaCore.getClasspathVariableDeprecationMessage(fName) != null;
 	}
 
-
+	/**
+	 * @return the deprecation message, or <code>null</code> iff the variable is not deprecated
+	 */
+	public String getDeprecationMessage() {
+		return BuildPathSupport.getDeprecationMessage(fName);
+	}
 }

@@ -109,7 +109,7 @@ public class VariableCreationDialog extends StatusDialog {
 	
 
 	public CPVariableElement getClasspathElement() {
-		return new CPVariableElement(fNameField.getText(), new Path(fPathField.getText()), false);
+		return new CPVariableElement(fNameField.getText(), new Path(fPathField.getText()));
 	}
 
 	/*

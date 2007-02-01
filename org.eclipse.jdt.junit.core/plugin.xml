@@ -271,17 +271,23 @@
          </configurationType>
       </shortcut>
    </extension>
+   
    <extension
          point="org.eclipse.jdt.core.classpathVariableInitializer">
       <classpathVariableInitializer
             variable="JUNIT_HOME"
-            class="org.eclipse.jdt.internal.junit.buildpath.JUnitHomeInitializer">
+            class="org.eclipse.jdt.internal.junit.buildpath.JUnitHomeInitializer"
+            deprecated="%classpathVariableInitializer.deprecated.JUNIT_HOME"
+            readOnly="true">
       </classpathVariableInitializer>
       <classpathVariableInitializer
             variable="JUNIT_SRC_HOME"
-            class="org.eclipse.jdt.internal.junit.buildpath.JUnitHomeInitializer">
+            class="org.eclipse.jdt.internal.junit.buildpath.JUnitHomeInitializer"
+            deprecated="%classpathVariableInitializer.deprecated.JUNIT_SRC_HOME"
+            readOnly="true">
       </classpathVariableInitializer>
    </extension>
+   
    <extension
          point="org.eclipse.jdt.ui.quickFixProcessors">
       <quickFixProcessor
@@ -290,6 +296,22 @@
             id="org.eclipse.jdt.junit.JUnitQuickFixProcessor">
       </quickFixProcessor>
    </extension>
+   
+   <extension
+         point="org.eclipse.ui.ide.markerResolution">
+      <markerResolutionGenerator 
+            markerType="org.eclipse.jdt.core.buildpath_problem"
+            class="org.eclipse.jdt.internal.junit.buildpath.ClasspathVariableMarkerResolutionGenerator"
+            >
+            <attribute
+                  name="id"
+                  value="1010">
+                  <!-- org.eclipse.jdt.core.IJavaModelMarker.ID,
+                       org.eclipse.jdt.core.IJavaModelStatusConstants.DEPRECATED_VARIABLE -->
+            </attribute>
+      </markerResolutionGenerator>
+   </extension>
+   
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
