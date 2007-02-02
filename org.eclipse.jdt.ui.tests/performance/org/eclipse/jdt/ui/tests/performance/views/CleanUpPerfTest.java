@@ -250,11 +250,6 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS, CleanUpConstants.TRUE);
 		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, CleanUpConstants.TRUE);
 		
-		node.put(CleanUpConstants.FORMAT_COMMENT, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.FORMAT_JAVADOC, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.FORMAT_MULTI_LINE_COMMENT, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT, CleanUpConstants.TRUE);
-		
 		node.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpConstants.TRUE);
 		
 		node.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpConstants.TRUE);

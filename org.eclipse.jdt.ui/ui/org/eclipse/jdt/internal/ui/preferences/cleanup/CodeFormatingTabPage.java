@@ -63,30 +63,6 @@ public final class CodeFormatingTabPage extends ModifyDialogTabPage {
 			createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_CheckboxName_FormatSourceCode, CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpModifyDialog.FALSE_TRUE);
 		}
 		
-		final CheckboxPreference formatCommentsPref= createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_CheckboxName_FormatComments, CleanUpConstants.FORMAT_COMMENT, CleanUpModifyDialog.FALSE_TRUE);
-		
-		indent(group);
-		final CheckboxPreference javadocPref= createCheckboxPref(group, numColumns - 1, CleanUpMessages.CodeFormatingTabPage_CheckboxName_FormatJavadocComments, CleanUpConstants.FORMAT_JAVADOC, CleanUpModifyDialog.FALSE_TRUE);
-		
-		indent(group);
-		final CheckboxPreference multiLinePref= createCheckboxPref(group, numColumns - 1, CleanUpMessages.CodeFormatingTabPage_CheckboxName_FormatMultiLineComments, CleanUpConstants.FORMAT_MULTI_LINE_COMMENT, CleanUpModifyDialog.FALSE_TRUE);
-		
-		indent(group);
-		final CheckboxPreference singleLinePref= createCheckboxPref(group, numColumns - 1, CleanUpMessages.CodeFormatingTabPage_CheckboxName_FormatSingleLineComments, CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT, CleanUpModifyDialog.FALSE_TRUE);
-		
-		formatCommentsPref.addObserver(new Observer() {
-			public void update(Observable o, Object arg) {
-				javadocPref.setEnabled(formatCommentsPref.getChecked());
-				multiLinePref.setEnabled(formatCommentsPref.getChecked());
-				singleLinePref.setEnabled(formatCommentsPref.getChecked());
-			}
-			
-		});
-		
-		javadocPref.setEnabled(formatCommentsPref.getChecked());
-		multiLinePref.setEnabled(formatCommentsPref.getChecked());
-		singleLinePref.setEnabled(formatCommentsPref.getChecked());
-		
 		final CheckboxPreference whiteSpace= createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_RemoveTrailingWhitespace_checkbox_text, CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES, CleanUpModifyDialog.FALSE_TRUE);
 		
 		Composite sub= new Composite(group, SWT.NONE);

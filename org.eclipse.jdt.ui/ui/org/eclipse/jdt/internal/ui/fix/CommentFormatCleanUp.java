@@ -10,14 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
@@ -38,8 +39,16 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 		if (compilationUnit == null)
 			return null;
 		
-		boolean formatComment= isEnabled(CleanUpConstants.FORMAT_COMMENT);
-		return CommentFormatFix.createCleanUp(compilationUnit, formatComment && isEnabled(CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT), formatComment && isEnabled(CleanUpConstants.FORMAT_MULTI_LINE_COMMENT), formatComment && isEnabled(CleanUpConstants.FORMAT_JAVADOC));
+		if (!isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE))
+			return null;
+		
+		HashMap preferences= new HashMap(compilationUnit.getJavaProject().getOptions(true));
+		
+		boolean singleLineComment= DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT));
+		boolean blockComment= DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT));
+		boolean javaDoc= DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT));
+
+		return CommentFormatFix.createCleanUp(compilationUnit, singleLineComment, blockComment, javaDoc, preferences);
 	}
 	
 	/**
@@ -74,14 +83,7 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 	 * {@inheritDoc}
 	 */
 	public String[] getDescriptions() {
-		List result= new ArrayList();
-		if (isEnabled(CleanUpConstants.FORMAT_COMMENT) && isEnabled(CleanUpConstants.FORMAT_MULTI_LINE_COMMENT))
-			result.add(MultiFixMessages.CommentFormatCleanUp_multiLineComments);
-		if (isEnabled(CleanUpConstants.FORMAT_COMMENT) && isEnabled(CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT))
-			result.add(MultiFixMessages.CommentFormatCleanUp_singleLineComments);
-		if (isEnabled(CleanUpConstants.FORMAT_COMMENT) && isEnabled(CleanUpConstants.FORMAT_JAVADOC))
-			result.add(MultiFixMessages.CommentFormatCleanUp_javadocComments);
-		return (String[])result.toArray(new String[result.size()]);
+		return null;
 	}
 	
 	public String getPreview() {
@@ -96,7 +98,17 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 		buf.append("*/\n"); //$NON-NLS-1$
 		buf.append("\n"); //$NON-NLS-1$
 		buf.append("//A single line comment\n"); //$NON-NLS-1$
-		return CommentFormatFix.format(buf.toString(), isEnabled(CleanUpConstants.FORMAT_COMMENT) && isEnabled(CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT), isEnabled(CleanUpConstants.FORMAT_COMMENT) && isEnabled(CleanUpConstants.FORMAT_MULTI_LINE_COMMENT), isEnabled(CleanUpConstants.FORMAT_COMMENT) && isEnabled(CleanUpConstants.FORMAT_JAVADOC));
+		
+		if (!isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE))
+			return buf.toString();
+		
+		HashMap preferences= new HashMap(JavaCore.getOptions());
+		
+		boolean singleLineComment= DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT));
+		boolean blockComment= DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT));
+		boolean javaDoc= DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT));
+		
+		return CommentFormatFix.format(buf.toString(), singleLineComment, blockComment, javaDoc);
 	}
 	
 	/**

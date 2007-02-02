@@ -4110,8 +4110,6 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		enable(CleanUpConstants.FORMAT_COMMENT);
-		enable(CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT);
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		
 		Hashtable options= TestOptions.getDefaultOptions();

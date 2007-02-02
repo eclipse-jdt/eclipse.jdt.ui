@@ -38,7 +38,6 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -52,12 +51,11 @@ import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
 
 public class CommentFormatFix implements IFix {
 	
-	public static IFix createCleanUp(ICompilationUnit unit, boolean singleLine, boolean multiLine, boolean javaDoc) throws CoreException {
+	public static IFix createCleanUp(ICompilationUnit unit, boolean singleLine, boolean multiLine, boolean javaDoc, HashMap preferences) throws CoreException {
 		if (!singleLine && !multiLine && !javaDoc)
 			return null;
 		
 		String content= unit.getBuffer().getContents();
-		HashMap preferences= new HashMap(unit.getJavaProject().getOptions(true));
 		Document document= new Document(content);
 		
 		final List edits= format(document, singleLine, multiLine, javaDoc, preferences);
@@ -105,13 +103,6 @@ public class CommentFormatFix implements IFix {
 	
 	private static List format(IDocument document, boolean singleLine, boolean multiLine, boolean javaDoc, HashMap preferences) {
 		final List edits= new ArrayList();
-		
-		if (DefaultCodeFormatterConstants.FALSE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT)))
-			preferences.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT, DefaultCodeFormatterConstants.TRUE);
-		if (DefaultCodeFormatterConstants.FALSE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT)))
-			preferences.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT, DefaultCodeFormatterConstants.TRUE);
-		if (DefaultCodeFormatterConstants.FALSE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT)))
-			preferences.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT, DefaultCodeFormatterConstants.TRUE);
 		
 		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 		

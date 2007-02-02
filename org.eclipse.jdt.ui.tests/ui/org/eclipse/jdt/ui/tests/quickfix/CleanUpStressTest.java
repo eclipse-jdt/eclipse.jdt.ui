@@ -84,6 +84,10 @@ public class CleanUpStressTest extends TestCase {
 			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 			
+			options.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT, DefaultCodeFormatterConstants.TRUE);
+			options.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT, DefaultCodeFormatterConstants.TRUE);
+			options.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT, DefaultCodeFormatterConstants.TRUE);
+			
 			JavaCore.setOptions(options);
 			
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -5333,11 +5337,6 @@ public class CleanUpStressTest extends TestCase {
 		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS, CleanUpConstants.TRUE);
 		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, CleanUpConstants.TRUE);				
 
-		node.put(CleanUpConstants.FORMAT_COMMENT, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.FORMAT_JAVADOC, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.FORMAT_MULTI_LINE_COMMENT, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.FORMAT_SINGLE_LINE_COMMENT, CleanUpConstants.TRUE);
-		
 		node.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpConstants.TRUE);
 		
 		node.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpConstants.TRUE);

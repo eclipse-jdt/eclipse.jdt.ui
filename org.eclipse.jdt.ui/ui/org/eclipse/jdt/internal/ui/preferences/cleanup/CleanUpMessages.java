@@ -29,10 +29,6 @@ public class CleanUpMessages extends NLS {
 
 	public static String CleanUpProfileManager_save_participant_profileName;
 
-	public static String CodeFormatingTabPage_CheckboxName_FormatComments;
-	public static String CodeFormatingTabPage_CheckboxName_FormatJavadocComments;
-	public static String CodeFormatingTabPage_CheckboxName_FormatMultiLineComments;
-	public static String CodeFormatingTabPage_CheckboxName_FormatSingleLineComments;
 	public static String CodeFormatingTabPage_CheckboxName_FormatSourceCode;
 	public static String CodeFormatingTabPage_FormatterSettings_Description;
 	public static String CodeFormatingTabPage_GroupName_Formatter;
