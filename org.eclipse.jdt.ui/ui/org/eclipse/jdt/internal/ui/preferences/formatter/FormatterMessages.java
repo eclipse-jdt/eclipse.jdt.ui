@@ -25,6 +25,7 @@ final class FormatterMessages extends NLS {
 		// Do not instantiate
 	}
 
+	public static String CommentsTabPage_remove_blank_block_comment_lines;
 	public static String ModifyDialog_BuiltIn_Status;
 	public static String ModifyDialog_Duplicate_Status;
 	public static String ModifyDialog_EmptyName_Status;
@@ -343,7 +344,9 @@ final class FormatterMessages extends NLS {
 	public static String CodingStyleConfigurationBlock_preview_title;
 	
 	public static String CommentsTabPage_group1_title;
-	public static String CommentsTabPage_enable_comment_formatting;
+	public static String commentsTabPage_enable_javadoc_comment_formatting;
+	public static String CommentsTabPage_enable_line_comment_formatting;
+	public static String CommentsTabPage_enable_block_comment_formatting;
 	public static String CommentsTabPage_format_header;
 	public static String CommentsTabPage_format_html;
 	public static String CommentsTabPage_format_code_snippets;
@@ -354,6 +357,7 @@ final class FormatterMessages extends NLS {
 	public static String CommentsTabPage_indent_description_after_param;
 	public static String CommentsTabPage_new_line_after_param_tags;
 	public static String CommentsTabPage_group3_title;
+	public static String CommentsTabPage_group4_title;
 	public static String CommentsTabPage_line_width;
 	public static String ControlStatementsTabPage_preview_header;
 	public static String ControlStatementsTabPage_general_group_title;

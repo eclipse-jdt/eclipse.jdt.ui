@@ -36,8 +36,9 @@ public class ProfileVersioner implements IProfileVersioner {
 	private static final int VERSION_8= 8; // fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=89739
 	private static final int VERSION_9= 9; // after storing project profile names in preferences
 	private static final int VERSION_10= 10; // splitting options for annotation types
+	private static final int VERSION_11= 11; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=49412
 	
-	private static final int CURRENT_VERSION= VERSION_10;
+	private static final int CURRENT_VERSION= VERSION_11;
 	
 	public int getFirstVersion() {
 	    return VERSION_1;
@@ -88,6 +89,9 @@ public class ProfileVersioner implements IProfileVersioner {
 		case VERSION_8:
 		case VERSION_9:
 		    version9to10(oldSettings);
+
+		case VERSION_10 :
+			version10to11(oldSettings);
 		    
 		default:
 		    for (final Iterator iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
@@ -555,19 +559,18 @@ public class ProfileVersioner implements IProfileVersioner {
 	}
 	
 	private static void version6to7(Map oldSettings) {
-		checkAndReplace(oldSettings, FORMATTER_COMMENT_FORMAT, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT);
+		checkAndReplace(oldSettings, FORMATTER_COMMENT_FORMAT, FORMATTER_COMMENT_FORMAT2);
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_FORMATHEADER, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER);
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_FORMATSOURCE, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_SOURCE);
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION); 
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_INDENTROOTTAGS, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_ROOT_TAGS);
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_LINELENGTH, DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH); 
-		checkAndReplace(oldSettings, FORMATTER_COMMENT_CLEARBLANKLINES, DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES);
+		checkAndReplace(oldSettings, FORMATTER_COMMENT_CLEARBLANKLINES, FORMATTER_COMMENT_CLEAR_BLANK_LINES);
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_FORMATHTML, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML);
 		
 		checkAndReplaceBooleanWithINSERT(oldSettings, FORMATTER_COMMENT_NEWLINEFORPARAMETER, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER); 
 		checkAndReplaceBooleanWithINSERT(oldSettings, FORMATTER_COMMENT_SEPARATEROOTTAGS, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS); 
 	}
-	
 
 	private static void version9to10(Map oldSettings) {
 		duplicate(oldSettings, 
@@ -578,7 +581,20 @@ public class ProfileVersioner implements IProfileVersioner {
 				DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_ANNOTATION_DECLARATION_HEADER);
 	}
 
-
+	private static void version10to11(Map oldSettings) {
+		checkAndReplace(oldSettings, 
+				FORMATTER_COMMENT_FORMAT2,
+				new String[] {
+					DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT,
+					DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT,
+					DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT
+				});
+		checkAndReplace(oldSettings, FORMATTER_COMMENT_CLEAR_BLANK_LINES, 
+				new String[] {
+					DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_BLOCK_COMMENT,
+					DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_JAVADOC_COMMENT,
+				});
+	}
 	
 	/* old format constant values */
 
@@ -655,6 +671,8 @@ public class ProfileVersioner implements IProfileVersioner {
     private static final String FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_THROWS = JavaCore.PLUGIN_ID + ".formatter.insert_space_after_comma_in_constructor_throws"; //$NON-NLS-1$
     private static final String FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_THROWS = JavaCore.PLUGIN_ID + ".formatter.insert_space_before_comma_in_constructor_throws"; //$NON-NLS-1$
     private static final String FORMATTER_NO_ALIGNMENT = "0";//$NON-NLS-1$
+	private static final String FORMATTER_COMMENT_FORMAT2= JavaCore.PLUGIN_ID + ".formatter.comment.format_comments"; //$NON-NLS-1$
+	private static final String FORMATTER_COMMENT_CLEAR_BLANK_LINES= JavaCore.PLUGIN_ID + ".formatter.comment.clear_blank_lines"; //$NON-NLS-1$ 
 
 	// Old comment formatter constants
 	private static final String FORMATTER_COMMENT_FORMATSOURCE= "comment_format_source_code"; //$NON-NLS-1$

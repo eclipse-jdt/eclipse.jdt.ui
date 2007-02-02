@@ -27,7 +27,9 @@ public class CommentFormattingContext extends FormattingContext {
 	 */
 	public String[] getPreferenceKeys() {
 		return new String[] {
-			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT,
+			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT,
+			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT,
+			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT,
 			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER,
 			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_SOURCE,
 			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION,
@@ -35,7 +37,8 @@ public class CommentFormattingContext extends FormattingContext {
 			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER,
 			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS,
 			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH,
-			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES,
+			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_BLOCK_COMMENT,
+			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_JAVADOC_COMMENT,
 			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML };	}
 
 

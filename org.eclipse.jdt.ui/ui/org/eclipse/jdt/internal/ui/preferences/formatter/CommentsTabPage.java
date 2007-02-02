@@ -48,12 +48,12 @@ public class CommentsTabPage extends ModifyDialogTabPage {
     };
 	
 	
-	private final static class Controller implements Observer {
+	private final static class AndController implements Observer {
 		
 		private final Collection fMasters;
 		private final Collection fSlaves;
 		
-		public Controller(Collection masters, Collection slaves) {
+		public AndController(Collection masters, Collection slaves) {
 			fMasters= masters;
 			fSlaves= slaves;
 			for (final Iterator iter= fMasters.iterator(); iter.hasNext();) {
@@ -80,6 +80,37 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 		}
 	}
 	
+	private final static class OrController implements Observer {
+		
+		private final Collection fMasters;
+		private final Collection fSlaves;
+		
+		public OrController(Collection masters, Collection slaves) {
+			fMasters= masters;
+			fSlaves= slaves;
+			for (final Iterator iter= fMasters.iterator(); iter.hasNext();) {
+			    ((CheckboxPreference)iter.next()).addObserver(this);
+			}
+			update(null, null);
+		}
+
+		public void update(Observable o, Object arg) {
+		    boolean enabled= false; 
+
+		    for (final Iterator iter= fMasters.iterator(); iter.hasNext();) {
+		        enabled |= ((CheckboxPreference)iter.next()).getChecked();
+		    }
+
+			for (final Iterator iter = fSlaves.iterator(); iter.hasNext();) {
+			    final Object obj= iter.next();
+			    if (obj instanceof Preference) {
+			        ((Preference)obj).setEnabled(enabled);
+			    } else if (obj instanceof Control) {
+			        ((Group)obj).setEnabled(enabled);
+			    }
+			}
+		}
+	}
 	
 	private final String PREVIEW=
 		createPreviewHeader("An example for comment formatting. This example is meant to illustrate the various possibilities offered by <i>Eclipse</i> in order to format comments.") +	//$NON-NLS-1$
@@ -93,7 +124,15 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 		" * These possibilities include:\n" + //$NON-NLS-1$
 		" * <ul><li>Formatting of header comments.</li><li>Formatting of Javadoc tags</li></ul>\n" + //$NON-NLS-1$
 		" */\n" + //$NON-NLS-1$
-		" int bar();" + //$NON-NLS-1$
+		" int bar();\n" + //$NON-NLS-1$
+		" /*\n" + //$NON-NLS-1$
+		" *\n" + //$NON-NLS-1$
+		" * These possibilities include:\n" + //$NON-NLS-1$
+		" * <ul><li>Formatting of header comments.</li><li>Formatting of Javadoc tags</li></ul>\n" + //$NON-NLS-1$
+		" */\n" + //$NON-NLS-1$
+		" int bar2();" + //$NON-NLS-1$
+		" // This is a long comment that should be split in multiple line comments in case the line comment formatting is enabled\n" + //$NON-NLS-1$
+		" int foo2();" + //$NON-NLS-1$
 		" /**\n" + //$NON-NLS-1$
 		" * The following is some sample code which illustrates source formatting within javadoc comments:\n" + //$NON-NLS-1$
 		" * <pre>public class Example {final int a= 1;final boolean b= true;}</pre>\n" + //$NON-NLS-1$ 
@@ -116,50 +155,72 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 	    
 		// global group
 		final Group globalGroup= createGroup(numColumns, composite, FormatterMessages.CommentsTabPage_group1_title); 
-		final CheckboxPreference global= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_enable_comment_formatting, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT); 
-		final CheckboxPreference header= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_format_header, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER); 
-		final CheckboxPreference html= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_format_html, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML); 
-		final CheckboxPreference code= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_format_code_snippets, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_SOURCE); 
+		final CheckboxPreference javadoc= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.commentsTabPage_enable_javadoc_comment_formatting, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT); 
+		final CheckboxPreference blockComment= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_enable_block_comment_formatting, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT); 
+		final CheckboxPreference singleLineComments= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_enable_line_comment_formatting, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT); 
 
-		// blank lines group
+		// javadoc comment formatting settings
 		final Group settingsGroup= createGroup(numColumns, composite, FormatterMessages.CommentsTabPage_group2_title); 
-		final CheckboxPreference blankComments= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_clear_blank_lines, DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES); 
+		final CheckboxPreference header= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_format_header, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER); 
+		final CheckboxPreference html= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_format_html, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML); 
+		final CheckboxPreference code= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_format_code_snippets, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_SOURCE); 
 		final CheckboxPreference blankJavadoc= createPrefInsert(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_blank_line_before_javadoc_tags, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS); 
 		final CheckboxPreference indentJavadoc= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_indent_javadoc_tags, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_ROOT_TAGS); 
-		
 		final CheckboxPreference indentDesc= createCheckboxPref(settingsGroup, numColumns , FormatterMessages.CommentsTabPage_indent_description_after_param, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION, FALSE_TRUE); 
 		((GridData)indentDesc.getControl().getLayoutData()).horizontalIndent= fPixelConverter.convertWidthInCharsToPixels(4);
 		final CheckboxPreference nlParam= createPrefInsert(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_new_line_after_param_tags, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER); 
+		final CheckboxPreference blankLinesJavadoc= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_clear_blank_lines, DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_JAVADOC_COMMENT); 
+		
+		// javadoc and block comment settings
+		final Group blockSettingsGroup= createGroup(numColumns, composite, FormatterMessages.CommentsTabPage_group4_title);
+		final CheckboxPreference blankLinesBlock= createPrefTrueFalse(blockSettingsGroup, numColumns, FormatterMessages.CommentsTabPage_remove_blank_block_comment_lines, DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_BLOCK_COMMENT);
 		
 		final Group widthGroup= createGroup(numColumns, composite, FormatterMessages.CommentsTabPage_group3_title); 
 		final NumberPreference lineWidth= createNumberPref(widthGroup, numColumns, FormatterMessages.CommentsTabPage_line_width, DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH, 0, 9999); 
 
-		Collection masters, slaves;
+		ArrayList javaDocMaster= new ArrayList();
+		javaDocMaster.add(javadoc);
+		
+		ArrayList javaDocSlaves= new ArrayList();
+		javaDocSlaves.add(settingsGroup);
+		javaDocSlaves.add(header);
+		javaDocSlaves.add(html);
+		javaDocSlaves.add(code);
+		javaDocSlaves.add(blankJavadoc);
+		javaDocSlaves.add(indentJavadoc);
+		javaDocSlaves.add(nlParam);
+		javaDocSlaves.add(blankLinesJavadoc);
+		
+		new AndController(javaDocMaster, javaDocSlaves);
+		
+		ArrayList indentMasters= new ArrayList();
+		indentMasters.add(javadoc);
+		indentMasters.add(indentJavadoc);
+		
+		ArrayList indentSlaves= new ArrayList();
+		indentSlaves.add(indentDesc);
+		
+		new AndController(indentMasters, indentSlaves);
+		
+		ArrayList blockMasters= new ArrayList();
+		blockMasters.add(blockComment);
+		
+		ArrayList blockSlaves= new ArrayList();
+		blockSlaves.add(blockSettingsGroup);
+		blockSlaves.add(blankLinesBlock);
+		
+		new AndController(blockMasters, blockSlaves);
+		
+		ArrayList lineWidthMasters= new ArrayList();
+		lineWidthMasters.add(javadoc);
+		lineWidthMasters.add(blockComment);
+		lineWidthMasters.add(singleLineComments);
 
-		masters= new ArrayList();
-		masters.add(global);
+		ArrayList lineWidthSlaves= new ArrayList();
+		lineWidthSlaves.add(widthGroup);
+		lineWidthSlaves.add(lineWidth);
 		
-		slaves= new ArrayList();
-		slaves.add(settingsGroup);
-		slaves.add(header);
-		slaves.add(html);
-		slaves.add(code);
-		slaves.add(blankComments);
-		slaves.add(blankJavadoc);
-		slaves.add(indentJavadoc);
-		slaves.add(nlParam);
-		slaves.add(lineWidth);
-		
-		new Controller(masters, slaves);
-		
-		masters= new ArrayList();
-		masters.add(global);
-		masters.add(indentJavadoc);
-		
-		slaves= new ArrayList();
-		slaves.add(indentDesc);
-		
-		new Controller(masters, slaves);
+		new OrController(lineWidthMasters, lineWidthSlaves);
 	}
 	
 	protected void initializePage() {
