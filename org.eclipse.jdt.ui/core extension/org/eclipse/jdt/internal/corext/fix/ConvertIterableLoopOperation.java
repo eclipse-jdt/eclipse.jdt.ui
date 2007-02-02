@@ -53,6 +53,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
+import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -211,6 +212,15 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		textEditGroups.add(group);
 		
 		final ASTRewrite astRewrite= cuRewrite.getASTRewrite();
+		
+		TightSourceRangeComputer rangeComputer;
+		if (astRewrite.getExtendedSourceRangeComputer() instanceof TightSourceRangeComputer) {
+			rangeComputer= (TightSourceRangeComputer)astRewrite.getExtendedSourceRangeComputer();
+		} else {
+			rangeComputer= new TightSourceRangeComputer();			
+		}
+		rangeComputer.addTightSourceNode(getForStatement());
+		astRewrite.setTargetSourceRangeComputer(rangeComputer);
 		
 		Statement statement= convert(cuRewrite, group, positionGroups);
 		astRewrite.replace(getForStatement(), statement, group);

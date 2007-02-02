@@ -1803,6 +1803,42 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 	
+	public void testBug110599() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void a(int[] ints) {\n");
+		buf.append("        //Comment\n");
+		buf.append("        for (int i = 0; i < ints.length; i++) {\n");
+		buf.append("            System.out.println(ints[i]);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		List proposals= fetchConvertingProposal(buf, cu);
+		
+		assertNotNull(fConvertLoopProposal);
+		
+		assertCorrectLabels(proposals);
+		
+		String preview1= getPreviewContent(fConvertLoopProposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void a(int[] ints) {\n");
+		buf.append("        //Comment\n");
+		buf.append("        for (int element : ints) {\n");
+		buf.append("            System.out.println(element);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+	}
+	
 	private boolean satisfiesPrecondition(ICompilationUnit cu) {
 		ForStatement statement= getForStatement(cu);
 		ConvertLoopOperation op= new ConvertForLoopOperation(statement);

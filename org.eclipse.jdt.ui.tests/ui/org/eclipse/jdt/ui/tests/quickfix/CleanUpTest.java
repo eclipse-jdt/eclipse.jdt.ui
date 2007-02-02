@@ -3864,6 +3864,49 @@ public class CleanUpTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
+	public void testJava50ForLoop110599() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void a(int[] i, List<String> l) {\n");
+		buf.append("        //Comment\n");
+		buf.append("        for (int j = 0; j < i.length; j++) {\n");
+		buf.append("            System.out.println(i[j]);\n");
+		buf.append("        }\n");
+		buf.append("        //Comment\n");
+		buf.append("        for (Iterator<String> iterator = l.iterator(); iterator.hasNext();) {\n");
+		buf.append("            String str = iterator.next();\n");
+		buf.append("            System.out.println(str);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void a(int[] i, List<String> l) {\n");
+		buf.append("        //Comment\n");
+		buf.append("        for (int element : i) {\n");
+		buf.append("            System.out.println(element);\n");
+		buf.append("        }\n");
+		buf.append("        //Comment\n");
+		buf.append("        for (String str : l) {\n");
+		buf.append("            System.out.println(str);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+	
 	public void testCombination01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

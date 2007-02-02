@@ -57,6 +57,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
@@ -489,6 +490,15 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
 		textEditGroups.add(group);
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
+		
+		TightSourceRangeComputer rangeComputer;
+		if (rewrite.getExtendedSourceRangeComputer() instanceof TightSourceRangeComputer) {
+			rangeComputer= (TightSourceRangeComputer)rewrite.getExtendedSourceRangeComputer();
+		} else {
+			rangeComputer= new TightSourceRangeComputer();			
+		}
+		rangeComputer.addTightSourceNode(getForStatement());
+		rewrite.setTargetSourceRangeComputer(rangeComputer);
 		
 		Statement statement= convert(cuRewrite, group, positionGroups);
 		rewrite.replace(getForStatement(), statement, group);
