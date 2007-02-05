@@ -12,7 +12,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -74,8 +73,8 @@ public class RenameLinkedMode {
 			Shell popup= fInfoPopup.getShell();
 			if (popup == null || popup.isDisposed())
 				return false;
-			Control focusControl= popup.getDisplay().getFocusControl();
-			return focusControl != null && focusControl.getShell() == popup;
+			Shell activeShell= popup.getDisplay().getActiveShell();
+			return popup == activeShell;
 		}
 
 		public boolean isOriginator(DocumentEvent event, IRegion subjectRegion) {
