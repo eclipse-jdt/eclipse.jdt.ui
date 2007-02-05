@@ -3014,7 +3014,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @since 3.3
 	 */
-	public static final String REFACTOR_LIGHTWEIGHT= "Refactoring.lightweight"; //$NON-NLS-1$
+	public static final String REFACTOR_LIGHTWEIGHT= "Refactor.lightweight"; //$NON-NLS-1$
 	
 	/**
 	 * A named preference that controls a reduced search menu is used in the Java editors.
@@ -3526,7 +3526,7 @@ public class PreferenceConstants {
 		// RefactoringPreferencePage
 		store.setDefault(PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, PreferenceConstants.REFACTOR_WARNING_SEVERITY);
 		store.setDefault(PreferenceConstants.REFACTOR_SAVE_ALL_EDITORS, false);		
-		store.setDefault(PreferenceConstants.REFACTOR_LIGHTWEIGHT, false);		
+		store.setDefault(PreferenceConstants.REFACTOR_LIGHTWEIGHT, true);		
 
 		// TemplatePreferencePage
 		store.setDefault(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER, true);
