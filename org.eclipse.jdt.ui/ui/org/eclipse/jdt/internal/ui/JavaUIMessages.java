@@ -38,13 +38,25 @@ public final class JavaUIMessages extends NLS {
 	
 	public static String MultiElementListSelectionDialog_pageInfoMessage;
 	
+	public static String TypeSelectionDialog_errorMessage;
+	public static String TypeSelectionDialog_dialogMessage;
+	public static String TypeSelectionDialog_errorTitle;
+	public static String TypeSelectionDialog_lowerLabel;
+	public static String TypeSelectionDialog_upperLabel;
+	public static String TypeSelectionDialog_notypes_title;
+	public static String TypeSelectionDialog_notypes_message;
+	public static String TypeSelectionDialog_error3Message;
+	public static String TypeSelectionDialog_error3Title;
+	public static String TypeSelectionDialog_progress_consistency;
+	public static String TypeSelectionDialog_error_type_doesnot_exist;
+
 	public static String ExceptionDialog_seeErrorLogMessage;
 	
 	public static String MainTypeSelectionDialog_errorTitle;
 	public static String MultiMainTypeSelectionDialog_errorTitle;
 	
-	public static String PackageSelectionDialog_error3Message;
 	public static String PackageSelectionDialog_error_title;
+	public static String PackageSelectionDialog_error3Message;
 	public static String PackageSelectionDialog_nopackages_title;
 	public static String PackageSelectionDialog_nopackages_message;
 	
@@ -126,7 +138,7 @@ public final class JavaUIMessages extends NLS {
 	public static String CoreUtility_job_title;
 	public static String CoreUtility_buildall_taskname;
 	public static String CoreUtility_buildproject_taskname;
-
+	
 	public static String FilteredTypesSelectionDialog_default_package;
 	public static String FilteredTypesSelectionDialog_dialogMessage;
 	public static String FilteredTypesSelectionDialog_error_type_doesnot_exist;
@@ -134,6 +146,26 @@ public final class JavaUIMessages extends NLS {
 	public static String FilteredTypesSelectionDialog_searchJob_taskName;
 	public static String FilteredTypeSelectionDialog_showContainerForDuplicatesAction;
 	public static String FilteredTypeSelectionDialog_titleFormat;
+	
+	public static String TypeSelectionDialog2_title_format;
+	
+	public static String TypeSelectionComponent_label;
+	public static String TypeSelectionComponent_menu;
+	public static String TypeSelectionComponent_show_status_line_label;
+	public static String TypeSelectionComponent_fully_qualify_duplicates_label;
+	
+	public static String TypeInfoViewer_job_label;
+	public static String TypeInfoViewer_job_error;
+	public static String TypeInfoViewer_job_cancel;
+	public static String TypeInfoViewer_default_package;
+	public static String TypeInfoViewer_progress_label;
+	public static String TypeInfoViewer_searchJob_taskName;
+	public static String TypeInfoViewer_syncJob_label;
+	public static String TypeInfoViewer_syncJob_taskName;
+	public static String TypeInfoViewer_progressJob_label;
+	public static String TypeInfoViewer_remove_from_history;
+	public static String TypeInfoViewer_separator_message;
+	public static String TypeInfoViewer_library_name_format;
 	
 	public static String InitializeAfterLoadJob_starter_job_name;
 	
