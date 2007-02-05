@@ -16,9 +16,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.JavaCore;
 
 
-import org.eclipse.jdt.launching.JavaRuntime;
-
-
 public class CPVariableElement {
 
 	private String fName;
@@ -91,17 +88,7 @@ public class CPVariableElement {
 	 * @return <code>true</code> iff variable is read-only
 	 */
 	public boolean isReadOnly() {
-		if (isReserved())
-			return true;
-		
 		return JavaCore.isClasspathVariableReadOnly(fName);
-	}
-
-	private boolean isReserved() {
-		//TODO: remove when JDT/Debug uses the extension attribute
-		return fName.equals(JavaRuntime.JRELIB_VARIABLE)
-				|| fName.equals(JavaRuntime.JRESRC_VARIABLE)
-				|| fName.equals(JavaRuntime.JRESRCROOT_VARIABLE);
 	}
 
 	/**
