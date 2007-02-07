@@ -158,7 +158,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 			} finally {
 				if (!wasJavaDoc)
 					preferences.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT, DefaultCodeFormatterConstants.FALSE);
-				if (!wasLineComment)
+				if (!wasBlockComment)
 					preferences.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT, DefaultCodeFormatterConstants.FALSE);
 				if (!wasLineComment)
 					preferences.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT, DefaultCodeFormatterConstants.FALSE);
