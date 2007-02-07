@@ -1337,7 +1337,7 @@
             name="%contentAssistFavoritesName"
             category="org.eclipse.jdt.ui.preferences.CodeAssistPreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.CodeAssistFavoritesPreferencePage"
-            id="org.eclipse.jdt.ui.preferences.CodeAssistPreferenceAdvanced">
+            id="org.eclipse.jdt.ui.preferences.CodeAssistPreferenceFavorites">
             <keywordReference id="org.eclipse.jdt.ui.contentassist"/>
       </page>
       <page
