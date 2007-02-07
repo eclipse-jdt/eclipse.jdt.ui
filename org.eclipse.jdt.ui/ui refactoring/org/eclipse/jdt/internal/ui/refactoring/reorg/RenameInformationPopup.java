@@ -472,6 +472,7 @@ public class RenameInformationPopup {
 				final Point POPUP_SOURCE= popupShell.getLocation();
 				final StyledText textWidget= fEditor.getViewer().getTextWidget();
 				Point pSize= fPopup.getSize();
+				int originalSnapPosition= fSnapPosition;
 				
 				/*
 				 * Feature in Tracker: it is not possible to directly control the feedback,
@@ -526,10 +527,14 @@ public class RenameInformationPopup {
 					}
 				};
 				tracker.addControlListener(moveListener);
-				tracker.open();
+				boolean committed= tracker.open();
 				tracker.close();
 				tracker.dispose();
-				getDialogSettings().put(fIsMinimized ? SNAP_POSITION_MINIMIZED_KEY : SNAP_POSITION_KEY, fSnapPosition);
+				if (committed) {
+					getDialogSettings().put(fIsMinimized ? SNAP_POSITION_MINIMIZED_KEY : SNAP_POSITION_KEY, fSnapPosition);
+				} else {
+					fSnapPosition= originalSnapPosition;
+				}
 				updatePopupLocation(true); //TODO: true?
 				//TODO: set focus back to editor
 			}
