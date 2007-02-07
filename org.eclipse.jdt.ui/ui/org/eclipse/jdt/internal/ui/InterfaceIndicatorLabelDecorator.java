@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -159,18 +160,23 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 					return getOverlayFromFlags(mainType.getFlags());
 				}
 			}
-			return getOverlayWithSearchEngine(unit);
+			return getOverlayWithSearchEngine(unit, null);
 		} else if (element instanceof IClassFile) {
 			IClassFile classFile= (IClassFile) element;
 			if (classFile.isOpen()) {
 				return getOverlayFromFlags(classFile.getType().getFlags());
 			}
-			return getOverlayWithSearchEngine(classFile);
+			/*
+			 * XXX: This optimization can be removed once JDT Core does
+			 * it itself, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=168354
+			 */
+			String typeName= classFile.getType().getElementName();
+			return getOverlayWithSearchEngine(classFile, typeName.toCharArray());
 		}
 		return null;
 	}
 	
-	private ImageDescriptor getOverlayWithSearchEngine(IJavaElement element) {
+	private ImageDescriptor getOverlayWithSearchEngine(ITypeRoot element, char[] typeName) {
 		SearchEngine engine= new SearchEngine();
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element });
 		
@@ -191,7 +197,7 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 		};
 		
 		try {
-			engine.searchAllTypeNames(null, SearchPattern.R_EXACT_MATCH, null, SearchPattern.R_EXACT_MATCH, IJavaSearchConstants.TYPE, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH , null);
+			engine.searchAllTypeNames(null, SearchPattern.R_EXACT_MATCH, typeName, SearchPattern.R_EXACT_MATCH, IJavaSearchConstants.TYPE, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH , null);
 		} catch (Result e) {
 			return getOverlayFromFlags(e.modifiers);
 		} catch (JavaModelException e) {
