@@ -915,6 +915,61 @@ public class CleanUpTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
+	public void testUnusedCodeBug173014_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("        void foo() {\n");
+		buf.append("                class Local {}\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("        void foo() {\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+	
+	public void testUnusedCodeBug173014_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        class Local {}\n");
+		buf.append("        class Local2 {\n");
+		buf.append("            class LMember {}\n");
+		buf.append("            class LMember2 extends Local2 {}\n");
+		buf.append("            LMember m;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+	
 	public void testJava5001() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

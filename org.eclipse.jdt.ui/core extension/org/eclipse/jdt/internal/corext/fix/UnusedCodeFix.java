@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TagElement;
+import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -162,6 +163,9 @@ public class UnusedCodeFix extends AbstractFix {
 			} else if (binding.getKind() == IBinding.TYPE) {
 				ITypeBinding decl= ((ITypeBinding) binding).getTypeDeclaration();
 				ASTNode declaration= root.findDeclaringNode(decl);
+				if (declaration.getParent() instanceof TypeDeclarationStatement) {
+					declaration= declaration.getParent();
+				}
 				rewrite.remove(declaration, group);
 			} else if (binding.getKind() == IBinding.VARIABLE) {
 				SimpleName nameNode= (SimpleName) NodeFinder.perform(completeRoot, simpleName.getStartPosition(), simpleName.getLength());
