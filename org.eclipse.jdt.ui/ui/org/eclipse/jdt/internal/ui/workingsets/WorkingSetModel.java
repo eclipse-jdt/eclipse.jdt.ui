@@ -228,28 +228,20 @@ public class WorkingSetModel {
 		}
 	}
 
-	public WorkingSetModel() {
-		fLocalWorkingSetManager= PlatformUI.getWorkbench().createLocalWorkingSetManager();
-		addListenersToWorkingSetManagers();
-		fActiveWorkingSets= new ArrayList(2);
-
-		IWorkingSet others= fLocalWorkingSetManager.createWorkingSet(WorkingSetMessages.WorkingSetModel_others_name, new IAdaptable[0]); 
-		others.setId(OthersWorkingSetUpdater.ID);
-		fLocalWorkingSetManager.addWorkingSet(others);
-		Assert.isNotNull(fOthersWorkingSetUpdater);
-		
-		fActiveWorkingSets.add(others);
-
-		fElementMapper.rebuild(getActiveWorkingSets());
-		fOthersWorkingSetUpdater.updateElements();
-	}
-
+	/**
+	 * @param memento a memento, or <code>null</code>
+	 */
 	public WorkingSetModel(IMemento memento) {
 		fLocalWorkingSetManager= PlatformUI.getWorkbench().createLocalWorkingSetManager();
 		addListenersToWorkingSetManagers();
 		fActiveWorkingSets= new ArrayList(2);
 		
-		restoreState(memento); // restore localWorkingSetManager and active working sets
+		if (memento == null || ! restoreState(memento)) {
+			IWorkingSet others= fLocalWorkingSetManager.createWorkingSet(WorkingSetMessages.WorkingSetModel_others_name, new IAdaptable[0]); 
+			others.setId(OthersWorkingSetUpdater.ID);
+			fLocalWorkingSetManager.addWorkingSet(others);
+			fActiveWorkingSets.add(others);
+		}
 		Assert.isNotNull(fOthersWorkingSetUpdater);
 		
 		fElementMapper.rebuild(getActiveWorkingSets());
@@ -385,10 +377,17 @@ public class WorkingSetModel {
 		return fElementMapper.getNonProjectTopLevelElements();
 	}
 
-	private void restoreState(IMemento memento) {
+	/**
+	 * Restore localWorkingSetManager and active working sets
+	 * @param memento
+	 * @return whether the restore was successful
+	 */
+	private boolean restoreState(IMemento memento) {
 		String configured= memento.getString(TAG_CONFIGURED);
-		fConfigured= configured != null && Boolean.valueOf(configured).booleanValue();
+		if (configured == null)
+			return false;
 		
+		fConfigured= Boolean.valueOf(configured).booleanValue();
 		fLocalWorkingSetManager.restoreState(memento.getChild(TAG_LOCAL_WORKING_SET_MANAGER));
 
 		IMemento[] actives= memento.getChildren(TAG_ACTIVE_WORKING_SET);
@@ -404,6 +403,7 @@ public class WorkingSetModel {
 				}
 			}
 		}
+		return true;
 	}
 	private void workingSetManagerChanged(PropertyChangeEvent event) {
 		String property= event.getProperty();

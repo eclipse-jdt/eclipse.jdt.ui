@@ -1017,6 +1017,12 @@ public class PackageExplorerPart extends ViewPart
 	}
 	
 	public void saveState(IMemento memento) {
+		if (fViewer == null && fMemento != null) {
+			// part has not been created -> keep the old state
+			memento.putMemento(fMemento);
+			return;
+		}
+		
 		memento.putInteger(TAG_ROOT_MODE, fRootMode);
 		if (fWorkingSetModel != null)
 			fWorkingSetModel.saveState(memento);
@@ -1515,12 +1521,10 @@ public class PackageExplorerPart extends ViewPart
 	private void createWorkingSetModel() {
 		SafeRunner.run(new ISafeRunnable() {
 			public void run() throws Exception {
-				fWorkingSetModel= fMemento != null 
-				? new WorkingSetModel(fMemento) 
-				: new WorkingSetModel();
+				fWorkingSetModel= new WorkingSetModel(fMemento);
 			}
 			public void handleException(Throwable exception) {
-				fWorkingSetModel= new WorkingSetModel();
+				fWorkingSetModel= new WorkingSetModel(null);
 			}
 		});
 	}
