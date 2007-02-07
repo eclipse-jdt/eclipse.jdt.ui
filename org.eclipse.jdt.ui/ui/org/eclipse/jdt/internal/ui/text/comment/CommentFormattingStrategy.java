@@ -101,11 +101,12 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 			return null;
 
 		Map preferences= getPreferences();
-		final boolean isFormattingHeader= Boolean.toString(true).equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER));
+		final boolean isFormattingHeader= DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER));
 		int documentsHeaderEnd= computeHeaderEnd(document);
 
-		TextEdit edit= null;
-		if (isFormattingHeader || position.offset >= documentsHeaderEnd) {
+		TextEdit edit= null;		
+		if (position.offset >= documentsHeaderEnd) {
+			// not a header
 			try {
 				// compute offset in document of region passed to the formatter
 				int sourceOffset= document.getLineOffset(document.getLineOfOffset(position.getOffset()));
@@ -124,6 +125,45 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 			} catch (BadLocationException x) {
 				JavaPlugin.log(x);
 			}
+		} else if (isFormattingHeader) {
+			boolean wasJavaDoc= DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT));
+			if (!wasJavaDoc)
+				preferences.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT, DefaultCodeFormatterConstants.TRUE);
+			
+			boolean wasBlockComment= DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT));
+			if (!wasBlockComment)
+				preferences.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT, DefaultCodeFormatterConstants.TRUE);
+			
+			boolean wasLineComment= DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT));
+			if (!wasLineComment)
+				preferences.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT, DefaultCodeFormatterConstants.TRUE);
+			
+			try {
+				// compute offset in document of region passed to the formatter
+				int sourceOffset= document.getLineOffset(document.getLineOfOffset(position.getOffset()));
+
+				// format region
+				int partitionOffset= position.getOffset() - sourceOffset;
+				int sourceLength= partitionOffset + position.getLength();
+				String source= document.get(sourceOffset, sourceLength);
+				CodeFormatter commentFormatter= ToolFactory.createCodeFormatter(preferences);
+				int indentationLevel= inferIndentationLevel(source.substring(0, partitionOffset), getTabSize(preferences), getIndentSize(preferences));
+				edit= commentFormatter.format(getKindForPartitionType(position.getType()), source, partitionOffset, position.getLength(), indentationLevel, TextUtilities.getDefaultLineDelimiter(document));
+
+				// move edit offset to match document
+				if (edit != null)
+					edit.moveTree(sourceOffset);
+			} catch (BadLocationException x) {
+				JavaPlugin.log(x);
+			} finally {
+				if (!wasJavaDoc)
+					preferences.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT, DefaultCodeFormatterConstants.FALSE);
+				if (!wasLineComment)
+					preferences.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT, DefaultCodeFormatterConstants.FALSE);
+				if (!wasLineComment)
+					preferences.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT, DefaultCodeFormatterConstants.FALSE);
+			}
+
 		}
 		return edit;		
 	}

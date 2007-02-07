@@ -47,68 +47,59 @@ public class CommentsTabPage extends ModifyDialogTabPage {
         JavaCore.INSERT
     };
 	
-	
-	private final static class AndController implements Observer {
+	private static abstract class Controller implements Observer {
 		
 		private final Collection fMasters;
 		private final Collection fSlaves;
 		
-		public AndController(Collection masters, Collection slaves) {
+		public Controller(Collection masters, Collection slaves) {
 			fMasters= masters;
 			fSlaves= slaves;
 			for (final Iterator iter= fMasters.iterator(); iter.hasNext();) {
-			    ((CheckboxPreference)iter.next()).addObserver(this);
+				((CheckboxPreference)iter.next()).addObserver(this);
 			}
-			update(null, null);
 		}
-
+		
 		public void update(Observable o, Object arg) {
-		    boolean enabled= true; 
-
-		    for (final Iterator iter= fMasters.iterator(); iter.hasNext();) {
-		        enabled &= ((CheckboxPreference)iter.next()).getChecked();
-		    }
-
-			for (final Iterator iter = fSlaves.iterator(); iter.hasNext();) {
-			    final Object obj= iter.next();
-			    if (obj instanceof Preference) {
-			        ((Preference)obj).setEnabled(enabled);
-			    } else if (obj instanceof Control) {
-			        ((Group)obj).setEnabled(enabled);
-			    }
+			boolean enabled= areSlavesEnabled();
+			
+			for (final Iterator iter= fSlaves.iterator(); iter.hasNext();) {
+				final Object obj= iter.next();
+				if (obj instanceof Preference) {
+					((Preference)obj).setEnabled(enabled);
+				} else if (obj instanceof Control) {
+					((Group)obj).setEnabled(enabled);
+				}
 			}
 		}
+		
+		public Collection getMasters() {
+			return fMasters;
+		}
+		
+		public Collection getSlaves() {
+			return fSlaves;
+		}
+		
+		protected abstract boolean areSlavesEnabled();
 	}
 	
-	private final static class OrController implements Observer {
-		
-		private final Collection fMasters;
-		private final Collection fSlaves;
+	private final static class OrController extends Controller {
 		
 		public OrController(Collection masters, Collection slaves) {
-			fMasters= masters;
-			fSlaves= slaves;
-			for (final Iterator iter= fMasters.iterator(); iter.hasNext();) {
-			    ((CheckboxPreference)iter.next()).addObserver(this);
-			}
+			super(masters, slaves);
 			update(null, null);
 		}
-
-		public void update(Observable o, Object arg) {
-		    boolean enabled= false; 
-
-		    for (final Iterator iter= fMasters.iterator(); iter.hasNext();) {
-		        enabled |= ((CheckboxPreference)iter.next()).getChecked();
-		    }
-
-			for (final Iterator iter = fSlaves.iterator(); iter.hasNext();) {
-			    final Object obj= iter.next();
-			    if (obj instanceof Preference) {
-			        ((Preference)obj).setEnabled(enabled);
-			    } else if (obj instanceof Control) {
-			        ((Group)obj).setEnabled(enabled);
-			    }
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		protected boolean areSlavesEnabled() {
+			for (final Iterator iter= getMasters().iterator(); iter.hasNext();) {
+				if (((CheckboxPreference)iter.next()).getChecked())
+					return true;
 			}
+			return false;
 		}
 	}
 	
@@ -156,12 +147,12 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 		// global group
 		final Group globalGroup= createGroup(numColumns, composite, FormatterMessages.CommentsTabPage_group1_title); 
 		final CheckboxPreference javadoc= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.commentsTabPage_enable_javadoc_comment_formatting, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT); 
-		final CheckboxPreference blockComment= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_enable_block_comment_formatting, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT); 
+		final CheckboxPreference blockComment= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_enable_block_comment_formatting, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT);
 		final CheckboxPreference singleLineComments= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_enable_line_comment_formatting, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT); 
+		final CheckboxPreference header= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_format_header, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER); 
 
 		// javadoc comment formatting settings
 		final Group settingsGroup= createGroup(numColumns, composite, FormatterMessages.CommentsTabPage_group2_title); 
-		final CheckboxPreference header= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_format_header, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER); 
 		final CheckboxPreference html= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_format_html, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML); 
 		final CheckboxPreference code= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_format_code_snippets, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_SOURCE); 
 		final CheckboxPreference blankJavadoc= createPrefInsert(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_blank_line_before_javadoc_tags, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS); 
@@ -180,10 +171,10 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 
 		ArrayList javaDocMaster= new ArrayList();
 		javaDocMaster.add(javadoc);
+		javaDocMaster.add(header);
 		
 		ArrayList javaDocSlaves= new ArrayList();
 		javaDocSlaves.add(settingsGroup);
-		javaDocSlaves.add(header);
 		javaDocSlaves.add(html);
 		javaDocSlaves.add(code);
 		javaDocSlaves.add(blankJavadoc);
@@ -191,30 +182,37 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 		javaDocSlaves.add(nlParam);
 		javaDocSlaves.add(blankLinesJavadoc);
 		
-		new AndController(javaDocMaster, javaDocSlaves);
+		new OrController(javaDocMaster, javaDocSlaves);
 		
 		ArrayList indentMasters= new ArrayList();
 		indentMasters.add(javadoc);
+		indentMasters.add(header);
 		indentMasters.add(indentJavadoc);
 		
 		ArrayList indentSlaves= new ArrayList();
 		indentSlaves.add(indentDesc);
 		
-		new AndController(indentMasters, indentSlaves);
+		new Controller(indentMasters, indentSlaves) {
+			protected boolean areSlavesEnabled() {
+				return (javadoc.getChecked() || header.getChecked()) && indentJavadoc.getChecked();
+            }
+		}.update(null, null);
 		
 		ArrayList blockMasters= new ArrayList();
 		blockMasters.add(blockComment);
+		blockMasters.add(header);
 		
 		ArrayList blockSlaves= new ArrayList();
 		blockSlaves.add(blockSettingsGroup);
 		blockSlaves.add(blankLinesBlock);
 		
-		new AndController(blockMasters, blockSlaves);
+		new OrController(blockMasters, blockSlaves);
 		
 		ArrayList lineWidthMasters= new ArrayList();
 		lineWidthMasters.add(javadoc);
 		lineWidthMasters.add(blockComment);
 		lineWidthMasters.add(singleLineComments);
+		lineWidthMasters.add(header);
 
 		ArrayList lineWidthSlaves= new ArrayList();
 		lineWidthSlaves.add(widthGroup);
