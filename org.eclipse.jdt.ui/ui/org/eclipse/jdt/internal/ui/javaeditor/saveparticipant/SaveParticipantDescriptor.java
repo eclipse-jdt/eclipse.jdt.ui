@@ -17,45 +17,23 @@ import org.eclipse.core.runtime.Assert;
  *
  * @since 3.3
  */
-public final class SaveParticipantDescriptor {
+public class SaveParticipantDescriptor {
 
 	/** The listener */
 	private final IPostSaveListener fPostSaveListener;
 	/** The preference configuration block, if any */
-	private final ISaveParticipantPreferenceConfiguration fPreferenceConfiguration;
+	private ISaveParticipantPreferenceConfiguration fPreferenceConfiguration;
 	
-	/**
-	 * Creates a new descriptor which connects a {@link IPostSaveListener}
-	 * with a default implementation of a {@link ISaveParticipantPreferenceConfiguration}.
-	 * @param listener the listener
-	 */
-	SaveParticipantDescriptor(final IPostSaveListener listener) {
-		this(listener, new AbstractSaveParticipantPreferenceConfiguration() {
-
-			protected String getPostSaveListenerId() {
-	            return listener.getId();
-            }
-
-			protected String getPostSaveListenerName() {
-	            return listener.getName();
-            }
-			
-		});
-	}
-
 	/**
 	 * Creates a new descriptor which connects a {@link IPostSaveListener}
 	 * with an {@link ISaveParticipantPreferenceConfiguration}.
 	 * 
 	 * @param listener the listener
-	 * @param preferenceConfiguration preference configuration
 	 */
-	SaveParticipantDescriptor(IPostSaveListener listener, ISaveParticipantPreferenceConfiguration preferenceConfiguration) {
+	SaveParticipantDescriptor(IPostSaveListener listener) {
 		Assert.isNotNull(listener);
-		Assert.isNotNull(preferenceConfiguration);
 
 		fPostSaveListener= listener;
-		fPreferenceConfiguration= preferenceConfiguration;
 	}
 
 	/**
@@ -69,14 +47,36 @@ public final class SaveParticipantDescriptor {
 	}
 
 	/**
+	 * Creates a new preference configuration of the described
+	 * save participant.
+	 * 
+	 * @return the preference configuration
+	 */
+	public ISaveParticipantPreferenceConfiguration createPreferenceConfiguration() {
+		return new AbstractSaveParticipantPreferenceConfiguration() {
+
+			protected String getPostSaveListenerId() {
+	            return fPostSaveListener.getId();
+            }
+
+			protected String getPostSaveListenerName() {
+	            return fPostSaveListener.getName();
+            }			
+		};
+	}
+	
+	/**
 	 * Returns the preference configuration of the described
 	 * save participant.
 	 * 
 	 * @return the preference configuration
 	 */
 	public ISaveParticipantPreferenceConfiguration getPreferenceConfiguration() {
-		return fPreferenceConfiguration;
-	}
+		if (fPreferenceConfiguration == null)
+			fPreferenceConfiguration= createPreferenceConfiguration();
+		
+	    return fPreferenceConfiguration;
+    }
 
 	/**
 	 * Returns the identifier of the described save participant.
@@ -86,4 +86,5 @@ public final class SaveParticipantDescriptor {
 	public String getId() {
 		return fPostSaveListener.getId();
 	}
+
 }

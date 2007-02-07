@@ -96,9 +96,14 @@ public final class SaveParticipantRegistry {
 	 */
 	private void reloadDescriptors() {
 		Map map= new HashMap();
-		SaveParticipantDescriptor desc= new SaveParticipantDescriptor(
-				new CleanUpPostSaveListener(), 
-				new CleanUpSaveParticipantPreferenceConfiguration());
+		SaveParticipantDescriptor desc= new SaveParticipantDescriptor(new CleanUpPostSaveListener()) {
+			/**
+			 * {@inheritDoc}
+			 */
+			public ISaveParticipantPreferenceConfiguration createPreferenceConfiguration() {
+				return new CleanUpSaveParticipantPreferenceConfiguration();
+			}
+		};	
 		map.put(desc.getId(), desc);
 				
 		fDescriptors= map;

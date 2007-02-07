@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import com.ibm.icu.text.Collator;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -46,6 +47,7 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 	
 	private final PreferencePage fPreferencePage;
 	private final IScopeContext fContext;
+	private final ArrayList fConfigurations;
 	
 	public SaveParticipantConfigurationBlock(IScopeContext context, PreferencePage preferencePage) {
 		Assert.isNotNull(context);
@@ -53,6 +55,7 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 		
 		fContext= context;
 		fPreferencePage= preferencePage;
+		fConfigurations= new ArrayList();
 	}
 	
 	/*
@@ -84,7 +87,9 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 		IPreferencePageContainer container= fPreferencePage.getContainer();
 		for (int i= 0; i < descriptors.length; i++) {
 			final SaveParticipantDescriptor descriptor= descriptors[i];
-			descriptor.getPreferenceConfiguration().createControl(composite, container);
+			ISaveParticipantPreferenceConfiguration configuration= descriptor.createPreferenceConfiguration();
+			configuration.createControl(composite, container);
+			fConfigurations.add(configuration);
 		}
 		
 		return composite;
@@ -161,12 +166,9 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 	}
 	
 	private void delegateToPreferenceConfiguration(IDelegateOperation op) {
-		SaveParticipantRegistry registry= JavaPlugin.getDefault().getSaveParticipantRegistry();
-		SaveParticipantDescriptor[] descriptors= registry.getSaveParticipantDescriptors();
-		
-		for (int i= 0; i < descriptors.length; i++) {
-			ISaveParticipantPreferenceConfiguration block= descriptors[i].getPreferenceConfiguration();
-			op.run(block);
-		}
+		for (int i= 0; i < fConfigurations.size(); i++) {
+	        ISaveParticipantPreferenceConfiguration block= (ISaveParticipantPreferenceConfiguration)fConfigurations.get(i);
+	        op.run(block);
+        }
 	}
 }
