@@ -465,6 +465,10 @@ public class RenameInformationPopup {
 		movedControl.addMouseListener(new MouseAdapter() {
 
 			public void mouseDown(final MouseEvent downEvent) {
+				if (downEvent.button != 1) {
+					return;
+				}
+				
 				final Point POPUP_SOURCE= popupShell.getLocation();
 				final StyledText textWidget= fEditor.getViewer().getTextWidget();
 				Point pSize= fPopup.getSize();
