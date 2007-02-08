@@ -58,7 +58,6 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
@@ -558,12 +557,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				return element;
 		}
 		return null;
-	}
-
-	/*
-	 * @see IEditorPart#saveState(IMemento)
-	 */
-	public void saveState(IMemento memento) {
 	}
 
 	/*
