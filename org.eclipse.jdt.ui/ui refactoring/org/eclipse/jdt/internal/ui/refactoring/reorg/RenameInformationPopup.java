@@ -105,7 +105,18 @@ public class RenameInformationPopup {
 					fEditor.getSite().getShell().removeControlListener(PopupVisibilityManager.this);
 					viewer.removeTextListener(PopupVisibilityManager.this);
 					viewer.removeViewportListener(PopupVisibilityManager.this);
-					fPopup.removeDisposeListener(this);
+					if (fRestoreImage != null)
+						fRestoreImage.dispose();
+					if (fMinimizeImage != null)
+						fMinimizeImage.dispose();
+					
+					// workaround for bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=173438 :
+//					fRenameLinkedMode.cancel();
+					fEditor.getSite().getShell().getDisplay().asyncExec(new Runnable() {
+						public void run() {
+							fRenameLinkedMode.cancel();
+						}
+					});
 				}
 			});
 		}
@@ -288,6 +299,8 @@ public class RenameInformationPopup {
 	private boolean fIsMinimized;
 	private Shell fPopup;
 	private List/*<InfoEntry>*/ fRefactorEntries;
+	private Image fRestoreImage;
+	private Image fMinimizeImage;
 	
 	
 	public RenameInformationPopup(CompilationUnitEditor editor, RenameLinkedMode renameLinkedMode) {
@@ -622,8 +635,8 @@ public class RenameInformationPopup {
 		gridData.exclude= true;
 		toolBar.setLayoutData(gridData);
 		ToolItem minimizeButton = new ToolItem(toolBar, SWT.PUSH, 0);
-		final Image minimizeImage= JavaPluginImages.DESC_ELCL_THIN_MINIMIZE_VIEW.createImage();
-		minimizeButton.setImage(minimizeImage);
+		fMinimizeImage= JavaPluginImages.DESC_ELCL_THIN_MINIMIZE_VIEW.createImage();
+		minimizeButton.setImage(fMinimizeImage);
 		minimizeButton.setToolTipText(ReorgMessages.RenameInformationPopup_minimize);
 		minimizeButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -633,11 +646,6 @@ public class RenameInformationPopup {
 				getDialogSettings().put(IS_MINIMIZED_KEY, true);
 				restoreSnapPosition();
 				updatePopupLocation(true);
-			}
-		});
-		minimizeButton.addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				minimizeImage.dispose();
 			}
 		});
 		toolBar.pack();
@@ -676,8 +684,8 @@ public class RenameInformationPopup {
 		
 		ToolBar restoreToolBar= new ToolBar(minimized, SWT.FLAT);
 		ToolItem restoreButton = new ToolItem(restoreToolBar, SWT.PUSH, 0);
-		final Image restoreImage= JavaPluginImages.DESC_ELCL_THIN_RESTORE_VIEW.createImage();
-		restoreButton.setImage(restoreImage);
+		fRestoreImage= JavaPluginImages.DESC_ELCL_THIN_RESTORE_VIEW.createImage();
+		restoreButton.setImage(fRestoreImage);
 		restoreButton.setToolTipText(ReorgMessages.RenameInformationPopup_restore);
 		restoreButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -687,11 +695,6 @@ public class RenameInformationPopup {
 				getDialogSettings().put(IS_MINIMIZED_KEY, false);
 				restoreSnapPosition();
 				updatePopupLocation(true);
-			}
-		});
-		restoreButton.addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				restoreImage.dispose();
 			}
 		});
 		restoreToolBar.pack();
