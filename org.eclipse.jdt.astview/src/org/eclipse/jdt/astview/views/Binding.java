@@ -138,7 +138,14 @@ public class Binding extends ASTAttribute {
 					res.add(new Binding(this, "COMPONENT TYPE", typeBinding.getComponentType(), isType(typeKind, ARRAY_TYPE))); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "DIMENSIONS", typeBinding.getDimensions(), isType(typeKind, ARRAY_TYPE))); //$NON-NLS-1$
 					if (! typeBinding.getName().equals(PrimitiveType.VOID.toString())) {
-						res.add(new Binding(this, "CREATE ARRAY TYPE (+1)", typeBinding.createArrayType(1), true));
+						try {
+							if (ITypeBinding.class.getMethod("createArrayType", new Class[] { int.class }) != null)
+								res.add(new Binding(this, "CREATE ARRAY TYPE (+1)", typeBinding.createArrayType(1), true));
+						} catch (SecurityException e) {
+							//skip
+						} catch (NoSuchMethodException e) {
+							//skip
+						}
 					}
 					
 					res.add(new BindingProperty(this, "TYPE BOUNDS", typeBinding.getTypeBounds(), isType(typeKind, VARIABLE_TYPE | CAPTURE_TYPE))); //$NON-NLS-1$
