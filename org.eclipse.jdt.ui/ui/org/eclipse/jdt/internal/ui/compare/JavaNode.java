@@ -167,5 +167,13 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 		}
 		return JavaPlugin.getImageDescriptorRegistry().get(id);
 	}
+	
+	/*
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return getType() + ": " + getName() //$NON-NLS-1$
+				+ "[" + getRange().offset + "+" + getRange().length + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
 }
 
