@@ -205,7 +205,7 @@ public class JavaContext extends CompilationUnitContext {
 			int start= getCompletionOffset();
 			int end= getCompletionOffset() + getCompletionLength();
 			
-			while (start != 0 && !Character.isWhitespace(document.getChar(start - 1)))
+			while (start != 0 && isTempalteNamePart(document.getChar(start - 1)))
 				start--;
 			
 			while (start != end && Character.isWhitespace(document.getChar(start)))
@@ -219,6 +219,17 @@ public class JavaContext extends CompilationUnitContext {
 		} catch (BadLocationException e) {
 			return super.getStart();	
 		}
+	}
+
+	/**
+	 * Tells whether the given character can be part of a template name.
+	 * 
+	 * @param ch the character to test
+	 * @return <code>true</code> if the given character can be part of a template name
+	 * @since 3.3
+	 */
+	private boolean isTempalteNamePart(char ch) {
+		return !Character.isWhitespace(ch) && ch != '(' && ch != ')' && ch != '{' && ch != '}' && ch != ';';
 	}
 
 	/*
