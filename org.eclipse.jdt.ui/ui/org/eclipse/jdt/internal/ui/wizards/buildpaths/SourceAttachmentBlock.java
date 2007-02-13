@@ -208,11 +208,11 @@ public class SourceAttachmentBlock {
 		
 		
 		if (isVariableEntry()) {
-			int widthHint= converter.convertWidthInCharsToPixels(50);
+			int widthHint= converter.convertWidthInCharsToPixels(40);
+			int labelWidthHint= widthHint * 2;
 			
 			Label message= new Label(composite, SWT.WRAP);
 			GridData gd= new GridData(GridData.FILL, GridData.BEGINNING, false, false, 4, 1);
-			gd.widthHint= widthHint;
 			message.setLayoutData(gd);
 			message.setText(Messages.format(NewWizardMessages.SourceAttachmentBlock_message, fEntry.getPath().lastSegment())); 
 			
@@ -220,7 +220,7 @@ public class SourceAttachmentBlock {
 
 			Label desc= new Label(composite, SWT.WRAP);
 			gd= new GridData(GridData.FILL, GridData.BEGINNING, false, false, 4, 1);
-			gd.widthHint= widthHint;
+			gd.widthHint= labelWidthHint;
 			desc.setLayoutData(gd);
 			desc.setText(NewWizardMessages.SourceAttachmentBlock_filename_description);
 			
@@ -232,7 +232,7 @@ public class SourceAttachmentBlock {
 			fFullPathResolvedLabel= new Label(composite, SWT.WRAP);
 			fFullPathResolvedLabel.setText(getResolvedLabelString());
 			gd= new GridData(GridData.FILL, GridData.BEGINNING, false, false, 4, 1);
-			gd.widthHint= widthHint;
+			gd.widthHint= labelWidthHint;
 			fFullPathResolvedLabel.setLayoutData(gd);
 			
 			LayoutUtil.setHorizontalGrabbing(fFileNameField.getTextControl(null));
@@ -255,7 +255,7 @@ public class SourceAttachmentBlock {
 			LayoutUtil.setWidthHint(fFileNameField.getTextControl(null), widthHint);
 			LayoutUtil.setHorizontalGrabbing(fFileNameField.getTextControl(null));
 
-			// aditional 'browse workspace' button for normal jars
+			// Additional 'browse workspace' button for normal jars
 			DialogField.createEmptySpace(composite, 3);
 			
 			fExternalFolderButton.doFillIntoGrid(composite, 1);
