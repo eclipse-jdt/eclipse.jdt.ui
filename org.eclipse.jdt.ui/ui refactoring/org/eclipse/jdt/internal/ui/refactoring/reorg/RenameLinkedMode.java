@@ -71,7 +71,6 @@ public class RenameLinkedMode {
 			if (fInfoPopup == null)
 				return false;
 			if (fInfoPopup.ownsFocusShell()) {
-				System.out.println("fInfoPopup.ownsFocusShell()");
 				return true;
 			}
 			
