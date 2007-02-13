@@ -231,7 +231,7 @@ public class TrayContentProvider implements ITreeContentProvider {
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
 	 */
 	public boolean hasChildren(Object element) {
-		return element instanceof Binding;
+		return ! (element instanceof DynamicAttributeProperty || element instanceof DynamicBindingProperty);
 	}
 	
 	/*
