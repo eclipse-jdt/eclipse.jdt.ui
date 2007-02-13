@@ -89,7 +89,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 public class RenameInformationPopup {
 	
 	private class PopupVisibilityManager implements IPartListener2, ControlListener, MouseListener, KeyListener, ITextListener, IViewportListener {
-		private boolean fAlwaysEnabled= true;
 		
 		public void start() {
 			fEditor.getSite().getWorkbenchWindow().getPartService().addPartListener(this);
@@ -119,7 +118,7 @@ public class RenameInformationPopup {
 					if (fTableMenuManager != null)
 						fTableMenuManager.dispose();
 					
-					// workaround for bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=173438 :
+					//XXX workaround for bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=173438 :
 //					fRenameLinkedMode.cancel();
 					fEditor.getSite().getShell().getDisplay().asyncExec(new Runnable() {
 						public void run() {
@@ -217,13 +216,6 @@ public class RenameInformationPopup {
 		
 		private void updateEnablement() {
 			if (fPopup != null && !fPopup.isDisposed()) {
-				if (fAlwaysEnabled) {
-					if (fRenameLinkedMode.isOriginalName()) {
-						return;
-					} else {
-						fAlwaysEnabled= false;
-					}
-				}
 				boolean enabled= fRenameLinkedMode.isEnabled();
 				for (Iterator iterator= fRefactorEntries.iterator(); iterator.hasNext();) {
 					InfoEntry entry= (InfoEntry) iterator.next();
