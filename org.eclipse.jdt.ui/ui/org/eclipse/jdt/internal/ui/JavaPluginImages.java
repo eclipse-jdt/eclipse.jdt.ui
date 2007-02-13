@@ -341,9 +341,6 @@ public class JavaPluginImages {
     public static final ImageDescriptor DESC_DLCL_COPY_QUALIFIED_NAME= createUnManaged(T_DLCL, "cpyqual_menu.gif"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_COPY_QUALIFIED_NAME= createUnManaged(T_ELCL, "cpyqual_menu.gif"); //$NON-NLS-1$
     
-    public static final ImageDescriptor DESC_ELCL_THIN_MINIMIZE_VIEW= createUnManaged(T_ELCL, "thin_min_view.gif"); //$NON-NLS-1$
-    public static final ImageDescriptor DESC_ELCL_THIN_RESTORE_VIEW= createUnManaged(T_ELCL, "thin_restore_view.gif"); //$NON-NLS-1$
-    
 	public static final ImageDescriptor DESC_OBJ_OVERRIDES= createUnManaged(T_OBJ, "over_co.gif");  					//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJ_IMPLEMENTS= createUnManaged(T_OBJ, "implm_co.gif");  				//$NON-NLS-1$
 	

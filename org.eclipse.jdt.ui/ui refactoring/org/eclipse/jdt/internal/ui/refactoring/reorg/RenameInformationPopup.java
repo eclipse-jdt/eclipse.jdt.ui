@@ -41,11 +41,18 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tracker;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.bindings.keys.IKeyLookup;
 import org.eclipse.jface.bindings.keys.KeyLookupFactory;
 import org.eclipse.jface.bindings.keys.KeyStroke;
@@ -105,10 +112,12 @@ public class RenameInformationPopup {
 					fEditor.getSite().getShell().removeControlListener(PopupVisibilityManager.this);
 					viewer.removeTextListener(PopupVisibilityManager.this);
 					viewer.removeViewportListener(PopupVisibilityManager.this);
-					if (fRestoreImage != null)
-						fRestoreImage.dispose();
-					if (fMinimizeImage != null)
-						fMinimizeImage.dispose();
+					if (fMenuImage != null)
+						fMenuImage.dispose();
+					if (fMinimizedMenuManager != null)
+						fMinimizedMenuManager.dispose();
+					if (fTableMenuManager != null)
+						fTableMenuManager.dispose();
 					
 					// workaround for bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=173438 :
 //					fRenameLinkedMode.cancel();
@@ -187,12 +196,12 @@ public class RenameInformationPopup {
 		}
 
 		public void mouseUp(MouseEvent e) {
-			updatePopupLocation(false); //TODO: false?
+			updatePopupLocation(false);
 			updateVisibility();
 		}
 
 		public void keyPressed(KeyEvent e) {
-			updatePopupLocation(false); //TODO: false?
+			updatePopupLocation(false);
 			updateVisibility();
 		}
 
@@ -299,8 +308,9 @@ public class RenameInformationPopup {
 	private boolean fIsMinimized;
 	private Shell fPopup;
 	private List/*<InfoEntry>*/ fRefactorEntries;
-	private Image fRestoreImage;
-	private Image fMinimizeImage;
+	private Image fMenuImage;
+	private MenuManager fMinimizedMenuManager;
+	private MenuManager fTableMenuManager;
 	
 	
 	public RenameInformationPopup(CompilationUnitEditor editor, RenameLinkedMode renameLinkedMode) {
@@ -390,8 +400,11 @@ public class RenameInformationPopup {
 		return fPopup;
 	}
 	
-	private void updatePopupLocation(boolean editorBoundsChanged) {
-		Point loc= computePopupLocation(fSnapPosition, editorBoundsChanged);
+	private void updatePopupLocation(boolean force) {
+		if (! force && fSnapPosition == SNAP_POSITION_LOWER_RIGHT)
+			return;
+		
+		Point loc= computePopupLocation(fSnapPosition);
 		if (loc != null) {
 			fPopup.setLocation(loc);
 			// XXX workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=170774
@@ -400,25 +413,22 @@ public class RenameInformationPopup {
 	}
 
 	/**
-	 * @returns the location in display coordinates or <code>null</code> iff unchanged
+	 * @returns the location in display coordinates or <code>null</code> iff not visible
 	 */
-	private Point computePopupLocation(int snapPosition, boolean editorBoundsChanged) {
+	private Point computePopupLocation(int snapPosition) {
 		if (fPopup == null || fPopup.isDisposed())
 			return null;
 		
-		//TODO: BiDi support
 		switch (snapPosition) {
 			case SNAP_POSITION_LOWER_RIGHT:
-				if (! editorBoundsChanged) {
-					return null;
-				} else {
-					StyledText eWidget= fEditor.getViewer().getTextWidget();
-					Rectangle eBounds= eWidget.getClientArea();
-					Point eLowerRight= eWidget.toDisplay(eBounds.x + eBounds.width, eBounds.y + eBounds.height);
-					Point pSize= fPopup.getSize();
-					return new Point(eLowerRight.x - pSize.x - 5, eLowerRight.y - pSize.y - 5);
-				}
-				
+			{
+				StyledText eWidget= fEditor.getViewer().getTextWidget();
+				Rectangle eBounds= eWidget.getClientArea();
+				Point eLowerRight= eWidget.toDisplay(eBounds.x + eBounds.width, eBounds.y + eBounds.height);
+				Point pSize= fPopup.getSize();
+				return new Point(eLowerRight.x - pSize.x - 5, eLowerRight.y - pSize.y - 5);
+			}
+			
 			case SNAP_POSITION_UNDER_RIGHT_FIELD:
 			case SNAP_POSITION_OVER_RIGHT_FIELD:
 			{
@@ -498,11 +508,11 @@ public class RenameInformationPopup {
 				final Tracker tracker= new Tracker(textWidget, SWT.NONE);
 				
 				final Point[] LOCATIONS= {
-						textWidget.toControl(computePopupLocation(SNAP_POSITION_UNDER_RIGHT_FIELD, true)),
-						textWidget.toControl(computePopupLocation(SNAP_POSITION_OVER_RIGHT_FIELD, true)),
-						textWidget.toControl(computePopupLocation(SNAP_POSITION_UNDER_LEFT_FIELD, true)),
-						textWidget.toControl(computePopupLocation(SNAP_POSITION_OVER_LEFT_FIELD, true)),
-						textWidget.toControl(computePopupLocation(SNAP_POSITION_LOWER_RIGHT, true))
+						textWidget.toControl(computePopupLocation(SNAP_POSITION_UNDER_RIGHT_FIELD)),
+						textWidget.toControl(computePopupLocation(SNAP_POSITION_OVER_RIGHT_FIELD)),
+						textWidget.toControl(computePopupLocation(SNAP_POSITION_UNDER_LEFT_FIELD)),
+						textWidget.toControl(computePopupLocation(SNAP_POSITION_OVER_LEFT_FIELD)),
+						textWidget.toControl(computePopupLocation(SNAP_POSITION_LOWER_RIGHT))
 				};
 				
 				final Rectangle[] DROP_TARGETS= new Rectangle[LOCATIONS.length];
@@ -548,7 +558,7 @@ public class RenameInformationPopup {
 				} else {
 					fSnapPosition= originalSnapPosition;
 				}
-				updatePopupLocation(true); //TODO: true?
+				updatePopupLocation(true);
 				//TODO: set focus back to editor
 			}
 		});
@@ -556,8 +566,6 @@ public class RenameInformationPopup {
 	
 	private Control createTable(Composite parent) {
 		final Display display= parent.getDisplay();
-//		Color foreground= fEditor.getViewer().getTextWidget().getForeground();
-//		Color background= fEditor.getViewer().getTextWidget().getBackground();
 		Color foreground= display.getSystemColor(SWT.COLOR_INFO_FOREGROUND);
 		Color background= display.getSystemColor(SWT.COLOR_INFO_BACKGROUND);
 		
@@ -630,29 +638,13 @@ public class RenameInformationPopup {
 		
 		addMoveSupport(fPopup, table);
 		
-		ToolBar toolBar= new ToolBar(table, SWT.FLAT);
+		ToolBar tableToolBar= addViewMenu(book, table, minimized, true);
 		GridData gridData= new GridData();
 		gridData.exclude= true;
-		toolBar.setLayoutData(gridData);
-		ToolItem minimizeButton = new ToolItem(toolBar, SWT.PUSH, 0);
-		fMinimizeImage= JavaPluginImages.DESC_ELCL_THIN_MINIMIZE_VIEW.createImage();
-		minimizeButton.setImage(fMinimizeImage);
-		minimizeButton.setToolTipText(ReorgMessages.RenameInformationPopup_minimize);
-		minimizeButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				book.showPage(minimized);
-				fPopup.pack();
-				fIsMinimized= true;
-				getDialogSettings().put(IS_MINIMIZED_KEY, true);
-				restoreSnapPosition();
-				updatePopupLocation(true);
-			}
-		});
-		toolBar.pack();
-		
+		tableToolBar.setLayoutData(gridData);
 		Point tableSize= table.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		// having the button overlap the keybinding for refactor is OK, since Ctrl+Enter is always wider than Enter...
-		toolBar.setLocation(tableSize.x - toolBar.getSize().x, 0); //TODO: BiDi
+		tableToolBar.setLocation(tableSize.x - tableToolBar.getSize().x, 0);
 		
 		// minimized:
 		GridLayout minimizedLayout= new GridLayout(2, false);
@@ -682,28 +674,91 @@ public class RenameInformationPopup {
 		addMoveSupport(fPopup, minimized);
 		addMoveSupport(fPopup, minimizedBorder);
 		
-		ToolBar restoreToolBar= new ToolBar(minimized, SWT.FLAT);
-		ToolItem restoreButton = new ToolItem(restoreToolBar, SWT.PUSH, 0);
-		fRestoreImage= JavaPluginImages.DESC_ELCL_THIN_RESTORE_VIEW.createImage();
-		restoreButton.setImage(fRestoreImage);
-		restoreButton.setToolTipText(ReorgMessages.RenameInformationPopup_restore);
-		restoreButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				book.showPage(table);
-				fPopup.pack();
-				fIsMinimized= false;
-				getDialogSettings().put(IS_MINIMIZED_KEY, false);
-				restoreSnapPosition();
-				updatePopupLocation(true);
-			}
-		});
-		restoreToolBar.pack();
+		addViewMenu(book, table, minimized, false);
 		
 		recursiveSetBackgroundColor(book, background);
 		book.showPage(fIsMinimized ? minimized : table);
 		return table;
 	}
 
+	private ToolBar addViewMenu(final PageBook book, final Composite table, final Composite minimized, final boolean addToTable) {
+		final ToolBar toolBar= new ToolBar(addToTable ? table : minimized, SWT.FLAT);
+		final ToolItem menuButton = new ToolItem(toolBar, SWT.PUSH, 0);
+		fMenuImage= JavaPluginImages.DESC_ELCL_VIEW_MENU.createImage();
+		menuButton.setImage(fMenuImage);
+		menuButton.setToolTipText(ReorgMessages.RenameInformationPopup_menu);
+		toolBar.addMouseListener(new MouseAdapter() {
+			public void mouseDown(MouseEvent e) {
+				showMenu(book, table, minimized, addToTable, toolBar);
+			}
+		});
+		menuButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				showMenu(book, table, minimized, addToTable, toolBar);
+			}
+		});
+		toolBar.pack();
+		return toolBar;
+	}
+
+	private void showMenu(PageBook book, Composite table, Composite minimized, boolean addToTable, ToolBar toolBar) {
+		MenuManager menuManager;
+		if (addToTable) {
+			if (fTableMenuManager == null)
+				fTableMenuManager= createMenuManager(book, table, minimized);
+			menuManager= fTableMenuManager;
+		} else {
+			if (fMinimizedMenuManager == null)
+				fMinimizedMenuManager= createMenuManager(book, table, minimized);
+			menuManager= fMinimizedMenuManager;
+		}
+		Menu menu= menuManager.createContextMenu(toolBar);
+		menu.setLocation(toolBar.toDisplay(0, toolBar.getSize().y));
+		menu.setVisible(true);
+	}
+
+	private MenuManager createMenuManager(final PageBook book, final Composite table, final Composite minimized) {
+		MenuManager menuManager= new MenuManager();
+		menuManager.setRemoveAllWhenShown(true);
+		menuManager.addMenuListener(new IMenuListener() {
+			public void menuAboutToShow(IMenuManager manager) {
+				IAction action= new Action(
+						fIsMinimized ? ReorgMessages.RenameInformationPopup_restore : ReorgMessages.RenameInformationPopup_minimize,
+						SWT.PUSH) {
+					public void run() {
+						book.showPage(fIsMinimized ? table : minimized);
+						fPopup.pack();
+						fIsMinimized= ! fIsMinimized;
+						getDialogSettings().put(IS_MINIMIZED_KEY, fIsMinimized); 
+						restoreSnapPosition();
+						updatePopupLocation(true);
+					}
+				};
+				manager.add(action);
+				
+				manager.add(new Separator());
+				addMoveMenuItem(manager, SNAP_POSITION_UNDER_LEFT_FIELD, ReorgMessages.RenameInformationPopup_snap_under_left);
+				addMoveMenuItem(manager, SNAP_POSITION_UNDER_RIGHT_FIELD, ReorgMessages.RenameInformationPopup_snap_under_right);
+				addMoveMenuItem(manager, SNAP_POSITION_OVER_LEFT_FIELD, ReorgMessages.RenameInformationPopup_snap_over_left);
+				addMoveMenuItem(manager, SNAP_POSITION_OVER_RIGHT_FIELD, ReorgMessages.RenameInformationPopup_snap_over_right);
+				addMoveMenuItem(manager, SNAP_POSITION_LOWER_RIGHT, ReorgMessages.RenameInformationPopup_snap_bottom_right);
+			}
+		});
+		return menuManager;
+	}
+
+	private void addMoveMenuItem(IMenuManager manager, final int snapPosition, String text) {
+		IAction action= new Action(text, IAction.AS_RADIO_BUTTON) {
+			public void run() {
+				fSnapPosition= snapPosition;
+				getDialogSettings().put(fIsMinimized ? SNAP_POSITION_MINIMIZED_KEY : SNAP_POSITION_KEY, fSnapPosition);
+				updatePopupLocation(true);
+			}
+		};
+		action.setChecked(fSnapPosition == snapPosition);
+		manager.add(action);
+	}
+	
 	private static String getOpenDialogBinding() {
 		IBindingService bindingService= (IBindingService)PlatformUI.getWorkbench().getAdapter(IBindingService.class);
 		if (bindingService == null)
