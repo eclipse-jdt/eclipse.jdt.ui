@@ -70,11 +70,16 @@ public class RenameLinkedMode {
 		public boolean ownsFocusShell() {
 			if (fInfoPopup == null)
 				return false;
-			Shell popup= fInfoPopup.getShell();
-			if (popup == null || popup.isDisposed())
-				return false;
-			Shell activeShell= popup.getDisplay().getActiveShell();
-			return popup == activeShell;
+			if (fInfoPopup.ownsFocusShell()) {
+				System.out.println("fInfoPopup.ownsFocusShell()");
+				return true;
+			}
+			
+			Shell editorShell= fEditor.getSite().getShell();
+			Shell activeShell= editorShell.getDisplay().getActiveShell();
+			if (editorShell == activeShell)
+				return true;
+			return false;
 		}
 
 		public boolean isOriginator(DocumentEvent event, IRegion subjectRegion) {

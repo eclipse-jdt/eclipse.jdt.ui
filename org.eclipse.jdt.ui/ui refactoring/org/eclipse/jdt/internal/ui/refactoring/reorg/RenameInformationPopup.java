@@ -49,7 +49,7 @@ import org.eclipse.swt.widgets.Tracker;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuListener2;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
@@ -311,7 +311,7 @@ public class RenameInformationPopup {
 	private Image fMenuImage;
 	private MenuManager fMinimizedMenuManager;
 	private MenuManager fTableMenuManager;
-	
+	private boolean fIsMenuUp= false;
 	
 	public RenameInformationPopup(CompilationUnitEditor editor, RenameLinkedMode renameLinkedMode) {
 		fEditor= editor;
@@ -363,16 +363,18 @@ public class RenameInformationPopup {
 		new PopupVisibilityManager().start();
 		
 		// Leave linked mode when popup loses focus
-		// (except when focus goes back to workbench window):
+		// (except when focus goes back to workbench window or menu is open):
 		fPopup.addShellListener(new ShellAdapter() {
 			public void shellDeactivated(ShellEvent e) {
+				if (fIsMenuUp)
+					return;
+				
 				final Shell editorShell= fEditor.getSite().getShell();
 				display.asyncExec(new Runnable() {
 					// post to UI thread since editor shell only gets activated after popup has lost focus
 					public void run() {
 						Shell activeShell= display.getActiveShell();
 						if (activeShell != editorShell) {
-//							fLinkedModeModel.exit(ILinkedModeListener.NONE);
 							fRenameLinkedMode.cancel();
 						}
 					}
@@ -559,7 +561,7 @@ public class RenameInformationPopup {
 					fSnapPosition= originalSnapPosition;
 				}
 				updatePopupLocation(true);
-				//TODO: set focus back to editor
+				fEditor.getSite().getShell().setActive();
 			}
 		});
 	}
@@ -714,13 +716,17 @@ public class RenameInformationPopup {
 		}
 		Menu menu= menuManager.createContextMenu(toolBar);
 		menu.setLocation(toolBar.toDisplay(0, toolBar.getSize().y));
+		fIsMenuUp= true;
 		menu.setVisible(true);
 	}
 
 	private MenuManager createMenuManager(final PageBook book, final Composite table, final Composite minimized) {
 		MenuManager menuManager= new MenuManager();
 		menuManager.setRemoveAllWhenShown(true);
-		menuManager.addMenuListener(new IMenuListener() {
+		menuManager.addMenuListener(new IMenuListener2() {
+			public void menuAboutToHide(IMenuManager manager) {
+				fIsMenuUp= false;
+			}
 			public void menuAboutToShow(IMenuManager manager) {
 				IAction action= new Action(
 						fIsMinimized ? ReorgMessages.RenameInformationPopup_restore : ReorgMessages.RenameInformationPopup_minimize,
@@ -732,6 +738,7 @@ public class RenameInformationPopup {
 						getDialogSettings().put(IS_MINIMIZED_KEY, fIsMinimized); 
 						restoreSnapPosition();
 						updatePopupLocation(true);
+						fEditor.getSite().getShell().setActive();
 					}
 				};
 				manager.add(action);
@@ -753,6 +760,7 @@ public class RenameInformationPopup {
 				fSnapPosition= snapPosition;
 				getDialogSettings().put(fIsMinimized ? SNAP_POSITION_MINIMIZED_KEY : SNAP_POSITION_KEY, fSnapPosition);
 				updatePopupLocation(true);
+				fEditor.getSite().getShell().setActive();
 			}
 		};
 		action.setChecked(fSnapPosition == snapPosition);
@@ -775,5 +783,16 @@ public class RenameInformationPopup {
 				recursiveSetBackgroundColor(children[i], color);
 			}
 		}
+	}
+
+	public boolean ownsFocusShell() {
+		if (fIsMenuUp)
+			return true;
+		if (fPopup == null || fPopup.isDisposed())
+			return false;
+		Shell activeShell= fPopup.getDisplay().getActiveShell();
+		if (fPopup == activeShell)
+			return true;
+		return false;
 	}
 }
