@@ -742,19 +742,13 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fTray.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection selection= (IStructuredSelection) event.getSelection();
-				boolean deleteEnabled= false;
-				if (selection.size() == 1 && selection.getFirstElement() instanceof Binding)
-					deleteEnabled= fTray.getTree().isFocusControl();
-				fDeleteAction.setEnabled(deleteEnabled);
+				fDeleteAction.setEnabled(selection.size() >= 1 && fTray.getTree().isFocusControl());
 			}
 		});
 		fTray.getTree().addFocusListener(new FocusAdapter() {
 			public void focusGained(FocusEvent e) {
 				IStructuredSelection selection= (IStructuredSelection) fTray.getSelection();
-				boolean deleteEnabled= false;
-				if (selection.size() == 1 && selection.getFirstElement() instanceof Binding)
-					deleteEnabled= true;
-				fDeleteAction.setEnabled(deleteEnabled);
+				fDeleteAction.setEnabled(selection.size() >= 1);
 			}
 			public void focusLost(FocusEvent e) {
 				fDeleteAction.setEnabled(false);
@@ -1438,24 +1432,19 @@ public class ASTView extends ViewPart implements IShowInSource {
 	}
 		
 	protected void performDelete() {
+		boolean removed= false;
 		IStructuredSelection selection= (IStructuredSelection) fTray.getSelection();
-		if (selection.size() != 1)
-			return;
-		Object obj = selection.getFirstElement();
-		if (obj instanceof Binding) {
-			int index= fTrayRoots.indexOf(obj);
-			if (index != -1) {
-				fTrayRoots.remove(index);
-				fTray.setInput(fTrayRoots);
-				int newSize= fTrayRoots.size();
-				if (newSize == 0)
-					return;
-				else if (index == newSize)
-					setTraySelection(new StructuredSelection(fTrayRoots.get(newSize - 1)));
-				else
-					setTraySelection(new StructuredSelection(fTrayRoots.get(index)));
-			}
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			Object obj= iter.next();
+			if (obj instanceof DynamicAttributeProperty)
+				obj= ((DynamicAttributeProperty) obj).getParent();
+			if (obj instanceof DynamicBindingProperty)
+				obj= ((DynamicBindingProperty) obj).getParent();
+			
+			removed|= fTrayRoots.remove(obj);
 		}
+		if (removed)
+			fTray.setInput(fTrayRoots);
 	}
 	
 	public void setFocus() {
