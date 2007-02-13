@@ -67,6 +67,8 @@
          point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
             name="%Launch.label"
+            delegateDescription="%JUnitLaunchDelegate.description"
+            delegateName="%JUnitLaunchDelegate.name"
             delegate="org.eclipse.jdt.junit.launcher.JUnitLaunchConfigurationDelegate"
             modes="run, debug"
             id="org.eclipse.jdt.junit.launchconfig"
