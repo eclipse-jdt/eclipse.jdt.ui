@@ -119,6 +119,54 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitLaunchConfigurationDelegate_verifying_attriburtes_description;
 
+	public static String JUnitLaunchConfigurationTab_error_invalidProjectName;
+
+	public static String JUnitLaunchConfigurationTab_error_noContainer;
+
+	public static String JUnitLaunchConfigurationTab_error_notJavaProject;
+
+	public static String JUnitLaunchConfigurationTab_error_projectnotdefined;
+
+	public static String JUnitLaunchConfigurationTab_error_projectnotexists;
+
+	public static String JUnitLaunchConfigurationTab_error_test_class_not_found;
+
+	public static String JUnitLaunchConfigurationTab_error_testcasenotonpath;
+
+	public static String JUnitLaunchConfigurationTab_error_testnotdefined;
+
+	public static String JUnitLaunchConfigurationTab_folderdialog_message;
+
+	public static String JUnitLaunchConfigurationTab_folderdialog_title;
+
+	public static String JUnitLaunchConfigurationTab_label_browse;
+
+	public static String JUnitLaunchConfigurationTab_label_containerTest;
+
+	public static String JUnitLaunchConfigurationTab_label_keeprunning;
+
+	public static String JUnitLaunchConfigurationTab_label_method;
+
+	public static String JUnitLaunchConfigurationTab_label_oneTest;
+
+	public static String JUnitLaunchConfigurationTab_label_project;
+
+	public static String JUnitLaunchConfigurationTab_label_search;
+
+	public static String JUnitLaunchConfigurationTab_label_test;
+
+	public static String JUnitLaunchConfigurationTab_projectdialog_message;
+
+	public static String JUnitLaunchConfigurationTab_projectdialog_title;
+
+	public static String JUnitLaunchConfigurationTab_tab_label;
+
+	public static String JUnitLaunchConfigurationTab_Test_Loader;
+
+	public static String JUnitLaunchConfigurationTab_testdialog_message;
+
+	public static String JUnitLaunchConfigurationTab_testdialog_title;
+
 	public static String JUnitLaunchShortcut_dialog_title;
 
 	public static String JUnitLaunchShortcut_dialog_title2;
@@ -136,29 +184,7 @@ public final class JUnitMessages extends NLS {
 	public static String JUnitLaunchShortcut_message_selectTestToDebug;
 
 	public static String JUnitLaunchShortcut_message_selectTestToRun;
-	public static String JUnitMainTab_error_invalidProjectName;
-	public static String JUnitMainTab_error_noContainer;
-	public static String JUnitMainTab_error_notJavaProject;
-	public static String JUnitMainTab_error_projectnotdefined;
-	public static String JUnitMainTab_error_projectnotexists;
-	public static String JUnitMainTab_error_testcasenotonpath;
-	public static String JUnitMainTab_error_testnotdefined;
-	public static String JUnitMainTab_folderdialog_message;
-	public static String JUnitMainTab_folderdialog_title;
-	public static String JUnitMainTab_label_browse;
-	public static String JUnitMainTab_label_containerTest;
 	public static String JUnitMainTab_label_defaultpackage;
-	public static String JUnitMainTab_label_keeprunning;
-	public static String JUnitMainTab_label_method;
-	public static String JUnitMainTab_label_oneTest;
-	public static String JUnitMainTab_label_project;
-	public static String JUnitMainTab_label_search;
-	public static String JUnitMainTab_label_test;
-	public static String JUnitMainTab_projectdialog_message;
-	public static String JUnitMainTab_projectdialog_title;
-	public static String JUnitMainTab_tab_label;
-	public static String JUnitMainTab_testdialog_message;
-	public static String JUnitMainTab_testdialog_title;
 	public static String JUnitPreferencePage_addfilterbutton_label;
 	public static String JUnitPreferencePage_addfilterbutton_tooltip;
 	public static String JUnitPreferencePage_addpackagebutton_label;
@@ -272,8 +298,6 @@ public final class JUnitMessages extends NLS {
 	private JUnitMessages() {
 		// Do not instantiate
 	}
-
-	public static String JUnitMainTab_Test_Loader;
 
 	public static String TestSessionLabelProvider_testMethodName_className;
 
