@@ -542,9 +542,12 @@ public class ASTView extends ViewPart implements IShowInSource {
 			ASTNode node= NodeFinder.perform(root, offset, length);
 			if (node != null) {
 				fViewer.getTree().setRedraw(false);
-				fASTLabelProvider.setSelectedRange(node.getStartPosition(), node.getLength());
-				fViewer.setSelection(new StructuredSelection(node), true);
-				fViewer.getTree().setRedraw(true);
+				try {
+					fASTLabelProvider.setSelectedRange(node.getStartPosition(), node.getLength());
+					fViewer.setSelection(new StructuredSelection(node), true);
+				} finally {
+					fViewer.getTree().setRedraw(true);
+				}
 			}
 			return root;
 			
@@ -1113,7 +1116,14 @@ public class ASTView extends ViewPart implements IShowInSource {
 			return;
 		}
 		ITextSelection textSelection= (ITextSelection) selection;
-		fASTLabelProvider.setSelectedRange(textSelection.getOffset(), textSelection.getLength());
+		if (part == fEditor) {
+			fViewer.getTree().setRedraw(false);
+			try {
+				fASTLabelProvider.setSelectedRange(textSelection.getOffset(), textSelection.getLength());
+			} finally {
+				fViewer.getTree().setRedraw(true);
+			}
+		}
 		if (!fDoLinkWithEditor) {
 			return;
 		}
