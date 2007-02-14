@@ -402,6 +402,9 @@ public class Binding extends ASTAttribute {
 		} else if (value instanceof Object[]) {
 			res= new GeneralAttribute(parent, name, (Object[]) value);
 			
+		} else if (value instanceof ASTAttribute) {
+			res= (ASTAttribute) value;
+			
 		} else {
 			res= new GeneralAttribute(parent, name, value);
 		}
