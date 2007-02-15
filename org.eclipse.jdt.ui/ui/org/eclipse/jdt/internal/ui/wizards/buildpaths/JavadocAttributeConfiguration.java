@@ -60,7 +60,11 @@ public class JavadocAttributeConfiguration extends ClasspathAttributeConfigurati
 				} else {
 					String archive= str.substring(prefix.length(), sepIndex);
 					String root= str.substring(sepIndex + 2);
-					arg= Messages.format(NewWizardMessages.CPListLabelProvider_twopart, new String[] { archive, root }); 
+					if (root.length() > 0) {
+						arg= Messages.format(NewWizardMessages.CPListLabelProvider_twopart, new String[] { archive, root }); 
+					} else {
+						arg= archive;
+					}
 				}
 			} else {
 				arg= str;
