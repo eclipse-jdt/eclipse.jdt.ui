@@ -903,6 +903,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		final DecoratingLabelProvider provider= new DecoratingLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), new ProblemsLabelDecorator());
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getContainer().getShell(), provider, cp);
 		dialog.setDoubleClickSelects(false);
+		dialog.setComparator(new JavaElementComparator());
 		dialog.setInput(JavaCore.create(JavaPlugin.getWorkspace().getRoot()));
 		dialog.addFilter(new EmptyInnerPackageFilter());		
 		dialog.addFilter(new LibraryFilter());

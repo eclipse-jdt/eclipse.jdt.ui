@@ -39,6 +39,8 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
+import org.eclipse.ui.views.navigator.ResourceComparator;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -223,6 +225,7 @@ public class NativeLibrariesConfigurationBlock {
 		dialog.setAllowMultiple(false);
 		dialog.setValidator(validator);
 		dialog.addFilter(filter);
+		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
 		dialog.setTitle(NewWizardMessages.NativeLibrariesDialog_intfiledialog_title); 
 		dialog.setMessage(NewWizardMessages.NativeLibrariesDialog_intfiledialog_message); 
 		dialog.setInput(root);
