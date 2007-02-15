@@ -107,6 +107,11 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaBasePreferencePage_search;
 	public static String JavaBasePreferencePage_search_small_menu;
 	public static String JavaBuildConfigurationBlock_build_recreate_modified;
+	public static String JavadocConfigurationBlock_error_archive_not_found_in_workspace;
+	public static String JavadocConfigurationBlock_external_radio;
+	public static String JavadocConfigurationBlock_workspace_archive_selection_dialog_description;
+	public static String JavadocConfigurationBlock_workspace_archive_selection_dialog_title;
+	public static String JavadocConfigurationBlock_workspace_radio;
 	public static String JavaEditorPropertyPage_SaveActionLink_Text;
 	public static String NewJavaProjectPreferencePage_title;
 	public static String NewJavaProjectPreferencePage_description;

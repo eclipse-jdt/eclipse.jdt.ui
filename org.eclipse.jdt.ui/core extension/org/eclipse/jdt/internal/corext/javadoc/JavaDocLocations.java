@@ -84,7 +84,7 @@ import org.xml.sax.SAXException;
 
 public class JavaDocLocations {
 	
-	public static final String ARCHIVE_PREFIX= "jar:file:/"; //$NON-NLS-1$
+	public static final String ARCHIVE_PREFIX= "jar:"; //$NON-NLS-1$
 	private static final String PREF_JAVADOCLOCATIONS= "org.eclipse.jdt.ui.javadoclocations"; //$NON-NLS-1$
 	public static final String PREF_JAVADOCLOCATIONS_MIGRATED= "org.eclipse.jdt.ui.javadoclocations.migrated"; //$NON-NLS-1$
 

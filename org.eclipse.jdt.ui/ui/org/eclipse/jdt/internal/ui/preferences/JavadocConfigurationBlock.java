@@ -25,9 +25,15 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -47,7 +53,11 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+import org.eclipse.ui.model.WorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.wizards.datatransfer.ZipFileStructureProvider;
+
+import org.eclipse.ui.views.navigator.ResourceComparator;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 
@@ -59,6 +69,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -80,6 +91,7 @@ public class JavadocConfigurationBlock {
 	private SelectionButtonDialogField fURLRadioButton;
 	private SelectionButtonDialogField fArchiveRadioButton;
 	private SelectionButtonDialogField fBrowseArchive;
+	private SelectionButtonDialogField fExternalRadio, fWorkspaceRadio;
 	private SelectionButtonDialogField fBrowseArchivePath;
 	private Shell fShell;
 	private IStatusChangeListener fContext;
@@ -125,6 +137,14 @@ public class JavadocConfigurationBlock {
 			fArchiveRadioButton.setDialogFieldListener(adapter);
 			fArchiveRadioButton.setLabelText(PreferencesMessages.JavadocConfigurationBlock_location_type_jar_label); 
 	
+			fExternalRadio= new SelectionButtonDialogField(SWT.RADIO);
+			fExternalRadio.setDialogFieldListener(adapter);
+			fExternalRadio.setLabelText(PreferencesMessages.JavadocConfigurationBlock_external_radio);
+			
+			fWorkspaceRadio= new SelectionButtonDialogField(SWT.RADIO);
+			fWorkspaceRadio.setDialogFieldListener(adapter);
+			fWorkspaceRadio.setLabelText(PreferencesMessages.JavadocConfigurationBlock_workspace_radio); 
+			
 			fArchiveField= new StringDialogField();
 			fArchiveField.setDialogFieldListener(adapter);
 			fArchiveField.setLabelText(PreferencesMessages.JavadocConfigurationBlock_location_jar_label); 
@@ -184,19 +204,30 @@ public class JavadocConfigurationBlock {
 			// Add the second radio button for the jar/zip
 			fArchiveRadioButton.doFillIntoGrid(topComp, 3);
 	
+			
+			// external - workspace selection
+			DialogField.createEmptySpace(topComp, 1);
+			Composite radioComposite= new Composite(topComp, SWT.NONE);
+			radioComposite.setLayoutData(new GridData(GridData.FILL, GridData.FILL, false, false));
+			GridLayout layout= new GridLayout(2, true);
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			radioComposite.setLayout(layout);
+			fExternalRadio.doFillIntoGrid(radioComposite, 1);
+			fWorkspaceRadio.doFillIntoGrid(radioComposite, 1);
+			DialogField.createEmptySpace(topComp, 1);
+			
 			// Add the jar/zip field
 			fArchiveField.doFillIntoGrid(topComp, 2);
 			LayoutUtil.setWidthHint(fArchiveField.getTextControl(null), converter.convertWidthInCharsToPixels(43));
 			LayoutUtil.setHorizontalGrabbing(fArchiveField.getTextControl(null));		
 
-	
 			fBrowseArchive.doFillIntoGrid(topComp, 1);
-			
+
 			// Add the path chooser for the jar/zip
 			fArchivePathField.doFillIntoGrid(topComp, 2);
 			LayoutUtil.setWidthHint(fArchivePathField.getTextControl(null), converter.convertWidthInCharsToPixels(43));
 			LayoutUtil.setHorizontalGrabbing(fArchivePathField.getTextControl(null));	
-
 			
 			fBrowseArchivePath.doFillIntoGrid(topComp, 1);
 			
@@ -209,7 +240,7 @@ public class JavadocConfigurationBlock {
 			LayoutUtil.setHorizontalIndent(fURLField.getLabelControl(null), indent);
 			
 			fURLRadioButton.attachDialogFields(new DialogField[] {fURLField,  fBrowseFolder, fValidateURLButton });
-			fArchiveRadioButton.attachDialogFields(new DialogField[] {fArchiveField,  fBrowseArchive, fArchivePathField, fBrowseArchivePath, fValidateArchiveButton });
+			fArchiveRadioButton.attachDialogFields(new DialogField[] {fArchiveField,  fBrowseArchive, fExternalRadio, fWorkspaceRadio, fArchivePathField, fBrowseArchivePath, fValidateArchiveButton });
 		}
 
 		
@@ -224,7 +255,9 @@ public class JavadocConfigurationBlock {
 			return;
 		}
 		String prefix= JavaDocLocations.ARCHIVE_PREFIX;
-		boolean isArchive= initialValue.startsWith(prefix); 
+		boolean isArchive= initialValue.startsWith(prefix);
+		
+		boolean isWorkspaceArchive= false;
 		
 		fURLRadioButton.setSelection(!isArchive);
 		fArchiveRadioButton.setSelection(isArchive);
@@ -239,12 +272,32 @@ public class JavadocConfigurationBlock {
 				jarPathStr= initialValue.substring(prefix.length(), excIndex);
 				insidePath= initialValue.substring(excIndex + 2);
 			}
+			
+			final String fileProtocol= "file:/"; //$NON-NLS-1$
+			final String resourceProtocol= "platform:/resource/"; //$NON-NLS-1$
+			
+			if (jarPathStr.startsWith(fileProtocol)) {
+				jarPathStr= jarPathStr.substring(fileProtocol.length());
+			} else if (jarPathStr.startsWith(resourceProtocol)) {
+				jarPathStr= jarPathStr.substring(resourceProtocol.length());
+				isWorkspaceArchive= true;
+			} else {
+				fURLField.setText(initialValue);
+				return;
+			}
 			IPath jarPath= new Path(decodeExclamationMarks(jarPathStr));
 			fArchivePathField.setText(decodeExclamationMarks(insidePath));
-			fArchiveField.setText(jarPath.makeAbsolute().toOSString());
+			if (isWorkspaceArchive) {
+				fArchiveField.setText(jarPath.makeRelative().toString());
+			} else {
+				fArchiveField.setText(jarPath.makeAbsolute().toOSString());
+			}
 		} else {
 			fURLField.setText(initialValue);
-		}		
+		}
+		fExternalRadio.setSelection(!isWorkspaceArchive);
+		fWorkspaceRadio.setSelection(isWorkspaceArchive);
+		
 	}
 		
 	public void setFocus() {
@@ -389,6 +442,9 @@ public class JavadocConfigurationBlock {
 			if (jarPath != null) {
 				fArchiveField.setText(jarPath);
 			}
+		} else if (field == fExternalRadio || field == fWorkspaceRadio) {
+			fArchiveStatus= updateArchiveStatus();
+			statusChanged();	
 		} else if (field == fBrowseArchivePath) {
 			String archivePath= chooseArchivePath();
 			if (archivePath != null) {
@@ -408,7 +464,12 @@ public class JavadocConfigurationBlock {
 			status= StatusUtil.getMoreSevere(fArchiveStatus, fArchivePathStatus);
 		}
 		if (!fIsForSource) {
-			fBrowseArchivePath.setEnabled(!isURL && fArchiveStatus.isOK() && fArchiveField.getText().length() > 0);
+			boolean canBrowseArchivePath= !isURL && fArchiveStatus.isOK() && fArchiveField.getText().length() > 0;
+			if (canBrowseArchivePath && fWorkspaceRadio.isSelected()) {
+				IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(fArchiveField.getText()));
+				canBrowseArchivePath= resource != null && resource.getLocation() != null;
+			}
+			fBrowseArchivePath.setEnabled(canBrowseArchivePath);
 		}
 		fContext.statusChanged(status);
 	}
@@ -457,7 +518,21 @@ public class JavadocConfigurationBlock {
 	private String internalChooseArchivePath() {		
 		ZipFile zipFile= null;
 		try {
-			zipFile= new ZipFile(fArchiveField.getText());
+			if (fWorkspaceRadio.isSelected()) {
+				IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(fArchiveField.getText()));
+				if (resource != null) {
+					IPath location= resource.getLocation();
+					if (location != null) {
+						zipFile= new ZipFile(location.toOSString());
+					}
+				}
+			} else {
+				zipFile= new ZipFile(fArchiveField.getText());
+			}
+			if (zipFile == null) {
+				return null;
+			}
+			
 			ZipFileStructureProvider provider= new ZipFileStructureProvider(zipFile);
 			
 			ILabelProvider lp= new ZipDialogLabelProvider(provider);
@@ -496,6 +571,10 @@ public class JavadocConfigurationBlock {
 	}
 
 	private String chooseArchive() {
+		if (fWorkspaceRadio.isSelected()) {
+			return chooseWorkspaceArchive();
+		}
+		
 		IPath currPath= new Path(fArchiveField.getText());
 		if (ArchiveFileFilter.isArchivePath(currPath)) {
 			currPath= currPath.removeLastSegments(1);
@@ -507,6 +586,37 @@ public class JavadocConfigurationBlock {
 		dialog.setFilterPath(currPath.toOSString());
 
 		return dialog.open();
+	}
+	
+	private String chooseWorkspaceArchive() {
+		String initSelection= fArchiveField.getText();
+		
+		ILabelProvider lp= new WorkbenchLabelProvider();
+		ITreeContentProvider cp= new WorkbenchContentProvider();
+		Class[] acceptedClasses= new Class[] { IFile.class };
+		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, true);
+
+		IResource initSel= null;
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+		if (initSelection.length() > 0) {
+			initSel= root.findMember(new Path(initSelection));
+		}
+
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(fShell, lp, cp);
+		dialog.addFilter(new ArchiveFileFilter((List) null, true));
+		dialog.setAllowMultiple(false);
+		dialog.setValidator(validator);
+		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
+		dialog.setTitle(PreferencesMessages.JavadocConfigurationBlock_workspace_archive_selection_dialog_title); 
+		dialog.setMessage(PreferencesMessages.JavadocConfigurationBlock_workspace_archive_selection_dialog_description); 
+		dialog.setInput(root);
+		dialog.setInitialSelection(initSel);
+		dialog.setHelpAvailable(false);
+		if (dialog.open() == Window.OK) {
+			IResource res= (IResource) dialog.getFirstResult();
+			return res.getFullPath().makeRelative().toString();
+		}
+		return null;
 	}
 	
 	/**
@@ -589,18 +699,32 @@ public class JavadocConfigurationBlock {
 					status.setError(PreferencesMessages.JavadocConfigurationBlock_error_invalidarchivepath); 
 					return status;	
 				}
-				IPath path= Path.fromOSString(jdocLocation);
-				if (!path.isAbsolute()) {
-					status.setError(PreferencesMessages.JavadocConfigurationBlock_error_archivepathnotabsolute); 
-					return status;	
-				}
-				File jarFile= new File(jdocLocation);
-				if (jarFile.isDirectory())  {
-					status.setError(PreferencesMessages.JavadocConfigurationBlock_error_notafile); 
-					return status;							
-				}
-				if (!jarFile.exists())  {
-					status.setWarning(PreferencesMessages.JavadocConfigurationBlock_error_notafile); 
+				if (fWorkspaceRadio.isSelected()) {
+					IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+					IResource res= root.findMember(new Path(jdocLocation));
+					if (res != null) {
+						if (!(res instanceof IFile)) {
+							status.setError(PreferencesMessages.JavadocConfigurationBlock_error_archive_not_found_in_workspace); 
+							return status;
+						}
+					} else {
+						status.setError(PreferencesMessages.JavadocConfigurationBlock_error_archive_not_found_in_workspace); 
+						return status;	
+					}
+				} else {
+					IPath path= Path.fromOSString(jdocLocation);
+					if (!path.isAbsolute()) {
+						status.setError(PreferencesMessages.JavadocConfigurationBlock_error_archivepathnotabsolute); 
+						return status;	
+					}
+					File jarFile= new File(jdocLocation);
+					if (jarFile.isDirectory())  {
+						status.setError(PreferencesMessages.JavadocConfigurationBlock_error_notafile); 
+						return status;							
+					}
+					if (!jarFile.exists())  {
+						status.setWarning(PreferencesMessages.JavadocConfigurationBlock_error_notafile); 
+					}
 				}
 				fArchiveURLResult= getArchiveURL();
 			}
@@ -634,7 +758,16 @@ public class JavadocConfigurationBlock {
 		
 		StringBuffer buf= new StringBuffer();
 		buf.append("jar:"); //$NON-NLS-1$
-		buf.append(encodeExclamationMarks(new File(jarLoc).toURL().toExternalForm()));
+		
+		if (fWorkspaceRadio.isSelected()) {
+			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+			IResource res= root.findMember(new Path(jarLoc));
+			if (res != null) {
+				buf.append("platform:/resource").append(encodeExclamationMarks(res.getFullPath().toString())); //$NON-NLS-1$
+			}
+		} else {
+			buf.append(encodeExclamationMarks(new File(jarLoc).toURL().toExternalForm()));
+		}
 		buf.append('!');
 		if (innerPath.length() > 0) {
 			if (innerPath.charAt(0) != '/') {
