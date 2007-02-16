@@ -23,6 +23,7 @@
       <import plugin="org.eclipse.jface.text.tests"/>
       <import plugin="org.eclipse.jdt.ui.tests"/>
       <import plugin="org.eclipse.core.filebuffers.tests"/>
+      <import plugin="org.eclipse.core.filesystem"/>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
