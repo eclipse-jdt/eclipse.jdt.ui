@@ -76,8 +76,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.util.ClassFileBytesDisassembler;
-import org.eclipse.jdt.core.util.IClassFileDisassembler;
-import org.eclipse.jdt.core.util.IClassFileReader;
+import org.eclipse.jdt.core.util.ClassFormatException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -372,11 +371,13 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		private void updateCodeView(StyledText styledText, IClassFile classFile) {
 			String content= null;
-			int flags= IClassFileReader.FIELD_INFOS | IClassFileReader.METHOD_INFOS | IClassFileReader.SUPER_INTERFACES | IClassFileReader.METHOD_BODIES;
-			IClassFileReader classFileReader= ToolFactory.createDefaultClassFileReader(classFile, flags);
-			if (classFileReader != null) {
-				IClassFileDisassembler disassembler= ToolFactory.createDefaultClassFileDisassembler();
-				content= disassembler.disassemble(classFileReader, "\n", ClassFileBytesDisassembler.DETAILED); //$NON-NLS-1$
+			ClassFileBytesDisassembler disassembler= ToolFactory.createDefaultClassFileBytesDisassembler();
+			try {
+				content= disassembler.disassemble(classFile.getBytes(), "\n", ClassFileBytesDisassembler.DETAILED); //$NON-NLS-1$
+			} catch (JavaModelException ex) {
+				JavaPlugin.log(ex.getStatus());
+			} catch (ClassFormatException ex) {
+				JavaPlugin.log(ex);
 			}
 			styledText.setText(content == null ? "" : content); //$NON-NLS-1$
 		}
