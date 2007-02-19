@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.core.resources.IFile;
 
@@ -177,8 +178,8 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		IPath path= getFile().getFullPath();
 		ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
 		try {
-			bufferManager.connect(path, new SubProgressMonitor(pm, 1));
-			IDocument document= bufferManager.getTextFileBuffer(path).getDocument();
+			bufferManager.connect(path, LocationKind.IFILE, new SubProgressMonitor(pm, 1));
+			IDocument document= bufferManager.getTextFileBuffer(path, LocationKind.IFILE).getDocument();
 			final CompilationUnitChange result= new CompilationUnitChange(getName(), fCUnit);
 			if (fLeaveDirty)
 				result.setSaveMode(TextFileChange.LEAVE_DIRTY);
@@ -210,7 +211,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
 				e.getMessage(), e));
 		} finally {
-			bufferManager.disconnect(path, new SubProgressMonitor(pm, 1));
+			bufferManager.disconnect(path, LocationKind.IFILE, new SubProgressMonitor(pm, 1));
 			pm.done();
 		}
 	}

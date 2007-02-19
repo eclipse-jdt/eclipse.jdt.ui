@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IStorage;
@@ -425,7 +426,7 @@ public class NLSHintHelper {
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		try {
 			if (manager != null) {
-				ITextFileBuffer buffer= manager.getTextFileBuffer(storage.getFullPath());
+				ITextFileBuffer buffer= manager.getTextFileBuffer(storage.getFullPath(), LocationKind.NORMALIZE);
 				if (buffer != null) {
 					IDocument document= buffer.getDocument();
 					is= new ByteArrayInputStream(document.get().getBytes());

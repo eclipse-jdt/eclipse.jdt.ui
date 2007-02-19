@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -318,7 +319,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 	private void checkDirtyFile(RefactoringStatus result, IFile file) {
 		if (file == null || !file.exists())
 			return;
-		ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(file.getFullPath());
+		ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(file.getFullPath(), LocationKind.IFILE);
 		if (buffer != null && buffer.isDirty()) {
 			if (buffer.isStateValidated() && buffer.isSynchronized()) {
 				result.addWarning(Messages.format(

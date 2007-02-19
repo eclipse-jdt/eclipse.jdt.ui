@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
@@ -42,7 +43,7 @@ abstract class AbstractDeleteChange extends JDTChange {
 	}
 	
 	protected static void saveFileIfNeeded(IFile file, IProgressMonitor pm) throws CoreException {
-		ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(file.getFullPath());
+		ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(file.getFullPath(), LocationKind.IFILE);
 		if (buffer != null && buffer.isDirty() &&  buffer.isStateValidated() && buffer.isSynchronized()) {
 			pm.beginTask("", 2); //$NON-NLS-1$
 			buffer.commit(new SubProgressMonitor(pm, 1), false);

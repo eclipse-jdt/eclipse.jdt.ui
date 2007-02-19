@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IRegion;
@@ -57,8 +58,8 @@ public class CodeRefactoringUtil {
 	public static int getIndentationLevel(ASTNode node, ICompilationUnit unit) throws CoreException {
 		IPath fullPath= unit.getCorrespondingResource().getFullPath();
 		try{
-			FileBuffers.getTextFileBufferManager().connect(fullPath, new NullProgressMonitor());
-			ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(fullPath);
+			FileBuffers.getTextFileBufferManager().connect(fullPath, LocationKind.IFILE, new NullProgressMonitor());
+			ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(fullPath, LocationKind.IFILE);
 			try {
 				IRegion region= buffer.getDocument().getLineInformationOfOffset(node.getStartPosition());
 				return Strings.computeIndentUnits(buffer.getDocument().get(region.getOffset(), region.getLength()), unit.getJavaProject());
@@ -67,7 +68,7 @@ public class CodeRefactoringUtil {
 			}
 			return 0;
 		} finally {
-			FileBuffers.getTextFileBufferManager().disconnect(fullPath, new NullProgressMonitor());
+			FileBuffers.getTextFileBufferManager().disconnect(fullPath, LocationKind.IFILE, new NullProgressMonitor());
 		}
 	}	
 

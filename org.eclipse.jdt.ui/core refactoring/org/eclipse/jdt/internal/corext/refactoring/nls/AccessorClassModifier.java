@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -118,13 +119,13 @@ public class AccessorClassModifier {
 		IPath path= fCU.getPath();
 		
 		if (manager != null && path != null) {
-			manager.connect(path, null);
+			manager.connect(path, LocationKind.NORMALIZE, null);
 			try {
-				ITextFileBuffer buffer= manager.getTextFileBuffer(path);
+				ITextFileBuffer buffer= manager.getTextFileBuffer(path, LocationKind.NORMALIZE);
 				if (buffer != null)
 					document= buffer.getDocument();
 			} finally {
-				manager.disconnect(path, null);
+				manager.disconnect(path, LocationKind.NORMALIZE, null);
 			}
 		}
 		

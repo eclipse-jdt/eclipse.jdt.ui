@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -188,18 +189,18 @@ public class NLSHint {
 		IPath path= cu.getPath();
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		try {
-			manager.connect(path, null);
+			manager.connect(path, LocationKind.NORMALIZE, null);
 		} catch (CoreException e) {
 			return null;
 		}
 		
 		try {
-			ITextFileBuffer buffer= manager.getTextFileBuffer(path);
+			ITextFileBuffer buffer= manager.getTextFileBuffer(path, LocationKind.NORMALIZE);
 			if (buffer != null)
 				return buffer.getDocument();
 		} finally {
 			try {
-				manager.disconnect(path, null);
+				manager.disconnect(path, LocationKind.NORMALIZE, null);
 			} catch (CoreException e) {
 				return null;
 			}
