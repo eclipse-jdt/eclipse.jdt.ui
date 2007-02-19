@@ -37,9 +37,9 @@ import org.eclipse.test.performance.PerformanceMeter;
  */
 public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 	
-	private static final int LONG_REPEAT_COUNT= 1;//1000000;
-	private static final int UNCONNECTED_REPEAT_COUNT= 1;//100000;
-	private static final int ALL_REPEAT_COUNT= 0;//5000;
+	private static final int LONG_REPEAT_COUNT= 1000000;
+	private static final int UNCONNECTED_REPEAT_COUNT= 100000;
+	private static final int ALL_REPEAT_COUNT= 5000;
 
 	private IProject fProject;
 	private ITextFileBufferManager fManager;
