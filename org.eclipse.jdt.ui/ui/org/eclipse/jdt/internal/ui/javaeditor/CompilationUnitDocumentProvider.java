@@ -16,11 +16,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.filesystem.URIUtil;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -83,6 +88,8 @@ import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.ForwardingDocumentProvider;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
+
+import org.eclipse.ui.ide.IURIEditorInput;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -952,13 +959,23 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	 * @since 3.2
 	 */
 	private ICompilationUnit createFakeCompiltationUnit(Object element, boolean setContents) {
-		if (!(element instanceof IStorageEditorInput))
-			return null;
-		
-		final IStorageEditorInput sei= (IStorageEditorInput)element;
-		
+		if (element instanceof IStorageEditorInput)
+			return createFakeCompiltationUnit((IStorageEditorInput)element, setContents); 
+		else if (element instanceof IURIEditorInput)
+			return createFakeCompiltationUnit((IURIEditorInput)element); 
+		return null;
+	}
+	
+	/**
+	 * Creates a fake compilation unit.
+	 *
+	 * @param editorInput the storage editor input
+	 * @param setContents tells whether to read and set the contents to the new CU
+	 * @since 3.2
+	 */
+	private ICompilationUnit createFakeCompiltationUnit(IStorageEditorInput editorInput, boolean setContents) {
 		try {
-			final IStorage storage= sei.getStorage();
+			final IStorage storage= editorInput.getStorage();
 			final IPath storagePath= storage.getFullPath();
 			if (storage.getName() == null || storagePath == null)
 				return null;
@@ -1007,9 +1024,52 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				cu.getBuffer().setContents(buffer.toString());
 			}
 			
-			if (!isModifiable(element))
+			if (!isModifiable(editorInput))
 				JavaModelUtil.reconcile(cu);
 			
+			return cu;
+		} catch (CoreException ex) {
+			return null;
+		}
+	}
+	
+	/**
+	 * Creates a fake compilation unit.
+	 *
+	 * @param editorInput the URI editor input
+	 * @since 3.3
+	 */
+	private ICompilationUnit createFakeCompiltationUnit(IURIEditorInput editorInput) {
+		try {
+			final URI uri= editorInput.getURI();
+			final IFileStore fileStore= EFS.getStore(uri);
+			final IPath path= URIUtil.toPath(uri);
+			if (fileStore.getName() == null || path == null)
+				return null;
+			
+			WorkingCopyOwner woc= new WorkingCopyOwner() {
+				/*
+				 * @see org.eclipse.jdt.core.WorkingCopyOwner#createBuffer(org.eclipse.jdt.core.ICompilationUnit)
+				 * @since 3.2
+				 */
+				public IBuffer createBuffer(ICompilationUnit workingCopy) {
+					return new DocumentAdapter(workingCopy, path);
+				}
+			};
+			
+			IClasspathEntry[] cpEntries= null;
+			IJavaProject jp= findJavaProject(path);
+			if (jp != null)
+				cpEntries= jp.getResolvedClasspath(true);
+			
+			if (cpEntries == null || cpEntries.length == 0)
+				cpEntries= new IClasspathEntry[] { JavaRuntime.getDefaultJREContainerEntry() };
+			
+			final ICompilationUnit cu= woc.newWorkingCopy(fileStore.getName(), cpEntries, null, getProgressMonitor());
+			
+			if (!isModifiable(editorInput))
+				JavaModelUtil.reconcile(cu);
+
 			return cu;
 		} catch (CoreException ex) {
 			return null;
