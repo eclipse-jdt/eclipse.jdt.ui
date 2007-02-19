@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
@@ -104,8 +105,8 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 		IPath path= context.getCompilationUnit().getPath();
 		
 		try {
-			textFileBufferManager.connect(path, null);
-			IDocument document= textFileBufferManager.getTextFileBuffer(path).getDocument();
+			textFileBufferManager.connect(path, LocationKind.NORMALIZE, null);
+			IDocument document= textFileBufferManager.getTextFileBuffer(path, LocationKind.NORMALIZE).getDocument();
 			int startLine= document.getLineOfOffset(selectionOffset);
 			int endLine= document.getLineOfOffset(selectionOffset + selectionLength);
 			
@@ -129,7 +130,7 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 		} catch (BadLocationException e) {
 			return false;
 		} finally {
-			textFileBufferManager.disconnect(path, null);
+			textFileBufferManager.disconnect(path, LocationKind.NORMALIZE, null);
 		}
 		return true;
 	}

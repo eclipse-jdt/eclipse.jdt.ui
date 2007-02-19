@@ -65,7 +65,7 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 		fProject= ResourceHelper.createProject("project");
 		fPath= createPath(fProject);
 		fNonExistingPath= new Path("project/folderA/folderB/noFile");
-		ITextFileBuffer buffer= fManager.getTextFileBuffer(fPath);
+		ITextFileBuffer buffer= fManager.getTextFileBuffer(fPath, LocationKind.NORMALIZE);
 		fTempFile= File.createTempFile("measureGetOldExternal", "txt");
 		fTempFilePath= new Path(fTempFile.getAbsolutePath());
 		assertTrue(buffer == null);
@@ -106,14 +106,14 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 	}
 	
 	public void measureGetOldNonExist(PerformanceMeter meter) throws CoreException {
-		fManager.connect(fNonExistingPath, null);
+		fManager.connect(fNonExistingPath, LocationKind.NORMALIZE, null);
 		meter.start();
 		for (int i= 0; i < LONG_REPEAT_COUNT; i++)
-			fManager.getTextFileBuffer(fNonExistingPath);
+			fManager.getTextFileBuffer(fNonExistingPath, LocationKind.NORMALIZE);
 		meter.stop();
-		fManager.disconnect(fNonExistingPath, null);
+		fManager.disconnect(fNonExistingPath, LocationKind.NORMALIZE, null);
 		
-		assertNull(fManager.getTextFileBuffer(fNonExistingPath));
+		assertNull(fManager.getTextFileBuffer(fNonExistingPath, LocationKind.NORMALIZE));
 	}
 	
 	public void measureGetOldExternal(PerformanceMeter meter) throws Exception {
@@ -122,7 +122,7 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 		for (int i= 0; i < LONG_REPEAT_COUNT; i++)
 			fManager.getTextFileBuffer(fTempFilePath, LocationKind.LOCATION);
 		meter.stop();
-		fManager.disconnect(fTempFilePath, null);
+		fManager.disconnect(fTempFilePath, LocationKind.LOCATION, null);
 		assertNull(fManager.getTextFileBuffer(fTempFilePath, LocationKind.LOCATION));
 	}
 	
@@ -135,7 +135,7 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 		}
 		meter.stop();
 		
-		assertNull(fManager.getTextFileBuffer(fPath));
+		assertNull(fManager.getTextFileBuffer(fPath, LocationKind.IFILE));
 	}
 	
 	public void measureGetUnconnectedOld(PerformanceMeter meter) throws CoreException {
@@ -150,10 +150,10 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 	public void measureGetUnconnectedOldNonExist(PerformanceMeter meter) throws CoreException {
 		meter.start();
 		for (int i= 0; i < UNCONNECTED_REPEAT_COUNT; i++)
-			fManager.getTextFileBuffer(fNonExistingPath);
+			fManager.getTextFileBuffer(fNonExistingPath, LocationKind.NORMALIZE);
 		meter.stop();
 		
-		assertNull(fManager.getTextFileBuffer(fNonExistingPath));
+		assertNull(fManager.getTextFileBuffer(fNonExistingPath, LocationKind.NORMALIZE));
 	}
 
 	public void measureGetUnconnectedOldExternal(PerformanceMeter meter) throws Exception {

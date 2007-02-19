@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -310,13 +311,13 @@ public class NLSSearchTest extends TestCase {
 		
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		try {
-			manager.connect(propertiesFile.getLocation(), new NullProgressMonitor());
-			ITextFileBuffer buffer= manager.getTextFileBuffer(propertiesFile.getLocation());
+			manager.connect(propertiesFile.getFullPath(), LocationKind.IFILE, new NullProgressMonitor());
+			ITextFileBuffer buffer= manager.getTextFileBuffer(propertiesFile.getFullPath(), LocationKind.IFILE);
 			buffer.getDocument().replace(8, 1, "1");
 			
 			NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 0);
 		} finally {
-			manager.disconnect(propertiesFile.getLocation(), new NullProgressMonitor());
+			manager.disconnect(propertiesFile.getFullPath(), LocationKind.IFILE, new NullProgressMonitor());
 		}
 	}
 }

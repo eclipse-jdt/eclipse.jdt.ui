@@ -14,6 +14,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ISynchronizable;
@@ -32,7 +33,7 @@ public class SynchronizedLineDifferInitializationTest extends DocumentLineDiffer
 	 * @see org.eclipse.jdt.text.tests.performance.DocumentLineDifferInitializationText#createDocument(java.lang.String)
 	 */
 	protected IDocument createDocument(String contents) {
-		IDocument document= FileBuffers.getTextFileBufferManager().createEmptyDocument(null);
+		IDocument document= FileBuffers.getTextFileBufferManager().createEmptyDocument(null, LocationKind.IFILE);
 		if (document instanceof ISynchronizable)
 			((ISynchronizable)document).setLockObject(new Object());		
 		document.set(contents);

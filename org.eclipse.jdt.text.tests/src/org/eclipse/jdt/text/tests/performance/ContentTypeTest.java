@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.test.performance.PerformanceMeter;
 
@@ -157,8 +158,8 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 		IPath path= file.getFullPath();
 		ITextFileBufferManager fileBufferManager= FileBuffers.getTextFileBufferManager();
 		try {
-			fileBufferManager.connect(path, null);
-			ITextFileBuffer fileBuffer= fileBufferManager.getTextFileBuffer(path);
+			fileBufferManager.connect(path, LocationKind.IFILE, null);
+			ITextFileBuffer fileBuffer= fileBufferManager.getTextFileBuffer(path, LocationKind.IFILE);
 			if (dirty) {
 				IDocument document= fileBuffer.getDocument();
 				document.replace(document.getLength(), 0, " ");
@@ -174,7 +175,7 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 				assertEquals(expectedContentType, contentType);
 			}
 		} finally {
-			fileBufferManager.disconnect(path, null);
+			fileBufferManager.disconnect(path, LocationKind.IFILE, null);
 		}
 	}
 }

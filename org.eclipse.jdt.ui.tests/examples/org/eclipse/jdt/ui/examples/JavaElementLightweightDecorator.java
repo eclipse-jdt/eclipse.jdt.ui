@@ -13,6 +13,8 @@ package org.eclipse.jdt.ui.examples;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.IFileBuffer;
 import org.eclipse.core.filebuffers.IFileBufferListener;
+import org.eclipse.core.filebuffers.LocationKind;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
@@ -127,7 +129,7 @@ public class JavaElementLightweightDecorator extends LabelProvider implements IL
 			path= ((IJavaElement) element).getPath();
 		}
 		if (path != null) {
-			if (FileBuffers.getTextFileBufferManager().getFileBuffer(path) != null) {
+			if (FileBuffers.getTextFileBufferManager().getFileBuffer(path, LocationKind.NORMALIZE) != null) {
 				decoration.setFont(fBold);
 			}
 		}
