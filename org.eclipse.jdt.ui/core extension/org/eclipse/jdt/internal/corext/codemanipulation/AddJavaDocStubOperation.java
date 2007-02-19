@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -122,9 +123,9 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		IPath path= cu.getPath();
 		
-		manager.connect(path, new SubProgressMonitor(monitor, 1));
+		manager.connect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
 		try {
-			IDocument document= manager.getTextFileBuffer(path).getDocument();
+			IDocument document= manager.getTextFileBuffer(path, LocationKind.IFILE).getDocument();
 			
 			String lineDelim= TextUtilities.getDefaultLineDelimiter(document);
 			MultiTextEdit edit= new MultiTextEdit();
@@ -173,7 +174,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 		} catch (BadLocationException e) {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		} finally {
-			manager.disconnect(path, new SubProgressMonitor(monitor, 1));
+			manager.disconnect(path, LocationKind.IFILE,new SubProgressMonitor(monitor, 1));
 		}
 	}
 

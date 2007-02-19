@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -394,10 +395,10 @@ public class FormatAllAction extends SelectionDispatchAction {
 				ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 				try {
 					try {
-						manager.connect(path, new SubProgressMonitor(monitor, 1));
+						manager.connect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
 		
 						monitor.subTask(path.makeRelative().toString());
-						ITextFileBuffer fileBuffer= manager.getTextFileBuffer(path);
+						ITextFileBuffer fileBuffer= manager.getTextFileBuffer(path, LocationKind.IFILE);
 						
 						formatCompilationUnit(fileBuffer, lastOptions);
 						
@@ -407,7 +408,7 @@ public class FormatAllAction extends SelectionDispatchAction {
 							monitor.worked(2);
 						}
 					} finally {
-						manager.disconnect(path, new SubProgressMonitor(monitor, 1));
+						manager.disconnect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
 					}
 				} catch (CoreException e) {
 					String message= Messages.format(ActionMessages.FormatAllAction_problem_accessing, new String[] { path.toString(), e.getLocalizedMessage() });

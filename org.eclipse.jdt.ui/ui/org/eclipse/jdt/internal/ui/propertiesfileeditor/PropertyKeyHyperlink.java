@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
@@ -144,9 +145,9 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 			try {
-				manager.connect(storage.getFullPath(), null);
+				manager.connect(storage.getFullPath(), LocationKind.NORMALIZE, null);
 				try {
-					ITextFileBuffer buffer= manager.getTextFileBuffer(storage.getFullPath());
+					ITextFileBuffer buffer= manager.getTextFileBuffer(storage.getFullPath(), LocationKind.NORMALIZE);
 					IDocument document= buffer.getDocument();
 					if (document != null) {
 						int line= document.getLineOfOffset(offset) + 1;
@@ -154,7 +155,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 						return Messages.format(PropertiesFileEditorMessages.OpenAction_SelectionDialog_elementLabel, args);
 					}
 				} finally {
-					manager.disconnect(storage.getFullPath(), null);
+					manager.disconnect(storage.getFullPath(), LocationKind.NORMALIZE, null);
 				}
 			} catch (CoreException e) {
 				JavaPlugin.log(e.getStatus());

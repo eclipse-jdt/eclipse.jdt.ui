@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -107,8 +108,8 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			pm.beginTask("", 2); //$NON-NLS-1$
 			ITextFileBuffer buffer= null;
 			try {
-				manager.connect(fFile.getFullPath(), new SubProgressMonitor(pm, 1));
-				buffer= manager.getTextFileBuffer(fFile.getFullPath());
+				manager.connect(fFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(pm, 1));
+				buffer= manager.getTextFileBuffer(fFile.getFullPath(), LocationKind.IFILE);
 				IDocument document= buffer.getDocument();
 				
 				long oldFileValue= fFile.getModificationStamp();
@@ -154,7 +155,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IRefactoringCoreStatusCodes.BAD_LOCATION, message, e));
 			} finally {
 				if (buffer != null)
-					manager.disconnect(fFile.getFullPath(), new SubProgressMonitor(pm, 1));
+					manager.disconnect(fFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(pm, 1));
 			}
 		}
 	}
@@ -272,8 +273,8 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	    
 	    ITextFileBuffer buffer= null;
 	    try {
-	    	manager.connect(path, new SubProgressMonitor(monitor, 1));
-		    buffer= manager.getTextFileBuffer(path);
+	    	manager.connect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
+		    buffer= manager.getTextFileBuffer(path, LocationKind.IFILE);
     	    IDocument document= buffer.getDocument();
     	    
     	    if (document instanceof IDocumentExtension4) {
@@ -283,7 +284,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     		}
 	    } finally {
 	    	if (buffer != null)
-	    		manager.disconnect(path, new SubProgressMonitor(monitor, 1));
+	    		manager.disconnect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
 	    	monitor.done();
 	    }
     }

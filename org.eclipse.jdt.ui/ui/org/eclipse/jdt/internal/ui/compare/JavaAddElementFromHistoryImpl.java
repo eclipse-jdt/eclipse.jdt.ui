@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.core.resources.IFile;
 
@@ -142,8 +143,8 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 		ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
 		ITextFileBuffer textFileBuffer= null;
 		try {
-			bufferManager.connect(path, null);
-			textFileBuffer= bufferManager.getTextFileBuffer(path);
+			bufferManager.connect(path, LocationKind.IFILE, null);
+			textFileBuffer= bufferManager.getTextFileBuffer(path, LocationKind.IFILE);
 			IDocument document= textFileBuffer.getDocument();
 			
 			// configure EditionSelectionDialog and let user select an edition
@@ -229,7 +230,7 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 		} finally {
 			try {
 				if (textFileBuffer != null)
-					bufferManager.disconnect(path, null);
+					bufferManager.disconnect(path, LocationKind.IFILE, null);
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}

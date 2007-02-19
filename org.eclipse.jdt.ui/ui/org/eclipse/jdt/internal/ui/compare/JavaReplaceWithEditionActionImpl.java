@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.core.resources.IFile;
 
@@ -142,8 +143,8 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 		ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
 		ITextFileBuffer textFileBuffer= null;
 		try {
-			bufferManager.connect(path, null);
-			textFileBuffer= bufferManager.getTextFileBuffer(path);
+			bufferManager.connect(path, LocationKind.IFILE, null);
+			textFileBuffer= bufferManager.getTextFileBuffer(path, LocationKind.IFILE);
 			IDocument document= textFileBuffer.getDocument();		
 			performReplace(input, file, textFileBuffer, document, element);
 	 	} catch(InvocationTargetException ex) {
@@ -159,7 +160,7 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 		} finally {
 			try {
 				if (textFileBuffer != null)
-					bufferManager.disconnect(path, null);
+					bufferManager.disconnect(path, LocationKind.IFILE, null);
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}

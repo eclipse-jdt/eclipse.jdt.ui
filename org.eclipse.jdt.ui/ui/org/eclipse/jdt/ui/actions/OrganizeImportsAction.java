@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
@@ -390,7 +391,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					try {
 						boolean save= !cu.isWorkingCopy();
 						if (!save) {
-							ITextFileBuffer textFileBuffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(cu.getPath());
+							ITextFileBuffer textFileBuffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(cu.getPath(), LocationKind.IFILE);
 							save= textFileBuffer != null && !textFileBuffer.isDirty(); // save when not dirty
 						}
 						

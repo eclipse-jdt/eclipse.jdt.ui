@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.core.resources.IFile;
 
@@ -349,7 +350,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	private InputStream createInputStream(IFile propertiesFile) throws CoreException {
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		if (manager != null) {
-			ITextFileBuffer buffer= manager.getTextFileBuffer(propertiesFile.getLocation());
+			ITextFileBuffer buffer= manager.getTextFileBuffer(propertiesFile.getFullPath(), LocationKind.IFILE);
 			if (buffer != null) {
 				return new ByteArrayInputStream(buffer.getDocument().get().getBytes());
 			}

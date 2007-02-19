@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -117,12 +118,12 @@ public class NLSHintHelperTest extends TestCase {
 		
 		IPath nonExistentPath= fJProject.getProject().getFullPath().append("" + System.currentTimeMillis());
 		try {
-			manager.connect(nonExistentPath, null);
+			manager.connect(nonExistentPath, LocationKind.NORMALIZE, null);
 		} catch (CoreException e) {
 			fail();
 		}
 		try {
-			ITextFileBuffer buffer= manager.getTextFileBuffer(nonExistentPath);
+			ITextFileBuffer buffer= manager.getTextFileBuffer(nonExistentPath, LocationKind.NORMALIZE);
 			buffer.getDocument().set("newKey= newValue");
 			
 			IFile nonExistentFile= ResourcesPlugin.getWorkspace().getRoot().getFile(nonExistentPath);
@@ -132,7 +133,7 @@ public class NLSHintHelperTest extends TestCase {
 			assertEquals("newValue", newValue);
 		} finally {
 			try {
-				manager.disconnect(nonExistentPath, null);
+				manager.disconnect(nonExistentPath, LocationKind.NORMALIZE, null);
 			} catch (CoreException e1) {
 				// ignore: test itself was already successful
 			}
@@ -145,12 +146,12 @@ public class NLSHintHelperTest extends TestCase {
 		
 		IPath nonExistentPath= fJProject.getProject().getFullPath().append("" + System.currentTimeMillis());
 		try {
-			manager.connect(nonExistentPath, null);
+			manager.connect(nonExistentPath, LocationKind.NORMALIZE, null);
 		} catch (CoreException e) {
 			fail();
 		}
 		try {
-			ITextFileBuffer buffer= manager.getTextFileBuffer(nonExistentPath);
+			ITextFileBuffer buffer= manager.getTextFileBuffer(nonExistentPath, LocationKind.NORMALIZE);
 			buffer.getDocument().set("newKey= newValue");
 			
 			IFile nonExistentFile= ResourcesPlugin.getWorkspace().getRoot().getFile(nonExistentPath);
@@ -160,7 +161,7 @@ public class NLSHintHelperTest extends TestCase {
 			assertEquals(newValue, null);
 		} finally {
 			try {
-				manager.disconnect(nonExistentPath, null);
+				manager.disconnect(nonExistentPath, LocationKind.NORMALIZE, null);
 			} catch (CoreException e1) {
 				// ignore: test itself was already successful
 			}
@@ -176,12 +177,12 @@ public class NLSHintHelperTest extends TestCase {
 		IPath nonExistentLocation= fJProject.getProject().getLocation().append(fileName);
 		
 		try {
-			manager.connect(nonExistentLocation, null);
+			manager.connect(nonExistentLocation, LocationKind.NORMALIZE, null);
 		} catch (CoreException e) {
 			fail();
 		}
 		try {
-			ITextFileBuffer buffer= manager.getTextFileBuffer(nonExistentLocation);
+			ITextFileBuffer buffer= manager.getTextFileBuffer(nonExistentLocation, LocationKind.NORMALIZE);
 			buffer.getDocument().set("newKey= newValue");
 			buffer.commit(null, false);
 			
@@ -197,7 +198,7 @@ public class NLSHintHelperTest extends TestCase {
 			fail();
 		} finally {
 			try {
-				manager.disconnect(nonExistentPath, null);
+				manager.disconnect(nonExistentPath, LocationKind.NORMALIZE, null);
 			} catch (CoreException e1) {
 				// ignore: test itself was already successful
 			}
@@ -212,12 +213,12 @@ public class NLSHintHelperTest extends TestCase {
 		IPath nonExistentPath= fJProject.getProject().getFullPath().append(fileName);
 		IPath nonExistentLocation= fJProject.getProject().getLocation().append(fileName);
 		try {
-			manager.connect(nonExistentLocation, null);
+			manager.connect(nonExistentLocation, LocationKind.NORMALIZE, null);
 		} catch (CoreException e) {
 			fail();
 		}
 		try {
-			ITextFileBuffer buffer= manager.getTextFileBuffer(nonExistentLocation);
+			ITextFileBuffer buffer= manager.getTextFileBuffer(nonExistentLocation, LocationKind.NORMALIZE);
 			buffer.getDocument().set("newKey= newValue");
 			buffer.commit(null, false);
 			
@@ -233,7 +234,7 @@ public class NLSHintHelperTest extends TestCase {
 			fail();
 		} finally {
 			try {
-				manager.disconnect(nonExistentPath, null);
+				manager.disconnect(nonExistentPath, LocationKind.NORMALIZE, null);
 			} catch (CoreException e1) {
 				// ignore: test itself was already successful
 			}

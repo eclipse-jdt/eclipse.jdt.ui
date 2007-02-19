@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 
@@ -208,11 +209,11 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 			final IJavaProject project= fCompilationUnit.getJavaProject();
 			final IPath path= fCompilationUnit.getResource().getFullPath();
 			try {
-				FileBuffers.getTextFileBufferManager().connect(path, new SubProgressMonitor(monitor, 10));
+				FileBuffers.getTextFileBufferManager().connect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 10));
 				if (monitor.isCanceled())
 					throw new InterruptedException();
 				
-				final ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(path);
+				final ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(path, LocationKind.IFILE);
 				if (buffer.isDirty() && buffer.isStateValidated() && buffer.isCommitable() && displayYesNoMessage(CorrectionMessages.SerialVersionHashProposal_save_caption, CorrectionMessages.SerialVersionHashProposal_save_message))
 					buffer.commit(new SubProgressMonitor(monitor, 20), true);
 				else
@@ -221,7 +222,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 				if (monitor.isCanceled())
 					throw new InterruptedException();
 			} finally {
-				FileBuffers.getTextFileBufferManager().disconnect(path, new SubProgressMonitor(monitor, 10));
+				FileBuffers.getTextFileBufferManager().disconnect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 10));
 			}
 			project.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor, 60));
 			if (monitor.isCanceled())

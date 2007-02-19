@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -923,8 +924,8 @@ public final class JavaModelUtil {
 			if (file.exists()) {
 				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
 				IPath path= cu.getPath();
-				bufferManager.connect(path, monitor);
-				return bufferManager.getTextFileBuffer(path).getDocument();
+				bufferManager.connect(path, LocationKind.IFILE, monitor);
+				return bufferManager.getTextFileBuffer(path, LocationKind.IFILE).getDocument();
 			}
 		}
 		monitor.done();
@@ -942,7 +943,7 @@ public final class JavaModelUtil {
 				new RewriteSessionEditProcessor(document, edit, TextEdit.UPDATE_REGIONS).performEdits(); // apply after file is commitable
 				
 				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
-				bufferManager.getTextFileBuffer(file.getFullPath()).commit(monitor, true);
+				bufferManager.getTextFileBuffer(file.getFullPath(), LocationKind.IFILE).commit(monitor, true);
 				return;
 			}
 		}
@@ -956,7 +957,7 @@ public final class JavaModelUtil {
 			IFile file= (IFile) cu.getResource();
 			if (file.exists()) {
 				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
-				bufferManager.disconnect(file.getFullPath(), monitor);
+				bufferManager.disconnect(file.getFullPath(), LocationKind.IFILE, monitor);
 				return;
 			}
 		}
