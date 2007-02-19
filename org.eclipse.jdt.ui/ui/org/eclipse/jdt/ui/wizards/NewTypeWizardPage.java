@@ -1956,7 +1956,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				
 				IBuffer buffer= parentCU.getBuffer();
 				
-				String cuContent= constructCUContent(parentCU, constructSimpleTypeStub(), lineDelimiter);
+				String simpleTypeStub= constructSimpleTypeStub();
+				String cuContent= constructCUContent(parentCU, simpleTypeStub, lineDelimiter);
 				buffer.setContents(cuContent);
 				
 				CompilationUnit astRoot= createASTForImports(parentCU);
@@ -1968,11 +1969,15 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				
 				String typeContent= constructTypeStub(parentCU, imports, lineDelimiter);
 				
-				AbstractTypeDeclaration typeNode= (AbstractTypeDeclaration) astRoot.types().get(0);
-				int start= ((ASTNode) typeNode.modifiers().get(0)).getStartPosition();
-				int end= typeNode.getStartPosition() + typeNode.getLength();
-				
-				buffer.replace(start, end - start, typeContent);
+				int index= cuContent.lastIndexOf(simpleTypeStub);
+				if (index == -1) {
+					AbstractTypeDeclaration typeNode= (AbstractTypeDeclaration) astRoot.types().get(0);
+					int start= ((ASTNode) typeNode.modifiers().get(0)).getStartPosition();
+					int end= typeNode.getStartPosition() + typeNode.getLength();
+					buffer.replace(start, end - start, typeContent);
+				} else {
+					buffer.replace(index, simpleTypeStub.length(), typeContent);
+				}
 				
 				createdType= parentCU.getType(typeName);
 			} else {
