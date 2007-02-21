@@ -18,6 +18,9 @@ import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 
+/**
+ * Notifier for the callback listener API {@link TestRunListener}.
+ */
 public class TestRunListenerAdapter implements ITestSessionListener {
 
 	private final ITestRunSession fSession;
