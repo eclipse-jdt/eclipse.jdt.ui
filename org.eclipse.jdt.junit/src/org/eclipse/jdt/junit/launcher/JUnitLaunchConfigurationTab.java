@@ -90,8 +90,9 @@ import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 
 import org.eclipse.jdt.internal.junit.Messages;
-import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
+import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
+import org.eclipse.jdt.internal.junit.launcher.JUnitMigrationDelegate;
 import org.eclipse.jdt.internal.junit.launcher.TestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.launcher.TestSelectionDialog;
@@ -451,16 +452,18 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, ""); //$NON-NLS-1$
 			 //workaround for bug 65399
 			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME, ""); //$NON-NLS-1$
-			config.setMappedResources(new IResource[] { fContainerElement.getJavaProject().getProject() });
 		} else {
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, fProjText.getText());
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, fTestText.getText());
 			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
 			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME, fOriginalTestMethodName);
-			mapResources(config);
 		}
 		config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_KEEPRUNNING, fKeepRunning.getSelection());
-		
+		try {
+			mapResources(config);
+		} catch (CoreException e) {
+			JUnitPlugin.log(e.getStatus());
+		}
 		IStructuredSelection testKindSelection= (IStructuredSelection) fTestLoaderViewer.getSelection();
 		if (! testKindSelection.isEmpty()) {
 			TestKind testKind= (TestKind) testKindSelection.getFirstElement();
@@ -468,13 +471,8 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		}
 	}
 	
-	private void mapResources(ILaunchConfigurationWorkingCopy config)  {
-		IJavaProject javaProject = getJavaProject();
-		IResource[] resources = null;
-		if (javaProject != null) {
-			resources = new IResource[]{javaProject.getProject()};
-		}
-		config.setMappedResources(resources);
+	private void mapResources(ILaunchConfigurationWorkingCopy config)  throws CoreException {
+		JUnitMigrationDelegate.mapResources(config);
 	}	
 
 	

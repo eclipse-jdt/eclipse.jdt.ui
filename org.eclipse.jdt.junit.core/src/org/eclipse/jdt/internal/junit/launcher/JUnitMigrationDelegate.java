@@ -2,13 +2,17 @@ package org.eclipse.jdt.internal.junit.launcher;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationMigrationDelegate;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
@@ -26,14 +30,21 @@ public class JUnitMigrationDelegate implements ILaunchConfigurationMigrationDele
 	 * @see org.eclipse.debug.core.ILaunchConfigurationMigrationDelegate#isCandidate()
 	 */
 	public boolean isCandidate(ILaunchConfiguration candidate) throws CoreException {
-		if (candidate.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String) null) == null) {
-			return false;
+		IResource[] mapped = candidate.getMappedResources();
+		IResource target = getResource(candidate);
+		if (target == null) {
+			return mapped == null;
+		} else {
+			if (mapped == null) {
+				return true;
+			} else {
+				if (mapped.length != 1) {
+					return true;
+				} else {
+					return !target.equals(mapped[0]);
+				}
+			}
 		}
-		IResource[] mappedResources= candidate.getMappedResources();
-		if (mappedResources != null && mappedResources.length > 0) {
-			return false;
-		}
-		return true;
 	}
 
 	/*
@@ -42,11 +53,64 @@ public class JUnitMigrationDelegate implements ILaunchConfigurationMigrationDele
 	 * @see org.eclipse.debug.core.ILaunchConfigurationMigrationDelegate#migrate(org.eclipse.debug.core.ILaunchConfiguration)
 	 */
 	public void migrate(ILaunchConfiguration candidate) throws CoreException {
-		String projectName= candidate.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, EMPTY_STRING);
-		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		ILaunchConfigurationWorkingCopy wc= candidate.getWorkingCopy();
-		wc.setMappedResources(new IProject[] { project });
+		mapResources(wc);
 		wc.doSave();
 	}
+	
+	/**
+	 * Maps a resource for the given launch configuration.
+	 * 
+	 * @param config working copy
+	 * @throws CoreException if an exception occurs mapping resource
+	 */
+	public static void mapResources(ILaunchConfigurationWorkingCopy config) throws CoreException {
+		IResource resource = getResource(config);
+		if (resource == null) {
+			config.setMappedResources(null);
+		} else {
+			config.setMappedResources(new IResource[]{resource});
+		}
+	}
+	
+	/**
+	 * Returns a resource mapping for the given launch configuration, or <code>null</code>
+	 * if none.
+	 * 
+	 * @param config working copy
+	 * @returns resource or <code>null</code>
+	 * @throws CoreException if an exception occurs mapping resource
+	 */
+	private static IResource getResource(ILaunchConfiguration config) throws CoreException {
+		String projName = config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String)null);
+		String containerHandle = config.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, (String)null);
+		String typeName = config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null);
+		IJavaElement element = null;
+		if (projName != null) {
+			IJavaProject javaProject = getJavaModel().getJavaProject(projName);
+			if (javaProject.exists()) {
+				if (typeName != null) {
+					element = javaProject.findType(typeName);
+				}
+				if (element == null) {
+					element = javaProject;
+				}
+			}
+		} else if (containerHandle != null) {
+			element = JavaCore.create(containerHandle);
+		}
+		IResource resource = null;
+		if (element != null) {
+			resource = element.getResource();
+		}
+		return resource;
+	}
+	
+	/*
+	 * Convenience method to get access to the java model.
+	 */
+	private static IJavaModel getJavaModel() {
+		return JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+	}	
 
 }

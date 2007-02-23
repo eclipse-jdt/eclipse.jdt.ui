@@ -19,8 +19,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -60,8 +58,9 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.junit.launcher.AssertionVMArg;
-import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
+import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
+import org.eclipse.jdt.internal.junit.launcher.JUnitMigrationDelegate;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
@@ -289,7 +288,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		wc.setAttribute(JUnitLaunchConfigurationConstants.ATTR_KEEPRUNNING, false);
 		wc.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, containerHandleId);
 		wc.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_RUNNER_KIND, testKindId);
-		wc.setMappedResources(new IResource[] { element.getJavaProject().getProject() });
+		JUnitMigrationDelegate.mapResources(wc);
 		AssertionVMArg.setArgDefault(wc);
 		if (element instanceof IMethod) {
 			wc.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME, element.getElementName()); // only set for methods
