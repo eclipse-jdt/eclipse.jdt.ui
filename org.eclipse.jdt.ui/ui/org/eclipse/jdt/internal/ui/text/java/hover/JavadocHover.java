@@ -31,6 +31,8 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavadocContentAccess;
 
@@ -168,9 +170,17 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 					
 					// Provide hint why there's no Javadoc
 					if (reader == null && member.isBinary()) {
+						boolean hasAttachedJavadoc= JavaDocLocations.getJavadocBaseLocation(member) != null;
 						IPackageFragmentRoot root= (IPackageFragmentRoot)member.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-						if (root != null && root.getSourceAttachmentPath() == null && root.getAttachedJavadoc(null) == null)
+						boolean hasAttachedSource= root != null && root.getSourceAttachmentPath() != null;
+						if (!hasAttachedSource && !hasAttachedJavadoc)
 							reader= new StringReader(JavaHoverMessages.JavadocHover_noAttachedInformation);
+						else if (!hasAttachedJavadoc)
+							reader= new StringReader(JavaHoverMessages.JavadocHover_noAttachedJavadocInformation);
+						else if (!hasAttachedSource)
+							reader= new StringReader(JavaHoverMessages.JavadocHover_noAttachedSourceInformation);
+						else
+							reader= new StringReader(JavaHoverMessages.JavadocHover_noInformation);
 					}
 					
 				} catch (JavaModelException ex) {
