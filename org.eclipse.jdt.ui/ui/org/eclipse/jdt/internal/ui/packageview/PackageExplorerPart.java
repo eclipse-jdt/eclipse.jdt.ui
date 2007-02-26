@@ -93,6 +93,7 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTarget;
@@ -1086,13 +1087,30 @@ public class PackageExplorerPart extends ViewPart
 	 * to be the editor's input, if linking is enabled.
 	 */
 	void editorActivated(IEditorPart editor) {
-		Object input= getElementOfInput(editor.getEditorInput());
+		IEditorInput editorInput= getEditorInput(editor);
+		Object input= getElementOfInput(editorInput);
 		if (input == null) 
 			return;
-		if (!inputIsSelected(editor.getEditorInput()))
+		if (!inputIsSelected(editorInput))
 			showInput(input);
 		else
 			getTreeViewer().getTree().showSelection();
+	}
+
+	private IEditorInput getEditorInput(IEditorPart editor) {
+		IEditorInput editorInput= editor.getEditorInput();
+		if (editorInput instanceof IClassFileEditorInput)
+			return editorInput;
+		else if (editorInput instanceof IFileEditorInput)
+			return editorInput;
+		else if (editorInput instanceof JarEntryEditorInput)
+			return editorInput;
+		
+		IFile file= (IFile)editorInput.getAdapter(IFile.class); 
+		if (file != null)
+			return new FileEditorInput(file);
+		
+		return null;
 	}
 
 	private boolean inputIsSelected(IEditorInput input) {
