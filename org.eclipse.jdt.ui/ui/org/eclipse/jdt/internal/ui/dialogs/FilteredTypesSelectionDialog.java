@@ -427,7 +427,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	}
 
 	/**
-	 * Sets a new validator
+	 * Sets a new validator.
 	 * 
 	 * @param validator
 	 *            the new validator
@@ -510,10 +510,10 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	}
 
 	/**
-	 * Sets search scope used when searching for types
+	 * Sets search scope used when searching for types.
 	 * 
 	 * @param scope
-	 *            the enw scope
+	 *            the new scope
 	 */
 	private void setSearchScope(IJavaSearchScope scope) {
 		fSearchScope= scope;
@@ -952,7 +952,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 		}
 
 		public boolean equalsFilter(ItemsFilter iFilter) {
-			if (!super.equals(iFilter))
+			if (!super.equalsFilter(iFilter))
 				return false;
 			if (!(iFilter instanceof TypeItemsFilter))
 				return false;
