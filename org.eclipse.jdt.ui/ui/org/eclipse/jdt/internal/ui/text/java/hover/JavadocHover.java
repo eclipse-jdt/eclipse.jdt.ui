@@ -28,6 +28,7 @@ import org.eclipse.jface.text.information.IInformationProviderExtension2;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -36,6 +37,7 @@ import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavadocContentAccess;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.IInformationControlExtension4;
 
 /**
@@ -173,18 +175,22 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 						boolean hasAttachedJavadoc= JavaDocLocations.getJavadocBaseLocation(member) != null;
 						IPackageFragmentRoot root= (IPackageFragmentRoot)member.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 						boolean hasAttachedSource= root != null && root.getSourceAttachmentPath() != null;
+						IOpenable openable= member.getOpenable();
+						boolean hasSource= openable.getBuffer() != null;
+
 						if (!hasAttachedSource && !hasAttachedJavadoc)
-							reader= new StringReader(JavaHoverMessages.JavadocHover_noAttachedInformation);
-						else if (!hasAttachedJavadoc)
-							reader= new StringReader(JavaHoverMessages.JavadocHover_noAttachedJavadocInformation);
+							reader= new StringReader(JavaHoverMessages.JavadocHover_noAttachments);
+						else if (!hasAttachedJavadoc && !hasSource)
+							reader= new StringReader(JavaHoverMessages.JavadocHover_noAttachedJavadoc);
 						else if (!hasAttachedSource)
-							reader= new StringReader(JavaHoverMessages.JavadocHover_noAttachedSourceInformation);
-						else
+							reader= new StringReader(JavaHoverMessages.JavadocHover_noAttachedSource);
+						else if (!hasSource)
 							reader= new StringReader(JavaHoverMessages.JavadocHover_noInformation);
 					}
 					
 				} catch (JavaModelException ex) {
-					return null;
+					reader= new StringReader(JavaHoverMessages.JavadocHover_error_gettingJavadoc);
+					JavaPlugin.log(ex.getStatus());
 				}
 				
 				if (reader != null) {

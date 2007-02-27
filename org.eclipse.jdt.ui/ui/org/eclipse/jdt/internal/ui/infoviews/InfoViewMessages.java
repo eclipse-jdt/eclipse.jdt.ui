@@ -37,10 +37,11 @@ final class InfoViewMessages extends NLS {
 	public static String JavadocView_error_noBrowser_title;
 	public static String JavadocView_error_noBrowser_message;
 	public static String JavadocView_error_noBrowser_doNotWarn;
-	public static String JavadocView_noAttachedInformation;
-	public static String JavadocView_noAttachedSourceInformation;
-	public static String JavadocView_noAttachedJavadocInformation;
+	public static String JavadocView_noAttachments;
+	public static String JavadocView_noAttachedSource;
+	public static String JavadocView_noAttachedJavadoc;
 	public static String JavadocView_noInformation;
+	public static String JavadocView_error_gettingJavadoc;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, InfoViewMessages.class);

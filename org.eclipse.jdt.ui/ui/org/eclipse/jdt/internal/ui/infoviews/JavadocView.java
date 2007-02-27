@@ -76,6 +76,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -585,18 +586,22 @@ public class JavadocView extends AbstractInfoView {
 						boolean hasAttachedJavadoc= JavaDocLocations.getJavadocBaseLocation(member) != null;
 						IPackageFragmentRoot root= (IPackageFragmentRoot)member.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 						boolean hasAttachedSource= root != null && root.getSourceAttachmentPath() != null;
+						IOpenable openable= member.getOpenable();
+						boolean hasSource= openable.getBuffer() != null;
+						
 						if (!hasAttachedSource && !hasAttachedJavadoc)
-							reader= new StringReader(InfoViewMessages.JavadocView_noAttachedInformation);
-						else if (!hasAttachedJavadoc)
-							reader= new StringReader(InfoViewMessages.JavadocView_noAttachedJavadocInformation);
+							reader= new StringReader(InfoViewMessages.JavadocView_noAttachments);
+						else if (!hasAttachedJavadoc && !hasSource)
+							reader= new StringReader(InfoViewMessages.JavadocView_noAttachedJavadoc);
 						else if (!hasAttachedSource)
-							reader= new StringReader(InfoViewMessages.JavadocView_noAttachedSourceInformation);
-						else
+							reader= new StringReader(InfoViewMessages.JavadocView_noAttachedSource);
+						else if (!hasSource)
 							reader= new StringReader(InfoViewMessages.JavadocView_noInformation);
 					}
 					
 				} catch (JavaModelException ex) {
-					return null;
+					reader= new StringReader(InfoViewMessages.JavadocView_error_gettingJavadoc);
+					JavaPlugin.log(ex.getStatus());
 				}
 				if (reader != null) {
 					HTMLPrinter.addParagraph(buffer, reader);

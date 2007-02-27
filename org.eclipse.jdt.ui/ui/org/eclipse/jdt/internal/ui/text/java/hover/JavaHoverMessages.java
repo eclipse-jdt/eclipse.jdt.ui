@@ -23,10 +23,11 @@ final class JavaHoverMessages extends NLS {
 		// Do not instantiate
 	}
 
-	public static String JavadocHover_noAttachedInformation;
-	public static String JavadocHover_noAttachedJavadocInformation;
-	public static String JavadocHover_noAttachedSourceInformation;
+	public static String JavadocHover_noAttachments;
+	public static String JavadocHover_noAttachedJavadoc;
+	public static String JavadocHover_noAttachedSource;
 	public static String JavadocHover_noInformation;
+	public static String JavadocHover_error_gettingJavadoc;
 	public static String JavaTextHover_createTextHover;
 	public static String JavaTextHover_makeStickyHint;
 	public static String NoBreakpointAnnotation_addBreakpoint;
