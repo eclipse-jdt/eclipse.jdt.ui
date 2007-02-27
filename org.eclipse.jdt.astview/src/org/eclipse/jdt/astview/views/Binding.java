@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.astview.views;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import org.eclipse.swt.graphics.Image;
@@ -138,9 +140,27 @@ public class Binding extends ASTAttribute {
 					res.add(new Binding(this, "COMPONENT TYPE", typeBinding.getComponentType(), isType(typeKind, ARRAY_TYPE))); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "DIMENSIONS", typeBinding.getDimensions(), isType(typeKind, ARRAY_TYPE))); //$NON-NLS-1$
 					if (! typeBinding.getName().equals(PrimitiveType.VOID.toString())) {
+						// call createArrayType(1) reflectively to keep 3.2 support:
 						try {
-							if (ITypeBinding.class.getMethod("createArrayType", new Class[] { int.class }) != null)
-								res.add(new Binding(this, "CREATE ARRAY TYPE (+1)", typeBinding.createArrayType(1), true));
+							Method createArrayType= ITypeBinding.class.getMethod("createArrayType", new Class[] { int.class });
+							if (createArrayType != null) {
+								Exception ex= null;
+								try {
+									ITypeBinding arrayType= (ITypeBinding) createArrayType.invoke(typeBinding, new Object[] { new Integer(1) });
+									res.add(new Binding(this, "CREATE ARRAY TYPE (+1)", arrayType, true));
+								} catch (RuntimeException e) {
+									ex= e;
+								} catch (IllegalAccessException e) {
+									ex= e;
+								} catch (InvocationTargetException e) {
+									ex= e;
+								}
+								if (ex != null) {
+									String label= "Error in ITypeBinding#createArrayType() for \"" + fBinding.getKey() + "\"";
+									res.add(new Error(this, label, ex));
+									ASTViewPlugin.log(label, ex);
+								}
+							}
 						} catch (SecurityException e) {
 							//skip
 						} catch (NoSuchMethodException e) {

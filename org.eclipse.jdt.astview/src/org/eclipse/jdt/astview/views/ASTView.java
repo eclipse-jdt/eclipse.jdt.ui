@@ -1338,7 +1338,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fPreviousDouble= isTripleClick ? null : obj;
 		
 		if (obj instanceof ExceptionAttribute) {
-			RuntimeException exception= ((ExceptionAttribute) obj).getException();
+			Exception exception= ((ExceptionAttribute) obj).getException();
 			if (exception != null) {
 				String label= ((ExceptionAttribute) obj).getLabel();
 				showAndLogError("An error occurred while calculating an AST View Label:\n" + label, exception); //$NON-NLS-1$
@@ -1428,7 +1428,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			return;
 		Object obj = selection.getFirstElement();
 		if (obj instanceof ExceptionAttribute) {
-			RuntimeException exception= ((ExceptionAttribute) obj).getException();
+			Exception exception= ((ExceptionAttribute) obj).getException();
 			if (exception != null) {
 				String label= ((ExceptionAttribute) obj).getLabel();
 				showAndLogError("An error occurred while calculating an AST View Label:\n" + label, exception); //$NON-NLS-1$
