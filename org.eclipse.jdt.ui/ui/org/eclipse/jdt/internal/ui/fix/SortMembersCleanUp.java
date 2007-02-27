@@ -11,12 +11,27 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
+import com.ibm.icu.text.MessageFormat;
+
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.debug.core.model.IBreakpoint;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.SortMembersFix;
@@ -25,6 +40,8 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class SortMembersCleanUp extends AbstractCleanUp {
 	
+	private HashSet fTouchedFiles;
+
 	public SortMembersCleanUp() {
 		super();
     }
@@ -38,7 +55,46 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 			return null;
 		
 		boolean sortMembers= isEnabled(CleanUpConstants.SORT_MEMBERS);
-		return SortMembersFix.createCleanUp(compilationUnit, sortMembers, sortMembers && isEnabled(CleanUpConstants.SORT_MEMBERS_ALL));
+		IFix fix= SortMembersFix.createCleanUp(compilationUnit, sortMembers, sortMembers && isEnabled(CleanUpConstants.SORT_MEMBERS_ALL));
+		if (fix != null) {
+			if (fTouchedFiles == null) {
+				fTouchedFiles= new HashSet();
+			}
+			fTouchedFiles.add(((ICompilationUnit)compilationUnit.getJavaElement()).getResource());
+		}
+		return fix;
+	}
+	
+	public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
+		if (fTouchedFiles == null) {
+			return super.checkPostConditions(monitor);
+		} else {
+			if (monitor == null)
+				monitor= new NullProgressMonitor();
+			
+			monitor.beginTask("", fTouchedFiles.size()); //$NON-NLS-1$
+						
+			try {
+				RefactoringStatus result= new RefactoringStatus();
+    			for (Iterator iterator= fTouchedFiles.iterator(); iterator.hasNext();) {
+    	            IFile file= (IFile)iterator.next();
+    	            IMarker[] markers= getRelevantMarkers(file);
+    	            if (markers.length != 0) {
+    	            	String fileLocation= file.getProjectRelativePath().toOSString();
+    	            	String projectName= file.getProject().getName();
+						result.addWarning(MessageFormat.format(MultiFixMessages.SortMembersCleanUp_RemoveMarkersWarning0, new Object[] {fileLocation, projectName}));
+    	            }
+    	            
+    	            monitor.worked(1);
+                }
+    			
+    			return result;
+			} finally {
+				monitor.done();
+				fTouchedFiles= null;
+			}
+			
+		}
 	}
 
 	/**
@@ -105,5 +161,28 @@ public class SortMembersCleanUp extends AbstractCleanUp {
     
 	public boolean requireAST(ICompilationUnit unit) throws CoreException {
 		return isEnabled(CleanUpConstants.SORT_MEMBERS);
-	}    
+	}
+	
+	private static IMarker[] getRelevantMarkers(IFile file) throws CoreException {
+		IMarker[] bookmarks= file.findMarkers(IMarker.BOOKMARK, true, IResource.DEPTH_INFINITE);
+		IMarker[] tasks= file.findMarkers(IMarker.TASK, true, IResource.DEPTH_INFINITE);
+		IMarker[] breakpoints= file.findMarkers(IBreakpoint.BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
+
+		if (tasks.length == 0 && breakpoints.length == 0) {
+			return bookmarks;
+		} else if (bookmarks.length == 0 && breakpoints.length == 0) {
+			return tasks;
+		} else if (tasks.length == 0 && bookmarks.length == 0) {
+			return breakpoints;
+		} else {
+			IMarker[] results= new IMarker[bookmarks.length + tasks.length + breakpoints.length];
+
+			System.arraycopy(bookmarks, 0, results, 0, bookmarks.length);
+			System.arraycopy(tasks, 0, results, bookmarks.length, tasks.length);
+			System.arraycopy(breakpoints, 0, results, bookmarks.length + tasks.length, breakpoints.length);
+
+			return results;
+		}
+	}
+
 }

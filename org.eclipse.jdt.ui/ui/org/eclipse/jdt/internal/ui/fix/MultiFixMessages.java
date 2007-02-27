@@ -45,6 +45,7 @@ public class MultiFixMessages extends NLS {
 	public static String ImportsCleanUp_OrganizeImports_Description;
 	public static String SortMembersCleanUp_AllMembers_description;
 	public static String SortMembersCleanUp_Excluding_description;
+	public static String SortMembersCleanUp_RemoveMarkersWarning0;
 	public static String StringMultiFix_AddMissingNonNls_description;
 	public static String StringMultiFix_RemoveUnnecessaryNonNls_description;
 	

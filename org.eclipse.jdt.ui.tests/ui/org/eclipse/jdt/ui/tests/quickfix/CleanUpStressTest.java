@@ -13,24 +13,13 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import junit.extensions.TestSetup;
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.runtime.Preferences;
-import org.eclipse.core.runtime.preferences.InstanceScope;
-
 import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -41,86 +30,39 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.jdt.testplugin.TestOptions;
 
-public class CleanUpStressTest extends TestCase {
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+
+public class CleanUpStressTest extends CleanUpTestCase {
 	
-	private static class MyTestSetup extends TestSetup {
-		public static final String SRC_CONTAINER= "src";
-		
-		public static IJavaProject fJProject1;
-		public static IPackageFragmentRoot fJunitSrcRoot;
-		
-		public MyTestSetup(Test test) {
-			super(test);
-		}
-		
-		protected void setUp() throws Exception {
-			Hashtable options= TestOptions.getDefaultOptions();
-			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
-			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
-			
-			options.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT, DefaultCodeFormatterConstants.TRUE);
-			options.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT, DefaultCodeFormatterConstants.TRUE);
-			options.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT, DefaultCodeFormatterConstants.TRUE);
-			
-			JavaCore.setOptions(options);
-			
-			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-			store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
-			store.setValue(PreferenceConstants.CODEGEN_KEYWORD_THIS, false);
-			
-			StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "//TODO\n${body_statement}", null);
-			StubUtility.setCodeTemplate(CodeTemplateContextType.FIELDCOMMENT_ID, "/* Test */", null);
-			
-			Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
-			corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
-			corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
-			corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
-			corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");	
-			
-			fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-			assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
-			File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
-			fJunitSrcRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
-		}
+	private static final String SRC_CONTAINER= "src";
+
+	protected static IPackageFragmentRoot fJunitSrcRoot;
+
+	protected void setUp() throws Exception {
+		super.setUp();
+
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
+		fJunitSrcRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
+	}
 	
-		protected void tearDown() throws Exception {
-			if (fJProject1 != null && fJProject1.exists())
-				JavaProjectHelper.delete(fJProject1);
-		}
+	public CleanUpStressTest(String name) {
+		super(name);
 	}
 	
 	public static Test suite() {
-		return new MyTestSetup(new TestSuite(CleanUpStressTest.class));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new MyTestSetup(someTest);
+		return new ProjectTestSetup(new TestSuite(CleanUpStressTest.class));
 	}
 	
 	private void addAllCUs(IJavaElement[] children, List result) throws JavaModelException {
@@ -5287,72 +5229,54 @@ public class CleanUpStressTest extends TestCase {
 	
 	public void testAllCleanUps() throws Exception {
 		List cus= new ArrayList();
-		addAllCUs(MyTestSetup.fJProject1.getChildren(), cus);
+		addAllCUs(fJProject1.getChildren(), cus);
 		
-		Map node= new HashMap();
-		
-		Collection keys= CleanUpConstants.getEclipseDefaultSettings().keySet();
-		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
-	        String key= (String)iterator.next();
-	        node.put(key, CleanUpConstants.FALSE);
-        }
-		
-		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_METHOD, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS, CleanUpConstants.TRUE);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_METHOD);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS);
 
-		node.put(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpConstants.TRUE);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		
-		node.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpConstants.TRUE);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS);
 		
-		node.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE, CleanUpConstants.TRUE);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
 		
-		node.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, CleanUpConstants.TRUE);
+		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
+		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT);
 		
-		node.put(CleanUpConstants.ADD_MISSING_NLS_TAGS, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.REMOVE_UNNECESSARY_CASTS, CleanUpConstants.TRUE);
+		enable(CleanUpConstants.ADD_MISSING_NLS_TAGS);
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
 
-		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES, CleanUpConstants.TRUE);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES);
 		
-		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, CleanUpConstants.TRUE);				
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);				
 
-		node.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpConstants.TRUE);
+		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		
-		node.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpConstants.TRUE);
+		enable(CleanUpConstants.ORGANIZE_IMPORTS);
 		
-		node.put(CleanUpConstants.SORT_MEMBERS, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.SORT_MEMBERS_ALL, CleanUpConstants.TRUE);
-		
-		ProfileManager.CustomProfile profile= new ProfileManager.CustomProfile("testProfile", node, CleanUpProfileVersioner.CURRENT_VERSION, CleanUpProfileVersioner.PROFILE_KIND);
-		new InstanceScope().getNode(JavaUI.ID_PLUGIN).put(CleanUpConstants.CLEANUP_PROFILE, profile.getID());
-		
-		List profiles= CleanUpPreferenceUtil.getBuiltInProfiles();
-		profiles.add(profile);
-
-		CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
-		ProfileStore profileStore= new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, versioner);
-		profileStore.writeProfiles(profiles, new InstanceScope());
+		enable(CleanUpConstants.SORT_MEMBERS);
+		enable(CleanUpConstants.SORT_MEMBERS_ALL);
 	
 		ICompilationUnit[] units= (ICompilationUnit[])cus.toArray(new ICompilationUnit[cus.size()]);	
 		Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
