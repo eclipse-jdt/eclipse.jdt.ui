@@ -2093,6 +2093,37 @@ public class ImportOrganizeTest extends CoreTests {
 
 		assertEqualString(cu.getSource(), buf.toString()); // no changes, don't add 'logger' as static import
 	}
+	
+	public void testStaticImports_bug175498() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("public class Test<T> {\n");
+		buf.append("        public static enum TestEnum {\n");
+		buf.append("                V1,\n");
+		buf.append("                V2\n");
+		buf.append("        }\n");
+		buf.append("\n");
+		buf.append("        public void test(final TestEnum value) {\n");
+		buf.append("                switch (value) {\n");
+		buf.append("                        case V1:\n");
+		buf.append("                        case V2:\n");
+		buf.append("                }\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("testStaticImports_bug175498", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		assertEqualString(cu.getSource(), buf.toString()); // no changes, don't add 'V1' and 'V2' as static import
+	}
+
 
 	
 	public void testImportCountAddNew() throws Exception {

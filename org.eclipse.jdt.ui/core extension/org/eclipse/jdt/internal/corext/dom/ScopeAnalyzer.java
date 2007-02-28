@@ -436,7 +436,7 @@ public class ScopeAnalyzer {
 			if (selector.getLocationInParent() == SwitchCase.EXPRESSION_PROPERTY) {
 				ITypeBinding binding= ((SwitchStatement) selector.getParent().getParent()).getExpression().resolveTypeBinding();
 				if (binding != null && binding.isEnum()) {
-					return hasEnumContants(declaration, binding);
+					return hasEnumContants(declaration, binding.getTypeDeclaration());
 				}
 			}
 			
