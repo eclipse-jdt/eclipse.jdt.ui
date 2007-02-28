@@ -283,7 +283,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	}
 
 	private int showStatus(RefactoringStatus status) {
-		if (status.isOK())
+		if (!status.hasError())
 			return Window.OK;
 
 		Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
