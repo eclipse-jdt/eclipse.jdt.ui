@@ -71,7 +71,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 		 */
 		public IBuffer createBuffer(ICompilationUnit workingCopy) {
 			// FIXME: Don't know how to get a buffer without using internal API.
-			return new BufferManager().createBuffer(workingCopy);
+			return BufferManager.createBuffer(workingCopy);
 		}
 	}
 
