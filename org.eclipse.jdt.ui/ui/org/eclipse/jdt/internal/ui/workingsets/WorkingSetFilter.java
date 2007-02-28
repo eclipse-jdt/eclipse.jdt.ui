@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
+import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer.RequiredProjectWrapper;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaViewerFilter;
 
 /**
@@ -46,6 +47,13 @@ public class WorkingSetFilter extends JavaViewerFilter {
 				init((IJavaElement) a);
 			} else if (a instanceof IResource) {
 				init((IResource) a);
+			} else if (a instanceof RequiredProjectWrapper) {
+				RequiredProjectWrapper wrapper= (RequiredProjectWrapper) a;
+				IJavaProject proj= wrapper.getParentClassPathContainer().getJavaProject();
+				// the project reference is treated like an internal JAR.
+				// that means it will only appear if the parent container project is in the working set
+				IResource fakeInternal= proj.getProject().getFile(wrapper.getProject().getElementName() + "-fake-jar.jar"); //$NON-NLS-1$
+				init(proj.getPackageFragmentRoot(fakeInternal));
 			} else {
 				IJavaElement je= (IJavaElement) a.getAdapter(IJavaElement.class);
 				if (je != null) {
@@ -157,12 +165,13 @@ public class WorkingSetFilter extends JavaViewerFilter {
 		if (fWorkingSet == null || (fWorkingSet.isAggregateWorkingSet() && fWorkingSet.isEmpty()))
 			return true;
 
-		if (element instanceof IAdaptable)
-			return isEnclosing((IAdaptable)element);
-
 		if (element instanceof PackageFragmentRootContainer) {
 			return isEnclosing((PackageFragmentRootContainer)element);
 		}
+		
+		if (element instanceof IAdaptable)
+			return isEnclosing((IAdaptable)element);
+
 		return true;
 	}
 
@@ -189,7 +198,7 @@ public class WorkingSetFilter extends JavaViewerFilter {
 	
 	private boolean isEnclosing(PackageFragmentRootContainer container) {
 		// check whether the containing package fragment roots are enclosed
-		IPackageFragmentRoot[] roots= container.getPackageFragmentRoots();
+		IAdaptable[] roots= container.getChildren();
 		for (int i= 0; i < roots.length; i++) {
 			if (isEnclosing(roots[i])) {
 				return true;

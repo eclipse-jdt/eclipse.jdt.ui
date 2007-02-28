@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.packageview;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IAdaptable;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -40,7 +42,7 @@ public class LibraryContainer extends PackageFragmentRootContainer {
 		return getJavaProject().hashCode();
 	}
 
-	public Object[] getChildren() {
+	public IAdaptable[] getChildren() {
 		return getPackageFragmentRoots();
 	}	
 

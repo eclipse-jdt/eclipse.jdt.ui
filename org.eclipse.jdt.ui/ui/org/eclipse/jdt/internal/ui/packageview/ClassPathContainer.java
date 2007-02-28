@@ -23,7 +23,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
-import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.ui.ide.IDE;
@@ -31,7 +31,6 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -52,19 +51,20 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 
 	public static class RequiredProjectWrapper implements IAdaptable, IWorkbenchAdapter {
 
-		private final IJavaElement fProject;
-		private static ImageDescriptor DESC_OBJ_PROJECT;	
-		{
-			ISharedImages images= JavaPlugin.getDefault().getWorkbench().getSharedImages(); 
-			DESC_OBJ_PROJECT= images.getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT);
-		}
-
-		public RequiredProjectWrapper(IJavaElement project) {
-			this.fProject= project;
+		private final ClassPathContainer fParent;
+		private final IJavaProject fProject;
+		
+		public RequiredProjectWrapper(ClassPathContainer parent, IJavaProject project) {
+			fParent= parent;
+			fProject= project;
 		}
 		
-		public IJavaElement getProject() {
+		public IJavaProject getProject() {
 			return fProject; 
+		}
+		
+		public ClassPathContainer getParentClassPathContainer() {
+			return fParent; 
 		}
 		
 		public Object getAdapter(Class adapter) {
@@ -74,11 +74,11 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 		}
 
 		public Object[] getChildren(Object o) {
-			return null;
+			return new Object[0];
 		}
 
 		public ImageDescriptor getImageDescriptor(Object object) {
-			return DESC_OBJ_PROJECT;
+			return PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT);
 		}
 
 		public String getLabel(Object o) {
@@ -86,7 +86,7 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 		}
 
 		public Object getParent(Object o) {
-			return null;
+			return fParent;
 		}
 	}
 
@@ -120,40 +120,30 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 		return getJavaProject().findPackageFragmentRoots(fClassPathEntry);
 	}
 
-	public Object[] getChildren() {
-		return concatenate(getPackageFragmentRoots(), getRequiredProjects());
-	}
-
-	private Object[] getRequiredProjects() {
+	public IAdaptable[] getChildren() {
 		List list= new ArrayList();
+		IPackageFragmentRoot[] roots= getPackageFragmentRoots();
+		for (int i= 0; i < roots.length; i++) {
+			list.add(roots[i]);
+		}
 		if (fContainer != null) {
 			IClasspathEntry[] classpathEntries= fContainer.getClasspathEntries();
 			if (classpathEntries == null) {
 				// invalid implementation of a classpath container
 				JavaPlugin.log(new IllegalArgumentException("Invalid classpath container implementation: getClasspathEntries() returns null. " + fContainer.getPath())); //$NON-NLS-1$
-				return new Object[0];
-			}
-			
-			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-			for (int i= 0; i < classpathEntries.length; i++) {
-				IClasspathEntry entry= classpathEntries[i];
-				if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT) {
-					IResource resource= root.findMember(entry.getPath());
-					if (resource instanceof IProject)
-						list.add(new RequiredProjectWrapper(JavaCore.create(resource)));
+			} else {
+				IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+				for (int i= 0; i < classpathEntries.length; i++) {
+					IClasspathEntry entry= classpathEntries[i];
+					if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT) {
+						IResource resource= root.findMember(entry.getPath());
+						if (resource instanceof IProject)
+							list.add(new RequiredProjectWrapper(this, JavaCore.create((IProject) resource)));
+					}
 				}
 			}
 		}
-		return list.toArray();
-	}
-
-	private static Object[] concatenate(Object[] a1, Object[] a2) {
-		int a1Len= a1.length;
-		int a2Len= a2.length;
-		Object[] res= new Object[a1Len + a2Len];
-		System.arraycopy(a1, 0, res, 0, a1Len);
-		System.arraycopy(a2, 0, res, a1Len, a2Len); 
-		return res;
+		return (IAdaptable[]) list.toArray(new IAdaptable[list.size()]);
 	}
 
 	public ImageDescriptor getImageDescriptor() {

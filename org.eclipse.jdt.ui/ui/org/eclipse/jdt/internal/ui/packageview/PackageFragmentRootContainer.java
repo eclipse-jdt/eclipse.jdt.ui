@@ -76,7 +76,7 @@ public abstract class PackageFragmentRootContainer implements IAdaptable {
 		return null;
 	}
 
-	public abstract Object[] getChildren();
+	public abstract IAdaptable[] getChildren();
 	
 	public abstract IPackageFragmentRoot[] getPackageFragmentRoots();
 	
