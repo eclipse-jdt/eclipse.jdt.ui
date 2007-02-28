@@ -24,6 +24,8 @@ import org.eclipse.jdt.core.IType;
  * The class should be subclassed by clients wishing to extend the type
  * selection dialog. 
  * </p>
+ * 
+ * @see org.eclipse.jdt.ui.JavaUI#createTypeDialog(org.eclipse.swt.widgets.Shell, org.eclipse.jface.operation.IRunnableContext, org.eclipse.jdt.core.search.IJavaSearchScope, int, boolean, String, TypeSelectionExtension)
  * @since 3.2
  */
 public abstract class TypeSelectionExtension {
