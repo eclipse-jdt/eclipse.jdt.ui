@@ -1,24 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launchConfiguration type="org.eclipse.pde.ui.JunitLaunchConfig">
 <stringAttribute key="product" value="org.eclipse.platform.ide"/>
-<booleanAttribute key="clearws" value="true"/>
 <stringAttribute key="bootstrap" value=""/>
 <booleanAttribute key="useProduct" value="false"/>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.eclipse.jdt.ui.tests.performance.PerformanceTestSuite"/>
 <booleanAttribute key="tracing" value="false"/>
-<stringAttribute key="location1" value="C:\e\runtime-test-workspace"/>
-<booleanAttribute key="default" value="true"/>
-<stringAttribute key="vmargs" value="-Xms250M -Xmx250M -DInternalPrintPerformanceResults -Dperf_ctrl=dbloc="/>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="1"/>
+</listAttribute>
 <stringAttribute key="org.eclipse.jdt.junit.CONTAINER" value=""/>
+<booleanAttribute key="automaticValidate" value="false"/>
+<booleanAttribute key="org.eclipse.jdt.junit.KEEPRUNNING_ATTR" value="false"/>
+<booleanAttribute key="automaticAdd" value="true"/>
+<stringAttribute key="checked" value="[NONE]"/>
+<stringAttribute key="location" value="${workspace_loc}/../junit-workspace"/>
+<stringAttribute key="configLocation" value=""/>
+<booleanAttribute key="clearws" value="true"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.eclipse.jdt.ui.tests.performance.PerformanceTestSuite"/>
+<stringAttribute key="location1" value="C:\e\runtime-test-workspace"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os win32 -ws win32 -arch x86 -nl de_CH -clean"/>
+<stringAttribute key="pde.version" value="3.2a"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms250M -Xmx250M -DInternalPrintPerformanceResults -Dperf_ctrl=dbloc="/>
+<booleanAttribute key="default" value="true"/>
 <booleanAttribute key="clearConfig" value="false"/>
 <booleanAttribute key="org.eclipse.debug.core.appendEnvironmentVariables" value="true"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-<booleanAttribute key="org.eclipse.jdt.junit.KEEPRUNNING_ATTR" value="false"/>
+<booleanAttribute key="useDefaultConfigArea" value="true"/>
 <booleanAttribute key="useDefaultConfig" value="true"/>
-<stringAttribute key="progargs" value="-os win32 -ws win32 -arch x86 -nl de_CH -clean"/>
 <stringAttribute key="org.eclipse.jdt.junit.TESTNAME" value=""/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="org.eclipse.jdt.ui.tests"/>
 <booleanAttribute key="askclear" value="false"/>
-<stringAttribute key="checked" value="[NONE]"/>
-<stringAttribute key="location0" value="C:\e\runtime-test-workspace"/>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/org.eclipse.jdt.ui.tests/performance/org/eclipse/jdt/ui/tests/performance/PerformanceTestSuite.java"/>
+</listAttribute>
+<booleanAttribute key="includeOptional" value="true"/>
+<stringAttribute key="org.eclipse.jdt.junit.TEST_KIND" value="org.eclipse.jdt.junit.loader.junit3"/>
 </launchConfiguration>
