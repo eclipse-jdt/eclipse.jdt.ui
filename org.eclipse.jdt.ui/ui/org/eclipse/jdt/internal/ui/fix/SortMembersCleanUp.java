@@ -78,8 +78,7 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 				RefactoringStatus result= new RefactoringStatus();
     			for (Iterator iterator= fTouchedFiles.iterator(); iterator.hasNext();) {
     	            IFile file= (IFile)iterator.next();
-    	            IMarker[] markers= getRelevantMarkers(file);
-    	            if (markers.length != 0) {
+    	            if (containsRelevantMarkers(file)) {
     	            	String fileLocation= file.getProjectRelativePath().toOSString();
     	            	String projectName= file.getProject().getName();
 						result.addWarning(MessageFormat.format(MultiFixMessages.SortMembersCleanUp_RemoveMarkersWarning0, new Object[] {fileLocation, projectName}));
@@ -163,26 +162,20 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 		return isEnabled(CleanUpConstants.SORT_MEMBERS);
 	}
 	
-	private static IMarker[] getRelevantMarkers(IFile file) throws CoreException {
+	private static boolean containsRelevantMarkers(IFile file) throws CoreException {
 		IMarker[] bookmarks= file.findMarkers(IMarker.BOOKMARK, true, IResource.DEPTH_INFINITE);
+		if (bookmarks.length != 0)
+			return true;
+		
 		IMarker[] tasks= file.findMarkers(IMarker.TASK, true, IResource.DEPTH_INFINITE);
+		if (tasks.length != 0)
+			return true;
+		
 		IMarker[] breakpoints= file.findMarkers(IBreakpoint.BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
-
-		if (tasks.length == 0 && breakpoints.length == 0) {
-			return bookmarks;
-		} else if (bookmarks.length == 0 && breakpoints.length == 0) {
-			return tasks;
-		} else if (tasks.length == 0 && bookmarks.length == 0) {
-			return breakpoints;
-		} else {
-			IMarker[] results= new IMarker[bookmarks.length + tasks.length + breakpoints.length];
-
-			System.arraycopy(bookmarks, 0, results, 0, bookmarks.length);
-			System.arraycopy(tasks, 0, results, bookmarks.length, tasks.length);
-			System.arraycopy(breakpoints, 0, results, bookmarks.length + tasks.length, breakpoints.length);
-
-			return results;
-		}
+		if (breakpoints.length != 0)
+			return true;
+		
+		return false;
 	}
 
 }
