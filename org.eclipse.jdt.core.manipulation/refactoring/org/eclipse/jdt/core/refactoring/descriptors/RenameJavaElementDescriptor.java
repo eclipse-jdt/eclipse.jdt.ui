@@ -539,14 +539,12 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 				if (type != IJavaElement.FIELD)
 					status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_accessor_constraint));
 			}
-			if (fQualified || fPatterns != null) {
+			if (fQualified) {
 				switch (type) {
 					case IJavaElement.PACKAGE_FRAGMENT:
 					case IJavaElement.TYPE: {
-						if (!(fPatterns == null || !"".equals(fPatterns))) //$NON-NLS-1$
+						if (fPatterns == null || fPatterns.length() == 0)
 							status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_patterns_constraint));
-						if (!(!fQualified || (fPatterns != null && !"".equals(fPatterns)))) //$NON-NLS-1$
-							status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_patterns_qualified_constraint));
 						break;
 					}
 					default:
