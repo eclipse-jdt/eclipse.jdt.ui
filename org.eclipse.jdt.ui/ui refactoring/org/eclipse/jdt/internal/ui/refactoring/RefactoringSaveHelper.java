@@ -109,7 +109,7 @@ public class RefactoringSaveHelper {
 				break;
 				
 			case SAVE_NON_JAVA_UPDATES:
-				dirtyEditors= EditorUtility.getDirtyEditorsToSave(true);
+				dirtyEditors= EditorUtility.getDirtyEditorsToSave(false); // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=175495
 				break;
 				
 			case SAVE_JAVA_ONLY_UPDATES:
