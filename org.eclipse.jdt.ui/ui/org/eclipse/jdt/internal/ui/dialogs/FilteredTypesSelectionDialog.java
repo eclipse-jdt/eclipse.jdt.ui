@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.dialogs;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,6 +27,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.IJobManager;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -39,6 +43,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -71,6 +76,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.core.search.TypeNameMatchRequestor;
+import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
@@ -84,6 +90,7 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.LibraryLocation;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.dialogs.ITypeInfoFilterExtension;
 import org.eclipse.jdt.ui.dialogs.ITypeInfoImageProvider;
 import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
@@ -92,6 +99,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
@@ -129,6 +137,10 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	private ISelectionStatusValidator fValidator;
 
 	private TypeInfoUtil fTypeInfoUtil;
+	
+	private IRunnableContext fRunnableContext;
+
+	private static boolean fgFirstTime= true; 
 
 	/**
 	 * Creates new FilteredTypesSelectionDialog instance
@@ -185,6 +197,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	 */
 	public FilteredTypesSelectionDialog(Shell shell, boolean multi, IRunnableContext context, IJavaSearchScope scope, int elementKinds, TypeSelectionExtension extension) {
 		super(shell, multi);
+		
+		fRunnableContext= context;
 
 		setSelectionHistory(new TypeSelectionHistory());
 
@@ -404,6 +418,17 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	 * @see org.eclipse.jface.window.Window#open()
 	 */
 	public int open() {
+		
+		try {
+			ensureConsistency();
+		} catch (InvocationTargetException e) {
+			ExceptionHandler.handle(e, JavaUIMessages.TypeSelectionDialog_error3Title, JavaUIMessages.TypeSelectionDialog_error3Message); 
+			return CANCEL;
+		} catch (InterruptedException e) {
+			// cancelled by user
+			return CANCEL;
+		}
+		
 		if (getInitialPattern() == null) {
 			IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
 			if (window != null) {
@@ -460,7 +485,15 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 		 */ 
 		typeSearchFilter.setMatchEverythingMode(true);
 		try {
-			engine.searchAllTypeNames(packPattern == null ? null : packPattern.toCharArray(), typeSearchFilter.getPackageFlags(), typeSearchFilter.getPattern().toCharArray(), typeSearchFilter.getMatchRule(), typeSearchFilter.getElementKind(), typeSearchFilter.getSearchScope(), requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, progressMonitor);
+			engine.searchAllTypeNames(packPattern.toCharArray(),
+					typeSearchFilter.getPackageFlags(), //TODO: https://bugs.eclipse.org/bugs/show_bug.cgi?id=176017
+					typeSearchFilter.getPattern().toCharArray(),
+					typeSearchFilter.getMatchRule(), //TODO: https://bugs.eclipse.org/bugs/show_bug.cgi?id=176017
+					typeSearchFilter.getElementKind(),
+					typeSearchFilter.getSearchScope(),
+					requestor,
+					IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+					progressMonitor);
 		} finally {
 			typeSearchFilter.setMatchEverythingMode(false);
 		}
@@ -513,6 +546,62 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	 */
 	private void setSearchScope(IJavaSearchScope scope) {
 		fSearchScope= scope;
+	}
+	
+	private void ensureConsistency() throws InvocationTargetException, InterruptedException {
+		// we only have to ensure history consistency here since the search engine
+		// takes care of working copies.
+		class ConsistencyRunnable implements IRunnableWithProgress {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+				if (fgFirstTime) {
+					// Join the initialize after load job.
+					IJobManager manager= Job.getJobManager();
+					manager.join(JavaUI.ID_PLUGIN, monitor);
+				}
+				OpenTypeHistory history= OpenTypeHistory.getInstance();
+				if (fgFirstTime || history.isEmpty()) {
+					monitor.beginTask(JavaUIMessages.TypeSelectionDialog_progress_consistency, 100);
+					if (history.needConsistencyCheck()) {
+						refreshSearchIndices(new SubProgressMonitor(monitor, 90));
+						history.checkConsistency(new SubProgressMonitor(monitor, 10));
+					} else {
+						refreshSearchIndices(monitor);
+					}
+					monitor.done();
+					fgFirstTime= false;
+				} else {
+					history.checkConsistency(monitor);
+				}
+			}
+			public boolean needsExecution() {
+				OpenTypeHistory history= OpenTypeHistory.getInstance();
+				return fgFirstTime || history.isEmpty() || history.needConsistencyCheck(); 
+			}
+			private void refreshSearchIndices(IProgressMonitor monitor) throws InvocationTargetException {
+				try {
+					new SearchEngine().searchAllTypeNames(
+						null,
+						0,
+						// make sure we search a concrete name. This is faster according to Kent  
+						"_______________".toCharArray(), //$NON-NLS-1$
+						SearchPattern.RULE_EXACT_MATCH | SearchPattern.RULE_CASE_SENSITIVE, 
+						IJavaSearchConstants.ENUM,
+						SearchEngine.createWorkspaceScope(), 
+						new TypeNameRequestor() {}, 
+						IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
+						monitor);
+				} catch (JavaModelException e) {
+					throw new InvocationTargetException(e);
+				}
+			}
+		}
+		ConsistencyRunnable runnable= new ConsistencyRunnable();
+		if (!runnable.needsExecution())
+			return;
+		IRunnableContext context= fRunnableContext != null 
+			? fRunnableContext 
+			: PlatformUI.getWorkbench().getProgressService();
+		context.run(true, true, runnable);
 	}
 
 	/**
