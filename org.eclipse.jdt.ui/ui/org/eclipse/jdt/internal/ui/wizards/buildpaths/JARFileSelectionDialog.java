@@ -44,7 +44,7 @@ public class JARFileSelectionDialog extends ElementTreeSelectionDialog {
 	public JARFileSelectionDialog(Shell parent, boolean multiSelect, boolean acceptFolders) {
 		super(parent, new FileLabelProvider(), new FileContentProvider());
 		setComparator(new FileViewerComparator());
-		addFilter(new FileArchiveFileFilter());
+		addFilter(new FileArchiveFileFilter(acceptFolders));
 		setValidator(new FileSelectionValidator(multiSelect, acceptFolders));
 		setHelpAvailable(false);
 	}
@@ -117,14 +117,27 @@ public class JARFileSelectionDialog extends ElementTreeSelectionDialog {
 	}
 	
 	private static class FileArchiveFileFilter extends ViewerFilter {
+		private final boolean fAcceptFolders;
+
+		public FileArchiveFileFilter(boolean acceptFolders) {
+			fAcceptFolders= acceptFolders;
+		}
+
 		public boolean select(Viewer viewer, Object parent, Object element) {
 			if (element instanceof File) {
 				File file= (File) element;
 				if (file.isFile()) {
 					return isArchive(file);
-				} else {
+				} else if (fAcceptFolders) {
 					return true;
-				}			
+				} else {
+					File[] listFiles= file.listFiles();
+					for (int i= 0; i < listFiles.length; i++) {
+						if (select(viewer, file, listFiles[i])) {
+							return true;
+						}
+					}
+				}
 			}
 			return false;
 		}		
