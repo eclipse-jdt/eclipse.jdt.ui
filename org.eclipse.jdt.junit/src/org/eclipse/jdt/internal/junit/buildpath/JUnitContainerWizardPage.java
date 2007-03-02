@@ -158,7 +158,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		if (libEntry == null) {
 			status.setError(JUnitMessages.JUnitContainerWizardPage_error_version_not_available);
 		} else if (JUnitContainerInitializer.JUNIT4_PATH.equals(containerPath)) {
-			if (!JUnitStubUtility.is50OrHigher(fProject)) {
+			if (fProject != null && !JUnitStubUtility.is50OrHigher(fProject)) {
 				status.setWarning(JUnitMessages.JUnitContainerWizardPage_warning_java5_required);
 			}
 		}
