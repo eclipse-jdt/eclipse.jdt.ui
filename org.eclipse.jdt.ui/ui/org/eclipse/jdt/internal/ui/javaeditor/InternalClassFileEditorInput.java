@@ -78,11 +78,7 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 	 * @see IEditorInput#getToolTipText()
 	 */
 	public String getToolTipText() {
-		try {
-			return fClassFile.getType().getFullyQualifiedName();
-		} catch (JavaModelException e) {
-		}
-		return fClassFile.getElementName();
+		return fClassFile.getType().getFullyQualifiedName();
 	}
 
 	/*

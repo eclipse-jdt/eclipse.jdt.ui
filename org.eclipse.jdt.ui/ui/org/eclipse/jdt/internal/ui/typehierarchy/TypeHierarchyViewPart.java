@@ -95,12 +95,11 @@ import org.eclipse.ui.part.ViewPart;
 
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -1590,13 +1589,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 		
 		IJavaElement elem= (IJavaElement)editor.getEditorInput().getAdapter(IJavaElement.class);
-		try {
-			IType type= null;
-			if (elem instanceof IClassFile) {
-				type= ((IClassFile) elem).getType();
-			} else if (elem instanceof ICompilationUnit) {
-				type= ((ICompilationUnit) elem).findPrimaryType();
-			}
+		if (elem instanceof ITypeRoot) {
+			IType type= ((ITypeRoot) elem).findPrimaryType();
 			if (type != null) {
 				internalSelectType(type, true);
 				if (getCurrentViewer().getSelection().isEmpty()) {
@@ -1605,10 +1599,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					updateMethodViewer(type);
 				}
 			}	
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
 		}
-		
 	}
 
 	/* (non-Javadoc)

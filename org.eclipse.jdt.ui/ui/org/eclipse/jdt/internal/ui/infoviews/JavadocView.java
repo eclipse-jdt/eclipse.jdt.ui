@@ -501,11 +501,7 @@ public class JavadocView extends AbstractInfoView {
 				}
 				break;
 			case IJavaElement.CLASS_FILE:
-				try {
-					javadocHtml= getJavadocHtml(new IJavaElement[] {((IClassFile)je).getType()});
-				} catch (JavaModelException ex) {
-					javadocHtml= null;
-				}
+				javadocHtml= getJavadocHtml(new IJavaElement[] {((IClassFile)je).getType()});
 				break;
 			default:
 				javadocHtml= getJavadocHtml(new IJavaElement[] { je });

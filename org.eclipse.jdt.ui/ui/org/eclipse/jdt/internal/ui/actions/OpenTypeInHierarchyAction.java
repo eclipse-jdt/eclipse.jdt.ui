@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog2;
+import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 
 public class OpenTypeInHierarchyAction extends Action implements IWorkbenchWindowActionDelegate {
@@ -44,7 +44,7 @@ public class OpenTypeInHierarchyAction extends Action implements IWorkbenchWindo
 
 	public void run() {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
-		OpenTypeSelectionDialog2 dialog= new OpenTypeSelectionDialog2(parent, false, 
+		OpenTypeSelectionDialog dialog= new OpenTypeSelectionDialog(parent, false, 
 			PlatformUI.getWorkbench().getProgressService(), 
 			SearchEngine.createWorkspaceScope(), IJavaSearchConstants.TYPE);
 		

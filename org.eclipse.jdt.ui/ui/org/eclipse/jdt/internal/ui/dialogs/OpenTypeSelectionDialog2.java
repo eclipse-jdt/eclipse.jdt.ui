@@ -29,6 +29,9 @@ import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+/**
+ * @deprecated use {@link OpenTypeSelectionDialog}
+ */
 public class OpenTypeSelectionDialog2 extends TypeSelectionDialog2 {
 
 	private IDialogSettings fSettings;

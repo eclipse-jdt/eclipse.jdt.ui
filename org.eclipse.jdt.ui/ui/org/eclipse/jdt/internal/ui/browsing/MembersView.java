@@ -240,10 +240,10 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 
 	/**
 	 * Finds the closest Java element which can be used as input for
-	 * this part and has the given Java element as child
+	 * this part and has the given Java element as child.
 	 *
 	 * @param 	je 	the Java element for which to search the closest input
-	 * @return	the closest Java element used as input for this part
+	 * @return	the closest Java element used as input for this part, or <code>null</code>
 	 */
 	protected IJavaElement findInputForJavaElement(IJavaElement je) {
 		if (je == null || !je.exists() || (je.getJavaProject() != null && !je.getJavaProject().isOnClasspath(je)))
@@ -259,11 +259,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 			case IJavaElement.COMPILATION_UNIT:
 				return getTypeForCU((ICompilationUnit)je);
 			case IJavaElement.CLASS_FILE:
-				try {
-					return findInputForJavaElement(((IClassFile)je).getType());
-				} catch (JavaModelException ex) {
-					return null;
-				}
+				return findInputForJavaElement(((IClassFile)je).getType());
 			case IJavaElement.IMPORT_DECLARATION:
 				return findInputForJavaElement(je.getParent());
 			case IJavaElement.PACKAGE_DECLARATION:

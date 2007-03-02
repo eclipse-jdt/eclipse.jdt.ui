@@ -24,8 +24,8 @@ import org.eclipse.jface.viewers.TableViewer;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IPageLayout;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.IShowInTargetList;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
@@ -130,11 +129,7 @@ public class TypesView extends JavaBrowsingPart {
 			case IJavaElement.COMPILATION_UNIT:
 				return getTypeForCU((ICompilationUnit)je);
 			case IJavaElement.CLASS_FILE:
-				try {
-					return findElementToSelect(((IClassFile)je).getType());
-				} catch (JavaModelException ex) {
-					return null;
-				}
+				return findElementToSelect(((IClassFile)je).getType());
 			case IJavaElement.IMPORT_CONTAINER:
 			case IJavaElement.IMPORT_DECLARATION:
 			case IJavaElement.PACKAGE_DECLARATION:
@@ -169,7 +164,7 @@ public class TypesView extends JavaBrowsingPart {
 		super.fillActionBars(actionBars);
 
 		// Add selectAll action handlers.
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.SELECT_ALL, fSelectAllAction);
+		actionBars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(), fSelectAllAction);
 	}
 
 	/**

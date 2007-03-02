@@ -48,13 +48,13 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.keys.KeySequence;
 import org.eclipse.ui.keys.SWTKeySupport;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -283,10 +283,8 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		 */
 		public Object[] getChildren(Object element) {
 			if (fShowOnlyMainType) {
-				if (element instanceof ICompilationUnit) {
-					element= getMainType((ICompilationUnit)element);
-				} else if (element instanceof IClassFile) {
-					element= getMainType((IClassFile)element);
+				if (element instanceof ITypeRoot) {
+					element= ((ITypeRoot)element).findPrimaryType();
 				}
 
 				if (element == null)
@@ -707,10 +705,8 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		
 		if (fOutlineContentProvider.isShowingInheritedMembers()) {
 			IJavaElement p= fInput;
-			if (p instanceof ICompilationUnit) {
-				p= getMainType((ICompilationUnit)p);
-			} else if (p instanceof IClassFile) {
-				p= getMainType((IClassFile)p);
+			if (p instanceof ITypeRoot) {
+				p= ((ITypeRoot)p).findPrimaryType();
 			}
 			while (p != null && !(p instanceof IType)) {
 				p= p.getParent();
@@ -759,35 +755,4 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		return editor.getEditorSite().getActionBars().getStatusLineManager().getProgressMonitor();
 	}
 	
-	/**
-	 * Returns the primary type of a compilation unit (has the same
-	 * name as the compilation unit).
-	 *
-	 * @param compilationUnit the compilation unit
-	 * @return returns the primary type of the compilation unit, or
-	 * <code>null</code> if is does not have one
-	 */
-	private IType getMainType(ICompilationUnit compilationUnit) {
-
-		if (compilationUnit == null)
-			return null;
-
-		return compilationUnit.findPrimaryType();
-	}
-
-	/**
-	 * Returns the primary type of a class file.
-	 *
-	 * @param classFile the class file
-	 * @return returns the primary type of the class file, or <code>null</code>
-	 * if is does not have one
-	 */
-	private IType getMainType(IClassFile classFile) {
-		try {
-			IType type= classFile.getType();
-			return type != null && type.exists() ? type : null;
-		} catch (JavaModelException e) {
-			return null;
-		}
-	}
 }

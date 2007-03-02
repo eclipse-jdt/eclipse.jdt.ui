@@ -96,6 +96,7 @@ import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -160,7 +161,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 								ICompilationUnit cu= (ICompilationUnit) fInput;
 								IJavaElement base= cu;
 								if (fTopLevelTypeOnly) {
-									base= getMainType(cu);
+									base= cu.findPrimaryType();
 									if (base == null) {
 										if (fOutlineViewer != null)
 											fOutlineViewer.refresh(true);
@@ -298,16 +299,9 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 				public Object[] getElements(Object parent) {
 					if (fTopLevelTypeOnly) {
-						if (parent instanceof ICompilationUnit) {
+						if (parent instanceof ITypeRoot) {
 							try {
-								IType type= getMainType((ICompilationUnit) parent);
-								return type != null ? type.getChildren() : NO_CLASS;
-							} catch (JavaModelException e) {
-								JavaPlugin.log(e);
-							}
-						} else if (parent instanceof IClassFile) {
-							try {
-								IType type= getMainType((IClassFile) parent);
+								IType type= ((ITypeRoot) parent).findPrimaryType();
 								return type != null ? type.getChildren() : NO_CLASS;
 							} catch (JavaModelException e) {
 								JavaPlugin.log(e);
@@ -936,43 +930,6 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			}
 		};
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
-	}
-
-	/**
-	 * Returns the primary type of a compilation unit (has the same
-	 * name as the compilation unit).
-	 *
-	 * @param compilationUnit the compilation unit
-	 * @return returns the primary type of the compilation unit, or
-	 * <code>null</code> if is does not have one
-	 */
-	protected IType getMainType(ICompilationUnit compilationUnit) {
-
-		if (compilationUnit == null)
-			return null;
-
-		String name= compilationUnit.getElementName();
-		int index= name.indexOf('.');
-		if (index != -1)
-			name= name.substring(0, index);
-		IType type= compilationUnit.getType(name);
-		return type.exists() ? type : null;
-	}
-
-	/**
-	 * Returns the primary type of a class file.
-	 *
-	 * @param classFile the class file
-	 * @return returns the primary type of the class file, or <code>null</code>
-	 * if is does not have one
-	 */
-	protected IType getMainType(IClassFile classFile) {
-		try {
-			IType type= classFile.getType();
-			return type != null && type.exists() ? type : null;
-		} catch (JavaModelException e) {
-			return null;
-		}
 	}
 
 	/* (non-Javadoc)

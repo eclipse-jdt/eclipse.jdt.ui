@@ -27,7 +27,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
-import org.eclipse.jdt.core.JavaModelException;
 
 public class GenericRefactoringHandleTransplanter {
 
@@ -117,11 +116,7 @@ public class GenericRefactoringHandleTransplanter {
 			case IJavaElement.COMPILATION_UNIT:
 				return ((ICompilationUnit) parent).getType(element.getElementName());
 			case IJavaElement.CLASS_FILE:
-				try {
-					return ((IClassFile) parent).getType();
-				} catch (JavaModelException e) {
-					return element; // JME never thrown
-				}
+				return ((IClassFile) parent).getType();
 			case IJavaElement.METHOD:
 				return ((IMethod) parent).getType(element.getElementName(), element.getOccurrenceCount());
 			case IJavaElement.FIELD:

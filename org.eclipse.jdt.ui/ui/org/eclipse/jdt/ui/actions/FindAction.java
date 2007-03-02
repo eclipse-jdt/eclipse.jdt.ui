@@ -131,7 +131,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 				else
 					return findType((ICompilationUnit)o, silent);
 			case IJavaElement.CLASS_FILE:
-				return findType((IClassFile)o);
+				return ((IClassFile)o).getType();
 			default:
 				return o;				
 		}
@@ -194,18 +194,6 @@ public abstract class FindAction extends SelectionDispatchAction {
 			return RETURN_WITHOUT_BEEP;
 	}
 
-	private IType findType(IClassFile cf) {
-		IType mainType;
-		try {					
-			mainType= cf.getType();
-		} catch (JavaModelException ex) {
-			if (JavaModelUtil.isExceptionToBeLogged(ex))
-				ExceptionHandler.log(ex, SearchMessages.JavaElementAction_error_open_message); 
-			return null;
-		}
-		return mainType;
-	}
-	
 	/* 
 	 * Method declared on SelectionChangedAction.
 	 */

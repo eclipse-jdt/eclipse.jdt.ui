@@ -233,12 +233,8 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 				break;
 			case IJavaElement.CLASS_FILE:	
 				if (delta.getKind() == IJavaElementDelta.CHANGED) {
-					try {
-						IType type= ((IClassFile) element).getType();
-						processTypeDelta(type, changedTypes);
-					} catch (JavaModelException e) {
-						JavaPlugin.log(e);
-					}
+					IType type= ((IClassFile) element).getType();
+					processTypeDelta(type, changedTypes);
 				} else {
 					processChildrenDelta(delta, changedTypes);
 				}
