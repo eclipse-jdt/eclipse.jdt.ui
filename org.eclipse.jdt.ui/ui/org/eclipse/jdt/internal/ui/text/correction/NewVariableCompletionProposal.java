@@ -300,10 +300,6 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 				public int compare(Object o1, Object o2) {
 					return ((SimpleName) o1).getStartPosition() - ((SimpleName) o2).getStartPosition();
 				}
-
-				public boolean equals(Object obj) {
-					return false;
-				}
 			});
 		}
 		return names;
