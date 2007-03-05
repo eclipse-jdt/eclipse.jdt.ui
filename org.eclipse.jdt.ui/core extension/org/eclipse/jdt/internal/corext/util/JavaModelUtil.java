@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
@@ -865,6 +866,18 @@ public final class JavaModelUtil {
 		}
 		return defaultCompliance;
 	}
+	
+	public static String getExecutionEnvironmentCompliance(IExecutionEnvironment executionEnvironment) {
+		String desc= executionEnvironment.getId();
+		if (desc.indexOf("1.6") != -1) { //$NON-NLS-1$
+			return JavaCore.VERSION_1_6;
+		} else if (desc.indexOf("1.5") != -1) { //$NON-NLS-1$
+			return JavaCore.VERSION_1_5;
+		} else if (desc.indexOf("1.4") != -1) { //$NON-NLS-1$
+			return JavaCore.VERSION_1_4;
+		}
+		return JavaCore.VERSION_1_3;
+	}
 
 	/**
 	 * Compute a new name for a compilation unit, given the name of the new main type.
@@ -977,5 +990,7 @@ public final class JavaModelUtil {
 		String mainTypeName= JavaModelUtil.concatenateName(packageName, typeName);
 		return qualifier.equals(mainTypeName);
 	}
+
+
 	
 }

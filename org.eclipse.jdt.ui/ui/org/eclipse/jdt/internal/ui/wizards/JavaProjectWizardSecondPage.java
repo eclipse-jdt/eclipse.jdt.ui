@@ -56,7 +56,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -258,9 +257,8 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			// use default
 			return defaultJRELibrary;
 		}
-		IVMInstall inst= fFirstPage.getJVM();
-		if (inst != null) {
-			IPath newPath= jreContainerPath.append(inst.getVMInstallType().getId()).append(inst.getName());
+		IPath newPath= fFirstPage.getJREContainerPath();
+		if (newPath != null) {
 			return new IClasspathEntry[] { JavaCore.newContainerEntry(newPath) };
 		}
 		return defaultJRELibrary;
