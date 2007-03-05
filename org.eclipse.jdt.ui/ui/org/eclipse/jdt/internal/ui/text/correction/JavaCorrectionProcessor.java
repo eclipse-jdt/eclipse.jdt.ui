@@ -62,8 +62,8 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 	private static final String QUICKFIX_PROCESSOR_CONTRIBUTION_ID= "quickFixProcessors"; //$NON-NLS-1$
 	private static final String QUICKASSIST_PROCESSOR_CONTRIBUTION_ID= "quickAssistProcessors"; //$NON-NLS-1$
 
-	private static ContributedProcessorDescriptor[] fContributedAssistProcessors= null;
-	private static ContributedProcessorDescriptor[] fContributedCorrectionProcessors= null;
+	private static ContributedProcessorDescriptor[] fgContributedAssistProcessors= null;
+	private static ContributedProcessorDescriptor[] fgContributedCorrectionProcessors= null;
 
 	private static ContributedProcessorDescriptor[] getProcessorDescriptors(String contributionId, boolean testMarkerTypes) {
 		IConfigurationElement[] elements= Platform.getExtensionRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, contributionId);
@@ -82,17 +82,17 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 	}
 
 	private static ContributedProcessorDescriptor[] getCorrectionProcessors() {
-		if (fContributedCorrectionProcessors == null) {
-			fContributedCorrectionProcessors= getProcessorDescriptors(QUICKFIX_PROCESSOR_CONTRIBUTION_ID, true);
+		if (fgContributedCorrectionProcessors == null) {
+			fgContributedCorrectionProcessors= getProcessorDescriptors(QUICKFIX_PROCESSOR_CONTRIBUTION_ID, true);
 		}
-		return fContributedCorrectionProcessors;
+		return fgContributedCorrectionProcessors;
 	}
 
 	private static ContributedProcessorDescriptor[] getAssistProcessors() {
-		if (fContributedAssistProcessors == null) {
-			fContributedAssistProcessors= getProcessorDescriptors(QUICKASSIST_PROCESSOR_CONTRIBUTION_ID, false);
+		if (fgContributedAssistProcessors == null) {
+			fgContributedAssistProcessors= getProcessorDescriptors(QUICKASSIST_PROCESSOR_CONTRIBUTION_ID, false);
 		}
-		return fContributedAssistProcessors;
+		return fgContributedAssistProcessors;
 	}
 
 	public static boolean hasCorrections(ICompilationUnit cu, int problemId, String markerType) {
