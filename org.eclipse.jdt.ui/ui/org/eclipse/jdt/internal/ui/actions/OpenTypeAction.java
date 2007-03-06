@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog2;
+import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class OpenTypeAction extends Action implements IWorkbenchWindowActionDelegate {
@@ -49,7 +49,7 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 
 	public void run() {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
-		SelectionDialog dialog= new OpenTypeSelectionDialog2(parent, true, PlatformUI.getWorkbench().getProgressService(), null, IJavaSearchConstants.TYPE);
+		SelectionDialog dialog= new OpenTypeSelectionDialog(parent, true, PlatformUI.getWorkbench().getProgressService(), null, IJavaSearchConstants.TYPE);
 		dialog.setTitle(JavaUIMessages.OpenTypeAction_dialogTitle);
 		dialog.setMessage(JavaUIMessages.OpenTypeAction_dialogMessage);
 
