@@ -127,6 +127,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	private ShowContainerForDuplicatesAction fShowContainerForDuplicatesAction;
 
 	private IJavaSearchScope fSearchScope;
+	
+	private boolean fAllowScopeSwitching;
 
 	private int fElementKinds;
 
@@ -170,7 +172,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	}
 
 	/**
-	 * Creates new FilteredTypesSelectionDialog instance
+	 * Creates new FilteredTypesSelectionDialog instance.
 	 * 
 	 * @param shell
 	 *            shell to parent the dialog on
@@ -180,7 +182,9 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	 *            context used to execute long-running operations associated
 	 *            with this dialog
 	 * @param scope
-	 *            scope used when searching for types
+	 *            scope used when searching for types. If the scope is <code>null</code>,
+	 *            then workspace is scope is used as default, and the user can
+	 *            choose a working set as scope. 
 	 * @param elementKinds
 	 *            flags defining nature of searched elements; the only valid
 	 *            values are: <code>IJavaSearchConstants.TYPE</code>
@@ -203,6 +207,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 		setSelectionHistory(new TypeSelectionHistory());
 
 		if (scope == null) {
+			fAllowScopeSwitching= true;
 			scope= SearchEngine.createWorkspaceScope();
 		}
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.TYPE_SELECTION_DIALOG2);
@@ -302,24 +307,25 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 		fShowContainerForDuplicatesAction.setChecked(showContainer);
 		fTypeInfoLabelProvider.setContainerInfo(showContainer);
 
-		String setting= settings.get(WORKINGS_SET_SETTINGS);
-		if (setting != null) {
-			try {
-				IMemento memento= XMLMemento.createReadRoot(new StringReader(setting));
-				fFilterActionGroup.restoreState(memento);
-			} catch (WorkbenchException e) {
-				// don't do anything. Simply don't restore the settings
-				JavaPlugin.log(e);
+		if (fAllowScopeSwitching) {
+			String setting= settings.get(WORKINGS_SET_SETTINGS);
+			if (setting != null) {
+				try {
+					IMemento memento= XMLMemento.createReadRoot(new StringReader(setting));
+					fFilterActionGroup.restoreState(memento);
+				} catch (WorkbenchException e) {
+					// don't do anything. Simply don't restore the settings
+					JavaPlugin.log(e);
+				}
 			}
-		}
-
-		IWorkingSet ws= fFilterActionGroup.getWorkingSet();
-		if (ws == null || (ws.isAggregateWorkingSet() && ws.isEmpty())) {
-			setSearchScope(SearchEngine.createWorkspaceScope());
-			setSubtitle(null);
-		} else {
-			setSearchScope(JavaSearchScopeFactory.getInstance().createJavaSearchScope(ws, true));
-			setSubtitle(ws.getLabel());
+			IWorkingSet ws= fFilterActionGroup.getWorkingSet();
+			if (ws == null || (ws.isAggregateWorkingSet() && ws.isEmpty())) {
+				setSearchScope(SearchEngine.createWorkspaceScope());
+				setSubtitle(null);
+			} else {
+				setSearchScope(JavaSearchScopeFactory.getInstance().createJavaSearchScope(ws, true));
+				setSubtitle(ws.getLabel());
+			}
 		}
 
 		// TypeNameMatch[] types = OpenTypeHistory.getInstance().getTypeInfos();
@@ -341,21 +347,23 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 		fShowContainerForDuplicatesAction= new ShowContainerForDuplicatesAction();
 		menuManager.add(fShowContainerForDuplicatesAction);
 
-		fFilterActionGroup= new WorkingSetFilterActionGroup(getShell(), JavaPlugin.getActivePage(), new IPropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent event) {
-				IWorkingSet ws= (IWorkingSet) event.getNewValue();
-				if (ws == null || (ws.isAggregateWorkingSet() && ws.isEmpty())) {
-					setSearchScope(SearchEngine.createWorkspaceScope());
-					setSubtitle(null);
-				} else {
-					setSearchScope(JavaSearchScopeFactory.getInstance().createJavaSearchScope(ws, true));
-					setSubtitle(ws.getLabel());
+		if (fAllowScopeSwitching) {
+			fFilterActionGroup= new WorkingSetFilterActionGroup(getShell(), JavaPlugin.getActivePage(), new IPropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent event) {
+					IWorkingSet ws= (IWorkingSet) event.getNewValue();
+					if (ws == null || (ws.isAggregateWorkingSet() && ws.isEmpty())) {
+						setSearchScope(SearchEngine.createWorkspaceScope());
+						setSubtitle(null);
+					} else {
+						setSearchScope(JavaSearchScopeFactory.getInstance().createJavaSearchScope(ws, true));
+						setSubtitle(ws.getLabel());
+					}
+	
+					applyFilter();
 				}
-
-				applyFilter();
-			}
-		});
-		fFilterActionGroup.fillViewMenu(menuManager);
+			});
+			fFilterActionGroup.fillViewMenu(menuManager);
+		}
 	}
 
 	/*
@@ -485,7 +493,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 		 */ 
 		typeSearchFilter.setMatchEverythingMode(true);
 		try {
-			engine.searchAllTypeNames(packPattern.toCharArray(),
+			engine.searchAllTypeNames(packPattern == null ? null : packPattern.toCharArray(),
 					typeSearchFilter.getPackageFlags(), //TODO: https://bugs.eclipse.org/bugs/show_bug.cgi?id=176017
 					typeSearchFilter.getPattern().toCharArray(),
 					typeSearchFilter.getMatchRule(), //TODO: https://bugs.eclipse.org/bugs/show_bug.cgi?id=176017
