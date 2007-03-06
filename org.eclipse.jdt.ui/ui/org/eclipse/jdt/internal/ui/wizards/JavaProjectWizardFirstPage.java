@@ -369,13 +369,13 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			fJRECombo.setDialogFieldListener(this);
 
 			Combo comboControl= fJRECombo.getComboControl(fGroup);
-			comboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false)); // make sure column 2 is grabing (but no fill)
+			comboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false)); // make sure column 2 is grabbing (but no fill)
 			comboControl.setVisibleItemCount(30);
 			
 			DialogField.createEmptySpace(fGroup);
 			
 			fUseEEJRE= new SelectionButtonDialogField(SWT.RADIO);
-			fUseEEJRE.setLabelText("Use a execution environment JRE:");
+			fUseEEJRE.setLabelText(NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_specific_EE);
 			fUseEEJRE.doFillIntoGrid(fGroup, 1);
 			fUseEEJRE.setDialogFieldListener(this);
 						
@@ -384,7 +384,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			fEECombo.setDialogFieldListener(this);
 
 			Combo eeComboControl= fEECombo.getComboControl(fGroup);
-			eeComboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false)); // make sure column 2 is grabing (but no fill)
+			eeComboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false)); // make sure column 2 is grabbing (but no fill)
 			eeComboControl.setVisibleItemCount(30);
 			
 			DialogField.createEmptySpace(fGroup);
@@ -496,7 +496,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		}
 		
 		private String getDefaultEEName() {
-			return "J2SE-1.5";
+			return "J2SE-1.5"; //$NON-NLS-1$
 		}
 
 		private String getDefaultJVMLabel() {
