@@ -499,4 +499,25 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview, expected);
 	}
+	
+	public void testBug176595() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(List<Object> list1, List list2) {\n");
+		buf.append("        for (Iterator<?> it1 = list1.iterator(), it2 = null; it1.hasNext();) {\n");
+		buf.append("                Object e1 = it1.next();\n");
+		buf.append("                System.out.println(it2.toString());\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		fetchConvertingProposal(buf, cu);
+		
+		assertNull(fConvertLoopProposal);
+	}
 }

@@ -350,8 +350,11 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 				final Expression initializer= (Expression)outer.next();
 				if (initializer instanceof VariableDeclarationExpression) {
 					final VariableDeclarationExpression declaration= (VariableDeclarationExpression)initializer;
-					for (Iterator inner= declaration.fragments().iterator(); inner.hasNext();) {
-						final VariableDeclarationFragment fragment= (VariableDeclarationFragment)inner.next();
+					List fragments= declaration.fragments();
+					if (fragments.size() != 1) {
+						return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
+					} else {
+						final VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragments.get(0);
 						fragment.accept(new ASTVisitor() {
 							
 							public final boolean visit(final MethodInvocation node) {
