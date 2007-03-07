@@ -380,7 +380,10 @@ public class JavaElementLabels {
 		} else if (obj instanceof IResource) {
 			return ((IResource) obj).getName();
 		} else if (obj instanceof IStorage) {
-			return new StorageLabelProvider().getText(obj);
+			StorageLabelProvider storageLabelProvider= new StorageLabelProvider();
+			String label= storageLabelProvider.getText(obj);
+			storageLabelProvider.dispose();
+			return label;
 		} else if (obj instanceof IAdaptable) {
 			IWorkbenchAdapter wbadapter= (IWorkbenchAdapter) ((IAdaptable)obj).getAdapter(IWorkbenchAdapter.class);
 			if (wbadapter != null) {
