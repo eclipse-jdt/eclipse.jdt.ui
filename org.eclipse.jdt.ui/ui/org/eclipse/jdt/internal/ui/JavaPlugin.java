@@ -26,6 +26,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.GroupMarker;
@@ -56,6 +57,9 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
 import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
+
+import org.eclipse.ui.forms.FormColors;
+import org.eclipse.ui.forms.widgets.FormToolkit;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -235,6 +239,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	private ClasspathAttributeConfigurationDescriptors fClasspathAttributeConfigurationDescriptors;
 	
+	private FormToolkit fDialogsFormToolkit;
 
 	public static JavaPlugin getDefault() {
 		return fgJavaPlugin;
@@ -554,6 +559,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 				fSaveParticipantRegistry= null;
 			}
 			
+			if (fDialogsFormToolkit != null) {
+				fDialogsFormToolkit.dispose();
+				fDialogsFormToolkit= null;
+			}
+			
 			SpellCheckEngine.shutdownInstance();
 			
 			QualifiedTypeNameHistory.getDefault().save();
@@ -651,6 +661,16 @@ public class JavaPlugin extends AbstractUIPlugin {
 			fTypeFilter= new TypeFilter();
 		return fTypeFilter;
 	}	
+	
+	public FormToolkit getDialogsFormToolkit() {
+		if (fDialogsFormToolkit == null) {
+			FormColors colors= new FormColors(Display.getCurrent());
+			colors.setBackground(null);
+			colors.setForeground(null);	
+			fDialogsFormToolkit= new FormToolkit(colors);
+		}
+		return fDialogsFormToolkit;
+	}
 
 	/**
 	 * Returns all Java editor text hovers contributed to the workbench.

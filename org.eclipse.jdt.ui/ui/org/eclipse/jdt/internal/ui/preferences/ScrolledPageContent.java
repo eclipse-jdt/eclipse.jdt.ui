@@ -14,15 +14,15 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.ui.forms.FormColors;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.SharedScrolledComposite;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 public class ScrolledPageContent extends SharedScrolledComposite {
 
 	private FormToolkit fToolkit;
-	private FormColors fColors;
 	
 	public ScrolledPageContent(Composite parent) {
 		this(parent, SWT.V_SCROLL | SWT.H_SCROLL);
@@ -33,11 +33,7 @@ public class ScrolledPageContent extends SharedScrolledComposite {
 		
 		setFont(parent.getFont());
 		
-		fColors= new FormColors(parent.getDisplay());
-		fColors.setBackground(null);
-		fColors.setForeground(null);
-		
-		fToolkit= new FormToolkit(fColors);
+		fToolkit= JavaPlugin.getDefault().getDialogsFormToolkit();
 		
 		setExpandHorizontal(true);
 		setExpandVertical(true);
@@ -47,14 +43,6 @@ public class ScrolledPageContent extends SharedScrolledComposite {
 		setContent(body);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.swt.widgets.Widget#dispose()
-	 */
-	public void dispose() {
-		fToolkit.dispose();
-		fColors.dispose();
-		super.dispose();
-	}
 	
 	public void adaptChild(Control childControl) {
 		fToolkit.adapt(childControl, true, true);
