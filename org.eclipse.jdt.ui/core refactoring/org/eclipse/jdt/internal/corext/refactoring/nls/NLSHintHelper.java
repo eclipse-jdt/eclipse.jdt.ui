@@ -63,6 +63,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
@@ -363,7 +364,7 @@ public class NLSHintHelper {
 			Object[] resources= packageFragment.isDefaultPackage() ? root.getNonJavaResources() : packageFragment.getNonJavaResources();
 			for (int j= 0; j < resources.length; j++) {
 				Object object= resources[j];
-				if (object instanceof IStorage) {
+				if (JavaModelUtil.isOpenableStorage(object)) {
 					IStorage storage= (IStorage)object;
 					if (storage.getName().equals(resourceName)) {
 						return storage;

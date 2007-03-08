@@ -111,6 +111,7 @@ import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
@@ -1177,9 +1178,9 @@ public class PackageExplorerPart extends ViewPart
 			return ((IJavaElement)element).getParent();
 		else if (element instanceof IResource)
 			return ((IResource)element).getParent();
-//		else if (element instanceof IStorage) {
-			// can't get parent - see bug 22376
-//		}
+		else if (element instanceof IJarEntryResource) {
+			return ((IJarEntryResource)element).getParent();
+		}
 		return null;
 	}
 	

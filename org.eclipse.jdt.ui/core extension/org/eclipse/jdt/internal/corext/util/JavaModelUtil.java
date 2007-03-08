@@ -33,6 +33,7 @@ import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -45,6 +46,7 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -991,6 +993,12 @@ public final class JavaModelUtil {
 		return qualifier.equals(mainTypeName);
 	}
 
-
+	public static boolean isOpenableStorage(Object storage) {
+		if (storage instanceof IJarEntryResource) {
+			return ((IJarEntryResource) storage).isFile();
+		} else {
+			return storage instanceof IStorage;
+		}
+	}
 	
 }

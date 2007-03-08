@@ -29,6 +29,8 @@ import org.eclipse.ui.IFileEditorMapping;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IJarEntryResource;
+
 /**
  * Standard label provider for IStorage objects.
  * Use this class when you want to present IStorage objects in a viewer.
@@ -60,10 +62,6 @@ public class StorageLabelProvider extends LabelProvider {
 	 */
 	public String getText(Object element) {
 		if (element instanceof IStorage) {
-			IPath path= ((IStorage)element).getFullPath();
-			if (path != null && path.segmentCount() > 0) {
-				return path.toString();
-			}
 			return ((IStorage)element).getName();
 		}
 		return super.getText(element);
@@ -90,6 +88,10 @@ public class StorageLabelProvider extends LabelProvider {
 	 * The image for a JarEntryFile is retrieved from the EditorRegistry.
 	 */ 
 	private Image getImageForJarEntry(IStorage element) {
+		if (element instanceof IJarEntryResource && !((IJarEntryResource) element).isFile()) {
+			return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
+		}
+		
 		if (fJarImageMap == null)
 			return getDefaultImage();
 

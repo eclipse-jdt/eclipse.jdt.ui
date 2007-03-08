@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaModel;
@@ -185,6 +186,10 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 				
 			if (element instanceof IFolder)
 				return getFolderContent((IFolder)element);
+			
+			if (element instanceof IJarEntryResource) {
+				return ((IJarEntryResource) element).getChildren();
+			}
 			
 			if (getProvideMembers() && element instanceof ISourceReference && element instanceof IParent) {
 				return ((IParent)element).getChildren();
@@ -433,6 +438,8 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 				return skipProjectPackageFragmentRoot((IPackageFragmentRoot) parent);
 			}
 			return parent;
+		} else if (element instanceof IJarEntryResource) {
+			return ((IJarEntryResource) element).getParent();
 		}
 		return null;
 	}

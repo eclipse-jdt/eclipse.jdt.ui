@@ -389,7 +389,7 @@ public class EditorUtility {
 		if (input instanceof IFile)
 			return new FileEditorInput((IFile) input);
 
-		if (input instanceof IStorage)
+		if (JavaModelUtil.isOpenableStorage(input))
 			return new JarEntryEditorInput((IStorage)input);
 
 		return null;

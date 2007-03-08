@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.util.OpenStrategy;
@@ -118,7 +117,7 @@ public class OpenAction extends SelectionDispatchAction {
 				continue;
 			if (element instanceof IFile)
 				continue;
-			if (element instanceof IStorage)
+			if (JavaModelUtil.isOpenableStorage(element))
 				continue;
 			return false;
 		}
