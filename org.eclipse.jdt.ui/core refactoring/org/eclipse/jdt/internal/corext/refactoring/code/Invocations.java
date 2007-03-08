@@ -15,9 +15,8 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -35,8 +34,7 @@ public class Invocations {
 			case ASTNode.CONSTRUCTOR_INVOCATION:
 				return ((ConstructorInvocation)invocation).arguments();
 			default:
-				Assert.isTrue(false, "Should not happen."); //$NON-NLS-1$
-				return null;
+				throw new IllegalArgumentException(invocation.toString());
 		}
 	}
 
@@ -48,8 +46,7 @@ public class Invocations {
 			case ASTNode.CONSTRUCTOR_INVOCATION:
 				return null;
 			default:
-				Assert.isTrue(false, "Should not happen."); //$NON-NLS-1$
-				return null;
+				throw new IllegalArgumentException(invocation.toString());
 		}
 	}
 	
@@ -62,14 +59,39 @@ public class Invocations {
 	public static IMethodBinding resolveBinding(ASTNode invocation) {
 		switch(invocation.getNodeType()) {
 			case ASTNode.METHOD_INVOCATION:
-				return (IMethodBinding)((MethodInvocation)invocation).getName().resolveBinding();
+				return ((MethodInvocation)invocation).resolveMethodBinding();
 			case ASTNode.SUPER_METHOD_INVOCATION:
-				return (IMethodBinding)((SuperMethodInvocation)invocation).getName().resolveBinding();
+				return ((SuperMethodInvocation)invocation).resolveMethodBinding();
 			case ASTNode.CONSTRUCTOR_INVOCATION:
 				return ((ConstructorInvocation)invocation).resolveConstructorBinding();
 			default:
-				Assert.isTrue(false, "Should not happen."); //$NON-NLS-1$
-				return null;
+				throw new IllegalArgumentException(invocation.toString());
+		}
+	}
+
+	public static boolean isResolvedTypeInferredFromExpectedType(Expression invocation) {
+		switch(invocation.getNodeType()) {
+			case ASTNode.METHOD_INVOCATION:
+				return ((MethodInvocation) invocation).isResolvedTypeInferredFromExpectedType();
+			case ASTNode.SUPER_METHOD_INVOCATION:
+				return ((SuperMethodInvocation) invocation).isResolvedTypeInferredFromExpectedType();
+			case ASTNode.CONSTRUCTOR_INVOCATION:
+				return false;
+			default:
+				throw new IllegalArgumentException(invocation.toString());
+		}
+	}
+
+	public static ChildListPropertyDescriptor getTypeArgumentsProperty(Expression invocation) {
+		switch(invocation.getNodeType()) {
+			case ASTNode.METHOD_INVOCATION:
+				return MethodInvocation.TYPE_ARGUMENTS_PROPERTY;
+			case ASTNode.SUPER_METHOD_INVOCATION:
+				return SuperMethodInvocation.TYPE_ARGUMENTS_PROPERTY;
+			case ASTNode.CONSTRUCTOR_INVOCATION:
+				return ConstructorInvocation.TYPE_ARGUMENTS_PROPERTY;
+			default:
+				throw new IllegalArgumentException(invocation.toString());
 		}
 	}
 }

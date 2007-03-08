@@ -74,11 +74,14 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -242,8 +245,29 @@ public class InlineConstantRefactoring extends ScriptableRefactoring {
 		
 			private void perform(Expression initializer) {
 				initializer.accept(this);
+				if (initializer instanceof MethodInvocation || initializer instanceof SuperMethodInvocation) {
+					addExplicitTypeArgumentsIfNecessary(initializer);
+				}
 			}
-		
+			
+			private void addExplicitTypeArgumentsIfNecessary(Expression invocation) {
+				if (Invocations.isResolvedTypeInferredFromExpectedType(invocation)) {
+					ASTNode referenceContext= fNewLocation.getParent();
+					if (! (referenceContext instanceof VariableDeclarationFragment
+							|| referenceContext instanceof SingleVariableDeclaration
+							|| referenceContext instanceof Assignment)) {
+						IMethodBinding methodBinding= Invocations.resolveBinding(invocation);
+						ITypeBinding[] typeArguments= methodBinding.getTypeArguments();
+						ListRewrite typeArgsRewrite= fInitializerRewrite.getListRewrite(invocation, Invocations.getTypeArgumentsProperty(invocation));
+						for (int i= 0; i < typeArguments.length; i++) {
+							Type typeArgument= fNewLocationCuRewrite.getImportRewrite().addImport(typeArguments[i], fNewLocationCuRewrite.getAST());
+							fNewLocationCuRewrite.getImportRemover().registerAddedImports(typeArgument);
+							typeArgsRewrite.insertLast(typeArgument, null);
+						}
+					}
+				}
+			}
+			
 			public boolean visit(FieldAccess fieldAccess) {
 				fieldAccess.getExpression().accept(this);
 				return false;

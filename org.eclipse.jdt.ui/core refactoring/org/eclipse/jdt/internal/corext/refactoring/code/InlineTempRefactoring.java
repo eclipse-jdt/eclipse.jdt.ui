@@ -14,12 +14,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.RangeMarker;
+import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
@@ -44,14 +53,21 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -70,9 +86,11 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class InlineTempRefactoring extends ScriptableRefactoring {
@@ -265,7 +283,6 @@ public class InlineTempRefactoring extends ScriptableRefactoring {
 	}
 
 	private void inlineTemp(CompilationUnitRewrite cuRewrite) throws JavaModelException {
-		VariableDeclaration variableDeclaration= getVariableDeclaration();
 		SimpleName[] references= getReferences();
 
 		TextEditGroup groupDesc= cuRewrite.createGroupDescription(RefactoringCoreMessages.InlineTempRefactoring_inline_edit_name);
@@ -273,7 +290,7 @@ public class InlineTempRefactoring extends ScriptableRefactoring {
 
 		for (int i= 0; i < references.length; i++){
 			SimpleName curr= references[i];
-			ASTNode initializerCopy= getInitializerSource(cuRewrite, needsBrackets(curr, variableDeclaration));
+			ASTNode initializerCopy= getInitializerSource(cuRewrite, curr);
 			rewrite.replace(curr, initializerCopy, groupDesc);
 		}
 	}
@@ -299,8 +316,9 @@ public class InlineTempRefactoring extends ScriptableRefactoring {
 		}
 	}
 	
-	private Expression getInitializerSource(CompilationUnitRewrite rewrite, boolean brackets) throws JavaModelException {
-		Expression copy= getModifiedInitializerSource(rewrite);
+	private Expression getInitializerSource(CompilationUnitRewrite rewrite, SimpleName reference) throws JavaModelException {
+		Expression copy= getModifiedInitializerSource(rewrite, reference);
+		boolean brackets= needsBrackets(reference, getVariableDeclaration());
 		if (brackets) {
 			ParenthesizedExpression parentExpr= rewrite.getAST().newParenthesizedExpression();
 			parentExpr.setExpression(copy);
@@ -309,11 +327,30 @@ public class InlineTempRefactoring extends ScriptableRefactoring {
 		return copy;
 	}
 	
-	private Expression getModifiedInitializerSource(CompilationUnitRewrite rewrite) throws JavaModelException {
+	private Expression getModifiedInitializerSource(CompilationUnitRewrite rewrite, SimpleName reference) throws JavaModelException {
 		VariableDeclaration varDecl= getVariableDeclaration();
+		Expression initializer= varDecl.getInitializer();
 		
-		Expression copy= (Expression) rewrite.getASTRewrite().createCopyTarget(varDecl.getInitializer());
-		if (copy instanceof ArrayInitializer && ASTNodes.getDimensions(varDecl) > 0) {
+		ASTNode referenceContext= reference.getParent();
+		if (isInvocation(initializer)) {
+			if (Invocations.isResolvedTypeInferredFromExpectedType(initializer)) {
+				if (! (referenceContext instanceof VariableDeclarationFragment
+						|| referenceContext instanceof SingleVariableDeclaration
+						|| referenceContext instanceof Assignment)) {
+					IMethodBinding methodBinding= Invocations.resolveBinding(initializer);
+					ITypeBinding[] typeArguments= methodBinding.getTypeArguments();
+					Type[] typeArgumentNodes= new Type[typeArguments.length];
+					for (int i= 0; i < typeArguments.length; i++) {
+						typeArgumentNodes[i]= rewrite.getImportRewrite().addImport(typeArguments[i], rewrite.getAST());
+					}
+					String newSource= createParameterizedInvocation(initializer, typeArgumentNodes);
+					return (Expression) rewrite.getASTRewrite().createStringPlaceholder(newSource, initializer.getNodeType());
+				}
+			}
+		}
+		
+		Expression copy= (Expression) rewrite.getASTRewrite().createCopyTarget(initializer);
+		if (initializer instanceof ArrayInitializer && ASTNodes.getDimensions(varDecl) > 0) {
 			ArrayType newType= (ArrayType) ASTNodeFactory.newType(rewrite.getAST(), varDecl);
 			
 			ArrayCreation newArrayCreation= rewrite.getAST().newArrayCreation();
@@ -322,6 +359,37 @@ public class InlineTempRefactoring extends ScriptableRefactoring {
 			return newArrayCreation;
 		}
 		return copy;
+	}
+
+	private String createParameterizedInvocation(Expression invocation, Type[] typeArgumentNodes) throws JavaModelException {
+		ASTRewrite rewrite= ASTRewrite.create(invocation.getAST());
+		ListRewrite typeArgsRewrite= rewrite.getListRewrite(invocation, Invocations.getTypeArgumentsProperty(invocation));
+		for (int i= 0; i < typeArgumentNodes.length; i++) {
+			typeArgsRewrite.insertLast(typeArgumentNodes[i], null);
+		}
+		
+		IDocument document= new Document(fCu.getBuffer().getContents());
+		final RangeMarker marker= new RangeMarker(invocation.getStartPosition(), invocation.getLength());
+		IJavaProject project= fCu.getJavaProject();
+		TextEdit[] rewriteEdits= rewrite.rewriteAST(document, project.getOptions(true)).removeChildren();
+		marker.addChildren(rewriteEdits);
+		try {
+			marker.apply(document, TextEdit.UPDATE_REGIONS);
+			String rewrittenInitializer= document.get(marker.getOffset(), marker.getLength());
+			IRegion region= document.getLineInformation(document.getLineOfOffset(marker.getOffset()));
+			int oldIndent= Strings.computeIndentUnits(document.get(region.getOffset(), region.getLength()), project);
+			return Strings.changeIndent(rewrittenInitializer, oldIndent, project, "", TextUtilities.getDefaultLineDelimiter(document)); //$NON-NLS-1$
+		} catch (MalformedTreeException e) {
+			JavaPlugin.log(e);
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+		}
+		//fallback:
+		return fCu.getBuffer().getText(invocation.getStartPosition(), invocation.getLength());
+	}
+	
+	private static boolean isInvocation(Expression node) {
+		return node instanceof MethodInvocation || node instanceof SuperMethodInvocation;
 	}
 
 	public SimpleName[] getReferences() {

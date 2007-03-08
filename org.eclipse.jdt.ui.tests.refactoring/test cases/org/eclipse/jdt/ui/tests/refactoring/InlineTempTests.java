@@ -252,6 +252,14 @@ public class InlineTempTests extends RefactoringTest {
 		helper1(4, 8, 4, 11);
 	}
 	
+	public void test31() throws Exception{
+		helper1(8, 30, 8, 30);
+	}
+	
+	public void test32() throws Exception{
+		helper1(10, 27, 10, 27);
+	}
+	
 	//------
 	
 	public void testFail0() throws Exception{
