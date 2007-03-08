@@ -80,7 +80,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.ZipTools;
 
 
 public class RenamePackageTests extends RefactoringTest {
-	private static final boolean BUG_6054= true;
+	private static final boolean BUG_6054= false;
 	private static final boolean BUG_54962_71267= false;
 	
 	private static final Class clazz= RenamePackageTests.class;
@@ -935,6 +935,10 @@ public class RenamePackageTests extends RefactoringTest {
 	
 	public void test7() throws Exception{
 		helper2(new String[]{"r", "r.s"}, new String[][]{{"A"}, {"B"}}, "q");
+	}
+	
+	public void test8() throws Exception{
+		helper2(new String[]{"java.lang.reflect"}, new String[][]{{"Klass"}}, "nonjava");
 	}
 	
 	public void testReadOnly() throws Exception{
