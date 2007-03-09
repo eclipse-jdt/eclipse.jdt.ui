@@ -566,7 +566,7 @@ public abstract class TType {
 	/**
 	 * Computes a plain pretty signature. For type with bounds (e.g
 	 * type variables and wildcards) the plain signature is different
-	 * than the full pretty signture.
+	 * than the full pretty signature.
 	 * 
 	 * @return a plain pretty signature for this type
 	 */
