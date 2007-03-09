@@ -56,23 +56,15 @@ public final class ParameterizedType extends HierarchyType {
 	
 	public boolean doEquals(TType type) {
 		ParameterizedType other= (ParameterizedType)type;
-		if (!fTypeDeclaration.equals(other.fTypeDeclaration))
+		if (! getBindingKey().equals(other.getBindingKey()))
 			return false;
-		if (fTypeArguments.length != other.fTypeArguments.length)
+		if (! getJavaElementType().equals(other.getJavaElementType()))
 			return false;
-		for (int i= 0; i < fTypeArguments.length; i++) {
-			if (!fTypeArguments[i].equals(other.fTypeArguments[i]))
-				return false;
-		}
 		return true;
 	}
 	
 	public int hashCode() {
-		int result= fTypeDeclaration.hashCode();
-		for (int i= 0; i < fTypeArguments.length; i++) {
-			result+= fTypeArguments[i].hashCode();
-		}
-		return result;
+		return getBindingKey().hashCode();
 	}
 	
 	protected boolean doCanAssignTo(TType lhs) {

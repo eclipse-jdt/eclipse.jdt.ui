@@ -423,4 +423,9 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 		performCuOK();
 	}
 	
+	public void testCuParameterizedTypes1() throws Exception {
+		// regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=176742
+		performCuOK();
+	}
+	
 }
