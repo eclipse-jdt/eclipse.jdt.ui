@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.viewers.ContentViewer;
@@ -29,6 +30,7 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -68,7 +70,6 @@ public class JavaElementComparator extends ViewerComparator {
 	
 	private static final int RESOURCEFOLDERS= 7;
 	private static final int RESOURCES= 8;
-	private static final int STORAGE= 9;	
 	
 	private static final int PACKAGE_DECL=	10;
 	private static final int IMPORT_CONTAINER= 11;
@@ -162,8 +163,11 @@ public class JavaElementComparator extends ViewerComparator {
 			return PROJECTS;
 		} else if (element instanceof IContainer) {
 			return RESOURCEFOLDERS;
-		} else if (element instanceof IStorage) {
-			return STORAGE;
+		} else if (element instanceof IJarEntryResource) {
+			if (((IJarEntryResource) element).isFile()) {
+				return RESOURCES;
+			}
+			return RESOURCEFOLDERS;
 		} else if (element instanceof PackageFragmentRootContainer) {
 			return PACKAGEFRAGMENTROOTS;
 		}
@@ -207,7 +211,7 @@ public class JavaElementComparator extends ViewerComparator {
 		if (cat1 != cat2)
 			return cat1 - cat2;
 
-		if (cat1 == PROJECTS || cat1 == RESOURCES || cat1 == RESOURCEFOLDERS || cat1 == STORAGE || cat1 == OTHERS) {
+		if (cat1 == PROJECTS || cat1 == RESOURCES || cat1 == RESOURCEFOLDERS || cat1 == OTHERS) {
 			String name1= getNonJavaElementLabel(viewer, e1);
 			String name2= getNonJavaElementLabel(viewer, e2);
 			if (name1 != null && name2 != null) {
@@ -285,7 +289,12 @@ public class JavaElementComparator extends ViewerComparator {
 	
 	private String getNonJavaElementLabel(Viewer viewer, Object element) {
 		// try to use the workbench adapter for non - java resources or if not available, use the viewers label provider
-
+		if (element instanceof IResource) {
+			return ((IResource) element).getName();
+		}
+		if (element instanceof IStorage) {
+			return ((IStorage) element).getName();
+		}
 		if (element instanceof IAdaptable) {
 			IWorkbenchAdapter adapter= (IWorkbenchAdapter) ((IAdaptable) element).getAdapter(IWorkbenchAdapter.class);
 			if (adapter != null) {
