@@ -25,7 +25,6 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.RetargetAction;
 import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -146,7 +145,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		if (editMenu != null) {
 
 			MenuManager structureSelection= new MenuManager(JavaEditorMessages.ExpandSelectionMenu_label, "expandSelection"); //$NON-NLS-1$
-			editMenu.insertAfter(ActionFactory.SELECT_ALL.getId(), structureSelection);
+			editMenu.insertAfter(ITextEditorActionConstants.SELECT_ALL, structureSelection);
 			structureSelection.add(fStructureSelectEnclosingAction);
 			structureSelection.add(fStructureSelectNextAction);
 			structureSelection.add(fStructureSelectPreviousAction);
