@@ -42,9 +42,9 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IViewSite;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.IShowInTargetList;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -535,9 +535,9 @@ public class PackagesView extends JavaBrowsingPart{
 		IActionBars actionBars= getViewSite().getActionBars();
 		if (isInListState()) {
 			fSelectAllAction= new SelectAllAction((TableViewer)fWrappedViewer.getViewer());
-			actionBars.setGlobalActionHandler(IWorkbenchActionConstants.SELECT_ALL, fSelectAllAction);
+			actionBars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(), fSelectAllAction);
 		} else {
-			actionBars.setGlobalActionHandler(IWorkbenchActionConstants.SELECT_ALL, null);
+			actionBars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(), null);
 			fSelectAllAction= null;
 		}
 		actionBars.updateActionBars();
