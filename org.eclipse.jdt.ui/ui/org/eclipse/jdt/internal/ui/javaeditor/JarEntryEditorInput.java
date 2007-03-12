@@ -76,7 +76,7 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 	 * @see IEditorInput#getToolTipText()
 	 */
 	public String getToolTipText() {
-		return fJarEntryFile.getFullPath().toString();
+		return getFullPath();
 	}
 
 	/*
@@ -84,7 +84,7 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 	 */
 	public ImageDescriptor getImageDescriptor() {
 		IEditorRegistry registry= PlatformUI.getWorkbench().getEditorRegistry();
-		return registry.getImageDescriptor(fJarEntryFile.getFullPath().getFileExtension());
+		return registry.getImageDescriptor(getContentType());
 	}
 
 	/*
