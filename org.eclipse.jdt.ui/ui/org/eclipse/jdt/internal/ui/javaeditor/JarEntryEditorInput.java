@@ -12,6 +12,8 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -20,6 +22,9 @@ import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.jdt.core.IJarEntryResource;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 
 /**
@@ -59,13 +64,6 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 	}
 
 	/*
-	 * @see IEditorInput#getFullPath()
-	 */
-	public String getFullPath() {
-		return fJarEntryFile.getFullPath().toString();
-	}
-
-	/*
 	 * @see IEditorInput#getContentType()
 	 */
 	public String getContentType() {
@@ -76,7 +74,20 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 	 * @see IEditorInput#getToolTipText()
 	 */
 	public String getToolTipText() {
-		return getFullPath();
+		if (fJarEntryFile instanceof IJarEntryResource) {
+			IJarEntryResource jarEntry= (IJarEntryResource)fJarEntryFile;
+			IPackageFragmentRoot root= jarEntry.getPackageFragmentRoot();
+			IPath fullPath= root.getPath().append(fJarEntryFile.getFullPath());
+			if (root.isExternal())
+				return fullPath.toOSString();
+			return fullPath.toString();
+			
+		}
+		
+		IPath fullPath= fJarEntryFile.getFullPath();
+		if (fullPath == null)
+			return null;
+		return fullPath.toString();
 	}
 
 	/*
