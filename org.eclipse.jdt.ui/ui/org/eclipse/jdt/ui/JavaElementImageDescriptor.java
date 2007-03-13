@@ -69,7 +69,20 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	 * Flag to render the 'deprecated' adornment.
 	 * @since 3.0
 	 */
-	public final static int DEPRECATED= 	0x400;	
+	public final static int DEPRECATED= 	0x400;
+	
+	/**
+	 * Flag to render the 'volatile' adornment.
+	 * @since 3.3
+	 */
+	public final static int VOLATILE= 	0x800;
+	
+	/**
+	 * Flag to render the 'transient' adornment.
+	 * @since 3.3
+	 */
+	public final static int TRANSIENT= 	0x1000;	
+	
 
 	private ImageDescriptor fBaseImage;
 	private int fFlags;
@@ -96,7 +109,7 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	 * Sets the descriptors adornments. Valid values are: {@link #ABSTRACT}, {@link #FINAL},
 	 * {@link #SYNCHRONIZED}, {@link #STATIC}, {@link #RUNNABLE}, {@link #WARNING}, 
 	 * {@link #ERROR}, {@link #OVERRIDES}, {@link #IMPLEMENTS}, {@link #CONSTRUCTOR},
-	 * {@link #DEPRECATED},  or any combination of those.
+	 * {@link #DEPRECATED}, {@link #VOLATILE}, {@link #TRANSIENT} or any combination of those.
 	 * 
 	 * @param adornments the image descriptors adornments
 	 */
@@ -211,6 +224,11 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 			x-= data.width;
 			drawImage(data, x, 0);
 		}
+		if ((fFlags & VOLATILE) != 0) {
+			ImageData data= getImageData(JavaPluginImages.DESC_OVR_VOLATILE);
+			x-= data.width;
+			drawImage(data, x, 0);
+		}
 	}		
 	
 	private void drawBottomRight() {
@@ -249,6 +267,11 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		}
 		if ((flags & RUNNABLE) != 0) {
 			ImageData data= getImageData(JavaPluginImages.DESC_OVR_RUN);
+			x-= data.width;
+			drawImage(data, x, size.y - data.height);
+		}
+		if ((flags & TRANSIENT) != 0) {
+			ImageData data= getImageData(JavaPluginImages.DESC_OVR_TRANSIENT);
 			x-= data.width;
 			drawImage(data, x, size.y - data.height);
 		}

@@ -55,6 +55,12 @@ public class BindingLabelProvider extends LabelProvider {
 			adornments|= JavaElementImageDescriptor.STATIC;
 		if (binding.isDeprecated())
 			adornments|= JavaElementImageDescriptor.DEPRECATED;
+		if (binding instanceof IVariableBinding && ((IVariableBinding) binding).isField()) {
+			if (Modifier.isTransient(modifiers))
+				adornments|= JavaElementImageDescriptor.TRANSIENT;
+			if (Modifier.isVolatile(modifiers))
+				adornments|= JavaElementImageDescriptor.VOLATILE;
+		}
 		return adornments;
 	}
 

@@ -349,12 +349,19 @@ public class JavaElementImageProvider {
 				
 				if (Flags.isDeprecated(modifiers))
 					flags |= JavaElementImageDescriptor.DEPRECATED;
-				
 				if (member.getElementType() == IJavaElement.TYPE) {
 					if (JavaModelUtil.hasMainMethod((IType) member)) {
 						flags |= JavaElementImageDescriptor.RUNNABLE;
 					}
 				}
+				if (member.getElementType() == IJavaElement.FIELD) {
+					if (Flags.isVolatile(modifiers))
+						flags |= JavaElementImageDescriptor.VOLATILE;
+					if (Flags.isTransient(modifiers))
+						flags |= JavaElementImageDescriptor.TRANSIENT;
+				}
+				
+				
 			} catch (JavaModelException e) {
 				// do nothing. Can't compute runnable adornment or get flags
 			}
