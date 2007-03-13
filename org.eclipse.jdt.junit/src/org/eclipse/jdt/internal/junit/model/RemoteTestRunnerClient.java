@@ -537,6 +537,8 @@ public class RemoteTestRunnerClient {
 
 	public void rerunTest(String testId, String className, String testName) {
 		if (isRunning()) {
+			fActualResult.setLength(0);
+			fExpectedResult.setLength(0);
 			fWriter.println(MessageIds.TEST_RERUN+testId+" "+className+" "+testName); //$NON-NLS-1$ //$NON-NLS-2$
 			fWriter.flush();
 		}
