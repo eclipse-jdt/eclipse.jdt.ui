@@ -1125,6 +1125,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 						case ITerminalSymbols.TokenNameCOMMENT_BLOCK: {
 							int end= scanner.getCurrentTokenEndPosition() + 1;
 							regions.add(new Region(start, end - start));
+							continue;
 						}
 						case ITerminalSymbols.TokenNameCOMMENT_LINE:
 							continue;
