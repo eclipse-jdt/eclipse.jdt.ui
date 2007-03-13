@@ -654,7 +654,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		}
 
 		IStatus status= ResourcesPlugin.getWorkspace().validatePath(IPath.SEPARATOR + projectName, IResource.PROJECT);
-		if (!status.isOK()) {
+		if (!status.isOK() || !Path.ROOT.isValidSegment(projectName)) {
 			setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_invalidProjectName, projectName));
 			return;
 		}

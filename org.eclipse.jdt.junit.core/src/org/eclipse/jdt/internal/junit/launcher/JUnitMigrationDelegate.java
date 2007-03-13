@@ -1,6 +1,7 @@
 package org.eclipse.jdt.internal.junit.launcher;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -86,7 +87,7 @@ public class JUnitMigrationDelegate implements ILaunchConfigurationMigrationDele
 		String containerHandle = config.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, (String)null);
 		String typeName = config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null);
 		IJavaElement element = null;
-		if (projName != null) {
+		if (projName != null && Path.ROOT.isValidSegment(projName)) {
 			IJavaProject javaProject = getJavaModel().getJavaProject(projName);
 			if (javaProject.exists()) {
 				if (typeName != null) {
