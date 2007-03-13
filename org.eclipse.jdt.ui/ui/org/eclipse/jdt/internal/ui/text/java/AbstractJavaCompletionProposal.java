@@ -193,7 +193,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 						} catch (BadLocationException e) {
 						}
 					}
-					// fall through
+					return null;
 				default:
 					return null;
 			}
