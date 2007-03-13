@@ -15,7 +15,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.zip.ZipFile;
 
@@ -293,6 +295,7 @@ public class JavaProjectHelper {
 	public static void performDummySearch() throws JavaModelException {
 		new SearchEngine().searchAllTypeNames(
 				null,
+				SearchPattern.R_EXACT_MATCH,
 				"XXXXXXXXX".toCharArray(), // make sure we search a concrete name. This is faster according to Kent 
 				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE,
 				IJavaSearchConstants.CLASS,
@@ -702,6 +705,32 @@ public class JavaProjectHelper {
 		}
 	}
 	
+	/**
+	 * Imports resources from <code>bundleSourcePath</code> to <code>importTarget</code>.
+	 * 
+	 * @param importTarget the parent container
+	 * @param bundleSourcePath the path to a folder containing resources
+	 * 
+	 * @throws CoreException import failed
+	 * @throws IOException import failed
+	 */
+	public static void importResources(IContainer importTarget, String bundleSourcePath) throws CoreException, IOException {
+		Enumeration entryPaths= JavaTestPlugin.getDefault().getBundle().getEntryPaths(bundleSourcePath);
+		while (entryPaths.hasMoreElements()) {
+			String path= (String) entryPaths.nextElement();
+			IPath name= new Path(path.substring(bundleSourcePath.length()));
+			if (path.endsWith("/")) {
+				IFolder folder= importTarget.getFolder(name);
+				folder.create(false, true, null);
+				importResources(folder, path);
+			} else {
+				URL url= JavaTestPlugin.getDefault().getBundle().getEntry(path);
+				IFile file= importTarget.getFile(name);
+				file.create(url.openStream(), true, null);
+			}
+		}
+	}
+
 	private static class ImportOverwriteQuery implements IOverwriteQuery {
 		public String queryOverwrite(String file) {
 			return ALL;

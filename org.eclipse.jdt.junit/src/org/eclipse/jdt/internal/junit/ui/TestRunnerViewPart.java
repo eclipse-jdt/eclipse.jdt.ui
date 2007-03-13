@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -49,6 +50,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
@@ -73,6 +75,7 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
@@ -103,11 +106,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.viewsupport.ViewHistory;
 
 import org.eclipse.jdt.internal.junit.Messages;
-import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
+import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.model.ITestRunSessionListener;
 import org.eclipse.jdt.internal.junit.model.ITestSessionListener;
+import org.eclipse.jdt.internal.junit.model.JUnitModel;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestElement;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
@@ -363,6 +367,12 @@ public class TestRunnerViewPart extends ViewPart {
 				return Messages.format(JUnitMessages.TestRunnerViewPart_testName_startTime, new Object[] { session.getTestRunName(), startTime });
 			}
 		}
+		
+		public void addMenuEntries(MenuManager manager) {
+			manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new ImportTestRunSessionAction(fParent.getShell()));
+			if (fTestRunSession != null)
+				manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new ExportTestRunSessionAction(fParent.getShell(), fTestRunSession));
+		}
 
 		public String getMaxEntriesMessage() {
 			return JUnitMessages.TestRunnerViewPart_max_remembered;
@@ -378,12 +388,88 @@ public class TestRunnerViewPart extends ViewPart {
 			store.setValue(JUnitPreferencesConstants.MAX_TEST_RUNS, maxEntries);
 		}
 	}
+	
+	private static class ImportTestRunSessionAction extends Action {
+		private final Shell fShell;
+
+		public ImportTestRunSessionAction(Shell shell) {
+			super(JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_name);
+			fShell= shell;
+		}
+		
+		public void run() {
+			FileDialog importDialog= new FileDialog(fShell, SWT.OPEN);
+			importDialog.setText(JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_title);
+			importDialog.setFilterExtensions(new String[] {"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+			String path= importDialog.open();
+			if (path == null)
+				return;
+			
+			//TODO: MULTI: getFileNames()
+			File file= new File(path);
+			
+			try {
+				JUnitModel.importTestRunSession(file);
+			} catch (CoreException e) {
+				JUnitPlugin.log(e);
+				ErrorDialog.openError(fShell, JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_error_title, e.getStatus().getMessage(), e.getStatus());
+			}
+		}
+	}
+	
+	private static class ExportTestRunSessionAction extends Action {
+		private final TestRunSession fTestRunSession;
+		private final Shell fShell;
+
+		public ExportTestRunSessionAction(Shell shell, TestRunSession testRunSession) {
+			super(JUnitMessages.TestRunnerViewPart_ExportTestRunSessionAction_name);
+			fShell= shell;
+			fTestRunSession= testRunSession;
+		}
+		
+		public void run() {
+			FileDialog exportDialog= new FileDialog(fShell, SWT.SAVE);
+			exportDialog.setText(JUnitMessages.TestRunnerViewPart_ExportTestRunSessionAction_title);
+			exportDialog.setFileName(getFileName());
+			exportDialog.setFilterExtensions(new String[] {"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+			String path= exportDialog.open();
+			if (path == null)
+				return;
+			
+			//TODO: MULTI: getFileNames()
+			File file= new File(path);
+			
+			try {
+				JUnitModel.exportTestRunSession(fTestRunSession, file);
+			} catch (CoreException e) {
+				JUnitPlugin.log(e);
+				ErrorDialog.openError(fShell, JUnitMessages.TestRunnerViewPart_ExportTestRunSessionAction_error_title, e.getStatus().getMessage(), e.getStatus());
+			}
+		}
+
+		private String getFileName() {
+			String testRunName= fTestRunSession.getTestRunName();
+			long startTime= fTestRunSession.getStartTime();
+			if (startTime == 0)
+				return testRunName;
+			
+			String isoTime= new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(startTime)); //$NON-NLS-1$
+			return testRunName + " " + isoTime + ".xml"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+	}
 
 	private class TestRunSessionListener implements ITestRunSessionListener {
 		public void sessionAdded(TestRunSession testRunSession) {
 			if (getSite().getWorkbenchWindow() == JUnitPlugin.getActiveWorkbenchWindow()) {
 				setActiveTestRunSession(testRunSession);
-				setContentDescription(Messages.format(JUnitMessages.TestRunnerViewPart_Launching, new Object[]{ fTestRunSession.getTestRunName() }));
+				String testRunName= fTestRunSession.getTestRunName();
+				String msg;
+				if (testRunSession.getLaunch() != null) {
+					msg= Messages.format(JUnitMessages.TestRunnerViewPart_Launching, new Object[]{ testRunName });
+				} else {
+					msg= testRunName;
+				}
+				setContentDescription(msg);
 			}
 		}
 		public void sessionRemoved(TestRunSession testRunSession) {
@@ -414,10 +500,7 @@ public class TestRunnerViewPart extends ViewPart {
 			
 			String[] keys= {elapsedTimeAsString(elapsedTime)};
 			String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_finish, keys); 
-			if (hasErrorsOrFailures())
-				registerInfoMessage(msg);
-			else
-				registerInfoMessage(msg);
+			registerInfoMessage(msg);
 				
 			postSyncRunnable(new Runnable() {				
 				public void run() {
@@ -884,10 +967,18 @@ public class TestRunnerViewPart extends ViewPart {
 				stopTest(); // TODO: wait for termination
 			}
 		}
-		if (fTestRunSession != null && fTestRunSession.getLaunch().getLaunchConfiguration() != null) {
-			ILaunchConfiguration configuration= prepareLaunchConfigForRelaunch(fTestRunSession.getLaunch().getLaunchConfiguration());
-			DebugUITools.launch(configuration, fTestRunSession.getLaunch().getLaunchMode());
-		}
+		
+		if (fTestRunSession == null)
+			return;
+		ILaunch launch= fTestRunSession.getLaunch();
+		if (launch == null)
+			return;
+		ILaunchConfiguration launchConfiguration= launch.getLaunchConfiguration();
+		if (launchConfiguration == null)
+			return;
+		
+		ILaunchConfiguration configuration= prepareLaunchConfigForRelaunch(launchConfiguration);
+		DebugUITools.launch(configuration, launch.getLaunchMode());
 	}
 
 	private ILaunchConfiguration prepareLaunchConfigForRelaunch(ILaunchConfiguration configuration) {
@@ -913,8 +1004,9 @@ public class TestRunnerViewPart extends ViewPart {
 					fTestRunSession.stopTestRun();
 			}
 		}
-		if (fTestRunSession.getLaunch() != null && fTestRunSession.getLaunch().getLaunchConfiguration() != null) {
-				ILaunchConfiguration launchConfiguration= fTestRunSession.getLaunch().getLaunchConfiguration();
+		ILaunch launch= fTestRunSession.getLaunch();
+		if (launch != null && launch.getLaunchConfiguration() != null) {
+				ILaunchConfiguration launchConfiguration= launch.getLaunchConfiguration();
 				if (launchConfiguration != null) {
 					try {
 						String oldName= launchConfiguration.getName(); 
@@ -927,7 +1019,7 @@ public class TestRunnerViewPart extends ViewPart {
 						}
 						ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy(configName); 
 						tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_FAILURES_NAMES, createFailureNamesFile());
-						tmp.launch(fTestRunSession.getLaunch().getLaunchMode(), null);	
+						tmp.launch(launch.getLaunchMode(), null);	
 						return;	
 					} catch (CoreException e) {
 						ErrorDialog.openError(getSite().getShell(), 
@@ -1108,7 +1200,7 @@ action enablement
 			registerInfoMessage(fTestRunSession.getTestRunName());
 			
 			updateRerunFailedFirstAction();
-			fRerunLastTestAction.setEnabled(true);
+			fRerunLastTestAction.setEnabled(fTestRunSession.getLaunch() != null);
 			
 			if (fTestRunSession.isRunning()) {
 				startUpdateJobs();
@@ -1119,12 +1211,13 @@ action enablement
 				stopUpdateJobs();
 				
 				fStopAction.setEnabled(fTestRunSession.isKeptAlive());
+				fTestViewer.expandFirstLevel();
 			}
 		}
 	}
 
 	private void updateRerunFailedFirstAction() {
-		boolean state= isJUnit3() && hasErrorsOrFailures();
+		boolean state= isJUnit3() && hasErrorsOrFailures() && fTestRunSession.getLaunch() != null;
 	    fRerunFailedFirstAction.setEnabled(state);
     }
 	
@@ -1541,12 +1634,11 @@ action enablement
 		});		
 	}
 
+	/**
+	 * @return the Java project, or <code>null</code>
+	 */
 	public IJavaProject getLaunchedProject() {
-		return fTestRunSession.getLaunchedProject();
-	}
-	
-	public ILaunch getLastLaunch() {
-		return fTestRunSession == null ? null : fTestRunSession.getLaunch();
+		return fTestRunSession == null ? null : fTestRunSession.getLaunchedProject();
 	}
 	
 	public static Image createImage(String path) {
@@ -1608,7 +1700,7 @@ action enablement
 						JUnitMessages.TestRunnerViewPart_cannotrerurn_message);
 			} else if (fTestRunSession.isKeptAlive()) {
 				TestCaseElement testCaseElement= (TestCaseElement) fTestRunSession.getTestElement(testId);
-				testCaseElement.setStatus(TestElement.Status.RUNNING);
+				testCaseElement.setStatus(TestElement.Status.RUNNING, null, null, null);
 				fTestViewer.registerViewerUpdate(testCaseElement);
 				postSyncProcessChanges();
 			}

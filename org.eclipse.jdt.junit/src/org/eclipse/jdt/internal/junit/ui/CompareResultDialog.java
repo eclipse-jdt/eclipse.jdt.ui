@@ -72,6 +72,12 @@ public class CompareResultDialog extends TrayDialog {
     		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJUnitHelpContextIds.RESULT_COMPARE_DIALOG);
      	}
          
+//        protected void createToolItems(ToolBarManager tbm) {
+//    		ResourceBundle bundle= CompareUI.getResourceBundle();
+//    		tbm.add(new IgnoreWhiteSpaceAction(bundle, getCompareConfiguration()));
+//    		super.createToolItems(tbm);
+//        }
+        
         protected void configureTextViewer(TextViewer textViewer) {
             if (textViewer instanceof SourceViewer) {
                 int[] prefixSuffixOffsets= (int[]) getCompareConfiguration().getProperty(PREFIX_SUFFIX_PROPERTY);

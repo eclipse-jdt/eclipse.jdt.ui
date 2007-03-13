@@ -40,16 +40,26 @@ import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 /**
- * 
+ * A test run session holds all information about a test run, i.e.
+ * launch configuration, launch, test tree (including results). 
  */
 public class TestRunSession implements ITestRunSession {
 
+	/**
+	 * The launch, or <code>null</code> iff this session was run externally.
+	 */
 	private final ILaunch fLaunch;
-	private final String fLaunchConfigName;
+	private final String fTestRunName;
+	/**
+	 * Java project, or <code>null</code>.
+	 */
 	private final IJavaProject fProject;
 
 	private final ITestKind fTestRunnerKind;
 	
+	/**
+	 * Test runner client or <code>null</code>.
+	 */
 	private final RemoteTestRunnerClient fTestRunnerClient;
 
 	private final ListenerList/*<ITestSessionListener>*/ fSessionListeners;
@@ -103,6 +113,25 @@ public class TestRunSession implements ITestRunSession {
 	volatile boolean fIsStopped;
 	
 
+	public TestRunSession(String testRunName) {
+		//TODO: check assumptions about non-null fields
+
+		fLaunch= null;
+		fProject= null; //TODO
+		
+		Assert.isNotNull(testRunName);
+		fTestRunName= testRunName;
+		fTestRunnerKind= ITestKind.NULL; //TODO
+		
+		fTestRoot= new TestRoot(this);
+		fIdToTest= new HashMap();
+		
+		fTestRunnerClient= null;
+
+		fSessionListeners= new ListenerList();
+	}
+	
+	
 	public TestRunSession(ILaunch launch, IJavaProject project, int port) {
 		Assert.isNotNull(launch);
 		
@@ -111,10 +140,10 @@ public class TestRunSession implements ITestRunSession {
 		
 		ILaunchConfiguration launchConfiguration= launch.getLaunchConfiguration();
 		if (launchConfiguration != null) {
-			fLaunchConfigName= launchConfiguration.getName();
+			fTestRunName= launchConfiguration.getName();
 			fTestRunnerKind= JUnitLaunchConfigurationConstants.getTestRunnerKind(launchConfiguration);
 		} else {
-			fLaunchConfigName= project.getElementName();
+			fTestRunName= project.getElementName();
 			fTestRunnerKind= ITestKind.NULL;
 		}
 		
@@ -181,6 +210,9 @@ public class TestRunSession implements ITestRunSession {
 		return fTestRoot;
 	}
 
+	/**
+	 * @return the Java project, or <code>null</code>
+	 */
 	public IJavaProject getLaunchedProject() {
 		return fProject;
 	}
@@ -190,12 +222,15 @@ public class TestRunSession implements ITestRunSession {
 	}
 	
 	
+	/**
+	 * @return the launch, or <code>null</code> iff this session was run externally
+	 */
 	public ILaunch getLaunch() {
 		return fLaunch;
 	}
 	
 	public String getTestRunName() {
-		return fLaunchConfigName;
+		return fTestRunName;
 	}
 	
 	public int getErrorCount() {
@@ -240,14 +275,17 @@ public class TestRunSession implements ITestRunSession {
 	public void stopTestRun() {
 		if (isRunning() || ! isKeptAlive())
 			fIsStopped= true;
-		fTestRunnerClient.stopTest();
+		if (fTestRunnerClient != null)
+			fTestRunnerClient.stopTest();
 	}
 
 	/**
 	 * @return <code>true</code> iff the runtime VM of this test session is still alive 
 	 */
 	public boolean isKeptAlive() {
-		return fTestRunnerClient.isRunning() && ILaunchManager.DEBUG_MODE.equals(getLaunch().getLaunchMode());
+		return fTestRunnerClient != null && fLaunch != null
+				&& fTestRunnerClient.isRunning()
+				&& ILaunchManager.DEBUG_MODE.equals(fLaunch.getLaunchMode());
 	}
 
 	/**
@@ -276,9 +314,9 @@ public class TestRunSession implements ITestRunSession {
 			fTestRunnerClient.rerunTest(testId, className, testName);
 			return true;
 			
-		} else if (getLaunch() != null) {
+		} else if (fLaunch != null) {
 			// run the selected test using the previous launch configuration
-			ILaunchConfiguration launchConfiguration= getLaunch().getLaunchConfiguration();
+			ILaunchConfiguration launchConfiguration= fLaunch.getLaunchConfiguration();
 			if (launchConfiguration != null) {
 
 				String name= className;
@@ -333,7 +371,7 @@ public class TestRunSession implements ITestRunSession {
 		}
 	}
 
-	private TestElement createTestElement(TestSuiteElement parent, String id, String testName, boolean isSuite, int testCount) {
+	public TestElement createTestElement(TestSuiteElement parent, String id, String testName, boolean isSuite, int testCount) {
 		TestElement testElement;
 		if (isSuite) {
 			TestSuiteElement testSuiteElement= new TestSuiteElement(parent, id, testName, testCount);
@@ -382,6 +420,8 @@ public class TestRunSession implements ITestRunSession {
 	 */
 	private class TestSessionNotifier implements ITestRunListener2 {
 		
+		private static final String IGNORED_TEST_PREFIX= "@Ignore: "; //$NON-NLS-1$
+
 		public void testRunStarted(int testCount) {
 			fIncompleteTestSuites= new ArrayList();
 			
@@ -494,7 +534,7 @@ public class TestRunSession implements ITestRunSession {
 				return;
 			}
 			TestCaseElement testCaseElement= (TestCaseElement) testElement;
-			if (testName.startsWith("@Ignore: ")) { //$NON-NLS-1$
+			if (testName.startsWith(IGNORED_TEST_PREFIX)) {
 				testCaseElement.setIgnored(true);
 				fIgnoredCount++;
 			}
@@ -524,13 +564,7 @@ public class TestRunSession implements ITestRunSession {
 			}
 
 			Status status= Status.convert(statusCode);
-			setStatus(testElement, status, trace, nullifyEmpty(expected), nullifyEmpty(actual));
-			
-			if (statusCode == ITestRunListener2.STATUS_ERROR) {
-				fErrorCount++;
-			} else {
-				fFailureCount++;
-			}
+			registerTestFailed(testElement, status, trace, nullifyEmpty(expected), nullifyEmpty(actual));
 			
 			Object[] listeners= fSessionListeners.getListeners();
 			for (int i= 0; i < listeners.length; ++i) {
@@ -566,11 +600,7 @@ public class TestRunSession implements ITestRunSession {
 			TestCaseElement testCaseElement= (TestCaseElement) testElement;
 			
 			Status status= Status.convert(statusCode);
-			if (status == Status.ERROR)
-				fErrorCount++;
-			else if (status == Status.FAILURE)
-				fFailureCount++;
-			testCaseElement.setStatus(status, trace, nullifyEmpty(expectedResult), nullifyEmpty(actualResult));
+			registerTestFailed(testElement, status, trace, nullifyEmpty(expectedResult), nullifyEmpty(actualResult));
 			
 			Object[] listeners= fSessionListeners.getListeners();
 			for (int i= 0; i < listeners.length; ++i) {
@@ -579,14 +609,6 @@ public class TestRunSession implements ITestRunSession {
 			}
 		}
 	
-		private void setStatus(TestElement testElement, Status status) {
-			testElement.setStatus(status);
-		}
-		
-		private void setStatus(TestElement testElement, Status status, String trace, String expected, String actual) {
-			testElement.setStatus(status, trace, expected, actual);
-		}
-		
 		private void logUnexpectedTest(String testId, TestElement testElement) {
 			JUnitPlugin.log(new Exception("Unexpected TestElement type for testId '" + testId + "': " + testElement)); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -601,7 +623,31 @@ public class TestRunSession implements ITestRunSession {
 			fOutstandingChildren= outstandingChildren;
 		}
 	}
+	
+	public void registerTestFailed(TestElement testElement, Status status, String trace, String expected, String actual) {
+		testElement.setStatus(status, trace, expected, actual);
+		if (status.isError()) {
+			fErrorCount++;
+		} else {
+			fFailureCount++;
+		}
+	}
 
+	public void registerTestEnded(TestElement testElement) {
+		fStartedCount++;
+		fTotalCount++;
+		if (testElement instanceof TestCaseElement && ((TestCaseElement) testElement).isIgnored()) {
+			fIgnoredCount++;
+		}
+
+		if (! testElement.getStatus().isErrorOrFailure())
+			setStatus(testElement, Status.OK);
+	}
+	
+	private void setStatus(TestElement testElement, Status status) {
+		testElement.setStatus(status);
+	}
+	
 	public TestElement[] getAllFailedTestElements() {
 		ArrayList failures= new ArrayList();
 		addFailures(failures, getTestRoot());

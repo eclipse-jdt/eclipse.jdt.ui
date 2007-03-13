@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 
@@ -94,6 +95,8 @@ public abstract class ViewHistory {
 		return new HistoryDropDownAction(this);
 	}
 
+	public abstract void addMenuEntries(MenuManager manager);
+	
 	public abstract String getMaxEntriesMessage();
 	public abstract int getMaxEntries();
 	public abstract void setMaxEntries(int maxEntries);

@@ -79,6 +79,9 @@ public abstract class OpenEditorAction extends Action {
 		return fTestRunner.getSite().getShell();
 	}
 
+	/**
+	 * @return the Java project, or <code>null</code>
+	 */
 	protected IJavaProject getLaunchedProject() {
 		return fTestRunner.getLaunchedProject();
 	}
@@ -91,7 +94,9 @@ public abstract class OpenEditorAction extends Action {
 	
 	protected abstract void reveal(ITextEditor editor);
 
-	protected IType findType(IJavaProject project, String className) throws JavaModelException {
+	protected final IType findType(IJavaProject project, String className) throws JavaModelException {
+		if (project == null)
+			return null; //TODO: search workspace
 		return internalFindType(project, className, new HashSet());
 	}
 

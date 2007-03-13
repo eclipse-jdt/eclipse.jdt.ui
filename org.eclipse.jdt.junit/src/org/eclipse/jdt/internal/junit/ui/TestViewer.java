@@ -254,6 +254,8 @@ public class TestViewer {
 	
 	private boolean testClassExists(String className) {
 		IJavaProject project= fTestRunnerPart.getLaunchedProject();
+		if (project == null)
+			return false;
 		try {
 			IType type= project.findType(className);
 			return type != null;
@@ -666,6 +668,10 @@ public class TestViewer {
 		Object parent= fTreeContentProvider.getParent(testElement);
 		if (parent != null)
 			fAutoExpand.add(parent);
+	}
+
+	public void expandFirstLevel() {
+		fTreeViewer.expandToLevel(2);
 	}
 	
 }

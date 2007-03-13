@@ -252,6 +252,18 @@ public final class JUnitMessages extends NLS {
 	public static String TestRunnerViewPart_cannotrerurn_message;
 	public static String TestRunnerViewPart_configName;
 	public static String TestRunnerViewPart_error_cannotrerun;
+
+	public static String TestRunnerViewPart_ExportTestRunSessionAction_error_title;
+
+	public static String TestRunnerViewPart_ExportTestRunSessionAction_name;
+
+	public static String TestRunnerViewPart_ExportTestRunSessionAction_title;
+
+	public static String TestRunnerViewPart_ImportTestRunSessionAction_error_title;
+
+	public static String TestRunnerViewPart_ImportTestRunSessionAction_name;
+
+	public static String TestRunnerViewPart_ImportTestRunSessionAction_title;
 	public static String TestRunnerViewPart_jobName;
 	public static String TestRunnerViewPart_label_failure;
 	public static String TestRunnerViewPart_Launching;
