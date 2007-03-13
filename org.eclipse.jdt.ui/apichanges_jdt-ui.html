@@ -29,7 +29,7 @@ Breaking API changes from R3.2 to R3.3</b></font> <br>
   </tbody>
 </table>
 <p> </p>
-<table border="0" cellpadding="2" cellspacing="5" width="100%" summary="Non-breaking API changes">
+<table border="1" cellpadding="2" cellspacing="5" width="100%" summary="Non-breaking API changes">
   <tbody>
     <tr>
       <td align="left" width="72%"> <font size="+3"><b>jdt ui -
@@ -135,15 +135,23 @@ deprecated in favor of <code>createJarDescriptionWriter(OutputStream, String)</c
         <ul>
 			<li>Extenders can define how custom class path attributes (<code>IClasspathAttribute</code>) are rendered and configured</li>
 			<li>New API <code>org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration</code> to be extended by extension point clients.</li>
-			
         </ul>
       </td>
     </tr>
     <tr>
       <td>
-        added API ProjectActionGroup.getOpenProjectAction() (org.eclipse.jdt.ui.actions)
+        Added API <code>ProjectActionGroup.getOpenProjectAction()</code> (org.eclipse.jdt.ui.actions)
       </td>
-    </tr>         
+    </tr>
+    <tr>
+      <td>
+        Added API to <code>JavaElementImageDescriptor (org.eclipse.jdt.ui)</code>
+         <ul>
+			<li>JavaElementImageDescriptor.VOLATILE</li>
+			<li>JavaElementImageDescriptor.TRANSIENT</li>
+        </ul>
+      </td>
+    </tr>     
   </tbody>
 </table>
 <p> </p>
