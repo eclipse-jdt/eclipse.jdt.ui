@@ -45,12 +45,14 @@
    <extension
          point="org.eclipse.ui.decorators">
       <decorator
-            objectClass="org.eclipse.jdt.core.IJavaElement"
             adaptable="true"
             label="%TestLabelDecorator.label"
             state="false"
             class="org.eclipse.jdt.ui.examples.JavaElementDecorator"
             id="org.eclipse.jdt.ui.examples.javaElementDecorator">
+            <enablement>
+                <objectClass name="org.eclipse.jdt.core.IJavaElement"/> 
+            </enablement>
       </decorator>
       
       <decorator
@@ -202,14 +204,5 @@
 		finalPerspective="org.eclipse.jdt.ui.JavaPerspective">
 		<description>In/Out Project (jdt.ui.tests)</description>
     </wizard>	 
-</extension>
-   <extension
-         point="org.eclipse.ui.perspectives">
-      <perspective
-            name="Test Perspective (jdt.ui.tests)"
-            class="org.eclipse.jdt.testplugin.util.TestPerspectiveFactory"
-            id="org.eclipse.jdt.ui.tests.testPerspective">
-      </perspective>
-   </extension>
-   
+</extension>   
 </plugin>
