@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -61,6 +62,8 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 				fOpen.run();
 			}
 		});
+		
+		OwnerDrawSupport.install(this);
 		
 		JavaUIHelp.setHelp(this, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
 	}

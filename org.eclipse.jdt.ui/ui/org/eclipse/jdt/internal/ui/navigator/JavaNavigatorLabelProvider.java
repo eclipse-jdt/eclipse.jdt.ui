@@ -33,8 +33,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.navigator.IExtensionStateConstants.Values;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
  * Provides the labels for the Project Explorer.
@@ -92,14 +90,7 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider {
 	}
 
 	private PackageExplorerLabelProvider createLabelProvider() {
-
-		return new PackageExplorerLabelProvider(
-				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS
-						| JavaElementLabels.P_COMPRESSED,
-				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS
-						| JavaElementImageProvider.SMALL_ICONS,
-				fContentProvider);
-
+		return new PackageExplorerLabelProvider(fContentProvider);
 	}
 
 	public void dispose() {
@@ -160,7 +151,7 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider {
 
 	// Taken from StatusBarUpdater
 
-	protected String formatMessage(Object element) {
+	private String formatMessage(Object element) {
 		if (element instanceof IJavaElement) {
 			return formatJavaElementMessage((IJavaElement) element);
 		} else if (element instanceof IResource) {

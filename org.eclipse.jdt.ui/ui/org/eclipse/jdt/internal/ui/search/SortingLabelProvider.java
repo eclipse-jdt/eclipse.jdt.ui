@@ -14,14 +14,14 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.viewers.IColorProvider;
-
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
-public class SortingLabelProvider extends SearchLabelProvider implements IColorProvider {
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
+
+public class SortingLabelProvider extends SearchLabelProvider {
 	public static final int SHOW_ELEMENT_CONTAINER= 1; // default
 	public static final int SHOW_CONTAINER_ELEMENT= 2;
 	public static final int SHOW_PATH= 3;
@@ -40,17 +40,28 @@ public class SortingLabelProvider extends SearchLabelProvider implements IColorP
 	}
 		
 	public final String getText(Object element) {
-		return getLabelWithCounts(element, internalGetText(element));
+		if (element instanceof IImportDeclaration)
+			element= ((IImportDeclaration)element).getParent().getParent();
+		
+		String text= super.getText(element);
+		if (text.length() > 0) {
+			return getLabelWithCounts(element, text);
+		}
+		return getParticipantText(element);	
 	}
-
-	private String internalGetText(Object o) {
-		if (o instanceof IImportDeclaration)
-			o= ((IImportDeclaration)o).getParent().getParent();
-
-		String text= super.getText(o);
-		if (text != null && (text.length() > 0))
-			return text;
-		return getParticipantText(o);	
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getRichTextLabel(java.lang.Object)
+	 */
+	public ColoredString getRichTextLabel(Object element) {
+		if (element instanceof IImportDeclaration)
+			element= ((IImportDeclaration)element).getParent().getParent();
+		
+		ColoredString text= super.getRichTextLabel(element);
+		if (text.length() > 0) {
+			return getColoredLabelWithCounts(element, text);
+		}
+		return new ColoredString(getParticipantText(element));	
 	}
 
 	public void setOrder(int orderFlag) {

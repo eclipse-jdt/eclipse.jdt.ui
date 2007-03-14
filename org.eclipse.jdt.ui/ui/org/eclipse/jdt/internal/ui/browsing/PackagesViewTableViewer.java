@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jdt.core.IPackageFragment;
 
+import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 
 /**
@@ -28,6 +29,7 @@ class PackagesViewTableViewer extends ProblemTableViewer implements IPackagesVie
 
 	public PackagesViewTableViewer(Composite parent, int style) {
 		super(parent, style);
+		OwnerDrawSupport.install(this);
 	}
 
 	public void mapElement(Object element, Widget item) {

@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
 
 /**
  * Label provider for the hierarchy method viewers. 
@@ -83,21 +84,40 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 	 */ 	
 	public String getText(Object element) {
 		String text= super.getText(element);
+		String qualifier= getQualifier(element);
+		if (qualifier != null) {
+			return qualifier + text;
+		}
+		return text;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getRichTextLabel(java.lang.Object)
+	 */
+	public ColoredString getRichTextLabel(Object element) {
+		ColoredString text= super.getRichTextLabel(element);
+		String qualifier= getQualifier(element);
+		if (qualifier != null) {
+			return new ColoredString(qualifier).append(text);
+		}
+		return text;
+		
+	}
+	
+	private String getQualifier(Object element) {
 		if (fShowDefiningType) {
 			try {
 				IType type= getDefiningType(element);
 				if (type != null) {
-					StringBuffer buf= new StringBuffer(super.getText(type));
-					buf.append(JavaElementLabels.CONCAT_STRING);
-					buf.append(text);
-					return buf.toString();			
+					return super.getText(type) + JavaElementLabels.CONCAT_STRING;
 				}
 			} catch (JavaModelException e) {
 			}
 		}
-		return text;
+		return null;
 	}
-
+	
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
 	 */

@@ -15,14 +15,21 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.LabelProvider;
 
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
+import org.eclipse.jdt.internal.ui.viewsupport.IRichLabelProvider;
+
+import org.eclipse.jdt.junit.model.ITestCaseElement;
+import org.eclipse.jdt.junit.model.ITestElement;
+import org.eclipse.jdt.junit.model.ITestRunSession;
+import org.eclipse.jdt.junit.model.ITestSuiteElement;
+
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
-import org.eclipse.jdt.internal.junit.model.TestElement;
-import org.eclipse.jdt.internal.junit.model.TestRoot;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 
-public class TestSessionLabelProvider extends LabelProvider {
+public class TestSessionLabelProvider extends LabelProvider implements IRichLabelProvider {
 	
 	private final TestRunnerViewPart fTestRunnerPart;
 	private final int fLayoutMode;
@@ -31,37 +38,62 @@ public class TestSessionLabelProvider extends LabelProvider {
 		fTestRunnerPart= testRunnerPart;
 		fLayoutMode= layoutMode;
 	}
-
-	public String getText(Object element) {
-		if (element instanceof TestCaseElement) {
-			TestCaseElement testCaseElement= (TestCaseElement) element;
-			String testMethodName= testCaseElement.getTestMethodName();
-			if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
-				return getElementLabel(testMethodName, testCaseElement);
-			} else {
-				String className= testCaseElement.getClassName();
-				return Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { testMethodName, className });
-			}
-			
-		} else if (element instanceof TestElement) {
-			TestElement testElement= (TestElement) element;
-			String testName= testElement.getTestName();
-			return getElementLabel(testName, testElement);
-		} else {
-			throw new IllegalArgumentException(String.valueOf(element));
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.IRichLabelProvider#getRichTextLabel(java.lang.Object)
+	 */
+	public ColoredString getRichTextLabel(Object element) {
+		String label= getSimpleLabel(element);
+		if (label == null) {
+			return new ColoredString(element.toString());
 		}
+		ColoredString text= new ColoredString(label);
+		if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
+			if (((ITestElement) element).getParentContainer() instanceof ITestRunSession) {
+				String testKindDisplayName= fTestRunnerPart.getTestKindDisplayName();
+				if (testKindDisplayName != null) {
+					String decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testName_JUnitVersion, new Object[] { label, testKindDisplayName });
+					return ColoredJavaElementLabels.decorateColoredString(text, decorated, ColoredJavaElementLabels.QUALIFIER_COLOR);
+				}
+			}
+		} else {
+			if (element instanceof ITestCaseElement) {
+				String className= ((ITestCaseElement) element).getTestClassName();
+				String decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, className });
+				return ColoredJavaElementLabels.decorateColoredString(text, decorated, ColoredJavaElementLabels.QUALIFIER_COLOR);
+			}
+		}
+		return text;
+	}
+	
+	private String getSimpleLabel(Object element) {
+		if (element instanceof ITestCaseElement) {
+			return ((ITestCaseElement) element).getTestMethodName();
+		} else if (element instanceof ITestSuiteElement) {
+			return ((ITestSuiteElement) element).getSuiteTypeName();
+		}
+		return null;
 	}
 
-	private String getElementLabel(String name, TestElement testElement) {
-		if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL && testElement.getParent() instanceof TestRoot) {
-			String testKindDisplayName= fTestRunnerPart.getTestKindDisplayName();
-				if (testKindDisplayName == null)
-					return name;
-				else
-					return Messages.format(JUnitMessages.TestSessionLabelProvider_testName_JUnitVersion, new Object[] { name, testKindDisplayName });
-		} else
-			return name;
-		
+	public String getText(Object element) {
+		String label= getSimpleLabel(element);
+		if (label == null) {
+			return element.toString();
+		}
+		if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
+			if (((ITestElement) element).getParentContainer() instanceof ITestRunSession) {
+				String testKindDisplayName= fTestRunnerPart.getTestKindDisplayName();
+				if (testKindDisplayName != null) {
+					return Messages.format(JUnitMessages.TestSessionLabelProvider_testName_JUnitVersion, new Object[] { label, testKindDisplayName });
+				}
+			}
+		} else {
+			if (element instanceof ITestCaseElement) {
+				String className= ((ITestCaseElement) element).getTestClassName();
+				return Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, className });
+			}
+		}
+		return label;
 	}
 
 	public Image getImage(Object element) {
@@ -103,4 +135,6 @@ public class TestSessionLabelProvider extends LabelProvider {
 			throw new IllegalArgumentException(String.valueOf(element));
 		}
 	}
+
+
 }

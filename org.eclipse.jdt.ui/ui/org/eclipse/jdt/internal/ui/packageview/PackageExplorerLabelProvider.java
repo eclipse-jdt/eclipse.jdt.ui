@@ -10,15 +10,28 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IFolder;
 
+import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+
+import org.eclipse.ui.IWorkingSet;
 
 import org.eclipse.jdt.core.IPackageFragment;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
  * Provides the labels for the Package Explorer.
@@ -31,20 +44,33 @@ import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 	
 	private PackageExplorerContentProvider fContentProvider;
-
+	private Map fWorkingSetImages;
+	
 	private boolean fIsFlatLayout;
 	private PackageExplorerProblemsDecorator fProblemDecorator;
 
-	public PackageExplorerLabelProvider(long textFlags, int imageFlags, PackageExplorerContentProvider cp) {
-		super(textFlags, imageFlags);
+	public PackageExplorerLabelProvider(PackageExplorerContentProvider cp) {
+		super(DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED | JavaElementLabels.ALL_CATEGORY, DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS);
+		
 		fProblemDecorator= new PackageExplorerProblemsDecorator();
 		addLabelDecorator(fProblemDecorator);
 		Assert.isNotNull(cp);
 		fContentProvider= cp;
+		fWorkingSetImages= null;
 	}
-
-
-	public String getText(Object element) {
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getRichTextLabel(java.lang.Object)
+	 */
+	public ColoredString getRichTextLabel(Object element) {
+		String text= getSpecificText(element);
+		if (text != null) {
+			return new ColoredString(decorateText(text, element));
+		}
+		return super.getRichTextLabel(element);
+	}
+	
+	private String getSpecificText(Object element) {
 		if (!fIsFlatLayout && element instanceof IPackageFragment) {
 			IPackageFragment fragment = (IPackageFragment) element;
 			Object parent= fContentProvider.getHierarchicalPackageParent(fragment);
@@ -53,6 +79,16 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 			} else if (parent instanceof IFolder) { // bug 152735
 				return getNameDelta((IFolder) parent, fragment);
 			}
+		} else if (element instanceof IWorkingSet) {
+			return ((IWorkingSet) element).getLabel();
+		}
+		return null;
+	}
+	
+	public String getText(Object element) {
+		String text= getSpecificText(element);
+		if (text != null) {
+			return decorateText(text, element);
 		}
 		return super.getText(element);
 	}
@@ -81,8 +117,34 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 		return fragment.getElementName();
 	}
 	
+	public Image getImage(Object element) {
+		if (element instanceof IWorkingSet) {
+			ImageDescriptor image= ((IWorkingSet)element).getImageDescriptor();
+			if (fWorkingSetImages == null) {
+				fWorkingSetImages= new HashMap();
+			}
+				
+			Image result= (Image) fWorkingSetImages.get(image);
+			if (result == null) {
+				result= image.createImage();
+				fWorkingSetImages.put(image, result);
+			}
+			return decorateImage(result, element);
+		}
+		return super.getImage(element);
+	}
+	
 	public void setIsFlatLayout(boolean state) {
 		fIsFlatLayout= state;
 		fProblemDecorator.setIsFlatLayout(state);
+	}
+	
+	public void dispose() {
+		if (fWorkingSetImages != null) {
+			for (Iterator iter= fWorkingSetImages.values().iterator(); iter.hasNext();) {
+				((Image)iter.next()).dispose();
+			}
+		}
+		super.dispose();
 	}
 }

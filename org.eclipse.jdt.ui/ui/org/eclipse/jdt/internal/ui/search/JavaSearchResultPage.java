@@ -32,7 +32,6 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.TransferDragSourceListener;
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -48,7 +47,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.part.IPageSite;
@@ -85,6 +83,8 @@ import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
@@ -134,6 +134,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	private GroupAction fGroupProjectAction;
 	
 	private SelectionDispatchAction fCopyQualifiedNameAction;
+	
+	private SortingLabelProvider fSortingLabelProvider;
 	
 	private int fCurrentGrouping;
 	
@@ -309,11 +311,11 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 
 	protected void configureTableViewer(TableViewer viewer) {
 		viewer.setUseHashlookup(true);
-		SortingLabelProvider sortingLabelProvider= new SortingLabelProvider(this);
-		viewer.setLabelProvider(new ColorDecoratingLabelProvider(sortingLabelProvider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
+		fSortingLabelProvider= new SortingLabelProvider(this);
+		viewer.setLabelProvider(new DecoratingJavaLabelProvider(fSortingLabelProvider, false));
 		fContentProvider=new JavaSearchTableContentProvider(this);
 		viewer.setContentProvider(fContentProvider);
-		viewer.setComparator(new DecoratorIgnoringViewerSorter(sortingLabelProvider));
+		viewer.setComparator(new DecoratorIgnoringViewerSorter(fSortingLabelProvider));
 		setSortOrder(fCurrentSortOrder);
 		addDragAdapters(viewer);
 	}
@@ -322,29 +324,34 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		PostfixLabelProvider postfixLabelProvider= new PostfixLabelProvider(this);
 		viewer.setUseHashlookup(true);
 		viewer.setComparator(new DecoratorIgnoringViewerSorter(postfixLabelProvider));
-		viewer.setLabelProvider(new ColorDecoratingLabelProvider(postfixLabelProvider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
+		viewer.setLabelProvider(new DecoratingJavaLabelProvider(postfixLabelProvider, false));
 		fContentProvider= new LevelTreeContentProvider(this, fCurrentGrouping);
 		viewer.setContentProvider(fContentProvider);
 		addDragAdapters(viewer);
 	}
 	
 	protected TreeViewer createTreeViewer(Composite parent) {
-		return new ProblemTreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		ProblemTreeViewer problemTreeViewer= new ProblemTreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		OwnerDrawSupport.install(problemTreeViewer);
+		return problemTreeViewer;
 	}
 	
 	protected TableViewer createTableViewer(Composite parent) {
-		return new ProblemTableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		ProblemTableViewer problemTableViewer= new ProblemTableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		OwnerDrawSupport.install(problemTableViewer);
+		return problemTableViewer;
 	}
 	
 	void setSortOrder(int order) {
-		fCurrentSortOrder= order;
-		StructuredViewer viewer= getViewer();
-		viewer.getControl().setRedraw(false);
-		DecoratingLabelProvider dlp= (DecoratingLabelProvider) viewer.getLabelProvider();
-		((SortingLabelProvider)dlp.getLabelProvider()).setOrder(order);
-		viewer.getControl().setRedraw(true);
-		viewer.refresh();
-		getSettings().put(KEY_SORTING, fCurrentSortOrder);
+		if (fSortingLabelProvider != null) {
+			fCurrentSortOrder= order;
+			StructuredViewer viewer= getViewer();
+			//viewer.getControl().setRedraw(false);
+			fSortingLabelProvider.setOrder(order);
+			//viewer.getControl().setRedraw(true);
+			viewer.refresh();
+			getSettings().put(KEY_SORTING, fCurrentSortOrder);
+		}
 	}
 
 	public void init(IPageSite site) {

@@ -146,7 +146,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.FilterUpdater;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.ConfigureWorkingSetAction;
@@ -188,7 +188,8 @@ public class PackageExplorerPart extends ViewPart
 	private int fRootMode;
 	private WorkingSetModel fWorkingSetModel;
 	
-	private PackageExplorerLabelProvider fLabelProvider;	
+	private PackageExplorerLabelProvider fLabelProvider;
+	private DecoratingJavaLabelProvider fDecoratingLabelProvider;
 	private PackageExplorerContentProvider fContentProvider;
 	private FilterUpdater fFilterUpdater;
 	
@@ -245,6 +246,7 @@ public class PackageExplorerPart extends ViewPart
 		public PackageExplorerProblemTreeViewer(Composite parent, int style) {
 			super(parent, style);
 			fPendingRefreshes= Collections.synchronizedList(new ArrayList());
+			OwnerDrawSupport.install(this);
 		}
 		public void add(Object parentElement, Object[] childElements) {
 			if (fPendingRefreshes.contains(parentElement)) {
@@ -646,7 +648,8 @@ public class PackageExplorerPart extends ViewPart
 		
 		fLabelProvider= createLabelProvider();
 		fLabelProvider.setIsFlatLayout(fIsCurrentLayoutFlat);
-		fViewer.setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, false, fIsCurrentLayoutFlat));
+		fDecoratingLabelProvider= new DecoratingJavaLabelProvider(fLabelProvider, false, fIsCurrentLayoutFlat);
+		fViewer.setLabelProvider(fDecoratingLabelProvider);
 		// problem decoration provided by PackageLabelProvider
 	}
 	
@@ -673,7 +676,7 @@ public class PackageExplorerPart extends ViewPart
 		if (fViewer != null) {
 			fContentProvider.setIsFlatLayout(isFlatLayout());
 			fLabelProvider.setIsFlatLayout(isFlatLayout());
-			((DecoratingJavaLabelProvider) fViewer.getLabelProvider()).setFlatPackageMode(isFlatLayout());
+			fDecoratingLabelProvider.setFlatPackageMode(isFlatLayout());
 			
 			fViewer.getControl().setRedraw(false);
 			fViewer.refresh();
@@ -695,14 +698,7 @@ public class PackageExplorerPart extends ViewPart
 	}
 	
 	private PackageExplorerLabelProvider createLabelProvider() {
-		if (showProjects()) 
-			return new PackageExplorerLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED | JavaElementLabels.ALL_CATEGORY,
-				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
-				fContentProvider);
-		else
-			return new WorkingSetAwareLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
-				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
-				fContentProvider);			
+		return new PackageExplorerLabelProvider(fContentProvider);
 	}
 	
 	private IElementComparer createElementComparer() {

@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;
 
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
@@ -173,6 +174,7 @@ public class TestViewer {
 		fViewerbook= new PageBook(parent, SWT.NULL);
 		
 		fTreeViewer= new TreeViewer(fViewerbook, SWT.V_SCROLL | SWT.SINGLE);
+		OwnerDrawSupport.install(fTreeViewer);
 		fTreeViewer.setUseHashlookup(true);
 		fTreeContentProvider= new TestSessionTreeContentProvider();
 		fTreeViewer.setContentProvider(fTreeContentProvider);
@@ -180,6 +182,7 @@ public class TestViewer {
 		fTreeViewer.setLabelProvider(fTreeLabelProvider);
 		
 		fTableViewer= new TableViewer(fViewerbook, SWT.V_SCROLL | SWT.H_SCROLL | SWT.SINGLE);
+		OwnerDrawSupport.install(fTableViewer);
 		fTableViewer.setUseHashlookup(true);
 		fTableContentProvider= new TestSessionTableContentProvider();
 		fTableViewer.setContentProvider(fTableContentProvider);

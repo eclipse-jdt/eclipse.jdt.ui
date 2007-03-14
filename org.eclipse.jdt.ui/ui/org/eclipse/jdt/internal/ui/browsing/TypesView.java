@@ -15,11 +15,13 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 
+import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 
 import org.eclipse.ui.IActionBars;
@@ -35,15 +37,16 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
 import org.eclipse.jdt.internal.ui.filters.NonJavaElementFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
-
-import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
 public class TypesView extends JavaBrowsingPart {
 
 	private SelectAllAction fSelectAllAction;
@@ -60,6 +63,13 @@ public class TypesView extends JavaBrowsingPart {
 						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
 	}
 
+	protected StructuredViewer createViewer(Composite parent) {
+		StructuredViewer viewer= super.createViewer(parent);
+		OwnerDrawSupport.install(viewer);
+		return viewer;
+	}
+	
+	
 	/**
 	 * Answer the property defined by key.
 	 */

@@ -30,6 +30,8 @@ import org.eclipse.ui.IWorkbenchPartSite;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
+import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
+
 class CallHierarchyViewer extends TreeViewer {
     private CallHierarchyViewPart fPart;
 
@@ -58,6 +60,8 @@ class CallHierarchyViewer extends TreeViewer {
                 fOpen.run();
             }
         });
+        
+        OwnerDrawSupport.install(this);
 
         clearViewer();
     }

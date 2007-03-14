@@ -21,6 +21,9 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
+
 public class PostfixLabelProvider extends SearchLabelProvider {
 	private ITreeContentProvider fContentProvider;
 	
@@ -38,8 +41,11 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 	
 	public String getText(Object element) {
 		String labelWithCounts= getLabelWithCounts(element, internalGetText(element));
-		
-		StringBuffer res= new StringBuffer(labelWithCounts);
+		return labelWithCounts + getQualification(element);
+	}
+	
+	private String getQualification(Object element) {
+		StringBuffer res= new StringBuffer();
 		
 		ITreeContentProvider provider= (ITreeContentProvider) fPage.getViewer().getContentProvider();
 		Object visibleParent= provider.getParent(element);
@@ -54,7 +60,6 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 		}
 		return res.toString();
 	}
-	
 
 	protected boolean hasChildren(Object element) {
 		ITreeContentProvider contentProvider= (ITreeContentProvider) fPage.getViewer().getContentProvider();
@@ -80,6 +85,15 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 			}
 		}
 		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.IRichLabelProvider#getRichTextLabel(java.lang.Object)
+	 */
+	public ColoredString getRichTextLabel(Object element) {
+		ColoredString coloredString= getColoredLabelWithCounts(element, super.getRichTextLabel(element));
+		coloredString.append(getQualification(element), ColoredJavaElementLabels.QUALIFIER_COLOR);
+		return coloredString;
 	}
 
 }

@@ -119,16 +119,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		}
 		return true;
 	}
-	
-	/* (non-Javadoc)
-	 * @see ILabelProvider#getText
-	 */ 	
-	public String getText(Object element) {
-		String text= super.getText(element);
-		return decorateText(text, element);
-	}	
-	
-	
+		
 	/* (non-Javadoc)
 	 * @see ILabelProvider#getImage
 	 */ 

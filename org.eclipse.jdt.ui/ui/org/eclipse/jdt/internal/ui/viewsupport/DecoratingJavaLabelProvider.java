@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
-import org.eclipse.swt.graphics.Color;
-
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DecorationContext;
-import org.eclipse.jface.viewers.IColorProvider;
+import org.eclipse.jface.viewers.ILabelDecorator;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.LabelDecorator;
 
 import org.eclipse.ui.PlatformUI;
 
@@ -22,12 +22,13 @@ import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 
 import org.eclipse.jdt.internal.ui.packageview.HierarchicalDecorationContext;
 
-public class DecoratingJavaLabelProvider extends DecoratingLabelProvider implements IColorProvider {
+public class DecoratingJavaLabelProvider extends DecoratingLabelProvider implements IRichLabelProvider {
 	
 	/**
 	 * Decorating label provider for Java. Combines a JavaUILabelProvider
-	 * with problem and override indicuator with the workbench decorator (label
+	 * with problem and override indicator with the workbench decorator (label
 	 * decorator extension point).
+	 * @param labelProvider the label provider to decorate
 	 */
 	public DecoratingJavaLabelProvider(JavaUILabelProvider labelProvider) {
 		this(labelProvider, true);
@@ -37,6 +38,8 @@ public class DecoratingJavaLabelProvider extends DecoratingLabelProvider impleme
 	 * Decorating label provider for Java. Combines a JavaUILabelProvider
 	 * (if enabled with problem indicator) with the workbench
 	 * decorator (label decorator extension point).
+	 * 	@param labelProvider the label provider to decorate
+	 * @param errorTick show error ticks
 	 */
 	public DecoratingJavaLabelProvider(JavaUILabelProvider labelProvider, boolean errorTick) {
 		this(labelProvider, errorTick, true);
@@ -46,6 +49,9 @@ public class DecoratingJavaLabelProvider extends DecoratingLabelProvider impleme
 	 * Decorating label provider for Java. Combines a JavaUILabelProvider
 	 * (if enabled with problem indicator) with the workbench
 	 * decorator (label decorator extension point).
+	 * 	@param labelProvider the label provider to decorate
+	 * @param errorTick show error ticks
+	 * @param flatPackageMode configure flat package mode
 	 */
 	public DecoratingJavaLabelProvider(JavaUILabelProvider labelProvider, boolean errorTick, boolean flatPackageMode) {
 		super(labelProvider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());
@@ -66,21 +72,33 @@ public class DecoratingJavaLabelProvider extends DecoratingLabelProvider impleme
 			setDecorationContext(HierarchicalDecorationContext.CONTEXT);
 		}
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
-	 */
-	public Color getForeground(Object element) {
-		// label provider is a JavaUILabelProvider
-		return ((IColorProvider) getLabelProvider()).getForeground(element);
-	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.IRichLabelProvider#getRichTextLabel(Object)
 	 */
-	public Color getBackground(Object element) {
-		// label provider is a JavaUILabelProvider
-		return ((IColorProvider) getLabelProvider()).getBackground(element);
+	public ColoredString getRichTextLabel(Object element) {
+		ILabelProvider labelProvider= getLabelProvider();
+		if (labelProvider instanceof IRichLabelProvider) {
+			// get a rich label from the label decorator
+			IRichLabelProvider richLabelProvider= (IRichLabelProvider) labelProvider;
+			ColoredString richLabel= richLabelProvider.getRichTextLabel(element);
+			if (richLabel != null) {
+				String decorated= null;
+				ILabelDecorator labelDecorator= getLabelDecorator();
+				if (labelDecorator != null) {
+					if (labelDecorator instanceof LabelDecorator) {
+						decorated= ((LabelDecorator) labelDecorator).decorateText(richLabel.getString(), element, getDecorationContext());
+					} else {
+						decorated= labelDecorator.decorateText(richLabel.getString(), element);
+					}
+				}
+				if (decorated != null) {
+					return ColoredJavaElementLabels.decorateColoredString(richLabel, decorated, ColoredJavaElementLabels.DECORATIONS_COLOR);
+				}
+				return richLabel;
+			}
+		}
+		return null;
 	}
 
 }

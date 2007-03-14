@@ -48,6 +48,7 @@ import org.eclipse.jdt.internal.ui.filters.SyntheticMembersFilter;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 
 /**
@@ -97,6 +98,8 @@ public class MethodsViewer extends ProblemTableViewer {
 		
 		showInheritedMethodsNoRedraw(false);
 		sortByDefiningTypeNoRedraw(false);
+		
+		OwnerDrawSupport.install(this);
 		
 		JavaUIHelp.setHelp(this, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
 	}
