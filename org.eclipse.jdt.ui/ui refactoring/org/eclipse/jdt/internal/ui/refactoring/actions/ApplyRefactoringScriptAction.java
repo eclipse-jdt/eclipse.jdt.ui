@@ -43,9 +43,11 @@ public final class ApplyRefactoringScriptAction implements IWorkbenchWindowActio
 	/**
 	 * {@inheritDoc}
 	 */
-	public void run(final IAction action) {
+	public void run(final IAction a) {
 		if (fWindow != null) {
-			org.eclipse.ltk.internal.ui.refactoring.actions.ApplyRefactoringScriptAction.showApplyScriptWizard(fWindow);
+			org.eclipse.ltk.ui.refactoring.actions.ApplyRefactoringScriptAction action= new org.eclipse.ltk.ui.refactoring.actions.ApplyRefactoringScriptAction();
+			action.init(fWindow);
+			action.run(a);
 		}
 	}
 
