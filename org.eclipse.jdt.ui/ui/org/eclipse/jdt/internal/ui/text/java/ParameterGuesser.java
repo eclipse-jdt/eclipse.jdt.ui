@@ -323,7 +323,7 @@ public class ParameterGuesser {
 		}
 
 		private void acceptLocalVariable(char[] name, char[] typePackageName, char[] typeName, int modifiers) {
-			addVariable(Variable.LOCAL, typePackageName, typeName, name, NO_TRIGGERS, decorate(JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE, modifiers));
+			addVariable(Variable.LOCAL, typePackageName, typeName, name, NO_TRIGGERS, decorate(JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE, modifiers, false));
 		}
 
 		private void acceptMethod(char[] declaringTypeName, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers) {
@@ -337,15 +337,15 @@ public class ParameterGuesser {
 
 		protected ImageDescriptor getMemberDescriptor(int modifiers) {
 			ImageDescriptor desc= JavaElementImageProvider.getMethodImageDescriptor(false, modifiers);
-			return decorate(desc, modifiers);
+			return decorate(desc, modifiers, false);
 		}
 
 		protected ImageDescriptor getFieldDescriptor(int modifiers) {
 			ImageDescriptor desc= JavaElementImageProvider.getFieldImageDescriptor(false, modifiers);
-			return decorate(desc, modifiers);
+			return decorate(desc, modifiers, true);
 		}
 
-		private ImageDescriptor decorate(ImageDescriptor descriptor, int modifiers) {
+		private ImageDescriptor decorate(ImageDescriptor descriptor, int modifiers, boolean isField) {
 			int flags= 0;
 
 			if (Flags.isDeprecated(modifiers))
@@ -362,7 +362,15 @@ public class ParameterGuesser {
 
 			if (Flags.isAbstract(modifiers))
 				flags |= JavaElementImageDescriptor.ABSTRACT;
-
+			
+			if (isField) {
+				if (Flags.isVolatile(modifiers))
+					flags |= JavaElementImageDescriptor.VOLATILE;
+	
+				if (Flags.isTransient(modifiers))
+					flags |= JavaElementImageDescriptor.TRANSIENT;
+			}
+			
 			return new JavaElementImageDescriptor(descriptor, flags, JavaElementImageProvider.SMALL_SIZE);
 
 		}

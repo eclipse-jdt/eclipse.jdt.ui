@@ -651,6 +651,13 @@ public class CompletionProposalLabelProvider {
 
 		if (kind == CompletionProposal.TYPE_REF && Flags.isAbstract(flags) && !Flags.isInterface(flags))
 			adornments |= JavaElementImageDescriptor.ABSTRACT;
+		
+		if (kind == CompletionProposal.FIELD_REF) {
+			if (Flags.isTransient(flags))
+				adornments |= JavaElementImageDescriptor.TRANSIENT;
+			if (Flags.isVolatile(flags))
+				adornments |= JavaElementImageDescriptor.VOLATILE;
+		}
 
 		return new JavaElementImageDescriptor(descriptor, adornments, JavaElementImageProvider.SMALL_SIZE);
 	}
