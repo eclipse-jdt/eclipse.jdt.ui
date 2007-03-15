@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,7 +33,6 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
-import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
 import org.eclipse.jdt.internal.ui.actions.FoldingActionGroup;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
@@ -54,8 +53,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	private RetargetTextEditorAction fOpenStructure;
 	private RetargetTextEditorAction fOpenHierarchy;
 
-	private RetargetAction fRetargetShowJavaDoc;
-	private RetargetTextEditorAction fShowJavaDoc;
+	private RetargetTextEditorAction fRetargetShowToolTipAction;
 
 	private RetargetTextEditorAction fStructureSelectEnclosingAction;
 	private RetargetTextEditorAction fStructureSelectNextAction;
@@ -72,9 +70,8 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 
 		ResourceBundle b= JavaEditorMessages.getBundleForConstructedKeys();
 
-		fRetargetShowJavaDoc= new RetargetAction(JdtActionConstants.SHOW_JAVA_DOC, JavaEditorMessages.ShowJavaDoc_label);
-		fRetargetShowJavaDoc.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
-		markAsPartListener(fRetargetShowJavaDoc);
+		fRetargetShowToolTipAction= new RetargetTextEditorAction(b, "Editor.ShowToolTip."); //$NON-NLS-1$
+		fRetargetShowToolTipAction.setActionDefinitionId(ITextEditorActionDefinitionIds.SHOW_TOOL_TIP);
 
 		// actions that are "contributed" to editors, they are considered belonging to the active editor
 		fTogglePresentation= new TogglePresentationAction();
@@ -83,9 +80,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 
 		fGotoMatchingBracket= new RetargetTextEditorAction(b, "GotoMatchingBracket."); //$NON-NLS-1$
 		fGotoMatchingBracket.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
-
-		fShowJavaDoc= new RetargetTextEditorAction(b, "ShowJavaDoc."); //$NON-NLS-1$
-		fShowJavaDoc.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
 
 		fShowOutline= new RetargetTextEditorAction(JavaEditorMessages.getBundleForConstructedKeys(), "ShowOutline."); //$NON-NLS-1$
 		fShowOutline.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
@@ -131,7 +125,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY, fTogglePresentation);
 		bars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.TOGGLE_MARK_OCCURRENCES, fToggleMarkOccurrencesAction);
 
-		bars.setGlobalActionHandler(JdtActionConstants.SHOW_JAVA_DOC, fShowJavaDoc);
 	}
 
 	/*
@@ -151,7 +144,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			structureSelection.add(fStructureSelectPreviousAction);
 			structureSelection.add(fStructureSelectHistoryAction);
 
-			editMenu.appendToGroup(ITextEditorActionConstants.GROUP_INFORMATION, fRetargetShowJavaDoc);
+			editMenu.appendToGroup(ITextEditorActionConstants.GROUP_INFORMATION, fRetargetShowToolTipAction);
 		}
 
 		IMenuManager navigateMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_NAVIGATE);
@@ -184,7 +177,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fToggleMarkOccurrencesAction.setEditor(textEditor);
 
 		fGotoMatchingBracket.setAction(getAction(textEditor, GotoMatchingBracketAction.GOTO_MATCHING_BRACKET));
-		fShowJavaDoc.setAction(getAction(textEditor, "ShowJavaDoc")); //$NON-NLS-1$
 		fShowOutline.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_OUTLINE));
 		fOpenHierarchy.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.OPEN_HIERARCHY));
 		fOpenStructure.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.OPEN_STRUCTURE));
@@ -198,6 +190,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fGotoPreviousMemberAction.setAction(getAction(textEditor, GoToNextPreviousMemberAction.PREVIOUS_MEMBER));
 
 		fRemoveOccurrenceAnnotationsAction.setAction(getAction(textEditor, "RemoveOccurrenceAnnotations")); //$NON-NLS-1$
+		fRetargetShowToolTipAction.setAction(getAction(textEditor, ITextEditorActionConstants.SHOW_TOOL_TIP));		
 
 		if (part instanceof JavaEditor) {
 			JavaEditor javaEditor= (JavaEditor) part;
@@ -231,11 +224,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			getPage().removePartListener((RetargetAction) e.next());
 		fPartListeners.clear();
 
-		if (fRetargetShowJavaDoc != null) {
-			fRetargetShowJavaDoc.dispose();
-			fRetargetShowJavaDoc= null;
-		}
-		
 		setActiveEditor(null);
 		super.dispose();
 	}

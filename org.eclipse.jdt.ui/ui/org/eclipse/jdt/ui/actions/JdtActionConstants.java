@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 /**
  * Action ids for standard actions, for groups in the menu bar, and
@@ -84,6 +86,7 @@ public class JdtActionConstants {
 	/**
 	 * Edit menu: name of standard Show Javadoc global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.ShowJavaDoc"</code>).
+	 * @deprecated As of 3.3, replaced by {@link ITextEditorActionConstants#SHOW_TOOL_TIP}
 	 */
 	public static final String SHOW_JAVA_DOC= "org.eclipse.jdt.ui.actions.ShowJavaDoc"; //$NON-NLS-1$
 	

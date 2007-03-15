@@ -3056,12 +3056,6 @@
             id="org.eclipse.jdt.ui.edit.text.java.select.last">
       </command>
       <command
-            name="%ActionDefinition.showJavadoc.name"
-            description="%ActionDefinition.showJavadoc.description"
-            categoryId="org.eclipse.ui.category.edit"
-            id="org.eclipse.jdt.ui.edit.text.java.show.javadoc">
-      </command>
-      <command
             name="%ActionDefinition.showInPackageView.name"
             description="%ActionDefinition.showInPackageView.description"
             categoryId="org.eclipse.ui.category.navigate"
@@ -3905,11 +3899,6 @@
             sequence="CTRL+SHIFT+ARROW_DOWN"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.select.last"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            sequence="F2"
-            contextId="org.eclipse.jdt.ui.javaEditorScope"
-            commandId="org.eclipse.jdt.ui.edit.text.java.show.javadoc"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 
 <!-- source -->

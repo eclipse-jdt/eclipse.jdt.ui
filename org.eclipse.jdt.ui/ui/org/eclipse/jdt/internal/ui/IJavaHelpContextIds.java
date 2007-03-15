@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -213,7 +213,6 @@ public interface IJavaHelpContextIds {
 	public static final String QUICK_FIX_ACTION= 						PREFIX + "quick_fix_action"; 	 //$NON-NLS-1$	
 	public static final String CONTENT_ASSIST_ACTION= 						PREFIX + "content_assist_action"; 	 //$NON-NLS-1$	
 	public static final String PARAMETER_HINTS_ACTION= 						PREFIX + "parameter_hints_action"; 	 //$NON-NLS-1$	
-	public static final String SHOW_JAVADOC_ACTION= 						PREFIX + "show_javadoc_action"; 	 //$NON-NLS-1$	
 	public static final String SHOW_OUTLINE_ACTION= 						PREFIX + "show_outline_action"; 	 //$NON-NLS-1$	
 	public static final String OPEN_STRUCTURE_ACTION= 						PREFIX + "open_structure_action"; 	 //$NON-NLS-1$	
 	public static final String OPEN_HIERARCHY_ACTION= 						PREFIX + "open_hierarchy_action"; 	 //$NON-NLS-1$	

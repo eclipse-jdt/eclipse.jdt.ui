@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -100,6 +100,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	/**
 	 * Action definition ID of the edit -> show Javadoc action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.show.javadoc"</code>).
+	 * @deprecated As of 3.3, replaced by {@link ITextEditorActionDefinitionIds#SHOW_TOOL_TIP}
 	 */
 	public static final String SHOW_JAVADOC= "org.eclipse.jdt.ui.edit.text.java.show.javadoc"; //$NON-NLS-1$
 
