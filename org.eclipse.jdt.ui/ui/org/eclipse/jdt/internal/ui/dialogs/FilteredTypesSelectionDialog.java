@@ -426,17 +426,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	 * @see org.eclipse.jface.window.Window#open()
 	 */
 	public int open() {
-		
-		try {
-			ensureConsistency();
-		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, JavaUIMessages.TypeSelectionDialog_error3Title, JavaUIMessages.TypeSelectionDialog_error3Message); 
-			return CANCEL;
-		} catch (InterruptedException e) {
-			// cancelled by user
-			return CANCEL;
-		}
-		
 		if (getInitialPattern() == null) {
 			IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
 			if (window != null) {
@@ -556,38 +545,39 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 		fSearchScope= scope;
 	}
 	
-	private void ensureConsistency() throws InvocationTargetException, InterruptedException {
-		// we only have to ensure history consistency here since the search engine
-		// takes care of working copies.
-		class ConsistencyRunnable implements IRunnableWithProgress {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				if (fgFirstTime) {
-					// Join the initialize after load job.
-					IJobManager manager= Job.getJobManager();
-					manager.join(JavaUI.ID_PLUGIN, monitor);
-				}
-				OpenTypeHistory history= OpenTypeHistory.getInstance();
-				if (fgFirstTime || history.isEmpty()) {
-					monitor.beginTask(JavaUIMessages.TypeSelectionDialog_progress_consistency, 100);
-					if (history.needConsistencyCheck()) {
-						refreshSearchIndices(new SubProgressMonitor(monitor, 90));
-						history.checkConsistency(new SubProgressMonitor(monitor, 10));
-					} else {
-						refreshSearchIndices(monitor);
-					}
-					monitor.done();
-					fgFirstTime= false;
+	/*
+	 * We only have to ensure history consistency here since the search engine
+	 * takes care of working copies.
+	 */
+	private static class ConsistencyRunnable implements IRunnableWithProgress {
+		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+			if (fgFirstTime) {
+				// Join the initialize after load job.
+				IJobManager manager= Job.getJobManager();
+				manager.join(JavaUI.ID_PLUGIN, monitor);
+			}
+			OpenTypeHistory history= OpenTypeHistory.getInstance();
+			if (fgFirstTime || history.isEmpty()) {
+				monitor.beginTask(JavaUIMessages.TypeSelectionDialog_progress_consistency, 100);
+				if (history.needConsistencyCheck()) {
+					refreshSearchIndices(new SubProgressMonitor(monitor, 90));
+					history.checkConsistency(new SubProgressMonitor(monitor, 10));
 				} else {
-					history.checkConsistency(monitor);
+					refreshSearchIndices(monitor);
 				}
+				monitor.done();
+				fgFirstTime= false;
+			} else {
+				history.checkConsistency(monitor);
 			}
-			public boolean needsExecution() {
-				OpenTypeHistory history= OpenTypeHistory.getInstance();
-				return fgFirstTime || history.isEmpty() || history.needConsistencyCheck(); 
-			}
-			private void refreshSearchIndices(IProgressMonitor monitor) throws InvocationTargetException {
-				try {
-					new SearchEngine().searchAllTypeNames(
+		}
+		public boolean needsExecution() {
+			OpenTypeHistory history= OpenTypeHistory.getInstance();
+			return fgFirstTime || history.isEmpty() || history.needConsistencyCheck(); 
+		}
+		private void refreshSearchIndices(IProgressMonitor monitor) throws InvocationTargetException {
+			try {
+				new SearchEngine().searchAllTypeNames(
 						null,
 						0,
 						// make sure we search a concrete name. This is faster according to Kent  
@@ -598,18 +588,37 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 						new TypeNameRequestor() {}, 
 						IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
 						monitor);
-				} catch (JavaModelException e) {
-					throw new InvocationTargetException(e);
-				}
+			} catch (JavaModelException e) {
+				throw new InvocationTargetException(e);
 			}
 		}
+	}
+	
+	/*
+	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#reloadCache(boolean, org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	public void reloadCache(boolean checkDuplicates, IProgressMonitor monitor) {
 		ConsistencyRunnable runnable= new ConsistencyRunnable();
-		if (!runnable.needsExecution())
-			return;
-		IRunnableContext context= fRunnableContext != null 
-			? fRunnableContext 
-			: PlatformUI.getWorkbench().getProgressService();
-		context.run(true, true, runnable);
+		IProgressMonitor remainingMonitor;
+		if (runnable.needsExecution()) {
+			monitor.beginTask(JavaUIMessages.TypeSelectionDialog_progress_consistency, 10);
+			try {
+				runnable.run(new SubProgressMonitor(monitor, 1));
+			} catch (InvocationTargetException e) {
+				ExceptionHandler.handle(e, JavaUIMessages.TypeSelectionDialog_error3Title, JavaUIMessages.TypeSelectionDialog_error3Message); 
+				close();
+				return;
+			} catch (InterruptedException e) {
+				// cancelled by user
+				close();
+				return;
+			}
+			remainingMonitor= new SubProgressMonitor(monitor, 9);
+		} else {
+			remainingMonitor= monitor;
+		}
+		super.reloadCache(checkDuplicates, remainingMonitor);
+		monitor.done();
 	}
 
 	/**
