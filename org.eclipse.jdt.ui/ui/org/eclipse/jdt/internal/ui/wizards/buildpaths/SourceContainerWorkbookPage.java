@@ -181,7 +181,11 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 	}
 	
-	private void updateFoldersList() {	
+	private void updateFoldersList() {
+		if (fSWTControl == null || fSWTControl.isDisposed()) {
+			return;
+		}
+
 		ArrayList folders= new ArrayList();
 	
 		boolean useFolderOutputs= false;
