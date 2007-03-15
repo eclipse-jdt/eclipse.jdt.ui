@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,6 +63,8 @@ public class JavaEditorTextHoverDescriptor {
 
 	/**
 	 * Returns all Java editor text hovers contributed to the workbench.
+	 * 
+	 * @return an array with the contributed text hovers 
 	 */
 	public static JavaEditorTextHoverDescriptor[] getContributedHovers() {
 		IExtensionRegistry registry= Platform.getExtensionRegistry();
@@ -98,6 +100,8 @@ public class JavaEditorTextHoverDescriptor {
 
 	/**
 	 * Creates a new Java Editor text hover descriptor from the given configuration element.
+	 * 
+	 * @param element the configuration element 
 	 */
 	private JavaEditorTextHoverDescriptor(IConfigurationElement element) {
 		Assert.isNotNull(element);
@@ -106,6 +110,8 @@ public class JavaEditorTextHoverDescriptor {
 
 	/**
 	 * Creates the Java editor text hover.
+	 * 
+	 * @return the text hover 
 	 */
 	public IJavaEditorTextHover createTextHover() {
  		String pluginId = fElement.getContributor().getName();
@@ -125,6 +131,8 @@ public class JavaEditorTextHoverDescriptor {
 
 	/**
 	 * Returns the hover's id.
+	 * 
+	 * @return the id 
 	 */
 	public String getId() {
 			return fElement.getAttribute(ID_ATTRIBUTE);
@@ -132,6 +140,8 @@ public class JavaEditorTextHoverDescriptor {
 
 	/**
 	 * Returns the hover's class name.
+	 * 
+	 * @return the class name
 	 */
 	public String getHoverClassName() {
 		return fElement.getAttribute(CLASS_ATTRIBUTE);
@@ -139,6 +149,8 @@ public class JavaEditorTextHoverDescriptor {
 
 	/**
 	 * Returns the hover's label.
+	 * 
+	 * @return the label
 	 */
 	public String getLabel() {
 		String label= fElement.getAttribute(LABEL_ATTRIBUTE);
