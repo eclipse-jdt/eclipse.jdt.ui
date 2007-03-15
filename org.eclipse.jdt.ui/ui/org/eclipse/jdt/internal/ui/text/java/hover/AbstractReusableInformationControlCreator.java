@@ -33,6 +33,9 @@ public abstract class AbstractReusableInformationControlCreator implements IInfo
 
 	/**
 	 * Creates the control.
+	 * 
+	 * @param parent the parent shell
+	 * @return the information control
 	 */
 	protected abstract IInformationControl doCreateInformationControl(Shell parent);
 
