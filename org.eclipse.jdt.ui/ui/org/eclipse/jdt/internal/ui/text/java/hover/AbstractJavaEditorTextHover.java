@@ -169,7 +169,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 		if (bindingService == null || !JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE))
 			return null;
 
-		String keySequence= bindingService.getBestActiveBindingFormattedFor(ITextEditorActionDefinitionIds.SHOW_TOOL_TIP);
+		String keySequence= bindingService.getBestActiveBindingFormattedFor(ITextEditorActionDefinitionIds.SHOW_INFORMATION);
 		if (keySequence == null)
 			return null;
 		

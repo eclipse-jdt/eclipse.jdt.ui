@@ -100,7 +100,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	/**
 	 * Action definition ID of the edit -> show Javadoc action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.show.javadoc"</code>).
-	 * @deprecated As of 3.3, replaced by {@link ITextEditorActionDefinitionIds#SHOW_TOOL_TIP}
+	 * @deprecated As of 3.3, replaced by {@link ITextEditorActionDefinitionIds#SHOW_INFORMATION}
 	 */
 	public static final String SHOW_JAVADOC= "org.eclipse.jdt.ui.edit.text.java.show.javadoc"; //$NON-NLS-1$
 

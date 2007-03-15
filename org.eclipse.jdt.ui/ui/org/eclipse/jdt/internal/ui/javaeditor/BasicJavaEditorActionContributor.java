@@ -53,7 +53,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	private RetargetTextEditorAction fOpenStructure;
 	private RetargetTextEditorAction fOpenHierarchy;
 
-	private RetargetTextEditorAction fRetargetShowToolTipAction;
+	private RetargetTextEditorAction fRetargetShowInformationAction;
 
 	private RetargetTextEditorAction fStructureSelectEnclosingAction;
 	private RetargetTextEditorAction fStructureSelectNextAction;
@@ -70,8 +70,8 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 
 		ResourceBundle b= JavaEditorMessages.getBundleForConstructedKeys();
 
-		fRetargetShowToolTipAction= new RetargetTextEditorAction(b, "Editor.ShowToolTip."); //$NON-NLS-1$
-		fRetargetShowToolTipAction.setActionDefinitionId(ITextEditorActionDefinitionIds.SHOW_TOOL_TIP);
+		fRetargetShowInformationAction= new RetargetTextEditorAction(b, "Editor.ShowInformation."); //$NON-NLS-1$
+		fRetargetShowInformationAction.setActionDefinitionId(ITextEditorActionDefinitionIds.SHOW_INFORMATION);
 
 		// actions that are "contributed" to editors, they are considered belonging to the active editor
 		fTogglePresentation= new TogglePresentationAction();
@@ -144,7 +144,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			structureSelection.add(fStructureSelectPreviousAction);
 			structureSelection.add(fStructureSelectHistoryAction);
 
-			editMenu.appendToGroup(ITextEditorActionConstants.GROUP_INFORMATION, fRetargetShowToolTipAction);
+			editMenu.appendToGroup(ITextEditorActionConstants.GROUP_INFORMATION, fRetargetShowInformationAction);
 		}
 
 		IMenuManager navigateMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_NAVIGATE);
@@ -190,7 +190,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fGotoPreviousMemberAction.setAction(getAction(textEditor, GoToNextPreviousMemberAction.PREVIOUS_MEMBER));
 
 		fRemoveOccurrenceAnnotationsAction.setAction(getAction(textEditor, "RemoveOccurrenceAnnotations")); //$NON-NLS-1$
-		fRetargetShowToolTipAction.setAction(getAction(textEditor, ITextEditorActionConstants.SHOW_TOOL_TIP));		
+		fRetargetShowInformationAction.setAction(getAction(textEditor, ITextEditorActionConstants.SHOW_TOOL_TIP));		
 
 		if (part instanceof JavaEditor) {
 			JavaEditor javaEditor= (JavaEditor) part;
