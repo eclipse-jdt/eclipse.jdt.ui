@@ -18,6 +18,8 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
@@ -42,6 +44,7 @@ import org.eclipse.ui.ide.IDEActionFactory;
 
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
@@ -153,11 +156,21 @@ public abstract class OpenCloseWorkingSetAction extends SelectionDispatchAction 
 					new WorkbenchRunnableAdapter(new IWorkspaceRunnable() {
 						public void run(IProgressMonitor monitor) throws CoreException {
 							monitor.beginTask("", projects.size()); //$NON-NLS-1$
+							
+							MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, WorkingSetMessages.OpenCloseWorkingSetAction_error_details, null);
 							for (Iterator iter= projects.iterator(); iter.hasNext();) {
-								IProject project= (IProject)iter.next();
-								performOperation(project, new SubProgressMonitor(monitor, 1));
+								try {
+									IProject project= (IProject)iter.next();
+									performOperation(project, new SubProgressMonitor(monitor, 1));
+								} catch (CoreException e) {
+									status.add(e.getStatus());
+								}
 							}
 							monitor.done();
+							if (!status.isOK()) {
+								throw new CoreException(status);
+							}
+							
 						}
 					}));
 			} catch (InvocationTargetException e) {

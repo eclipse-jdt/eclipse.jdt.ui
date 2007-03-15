@@ -39,6 +39,7 @@ public final class WorkingSetMessages extends NLS {
 	public static String JavaWorkingSetPage_selectAll_toolTip;
 	public static String JavaWorkingSetPage_deselectAll_label;
 	public static String JavaWorkingSetPage_deselectAll_toolTip;
+	public static String OpenCloseWorkingSetAction_error_details;
 	
 	public static String SelectWorkingSetAction_text;
 	public static String SelectWorkingSetAction_toolTip;
