@@ -86,7 +86,7 @@ public class JdtActionConstants {
 	/**
 	 * Edit menu: name of standard Show Javadoc global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.ShowJavaDoc"</code>).
-	 * @deprecated As of 3.3, replaced by {@link ITextEditorActionConstants#SHOW_TOOL_TIP}
+	 * @deprecated As of 3.3, replaced by {@link ITextEditorActionConstants#SHOW_INFORMATION}
 	 */
 	public static final String SHOW_JAVA_DOC= "org.eclipse.jdt.ui.actions.ShowJavaDoc"; //$NON-NLS-1$
 	

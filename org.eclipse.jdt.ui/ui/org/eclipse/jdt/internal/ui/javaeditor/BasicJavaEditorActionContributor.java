@@ -190,7 +190,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fGotoPreviousMemberAction.setAction(getAction(textEditor, GoToNextPreviousMemberAction.PREVIOUS_MEMBER));
 
 		fRemoveOccurrenceAnnotationsAction.setAction(getAction(textEditor, "RemoveOccurrenceAnnotations")); //$NON-NLS-1$
-		fRetargetShowInformationAction.setAction(getAction(textEditor, ITextEditorActionConstants.SHOW_TOOL_TIP));		
+		fRetargetShowInformationAction.setAction(getAction(textEditor, ITextEditorActionConstants.SHOW_INFORMATION));		
 
 		if (part instanceof JavaEditor) {
 			JavaEditor javaEditor= (JavaEditor) part;
