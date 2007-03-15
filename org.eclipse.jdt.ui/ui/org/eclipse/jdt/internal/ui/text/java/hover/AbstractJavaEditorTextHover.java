@@ -35,15 +35,12 @@ import org.eclipse.jface.text.ITextViewer;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.keys.IBindingService;
-import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
+
+import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
@@ -152,28 +149,9 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	public IInformationControlCreator getHoverControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true), getTooltipAffordanceString());
+				return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true), EditorsUI.getTooltipAffordanceString());
 			}
 		};
-	}
-
-	/**
-	 * Returns the tool tip affordance string.
-	 *
-	 * @return the affordance string or <code>null</code> if disabled or no key binding is defined
-	 * @since 3.0
-	 */
-	protected static String getTooltipAffordanceString() {
-		IBindingService bindingService= (IBindingService)PlatformUI.getWorkbench().getAdapter(IBindingService.class);
-		
-		if (bindingService == null || !JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE))
-			return null;
-
-		String keySequence= bindingService.getBestActiveBindingFormattedFor(ITextEditorActionDefinitionIds.SHOW_INFORMATION);
-		if (keySequence == null)
-			return null;
-		
-		return Messages.format(JavaHoverMessages.JavaTextHover_makeStickyHint, keySequence);
 	}
 
 	protected static String getStyleSheet() {

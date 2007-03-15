@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -160,7 +160,6 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 	private TableColumn fNameColumn;
 	private TableColumn fModifierColumn;
 	private Text fDescription;
-	private Button fShowHoverAffordanceCheckbox;
 	
 	private PreferencePage fMainPreferencePage;
 
@@ -194,7 +193,6 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 	
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER));
 
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS));
 		
@@ -226,19 +224,11 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 		String rollOverLabel= PreferencesMessages.JavaEditorHoverConfigurationBlock_annotationRollover; 
 		addCheckBox(hoverComposite, rollOverLabel, PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER, 0); 
 
-		// Affordance checkbox
-		fShowHoverAffordanceCheckbox= new Button(hoverComposite, SWT.CHECK);
-		fShowHoverAffordanceCheckbox.setText(PreferencesMessages.JavaEditorHoverConfigurationBlock_showAffordance); 
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= 0;
-		gd.horizontalSpan= 2;
-		fShowHoverAffordanceCheckbox.setLayoutData(gd);
-
 		addFiller(hoverComposite);
 
 		Label label= new Label(hoverComposite, SWT.NONE);
 		label.setText(PreferencesMessages.JavaEditorHoverConfigurationBlock_hoverPreferences); 
-		gd= new GridData(GridData.FILL_HORIZONTAL);
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
 		gd.horizontalSpan= 2;
 		label.setLayoutData(gd);
@@ -402,8 +392,6 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 	}
 
 	void initializeFields() {
-		fShowHoverAffordanceCheckbox.setSelection(fStore.getBoolean(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE));
-
 		fModifierEditor.setEnabled(false);
 		
 		Iterator e= fCheckBoxes.keySet().iterator();
@@ -440,8 +428,6 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 		fStore.setValue(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS, buf.toString());
 		fStore.setValue(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS, maskBuf.toString());
 		
-		fStore.setValue(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE, fShowHoverAffordanceCheckbox.getSelection());
-		
 		JavaPlugin.getDefault().resetJavaEditorTextHoverDescriptors();
 	}
 
@@ -452,9 +438,6 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 	}
 
 	private void restoreFromPreferences() {
-
-		fShowHoverAffordanceCheckbox.setSelection(fStore.getBoolean(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE));
-
 		String compiledTextHoverModifiers= fStore.getString(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS);
 		
 		StringTokenizer tokenizer= new StringTokenizer(compiledTextHoverModifiers, JavaEditorTextHoverDescriptor.VALUE_SEPARATOR);

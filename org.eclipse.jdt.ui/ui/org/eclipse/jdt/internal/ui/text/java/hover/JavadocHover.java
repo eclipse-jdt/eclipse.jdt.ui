@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,8 @@ import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextHoverExtension;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
+
+import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -79,9 +81,9 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		 */
 		public IInformationControl doCreateInformationControl(Shell parent) {
 			if (BrowserInformationControl.isAvailable(parent))
-				return new BrowserInformationControl(parent, SWT.TOOL | SWT.NO_TRIM, SWT.NONE, getTooltipAffordanceString());
+				return new BrowserInformationControl(parent, SWT.TOOL | SWT.NO_TRIM, SWT.NONE, EditorsUI.getTooltipAffordanceString());
 			else
-				return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true), getTooltipAffordanceString());
+				return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true), EditorsUI.getTooltipAffordanceString());
 		}
 
 		/*
@@ -90,7 +92,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		public boolean canReuse(IInformationControl control) {
 			boolean canReuse= super.canReuse(control);
 			if (canReuse && control instanceof IInformationControlExtension4)
-				((IInformationControlExtension4)control).setStatusText(getTooltipAffordanceString());
+				((IInformationControlExtension4)control).setStatusText(EditorsUI.getTooltipAffordanceString());
 			return canReuse;
 				
 		}

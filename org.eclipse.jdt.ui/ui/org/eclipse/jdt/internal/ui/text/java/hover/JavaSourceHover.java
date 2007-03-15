@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,8 @@ import org.eclipse.jface.text.information.IInformationProviderExtension2;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.part.IWorkbenchPartOrientation;
+
+import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
@@ -122,7 +124,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 				int shellStyle= SWT.TOOL | SWT.NO_TRIM;
 				if (editor instanceof IWorkbenchPartOrientation)
 					shellStyle |= ((IWorkbenchPartOrientation)editor).getOrientation();
-				return new SourceViewerInformationControl(parent, shellStyle, SWT.NONE, getTooltipAffordanceString());
+				return new SourceViewerInformationControl(parent, shellStyle, SWT.NONE, EditorsUI.getTooltipAffordanceString());
 			}
 		};
 	}
