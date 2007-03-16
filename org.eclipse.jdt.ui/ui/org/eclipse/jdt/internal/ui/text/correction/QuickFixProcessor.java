@@ -498,7 +498,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				ReorgCorrectionsSubProcessor.getNeed50ComplianceProposals(context, problem, proposals);
 				break;
 			case IProblem.NonGenericType:
-				TypeParameterMismatchSubProcessor.getTypeParameterMismatchProposals(context, problem, proposals);
+				TypeParameterMismatchSubProcessor.removeMismatchedParameters(context, problem, proposals);
 				break;
 			case IProblem.MissingOverrideAnnotation:
 				ModifierCorrectionSubProcessor.addOverrideAnnotationProposal(context, problem, proposals);

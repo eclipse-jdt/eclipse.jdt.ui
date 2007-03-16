@@ -147,6 +147,7 @@ public final class CorrectionMessages extends NLS {
 	public static String ReturnTypeSubProcessor_changetovoid_description;
 	public static String MissingReturnTypeCorrectionProposal_addreturnstatement_description;
 	public static String MissingReturnTypeCorrectionProposal_changereturnstatement_description;
+	public static String TypeParameterMismatchSubProcessor_removeTypeParameter;
 	public static String UnresolvedElementsSubProcessor_swaparguments_description;
 	public static String UnresolvedElementsSubProcessor_addargumentcast_description;
 	public static String UnresolvedElementsSubProcessor_changemethod_description;

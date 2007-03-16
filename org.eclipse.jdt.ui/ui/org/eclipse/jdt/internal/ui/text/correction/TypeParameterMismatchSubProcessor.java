@@ -12,15 +12,21 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Collection;
 
+import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 public class TypeParameterMismatchSubProcessor {
@@ -40,4 +46,25 @@ public class TypeParameterMismatchSubProcessor {
 
 
 	}
+	
+	public static void removeMismatchedParameters(IInvocationContext context, IProblemLocation problem, Collection proposals){
+		ICompilationUnit cu= context.getCompilationUnit();
+		ASTNode selectedNode= problem.getCoveredNode(context.getASTRoot());
+		if (!(selectedNode instanceof SimpleName)) {
+			return;
+		}
+		
+		ASTNode normalizedNode=ASTNodes.getNormalizedNode(selectedNode);
+		if (normalizedNode instanceof ParameterizedType) {
+			ASTRewrite rewrite = ASTRewrite.create(normalizedNode.getAST());
+			ParameterizedType pt = (ParameterizedType) normalizedNode;
+			ASTNode mt = rewrite.createMoveTarget(pt.getType());
+			rewrite.replace(pt, mt, null);
+			String label= CorrectionMessages.TypeParameterMismatchSubProcessor_removeTypeParameter;
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
+			proposals.add(proposal);
+		}
+	}
+	
 }

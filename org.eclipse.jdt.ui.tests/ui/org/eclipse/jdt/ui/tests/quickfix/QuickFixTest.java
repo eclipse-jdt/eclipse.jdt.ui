@@ -84,6 +84,7 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(CleanUpTestCase.allTests());
 		suite.addTest(QuickFixEnablementTest.allTests());
 		suite.addTest(SurroundWithTemplateTest.allTests());
+		suite.addTest(TypeParameterMismatchTest.allTests());
 		
 		return new ProjectTestSetup(suite);
 	}
