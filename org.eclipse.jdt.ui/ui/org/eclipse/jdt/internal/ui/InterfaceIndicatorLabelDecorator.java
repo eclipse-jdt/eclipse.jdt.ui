@@ -159,24 +159,22 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 				if (mainType != null) {
 					return getOverlayFromFlags(mainType.getFlags());
 				}
+				return null;
 			}
-			return getOverlayWithSearchEngine(unit, null);
+			String typeName= JavaCore.removeJavaLikeExtension(unit.getElementName());
+			return getOverlayWithSearchEngine(unit, typeName);
 		} else if (element instanceof IClassFile) {
 			IClassFile classFile= (IClassFile) element;
 			if (classFile.isOpen()) {
 				return getOverlayFromFlags(classFile.getType().getFlags());
 			}
-			/*
-			 * XXX: This optimization can be removed once JDT Core does
-			 * it itself, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=168354
-			 */
 			String typeName= classFile.getType().getElementName();
-			return getOverlayWithSearchEngine(classFile, typeName.toCharArray());
+			return getOverlayWithSearchEngine(classFile, typeName);
 		}
 		return null;
 	}
 	
-	private ImageDescriptor getOverlayWithSearchEngine(ITypeRoot element, char[] typeName) {
+	private ImageDescriptor getOverlayWithSearchEngine(ITypeRoot element, String typeName) {
 		SearchEngine engine= new SearchEngine();
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element });
 		
@@ -197,7 +195,9 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 		};
 		
 		try {
-			engine.searchAllTypeNames(null, SearchPattern.R_EXACT_MATCH, typeName, SearchPattern.R_EXACT_MATCH, IJavaSearchConstants.TYPE, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH , null);
+			String packName = element.getParent().getElementName();
+			int matchRule = SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
+			engine.searchAllTypeNames(packName.toCharArray(), matchRule, typeName.toCharArray(), matchRule, IJavaSearchConstants.TYPE, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH , null);
 		} catch (Result e) {
 			return getOverlayFromFlags(e.modifiers);
 		} catch (JavaModelException e) {
