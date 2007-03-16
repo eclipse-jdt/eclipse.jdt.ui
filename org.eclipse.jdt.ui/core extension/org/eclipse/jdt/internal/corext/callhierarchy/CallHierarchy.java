@@ -19,19 +19,18 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
@@ -164,6 +163,7 @@ public class CallHierarchy {
     
     /**
      * Returns the current filters as a string.
+     * @return returns the filters
      */
     public String getFilters() {
         IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
@@ -207,6 +207,7 @@ public class CallHierarchy {
 
     /**
      * Parses the comma separated string into an array of StringMatcher objects
+     * @param listString the string to parse
      *
      * @return list
      */
@@ -223,26 +224,16 @@ public class CallHierarchy {
     }
     
     static CompilationUnit getCompilationUnitNode(IMember member, boolean resolveBindings) {
-        if (member.isBinary()) {
-            IClassFile classFile= member.getClassFile();
-            try {
-                if (classFile != null && classFile.exists() && classFile.getSource() != null) {
-					ASTParser parser= ASTParser.newParser(AST.JLS3);
-					parser.setSource(classFile);
-					parser.setResolveBindings(resolveBindings);
-					return (CompilationUnit) parser.createAST(null);
-                }
-            } catch (JavaModelException e) {
-                JavaPlugin.log(e);
-            }
-        } else {
-            ICompilationUnit icu= member.getCompilationUnit();
-            if (icu != null && icu.exists()) {
+    	ITypeRoot typeRoot= member.getTypeRoot();
+        try {
+	    	if (typeRoot.exists() && typeRoot.getBuffer() != null) {
 				ASTParser parser= ASTParser.newParser(AST.JLS3);
-				parser.setSource(icu);
+				parser.setSource(typeRoot);
 				parser.setResolveBindings(resolveBindings);
 				return (CompilationUnit) parser.createAST(null);
-            }
+	    	}
+        } catch (JavaModelException e) {
+            JavaPlugin.log(e);
         }
         return null;
     }
