@@ -1103,6 +1103,7 @@ public class ASTResolving {
 		astParser.setSource(compilationUnit);
 		astParser.setResolveBindings(true);
 		astParser.setStatementsRecovery(ASTProvider.SHARED_AST_STATEMENT_RECOVERY);
+		astParser.setBindingsRecovery(ASTProvider.SHARED_BINDING_RECOVERY);
 		return (CompilationUnit) astParser.createAST(monitor);
 	}
 

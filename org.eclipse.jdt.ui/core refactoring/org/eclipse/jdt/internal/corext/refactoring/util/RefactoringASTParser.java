@@ -47,12 +47,13 @@ public class RefactoringASTParser {
 	}
 
 	public CompilationUnit parse(ITypeRoot typeRoot, WorkingCopyOwner owner, boolean resolveBindings, IProgressMonitor pm) {
-		return parse(typeRoot, owner, resolveBindings, false, pm);
+		return parse(typeRoot, owner, resolveBindings, false, false, pm);
 	}
 
-	public CompilationUnit parse(ITypeRoot typeRoot, WorkingCopyOwner owner, boolean resolveBindings, boolean statementsRecovery, IProgressMonitor pm) {
+	public CompilationUnit parse(ITypeRoot typeRoot, WorkingCopyOwner owner, boolean resolveBindings, boolean statementsRecovery, boolean bindingsRecovery, IProgressMonitor pm) {
 		fParser.setResolveBindings(resolveBindings);
 		fParser.setStatementsRecovery(statementsRecovery);
+		fParser.setBindingsRecovery(bindingsRecovery);
 		fParser.setSource(typeRoot);
 		if (owner != null)
 			fParser.setWorkingCopyOwner(owner);
@@ -115,7 +116,7 @@ public class RefactoringASTParser {
 		if (cuNode != null) {
 			return cuNode;
 		} else {
-			return new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(unit, null, resolveBindings, ASTProvider.SHARED_AST_STATEMENT_RECOVERY, pm);
+			return new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(unit, null, resolveBindings, ASTProvider.SHARED_AST_STATEMENT_RECOVERY, ASTProvider.SHARED_BINDING_RECOVERY, pm);
 		}
 	}
 

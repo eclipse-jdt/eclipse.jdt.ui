@@ -247,6 +247,7 @@ public final class ASTProvider {
 
 	public static final int SHARED_AST_LEVEL= AST.JLS3;
 	public static final boolean SHARED_AST_STATEMENT_RECOVERY= true;
+	public static final boolean SHARED_BINDING_RECOVERY= false;
 
 	private static final String DEBUG_PREFIX= "ASTProvider > "; //$NON-NLS-1$
 
@@ -583,6 +584,7 @@ public final class ASTProvider {
 		final ASTParser parser = ASTParser.newParser(SHARED_AST_LEVEL);
 		parser.setResolveBindings(true);
 		parser.setStatementsRecovery(SHARED_AST_STATEMENT_RECOVERY);
+		parser.setBindingsRecovery(SHARED_BINDING_RECOVERY);
 
 		if (progressMonitor != null && progressMonitor.isCanceled())
 			return null;
