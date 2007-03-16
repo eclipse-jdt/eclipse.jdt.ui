@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -66,9 +66,11 @@ class ChangeHoverInformationControl extends SourceViewerInformationControl {
 	 * @param shellStyle the additional styles for the shell
 	 * @param style the additional styles for the styled text widget
 	 * @param partition the initial partition type to be used for the underlying viewer
+	 * @param statusFieldText the text to be used in the optional status field
+	 *                         or <code>null</code> if the status field should be hidden
 	 */
-	public ChangeHoverInformationControl(Shell parent, int shellStyle, int style, String partition) {
-		super(parent, shellStyle, style);
+	public ChangeHoverInformationControl(Shell parent, int shellStyle, int style, String partition, String statusFieldText) {
+		super(parent, shellStyle, style, statusFieldText);
 		setViewerFont();
 		setStartingPartitionType(partition);
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,8 @@ import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.LineChangeHover;
+
+import org.eclipse.ui.editors.text.EditorsUI;
 
 /**
  * A line change hover for Java source code. Adds a custom information control creator returning a
@@ -75,7 +77,7 @@ public class JavaChangeHover extends LineChangeHover  {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
 				int shellStyle= SWT.TOOL | SWT.NO_TRIM | fOrientation;
-				fInformationControl= new ChangeHoverInformationControl(parent, shellStyle, SWT.NONE, fPartition);
+				fInformationControl= new ChangeHoverInformationControl(parent, shellStyle, SWT.NONE, fPartition, EditorsUI.getTooltipAffordanceString());
 				fInformationControl.setHorizontalScrollPixel(fLastScrollIndex);
 				return fInformationControl;
 			}
@@ -91,7 +93,7 @@ public class JavaChangeHover extends LineChangeHover  {
 			public IInformationControl createInformationControl(Shell parent) {
 				int shellStyle= SWT.RESIZE | SWT.TOOL | fOrientation;
 				int style= SWT.V_SCROLL | SWT.H_SCROLL;
-				fInformationControl= new ChangeHoverInformationControl(parent, shellStyle, style, fPartition);
+				fInformationControl= new ChangeHoverInformationControl(parent, shellStyle, style, fPartition, null);
 				fInformationControl.setHorizontalScrollPixel(fLastScrollIndex);
 				return fInformationControl;
 			}
