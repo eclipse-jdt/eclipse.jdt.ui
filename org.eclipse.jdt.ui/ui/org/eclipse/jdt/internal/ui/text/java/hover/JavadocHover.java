@@ -23,6 +23,7 @@ import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.IInformationControlExtension4;
 import org.eclipse.jface.text.ITextHoverExtension;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
 
@@ -40,7 +41,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavadocContentAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.IInformationControlExtension4;
 
 /**
  * Provides Javadoc as hover info for Java elements.
@@ -90,11 +90,13 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#canReuse(org.eclipse.jface.text.IInformationControl)
 		 */
 		public boolean canReuse(IInformationControl control) {
-			boolean canReuse= super.canReuse(control);
-			if (canReuse && control instanceof IInformationControlExtension4)
+			if (!super.canReuse(control))
+				return false;
+			
+			if (control instanceof IInformationControlExtension4)
 				((IInformationControlExtension4)control).setStatusText(EditorsUI.getTooltipAffordanceString());
-			return canReuse;
-				
+			
+			return true;
 		}
 	}
 
