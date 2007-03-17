@@ -140,8 +140,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 
 	private TypeInfoUtil fTypeInfoUtil;
 	
-	private IRunnableContext fRunnableContext;
-
 	private static boolean fgFirstTime= true; 
 
 	/**
@@ -202,8 +200,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	public FilteredTypesSelectionDialog(Shell shell, boolean multi, IRunnableContext context, IJavaSearchScope scope, int elementKinds, TypeSelectionExtension extension) {
 		super(shell, multi);
 		
-		fRunnableContext= context;
-
 		setSelectionHistory(new TypeSelectionHistory());
 
 		if (scope == null) {
@@ -470,9 +466,9 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	 *      org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter,
 	 *      org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	protected void fillContentProvider(AbstractContentProvider contentProvider, ItemsFilter itemsFilter, IProgressMonitor progressMonitor) throws CoreException {
+	protected void fillContentProvider(AbstractContentProvider provider, ItemsFilter itemsFilter, IProgressMonitor progressMonitor) throws CoreException {
 		TypeItemsFilter typeSearchFilter= (TypeItemsFilter) itemsFilter;
-		TypeSearchRequestor requestor= new TypeSearchRequestor(contentProvider, typeSearchFilter);
+		TypeSearchRequestor requestor= new TypeSearchRequestor(provider, typeSearchFilter);
 		SearchEngine engine= new SearchEngine((WorkingCopyOwner) null);
 		String packPattern= typeSearchFilter.getPackagePattern();
 		progressMonitor.setTaskName(JavaUIMessages.FilteredTypesSelectionDialog_searchJob_taskName);
