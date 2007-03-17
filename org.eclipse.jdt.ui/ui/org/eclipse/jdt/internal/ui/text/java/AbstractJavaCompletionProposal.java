@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 
+import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
@@ -82,7 +83,6 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator;
 
 import org.osgi.framework.Bundle;
 
@@ -124,6 +124,8 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		 * Called before document changes occur. It must be followed by a call to postReplace().
 		 *
 		 * @param document the document on which to track the reference position.
+		 * @param offset the offset
+		 * @throws BadLocationException if the offset describes an invalid range in this document 
 		 *
 		 */
 		public void preReplace(IDocument document, int offset) throws BadLocationException {
@@ -143,6 +145,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		 * Called after the document changed occurred. It must be preceded by a call to preReplace().
 		 *
 		 * @param document the document on which to track the reference position.
+		 * @return offset after the replace
 		 */
 		public int postReplace(IDocument document) {
 			try {
@@ -530,7 +533,8 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	
 	/**
 	 * Returns the style information for displaying HTML (Javadoc) content.
-	 *
+	 * 
+	 * @return the CSS styles 
 	 * @since 3.3
 	 */
 	protected String getCSSStyles() {
@@ -727,6 +731,9 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * <code>offset</code>. Returns the empty string if <code>offset</code> is before the
 	 * replacement offset or if an exception occurs when accessing the document.
 	 * 
+	 * @param document the document 
+	 * @param offset the offset
+	 * @return the prefix
 	 * @since 3.2
 	 */
 	protected String getPrefix(IDocument document, int offset) {
@@ -741,8 +748,12 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	
 	/**
 	 * Case insensitive comparison of <code>prefix</code> with the start of <code>string</code>.
-	 * Returns <code>false</code> if <code>prefix</code> is longer than <code>string</code>
 	 * 
+	 * @param prefix the prefix
+	 * @param string  the string to look for the prefix
+	 * @return <code>true</code> if the string begins with the given prefix and
+	 *			<code>false</code> if <code>prefix</code> is longer than <code>string</code>
+	 *			or the string doesn't start with the given prefix 
 	 * @since 3.2
 	 */
 	protected boolean isPrefix(String prefix, String string) {
@@ -791,6 +802,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	/**
 	 * Returns true if camel case matching is enabled.
 	 * 
+	 * @return <code>true</code> if camel case matching is enabled
 	 * @since 3.2
 	 */
 	protected boolean isCamelCaseMatching() {
