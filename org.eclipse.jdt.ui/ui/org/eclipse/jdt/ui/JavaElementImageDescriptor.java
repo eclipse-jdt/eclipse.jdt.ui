@@ -219,16 +219,17 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 			x-= data.width;
 			drawImage(data, x, 0);
 		}
-		if ((fFlags & STATIC) != 0) {
-			ImageData data= getImageData(JavaPluginImages.DESC_OVR_STATIC);
-			x-= data.width;
-			drawImage(data, x, 0);
-		}
 		if ((fFlags & VOLATILE) != 0) {
 			ImageData data= getImageData(JavaPluginImages.DESC_OVR_VOLATILE);
 			x-= data.width;
 			drawImage(data, x, 0);
 		}
+		if ((fFlags & STATIC) != 0) {
+			ImageData data= getImageData(JavaPluginImages.DESC_OVR_STATIC);
+			x-= data.width;
+			drawImage(data, x, 0);
+		}
+
 	}		
 	
 	private void drawBottomRight() {
