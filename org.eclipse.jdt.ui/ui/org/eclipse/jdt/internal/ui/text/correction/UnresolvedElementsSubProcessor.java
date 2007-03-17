@@ -689,7 +689,7 @@ public class UnresolvedElementsSubProcessor {
 				} else {
 					Name qualifierName= ((QualifiedName) node).getQualifier();
 					 IBinding binding= qualifierName.resolveBinding();
-					 if (binding.isRecovered()) {
+					 if (binding != null && binding.isRecovered()) {
 						 binding= null;
 					 }
 					 if (binding instanceof ITypeBinding) {
