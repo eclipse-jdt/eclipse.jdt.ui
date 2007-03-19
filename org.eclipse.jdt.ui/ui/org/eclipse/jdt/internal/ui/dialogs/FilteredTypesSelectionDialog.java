@@ -44,8 +44,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.resource.LocalResourceManager;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ILabelDecorator;
@@ -140,8 +138,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	private ISelectionStatusValidator fValidator;
 
 	private TypeInfoUtil fTypeInfoUtil;
-	
-	private LocalResourceManager fResourceManager;
 	
 	private static boolean fgFirstTime= true; 
 
@@ -371,7 +367,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#createExtendedContentArea(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createExtendedContentArea(Composite parent) {
-		fResourceManager = new LocalResourceManager(JFaceResources.getResources(), parent);
 		Control addition= null;
 
 		if (fExtension != null) {
@@ -680,11 +675,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 			TypeNameMatch type= (TypeNameMatch) element;
 
 			ImageDescriptor iD= JavaElementImageProvider.getTypeImageDescriptor(isInnerType(type), false, type.getModifiers(), false);
-
-			if (iD == null)
-				iD= ImageDescriptor.getMissingImageDescriptor();
-
-			return (Image) fResourceManager.get(iD);
+			
+			return JavaPlugin.getImageDescriptorRegistry().get(iD);
 		}
 
 		/*
