@@ -3477,6 +3477,33 @@ public class PreferenceConstants {
 	public static final String CODEASSIST_SORTER= "content_assist_sorter"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that holds the source hover background color.
+	 * <p>
+	 * Value is of type <code>String</code>. A RGB color value encoded as a string
+	 * using class <code>PreferenceConverter</code>
+	 * </p>
+	 *
+	 * @see org.eclipse.jface.resource.StringConverter
+	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @since 3.3
+	 */
+	public final static String EDITOR_SOURCE_HOVER_BACKGROUND_COLOR= "sourceHoverBackgroundColor"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that tells whether to use the system
+	 * default color ({@link SWT#COLOR_INFO_BACKGROUND}) for
+	 * the source hover background color.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @see org.eclipse.jface.resource.StringConverter
+	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @since 3.3
+	 */
+	public final static String EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT= "sourceHoverBackgroundColor.SystemDefault"; //$NON-NLS-1$
+	
+	/**
 	 * Initializes the given preference store with the default values.
 	 * 
 	 * @param store the preference store to be initialized
@@ -3680,6 +3707,8 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_SMART_TAB, true);
 		store.setDefault(PreferenceConstants.EDITOR_SMART_BACKSPACE, true);
 		store.setDefault(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER, false);
+		
+		store.setDefault(EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT, true);
 		
 		store.setDefault(PreferenceConstants.FORMATTER_PROFILE, FormatterProfileManager.DEFAULT_PROFILE);
 		

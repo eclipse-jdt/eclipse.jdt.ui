@@ -184,6 +184,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_foregroundForMethodParameters;
 	public static String JavaEditorPreferencePage_backgroundForCompletionReplacement;
 	public static String JavaEditorPreferencePage_foregroundForCompletionReplacement;
+	public static String JavaEditorPreferencePage_sourceHoverBackgroundColor;
 	public static String JavaEditorPreferencePage_general;
 	public static String JavaEditorPreferencePage_colors;
 	public static String JavaEditorPreferencePage_empty_input;

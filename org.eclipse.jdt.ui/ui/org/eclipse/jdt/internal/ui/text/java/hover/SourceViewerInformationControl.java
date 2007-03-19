@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -29,6 +30,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jface.text.Document;
@@ -38,6 +40,7 @@ import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -88,6 +91,10 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * @since 3.2
 	 */
 	private int fMaxHeight= SWT.DEFAULT;
+	
+	private Color fBackgroundColor;
+	private boolean fIsSystemBackgroundColor= true;
+
 
 	/**
 	 * Creates a default information control with the given shell as parent. The given
@@ -121,7 +128,9 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		fShell= new Shell(parent, SWT.NO_FOCUS | SWT.ON_TOP | shellStyle);
 		Display display= fShell.getDisplay();
 		fShell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
-
+		
+		initializeColors();
+		
 		Composite composite= fShell;
 		layout= new GridLayout(1, false);
 		int border= ((shellStyle & SWT.NO_TRIM) == 0) ? 0 : BORDER;
@@ -140,7 +149,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 			gd= new GridData(GridData.FILL_BOTH);
 			composite.setLayoutData(gd);
 			composite.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-			composite.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+			composite.setBackground(fBackgroundColor);
 		}
 
 		// Source viewer
@@ -152,8 +161,8 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		fText= fViewer.getTextWidget();
 		gd= new GridData(GridData.BEGINNING | GridData.FILL_BOTH);
 		fText.setLayoutData(gd);
-		fText.setForeground(parent.getDisplay().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-		fText.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+		fText.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+		fText.setBackground(fBackgroundColor);
 		
 		initializeFont();
 
@@ -188,11 +197,28 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 
 			// Regarding the color see bug 41128
 			fStatusField.setForeground(display.getSystemColor(SWT.COLOR_WIDGET_DARK_SHADOW));
-
-			fStatusField.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+			fStatusField.setBackground(fBackgroundColor);
 		}
 
 		addDisposeListener(this);
+	}
+
+	private void initializeColors() {
+		RGB bgRGB= getHoverBackgroundColorRGB();
+		if (bgRGB != null) {
+			fBackgroundColor= new Color(fShell.getDisplay(), bgRGB);
+			fIsSystemBackgroundColor= false;
+		} else {
+			fBackgroundColor= fShell.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND);
+			fIsSystemBackgroundColor= true;
+		}
+	}
+	
+	private RGB getHoverBackgroundColorRGB() {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		return store.getBoolean(PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT)
+			? null
+			: PreferenceConverter.getColor(store, PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR);
 	}
 
 	/**
@@ -306,6 +332,8 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * {@inheritDoc}
 	 */
 	public final void dispose() {
+		if (!fIsSystemBackgroundColor)
+			fBackgroundColor.dispose();
 		if (fShell != null && !fShell.isDisposed())
 			fShell.dispose();
 		else

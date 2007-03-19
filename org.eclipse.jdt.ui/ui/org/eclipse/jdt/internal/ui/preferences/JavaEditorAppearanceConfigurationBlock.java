@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,7 +57,9 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 			{PreferencesMessages.JavaEditorPreferencePage_backgroundForMethodParameters, PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND, null }, 
 			{PreferencesMessages.JavaEditorPreferencePage_foregroundForMethodParameters, PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND, null }, 
 			{PreferencesMessages.JavaEditorPreferencePage_backgroundForCompletionReplacement, PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND, null }, 
-			{PreferencesMessages.JavaEditorPreferencePage_foregroundForCompletionReplacement, PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND, null }, 
+			{PreferencesMessages.JavaEditorPreferencePage_foregroundForCompletionReplacement, PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND, null },
+			{PreferencesMessages.JavaEditorPreferencePage_sourceHoverBackgroundColor, PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR, PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT},
+			
 		};
 
 	private List fAppearanceColorList;
@@ -88,6 +90,8 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT));
 
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
 		overlayKeys.toArray(keys);
@@ -373,8 +377,8 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#initialize()
 	 */
 	public void initialize() {
-
 		super.initialize();
+		initializeDefaultColors();
 		
 		for (int i= 0; i < fAppearanceColorListModel.length; i++)
 			fAppearanceColorList.add(fAppearanceColorListModel[i][0]);
@@ -390,11 +394,24 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 
 	}
 
+	/**
+	 * Initializes the default colors.
+	 * 
+	 * @since 3.3
+	 */
+	private void initializeDefaultColors() {
+		if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT)) {
+			RGB rgb= fAppearanceColorList.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND).getRGB();
+			PreferenceConverter.setValue(getPreferenceStore(), PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR, rgb);
+		}
+	}
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#performDefaults()
 	 */
 	public void performDefaults() {
 		super.performDefaults();
+		initializeDefaultColors();
 		handleAppearanceColorListSelection();
 	}
 
