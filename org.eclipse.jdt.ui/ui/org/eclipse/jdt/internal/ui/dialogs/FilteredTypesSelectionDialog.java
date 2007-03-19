@@ -18,7 +18,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +44,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.resource.LocalResourceManager;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ILabelDecorator;
@@ -139,6 +140,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	private ISelectionStatusValidator fValidator;
 
 	private TypeInfoUtil fTypeInfoUtil;
+	
+	private LocalResourceManager fResourceManager;
 	
 	private static boolean fgFirstTime= true; 
 
@@ -368,7 +371,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#createExtendedContentArea(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createExtendedContentArea(Composite parent) {
-
+		fResourceManager = new LocalResourceManager(JFaceResources.getResources(), parent);
 		Control addition= null;
 
 		if (fExtension != null) {
@@ -647,7 +650,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 
 		private boolean fContainerInfo;
 
-		private ImageManager fImageManager= new ImageManager();
 
 		/**
 		 * Construct a new <code>TypeItemLabelProvider</code>. F
@@ -679,7 +681,10 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 
 			ImageDescriptor iD= JavaElementImageProvider.getTypeImageDescriptor(isInnerType(type), false, type.getModifiers(), false);
 
-			return fImageManager.get(iD);
+			if (iD == null)
+				iD= ImageDescriptor.getMissingImageDescriptor();
+
+			return (Image) fResourceManager.get(iD);
 		}
 
 		/*
@@ -964,31 +969,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 			StringBuffer buf= new StringBuffer();
 			JavaElementLabels.getPackageFragmentRootLabel(root, JavaElementLabels.ROOT_QUALIFIED | JavaElementLabels.ROOT_VARIABLE, buf);
 			return buf.toString();
-		}
-	}
-
-	private static class ImageManager {
-		private Map fImages= new HashMap(20);
-
-		public Image get(ImageDescriptor descriptor) {
-			if (descriptor == null)
-				descriptor= ImageDescriptor.getMissingImageDescriptor();
-
-			Image result= (Image) fImages.get(descriptor);
-			if (result != null)
-				return result;
-			result= descriptor.createImage();
-			if (result != null)
-				fImages.put(descriptor, result);
-			return result;
-		}
-
-		public void dispose() {
-			for (Iterator iter= fImages.values().iterator(); iter.hasNext();) {
-				Image image= (Image) iter.next();
-				image.dispose();
-			}
-			fImages.clear();
 		}
 	}
 
