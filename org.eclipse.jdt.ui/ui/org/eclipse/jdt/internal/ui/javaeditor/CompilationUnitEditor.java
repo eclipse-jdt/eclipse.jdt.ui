@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,10 +12,7 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
@@ -49,19 +46,21 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
+import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension;
 import org.eclipse.jface.text.IDocumentListener;
-import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextViewerExtension;
+import org.eclipse.jface.text.ITextViewerExtension7;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.IWidgetTokenKeeper;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.TabsToSpacesConverter;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
@@ -108,7 +107,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
@@ -156,9 +154,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 	class AdaptedSourceViewer extends JavaSourceViewer  {
 
-		private List fTextConverters;
-		private boolean fIgnoreTextConverters= false;
-
 		public AdaptedSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
 			super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles, store);
 		}
@@ -193,61 +188,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					msg= fQuickAssistAssistant.showPossibleQuickAssists();
 					setStatusLineErrorMessage(msg);
 					return;
-				case UNDO:
-					fIgnoreTextConverters= true;
-					super.doOperation(operation);
-					fIgnoreTextConverters= false;
-					return;
-				case REDO:
-					fIgnoreTextConverters= true;
-					super.doOperation(operation);
-					fIgnoreTextConverters= false;
-					return;
 			}
 
 			super.doOperation(operation);
-		}
-
-		public void insertTextConverter(ITextConverter textConverter, int index) {
-			throw new UnsupportedOperationException();
-		}
-
-		public void addTextConverter(ITextConverter textConverter) {
-			if (fTextConverters == null) {
-				fTextConverters= new ArrayList(1);
-				fTextConverters.add(textConverter);
-			} else if (!fTextConverters.contains(textConverter))
-				fTextConverters.add(textConverter);
-		}
-
-		public void removeTextConverter(ITextConverter textConverter) {
-			if (fTextConverters != null) {
-				fTextConverters.remove(textConverter);
-				if (fTextConverters.size() == 0)
-					fTextConverters= null;
-			}
-		}
-
-		/*
-		 * @see TextViewer#customizeDocumentCommand(DocumentCommand)
-		 */
-		protected void customizeDocumentCommand(DocumentCommand command) {
-			super.customizeDocumentCommand(command);
-			if (!fIgnoreTextConverters && fTextConverters != null) {
-				for (Iterator e = fTextConverters.iterator(); e.hasNext();)
-					((ITextConverter) e.next()).customizeDocumentCommand(getDocument(), command);
-			}
-		}
-
-		// http://dev.eclipse.org/bugs/show_bug.cgi?id=19270
-		public void updateIndentationPrefixes() {
-			SourceViewerConfiguration configuration= getSourceViewerConfiguration();
-			String[] types= configuration.getConfiguredContentTypes(this);
-			for (int i= 0; i < types.length; i++) {
-				String[] prefixes= configuration.getIndentPrefixes(this, types[i]);
-				if (prefixes != null && prefixes.length > 0)
-					setIndentPrefixes(prefixes, types[i]);
-			}
 		}
 
 		/*
@@ -290,82 +233,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		}
 	}
 
-	static class TabConverter implements ITextConverter {
-
-		private int fTabRatio;
-		private ILineTracker fLineTracker;
-
-		public TabConverter() {
-		}
-
-		public void setNumberOfSpacesPerTab(int ratio) {
-			fTabRatio= ratio;
-		}
-
-		public void setLineTracker(ILineTracker lineTracker) {
-			fLineTracker= lineTracker;
-		}
-
-		private int insertTabString(StringBuffer buffer, int offsetInLine) {
-
-			if (fTabRatio == 0)
-				return 0;
-
-			int remainder= offsetInLine % fTabRatio;
-			remainder= fTabRatio - remainder;
-			for (int i= 0; i < remainder; i++)
-				buffer.append(' ');
-			return remainder;
-		}
-
-		public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
-			String text= command.text;
-			if (text == null)
-				return;
-
-			int index= text.indexOf('\t');
-			if (index > -1) {
-
-				StringBuffer buffer= new StringBuffer();
-
-				fLineTracker.set(command.text);
-				int lines= fLineTracker.getNumberOfLines();
-
-				try {
-
-						for (int i= 0; i < lines; i++) {
-
-							int offset= fLineTracker.getLineOffset(i);
-							int endOffset= offset + fLineTracker.getLineLength(i);
-							String line= text.substring(offset, endOffset);
-
-							int position= 0;
-							if (i == 0) {
-								IRegion firstLine= document.getLineInformationOfOffset(command.offset);
-								position= command.offset - firstLine.getOffset();
-							}
-
-							int length= line.length();
-							for (int j= 0; j < length; j++) {
-								char c= line.charAt(j);
-								if (c == '\t') {
-									position += insertTabString(buffer, position);
-								} else {
-									buffer.append(c);
-									++ position;
-								}
-							}
-
-						}
-
-						command.text= buffer.toString();
-
-				} catch (BadLocationException x) {
-				}
-			}
-		}
-	}
-
+	
 	private class ExitPolicy implements IExitPolicy {
 
 		final char fExitCharacter;
@@ -1108,8 +976,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	protected ISavePolicy fSavePolicy;
 	/** Listener to annotation model changes that updates the error tick in the tab image */
 	private JavaEditorErrorTickUpdater fJavaEditorErrorTickUpdater;
-	/** The editor's tab converter */
-	private TabConverter fTabConverter;
 	/**
 	 * The remembered selection.
 	 * @since 3.0
@@ -1444,7 +1310,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		super.doSetInput(input);
-		configureTabConverter();
+//		configureTabConverter(); FIXME
 		configureToggleCommentAction();
 		if (fJavaEditorErrorTickUpdater != null)
 			fJavaEditorErrorTickUpdater.updateEditorImage(getInputJavaElement());
@@ -1487,45 +1353,33 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		}
 	}
 
-	private void configureTabConverter() {
-		if (fTabConverter != null) {
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#installTabsToSpacesConverter()
+	 * @since 3.3
+	 */
+	protected void installTabsToSpacesConverter() {
+		ISourceViewer sourceViewer= getSourceViewer(); 
+		SourceViewerConfiguration config= getSourceViewerConfiguration();
+		if (config != null && sourceViewer instanceof ITextViewerExtension7) {
+			int tabWidth= config.getTabWidth(sourceViewer);
+			TabsToSpacesConverter tabToSpacesConverter= new TabsToSpacesConverter();
+			tabToSpacesConverter.setNumberOfSpacesPerTab(tabWidth);
 			IDocumentProvider provider= getDocumentProvider();
 			if (provider instanceof ICompilationUnitDocumentProvider) {
 				ICompilationUnitDocumentProvider cup= (ICompilationUnitDocumentProvider) provider;
-				fTabConverter.setLineTracker(cup.createLineTracker(getEditorInput()));
-			}
+				tabToSpacesConverter.setLineTracker(cup.createLineTracker(getEditorInput()));
+			} else
+				tabToSpacesConverter.setLineTracker(new DefaultLineTracker());
+			((ITextViewerExtension7)sourceViewer).setTabsToSpacesConverter(tabToSpacesConverter);
+			updateIndentPrefixes();
 		}
 	}
 
-	private int getTabSize() {
-		IJavaElement element= getInputJavaElement();
-		IJavaProject project= element == null ? null : element.getJavaProject();
-		return CodeFormatterUtil.getTabWidth(project);
-	}
-
-	private void startTabConversion() {
-		if (fTabConverter == null) {
-			fTabConverter= new TabConverter();
-			configureTabConverter();
-			fTabConverter.setNumberOfSpacesPerTab(getTabSize());
-			AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
-			asv.addTextConverter(fTabConverter);
-			// http://dev.eclipse.org/bugs/show_bug.cgi?id=19270
-			asv.updateIndentationPrefixes();
-		}
-	}
-
-	private void stopTabConversion() {
-		if (fTabConverter != null) {
-			AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
-			asv.removeTextConverter(fTabConverter);
-			// http://dev.eclipse.org/bugs/show_bug.cgi?id=19270
-			asv.updateIndentationPrefixes();
-			fTabConverter= null;
-		}
-	}
-
-	private boolean isTabConversionEnabled() {
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#isTabsToSpacesConversionEnabled()
+	 * @since 3.3
+	 */
+	protected boolean isTabsToSpacesConversionEnabled() {
 		IJavaElement element= getInputJavaElement();
 		IJavaProject project= element == null ? null : element.getJavaProject();
 		String option;
@@ -1561,9 +1415,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	public void createPartControl(Composite parent) {
 
 		super.createPartControl(parent);
-
-		if (isTabConversionEnabled())
-			startTabConversion();
 
 		IPreferenceStore preferenceStore= getPreferenceStore();
 		boolean closeBrackets= preferenceStore.getBoolean(CLOSE_BRACKETS);
@@ -1649,10 +1500,10 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				}
 
 				if (SPACES_FOR_TABS.equals(p)) {
-					if (isTabConversionEnabled())
-						startTabConversion();
+					if (isTabsToSpacesConversionEnabled())
+						installTabsToSpacesConverter();
 					else
-						stopTabConversion();
+						uninstallTabsToSpacesConverter();
 					return;
 				}
 
@@ -1668,10 +1519,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				if (c instanceof ContentAssistant)
 					ContentAssistPreference.changeConfiguration((ContentAssistant) c, getPreferenceStore(), event);
 
-				if (CODE_FORMATTER_TAB_SIZE.equals(p)) {
-					asv.updateIndentationPrefixes();
-					if (fTabConverter != null)
-						fTabConverter.setNumberOfSpacesPerTab(getTabSize());
+				if (CODE_FORMATTER_TAB_SIZE.equals(p) && isTabsToSpacesConversionEnabled()) {
+					uninstallTabsToSpacesConverter();
+					installTabsToSpacesConverter();
 				}
 			}
 
