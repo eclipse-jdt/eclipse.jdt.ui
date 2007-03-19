@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 
-
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbenchPart;
@@ -33,7 +32,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -634,7 +633,7 @@ public final class ASTProvider {
 			return false;
 		
 		try {
-			return je instanceof ISourceReference && ((ISourceReference)je).getSource() != null;
+			return je instanceof ITypeRoot && ((ITypeRoot)je).getBuffer() != null;
 		} catch (JavaModelException ex) {
 			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, "Error in JDT Core during AST creation", ex);  //$NON-NLS-1$
 			JavaPlugin.getDefault().getLog().log(status);
