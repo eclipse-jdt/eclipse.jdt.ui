@@ -22,6 +22,10 @@ public class DescriptorMessages extends NLS {
 
 	public static String JavaRefactoringDescriptor_not_available;
 
+	public static String MoveDescriptor_no_destination_set;
+
+	public static String MoveDescriptor_no_elements_set;
+
 	public static String MoveStaticMembersDescriptor_invalid_members;
 
 	public static String MoveStaticMembersDescriptor_no_members;
