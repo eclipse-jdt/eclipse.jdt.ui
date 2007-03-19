@@ -52,7 +52,8 @@ public class ImageDescriptorRegistry {
 	/**
 	 * Returns the image associated with the given image descriptor.
 	 * 
-	 * @param descriptor the image descriptor for which the registry manages an image
+	 * @param descriptor the image descriptor for which the registry manages an image,
+	 *  or <code>null</code> for a missing image descriptor
 	 * @return the image associated with the image descriptor or <code>null</code>
 	 *  if the image descriptor can't create the requested image.
 	 */
