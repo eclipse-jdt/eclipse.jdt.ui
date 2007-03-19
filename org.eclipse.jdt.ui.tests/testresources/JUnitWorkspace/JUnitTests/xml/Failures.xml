@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testrun name="Failures" tests="4" started="4" failures="3" errors="1" ignored="0">
+<testrun name="Failures" project="JUnitTests" tests="4" started="4" failures="3" errors="1" ignored="0">
   <testsuite name="pack.Failures">
     <testcase name="testNasty" classname="pack.Failures">
       <failure>junit.framework.AssertionFailedError: &lt;/failure&gt;

@@ -15,8 +15,12 @@ import java.io.IOException;
 
 import org.eclipse.core.runtime.Assert;
 
+import org.eclipse.jdt.core.IJavaProject;
+
 import org.eclipse.jdt.junit.model.ITestElement;
 import org.eclipse.jdt.junit.model.ITestElement.FailureTrace;
+import org.eclipse.jdt.junit.model.ITestElement.ProgressState;
+import org.eclipse.jdt.junit.model.ITestElement.Result;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -59,6 +63,9 @@ public class TestRunSessionSerializer implements XMLReader {
 	private void handleTestRun(TestRunSession testRunSession) throws SAXException {
 		AttributesImpl atts= new AttributesImpl();
 		addCDATA(atts, IXMLTags.ATTR_NAME, fTestRunSession.getTestRunName());
+		IJavaProject project= fTestRunSession.getLaunchedProject();
+		if (project != null)
+			addCDATA(atts, IXMLTags.ATTR_PROJECT, project.getElementName());
 		addCDATA(atts, IXMLTags.ATTR_TESTS, fTestRunSession.getTotalCount());
 		addCDATA(atts, IXMLTags.ATTR_STARTED, fTestRunSession.getStartedCount());
 		addCDATA(atts, IXMLTags.ATTR_FAILURES, fTestRunSession.getFailureCount());
@@ -81,8 +88,13 @@ public class TestRunSessionSerializer implements XMLReader {
 			
 			AttributesImpl atts= new AttributesImpl();
 			addCDATA(atts, IXMLTags.ATTR_NAME, testSuiteElement.getSuiteTypeName());
+//			addCDATA(atts, IXMLTags.ATTR_TIME, Integer.toString(testCaseElement.getTime()));
+			if (testElement.getProgressState() != ProgressState.COMPLETED || testElement.getTestResult(false) != Result.UNDEFINED)
+				addCDATA(atts, IXMLTags.ATTR_INCOMPLETE, Boolean.TRUE.toString());
 			
 			startElement(IXMLTags.NODE_TESTSUITE, atts);
+			addFailure(testElement);
+			
 			ITestElement[] children= testSuiteElement.getChildren();
 			for (int i= 0; i < children.length; i++) {
 				handleTestElement(children[i]);
@@ -96,39 +108,46 @@ public class TestRunSessionSerializer implements XMLReader {
 			addCDATA(atts, IXMLTags.ATTR_NAME, testCaseElement.getTestMethodName());
 			addCDATA(atts, IXMLTags.ATTR_CLASSNAME, testCaseElement.getClassName());
 //			addCDATA(atts, IXMLTags.ATTR_TIME, Integer.toString(testCaseElement.getTime()));
+			if (testElement.getProgressState() != ProgressState.COMPLETED)
+				addCDATA(atts, IXMLTags.ATTR_INCOMPLETE, Boolean.TRUE.toString());
+			if (testCaseElement.isIgnored())
+				addCDATA(atts, IXMLTags.ATTR_IGNORED, Boolean.TRUE.toString());
 			
 			startElement(IXMLTags.NODE_TESTCASE, atts);
-			FailureTrace failureTrace= testCaseElement.getFailureTrace();
-			if (failureTrace != null) {
-				AttributesImpl failureAtts= new AttributesImpl();
-//				addCDATA(failureAtts, IXMLTags.ATTR_MESSAGE, xx);
-//				addCDATA(failureAtts, IXMLTags.ATTR_TYPE, xx);
-				String failureKind= testCaseElement.getStatus().isError() ? IXMLTags.NODE_ERROR : IXMLTags.NODE_FAILURE;
-				startElement(failureKind, failureAtts);
-				String expected= failureTrace.getExpected();
-				String actual= failureTrace.getActual();
-				if (expected != null) {
-					startElement(IXMLTags.NODE_EXPECTED, NO_ATTS);
-					fHandler.characters(expected.toCharArray(), 0, expected.length());
-					endElement(IXMLTags.NODE_EXPECTED);
-				}
-				if (actual != null) {
-					startElement(IXMLTags.NODE_ACTUAL, NO_ATTS);
-					fHandler.characters(actual.toCharArray(), 0, actual.length());
-					endElement(IXMLTags.NODE_ACTUAL);
-				}
-				String trace= failureTrace.getTrace();
-				fHandler.characters(trace.toCharArray(), 0, trace.length());
-				endElement(failureKind);
-			}
+			addFailure(testElement);
 			
 			endElement(IXMLTags.NODE_TESTCASE);
-			
 			
 		} else {
 			throw new IllegalStateException(String.valueOf(testElement));
 		}
 		
+	}
+
+	private void addFailure(ITestElement testElement) throws SAXException {
+		FailureTrace failureTrace= testElement.getFailureTrace();
+		if (failureTrace != null) {
+			AttributesImpl failureAtts= new AttributesImpl();
+//				addCDATA(failureAtts, IXMLTags.ATTR_MESSAGE, xx);
+//				addCDATA(failureAtts, IXMLTags.ATTR_TYPE, xx);
+			String failureKind= testElement.getTestResult(false) == Result.ERROR ? IXMLTags.NODE_ERROR : IXMLTags.NODE_FAILURE;
+			startElement(failureKind, failureAtts);
+			String expected= failureTrace.getExpected();
+			String actual= failureTrace.getActual();
+			if (expected != null) {
+				startElement(IXMLTags.NODE_EXPECTED, NO_ATTS);
+				fHandler.characters(expected.toCharArray(), 0, expected.length());
+				endElement(IXMLTags.NODE_EXPECTED);
+			}
+			if (actual != null) {
+				startElement(IXMLTags.NODE_ACTUAL, NO_ATTS);
+				fHandler.characters(actual.toCharArray(), 0, actual.length());
+				endElement(IXMLTags.NODE_ACTUAL);
+			}
+			String trace= failureTrace.getTrace();
+			fHandler.characters(trace.toCharArray(), 0, trace.length());
+			endElement(failureKind);
+		}
 	}
 
 	private void startElement(String name, Attributes atts) throws SAXException {

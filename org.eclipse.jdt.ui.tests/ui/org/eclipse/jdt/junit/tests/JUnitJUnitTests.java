@@ -17,14 +17,12 @@ import junit.framework.TestSuite;
 public class JUnitJUnitTests {
 
 	public static Test suite() {
-		TestSuite suite = new TestSuite("Test for org.eclipse.jdt.junit.tests");
+		TestSuite suite = new TestSuite();
 		//$JUnit-BEGIN$
 		
 		// TODO disabled unreliable tests driving the event loop:
 //		suite.addTestSuite(WrappingSystemTest.class);
 //		suite.addTestSuite(WrappingUnitTest.class);
-		
-		suite.addTest(TestRunSessionSerializationTests.suite());
 		
 		suite.addTestSuite(TestEnableAssertions.class);
 		suite.addTestSuite(TestPriorization.class);
@@ -34,6 +32,9 @@ public class JUnitJUnitTests {
 		
 		suite.addTestSuite(TestRunListenerTest.class);
 
+		suite.addTest(TestRunSessionSerializationTests3.suite());
+		suite.addTest(TestRunSessionSerializationTests4.suite());
+		
 		suite.addTestSuite(JUnit3TestFinderTest.class);
 		suite.addTestSuite(JUnit4TestFinderTest.class);
 		//$JUnit-END$

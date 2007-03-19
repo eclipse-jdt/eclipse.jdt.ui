@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testrun name="ATestCase" tests="2" started="2" failures="0" errors="0" ignored="0">
+<testrun name="ATestCase" project="JUnit4Tests" tests="2" started="2" failures="0" errors="0" ignored="0">
   <testsuite name="pack.ATestCase">
     <testcase name="testSucceed" classname="pack.ATestCase"/>
     <testcase name="testSucceed2" classname="pack.ATestCase"/>

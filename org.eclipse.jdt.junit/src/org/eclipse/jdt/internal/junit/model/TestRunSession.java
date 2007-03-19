@@ -113,7 +113,11 @@ public class TestRunSession implements ITestRunSession {
 	volatile boolean fIsStopped;
 	
 
-	public TestRunSession(String testRunName) {
+	/**
+	 * @param testRunName
+	 * @param project may be <code>null</code>
+	 */
+	public TestRunSession(String testRunName, IJavaProject project) {
 		//TODO: check assumptions about non-null fields
 
 		fLaunch= null;
@@ -633,15 +637,19 @@ public class TestRunSession implements ITestRunSession {
 		}
 	}
 
-	public void registerTestEnded(TestElement testElement) {
-		fStartedCount++;
-		fTotalCount++;
-		if (testElement instanceof TestCaseElement && ((TestCaseElement) testElement).isIgnored()) {
-			fIgnoredCount++;
+	public void registerTestEnded(TestElement testElement, boolean completed) {
+		if (testElement instanceof TestCaseElement) {
+			fTotalCount++;
+			if (! completed) {
+				return;
+			}
+			fStartedCount++;
+			if (((TestCaseElement) testElement).isIgnored()) {
+				fIgnoredCount++;
+			}
+			if (! testElement.getStatus().isErrorOrFailure())
+				setStatus(testElement, Status.OK);
 		}
-
-		if (! testElement.getStatus().isErrorOrFailure())
-			setStatus(testElement, Status.OK);
 	}
 	
 	private void setStatus(TestElement testElement, Status status) {

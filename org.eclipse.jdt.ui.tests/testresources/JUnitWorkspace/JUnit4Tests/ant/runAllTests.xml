@@ -19,7 +19,7 @@
     	  <test name="junit.samples.SimpleTest" todir="${result}"/>
     	  <test name="more.Failures" todir="${result}"/>
 -->
-    	  <test name="pack.ALLTests" todir="${result}"/>
+    	  <test name="pack.AllTests" todir="${result}"/>
     	  <test name="pack.ATestCase" todir="${result}"/>
     	  <test name="pack.ATestSuite" todir="${result}"/>
     	  <test name="pack.Failures" todir="${result}"/>

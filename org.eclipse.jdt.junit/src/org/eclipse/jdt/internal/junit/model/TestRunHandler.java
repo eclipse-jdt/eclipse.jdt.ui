@@ -11,6 +11,14 @@
 
 package org.eclipse.jdt.internal.junit.model;
 
+import java.util.Stack;
+
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 
 import org.xml.sax.Attributes;
@@ -30,6 +38,7 @@ public class TestRunHandler extends DefaultHandler {
 	private TestRunSession fTestRunSession;
 	private TestSuiteElement fTestSuite;
 	private TestCaseElement fTestCase;
+	private Stack/*<Boolean>*/ fNotRun= new Stack();
 
 	private StringBuffer fFailureBuffer;
 	private boolean fInExpected;
@@ -54,8 +63,16 @@ public class TestRunHandler extends DefaultHandler {
 				throw new SAXParseException("unexpected second '" + IXMLTags.NODE_TESTRUN + "' node", fLocator); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			String name= attributes.getValue(IXMLTags.ATTR_NAME);
-			fTestRunSession= new TestRunSession(name);
-			//TODO: read counts
+			String project= attributes.getValue(IXMLTags.ATTR_PROJECT);
+			IJavaProject javaProject= null;
+			if (project != null) {
+				IJavaModel javaModel= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+				javaProject= javaModel.getJavaProject(project);
+				if (! javaProject.exists())
+					javaProject= null;
+			}
+			fTestRunSession= new TestRunSession(name, javaProject);
+			//TODO: read counts?
 			
 		} else if (qName.equals(IXMLTags.NODE_TESTSUITES)) { 
 			// support Ant's 'junitreport' task; create suite from NODE_TESTSUITE
@@ -65,13 +82,14 @@ public class TestRunHandler extends DefaultHandler {
 			
 			if (fTestRunSession == null) {
 				// support standalone suites and Ant's 'junitreport' task:
-				fTestRunSession= new TestRunSession(name);
+				fTestRunSession= new TestRunSession(name, null);
 			}
 			
 			String pack= attributes.getValue(IXMLTags.ATTR_PACKAGE);
 			String suiteName= pack == null ? name : pack + "." + name; //$NON-NLS-1$
 			TestSuiteElement parent= fTestSuite == null ? fTestRunSession.getTestRoot() : fTestSuite;
 			fTestSuite= (TestSuiteElement) fTestRunSession.createTestElement(parent, getNextId(), suiteName, true, 0);
+			fNotRun.push(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_INCOMPLETE)));
 			
 		} else if (qName.equals(IXMLTags.NODE_PROPERTIES) || qName.equals(IXMLTags.NODE_PROPERTY)) {
 			// not interested
@@ -80,6 +98,8 @@ public class TestRunHandler extends DefaultHandler {
 			String name= attributes.getValue(IXMLTags.ATTR_NAME);
 			String classname= attributes.getValue(IXMLTags.ATTR_CLASSNAME);
 			fTestCase= (TestCaseElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), name + '(' + classname + ')', false, 0);
+			fNotRun.push(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_INCOMPLETE)));
+			fTestCase.setIgnored(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_IGNORED)).booleanValue());
 			
 		} else if (qName.equals(IXMLTags.NODE_ERROR)) {
 			//TODO: multiple failures: https://bugs.eclipse.org/bugs/show_bug.cgi?id=125296
@@ -127,6 +147,7 @@ public class TestRunHandler extends DefaultHandler {
 			// OK
 			
 		} else if (qName.equals(IXMLTags.NODE_TESTSUITE)) {
+			handleTestElementEnd(fTestSuite);
 			fTestSuite= fTestSuite.getParent();
 			//TODO: end suite: compare counters?
 			
@@ -134,17 +155,14 @@ public class TestRunHandler extends DefaultHandler {
 			// OK
 			
 		} else if (qName.equals(IXMLTags.NODE_TESTCASE)) {
-			if (fFailureBuffer != null) {
-				fTestRunSession.registerTestFailed(fTestCase, fStatus, fFailureBuffer.toString(), toString(fExpectedBuffer), toString(fActualBuffer));
-				fFailureBuffer= null;
-				fExpectedBuffer= null;
-				fActualBuffer= null;
-				fStatus= null;
-			}
-			fTestRunSession.registerTestEnded(fTestCase);
+			handleTestElementEnd(fTestCase);
+			fTestCase= null;
 			
 		} else if (qName.equals(IXMLTags.NODE_FAILURE) || qName.equals(IXMLTags.NODE_ERROR)) {
-			// OK
+			TestElement testElement= fTestCase;
+			if (testElement == null)
+				testElement= fTestSuite;
+			handleFailure(testElement);
 			
 		} else if (qName.equals(IXMLTags.NODE_EXPECTED)) {
 			fInExpected= false;
@@ -158,6 +176,21 @@ public class TestRunHandler extends DefaultHandler {
 		} else {
 			
 			handleUnknownNode(qName);
+		}
+	}
+
+	private void handleTestElementEnd(TestElement testElement) {
+		boolean completed= fNotRun.pop() != Boolean.TRUE;
+		fTestRunSession.registerTestEnded(testElement, completed);
+	}
+
+	private void handleFailure(TestElement testElement) {
+		if (fFailureBuffer != null) {
+			fTestRunSession.registerTestFailed(testElement, fStatus, fFailureBuffer.toString(), toString(fExpectedBuffer), toString(fActualBuffer));
+			fFailureBuffer= null;
+			fExpectedBuffer= null;
+			fActualBuffer= null;
+			fStatus= null;
 		}
 	}
 

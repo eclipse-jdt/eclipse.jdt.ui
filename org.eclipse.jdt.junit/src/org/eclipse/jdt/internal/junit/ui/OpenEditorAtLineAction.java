@@ -22,7 +22,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * Open a test in the Java editor and reveal a given line
@@ -52,11 +51,4 @@ public class OpenEditorAtLineAction extends OpenEditorAction {
 		return findType(project, className);
 	}
 
-	public boolean isEnabled() {
-		try {
-			return findType(getLaunchedProject(), getClassName()) != null;
-		} catch (JavaModelException e) {
-		}
-		return false;
-	}
 }

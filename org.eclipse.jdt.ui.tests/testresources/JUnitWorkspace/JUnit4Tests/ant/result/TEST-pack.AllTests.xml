@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite errors="0" failures="1" name="pack.ATestSuite" tests="1" time="0.0">
+<testsuite errors="0" failures="1" name="pack.AllTests" tests="1" time="0.281">
   <properties>
     <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"></property>
     <property name="sun.boot.library.path" value="C:\java\jdk6_01\jre\bin"></property>
@@ -68,8 +68,8 @@
     <property name="sun.desktop" value="windows"></property>
     <property name="sun.cpu.isalist" value="pentium_pro+mmx pentium_pro pentium+mmx pentium i486 i386 i86"></property>
   </properties>
-  <testcase classname="junit.framework.TestSuite$1" name="warning" time="0.0">
-    <failure message="No tests found in pack.ATestSuite" type="junit.framework.AssertionFailedError">junit.framework.AssertionFailedError: No tests found in pack.ATestSuite
+  <testcase classname="junit.framework.TestSuite$1" name="warning" time="0.047">
+    <failure message="No tests found in pack.AllTests" type="junit.framework.AssertionFailedError">junit.framework.AssertionFailedError: No tests found in pack.AllTests
 	at org.eclipse.ant.internal.ui.antsupport.EclipseDefaultExecutor.executeTargets(EclipseDefaultExecutor.java:32)
 	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.run(InternalAntRunner.java:423)
 	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.main(InternalAntRunner.java:137)

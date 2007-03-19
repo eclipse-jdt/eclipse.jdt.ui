@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testrun name="AllTests" tests="6" started="6" failures="3" errors="1" ignored="0">
+<testrun name="AllTests" project="JUnitTests" tests="6" started="6" failures="3" errors="1" ignored="0">
   <testsuite name="All the Tests">
     <testsuite name="Test Suite">
       <testsuite name="pack.ATestCase">

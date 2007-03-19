@@ -21,9 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
-import junit.framework.Test;
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
@@ -52,15 +50,7 @@ import org.eclipse.jdt.junit.model.ITestRunSession;
 import org.eclipse.jdt.junit.model.ITestSuiteElement;
 import org.eclipse.jdt.junit.model.ITestElement.FailureTrace;
 
-public class TestRunSessionSerializationTests extends TestCase {
-	
-	public static Test setUpTest(Test test) {
-		return new JUnitWorkspaceTestSetup(test);
-	}
-	
-	public static Test suite() {
-		return new JUnitWorkspaceTestSetup(new TestSuite(TestRunSessionSerializationTests.class));
-	}
+public class AbstractTestRunSessionSerializationTests extends TestCase {
 	
 	private static class SerializationResult {
 		TestRunSession fTestRunSession;
@@ -119,11 +109,14 @@ public class TestRunSessionSerializationTests extends TestCase {
 		/*
 		 * Just strips all whitespace and avoids comparing stack traces (which are VM-dependent). 
 		 */
-		
 		String regex= "(?m)^\\s*at\\s+[\\w\\.\\:\\;\\$\\(\\)\\[ \\t]+$\r?\n?";
+		/*
+		 * Strips lines like " ... 18 more"
+		 */
+		String regex2= "(?m)^\\s*\\.{3}\\s+\\d+\\s+more\\s+$\r?\n?";
 		String replacement= "";
-		expected= expected.replaceAll(regex, replacement);
-		actual= actual.replaceAll(regex, replacement);
+		expected= expected.replaceAll(regex, replacement).replaceAll(regex2, replacement);
+		actual= actual.replaceAll(regex, replacement).replaceAll(regex2, replacement);
 		
 		StringTokenizer expTok= new StringTokenizer(expected);
 		StringTokenizer actTok= new StringTokenizer(actual);
@@ -209,13 +202,13 @@ public class TestRunSessionSerializationTests extends TestCase {
 		return sb.toString();
 	}
 	
-	private void runCUTest(String test) throws CoreException, IOException, FileNotFoundException, Exception {
+	protected void runCUTest(String test) throws CoreException, IOException, FileNotFoundException, Exception {
 		IPackageFragmentRoot root= JUnitWorkspaceTestSetup.getRoot();
 		IPackageFragment pack= root.getPackageFragment("pack");
 		ICompilationUnit cu= pack.getCompilationUnit(test + ".java");
 		IType aTestCase= cu.findPrimaryType();
 		
-		Path expectedPath= new Path(JUnitWorkspaceTestSetup.PROJECT_PATH + "xml/" + test + ".xml");
+		Path expectedPath= new Path(JUnitWorkspaceTestSetup.getProjectPath() + "xml/" + test + ".xml");
 		File expectedFile= JavaTestPlugin.getDefault().getFileInPlugin(expectedPath);
 		String expected= getContents(new FileInputStream(expectedFile));
 		runExportImport(aTestCase, expected);
@@ -224,35 +217,9 @@ public class TestRunSessionSerializationTests extends TestCase {
 	}
 	
 	private void runImportAntResult(String test) throws CoreException {
-		Path testPath= new Path(JUnitWorkspaceTestSetup.PROJECT_PATH + "ant/result/TEST-pack." + test + ".xml");
+		Path testPath= new Path(JUnitWorkspaceTestSetup.getProjectPath() + "ant/result/TEST-pack." + test + ".xml");
 		File testFile= JavaTestPlugin.getDefault().getFileInPlugin(testPath);
 		JUnitModel.importTestRunSession(testFile); // no contents check for now...
-	}
-
-	public void testATestCase() throws Exception {
-		String test= "ATestCase";
-		runCUTest(test);
-	}
-	
-	public void testATestSuite() throws Exception {
-		String test= "ATestSuite";
-		runCUTest(test);
-	}
-	
-	public void testFailures() throws Exception {
-		String test= "Failures";
-		runCUTest(test);
-	}
-	
-	public void testAllTests() throws Exception {
-		String test= "AllTests";
-		runCUTest(test);
-	}
-	
-	public void testImportAntSuite() throws Exception {
-		Path testsPath= new Path(JUnitWorkspaceTestSetup.PROJECT_PATH + "ant/result/TESTS-TestSuites.xml");
-		File testsFile= JavaTestPlugin.getDefault().getFileInPlugin(testsPath);
-		JUnitModel.importTestRunSession(testsFile); // no contents check for now...
 	}
 	
 }

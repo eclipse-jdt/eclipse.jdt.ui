@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testrun name="Failures" tests="7" started="7" failures="3" errors="2" ignored="1">
+<testrun name="Failures" project="JUnit4Tests" tests="7" started="7" failures="3" errors="2" ignored="1">
   <testsuite name="pack.Failures">
     <testcase name="testNasty" classname="pack.Failures">
       <failure>java.lang.AssertionError: &lt;/failure&gt;
 	at org.junit.Assert.fail(Assert.java:69)
-	at pack.Failures.testNasty(Failures.java:12)
+	at pack.Failures.testNasty(Failures.java:18)
 	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
 	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
@@ -28,10 +28,10 @@
 
 </failure>
     </testcase>
-    <testcase name="ignored" classname="pack.Failures"/>
+    <testcase name="ignored" classname="pack.Failures" ignored="true"/>
     <testcase name="testError" classname="pack.Failures">
       <error>java.lang.IllegalStateException: &lt;/failure&gt;
-	at pack.Failures.testError(Failures.java:22)
+	at pack.Failures.testError(Failures.java:28)
 	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
 	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
@@ -74,7 +74,7 @@
 	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.run(RemoteTestRunner.java:386)
 	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.main(RemoteTestRunner.java:196)
 Caused by: java.lang.IllegalStateException: xx
-	at pack.Failures.errorExpectedOther(Failures.java:32)
+	at pack.Failures.errorExpectedOther(Failures.java:38)
 	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
 	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
@@ -101,7 +101,7 @@ Hello my friend.</actual>org.junit.ComparisonFailure: null expected:&lt;
 Hello my friend.]&gt;
 	at org.junit.Assert.assertEquals(Assert.java:92)
 	at org.junit.Assert.assertEquals(Assert.java:104)
-	at pack.Failures.compareTheStuff(Failures.java:37)
+	at pack.Failures.compareTheStuff(Failures.java:43)
 	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
 	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
@@ -131,7 +131,7 @@ Hello my friend.]&gt;
 	at org.junit.Assert.failNotEquals(Assert.java:314)
 	at org.junit.Assert.assertEquals(Assert.java:94)
 	at org.junit.Assert.assertEquals(Assert.java:104)
-	at pack.Failures.testCompareNull(Failures.java:42)
+	at pack.Failures.testCompareNull(Failures.java:48)
 	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
 	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
