@@ -230,23 +230,29 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		if (res == null || !res.isAccessible()) {
 			return 0;
 		}
-		int info= 0;
-		
-		IMarker[] markers= res.findMarkers(IMarker.PROBLEM, true, depth);
-		if (markers != null) {
-			for (int i= 0; i < markers.length && (info != ERRORTICK_ERROR); i++) {
-				IMarker curr= markers[i];
-				if (sourceElement == null || isMarkerInRange(curr, sourceElement)) {
-					int priority= curr.getAttribute(IMarker.SEVERITY, -1);
-					if (priority == IMarker.SEVERITY_WARNING) {
-						info= ERRORTICK_WARNING;
-					} else if (priority == IMarker.SEVERITY_ERROR) {
-						info= ERRORTICK_ERROR;
-					}
+		int severity= 0;
+		if (sourceElement == null) {
+			severity= res.findMaxProblemSeverity(IMarker.PROBLEM, true, depth);
+		} else {
+			IMarker[] markers= res.findMarkers(IMarker.PROBLEM, true, depth);
+			if (markers != null && markers.length > 0) {
+				for (int i= 0; i < markers.length && (severity != IMarker.SEVERITY_ERROR); i++) {
+					IMarker curr= markers[i];
+					if (isMarkerInRange(curr, sourceElement)) {
+						int val= curr.getAttribute(IMarker.SEVERITY, -1);
+						if (val == IMarker.SEVERITY_WARNING || val == IMarker.SEVERITY_ERROR) {
+							severity= val;
+						}
+					}			
 				}
-			}			
+			}
 		}
-		return info;
+		if (severity == IMarker.SEVERITY_ERROR) {
+			return ERRORTICK_ERROR;
+		} else if (severity == IMarker.SEVERITY_WARNING) {
+			return ERRORTICK_WARNING;
+		}
+		return 0;
 	}
 
 	private boolean isMarkerInRange(IMarker marker, ISourceReference sourceElement) throws CoreException {
