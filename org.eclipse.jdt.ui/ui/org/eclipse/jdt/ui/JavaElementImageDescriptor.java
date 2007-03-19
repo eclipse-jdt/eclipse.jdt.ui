@@ -201,95 +201,96 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		return data;
 	}
 	
+	private void addTopRightImage(ImageDescriptor desc, Point pos) {
+		ImageData data= getImageData(desc);
+		int x= pos.x - data.width;
+		if (x >= 0) {
+			drawImage(data, x, pos.y);
+			pos.x= x;
+		}
+	}
 	
-	private void drawTopRight() {		
-		int x= getSize().x;
+	private void addBottomRightImage(ImageDescriptor desc, Point pos) {
+		ImageData data= getImageData(desc);
+		int x= pos.x - data.width;
+		int y= pos.y - data.height;
+		if (x >= 0 && y >= 0) {
+			drawImage(data, x, y);
+			pos.x= x;
+		}
+	}
+	
+	private void addBottomLeftImage(ImageDescriptor desc, Point pos) {
+		ImageData data= getImageData(desc);
+		int x= pos.x;
+		int y= pos.y - data.height;
+		if (x + data.width < getSize().x && y >= 0) {
+			drawImage(data, x, y);
+			pos.x= x + data.width;
+		}
+	}
+	
+	
+	private void drawTopRight() {
+		Point pos= new Point(getSize().x, 0);
 		if ((fFlags & ABSTRACT) != 0) {
-			ImageData data= getImageData(JavaPluginImages.DESC_OVR_ABSTRACT);
-			x-= data.width;
-			drawImage(data, x, 0);
+			addTopRightImage(JavaPluginImages.DESC_OVR_ABSTRACT, pos);
 		}
 		if ((fFlags & CONSTRUCTOR) != 0) {
-			ImageData data= getImageData(JavaPluginImages.DESC_OVR_CONSTRUCTOR);
-			x-= data.width;
-			drawImage(data, x, 0);
+			addTopRightImage(JavaPluginImages.DESC_OVR_CONSTRUCTOR, pos);
 		}
 		if ((fFlags & FINAL) != 0) {
-			ImageData data= getImageData(JavaPluginImages.DESC_OVR_FINAL);
-			x-= data.width;
-			drawImage(data, x, 0);
+			addTopRightImage(JavaPluginImages.DESC_OVR_FINAL, pos);
 		}
 		if ((fFlags & VOLATILE) != 0) {
-			ImageData data= getImageData(JavaPluginImages.DESC_OVR_VOLATILE);
-			x-= data.width;
-			drawImage(data, x, 0);
+			addTopRightImage(JavaPluginImages.DESC_OVR_VOLATILE, pos);
 		}
 		if ((fFlags & STATIC) != 0) {
-			ImageData data= getImageData(JavaPluginImages.DESC_OVR_STATIC);
-			x-= data.width;
-			drawImage(data, x, 0);
+			addTopRightImage(JavaPluginImages.DESC_OVR_STATIC, pos);
 		}
 
 	}		
 	
 	private void drawBottomRight() {
 		Point size= getSize();
-		int x= size.x;
+		Point pos= new Point(size.x, size.y);
+
 		int flags= fFlags;
 		
 		int syncAndOver= SYNCHRONIZED | OVERRIDES;
 		int syncAndImpl= SYNCHRONIZED | IMPLEMENTS;
 		
 		if ((flags & syncAndOver) == syncAndOver) { // both flags set: merged overlay image
-			ImageData data= getImageData(JavaPluginImages.DESC_OVR_SYNCH_AND_OVERRIDES);
-			x-= data.width;
-			drawImage(data, x, size.y - data.height);
+			addBottomRightImage(JavaPluginImages.DESC_OVR_SYNCH_AND_OVERRIDES, pos);
 			flags &= ~syncAndOver; // clear to not render again
 		} else if ((flags & syncAndImpl) == syncAndImpl) { // both flags set: merged overlay image
-			ImageData data= getImageData(JavaPluginImages.DESC_OVR_SYNCH_AND_IMPLEMENTS);
-			x-= data.width;
-			drawImage(data, x, size.y - data.height);
+			addBottomRightImage(JavaPluginImages.DESC_OVR_SYNCH_AND_IMPLEMENTS, pos);
 			flags &= ~syncAndImpl; // clear to not render again
 		}
 		if ((flags & OVERRIDES) != 0) {
-			ImageData data= getImageData(JavaPluginImages.DESC_OVR_OVERRIDES);
-			x-= data.width;
-			drawImage(data, x, size.y - data.height);
+			addBottomRightImage(JavaPluginImages.DESC_OVR_OVERRIDES, pos);
 		}
 		if ((flags & IMPLEMENTS) != 0) {
-			ImageData data= getImageData(JavaPluginImages.DESC_OVR_IMPLEMENTS);
-			x-= data.width;
-			drawImage(data, x, size.y - data.height);
+			addBottomRightImage(JavaPluginImages.DESC_OVR_IMPLEMENTS, pos);
 		}
 		if ((flags & SYNCHRONIZED) != 0) {
-			ImageData data= getImageData(JavaPluginImages.DESC_OVR_SYNCH);
-			x-= data.width;
-			drawImage(data, x, size.y - data.height);
+			addBottomRightImage(JavaPluginImages.DESC_OVR_SYNCH, pos);
 		}
 		if ((flags & RUNNABLE) != 0) {
-			ImageData data= getImageData(JavaPluginImages.DESC_OVR_RUN);
-			x-= data.width;
-			drawImage(data, x, size.y - data.height);
+			addBottomRightImage(JavaPluginImages.DESC_OVR_RUN, pos);
 		}
 		if ((flags & TRANSIENT) != 0) {
-			ImageData data= getImageData(JavaPluginImages.DESC_OVR_TRANSIENT);
-			x-= data.width;
-			drawImage(data, x, size.y - data.height);
+			addBottomRightImage(JavaPluginImages.DESC_OVR_TRANSIENT, pos);
 		}
 	}		
 	
 	private void drawBottomLeft() {
-		Point size= getSize();
-		int x= 0;
+		Point pos= new Point(0, getSize().y);
 		if ((fFlags & ERROR) != 0) {
-			ImageData data= getImageData(JavaPluginImages.DESC_OVR_ERROR);
-			drawImage(data, x, size.y - data.height);
-			x+= data.width;
+			addBottomLeftImage(JavaPluginImages.DESC_OVR_ERROR, pos);
 		}
 		if ((fFlags & WARNING) != 0) {
-			ImageData data= getImageData(JavaPluginImages.DESC_OVR_WARNING);
-			drawImage(data, x, size.y - data.height);
-			x+= data.width;
+			addBottomLeftImage(JavaPluginImages.DESC_OVR_WARNING, pos);
 		}
 
 	}		
