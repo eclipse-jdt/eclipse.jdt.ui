@@ -1188,6 +1188,7 @@
             class="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertyKeyHyperlinkDetector"
             id="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertyKeyHyperlinkDetector"
             name="%PropertyKeyHyperlinkDetector"
+            modifierKeys="M1+M3"
             targetId="org.eclipse.jdt.ui.PropertiesFileEditor">
       </hyperlinkDetector>
    </extension>
