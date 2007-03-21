@@ -15,9 +15,6 @@ package org.eclipse.jdt.junit.model;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * <strong>EXPERIMENTAL</strong> This class or interface has been added as part
- * of a work in progress. This API may change at any given time. Please do not
- * use this API without consulting with the JDT/UI team.
  * 
  * @since 3.3
  */
