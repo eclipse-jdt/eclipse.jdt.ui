@@ -107,10 +107,13 @@ public class JEJarEntryResource extends JEAttribute {
 
 	@Override
 	public String getLabel() {
-		String label= fJarEntryResource.getName();
+		StringBuilder sb= new StringBuilder();
 		if (fName != null)
-			label= fName +  ": " + label;
-		return label;
+			sb.append(fName).append(": ");
+		String classname= fJarEntryResource.getClass().getName();
+		sb.append(classname.substring(classname.lastIndexOf('.') + 1)).append(": ");
+		sb.append(fJarEntryResource.getName());
+		return sb.toString();
 	}
 
 }
