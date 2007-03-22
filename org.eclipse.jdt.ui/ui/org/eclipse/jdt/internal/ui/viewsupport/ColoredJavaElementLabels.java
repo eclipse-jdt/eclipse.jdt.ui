@@ -923,12 +923,11 @@ public class ColoredJavaElementLabels {
 	}
 	
 	/**
-	 * Returns <code>true</code> if the given package fragment root is
-	 * referenced. This means it is own by a different project but is referenced
+	 * @param root
+	 * @return <code>true</code> if the given package fragment root is
+	 * referenced. This means it is owned by a different project but is referenced
 	 * by the root's parent. Returns <code>false</code> if the given root
 	 * doesn't have an underlying resource.
-	 *
-	 * @since 3.2
 	 */
 	private static boolean isReferenced(IPackageFragmentRoot root) {
 		IResource resource= root.getResource();
@@ -961,11 +960,17 @@ public class ColoredJavaElementLabels {
 
 	public static ColoredString decorateColoredString(ColoredString string, String decorated, int color) {
 		String label= string.getString();
-		if (!decorated.startsWith(label)) {
+		int originalStart= decorated.indexOf(label);
+		if (originalStart == -1) {
 			return new ColoredString(decorated, 0, 0); // the decorator did something wild
 		}
-		if (decorated.length() > label.length()) { // decorator appended something
-			return string.append(decorated.substring(label.length()), color);
+		if (originalStart > 0) {
+			ColoredString newString= new ColoredString(decorated.substring(0, originalStart), color, 0);
+			newString.append(string);
+			string= newString;
+		}
+		if (decorated.length() > originalStart + label.length()) { // decorator appended something
+			return string.append(decorated.substring(originalStart + label.length()), color);
 		}
 		return string; // no change
 	}
