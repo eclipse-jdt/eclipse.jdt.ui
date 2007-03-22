@@ -19,7 +19,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
@@ -67,6 +66,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPageLayout;
+import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
@@ -91,6 +91,7 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
@@ -107,6 +108,7 @@ import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
 import org.eclipse.jdt.jeview.EditorUtility;
 import org.eclipse.jdt.jeview.JEPluginImages;
 import org.eclipse.jdt.jeview.JEViewPlugin;
+import org.eclipse.jdt.jeview.properties.JarEntryResourceProperties;
 import org.eclipse.jdt.jeview.properties.JavaElementProperties;
 import org.eclipse.jdt.jeview.properties.MarkerProperties;
 import org.eclipse.jdt.jeview.properties.ResourceProperties;
@@ -163,7 +165,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 
 		public ISelection getSelection() {
 			IStructuredSelection selection= (IStructuredSelection) fViewer.getSelection();
-			ArrayList<IAdaptable> externalSelection= new ArrayList<IAdaptable>();
+			ArrayList<Object> externalSelection= new ArrayList<Object>();
 			for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 				Object element= iter.next();
 				if (element instanceof JavaElement) {
@@ -174,10 +176,8 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 					IResource resource= ((JEResource) element).getResource();
 					if (! (resource instanceof IWorkspaceRoot)) // various selection listeners assume getProject() is non-null
 						externalSelection.add(resource);
-				} else if (element instanceof JEMarker) {
-					externalSelection.add(((JEMarker) element).getMarker());
-				} else {
-					//TODO: support for other node types?
+				} else if (element instanceof JEAttribute) {
+					externalSelection.add(((JEAttribute) element).getWrappedObject());
 				}
 			}
 			return new StructuredSelection(externalSelection);
@@ -701,16 +701,18 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			if (structuredSelection.size() >= 1) {
 				Set<Object> input= new LinkedHashSet<Object>();
 				for (Iterator<?> iter = structuredSelection.iterator(); iter.hasNext();) {
-					Object first= iter.next();
-					if (first instanceof IJavaElement) {
-						input.add(first);
-					} else if (first instanceof IResource) {
-						IJavaElement je= JavaCore.create((IResource) first);
+					Object item= iter.next();
+					if (item instanceof IJavaElement) {
+						input.add(item);
+					} else if (item instanceof IResource) {
+						IJavaElement je= JavaCore.create((IResource) item);
 						if (je == null) {
-							input.add(first);
+							input.add(item);
 						} else {
 							input.add(je);
 						}
+					} else if (item instanceof IJarEntryResource) {
+						input.add(item);
 					}
 				}
 				if (input.size() > 0) {
@@ -746,6 +748,12 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			} else {
 				return file;
 			}
+		} else if (input instanceof IStorageEditorInput) {
+			try {
+				return ((IStorageEditorInput) input).getStorage();
+			} catch (CoreException e) {
+				return null;
+			}
 		}
 		return null;
 	}
@@ -770,6 +778,8 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 						return new ResourceProperties((IResource) object);
 					else if (object instanceof IMarker)
 						return new MarkerProperties((IMarker) object);
+					else if (object instanceof IJarEntryResource)
+						return new JarEntryResourceProperties((IJarEntryResource) object);
 					else
 						return null;
 				}

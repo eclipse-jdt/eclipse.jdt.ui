@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 
 
@@ -30,6 +31,8 @@ public class JERoot extends JEAttribute {
 					return new JavaElement(null, (IJavaElement) element);
 				else if (element instanceof IResource)
 					return new JEResource(null, null, (IResource) element);
+				else if (element instanceof IJarEntryResource)
+					return new JEJarEntryResource(null, null, (IJarEntryResource) element);
 				else
 					throw new IllegalArgumentException(String.valueOf(element));
 				

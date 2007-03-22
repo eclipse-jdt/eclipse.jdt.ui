@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
@@ -461,9 +462,11 @@ public class JavaElement extends JEAttribute {
 		for (int i= 0; i < resources.length; i++) {
 			Object resource= resources[i];
 			if (resource instanceof IResource)
-				resourceChildren[i]= new JEResource(parent, "", (IResource) resource);
+				resourceChildren[i]= new JEResource(parent, null, (IResource) resource);
+			else if (resource instanceof IJarEntryResource)
+				resourceChildren[i]= new JEJarEntryResource(parent, null, (IJarEntryResource) resource);
 			else
-				resourceChildren[i]= new JavaElementProperty(parent, "", resource);
+				resourceChildren[i]= new JavaElementProperty(parent, null, resource);
 		}
 		return resourceChildren;
 	}

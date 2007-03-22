@@ -108,7 +108,7 @@ public class JEResource extends JEAttribute {
 					IResource[] resources= container.members();
 					JEAttribute[] children= new JEAttribute[resources.length];
 					for (int i= 0; i < resources.length; i++) {
-						children[i]= new JEResource(this, "", resources[i]);
+						children[i]= new JEResource(this, null, resources[i]);
 					}
 					return children;
 				}

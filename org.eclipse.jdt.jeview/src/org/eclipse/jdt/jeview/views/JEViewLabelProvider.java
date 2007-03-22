@@ -53,6 +53,9 @@ public class JEViewLabelProvider extends LabelProvider /*implements IColorProvid
 		} else if (element instanceof JEResource) {
 			return fJavaElementLabelProvider.getImage(((JEResource) element).getResource());
 			
+		} else if (element instanceof JEJarEntryResource) {
+			return fJavaElementLabelProvider.getImage(((JEJarEntryResource) element).getJarEntryResource());
+			
 		} else if (element instanceof JavaElementProperty) {
 			return fInfoImg;
 			
