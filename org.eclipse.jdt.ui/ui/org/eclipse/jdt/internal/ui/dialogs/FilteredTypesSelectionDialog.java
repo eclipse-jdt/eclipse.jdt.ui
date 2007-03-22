@@ -35,6 +35,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -414,6 +415,17 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 		super.setResult(resultToReturn);
 	}
 
+	/*
+	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#create()
+	 */
+	public void create() {
+		super.create();
+		Control patternControl= getPatternControl();
+		if (patternControl instanceof Text) {
+			TextFieldNavigationHandler.install((Text) patternControl);
+		}
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
