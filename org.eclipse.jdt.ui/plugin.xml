@@ -5233,7 +5233,7 @@
 					<instanceof
 							value="org.eclipse.jdt.core.IJavaElement" />
 					<instanceof
-							value="org.eclipse.jdt.internal.core.JarEntryFile" />
+							value="org.eclipse.jdt.core.IJarEntryResource" />
 					<instanceof
 							value="org.eclipse.jdt.core.IClassFile" />
 					<instanceof
@@ -5262,7 +5262,7 @@
 					<instanceof
 							value="org.eclipse.jdt.core.IJavaElement" />
 					<instanceof
-							value="org.eclipse.jdt.internal.core.JarEntryFile" />
+							value="org.eclipse.jdt.core.IJarEntryResource" />
 					<instanceof
 							value="org.eclipse.jdt.core.IClassFile" />
 					<instanceof
@@ -5291,7 +5291,7 @@
 					<instanceof
 							value="org.eclipse.jdt.core.IJavaElement" />
 					<instanceof
-							value="org.eclipse.jdt.internal.core.JarEntryFile" />
+							value="org.eclipse.jdt.core.IJarEntryResource" />
 					<instanceof
 							value="org.eclipse.jdt.core.IClassFile" />
 					<instanceof
