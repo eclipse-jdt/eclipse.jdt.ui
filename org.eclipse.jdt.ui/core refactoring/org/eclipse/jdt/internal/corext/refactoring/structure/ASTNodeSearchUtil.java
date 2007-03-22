@@ -60,7 +60,6 @@ public class ASTNodeSearchUtil {
 		//no instance
 	}
 
-	/** misses javadoc nodes */
 	public static ASTNode[] getAstNodes(SearchMatch[] searchResults, CompilationUnit cuNode) {
 		List result= new ArrayList(searchResults.length);
 		for (int i= 0; i < searchResults.length; i++) {
@@ -71,7 +70,6 @@ public class ASTNodeSearchUtil {
 		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);
 	}
 
-	/** misses javadoc nodes */
 	public static ASTNode getAstNode(SearchMatch searchResult, CompilationUnit cuNode) {
 		ASTNode selectedNode= getAstNode(cuNode, searchResult.getOffset(), searchResult.getLength());
 		if (selectedNode == null)
@@ -81,7 +79,6 @@ public class ASTNodeSearchUtil {
 		return selectedNode;
 	}
 
-	/** misses javadoc nodes */
 	public static ASTNode getAstNode(CompilationUnit cuNode, int start, int length){
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(start, length), true);
 		cuNode.accept(analyzer);
