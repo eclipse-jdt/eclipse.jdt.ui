@@ -17,6 +17,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.List;
 
@@ -27,16 +28,15 @@ import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.internal.junit.runner.FailedComparison;
+import org.eclipse.jdt.internal.junit.runner.IClassifiesThrowables;
+import org.eclipse.jdt.internal.junit.runner.IListensToTestExecutions;
 import org.eclipse.jdt.internal.junit.runner.IStopListener;
 import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
-import org.eclipse.jdt.internal.junit.runner.JUnitMessages;
+import org.eclipse.jdt.internal.junit.runner.ITestReference;
+import org.eclipse.jdt.internal.junit.runner.IVisitsTestTrees;
 import org.eclipse.jdt.internal.junit.runner.MessageIds;
 import org.eclipse.jdt.internal.junit.runner.TestExecution;
-import org.eclipse.jdt.internal.junit.runner.IListensToTestExecutions;
-import org.eclipse.jdt.internal.junit.runner.ITestReference;
 import org.eclipse.jdt.internal.junit.runner.TestReferenceFailure;
-import org.eclipse.jdt.internal.junit.runner.IVisitsTestTrees;
-import org.eclipse.jdt.internal.junit.runner.IClassifiesThrowables;
 
 public class JUnit3TestReference implements ITestReference {
 	
@@ -89,12 +89,12 @@ public class JUnit3TestReference implements ITestReference {
 	public String getName() {
 		if (isJUnit4TestCaseAdapter(fTest)) {
 			Method method= (Method) callJUnit4GetterMethod(fTest, "getTestMethod"); //$NON-NLS-1$
-			return JUnitMessages.getFormattedString(
-					"RemoteTestRunner.testName", new String[] { method.getName(), method.getDeclaringClass().getName() }); //$NON-NLS-1$			
+			return MessageFormat.format(
+					MessageIds.TEST_IDENTIFIER_MESSAGE_FORMAT, new String[] { method.getName(), method.getDeclaringClass().getName() });
 		}
 		if (fTest instanceof TestCase) {
 			TestCase testCase= (TestCase) fTest;
-			return JUnitMessages.getFormattedString("RemoteTestRunner.testName", new String[] { testCase.getName(), fTest.getClass().getName() }); //$NON-NLS-1$
+			return MessageFormat.format(MessageIds.TEST_IDENTIFIER_MESSAGE_FORMAT, new String[] { testCase.getName(), fTest.getClass().getName() });
 		}
 		if (fTest instanceof TestSuite) {
 			TestSuite suite= (TestSuite) fTest;

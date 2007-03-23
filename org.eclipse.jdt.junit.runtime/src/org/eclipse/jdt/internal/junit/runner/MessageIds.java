@@ -64,7 +64,7 @@ public class MessageIds {
 	public static final String RTRACE_END=  "%RTRACEE"; //$NON-NLS-1$
 	/**
 	 * Notification that a test run has started. 
-	 * MessageIds.TEST_RUN_START+testCount.toString+" "+version
+	 * MessageIds.TEST_RUN_START + testCount.toString + " " + version
 	 */
 	public static final String TEST_RUN_START=  "%TESTC  "; //$NON-NLS-1$
 	/**
@@ -91,7 +91,7 @@ public class MessageIds {
 	public static final String TEST_FAILED= "%FAILED ";	 //$NON-NLS-1$
 	/**
 	 * Notification that a test run has ended.
-	 * TEST_RUN_END+elapsedTime.toString().
+	 * TEST_RUN_END + elapsedTime.toString().
 	 */ 	
 	public static final String TEST_RUN_END="%RUNTIME";	 //$NON-NLS-1$
 	/**
@@ -100,7 +100,7 @@ public class MessageIds {
 	public static final String TEST_STOPPED="%TSTSTP "; //$NON-NLS-1$
 	/**
 	 * Notification that a test was reran.
-	 * TEST_RERAN+testId+" "+testClass+" "+testName+STATUS.
+	 * TEST_RERAN + testId + " " + testClass + " " + testName + STATUS.
 	 * Status = "OK" or "FAILURE".
 	 */ 
 	public static final String TEST_RERAN=  "%TSTRERN"; //$NON-NLS-1$
@@ -116,9 +116,20 @@ public class MessageIds {
 	public static final String TEST_STOP=	">STOP   "; //$NON-NLS-1$
 	/**
 	 * Request to rerun a test.
-	 * TEST_RERUN+testId+" "+ClassName+" "+testName
+	 * TEST_RERUN + testId + " " + testClass + " "+testName
 	 */
 	public static final String TEST_RERUN=	">RERUN  "; //$NON-NLS-1$
+
+	/**
+	 * MessageFormat to encode test method identifiers:
+	 * testMethod(testClass)
+	 */
+	public static final String TEST_IDENTIFIER_MESSAGE_FORMAT= "{0}({1})"; //$NON-NLS-1$
+
+	/**
+	 * Test identifier prefix for ignored tests.
+	 */
+	public static final String IGNORED_TEST_PREFIX= "@Ignore: "; //$NON-NLS-1$
 }
 
 

@@ -25,21 +25,26 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 		Assert.isNotNull(parent);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.junit.ITestCaseElement#getTestMethodName()
+	/**
+	 * {@inheritDoc}
+	 * @see org.eclipse.jdt.junit.model.ITestCaseElement#getTestMethodName()
+	 * @see org.eclipse.jdt.internal.junit.runner.MessageIds#TEST_IDENTIFIER_MESSAGE_FORMAT
+	 * @see org.eclipse.jdt.internal.junit.runner.MessageIds#IGNORED_TEST_PREFIX
 	 */
 	public String getTestMethodName() {
-		int index= getTestName().indexOf('(');
+		String testName= getTestName();
+		int index= testName.indexOf('(');
 		if (index > 0)
-			return getTestName().substring(0, index);
-		index= getTestName().indexOf('@');
-		if(index > 0)
-			return getTestName().substring(0, index);
-		return getTestName();
+			return testName.substring(0, index);
+		index= testName.indexOf('@');
+		if (index > 0)
+			return testName.substring(0, index);
+		return testName;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.junit.ITestCaseElement#getTestCaseTypeName()
+	/**
+	 * {@inheritDoc}
+	 * @see org.eclipse.jdt.junit.model.ITestCaseElement#getTestClassName()
 	 */
 	public String getTestClassName() {
 		return getClassName();

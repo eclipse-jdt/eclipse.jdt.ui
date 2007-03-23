@@ -286,8 +286,10 @@ public abstract class TestElement implements ITestElement {
 		return fExpected != null && fActual != null;
 	}
 	
-	// TODO: Format of testName is highly underspecified. See RemoteTestRunner#getTestName(Test).
-	
+	/**
+	 * @see org.eclipse.jdt.internal.junit.runner.ITestIdentifier#getName()
+	 * @see org.eclipse.jdt.internal.junit.runner.MessageIds#TEST_IDENTIFIER_MESSAGE_FORMAT
+	 */
 	public String getClassName() {
 		return extractClassName(getTestName());
 	}

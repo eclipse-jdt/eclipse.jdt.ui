@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
+import org.eclipse.jdt.internal.junit.runner.MessageIds;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
@@ -424,8 +425,6 @@ public class TestRunSession implements ITestRunSession {
 	 */
 	private class TestSessionNotifier implements ITestRunListener2 {
 		
-		private static final String IGNORED_TEST_PREFIX= "@Ignore: "; //$NON-NLS-1$
-
 		public void testRunStarted(int testCount) {
 			fIncompleteTestSuites= new ArrayList();
 			
@@ -538,7 +537,7 @@ public class TestRunSession implements ITestRunSession {
 				return;
 			}
 			TestCaseElement testCaseElement= (TestCaseElement) testElement;
-			if (testName.startsWith(IGNORED_TEST_PREFIX)) {
+			if (testName.startsWith(MessageIds.IGNORED_TEST_PREFIX)) {
 				testCaseElement.setIgnored(true);
 				fIgnoredCount++;
 			}

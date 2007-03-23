@@ -33,7 +33,7 @@ public class JUnit4TestListener extends RunListener {
 		public String getName() {
 			String name= super.getName();
 			if (name != null)
-				return "@Ignore: " + name; //$NON-NLS-1$
+				return MessageIds.IGNORED_TEST_PREFIX + name;
 			return null;
 		}
 	}
