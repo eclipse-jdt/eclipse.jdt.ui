@@ -1310,7 +1310,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		super.doSetInput(input);
-//		configureTabConverter(); FIXME
 		configureToggleCommentAction();
 		if (fJavaEditorErrorTickUpdater != null)
 			fJavaEditorErrorTickUpdater.updateEditorImage(getInputJavaElement());
