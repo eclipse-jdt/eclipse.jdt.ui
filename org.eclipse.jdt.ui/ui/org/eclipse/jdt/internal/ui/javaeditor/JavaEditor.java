@@ -1449,9 +1449,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected OverrideIndicatorManager fOverrideIndicatorManager;
 	/**
 	 * Semantic highlighting manager
-	 * @since 3.0
+	 * @since 3.0, protected as of 3.3
 	 */
-	private SemanticHighlightingManager fSemanticManager;
+	protected SemanticHighlightingManager fSemanticManager;
 	/**
 	 * The folding runner.
 	 * @since 3.1
@@ -2583,9 +2583,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fEditorSelectionChangedListener= new EditorSelectionChangedListener();
 		fEditorSelectionChangedListener.install(getSelectionProvider());
 
-		if (fMarkOccurrenceAnnotations)
-			installOccurrencesFinder(false);
-
 		if (isSemanticHighlightingEnabled())
 			installSemanticHighlighting();
 
@@ -2899,7 +2896,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 
 	protected boolean isMarkingOccurrences() {
-		return fMarkOccurrenceAnnotations;
+		return getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
 	}
 
 	boolean markOccurrencesOfType(IBinding binding) {
@@ -2971,23 +2968,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			return;
 
 		fOverrideIndicatorManager= new OverrideIndicatorManager(model, inputElement, null);
-
+		
 		if (provideAST) {
-			Job job= new Job(JavaEditorMessages.OverrideIndicatorManager_intallJob) {
-				/*
-				 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
-				 * @since 3.0
-				 */
-				protected IStatus run(IProgressMonitor monitor) {
-					CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(inputElement, ASTProvider.WAIT_YES, null);
-					if (fOverrideIndicatorManager != null) // editor might have been closed in the meanwhile
-						fOverrideIndicatorManager.reconciled(ast, true, monitor);
-					return Status.OK_STATUS;
-				}
-			};
-			job.setPriority(Job.DECORATE);
-			job.setSystem(true);
-			job.schedule();
+			CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(inputElement, ASTProvider.WAIT_ACTIVE_ONLY, getProgressMonitor());
+			fOverrideIndicatorManager.reconciled(ast, true, getProgressMonitor());
 		}
 	}
 

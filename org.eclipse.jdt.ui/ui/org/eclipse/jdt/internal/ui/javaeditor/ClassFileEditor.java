@@ -20,6 +20,10 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.IFile;
 
@@ -75,6 +79,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.util.ClassFileBytesDisassembler;
 import org.eclipse.jdt.core.util.ClassFormatException;
 
@@ -112,6 +117,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		/**
 		 * Creates a source attachment form for a class file.
+		 * 
+		 * @param file the class file
 		 */
 		public SourceAttachmentForm(IClassFile file) {
 			fFile= file;
@@ -119,6 +126,9 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		/**
 		 * Returns the package fragment root of this file.
+		 * 
+		 * @param file the class file 
+		 * @return the package fragment root of the given class file
 		 */
 		private IPackageFragmentRoot getPackageFragmentRoot(IClassFile file) {
 
@@ -131,6 +141,9 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		/**
 		 * Creates the control of the source attachment form.
+		 * 
+		 * @param parent the parent composite 
+		 * @return the creates source attachment form
 		 */
 		public Control createControl(Composite parent) {
 
@@ -603,6 +616,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 * @see AbstractTextEditor#doSetInput(IEditorInput)
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
+		uninstallOccurrencesFinder();
 
 		input= transformEditorInput(input);
 		if (!(input instanceof IClassFileEditorInput))
@@ -637,16 +651,33 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			((ClassFileDocumentProvider) documentProvider).addInputChangeListener(this);
 
 		verifyInput(getEditorInput());
-	}
+		
+		final IJavaElement inputElement= getInputJavaElement();
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#installOverrideIndicator(boolean)
-	 * @since 3.0
-	 */
-	protected void installOverrideIndicator(boolean provideAST) {
-		super.installOverrideIndicator(true);
+		Job job= new Job(JavaEditorMessages.OverrideIndicatorManager_intallJob) {
+			/*
+			 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+			 * @since 3.0
+			 */
+			protected IStatus run(IProgressMonitor monitor) {
+				CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(inputElement, ASTProvider.WAIT_YES, null);
+				if (fOverrideIndicatorManager != null)
+					fOverrideIndicatorManager.reconciled(ast, true, monitor);
+				if (fSemanticManager != null) {
+					SemanticHighlightingReconciler reconciler= fSemanticManager.getReconciler();
+					if (reconciler != null)
+						reconciler.reconciled(ast, false, monitor);
+				}
+				if (isMarkingOccurrences())
+					installOccurrencesFinder(false);
+				return Status.OK_STATUS;
+			}
+		};
+		job.setPriority(Job.DECORATE);
+		job.setSystem(true);
+		job.schedule();
+		
 	}
-
 
 	/*
 	 * @see IWorkbenchPart#createPartControl(Composite)
@@ -692,8 +723,11 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 	/**
 	 * Checks if the class file input has no source attached. If so, a source attachment form is shown.
+	 * 
+	 * @param input the editor input 
+	 * @throws JavaModelException if an exception occurs while accessing its corresponding resource 
 	 */
-	private void verifyInput(IEditorInput input) throws CoreException {
+	private void verifyInput(IEditorInput input) throws JavaModelException {
 
 		if (fParent == null || input == null)
 			return;

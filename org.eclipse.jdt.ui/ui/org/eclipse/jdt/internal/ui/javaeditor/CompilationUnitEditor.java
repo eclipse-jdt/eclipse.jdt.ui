@@ -1429,6 +1429,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		if (sourceViewer instanceof ITextViewerExtension)
 			((ITextViewerExtension) sourceViewer).prependVerifyKeyListener(fBracketInserter);
 
+		if (isMarkingOccurrences())
+			installOccurrencesFinder(false);
 	}
 
 	private static char getEscapeCharacter(char character) {
