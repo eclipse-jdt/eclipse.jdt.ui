@@ -369,7 +369,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 
 		if (fEditor instanceof CompilationUnitEditor) {
 			((CompilationUnitEditor)fEditor).addReconcileListener(this);
-		} else {
+		} else if (fEditor == null) {
 			fSourceViewer.addTextInputListener(this);
 			scheduleJob();
 		}

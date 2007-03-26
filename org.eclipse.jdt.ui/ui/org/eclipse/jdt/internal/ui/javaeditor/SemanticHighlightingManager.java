@@ -618,4 +618,14 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		if (fColorManager instanceof IColorManagerExtension)
 			((IColorManagerExtension) fColorManager).unbindColor(colorKey);
 	}
+
+	/**
+	 * Returns this hightlighter's reconciler.
+	 * 
+	 * @return the semantic highlighter reconciler or <code>null</code> if none
+	 * @since 3.3
+	 */
+	public SemanticHighlightingReconciler getReconciler() {
+		return fReconciler;
+	}
 }
