@@ -104,10 +104,10 @@ public class BuildPathSupport {
 	public static IClasspathEntry getJUnit4LibraryEntry() {
 		IPath bundleBase= getBundleLocation(JUNIT4_PLUGIN_ID);
 		if (bundleBase != null) {
-			IPath jarLocation= bundleBase.append("junit-4.1.jar"); //$NON-NLS-1$
+			IPath jarLocation= bundleBase.append("junit.jar"); //$NON-NLS-1$
 			
 			IPath sourceBase= getSourceLocation(JUNIT4_PLUGIN_ID);
-			IPath srcLocation= sourceBase != null ? sourceBase.append("junit-4.1src.zip") : null; //$NON-NLS-1$
+			IPath srcLocation= sourceBase != null ? sourceBase.append("junitsrc.zip") : null; //$NON-NLS-1$
 			
 			IAccessRule[] accessRules= { };
 			
