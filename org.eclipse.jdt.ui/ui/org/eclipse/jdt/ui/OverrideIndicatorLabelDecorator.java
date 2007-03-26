@@ -149,7 +149,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 * @throws JavaModelException
 	 */
 	protected int getOverrideIndicators(IMethod method) throws JavaModelException {
-		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST((IJavaElement) method.getOpenable(), ASTProvider.WAIT_NO, null);
+		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST((IJavaElement) method.getOpenable(), ASTProvider.WAIT_ACTIVE_ONLY, null);
 		if (astRoot != null) {
 			int res= findInHierarchyWithAST(astRoot, method);
 			if (res != -1) {
