@@ -66,11 +66,15 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 			return null;
 
 		ASTNode node= NodeFinder.perform(ast, offset, 1);
-		if (!(node instanceof StringLiteral))
-			return null;
-		StringLiteral stringLiteral= (StringLiteral)node;
+		if (node instanceof StringLiteral) {
+			StringLiteral stringLiteral= (StringLiteral)node;
+			return new Region(stringLiteral.getStartPosition(), stringLiteral.getLength());
+		} else if (node instanceof SimpleName) {
+			SimpleName simpleName= (SimpleName)node;
+			return new Region(simpleName.getStartPosition(), simpleName.getLength());
+		}
 
-		return new Region(stringLiteral.getStartPosition(), stringLiteral.getLength());
+		return null;
 	}
 
 	/*
