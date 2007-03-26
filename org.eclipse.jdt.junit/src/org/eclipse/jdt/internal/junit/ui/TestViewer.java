@@ -224,8 +224,8 @@ public class TestViewer {
 				manager.add(new OpenTestAction(fTestRunnerPart, testLabel));
 				manager.add(new Separator());
 				if (testClassExists(className) && !fTestRunnerPart.lastLaunchIsKeptAlive()) {
-					manager.add(new RerunAction(fTestRunnerPart, testElement.getId(), className, null, ILaunchManager.RUN_MODE));
-					manager.add(new RerunAction(fTestRunnerPart, testElement.getId(), className, null, ILaunchManager.DEBUG_MODE));
+					manager.add(new RerunAction(JUnitMessages.RerunAction_label_run, fTestRunnerPart, testElement.getId(), className, null, ILaunchManager.RUN_MODE));
+					manager.add(new RerunAction(JUnitMessages.RerunAction_label_debug, fTestRunnerPart, testElement.getId(), className, null, ILaunchManager.DEBUG_MODE));
 				}
 			} else {
 				TestCaseElement testCaseElement= (TestCaseElement) testElement;
@@ -233,11 +233,11 @@ public class TestViewer {
 				manager.add(new OpenTestAction(fTestRunnerPart, className, testMethodName));
 				manager.add(new Separator());
 				if (fTestRunnerPart.lastLaunchIsKeptAlive()) {
-					manager.add(new RerunAction(fTestRunnerPart, testElement.getId(), className, testMethodName, ILaunchManager.RUN_MODE));
+					manager.add(new RerunAction(JUnitMessages.RerunAction_label_rerun, fTestRunnerPart, testElement.getId(), className, testMethodName, ILaunchManager.RUN_MODE));
 					
 				} else {
-					manager.add(new RerunAction(fTestRunnerPart, testElement.getId(), className, testMethodName, ILaunchManager.RUN_MODE));
-					manager.add(new RerunAction(fTestRunnerPart, testElement.getId(), className, testMethodName, ILaunchManager.DEBUG_MODE));
+					manager.add(new RerunAction(JUnitMessages.RerunAction_label_run, fTestRunnerPart, testElement.getId(), className, testMethodName, ILaunchManager.RUN_MODE));
+					manager.add(new RerunAction(JUnitMessages.RerunAction_label_debug, fTestRunnerPart, testElement.getId(), className, testMethodName, ILaunchManager.DEBUG_MODE));
 				} 
 			}
 			if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {

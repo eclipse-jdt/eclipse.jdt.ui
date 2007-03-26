@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.junit.ui;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.action.Action;
 
 /**
@@ -28,12 +27,9 @@ public class RerunAction extends Action {
 	/**
 	 * Constructor for RerunAction.
 	 */
-	public RerunAction(TestRunnerViewPart runner, String testId, String className, String testName, String launchMode) {
-		super(); 
-		if (launchMode.equals(ILaunchManager.RUN_MODE))
-			setText(JUnitMessages.RerunAction_label_run); 
-		else if (launchMode.equals(ILaunchManager.DEBUG_MODE))
-			setText(JUnitMessages.RerunAction_label_debug); 
+	public RerunAction(String actionName, TestRunnerViewPart runner, String testId, String className, String testName,
+			String launchMode) {
+		super(actionName); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.RERUN_ACTION);
 		fTestRunner= runner;
 		fTestId= testId;

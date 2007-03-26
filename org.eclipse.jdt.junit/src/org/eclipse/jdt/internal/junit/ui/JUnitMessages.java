@@ -227,6 +227,7 @@ public final class JUnitMessages extends NLS {
 	public static String OpenTestAction_error_title;
 	public static String RerunAction_label_debug;
 	public static String RerunAction_label_run;
+	public static String RerunAction_label_rerun;
 	public static String Resources_fileModified;
 	public static String Resources_modifiedResources;
 	
