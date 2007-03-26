@@ -381,7 +381,7 @@
             label="%nlsStringHover"
             description="%nlsStringHoverDescription"
             class="org.eclipse.jdt.internal.ui.text.java.hover.NLSStringHover"
-            id="org.eclipse.jdt.ui.NLStringHover">
+            id="org.eclipse.jdt.ui.NLSStringHover">
       </hover>
       <hover
             label="%javadocHover"
