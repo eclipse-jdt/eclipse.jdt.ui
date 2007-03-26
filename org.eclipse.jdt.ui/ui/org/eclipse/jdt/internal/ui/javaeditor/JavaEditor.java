@@ -1762,22 +1762,27 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 
 		if (required == IShowInSource.class) {
-			IJavaElement je= null;
-			try {
-				je= SelectionConverter.getElementAtOffset(this);
-			} catch (JavaModelException ex) {
-				je= null;
-			}
-			if (je != null) { 
-				final ISelection selection= new StructuredSelection(je);
-				return new IShowInSource() {
-					public ShowInContext getShowInContext() {
-						return new ShowInContext(getEditorInput(), selection);
-					}
-				};
-			}
+			return new IShowInSource() {
+				public ShowInContext getShowInContext() {
+					return new ShowInContext(getEditorInput(), null) {
+						/*
+						 * @see org.eclipse.ui.part.ShowInContext#getSelection()
+						 * @since 3.3
+						 */
+						public ISelection getSelection() {
+							IJavaElement je= null;
+							try {
+								je= SelectionConverter.getElementAtOffset(JavaEditor.this);
+								return new StructuredSelection(je);
+							} catch (JavaModelException ex) {
+								return null;
+							}
+						}
+					};
+				}
+			};
 		}
-		
+
 		if (required == IJavaFoldingStructureProvider.class)
 			return fProjectionModelUpdater;
 
@@ -2001,7 +2006,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		try {
 
-			IJavaElement element= getElementAt(offset);
+			IJavaElement element= getElementAt(offset, false);
 			while (element instanceof ISourceReference) {
 				ISourceRange range= ((ISourceReference) element).getSourceRange();
 				if (range != null && offset < range.getOffset() + range.getLength() && range.getOffset() < offset + length) {
