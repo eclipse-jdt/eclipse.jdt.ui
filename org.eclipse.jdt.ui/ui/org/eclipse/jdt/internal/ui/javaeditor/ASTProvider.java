@@ -512,15 +512,16 @@ public final class ASTProvider {
 		CompilationUnit ast= null;
 		try {
 			ast= createAST(je, progressMonitor);
-			if (progressMonitor != null && progressMonitor.isCanceled())
+			if (progressMonitor != null && progressMonitor.isCanceled()) {
 				ast= null;
-			else if (DEBUG && ast != null)
-				System.err.println(getThreadName() + " - " + DEBUG_PREFIX + "created AST for: " + je.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+				if (DEBUG)
+					System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "Ignore created AST for: " + je.getElementName() + " - operation has been cancelled"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
 		} finally {
 			if (isActiveElement) {
 				if (fAST != null) {
 					if (DEBUG)
-						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "Ignore created AST for " + je.getElementName() + "- AST from reconciler is newer"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "Ignore created AST for " + je.getElementName() + " - AST from reconciler is newer"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					reconciled(fAST, je, null);
 				} else
 					reconciled(ast, je, null);
@@ -573,7 +574,7 @@ public final class ASTProvider {
 	 * @param progressMonitor the progress monitor
 	 * @return AST
 	 */
-	private CompilationUnit createAST(IJavaElement je, final IProgressMonitor progressMonitor) {
+	private CompilationUnit createAST(final IJavaElement je, final IProgressMonitor progressMonitor) {
 		if (!hasSource(je))
 			return null;
 		
@@ -602,10 +603,12 @@ public final class ASTProvider {
 			public void run() {
 				try {
 					if (progressMonitor != null && progressMonitor.isCanceled())
-						root[0]= null;
+						return;
+					if (DEBUG)
+						System.err.println(getThreadName() + " - " + DEBUG_PREFIX + "creating AST for: " + je.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
 					root[0]= (CompilationUnit)parser.createAST(progressMonitor);
 				} catch (OperationCanceledException ex) {
-					root[0]= null;
+					return;
 				}
 			}
 			public void handleException(Throwable ex) {
