@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.core.manipulation;
 
 import java.util.regex.Pattern;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.expressions.PropertyTester;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -37,6 +39,11 @@ public class JavaElementPropertyTester extends PropertyTester {
 	 * A property indicating if the element is in a open and existing Java project (value <code>"isInJavaProject"</code>). 
 	 */
 	public static final String IS_IN_JAVA_PROJECT = "isInJavaProject"; //$NON-NLS-1$
+	
+	/**
+	 * A property indicating if the element is in a open and existing Java project that also implements the given nature (value <code>"isInJavaProjectWithNature"</code>). 
+	 */
+	public static final String IS_IN_JAVA_PROJECT_WITH_NATURE = "isInJavaProjectWithNature"; //$NON-NLS-1$
 
 	/**
 	 * A property indicating if the element is on the classpath (value <code>"isOnClasspath"</code>). 
@@ -90,6 +97,18 @@ public class JavaElementPropertyTester extends PropertyTester {
 		} else if (method.equals(IS_IN_JAVA_PROJECT)) {
 			IJavaProject javaProject= res.getJavaProject();
 			return javaProject != null && javaProject.exists() && javaProject.getProject().isOpen();
+		} else if (method.equals(IS_IN_JAVA_PROJECT_WITH_NATURE)) {
+			IJavaProject javaProject= res.getJavaProject();
+			if (javaProject != null && javaProject.exists() && javaProject.getProject().isOpen() ) {
+				if (expectedValue != null) {
+					try {
+						return javaProject.getProject().hasNature(toString(expectedValue));
+					} catch (CoreException e) {
+						return false;
+					}
+				}
+			}
+			return false;
 		} else if (method.equals(IS_ON_CLASSPATH)) {
 			IJavaProject javaProject= res.getJavaProject();
 			if (javaProject != null && javaProject.exists()) {
