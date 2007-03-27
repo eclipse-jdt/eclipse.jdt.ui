@@ -271,6 +271,14 @@
          <configurationType
                id="org.eclipse.jdt.junit.launchconfig">
          </configurationType>
+         <description
+               description="%DebugJUnitLaunchShortcut.description"
+               mode="debug">
+         </description>
+         <description
+               description="%RunJUnitLaunchShortcut.description"
+               mode="run">
+         </description>
       </shortcut>
    </extension>
    
