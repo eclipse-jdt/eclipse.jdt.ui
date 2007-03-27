@@ -477,6 +477,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			private ReverseMap fReverseMap= new ReverseMap();
 			private List fPreviouslyOverlaid= null;
 			private List fCurrentlyOverlaid= new ArrayList();
+			private Thread fActiveThread;
 
 
 			public CompilationUnitAnnotationModel(IResource resource) {
@@ -706,8 +707,8 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			/*
 			 * @see IProblemRequestor#isActive()
 			 */
-			public boolean isActive() {
-				return fIsActive;
+			public synchronized boolean isActive() {
+				return fIsActive && fActiveThread == Thread.currentThread();
 			}
 
 			/*
@@ -720,8 +721,14 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			/*
 			 * @see IProblemRequestorExtension#setIsActive(boolean)
 			 */
-			public void setIsActive(boolean isActive) {
+			public synchronized void setIsActive(boolean isActive) {
+				Assert.isLegal(!isActive || Display.getCurrent() == null); // must not be enabled from UI threads
+				Assert.isLegal(fActiveThread == null || fActiveThread == Thread.currentThread());
 				fIsActive= isActive;
+				if (fIsActive)
+					fActiveThread= Thread.currentThread();
+				else
+					fActiveThread= null;
 			}
 
 			/*
