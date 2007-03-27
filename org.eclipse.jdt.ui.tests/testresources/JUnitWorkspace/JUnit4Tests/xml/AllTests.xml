@@ -35,7 +35,7 @@ Hello World.
 </expected>
           <actual>
 
-Hello my friend.</actual>org.junit.ComparisonFailure: null expected:&lt;
+Hello my friend.</actual>org.junit.ComparisonFailure: expected:&lt;
 [Hello World.
 
 ]&gt; but was:&lt;
