@@ -187,7 +187,7 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS) ||
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES)) 
 		{
-			UnusedCodeFix fix= UnusedCodeFix.createUnusedMemberFix(compilationUnit, problem);
+			UnusedCodeFix fix= UnusedCodeFix.createUnusedMemberFix(compilationUnit, problem, false);
 			if (fix != null)
 				return true;
 		}

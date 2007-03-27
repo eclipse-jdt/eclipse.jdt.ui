@@ -471,7 +471,20 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void addUnusedMemberProposal(IInvocationContext context, IProblemLocation problem,  Collection proposals) {
-		UnusedCodeFix fix= UnusedCodeFix.createUnusedMemberFix(context.getASTRoot(), problem);
+		int problemId = problem.getProblemId();
+		UnusedCodeFix fix= UnusedCodeFix.createUnusedMemberFix(context.getASTRoot(), problem, false);
+		if (fix != null) {
+			addProposal(context, proposals, fix);
+		}
+		
+		if (problemId==IProblem.LocalVariableIsNeverUsed){
+			fix= UnusedCodeFix.createUnusedMemberFix(context.getASTRoot(), problem, true);
+			addProposal(context, proposals, fix);
+		}
+		
+	}
+
+	private static void addProposal(IInvocationContext context, Collection proposals, final UnusedCodeFix fix) {
 		if (fix != null) {
 			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, fix.getCleanUp(), 10, image, context);

@@ -34,6 +34,7 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.fix.AbstractFix;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.LinkedFix;
@@ -107,6 +108,17 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 	    	buf.append(result);
 	    	return buf.toString();
 	    } else {
+	    	if (fFix instanceof AbstractFix) {
+				AbstractFix af = (AbstractFix) fFix;
+				String info = af.getAdditionalInfo();
+				if (info != null) {
+					StringBuffer sb=new StringBuffer();
+					sb.append(info);
+					sb.append("<br>"); //$NON-NLS-1$
+					sb.append(result);
+					return sb.toString();
+				}
+			}
 	    	return result;
 	    }
 	}

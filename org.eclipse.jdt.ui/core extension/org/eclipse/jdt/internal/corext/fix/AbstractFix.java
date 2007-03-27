@@ -55,6 +55,10 @@ public abstract class AbstractFix implements IFix {
 				return new TextEditGroup(label);
 			}
 		}
+
+		public String getAdditionalInfo() {
+			return null;
+		}
 	}
 	
 	private final String fName;
@@ -109,6 +113,23 @@ public abstract class AbstractFix implements IFix {
 			result.addTextEditGroup(group);
 		}
 		return result;
+	}
+	
+	public String getAdditionalInfo(){
+		StringBuffer sb= new StringBuffer();
+		for (int i = 0; i < fFixRewrites.length; i++) {
+			IFixRewriteOperation frw = fFixRewrites[i];
+			if (frw instanceof AbstractFixRewriteOperation) {
+				AbstractFixRewriteOperation fro= (AbstractFixRewriteOperation) frw;
+				String info= fro.getAdditionalInfo();
+				if (info != null)
+					sb.append(info);
+			}
+		}
+		if (sb.length() > 0) {
+			return sb.toString();
+		}
+		return null;
 	}
 	
 	/* (non-Javadoc)
