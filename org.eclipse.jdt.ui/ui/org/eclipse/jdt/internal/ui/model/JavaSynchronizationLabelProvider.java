@@ -77,7 +77,7 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 	 */
 	protected ILabelProvider getDelegateLabelProvider() {
 		if (fLabelProvider == null)
-			fLabelProvider= new DecoratingLabelProvider(new JavaModelLabelProvider(ModelMessages.JavaModelLabelProvider_project_preferences_label, ModelMessages.JavaModelLabelProvider_refactorings_label), new ProblemsLabelDecorator());
+			fLabelProvider= new DecoratingLabelProvider(new JavaModelLabelProvider(ModelMessages.JavaModelLabelProvider_project_preferences_label, ModelMessages.JavaModelLabelProvider_refactorings_label), new ProblemsLabelDecorator(null));
 		return fLabelProvider;
 	}
 

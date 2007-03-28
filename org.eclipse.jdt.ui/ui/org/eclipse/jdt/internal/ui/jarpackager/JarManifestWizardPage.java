@@ -900,7 +900,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 				return !(element instanceof IPackageFragment) && super.hasChildren(element);
 			}
 		};
-		final DecoratingLabelProvider provider= new DecoratingLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), new ProblemsLabelDecorator());
+		final DecoratingLabelProvider provider= new DecoratingLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), new ProblemsLabelDecorator(null));
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getContainer().getShell(), provider, cp);
 		dialog.setDoubleClickSelects(false);
 		dialog.setComparator(new JavaElementComparator());
@@ -941,7 +941,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		int labelFlags= JavaElementLabelProvider.SHOW_BASICS
 						| JavaElementLabelProvider.SHOW_OVERLAY_ICONS
 						| JavaElementLabelProvider.SHOW_SMALL_ICONS;
-		final DecoratingLabelProvider provider= new DecoratingLabelProvider(new JavaElementLabelProvider(labelFlags), new ProblemsLabelDecorator());
+		final DecoratingLabelProvider provider= new DecoratingLabelProvider(new JavaElementLabelProvider(labelFlags), new ProblemsLabelDecorator(null));
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), provider, new StandardJavaElementContentProvider()); 
 		dialog.setComparator(new JavaElementComparator());
 		dialog.setAllowMultiple(false);

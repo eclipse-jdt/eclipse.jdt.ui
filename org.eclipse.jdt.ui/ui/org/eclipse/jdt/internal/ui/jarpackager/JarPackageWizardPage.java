@@ -496,7 +496,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 					return !(element instanceof IPackageFragment) && super.hasChildren(element);
 				}
 			};
-		final DecoratingLabelProvider provider= new DecoratingLabelProvider(new JavaElementLabelProvider(labelFlags), new ProblemsLabelDecorator());
+		final DecoratingLabelProvider provider= new DecoratingLabelProvider(new JavaElementLabelProvider(labelFlags), new ProblemsLabelDecorator(null));
 		fInputGroup= new CheckboxTreeAndListGroup(
 					parent,
 					JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()),

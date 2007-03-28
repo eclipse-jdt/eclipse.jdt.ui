@@ -67,7 +67,7 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 
 	public SearchLabelProvider(JavaSearchResultPage page) {
 		super(DEFAULT_SEARCH_TEXTFLAGS, DEFAULT_SEARCH_IMAGEFLAGS);
-		addLabelDecorator(new ProblemsLabelDecorator());
+		addLabelDecorator(new ProblemsLabelDecorator(null));
 		
 		fPage= page;
 		fLabelProviderMap= new HashMap(5);
