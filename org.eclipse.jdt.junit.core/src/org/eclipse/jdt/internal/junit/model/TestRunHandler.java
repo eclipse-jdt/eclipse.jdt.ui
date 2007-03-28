@@ -50,6 +50,14 @@ public class TestRunHandler extends DefaultHandler {
 
 	private Status fStatus;
 	
+	public TestRunHandler() {
+		
+	}
+	
+	public TestRunHandler(TestRunSession testRunSession) {
+		fTestRunSession= testRunSession;
+	}
+
 	public void setDocumentLocator(Locator locator) {
 		fLocator= locator;
 	}
@@ -59,20 +67,22 @@ public class TestRunHandler extends DefaultHandler {
 	
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		if (qName.equals(IXMLTags.NODE_TESTRUN)) {
-			if (fTestRunSession != null) {
-				throw new SAXParseException("unexpected second '" + IXMLTags.NODE_TESTRUN + "' node", fLocator); //$NON-NLS-1$ //$NON-NLS-2$
+			if (fTestRunSession == null) {
+				String name= attributes.getValue(IXMLTags.ATTR_NAME);
+				String project= attributes.getValue(IXMLTags.ATTR_PROJECT);
+				IJavaProject javaProject= null;
+				if (project != null) {
+					IJavaModel javaModel= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+					javaProject= javaModel.getJavaProject(project);
+					if (! javaProject.exists())
+						javaProject= null;
+				}
+				fTestRunSession= new TestRunSession(name, javaProject);
+				//TODO: read counts?
+				
+			} else {
+				fTestRunSession.reset(); 
 			}
-			String name= attributes.getValue(IXMLTags.ATTR_NAME);
-			String project= attributes.getValue(IXMLTags.ATTR_PROJECT);
-			IJavaProject javaProject= null;
-			if (project != null) {
-				IJavaModel javaModel= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
-				javaProject= javaModel.getJavaProject(project);
-				if (! javaProject.exists())
-					javaProject= null;
-			}
-			fTestRunSession= new TestRunSession(name, javaProject);
-			//TODO: read counts?
 			
 		} else if (qName.equals(IXMLTags.NODE_TESTSUITES)) { 
 			// support Ant's 'junitreport' task; create suite from NODE_TESTSUITE

@@ -143,8 +143,7 @@ public final class JUnitModel {
 			}
 			
 			TestRunSession testRunSession= new TestRunSession(launch, javaProject, port);
-			fTestRunSessions.addFirst(testRunSession);
-			notifyTestRunSessionAdded(testRunSession);
+			addTestRunSession(testRunSession);
 		}
 
 		private TestRunnerViewPart showTestRunnerViewPartInActivePage(TestRunnerViewPart testRunner) {
@@ -264,6 +263,10 @@ public final class JUnitModel {
 						testRunListeners[i].testReran(testCaseElement.getId(), testCaseElement.getClassName(), testCaseElement.getTestMethodName(), status.getOldCode(), trace);
 					}
 				}
+				
+				public boolean acceptsSwapToDisk() {
+					return true;
+				}
 			};
 			fActiveTestRunSession.addTestSessionListener(fTestSessionListener);
 		}
@@ -291,6 +294,34 @@ public final class JUnitModel {
 		ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
 		launchManager.addLaunchListener(fLaunchListener);
 		
+/*
+ * TODO: restore on restart:
+ * - only import headers!
+ * - only import last n sessions; remove all other files in historyDirectory
+ */
+//		File historyDirectory= JUnitPlugin.getHistoryDirectory();
+//		File[] swapFiles= historyDirectory.listFiles();
+//		if (swapFiles != null) {
+//			Arrays.sort(swapFiles, new Comparator() {
+//				public int compare(Object o1, Object o2) {
+//					String name1= ((File) o1).getName();
+//					String name2= ((File) o2).getName();
+//					return name1.compareTo(name2);
+//				}
+//			});
+//			for (int i= 0; i < swapFiles.length; i++) {
+//				final File file= swapFiles[i];
+//				SafeRunner.run(new ISafeRunnable() {
+//					public void run() throws Exception {
+//						importTestRunSession(file );
+//					}
+//					public void handleException(Throwable exception) {
+//						JUnitPlugin.log(exception);
+//					}
+//				});
+//			}
+//		}
+		
 		addTestRunSessionListener(new LegacyTestRunSessionListener());
 	}
 
@@ -300,6 +331,26 @@ public final class JUnitModel {
 	public void stop() {
 		ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
 		launchManager.removeLaunchListener(fLaunchListener);
+		
+		File historyDirectory= JUnitPlugin.getHistoryDirectory();
+		File[] swapFiles= historyDirectory.listFiles();
+		if (swapFiles != null) {
+			for (int i= 0; i < swapFiles.length; i++) {
+				swapFiles[i].delete();
+			}
+		}
+		
+//		for (Iterator iter= fTestRunSessions.iterator(); iter.hasNext();) {
+//			final TestRunSession session= (TestRunSession) iter.next();
+//			SafeRunner.run(new ISafeRunnable() {
+//				public void run() throws Exception {
+//					session.swapOut();
+//				}
+//				public void handleException(Throwable exception) {
+//					JUnitPlugin.log(exception);
+//				}
+//			});
+//		}
 	}
 	
 	
@@ -364,6 +415,22 @@ public final class JUnitModel {
 		return null; // does not happen
 	}
 	
+	public static void importIntoTestRunSession(File swapFile, TestRunSession testRunSession) throws CoreException {
+		try {
+			SAXParserFactory parserFactory= SAXParserFactory.newInstance();
+//			parserFactory.setValidating(true); // TODO: add DTD and debug flag
+			SAXParser parser= parserFactory.newSAXParser();
+			TestRunHandler handler= new TestRunHandler(testRunSession);
+			parser.parse(swapFile, handler);
+		} catch (ParserConfigurationException e) {
+			throwImportError(swapFile, e);
+		} catch (SAXException e) {
+			throwImportError(swapFile, e);
+		} catch (IOException e) {
+			throwImportError(swapFile, e);
+		}
+	}
+
 	/**
 	 * Exports the given test run session.
 	 * 
@@ -446,6 +513,7 @@ public final class JUnitModel {
 		if (existed) {
 			notifyTestRunSessionRemoved(testRunSession);
 		}
+		testRunSession.removeSwapFile();
 	}
 	
 	private void notifyTestRunSessionRemoved(TestRunSession testRunSession) {

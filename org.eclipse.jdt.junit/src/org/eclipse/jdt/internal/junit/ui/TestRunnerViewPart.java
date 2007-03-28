@@ -105,6 +105,8 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.viewsupport.ViewHistory;
 
+import org.eclipse.jdt.junit.model.ITestElement.Result;
+
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
@@ -325,16 +327,22 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 
 		public void setActiveEntry(Object entry) {
-			setActiveTestRunSession((TestRunSession) entry);
+			TestRunSession deactivatedSession= setActiveTestRunSession((TestRunSession) entry);
+			if (deactivatedSession != null)
+				deactivatedSession.swapOut();
 		}
 
 		public void setHistoryEntries(List remainingEntries, Object activeEntry) {
-			setActiveEntry(activeEntry);
+			setActiveTestRunSession((TestRunSession) activeEntry);
 			
 			List testRunSessions= JUnitPlugin.getModel().getTestRunSessions();
 			testRunSessions.removeAll(remainingEntries);
 			for (Iterator iter= testRunSessions.iterator(); iter.hasNext();) {
 				JUnitPlugin.getModel().removeTestRunSession((TestRunSession) iter.next());
+			}
+			for (Iterator iter= remainingEntries.iterator(); iter.hasNext();) {
+				TestRunSession remaining= (TestRunSession) iter.next();
+				remaining.swapOut();
 			}
 		}
 
@@ -342,20 +350,19 @@ public class TestRunnerViewPart extends ViewPart {
 			TestRunSession session= (TestRunSession) element;
 			if (session.isStopped())
 				return fSuiteIconDescriptor;
-				
-			TestElement.Status status= session.getTestRoot().getStatus();
-			if (status.isNotRun())
-				return fSuiteIconDescriptor;
-			else if (status.isRunning())
+			
+			if (session.isRunning())
 				return fSuiteRunningIconDescriptor;
-			else if (status.isOK())
+				
+			Result result= session.getTestResult(true);
+			if (result == Result.OK)
 				return fSuiteOkIconDescriptor;
-			else if (status.isError())
+			else if (result == Result.ERROR)
 				return fSuiteErrorIconDescriptor;
-			else if (status.isFailure())
+			else if (result == Result.FAILURE)
 				return fSuiteFailIconDescriptor;
 			else
-				throw new IllegalStateException(element.toString());
+				return fSuiteIconDescriptor;
 		}
 
 		public String getText(Object element) {
@@ -461,7 +468,9 @@ public class TestRunnerViewPart extends ViewPart {
 	private class TestRunSessionListener implements ITestRunSessionListener {
 		public void sessionAdded(TestRunSession testRunSession) {
 			if (getSite().getWorkbenchWindow() == JUnitPlugin.getActiveWorkbenchWindow()) {
-				setActiveTestRunSession(testRunSession);
+				TestRunSession deactivatedSession= setActiveTestRunSession(testRunSession);
+				if (deactivatedSession != null)
+					deactivatedSession.swapOut();
 				String testRunName= fTestRunSession.getTestRunName();
 				String msg;
 				if (testRunSession.getLaunch() != null) {
@@ -475,11 +484,14 @@ public class TestRunnerViewPart extends ViewPart {
 		public void sessionRemoved(TestRunSession testRunSession) {
 			if (testRunSession.equals(fTestRunSession)) {
 				List testRunSessions= JUnitPlugin.getModel().getTestRunSessions();
+				TestRunSession deactivatedSession;
 				if (! testRunSessions.isEmpty()) {
-					setActiveTestRunSession((TestRunSession) testRunSessions.get(0));
+					deactivatedSession= setActiveTestRunSession((TestRunSession) testRunSessions.get(0));
 				} else {
-					setActiveTestRunSession(null);
+					deactivatedSession= setActiveTestRunSession(null);
 				}
+				if (deactivatedSession != null)
+					deactivatedSession.swapOut();
 			}
 		}
 	}
@@ -583,6 +595,10 @@ public class TestRunnerViewPart extends ViewPart {
 		
 		public void testAdded(TestElement testElement) {
 			fTestViewer.registerTestAdded(testElement);
+		}
+		
+		public boolean acceptsSwapToDisk() {
+			return false;
 		}
 	}
 	
@@ -1141,7 +1157,11 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 	}
 	
-	private void setActiveTestRunSession(TestRunSession testRunSession) {
+	/**
+	 * @param testRunSession new active test run session
+	 * @return deactivated session, or <code>null</code> iff no session got deactivated
+	 */
+	private TestRunSession setActiveTestRunSession(TestRunSession testRunSession) {
 /*
 - State:
 fTestRunSession
@@ -1160,19 +1180,21 @@ fFailureTrace
 action enablement
  */
 		if (fTestRunSession == testRunSession)
-			return;
+			return null;
 		
 		if (fTestRunSession != null && fTestSessionListener != null) {
 			fTestRunSession.removeTestSessionListener(fTestSessionListener);
 			fTestSessionListener= null;
 		}
 		
+		TestRunSession deactivatedSession= fTestRunSession;
+		
 		fTestRunSession= testRunSession;
 		fTestViewer.registerActiveSession(testRunSession);
 		
 		if (fSashForm.isDisposed()) {
 			stopUpdateJobs();
-			return;
+			return deactivatedSession;
 		}
 		
 		if (testRunSession == null) {
@@ -1189,7 +1211,6 @@ action enablement
 			fRerunLastTestAction.setEnabled(false);
 			
 		} else {
-			fTestRunSession= testRunSession;
 			fTestSessionListener= new TestSessionListener();
 			fTestRunSession.addTestSessionListener(fTestSessionListener);
 			
@@ -1214,6 +1235,7 @@ action enablement
 				fTestViewer.expandFirstLevel();
 			}
 		}
+		return deactivatedSession;
 	}
 
 	private void updateRerunFailedFirstAction() {

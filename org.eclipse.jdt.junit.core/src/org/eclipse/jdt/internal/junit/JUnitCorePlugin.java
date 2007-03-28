@@ -14,6 +14,7 @@
 
 package org.eclipse.jdt.internal.junit.ui;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -53,7 +54,6 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * The plug-in runtime class for the JUnit plug-in.
  */
 public class JUnitPlugin extends AbstractUIPlugin {
-	//TODO: move to org.eclipse.jdt.internal.junit
 	
 	/**
 	 * The single instance of this plug-in runtime class.
@@ -80,9 +80,10 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	 * The class path variable referring to the junit source location
      * @since 3.2
 	 */
-	public final static String JUNIT_SRC_HOME= "JUNIT_SRC_HOME";  //$NON-NLS-1$
+	public static final String JUNIT_SRC_HOME= "JUNIT_SRC_HOME";  //$NON-NLS-1$
 
 	private static final IPath ICONS_PATH= new Path("$nl$/icons/full"); //$NON-NLS-1$
+	private static final String HISTORY_DIR_NAME= "history"; //$NON-NLS-1$
 	
 	private final JUnitModel fJUnitModel= new JUnitModel();
 	
@@ -377,6 +378,14 @@ public class JUnitPlugin extends AbstractUIPlugin {
 			section= dialogSettings.addNewSection(name);
 		}
 		return section;
+	}
+
+	public static File getHistoryDirectory() throws IllegalStateException {
+		File historyDir= getDefault().getStateLocation().append(HISTORY_DIR_NAME).toFile();
+		if (! historyDir.isDirectory()) {
+			historyDir.mkdir();
+		}
+		return historyDir;
 	}
 
 }

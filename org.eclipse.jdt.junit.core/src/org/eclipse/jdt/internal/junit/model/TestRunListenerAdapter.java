@@ -130,4 +130,8 @@ public class TestRunListenerAdapter implements ITestSessionListener {
 	public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult) {
 		// ignore
 	}
+	
+	public boolean acceptsSwapToDisk() {
+		return true;
+	}
 }

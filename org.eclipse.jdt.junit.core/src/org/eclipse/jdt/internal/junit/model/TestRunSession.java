@@ -11,7 +11,10 @@
 
 package org.eclipse.jdt.internal.junit.model;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -61,19 +64,24 @@ public class TestRunSession implements ITestRunSession {
 	/**
 	 * Test runner client or <code>null</code>.
 	 */
-	private final RemoteTestRunnerClient fTestRunnerClient;
+	private RemoteTestRunnerClient fTestRunnerClient;
 
 	private final ListenerList/*<ITestSessionListener>*/ fSessionListeners;
 	
 	/**
-	 * The model root.
+	 * The model root, or <code>null</code> if swapped to disk.
 	 */
-	private final TestRoot fTestRoot;
+	private TestRoot fTestRoot;
+	
+	/**
+	 * The test run session's cached result, or <code>null</code> if <code>fTestRoot != null</code>.
+	 */
+	private Result fTestResult;
 	
 	/**
 	 * Map from testId to testElement.
 	 */
-	private final HashMap/*<String, TestElement>*/ fIdToTest;
+	private HashMap/*<String, TestElement>*/ fIdToTest;
 	
 	/**
 	 * The TestSuites for which additional children are expected. 
@@ -159,7 +167,19 @@ public class TestRunSession implements ITestRunSession {
 		fTestRunnerClient.startListening(new ITestRunListener2[] { new TestSessionNotifier() }, port);
 
 		fSessionListeners= new ListenerList();
-		fSessionListeners.add(new TestRunListenerAdapter(this));
+		addTestSessionListener(new TestRunListenerAdapter(this));
+	}
+	
+	void reset() {
+		fStartedCount= 0; 
+		fFailureCount= 0; 
+		fErrorCount= 0; 
+		fIgnoredCount= 0; 
+		fTotalCount= 0;
+		
+		fTestRoot= new TestRoot(this);
+		fTestResult= null;
+		fIdToTest= new HashMap();
 	}
 	
 	/* (non-Javadoc)
@@ -179,7 +199,11 @@ public class TestRunSession implements ITestRunSession {
 	 * @see org.eclipse.jdt.junit.model.ITestElement#getTestResult(boolean)
 	 */
 	public Result getTestResult(boolean includeChildren) {
-		return getTestRoot().getTestResult(true);
+		if (fTestRoot != null) {
+			return fTestRoot.getTestResult(true);
+		} else {
+			return fTestResult;
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -212,6 +236,7 @@ public class TestRunSession implements ITestRunSession {
 	
 	
 	public TestRoot getTestRoot() {
+		swapIn(); //TODO: TestRoot should stay (e.g. for getTestRoot().getStatus())
 		return fTestRoot;
 	}
 
@@ -270,6 +295,7 @@ public class TestRunSession implements ITestRunSession {
 	}
 
 	public void addTestSessionListener(ITestSessionListener listener) {
+		swapIn();
 		fSessionListeners.add(listener);
 	}
 	
@@ -277,6 +303,68 @@ public class TestRunSession implements ITestRunSession {
 		fSessionListeners.remove(listener);
 	}
 	
+	public void swapOut() {
+		if (fTestRoot == null)
+			return;
+		if (isRunning() || getStartTime() == 0 || isKeptAlive())
+			return;
+		
+		Object[] listeners= fSessionListeners.getListeners();
+		for (int i= 0; i < listeners.length; ++i) {
+			ITestSessionListener registered= (ITestSessionListener) listeners[i];
+			if (! registered.acceptsSwapToDisk())
+				return;
+		}
+		
+		try {
+			File swapFile= getSwapFile();
+			
+			JUnitModel.exportTestRunSession(this, swapFile);
+			fTestResult= fTestRoot.getTestResult(true);
+			fTestRoot= null;
+			fTestRunnerClient= null;
+			fIdToTest= new HashMap();
+			fIncompleteTestSuites= null;
+			fUnrootedSuite= null;
+			
+		} catch (IllegalStateException e) {
+			JUnitPlugin.log(e);
+		} catch (CoreException e) {
+			JUnitPlugin.log(e);
+		}
+	}
+	
+	public void removeSwapFile() {
+		File swapFile= getSwapFile();
+		if (swapFile.exists())
+			swapFile.delete();
+	}
+
+	private File getSwapFile() throws IllegalStateException {
+		File historyDir= JUnitPlugin.getHistoryDirectory();
+		String isoTime= new SimpleDateFormat("yyyyMMdd-HHmmss.SSS").format(new Date(getStartTime())); //$NON-NLS-1$
+		String swapFileName= isoTime + ".xml"; //$NON-NLS-1$
+		return new File(historyDir, swapFileName);
+	}
+
+
+	public void swapIn() {
+		if (fTestRoot != null)
+			return;
+
+		try {
+			JUnitModel.importIntoTestRunSession(getSwapFile(), this);
+		} catch (IllegalStateException e) {
+			JUnitPlugin.log(e);
+			fTestRoot= new TestRoot(this);
+			fTestResult= null;
+		} catch (CoreException e) {
+			JUnitPlugin.log(e);
+			fTestRoot= new TestRoot(this);
+			fTestResult= null;
+		}
+	}
+
 	public void stopTestRun() {
 		if (isRunning() || ! isKeptAlive())
 			fIsStopped= true;

@@ -86,5 +86,11 @@ public interface ITestSessionListener {
 	 * @param actualResult actual value
 	 */
 	public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult);
+	
+	/**
+	 * @return <code>true</code> if the test run session can be swapped to disk although
+	 * this listener is still installed
+	 */
+	public boolean acceptsSwapToDisk();
 
 }
