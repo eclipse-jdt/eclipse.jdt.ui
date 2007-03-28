@@ -66,6 +66,7 @@ public final class TypeHierarchyMessages extends NLS {
 	public static String SuperTypeHierarchyViewer_filtered_title;
 	public static String TraditionalHierarchyViewer_title;
 	public static String TraditionalHierarchyViewer_filtered_title;
+	public static String TypeHierarchyViewPart_createinput;
 	public static String TypeHierarchyViewPart_error_title;
 	public static String TypeHierarchyViewPart_error_message;
 	public static String TypeHierarchyViewPart_empty;

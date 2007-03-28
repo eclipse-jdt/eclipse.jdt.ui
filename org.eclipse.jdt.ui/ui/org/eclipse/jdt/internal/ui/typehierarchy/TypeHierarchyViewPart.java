@@ -507,12 +507,13 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		// Make sure the UI got repainted before we execute a long running
 		// operation. This can be removed if we refresh the hierarchy in a 
 		// separate thread.
-		// Work-araound for http://dev.eclipse.org/bugs/show_bug.cgi?id=30881
+		// Work-around for http://dev.eclipse.org/bugs/show_bug.cgi?id=30881
 		processOutstandingEvents();
 		if (inputElement == null) {	
 			clearInput();
 		} else {
 			fInputElement= inputElement;
+			fNoHierarchyShownLabel.setText(Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_createinput, inputElement.getElementName())); 
 			try {
 				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(inputElement, JavaPlugin.getActiveWorkbenchWindow());
 				// fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(inputElement, getSite().getWorkbenchWindow());
@@ -521,6 +522,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				clearInput();
 				return;
 			} catch (InterruptedException e) {
+				fNoHierarchyShownLabel.setText(TypeHierarchyMessages.TypeHierarchyViewPart_empty); 
 				return;				
 			}
 				
@@ -1503,16 +1505,18 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	private void doRestoreInBackground(final IMemento memento, final IJavaElement hierarchyInput, IProgressMonitor monitor) throws JavaModelException {
 		fHierarchyLifeCycle.doHierarchyRefresh(hierarchyInput, monitor);	
-		if (!monitor.isCanceled()) {
-			Display.getDefault().asyncExec(new Runnable() {
-				public void run() {
-					// running async: check first if view still exists
-					if (fPagebook != null && !fPagebook.isDisposed()) {
+		final boolean doRestore= !monitor.isCanceled();
+		Display.getDefault().asyncExec(new Runnable() {
+			public void run() {
+				// running async: check first if view still exists
+				if (fPagebook != null && !fPagebook.isDisposed()) {
+					if (doRestore)
 						doRestoreState(memento, hierarchyInput);
-					}
+					else
+						fNoHierarchyShownLabel.setText(TypeHierarchyMessages.TypeHierarchyViewPart_empty); 
 				}
-			});
-		}
+			}
+		});
 	}
 	
 		
