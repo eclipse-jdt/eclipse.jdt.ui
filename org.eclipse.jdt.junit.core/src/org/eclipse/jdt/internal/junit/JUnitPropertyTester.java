@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.junit;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.expressions.PropertyTester;
 
@@ -39,6 +40,10 @@ public class JUnitPropertyTester extends PropertyTester {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.properties.IPropertyEvaluator#test(java.lang.Object, java.lang.String, java.lang.String)
 	 */
 	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
+		if (!(receiver instanceof IAdaptable)) {
+			throw new IllegalArgumentException("Element must be of type 'IAdaptable', is " + receiver == null ? "null" : receiver.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		
 		IJavaElement element;
 		if (receiver instanceof IJavaElement) {
 			element= (IJavaElement) receiver;
@@ -47,8 +52,16 @@ public class JUnitPropertyTester extends PropertyTester {
 			if (element == null) {
 				return false;
 			}
-		} else {
-			throw new IllegalArgumentException("Element must be of type 'IJavaElement' or 'IResource'"); //$NON-NLS-1$
+		} else { // is IAdaptable
+			element= (IJavaElement) ((IAdaptable) receiver).getAdapter(IJavaElement.class);
+			if (element == null) {
+				IResource resource= (IResource) ((IAdaptable) receiver).getAdapter(IResource.class);
+				element = JavaCore.create(resource);
+				if (element == null) {
+					return false;
+				}
+				return false;
+			}
 		}
 		if (PROPERTY_IS_TEST.equals(property)) { 
 			return isJUnitTest(element);
