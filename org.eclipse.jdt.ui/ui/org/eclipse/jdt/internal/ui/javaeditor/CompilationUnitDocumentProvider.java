@@ -723,7 +723,6 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			 */
 			public synchronized void setIsActive(boolean isActive) {
 				Assert.isLegal(!isActive || Display.getCurrent() == null); // must not be enabled from UI threads
-				Assert.isLegal(fActiveThread == null || fActiveThread == Thread.currentThread());
 				fIsActive= isActive;
 				if (fIsActive)
 					fActiveThread= Thread.currentThread();
