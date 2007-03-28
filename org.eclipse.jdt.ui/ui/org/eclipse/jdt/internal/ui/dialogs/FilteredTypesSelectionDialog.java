@@ -120,7 +120,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 
 	private WorkingSetFilterActionGroup fFilterActionGroup;
 
-	private TypeItemLabelProvider fTypeInfoLabelProvider;
+	private final TypeItemLabelProvider fTypeInfoLabelProvider;
 
 	private String fTitle;
 
@@ -130,17 +130,19 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	
 	private boolean fAllowScopeSwitching;
 
-	private int fElementKinds;
+	private final int fElementKinds;
 
-	private ITypeInfoFilterExtension fFilterExtension;
+	private final ITypeInfoFilterExtension fFilterExtension;
 
-	private TypeSelectionExtension fExtension;
+	private final TypeSelectionExtension fExtension;
 
 	private ISelectionStatusValidator fValidator;
 
-	private TypeInfoUtil fTypeInfoUtil;
+	private final TypeInfoUtil fTypeInfoUtil;
 	
-	private static boolean fgFirstTime= true; 
+	private static boolean fgFirstTime= true;
+
+	private final TypeItemsComparator fTypeItemsComparator; 
 
 	/**
 	 * Creates new FilteredTypesSelectionDialog instance
@@ -224,7 +226,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 		setListLabelProvider(fTypeInfoLabelProvider);
 		setListSelectionLabelDecorator(fTypeInfoLabelProvider);
 		setDetailsLabelProvider(new TypeItemDetailsLabelProvider(fTypeInfoUtil));
-
+		
+		fTypeItemsComparator= new TypeItemsComparator();
 	}
 
 	/*
@@ -508,7 +511,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#getItemsComparator()
 	 */
 	protected Comparator getItemsComparator() {
-		return new TypeItemsComparator();
+		return fTypeItemsComparator;
 	}
 
 	/*
@@ -747,9 +750,9 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	 */
 	private static class TypeItemDetailsLabelProvider extends LabelProvider {
 
-		private TypeNameMatchLabelProvider fLabelProvider= new TypeNameMatchLabelProvider(TypeNameMatchLabelProvider.SHOW_TYPE_CONTAINER_ONLY + TypeNameMatchLabelProvider.SHOW_ROOT_POSTFIX);
+		private final TypeNameMatchLabelProvider fLabelProvider= new TypeNameMatchLabelProvider(TypeNameMatchLabelProvider.SHOW_TYPE_CONTAINER_ONLY + TypeNameMatchLabelProvider.SHOW_ROOT_POSTFIX);
 
-		private TypeInfoUtil fTypeInfoUtil;
+		private final TypeInfoUtil fTypeInfoUtil;
 
 		public TypeItemDetailsLabelProvider(TypeInfoUtil typeInfoUtil) {
 			fTypeInfoUtil= typeInfoUtil;
@@ -784,15 +787,15 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 
 	private static class TypeInfoUtil {
 
-		private ITypeInfoImageProvider fProviderExtension;
+		private final ITypeInfoImageProvider fProviderExtension;
 
-		private TypeInfoRequestorAdapter fAdapter= new TypeInfoRequestorAdapter();
+		private final TypeInfoRequestorAdapter fAdapter= new TypeInfoRequestorAdapter();
 
-		private Map fLib2Name= new HashMap();
+		private final Map fLib2Name= new HashMap();
 
-		private String[] fInstallLocations;
+		private final String[] fInstallLocations;
 
-		private String[] fVMNames;
+		private final String[] fVMNames;
 
 		private boolean fFullyQualifyDuplicates;
 
@@ -983,15 +986,15 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 
 		private static final int TYPE_MODIFIERS= Flags.AccEnum | Flags.AccAnnotation | Flags.AccInterface;
 
-		private IJavaSearchScope fScope;
+		private final IJavaSearchScope fScope;
 
-		private boolean fIsWorkspaceScope;
+		private final boolean fIsWorkspaceScope;
 
-		private int fElemKind;
+		private final int fElemKind;
 
-		private ITypeInfoFilterExtension fFilterExt;
+		private final ITypeInfoFilterExtension fFilterExt;
 
-		private TypeInfoRequestorAdapter fAdapter= new TypeInfoRequestorAdapter();
+		private final TypeInfoRequestorAdapter fAdapter= new TypeInfoRequestorAdapter();
 
 		private SearchPattern fPackageMatcher;
 		
@@ -1272,9 +1275,9 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	private static class TypeSearchRequestor extends TypeNameMatchRequestor {
 		private volatile boolean fStop;
 
-		private AbstractContentProvider fContentProvider;
+		private final AbstractContentProvider fContentProvider;
 
-		private TypeItemsFilter fTypeItemsFilter;
+		private final TypeItemsFilter fTypeItemsFilter;
 
 		public TypeSearchRequestor(AbstractContentProvider contentProvider, TypeItemsFilter typeItemsFilter) {
 			super();
@@ -1307,11 +1310,11 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	 */
 	private static class TypeItemsComparator implements Comparator {
 
-		private Map fLib2Name= new HashMap();
+		private final Map fLib2Name= new HashMap();
 
-		private String[] fInstallLocations;
+		private final String[] fInstallLocations;
 
-		private String[] fVMNames;
+		private final String[] fVMNames;
 
 		/**
 		 * Creates new instance of TypeItemsComparator
