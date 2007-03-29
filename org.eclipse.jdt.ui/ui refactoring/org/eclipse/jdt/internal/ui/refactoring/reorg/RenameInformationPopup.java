@@ -118,13 +118,7 @@ public class RenameInformationPopup {
 					if (fTableMenuManager != null)
 						fTableMenuManager.dispose();
 					
-					//XXX workaround for bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=173438 :
-//					fRenameLinkedMode.cancel();
-					fEditor.getSite().getShell().getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							fRenameLinkedMode.cancel();
-						}
-					});
+					fRenameLinkedMode.cancel();
 				}
 			});
 		}
@@ -407,7 +401,8 @@ public class RenameInformationPopup {
 	}
 
 	/**
-	 * @returns the location in display coordinates or <code>null</code> iff not visible
+	 * @param snapPosition one of the SNAP_POSITION_* constants
+	 * @return the location in display coordinates or <code>null</code> iff not visible
 	 */
 	private Point computePopupLocation(int snapPosition) {
 		if (fPopup == null || fPopup.isDisposed())
