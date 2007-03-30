@@ -63,81 +63,98 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class DocumentAdapter implements IBuffer, IDocumentListener {
 
-		/**
-		 * Internal implementation of a NULL instanceof IBuffer.
-		 */
-		static private class NullBuffer implements IBuffer {
-			public void addBufferChangedListener(IBufferChangedListener listener) {}
-			public void append(char[] text) {}
-			public void append(String text) {}
-			public void close() {}
-			public char getChar(int position) { return 0; }
-			public char[] getCharacters() { return null; }
-			public String getContents() { return null; }
-			public int getLength() { return 0; }
-			public IOpenable getOwner() { return null; }
-			public String getText(int offset, int length) { return null; }
-			public IResource getUnderlyingResource() { return null; }
-			public boolean hasUnsavedChanges() { return false; }
-			public boolean isClosed() { return false; }
-			public boolean isReadOnly() { return true; }
-			public void removeBufferChangedListener(IBufferChangedListener listener) {}
-			public void replace(int position, int length, char[] text) {}
-			public void replace(int position, int length, String text) {}
-			public void save(IProgressMonitor progress, boolean force) throws JavaModelException {}
-			public void setContents(char[] contents) {}
-			public void setContents(String contents) {}
+	/**
+	 * Internal implementation of a NULL instanceof IBuffer.
+	 */
+	static private class NullBuffer implements IBuffer {
+		public void addBufferChangedListener(IBufferChangedListener listener) {}
+		public void append(char[] text) {}
+		public void append(String text) {}
+		public void close() {}
+		public char getChar(int position) { return 0; }
+		public char[] getCharacters() { return null; }
+		public String getContents() { return null; }
+		public int getLength() { return 0; }
+		public IOpenable getOwner() { return null; }
+		public String getText(int offset, int length) { return null; }
+		public IResource getUnderlyingResource() { return null; }
+		public boolean hasUnsavedChanges() { return false; }
+		public boolean isClosed() { return false; }
+		public boolean isReadOnly() { return true; }
+		public void removeBufferChangedListener(IBufferChangedListener listener) {}
+		public void replace(int position, int length, char[] text) {}
+		public void replace(int position, int length, String text) {}
+		public void save(IProgressMonitor progress, boolean force) throws JavaModelException {}
+		public void setContents(char[] contents) {}
+		public void setContents(String contents) {}
+	}
+
+
+	/** NULL implementing <code>IBuffer</code> */
+	public final static IBuffer NULL= new NullBuffer();
+
+
+	/**
+	 * Run the given runnable in the UI thread.
+	 * 
+	 * @param runnable the runnable
+	 * @sinec 3.3
+	 */
+	private static final void run(Runnable runnable) {
+		Display currentDisplay= Display.getCurrent();
+		if (currentDisplay != null)
+			currentDisplay.syncExec(runnable);
+		else
+			Display.getDefault().asyncExec(runnable);
+	}
+
+
+	/**
+	 *  Executes a document set content call in the UI thread.
+	 */
+	protected class DocumentSetCommand implements Runnable {
+
+		private String fContents;
+
+		public void run() {
+			if (!isClosed())
+				fDocument.set(fContents);
 		}
 
+		public void set(String contents) {
+			fContents= contents;
+			DocumentAdapter.run(this);
+		}
+	}
 
-		/** NULL implementing <code>IBuffer</code> */
-		public final static IBuffer NULL= new NullBuffer();
 
+	/**
+	 * Executes a document replace call in the UI thread.
+	 */
+	protected class DocumentReplaceCommand implements Runnable {
 
-		/**
-		 *  Executes a document set content call in the UI thread.
-		 */
-		protected class DocumentSetCommand implements Runnable {
+		private int fOffset;
+		private int fLength;
+		private String fText;
 
-			private String fContents;
-
-			public void run() {
+		public void run() {
+			try {
 				if (!isClosed())
-					fDocument.set(fContents);
-			}
-
-			public void set(String contents) {
-				fContents= contents;
-				Display.getDefault().syncExec(this);
+					fDocument.replace(fOffset, fLength, fText);
+			} catch (BadLocationException x) {
+				// ignore
 			}
 		}
 
-		/**
-		 * Executes a document replace call in the UI thread.
-		 */
-		protected class DocumentReplaceCommand implements Runnable {
-
-			private int fOffset;
-			private int fLength;
-			private String fText;
-
-			public void run() {
-				try {
-					if (!isClosed())
-						fDocument.replace(fOffset, fLength, fText);
-				} catch (BadLocationException x) {
-					// ignore
-				}
-			}
-
-			public void replace(int offset, int length, String text) {
-				fOffset= offset;
-				fLength= length;
-				fText= text;
-				Display.getDefault().syncExec(this);
-			}
+		public void replace(int offset, int length, String text) {
+			fOffset= offset;
+			fLength= length;
+			fText= text;
+			DocumentAdapter.run(this);
 		}
+	}
 
+		
 	private static final boolean DEBUG_LINE_DELIMITERS= true;
 
 	private IOpenable fOwner;
@@ -166,7 +183,9 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 
 	/**
 	 * Constructs a new document adapter.
-	 *
+	 * 
+	 * @param owner the owner of this buffer
+	 * @param path the path of the file that backs the buffer
 	 * @since 3.2
 	 */
 	public DocumentAdapter(IOpenable owner, IPath path) {
@@ -181,6 +200,9 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	
 	/**
 	 * Constructs a new document adapter.
+	 * 
+	 * @param owner the owner of this buffer 
+	 * @param file the <code>IFile</code> that backs the buffer
 	 */
 	public DocumentAdapter(IOpenable owner, IFile file) {
 
@@ -209,6 +231,8 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 
 	/**
 	 * Returns the status of this document adapter.
+	 * 
+	 * @return the status 
 	 */
 	public IStatus getStatus() {
 		if (fStatus != null)
