@@ -646,7 +646,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 								final ILocalVariable currentLocal= (ILocalVariable) element;
 								final boolean isParameter;
 								
-								if (isParameter(currentLocal)) {
+								if (JavaModelUtil.isParameter(currentLocal)) {
 									addMethodRename(unQualifiedTypeName, sugg, (IMethod) currentLocal.getParent());
 									isParameter= true;
 								} else
@@ -677,26 +677,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			throw new OperationCanceledException();
 		}
 		return fCachedRefactoringStatus;
-	}
-
-	/**
-	 * Returns true iff the given local variable is a parameter of its
-	 * declaring method.
-	 * 
-	 * TODO replace this method with new API when available: 
-	 * 		https://bugs.eclipse.org/bugs/show_bug.cgi?id=48420
-	 */
-	private boolean isParameter(ILocalVariable currentLocal) throws JavaModelException {
-
-		final IJavaElement parent= currentLocal.getParent();
-		if (parent instanceof IMethod) {
-			final String[] params= ((IMethod) parent).getParameterNames();
-			for (int i= 0; i < params.length; i++) {
-				if (params[i].equals(currentLocal.getElementName()))
-					return true;
-			}
-		}
-		return false;
 	}
 
 	/**
