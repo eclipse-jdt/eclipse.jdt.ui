@@ -511,6 +511,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			final boolean detect= fDetectGroup.mustDetect();
 			fUseDefaultJRE.setEnabled(!detect);
 			fUseProjectJRE.setEnabled(!detect);
+			fUseEEJRE.setEnabled(!detect);
 			fJRECombo.setEnabled(!detect && fUseProjectJRE.isSelected());
 			fEECombo.setEnabled(!detect && fUseEEJRE.isSelected());
 			fPreferenceLink.setEnabled(!detect);
