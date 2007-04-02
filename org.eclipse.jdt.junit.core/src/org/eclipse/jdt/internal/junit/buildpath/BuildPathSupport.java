@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.ui.JUnitPreferencesConstants;
 
 import org.osgi.framework.Bundle;
 
@@ -93,7 +94,7 @@ public class BuildPathSupport {
 			
 			IAccessRule[] accessRules= { };
 			
-			String javadocLocation= "http://www.junit.org/junit/javadoc/3.8.1"; //$NON-NLS-1$
+			String javadocLocation= JUnitPlugin.getDefault().getPreferenceStore().getString(JUnitPreferencesConstants.JUNIT3_JAVADOC);
 			IClasspathAttribute[] attributes= { JavaCore.newClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME, javadocLocation) };
 			
 			return JavaCore.newLibraryEntry(jarLocation, srcLocation, null, accessRules, attributes, false);
@@ -111,11 +112,11 @@ public class BuildPathSupport {
 			
 			IAccessRule[] accessRules= { };
 			
-			IClasspathAttribute[] attributes= { };// no complete reference found yet
+			String javadocLocation= JUnitPlugin.getDefault().getPreferenceStore().getString(JUnitPreferencesConstants.JUNIT4_JAVADOC);
+			IClasspathAttribute[] attributes= { JavaCore.newClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME, javadocLocation) };
 			
 			return JavaCore.newLibraryEntry(jarLocation, srcLocation, null, accessRules, attributes, false);
 		}
 		return null;
 	}
-	
 }

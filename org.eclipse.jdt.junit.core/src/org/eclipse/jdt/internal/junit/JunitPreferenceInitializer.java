@@ -34,5 +34,8 @@ public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
 		prefs.setDefault(JUnitPreferencesConstants.PREF_ACTIVE_FILTERS_LIST, active);
 		prefs.setDefault(JUnitPreferencesConstants.PREF_INACTIVE_FILTERS_LIST, ""); //$NON-NLS-1$
 		prefs.setDefault(JUnitPreferencesConstants.MAX_TEST_RUNS, 10);
+		
+		prefs.setDefault(JUnitPreferencesConstants.JUNIT3_JAVADOC, "http://www.junit.org/junit/javadoc/3.8.1"); //$NON-NLS-1$
+		prefs.setDefault(JUnitPreferencesConstants.JUNIT4_JAVADOC, "http://junit.sourceforge.net/javadoc_40"); //$NON-NLS-1$
 	}
 }
