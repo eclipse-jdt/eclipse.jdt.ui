@@ -51,13 +51,21 @@ public class InlineTempWizard extends RefactoringWizard {
 		
 		protected String getMessageString() {
 			InlineTempRefactoring refactoring= (InlineTempRefactoring) getRefactoring();
-			int occurences= refactoring.getReferences().length;
+			int occurrences= refactoring.getReferences().length;
 			final String identifier= refactoring.getVariableDeclaration().getName().getIdentifier();
-			if (occurences == 1) 
-				return Messages.format(RefactoringMessages.InlineTempInputPage_message_one,  identifier); 
-			else
-				return Messages.format(RefactoringMessages.InlineTempInputPage_message_multi,  
-					new Object[] { new Integer(occurences),  identifier });
+			switch (occurrences) {
+				case 0:
+					return Messages.format(
+							RefactoringMessages.InlineTempInputPage_message_zero,
+							identifier);
+
+				case 1:
+					return Messages.format(RefactoringMessages.InlineTempInputPage_message_one, identifier);
+
+				default:
+					return Messages.format(RefactoringMessages.InlineTempInputPage_message_multi, new Object[] {
+							new Integer(occurrences), identifier });
+			}
 		}
 	}
 }

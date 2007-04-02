@@ -382,6 +382,8 @@ public final class RefactoringMessages extends NLS {
 
 	public static String InlineTempInputPage_message_one;
 
+	public static String InlineTempInputPage_message_zero;
+
 	public static String InlineTempWizard_defaultPageTitle;
 
 	public static String IntroduceFactoryAction_description;
