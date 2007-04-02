@@ -59,6 +59,8 @@ public class JavaNavigatorContentProvider extends
 
 	private Object fRealInput;
 
+	private IPropertyChangeListener fLayoutPropertyListener;
+
 	public void init(ICommonContentExtensionSite commonContentExtensionSite) {
 		IExtensionStateModel stateModel = commonContentExtensionSite
 				.getExtensionStateModel();
@@ -66,7 +68,7 @@ public class JavaNavigatorContentProvider extends
 
 		fStateModel = stateModel; 
 		restoreState(memento);
-		fStateModel.addPropertyChangeListener(new IPropertyChangeListener() {
+		fLayoutPropertyListener = new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				if (Values.IS_LAYOUT_FLAT.equals(event.getProperty())) {
 					if (event.getNewValue() != null) {
@@ -77,12 +79,18 @@ public class JavaNavigatorContentProvider extends
 				}
 
 			}
-		});
+		};
+		fStateModel.addPropertyChangeListener(fLayoutPropertyListener);
 
 		IPreferenceStore store = PreferenceConstants.getPreferenceStore();
 		boolean showCUChildren = store
 				.getBoolean(PreferenceConstants.SHOW_CU_CHILDREN);
 		setProvideMembers(showCUChildren);
+	}
+	
+	public void dispose() { 
+		super.dispose();
+		fStateModel.removePropertyChangeListener(fLayoutPropertyListener);
 	}
 
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) { 
@@ -160,9 +168,9 @@ public class JavaNavigatorContentProvider extends
 	 * 
 	 * @param modification
 	 *            the shape modification to convert
+	 * @return returns true if the conversion took place
 	 */
-	private boolean convertToJavaElements(
-			PipelinedShapeModification modification) {
+	private boolean convertToJavaElements(PipelinedShapeModification modification) {
 		Object parent = modification.getParent();
 		if (parent instanceof IContainer) {
 			IJavaElement element = JavaCore.create((IContainer) parent);
@@ -183,6 +191,7 @@ public class JavaNavigatorContentProvider extends
 	 * 
 	 * @param currentChildren
 	 *            The set of current children that would be contributed or refreshed in the viewer.
+	 * @return returns true if the conversion took place
 	 */
 	private boolean convertToJavaElements(Set currentChildren) {
 

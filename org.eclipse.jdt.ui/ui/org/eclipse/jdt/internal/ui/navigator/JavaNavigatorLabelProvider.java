@@ -61,6 +61,8 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider {
 
 	private IExtensionStateModel fStateModel;
 
+	private IPropertyChangeListener fLayoutPropertyListener;
+
 	public JavaNavigatorLabelProvider() {
 
 	}
@@ -71,7 +73,7 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider {
 
 		delegeteLabelProvider.setIsFlatLayout(fStateModel
 				.getBooleanProperty(Values.IS_LAYOUT_FLAT));
-		fStateModel.addPropertyChangeListener(new IPropertyChangeListener() {
+		fLayoutPropertyListener = new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				if (Values.IS_LAYOUT_FLAT.equals(event.getProperty())) {
 					if (event.getNewValue() != null) {
@@ -82,7 +84,8 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider {
 				}
 
 			}
-		});
+		};
+		fStateModel.addPropertyChangeListener(fLayoutPropertyListener);
 	}
 
 	public String getDescription(Object element) {
@@ -93,8 +96,9 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider {
 		return new PackageExplorerLabelProvider(fContentProvider);
 	}
 
-	public void dispose() {
+	public void dispose() { 
 		delegeteLabelProvider.dispose();
+		fStateModel.removePropertyChangeListener(fLayoutPropertyListener);
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
@@ -172,12 +176,13 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider {
 		else
 			return element.getName();
 	}
-
-	public void restoreState(IMemento memento) {
-
+	
+	public void restoreState(IMemento memento) { 
+		
 	}
-
-	public void saveState(IMemento memento) {
-
+	
+	public void saveState(IMemento memento) { 
+		
 	}
+ 
 }

@@ -5238,11 +5238,7 @@
 							value="org.eclipse.jdt.core.IClassFile" />
 					<instanceof
 							value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" />
-<!--
-					<instanceof
-							value="org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel" />
--->
-				</or>
+ 				</or>
 			</triggerPoints>
 			<possibleChildren>
 				<or>
@@ -5268,44 +5264,54 @@
 					<instanceof
 							value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" />
 				</or>
-			</possibleChildren>
+			</possibleChildren> 
 			<actionProvider
-					class="org.eclipse.jdt.internal.ui.navigator.PackageExplorerActionProvider"
-					id="org.eclipse.jdt.internal.ui.navigator.PackageExplorerActionProvider"
-					overrides="org.eclipse.ui.navigator.resources.actions.RefactorActions"> 
+					class="org.eclipse.jdt.internal.ui.navigator.JavaNavigatorViewActionProvider"
+					id="org.eclipse.jdt.ui.navigator.actions.ViewActions"> 
 				<enablement>
-					<or>
-					<adapt
-							type="org.eclipse.core.resources.IProject" >
-					</adapt>
-					<instanceof
-							value="org.eclipse.core.resources.IWorkspaceRoot" />
-					<instanceof
-							value="org.eclipse.core.resources.IFolder" />
-					<instanceof
-							value="org.eclipse.core.resources.IFile" />
-					<instanceof
-							value="org.eclipse.core.resources.IStorage" />
-					<instanceof
-							value="org.eclipse.jdt.core.IJavaProject" />
-					<instanceof
-							value="org.eclipse.jdt.core.IJavaElement" />
-					<instanceof
-							value="org.eclipse.jdt.core.IJarEntryResource" />
-					<instanceof
-							value="org.eclipse.jdt.core.IClassFile" />
-					<instanceof
-							value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" /> 
+					<or>  
+					<instanceof value="org.eclipse.core.resources.IWorkspaceRoot" /> 
+					<adapt type="org.eclipse.jdt.core.IJavaModel" />
+					<adapt type="java.util.Collection"> 
+						<count value="0" />
+					</adapt>		
+					</or>
+				</enablement>
+			</actionProvider>				
+			<actionProvider
+					class="org.eclipse.jdt.internal.ui.navigator.JavaNavigatorActionProvider"
+					id="org.eclipse.jdt.ui.navigator.actions.StandardActions"
+					overrides="org.eclipse.ui.navigator.resources.actions.EditActions"> 
+				<enablement>
+					<or>   
+					<instanceof value="org.eclipse.jdt.core.IJavaElement" />
+					<instanceof value="org.eclipse.jdt.core.IJarEntryResource" /> 
+					<instanceof	value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" /> 
 					<adapt type="java.util.Collection"> 
 						<count value="0" />
 					</adapt>				
-				</or>
+					</or>
+				</enablement>
+			</actionProvider> 
+			
+			<actionProvider
+					class="org.eclipse.jdt.internal.ui.navigator.JavaNavigatorRefactorActionProvider"
+					id="org.eclipse.jdt.ui.navigator.actions.RefactorActions"
+					overrides="org.eclipse.ui.navigator.resources.actions.RefactorActions"> 
+				<enablement>
+					<or>
+					<instanceof value="org.eclipse.jdt.core.IJavaElement" />
+					<instanceof value="org.eclipse.jdt.core.IJarEntryResource" /> 
+					<instanceof value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" /> 
+					<adapt type="java.util.Collection"> 
+						<count value="0" />
+					</adapt>				
+					</or>
 				</enablement>
 			</actionProvider>
-			
 		   <actionProvider
 		         class="org.eclipse.jdt.internal.ui.navigator.PackageExplorerOpenActionProvider"
-		         id="org.eclipse.jdt.internal.ui.navigator.PackageExplorerOpenActionProvider"
+		         id="org.eclipse.jdt.ui.navigator.actions.OpenActions"
 		         overrides="org.eclipse.ui.navigator.resources.OpenActions"> 
 		   </actionProvider> 
 		   

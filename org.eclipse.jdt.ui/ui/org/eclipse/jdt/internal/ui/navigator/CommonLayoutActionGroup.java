@@ -35,25 +35,30 @@ import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
  */
 public class CommonLayoutActionGroup extends MultiActionGroup {
 
+	public static final String LAYOUT_GROUP_NAME = "layout"; //$NON-NLS-1$
+
 	private IExtensionStateModel fStateModel;
 	private StructuredViewer fStructuredViewer;
-	
+
 	private boolean fHasContributedToViewMenu = false;
 	private IAction fHierarchicalLayout = null;
-	private IAction fFlatLayoutAction = null; 
-	private IAction[] actions;
-	
+	private IAction fFlatLayoutAction = null;
+	private IAction[] fActions;
+
+	private IMenuManager fLayoutSubMenu;
+
 	private class CommonLayoutAction extends Action implements IAction {
 
 		private final boolean fIsFlatLayout;
 
 		public CommonLayoutAction(boolean flat) {
 			super("", AS_RADIO_BUTTON); //$NON-NLS-1$
-			fIsFlatLayout= flat; 
-			if (fIsFlatLayout)
+			fIsFlatLayout = flat;
+			if (fIsFlatLayout) {
 				PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LAYOUT_FLAT_ACTION);
-			else
+			} else {
 				PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LAYOUT_HIERARCHICAL_ACTION);
+			}
 		}
 
 		/*
@@ -62,7 +67,7 @@ public class CommonLayoutActionGroup extends MultiActionGroup {
 		public void run() {
 			if (fStateModel.getBooleanProperty(Values.IS_LAYOUT_FLAT) != fIsFlatLayout) {
 				fStateModel.setBooleanProperty(Values.IS_LAYOUT_FLAT, fIsFlatLayout);
-	  			 	
+
 				fStructuredViewer.getControl().setRedraw(false);
 				try {
 					fStructuredViewer.refresh();
@@ -72,67 +77,70 @@ public class CommonLayoutActionGroup extends MultiActionGroup {
 			}
 		}
 	}
-	
 
-	public CommonLayoutActionGroup(StructuredViewer structuredViewer, IExtensionStateModel stateModel) {
-		super();  
+	public CommonLayoutActionGroup(StructuredViewer structuredViewer,
+			IExtensionStateModel stateModel) {
+		super();
 		fStateModel = stateModel;
 		fStructuredViewer = structuredViewer;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see ActionGroup#fillActionBars(IActionBars)
 	 */
 	public void fillActionBars(IActionBars actionBars) {
-		super.fillActionBars(actionBars);
-		if(!fHasContributedToViewMenu) {
-			synchronized(this) {
-				if(!fHasContributedToViewMenu) {
-					fHasContributedToViewMenu = true;
-					contributeToViewMenu(actionBars.getMenuManager());
-				}
+		if (!fHasContributedToViewMenu) {
+
+			IMenuManager viewMenu = actionBars.getMenuManager();
+			// Create layout sub menu
+			if (fLayoutSubMenu == null) {
+				fLayoutSubMenu = new MenuManager(PackagesMessages.LayoutActionGroup_label);
+				addActions(fLayoutSubMenu);
+
+				viewMenu.insertAfter(IWorkbenchActionConstants.MB_ADDITIONS, new Separator(LAYOUT_GROUP_NAME));
 			}
+
+			viewMenu.appendToGroup(LAYOUT_GROUP_NAME, fLayoutSubMenu);
+
+			fHasContributedToViewMenu = true;
 		}
 	}
-	
-	private void contributeToViewMenu(IMenuManager viewMenu) {
-		viewMenu.add(new Separator());
 
-		// Create layout sub menu
-		
-		IMenuManager layoutSubMenu= new MenuManager(PackagesMessages.LayoutActionGroup_label); 
-		final String layoutGroupName= "layout"; //$NON-NLS-1$
-		Separator marker= new Separator(layoutGroupName);
+	public void unfillActionBars(IActionBars actionBars) {
+		if (fHasContributedToViewMenu) {
+			// Create layout sub menu
+			if (fLayoutSubMenu != null) {
+				actionBars.getMenuManager().remove(fLayoutSubMenu);
+			}
 
-		viewMenu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-		viewMenu.add(marker);
-		viewMenu.appendToGroup(layoutGroupName, layoutSubMenu);
-		viewMenu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$		
-		addActions(layoutSubMenu);
+			fHasContributedToViewMenu = false;
+		}
 	}
-	
-	
+
 	private IAction[] createActions() {
-		
-		fFlatLayoutAction= new CommonLayoutAction(true);
-		fFlatLayoutAction.setText(PackagesMessages.LayoutActionGroup_flatLayoutAction_label); 
+
+		fFlatLayoutAction = new CommonLayoutAction(true);
+		fFlatLayoutAction.setText(PackagesMessages.LayoutActionGroup_flatLayoutAction_label);
 		JavaPluginImages.setLocalImageDescriptors(fFlatLayoutAction, "flatLayout.gif"); //$NON-NLS-1$
-		
-		fHierarchicalLayout= new CommonLayoutAction(false);
-		fHierarchicalLayout.setText(PackagesMessages.LayoutActionGroup_hierarchicalLayoutAction_label);	  
+
+		fHierarchicalLayout = new CommonLayoutAction(false);
+		fHierarchicalLayout.setText(PackagesMessages.LayoutActionGroup_hierarchicalLayoutAction_label);
 		JavaPluginImages.setLocalImageDescriptors(fHierarchicalLayout, "hierarchicalLayout.gif"); //$NON-NLS-1$
-		  
-		return new IAction[]{fFlatLayoutAction, fHierarchicalLayout};
+
+		return new IAction[] { fFlatLayoutAction, fHierarchicalLayout };
 	}
-	
-	public void setFlatLayout(boolean flatLayout) { 
-		if(actions == null) {
-			actions = createActions(); 
-			setActions(actions, flatLayout ? 0 /* indicates check the flat action */ : 1);
+
+	public void setFlatLayout(boolean flatLayout) {
+		if (fActions == null) {
+			fActions = createActions();
+			
+			// indicates check the flat action
+			setActions(fActions, flatLayout ? 0	: 1);
 		}
 		fHierarchicalLayout.setChecked(!flatLayout);
 		fFlatLayoutAction.setChecked(flatLayout); 
-		
 	}
-	 
+
 }
