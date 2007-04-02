@@ -7,11 +7,13 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Matt McCutchen - Bug 148313 [build path] "Configure Build Path" incorrectly appears for non-Java projects
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.util.HashMap;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Path;
 
@@ -108,7 +110,15 @@ public class ConfigureBuildPathAction extends BuildpathModifierAction {
 			if (res == null)
 				return false;
 			
-			return res.getProject() != null;
+			IProject project = res.getProject();
+			if (project == null || !project.isOpen())
+				return false;
+			
+			try {
+				return project.hasNature(JavaCore.NATURE_ID);
+			} catch (CoreException e) {
+				return false;
+			}
 		}
 		return false;
 	}
