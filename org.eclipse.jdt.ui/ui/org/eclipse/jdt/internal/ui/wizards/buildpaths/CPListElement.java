@@ -17,7 +17,9 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -35,6 +37,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.launching.JavaRuntime;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -140,7 +144,6 @@ public class CPListElement {
 				break;
 			default:
 		}
-		
 	}
 	
 	public IClasspathEntry getClasspathEntry() {
@@ -201,6 +204,7 @@ public class CPListElement {
 	
 	/**
 	 * Gets the class path entry path.
+	 * @return returns the path
 	 * @see IClasspathEntry#getPath()
 	 */
 	public IPath getPath() {
@@ -209,6 +213,7 @@ public class CPListElement {
 
 	/**
 	 * Gets the class path entry kind.
+	 * @return the entry kind
 	 * @see IClasspathEntry#getEntryKind()
 	 */	
 	public int getEntryKind() {
@@ -218,6 +223,7 @@ public class CPListElement {
 	/**
 	 * Entries without resource are either non existing or a variable entry
 	 * External jars do not have a resource
+	 * @return returns the resource
 	 */
 	public IResource getResource() {
 		return fResource;
@@ -342,6 +348,9 @@ public class CPListElement {
 					return true;
 				}
 			}
+			if (curr.isNotSupported()) {
+				return true;
+			}
 			if (!curr.isBuiltIn() && !key.equals(CPListElement.JAVADOC) && !key.equals(CPListElement.NATIVE_LIB_PATH)) {
 				return !JavaPlugin.getDefault().getClasspathAttributeConfigurationDescriptors().containsKey(key);
 			}
@@ -366,9 +375,9 @@ public class CPListElement {
 		if (hideOutputFolder && fEntryKind == IClasspathEntry.CPE_SOURCE) {
 			return getFilteredChildren(new String[] { OUTPUT });
 		}
-		if (isInContainer(JavaRuntime.JRE_CONTAINER)) {
+		/*if (isInContainer(JavaRuntime.JRE_CONTAINER)) {
 			return getFilteredChildren(new String[] { COMBINE_ACCESSRULES, NATIVE_LIB_PATH });
-		}
+		}*/
 		if (fEntryKind == IClasspathEntry.CPE_PROJECT) {
 			return getFilteredChildren(new String[] { COMBINE_ACCESSRULES });
 		}
@@ -382,21 +391,36 @@ public class CPListElement {
 	protected void attributeChanged(String key) {
 		fCachedEntry= null;
 	}
-	
-	private boolean canUpdateContainer() {
-		if (fEntryKind == IClasspathEntry.CPE_CONTAINER && fProject != null) {
+		
+	private IStatus evaluateContainerChildStatus(CPListElementAttribute attrib) {
+		if (fProject != null) {
 			ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(fPath.segment(0));
-			return (initializer != null && initializer.canUpdateClasspathContainer(fPath, fProject));
+			if (initializer != null && initializer.canUpdateClasspathContainer(fPath, fProject)) {
+				if (attrib.isBuiltIn()) {
+					if (CPListElement.SOURCEATTACHMENT.equals(attrib.getKey())) {
+						return initializer.getSourceAttachmentStatus(fPath, fProject);
+					} else if (CPListElement.ACCESSRULES.equals(attrib.getKey())) {
+						return initializer.getAccessRulesStatus(fPath, fProject);
+					}
+				} else {
+					return initializer.getAttributeStatus(fPath, fProject, attrib.getKey());
+				}
+			}
+			return new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, ClasspathContainerInitializer.ATTRIBUTE_READ_ONLY, "", null); //$NON-NLS-1$
 		}
-		return false;
+		return null;
+	}
+		
+	public IStatus getContainerChildStatus(CPListElementAttribute attrib) {
+		if (getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+			return evaluateContainerChildStatus(attrib);
+		}
+		if (fParentContainer instanceof CPListElement) {
+			return ((CPListElement) fParentContainer).getContainerChildStatus(attrib);
+		}
+		return null;
 	}
 	
-	public boolean isInNonModifiableContainer() {
-		if (fParentContainer instanceof CPListElement) {
-			return !((CPListElement) fParentContainer).canUpdateContainer();
-		}
-		return false;
-	}
 	
 	public boolean isInContainer(String containerName) {
 		if ( fParentContainer instanceof CPListElement) {
@@ -462,6 +486,7 @@ public class CPListElement {
 
 	/**
 	 * Sets the 'missing' state of the entry.
+	 * @param isMissing the new state
 	 */
 	public void setIsMissing(boolean isMissing) {
 		fIsMissing= isMissing;
@@ -477,6 +502,7 @@ public class CPListElement {
 
 	/**
 	 * Sets the export state of the entry.
+	 * @param isExported the new state
 	 */
 	public void setExported(boolean isExported) {
 		if (isExported != fIsExported) {

@@ -418,7 +418,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
-				if (attrib.isInNonModifiableContainer()) {
+				if (attrib.isNonModifiable()) {
 					return false;
 				}
 				if (attrib.isBuiltIn()) {
@@ -598,11 +598,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 		if (elem instanceof CPListElementAttribute) {
 			CPListElementAttribute attrib= (CPListElementAttribute) elem;
-			if (attrib.isInNonModifiableContainer()) {
+			if (attrib.isNonModifiable()) {
 				return false;
-			}
-			if (attrib.getParent().isInContainer(JavaRuntime.JRE_CONTAINER) && CPListElement.ACCESSRULES.equals(attrib.getKey())) {
-				return false; // workaround for 166519 until we have full story
 			}
 			if (!attrib.isBuiltIn()) {
 				return canEditCustomAttribute(attrib);

@@ -300,6 +300,9 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
+				if (attrib.isNonModifiable()) {
+					return false;
+				}
 				if (attrib.isBuiltIn()) {
 					if (CPListElement.ACCESSRULES.equals(attrib.getKey())) {
 						if (((IAccessRule[]) attrib.getValue()).length == 0) {
@@ -328,11 +331,13 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		}
 		if (elem instanceof CPListElementAttribute) {
 			CPListElementAttribute attrib= (CPListElementAttribute) elem;
-			if (attrib.isBuiltIn()) {
-				return true;
-			} else {
+			if (attrib.isNonModifiable()) {
+				return false;
+			}
+			if (!attrib.isBuiltIn()) {
 				return canEditCustomAttribute(attrib);
 			}
+			return true;
 		}
 		return false;
 	}

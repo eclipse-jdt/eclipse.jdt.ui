@@ -1199,7 +1199,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			Object elem= list.get(i);
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
-				if (attrib.isInNonModifiableContainer()) {
+				if (attrib.isNonModifiable()) {
 					return false;
 				}
 				if (attrib.isBuiltIn()) {

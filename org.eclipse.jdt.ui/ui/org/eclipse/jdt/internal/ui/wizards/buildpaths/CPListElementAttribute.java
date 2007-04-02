@@ -11,7 +11,9 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -28,6 +30,7 @@ public class CPListElementAttribute {
 	private String fKey;
 	private Object fValue;
 	private final boolean fBuiltIn;
+	private IStatus fStatus;
 	
 	private ClasspathAttributeAccess fCachedAccess;
 	
@@ -39,6 +42,7 @@ public class CPListElementAttribute {
 		if (!builtIn) {
 			Assert.isTrue(value instanceof String || value == null);
 		}	
+		fStatus= getContainerChildStatus();
 	}
 	
     private CPListElementAttribute(boolean buildIn) {
@@ -62,12 +66,27 @@ public class CPListElementAttribute {
 	}
 	
 	/**
-	 * @return Returns <code>true</code> if the attribute is in a non-modifiable classpath container
+	 * @return Returns <code>true</code> if the attribute a on a container child and is read-only
 	 */
-	public boolean isInNonModifiableContainer() {
-		return fParent.isInNonModifiableContainer();
+	public boolean isNonModifiable() {
+		return fStatus != null && !fStatus.isOK();
 	}
-
+	
+	/**
+	 * @return Returns <code>true</code> if the attribute a on a container child and is not supported
+	 */
+	public boolean isNotSupported() {
+		return fStatus != null && fStatus.getCode() == ClasspathContainerInitializer.ATTRIBUTE_NOT_SUPPORTED;
+	}
+	
+	/**
+	 * @return Returns the container child status or <code>null</code> if the attribute is not in a container child
+	 */
+	private IStatus getContainerChildStatus() {
+		return fParent.getContainerChildStatus(this);
+	}
+	
+	
 	/**
 	 * Returns the key.
 	 * @return String
@@ -86,6 +105,7 @@ public class CPListElementAttribute {
 	
 	/**
 	 * Returns the value.
+	 * @param value value to set
 	 */
 	public void setValue(Object value) {
 		fValue= value;
@@ -105,6 +125,7 @@ public class CPListElementAttribute {
     	result.fParent= fParent;
     	result.fKey= fKey;
     	result.fValue= fValue;
+    	result.fStatus= fStatus;
 	    return result;
     }
     

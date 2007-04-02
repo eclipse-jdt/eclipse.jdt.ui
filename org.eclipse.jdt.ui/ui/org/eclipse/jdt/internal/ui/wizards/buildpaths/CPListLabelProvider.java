@@ -79,7 +79,7 @@ public class CPListLabelProvider extends LabelProvider {
 		} else if (element instanceof CPListElementAttribute) {
 			CPListElementAttribute attribute= (CPListElementAttribute) element;
 			String text= getCPListElementAttributeText(attribute);
-			if (attribute.isInNonModifiableContainer()) {
+			if (attribute.isNonModifiable()) {
 				return Messages.format(NewWizardMessages.CPListLabelProvider_non_modifiable_attribute, text); 
 			}
 			return text;
