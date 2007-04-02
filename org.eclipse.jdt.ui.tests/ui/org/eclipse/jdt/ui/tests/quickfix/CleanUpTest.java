@@ -2841,7 +2841,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("        static class ClassD {}\n");
 		buf.append("\n");
 		buf.append("        public void foo() {\n");
-		buf.append("                ClassB.C.D.toString();\n");
+		buf.append("                ClassC.D.toString();\n");
 		buf.append("        }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
