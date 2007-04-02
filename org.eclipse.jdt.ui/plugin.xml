@@ -4436,7 +4436,8 @@
             name="%HideInnerClassFiles.label"
             enabled="true"
             description="%HideInnerClassFiles.description"
-            pattern="*$*.class">
+            class="org.eclipse.jdt.internal.ui.filters.InnerClassFilesFilter"
+            id="org.eclipse.jdt.internal.ui.PackageExplorer.HideInnerClassFilesFilter">
       </filter>
       <filter
             targetId="org.eclipse.jdt.ui.PackageExplorer"

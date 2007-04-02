@@ -18,6 +18,7 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -41,6 +42,7 @@ public class NamePatternFilter extends ViewerFilter {
 	
 	/**
 	 * Return the currently configured StringMatchers.
+	 * @return returns the matchers
 	 */
 	private StringMatcher[] getMatchers() {
 		return fMatchers;
@@ -48,6 +50,7 @@ public class NamePatternFilter extends ViewerFilter {
 	
 	/**
 	 * Gets the patterns for the receiver.
+	 * @return returns the patterns to be filtered for
 	 */
 	public String[] getPatterns() {
 		return fPatterns;
@@ -58,6 +61,9 @@ public class NamePatternFilter extends ViewerFilter {
 	 * Method declared on ViewerFilter.
 	 */
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
+		if (fMatchers.length == 0) {
+			return true;
+		}
 		String matchName= null;
 		if (element instanceof IJavaElement) {
 			matchName= ((IJavaElement) element).getElementName();
@@ -65,6 +71,8 @@ public class NamePatternFilter extends ViewerFilter {
 			matchName= ((IResource) element).getName();
 		} else if (element instanceof IStorage) {
 			matchName= ((IStorage) element).getName();
+		} else if (element instanceof IWorkingSet) {
+			matchName= ((IWorkingSet) element).getLabel();
 		} else if (element instanceof IAdaptable) {
 			IWorkbenchAdapter wbadapter= (IWorkbenchAdapter) ((IAdaptable)element).getAdapter(IWorkbenchAdapter.class);
 			if (wbadapter != null) {
@@ -89,6 +97,7 @@ public class NamePatternFilter extends ViewerFilter {
 	 *   ? => any character
 	 *   * => any string
 	 * </p>
+	 * @param newPatterns the new patterns
 	 */
 	public void setPatterns(String[] newPatterns) {
 		fPatterns = newPatterns;
