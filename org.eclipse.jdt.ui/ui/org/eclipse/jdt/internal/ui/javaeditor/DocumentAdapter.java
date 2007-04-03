@@ -98,7 +98,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	 * Run the given runnable in the UI thread.
 	 * 
 	 * @param runnable the runnable
-	 * @sinec 3.3
+	 * @since 3.3
 	 */
 	private static final void run(Runnable runnable) {
 		Display currentDisplay= Display.getCurrent();
