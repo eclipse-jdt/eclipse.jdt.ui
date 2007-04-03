@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -69,6 +70,7 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
+import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -227,14 +229,24 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			IJavaProject jproject= root.getJavaProject();
 			if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 				containerPath= entry.getPath();
-				IClasspathEntry entry2= JavaModelUtil.getClasspathEntryToEdit(jproject, containerPath, root.getPath());
-				if (entry2 == null) {
-					IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), root.getJavaProject());
-					String containerName= container == null ? entry.getPath().toString() : container.getDescription();
-					createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_containerEntry, containerName));
+				ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerPath.segment(0));
+				IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
+				if (initializer == null || container == null) {
+					createLabel(composite, Messages.format(JavaEditorMessages.ClassFileEditor_SourceAttachmentForm_cannotconfigure, containerPath.toString())); 
 					return;
 				}
-				entry= entry2;
+				String containerName= container.getDescription();
+				IStatus status= initializer.getSourceAttachmentStatus(containerPath, jproject);
+				if (status.getCode() == ClasspathContainerInitializer.ATTRIBUTE_NOT_SUPPORTED) {
+					createLabel(composite, Messages.format(JavaEditorMessages.ClassFileEditor_SourceAttachmentForm_notsupported, containerName));  
+					return;
+				}
+				if (status.getCode() == ClasspathContainerInitializer.ATTRIBUTE_READ_ONLY) {
+					createLabel(composite, Messages.format(JavaEditorMessages.ClassFileEditor_SourceAttachmentForm_readonly, containerName));  
+					return;
+				}
+				entry= JavaModelUtil.findEntryInContainer(container, root.getPath());
+				Assert.isNotNull(entry);
 			}
 
 

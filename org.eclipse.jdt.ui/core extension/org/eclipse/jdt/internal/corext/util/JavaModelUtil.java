@@ -713,18 +713,31 @@ public final class JavaModelUtil {
 	 * @param libPath The path of the library to be found
 	 * @return IClasspathEntry A classpath entry from the container of
 	 * <code>null</code> if the container can not be modified.
+	 * @throws JavaModelException thrown if accessing the container failed
 	 */
 	public static IClasspathEntry getClasspathEntryToEdit(IJavaProject jproject, IPath containerPath, IPath libPath) throws JavaModelException {
 		IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
 		ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerPath.segment(0));
 		if (container != null && initializer != null && initializer.canUpdateClasspathContainer(containerPath, jproject)) {
-			IClasspathEntry[] entries= container.getClasspathEntries();
-			for (int i= 0; i < entries.length; i++) {
-				IClasspathEntry curr= entries[i];
-				IClasspathEntry resolved= JavaCore.getResolvedClasspathEntry(curr);
-				if (resolved != null && libPath.equals(resolved.getPath())) {
-					return curr; // return the real entry
-				}
+			return findEntryInContainer(container, libPath);
+		}
+		return null; // attachment not possible
+	}
+	
+	/**
+	 * Finds an entry in a container. <code>null</code> is returned if the entry can not be found
+	 * @param container The container
+	 * @param libPath The path of the library to be found
+	 * @return IClasspathEntry A classpath entry from the container of
+	 * <code>null</code> if the container can not be modified.
+	 */
+	public static IClasspathEntry findEntryInContainer(IClasspathContainer container, IPath libPath) {
+		IClasspathEntry[] entries= container.getClasspathEntries();
+		for (int i= 0; i < entries.length; i++) {
+			IClasspathEntry curr= entries[i];
+			IClasspathEntry resolved= JavaCore.getResolvedClasspathEntry(curr);
+			if (resolved != null && libPath.equals(resolved.getPath())) {
+				return curr; // return the real entry
 			}
 		}
 		return null; // attachment not possible

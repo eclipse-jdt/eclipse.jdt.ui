@@ -112,7 +112,13 @@ public final class PreferencesMessages extends NLS {
 	public static String JavadocConfigurationBlock_workspace_archive_selection_dialog_description;
 	public static String JavadocConfigurationBlock_workspace_archive_selection_dialog_title;
 	public static String JavadocConfigurationBlock_workspace_radio;
+	public static String JavadocConfigurationPropertyPage_invalid_container;
+	public static String JavadocConfigurationPropertyPage_not_supported;
+	public static String JavadocConfigurationPropertyPage_read_only;
 	public static String JavaEditorPropertyPage_SaveActionLink_Text;
+	public static String NativeLibrariesPropertyPage_invalid_container;
+	public static String NativeLibrariesPropertyPage_not_supported;
+	public static String NativeLibrariesPropertyPage_read_only;
 	public static String NewJavaProjectPreferencePage_title;
 	public static String NewJavaProjectPreferencePage_description;
 	public static String NewJavaProjectPreferencePage_sourcefolder_label;
@@ -291,6 +297,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_treat_optional_as_fatal;
 	public static String SourceAttachmentPropertyPage_error_title;
 	public static String SourceAttachmentPropertyPage_error_message;
+	public static String SourceAttachmentPropertyPage_invalid_container;
 	public static String SourceAttachmentPropertyPage_noarchive_message;
 	public static String SourceAttachmentPropertyPage_containerentry_message;
 	public static String NativeLibrariesPropertyPage_invalidElementSelection_desription;
@@ -310,6 +317,8 @@ public final class PreferencesMessages extends NLS {
 	public static String AppearancePreferencePage_foldEmptyPackages;
 	public static String CodeFormatterPreferencePage_title;
 	public static String CodeFormatterPreferencePage_description;
+	public static String SourceAttachmentPropertyPage_not_supported;
+	public static String SourceAttachmentPropertyPage_read_only;
 	public static String TodoTaskPreferencePage_title;
 	public static String TodoTaskPreferencePage_description;
 	public static String TodoTaskConfigurationBlock_markers_tasks_high_priority;

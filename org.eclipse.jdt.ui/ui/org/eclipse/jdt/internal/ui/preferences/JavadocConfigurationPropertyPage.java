@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
@@ -34,6 +35,9 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
 
+import org.eclipse.jdt.core.ClasspathContainerInitializer;
+import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -42,6 +46,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -83,32 +88,56 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 				IClasspathEntry entry= root.getRawClasspathEntry();
 				if (entry == null) {
 					fIsValidElement= false;
+					setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsIncorrectElement_description);
 				} else {
 					if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 						fContainerPath= entry.getPath();
-						fEntry= JavaModelUtil.getClasspathEntryToEdit(elem.getJavaProject(), fContainerPath, root.getPath());
+						fEntry= handleContainerEntry(fContainerPath, elem.getJavaProject(), root.getPath());
 						fIsValidElement= fEntry != null;
 					} else {
 						fContainerPath= null;
 						fEntry= entry;
 						fIsValidElement= true;
+						setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsPackageFragmentRoot_description); 
 					}
 				}
-				setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsPackageFragmentRoot_description); 
+
 			} else if (elem instanceof IJavaProject) {
 				fIsValidElement= true;
 				setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsJavaProject_description); 
 			} else {
 				fIsValidElement= false;
+				setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsIncorrectElement_description);
 			}
 		} catch (JavaModelException e) {
 			fIsValidElement= false;
-		}
-		if (!fIsValidElement) {
-			setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsIncorrectElement_description); 
+			setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsIncorrectElement_description);
 		}
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.JAVADOC_CONFIGURATION_PROPERTY_PAGE);
+	}
+	
+	private IClasspathEntry handleContainerEntry(IPath containerPath, IJavaProject jproject, IPath jarPath) throws JavaModelException {
+		ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerPath.segment(0));
+		IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
+		if (initializer == null || container == null) {
+			setDescription(Messages.format(PreferencesMessages.JavadocConfigurationPropertyPage_invalid_container, containerPath.toString()));
+			return null;
+		}
+		String containerName= container.getDescription();
+		IStatus status= initializer.getAttributeStatus(containerPath, jproject, IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME);
+		if (status.getCode() == ClasspathContainerInitializer.ATTRIBUTE_NOT_SUPPORTED) {
+			setDescription(Messages.format(PreferencesMessages.JavadocConfigurationPropertyPage_not_supported, containerName));
+			return null;
+		}
+		if (status.getCode() == ClasspathContainerInitializer.ATTRIBUTE_READ_ONLY) {
+			setDescription(Messages.format(PreferencesMessages.JavadocConfigurationPropertyPage_read_only, containerName));
+			return null;
+		}
+		IClasspathEntry entry= JavaModelUtil.findEntryInContainer(container, jarPath);
+		Assert.isNotNull(entry);
+		setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsPackageFragmentRoot_description); 
+		return entry;
 	}
 
 	/*
