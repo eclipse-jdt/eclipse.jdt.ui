@@ -95,9 +95,9 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IProblemRequestor;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
@@ -382,6 +382,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private final static String SETTINGS_INPUT_KIND= "input_kind"; //$NON-NLS-1$
 	private final static String SETTINGS_NO_BINDINGS= "create_bindings"; //$NON-NLS-1$
 	private final static String SETTINGS_NO_STATEMENTS_RECOVERY= "no_statements_recovery"; //$NON-NLS-1$
+	private final static String SETTINGS_NO_BINDINGS_RECOVERY= "no_bindings_recovery"; //$NON-NLS-1$
 	private final static String SETTINGS_SHOW_NON_RELEVANT="show_non_relevant";//$NON-NLS-1$
 	private final static String SETTINGS_JLS= "jls"; //$NON-NLS-1$
 
@@ -396,6 +397,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private Action fRefreshAction;
 	private Action fCreateBindingsAction;
 	private Action fStatementsRecoveryAction;
+	private Action fBindingsRecoveryAction;
 	private Action fFilterNonRelevantAction;
 	private Action fResolveBindingKeyAction;
 	private Action fCreateBindingFromElementAction;
@@ -415,7 +417,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private int fCurrentInputKind;
 	
 	private ITextEditor fEditor;
-	private IOpenable fOpenable;
+	private ITypeRoot fTypeRoot;
 	private CompilationUnit fRoot;
 	private IDocument fCurrentDocument;
 	private ArrayList fTrayRoots;
@@ -424,6 +426,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private boolean fCreateBindings;
 	private NonRelevantFilter fNonRelevantFilter;
 	private boolean fStatementsRecovery;
+	private boolean fBindingsRecovery;
 	
 	private Object fPreviousDouble;
 	
@@ -444,6 +447,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		}
 		fCreateBindings= !fDialogSettings.getBoolean(SETTINGS_NO_BINDINGS); // inverse so that default is to create bindings
 		fStatementsRecovery= !fDialogSettings.getBoolean(SETTINGS_NO_STATEMENTS_RECOVERY); // inverse so that default is use recovery
+		fBindingsRecovery= !fDialogSettings.getBoolean(SETTINGS_NO_BINDINGS_RECOVERY); // inverse so that default is use recovery
 		fCurrentASTLevel= JLS3;
 		try {
 			int level= fDialogSettings.getInt(SETTINGS_JLS);
@@ -499,17 +503,17 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fRoot= null;
 		
 		if (editor != null) {
-			IOpenable openable= EditorUtility.getJavaInput(editor);
-			if (openable == null) {
+			ITypeRoot typeRoot= EditorUtility.getJavaInput(editor);
+			if (typeRoot == null) {
 				throw new CoreException(getErrorStatus("Editor not showing a CU or class file", null)); //$NON-NLS-1$
 			}
-			fOpenable= openable;
-			int astLevel= getInitialASTLevel((IJavaElement) openable);
+			fTypeRoot= typeRoot;
+			int astLevel= getInitialASTLevel(typeRoot);
 			
 			ISelection selection= editor.getSelectionProvider().getSelection();
 			if (selection instanceof ITextSelection) {
 				ITextSelection textSelection= (ITextSelection) selection;
-				fRoot= internalSetInput(openable, textSelection.getOffset(), textSelection.getLength(), astLevel);
+				fRoot= internalSetInput(typeRoot, textSelection.getOffset(), textSelection.getLength(), astLevel);
 				fEditor= editor;
 				setASTLevel(astLevel, false);
 			}
@@ -518,16 +522,15 @@ public class ASTView extends ViewPart implements IShowInSource {
 
 	}
 	
-	private int getInitialASTLevel(IJavaElement openable) {
-		IJavaProject project= (IJavaProject) openable.getAncestor(IJavaElement.JAVA_PROJECT);
-		String option= project.getOption(JavaCore.COMPILER_SOURCE, true);
-		if (JavaCore.VERSION_1_5.equals(option) || JavaCore.VERSION_1_6.equals(option)) {
+	private int getInitialASTLevel(ITypeRoot typeRoot) {
+		String option= typeRoot.getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true);
+		if (option.compareTo(JavaCore.VERSION_1_5) >= 0) {
 			return JLS3;
 		}
 		return fCurrentASTLevel; // use previous level
 	}
 
-	private CompilationUnit internalSetInput(IOpenable input, int offset, int length, int astLevel) throws CoreException {
+	private CompilationUnit internalSetInput(ITypeRoot input, int offset, int length, int astLevel) throws CoreException {
 		if (input.getBuffer() == null) {
 			throw new CoreException(getErrorStatus("Input has no buffer", null)); //$NON-NLS-1$
 		}
@@ -575,13 +578,13 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fPreviousDouble= null; // avoid leaking AST
 	}
 	
-	private CompilationUnit createAST(IOpenable input, int astLevel, int offset) throws JavaModelException, CoreException {
+	private CompilationUnit createAST(ITypeRoot input, int astLevel, int offset) throws JavaModelException, CoreException {
 		long startTime;
 		long endTime;
 		CompilationUnit root;
 		
-		if ((input instanceof ICompilationUnit || input instanceof IClassFile) && (getCurrentInputKind() == ASTInputKindAction.USE_RECONCILE)) {
-			IProblemRequestor problemRequestor= new IProblemRequestor() { //strange: don't get bindings when supplying null as problemRequestor
+		if ((getCurrentInputKind() == ASTInputKindAction.USE_RECONCILE)) {
+			final IProblemRequestor problemRequestor= new IProblemRequestor() { //strange: don't get bindings when supplying null as problemRequestor
 				public void acceptProblem(IProblem problem) {/*not interested*/}
 				public void beginReporting() {/*not interested*/}
 				public void endReporting() {/*not interested*/}
@@ -589,26 +592,20 @@ public class ASTView extends ViewPart implements IShowInSource {
 					return true;
 				}
 			};
-			ICompilationUnit wc;
-			if (input instanceof ICompilationUnit) {
-				wc= ((ICompilationUnit) input).getWorkingCopy(
-						new WorkingCopyOwner() {/*useless subclass*/},
-						problemRequestor,
-						null);
-			} else {
-				wc= ((IClassFile) input).becomeWorkingCopy(
-						problemRequestor,
-						new WorkingCopyOwner() {/*useless subclass*/},
-						null);
-			}
+			WorkingCopyOwner workingCopyOwner= new WorkingCopyOwner() {
+				public IProblemRequestor getProblemRequestor(ICompilationUnit workingCopy) {
+					return problemRequestor;
+				}
+			};
+			ICompilationUnit wc= input.getWorkingCopy(workingCopyOwner, null);
 			try {
-				//make inconsistent (otherwise, no AST is generated):
-//				IBuffer buffer= wc.getBuffer();
-//				buffer.append(new char[] {' '});
-//				buffer.replace(buffer.getLength() - 1, 1, new char[0]);
-				
+				int reconcileFlags= ICompilationUnit.FORCE_PROBLEM_DETECTION;
+				if (fStatementsRecovery)
+					reconcileFlags |= ICompilationUnit.ENABLE_STATEMENTS_RECOVERY;
+				if (fBindingsRecovery)
+					reconcileFlags |= ICompilationUnit.ENABLE_BINDINGS_RECOVERY;
 				startTime= System.currentTimeMillis();
-				root= wc.reconcile(getCurrentASTLevel(), true, fStatementsRecovery, null, null);
+				root= wc.reconcile(getCurrentASTLevel(), reconcileFlags, null, null);
 				endTime= System.currentTimeMillis();
 			} finally {
 				wc.discardWorkingCopy();
@@ -629,6 +626,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 				parser.setSource((IClassFile) input);
 			}
 			parser.setStatementsRecovery(fStatementsRecovery);
+			parser.setBindingsRecovery(fBindingsRecovery);
 			if (getCurrentInputKind() == ASTInputKindAction.USE_FOCAL) {
 				parser.setFocalPosition(offset);
 			}
@@ -637,7 +635,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			endTime= System.currentTimeMillis();
 		}
 		if (root != null) {
-			updateContentDescription((IJavaElement) input, root, endTime - startTime);
+			updateContentDescription(input, root, endTime - startTime);
 		}
 		return root;
 	}
@@ -772,10 +770,10 @@ public class ASTView extends ViewPart implements IShowInSource {
 		} catch (CoreException e) {
 			// ignore
 		}
-		if (fOpenable == null) {
+		if (fTypeRoot == null) {
 			clearView();
 		} else {
-			setASTUptoDate(fOpenable != null);
+			setASTUptoDate(fTypeRoot != null);
 		}
 	}
 
@@ -825,18 +823,17 @@ public class ASTView extends ViewPart implements IShowInSource {
 		manager.add(new Separator());
 		manager.add(fCreateBindingsAction);
 		manager.add(fStatementsRecoveryAction);
+		manager.add(fBindingsRecoveryAction);
 		manager.add(fFilterNonRelevantAction);
+		manager.add(new Separator());
+		for (int i= 0; i < fASTInputKindActions.length; i++) {
+			manager.add(fASTInputKindActions[i]);	
+		}
 		manager.add(new Separator());
 		manager.add(fResolveBindingKeyAction);
 		manager.add(fCreateBindingFromElementAction);
 		manager.add(new Separator());
 		manager.add(fLinkWithEditor);
-		
-		MenuManager menu= new MenuManager("&Advanced Options");
-		manager.add(menu);
-		for (int i= 0; i < fASTInputKindActions.length; i++) {
-			menu.add(fASTInputKindActions[i]);	
-		}
 	}
 
 	protected void fillContextMenu(IMenuManager manager) {
@@ -869,7 +866,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	}
 	
 	private void setASTUptoDate(boolean isuptoDate) {
-		fRefreshAction.setEnabled(!isuptoDate && fOpenable != null);
+		fRefreshAction.setEnabled(!isuptoDate && fTypeRoot != null);
 	}
 	
 	private void makeActions() {
@@ -916,6 +913,14 @@ public class ASTView extends ViewPart implements IShowInSource {
 		};
 		fStatementsRecoveryAction.setChecked(fStatementsRecovery);
 		fStatementsRecoveryAction.setEnabled(true);
+		
+		fBindingsRecoveryAction = new Action("&Bindings Recovery", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
+			public void run() {
+				performBindingsRecovery();
+			}
+		};
+		fBindingsRecoveryAction.setChecked(fBindingsRecovery);
+		fBindingsRecoveryAction.setEnabled(true);
 		
 		fFilterNonRelevantAction = new Action("&Hide Non-Relevant Attributes", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
 			public void run() {
@@ -1029,7 +1034,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			length= node.getLength();
 		}
 
-		internalSetInput(fOpenable, offset, length, getCurrentASTLevel());
+		internalSetInput(fTypeRoot, offset, length, getCurrentASTLevel());
 	}
 		
 	protected void setASTLevel(int level, boolean doRefresh) {
@@ -1038,7 +1043,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 
 		fDialogSettings.put(SETTINGS_JLS, fCurrentASTLevel);
 		
-		if (doRefresh && fOpenable != null && oldLevel != fCurrentASTLevel) {
+		if (doRefresh && fTypeRoot != null && oldLevel != fCurrentASTLevel) {
 			try {
 				refreshAST();
 			} catch (CoreException e) {
@@ -1212,7 +1217,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	}
 	
 	protected void performRefresh() {
-		if (fOpenable != null) {
+		if (fTypeRoot != null) {
 			try {
 				refreshAST();
 			} catch (CoreException e) {
@@ -1222,7 +1227,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	}
 
 	protected void performClear() {
-		fOpenable= null;
+		fTypeRoot= null;
 		try {
 			setInput(null);
 		} catch (CoreException e) {
@@ -1236,7 +1241,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		ErrorDialog.openError(getSite().getShell(), "AST View", message, e.getStatus()); //$NON-NLS-1$
 	}
 	
-	private void showAndLogError(String message, Exception e) {
+	private void showAndLogError(String message, Throwable e) {
 		IStatus status= new Status(IStatus.ERROR, ASTViewPlugin.getPluginId(), 0, message, e);
 		ASTViewPlugin.log(status);
 		ErrorDialog.openError(getSite().getShell(), "AST View", null, status); //$NON-NLS-1$
@@ -1251,6 +1256,12 @@ public class ASTView extends ViewPart implements IShowInSource {
 	protected void performStatementsRecovery() {
 		fStatementsRecovery= fStatementsRecoveryAction.isChecked();
 		fDialogSettings.put(SETTINGS_NO_STATEMENTS_RECOVERY, !fStatementsRecovery);
+		performRefresh();
+	}
+	
+	protected void performBindingsRecovery() {
+		fBindingsRecovery= fBindingsRecoveryAction.isChecked();
+		fDialogSettings.put(SETTINGS_NO_BINDINGS_RECOVERY, !fBindingsRecovery);
 		performRefresh();
 	}
 	
@@ -1271,32 +1282,30 @@ public class ASTView extends ViewPart implements IShowInSource {
 			key= key.substring(6, key.length() - 1);
 		ASTParser parser= ASTParser.newParser(fCurrentASTLevel);
 		parser.setResolveBindings(true);
-		if (fOpenable instanceof IJavaElement) {
-			parser.setProject(((IJavaElement) fOpenable).getJavaProject());
-			class MyASTRequestor extends ASTRequestor {
-				String fBindingKey;
-				IBinding fBinding;
-				public void acceptBinding(String bindingKey, IBinding binding) {
-					fBindingKey= bindingKey;
-					fBinding= binding;
-				}
+		parser.setProject(fTypeRoot.getJavaProject());
+		class MyASTRequestor extends ASTRequestor {
+			String fBindingKey;
+			IBinding fBinding;
+			public void acceptBinding(String bindingKey, IBinding binding) {
+				fBindingKey= bindingKey;
+				fBinding= binding;
 			}
-			MyASTRequestor requestor= new MyASTRequestor();
-			ASTAttribute item;
-			Object viewerInput= fViewer.getInput();
-			try {
-				parser.createASTs(new ICompilationUnit[0], new String[] { key }, requestor, null);
-				if (requestor.fBindingKey != null) {
-					item= new Binding(viewerInput, requestor.fBindingKey, requestor.fBinding, true);
-				} else {
-					item= new Error(viewerInput, "Key not resolved: " + key, null);
-				}
-			} catch (RuntimeException e) {
-				item= new Error(viewerInput, "Error resolving key: " + key, e);
-			}
-			fViewer.add(viewerInput, item);
-			fViewer.setSelection(new StructuredSelection(item), true);
 		}
+		MyASTRequestor requestor= new MyASTRequestor();
+		ASTAttribute item;
+		Object viewerInput= fViewer.getInput();
+		try {
+			parser.createASTs(new ICompilationUnit[0], new String[] { key }, requestor, null);
+			if (requestor.fBindingKey != null) {
+				item= new Binding(viewerInput, requestor.fBindingKey, requestor.fBinding, true);
+			} else {
+				item= new Error(viewerInput, "Key not resolved: " + key, null);
+			}
+		} catch (RuntimeException e) {
+			item= new Error(viewerInput, "Error resolving key: " + key, e);
+		}
+		fViewer.add(viewerInput, item);
+		fViewer.setSelection(new StructuredSelection(item), true);
 	}
 	
 	protected void performCreateBindingFromElement() {
@@ -1338,7 +1347,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fPreviousDouble= isTripleClick ? null : obj;
 		
 		if (obj instanceof ExceptionAttribute) {
-			Exception exception= ((ExceptionAttribute) obj).getException();
+			Throwable exception= ((ExceptionAttribute) obj).getException();
 			if (exception != null) {
 				String label= ((ExceptionAttribute) obj).getLabel();
 				showAndLogError("An error occurred while calculating an AST View Label:\n" + label, exception); //$NON-NLS-1$
@@ -1428,7 +1437,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			return;
 		Object obj = selection.getFirstElement();
 		if (obj instanceof ExceptionAttribute) {
-			Exception exception= ((ExceptionAttribute) obj).getException();
+			Throwable exception= ((ExceptionAttribute) obj).getException();
 			if (exception != null) {
 				String label= ((ExceptionAttribute) obj).getLabel();
 				showAndLogError("An error occurred while calculating an AST View Label:\n" + label, exception); //$NON-NLS-1$

@@ -19,7 +19,7 @@ public class Error extends ExceptionAttribute {
 	private final Object fParent;
 	private final String fLabel;
 	
-	public Error(Object parent, String label, Exception thrownException) {
+	public Error(Object parent, String label, Throwable thrownException) {
 		fParent= parent;
 		fLabel= label;
 		fException= thrownException;

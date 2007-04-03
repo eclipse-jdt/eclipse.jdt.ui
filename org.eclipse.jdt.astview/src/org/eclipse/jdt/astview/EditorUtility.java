@@ -11,8 +11,6 @@
 package org.eclipse.jdt.astview;
 
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -20,7 +18,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.ITypeRoot;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -43,34 +41,17 @@ public class EditorUtility {
 		return null;
 	}
 	
-	
-	public static IOpenable getJavaInput(IEditorPart part) {
+	public static ITypeRoot getJavaInput(IEditorPart part) {
 		IEditorInput editorInput= part.getEditorInput();
 		if (editorInput != null) {
-			IJavaElement input= javaUIgetEditorInputJavaElement(editorInput);
-			if (input instanceof IOpenable) {
-				return (IOpenable) input;
+			IJavaElement input= JavaUI.getEditorInputJavaElement(editorInput);
+			if (input instanceof ITypeRoot) {
+				return (ITypeRoot) input;
 			}
 		}
 		return null;	
 	}
 
-	/**
-	 * Note: This is an inlined version of {@link JavaUI#getEditorInputJavaElement(IEditorInput)},
-	 * which is not available in 3.1.
-	 */
-	private static IJavaElement javaUIgetEditorInputJavaElement(IEditorInput editorInput) {
-		Assert.isNotNull(editorInput);
-		IJavaElement je= JavaUI.getWorkingCopyManager().getWorkingCopy(editorInput); 
-		if (je != null)
-			return je;
-		
-		/*
-		 * This needs works, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=120340
-		 */
-		return (IJavaElement)editorInput.getAdapter(IJavaElement.class);
-	}
-	
 	public static void selectInEditor(ITextEditor editor, int offset, int length) {
 		IEditorPart active = getActiveEditor();
 		if (active != editor) {

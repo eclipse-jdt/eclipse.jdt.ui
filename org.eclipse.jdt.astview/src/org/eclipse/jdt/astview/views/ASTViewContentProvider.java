@@ -113,11 +113,17 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 				if (binding != expressionTypeBinding)
 					res.add(createBinding(expression, binding));
 			} else if (expression instanceof MethodInvocation) {
-				IMethodBinding binding= ((MethodInvocation) expression).resolveMethodBinding();
+				MethodInvocation methodInvocation= (MethodInvocation) expression;
+				IMethodBinding binding= methodInvocation.resolveMethodBinding();
 				res.add(createBinding(expression, binding));
+				String inferred= String.valueOf(methodInvocation.isResolvedTypeInferredFromExpectedType());
+				res.add(new GeneralAttribute(expression, "ResolvedTypeInferredFromExpectedType", inferred)); //$NON-NLS-1$
 			} else if (expression instanceof SuperMethodInvocation) {
-				IMethodBinding binding= ((SuperMethodInvocation) expression).resolveMethodBinding();
+				SuperMethodInvocation superMethodInvocation= (SuperMethodInvocation) expression;
+				IMethodBinding binding= superMethodInvocation.resolveMethodBinding();
 				res.add(createBinding(expression, binding));
+				String inferred= String.valueOf(superMethodInvocation.isResolvedTypeInferredFromExpectedType());
+				res.add(new GeneralAttribute(expression, "ResolvedTypeInferredFromExpectedType", inferred)); //$NON-NLS-1$
 			} else if (expression instanceof ClassInstanceCreation) {
 				IMethodBinding binding= ((ClassInstanceCreation) expression).resolveConstructorBinding();
 				res.add(createBinding(expression, binding));
@@ -200,6 +206,7 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 			res.add(new JavaElement(root, root.getJavaElement()));
 			res.add(new CommentsProperty(root));
 			res.add(new ProblemsProperty(root));
+			res.add(new SettingsProperty(root));
 		}
 		
 		return res.toArray();

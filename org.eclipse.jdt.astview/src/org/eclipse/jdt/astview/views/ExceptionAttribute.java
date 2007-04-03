@@ -13,9 +13,9 @@ package org.eclipse.jdt.astview.views;
 
 public abstract class ExceptionAttribute extends ASTAttribute {
 
-	protected Exception fException= null;
+	protected Throwable fException= null;
 
-	public Exception getException() {
+	public Throwable getException() {
 		return fException;
 	}
 
