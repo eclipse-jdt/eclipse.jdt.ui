@@ -27,10 +27,12 @@ import org.eclipse.swt.widgets.Widget;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 
 public class OwnerDrawSupport {
-	private static final String PREF="org.eclipse.jdt.ui.coloredlabels"; //$NON-NLS-1$
+	//private static final String PREF="org.eclipse.jdt.ui.coloredlabels"; //$NON-NLS-1$
 	
 	private final StructuredViewer fViewer;
 	private final Point fBoundOffset;
@@ -126,7 +128,13 @@ public class OwnerDrawSupport {
 	}
 	
 	public static void install(StructuredViewer viewer) {
-		String property= System.getProperty(PREF, "false"); //$NON-NLS-1$
+		String preference= PreferenceConstants.getPreference(AppearancePreferencePage.PREF_COLORED_LABELS, null);
+		if (preference != null && Boolean.valueOf(preference).booleanValue()) {
+			OwnerDrawSupport support= new OwnerDrawSupport(viewer);
+			support.installOwnerDraw();
+		}
+		
+		/*String property= System.getProperty(PREF, "false"); //$NON-NLS-1$
 		if (Boolean.valueOf(property).booleanValue()) {
 			OwnerDrawSupport support= new OwnerDrawSupport(viewer);
 			support.installOwnerDraw();
@@ -142,7 +150,7 @@ public class OwnerDrawSupport {
 			} catch (NumberFormatException e) {
 				JavaPlugin.logErrorMessage("Invalid arguments for " + PREF); //$NON-NLS-1$
 			}
-		}
+		}*/
 	}
 
 }
