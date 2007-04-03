@@ -5476,16 +5476,10 @@
 		        id="org.eclipse.jdt.java.ui.filters.HideImportDeclaration"/> 
   		<commonFilter
 		        activeByDefault="true"
+		        class="org.eclipse.jdt.internal.ui.filters.InnerClassFilesFilter"
 		        name="%HideInnerClassFiles.label"
 		        description="%HideInnerClassFiles.description"
-		        id="org.eclipse.jdt.java.ui.filters.HideInnerClassFiles"> 
-	         <filterExpression>
-	         	<and>
-		            <instanceof value="org.eclipse.core.resources.IFile"/>
-	            	<test property="org.eclipse.core.resources.name" value="*$*.class"/>	            
-		        </and>
-	         </filterExpression>		        
-		</commonFilter>		 
+		        id="org.eclipse.jdt.java.ui.filters.HideInnerClassFiles"/>
   		<commonFilter 
 		        class="org.eclipse.jdt.internal.ui.filters.JavaFileFilter"
 		        name="%HideJavaFiles.label"
@@ -5495,7 +5489,7 @@
 		        class="org.eclipse.jdt.internal.ui.filters.LocalTypesFilter"
 		        name="%HideLocalTypes.label"
 		        description="%HideLocalTypes.description"
-		        id="org.eclipse.jdt.java.ui.filters.HideLocalTypes"/>    		 
+		        id="org.eclipse.jdt.java.ui.filters.HideLocalTypes"/>
   		<commonFilter 
 		        class="org.eclipse.jdt.internal.ui.filters.NonJavaElementFilter"
 		        name="%HideNonJavaElements.label"
