@@ -103,9 +103,9 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	private static final void run(Runnable runnable) {
 		Display currentDisplay= Display.getCurrent();
 		if (currentDisplay != null)
-			currentDisplay.syncExec(runnable);
+			runnable.run();
 		else
-			Display.getDefault().asyncExec(runnable);
+			Display.getDefault().syncExec(runnable);
 	}
 
 
