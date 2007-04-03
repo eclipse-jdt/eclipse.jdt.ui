@@ -88,6 +88,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewPackageWizardPage_title;
 	public static String NewPackageWizardPage_description;
 	public static String NewPackageWizardPage_info;
+	public static String NewSourceFolderWizardPage_error_ProjectNotOpen;
 	
 	public static String NewTypeWizardPage_package_label;
 	public static String NewTypeWizardPage_package_button;

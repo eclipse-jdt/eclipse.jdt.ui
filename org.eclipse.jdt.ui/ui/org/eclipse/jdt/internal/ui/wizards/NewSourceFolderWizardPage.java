@@ -297,6 +297,10 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 			fProjectStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_ProjectNotExists); 
 			return;
 		}
+		if (!project.isOpen()) {
+			fProjectStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_ProjectNotOpen); 
+			return;	
+		}
 		try {
 			if (project.hasNature(JavaCore.NATURE_ID)) {
 				fCurrJProject= JavaCore.create(project);
