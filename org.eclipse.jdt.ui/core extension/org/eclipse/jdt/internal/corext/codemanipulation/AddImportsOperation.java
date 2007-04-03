@@ -210,7 +210,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			}
 			
 			IBinding binding= nameNode.resolveBinding();
-			if (binding != null) {
+			if (binding != null && !binding.isRecovered()) {
 				if (binding instanceof ITypeBinding) {
 					ITypeBinding typeBinding= (ITypeBinding) binding;
 					String qualifiedBindingName= typeBinding.getQualifiedName();
@@ -223,12 +223,12 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 						// adding import failed
 						return null;
 					}
-					return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
+					return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, new String());
 				} else if (binding instanceof IVariableBinding || binding instanceof IMethodBinding) {
 					boolean isField= binding instanceof IVariableBinding;
 					ITypeBinding declaringClass= isField ? ((IVariableBinding) binding).getDeclaringClass() : ((IMethodBinding) binding).getDeclaringClass();
 					if (declaringClass == null) {
-						return null; // variablebinding.getDeclaringClass() is null for array.length
+						return null; // variableBinding.getDeclaringClass() is null for array.length
 					}
 					if (Modifier.isStatic(binding.getModifiers())) {
 						if (Modifier.isPrivate(declaringClass.getModifiers())) {
@@ -251,6 +251,10 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 				} else {
 					return null;
 				}
+			}
+			if (binding != null && binding.getKind() != IBinding.TYPE) {
+				// recovered binding
+				return null; 
 			}
 			
 		} else {

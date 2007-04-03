@@ -149,7 +149,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 		
 		private boolean needsImport(ITypeBinding typeBinding, SimpleName ref) {
-			if (!typeBinding.isTopLevel() && !typeBinding.isMember()) {
+			if (!typeBinding.isTopLevel() && !typeBinding.isMember() || typeBinding.isRecovered()) {
 				return false; // no imports for anonymous, local, primitive types or parameters types
 			}
 			int modifiers= typeBinding.getModifiers();
@@ -184,8 +184,9 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		
 		/**
 		 * Tries to find the given type name and add it to the import structure.
+		 * @param ref the name node
 		 */
-		public void add(SimpleName ref) throws CoreException {
+		public void add(SimpleName ref) {
 			String typeName= ref.getIdentifier();
 			
 			if (fImportsAdded.contains(typeName)) {
@@ -194,25 +195,27 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			
 			IBinding binding= ref.resolveBinding();
 			if (binding != null) {
-				if (binding.getKind() == IBinding.TYPE) {
-					ITypeBinding typeBinding= (ITypeBinding) binding;
-					if (typeBinding.isArray()) {
-						typeBinding= typeBinding.getElementType();
-					}
-					typeBinding= typeBinding.getTypeDeclaration();
-					
+				if (binding.getKind() != IBinding.TYPE) {
+					return;
+				}
+				ITypeBinding typeBinding= (ITypeBinding) binding;
+				if (typeBinding.isArray()) {
+					typeBinding= typeBinding.getElementType();
+				}
+				typeBinding= typeBinding.getTypeDeclaration();
+				if (!typeBinding.isRecovered()) {
 					if (needsImport(typeBinding, ref)) {
 						fImpStructure.addImport(typeBinding);
 						fImportsAdded.add(typeName);
 					}
-				}	
-				return;
-			}
-			
-			if (fDoIgnoreLowerCaseNames && typeName.length() > 0) {
-				char ch= typeName.charAt(0);
-				if (Strings.isLowerCase(ch) && Character.isLetter(ch)) {
 					return;
+				}
+			} else {
+				if (fDoIgnoreLowerCaseNames && typeName.length() > 0) {
+					char ch= typeName.charAt(0);
+					if (Strings.isLowerCase(ch) && Character.isLetter(ch)) {
+						return;
+					}
 				}
 			}
 			fImportsAdded.add(typeName);			
@@ -376,6 +379,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Runs the operation.
+	 * @param monitor the progress monitor
+	 * @throws CoreException thrown when the operation failed
 	 * @throws OperationCanceledException Runtime error thrown when operation is canceled.
 	 */	
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
@@ -524,6 +529,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	/**
 	 * After executing the operation, returns <code>null</code> if the operation has been executed successfully or
 	 * the range where parsing failed. 
+	 * @return returns the parse error
 	 */
 	public IProblem getParseError() {
 		return fParsingError;
