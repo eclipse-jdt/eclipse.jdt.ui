@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
@@ -45,6 +46,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizardPage;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -139,11 +141,22 @@ public class RenameLinkedMode {
 	}
 	
 	public static RenameLinkedMode getActiveLinkedMode() {
-		return fgActiveLinkedMode;
+		if (fgActiveLinkedMode != null) {
+			ISourceViewer viewer= fgActiveLinkedMode.fEditor.getViewer();
+			if (viewer != null) {
+				StyledText textWidget= viewer.getTextWidget();
+				if (textWidget != null && ! textWidget.isDisposed()) {
+					return fgActiveLinkedMode;
+				}
+			}
+			// make sure we don't hold onto the active linked mode if anything went wrong with canceling:
+			fgActiveLinkedMode= null;
+		}
+		return null;
 	}
 	
 	public void start() {
-		if (fgActiveLinkedMode != null) {
+		if (getActiveLinkedMode() != null) {
 			// for safety; should already be handled in RenameJavaElementAction
 			fgActiveLinkedMode.startFullDialog();
 			return;
@@ -210,18 +223,18 @@ public class RenameLinkedMode {
 			
 			viewer.setSelectedRange(fOriginalSelection.x, fOriginalSelection.y); // by default, full word is selected; restore original selection
 			
+			if (viewer instanceof IEditingSupportRegistry) {
+				IEditingSupportRegistry registry= (IEditingSupportRegistry) viewer;
+				registry.register(fFocusEditingSupport);
+			}
+			
+			openSecondaryPopup();
+//			startAnimation();
+			fgActiveLinkedMode= this;
+			
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
-		
-		if (viewer instanceof IEditingSupportRegistry) {
-			IEditingSupportRegistry registry= (IEditingSupportRegistry) viewer;
-			registry.register(fFocusEditingSupport);
-		}
-
-		openSecondaryPopup();
-//		startAnimation();
-		fgActiveLinkedMode= this;
 	}
 	
 //	private void startAnimation() {
@@ -443,7 +456,11 @@ public class RenameLinkedMode {
 					contributionId= IJavaRefactorings.RENAME_METHOD;
 				break;
 			case IJavaElement.FIELD:
-				contributionId= IJavaRefactorings.RENAME_FIELD;
+				IField field= (IField) javaElement;
+				if (field.isEnumConstant())
+					contributionId= IJavaRefactorings.RENAME_ENUM_CONSTANT;
+				else
+					contributionId= IJavaRefactorings.RENAME_FIELD;
 				break;
 			case IJavaElement.TYPE_PARAMETER:
 				contributionId= IJavaRefactorings.RENAME_TYPE_PARAMETER;
