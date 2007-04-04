@@ -274,5 +274,10 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 			return;
 		}
 		helper2("fList", "fElements", true, false, true, true, true, true);
+	}
+	
+	public void testUnicode01() throws Exception{
+		//regression test for 180331
+		helper2("field", "feel", true, false, true, true, true, true);
 	}		
 }

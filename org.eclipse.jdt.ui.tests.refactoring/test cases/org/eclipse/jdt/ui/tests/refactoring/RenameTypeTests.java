@@ -1154,6 +1154,11 @@ public class RenameTypeTests extends RefactoringTest {
 		helper2("A", "B");		
 	}
 	
+	public void testUnicode01() throws Exception {
+		helper2("B", "C");
+		//TODO: test undo!
+	}
+	
 	public void testQualifiedName1() throws Exception {
 		helperQualifiedName("A", "B", "build.xml", "*.xml");
 	}

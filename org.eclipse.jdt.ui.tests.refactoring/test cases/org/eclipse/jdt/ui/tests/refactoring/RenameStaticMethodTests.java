@@ -234,6 +234,10 @@ public class RenameStaticMethodTests extends RefactoringTest {
 		}
 	}
 	
+	public void testUnicode01() throws Exception{
+		helper2_0("e", "f", new String[]{});
+	}
+	
 	public void testStaticImportFail0() throws Exception {
 		helper1();
 	}

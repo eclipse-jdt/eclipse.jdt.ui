@@ -439,7 +439,6 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return RefactoringScopeFactory.create(method);
 	}
 	
-	/** */
 	SearchPattern createOccurrenceSearchPattern() {
 		HashSet methods= new HashSet(fMethodsToRename);
 		methods.add(fMethod);
@@ -582,11 +581,11 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			// Note that except these ocurrences, the delegate bodies are empty 
 			// (as they were created this way).
 			requestor= new MethodOccurenceCollector(getNewElementName()) {
-				public void acceptSearchMatch(SearchMatch match) throws CoreException {
+				public void acceptSearchMatch(ICompilationUnit unit, SearchMatch match) throws CoreException {
 					for (int i= 0; i < wcOldMethods.length; i++) 
 						if (wcOldMethods[i].equals(match.getElement()))
 							return;
-					super.acceptSearchMatch(match);
+					super.acceptSearchMatch(unit, match);
 				}
 			};
 		} else

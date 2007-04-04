@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
@@ -269,6 +270,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	
 	/**
 	 * @return Error message or <code>null</code> if getter can be renamed.
+	 * @throws CoreException 
 	 */
 	public String canEnableGetterRenaming() throws CoreException{
 		if (fField.getDeclaringType().isInterface())
@@ -288,6 +290,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	
 	/**
 	 * @return Error message or <code>null</code> if setter can be renamed.
+	 * @throws CoreException 
 	 */
 	public String canEnableSetterRenaming() throws CoreException{
 		if (fField.getDeclaringType().isInterface())
@@ -656,7 +659,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	}
 
 	private void addDeclarationUpdate() throws CoreException { 
-		TextEdit textEdit= new ReplaceEdit(fField.getNameRange().getOffset(), fField.getElementName().length(), getNewElementName());
+		ISourceRange nameRange= fField.getNameRange();
+		TextEdit textEdit= new ReplaceEdit(nameRange.getOffset(), nameRange.getLength(), getNewElementName());
 		ICompilationUnit cu= fField.getCompilationUnit();
 		String groupName= RefactoringCoreMessages.RenameFieldRefactoring_Update_field_declaration; 
 		addTextEdit(fChangeManager.get(cu), groupName, textEdit);
@@ -739,9 +743,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	}
 	
 	private TextEdit createTextChange(SearchMatch match) {
-		String oldName= fField.getElementName();
-		int offset= match.getOffset() + match.getLength() - oldName.length(); // could be qualified
-		return new ReplaceEdit(offset, oldName.length(), getNewElementName());
+		return new ReplaceEdit(match.getOffset(), match.getLength(), getNewElementName());
 	}
 	
 	private void addGetterOccurrences(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
