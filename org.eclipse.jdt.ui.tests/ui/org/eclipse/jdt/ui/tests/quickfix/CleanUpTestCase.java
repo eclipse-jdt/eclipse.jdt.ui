@@ -189,7 +189,7 @@ public class CleanUpTestCase extends QuickFixTest {
 	}
 
 	protected void assertRefactoringResultAsExpectedIgnoreHashValue(ICompilationUnit[] cus, String[] expected) throws InvocationTargetException, JavaModelException {
-		RefactoringExecutionStarter.startCleanupRefactoring(cus, false, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+		RefactoringExecutionStarter.startCleanupRefactoring(cus, CleanUpRefactoring.createCleanUps(), PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), false, "Clean Up");
 
 		Pattern regex= Pattern.compile("long serialVersionUID = .*L;");
 

@@ -109,12 +109,11 @@ public final class ActionMessages extends NLS {
 	public static String CleanUpAction_labelWizard;
 	public static String CleanUpAction_tooltip;
 	public static String CleanUpAction_description;
-	public static String CleanUpAction_ErrorDialogTitle;
 	public static String CleanUpAction_MultiStateErrorTitle;
 	public static String CleanUpAction_UnexpectedErrorMessage;
 	public static String CleanUpAction_CUNotOnBuildpathMessage;
 	public static String CleanUpAction_EmptySelection_description;
-	public static String CleanUpAction_EmptySelection_title;
+	public static String CleanUpAction_actionName;
 	
 	public static String AddGetterSetterAction_no_primary_type_title;
 	public static String AddGetterSetterAction_no_primary_type_message;

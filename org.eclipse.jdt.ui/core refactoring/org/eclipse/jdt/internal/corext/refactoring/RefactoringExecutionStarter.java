@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
@@ -227,27 +228,33 @@ public final class RefactoringExecutionStarter {
 		new RefactoringStarter().activate(refactoring, new ChangeTypeWizard(refactoring), shell, RefactoringMessages.ChangeTypeAction_dialog_title, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
 	}
 	
-	public static void startCleanupRefactoring(ICompilationUnit[] cus, boolean showWizard, Shell shell) throws InvocationTargetException, JavaModelException {
-		final CleanUpRefactoring refactoring= new CleanUpRefactoring();
+	public static void startCleanupRefactoring(ICompilationUnit[] cus, ICleanUp[] cleanUps, Shell shell, boolean showWizard, String actionName) throws InvocationTargetException, JavaModelException {
+		final CleanUpRefactoring refactoring= new CleanUpRefactoring(actionName);
 		for (int i= 0; i < cus.length; i++) {
 			refactoring.addCompilationUnit(cus[i]);
 		}
 		
 		if (!showWizard) {
-			ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps();
 			for (int i= 0; i < cleanUps.length; i++) {
-	            refactoring.addCleanUp(cleanUps[i]);
-            }
+				refactoring.addCleanUp(cleanUps[i]);
+			}
 			
-    		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.ERROR, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES, shell, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
-    		try {
-    	        helper.perform(true, true);
-            } catch (InterruptedException e) {
-            }
+			IRunnableContext context;
+			if (refactoring.getCompilationUnits().length > 1) {
+				context= new ProgressMonitorDialog(shell);
+			} else {
+				context= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+			}
+			
+			RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.WARNING, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES, shell, context);
+			try {
+				helper.perform(true, true);
+			} catch (InterruptedException e) {
+			}
 		} else {
 			CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE);
 			RefactoringStarter starter= new RefactoringStarter();
-			starter.activate(refactoring, refactoringWizard, shell, RefactoringMessages.CleanUpAction_dialog_title, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
+			starter.activate(refactoring, refactoringWizard, shell, actionName, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);			
 		}
 	}
 

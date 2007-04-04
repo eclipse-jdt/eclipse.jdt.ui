@@ -481,12 +481,16 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 	
 	private final List/*<ICleanUp>*/fCleanUps;
 	private final Hashtable/*<IJavaProject, List<ICompilationUnit>*/fProjects;
-	
 	private Change fChange;
-	
 	private boolean fLeaveFilesDirty;
+	private final String fName;
 	
 	public CleanUpRefactoring() {
+		this(FixMessages.CleanUpRefactoring_Refactoring_name);
+	}
+	
+	public CleanUpRefactoring(String name) {
+		fName= name;
 		fCleanUps= new ArrayList();
 		fProjects= new Hashtable();
 	}
@@ -545,7 +549,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#getName()
 	 */
 	public String getName() {
-		return FixMessages.CleanUpRefactoring_Refactoring_name;
+		return fName;
 	}
 	
 	/* (non-Javadoc)

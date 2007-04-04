@@ -98,8 +98,6 @@ public final class RefactoringMessages extends NLS {
 
 	public static String ChangeTypeWizard_with_itself;
 
-	public static String CleanUpAction_dialog_title;
-
 	public static String ConvertAnonymousToNestedAction_Convert_Anonymous;
 
 	public static String ConvertAnonymousToNestedAction_dialog_title;

@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -5280,7 +5281,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 	
 		ICompilationUnit[] units= (ICompilationUnit[])cus.toArray(new ICompilationUnit[cus.size()]);	
 		Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-		RefactoringExecutionStarter.startCleanupRefactoring(units, false, shell);
+		RefactoringExecutionStarter.startCleanupRefactoring(units, CleanUpRefactoring.createCleanUps(), shell, false, "Clean Up");
 		
 //		generateTable(units);
 		
