@@ -36,18 +36,22 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.corext.refactoring.IRefactoringSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
+import org.eclipse.jdt.internal.corext.refactoring.rename.TypeOccurrenceCollector;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 
@@ -65,9 +69,8 @@ public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChang
 			SearchMatch searchResult= results[j];
 			if (searchResult.getAccuracy() == SearchMatch.A_INACCURATE)
 				continue;
-			String oldName= copy.findPrimaryType().getElementName();
-			int length= oldName.length();
-			int offset= searchResult.getOffset() + searchResult.getLength() - length;
+			int offset= searchResult.getOffset();
+			int length= searchResult.getLength();
 			TextChangeCompatibility.addTextEdit(manager.get(copy), name, new ReplaceEdit(offset, length, newName));
 		}
 		return manager;
@@ -93,16 +96,28 @@ public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChang
 		}
 	}
 
-	private static SearchResultGroup getReferences(ICompilationUnit copy, IProgressMonitor monitor) throws JavaModelException {
+	private static SearchResultGroup getReferences(final ICompilationUnit copy, IProgressMonitor monitor) throws JavaModelException {
 		final ICompilationUnit[] copies= new ICompilationUnit[] { copy};
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(copies);
-		if (copy.findPrimaryType() == null)
+		final IType type= copy.findPrimaryType();
+		if (type == null)
 			return null;
-		SearchPattern pattern= createSearchPattern(copy.findPrimaryType());
+		SearchPattern pattern= createSearchPattern(type);
 		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(pattern);
 		engine.setScope(scope);
 		engine.setWorkingCopies(copies);
 		engine.searchPattern(monitor);
+		engine.setRequestor(new IRefactoringSearchRequestor() {
+			TypeOccurrenceCollector fTypeOccurrenceCollector= new TypeOccurrenceCollector(type);
+			public SearchMatch acceptSearchMatch(SearchMatch match) {
+				try {
+					return fTypeOccurrenceCollector.acceptSearchMatch2(copy, match);
+				} catch (CoreException e) {
+					JavaPlugin.log(e);
+					return null;
+				}
+			}
+		});
 		final Object[] results= engine.getResults();
 		// Assert.isTrue(results.length <= 1);
 		// just 1 file or none, but inaccurate matches can play bad here (see

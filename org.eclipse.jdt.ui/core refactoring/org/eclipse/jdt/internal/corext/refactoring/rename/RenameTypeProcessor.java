@@ -69,9 +69,6 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.compiler.ITerminalSymbols;
-import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -90,8 +87,6 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeReferenceMatch;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
-import org.eclipse.jdt.internal.corext.refactoring.CuCollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -587,58 +582,10 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		
 		try {
 			SearchPattern pattern= SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
-			final String oldName= fType.getElementName();
-			final String oldQualifiedName= fType.getFullyQualifiedName('.');
-			CollectingSearchRequestor requestor= new CuCollectingSearchRequestor() {
-				public void acceptSearchMatch(ICompilationUnit unit, SearchMatch match) throws CoreException {
-					int start= match.getOffset();
-					int length= match.getLength();
-					
-					//unqualified:
-					String matchText= unit.getBuffer().getText(start, length);
-					if (oldName.equals(matchText)) {
-						collectMatch(match);
-						return;
-					}
-					
-					//(partially) qualified:
-					if (oldQualifiedName.endsWith(matchText)) {
-						//e.g. rename B and p.A.B ends with match A.B
-						int simpleNameLenght= oldName.length();
-						match.setOffset(start + length - simpleNameLenght);
-						match.setLength(simpleNameLenght);
-						collectMatch(match);
-						return;
-					}
-					
-					//Not a standard reference -- use scanner to find last identifier token:
-					IScanner scanner= getScanner(unit);
-					scanner.setSource(matchText.toCharArray());
-					int simpleNameStart= -1;
-					int simpleNameEnd= -1;
-					try {
-						int token = scanner.getNextToken();
-						while (token != ITerminalSymbols.TokenNameEOF) {
-							if (token == ITerminalSymbols.TokenNameIdentifier) {
-								simpleNameStart= scanner.getCurrentTokenStartPosition();
-								simpleNameEnd= scanner.getCurrentTokenEndPosition();
-							}
-							token = scanner.getNextToken();
-						}
-					} catch (InvalidInputException e){
-						//ignore
-					}	
-					if (simpleNameStart != -1) {
-						match.setOffset(start + simpleNameStart);
-						match.setLength(simpleNameEnd + 1 - simpleNameStart);
-					}
-					collectMatch(match);
-				}
-			};
 			fReferences= RefactoringSearchEngine.search(
 					pattern,
 					RefactoringScopeFactory.create(fType),
-					requestor,
+					new TypeOccurrenceCollector(fType),
 					monitor,
 					fCachedRefactoringStatus);
 			fReferences= Checks.excludeCompilationUnits(fReferences, fCachedRefactoringStatus);
