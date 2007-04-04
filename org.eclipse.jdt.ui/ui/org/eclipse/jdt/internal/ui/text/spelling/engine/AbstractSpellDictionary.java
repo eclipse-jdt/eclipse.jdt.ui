@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,7 @@ import java.nio.charset.MalformedInputException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -90,13 +90,8 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	 *                   The hash to retrieve the candidates of
 	 * @return Array of candidates for the phonetic hash
 	 */
-	protected final ArrayList getCandidates(final String hash) {
-
-		ArrayList list= (ArrayList)fHashBuckets.get(hash);
-		if (list == null)
-			list= new ArrayList(0);
-
-		return list;
+	protected final Object getCandidates(final String hash) {
+		return fHashBuckets.get(hash);
 	}
 
 	/**
@@ -112,13 +107,10 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	 *                   Array of close hashes to find the matches
 	 * @return Set of ranked words with bounded distance to the specified word
 	 */
-	protected final HashSet getCandidates(final String word, final boolean sentence, final ArrayList hashs) {
+	protected final Set getCandidates(final String word, final boolean sentence, final ArrayList hashs) {
 
 		int distance= 0;
 		String hash= null;
-
-		String candidate= null;
-		List candidates= null;
 
 		final StringBuffer buffer= new StringBuffer(BUFFER_CAPACITY);
 		final HashSet result= new HashSet(BUCKET_CAPACITY * hashs.size());
@@ -126,11 +118,27 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		for (int index= 0; index < hashs.size(); index++) {
 
 			hash= (String)hashs.get(index);
-			candidates= getCandidates(hash);
 
-			for (int offset= 0; offset < candidates.size(); offset++) {
+			final Object candidates= getCandidates(hash);
+			if (candidates == null)
+				continue;
+			else if (candidates instanceof String) {
+				String candidate= (String)candidates;
+				distance= fDistanceAlgorithm.getDistance(word, candidate);
+				if (distance < DISTANCE_THRESHOLD) {
+					buffer.setLength(0);
+					buffer.append(candidate);
+					if (sentence)
+						buffer.setCharAt(0, Character.toUpperCase(buffer.charAt(0)));
+					result.add(new RankedWordProposal(buffer.toString(), -distance));
+				}
+				continue;
+			}
 
-				candidate= (String)candidates.get(offset);
+			final ArrayList candidateList= (ArrayList)candidates;
+			for (int offset= 0; offset < candidateList.size(); offset++) {
+
+				String candidate= (String)candidateList.get(offset);
 				distance= fDistanceAlgorithm.getDistance(word, candidate);
 
 				if (distance < DISTANCE_THRESHOLD) {
@@ -161,23 +169,37 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	 *                   Set of ranked words with smallest possible distance to the
 	 *                   specified word
 	 */
-	protected final void getCandidates(final String word, final boolean sentence, final HashSet result) {
+	protected final void getCandidates(final String word, final boolean sentence, final Set result) {
 
 		int distance= 0;
 		int minimum= Integer.MAX_VALUE;
 
-		String candidate= null;
 		StringBuffer buffer= new StringBuffer(BUFFER_CAPACITY);
 
-		final ArrayList candidates= getCandidates(fHashProvider.getHash(word));
-		final ArrayList matches= new ArrayList(candidates.size());
+		final Object candidates= getCandidates(fHashProvider.getHash(word));
+		if (candidates == null)
+			return;
+		else if (candidates instanceof String) {
+			String candidate= (String)candidates;
+			distance= fDistanceAlgorithm.getDistance(word, candidate);
+			buffer.append(candidate);
+			if (sentence)
+				buffer.setCharAt(0, Character.toUpperCase(buffer.charAt(0)));
+			result.add(new RankedWordProposal(buffer.toString(), -distance));
+			return;
+		}
 
-		for (int index= 0; index < candidates.size(); index++) {
+		final ArrayList candidateList= (ArrayList)candidates;
+		final ArrayList matches= new ArrayList(candidateList.size());
 
-			candidate= (String)candidates.get(index);
+		for (int index= 0; index < candidateList.size(); index++) {
+			String candidate= (String)candidateList.get(index);
 			distance= fDistanceAlgorithm.getDistance(word, candidate);
 
 			if (distance <= minimum) {
+				
+				if (distance < minimum)
+					matches.clear();
 
 				buffer.setLength(0);
 				buffer.append(candidate);
@@ -190,14 +212,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 			}
 		}
 
-		RankedWordProposal match= null;
-
-		for (int index= 0; index < matches.size(); index++) {
-
-			match= (RankedWordProposal)matches.get(index);
-			if (match.getRank() == minimum)
-				result.add(match);
-		}
+		result.addAll(matches);
 	}
 
 	/**
@@ -228,6 +243,8 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 			if (!fLoaded) {
 				synchronized (this) {
 					fLoaded= load(getURL());
+					if (fLoaded)
+						compact();
 				}
 			}
 
@@ -241,7 +258,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		final ArrayList neighborhood= new ArrayList((word.length() + 1) * (mutators.length + 2));
 		neighborhood.add(hash);
 
-		final HashSet candidates= getCandidates(word, sentence, neighborhood);
+		final Set candidates= getCandidates(word, sentence, neighborhood);
 		neighborhood.clear();
 
 		char previous= 0;
@@ -319,7 +336,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		}
 
 		neighborhood.remove(hash);
-		final HashSet matches= getCandidates(word, sentence, neighborhood);
+		final Set matches= getCandidates(word, sentence, neighborhood);
 
 		if (matches.size() == 0 && candidates.size() == 0)
 			getCandidates(word, sentence, candidates);
@@ -347,15 +364,18 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	protected final void hashWord(final String word) {
 
 		final String hash= fHashProvider.getHash(word);
-		ArrayList bucket= (ArrayList)fHashBuckets.get(hash);
+		Object bucket= fHashBuckets.get(hash);
 
 		if (bucket == null) {
-
-			bucket= new ArrayList(BUCKET_CAPACITY);
-			fHashBuckets.put(hash, bucket);
+			fHashBuckets.put(hash, word);
+		} else if (bucket instanceof ArrayList) {
+			((ArrayList)bucket).add(word);
+		} else {
+			ArrayList list= new ArrayList(BUCKET_CAPACITY);
+			list.add(bucket);
+			list.add(word);
+			fHashBuckets.put(hash, list);
 		}
-
-		bucket.add(word);
 	}
 
 	/*
@@ -368,6 +388,8 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 			if (!fLoaded) {
 				synchronized (this) {
 					fLoaded= load(getURL());
+					if (fLoaded)
+						compact();
 				}
 			}
 
@@ -375,9 +397,17 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 			// Do nothing
 		}
 
-		final ArrayList candidates= getCandidates(fHashProvider.getHash(word));
-
-		if (candidates.contains(word) || candidates.contains(word.toLowerCase()))
+		final Object candidates= getCandidates(fHashProvider.getHash(word));
+		if (candidates == null)
+			return false;
+		else if (candidates instanceof String) {
+			String candidate= (String)candidates;
+			if (candidate.equals(word) || candidate.equals(word.toLowerCase()))
+				return true;
+			return false;
+		}
+		final ArrayList candidateList= (ArrayList)candidates;
+		if (candidateList.contains(word) || candidateList.contains(word.toLowerCase()))
 			return true;
 
 		return false;
@@ -492,6 +522,20 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Compacts the dictionary.
+	 * 
+	 * @since 3.3.
+	 */
+	private void compact() {
+		Iterator iter= fHashBuckets.values().iterator();
+		while (iter.hasNext()) {
+			Object element= iter.next();
+			if (element instanceof ArrayList)
+				((ArrayList)element).trimToSize();
+		}
 	}
 
 	/**
