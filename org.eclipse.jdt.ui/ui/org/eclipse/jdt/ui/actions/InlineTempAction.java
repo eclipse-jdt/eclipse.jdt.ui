@@ -21,15 +21,12 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -79,6 +76,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 	
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
+	 * @param selection 
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
@@ -96,7 +94,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 			ICompilationUnit input= SelectionConverter.getInputAsCompilationUnit(fEditor);
 			if (!ActionUtil.isEditable(fEditor))
 				return;
-			RefactoringExecutionStarter.startInlineTempRefactoring(input, new RefactoringASTParser(AST.JLS3).parse(input, true), selection, getShell(), true);
+			RefactoringExecutionStarter.startInlineTempRefactoring(input, null, selection, getShell());
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, RefactoringMessages.InlineTempAction_inline_temp, RefactoringMessages.NewTextRefactoringAction_exception); 
 		}	
@@ -118,12 +116,11 @@ public class InlineTempAction extends SelectionDispatchAction {
 
 	/* package */ boolean tryInlineTemp(ICompilationUnit unit, CompilationUnit node, ITextSelection selection, Shell shell) {
 		try {
-			if (RefactoringExecutionStarter.startInlineTempRefactoring(unit, node, selection, shell, false)) {
-				run(selection);
+			if (RefactoringExecutionStarter.startInlineTempRefactoring(unit, node, selection, shell)) {
 				return true;
 			}
 		} catch (JavaModelException exception) {
-			JavaPlugin.log(exception);
+			ExceptionHandler.handle(exception, RefactoringMessages.InlineTempAction_inline_temp, RefactoringMessages.NewTextRefactoringAction_exception); 
 		}
 		return false;
 	}

@@ -103,20 +103,20 @@ public class RefactoringASTParser {
 	
 	/**
 	 * Tries to get the shared AST from the ASTProvider.
-	 * If the shared AST is not available, parses the compilation unit with a
+	 * If the shared AST is not available, parses the type root with a
 	 * RefactoringASTParser that uses settings similar to the ASTProvider.
 	 * 
-	 * @param unit the compilation unit
+	 * @param typeRoot the type root
 	 * @param resolveBindings TODO
 	 * @param pm an {@link IProgressMonitor}, or <code>null</code>
 	 * @return the parsed CompilationUnit
 	 */
-	public static CompilationUnit parseWithASTProvider(ICompilationUnit unit, boolean resolveBindings, IProgressMonitor pm) {
-		CompilationUnit cuNode= ASTProvider.getASTProvider().getAST(unit, ASTProvider.WAIT_ACTIVE_ONLY, pm);
+	public static CompilationUnit parseWithASTProvider(ITypeRoot typeRoot, boolean resolveBindings, IProgressMonitor pm) {
+		CompilationUnit cuNode= ASTProvider.getASTProvider().getAST(typeRoot, ASTProvider.WAIT_ACTIVE_ONLY, pm);
 		if (cuNode != null) {
 			return cuNode;
 		} else {
-			return new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(unit, null, resolveBindings, ASTProvider.SHARED_AST_STATEMENT_RECOVERY, ASTProvider.SHARED_BINDING_RECOVERY, pm);
+			return new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(typeRoot, null, resolveBindings, ASTProvider.SHARED_AST_STATEMENT_RECOVERY, ASTProvider.SHARED_BINDING_RECOVERY, pm);
 		}
 	}
 

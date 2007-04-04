@@ -23,7 +23,6 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ITypeRoot;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -105,7 +104,7 @@ public class InlineAction extends SelectionDispatchAction {
 		if (typeRoot == null)
 			return;
 
-		CompilationUnit node= new RefactoringASTParser(AST.JLS3).parse(typeRoot, true);
+		CompilationUnit node= RefactoringASTParser.parseWithASTProvider(typeRoot, true, null);
 		
 		if (typeRoot instanceof ICompilationUnit) {
 			ICompilationUnit cu= (ICompilationUnit) typeRoot;

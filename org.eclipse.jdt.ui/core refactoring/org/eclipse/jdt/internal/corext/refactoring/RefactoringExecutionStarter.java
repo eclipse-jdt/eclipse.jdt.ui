@@ -313,35 +313,28 @@ public final class RefactoringExecutionStarter {
 		}
 	}
 
-	public static boolean startInlineConstantRefactoring(final ICompilationUnit unit, final CompilationUnit node, final int offset, final int length, final Shell shell, final boolean activate) throws JavaModelException {
+	public static boolean startInlineConstantRefactoring(final ICompilationUnit unit, final CompilationUnit node, final int offset, final int length, final Shell shell) throws JavaModelException {
 		final InlineConstantRefactoring refactoring= new InlineConstantRefactoring(unit, node, offset, length);
-		if (refactoring.checkStaticFinalConstantNameSelected().hasFatalError()) {
-			if (activate)
-				MessageDialog.openInformation(shell, RefactoringMessages.InlineConstantAction_dialog_title, RefactoringMessages.InlineConstantAction_no_constant_reference_or_declaration);
-			return false;
-		}
-		if (activate)
+		if (! refactoring.checkStaticFinalConstantNameSelected().hasFatalError()) {
 			new RefactoringStarter().activate(refactoring, new InlineConstantWizard(refactoring), shell, RefactoringMessages.InlineConstantAction_dialog_title, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
-		return true;
-	}
-
-	public static boolean startInlineMethodRefactoring(final ITypeRoot typeRoot, final CompilationUnit node, final int offset, final int length, final Shell shell, final boolean activate) throws JavaModelException {
-		final InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(typeRoot, node, offset, length);
-		if (refactoring == null) {
-			if (activate)
-				MessageDialog.openInformation(shell, RefactoringMessages.InlineMethodAction_dialog_title, RefactoringMessages.InlineMethodAction_no_method_invocation_or_declaration_selected);
-			return false;
+			return true;
 		}
-		if (activate)
-			new RefactoringStarter().activate(refactoring, new InlineMethodWizard(refactoring), shell, RefactoringMessages.InlineMethodAction_dialog_title, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
-		return true;
+		return false;
 	}
 
-	public static boolean startInlineTempRefactoring(final ICompilationUnit unit, final CompilationUnit node, final ITextSelection selection, final Shell shell, final boolean activate) throws JavaModelException {
-		final InlineTempRefactoring refactoring= new InlineTempRefactoring(unit, selection.getOffset(), selection.getLength());
-		if (!refactoring.checkIfTempSelected().hasFatalError()) {
-			if (activate)
-				new RefactoringStarter().activate(refactoring, new InlineTempWizard(refactoring), shell, RefactoringMessages.InlineTempAction_inline_temp, RefactoringSaveHelper.SAVE_NOTHING);
+	public static boolean startInlineMethodRefactoring(final ITypeRoot typeRoot, final CompilationUnit node, final int offset, final int length, final Shell shell) throws JavaModelException {
+		final InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(typeRoot, node, offset, length);
+		if (refactoring != null) {
+			new RefactoringStarter().activate(refactoring, new InlineMethodWizard(refactoring), shell, RefactoringMessages.InlineMethodAction_dialog_title, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
+			return true;
+		}
+		return false;
+	}
+
+	public static boolean startInlineTempRefactoring(final ICompilationUnit unit, CompilationUnit node, final ITextSelection selection, final Shell shell) throws JavaModelException {
+		final InlineTempRefactoring refactoring= new InlineTempRefactoring(unit, node, selection.getOffset(), selection.getLength());
+		if (! refactoring.checkIfTempSelected().hasFatalError()) {
+			new RefactoringStarter().activate(refactoring, new InlineTempWizard(refactoring), shell, RefactoringMessages.InlineTempAction_inline_temp, RefactoringSaveHelper.SAVE_NOTHING);
 			return true;
 		}
 		return false;

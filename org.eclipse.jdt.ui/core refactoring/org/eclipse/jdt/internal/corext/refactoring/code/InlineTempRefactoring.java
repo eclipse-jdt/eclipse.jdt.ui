@@ -107,18 +107,29 @@ public class InlineTempRefactoring extends ScriptableRefactoring {
 	/**
 	 * Creates a new inline constant refactoring.
 	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
+	 * @param node compilation unit node, or <code>null</code>
 	 * @param selectionStart
 	 * @param selectionLength
 	 */
-	public InlineTempRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) {
+	public InlineTempRefactoring(ICompilationUnit unit, CompilationUnit node, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fCu= unit;
 		
-		fASTRoot= null;
+		fASTRoot= node;
 		fVariableDeclaration= null;
+	}
+	
+	/**
+	 * Creates a new inline constant refactoring.
+	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
+	 * @param selectionStart
+	 * @param selectionLength
+	 */
+	public InlineTempRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) {
+		this(unit, null, selectionStart, selectionLength);
 	}
 	
 	public InlineTempRefactoring(VariableDeclaration decl) {

@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -24,7 +25,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
@@ -116,6 +116,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
 	
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
+	 * @param selection 
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
@@ -139,7 +140,11 @@ public class InlineConstantAction extends SelectionDispatchAction {
 		if (!ActionUtil.isEditable(fEditor, getShell(), cu))
 			return;
 		try {
-			RefactoringExecutionStarter.startInlineConstantRefactoring(cu, new RefactoringASTParser(AST.JLS3).parse(cu, true), offset, length, getShell(), true);
+			CompilationUnit node= RefactoringASTParser.parseWithASTProvider(cu, true, null);
+			if (! RefactoringExecutionStarter.startInlineConstantRefactoring(cu, node, offset, length, getShell())) {
+				MessageDialog.openInformation(getShell(), RefactoringMessages.InlineConstantAction_dialog_title, RefactoringMessages.InlineConstantAction_no_constant_reference_or_declaration);
+			}
+			
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), RefactoringMessages.InlineConstantAction_dialog_title, RefactoringMessages.InlineConstantAction_unexpected_exception); 
 		}
@@ -147,12 +152,11 @@ public class InlineConstantAction extends SelectionDispatchAction {
 
 	public boolean tryInlineConstant(ICompilationUnit unit, CompilationUnit node, ITextSelection selection, Shell shell) {
 		try {
-			if (RefactoringExecutionStarter.startInlineConstantRefactoring(unit, node, selection.getOffset(), selection.getLength(), shell, false)) {
-				run(selection);
+			if (RefactoringExecutionStarter.startInlineConstantRefactoring(unit, node, selection.getOffset(), selection.getLength(), shell)) {
 				return true;
 			}
-		} catch (JavaModelException exception) {
-			JavaPlugin.log(exception);
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, getShell(), RefactoringMessages.InlineConstantAction_dialog_title, RefactoringMessages.InlineConstantAction_unexpected_exception); 
 		}
 		return false;
 	}
