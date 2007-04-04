@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,6 +43,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
+import org.eclipse.core.resources.IEncodedStorage;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFileState;
 import org.eclipse.core.resources.IMarker;
@@ -593,6 +595,8 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 
 			/**
 			 * Signals the end of problem reporting.
+			 * 
+			 * @param reportedProblems the problems to report 
 			 */
 			private void reportProblems(List reportedProblems) {
 				if (fProgressMonitor != null && fProgressMonitor.isCanceled())
@@ -663,6 +667,8 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 
 			/**
 			 * Overlays value with problem annotation.
+			 * 
+			 * @param value the value 
 			 * @param problemAnnotation
 			 */
 			private void setOverlay(Object value, ProblemAnnotation problemAnnotation) {
@@ -888,6 +894,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	 * Creates a compilation unit from the given file.
 	 *
 	 * @param file the file from which to create the compilation unit
+	 * @return the fake compilation unit
 	 */
 	protected ICompilationUnit createCompilationUnit(IFile file) {
 		Object element= JavaCore.create(file);
@@ -961,6 +968,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	 *
 	 * @param element the element
 	 * @param setContents tells whether to read and set the contents to the new CU
+	 * @return the fake compilation unit
 	 * @since 3.2
 	 */
 	private ICompilationUnit createFakeCompiltationUnit(Object element, boolean setContents) {
@@ -976,6 +984,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	 *
 	 * @param editorInput the storage editor input
 	 * @param setContents tells whether to read and set the contents to the new CU
+	 * @return the fake compilation unit
 	 * @since 3.2
 	 */
 	private ICompilationUnit createFakeCompiltationUnit(IStorageEditorInput editorInput, boolean setContents) {
@@ -1009,11 +1018,27 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			if (cpEntries == null || cpEntries.length == 0)
 				cpEntries= new IClasspathEntry[] { JavaRuntime.getDefaultJREContainerEntry() };
 
-			final ICompilationUnit cu= woc.newWorkingCopy(storage.getName(), cpEntries, null, getProgressMonitor());
+			final ICompilationUnit cu= woc.newWorkingCopy(storage.getName(), cpEntries, getProgressMonitor());
 			if (setContents) {
 				int READER_CHUNK_SIZE= 2048;
 				int BUFFER_SIZE= 8 * READER_CHUNK_SIZE;
-				Reader in= new BufferedReader(new InputStreamReader(storage.getContents()));
+				Reader in= null;
+				if (storage instanceof IEncodedStorage) {
+					String charsetName= ((IEncodedStorage)storage).getCharset();
+					if (charsetName != null) {
+						try {
+							in= new InputStreamReader(storage.getContents(), charsetName);
+						} catch (UnsupportedEncodingException ex) {
+							JavaPlugin.log(ex);
+							// fall trough and try default encoding
+						}
+					} // else: try default encoding
+				}
+
+				if (in == null)
+					in= new InputStreamReader(storage.getContents());
+				
+				in= new BufferedReader(in);
 				StringBuffer buffer= new StringBuffer(BUFFER_SIZE);
 				char[] readBuffer= new char[READER_CHUNK_SIZE];
 				int n;
@@ -1034,14 +1059,16 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			
 			return cu;
 		} catch (CoreException ex) {
+			JavaPlugin.log(ex.getStatus());
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Creates a fake compilation unit.
 	 *
 	 * @param editorInput the URI editor input
+	 * @return the fake compilation unit
 	 * @since 3.3
 	 */
 	private ICompilationUnit createFakeCompiltationUnit(IURIEditorInput editorInput) {
@@ -1070,7 +1097,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			if (cpEntries == null || cpEntries.length == 0)
 				cpEntries= new IClasspathEntry[] { JavaRuntime.getDefaultJREContainerEntry() };
 			
-			final ICompilationUnit cu= woc.newWorkingCopy(fileStore.getName(), cpEntries, null, getProgressMonitor());
+			final ICompilationUnit cu= woc.newWorkingCopy(fileStore.getName(), cpEntries, getProgressMonitor());
 			
 			if (!isModifiable(editorInput))
 				JavaModelUtil.reconcile(cu);
@@ -1405,6 +1432,8 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 
 	/**
 	 * Returns the preference whether handling temporary problems is enabled.
+	 * 
+	 * @return <code>true</code> if temporary problems are handled 
 	 */
 	protected boolean isHandlingTemporaryProblems() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -1497,7 +1526,11 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
      * called in the UI thread i.e. if they open a dialog they
      * must ensure it ends up in the UI thread.
      * </p>
-     *
+     * 
+     * @param unit the compilation unit
+     * @param info compilation unit info
+     * @param monitor the progress monitor
+     * @throws CoreException 
      * @see IPostSaveListener
      * @since 3.3
      */
