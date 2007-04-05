@@ -412,18 +412,18 @@ public class CPListElement {
 	}
 		
 	public IStatus getContainerChildStatus(CPListElementAttribute attrib) {
-		if (getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-			return evaluateContainerChildStatus(attrib);
-		}
 		if (fParentContainer instanceof CPListElement) {
+			CPListElement parent= (CPListElement) fParentContainer;
+			if (parent.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+				return parent.evaluateContainerChildStatus(attrib);
+			}
 			return ((CPListElement) fParentContainer).getContainerChildStatus(attrib);
 		}
 		return null;
 	}
 	
-	
 	public boolean isInContainer(String containerName) {
-		if ( fParentContainer instanceof CPListElement) {
+		if (fParentContainer instanceof CPListElement) {
 			CPListElement elem= (CPListElement) fParentContainer;
 			return new Path(containerName).isPrefixOf(elem.getPath());
 		}
