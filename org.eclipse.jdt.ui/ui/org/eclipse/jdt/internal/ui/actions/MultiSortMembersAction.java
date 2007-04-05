@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Hashtable;
 
 import org.eclipse.jface.window.Window;
@@ -25,7 +24,6 @@ import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -111,10 +109,4 @@ public class MultiSortMembersAction extends CleanUpAction {
 		return hasMembersToSort(((IParent)elem).getChildren());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void performRefactoring(ICompilationUnit[] units, ICleanUp[] cleanUps) throws JavaModelException, InvocationTargetException {
-		RefactoringExecutionStarter.startCleanupRefactoring(units, cleanUps, getShell(), false, getActionName());
-    }
 }

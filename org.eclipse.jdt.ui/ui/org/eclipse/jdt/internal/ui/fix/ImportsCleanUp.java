@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 public class ImportsCleanUp extends AbstractCleanUp {
 	
 	private CodeGenerationSettings fCodeGeneratorSettings;
+	private RefactoringStatus fStatus;
 
 	public ImportsCleanUp(Map options) {
 		super(options);
@@ -54,7 +55,7 @@ public class ImportsCleanUp extends AbstractCleanUp {
      */
     public IFix createFix(final CompilationUnit compilationUnit) throws CoreException {
 		return ImportsFix.createCleanUp(compilationUnit, fCodeGeneratorSettings,
-				isEnabled(CleanUpConstants.ORGANIZE_IMPORTS));
+				isEnabled(CleanUpConstants.ORGANIZE_IMPORTS), fStatus);
 	}
 
 	/**
@@ -70,9 +71,11 @@ public class ImportsCleanUp extends AbstractCleanUp {
     public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
 		RefactoringStatus result= super.checkPreConditions(project, compilationUnits, monitor);
     	
-		if (isEnabled(CleanUpConstants.ORGANIZE_IMPORTS))
+		if (isEnabled(CleanUpConstants.ORGANIZE_IMPORTS)) {
     		fCodeGeneratorSettings= JavaPreferencesSettings.getCodeGenerationSettings(project);
-    	
+    		fStatus= new RefactoringStatus();
+		}
+		
     	return result;
     }
     
@@ -81,8 +84,11 @@ public class ImportsCleanUp extends AbstractCleanUp {
      */
     public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
     	fCodeGeneratorSettings= null;
-    	
-        return super.checkPostConditions(monitor);
+    	if (fStatus == null || fStatus.isOK()) {
+    		return super.checkPostConditions(monitor);
+    	} else {
+    		return fStatus;
+    	}
     }
 
 	/**

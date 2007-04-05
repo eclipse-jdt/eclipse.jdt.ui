@@ -202,12 +202,12 @@ public class CleanUpTestCase extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(previews, expected);
 	}
 
-	protected void assertRefactoringHasNoChange(ICompilationUnit[] cus) throws JavaModelException, InvocationTargetException {
+	protected RefactoringStatus assertRefactoringHasNoChange(ICompilationUnit[] cus) throws JavaModelException, InvocationTargetException {
 		String[] expected= new String[cus.length];
 		for (int i= 0; i < cus.length; i++) {
 			expected[i]= cus[i].getBuffer().getContents();
 		}
-		assertRefactoringResultAsExpected(cus, expected);
+		return assertRefactoringResultAsExpected(cus, expected);
 	}
 
 }

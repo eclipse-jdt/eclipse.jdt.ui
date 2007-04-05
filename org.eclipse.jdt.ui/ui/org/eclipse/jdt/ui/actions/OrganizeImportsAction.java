@@ -13,29 +13,12 @@ package org.eclipse.jdt.ui.actions;
 import com.ibm.icu.text.Collator;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-import org.eclipse.core.filebuffers.LocationKind;
-
-import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -60,33 +43,26 @@ import org.eclipse.ui.progress.IProgressService;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 
-import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.History;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
 
-import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+import org.eclipse.jdt.internal.ui.actions.MultiOrganizeImportAction;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -116,6 +92,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	private JavaEditor fEditor;
 	/** <code>true</code> if the query dialog is showing. */
 	private boolean fIsQueryShowing= false;
+	private final MultiOrganizeImportAction fCleanUpDelegate;
 
 	/* (non-Javadoc)
 	 * Class implements IObjectActionDelegate
@@ -166,9 +143,12 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	 */
 	public OrganizeImportsAction(IWorkbenchSite site) {
 		super(site);
+		
+		fCleanUpDelegate= new MultiOrganizeImportAction(site);
+		
 		setText(ActionMessages.OrganizeImportsAction_label); 
 		setToolTipText(ActionMessages.OrganizeImportsAction_tooltip); 
-		setDescription(ActionMessages.OrganizeImportsAction_description); 
+		setDescription(ActionMessages.OrganizeImportsAction_description);
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ORGANIZE_IMPORTS_ACTION);					
 	}
@@ -178,124 +158,34 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	 * @param editor the Java editor
 	 */
 	public OrganizeImportsAction(JavaEditor editor) {
-		this(editor.getEditorSite());
+		super(editor.getEditorSite());
+		
 		fEditor= editor;
-		setEnabled(getCompilationUnit(fEditor) != null);
+		fCleanUpDelegate= new MultiOrganizeImportAction(editor);
+		
+		setText(ActionMessages.OrganizeImportsAction_label); 
+		setToolTipText(ActionMessages.OrganizeImportsAction_tooltip); 
+		setDescription(ActionMessages.OrganizeImportsAction_description);
+
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ORGANIZE_IMPORTS_ACTION);
+
+		setEnabled(fCleanUpDelegate.isEnabled());
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void selectionChanged(ITextSelection selection) {
-		setEnabled(getCompilationUnit(fEditor) != null);
+		fCleanUpDelegate.selectionChanged(selection);
+		setEnabled(fCleanUpDelegate.isEnabled());
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		setEnabled(isEnabled(selection));
-	}
-	
-	private ICompilationUnit[] getCompilationUnits(IStructuredSelection selection) {
-		HashSet result= new HashSet();
-		Object[] selected= selection.toArray();
-		for (int i= 0; i < selected.length; i++) {
-			try {
-				if (selected[i] instanceof IJavaElement) {
-					IJavaElement elem= (IJavaElement) selected[i];
-					if (elem.exists()) {
-					
-						switch (elem.getElementType()) {
-							case IJavaElement.TYPE:
-								if (elem.getParent().getElementType() == IJavaElement.COMPILATION_UNIT) {
-									result.add(elem.getParent());
-								}
-								break;						
-							case IJavaElement.COMPILATION_UNIT:
-								result.add(elem);
-								break;
-							case IJavaElement.IMPORT_CONTAINER:
-								result.add(elem.getParent());
-								break;							
-							case IJavaElement.PACKAGE_FRAGMENT:
-								collectCompilationUnits((IPackageFragment) elem, result);
-								break;
-							case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-								collectCompilationUnits((IPackageFragmentRoot) elem, result);
-								break;
-							case IJavaElement.JAVA_PROJECT:
-								IPackageFragmentRoot[] roots= ((IJavaProject) elem).getPackageFragmentRoots();
-								for (int k= 0; k < roots.length; k++) {
-									collectCompilationUnits(roots[k], result);
-								}
-								break;			
-						}
-					}
-				} else if (selected[i] instanceof LogicalPackage) {
-					IPackageFragment[] packageFragments= ((LogicalPackage)selected[i]).getFragments();
-					for (int k= 0; k < packageFragments.length; k++) {
-						IPackageFragment pack= packageFragments[k];
-						if (pack.exists()) {
-							collectCompilationUnits(pack, result);
-						}
-					}
-				}
-			} catch (JavaModelException e) {
-				if (JavaModelUtil.isExceptionToBeLogged(e))
-					JavaPlugin.log(e);
-			}
-		}
-		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
-	}
-	
-	private void collectCompilationUnits(IPackageFragment pack, Collection result) throws JavaModelException {
-		result.addAll(Arrays.asList(pack.getCompilationUnits()));
-	}
-
-	private void collectCompilationUnits(IPackageFragmentRoot root, Collection result) throws JavaModelException {
-		if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
-			IJavaElement[] children= root.getChildren();
-			for (int i= 0; i < children.length; i++) {
-				collectCompilationUnits((IPackageFragment) children[i], result);
-			}
-		}
-	}	
-	
-	
-	private boolean isEnabled(IStructuredSelection selection) {
-		Object[] selected= selection.toArray();
-		for (int i= 0; i < selected.length; i++) {
-			try {
-				if (selected[i] instanceof IJavaElement) {
-					IJavaElement elem= (IJavaElement) selected[i];
-					if (elem.exists()) {
-						switch (elem.getElementType()) {
-							case IJavaElement.TYPE:
-								return elem.getParent().getElementType() == IJavaElement.COMPILATION_UNIT; // for browsing perspective
-							case IJavaElement.COMPILATION_UNIT:
-								return true;
-							case IJavaElement.IMPORT_CONTAINER:
-								return true;
-							case IJavaElement.PACKAGE_FRAGMENT:
-							case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-								IPackageFragmentRoot root= (IPackageFragmentRoot) elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-								return (root.getKind() == IPackageFragmentRoot.K_SOURCE);
-							case IJavaElement.JAVA_PROJECT:
-								// https://bugs.eclipse.org/bugs/show_bug.cgi?id=65638
-								return true;
-						}
-					}
-				} else if (selected[i] instanceof LogicalPackage) {
-					return true;
-				}
-			} catch (JavaModelException e) {
-				if (!e.isDoesNotExist()) {
-					JavaPlugin.log(e);
-				}
-			}
-		}
-		return false;
+		fCleanUpDelegate.selectionChanged(selection);
+		setEnabled(fCleanUpDelegate.isEnabled());
 	}
 	
 	/* (non-Javadoc)
@@ -309,151 +199,26 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	}
 
 	private static ICompilationUnit getCompilationUnit(JavaEditor editor) {
-		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
-		ICompilationUnit cu= manager.getWorkingCopy(editor.getEditorInput());
-		return cu;
+		IJavaElement element= JavaUI.getEditorInputJavaElement(editor.getEditorInput());
+		if (!(element instanceof ICompilationUnit))
+			return null;
+		
+		return (ICompilationUnit)element;
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void run(IStructuredSelection selection) {
-		ICompilationUnit[] cus= getCompilationUnits(selection);
+		ICompilationUnit[] cus= fCleanUpDelegate.getCompilationUnits(selection);
 		if (cus.length == 0) {
 			MessageDialog.openInformation(getShell(), ActionMessages.OrganizeImportsAction_EmptySelection_title, ActionMessages.OrganizeImportsAction_EmptySelection_description);
 		} else if (cus.length == 1) {
 			run(cus[0]);
 		} else {
-			runOnMultiple(cus);
+			fCleanUpDelegate.run(selection);
 		}
 	}
-
-	/**
-	 * Perform organize import on multiple compilation units. No editors are opened.
-	 * @param cus The compilation units to run on
-	 */
-	public void runOnMultiple(final ICompilationUnit[] cus) {
-		try {
-			String message= ActionMessages.OrganizeImportsAction_multi_status_description; 
-			final MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, message, null);
-
-			IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
-			progressService.run(true, true, new WorkbenchRunnableAdapter(new IWorkspaceRunnable() {
-				public void run(IProgressMonitor monitor) {
-					doRunOnMultiple(cus, status, monitor);
-				}
-			})); // workspace lock
-			if (!status.isOK()) {
-				String title= ActionMessages.OrganizeImportsAction_multi_status_title; 
-				ErrorDialog.openError(getShell(), title, null, status);
-			}
-		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), ActionMessages.OrganizeImportsAction_error_title, ActionMessages.OrganizeImportsAction_error_message); 
-		} catch (InterruptedException e) {
-			// Canceled by user
-		}		
-		
-	}
-	
-	static final class OrganizeImportError extends RuntimeException {
-		private static final long serialVersionUID= 1L;
-	}
-	
-	private void doRunOnMultiple(ICompilationUnit[] cus, MultiStatus status, IProgressMonitor monitor) throws OperationCanceledException {
-		if (monitor == null) {
-			monitor= new NullProgressMonitor();
-		}	
-		monitor.setTaskName(ActionMessages.OrganizeImportsAction_multi_op_description); 
-	
-		monitor.beginTask("", cus.length); //$NON-NLS-1$
-		try {
-			IChooseImportQuery query= new IChooseImportQuery() {
-				public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
-					throw new OrganizeImportError();
-				}
-			};
-			IJavaProject lastProject= null;
-			
-	
-			for (int i= 0; i < cus.length; i++) {
-				ICompilationUnit cu= cus[i];
-				if (testOnBuildPath(cu, status)) {
-					if (lastProject == null || !lastProject.equals(cu.getJavaProject())) {
-						lastProject= cu.getJavaProject();
-					}
-					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(lastProject);
-
-					
-					String cuLocation= cu.getPath().makeRelative().toString();
-					
-					monitor.subTask(cuLocation);
-
-					try {
-						boolean save= !cu.isWorkingCopy();
-						if (!save) {
-							ITextFileBuffer textFileBuffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(cu.getPath(), LocationKind.IFILE);
-							save= textFileBuffer != null && !textFileBuffer.isDirty(); // save when not dirty
-						}
-						
-						OrganizeImportsOperation op= new OrganizeImportsOperation(cu, null, settings.importIgnoreLowercase, save, false, query);
-						runInSync(op, cuLocation, status, monitor);
-
-						IProblem parseError= op.getParseError();
-						if (parseError != null) {
-							String message= Messages.format(ActionMessages.OrganizeImportsAction_multi_error_parse, cuLocation); 
-							status.add(new Status(IStatus.INFO, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
-						} 	
-					} catch (CoreException e) {
-						JavaPlugin.log(e);
-						String message= Messages.format(ActionMessages.OrganizeImportsAction_multi_error_unexpected, e.getStatus().getMessage()); 
-						status.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));					
-					}
-
-					if (monitor.isCanceled()) {
-						throw new OperationCanceledException();
-					}
-				}
-			}
-		} finally {
-			monitor.done();
-		}
-	}
-	
-	private boolean testOnBuildPath(ICompilationUnit cu, MultiStatus status) {
-		IJavaProject project= cu.getJavaProject();
-		if (!project.isOnClasspath(cu)) {
-			String cuLocation= cu.getPath().makeRelative().toString();
-			String message= Messages.format(ActionMessages.OrganizeImportsAction_multi_error_notoncp, cuLocation); 
-			status.add(new Status(IStatus.INFO, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
-			return false;
-		}
-		return true;
-	}
-	
-		
-	private void runInSync(final OrganizeImportsOperation op, final String cuLocation, final MultiStatus status, final IProgressMonitor monitor) {
-		Runnable runnable= new Runnable() {
-			public void run() {
-				try {
-					op.run(new SubProgressMonitor(monitor, 1));
-				} catch (ValidateEditException e) {
-					status.add(e.getStatus());
-				} catch (CoreException e) {
-					JavaPlugin.log(e);
-					String message= Messages.format(ActionMessages.OrganizeImportsAction_multi_error_unexpected, e.getStatus().getMessage()); 
-					status.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));					
-				} catch (OrganizeImportError e) {
-					String message= Messages.format(ActionMessages.OrganizeImportsAction_multi_error_unresolvable, cuLocation); 
-					status.add(new Status(IStatus.INFO, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
-				} catch (OperationCanceledException e) {
-					// Canceled
-					monitor.setCanceled(true);
-				}
-			}
-		};
-		getShell().getDisplay().syncExec(runnable);
-	}
-				
 
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.

@@ -246,7 +246,7 @@ public final class RefactoringExecutionStarter {
 				context= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 			}
 			
-			RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.WARNING, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES, shell, context);
+			RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.INFO, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES, shell, context);
 			try {
 				helper.perform(true, true);
 			} catch (InterruptedException e) {

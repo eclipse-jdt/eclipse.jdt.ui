@@ -18,25 +18,52 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
+import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 public class ImportsFix extends AbstractFix {
 	
-	public static IFix createCleanUp(final CompilationUnit cu, CodeGenerationSettings settings, boolean organizeImports) throws CoreException {
+	private static final class AmbiguousImportException extends RuntimeException {
+		private static final long serialVersionUID= 1L;
+	}
+
+	public static IFix createCleanUp(final CompilationUnit cu, CodeGenerationSettings settings, boolean organizeImports, RefactoringStatus status) throws CoreException {
 		if (!organizeImports)
 			return null;
 		
-		OrganizeImportsOperation op= new OrganizeImportsOperation((ICompilationUnit)cu.getJavaElement(), cu, settings.importIgnoreLowercase, false, false, null);
-		final TextEdit edit= op.createTextEdit(null);
+		IChooseImportQuery query= new IChooseImportQuery() {
+			public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
+				throw new AmbiguousImportException();
+			}
+		};
+		OrganizeImportsOperation op= new OrganizeImportsOperation((ICompilationUnit)cu.getJavaElement(), cu, settings.importIgnoreLowercase, false, false, query);
+		final TextEdit edit;
+		try {
+			edit= op.createTextEdit(null);
+		} catch (AmbiguousImportException e) {
+			status.addInfo(Messages.format(ActionMessages.OrganizeImportsAction_multi_error_unresolvable, getLocationString(cu)));
+			return null;
+		}
+		
+		if (op.getParseError() != null) {
+			status.addInfo(Messages.format(ActionMessages.OrganizeImportsAction_multi_error_parse, getLocationString(cu)));
+			return null;
+		}
+		
 		if (edit == null)
 			return null;
 		
@@ -66,6 +93,10 @@ public class ImportsFix extends AbstractFix {
          	  }
     	};
     }
+
+	private static String getLocationString(final CompilationUnit cu) {
+		return cu.getJavaElement().getPath().makeRelative().toString();
+	}
 	
 	protected ImportsFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations) {
 	    super(name, compilationUnit, fixRewriteOperations);

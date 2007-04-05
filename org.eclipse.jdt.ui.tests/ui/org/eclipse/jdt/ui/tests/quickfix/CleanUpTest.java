@@ -21,6 +21,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
@@ -5924,6 +5927,56 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected1= buf.toString();
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+	
+	public void testOrganizeImports01() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    A a;\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {}\n");
+		pack2.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		IPackageFragment pack3= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class A {}\n");
+		pack3.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.ORGANIZE_IMPORTS);
+		
+		RefactoringStatus status= assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
+		RefactoringStatusEntry[] entries= status.getEntries();
+		assertTrue(entries.length == 1);
+		String message= entries[0].getMessage();
+		assertTrue(message, entries[0].isInfo());
+		assertTrue(message, message.indexOf("ambiguous") != -1);
+	}
+	
+	public void testOrganizeImports02() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    Vect or v;\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.ORGANIZE_IMPORTS);
+		
+		RefactoringStatus status= assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
+		RefactoringStatusEntry[] entries= status.getEntries();
+		assertTrue(entries.length == 1);
+		String message= entries[0].getMessage();
+		assertTrue(message, entries[0].isInfo());
+		assertTrue(message, message.indexOf("parse") != -1);
 	}
 	
 }

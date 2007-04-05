@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -91,7 +92,9 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 	 * @throws JavaModelException
 	 * @throws InvocationTargetException
 	 */
-	protected abstract void performRefactoring(ICompilationUnit[] units, ICleanUp[] cleanUps) throws JavaModelException, InvocationTargetException;
+	protected void performRefactoring(ICompilationUnit[] units, ICleanUp[] cleanUps) throws JavaModelException, InvocationTargetException {
+		RefactoringExecutionStarter.startCleanupRefactoring(units, cleanUps, getShell(), false, getActionName());
+	}
 
 	public void run(ITextSelection selection) {
 		ICompilationUnit cu= getCompilationUnit(fEditor);
@@ -217,7 +220,7 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 		ErrorDialog.openError(getShell(), getActionName(), null, status);
 	}
 
-	private ICompilationUnit[] getCompilationUnits(IStructuredSelection selection) {
+	public ICompilationUnit[] getCompilationUnits(IStructuredSelection selection) {
 		HashSet result= new HashSet();
 		Object[] selected= selection.toArray();
 		for (int i= 0; i < selected.length; i++) {
