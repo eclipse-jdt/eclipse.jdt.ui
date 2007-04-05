@@ -54,6 +54,8 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
  */
 public class TypeFilterPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
+	public static final String TYPE_FILTER_PREF_PAGE_ID= "org.eclipse.jdt.ui.preferences.TypeFilterPreferencePage"; //$NON-NLS-1$
+	
 	private static final String PREF_FILTER_ENABLED= PreferenceConstants.TYPEFILTER_ENABLED;
 	private static final String PREF_FILTER_DISABLED= PreferenceConstants.TYPEFILTER_DISABLED;
 	

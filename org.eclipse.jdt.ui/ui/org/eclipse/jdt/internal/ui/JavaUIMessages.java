@@ -20,6 +20,7 @@ public final class JavaUIMessages extends NLS {
 		// Do not instantiate
 	}
 
+	public static String FilteredTypesSelectionDialog_TypeFiltersPreferencesAction_label;
 	public static String GenerateHashCodeEqualsDialog_instanceof_button;
 	public static String JavaPlugin_internal_error;
 	public static String JavaPlugin_initializing_ui;

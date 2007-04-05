@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -62,6 +63,7 @@ import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.dialogs.SearchPattern;
 
 import org.eclipse.jdt.core.Flags;
@@ -98,6 +100,7 @@ import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.preferences.TypeFilterPreferencePage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
@@ -143,6 +146,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 	private static boolean fgFirstTime= true;
 
 	private final TypeItemsComparator fTypeItemsComparator; 
+	
+	private int fTypeFilterVersion= 0;
 
 	/**
 	 * Creates new FilteredTypesSelectionDialog instance
@@ -363,6 +368,9 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 			});
 			fFilterActionGroup.fillViewMenu(menuManager);
 		}
+		
+		menuManager.add(new Separator());
+		menuManager.add(new TypeFiltersPreferencesAction());
 	}
 
 	/*
@@ -650,6 +658,25 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 		 */
 		public void run() {
 			fTypeInfoLabelProvider.setContainerInfo(isChecked());
+		}
+	}
+	
+	private class TypeFiltersPreferencesAction extends Action {
+		
+		public TypeFiltersPreferencesAction() {
+			super(JavaUIMessages.FilteredTypesSelectionDialog_TypeFiltersPreferencesAction_label);
+		}
+		
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.jface.action.Action#run()
+		 */
+		public void run() {
+			String typeFilterID= TypeFilterPreferencePage.TYPE_FILTER_PREF_PAGE_ID;
+			PreferencesUtil.createPreferenceDialogOn(getShell(), typeFilterID, new String[] { typeFilterID }, null).open();
+			fTypeFilterVersion++;
+			applyFilter();
 		}
 	}
 
@@ -999,6 +1026,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 		private SearchPattern fPackageMatcher;
 		
 		private boolean fMatchEverything= false;
+		
+		private final int fMyTypeFilterVersion= fTypeFilterVersion;
 
 		/**
 		 * Creates instance of TypeItemsFilter
@@ -1033,6 +1062,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 			TypeItemsFilter typeItemsFilter= (TypeItemsFilter) filter;
 			if (fScope != typeItemsFilter.getSearchScope())
 				return false;
+			if (fMyTypeFilterVersion != typeItemsFilter.getMyTypeFilterVersion())
+				return false;
 			return getPattern().indexOf('.', filter.getPattern().length()) == -1;
 		}
 
@@ -1043,6 +1074,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 				return false;
 			TypeItemsFilter typeItemsFilter= (TypeItemsFilter) iFilter;
 			if (fScope != typeItemsFilter.getSearchScope())
+				return false;
+			if (fMyTypeFilterVersion != typeItemsFilter.getMyTypeFilterVersion())
 				return false;
 			return true;
 		}
@@ -1059,6 +1092,10 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 			return fScope;
 		}
 
+		public int getMyTypeFilterVersion() {
+			return fMyTypeFilterVersion;
+		}
+		
 		public String getPackagePattern() {
 			if (fPackageMatcher == null)
 				return null;
