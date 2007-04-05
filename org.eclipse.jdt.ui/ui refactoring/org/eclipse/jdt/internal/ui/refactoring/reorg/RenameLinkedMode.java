@@ -112,7 +112,7 @@ public class RenameLinkedMode {
 	
 	private class ExitPolicy implements IExitPolicy {
 		public ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length) {
-			fShowPreview= (event.stateMask & SWT.CTRL) != 0;
+			fShowPreview|= (event.stateMask & SWT.CTRL) != 0;
 			return null; // don't change behavior; do actions in EditorSynchronizer
 		}
 	}
@@ -269,6 +269,7 @@ public class RenameLinkedMode {
 		Image image= null;
 		Label label= null;
 		
+		fShowPreview|= showPreview;
 		try {
 			ISourceViewer viewer= fEditor.getViewer();
 			if (viewer instanceof SourceViewer) {
@@ -311,7 +312,7 @@ public class RenameLinkedMode {
 			
 			Shell shell= fEditor.getSite().getShell();
 			boolean executed;
-			if (showPreview) {
+			if (fShowPreview) { // could have been updated by undoAndCreateRenameSupport(..)
 				executed= renameSupport.openDialog(shell, true);
 			} else {
 				renameSupport.perform(shell, fEditor.getSite().getWorkbenchWindow());
@@ -513,6 +514,7 @@ public class RenameLinkedMode {
 				if (fileNamePatterns != null && fileNamePatterns.length() != 0) {
 					descriptor.setFileNamePatterns(fileNamePatterns);
 					descriptor.setUpdateQualifiedNames(refactoringSettings.getBoolean(RenameRefactoringWizard.UPDATE_QUALIFIED_NAMES));
+					fShowPreview= true;
 				}
 		}
 		switch (elementType) {
@@ -520,6 +522,7 @@ public class RenameLinkedMode {
 			case IJavaElement.TYPE:
 			case IJavaElement.FIELD:
 				descriptor.setUpdateTextualOccurrences(refactoringSettings.getBoolean(RenameRefactoringWizard.UPDATE_TEXTUAL_MATCHES));
+				fShowPreview= true;
 		}
 		switch (elementType) {
 			case IJavaElement.FIELD:
