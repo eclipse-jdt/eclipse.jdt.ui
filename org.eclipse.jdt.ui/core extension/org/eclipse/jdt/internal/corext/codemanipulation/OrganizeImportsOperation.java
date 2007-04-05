@@ -413,6 +413,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			CompilationUnit astRoot= fASTRoot;
 			if (astRoot == null) {
 				astRoot= ASTProvider.getASTProvider().getAST(fCompilationUnit, ASTProvider.WAIT_YES, new SubProgressMonitor(monitor, 2));
+				if (monitor.isCanceled())
+					throw new OperationCanceledException();
 			} else {
 				monitor.worked(2);
 			}
