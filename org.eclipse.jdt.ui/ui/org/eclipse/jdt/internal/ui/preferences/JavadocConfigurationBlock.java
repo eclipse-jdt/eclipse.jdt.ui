@@ -662,21 +662,6 @@ public class JavadocConfigurationBlock {
 				if (url.getFile() == null) {
 					status.setError(PreferencesMessages.JavadocConfigurationBlock_error_notafolder); 
 					return status;
-				} else {
-					File dir= new File(url.getFile());
-					if (dir.exists()) {
-						if (dir.isFile()) {
-							status.setError(PreferencesMessages.JavadocConfigurationBlock_error_notafolder); 
-							return status;
-						}
-						File packagesFile= new File(dir, "package-list"); //$NON-NLS-1$
-						if (!packagesFile.exists()) {
-							status.setWarning(PreferencesMessages.JavadocConfigurationBlock_warning_packagelistnotfound); 
-							// only a warning, go on
-						}
-					} else {
-						status.setWarning(PreferencesMessages.JavadocConfigurationBlock_error_notafolder); 
-					}
 				}
 			}
 			fURLResult= url;

@@ -271,7 +271,6 @@ public final class PreferencesMessages extends NLS {
 	public static String JavadocConfigurationPropertyPage_IsJavaProject_description;
 	public static String JavadocConfigurationBlock_browse_folder_button;
 	public static String JavadocConfigurationBlock_error_notafolder;
-	public static String JavadocConfigurationBlock_warning_packagelistnotfound;
 	public static String JavadocConfigurationBlock_javadocFolderDialog_label;
 	public static String JavadocConfigurationBlock_javadocFolderDialog_message;
 	public static String JavadocConfigurationBlock_MalformedURL_error;
