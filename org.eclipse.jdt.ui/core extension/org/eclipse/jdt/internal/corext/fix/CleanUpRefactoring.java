@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -24,7 +23,6 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.text.edits.TextEditVisitor;
 import org.eclipse.text.edits.UndoEdit;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -42,7 +40,6 @@ import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.ContentStamp;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
-import org.eclipse.ltk.core.refactoring.MultiStateTextFileChange;
 import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -51,11 +48,11 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextEditBasedChangeGroup;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
-import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -70,6 +67,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CommentFormatCleanUp;
@@ -199,11 +197,9 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		private final Hashtable/*<ICompilationUnit, Change>*/fSolutions;
 		private final Hashtable/*<ICompilationUnit, ICleanUp[]>*/fCompilationUnitCleanUpMap;
 		private final CleanUpRefactoringProgressMonitor fMonitor;
-		private final boolean fLeaveFilesDirty2;
 		
-		public CleanUpASTRequestor(List parseList, Hashtable solutions, boolean leavFilesDirty, CleanUpRefactoringProgressMonitor monitor) {
+		public CleanUpASTRequestor(List parseList, Hashtable solutions, CleanUpRefactoringProgressMonitor monitor) {
 			fSolutions= solutions;
-			fLeaveFilesDirty2= leavFilesDirty;
 			fMonitor= monitor;
 			fUndoneElements= new ArrayList();
 			fCompilationUnitCleanUpMap= new Hashtable(parseList.size());
@@ -220,13 +216,13 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			
 			fMonitor.subTask(fMonitor.getSubTaskMessage(source));
 			
-			ICompilationUnit primarySource= (ICompilationUnit)source.getPrimaryElement();
-			ICleanUp[] cleanUps= (ICleanUp[])fCompilationUnitCleanUpMap.get(primarySource);
+			ICompilationUnit primary= (ICompilationUnit)source.getPrimaryElement();
+			ICleanUp[] cleanUps= (ICleanUp[])fCompilationUnitCleanUpMap.get(primary);
 			
-			ICleanUp[] rejectedCleanUps= calculateSolutions(primarySource, ast, cleanUps);
+			ICleanUp[] rejectedCleanUps= calculateSolutions(source, ast, cleanUps);
 			
 			if (rejectedCleanUps.length > 0) {
-				fUndoneElements.add(new ParseListElement(primarySource, rejectedCleanUps));
+				fUndoneElements.add(new ParseListElement(primary, rejectedCleanUps));
 				fMonitor.reset();
 			} else {
 				fMonitor.flush();
@@ -262,37 +258,15 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		}
 		
 		private void integrateSolution(CleanUpChange solution, ICompilationUnit source) throws JavaModelException {
-			if (fLeaveFilesDirty2 || source.getBuffer().hasUnsavedChanges()) {
-				solution.setSaveMode(TextFileChange.LEAVE_DIRTY);
-			} else {
-				solution.setSaveMode(TextFileChange.FORCE_SAVE);
-			}
+			ICompilationUnit primary= source.getPrimary();
 			
-			if (fSolutions.containsKey(source)) {
-				Object obj= fSolutions.get(source);
-				if (obj instanceof MultiStateCompilationUnitChange) {
-					MultiStateCompilationUnitChange change= (MultiStateCompilationUnitChange)obj;
-					change.addChange(createGroupFreeChange(solution));
-				} else {
-					MultiStateCompilationUnitChange mscuc= new MultiStateCompilationUnitChange(getChangeName(source), source);
-					mscuc.setSaveMode(((TextFileChange)obj).getSaveMode());
-					mscuc.setKeepPreviewEdits(true);
-					mscuc.addChange(createGroupFreeChange((CleanUpChange)obj));
-					mscuc.addChange(createGroupFreeChange(solution));
-					fSolutions.remove(source);
-					fSolutions.put(source, mscuc);
-				}
-			} else {
-				fSolutions.put(source, solution);
+			List changes= (List)fSolutions.get(primary);
+			if (changes == null) {
+				changes= new ArrayList();
+				fSolutions.put(primary, changes);
 			}
+			changes.add(solution);
 		}
-
-		private TextChange createGroupFreeChange(CleanUpChange change) {
-			CleanUpChange result= new CleanUpChange(change.getName(), change.getCompilationUnit());
-			result.setEdit(change.getEdit());
-			result.setSaveMode(change.getSaveMode());
-	        return result;
-        }
 	}
 	
 	private static abstract class CleanUpParser {
@@ -351,7 +325,8 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 	private class CleanUpFixpointIterator {
 		
 		private List/*<ParseListElement>*/fParseList;
-		private final Hashtable/*<ICompilationUnit, Change>*/fSolutions;
+		private final Hashtable/*<ICompilationUnit, List<CleanUpChange>>*/fSolutions;
+		private final Hashtable/*<ICompilationUnit (primary), ICompilationUnit (working copy)>*/fWorkingCopies;
 		private final IJavaProject fProject;
 		private final Map fCleanUpOptions;
 		private final int fSize;
@@ -360,6 +335,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		public CleanUpFixpointIterator(IJavaProject project, ICompilationUnit[] units, ICleanUp[] cleanUps) {
 			fProject= project;
 			fSolutions= new Hashtable(units.length);
+			fWorkingCopies= new Hashtable();
 			
 			fParseList= new ArrayList(units.length);
 			for (int i= 0; i < units.length; i++) {
@@ -386,24 +362,19 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			List parseList= new ArrayList();
 			List sourceList= new ArrayList();
 			
-			List primaryWorkingCopies= new ArrayList();
-			ArrayList secondaryWorkingCopies= new ArrayList();
-			ArrayList oldContents= new ArrayList();
 			try {
 				for (Iterator iter= fParseList.iterator(); iter.hasNext();) {
 					ParseListElement element= (ParseListElement)iter.next();
 					
 					ICompilationUnit compilationUnit= element.getCompilationUnit();
 					if (fSolutions.containsKey(compilationUnit)) {
-						if (compilationUnit.isWorkingCopy()) {
-							oldContents.add(compilationUnit.getBuffer().getContents());
-							applyChange(compilationUnit, (Change)fSolutions.get(compilationUnit));
-							secondaryWorkingCopies.add(compilationUnit);
+						if (fWorkingCopies.containsKey(compilationUnit)) {
+							compilationUnit= (ICompilationUnit)fWorkingCopies.get(compilationUnit);
 						} else {
-							compilationUnit.becomeWorkingCopy(null, null);
-							applyChange(compilationUnit, (Change)fSolutions.get(compilationUnit));
-							primaryWorkingCopies.add(compilationUnit);
+							compilationUnit= compilationUnit.getWorkingCopy(new WorkingCopyOwner() {}, null);
+							fWorkingCopies.put(compilationUnit.getPrimary(), compilationUnit);
 						}
+						applyChange(compilationUnit, (List)fSolutions.get(compilationUnit.getPrimary()));
 					}
 					
 					if (requiresAST(compilationUnit, element.getCleanUps())) {
@@ -414,7 +385,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				}
 				
 				CleanUpRefactoringProgressMonitor cuMonitor= new CleanUpRefactoringProgressMonitor(monitor, parseList.size() + sourceList.size(), fSize, fIndex);
-				CleanUpASTRequestor requestor= new CleanUpASTRequestor(fParseList, fSolutions, fLeaveFilesDirty, cuMonitor);
+				CleanUpASTRequestor requestor= new CleanUpASTRequestor(fParseList, fSolutions, cuMonitor);
 				CleanUpParser parser= new CleanUpParser() {
 					protected ASTParser createParser() {
 						ASTParser result= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
@@ -442,12 +413,16 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				fParseList= requestor.getUndoneElements();
 				fIndex= cuMonitor.getIndex();
 			} finally {
-				for (Iterator iter= primaryWorkingCopies.iterator(); iter.hasNext();) {
-					((ICompilationUnit)iter.next()).discardWorkingCopy();
-				}
-				for (int i= 0; i < secondaryWorkingCopies.size(); i++) {
-					ICompilationUnit unit= (ICompilationUnit)secondaryWorkingCopies.get(i);
-					unit.getBuffer().setContents((String)oldContents.get(i));
+			}
+		}
+		
+		public void dispose() {
+			for (Iterator iterator= fWorkingCopies.values().iterator(); iterator.hasNext();) {
+				ICompilationUnit cu= (ICompilationUnit)iterator.next();
+				try {
+					cu.discardWorkingCopy();
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
 				}
 			}
 		}
@@ -461,18 +436,63 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		}
 		
 		public Change[] getResult() {
-			Collection collection= fSolutions.values();
-			return (Change[])collection.toArray(new Change[collection.size()]);
+			
+			Change[] result= new Change[fSolutions.size()];
+			int i=0;
+			for (Iterator iterator= fSolutions.entrySet().iterator(); iterator.hasNext();) {
+				Map.Entry entry= (Map.Entry)iterator.next();
+				
+				List changes= (List)entry.getValue();
+				ICompilationUnit unit= (ICompilationUnit)entry.getKey();
+				
+				int saveMode;
+				try {
+					if (fLeaveFilesDirty || unit.getBuffer().hasUnsavedChanges()) {
+						saveMode= TextFileChange.LEAVE_DIRTY;
+					} else {
+						saveMode= TextFileChange.FORCE_SAVE;
+					}
+				} catch (JavaModelException e) {
+					saveMode= TextFileChange.LEAVE_DIRTY;
+					JavaPlugin.log(e);
+				}
+				
+				if (changes.size() == 1) {
+					CleanUpChange change= (CleanUpChange)changes.get(0);
+					change.setSaveMode(saveMode);
+					result[i]= change;
+				} else {
+					MultiStateCompilationUnitChange mscuc= new MultiStateCompilationUnitChange(getChangeName(unit), unit);
+					for (int j= 0; j < changes.size(); j++) {
+						mscuc.addChange(createGroupFreeChange((CleanUpChange)changes.get(j)));
+					}
+					mscuc.setSaveMode(saveMode);
+					result[i]= mscuc;
+				}
+				
+				i++;
+			}
+			
+			return result;
 		}
 		
-		private void applyChange(ICompilationUnit compilationUnit, Change change) throws JavaModelException, CoreException {
-			IBuffer buffer= compilationUnit.getBuffer();
-			if (change instanceof TextChange) {
-				buffer.setContents(((TextChange)change).getPreviewContent(null));
-			} else if (change instanceof MultiStateTextFileChange) {
-				buffer.setContents(((MultiStateTextFileChange)change).getPreviewContent(null));
+		private TextChange createGroupFreeChange(CleanUpChange change) {
+			CleanUpChange result= new CleanUpChange(change.getName(), change.getCompilationUnit());
+			result.setEdit(change.getEdit());
+			result.setSaveMode(change.getSaveMode());
+	        return result;
+        }
+		
+		private void applyChange(ICompilationUnit compilationUnit, List changes) throws JavaModelException, CoreException {
+			if (changes.size() == 1) {
+				CleanUpChange change= (CleanUpChange)changes.get(changes.size() - 1);
+				compilationUnit.getBuffer().setContents(change.getPreviewContent(null));
 			} else {
-				Assert.isTrue(false);
+				MultiStateCompilationUnitChange mscuc= new MultiStateCompilationUnitChange("", compilationUnit.getPrimary()); //$NON-NLS-1$
+				for (int i= 0; i < changes.size(); i++) {
+					mscuc.addChange((CleanUpChange)changes.get(i));
+				}
+				compilationUnit.getBuffer().setContents(mscuc.getPreviewContent(null));
 			}
 		}
 	}
@@ -668,10 +688,12 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			while (iter.hasNext()) {
 				iter.next(subMonitor);
 			}
+			
+			return iter.getResult();
 		} finally {
+			iter.dispose();
 			subMonitor.done();
 		}
-		return iter.getResult();
 	}
 	
 	private RefactoringStatus initialize(IJavaProject javaProject) throws CoreException {
