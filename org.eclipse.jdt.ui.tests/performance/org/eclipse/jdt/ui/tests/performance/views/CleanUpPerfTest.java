@@ -60,6 +60,8 @@ import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 
+import org.eclipse.test.performance.Dimension;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
@@ -276,7 +278,9 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		}
 	}
 	
-	public void testCodeStyleCleanUp() throws Exception {
+	public void testCodeStyleCleanUp() throws Exception {		
+		tagAsSummary("Clean Up - Code Style", Dimension.ELAPSED_PROCESS);
+		
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 		

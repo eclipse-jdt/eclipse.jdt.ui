@@ -33,6 +33,8 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 
+import org.eclipse.test.performance.Dimension;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
@@ -99,6 +101,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 	}
 	
 	public void testExpand() throws Exception {
+		tagAsSummary("Package Explorer - Expand to first level", Dimension.ELAPSED_PROCESS);
 		joinBackgroudActivities();
 		TreeViewer viewer= getViewer();
 		startMeasuring();
