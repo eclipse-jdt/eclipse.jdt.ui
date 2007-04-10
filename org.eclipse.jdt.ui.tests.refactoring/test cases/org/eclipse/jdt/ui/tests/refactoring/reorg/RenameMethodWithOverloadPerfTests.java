@@ -55,7 +55,7 @@ public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerfo
 	}
 	
 	public void test_100_10() throws Exception {
-		tagAsSummary("Rename method with overloading", Dimension.CPU_TIME);
+		tagAsSummary("Rename method with overloading", Dimension.ELAPSED_PROCESS);
 		executeRefactoring(100, 10, true, 10);
 	}
 	

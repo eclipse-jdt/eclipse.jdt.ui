@@ -26,8 +26,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRef
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-import org.eclipse.test.performance.Dimension;
-
 import org.eclipse.jdt.ui.tests.performance.SWTTestProject;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringHeapTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
@@ -78,7 +76,6 @@ public class ExtractInterfaceHeapAcceptanceTests extends RefactoringHeapTestCase
 	}
 	
 	public void testExtractControl() throws Exception {
-		tagAsSummary("Extract Interface - Heap", Dimension.USED_JAVA_HEAP);
 		executeRefactoring(fRefactoring, true);
 	}
 }
