@@ -10,13 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.model;
 
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ITreePathLabelProvider;
+import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.ViewerLabel;
 
 import org.eclipse.team.core.diff.IDiff;
 import org.eclipse.team.core.diff.IDiffTree;
@@ -36,7 +42,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  * 
  * @since 3.2
  */
-public final class JavaSynchronizationLabelProvider extends AbstractSynchronizationLabelProvider {
+public final class JavaSynchronizationLabelProvider extends AbstractSynchronizationLabelProvider implements ITreePathLabelProvider{
 
 	/** The delegate label provider, or <code>null</code> */
 	private ILabelProvider fLabelProvider= null;
@@ -141,5 +147,32 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 	 */
 	protected boolean isIncludeOverlays() {
 		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ITreePathLabelProvider#updateLabel(org.eclipse.jface.viewers.ViewerLabel, org.eclipse.jface.viewers.TreePath)
+	 */
+	public void updateLabel(ViewerLabel label, TreePath elementPath) {
+		Object firstSegment = elementPath.getFirstSegment();
+		if (firstSegment instanceof IProject && elementPath.getSegmentCount() == 2) {
+			IProject project = (IProject) firstSegment;
+			Object lastSegment = elementPath.getLastSegment();
+			if (lastSegment instanceof IFolder) {
+				IFolder folder = (IFolder) lastSegment;
+				if (!folder.getParent().equals(project)) {
+					// This means that a folder that is not a direct child of the project
+					// is a child in the tree. Therefore, the resource content provider
+					// must be active and in compress folder mode so we will leave
+					// it to the resource provider to provide the proper label.
+					// We need to do this because of bug 153912
+					return;
+				}
+			}
+		}
+		label.setImage(getImage(elementPath));
+		label.setText(getText(elementPath));
+		Font f = getFont(elementPath);
+		if (f != null)
+			label.setFont(f);
 	}
 }
