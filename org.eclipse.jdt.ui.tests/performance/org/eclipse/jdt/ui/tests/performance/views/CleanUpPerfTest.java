@@ -224,7 +224,6 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		
 		node.put(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, CleanUpConstants.TRUE);
 		node.put(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS, CleanUpConstants.TRUE);
-		node.put(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpConstants.TRUE);
 		
 		node.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES, CleanUpConstants.TRUE);
 		node.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpConstants.TRUE);
@@ -320,6 +319,30 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		
 		node.put(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, CleanUpConstants.TRUE);
 		node.put(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS, CleanUpConstants.TRUE);
+		
+		storeSettings(node);
+		
+		cleanUpRefactoring.addCleanUp(new ControlStatementsCleanUp());
+		cleanUpRefactoring.addCleanUp(new ConvertLoopCleanUp());
+		
+		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+		cleanUpRefactoring.createChange(null);
+		
+		joinBackgroudActivities();
+		for (int i= 0; i < 10; i++) {
+			startMeasuring();
+			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
+			cleanUpRefactoring.createChange(null);
+			finishMeasurements();
+		}
+	}
+	
+	public void testConvertLoopCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+		
+		Map node= getNullSettings();
+		
 		node.put(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpConstants.TRUE);
 		
 		storeSettings(node);
