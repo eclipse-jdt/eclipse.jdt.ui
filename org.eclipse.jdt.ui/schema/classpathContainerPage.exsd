@@ -48,7 +48,7 @@ edit a classpath container entry.
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  identifies the classpath container as defined by &lt;samp&gt;org.eclipse.jdt.core.classpathVariableInitializer&lt;/samp&gt;
+                  identified the classpath containers for which this page will be used. The id corresponds to the first segment of the path of a container classpath entry and matches the id referenced in &lt;samp&gt;org.eclipse.jdt.core.classpathVariableInitializer&lt;/samp&gt;
                </documentation>
             </annotation>
          </attribute>
