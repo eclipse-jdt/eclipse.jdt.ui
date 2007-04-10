@@ -2896,7 +2896,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 
 	protected boolean isMarkingOccurrences() {
-		return getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
+		IPreferenceStore store= getPreferenceStore();
+		return store != null && store.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
 	}
 
 	boolean markOccurrencesOfType(IBinding binding) {
