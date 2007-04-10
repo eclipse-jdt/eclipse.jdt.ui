@@ -18,16 +18,17 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.navigator.ILinkHelper;
+
+import org.eclipse.ui.ide.ResourceUtil;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
-import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 
 public class JavaFileLinkHelper implements ILinkHelper {
 
@@ -45,16 +46,14 @@ public class JavaFileLinkHelper implements ILinkHelper {
 	}
 
 	public IStructuredSelection findSelection(IEditorInput input) {
-		Object javaElement= null;
-		if (input instanceof IClassFileEditorInput)
-			javaElement= ((IClassFileEditorInput) input).getClassFile();
-		else if (input instanceof IFileEditorInput) {
-			IFile file= ((IFileEditorInput) input).getFile();
-			javaElement= JavaCore.create(file);
-		} else if (input instanceof JarEntryEditorInput)
-			javaElement= ((JarEntryEditorInput) input).getStorage();
-
-		return (javaElement != null) ? new StructuredSelection(javaElement) : StructuredSelection.EMPTY;
+		IJavaElement element= JavaUI.getEditorInputJavaElement(input);
+		if (element == null) {
+			IFile file = ResourceUtil.getFile(input);
+			if (file != null) {
+				element= JavaCore.create(file);
+			}
+		}
+		return (element != null) ? new StructuredSelection(element) : StructuredSelection.EMPTY;
 	}
 
 }
