@@ -35,11 +35,11 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -606,17 +606,28 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 	private final class DetectGroup extends Observable implements Observer, SelectionListener {
 
 		private final Link fHintText;
+		private Label fIcon;
 		private boolean fDetect;
 		
-		public DetectGroup(Composite composite) {
+		public DetectGroup(Composite parent) {
 			
-			Link jre50Text= new Link(composite, SWT.WRAP);
-			jre50Text.setFont(composite.getFont());
-			jre50Text.addSelectionListener(this);
-			GridData gridData= new GridData(GridData.FILL, SWT.FILL, true, true);
+			Composite composite= new Composite(parent, SWT.NONE);
+			composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+			GridLayout layout= new GridLayout(2, false);
+			layout.horizontalSpacing= 10;
+			composite.setLayout(layout);
+			
+			fIcon= new Label(composite, SWT.LEFT);
+			fIcon.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
+			GridData gridData= new GridData(SWT.LEFT, SWT.CENTER, false, false);
+			fIcon.setLayoutData(gridData);
+			
+			fHintText= new Link(composite, SWT.WRAP);
+			fHintText.setFont(composite.getFont());
+			fHintText.addSelectionListener(this);
+			gridData= new GridData(GridData.FILL, SWT.FILL, true, true);
 			gridData.widthHint= convertWidthInCharsToPixels(50);
-			jre50Text.setLayoutData(gridData);
-			fHintText= jre50Text;
+			fHintText.setLayoutData(gridData);
 			
 			handlePossibleJVMChange();
 		}
@@ -625,6 +636,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			String selectedCompliance= fJREGroup.getSelectedCompilerCompliance();
 			if (selectedCompliance != null) {
 				fHintText.setVisible(false);
+				fIcon.setVisible(false);
 				return;
 			}
 
@@ -645,8 +657,11 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 				
 				fHintText.setText(Messages.format(NewWizardMessages.JavaProjectWizardFirstPage_DetectGroup_jre_message, new String[] {selectedCompliance, jvmCompliance}));
 				fHintText.setVisible(true);
+				fIcon.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
+				fIcon.setVisible(true);
 			} else {
 				fHintText.setVisible(false);
+				fIcon.setVisible(false);
 			}
 		}
 		
@@ -673,6 +688,8 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 					if (fDetect) {
 						fHintText.setVisible(true);
 						fHintText.setText(NewWizardMessages.JavaProjectWizardFirstPage_DetectGroup_message);
+						fIcon.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_INFO));
+						fIcon.setVisible(true);
 					} else {
 						handlePossibleJVMChange();
 					}
@@ -904,6 +921,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 	
 	/**
 	 * Returns the path of the classpath container selected, or <code>null</code> if the default JRE was selected
+	 * @return the path to the selected JRE
 	 */
 	public IPath getJREContainerPath() {
 		return fJREGroup.getJREContainerPath();
@@ -928,6 +946,9 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		
 	/**
 	 * Initialize a grid layout with the default Dialog settings.
+	 * @param layout the layout to initialize
+	 * @param margins true if margins should be used
+	 * @return the initialized layout
 	 */
 	protected GridLayout initGridLayout(GridLayout layout, boolean margins) {
 		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
@@ -940,12 +961,5 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			layout.marginHeight= 0;
 		}
 		return layout;
-	}
-	
-	/**
-	 * Set the layout data for a button.
-	 */
-	protected GridData setButtonLayoutData(Button button) {
-		return super.setButtonLayoutData(button);
 	}
 }
