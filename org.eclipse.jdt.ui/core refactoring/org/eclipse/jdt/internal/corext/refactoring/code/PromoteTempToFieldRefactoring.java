@@ -762,6 +762,7 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 			ArrayCreation arrayCreation= rewrite.getAST().newArrayCreation();
 			arrayCreation.setType((ArrayType) ASTNodeFactory.newType(rewrite.getAST(), fTempDeclarationNode));
 			arrayCreation.setInitializer((ArrayInitializer) initializer);
+			return arrayCreation;
 		}
 		return initializer;
 	}

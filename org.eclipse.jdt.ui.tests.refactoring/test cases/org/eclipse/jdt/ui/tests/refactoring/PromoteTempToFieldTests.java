@@ -623,6 +623,14 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(5, 31, 5, 31, "fCount", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 	
+	public void test24() throws Exception{ //syntax error
+		int accessModifier= Modifier.PRIVATE;
+		int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
+		boolean declareFinal= false;
+		boolean declareStatic= false;
+		passHelper(4, 33, 4, 33, "fFinisheds", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+	
 	public void testGenerics01() throws Exception {
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD;
