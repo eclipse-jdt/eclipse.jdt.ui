@@ -627,6 +627,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			fHintText.addSelectionListener(this);
 			gridData= new GridData(GridData.FILL, SWT.FILL, true, true);
 			gridData.widthHint= convertWidthInCharsToPixels(50);
+			gridData.heightHint= convertHeightInCharsToPixels(3);
 			fHintText.setLayoutData(gridData);
 			
 			handlePossibleJVMChange();
@@ -635,8 +636,16 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		public void handlePossibleJVMChange() {
 			String selectedCompliance= fJREGroup.getSelectedCompilerCompliance();
 			if (selectedCompliance != null) {
-				fHintText.setVisible(false);
-				fIcon.setVisible(false);
+				String defaultCompliance= JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE);
+				if (selectedCompliance.equals(defaultCompliance)) {
+					fHintText.setVisible(false);
+					fIcon.setVisible(false);
+				} else {
+					fHintText.setText(Messages.format(NewWizardMessages.JavaProjectWizardFirstPage_DetectGroup_differendWorkspaceCC_message, new String[] {defaultCompliance, selectedCompliance}));
+					fHintText.setVisible(true);
+					fIcon.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_INFO));
+					fIcon.setVisible(true);
+				}
 				return;
 			}
 
