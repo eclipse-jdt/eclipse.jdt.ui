@@ -513,16 +513,18 @@ public class RenameLinkedMode {
 				String fileNamePatterns= refactoringSettings.get(RenameRefactoringWizard.QUALIFIED_NAMES_PATTERNS);
 				if (fileNamePatterns != null && fileNamePatterns.length() != 0) {
 					descriptor.setFileNamePatterns(fileNamePatterns);
-					descriptor.setUpdateQualifiedNames(refactoringSettings.getBoolean(RenameRefactoringWizard.UPDATE_QUALIFIED_NAMES));
-					fShowPreview= true;
+					boolean updateQualifiedNames= refactoringSettings.getBoolean(RenameRefactoringWizard.UPDATE_QUALIFIED_NAMES);
+					descriptor.setUpdateQualifiedNames(updateQualifiedNames);
+					fShowPreview|= updateQualifiedNames;
 				}
 		}
 		switch (elementType) {
 			case IJavaElement.PACKAGE_FRAGMENT:
 			case IJavaElement.TYPE:
 			case IJavaElement.FIELD:
-				descriptor.setUpdateTextualOccurrences(refactoringSettings.getBoolean(RenameRefactoringWizard.UPDATE_TEXTUAL_MATCHES));
-				fShowPreview= true;
+				boolean updateTextualOccurrences= refactoringSettings.getBoolean(RenameRefactoringWizard.UPDATE_TEXTUAL_MATCHES);
+				descriptor.setUpdateTextualOccurrences(updateTextualOccurrences);
+				fShowPreview|= updateTextualOccurrences;
 		}
 		switch (elementType) {
 			case IJavaElement.FIELD:
