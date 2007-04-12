@@ -93,7 +93,7 @@ public class DecoratingJavaLabelProvider extends DecoratingLabelProvider impleme
 					}
 				}
 				if (decorated != null) {
-					return ColoredJavaElementLabels.decorateColoredString(richLabel, decorated, ColoredJavaElementLabels.DECORATIONS_COLOR);
+					return ColoredJavaElementLabels.decorateColoredString(richLabel, decorated, ColoredJavaElementLabels.DECORATIONS_STYLE);
 				}
 				return richLabel;
 			}

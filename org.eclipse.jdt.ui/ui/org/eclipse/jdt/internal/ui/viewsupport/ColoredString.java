@@ -13,9 +13,18 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Display;
+
 
 public class ColoredString {
-
+	
+	public static abstract class Style {
+		public abstract Color getForeground(Display display);
+	}
+	
+	public static final Style DEFAULT_STYLE= null;
+	
 	private StringBuffer fBuffer;
 	private ArrayList fRanges;
 	
@@ -25,12 +34,12 @@ public class ColoredString {
 	}
 	
 	public ColoredString(String text) {
-		this(text, 0, 0);
+		this(text, ColoredString.DEFAULT_STYLE);
 	}
 	
-	public ColoredString(String text, int foregroundColor, int backgroundColor) {
+	public ColoredString(String text, Style style) {
 		this();
-		append(text, foregroundColor, backgroundColor);
+		append(text, style);
 	}
 	
 	public String getString() {
@@ -46,47 +55,43 @@ public class ColoredString {
 	}
 	
 	public ColoredString append(String text) {
-		return append(text, 0, 0);
+		return append(text, DEFAULT_STYLE);
 	}
 	
 	public ColoredString append(char ch) {
-		return append(String.valueOf(ch), 0, 0);
+		return append(String.valueOf(ch), DEFAULT_STYLE);
 	}
 	
 	public ColoredString append(ColoredString string) {
 		int offset= fBuffer.length();
 		fBuffer.append(string.getString());
 		for (Iterator iterator= string.getRanges(); iterator.hasNext();) {
-			ColorRange curr= (ColorRange) iterator.next();
-			fRanges.add(new ColorRange(offset + curr.offset, curr.length, curr.foregroundColor, curr.backgroundColor));
+			StyleRange curr= (StyleRange) iterator.next();
+			fRanges.add(new StyleRange(offset + curr.offset, curr.length, curr.style));
 		}
 		return this;
 	}
-	
-	public ColoredString append(String text, int foregroundColor) {
-		return append(text, foregroundColor, 0);
-	}
-	
-	public ColoredString append(String text, int foregroundColor, int backgroundColor) {
+		
+	public ColoredString append(String text, Style style) {
 		if (text.length() == 0)
 			return this;
 		
 		int offset= fBuffer.length();
 		fBuffer.append(text);
-		if (foregroundColor != 0 || backgroundColor != 0) {
+		if (style != null) {
 			if (!fRanges.isEmpty()) {
-				ColorRange last= (ColorRange) fRanges.get(fRanges.size() - 1);
-				if (last.offset + last.length == offset && last.foregroundColor == foregroundColor && last.backgroundColor == backgroundColor) {
+				StyleRange last= (StyleRange) fRanges.get(fRanges.size() - 1);
+				if (last.offset + last.length == offset && style.equals(last.style)) {
 					last.length += text.length();
 					return this;
 				}
 			}
-			fRanges.add(new ColorRange(offset, text.length(), foregroundColor, backgroundColor));
+			fRanges.add(new StyleRange(offset, text.length(), style));
 		}
 		return this;
 	}
 	
-	public void colorize(int offset, int length, int foregroundColor, int backgroundColor) {
+	public void colorize(int offset, int length, Style style) {
 		if (offset < 0 || offset + length > fBuffer.length()) {
 			throw new IllegalArgumentException("Invalid offset (" + offset + ") or length (" + length + ")");   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 		}
@@ -94,31 +99,29 @@ public class ColoredString {
 		
 		int insertPos= 0;
 		for (int i= 0; i < fRanges.size(); i++) {
-			ColorRange curr= (ColorRange) fRanges.get(i);
+			StyleRange curr= (StyleRange) fRanges.get(i);
 			if (curr.offset + curr.length <= offset) {
 				insertPos= i + 1;
 			}
 		}
 		if (insertPos < fRanges.size()) {
-			ColorRange curr= (ColorRange) fRanges.get(insertPos);
+			StyleRange curr= (StyleRange) fRanges.get(insertPos);
 			if (curr.offset > offset + length) {
 				throw new IllegalArgumentException("Overlapping ranges"); //$NON-NLS-1$
 			}
 		}
-		fRanges.add(insertPos, new ColorRange(offset, length, foregroundColor, backgroundColor));
+		fRanges.add(insertPos, new StyleRange(offset, length, style));
 	}
 	
-	public static class ColorRange {
+	public static class StyleRange {
 		public int offset;
 		public int length;
-		public int foregroundColor;
-		public int backgroundColor;
+		public Style style;
 		
-		public ColorRange(int offset, int length, int foregroundColor, int backgroundColor) {
+		public StyleRange(int offset, int length, Style style) {
 			this.offset= offset;
 			this.length= length;
-			this.foregroundColor= foregroundColor;
-			this.backgroundColor= backgroundColor;
+			this.style= style;
 		}
 	}
 }

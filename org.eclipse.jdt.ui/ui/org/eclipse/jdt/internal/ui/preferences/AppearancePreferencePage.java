@@ -109,7 +109,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		
 		fShowColoredLabels= new SelectionButtonDialogField(SWT.CHECK);
 		fShowColoredLabels.setDialogFieldListener(listener);
-		fShowColoredLabels.setLabelText("Show colored labels (experimental, restart required)");  //$NON-NLS-1$
+		fShowColoredLabels.setLabelText(PreferencesMessages.AppearancePreferencePage_coloredlabels_label);
 	}	
 
 	private void initFields() {

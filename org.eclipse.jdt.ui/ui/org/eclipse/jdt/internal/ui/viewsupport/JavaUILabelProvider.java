@@ -63,6 +63,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, IRic
 	
 	/**
 	 * Adds a decorator to the label provider
+	 * @param decorator the decorator to add
 	 */
 	public void addLabelDecorator(ILabelDecorator decorator) {
 		if (fLabelDecorators == null) {
@@ -107,6 +108,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, IRic
 	/**
 	 * Evaluates the image flags for a element.
 	 * Can be overwritten by super classes.
+	 * @param element the element to compute the image flags for
 	 * @return Returns a int
 	 */
 	protected int evaluateImageFlags(Object element) {
@@ -115,6 +117,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, IRic
 
 	/**
 	 * Evaluates the text flags for a element. Can be overwritten by super classes.
+	 * @param element the element to compute the text flags for
 	 * @return Returns a int
 	 */
 	protected long evaluateTextFlags(Object element) {
@@ -175,7 +178,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, IRic
 		}
 		String decorated= decorateText(string.getString(), element);
 		if (decorated != null) {
-			return ColoredJavaElementLabels.decorateColoredString(string, decorated, ColoredJavaElementLabels.DECORATIONS_COLOR);
+			return ColoredJavaElementLabels.decorateColoredString(string, decorated, ColoredJavaElementLabels.DECORATIONS_STYLE);
 		}
 		return string;
 	}

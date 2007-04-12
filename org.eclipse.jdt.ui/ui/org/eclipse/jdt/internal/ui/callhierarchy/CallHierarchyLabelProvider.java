@@ -39,7 +39,7 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
         super(TEXTFLAGS, IMAGEFLAGS);
         fDecorator= new CallHierarchyLabelDecorator();
     }
-    /**
+    /*
      * @see org.eclipse.jface.viewers.LabelProvider#getImage(java.lang.Object)
      */
     public Image getImage(Object element) {
@@ -77,7 +77,7 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
         	MethodWrapper wrapper= (MethodWrapper) element;
         	String decorated= getElementLabel(wrapper);
         	ColoredString text= super.getRichTextLabel(wrapper.getMember());
-        	return ColoredJavaElementLabels.decorateColoredString(text, decorated, ColoredJavaElementLabels.NUMBER_OF_MATCHES_COLOR);
+        	return ColoredJavaElementLabels.decorateColoredString(text, decorated, ColoredJavaElementLabels.COUNTER_STYLE);
         }
         return new ColoredString(getSpecialLabel(element));
     }
