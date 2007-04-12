@@ -51,11 +51,7 @@ public class OwnerDrawSupport {
 	
 	private static final int X_OFFSET= 2; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=178008 
 	private static final int Y_OFFSET= 2; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=178008
-	
-	public static final int QUALIFIER_STYLE= 1;
-	public static final int COUNTER_STYLE= 2;
-	public static final int DECORATION_STYLE= 3;
-	
+		
 	private OwnerDrawSupport(StructuredViewer viewer) {
 		this(viewer, new Point(X_OFFSET, Y_OFFSET));
 	}

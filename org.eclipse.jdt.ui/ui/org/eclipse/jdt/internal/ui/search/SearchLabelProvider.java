@@ -126,7 +126,7 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 		String name= coloredName.getString();
 		String decorated= getLabelWithCounts(element, name);
 		if (decorated.length() > name.length()) {
-			ColoredJavaElementLabels.decorateColoredString(coloredName, decorated, ColoredJavaElementLabels.NUMBER_OF_MATCHES_COLOR);
+			ColoredJavaElementLabels.decorateColoredString(coloredName, decorated, ColoredJavaElementLabels.COUNTER_STYLE);
 		}
 		return coloredName;
 	}

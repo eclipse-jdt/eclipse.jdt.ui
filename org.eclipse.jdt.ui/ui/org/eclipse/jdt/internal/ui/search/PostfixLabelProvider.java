@@ -92,7 +92,7 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 	 */
 	public ColoredString getRichTextLabel(Object element) {
 		ColoredString coloredString= getColoredLabelWithCounts(element, super.getRichTextLabel(element));
-		coloredString.append(getQualification(element), ColoredJavaElementLabels.QUALIFIER_COLOR);
+		coloredString.append(getQualification(element), ColoredJavaElementLabels.QUALIFIER_STYLE);
 		return coloredString;
 	}
 

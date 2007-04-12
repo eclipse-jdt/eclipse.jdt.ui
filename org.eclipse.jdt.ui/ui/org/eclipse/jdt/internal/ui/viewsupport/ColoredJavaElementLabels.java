@@ -12,9 +12,13 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
@@ -44,19 +48,40 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredString.Style;
 
 public class ColoredJavaElementLabels {
-	
-	public static final int QUALIFIER_COLOR= 1;
-	public static final int NUMBER_OF_MATCHES_COLOR= 2;
-	public static final int DECORATIONS_COLOR= 4;
-	public static final int FILE_SUFFIX_COLOR= 0;
+
+	public static final Style QUALIFIER_STYLE= new Style() {
+		private Color fColor;
+		public Color getForeground(Display display) {
+			if (fColor == null)
+				fColor= display.getSystemColor(SWT.COLOR_DARK_GRAY);
+			return fColor;
+		}
+	};
+	public static final Style COUNTER_STYLE= new Style() {
+		private Color fColor;
+		public Color getForeground(Display display) {
+			if (fColor == null)
+				fColor= JavaUI.getColorManager().getColor(new RGB(35, 136, 174));
+			return fColor;
+		}
+	};
+	public static final Style DECORATIONS_STYLE= new Style() {
+		private Color fColor;
+		public Color getForeground(Display display) {
+			if (fColor == null)
+				fColor= JavaUI.getColorManager().getColor(new RGB(149, 125, 71));
+			return fColor;
+		}
+	};
 	
 	public final static long COLORIZE= 1L << 55;
-	
 	
 	private final static long QUALIFIER_FLAGS= JavaElementLabels.P_COMPRESSED | JavaElementLabels.USE_RESOLVED;
 	
@@ -76,14 +101,9 @@ public class ColoredJavaElementLabels {
 		if (obj instanceof IJavaElement) {
 			return getElementLabel((IJavaElement) obj, flags);
 		} else if (obj instanceof IResource) {
-			ColoredString result= new ColoredString(((IResource) obj).getName());
-			if (obj instanceof IFile && getFlag(flags, COLORIZE) && FILE_SUFFIX_COLOR != 0) {
-				int extLen= ((IFile) obj).getFileExtension().length();
-				result.colorize(result.length() - extLen, extLen, FILE_SUFFIX_COLOR, 0);
-			}
-			return result;
+			return new ColoredString(((IResource) obj).getName());
 		}
-		return new ColoredString(JavaElementLabels.getTextLabel(obj, flags), 0, 0);
+		return new ColoredString(JavaElementLabels.getTextLabel(obj, flags));
 	}
 				
 	/**
@@ -162,7 +182,7 @@ public class ColoredJavaElementLabels {
 			getPackageFragmentRootLabel(root, JavaElementLabels.ROOT_QUALIFIED, result);
 			
 			if (getFlag(flags, COLORIZE)) {
-				result.colorize(offset, result.length() - offset, QUALIFIER_COLOR, 0);
+				result.colorize(offset, result.length() - offset, QUALIFIER_STYLE);
 			}
 			
 		}
@@ -345,7 +365,7 @@ public class ColoredJavaElementLabels {
 				result.append(JavaElementLabels.CONCAT_STRING);
 				getTypeLabel(method.getDeclaringType(), JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS), result);
 				if (getFlag(flags, COLORIZE)) {
-					result.colorize(offset, result.length() - offset, QUALIFIER_COLOR, 0);
+					result.colorize(offset, result.length() - offset, QUALIFIER_STYLE);
 				}
 			}
 			
@@ -425,7 +445,7 @@ public class ColoredJavaElementLabels {
 				result.append(JavaElementLabels.CONCAT_STRING);
 				getTypeLabel(field.getDeclaringType(), JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS), result);
 				if (getFlag(flags, COLORIZE)) {
-					result.colorize(offset, result.length() - offset, QUALIFIER_COLOR, 0);
+					result.colorize(offset, result.length() - offset, QUALIFIER_STYLE);
 				}
 			}
 
@@ -485,7 +505,7 @@ public class ColoredJavaElementLabels {
 			result.append(JavaElementLabels.CONCAT_STRING);
 			getTypeLabel(initializer.getDeclaringType(), JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS), result);
 			if (getFlag(flags, COLORIZE)) {
-				result.colorize(offset, result.length() - offset, QUALIFIER_COLOR, 0);
+				result.colorize(offset, result.length() - offset, QUALIFIER_STYLE);
 			}
 		}
 	}
@@ -654,7 +674,7 @@ public class ColoredJavaElementLabels {
 				getPackageFragmentLabel(type.getPackageFragment(), flags & QUALIFIER_FLAGS, result);
 			}
 			if (getFlag(flags, COLORIZE)) {
-				result.colorize(offset, result.length() - offset, QUALIFIER_COLOR, 0);
+				result.colorize(offset, result.length() - offset, QUALIFIER_STYLE);
 			}
 		}
 	}
@@ -687,7 +707,7 @@ public class ColoredJavaElementLabels {
 				result.append(getElementLabel(openable, JavaElementLabels.CF_QUALIFIED | JavaElementLabels.CU_QUALIFIED | (flags & QUALIFIER_FLAGS)));
 			}
 			if (getFlag(flags, COLORIZE)) {
-				result.colorize(offset, result.length() - offset, QUALIFIER_COLOR, 0);
+				result.colorize(offset, result.length() - offset, QUALIFIER_STYLE);
 			}
 		}
 	}	
@@ -707,17 +727,13 @@ public class ColoredJavaElementLabels {
 			}
 		}
 		result.append(classFile.getElementName());
-		if (getFlag(flags, COLORIZE) && FILE_SUFFIX_COLOR != 0) {
-			int extLen= 6;
-			result.colorize(result.length() - extLen, extLen, FILE_SUFFIX_COLOR, 0);
-		}
 		
 		if (getFlag(flags, JavaElementLabels.CF_POST_QUALIFIED)) {
 			int offset= result.length();
 			result.append(JavaElementLabels.CONCAT_STRING);
 			getPackageFragmentLabel((IPackageFragment) classFile.getParent(), flags & QUALIFIER_FLAGS, result);
 			if (getFlag(flags, COLORIZE)) {
-				result.colorize(offset, result.length() - offset, QUALIFIER_COLOR, 0);
+				result.colorize(offset, result.length() - offset, QUALIFIER_STYLE);
 			}
 		}
 	}
@@ -737,17 +753,13 @@ public class ColoredJavaElementLabels {
 			}
 		}
 		result.append(cu.getElementName());
-		if (getFlag(flags, COLORIZE) && FILE_SUFFIX_COLOR != 0) {
-			int extLen= cu.getPath().getFileExtension().length();
-			result.colorize(result.length() - extLen, extLen, FILE_SUFFIX_COLOR, 0);
-		}
 		
 		if (getFlag(flags, JavaElementLabels.CU_POST_QUALIFIED)) {
 			int offset= result.length();
 			result.append(JavaElementLabels.CONCAT_STRING);
 			getPackageFragmentLabel((IPackageFragment) cu.getParent(), flags & QUALIFIER_FLAGS, result);
 			if (getFlag(flags, COLORIZE)) {
-				result.colorize(offset, result.length() - offset, QUALIFIER_COLOR, 0);
+				result.colorize(offset, result.length() - offset, QUALIFIER_STYLE);
 			}
 		}		
 	}
@@ -777,7 +789,7 @@ public class ColoredJavaElementLabels {
 			result.append(JavaElementLabels.CONCAT_STRING);
 			getPackageFragmentRootLabel((IPackageFragmentRoot) pack.getParent(), JavaElementLabels.ROOT_QUALIFIED, result);
 			if (getFlag(flags, COLORIZE)) {
-				result.colorize(offset, result.length() - offset, QUALIFIER_COLOR, 0);
+				result.colorize(offset, result.length() - offset, QUALIFIER_STYLE);
 			}
 		}
 	}
@@ -833,7 +845,7 @@ public class ColoredJavaElementLabels {
 					result.append(root.getPath().makeRelative().toString());
 				
 				if (getFlag(flags, COLORIZE)) {
-					result.colorize(offset, result.length() - offset, QUALIFIER_COLOR, 0);
+					result.colorize(offset, result.length() - offset, QUALIFIER_STYLE);
 				}
 				return true;
 			}
@@ -855,7 +867,7 @@ public class ColoredJavaElementLabels {
 					result.append(path.removeLastSegments(1).toOSString());
 				}
 				if (getFlag(flags, COLORIZE)) {
-					result.colorize(offset, result.length() - offset, QUALIFIER_COLOR, 0);
+					result.colorize(offset, result.length() - offset, QUALIFIER_STYLE);
 				}
 			} else {
 				result.append(path.toOSString());
@@ -884,7 +896,7 @@ public class ColoredJavaElementLabels {
 				return;
 			}
 			if (getFlag(flags, COLORIZE)) {
-				result.colorize(offset, result.length() - offset, QUALIFIER_COLOR, 0);
+				result.colorize(offset, result.length() - offset, QUALIFIER_STYLE);
 			}
 		}
 	}
@@ -917,7 +929,7 @@ public class ColoredJavaElementLabels {
 				return;
 			}
 			if (getFlag(flags, COLORIZE)) {
-				result.colorize(offset, result.length() - offset, QUALIFIER_COLOR, 0);
+				result.colorize(offset, result.length() - offset, QUALIFIER_STYLE);
 			}
 		}
 	}
@@ -958,14 +970,14 @@ public class ColoredJavaElementLabels {
 		return containerPath.toString();
 	}
 
-	public static ColoredString decorateColoredString(ColoredString string, String decorated, int color) {
+	public static ColoredString decorateColoredString(ColoredString string, String decorated, Style color) {
 		String label= string.getString();
 		int originalStart= decorated.indexOf(label);
 		if (originalStart == -1) {
-			return new ColoredString(decorated, 0, 0); // the decorator did something wild
+			return new ColoredString(decorated); // the decorator did something wild
 		}
 		if (originalStart > 0) {
-			ColoredString newString= new ColoredString(decorated.substring(0, originalStart), color, 0);
+			ColoredString newString= new ColoredString(decorated.substring(0, originalStart), color);
 			newString.append(string);
 			string= newString;
 		}
