@@ -34,7 +34,6 @@ import org.eclipse.ui.actions.AddBookmarkAction;
 import org.eclipse.ui.handlers.IHandlerActivation;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.Page;
-import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
@@ -45,7 +44,6 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.AddTaskAction;
 import org.eclipse.jdt.internal.ui.actions.AllCleanUpsAction;
-import org.eclipse.jdt.internal.ui.actions.CopyQualifiedNameAction;
 import org.eclipse.jdt.internal.ui.actions.FindBrokenNLSKeysAction;
 import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
 import org.eclipse.jdt.internal.ui.actions.MultiSortMembersAction;
@@ -141,7 +139,6 @@ public class GenerateActionGroup extends ActionGroup {
 	private OrganizeImportsAction fOrganizeImports;
 	private MultiSortMembersAction fSortMembers;
 	private FormatAllAction fFormatAll;
-	private CopyQualifiedNameAction fCopyQualifiedNameAction;
 	
 	private static final String QUICK_MENU_ID= "org.eclipse.jdt.ui.edit.text.java.source.quickMenu"; //$NON-NLS-1$
 	
@@ -180,11 +177,6 @@ public class GenerateActionGroup extends ActionGroup {
 		fSortMembers= new MultiSortMembersAction(editor);
 		fSortMembers.setActionDefinitionId(IJavaEditorActionDefinitionIds.SORT_MEMBERS);
 		editor.setAction("SortMembers", fSortMembers); //$NON-NLS-1$
-		
-		IAction pastAction= editor.getAction(ITextEditorActionConstants.PASTE);//IWorkbenchActionDefinitionIds.PASTE);
-		fCopyQualifiedNameAction= new CopyQualifiedNameAction(editor, null, pastAction);
-		fCopyQualifiedNameAction.setActionDefinitionId(CopyQualifiedNameAction.JAVA_EDITOR_ACTION_DEFINITIONS_ID);
-		editor.setAction("CopyQualifiedName", fCopyQualifiedNameAction); //$NON-NLS-1$
 
 		fOverrideMethods= new OverrideMethodsAction(editor);
 		fOverrideMethods.setActionDefinitionId(IJavaEditorActionDefinitionIds.OVERRIDE_METHODS);
@@ -494,8 +486,6 @@ public class GenerateActionGroup extends ActionGroup {
 			actionBar.setGlobalActionHandler(IDEActionFactory.BOOKMARK.getId(), fAddBookmark);
 			actionBar.setGlobalActionHandler(IDEActionFactory.ADD_TASK.getId(), fAddTaskAction);
 			actionBar.setGlobalActionHandler(JdtActionConstants.FORMAT, fFormatAll);
-		} else {
-			actionBar.setGlobalActionHandler(CopyQualifiedNameAction.ACTION_HANDLER_ID, fCopyQualifiedNameAction);
 		}
 	}
 	

@@ -31,6 +31,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IWorkbenchSite;
@@ -62,14 +63,16 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public class CopyQualifiedNameAction extends SelectionDispatchAction {
 	
@@ -81,22 +84,18 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 	//TODO: Make API
 	public static final String ACTION_HANDLER_ID= "org.eclipse.jdt.ui.actions.CopyQualifiedName"; //$NON-NLS-1$
 
-    /**
-     * System clipboard
-     */
-    private final Clipboard fClipboard;
-	private CompilationUnitEditor fEditor;
+	private JavaEditor fEditor;
 	private final IAction fPasteAction;
 
-    public CopyQualifiedNameAction(CompilationUnitEditor editor, Clipboard clipboard, IAction pastAction) {
-    	this(editor.getSite(), clipboard, pastAction);
+    public CopyQualifiedNameAction(JavaEditor editor, IAction pastAction) {
+    	this(editor.getSite(), pastAction);
 		fEditor= editor;
+		setEnabled(true);
 	}
 
-	public CopyQualifiedNameAction(IWorkbenchSite site, Clipboard clipboard, IAction pastAction) {
+	public CopyQualifiedNameAction(IWorkbenchSite site, IAction pastAction) {
 		super(site);
 		fPasteAction= pastAction;
-		fClipboard= clipboard;
 		
 		setText(ActionMessages.CopyQualifiedNameAction_ActionName);
 		setToolTipText(ActionMessages.CopyQualifiedNameAction_ToolTipText);
@@ -109,6 +108,10 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canEnable(selection.toArray()));
+	}
+	
+	public void selectionChanged(ITextSelection selection) {
+		//Must not create an AST
 	}
 
 	private boolean canEnable(Object[] objects) {
@@ -188,10 +191,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 				dataTypes= new Transfer[] {TextTransfer.getInstance()};
 			}
 			
-			Clipboard clipboard= fClipboard;
-			if (clipboard == null) {
-				clipboard= new Clipboard(getShell().getDisplay());
-			}
+			Clipboard clipboard= new Clipboard(getShell().getDisplay());
 			try {
 				clipboard.setContents(data, dataTypes);
 
@@ -213,9 +213,8 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 				if (MessageDialog.openQuestion(getShell(), ActionMessages.CopyQualifiedNameAction_ErrorTitle, ActionMessages.CopyQualifiedNameAction_ErrorDescription)) {
 					clipboard.setContents(data, dataTypes);
 				}
-				if (fClipboard == null) {
-					clipboard.dispose();
-				}
+			} finally {
+				clipboard.dispose();
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
@@ -247,7 +246,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		return (IJavaElement[])result.toArray(new IJavaElement[result.size()]);
 	}
 
-	private IJavaElement getSelectedElement(CompilationUnitEditor editor) {
+	private IJavaElement getSelectedElement(JavaEditor editor) {
 		ISourceViewer viewer= editor.getViewer();
 		if (viewer == null)
 			return null;
@@ -256,12 +255,14 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		int length= selectedRange.y;
 		int offset= selectedRange.x;
 		
-		ICompilationUnit cu= JavaUI.getWorkingCopyManager().getWorkingCopy(editor.getEditorInput());
-		if (cu == null)
+		IJavaElement element= JavaUI.getEditorInputJavaElement(editor.getEditorInput());		
+		CompilationUnit ast= ASTProvider.getASTProvider().getAST(element, ASTProvider.WAIT_YES, null);
+		if (ast == null)
 			return null;
-		
-		AssistContext context= new AssistContext(cu, offset, length);
-		ASTNode node= context.getCoveringNode();
+
+		NodeFinder finder= new NodeFinder(offset, length);
+		ast.accept(finder);
+		ASTNode node= finder.getCoveringNode();
 		
 		IBinding binding= null;
 		if (node instanceof Name) {

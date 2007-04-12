@@ -221,7 +221,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	
 	private SelectionDispatchAction getCopyQualifiedNameAction() {
 		if (fCopyQualifiedNameAction == null) {
-			fCopyQualifiedNameAction= new CopyQualifiedNameAction(getSite(), null, null);
+			fCopyQualifiedNameAction= new CopyQualifiedNameAction(getSite(), null);
 		}
 		return fCopyQualifiedNameAction;
 	}
