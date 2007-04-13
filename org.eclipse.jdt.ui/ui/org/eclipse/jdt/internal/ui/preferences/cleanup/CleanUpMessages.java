@@ -38,6 +38,8 @@ public class CleanUpMessages extends NLS {
 	public static String CodeFormatingTabPage_SortMembers_GroupName;
 	public static String CodeFormatingTabPage_SortMembers_CheckBoxLabel;
 	public static String CodeFormatingTabPage_SortMembers_Description;
+
+	public static String CodeFormatingTabPage_SortMembersExclusive_radio0;
 	public static String CodeFormatingTabPage_SortMembersFields_CheckBoxLabel;
 
 	public static String CodeFormatingTabPage_RemoveTrailingWhitespace_all_radio;
