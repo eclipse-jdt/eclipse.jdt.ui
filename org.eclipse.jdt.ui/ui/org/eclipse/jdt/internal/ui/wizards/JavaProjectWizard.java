@@ -11,14 +11,22 @@
 package org.eclipse.jdt.internal.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
+import org.eclipse.jface.viewers.TreePath;
+
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -27,6 +35,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
 
 public class JavaProjectWizard extends NewElementWizard implements IExecutableExtension {
     
@@ -65,6 +74,15 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 	public boolean performFinish() {
 		boolean res= super.performFinish();
 		if (res) {
+			IWorkingSet workingSet= getWorkingSet(getSelection());
+			if (workingSet != null && JavaWorkingSetUpdater.ID.equals(workingSet.getId())) {
+				IAdaptable[] elements= workingSet.getElements();
+				IAdaptable[] newElements= new IAdaptable[elements.length + 1];
+				System.arraycopy(elements, 0, newElements, 0, elements.length);
+				IJavaElement element= getCreatedElement();
+				newElements[newElements.length - 1]= element;
+				workingSet.setElements(newElements);
+			}
 			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
 	 		selectAndReveal(fSecondPage.getJavaProject().getProject());
 		}
@@ -98,6 +116,35 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 	 */
 	public IJavaElement getCreatedElement() {
 		return JavaCore.create(fFirstPage.getProjectHandle());
+	}
+	
+	private IWorkingSet getWorkingSet(IStructuredSelection selection) {
+		if (!(selection instanceof ITreeSelection))
+			return null;
+		ITreeSelection treeSelection= (ITreeSelection)selection;
+		List elements= treeSelection.toList();
+		IWorkingSet result= null;
+		for (Iterator iter= elements.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			if (element instanceof IWorkingSet)
+				return (IWorkingSet)element;
+			TreePath[] paths= treeSelection.getPathsFor(element);
+			if (paths.length != 1)
+				return null;
+			TreePath path= paths[0];
+			if (path.getSegmentCount() != 2)
+				return null;
+			Object candidate= path.getSegment(0);
+			if (!(candidate instanceof IWorkingSet))
+				return null;
+			if (result == null) {
+				result= (IWorkingSet)candidate;
+			} else {
+				if (result != candidate)
+					return null;
+			}
+		}
+		return result;
 	}
         
 }

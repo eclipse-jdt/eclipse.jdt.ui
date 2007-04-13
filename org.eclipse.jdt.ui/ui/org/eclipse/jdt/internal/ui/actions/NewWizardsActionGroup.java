@@ -10,19 +10,23 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.NewWizardMenu;
+
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+
+import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
 
 
 /**
@@ -80,6 +84,9 @@ public class NewWizardsActionGroup extends ActionGroup {
 				type == IJavaElement.PACKAGE_FRAGMENT ||
 				type == IJavaElement.COMPILATION_UNIT ||
 				type == IJavaElement.TYPE;
+		}
+		if (element instanceof IWorkingSet) {
+			return JavaWorkingSetUpdater.ID.equals(((IWorkingSet)element).getId());
 		}
 		return false;
 	}	
