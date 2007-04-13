@@ -68,7 +68,7 @@ public class ColoredJavaElementLabels {
 		private Color fColor;
 		public Color getForeground(Display display) {
 			if (fColor == null)
-				fColor= JavaUI.getColorManager().getColor(new RGB(35, 136, 174));
+				fColor= JavaUI.getColorManager().getColor(new RGB(0, 127, 174));
 			return fColor;
 		}
 	};
