@@ -67,7 +67,7 @@ public final class CodeFormatingTabPage extends CleanUpTabPage {
 		intent(group);
 		final RadioPreference allPref= createRadioPref(group, 1, CleanUpMessages.CodeFormatingTabPage_RemoveTrailingWhitespace_all_radio, CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL, CleanUpModifyDialog.FALSE_TRUE);
 		final RadioPreference ignoreEmptyPref= createRadioPref(group, 1, CleanUpMessages.CodeFormatingTabPage_RemoveTrailingWhitespace_ignoreEmpty_radio, CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY, CleanUpModifyDialog.FALSE_TRUE);
-		registerSlavePreference(whiteSpace, new ButtonPreference[] {allPref, ignoreEmptyPref});
+		registerSlavePreference(whiteSpace, new RadioPreference[] {allPref, ignoreEmptyPref});
 		
 		PixelConverter pixelConverter= new PixelConverter(composite);
 
@@ -90,7 +90,7 @@ public final class CodeFormatingTabPage extends CleanUpTabPage {
 		nullRadio.setText(CleanUpMessages.CodeFormatingTabPage_SortMembersExclusive_radio0);
 		nullRadio.setLayoutData(createGridData(numColumns - 1, GridData.FILL_HORIZONTAL, SWT.DEFAULT));
 		nullRadio.setFont(composite.getFont());
-		registerSlavePreference(sortMembersPref, new ButtonPreference[] {sortAllPref});
+		registerSlavePreference(sortMembersPref, new RadioPreference[] {sortAllPref});
 		sortMembersPref.addObserver(new Observer() {
 			public void update(Observable o, Object arg) {
 				nullRadio.setEnabled(sortMembersPref.getChecked());

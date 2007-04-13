@@ -19,11 +19,15 @@ public class CleanUpMessages extends NLS {
 	public static String CleanUpConfigurationBlock_SelectedCleanUps_label;
 	public static String CleanUpConfigurationBlock_ShowCleanUpWizard_checkBoxLabel;
 
+	public static String CleanUpModifyDialog_SelectOne_Error;
+
 	public static String CleanUpModifyDialog_TabPageName_CodeFormating;
 	public static String CleanUpModifyDialog_TabPageName_CodeStyle;
 	public static String CleanUpModifyDialog_TabPageName_MemberAccesses;
 	public static String CleanUpModifyDialog_TabPageName_MissingCode;
 	public static String CleanUpModifyDialog_TabPageName_UnnecessaryCode;
+
+	public static String CleanUpModifyDialog_XofYSelected_Label;
 	
 	public static String CleanUpProfileManager_ProfileName_EclipseBuildIn;
 

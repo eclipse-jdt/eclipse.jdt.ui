@@ -45,13 +45,13 @@ public final class MemberAccessesTabPage extends CleanUpTabPage {
     	intent(instanceGroup);
 		final RadioPreference thisFieldAlwaysPref= createRadioPref(instanceGroup, 1, CleanUpMessages.MemberAccessesTabPage_RadioName_AlwaysThisForFields, CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS, CleanUpModifyDialog.FALSE_TRUE);
 		final RadioPreference thisFieldNecessaryPref= createRadioPref(instanceGroup, 1, CleanUpMessages.MemberAccessesTabPage_RadioName_NeverThisForFields, CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY, CleanUpModifyDialog.FALSE_TRUE);    	
-		registerSlavePreference(thisFieldPref, new ButtonPreference[] {thisFieldAlwaysPref, thisFieldNecessaryPref});
+		registerSlavePreference(thisFieldPref, new RadioPreference[] {thisFieldAlwaysPref, thisFieldNecessaryPref});
 
     	final CheckboxPreference thisMethodPref= createCheckboxPref(instanceGroup, numColumns, CleanUpMessages.MemberAccessesTabPage_CheckboxName_MethodQualifier, CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS, CleanUpModifyDialog.FALSE_TRUE);    	
     	intent(instanceGroup);
 		final RadioPreference thisMethodAlwaysPref= createRadioPref(instanceGroup, 1, CleanUpMessages.MemberAccessesTabPage_RadioName_AlwaysThisForMethods, CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS, CleanUpModifyDialog.FALSE_TRUE);
 		final RadioPreference thisMethodNecessaryPref= createRadioPref(instanceGroup, 1, CleanUpMessages.MemberAccessesTabPage_RadioName_NeverThisForMethods, CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY, CleanUpModifyDialog.FALSE_TRUE);
-		registerSlavePreference(thisMethodPref, new ButtonPreference[] {thisMethodAlwaysPref, thisMethodNecessaryPref});
+		registerSlavePreference(thisMethodPref, new RadioPreference[] {thisMethodAlwaysPref, thisMethodNecessaryPref});
     	
     	Group staticGroup= createGroup(numColumns, composite, CleanUpMessages.MemberAccessesTabPage_GroupName_StaticAccesses);
     	
@@ -64,6 +64,6 @@ public final class MemberAccessesTabPage extends CleanUpTabPage {
 		final CheckboxPreference accessesThroughSubtypesPref= createCheckboxPref(staticGroup, numColumns - 1, CleanUpMessages.MemberAccessesTabPage_CheckboxName_ChangeAccessesThroughSubtypes, CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS, CleanUpModifyDialog.FALSE_TRUE);
 		intent(staticGroup);
 		final CheckboxPreference accessesThroughInstancesPref= createCheckboxPref(staticGroup, numColumns - 1, CleanUpMessages.MemberAccessesTabPage_CheckboxName_ChangeAccessesThroughInstances, CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpModifyDialog.FALSE_TRUE);
-		registerSlavePreference(staticMemberPref, new ButtonPreference[] {staticFieldPref, staticMethodPref, accessesThroughSubtypesPref, accessesThroughInstancesPref});
+		registerSlavePreference(staticMemberPref, new CheckboxPreference[] {staticFieldPref, staticMethodPref, accessesThroughSubtypesPref, accessesThroughInstancesPref});
     }
 }

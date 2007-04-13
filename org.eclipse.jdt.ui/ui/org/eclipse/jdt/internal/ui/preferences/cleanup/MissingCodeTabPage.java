@@ -48,7 +48,7 @@ public final class MissingCodeTabPage extends CleanUpTabPage {
 		final CheckboxPreference overridePref= createCheckboxPref(annotationsGroup, numColumns - 1, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddMissingOverrideAnnotations, CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE, CleanUpModifyDialog.FALSE_TRUE);
 		intent(annotationsGroup);
 		final CheckboxPreference deprecatedPref= createCheckboxPref(annotationsGroup, numColumns - 1, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddMissingDeprecatedAnnotations, CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED, CleanUpModifyDialog.FALSE_TRUE);
-		registerSlavePreference(annotationsPref, new ButtonPreference[] {overridePref, deprecatedPref});
+		registerSlavePreference(annotationsPref, new CheckboxPreference[] {overridePref, deprecatedPref});
 		
 		if (!isSaveAction()) {
 			Group pppGroup= createGroup(numColumns, composite, CleanUpMessages.MissingCodeTabPage_GroupName_PotentialProgrammingProblems);
@@ -57,7 +57,7 @@ public final class MissingCodeTabPage extends CleanUpTabPage {
 			intent(pppGroup);
 			final RadioPreference generatedPref= createRadioPref(pppGroup, 1, CleanUpMessages.MissingCodeTabPage_RadioName_AddGeneratedSUID, CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED, CleanUpModifyDialog.FALSE_TRUE);
 			final RadioPreference defaultPref= createRadioPref(pppGroup, 1, CleanUpMessages.MissingCodeTabPage_RadioName_AddDefaultSUID, CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, CleanUpModifyDialog.FALSE_TRUE);
-			registerSlavePreference(addSUIDPref, new ButtonPreference[] {generatedPref, defaultPref});			
+			registerSlavePreference(addSUIDPref, new RadioPreference[] {generatedPref, defaultPref});			
 		}
     }
 }

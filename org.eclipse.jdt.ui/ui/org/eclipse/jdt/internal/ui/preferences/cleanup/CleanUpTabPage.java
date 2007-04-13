@@ -18,11 +18,15 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage {
 	private final Map fValues;
 	private CleanUpPreview fCleanUpPreview;
 	private final boolean fIsSaveAction;
+	private int fCount;
+	private int fSelectedCount;
 	
 	public CleanUpTabPage(IModificationListener listener, Map values, boolean isSaveAction) {
 		super(listener, values);
 		fValues= values;
 		fIsSaveAction= isSaveAction;
+		fCount= 0;
+		fSelectedCount= 0;
 	}
 	
 	/**
@@ -30,6 +34,14 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage {
 	 */
 	public boolean isSaveAction() {
 		return fIsSaveAction;
+	}
+	
+	public int getCleanUpCount() {
+		return fCount;
+	}
+
+	public int getSelectedCleanUpCount() {
+		return fSelectedCount;
 	}
 	
 	protected abstract ICleanUp[] createPreviewCleanUps(Map values);
@@ -48,10 +60,72 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage {
 		fCleanUpPreview.update();
 	}
 	
-	protected void registerPreference(ButtonPreference preference) {
+	protected void registerPreference(final CheckboxPreference preference) {
+		fCount++;
+		preference.addObserver(new Observer() {
+			public void update(Observable o, Object arg) {
+				if (preference.getChecked()) {
+					fSelectedCount++;
+				} else {
+					fSelectedCount--;
+				}
+			}
+		});
+		if (preference.getChecked()) {
+			fSelectedCount++;
+		}
 	}
 	
-	protected void registerSlavePreference(final CheckboxPreference master, final ButtonPreference[] slaves) {
+	protected void registerSlavePreference(final CheckboxPreference master, final RadioPreference[] slaves) {
+		internalRegisterSlavePreference(master, slaves);
+		registerPreference(master);
+	}
+	
+	protected void registerSlavePreference(final CheckboxPreference master, final CheckboxPreference[] slaves) {
+		internalRegisterSlavePreference(master, slaves);
+		fCount+= slaves.length;
+		
+		master.addObserver(new Observer() {
+			public void update(Observable o, Object arg) {
+				if (master.getChecked()) {
+					for (int i= 0; i < slaves.length; i++) {
+						if (slaves[i].getChecked()) {
+							fSelectedCount++;
+						}
+					}	
+				} else {
+					for (int i= 0; i < slaves.length; i++) {
+						if (slaves[i].getChecked()) {
+							fSelectedCount--;
+						}
+					}
+				}
+			}
+		});
+		
+		for (int i= 0; i < slaves.length; i++) {
+			final CheckboxPreference slave= slaves[i];
+			slave.addObserver(new Observer() {
+				public void update(Observable o, Object arg) {
+					if (slave.getChecked()) {
+						fSelectedCount++;
+					} else {
+						fSelectedCount--;
+					}
+				}
+			});
+		}
+		
+		if (master.getChecked()) {
+			for (int i= 0; i < slaves.length; i++) {
+				if (slaves[i].getChecked()) {
+					fSelectedCount++;
+				}
+			}
+		}
+	}
+	
+	private void internalRegisterSlavePreference(final CheckboxPreference master, final ButtonPreference[] slaves) {
     	master.addObserver( new Observer() {
     		public void update(Observable o, Object arg) {
     			for (int i= 0; i < slaves.length; i++) {
@@ -71,4 +145,5 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage {
     	gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(4);
     	l.setLayoutData(gd);
     }
+
 }
