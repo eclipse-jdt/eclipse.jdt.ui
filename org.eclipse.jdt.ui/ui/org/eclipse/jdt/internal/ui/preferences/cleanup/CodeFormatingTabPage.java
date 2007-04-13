@@ -29,12 +29,14 @@ import org.eclipse.jdt.internal.ui.fix.CommentFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
+import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 public final class CodeFormatingTabPage extends CleanUpTabPage {
 
 	private final Map fValues;
+	private CleanUpPreview fPreview;
 
 	public CodeFormatingTabPage(ModifyDialog dialog, Map values) {
 		this(dialog, values, false);
@@ -48,10 +50,17 @@ public final class CodeFormatingTabPage extends CleanUpTabPage {
 	protected ICleanUp[] createPreviewCleanUps(Map values) {
 		return new ICleanUp[] {
 				new ImportsCleanUp(values),
-				new CodeFormatCleanUp(values),
 				new CommentFormatCleanUp(values),
+				new CodeFormatCleanUp(values),
 				new SortMembersCleanUp(values)
 		};
+	}
+	
+	protected JavaPreview doCreateJavaPreview(Composite parent) {
+		fPreview= (CleanUpPreview)super.doCreateJavaPreview(parent);
+		fPreview.showInvisibleCharacters(true);
+        fPreview.setFormat(CleanUpConstants.TRUE.equals(fValues.get(CleanUpConstants.FORMAT_SOURCE_CODE)));
+		return fPreview;
 	}
 
 	protected void doCreatePreferences(Composite composite, int numColumns) {
@@ -59,8 +68,14 @@ public final class CodeFormatingTabPage extends CleanUpTabPage {
 		Group group= createGroup(numColumns, composite, CleanUpMessages.CodeFormatingTabPage_GroupName_Formatter);
 
 		if (!isSaveAction()) {
-			CheckboxPreference format= createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_CheckboxName_FormatSourceCode, CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpModifyDialog.FALSE_TRUE);
+			final CheckboxPreference format= createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_CheckboxName_FormatSourceCode, CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpModifyDialog.FALSE_TRUE);
 			registerPreference(format);
+			format.addObserver(new Observer() {
+				public void update(Observable o, Object arg) {
+					fPreview.setFormat(format.getChecked());
+					fPreview.update();
+				}
+			});
 		}
 
 		final CheckboxPreference whiteSpace= createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_RemoveTrailingWhitespace_checkbox_text, CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES, CleanUpModifyDialog.FALSE_TRUE);

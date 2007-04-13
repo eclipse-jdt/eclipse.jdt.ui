@@ -11,30 +11,17 @@
 package org.eclipse.jdt.internal.ui.fix;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
-
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CodeFormatCleanUp extends AbstractCleanUp {
 	
@@ -103,32 +90,23 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 	
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package org.model;\n"); //$NON-NLS-1$
 		buf.append("public class Engine {\n"); //$NON-NLS-1$
 		buf.append("  public void start() {}\n"); //$NON-NLS-1$
-		buf.append("    public \n"); //$NON-NLS-1$
+		if (isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES) && isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL)) {
+			buf.append("\n"); //$NON-NLS-1$
+		} else {
+			buf.append("    \n"); //$NON-NLS-1$
+		}
+		if (isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES)) {
+			buf.append("    public\n"); //$NON-NLS-1$
+		} else {
+			buf.append("    public \n"); //$NON-NLS-1$
+		}
 		buf.append("        void stop() {\n"); //$NON-NLS-1$
 		buf.append("    }\n"); //$NON-NLS-1$
 		buf.append("}\n"); //$NON-NLS-1$
 		
-		String original= buf.toString();
-		if (!isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE))
-			return original;
-		
-		HashMap preferences= new HashMap(JavaCore.getOptions());
-		TextEdit edit= CodeFormatterUtil.format2(CodeFormatter.K_COMPILATION_UNIT, original, 0, original.length(), 0, "\n", preferences); //$NON-NLS-1$
-		if (edit == null)
-			return original;
-		
-		IDocument doc= new Document(original);
-		try {
-			edit.apply(doc);
-		} catch (MalformedTreeException e) {
-			JavaPlugin.log(e);
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
-		}
-		return doc.get();
+		return buf.toString();
 	}
 	
 	/**

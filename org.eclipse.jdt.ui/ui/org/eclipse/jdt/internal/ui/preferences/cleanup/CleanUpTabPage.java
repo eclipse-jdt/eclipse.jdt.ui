@@ -47,7 +47,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage {
 	protected abstract ICleanUp[] createPreviewCleanUps(Map values);
 	
 	protected JavaPreview doCreateJavaPreview(Composite parent) {
-        fCleanUpPreview= new CleanUpPreview(parent, createPreviewCleanUps(fValues), false);        
+        fCleanUpPreview= new CleanUpPreview(parent, createPreviewCleanUps(fValues));
     	return fCleanUpPreview;
     }
 

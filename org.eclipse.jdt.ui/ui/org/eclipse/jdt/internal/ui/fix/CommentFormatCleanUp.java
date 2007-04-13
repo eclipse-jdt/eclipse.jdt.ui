@@ -16,7 +16,6 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
@@ -90,25 +89,10 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 		StringBuffer buf= new StringBuffer();
 		buf.append("/**\n"); //$NON-NLS-1$
 		buf.append(" *A Javadoc comment\n"); //$NON-NLS-1$
-		buf.append("* @param i\n"); //$NON-NLS-1$
+		buf.append("* @since 2007\n"); //$NON-NLS-1$
 		buf.append(" */\n"); //$NON-NLS-1$
-		buf.append("\n"); //$NON-NLS-1$
-		buf.append("/*\n"); //$NON-NLS-1$
-		buf.append("*A multi line comment\n"); //$NON-NLS-1$
-		buf.append("*/\n"); //$NON-NLS-1$
-		buf.append("\n"); //$NON-NLS-1$
-		buf.append("//A single line comment\n"); //$NON-NLS-1$
 		
-		if (!isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE))
-			return buf.toString();
-		
-		HashMap preferences= new HashMap(JavaCore.getOptions());
-		
-		boolean singleLineComment= DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT));
-		boolean blockComment= DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT));
-		boolean javaDoc= DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT));
-		
-		return CommentFormatFix.format(buf.toString(), singleLineComment, blockComment, javaDoc);
+		return buf.toString();
 	}
 	
 	/**

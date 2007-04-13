@@ -124,7 +124,7 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 		
-		buf.append("public class SortExample {\n"); //$NON-NLS-1$
+		buf.append("class SortExample {\n"); //$NON-NLS-1$
 		
 		if ((isEnabled(CleanUpConstants.SORT_MEMBERS) && isEnabled(CleanUpConstants.SORT_MEMBERS_ALL))) {
 			buf.append("  private String bar;\n"); //$NON-NLS-1$
@@ -135,11 +135,11 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 		}
 		
 		if (isEnabled(CleanUpConstants.SORT_MEMBERS)) {
-			buf.append("  private void bar();\n"); //$NON-NLS-1$
-			buf.append("  private void foo();\n"); //$NON-NLS-1$
+			buf.append("  private void bar() {}\n"); //$NON-NLS-1$
+			buf.append("  private void foo() {}\n"); //$NON-NLS-1$
 		} else {
-			buf.append("  private void foo();\n"); //$NON-NLS-1$
-			buf.append("  private void bar();\n"); //$NON-NLS-1$
+			buf.append("  private void foo() {}\n"); //$NON-NLS-1$
+			buf.append("  private void bar() {}\n"); //$NON-NLS-1$
 		}
 		
 		buf.append("}\n"); //$NON-NLS-1$
