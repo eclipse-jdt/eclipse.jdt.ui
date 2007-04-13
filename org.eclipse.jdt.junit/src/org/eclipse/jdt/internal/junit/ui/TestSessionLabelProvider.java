@@ -53,14 +53,14 @@ public class TestSessionLabelProvider extends LabelProvider implements IRichLabe
 				String testKindDisplayName= fTestRunnerPart.getTestKindDisplayName();
 				if (testKindDisplayName != null) {
 					String decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testName_JUnitVersion, new Object[] { label, testKindDisplayName });
-					return ColoredJavaElementLabels.decorateColoredString(text, decorated, ColoredJavaElementLabels.QUALIFIER_COLOR);
+					return ColoredJavaElementLabels.decorateColoredString(text, decorated, ColoredJavaElementLabels.QUALIFIER_STYLE);
 				}
 			}
 		} else {
 			if (element instanceof ITestCaseElement) {
 				String className= ((ITestCaseElement) element).getTestClassName();
 				String decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, className });
-				return ColoredJavaElementLabels.decorateColoredString(text, decorated, ColoredJavaElementLabels.QUALIFIER_COLOR);
+				return ColoredJavaElementLabels.decorateColoredString(text, decorated, ColoredJavaElementLabels.QUALIFIER_STYLE);
 			}
 		}
 		return text;
