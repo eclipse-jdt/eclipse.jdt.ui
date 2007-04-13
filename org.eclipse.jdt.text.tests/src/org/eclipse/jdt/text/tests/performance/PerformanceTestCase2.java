@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,13 +14,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
-import org.eclipse.test.performance.Performance;
-import org.eclipse.test.performance.PerformanceMeter;
+import java.util.Map;
 
 import junit.framework.TestCase;
+import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.Performance;
+import org.eclipse.test.performance.PerformanceMeter;
 
 
 /**
@@ -167,6 +169,34 @@ public class PerformanceTestCase2 extends TestCase {
 	 * @return the created performance meter
 	 */
 	protected final PerformanceMeter createPerformanceMeter() {
-		return internalCreatePerformanceMeter(getBaseScenarioId());
+		PerformanceMeter perfMeter= internalCreatePerformanceMeter(getBaseScenarioId());
+		String localFingerprintName= (String)getLocalFingerprints().get(getName()); 
+		if (localFingerprintName != null)
+			Performance.getDefault().tagAsSummary(perfMeter, localFingerprintName, Dimension.ELAPSED_PROCESS);
+		
+		String comment= (String)getDegradationComments().get(getName()); 
+		if (comment != null)
+			Performance.getDefault().setComment(perfMeter, Performance.EXPLAINS_DEGRADATION_COMMENT, comment);
+		
+		return perfMeter;
 	}
+
+	/**
+	 * Returns a map with local fingerprints.
+	 * 
+	 * @return the map with local fingerprints ( test name -> short name)
+	 */
+	protected Map getLocalFingerprints() {
+		return Collections.EMPTY_MAP;		
+	}
+	
+	/**
+	 * Returns a map with degradation comments.
+	 * 
+	 * @return the map with degradation comments ( test name -> comment)
+	 */
+	protected Map getDegradationComments() {
+		return Collections.EMPTY_MAP;		
+	}
+
 }
