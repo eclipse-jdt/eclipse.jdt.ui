@@ -10,8 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import com.ibm.icu.text.Collator;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -128,10 +132,21 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 
 			ArrayList resultingCollections= new ArrayList();
 			collectSurroundTemplates(document, cu, offset, length, resultingCollections);
+			sort(resultingCollections);
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		} catch (BadLocationException e) {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, "", e)); //$NON-NLS-1$
 		}
+	}
+
+	private void sort(ArrayList proposals) {
+		Collections.sort(proposals, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				IJavaCompletionProposal p1= (IJavaCompletionProposal)o1;
+				IJavaCompletionProposal p2= (IJavaCompletionProposal)o2;
+				return Collator.getInstance().compare(p1.getDisplayString(), p2.getDisplayString());
+			}
+		});
 	}
 
 	private IDocument getDocument(ICompilationUnit cu) throws JavaModelException {
