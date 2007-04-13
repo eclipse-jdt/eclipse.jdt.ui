@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,8 @@ package org.eclipse.jdt.text.tests.performance;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import org.eclipse.test.performance.PerformanceMeter;
@@ -33,6 +35,7 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 	protected static final String FAUST1;
 	protected static final String FAUST100;
 	protected static final String FAUST500;
+	protected static final Map LOCAL_FINGERPRINTS= new HashMap();
 
 	static {
 		String faust;
@@ -45,11 +48,24 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 		FAUST1 = faust;
 		FAUST100 = faust.substring(0, 100).intern();
 		FAUST500 = faust.substring(0, 500).intern();
+		
+		// Set local fingerprints
+		LOCAL_FINGERPRINTS.put("measureDeleteInsert", "Gap text store: delete and insert");
+		LOCAL_FINGERPRINTS.put("measureInsertAtStart", "Gap text store: insert at beginning");
+		LOCAL_FINGERPRINTS.put("measureRandomReplace", "Gap text store: random replace");
+		LOCAL_FINGERPRINTS.put("measureRepeatedReplace", "Gap text store: repeated replace");
 	}
 
 	abstract protected ITextStore createTextStore();
 
 	private ITextStore fTextStore;
+
+	/*
+	 * @see org.eclipse.jdt.text.tests.performance.PerformanceTestCase2#getLocalFingerprints()
+	 */
+	protected final Map getLocalFingerprints() {
+		return LOCAL_FINGERPRINTS;		
+	}
 
 	protected void setUp() throws Exception {
 		super.setUp();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,8 @@ package org.eclipse.jdt.text.tests.performance;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import org.eclipse.jface.text.AbstractDocument;
@@ -42,7 +44,10 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 	protected static final String FAUST1;
 	protected static final String FAUST100;
 	protected static final String FAUST500;
+	protected static final Map LOCAL_FINGERPRINTS= new HashMap();
+	protected static final Map DEGRADATION_COMMENTS= new HashMap();
 
+	
 	static {
 		String faust;
 		try {
@@ -54,21 +59,51 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 		FAUST1 = faust;
 		FAUST100 = faust.substring(0, 100).intern();
 		FAUST500 = faust.substring(0, 500).intern();
+		
+		// Set local fingerprints
+		LOCAL_FINGERPRINTS.put("measureDeleteInsert", "Document: delete and insert");
+		LOCAL_FINGERPRINTS.put("measureInsertAtStart", "Document: insert at beginning");
+		LOCAL_FINGERPRINTS.put("measureInsertAtEnd", "Document: insert at end");
+		LOCAL_FINGERPRINTS.put("measureRandomReplace", "Document: random replace");
+		LOCAL_FINGERPRINTS.put("measureRepeatedReplace", "Document: repeated replace");
+		
+		// Set degradation comments
+		DEGRADATION_COMMENTS.put("measureGetChar", "Test fails because document implementation got optimized for most common scenarios.");
+		DEGRADATION_COMMENTS.put("measureGetLength", "Test fails because document implementation got optimized for most common scenarios.");
+		DEGRADATION_COMMENTS.put("measureGetLine", "Test fails because document implementation got optimized for most common scenarios.");
+		DEGRADATION_COMMENTS.put("measureGetNumberOfLines", "Test fails because document implementation got optimized for most common scenarios.");
+		DEGRADATION_COMMENTS.put("measureLineByIndex", "Test fails because document implementation got optimized for most common scenarios.");
+		DEGRADATION_COMMENTS.put("measureLineDelimiterByIndex", "Test fails because document implementation got optimized for most common scenarios.");
+		DEGRADATION_COMMENTS.put("measureLineLengthByIndex", "Test fails because document implementation got optimized for most common scenarios.");
 	}
+	
 
 	abstract protected IDocument createDocument();
 
 	private IDocument fDocument;
 
+
+	/*
+	 * @see org.eclipse.jdt.text.tests.performance.PerformanceTestCase2#getLocalFingerprints()
+	 */
+	protected final Map getLocalFingerprints() {
+		return LOCAL_FINGERPRINTS;		
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.text.tests.performance.PerformanceTestCase2#getDegradations()
+	 */
+	protected Map getDegradationComments() {
+		return DEGRADATION_COMMENTS;
+	}
+
 	protected void setUp() throws Exception {
 		super.setUp();
-
 		fDocument = createDocument();
 	}
 	
 	protected void tearDown() throws Exception {
 		fDocument= null;
-		
 		super.tearDown();
 	}
 	
