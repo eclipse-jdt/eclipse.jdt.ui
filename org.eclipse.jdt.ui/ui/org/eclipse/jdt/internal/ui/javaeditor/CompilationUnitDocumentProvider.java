@@ -14,9 +14,9 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1022,36 +1022,38 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			if (setContents) {
 				int READER_CHUNK_SIZE= 2048;
 				int BUFFER_SIZE= 8 * READER_CHUNK_SIZE;
-				Reader in= null;
-				if (storage instanceof IEncodedStorage) {
-					String charsetName= ((IEncodedStorage)storage).getCharset();
-					if (charsetName != null) {
-						try {
-							in= new InputStreamReader(storage.getContents(), charsetName);
-						} catch (UnsupportedEncodingException ex) {
-							JavaPlugin.log(ex);
-							// fall trough and try default encoding
-						}
-					} // else: try default encoding
-				}
-
-				if (in == null)
-					in= new InputStreamReader(storage.getContents());
 				
-				in= new BufferedReader(in);
-				StringBuffer buffer= new StringBuffer(BUFFER_SIZE);
-				char[] readBuffer= new char[READER_CHUNK_SIZE];
-				int n;
+				String charsetName= null;
+				if (storage instanceof IEncodedStorage)
+					charsetName= ((IEncodedStorage)storage).getCharset();
+				if (charsetName == null)
+					charsetName= getDefaultEncoding();
+				
+				Reader in= null;
+				InputStream contents= storage.getContents();
 				try {
+					in= new BufferedReader(new InputStreamReader(contents, charsetName));
+					StringBuffer buffer= new StringBuffer(BUFFER_SIZE);
+					char[] readBuffer= new char[READER_CHUNK_SIZE];
+					int n;
 					n= in.read(readBuffer);
 					while (n > 0) {
 						buffer.append(readBuffer, 0, n);
 						n= in.read(readBuffer);
 					}
+					cu.getBuffer().setContents(buffer.toString());
 				} catch (IOException e) {
 					JavaPlugin.log(e);
+					return null;
+				} finally {
+					try {
+						if (in != null)
+							in.close();
+						else
+							contents.close();
+					} catch (IOException x) {
+					}
 				}
-				cu.getBuffer().setContents(buffer.toString());
 			}
 			
 			if (!isModifiable(editorInput))
