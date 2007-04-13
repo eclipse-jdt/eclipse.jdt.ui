@@ -868,7 +868,7 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
     		String fieldName= fieldNames[i];
     		SimpleName fieldNameNode= ast.newSimpleName(fieldName);
     		SimpleName paramNameNode= ast.newSimpleName(paramName);
-			newStatements.add(newFieldAssignment(ast, fieldNameNode, paramNameNode, useThisAccess || fieldName.equals(paramName)));
+			newStatements.add(newFieldAssignment(ast, fieldNameNode, paramNameNode, useThisAccess || newParameterNames.contains(fieldName)));
 			
 			if (fLinkedProposalModel != null) {
 				LinkedProposalPositionGroup positionGroup= fLinkedProposalModel.getPositionGroup(KEY_PARAM_NAME_EXT+ String.valueOf(i), true);
