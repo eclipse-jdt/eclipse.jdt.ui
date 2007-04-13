@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
@@ -211,6 +212,13 @@ class AccessAnalyzer extends ASTVisitor {
 			createInvocation(node.getAST(), node.getOperand(), node.getOperator().toString()), 
 			createGroupDescription(POSTFIX_ACCESS));
 		return false;
+	}
+	
+	public boolean visit(MethodDeclaration node) {
+		String name= node.getName().getIdentifier();
+		if (name.equals(fGetter) || name.equals(fSetter))
+			return false;
+		return true;
 	}
 	
 	public void endVisit(CompilationUnit node) {

@@ -22,6 +22,7 @@ public class SefTestSetup extends RefactoringTestSetup {
 	private IPackageFragment fInvalid;
 	private IPackageFragment fStatic;
 	private IPackageFragment fStaticRef;
+	private IPackageFragment fExistingMethod;
 	
 	public SefTestSetup(Test test) {
 		super(test);
@@ -37,6 +38,7 @@ public class SefTestSetup extends RefactoringTestSetup {
 		fInvalid= root.createPackageFragment("invalid", true, null);
 		fStatic= root.createPackageFragment("static_in", true, null);
 		fStaticRef= root.createPackageFragment("static_ref_in", true, null);
+		fExistingMethod= root.createPackageFragment("existingmethods_in", true, null);
 	}
 
 	public IPackageFragment getBasePackage() {
@@ -57,5 +59,9 @@ public class SefTestSetup extends RefactoringTestSetup {
 	
 	public IPackageFragment getStaticRefPackage() {
 		return fStaticRef;
-	}	
+	}
+	
+	public IPackageFragment getExistingMethodPackage(){
+		return fExistingMethod;
+	}
 }

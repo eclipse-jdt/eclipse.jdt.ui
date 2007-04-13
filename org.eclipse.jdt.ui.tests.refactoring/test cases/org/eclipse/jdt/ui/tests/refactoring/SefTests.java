@@ -120,6 +120,9 @@ public class SefTests extends AbstractSelectionTestCase {
 		performInvalidTest(fgTestSetup.getInvalidPackage(), getName(), fieldName);
 	}
 	
+	private void existingTest(String fieldName) throws Exception {
+		performTest(fgTestSetup.getExistingMethodPackage(), getName(), "existingmethods_out", fieldName);
+	}
 	//=====================================================================================
 	// Invalid
 	//=====================================================================================
@@ -278,5 +281,21 @@ public class SefTests extends AbstractSelectionTestCase {
 	
 	public void testStaticImportNone() throws Exception {
 		performStaticImportTest("StaticImportNoReference");	
+	}
+
+	//=====================================================================================
+	// existing getter/setter
+	//=====================================================================================
+	
+	public void testThisExpressionInnerWithSetter() throws Exception {
+		existingTest("field");
+	}
+	
+	public void testThisExpressionWithGetterSetter() throws Exception {
+		existingTest("field");
+	}
+	
+	public void testTwoFragmentsWithSetter() throws Exception {
+		existingTest("field");
 	}
 }

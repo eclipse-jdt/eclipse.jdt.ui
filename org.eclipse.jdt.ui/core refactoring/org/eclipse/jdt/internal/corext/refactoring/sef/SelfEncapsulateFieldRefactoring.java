@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,8 +48,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -86,12 +88,13 @@ import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -141,6 +144,7 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 	
 	private List fUsedReadNames;
 	private List fUsedModifyNames;
+	private boolean fConsiderVisibility=true;
 	
 	private static final String NO_NAME= ""; //$NON-NLS-1$
 	
@@ -267,48 +271,73 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 	}
 
 	//---- Input checking ----------------------------------------------------------
-	
+
 	public RefactoringStatus checkMethodNames() {
+		return checkMethodNames(isUsingLocalGetter(),isUsingLocalSetter());
+	}
+	
+	public RefactoringStatus checkMethodNames(boolean usingLocalGetter, boolean usingLocalSetter) {
 		RefactoringStatus result= new RefactoringStatus();
 		IType declaringType= fField.getDeclaringType();
-		checkName(result, fGetterName, fUsedReadNames, declaringType);
-		checkName(result, fSetterName, fUsedModifyNames, declaringType);
+		checkName(result, fGetterName, fUsedReadNames, declaringType, usingLocalGetter, fField);
+		checkName(result, fSetterName, fUsedModifyNames, declaringType, usingLocalSetter, fField);
 		return result;
 	}
 	
-	private static void checkName(RefactoringStatus status, String name, List usedNames, IType type) {
+	private static void checkName(RefactoringStatus status, String name, List usedNames, IType type, boolean reUseExistingField, IField field) {
 		if ("".equals(name)) { //$NON-NLS-1$
 			status.addFatalError(RefactoringCoreMessages.Checks_Choose_name); 
 			return;
 	    }
+		boolean isStatic=false;
+		try {
+			isStatic= Flags.isStatic(field.getFlags());
+		} catch (JavaModelException e) {
+		}
 		status.merge(Checks.checkMethodName(name));
 		for (Iterator iter= usedNames.iterator(); iter.hasNext(); ) {
 			IMethodBinding method= (IMethodBinding)iter.next();
 			String selector= method.getName();
-			if (selector.equals(name))
-				status.addFatalError(Messages.format(
-					RefactoringCoreMessages.SelfEncapsulateField_method_exists, 
-					new String[] {BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED), type.getElementName()}));
+			if (selector.equals(name)) {
+				if (!reUseExistingField) {
+					status.addFatalError(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_method_exists, new String[] { BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED), type.getElementName() }));
+				} else {
+					boolean methodIsStatic= Modifier.isStatic(method.getModifiers());
+					if (methodIsStatic && !isStatic)
+						status.addWarning(Messages.format(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_static_method_but_nonstatic_field, new String[] { method.getName(), field.getElementName() }));
+					if (!methodIsStatic && isStatic)
+						status.addFatalError(Messages.format(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_nonstatic_method_but_static_field, new String[] { method.getName(), field.getElementName() }));
+					return;
+				}
+
+			}
 		}
+		if (reUseExistingField)
+			status.addFatalError(Messages.format(
+				RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_methoddoesnotexist_status_fatalError, 
+				new String[] {name, type.getElementName()}));
 	}	
 
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		fChangeManager.clear();
 		pm.beginTask(NO_NAME, 12);
-		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_checking_preconditions); 
-		result.merge(checkMethodNames());
+		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_checking_preconditions);
+		boolean usingLocalGetter=isUsingLocalGetter();
+		boolean usingLocalSetter=isUsingLocalSetter();
+		result.merge(checkMethodNames(usingLocalGetter,usingLocalSetter));
 		pm.worked(1);
 		if (result.hasFatalError())
 			return result;
 		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_searching_for_cunits); 
+		final SubProgressMonitor subPm= new SubProgressMonitor(pm, 5);
 		ICompilationUnit[] affectedCUs= RefactoringSearchEngine.findAffectedCompilationUnits(
 			SearchPattern.createPattern(fField, IJavaSearchConstants.REFERENCES),
-			RefactoringScopeFactory.create(fField),
-			new SubProgressMonitor(pm, 5),
-			result);
+			RefactoringScopeFactory.create(fField, fConsiderVisibility),
+			subPm,
+			result, true);
 		
-		checkInHierarchy(result);
+		checkInHierarchy(result, usingLocalGetter, usingLocalSetter);
 		if (result.hasFatalError())
 			return result;
 			
@@ -357,7 +386,7 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 		}
-		ownerDescriptions.addAll(addGetterSetterChanges(fRoot, fRewriter, owner.findRecommendedLineSeparator()));
+		ownerDescriptions.addAll(addGetterSetterChanges(fRoot, fRewriter, owner.findRecommendedLineSeparator(),usingLocalSetter, usingLocalGetter));
 		createEdits(owner, fRewriter, ownerDescriptions, fImportRewrite);
 
 		sub.done();
@@ -437,22 +466,60 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 	//---- Helper methods -------------------------------------------------------------
 	
 	private void checkCompileErrors(RefactoringStatus result, CompilationUnit root, ICompilationUnit element) {
-		Message[] messages= root.getMessages();
-		if (messages.length != 0) {
-			result.addError(Messages.format(
-				RefactoringCoreMessages.SelfEncapsulateField_compiler_errors_update, 
-				element.getElementName()), JavaStatusContext.create(element));
+		IProblem[] messages= root.getProblems();
+		for (int i= 0; i < messages.length; i++) {
+			IProblem problem= messages[i];
+			if (!isIgnorableProblem(problem)) {
+				result.addError(Messages.format(
+						RefactoringCoreMessages.SelfEncapsulateField_compiler_errors_update, 
+						element.getElementName()), JavaStatusContext.create(element));
+				return;
+			}
 		}
 	}
 	
-	private void checkInHierarchy(RefactoringStatus status) {
+	private void checkInHierarchy(RefactoringStatus status, boolean usingLocalGetter, boolean usingLocalSetter) {
 		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration)ASTNodes.getParent(fFieldDeclaration, AbstractTypeDeclaration.class);
 		ITypeBinding type= declaration.resolveBinding();
 		if (type != null) {
 			ITypeBinding fieldType= fFieldDeclaration.resolveBinding().getType();
-			status.merge(Checks.checkMethodInHierarchy(type, fGetterName, fieldType, new ITypeBinding[0]));
-			status.merge(Checks.checkMethodInHierarchy(type, fSetterName, fFieldDeclaration.getAST().resolveWellKnownType("void"), //$NON-NLS-1$
-				new ITypeBinding[] {fieldType}));
+			checkMethodInHierarchy(type, fGetterName, fieldType, new ITypeBinding[0], status, usingLocalGetter);
+			checkMethodInHierarchy(type, fSetterName, fFieldDeclaration.getAST().resolveWellKnownType("void"), //$NON-NLS-1$
+				new ITypeBinding[] {fieldType}, status, usingLocalSetter);
+		}
+	}
+	
+	public static void checkMethodInHierarchy(ITypeBinding type, String methodName, ITypeBinding returnType, ITypeBinding[] parameters, RefactoringStatus result, boolean reUseMethod) {
+		IMethodBinding method= Bindings.findMethodInHierarchy(type, methodName, parameters);
+		if (method != null) {
+			boolean returnTypeClash= false;
+			ITypeBinding methodReturnType= method.getReturnType();
+			if (returnType != null && methodReturnType != null) {
+				String returnTypeKey= returnType.getKey();
+				String methodReturnTypeKey= methodReturnType.getKey();
+				if (returnTypeKey == null && methodReturnTypeKey == null) {
+					returnTypeClash= returnType != methodReturnType;	
+				} else if (returnTypeKey != null && methodReturnTypeKey != null) {
+					returnTypeClash= !returnTypeKey.equals(methodReturnTypeKey);
+				}
+			}
+			ITypeBinding dc= method.getDeclaringClass();
+			if (returnTypeClash) {
+				result.addError(Messages.format(RefactoringCoreMessages.Checks_methodName_returnTypeClash, 
+					new Object[] {methodName, dc.getName()}),
+					JavaStatusContext.create(method));
+			} else {
+				if (!reUseMethod)
+					result.addError(Messages.format(RefactoringCoreMessages.Checks_methodName_overrides, 
+						new Object[] {methodName, dc.getName()}),
+						JavaStatusContext.create(method));
+			}
+		} else {
+			if (reUseMethod){
+				result.addError(Messages.format(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_nosuchmethod_status_fatalError, 
+						new Object[] {methodName}),
+						JavaStatusContext.create(method));
+			}
 		}
 	}
 	
@@ -473,7 +540,7 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	private List addGetterSetterChanges(CompilationUnit root, ASTRewrite rewriter, String lineDelimiter) throws CoreException {
+	private List addGetterSetterChanges(CompilationUnit root, ASTRewrite rewriter, String lineDelimiter, boolean usingLocalSetter, boolean usingLocalGetter) throws CoreException {
 		List result= new ArrayList(2);
 		AST ast= root.getAST();
 		FieldDeclaration decl= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, ASTNode.FIELD_DECLARATION);
@@ -495,14 +562,16 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 		}
 		TextEditGroup description;
 		ListRewrite rewrite= fRewriter.getListRewrite(decl.getParent(), getBodyDeclarationsProperty(decl.getParent()));
-		if (!JdtFlags.isFinal(fField)) {
+		if (!JdtFlags.isFinal(fField) && !usingLocalSetter) {
 			description= new TextEditGroup(RefactoringCoreMessages.SelfEncapsulateField_add_setter); 
 			result.add(description);
 			rewrite.insertAt(createSetterMethod(ast, rewriter, lineDelimiter), position++, description);
 		}
-		description= new TextEditGroup(RefactoringCoreMessages.SelfEncapsulateField_add_getter); 
-		result.add(description);
-		rewrite.insertAt(createGetterMethod(ast, rewriter, lineDelimiter), position, description);
+		if (!usingLocalGetter){
+			description= new TextEditGroup(RefactoringCoreMessages.SelfEncapsulateField_add_getter); 
+			result.add(description);
+			rewrite.insertAt(createGetterMethod(ast, rewriter, lineDelimiter), position, description);
+		}
 		if (!JdtFlags.isPrivate(fField))
 			result.add(makeDeclarationPrivate(rewriter, decl));
 		return result;
@@ -641,9 +710,12 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 			isStatic= JdtFlags.isStatic(fField);
 		} catch(JavaModelException e) {
 		}
-		if ((isStatic && fArgName.equals(fieldName) 
-			&& fieldName.equals(fField.getDeclaringType().getElementName()))
-			|| JavaConventions.validateIdentifier(fArgName).getSeverity() == IStatus.ERROR)
+		IJavaProject project= fField.getJavaProject();
+		String sourceLevel= project.getOption(JavaCore.COMPILER_SOURCE, true);
+		String compliance= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+		
+		if ((isStatic && fArgName.equals(fieldName) && fieldName.equals(fField.getDeclaringType().getElementName()))
+			|| JavaConventions.validateIdentifier(fArgName, sourceLevel, compliance).getSeverity() == IStatus.ERROR)
 			fArgName= "_" + fArgName; //$NON-NLS-1$
 	}
 	
@@ -720,4 +792,41 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
 	}
+
+	public boolean isUsingLocalGetter() {
+		IType declaringType= fField.getDeclaringType();
+		return checkName(fGetterName, fUsedReadNames, declaringType);
+	}
+
+	public boolean isUsingLocalSetter() {
+		IType declaringType= fField.getDeclaringType();
+		return checkName(fSetterName, fUsedModifyNames, declaringType);
+	}
+	
+	private static boolean checkName(String name, List usedNames, IType type) {
+		for (Iterator iter= usedNames.iterator(); iter.hasNext(); ) {
+			IMethodBinding method= (IMethodBinding)iter.next();
+			String selector= method.getName();
+			if (selector.equals(name)) {
+				return true;
+			}
+		}
+		return false;
+	}	
+	
+	private boolean isIgnorableProblem(IProblem problem) {
+		if (problem.getID() == IProblem.NotVisibleField)
+			return true;
+		return false;
+	}
+
+	public boolean isConsiderVisibility() {
+		return fConsiderVisibility;
+	}
+
+	public void setConsiderVisibility(boolean considerVisibility) {
+		fConsiderVisibility= considerVisibility;
+	}
+
+
 }

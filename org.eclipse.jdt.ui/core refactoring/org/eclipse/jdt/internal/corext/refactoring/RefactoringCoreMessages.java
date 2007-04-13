@@ -2214,6 +2214,14 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String SelfEncapsulateFieldRefactoring_descriptor_description;
 
+	public static String SelfEncapsulateFieldRefactoring_methoddoesnotexist_status_fatalError;
+
+	public static String SelfEncapsulateFieldRefactoring_nonstatic_method_but_static_field;
+
+	public static String SelfEncapsulateFieldRefactoring_nosuchmethod_status_fatalError;
+
+	public static String SelfEncapsulateFieldRefactoring_static_method_but_nonstatic_field;
+
 	public static String SourceCreationOperation_creating_source_folder;
 
 	public static String StatementAnalyzer_beginning_of_selection;

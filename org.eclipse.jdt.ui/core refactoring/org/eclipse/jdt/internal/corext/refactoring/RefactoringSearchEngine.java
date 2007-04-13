@@ -53,31 +53,34 @@ public class RefactoringSearchEngine {
 	
 	//TODO: throw CoreException
 	public static ICompilationUnit[] findAffectedCompilationUnits(SearchPattern pattern,
-			IJavaSearchScope scope, final IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
+			IJavaSearchScope scope, final IProgressMonitor pm, RefactoringStatus status, final boolean tolerateInAccurateMatches) throws JavaModelException {
 		
-		final boolean[] hasPotentialMatches= { false };
 		boolean hasNonCuMatches= false;
 		
-		final Set resources= new HashSet(5);
-		SearchRequestor requestor = new SearchRequestor() {
+		class ResourceSearchRequestor extends SearchRequestor{
+			boolean hasPotentialMatches= false ;
+			Set resources= new HashSet(5);
 			private IResource fLastResource;
+			
 			public void acceptSearchMatch(SearchMatch match) {
-				if (match.getAccuracy() == SearchMatch.A_INACCURATE)
-					hasPotentialMatches[0]= true;
+				if (!tolerateInAccurateMatches && match.getAccuracy() == SearchMatch.A_INACCURATE) {
+					hasPotentialMatches= true;
+				}
 				if (fLastResource != match.getResource()) {
 					fLastResource= match.getResource();
 					resources.add(fLastResource);	
 				}
-			}
-		};
+			}			
+		}
+		ResourceSearchRequestor requestor = new ResourceSearchRequestor();
 		try {
 			new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), scope, requestor, pm);
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		}
 
-		List result= new ArrayList(resources.size());
-		for (Iterator iter= resources.iterator(); iter.hasNext(); ) {
+		List result= new ArrayList(requestor.resources.size());
+		for (Iterator iter= requestor.resources.iterator(); iter.hasNext(); ) {
 			IResource resource= (IResource) iter.next();
 			IJavaElement element= JavaCore.create(resource);
 			if (element instanceof ICompilationUnit) {
@@ -86,14 +89,22 @@ public class RefactoringSearchEngine {
 				hasNonCuMatches= true;
 			}
 		}
-		addStatusErrors(status, hasPotentialMatches[0], hasNonCuMatches);
+		addStatusErrors(status, requestor.hasPotentialMatches, hasNonCuMatches);
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
+	}	
+	
+	//TODO: throw CoreException
+	public static ICompilationUnit[] findAffectedCompilationUnits(SearchPattern pattern,
+			IJavaSearchScope scope, final IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
+		return findAffectedCompilationUnits(pattern, scope, pm, status);
 	}
 	
 	/**
 	 * Performs a search and groups the resulting {@link SearchMatch}es by
 	 * {@link SearchResultGroup#getCompilationUnit()}.
-	 *
+	 * @param pattern the search pattern
+	 * @param scope the search scope
+	 * @param monitor the progress monitor
 	 * @param status an error is added here if inaccurate or non-cu matches have been found
 	 * @return a {@link SearchResultGroup}[], where each {@link SearchResultGroup} 
 	 * 		has a different {@link SearchMatch#getResource() getResource()}s.
@@ -123,14 +134,7 @@ public class RefactoringSearchEngine {
 			CollectingSearchRequestor requestor, IProgressMonitor monitor, RefactoringStatus status) throws JavaModelException {
 		return internalSearch(owner != null ? new SearchEngine(owner) : new SearchEngine(), pattern, scope, requestor, monitor, status);
 	}
-	
-	/** @deprecated use {@link #search(SearchPattern, WorkingCopyOwner, IJavaSearchScope, CollectingSearchRequestor, IProgressMonitor, RefactoringStatus)} */
-	//TODO: throw CoreException
-	public static SearchResultGroup[] search(SearchPattern pattern, IJavaSearchScope scope,
-			IProgressMonitor monitor, ICompilationUnit[] workingCopies, RefactoringStatus status) throws JavaModelException {
-		return internalSearch(new SearchEngine(workingCopies), pattern, scope, new CollectingSearchRequestor(), monitor, status);
-	}
-	
+		
 	//TODO: throw CoreException
 	private static SearchResultGroup[] internalSearch(SearchEngine searchEngine, SearchPattern pattern, IJavaSearchScope scope,
 			CollectingSearchRequestor requestor, IProgressMonitor monitor, RefactoringStatus status) throws JavaModelException {

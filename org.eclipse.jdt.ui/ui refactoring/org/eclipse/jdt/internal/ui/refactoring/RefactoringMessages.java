@@ -868,6 +868,10 @@ public final class RefactoringMessages extends NLS {
 
 	public static String SelfEncapsulateFieldInputPage_setter_name;
 
+	public static String SelfEncapsulateFieldInputPage_usenewgetter_label;
+
+	public static String SelfEncapsulateFieldInputPage_usenewsetter_label;
+
 	public static String SurroundWithTryCatchAction_dialog_title;
 
 	public static String SurroundWithTryCatchAction_exception;
@@ -913,6 +917,11 @@ public final class RefactoringMessages extends NLS {
 	public static String VisibilityControlUtil_final;
 
 	public static String VisibilityControlUtil_synchronized;
+
+	public static String SelfEncapsulateFieldInputPage_useexistingsetter_label;
+
+	public static String SelfEncapsulateFieldInputPage_useexistinggetter_label;
+	
 
 	static {
 		reloadMessages();

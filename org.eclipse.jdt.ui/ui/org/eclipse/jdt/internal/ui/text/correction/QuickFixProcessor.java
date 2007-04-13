@@ -369,10 +369,13 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnexpectedStaticModifierForMethod:
 				ModifierCorrectionSubProcessor.addRemoveInvalidModfiersProposal(context, problem, proposals, 5);
 				break;
+			case IProblem.NotVisibleField:
+				ModifierCorrectionSubProcessor.addGetterSetterProposal(context,problem,proposals, 15);
+				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE, 10);
+				break;
 			case IProblem.NotVisibleMethod:
 			case IProblem.NotVisibleConstructor:
 			case IProblem.NotVisibleType:
-			case IProblem.NotVisibleField:
 			case IProblem.JavadocNotVisibleType:
 				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE, 10);
 				break;
@@ -431,6 +434,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				LocalCorrectionsSubProcessor.addUnnecessaryThrownExceptionProposal(context, problem, proposals);
 				break;
 			case IProblem.UnqualifiedFieldAccess:
+				//ModifierCorrectionSubProcessor.addGetterSetterProposal(context, problem, proposals, 15);
 				LocalCorrectionsSubProcessor.addUnqualifiedFieldAccessProposal(context, problem, proposals);
 				break;
 			case IProblem.Task:

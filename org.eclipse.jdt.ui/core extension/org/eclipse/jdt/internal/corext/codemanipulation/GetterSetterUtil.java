@@ -20,11 +20,12 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
+import org.eclipse.jdt.ui.CodeGeneration;
 
 public class GetterSetterUtil {
 	
@@ -44,12 +45,21 @@ public class GetterSetterUtil {
 			excludedNames= EMPTY;
 		}
 		return getGetterName(field.getJavaProject(), field.getElementName(), field.getFlags(), useIsForBoolGetters && JavaModelUtil.isBoolean(field), excludedNames);
-	}	
+	}
+	
+	public static String getGetterName(IVariableBinding variableType, IJavaProject project, String[] excludedNames, boolean isBoolean) {
+		boolean useIs= StubUtility.useIsForBooleanGetters(project) && isBoolean;
+		return getGetterName(project, variableType.getName(), variableType.getModifiers(), useIs, excludedNames);
+	}
 	
 	public static String getGetterName(IJavaProject project, String fieldName, int flags, boolean isBoolean, String[] excludedNames){
 		return NamingConventions.suggestGetterName(project, fieldName, flags, isBoolean, excludedNames);	
 	}
 
+	public static String getSetterName(IVariableBinding variableType, IJavaProject project, String[] excludedNames, boolean isBoolean) {
+		return getSetterName(project, variableType.getName(), variableType.getModifiers(), isBoolean, excludedNames);
+	}
+	
 	public static String getSetterName(IJavaProject project, String fieldName, int flags, boolean isBoolean, String[] excludedNames){
 		return NamingConventions.suggestSetterName(project, fieldName, flags, isBoolean, excludedNames);	
 	}
@@ -205,5 +215,6 @@ public class GetterSetterUtil {
 		buf.append(lineDelim);
 		return buf.toString(); 
 	}
+
 
 }

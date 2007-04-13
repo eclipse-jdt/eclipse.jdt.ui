@@ -466,10 +466,10 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -502,10 +502,10 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 5);
+		assertNumberOfProposals(proposals, 6);
 		assertCorrectLabels(proposals);
 		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -515,7 +515,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		proposal= (CUCorrectionProposal) proposals.get(1);
+		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview2= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -529,7 +529,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 		
-		proposal= (CUCorrectionProposal) proposals.get(2);
+		proposal= (CUCorrectionProposal) proposals.get(3);
 		String preview3= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -541,7 +541,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 		
-		proposal= (CUCorrectionProposal) proposals.get(3);
+		proposal= (CUCorrectionProposal) proposals.get(4);
 		String preview4= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -553,7 +553,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected4= buf.toString();
 		
-		proposal= (CUCorrectionProposal) proposals.get(4);
+		proposal= (CUCorrectionProposal) proposals.get(5);
 		String preview5= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -1520,10 +1520,10 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -2991,5 +2991,63 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
+	
+	public void testInvisibleFieldToGetterSetter() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("b112441", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package b112441;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    private byte test;\n");
+		buf.append("\n");
+		buf.append("    public byte getTest() {\n");
+		buf.append("        return this.test;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void setTest(byte test) {\n");
+		buf.append("        this.test = test;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class D {\n");
+		buf.append("    public void foo(){\n");
+		buf.append("        C c=new C();\n");
+		buf.append("        ++c.test;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package b112441;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    private byte test;\n");
+		buf.append("\n");
+		buf.append("    public byte getTest() {\n");
+		buf.append("        return this.test;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void setTest(byte test) {\n");
+		buf.append("        this.test = test;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class D {\n");
+		buf.append("    public void foo(){\n");
+		buf.append("        C c=new C();\n");
+		buf.append("        c.setTest((byte) (c.getTest() + 1));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
 }
