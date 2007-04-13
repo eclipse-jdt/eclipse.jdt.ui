@@ -19,15 +19,24 @@ import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
 
 public class SortingLabelProvider extends SearchLabelProvider {
+	
 	public static final int SHOW_ELEMENT_CONTAINER= 1; // default
 	public static final int SHOW_CONTAINER_ELEMENT= 2;
 	public static final int SHOW_PATH= 3;
 	
+	private static final long FLAGS_QUALIFIED= DEFAULT_SEARCH_TEXTFLAGS | JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED
+		| JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.D_QUALIFIED | JavaElementLabels.CF_QUALIFIED  | JavaElementLabels.CU_QUALIFIED | ColoredJavaElementLabels.COLORIZE;
+	
+	
+	private int fCurrentOrder;
+	
 	public SortingLabelProvider(JavaSearchResultPage page) {
 		super(page);
+		fCurrentOrder= SHOW_ELEMENT_CONTAINER;
 	}	
 
 	public Image getImage(Object element) {
@@ -45,7 +54,11 @@ public class SortingLabelProvider extends SearchLabelProvider {
 		
 		String text= super.getText(element);
 		if (text.length() > 0) {
-			return getLabelWithCounts(element, text);
+			String labelWithCount= getLabelWithCounts(element, text);
+			if (fCurrentOrder == SHOW_ELEMENT_CONTAINER) {
+				labelWithCount += getPostQualification(element, text);
+			}
+			return labelWithCount;
 		}
 		return getParticipantText(element);	
 	}
@@ -59,24 +72,33 @@ public class SortingLabelProvider extends SearchLabelProvider {
 		
 		ColoredString text= super.getRichTextLabel(element);
 		if (text.length() > 0) {
-			return getColoredLabelWithCounts(element, text);
+			ColoredString countLabel= getColoredLabelWithCounts(element, text);
+			if (fCurrentOrder == SHOW_ELEMENT_CONTAINER) {
+				countLabel.append(getPostQualification(element, text.getString()), ColoredJavaElementLabels.QUALIFIER_STYLE);
+			}
+			return countLabel;
 		}
 		return new ColoredString(getParticipantText(element));	
 	}
 
+	private String getPostQualification(Object element, String text) {
+		String textLabel= JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_POST_QUALIFIED);
+		int indexOf= textLabel.indexOf(JavaElementLabels.CONCAT_STRING);
+		if (indexOf != -1) {
+			return textLabel.substring(indexOf);
+		}
+		return new String();
+	}
+
 	public void setOrder(int orderFlag) {
-		long flags= DEFAULT_SEARCH_TEXTFLAGS;
+		fCurrentOrder= orderFlag;
+		long flags= 0;
 		if (orderFlag == SHOW_ELEMENT_CONTAINER)
-			flags |= JavaElementLabels.F_POST_QUALIFIED | JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.I_POST_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES
-							| JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.D_POST_QUALIFIED | JavaElementLabels.CF_POST_QUALIFIED  | JavaElementLabels.CU_POST_QUALIFIED;
-			
+			flags= DEFAULT_SEARCH_TEXTFLAGS;
 		else if (orderFlag == SHOW_CONTAINER_ELEMENT)
-			flags |= JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES
-				| JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.D_QUALIFIED | JavaElementLabels.CF_QUALIFIED  | JavaElementLabels.CU_QUALIFIED;
+			flags= FLAGS_QUALIFIED;
 		else if (orderFlag == SHOW_PATH) {
-			flags |= JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES
-				| JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.D_QUALIFIED | JavaElementLabels.CF_QUALIFIED  | JavaElementLabels.CU_QUALIFIED;
-			flags |= JavaElementLabels.PREPEND_ROOT_PATH;
+			flags= FLAGS_QUALIFIED | JavaElementLabels.PREPEND_ROOT_PATH;
 		}
 		setTextFlags(flags);
 	}

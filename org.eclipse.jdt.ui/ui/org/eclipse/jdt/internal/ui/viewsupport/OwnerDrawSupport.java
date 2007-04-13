@@ -90,7 +90,7 @@ public class OwnerDrawSupport {
 							} else {
 								uninstallOwnerDraw();
 							}
-							fViewer.setInput(fViewer.getInput()); // refresh doesn't seem to do the job
+							control.redraw();
 						}
 					}
 				});
