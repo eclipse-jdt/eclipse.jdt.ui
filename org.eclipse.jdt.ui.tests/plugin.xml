@@ -53,6 +53,9 @@
             <enablement>
                 <objectClass name="org.eclipse.jdt.core.IJavaElement"/> 
             </enablement>
+            <description>
+               Appends an asterisk (*) to all IJavaElements.
+            </description>
       </decorator>
       
       <decorator
@@ -72,6 +75,9 @@
 				</objectClass>
 			</or>                
 		</enablement>
+		<description>
+			Renders files with open FileBuffers bold.
+		</description>
 	  </decorator>	
       
    </extension>
