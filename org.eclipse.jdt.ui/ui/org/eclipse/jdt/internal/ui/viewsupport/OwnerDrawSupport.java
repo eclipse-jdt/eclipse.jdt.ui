@@ -90,7 +90,7 @@ public class OwnerDrawSupport {
 							} else {
 								uninstallOwnerDraw();
 							}
-							control.redraw();
+							fViewer.setInput(fViewer.getInput()); // make sure all items are rebuilt
 						}
 					}
 				});
@@ -141,7 +141,7 @@ public class OwnerDrawSupport {
 		if (item instanceof TreeItem) {
 			TreeItem treeItem= (TreeItem) item;
 			Rectangle bounds= treeItem.getBounds();
-			Font font= treeItem.getFont(0);
+			Font font= treeItem.getFont();
 			processRichLabel(richLabel, gc, bounds.x + fBoundOffset.x, bounds.y + fBoundOffset.y, isSelected, font);
 			if ((event.detail & SWT.FOCUSED) != 0) {
 				gc.drawFocus(bounds.x, bounds.y, bounds.width, bounds.height);
