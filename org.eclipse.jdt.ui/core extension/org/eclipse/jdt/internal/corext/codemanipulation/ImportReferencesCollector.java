@@ -387,7 +387,6 @@ public class ImportReferencesCollector extends GenericVisitor {
 				} else if ("@see".equals(tagName) || "@link".equals(tagName) || "@linkplain".equals(tagName)) {  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 					Name name= (Name) first;
 					possibleTypeRefFound(name);
-					possibleStaticImportFound(name);
 				}
 				idx++;
 			}
@@ -402,11 +401,6 @@ public class ImportReferencesCollector extends GenericVisitor {
 		Name qualifier= node.getQualifier();
 		if (qualifier != null) {
 			typeRefFound(qualifier);
-		} else {
-			SimpleName name= node.getName();
-			if (name != null) {
-				possibleStaticImportFound(name);
-			}
 		}
 		return false;
 	}
@@ -415,11 +409,6 @@ public class ImportReferencesCollector extends GenericVisitor {
 		Name qualifier= node.getQualifier();
 		if (qualifier != null) {
 			typeRefFound(qualifier);
-		} else {
-			SimpleName name= node.getName();
-			if (name != null) {
-				possibleStaticImportFound(name);
-			}
 		}
 		List list= node.parameters();
 		if (list != null) {
