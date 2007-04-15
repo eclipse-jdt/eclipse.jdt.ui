@@ -96,7 +96,7 @@ public class RefactoringSearchEngine {
 	//TODO: throw CoreException
 	public static ICompilationUnit[] findAffectedCompilationUnits(SearchPattern pattern,
 			IJavaSearchScope scope, final IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
-		return findAffectedCompilationUnits(pattern, scope, pm, status);
+		return findAffectedCompilationUnits(pattern, scope, pm, status, false);
 	}
 	
 	/**
