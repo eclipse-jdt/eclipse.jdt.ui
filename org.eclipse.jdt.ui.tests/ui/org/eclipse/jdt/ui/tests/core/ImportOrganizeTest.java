@@ -2135,6 +2135,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("\n");
 		buf.append("public class Test {\n");
 		buf.append("        /**\n");
+		buf.append("         * @see #max\n");
 		buf.append("         */\n");
 		buf.append("        public void doFoo() {\n");
 		buf.append("        }\n");
