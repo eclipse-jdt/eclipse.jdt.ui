@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -100,7 +101,7 @@ public class Bindings {
 	
 	/**
 	 * Note: this method is for debugging and testing purposes only.
-	 * There are tests whose precomputed test results rely on the returned String's format.
+	 * There are tests whose pre-computed test results rely on the returned String's format.
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider
 	 */
 	public static String asString(IBinding binding) {
@@ -433,7 +434,7 @@ public class Bindings {
 	 * Returns <code>null</code> if no such method exists. If the method is defined in more than one super type only the first match is 
 	 * returned. First the super class is examined and than the implemented interfaces.
 	 * @param type The type to search the method in
-	 * @param binding The method that overrrides
+	 * @param binding The method that overrides
 	 * @return the method binding overridden the method
 	 */
 	public static IMethodBinding findOverriddenMethodInHierarchy(ITypeBinding type, IMethodBinding binding) {
@@ -961,6 +962,8 @@ public class Bindings {
 	 * Normalizes the binding so that it can be used as a type inside a declaration
 	 * (e.g. variable declaration, method return type, parameter type, ...). For
 	 * null bindings Object is returned.
+	 * @param binding binding to normalize
+	 * @param ast current ast
 	 * 
 	 * @return the normalized type to be used in declarations
 	 */
@@ -1009,6 +1012,8 @@ public class Bindings {
 			if (node instanceof AbstractTypeDeclaration) {
 				AbstractTypeDeclaration decl= (AbstractTypeDeclaration) node;
 				if (lastLocation == decl.getBodyDeclarationsProperty()) {
+					return decl.resolveBinding();
+				} else if (decl instanceof EnumDeclaration && lastLocation == EnumDeclaration.ENUM_CONSTANTS_PROPERTY) {
 					return decl.resolveBinding();
 				}
 			} else if (node instanceof AnonymousClassDeclaration) {
@@ -1082,6 +1087,8 @@ public class Bindings {
 	/**
 	 * Tests if the given node is a declaration, not a instance of a generic type, method or field.
 	 * Declarations can be found in AST with CompilationUnit.findDeclaringNode
+	 * @param binding binding to test
+	 * @return returns <code>true</code> if the binding is a declaration binding
 	 */
 	public static boolean isDeclarationBinding(IBinding binding) {
 		switch (binding.getKind()) {

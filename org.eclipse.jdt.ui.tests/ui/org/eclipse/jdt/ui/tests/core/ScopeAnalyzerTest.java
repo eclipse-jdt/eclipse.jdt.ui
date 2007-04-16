@@ -848,7 +848,43 @@ public class ScopeAnalyzerTest extends CoreTests {
 		}
 		
 		assertEqualStringsIgnoreOrder(names, expected);
-	}	
+	}
+	
+	public void testEnumConstantDeclaration1() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public enum TestEnum {\n");
+		buf.append("    A(11);\n");
+		buf.append("\n");
+		buf.append("    TestEnum(int value) {}\n");
+		buf.append("\n");
+		buf.append("    private static int getDefaultValue() {\n");
+		buf.append("        return -1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("TestEnum.java", buf.toString(), false, null);		
+		
+		CompilationUnit astRoot= createAST(compilationUnit);
+		assertNoProblems(astRoot);
+		{
+			String str= "11";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.METHODS;
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
+			for (int i= 0; i < res.length; i++) {
+				if ("getDefaultValue".equals(res[i].getName())) {
+					return;
+				}
+				
+			}
+			assertFalse("getDefaultValue not found", true);
+		}			
+			
+	}
 
 	private void assertVariables(IBinding[] res, String[] expectedNames) {
 		String[] names= new String[res.length];		
