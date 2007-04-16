@@ -3127,6 +3127,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		Hashtable hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PARAMETER, JavaCore.ERROR);
+		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PARAMETER_INCLUDE_DOC_COMMENT_REFERENCE, JavaCore.DISABLED);
 		JavaCore.setOptions(hashtable);
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
