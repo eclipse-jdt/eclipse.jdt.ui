@@ -47,6 +47,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.util.Policy;
 import org.eclipse.jface.wizard.WizardPage;
 
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
@@ -79,12 +80,14 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetConfigurationBlock;
 
 /**
  * The first page of the <code>SimpleProjectWizard</code>.
  */
 public class JavaProjectWizardFirstPage extends WizardPage {
-	
+
 	/**
 	 * Request a project name. Fires an event whenever the text field is
 	 * changed, regardless of its content.
@@ -598,8 +601,29 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 
 
 	}
-
 	
+	private final class WorkingSetGroup {
+		
+		private WorkingSetConfigurationBlock fWorkingSetBlock;
+
+		public WorkingSetGroup(Composite composite, IWorkingSet[] initialWorkingSets) {
+			Group workingSetGroup= new Group(composite, SWT.NONE);
+			workingSetGroup.setFont(composite.getFont());
+			workingSetGroup.setText(NewWizardMessages.JavaProjectWizardFirstPage_WorkingSets_group);
+			workingSetGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+			workingSetGroup.setLayout(new GridLayout(1, false));
+			
+			String[] workingSetIds= new String[] {JavaWorkingSetUpdater.ID, "org.eclipse.ui.resourceWorkingSetPage"}; //$NON-NLS-1$
+			fWorkingSetBlock= new WorkingSetConfigurationBlock(initialWorkingSets, workingSetIds);
+			fWorkingSetBlock.setDialogMessage(NewWizardMessages.JavaProjectWizardFirstPage_WorkingSetSelection_message);
+			fWorkingSetBlock.createContent(workingSetGroup);
+		}
+
+		public IWorkingSet[] getSelectedWorkingSets() {
+			return fWorkingSetBlock.getSelectedWorkingSets();
+		}
+	}
+
 	/**
 	 * Show a warning when the project location contains files.
 	 */
@@ -820,7 +844,9 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 
 	private String fInitialName;
 	
-	private static final String PAGE_NAME= NewWizardMessages.JavaProjectWizardFirstPage_page_pageName; 
+	private static final String PAGE_NAME= NewWizardMessages.JavaProjectWizardFirstPage_page_pageName;
+	private WorkingSetGroup fWorkingSetGroup;
+	private IWorkingSet[] fInitWorkingSets; 
 
 	/**
 	 * Create a new <code>SimpleProjectFirstPage</code>.
@@ -858,6 +884,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		fLocationGroup= new LocationGroup(composite);
 		fJREGroup= new JREGroup(composite);
 		fLayoutGroup= new LayoutGroup(composite);
+		fWorkingSetGroup= new WorkingSetGroup(composite, fInitWorkingSets);
 		fDetectGroup= new DetectGroup(composite);
 		
 		// establish connections
@@ -970,5 +997,23 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			layout.marginHeight= 0;
 		}
 		return layout;
+	}
+
+	/**
+	 * @param workingSets the initialy selected working sets or <b>null</b>
+	 */
+	public void setWorkingSets(IWorkingSet[] workingSets) {
+		if (workingSets == null) {
+			fInitWorkingSets= new IWorkingSet[0];
+		} else {
+			fInitWorkingSets= workingSets;
+		}
+	}
+
+	/**
+	 * @return the selected working sets, not <b>null</b>
+	 */
+	public IWorkingSet[] getWorkingSets() {
+		return fWorkingSetGroup.getSelectedWorkingSets();
 	}
 }

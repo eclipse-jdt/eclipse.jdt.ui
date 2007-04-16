@@ -11,7 +11,9 @@
 package org.eclipse.jdt.internal.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -34,8 +36,10 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
 
 public class JavaProjectWizard extends NewElementWizard implements IExecutableExtension {
     
@@ -56,6 +60,7 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
     public void addPages() {
         super.addPages();
         fFirstPage= new JavaProjectWizardFirstPage();
+        fFirstPage.setWorkingSets(getWorkingSets(getSelection()));
         addPage(fFirstPage);
         fSecondPage= new JavaProjectWizardSecondPage(fFirstPage);
         addPage(fSecondPage);
@@ -74,8 +79,9 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 	public boolean performFinish() {
 		boolean res= super.performFinish();
 		if (res) {
-			IWorkingSet workingSet= getWorkingSet(getSelection());
-			if (workingSet != null && JavaWorkingSetUpdater.ID.equals(workingSet.getId())) {
+			IWorkingSet[] workingSets= fFirstPage.getWorkingSets();
+			for (int i= 0; i < workingSets.length; i++) {
+				IWorkingSet workingSet= workingSets[i];
 				IAdaptable[] elements= workingSet.getElements();
 				IAdaptable[] newElements= new IAdaptable[elements.length + 1];
 				System.arraycopy(elements, 0, newElements, 0, elements.length);
@@ -83,13 +89,33 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 				newElements[newElements.length - 1]= element;
 				workingSet.setElements(newElements);
 			}
+			
+			PackageExplorerPart explorerPart= PackageExplorerPart.getFromActivePerspective();
+			if (explorerPart != null && workingSets.length > 0) {
+				WorkingSetModel workingSetModel= explorerPart.getWorkingSetModel();
+				HashSet active= new HashSet(Arrays.asList(workingSetModel.getActiveWorkingSets()));
+				
+				boolean hasChange= false;
+				for (int j= 0; j < workingSets.length; j++) {
+					IWorkingSet workingSet= workingSets[j];
+					if (!active.contains(workingSet)) {
+						active.add(workingSet);
+						hasChange= true;
+					}
+				}
+				
+				if (hasChange) {
+					workingSetModel.setActiveWorkingSets((IWorkingSet[])active.toArray(new IWorkingSet[active.size()]));
+				}
+			}
+			
 			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
 	 		selectAndReveal(fSecondPage.getJavaProject().getProject());
 		}
 		return res;
 	}
-    
-    protected void handleFinishException(Shell shell, InvocationTargetException e) {
+
+	protected void handleFinishException(Shell shell, InvocationTargetException e) {
         String title= NewWizardMessages.JavaProjectWizard_op_error_title; 
         String message= NewWizardMessages.JavaProjectWizard_op_error_create_message;			 
         ExceptionHandler.handle(e, getShell(), title, message);
@@ -118,33 +144,64 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 		return JavaCore.create(fFirstPage.getProjectHandle());
 	}
 	
-	private IWorkingSet getWorkingSet(IStructuredSelection selection) {
+	private IWorkingSet[] getWorkingSets(IStructuredSelection selection) {
 		if (!(selection instanceof ITreeSelection))
 			return null;
+		
 		ITreeSelection treeSelection= (ITreeSelection)selection;
 		List elements= treeSelection.toList();
-		IWorkingSet result= null;
-		for (Iterator iter= elements.iterator(); iter.hasNext();) {
-			Object element= iter.next();
-			if (element instanceof IWorkingSet)
-				return (IWorkingSet)element;
-			TreePath[] paths= treeSelection.getPathsFor(element);
-			if (paths.length != 1)
-				return null;
-			TreePath path= paths[0];
-			if (path.getSegmentCount() != 2)
-				return null;
-			Object candidate= path.getSegment(0);
-			if (!(candidate instanceof IWorkingSet))
-				return null;
-			if (result == null) {
-				result= (IWorkingSet)candidate;
-			} else {
-				if (result != candidate)
-					return null;
+		if (elements.size() != 1)
+			return null;
+		
+		Object element= elements.get(0);
+		TreePath[] paths= treeSelection.getPathsFor(element);
+		if (paths.length != 1)
+			return null;
+
+		TreePath path= paths[0];
+		if (path.getSegmentCount() == 0)
+			return null;
+
+		Object candidate= path.getSegment(0);
+		if (candidate instanceof IWorkingSet) {
+			if (isValidWorkingSet((IWorkingSet)candidate))
+				return new IWorkingSet[] {(IWorkingSet)candidate};
+		} else {
+			PackageExplorerPart explorerPart= PackageExplorerPart.getFromActivePerspective();
+			WorkingSetModel workingSetModel= explorerPart.getWorkingSetModel();
+			IWorkingSet[] activeWorkingSets= workingSetModel.getActiveWorkingSets();
+
+			ArrayList result= new ArrayList();
+			for (int i= 0; i < activeWorkingSets.length; i++) {
+				IWorkingSet workingSet= activeWorkingSets[i];
+				if (contains(workingSet, candidate)) {
+					if (isValidWorkingSet(workingSet))
+						result.add(workingSet);
+				}
 			}
+			if (result.size() == 0)
+				return null;
+			
+			return (IWorkingSet[])result.toArray(new IWorkingSet[result.size()]);
 		}
-		return result;
+		
+		return null;
+	}
+
+	private boolean isValidWorkingSet(IWorkingSet workingSet) {
+		if (OthersWorkingSetUpdater.ID.equals(workingSet.getId()))
+			return false;
+		
+		return true;
+	}
+
+	private boolean contains(IWorkingSet workingSet, Object candidate) {
+		IAdaptable[] elements= workingSet.getElements();
+		for (int i= 0; i < elements.length; i++) {
+			if (candidate.equals(elements[i]))
+				return true;
+		}
+		return false;
 	}
         
 }

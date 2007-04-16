@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
 
 
 /**
@@ -86,7 +87,11 @@ public class NewWizardsActionGroup extends ActionGroup {
 				type == IJavaElement.TYPE;
 		}
 		if (element instanceof IWorkingSet) {
-			return JavaWorkingSetUpdater.ID.equals(((IWorkingSet)element).getId());
+			String workingSetId= ((IWorkingSet)element).getId();
+			return 
+				JavaWorkingSetUpdater.ID.equals(workingSetId) || 
+				"org.eclipse.ui.resourceWorkingSetPage".equals(workingSetId) || //$NON-NLS-1$
+				OthersWorkingSetUpdater.ID.equals(workingSetId);
 		}
 		return false;
 	}	
