@@ -13,11 +13,13 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -48,7 +50,6 @@ import org.eclipse.ui.progress.IProgressService;
 
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 
-import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -62,9 +63,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -113,12 +117,29 @@ public class ReorgCorrectionsSubProcessor {
 		String sourceLevel= javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
 		String compliance= javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
 		
-		IBuffer buffer= cu.getBuffer();
-		if (buffer == null) {
+		CompilationUnit root= context.getASTRoot();
+		
+		ASTNode coveredNode= problem.getCoveredNode(root);
+		if (!(coveredNode instanceof SimpleName))
+			return;		
+		
+		ASTNode parentType= coveredNode.getParent();
+		if (!(parentType instanceof AbstractTypeDeclaration))
 			return;
-		}
+		
+		 List types= root.types();
+		int index= types.indexOf(parentType);
+		 if (index == -1)
+			 return;
+		 
+		 for (int i= 0; i < index; i++) {
+			 AbstractTypeDeclaration curr= (AbstractTypeDeclaration) types.get(i);
+			 if (Modifier.isPublic(curr.getModifiers())) {
+				 return;
+			 }
+		 }
 			
-		String currTypeName= buffer.getText(problem.getOffset(), problem.getLength());
+		String currTypeName= ((SimpleName) coveredNode).getIdentifier();
 		String newTypeName= JavaCore.removeJavaLikeExtension(cu.getElementName());
 		if (!JavaConventions.validateJavaTypeName(newTypeName, sourceLevel, compliance).matches(IStatus.ERROR)) {
 			proposals.add(new CorrectMainTypeNameProposal(cu, context, currTypeName, newTypeName, 5));
