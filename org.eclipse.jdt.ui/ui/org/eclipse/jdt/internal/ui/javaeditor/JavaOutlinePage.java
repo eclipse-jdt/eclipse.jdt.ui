@@ -1028,7 +1028,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	 */
 	public void createControl(Composite parent) {
 
-		Tree tree= new Tree(parent, SWT.MULTI | SWT.LEFT_TO_RIGHT);
+		Tree tree= new Tree(parent, SWT.MULTI);
 
 		AppearanceAwareLabelProvider lprovider= new AppearanceAwareLabelProvider(
 			AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE | JavaElementLabels.ALL_CATEGORY,
