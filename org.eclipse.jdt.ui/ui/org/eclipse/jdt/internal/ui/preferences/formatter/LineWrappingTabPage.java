@@ -53,7 +53,7 @@ import org.eclipse.swt.widgets.Label;
 /**
  * The line wrapping tab page.
  */
-public class LineWrappingTabPage extends ModifyDialogTabPage {
+public class LineWrappingTabPage extends FormatterTabPage {
 
     /**
      * Represents a line wrapping category. All members are final.
@@ -735,6 +735,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	}
 	
 	protected void doUpdatePreview() {
+		super.doUpdatePreview();
 		final Object normalSetting= fWorkingValues.get(LINE_SPLIT);
 		fWorkingValues.put(LINE_SPLIT, fPreviewPreferences.get(LINE_SPLIT));
 		fPreview.update();

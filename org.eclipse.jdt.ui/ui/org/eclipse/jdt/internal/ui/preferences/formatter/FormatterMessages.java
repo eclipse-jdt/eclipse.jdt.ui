@@ -26,6 +26,7 @@ final class FormatterMessages extends NLS {
 	}
 
 	public static String CommentsTabPage_remove_blank_block_comment_lines;
+	public static String FormatterTabPage_ShowInvisibleCharacters_label;
 	public static String ModifyDialog_BuiltIn_Status;
 	public static String ModifyDialog_Duplicate_Status;
 	public static String ModifyDialog_EmptyName_Status;

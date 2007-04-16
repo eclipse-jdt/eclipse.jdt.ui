@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 /**
  * Tab page for the comment formatter settings.
  */
-public class CommentsTabPage extends ModifyDialogTabPage {
+public class CommentsTabPage extends FormatterTabPage {
 	
 	/**
 	 * Constant array for boolean selection 
@@ -237,6 +237,7 @@ public class CommentsTabPage extends ModifyDialogTabPage {
      * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doUpdatePreview()
      */
     protected void doUpdatePreview() {
+    	super.doUpdatePreview();
         fPreview.update();
     }
 	

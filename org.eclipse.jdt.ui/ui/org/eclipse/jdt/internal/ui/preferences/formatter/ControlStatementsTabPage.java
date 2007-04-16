@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 
-public class ControlStatementsTabPage extends ModifyDialogTabPage {
+public class ControlStatementsTabPage extends FormatterTabPage {
 	
 	/**
 	 * Constant array for boolean selection 
@@ -131,6 +131,7 @@ public class ControlStatementsTabPage extends ModifyDialogTabPage {
      * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doUpdatePreview()
      */
     protected void doUpdatePreview() {
+    	super.doUpdatePreview();
         fPreview.update();
     }
 

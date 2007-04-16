@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.WhitespaceCharacterPainter;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IContentFormatter;
 import org.eclipse.jface.text.formatter.IContentFormatterExtension;
@@ -39,8 +38,6 @@ public class CleanUpPreview extends JavaPreview {
 
 	private ICleanUp[] fPreviewCleanUps;
 	private boolean fFormat;
-	private WhitespaceCharacterPainter fWhitespaceCharacterPainter;
-
 	public CleanUpPreview(Composite parent, ICleanUp[] cleanUps) {
 		super(JavaCore.getDefaultOptions(), parent);
 		fPreviewCleanUps= cleanUps;
@@ -49,18 +46,6 @@ public class CleanUpPreview extends JavaPreview {
 	
 	public void setCleanUps(ICleanUp[] fCleanUps) {
 		fPreviewCleanUps= fCleanUps;
-	}
-	
-	public void showInvisibleCharacters(boolean enable) {
-		if (enable) {
-			if (fWhitespaceCharacterPainter == null) {
-				fWhitespaceCharacterPainter= new WhitespaceCharacterPainter(fSourceViewer);
-				fSourceViewer.addPainter(fWhitespaceCharacterPainter);
-			}
-		} else {
-			fSourceViewer.removePainter(fWhitespaceCharacterPainter);
-			fWhitespaceCharacterPainter= null;
-		}
 	}
 	
 	public void setFormat(boolean enable) {

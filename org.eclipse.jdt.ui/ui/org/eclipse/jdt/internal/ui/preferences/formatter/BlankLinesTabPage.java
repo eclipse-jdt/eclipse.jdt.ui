@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 
-public class BlankLinesTabPage extends ModifyDialogTabPage {
+public class BlankLinesTabPage extends FormatterTabPage {
 
 	private final String PREVIEW=
 	createPreviewHeader(FormatterMessages.BlankLinesTabPage_preview_header) + 
@@ -115,6 +115,7 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
      * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doUpdatePreview()
      */
     protected void doUpdatePreview() {
+    	super.doUpdatePreview();
         fPreview.update();
     }
 }

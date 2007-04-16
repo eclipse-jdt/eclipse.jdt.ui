@@ -16,7 +16,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage;
 public abstract class CleanUpTabPage extends ModifyDialogTabPage {
 
 	private final Map fValues;
-	private CleanUpPreview fCleanUpPreview;
+	private JavaPreview fCleanUpPreview;
 	private final boolean fIsSaveAction;
 	private int fCount;
 	private int fSelectedCount;

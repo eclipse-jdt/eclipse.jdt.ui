@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Group;
 
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-public class BracesTabPage extends ModifyDialogTabPage {
+public class BracesTabPage extends FormatterTabPage {
 	
 	/**
 	 * Constant array for boolean selection 
@@ -164,6 +164,7 @@ public class BracesTabPage extends ModifyDialogTabPage {
 	
 
     protected void doUpdatePreview() {
+    	super.doUpdatePreview();
         fPreview.update();
     }
 

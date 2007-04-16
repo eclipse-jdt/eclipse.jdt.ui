@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 
 
-public class NewLinesTabPage extends ModifyDialogTabPage {
+public class NewLinesTabPage extends FormatterTabPage {
 	
 	/**
 	 * Constant array for boolean selection 
@@ -105,6 +105,7 @@ public class NewLinesTabPage extends ModifyDialogTabPage {
     }
 
     protected void doUpdatePreview() {
+    	super.doUpdatePreview();
         fPreview.update();
     }
 

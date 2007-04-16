@@ -25,7 +25,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 
-public class IndentationTabPage extends ModifyDialogTabPage {
+public class IndentationTabPage extends FormatterTabPage {
 	
 	/**
 	 * Constant array for boolean selection 
@@ -141,6 +141,7 @@ public class IndentationTabPage extends ModifyDialogTabPage {
      * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doUpdatePreview()
      */
     protected void doUpdatePreview() {
+    	super.doUpdatePreview();
         fPreview.update();
     }
 

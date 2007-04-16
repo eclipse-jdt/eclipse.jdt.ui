@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.WhiteSpaceOptions.Node;
 import org.eclipse.jdt.internal.ui.preferences.formatter.WhiteSpaceOptions.OptionNode;
 
 
-public class WhiteSpaceTabPage extends ModifyDialogTabPage {
+public class WhiteSpaceTabPage extends FormatterTabPage {
 	
     
     /**
@@ -473,6 +473,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
     }
 
     protected void doUpdatePreview() {
+    	super.doUpdatePreview();
         fPreview.update();
     }
 }

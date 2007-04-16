@@ -30,6 +30,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.MarginPainter;
+import org.eclipse.jface.text.WhitespaceCharacterPainter;
 import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
@@ -98,6 +99,7 @@ public abstract class JavaPreview {
 	protected Map fWorkingValues;
 
 	private int fTabSize= 0;
+	private WhitespaceCharacterPainter fWhitespaceCharacterPainter;
 	
 	/**
 	 * Create a new Java preview
@@ -203,5 +205,18 @@ public abstract class JavaPreview {
 	
 	public void setWorkingValues(Map workingValues) {
 		fWorkingValues= workingValues;
+	}
+
+	public void showInvisibleCharacters(boolean enable) {
+		if (enable) {
+			if (fWhitespaceCharacterPainter == null) {
+				fWhitespaceCharacterPainter= new WhitespaceCharacterPainter(fSourceViewer);
+				fSourceViewer.addPainter(fWhitespaceCharacterPainter);
+			}
+		} else {
+			fSourceViewer.removePainter(fWhitespaceCharacterPainter);
+			fWhitespaceCharacterPainter= null;
+		}
+		update();
 	}
 }
