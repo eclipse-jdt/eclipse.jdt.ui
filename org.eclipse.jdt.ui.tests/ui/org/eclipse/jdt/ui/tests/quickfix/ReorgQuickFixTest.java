@@ -500,6 +500,51 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		}
 	}
 	
+	public void testWrongTypeName_bug180330() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("public class \\u0042 {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+		
+		boolean hasRename= true, hasMove= true;
+		
+		for (int i= 0; i < proposals.size(); i++) {
+			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposals.get(i);
+			if (curr instanceof CorrectMainTypeNameProposal) {
+				assertTrue("Duplicated proposal", hasRename);
+				hasRename= false;
+				
+				CUCorrectionProposal proposal= (CUCorrectionProposal) curr;
+				String preview= getPreviewContent(proposal);				
+				buf= new StringBuffer();
+				buf.append("package p;\n");
+				buf.append("public class C {\n");
+				buf.append("}\n");
+				assertEqualString(preview, buf.toString());					
+			} else {						
+				assertTrue("Duplicated proposal", hasMove);
+				hasMove= false;				
+				curr.apply(null);
+				
+				ICompilationUnit cu2= pack1.getCompilationUnit("B.java");
+				assertTrue("CU does not exist", cu2.exists());
+				buf= new StringBuffer();
+				buf.append("package p;\n");
+				buf.append("public class \\u0042 {\n");
+				buf.append("}\n");
+				assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());
+			}
+		}
+	}
+	
 	public void testWrongTypeNameButColliding() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1041,6 +1086,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		}
 	}
 	
-	
+
+
 
 }
