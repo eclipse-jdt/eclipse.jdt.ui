@@ -102,7 +102,6 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 
-import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPageLayout;
@@ -183,7 +182,6 @@ import org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProviderExtension;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-import org.eclipse.jdt.internal.ui.actions.CopyQualifiedNameAction;
 import org.eclipse.jdt.internal.ui.actions.FoldingActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
@@ -2310,15 +2308,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		action= new ClipboardOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "Editor.Paste.", this, ITextOperationTarget.PASTE); //$NON-NLS-1$
 		setAction(ITextEditorActionConstants.PASTE, action);
-		
-		final IAction cqnAction= new CopyQualifiedNameAction(this, getAction(ITextEditorActionConstants.PASTE));
-		cqnAction.setActionDefinitionId(CopyQualifiedNameAction.JAVA_EDITOR_ACTION_DEFINITIONS_ID);
-		setAction("CopyQualifiedName", cqnAction); //$NON-NLS-1$
-		fActionGroups.addGroup(new ActionGroup() {
-			public void fillActionBars(IActionBars actionBars) {
-				actionBars.setGlobalActionHandler(CopyQualifiedNameAction.ACTION_HANDLER_ID, cqnAction);
-			}
-		});
 	}
 	
 	/**
