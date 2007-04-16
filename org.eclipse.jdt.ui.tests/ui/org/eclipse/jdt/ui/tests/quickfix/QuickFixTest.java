@@ -207,7 +207,7 @@ public class QuickFixTest extends TestCase {
 	protected static final ArrayList collectCorrections2(ICompilationUnit cu, int nProblems) throws CoreException {
 		
 		final ArrayList problemsList= new ArrayList();
-		IProblemRequestor requestor= new IProblemRequestor() {
+		final IProblemRequestor requestor= new IProblemRequestor() {
 			public void acceptProblem(IProblem problem) {
 				problemsList.add(problem);
 			}
@@ -218,7 +218,12 @@ public class QuickFixTest extends TestCase {
 			public boolean isActive() {	return true;}
 		};
 		
-		ICompilationUnit wc= cu.getWorkingCopy(new WorkingCopyOwner() {}, requestor, null);
+		WorkingCopyOwner workingCopyOwner= new WorkingCopyOwner() {
+			public IProblemRequestor getProblemRequestor(ICompilationUnit workingCopy) {
+				return requestor;
+			}
+		};
+		ICompilationUnit wc= cu.getWorkingCopy(workingCopyOwner, null);
 		try {
 			wc.reconcile(ICompilationUnit.NO_AST, true, true, wc.getOwner(), null);
 		} finally {
