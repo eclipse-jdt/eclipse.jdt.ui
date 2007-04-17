@@ -168,6 +168,9 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 				return new IWorkingSet[] {(IWorkingSet)candidate};
 		} else {
 			PackageExplorerPart explorerPart= PackageExplorerPart.getFromActivePerspective();
+			if (explorerPart == null)
+				return null;
+			
 			WorkingSetModel workingSetModel= explorerPart.getWorkingSetModel();
 			IWorkingSet[] activeWorkingSets= workingSetModel.getActiveWorkingSets();
 
