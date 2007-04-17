@@ -31,7 +31,8 @@ public class JavaReplaceAllWithQuickDiffTest extends AbstractJavaReplaceAllTest 
 	}
 	
 	public void test() throws Exception {
-		setShortName("Replace All in Java editor (with quick diff)");
+		// XXX: Removing from fingerprint as it is unstable
+//		setShortName("Replace All in Java editor (with quick diff)");
 		super.test();
 	}
 	
