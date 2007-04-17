@@ -246,7 +246,7 @@ public final class ASTProvider {
 
 	public static final int SHARED_AST_LEVEL= AST.JLS3;
 	public static final boolean SHARED_AST_STATEMENT_RECOVERY= true;
-	public static final boolean SHARED_BINDING_RECOVERY= false;
+	public static final boolean SHARED_BINDING_RECOVERY= true;
 
 	private static final String DEBUG_PREFIX= "ASTProvider > "; //$NON-NLS-1$
 
