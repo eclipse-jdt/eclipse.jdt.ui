@@ -39,6 +39,7 @@ public final class ReorgMessages extends NLS {
 	public static String RenameInformationPopup_menu;
 	public static String RenameInformationPopup_minimize;
 	public static String RenameInformationPopup_open_dialog;
+	public static String RenameInformationPopup_preferences;
 	public static String RenameInformationPopup_preview;
 	public static String RenameInformationPopup_refactor_rename;
 	public static String RenameInformationPopup_restore;

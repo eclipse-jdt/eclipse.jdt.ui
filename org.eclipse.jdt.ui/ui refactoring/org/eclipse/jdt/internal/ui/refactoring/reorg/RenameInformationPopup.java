@@ -71,6 +71,7 @@ import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.part.PageBook;
 
@@ -85,6 +86,7 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 
 public class RenameInformationPopup {
 	
@@ -715,7 +717,7 @@ public class RenameInformationPopup {
 				fIsMenuUp= false;
 			}
 			public void menuAboutToShow(IMenuManager manager) {
-				IAction action= new Action(
+				IAction minMaxAction= new Action(
 						fIsMinimized ? ReorgMessages.RenameInformationPopup_restore : ReorgMessages.RenameInformationPopup_minimize,
 						SWT.PUSH) {
 					public void run() {
@@ -728,7 +730,7 @@ public class RenameInformationPopup {
 						fEditor.getSite().getShell().setActive();
 					}
 				};
-				manager.add(action);
+				manager.add(minMaxAction);
 				
 				manager.add(new Separator());
 				addMoveMenuItem(manager, SNAP_POSITION_UNDER_LEFT_FIELD, ReorgMessages.RenameInformationPopup_snap_under_left);
@@ -736,6 +738,15 @@ public class RenameInformationPopup {
 				addMoveMenuItem(manager, SNAP_POSITION_OVER_LEFT_FIELD, ReorgMessages.RenameInformationPopup_snap_over_left);
 				addMoveMenuItem(manager, SNAP_POSITION_OVER_RIGHT_FIELD, ReorgMessages.RenameInformationPopup_snap_over_right);
 				addMoveMenuItem(manager, SNAP_POSITION_LOWER_RIGHT, ReorgMessages.RenameInformationPopup_snap_bottom_right);
+				
+				manager.add(new Separator());
+				IAction prefsAction= new Action(ReorgMessages.RenameInformationPopup_preferences) {
+					public void run() {
+						String prefPageID= JavaBasePreferencePage.JAVA_BASE_PREF_PAGE_ID;
+						PreferencesUtil.createPreferenceDialogOn(fEditor.getSite().getShell(), prefPageID, new String[] { prefPageID }, null).open();
+					}
+				};
+				manager.add(prefsAction);
 			}
 		});
 		return menuManager;
