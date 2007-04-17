@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
@@ -147,7 +148,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 			if (obj instanceof TypeNameMatch) {
 				accessedHistoryItem(obj);
 				TypeNameMatch type= (TypeNameMatch) obj;
-				String qualifiedName= type.getFullyQualifiedName();
+				String qualifiedName= JavaModelUtil.getFullyQualifiedName(type.getType()); 
 				String message;
 
 				if (fTypeWizardPage.addSuperInterface(qualifiedName)) {
