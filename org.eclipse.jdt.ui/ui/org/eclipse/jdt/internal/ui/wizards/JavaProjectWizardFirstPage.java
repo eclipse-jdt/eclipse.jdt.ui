@@ -845,8 +845,8 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 	private String fInitialName;
 	
 	private static final String PAGE_NAME= NewWizardMessages.JavaProjectWizardFirstPage_page_pageName;
-	private WorkingSetGroup fWorkingSetGroup;
-	private IWorkingSet[] fInitWorkingSets; 
+//	private WorkingSetGroup fWorkingSetGroup;
+//	private IWorkingSet[] fInitWorkingSets; 
 
 	/**
 	 * Create a new <code>SimpleProjectFirstPage</code>.
@@ -884,7 +884,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		fLocationGroup= new LocationGroup(composite);
 		fJREGroup= new JREGroup(composite);
 		fLayoutGroup= new LayoutGroup(composite);
-		fWorkingSetGroup= new WorkingSetGroup(composite, fInitWorkingSets);
+//		fWorkingSetGroup= new WorkingSetGroup(composite, fInitWorkingSets);
 		fDetectGroup= new DetectGroup(composite);
 		
 		// establish connections
@@ -999,21 +999,21 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		return layout;
 	}
 
-	/**
-	 * @param workingSets the initialy selected working sets or <b>null</b>
-	 */
-	public void setWorkingSets(IWorkingSet[] workingSets) {
-		if (workingSets == null) {
-			fInitWorkingSets= new IWorkingSet[0];
-		} else {
-			fInitWorkingSets= workingSets;
-		}
-	}
-
-	/**
-	 * @return the selected working sets, not <b>null</b>
-	 */
-	public IWorkingSet[] getWorkingSets() {
-		return fWorkingSetGroup.getSelectedWorkingSets();
-	}
+//	/**
+//	 * @param workingSets the initialy selected working sets or <b>null</b>
+//	 */
+//	public void setWorkingSets(IWorkingSet[] workingSets) {
+//		if (workingSets == null) {
+//			fInitWorkingSets= new IWorkingSet[0];
+//		} else {
+//			fInitWorkingSets= workingSets;
+//		}
+//	}
+//
+//	/**
+//	 * @return the selected working sets, not <b>null</b>
+//	 */
+//	public IWorkingSet[] getWorkingSets() {
+//		return fWorkingSetGroup.getSelectedWorkingSets();
+//	}
 }
