@@ -182,6 +182,7 @@ import org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProviderExtension;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.CopyQualifiedNameAction;
 import org.eclipse.jdt.internal.ui.actions.FoldingActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
@@ -2308,6 +2309,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		action= new ClipboardOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "Editor.Paste.", this, ITextOperationTarget.PASTE); //$NON-NLS-1$
 		setAction(ITextEditorActionConstants.PASTE, action);
+		
+		action= new CopyQualifiedNameAction(this, getAction(ITextEditorActionConstants.PASTE));
+		setAction(CopyQualifiedNameAction.JAVA_EDITOR_ACTION_DEFINITIONS_ID, action);
 	}
 	
 	/**

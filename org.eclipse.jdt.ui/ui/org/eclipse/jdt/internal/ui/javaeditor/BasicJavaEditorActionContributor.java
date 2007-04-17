@@ -34,6 +34,7 @@ import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
+import org.eclipse.jdt.internal.ui.actions.CopyQualifiedNameAction;
 import org.eclipse.jdt.internal.ui.actions.FoldingActionGroup;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
@@ -64,6 +65,8 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	private RetargetTextEditorAction fGotoPreviousMemberAction;
 
 	private RetargetTextEditorAction fRemoveOccurrenceAnnotationsAction;
+	
+	private RetargetTextEditorAction fCopyQualifiedNameAction;
 
 	public BasicJavaEditorActionContributor() {
 		super();
@@ -106,6 +109,9 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 
 		fRemoveOccurrenceAnnotationsAction= new RetargetTextEditorAction(b, "RemoveOccurrenceAnnotations."); //$NON-NLS-1$
 		fRemoveOccurrenceAnnotationsAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.REMOVE_OCCURRENCE_ANNOTATIONS);
+		
+		fCopyQualifiedNameAction= new RetargetTextEditorAction(b, "CopyQualifiedName."); //$NON-NLS-1$
+		fCopyQualifiedNameAction.setActionDefinitionId(CopyQualifiedNameAction.JAVA_EDITOR_ACTION_DEFINITIONS_ID);
 	}
 
 	protected final void markAsPartListener(RetargetAction action) {
@@ -190,7 +196,9 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fGotoPreviousMemberAction.setAction(getAction(textEditor, GoToNextPreviousMemberAction.PREVIOUS_MEMBER));
 
 		fRemoveOccurrenceAnnotationsAction.setAction(getAction(textEditor, "RemoveOccurrenceAnnotations")); //$NON-NLS-1$
-		fRetargetShowInformationAction.setAction(getAction(textEditor, ITextEditorActionConstants.SHOW_INFORMATION));		
+		fRetargetShowInformationAction.setAction(getAction(textEditor, ITextEditorActionConstants.SHOW_INFORMATION));
+		
+		fCopyQualifiedNameAction.setAction(getAction(textEditor, CopyQualifiedNameAction.JAVA_EDITOR_ACTION_DEFINITIONS_ID));
 
 		if (part instanceof JavaEditor) {
 			JavaEditor javaEditor= (JavaEditor) part;
@@ -212,6 +220,8 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		action= getAction(textEditor, ITextEditorActionConstants.PREVIOUS);
 		actionBars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_PREVIOUS_ANNOTATION, action);
 		actionBars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, action);
+		action= getAction(textEditor, CopyQualifiedNameAction.JAVA_EDITOR_ACTION_DEFINITIONS_ID);
+		actionBars.setGlobalActionHandler(CopyQualifiedNameAction.ACTION_HANDLER_ID, action);
 	}
 
 	/*
