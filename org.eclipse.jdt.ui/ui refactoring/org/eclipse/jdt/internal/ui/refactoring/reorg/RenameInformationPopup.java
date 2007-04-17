@@ -742,6 +742,7 @@ public class RenameInformationPopup {
 				manager.add(new Separator());
 				IAction prefsAction= new Action(ReorgMessages.RenameInformationPopup_preferences) {
 					public void run() {
+						fRenameLinkedMode.cancel();
 						String prefPageID= JavaBasePreferencePage.JAVA_BASE_PREF_PAGE_ID;
 						PreferencesUtil.createPreferenceDialogOn(fEditor.getSite().getShell(), prefPageID, new String[] { prefPageID }, null).open();
 					}
