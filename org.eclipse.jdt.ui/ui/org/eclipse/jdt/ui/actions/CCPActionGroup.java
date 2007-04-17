@@ -88,7 +88,7 @@ public class CCPActionGroup extends ActionGroup {
 		fCopyAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.COPY);
 		
 		fCopyQualifiedNameAction= new CopyQualifiedNameAction(fSite, fPasteAction);
-		fCopyQualifiedNameAction.setActionDefinitionId(CopyQualifiedNameAction.JAVA_EDITOR_ACTION_DEFINITIONS_ID);
+		fCopyQualifiedNameAction.setActionDefinitionId(CopyQualifiedNameAction.ACTION_DEFINITION_ID);
 		
 		fCutAction= new CutAction(fSite, fClipboard, fPasteAction);
 		fCutAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.CUT);

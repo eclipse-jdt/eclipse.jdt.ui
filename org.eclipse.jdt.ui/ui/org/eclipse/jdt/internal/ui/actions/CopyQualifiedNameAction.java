@@ -79,7 +79,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 	private static final long LABEL_FLAGS= new Long(JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED | JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED | JavaElementLabels.T_TYPE_PARAMETERS | JavaElementLabels.CU_QUALIFIED | JavaElementLabels.CF_QUALIFIED).longValue();
 
     //TODO: Make API
-	public static final String JAVA_EDITOR_ACTION_DEFINITIONS_ID= "org.eclipse.jdt.ui.edit.text.java.copy.qualified.name"; //$NON-NLS-1$
+	public static final String ACTION_DEFINITION_ID= "org.eclipse.jdt.ui.edit.text.java.copy.qualified.name"; //$NON-NLS-1$
 
 	//TODO: Make API
 	public static final String ACTION_HANDLER_ID= "org.eclipse.jdt.ui.actions.CopyQualifiedName"; //$NON-NLS-1$
