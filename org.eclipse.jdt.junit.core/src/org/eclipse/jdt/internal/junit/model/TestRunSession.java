@@ -376,9 +376,21 @@ public class TestRunSession implements ITestRunSession {
 	 * @return <code>true</code> iff the runtime VM of this test session is still alive 
 	 */
 	public boolean isKeptAlive() {
-		return fTestRunnerClient != null && fLaunch != null
+		if (fTestRunnerClient != null
+				&& fLaunch != null
 				&& fTestRunnerClient.isRunning()
-				&& ILaunchManager.DEBUG_MODE.equals(fLaunch.getLaunchMode());
+				&& ILaunchManager.DEBUG_MODE.equals(fLaunch.getLaunchMode())) {
+			ILaunchConfiguration config= fLaunch.getLaunchConfiguration();
+			try {
+				return config != null
+				&& config.getAttribute(JUnitLaunchConfigurationConstants.ATTR_KEEPRUNNING, false);
+			} catch (CoreException e) {
+				return false;
+			}
+			
+		} else {
+			return false;
+		}
 	}
 
 	/**
