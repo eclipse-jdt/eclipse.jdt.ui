@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,9 @@ package org.eclipse.jdt.internal.ui.text;
 
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -177,8 +179,17 @@ public class JavaReconciler extends MonoReconciler {
 				IResourceDelta child= delta.findMember(resource.getFullPath());
 				if (child != null) {
 					IMarkerDelta[] deltas= child.getMarkerDeltas();
-					if (deltas.length > 0)
-						forceReconciling();
+					int i= deltas.length;
+					while (--i >= 0) {
+						try {
+							if (deltas[i].getMarker().isSubtypeOf(IMarker.PROBLEM)) {
+								forceReconciling();
+								return;
+							}
+						} catch (CoreException e1) {
+							// ignore and try next one
+						}
+					}
 				}
 			}
 		}
@@ -225,6 +236,10 @@ public class JavaReconciler extends MonoReconciler {
 
 	/**
 	 * Creates a new reconciler.
+	 * 
+	 * @param editor the editor 
+	 * @param strategy the reconcile strategy
+	 * @param isIncremental <code>true</code> if this is an incremental reconciler
 	 */
 	public JavaReconciler(ITextEditor editor, JavaCompositeReconcilingStrategy strategy, boolean isIncremental) {
 		super(strategy, isIncremental);
