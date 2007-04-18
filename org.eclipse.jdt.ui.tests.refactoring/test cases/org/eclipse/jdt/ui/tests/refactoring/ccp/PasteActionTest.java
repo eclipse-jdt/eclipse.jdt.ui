@@ -92,7 +92,7 @@ public class PasteActionTest extends RefactoringTest{
 	
 	private PasteAction verifyEnabled(IResource[] copySelectedResources, IJavaElement[] copySelectedJavaElements, IResource[] pasteSelectedResources, IJavaElement[] pasteSelectedJavaElements) throws JavaModelException {
 		PasteAction pasteAction= new PasteAction(new MockWorkbenchSite(merge(pasteSelectedResources, pasteSelectedJavaElements)), fClipboard);
-		CopyToClipboardAction copyToClipboardAction= new CopyToClipboardAction(new MockWorkbenchSite(merge(copySelectedResources, copySelectedJavaElements)), fClipboard, pasteAction);
+		CopyToClipboardAction copyToClipboardAction= new CopyToClipboardAction(new MockWorkbenchSite(merge(copySelectedResources, copySelectedJavaElements)), fClipboard);
 		copyToClipboardAction.setAutoRepeatOnFailure(true);
 		copyToClipboardAction.update(copyToClipboardAction.getSelection());
 		assertTrue("copy not enabled", copyToClipboardAction.isEnabled());
@@ -105,7 +105,7 @@ public class PasteActionTest extends RefactoringTest{
 
 	private PasteAction verifyEnabled(IResource[] copySelectedResources, IJavaElement[] copySelectedJavaElements, IWorkingSet pasteSelectedWorkingSet) throws JavaModelException {
 		PasteAction pasteAction= new PasteAction(new MockWorkbenchSite(new Object[] {pasteSelectedWorkingSet}), fClipboard);
-		CopyToClipboardAction copyToClipboardAction= new CopyToClipboardAction(new MockWorkbenchSite(merge(copySelectedResources, copySelectedJavaElements)), fClipboard, pasteAction);
+		CopyToClipboardAction copyToClipboardAction= new CopyToClipboardAction(new MockWorkbenchSite(merge(copySelectedResources, copySelectedJavaElements)), fClipboard);
 		copyToClipboardAction.setAutoRepeatOnFailure(true);
 		copyToClipboardAction.update(copyToClipboardAction.getSelection());
 		assertTrue("copy not enabled", copyToClipboardAction.isEnabled());

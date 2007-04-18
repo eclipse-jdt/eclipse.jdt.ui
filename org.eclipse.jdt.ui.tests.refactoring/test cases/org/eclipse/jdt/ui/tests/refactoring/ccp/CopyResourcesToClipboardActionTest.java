@@ -13,9 +13,10 @@ package org.eclipse.jdt.ui.tests.refactoring.ccp;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.widgets.Display;
@@ -27,13 +28,13 @@ import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
-import org.eclipse.jdt.ui.tests.refactoring.infra.MockClipboard;
-import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
 
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
-import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
+
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
+import org.eclipse.jdt.ui.tests.refactoring.infra.MockClipboard;
+import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
 
 public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 
@@ -113,15 +114,13 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 	}
 
 	private void checkEnabled(Object[] elements) {
-		SelectionDispatchAction pasteAction= new PasteAction(new MockWorkbenchSite(elements), fClipboard);
-		SelectionDispatchAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(elements), fClipboard, pasteAction);
+		SelectionDispatchAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(elements), fClipboard);
 		copyAction.update(copyAction.getSelection());
 		assertTrue("action should be enabled", copyAction.isEnabled());
 	}
 	
 	private void checkDisabled(Object[] elements) {
-		SelectionDispatchAction pasteAction= new PasteAction(new MockWorkbenchSite(elements), fClipboard);
-		SelectionDispatchAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(elements), fClipboard, pasteAction);
+		SelectionDispatchAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(elements), fClipboard);
 		copyAction.update(copyAction.getSelection());
 		assertTrue("action should not be enabled", ! copyAction.isEnabled());
 	}
