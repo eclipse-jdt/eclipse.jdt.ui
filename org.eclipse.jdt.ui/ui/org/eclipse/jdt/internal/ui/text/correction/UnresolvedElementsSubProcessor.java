@@ -860,7 +860,7 @@ public class UnresolvedElementsSubProcessor {
 				Image image;
 				ITypeBinding[] parameterTypes= getParameterTypes(arguments);
 				if (parameterTypes != null) {
-					String sig= ASTResolving.getMethodSignature(methodName, parameterTypes);
+					String sig= ASTResolving.getMethodSignature(methodName, parameterTypes, false);
 	
 					if (ASTResolving.isUseableTypeInContext(parameterTypes, senderDeclBinding, false)) {
 						if (nodeParentType == senderDeclBinding) {
@@ -1335,8 +1335,8 @@ public class UnresolvedElementsSubProcessor {
 					for (int i= 0; i < newParamTypes.length; i++) {
 						newParamTypes[i]= changeDesc[i] == null ? declParamTypes[i] : ((EditDescription) changeDesc[i]).type;
 					}
-	
-					String[] args=  new String[] { ASTResolving.getMethodSignature(methodDecl, !targetCU.equals(cu)), ASTResolving.getMethodSignature(methodDecl.getName(), newParamTypes) };
+					boolean isVarArgs= methodDecl.isVarargs() && newParamTypes.length > 0 && newParamTypes[newParamTypes.length - 1].isArray();
+					String[] args=  new String[] { ASTResolving.getMethodSignature(methodDecl, !targetCU.equals(cu)), ASTResolving.getMethodSignature(methodDecl.getName(), newParamTypes, isVarArgs) };
 					String label;
 					if (methodDecl.isConstructor()) {
 						label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changeparamsignature_constr_description, args);
@@ -1487,7 +1487,7 @@ public class UnresolvedElementsSubProcessor {
 
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, targetDecl);
 			if (targetCU != null) {
-				String[] args= new String[] { ASTResolving.getMethodSignature( ASTResolving.getTypeSignature(targetDecl), getParameterTypes(arguments)) };
+				String[] args= new String[] { ASTResolving.getMethodSignature( ASTResolving.getTypeSignature(targetDecl), getParameterTypes(arguments), false) };
 				String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createconstructor_description, args);
 				Image image= JavaElementImageProvider.getDecoratedImage(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE);
 				proposals.add(new NewMethodCompletionProposal(label, targetCU, selectedNode, arguments, targetDecl, 5, image));

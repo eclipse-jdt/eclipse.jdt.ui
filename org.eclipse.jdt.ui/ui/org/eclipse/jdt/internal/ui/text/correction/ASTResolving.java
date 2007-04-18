@@ -508,7 +508,12 @@ public class ASTResolving {
 	}
 
    	/**
-   	 *@return  Returns all types known in the AST that have a method with a given name
+   	 * Finds all type bindings that contain a method of a given signature
+   	 * @param searchRoot the ast node to start the search from
+   	 * @param selector the method name
+   	 * @param arguments the method arguments
+   	 * @param context the context in which the method would be called
+   	 * @return returns all types known in the AST that have a method with a given name
    	 */
 	public static ITypeBinding[] getQualifierGuess(ASTNode searchRoot, final String selector, List arguments, final IBinding context) {
 		final int nArgs= arguments.size();
@@ -634,9 +639,11 @@ public class ASTResolving {
 	}
 
 	/**
-	 * Returns either a AbstractTypeDeclaration or an AnonymousTypeDeclaration
-	 * @param node
-	 * @return CompilationUnit
+	 * Finds the parent type of a node.
+	 * 
+	 * @param node the node inside the type to find
+	 * @param treatModifiersOutside if set, modifiers are not part of their type, but of the type's parent
+	 * @return returns either a AbstractTypeDeclaration or an AnonymousTypeDeclaration 
 	 */
 	public static ASTNode findParentType(ASTNode node, boolean treatModifiersOutside) {
 		StructuralPropertyDescriptor lastLocation= null;
@@ -1053,8 +1060,10 @@ public class ASTResolving {
 		
 	/**
 	 * Use this method before creating a type for a wildcard. Either to assign a wildcard to a new type or for a type to be assigned.
+	 * 
 	 * @param wildcardType the wildcard type to normalize
 	 * @param isBindingToAssign If true, then a new receiver type is searched (X x= s), else the type of a sender (R r= x)
+	 * @param ast th current AST
 	 * @return Returns the normalized binding or null when only the 'null' binding 
 	 */
 	public static ITypeBinding normalizeWildcardType(ITypeBinding wildcardType, boolean isBindingToAssign, AST ast) {
@@ -1085,14 +1094,19 @@ public class ASTResolving {
 		return BindingLabelProvider.getBindingLabel(binding, BindingLabelProvider.DEFAULT_TEXTFLAGS);
 	}
 
-	public static String getMethodSignature(String name, ITypeBinding[] params) {
+	public static String getMethodSignature(String name, ITypeBinding[] params, boolean isVarArgs) {
 		StringBuffer buf= new StringBuffer();
 		buf.append(name).append('(');
 		for (int i= 0; i < params.length; i++) {
 			if (i > 0) {
 				buf.append(JavaElementLabels.COMMA_STRING);
 			}
-			buf.append(getTypeSignature(params[i]));
+			if (isVarArgs && i == params.length - 1) {
+				buf.append(getTypeSignature(params[i].getElementType()));
+				buf.append("..."); //$NON-NLS-1$
+			} else {
+				buf.append(getTypeSignature(params[i]));
+			}
 		}
 		buf.append(')');
 		return buf.toString();

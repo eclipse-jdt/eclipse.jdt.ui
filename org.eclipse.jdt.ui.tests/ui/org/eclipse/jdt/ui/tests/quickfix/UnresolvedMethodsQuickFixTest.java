@@ -3456,6 +3456,112 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });		
 	}
 
+	public void testParameterMismatchWithExtraDimensions() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class ArrayTest {\n");
+		buf.append("        public void test(String[] a){\n");
+		buf.append("                foo(a);\n");
+		buf.append("        }\n");
+		buf.append("        private void foo(int a[]) {\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("ArrayTest.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+
+		String[] expected= new String[3];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class ArrayTest {\n");
+		buf.append("        public void test(String[] a){\n");
+		buf.append("                foo(a);\n");
+		buf.append("        }\n");
+		buf.append("        private void foo(String[] a) {\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class ArrayTest {\n");
+		buf.append("        public void test(String[] a){\n");
+		buf.append("                foo(a);\n");
+		buf.append("        }\n");
+		buf.append("        private void foo(String[] a) {\n");
+		buf.append("        }\n");
+		buf.append("        private void foo(int a[]) {\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class ArrayTest {\n");
+		buf.append("        public void test(int[] a){\n");
+		buf.append("                foo(a);\n");
+		buf.append("        }\n");
+		buf.append("        private void foo(int a[]) {\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	public void testParameterMismatchWithVarArgs() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class ArrayTest {\n");
+		buf.append("        public void test(String[] a){\n");
+		buf.append("                foo(a, a);\n");
+		buf.append("        }\n");
+		buf.append("        private void foo(int[] a, int... i) {\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("ArrayTest.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class ArrayTest {\n");
+		buf.append("        public void test(String[] a){\n");
+		buf.append("                foo(a, a);\n");
+		buf.append("        }\n");
+		buf.append("        private void foo(String[] a, String... a2) {\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class ArrayTest {\n");
+		buf.append("        public void test(String[] a){\n");
+		buf.append("                foo(a, a);\n");
+		buf.append("        }\n");
+		buf.append("        private void foo(String[] a, String[] a2) {\n");
+		buf.append("        }\n");
+		buf.append("        private void foo(int[] a, int... i) {\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+
 	
 	public void testParameterMismatchSwap2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

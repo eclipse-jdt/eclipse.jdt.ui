@@ -197,10 +197,18 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			} else if (curr instanceof EditDescription) {
 				EditDescription desc= (EditDescription) curr;
 
-				Type newType= imports.addImport(desc.type, ast);
-				
+				ITypeBinding newTypeBinding= desc.type;
 				SingleVariableDeclaration decl= (SingleVariableDeclaration) parameters.get(k);
+				
+				if (k == parameters.size() - 1 && i == fParameterChanges.length - 1 && decl.isVarargs() && newTypeBinding.isArray()) {
+					newTypeBinding= newTypeBinding.getElementType(); // stick with varargs if it was before
+				} else {
+					rewrite.set(decl, SingleVariableDeclaration.VARARGS_PROPERTY, Boolean.FALSE, null);
+				}
+				
+				Type newType= imports.addImport(newTypeBinding, ast);
 				rewrite.replace(decl.getType(), newType, null);
+				rewrite.set(decl, SingleVariableDeclaration.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
 				
 				IBinding binding= decl.getName().resolveBinding();
 				if (binding != null) {
@@ -210,6 +218,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 						SimpleName newName= ast.newSimpleName("x"); //$NON-NLS-1$  // name will be set later
 						newNames[j]= newName;
 						rewrite.replace(names[j], newName, null); 
+						
 					}
 					desc.resultingParamName= newNames;
 				} else {
